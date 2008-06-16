@@ -453,11 +453,18 @@ rem ############################################################################
     call :tooltest tindicesyes.ddl taindices.h5
     call :tooltest tindicesno.ddl -y taindices.h5
 
-    rem array indices with subsetting
-    call :tooltest tindicessub1.ddl -d 1d -s 3 -c 40 taindices.h5
-    call :tooltest tindicessub2.ddl -d 2d -s 1,3 -c 6,4 taindices.h5
-    call :tooltest tindicessub3.ddl -d 3d -s 0,1,3 -c 2,6,4 taindices.h5
-    call :tooltest tindicessub4.ddl -d 4d -s 0,0,1,3 -c 2,2,6,4 taindices.h5
+    rem ######### array indices with subsetting
+    rem 1D case
+    call :tooltest tindicessub1.ddl -d 1d -s 1 -S 10 -c 2 -k 3 taindices.h5
+
+    rem 2D case
+    call :tooltest tindicessub2.ddl -d 2d -s 1,2 -S 3,3 -c 3,2 -k 2,2 taindices.h5
+
+    rem 3D case
+    call :tooltest tindicessub3.ddl -d 3d -s 0,1,2 -S 1,3,3 -c 2,2,2 -k 1,2,2 taindices.h5
+
+    rem 4D case
+    call :tooltest tindicessub4.ddl -d 4d -s 0,0,1,2 -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2 taindices.h5
 
 
     rem tests for filters

@@ -196,7 +196,8 @@ main(void)
 #if defined _WIN32 && defined _HDF5USEDLL_
 	SKIPPED();
 	puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
-
+#elif defined H5_VMS
+        SKIPPED();
 #else
         H5_FAILED()
         goto error;
@@ -218,7 +219,8 @@ main(void)
 #if defined _WIN32 && defined _HDF5USEDLL_
 	SKIPPED();
 	puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
-
+#elif defined H5_VMS
+        SKIPPED();
 #else
         H5_FAILED()
         goto error;

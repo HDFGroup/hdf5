@@ -24,13 +24,6 @@
 extern "C" {
 #endif
 
-#define IMAGE_CLASS   "IMAGE"
-#define PALETTE_CLASS "PALETTE"
-#define IMAGE_VERSION "1.2"
-#define IMAGE8_RANK    3
-#define IMAGE24_RANK   3
-
-
 
 herr_t H5IMmake_image_8bitf( hid_t loc_id,
                              const char *dset_name,

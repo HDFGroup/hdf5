@@ -74,6 +74,25 @@ typedef int H5Z_filter_t;
 #define H5_SZIP_NN_OPTION_MASK          32
 #define H5_SZIP_MAX_PIXELS_PER_BLOCK    32
 
+/* Macros for the shuffle filter */
+#define H5Z_SHUFFLE_USER_NPARMS    0    /* Number of parameters that users can set */
+#define H5Z_SHUFFLE_TOTAL_NPARMS   1    /* Total number of parameters for filter */
+ 
+/* Macros for the szip filter */
+#define H5Z_SZIP_USER_NPARMS    2       /* Number of parameters that users can set */
+#define H5Z_SZIP_TOTAL_NPARMS   4       /* Total number of parameters for filter */
+#define H5Z_SZIP_PARM_MASK      0       /* "User" parameter for option mask */
+#define H5Z_SZIP_PARM_PPB       1       /* "User" parameter for pixels-per-block */
+#define H5Z_SZIP_PARM_BPP       2       /* "Local" parameter for bits-per-pixel */
+#define H5Z_SZIP_PARM_PPS       3       /* "Local" parameter for pixels-per-scanline */
+   
+/* Macros for the nbit filter */
+#define H5Z_NBIT_USER_NPARMS     0     /* Number of parameters that users can set */
+
+/* Macros for the scale offset filter */
+#define H5Z_SCALEOFFSET_USER_NPARMS      2    /* Number of parameters that users can set */
+
+
 /* Special parameters for ScaleOffset filter*/
 #define H5Z_SO_INT_MINBITS_DEFAULT 0
 typedef enum H5Z_SO_scale_type_t {

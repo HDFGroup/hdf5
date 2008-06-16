@@ -454,7 +454,7 @@ void DataSpace::getSelectBounds ( hsize_t* start, hsize_t* end ) const
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5S.html#Dataspace-SelectElements
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void DataSpace::selectElements ( H5S_seloper_t op, const size_t num_elements, const hsize_t *coord[ ] ) const
+void DataSpace::selectElements ( H5S_seloper_t op, const size_t num_elements, const hsize_t *coord) const
 {
    herr_t ret_value;
    ret_value = H5Sselect_elements( id, op, num_elements, coord );

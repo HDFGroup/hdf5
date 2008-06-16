@@ -119,6 +119,26 @@ typedef struct H5D_io_info_t {
 #endif /* H5S_DEBUG */
 } H5D_io_info_t;
 
+/* Structure holding information about a chunk's selection for mapping */
+typedef struct H5D_chunk_info_t {
+    hsize_t index;              /* "Index" of chunk in dataset */
+    size_t chunk_points;        /* Number of elements selected in chunk */
+    hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
+    H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
+    unsigned fspace_shared;     /* Indicate that the file space for a chunk is shared and shouldn't be freed */
+    H5S_t *mspace;              /* Dataspace describing selection in memory corresponding to this chunk */
+    unsigned mspace_shared;     /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
+} H5D_chunk_info_t;
+
+/* Cached information about a particular chunk */
+typedef struct {
+    hbool_t     valid;                          /*whether cache info is valid*/
+    hsize_t	offset[H5O_LAYOUT_NDIMS];	/*logical offset to start*/
+    size_t	nbytes;				/*size of stored data	*/
+    unsigned	filter_mask;			/*excluded filters	*/
+    haddr_t	addr;				/*file address of chunk */
+} H5D_chunk_cached_t;
+
 /* The raw data chunk cache */
 typedef struct H5D_rdcc_t {
 #ifdef H5D_ISTORE_DEBUG
@@ -132,7 +152,11 @@ typedef struct H5D_rdcc_t {
     struct H5D_rdcc_ent_t *head; /* Head of doubly linked list		*/
     struct H5D_rdcc_ent_t *tail; /* Tail of doubly linked list		*/
     int		nused;	/* Number of chunk slots in use		*/
+    H5D_chunk_cached_t last;    /* Cached copy of last chunk information */
     struct H5D_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
+    H5SL_t *sel_chunks;     /* Skip list containing information for each chunk selected */
+    H5S_t  *single_space;    /* Dataspace for single element I/O on chunks */
+    H5D_chunk_info_t *single_chunk_info;  /* Pointer to single chunk's info */
 } H5D_rdcc_t;
 
 /* The raw data contiguous data cache */
@@ -156,6 +180,7 @@ typedef struct H5D_shared_t {
     H5T_t              *type;           /* datatype of this dataset     */
     H5S_t              *space;          /* dataspace of this dataset    */
     hbool_t             space_dirty;    /* Whether the dataspace info needs to be flushed to the file */
+    hbool_t             layout_dirty;   /* Whether the layout info needs to be flushed to the file */
     hid_t               dcpl_id;        /* dataset creation property id */
     H5D_dcpl_cache_t    dcpl_cache;     /* Cached DCPL values */
     H5D_io_ops_t        io_ops;         /* I/O operations */
@@ -188,16 +213,6 @@ typedef enum {
 } H5D_time_alloc_t;
 
 
-/* Structure holding information about a chunk's selection for mapping */
-typedef struct H5D_chunk_info_t {
-    hsize_t index;              /* "Index" of chunk in dataset */
-    size_t chunk_points;        /* Number of elements selected in chunk */
-    H5S_t *fspace;              /* Dataspace describing chunk & selection in it */
-    hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
-    H5S_t *mspace;              /* Dataspace describing selection in memory corresponding to this chunk */
-    unsigned mspace_shared;     /* Indicate that the memory space for a chunk is shared and shouldn't be freed */
-} H5D_chunk_info_t;
-
 /* Main structure holding the mapping between file chunks and memory */
 typedef struct H5D_chunk_map_t {
     H5O_layout_t *layout;       /* Dataset layout information*/
@@ -213,7 +228,10 @@ typedef struct H5D_chunk_map_t {
     unsigned m_ndims;           /* Number of dimensions for memory dataspace */
     H5S_sel_type msel_type;     /* Selection type in memory */
 
-    H5SL_t *fsel;               /* Skip list containing file dataspaces for all chunks */
+    H5SL_t *sel_chunks;         /* Skip list containing information for each chunk selected */
+    H5S_t  *single_space;       /* Dataspace for single chunk */
+    H5D_chunk_info_t *single_chunk_info;  /* Pointer to single chunk's info */
+    hbool_t use_single;         /* Whether I/O is on a single element */
     hsize_t last_index;         /* Index of last chunk operated on */
     H5D_chunk_info_t *last_chunk_info;  /* Pointer to last chunk's info */
     hsize_t chunks[H5O_LAYOUT_NDIMS];   /* Number of chunks in each dimension */
@@ -289,14 +307,18 @@ typedef struct H5D_istore_key_t {
  */
 typedef struct H5D_istore_bt_ud_common_t {
     /* downward */
-    H5D_istore_key_t	key;	                /*key values		*/
-    const H5O_layout_t	*mesg;		        /*layout message	*/
+    const H5O_layout_t *mesg;		        /*layout message	*/
+    const hsize_t *offset;	                /*logical offset of chunk*/
 } H5D_istore_bt_ud_common_t;
 
 /* B-tree callback info for various operations */
 typedef struct H5D_istore_ud1_t {
     H5D_istore_bt_ud_common_t common;           /* Common info for B-tree user data (must be first) */
-    haddr_t		addr;			/*file address of chunk */
+
+    /* Upward */
+    size_t	nbytes;				/*size of stored data	*/
+    unsigned	filter_mask;			/*excluded filters	*/
+    haddr_t	addr;				/*file address of chunk */
 } H5D_istore_ud1_t; 
 
 /* Internal data structure for computing variable-length dataset's total size */
@@ -329,7 +351,7 @@ H5_DLL H5D_t *H5D_create_named(const H5G_loc_t *loc, const char *name,
 H5_DLL herr_t H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation,
     hid_t dxpl_id);
 H5_DLL herr_t H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset, H5D_time_alloc_t time_alloc,
-    hbool_t update_time, hbool_t full_overwrite);
+    hbool_t full_overwrite);
 H5_DLL hsize_t H5D_get_storage_size(H5D_t *dset, hid_t dxpl_id);
 H5_DLL haddr_t H5D_get_offset(const H5D_t *dset);
 H5_DLL herr_t H5D_iterate(void *buf, hid_t type_id, const H5S_t *space,

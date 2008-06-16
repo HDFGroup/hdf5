@@ -6025,7 +6025,7 @@ test_random_chunks(void)
     if((m = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
 
     /* Select the random points for writing */
-    if(H5Sselect_elements(s, H5S_SELECT_SET, NPOINTS, (const hsize_t **)coord) < 0) TEST_ERROR;
+    if(H5Sselect_elements(s, H5S_SELECT_SET, NPOINTS, coord) < 0) TEST_ERROR;
 
     /* Write into dataset */
     if(H5Dwrite(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, wbuf) < 0) TEST_ERROR;
@@ -6050,7 +6050,7 @@ test_random_chunks(void)
     if((m = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
 
     /* Select the random points for reading */
-    if(H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, (const hsize_t **)coord) < 0) TEST_ERROR;
+    if(H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, coord) < 0) TEST_ERROR;
 
     /* Read from dataset */
     if(H5Dread(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, rbuf) < 0) TEST_ERROR;
@@ -6059,7 +6059,8 @@ test_random_chunks(void)
     for(i = 0; i < NPOINTS; i++)
         if(rbuf[i] != wbuf[i]){
             printf("    Line %d: Incorrect value, wbuf[%u]=%d, rbuf[%u]=%d\n",__LINE__,(unsigned)i,wbuf[i],(unsigned)i,rbuf[i]);
-                TEST_ERROR;
+            printf("             coord[%u] = {%lu, %lu}\n", (unsigned)i, (unsigned long)coord[i][0], (unsigned long)coord[i][1]);
+            TEST_ERROR;
         } /* end if */
 
     /* Close resources */
@@ -6117,7 +6118,7 @@ test_random_chunks(void)
     if((m = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
 
     /* Select the random points for writing */
-    if(H5Sselect_elements(s, H5S_SELECT_SET, NPOINTS, (const hsize_t **)coord) < 0) TEST_ERROR;
+    if(H5Sselect_elements(s, H5S_SELECT_SET, NPOINTS, coord) < 0) TEST_ERROR;
 
     /* Write into dataset */
     if(H5Dwrite(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, wbuf) < 0) TEST_ERROR;
@@ -6142,7 +6143,7 @@ test_random_chunks(void)
     if((m = H5Screate_simple(1, msize, NULL)) < 0) TEST_ERROR;
 
     /* Select the random points for reading */
-    if(H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, (const hsize_t **)coord) < 0) TEST_ERROR;
+    if(H5Sselect_elements (s, H5S_SELECT_SET, NPOINTS, coord) < 0) TEST_ERROR;
 
     /* Read from dataset */
     if(H5Dread(d, H5T_NATIVE_INT, m, s, H5P_DEFAULT, rbuf) < 0) TEST_ERROR;
@@ -6404,8 +6405,8 @@ main(void)
         /* Copy the file access property list */
         if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
-        /* Set the "use the latest version of the format" flag for creating objects in the file */
-        if(H5Pset_latest_format(fapl2, TRUE) < 0) TEST_ERROR
+        /* Set the "use the latest version of the format" bounds for creating objects in the file */
+        if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
 	h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 

@@ -97,8 +97,7 @@ int main(void)
      * Create a reference to elements selection.
      */
     status = H5Sselect_none(space_id);
-    status = H5Sselect_elements(space_id, H5S_SELECT_SET, num_points,
-                                (const hsize_t **)coord);
+    status = H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, coord);
     status = H5Rcreate(&ref[1], file_id, dsetnamev, H5R_DATASET_REGION, space_id);
 
     /*

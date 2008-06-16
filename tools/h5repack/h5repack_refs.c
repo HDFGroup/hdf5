@@ -31,7 +31,7 @@
 
 static const char* MapIdToName(hid_t refobj_id,trav_table_t *travt);
 static int copy_refs_attr(hid_t loc_in, hid_t loc_out, pack_opt_t *options,
-    trav_table_t *travt, hid_t fidout);
+                          trav_table_t *travt, hid_t fidout);
 
 /*-------------------------------------------------------------------------
  * Function: do_copy_refobjs

@@ -96,7 +96,6 @@ H5Z_class_t H5Z_NBIT[1] = {{
 #define H5Z_NBIT_ARRAY           2     /* Array datatype class */
 #define H5Z_NBIT_COMPOUND        3     /* Compound datatype class */
 #define H5Z_NBIT_NOOPTYPE        4     /* Other datatype class: nbit does no compression */
-#define H5Z_NBIT_USER_NPARMS     0     /* Number of parameters that users can set */
 #define H5Z_NBIT_MAX_NPARMS      4096  /* Max number of parameters for filter */
 #define H5Z_NBIT_ORDER_LE        0     /* Little endian for datatype byte order */
 #define H5Z_NBIT_ORDER_BE        1     /* Big endian for datatype byte order */
@@ -1409,4 +1408,4 @@ static void H5Z_nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned c
 
    *buffer_size = j + 1; /* sometimes is catually j, but to be safe */
 }
-#endif /* H5_HAVE_FILTER_NZIP */
+#endif /* H5_HAVE_FILTER_NBIT */

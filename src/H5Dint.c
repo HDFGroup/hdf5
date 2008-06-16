@@ -65,6 +65,7 @@ static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
 static herr_t H5D_init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset);
 static herr_t H5D_open_oid(H5D_t *dataset, hid_t dxpl_id);
+static herr_t H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 
 
 /*********************/
@@ -96,6 +97,9 @@ H5FL_DEFINE_STATIC(H5D_shared_t);
 
 /* Declare the external PQ free list for the sieve buffer information */
 H5FL_BLK_EXTERN(sieve_buf);
+
+/* Declare the external free list to manage the H5D_chunk_info_t struct */
+H5FL_EXTERN(H5D_chunk_info_t);
 
 /* Define a static "default" dataset structure to use to initialize new datasets */
 static H5D_shared_t H5D_def_dset;
@@ -567,7 +571,7 @@ done:
 static herr_t
 H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
 {
-    struct H5O_t       *oh = NULL;      /* Pointer to dataset's object header */
+    H5O_t              *oh = NULL;      /* Pointer to dataset's object header */
     size_t              ohdr_size = H5D_MINHDR_SIZE;    /* Size of dataset's object header */
     H5O_loc_t          *oloc = NULL;    /* Dataset's object location */
     H5O_layout_t       *layout;         /* Dataset's layout information */
@@ -653,10 +657,10 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
 
     /* Get a pointer to the object header itself */
     if((oh = H5O_protect(oloc, dxpl_id)) == NULL)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to protect dataset object header")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect dataset object header")
 
     /* Write new fill value message */
-    if(H5O_msg_append(file, dxpl_id, oh, H5O_FILL_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, fill_prop) < 0)
+    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_FILL_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, fill_prop) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update new fill value header message")
 
     /* If there is valid information for the old fill value struct, add it */
@@ -672,12 +676,12 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
         H5O_msg_reset_share(H5O_FILL_ID, &old_fill_prop);
 
         /* Write old fill value */
-        if(H5O_msg_append(file, dxpl_id, oh, H5O_FILL_ID, H5O_MSG_FLAG_CONSTANT, 0, &old_fill_prop) < 0)
+        if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_FILL_ID, H5O_MSG_FLAG_CONSTANT, 0, &old_fill_prop) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update old fill value header message")
     } /* end if */
 
     /* Update the datatype and dataspace header messages */
-    if(H5O_msg_append(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT, 0, type) < 0)
+    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT, 0, type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update datatype header message")
     if(H5S_append(file, dxpl_id, oh, dset->shared->space) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update dataspace header message")
@@ -687,7 +691,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
         H5O_pline_t     *pline;         /* Dataset's I/O pipeline information */
 
         pline = &dset->shared->dcpl_cache.pline;
-        if(pline->nused > 0 && H5O_msg_append(file, dxpl_id, oh, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, pline) < 0)
+        if(pline->nused > 0 && H5O_msg_append_oh(file, dxpl_id, oh, H5O_PLINE_ID, H5O_MSG_FLAG_CONSTANT, 0, pline) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message")
     } /* end if */
 
@@ -696,7 +700,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
      * allocation until later.
      */
     if(fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY)
-        if(H5D_alloc_storage(file, dxpl_id, dset, H5D_ALLOC_CREATE, FALSE, FALSE) < 0)
+        if(H5D_alloc_storage(file, dxpl_id, dset, H5D_ALLOC_CREATE, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
 
     /* Update external storage message, if it's used */
@@ -716,7 +720,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
 
         /* Pin the heap down in memory */
         if(NULL == (heap = H5HL_protect(file, dxpl_id, efl->heap_addr, H5AC_WRITE)))
-            HGOTO_ERROR(H5E_DATASET, H5E_PROTECT, FAIL, "unable to protect EFL file name heap")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect EFL file name heap")
 
         /* Insert "empty" name first */
         if((size_t)(-1) == H5HL_insert(file, dxpl_id, heap, (size_t)1, "")) {
@@ -741,18 +745,18 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
 
         /* Release the heap */
         if(H5HL_unprotect(file, dxpl_id, heap, efl->heap_addr) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_PROTECT, FAIL, "unable to unprotect EFL file name heap")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to unprotect EFL file name heap")
         heap = NULL;
 
         /* Insert EFL message into dataset object header */
-        if(H5O_msg_append(file, dxpl_id, oh, H5O_EFL_ID, H5O_MSG_FLAG_CONSTANT, 0, efl) < 0)
+        if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_EFL_ID, H5O_MSG_FLAG_CONSTANT, 0, efl) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update external file list message")
     } /* end if */
 
     /* Create layout message */
     /* (Don't make layout message constant unless allocation time is early, since space may not be allocated) */
     /* (Note: this is relying on H5D_alloc_storage not calling H5O_msg_write during dataset creation) */
-    if(H5O_msg_append(file, dxpl_id, oh, H5O_LAYOUT_ID, ((fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type) ? H5O_MSG_FLAG_CONSTANT : 0), 0, layout) < 0)
+    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, ((fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type) ? H5O_MSG_FLAG_CONSTANT : 0), 0, layout) < 0)
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
 
 #ifdef H5O_ENABLE_BOGUS
@@ -778,15 +782,16 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
 }
 #endif /* H5O_ENABLE_BOGUS */
 
-    /* Add a modification time message. */
-    if(H5O_touch_oh(file, dxpl_id, oh, TRUE) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time message")
+    /* Add a modification time message, if using older format. */
+    if(!use_latest_format)
+        if(H5O_touch_oh(file, dxpl_id, oh, TRUE) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update modification time message")
 
 done:
     /* Release pointer to object header itself */
     if(oloc != NULL && oh != NULL)
         if(H5O_unprotect(oloc, oh) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
+            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to unprotect dataset object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_update_oh_info() */
@@ -1428,7 +1433,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
             && ((dataset->shared->layout.type == H5D_CONTIGUOUS && !H5F_addr_defined(dataset->shared->layout.u.contig.addr))
                 || (dataset->shared->layout.type == H5D_CHUNKED && !H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))
             && IS_H5FD_MPI(dataset->oloc.file)) {
-        if(H5D_alloc_storage(dataset->oloc.file, dxpl_id, dataset, H5D_ALLOC_OPEN, TRUE, FALSE) < 0)
+        if(H5D_alloc_storage(dataset->oloc.file, dxpl_id, dataset, H5D_ALLOC_OPEN, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize file storage")
     } /* end if */
 
@@ -1491,27 +1496,13 @@ H5D_close(H5D_t *dataset)
 
     dataset->shared->fo_count--;
     if(dataset->shared->fo_count == 0) {
-        /* Update the dataspace on disk, if it's been changed */
-        if(dataset->shared->space_dirty) {
-            if(H5S_write(&(dataset->oloc), dataset->shared->space, TRUE, H5AC_dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
-            dataset->shared->space_dirty = FALSE;
-        } /* end if */
+        /* Flush the dataset's information */
+        if(H5D_flush_real(dataset, H5AC_dxpl_id, H5F_FLUSH_NONE) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
 
         /* Free the data sieve buffer, if it's been allocated */
         if(dataset->shared->cache.contig.sieve_buf) {
             HDassert(dataset->shared->layout.type != H5D_COMPACT);      /* We should never have a sieve buffer for compact storage */
-
-            /* Flush the raw data buffer, if its dirty */
-            if(dataset->shared->cache.contig.sieve_dirty) {
-                /* Write dirty data sieve buffer to file */
-                if(H5F_block_write(dataset->oloc.file, H5FD_MEM_DRAW, dataset->shared->cache.contig.sieve_loc,
-                        dataset->shared->cache.contig.sieve_size, H5AC_dxpl_id, dataset->shared->cache.contig.sieve_buf) < 0)
-                    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
-
-                /* Reset sieve buffer dirty flag */
-                dataset->shared->cache.contig.sieve_dirty = FALSE;
-            } /* end if */
 
             dataset->shared->cache.contig.sieve_buf = (unsigned char *)H5FL_BLK_FREE(sieve_buf,dataset->shared->cache.contig.sieve_buf);
         } /* end if */
@@ -1522,19 +1513,31 @@ H5D_close(H5D_t *dataset)
                 break;
 
             case H5D_CHUNKED:
+                /* Check for skip list for iterating over chunks during I/O to close */
+                if(dataset->shared->cache.chunk.sel_chunks) {
+                    HDassert(H5SL_count(dataset->shared->cache.chunk.sel_chunks) == 0);
+                    H5SL_close(dataset->shared->cache.chunk.sel_chunks);
+                    dataset->shared->cache.chunk.sel_chunks = NULL;
+                } /* end if */
+
+                /* Check for cached single chunk dataspace */
+                if(dataset->shared->cache.chunk.single_space) {
+                    (void)H5S_close(dataset->shared->cache.chunk.single_space);
+                    dataset->shared->cache.chunk.single_space = NULL;
+                } /* end if */
+
+                /* Check for cached single element chunk info */
+                if(dataset->shared->cache.chunk.single_chunk_info) {
+                    (void)H5FL_FREE(H5D_chunk_info_t, dataset->shared->cache.chunk.single_chunk_info);
+                    dataset->shared->cache.chunk.single_chunk_info = NULL;
+                } /* end if */
+
                 /* Flush and destroy chunks in the cache */
-                if(H5D_istore_dest(dataset,H5AC_dxpl_id) < 0)
+                if(H5D_istore_dest(dataset, H5AC_dxpl_id) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy chunk cache")
                 break;
 
             case H5D_COMPACT:
-                /* Update header message of layout for compact dataset. */
-                if(dataset->shared->layout.u.compact.dirty) {
-                    if(H5O_msg_write(&(dataset->oloc), H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &(dataset->shared->layout), H5AC_dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to update layout message")
-                    dataset->shared->layout.u.compact.dirty = FALSE;
-                } /* end if */
-
                 /* Free the buffer for the raw data for compact datasets */
                 dataset->shared->layout.u.compact.buf = H5MM_xfree(dataset->shared->layout.u.compact.buf);
                 break;
@@ -1716,7 +1719,7 @@ H5D_get_file(const H5D_t *dset)
  */
 herr_t
 H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_alloc_t time_alloc,
-    hbool_t update_time, hbool_t full_overwrite)
+    hbool_t full_overwrite)
 {
     struct H5O_layout_t *layout;        /* The dataset's layout information */
     hbool_t must_init_space = FALSE;    /* Flag to indicate that space should be initialized */
@@ -1771,7 +1774,7 @@ H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_alloc
                  */
 		if(dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY
                         && time_alloc == H5D_ALLOC_EXTEND)
-		    must_init_space = 1;
+		    must_init_space = TRUE;
                 break;
 
             case H5D_COMPACT:
@@ -1833,12 +1836,15 @@ H5D_alloc_storage(H5F_t *f, hid_t dxpl_id, H5D_t *dset/*in,out*/, H5D_time_alloc
             } /* end else */
         } /* end if */
 
-        /* Also update header message for layout with new address, if we
-         * set the address.  (this is improves forward compatibility).
+        /* If we set the address (and aren't in the middle of creating the
+         *      dataset), mark the layout header message for later writing to
+         *      the file.  (this improves forward compatibility).
+         */
+        /* (The layout message is already in the dataset's object header, this
+         *      operation just sets the address and makes it constant)
          */
         if(time_alloc != H5D_ALLOC_CREATE && addr_set)
-            if(H5O_msg_write(&dset->oloc, H5O_LAYOUT_ID, H5O_MSG_FLAG_CONSTANT, update_time, &dset->shared->layout, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout message")
+            dset->shared->layout_dirty = TRUE;
     } /* end if */
 
 done:
@@ -2171,7 +2177,7 @@ H5D_vlen_get_buf_size(void UNUSED *elem, hid_t type_id, unsigned UNUSED ndim, co
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't resize tbuf")
 
     /* Select point to read in */
-    if(H5Sselect_elements(vlen_bufsize->fspace_id, H5S_SELECT_SET, (size_t)1, (const hsize_t **)point) < 0)
+    if(H5Sselect_elements(vlen_bufsize->fspace_id, H5S_SELECT_SET, (size_t)1, point) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't select point")
 
     /* Read in the point (with the custom VL memory allocator) */
@@ -2309,7 +2315,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 
 	/* Allocate space for the new parts of the dataset, if appropriate */
         if(expand && dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY)
-            if(H5D_alloc_storage(dset->oloc.file, dxpl_id, dset, H5D_ALLOC_EXTEND, TRUE, FALSE) < 0)
+            if(H5D_alloc_storage(dset->oloc.file, dxpl_id, dset, H5D_ALLOC_EXTEND, FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset storage")
 
 
@@ -2349,6 +2355,111 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D_flush_real
+ *
+ * Purpose:     Flush any dataset information cached in memory
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              December 6, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, unsigned flags)
+{
+    H5O_t *oh = NULL;                   /* Pointer to dataset's object header */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_flush_real)
+
+    /* Check args */
+    HDassert(dataset);
+
+    /* Check for metadata changes that will require updating the object's modification time */
+    if(dataset->shared->layout_dirty || dataset->shared->space_dirty) {
+        unsigned update_flags = H5O_UPDATE_TIME;        /* Modification time flag */
+
+        /* Get a pointer to the dataset's object header */
+        if((oh = H5O_protect(&dataset->oloc, dxpl_id)) == NULL)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect dataset object header")
+
+        /* Update the layout on disk, if it's been changed */
+        if(dataset->shared->layout_dirty) {
+            if(H5O_msg_write_oh(dataset->oloc.file, dxpl_id, oh, H5O_LAYOUT_ID, H5O_MSG_FLAG_CONSTANT, update_flags, &dataset->shared->layout) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update layout message")
+            dataset->shared->layout_dirty = FALSE;
+
+            /* Reset the "update the modification time" flag, so we only do it once */
+            update_flags = 0;
+        } /* end if */
+
+        /* Update the dataspace on disk, if it's been changed */
+        if(dataset->shared->space_dirty) {
+            if(H5S_write(dataset->oloc.file, dxpl_id, oh, update_flags, dataset->shared->space) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
+            dataset->shared->space_dirty = FALSE;
+
+            /* Reset the "update the modification time" flag, so we only do it once */
+            update_flags = 0;
+        } /* end if */
+
+        /* _Somebody_ should have update the modification time! */
+        HDassert(update_flags == 0);
+    } /* end if */
+
+    /* Flush the raw data buffer, if we have a dirty one */
+    if(dataset->shared->cache.contig.sieve_buf && dataset->shared->cache.contig.sieve_dirty) {
+        HDassert(dataset->shared->layout.type != H5D_COMPACT);      /* We should never have a sieve buffer for compact storage */
+
+        /* Write dirty data sieve buffer to file */
+        if(H5F_block_write(dataset->oloc.file, H5FD_MEM_DRAW, dataset->shared->cache.contig.sieve_loc,
+                dataset->shared->cache.contig.sieve_size, dxpl_id, dataset->shared->cache.contig.sieve_buf) < 0)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
+
+        /* Reset sieve buffer dirty flag */
+        dataset->shared->cache.contig.sieve_dirty = FALSE;
+    } /* end if */
+
+    /* Flush cached information for each kind of dataset */
+    switch(dataset->shared->layout.type) {
+        case H5D_CONTIGUOUS:
+            break;
+
+        case H5D_CHUNKED:
+            /* Flush the raw data cache */
+            if(H5D_istore_flush(dataset, dxpl_id, flags & H5F_FLUSH_INVALIDATE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache")
+            break;
+
+        case H5D_COMPACT:
+            if(dataset->shared->layout.u.compact.dirty) {
+                if(H5O_msg_write(&(dataset->oloc), H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &(dataset->shared->layout), dxpl_id) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
+                dataset->shared->layout.u.compact.dirty = FALSE;
+            } /* end if */
+            break;
+
+        default:
+            HDassert("not implemented yet" && 0);
+#ifdef NDEBUG
+            HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
+#endif /* NDEBUG */
+    } /* end switch */ /*lint !e788 All appropriate cases are covered */
+
+done:
+    /* Release pointer to object header */
+    if(oh != NULL)
+        if(H5O_unprotect(&(dataset->oloc), oh) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to unprotect dataset object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_flush_real() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5D_flush_cb
  *
  * Purpose:     Flush any dataset information cached in memory
@@ -2375,51 +2486,9 @@ H5D_flush_cb(void *_dataset, hid_t UNUSED id, void *_udata)
 
     /* Check for dataset in same file */
     if(udata->f == dataset->oloc.file) {
-        /* Update the dataspace on disk, if it's been changed */
-        if(dataset->shared->space_dirty) {
-            if(H5S_write(&(dataset->oloc), dataset->shared->space, TRUE, udata->dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
-            dataset->shared->space_dirty = FALSE;
-        } /* end if */
-
-        /* Flush the raw data buffer, if we have a dirty one */
-        if(dataset->shared->cache.contig.sieve_buf && dataset->shared->cache.contig.sieve_dirty) {
-            HDassert(dataset->shared->layout.type != H5D_COMPACT);      /* We should never have a sieve buffer for compact storage */
-
-            /* Write dirty data sieve buffer to file */
-            if(H5F_block_write(udata->f, H5FD_MEM_DRAW, dataset->shared->cache.contig.sieve_loc,
-                    dataset->shared->cache.contig.sieve_size, udata->dxpl_id, dataset->shared->cache.contig.sieve_buf) < 0)
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "block write failed")
-
-            /* Reset sieve buffer dirty flag */
-            dataset->shared->cache.contig.sieve_dirty = FALSE;
-        } /* end if */
-
-        /* Flush cached information for each kind of dataset */
-        switch(dataset->shared->layout.type) {
-            case H5D_CONTIGUOUS:
-                break;
-
-            case H5D_CHUNKED:
-                /* Flush the raw data cache */
-                if(H5D_istore_flush(dataset, udata->dxpl_id, udata->flags & H5F_FLUSH_INVALIDATE) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush raw data cache")
-                break;
-
-            case H5D_COMPACT:
-                if(dataset->shared->layout.u.compact.dirty) {
-                    if(H5O_msg_write(&(dataset->oloc), H5O_LAYOUT_ID, 0, H5O_UPDATE_TIME, &(dataset->shared->layout), udata->dxpl_id) < 0)
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update layout message")
-                    dataset->shared->layout.u.compact.dirty = FALSE;
-                } /* end if */
-                break;
-
-            default:
-                HDassert("not implemented yet" && 0);
-#ifdef NDEBUG
-                HGOTO_ERROR(H5E_IO, H5E_UNSUPPORTED, FAIL, "unsupported storage layout")
-#endif /* NDEBUG */
-        } /* end switch */ /*lint !e788 All appropriate cases are covered */
+        /* Flush the dataset's information */
+        if(H5D_flush_real(dataset, udata->dxpl_id, udata->flags) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, H5_ITER_ERROR, "unable to flush cached dataset info")
     } /* end if */
 
 done:
@@ -2460,7 +2529,6 @@ H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags)
     H5I_search(H5I_DATASET, H5D_flush_cb, &udata);
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_flush() */
 

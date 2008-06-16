@@ -312,7 +312,7 @@ rem
     )
       
     rem szip remove
-    set arg=%file7% -f dset_szip:NONE
+    set arg=%file7% --filter=dset_szip:NONE
     if not "%use_filter_szip_encoder%"=="yes" (
         call :skip %arg%
     ) else if not "%use_filter_szip%"=="yes" (
@@ -483,7 +483,7 @@ rem
     rem  layout options (these files have no filters)
     rem ########################################################
 
-    call :tooltest %file4% -l dset2:CHUNK=20x10
+    call :tooltest %file4% --layout=dset2:CHUNK=20x10
     call :tooltest %file4% -l CHUNK=20x10
     call :tooltest %file4% -l dset2:CONTI
     call :tooltest %file4% -l CONTI
@@ -514,9 +514,30 @@ rem
     call :tooltest %arg8%
     call :tooltest %arg9%
 
-    rem native option
+    rem Native option
     set arg=%file1% -n
     call :tooltest %arg%
+
+
+    rem long swtiches. use FILE4=h5repack_layout.h5 (no filters)
+
+    set arg=%file4% --layout CHUNK=20x10 --filter GZIP=1 --threshold=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype]
+    if not "%use_filter_deflate%"=="yes" (
+       call :skip %arg%
+    ) else (
+       call :tooltest %arg%
+    )
+
+    rem several global filters
+
+    set arg=%file4% --filter GZIP=1 --filter SHUF
+    if not "%use_filter_deflate%"=="yes" (
+        call :skip %arg%
+    ) else if not "%use_filter_shuffle%"=="yes" (
+        call :skip %arg%
+    ) else (
+        call :tooltest %arg%
+    )
 
     
     if %nerrors% equ 0 (

@@ -406,9 +406,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_compact_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo, 
+H5G_compact_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo, 
     H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
-    hid_t gid, H5G_link_iterate_t *lnk_op, void *op_data)
+    H5G_lib_iterate_t op, void *op_data)
 {
     H5G_link_table_t    ltable = {0, NULL};     /* Link table */
     herr_t		ret_value;              /* Return value */
@@ -418,14 +418,14 @@ H5G_compact_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
     /* Sanity check */
     HDassert(oloc);
     HDassert(linfo);
-    HDassert(lnk_op && lnk_op->u.lib_op);
+    HDassert(op);
 
     /* Build table of all link messages */
     if(H5G_compact_build_table(oloc, dxpl_id, linfo, idx_type, order, &ltable) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create link message table")
 
     /* Iterate over links in table */
-    if((ret_value = H5G_link_iterate_table(&ltable, skip, last_lnk, gid, lnk_op, op_data)) < 0)
+    if((ret_value = H5G_link_iterate_table(&ltable, skip, last_lnk, op, op_data)) < 0)
         HERROR(H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
 done:

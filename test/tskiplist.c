@@ -539,7 +539,7 @@ test_skiplist_string(void)
         {32,"32"},
         {80,"80"},
         {90,"90"}};
-    string_node sorted_data[10]={
+    string_node hashed_data[10]={
         { 5,"05"},
         {10,"10"},
         {15,"15"},
@@ -549,7 +549,8 @@ test_skiplist_string(void)
         {32,"32"},
         {50,"50"},
         {80,"80"},
-        {90,"90"}};
+        {90,"90"}
+        };
     string_node *found_item;    /* Item found in skip list */
     herr_t ret;         /* Generic return value */
 
@@ -579,7 +580,7 @@ test_skiplist_string(void)
     u=0;
     while(node!=NULL) {
         found_item=H5SL_item(node);
-        VERIFY(found_item->i,sorted_data[u].i,"H5SL_next");
+        VERIFY(found_item->i, hashed_data[u].i, "H5SL_next");
         u++;
         node=H5SL_next(node);
     } /* end while */

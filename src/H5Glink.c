@@ -603,7 +603,7 @@ H5G_link_sort_table(H5G_link_table_t *ltable, H5_index_t idx_type,
  */
 herr_t
 H5G_link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip,
-    hsize_t *last_lnk, hid_t gid, const H5G_link_iterate_t *lnk_op, void *op_data)
+    hsize_t *last_lnk, const H5G_lib_iterate_t op, void *op_data)
 {
     size_t u;                           /* Local index variable */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
@@ -612,7 +612,7 @@ H5G_link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip,
 
     /* Sanity check */
     HDassert(ltable);
-    HDassert(lnk_op);
+    HDassert(op);
 
     /* Skip over links, if requested */
     if(last_lnk)
@@ -621,32 +621,8 @@ H5G_link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip,
     /* Iterate over link messages */
     H5_ASSIGN_OVERFLOW(/* To: */ u, /* From: */ skip, /* From: */ hsize_t, /* To: */ size_t)
     for(; u < ltable->nlinks && !ret_value; u++) {
-        /* Check which kind of callback to make */
-        switch(lnk_op->op_type) {
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-            case H5G_LINK_OP_OLD:
-                /* Make the old-type application callback */
-                ret_value = (lnk_op->u.old_op)(gid, ltable->lnks[u].name, op_data);
-                break;
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
-            case H5G_LINK_OP_APP:
-                {
-                    H5L_info_t info;    /* Link info */
-
-                    /* Retrieve the info for the link */
-                    if(H5G_link_to_info(&(ltable->lnks[u]), &info) < 0)
-                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "unable to get info for link")
-
-                    /* Make the application callback */
-                    ret_value = (lnk_op->u.app_op)(gid, ltable->lnks[u].name, &info, op_data);
-                }
-                break;
-
-            case H5G_LINK_OP_LIB:
-                /* Call the library's callback */
-                ret_value = (lnk_op->u.lib_op)(&(ltable->lnks[u]), op_data);
-        } /* end switch */
+        /* Make the callback */
+        ret_value = (op)(&(ltable->lnks[u]), op_data);
 
         /* Increment the number of entries passed through */
         if(last_lnk)
@@ -657,7 +633,6 @@ H5G_link_iterate_table(const H5G_link_table_t *ltable, hsize_t skip,
     if(ret_value < 0)
         HERROR(H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_link_iterate_table() */
 

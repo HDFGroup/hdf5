@@ -9,7 +9,6 @@ File information
 	# of unique links: 0
 	# of unique other: 0
 	Max. # of links to object: 1
-	Max. depth of hierarchy: 0
 	Max. # of objects in group: 2
 Object header size: (total/unused)
 	Groups: 51/2

@@ -67,15 +67,22 @@ rem %1 -- actual output filename to use
 rem %2 and on -- argument for the h5ls tool
 :tooltest
     set expect=%CD%\..\testfiles\%1
-    set expect_parsed=%expect%.parsed
     set actual=%CD%\..\testfiles\%~n1.out
-    set actual_parsed=%actual%.parsed
+    set actual_err=%CD%\..\testfiles\%~n1.err
     
     rem We define %params% here because Windows `shift` command doesn't affect
     rem the %* variable.  --SJW 8/23/07
     set params=%*
     set params=%params:* =%
     
+    rem Target the first variable in params, retvalexpect
+    for %%a in (%params%) do (
+        set retvalexpect=%%a
+        set params=%params:* =%
+        goto break1
+    )
+    :break1
+
     rem Run test.
     rem Stderr is included in stdout so that the diff can detect
     rem any unexpected output from that stream too
@@ -88,20 +95,11 @@ rem %2 and on -- argument for the h5ls tool
         pushd %CD%\..\testfiles
         %h5ls_bin% %params%
         popd
-    ) >%actual% 2>&1
+    ) >%actual% 2>%actual_err%
     
     set exitcode=%errorlevel%
-        
-    rem Windows doesn't have "sed" command, and parsing the files line-by-line
-    rem to emulate Unix takes a very long time.  Instead, we simply remove lines
-    rem with "Modified".  Do this for actual and expected otput.  If there is a 
-    rem better alternative in the future, we should use it instead. --SJW 8/22/07
-    for %%a in (expect actual) do (
-        findstr /v /c:"    Modified:" !%%a! > tmp.txt
-        move /y tmp.txt !%%a_parsed! > nul
-    )
-
-    if "%exitcode%" neq "0" (
+    type %actual_err% >> %actual%
+    if "%exitcode%" neq "%retvalexpect%" (
         call :testing *FAILED* %params%
         set /a nerrors=!nerrors!+1
         if "yes"=="%verbose%" (
@@ -110,11 +108,11 @@ rem %2 and on -- argument for the h5ls tool
             rem Count lines echo'ed, and break out after 20.  --SJW 8/28/07
             set line=0
             for /f "tokens=* delims=" %%a in (%actual%) do (
-                if !line! geq %nlines% goto break
+                if !line! geq %nlines% goto break2
                 echo.%%a
                 set /a line=!line!+1
             )
-            :break
+            :break2
             echo.***end of test output***
             echo.
         )
@@ -126,20 +124,20 @@ rem %2 and on -- argument for the h5ls tool
     rem     call :testing CREATED %params%
     rem     copy %actual% %expect% > nul
     ) else (
-        fc /w %expect_parsed% %actual_parsed% | find "FC: no diff" > nul
+        fc /w %expect% %actual% | find "FC: no diff" > nul
         if !errorlevel! equ 0 (
             call :testing PASSED %params%
         ) else (
             call :testing *FAILED* %params%
             echo.    Expected result differs from actual result
             set nerrors=!nerrors!+1
-            if "yes"=="%verbose%" fc %expect_parsed% %actual_parsed%
+            if "yes"=="%verbose%" fc %expect% %actual%
         )
     )
     
     rem Clean up output file
     if not defined hdf5_nocleanup (
-        del /f %actual% %actual_parsed% %expected_parsed%
+        del /f %actual% %actual_err%
     )
     
     exit /b
@@ -154,62 +152,63 @@ rem ############################################################################
     
     rem Toss in a bunch of tests.  Not sure if they are the right kinds.
     rem test the help syntax
-    call :tooltest help-1.ls -w80 -h
-    call :tooltest help-2.ls -w80 -help
-    call :tooltest help-3.ls -w80 -?
+    call :tooltest help-1.ls 0 -w80 -h
+    call :tooltest help-2.ls 0 -w80 -help
+    call :tooltest help-3.ls 0 -w80 -?
 
     rem test simple command
-    call :tooltest tall-1.ls -w80 tall.h5
-    call :tooltest tall-2.ls -w80 -r -d tall.h5
-    call :tooltest tgroup.ls -w80 tgroup.h5
+    call :tooltest tall-1.ls 0 -w80 tall.h5
+    call :tooltest tall-2.ls 0 -w80 -r -d tall.h5
+    call :tooltest tgroup.ls 0 -w80 tgroup.h5
 
     rem test for displaying groups
-    call :tooltest tgroup-1.ls -w80 -r -g tgroup.h5
+    call :tooltest tgroup-1.ls 1 -w80 -r -g tgroup.h5
+    call :tooltest tgroup-2.ls 0 -w80 -g tgroup.h5/g1
 
     rem test for displaying simple space datasets
-    call :tooltest tdset-1.ls -w80 -r -d tdset.h5
+    call :tooltest tdset-1.ls 0 -w80 -r -d tdset.h5
 
     rem test for displaying soft links
-    call :tooltest tslink-1.ls -w80 -r tslink.h5
+    call :tooltest tslink-1.ls 0 -w80 -r tslink.h5
 
     rem test for displaying external and user-defined links
-    call :tooltest textlink-1.ls -w80 -r textlink.h5
-    call :tooltest tudlink-1.ls -w80 -r tudlink.h5
+    call :tooltest textlink-1.ls 0 -w80 -r textlink.h5
+    call :tooltest tudlink-1.ls 0 -w80 -r tudlink.h5
 
     rem tests for hard links
-    call :tooltest thlink-1.ls -w80 thlink.h5
+    call :tooltest thlink-1.ls 0 -w80 thlink.h5
 
     rem tests for compound data types
-    call :tooltest tcomp-1.ls -w80 -r -d tcompound.h5
+    call :tooltest tcomp-1.ls 0 -w80 -r -d tcompound.h5
 
     rem test for the nested compound type
-    call :tooltest tnestcomp-1.ls -w80 -r -d tnestedcomp.h5
+    call :tooltest tnestcomp-1.ls 0 -w80 -r -d tnestedcomp.h5
 
     rem test for loop detection
-    call :tooltest tloop-1.ls -w80 -r -d tloop.h5
+    call :tooltest tloop-1.ls 0 -w80 -r -d tloop.h5
 
     rem test for string 
-    call :tooltest tstr-1.ls -w80 -r -d tstr.h5
+    call :tooltest tstr-1.ls 0 -w80 -r -d tstr.h5
 
     rem test test file created from lib SAF team
-    call :tooltest tsaf.ls -w80 -r -d tsaf.h5
+    call :tooltest tsaf.ls 0 -w80 -r -d tsaf.h5
 
     rem test for variable length data types
-    call :tooltest tvldtypes1.ls -w80 -r -d tvldtypes1.h5
+    call :tooltest tvldtypes1.ls 0 -w80 -r -d tvldtypes1.h5
 
     rem test for array data types
-    call :tooltest tarray1.ls -w80 -r -d tarray1.h5
+    call :tooltest tarray1.ls 0 -w80 -r -d tarray1.h5
 
     rem test for empty data
-    call :tooltest tempty.ls -w80 -d tempty.h5
+    call :tooltest tempty.ls 0 -w80 -d tempty.h5
 
     rem test for all dataset types written to attributes
     rem enable -S for avoiding printing NATIVE types
-    call :tooltest tattr2.ls -w80 -v -S tattr2.h5
+    call :tooltest tattr2.ls 0 -w80 -v -S tattr2.h5
 
     rem tests for error handling.
     rem test for non-existing file
-    call :tooltest nosuchfile.ls nosuchfile.h5
+    call :tooltest nosuchfile.ls 0 nosuchfile.h5
 
     if %nerrors% equ 0 (
         echo.All h5ls tests passed.

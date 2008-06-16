@@ -49,6 +49,9 @@ TESTING() {
 TOOLTEST() {
     expect="$srcdir/../testfiles/$1"
     actual="../testfiles/`basename $1 .ls`.out"
+    actual_err="../testfiles/`basename $1 .ls`.err"
+    shift
+    retvalexpect=$1
     shift
 
     # Run test.
@@ -61,10 +64,11 @@ TOOLTEST() {
 	echo "#############################"
 	cd $srcdir/../testfiles
         $RUNSERIAL $H5LS_BIN "$@"
-    ) 2>&1 |sed 's/Modified:.*/Modified:  XXXX-XX-XX XX:XX:XX XXX/' >$actual
+    ) >$actual 2>$actual_err 
     
     exitcode=$?
-    if [ $exitcode -ne 0 ]; then
+    cat $actual_err >> $actual
+    if [ $exitcode -ne $retvalexpect ]; then
 	echo "*FAILED*"
 	nerrors="`expr $nerrors + 1`"
 	if [ yes = "$verbose" ]; then
@@ -89,7 +93,7 @@ TOOLTEST() {
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
-	rm -f $actual
+	rm -f $actual $actual_err
     fi
 }
 
@@ -101,62 +105,65 @@ TOOLTEST() {
 
 # Toss in a bunch of tests.  Not sure if they are the right kinds.
 # test the help syntax
-TOOLTEST help-1.ls -w80 -h
-TOOLTEST help-2.ls -w80 -help
-TOOLTEST help-3.ls -w80 -?
+TOOLTEST help-1.ls 0 -w80 -h
+TOOLTEST help-2.ls 0 -w80 -help
+TOOLTEST help-3.ls 0 -w80 -?
 
 # test simple command
-TOOLTEST tall-1.ls -w80 tall.h5
-TOOLTEST tall-2.ls -w80 -r -d tall.h5
-TOOLTEST tgroup.ls -w80 tgroup.h5
+TOOLTEST tall-1.ls 0 -w80 tall.h5
+TOOLTEST tall-2.ls 0 -w80 -r -d tall.h5
+TOOLTEST tgroup.ls 0 -w80 tgroup.h5
 
 # test for displaying groups
-TOOLTEST tgroup-1.ls -w80 -r -g tgroup.h5
+# The following combination of arguments is expected to return an error message
+# and return value 1
+TOOLTEST tgroup-1.ls 1 -w80 -r -g tgroup.h5
+TOOLTEST tgroup-2.ls 0 -w80 -g tgroup.h5/g1
 
 # test for displaying simple space datasets
-TOOLTEST tdset-1.ls -w80 -r -d tdset.h5
+TOOLTEST tdset-1.ls 0 -w80 -r -d tdset.h5
 
 # test for displaying soft links
-TOOLTEST tslink-1.ls -w80 -r tslink.h5
+TOOLTEST tslink-1.ls 0 -w80 -r tslink.h5
 
 # test for displaying external and user-defined links
-TOOLTEST textlink-1.ls -w80 -r textlink.h5
-TOOLTEST tudlink-1.ls -w80 -r tudlink.h5
+TOOLTEST textlink-1.ls 0 -w80 -r textlink.h5
+TOOLTEST tudlink-1.ls 0 -w80 -r tudlink.h5
 
 # tests for hard links
-TOOLTEST thlink-1.ls -w80 thlink.h5
+TOOLTEST thlink-1.ls 0 -w80 thlink.h5
 
 # tests for compound data types
-TOOLTEST tcomp-1.ls -w80 -r -d tcompound.h5
+TOOLTEST tcomp-1.ls 0 -w80 -r -d tcompound.h5
 
 #test for the nested compound type
-TOOLTEST tnestcomp-1.ls -w80 -r -d tnestedcomp.h5
+TOOLTEST tnestcomp-1.ls 0 -w80 -r -d tnestedcomp.h5
 
 # test for loop detection
-TOOLTEST tloop-1.ls -w80 -r -d tloop.h5
+TOOLTEST tloop-1.ls 0 -w80 -r -d tloop.h5
 
 # test for string 
-TOOLTEST tstr-1.ls -w80 -r -d tstr.h5
+TOOLTEST tstr-1.ls 0 -w80 -r -d tstr.h5
 
 # test test file created from lib SAF team
-TOOLTEST tsaf.ls -w80 -r -d tsaf.h5
+TOOLTEST tsaf.ls 0 -w80 -r -d tsaf.h5
 
 # test for variable length data types
-TOOLTEST tvldtypes1.ls -w80 -r -d tvldtypes1.h5
+TOOLTEST tvldtypes1.ls 0 -w80 -r -d tvldtypes1.h5
 
 # test for array data types
-TOOLTEST tarray1.ls -w80 -r -d tarray1.h5
+TOOLTEST tarray1.ls 0 -w80 -r -d tarray1.h5
 
 # test for empty data
-TOOLTEST tempty.ls -w80 -d tempty.h5
+TOOLTEST tempty.ls 0 -w80 -d tempty.h5
 
 # test for all dataset types written to attributes
 # enable -S for avoiding printing NATIVE types
-TOOLTEST tattr2.ls -w80 -v -S tattr2.h5
+TOOLTEST tattr2.ls 0 -w80 -v -S tattr2.h5
 
 # tests for error handling.
 # test for non-existing file
-TOOLTEST nosuchfile.ls nosuchfile.h5
+TOOLTEST nosuchfile.ls 0 nosuchfile.h5
 
 if test $nerrors -eq 0 ; then
 	echo "All h5ls tests passed."

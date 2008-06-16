@@ -244,6 +244,12 @@
  
           CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error, access_prp = fapl)
               CALL check("h5fcreate_f", error, total_error)
+          if(error .ne. 0) then
+             write(*,*) "Cannot create file using multi-file driver... Exiting...."
+             total_error = 1
+             call h5pclose_f(fapl, error)
+             return
+          endif  
 
 
           ! 

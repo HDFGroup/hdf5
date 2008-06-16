@@ -378,7 +378,7 @@ test_h5s_null(void)
         hsize_t	coord[1][1]; /* Coordinates for point selection */
 
         coord[0][0]=0;
-	ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)1, (const hsize_t **)coord);
+	ret = H5Sselect_elements(sid, H5S_SELECT_SET, (size_t)1, coord);
     } H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sselect_elements");
 

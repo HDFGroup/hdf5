@@ -325,7 +325,7 @@ attach_reg_ref_attr(hid_t file_id, hid_t loc_id)
 
     /* create reg_ref of point selection */
     if(H5Sselect_none(space_id) < 0) TEST_ERROR
-    if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t **)coord) < 0) TEST_ERROR
+    if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, coord) < 0) TEST_ERROR
     if(H5Rcreate(&ref[1], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
 
     /* create reg_ref attribute */
@@ -408,7 +408,7 @@ create_reg_ref_dataset(hid_t file_id, hid_t loc_id)
     if(H5Sselect_hyperslab(space_id,H5S_SELECT_SET,start,NULL,count,NULL) < 0) TEST_ERROR
     if(H5Rcreate(&ref[0], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
     if(H5Sselect_none(space_id) < 0) TEST_ERROR
-    if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t **)coord) < 0) TEST_ERROR
+    if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, coord) < 0) TEST_ERROR
     if(H5Rcreate(&ref[1], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
     if(H5Dwrite(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT,ref) < 0) TEST_ERROR
     if(H5Dclose(dsetr_id) < 0) TEST_ERROR
@@ -7175,13 +7175,13 @@ main(void)
         /* Copy the file access property list */
         if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
-        /* Set the "use the latest version of the format" flag for creating objects in the file */
-        if(H5Pset_latest_format(fapl2, TRUE) < 0) TEST_ERROR
+        /* Set the "use the latest version of the format" bounds for creating objects in the file */
+        if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
         /* Create an FCPL with sharing enabled */
         if((fcpl_shared = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR
         if(H5Pset_shared_mesg_nindexes(fcpl_shared, 1) < 0) TEST_ERROR
-        if(H5Pset_shared_mesg_index(fcpl_shared, 0, H5O_MESG_ALL_FLAG, (size_t) 10) < 0) TEST_ERROR 
+        if(H5Pset_shared_mesg_index(fcpl_shared, 0, H5O_SHMESG_ALL_FLAG, (size_t) 10) < 0) TEST_ERROR 
 
         /* Test in all configurations */
         for(configuration = 0; configuration <= MAX_CONFIGURATION; configuration++) {

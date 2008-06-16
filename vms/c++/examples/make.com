@@ -15,9 +15,10 @@ $!#
 $!
 $! Make HDF5 C++ examples
 $!
-$! cxxopt = "/float=ieee_float/standard=strict_ansi/define=H5_VMS"
+$ cxxopt = "/float=ieee_float/standard=strict_ansi/define=H5_VMS"
+$ define zlib_dir sys$sysusers:[pourmale.zlib-1_2_3]
 $
-$ ccc := cxx 'cxxopt /include=([-.-.src], [-.src])
+$ ccc := cxx 'cxxopt /include=([-.-.include])
 $!
 $!
 $ cxxobj= "create.cxx, readdata.cxx, writedata.cxx, compound.cxx,"+-
@@ -29,48 +30,48 @@ $ type sys$input
 
        Creating create 
 $ cxxlink  create, -
-           [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+           [-.-.lib]hdf5_cplus.olb/lib, -
+           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
        Creating readdata  
 $ cxxlink  readdata, -
-           [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+           [-.-.lib]hdf5_cplus.olb/lib, -
+           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input
 
        Creating writedata  
 $ cxxlink  writedata, -
-           [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+           [-.-.lib]hdf5_cplus.olb/lib, -
+           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ !                              
 $ type sys$input
 
        Creating compound 
 $ cxxlink  compound, -
-           [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+           [-.-.lib]hdf5_cplus.olb/lib, -
+           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input
 
        Creating extend_ds  
 $ cxxlink  extend_ds, -
-           [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+           [-.-.lib]hdf5_cplus.olb/lib, -
+           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input
 
        Creating chunks 
 $ cxxlink  chunks, -
-           [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+           [-.-.lib]hdf5_cplus.olb/lib, -
+           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input
 
        Creating h5group 
 $ cxxlink  h5group, -
-           [-.src]hdf5_cplus.olb/lib, -
-           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+           [-.-.lib]hdf5_cplus.olb/lib, -
+           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ exit

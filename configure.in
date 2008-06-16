@@ -26,7 +26,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.8.0-beta4post1], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.8.0], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
@@ -1011,7 +1011,7 @@ AC_ARG_ENABLE(production,
                               [Determines how to run the compiler.])])
 
 case "X-$enable_production" in
-  X-yes)
+  X-|X-yes)
     enable_production="yes"
     AC_MSG_RESULT([production])
 
@@ -1053,7 +1053,7 @@ case "X-$enable_production" in
     H5_CXXFLAGS="$H5_CXXFLAGS $PROD_CXXFLAGS"
     H5_FCFLAGS="$H5_FCFLAGS $PROD_FCFLAGS"
     ;;
-  X-|X-no)
+  X-no)
     enable_production="no"
     AC_MSG_RESULT([development])
     CONFIG_MODE=development
@@ -3645,6 +3645,41 @@ if test "X${DEFAULT_API_VERSION}" != "Xv18" -a "X${DEPRECATED_SYMBOLS}" = "Xno" 
   AC_MSG_ERROR([Removing old public API symbols not allowed when using them as default public API symbols])
 fi
 
+
+dnl ----------------------------------------------------------------------
+dnl Enable strict file format checks
+dnl
+AC_SUBST([STRICT_FORMAT_CHECKS])
+AC_MSG_CHECKING([Whether to perform strict file format checks]);
+AC_ARG_ENABLE([strict-format-checks],
+              [AC_HELP_STRING([--enable-strict-format-checks],
+                     [Enable strict file format checks, default=yes if
+                        debug flag is enabled, no otherwise])],
+             [STRICT_CHECKS=$enableval])
+
+dnl Default to yes if debug is enabled
+if test "X-$STRICT_CHECKS" = X- ; then
+  if test -z "$DEBUG_PKG" ; then
+    STRICT_CHECKS=no
+  else
+    STRICT_CHECKS=yes
+  fi
+fi
+
+case "X-$STRICT_CHECKS" in
+  X-yes)
+    AC_MSG_RESULT([yes])
+    STRICT_FORMAT_CHECKS=yes
+    AC_DEFINE([STRICT_FORMAT_CHECKS], [1],
+              [Define if strict file format checks are enabled])
+    ;;
+  X-no|*)
+    AC_MSG_RESULT([no])
+    STRICT_FORMAT_CHECKS=no
+    ;;
+esac
+
+
 dnl ----------------------------------------------------------------------
 dnl Create automake conditionals to tell automake makefiles which directories
 dnl need to be compiled
@@ -3953,6 +3988,9 @@ IF_ENABLED_DISABLED "$CODESTACK"
 
 PRINT_N "                           GPFS"
 IF_YES_NO "$GPFS"
+
+PRINT_N "      Strict File Format Checks"
+IF_ENABLED_DISABLED "$STRICT_FORMAT_CHECKS"
 
 PRINT_N "            Default API Mapping"
 PRINT "$DEFAULT_API_VERSION"

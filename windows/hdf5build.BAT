@@ -92,14 +92,12 @@ rem Setup our environment
     
     echo.Setting up environment
 
-    rem By default, use all.sln and typegen.sln, unless hdf5_enablefortran is set
+    rem By default, use all.sln, unless hdf5_enablefortran is set
     if defined hdf5_enablefortran (
         echo.Building Fortran projects enabled
         set hdf5_sln="%CD%\windows\proj\all_fortran\all_fortran.sln"
-        set hdf5_tinit_sln="%CD%\windows\misc\typegen\typegen_fortran.sln"
     ) else (
         set hdf5_sln="%CD%\windows\proj\all\all.sln"
-        set hdf5_tinit_sln="%CD%\windows\misc\typegen\typegen.sln"
     )
     
     
@@ -145,21 +143,6 @@ rem Setup our environment
     )
 
     exit /b 0
-
-
-rem Build H5tinit.exe and generate h4tinit.c
-:h5tinit
-
-    echo.Generating H5tint.c
-
-    echo.*****************************************************************************
-    echo.                        Build H5Tinit.exe
-    echo.*****************************************************************************
-    echo.
-    devenv %hdf5_tinit_sln% %ccflags% /rebuild Debug
-    if %errorlevel% neq 0 exit /b 1
-
-    exit /b
 
 
 rem Build the HDF5 libraries.  By default, C and C++ libraries are built.
@@ -225,12 +208,6 @@ rem This is where the magic happens
     echo.*****************************************************************************
     echo.
 
-
-    call :h5tinit
-    if %errorlevel% neq 0 (
-        echo.Error building h5tinit!
-        goto error
-    )
 
     call :all
     if %errorlevel% neq 0 (

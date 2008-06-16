@@ -95,7 +95,7 @@ typedef struct table_t {
 
 /*this struct stores the information that is passed to the find_objs function*/
 typedef struct find_objs_t {
-    char *prefix;
+    hid_t fid;
     table_t *group_table;
     table_t *type_table;
     table_t *dset_table;

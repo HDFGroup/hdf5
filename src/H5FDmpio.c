@@ -322,13 +322,13 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
     FUNC_ENTER_API(H5Pset_fapl_mpio, FAIL)
     H5TRACE3("e", "iMcMi", fapl_id, comm, info);
 
-    if(fapl_id==H5P_DEFAULT)
+    if(fapl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
 
     /* Check arguments */
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+    if(NULL == (plist = (H5P_genplist_t *)H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list")
-    if (MPI_COMM_NULL == comm)
+    if(MPI_COMM_NULL == comm)
 	HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a valid communicator")
 
     /* Initialize driver specific properties */
@@ -393,11 +393,11 @@ H5Pget_fapl_mpio(hid_t fapl_id, MPI_Comm *comm/*out*/, MPI_Info *info/*out*/)
     FUNC_ENTER_API(H5Pget_fapl_mpio, FAIL)
     H5TRACE3("e", "ixx", fapl_id, comm, info);
 
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+    if(NULL == (plist = (H5P_genplist_t *)H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access list")
-    if (H5FD_MPIO!=H5P_get_driver(plist))
+    if(H5FD_MPIO != H5P_get_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
-    if (NULL==(fa=H5P_get_driver_info(plist)))
+    if(NULL == (fa = (H5FD_mpio_fapl_t *)H5P_get_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
     /* Store the duplicated communicator in a temporary variable for error */
@@ -471,9 +471,9 @@ H5Pset_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t xfer_mode)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
 
     /* Check arguments */
-    if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
+    if(NULL == (plist = (H5P_genplist_t *)H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
-    if (H5FD_MPIO_INDEPENDENT!=xfer_mode && H5FD_MPIO_COLLECTIVE!=xfer_mode)
+    if(H5FD_MPIO_INDEPENDENT != xfer_mode && H5FD_MPIO_COLLECTIVE != xfer_mode)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "incorrect xfer_mode")
 
     /* Set the transfer mode */
@@ -517,9 +517,9 @@ H5Pget_dxpl_mpio(hid_t dxpl_id, H5FD_mpio_xfer_t *xfer_mode/*out*/)
     FUNC_ENTER_API(H5Pget_dxpl_mpio, FAIL)
     H5TRACE2("e", "ix", dxpl_id, xfer_mode);
 
-    if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
+    if(NULL == (plist = (H5P_genplist_t *)H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
-    if (H5FD_MPIO!=H5P_get_driver(plist))
+    if(H5FD_MPIO != H5P_get_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
 
     /* Get the transfer mode */
@@ -563,13 +563,12 @@ H5Pset_dxpl_mpio_collective_opt(hid_t dxpl_id, H5FD_mpio_collective_opt_t opt_mo
 
     FUNC_ENTER_API(H5Pset_dxpl_mpio_collective_opt, FAIL)
     H5TRACE2("e", "iDc", dxpl_id, opt_mode);
-/*    H5TRACE2("e","iDt",dxpl_id,xfer_mode);*/
 
-    if(dxpl_id==H5P_DEFAULT)
+    if(dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
 
     /* Check arguments */
-    if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
+    if(NULL == (plist = (H5P_genplist_t *)H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
 
     /* Set the transfer mode */
@@ -616,13 +615,12 @@ H5Pset_dxpl_mpio_chunk_opt(hid_t dxpl_id, H5FD_mpio_chunk_opt_t opt_mode)
 
     FUNC_ENTER_API(H5Pset_dxpl_mpio_chunk_opt, FAIL)
     H5TRACE2("e", "iDh", dxpl_id, opt_mode);
-/*    H5TRACE2("e","iDt",dxpl_id,xfer_mode);*/
 
-    if(dxpl_id==H5P_DEFAULT)
+    if(dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
 
     /* Check arguments */
-    if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
+    if(NULL == (plist = (H5P_genplist_t *)H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
 
     /* Set the transfer mode */
@@ -666,11 +664,11 @@ H5Pset_dxpl_mpio_chunk_opt_num(hid_t dxpl_id, unsigned num_chunk_per_proc)
     FUNC_ENTER_API(H5Pset_dxpl_mpio_chunk_opt_num, FAIL)
     H5TRACE2("e", "iIu", dxpl_id, num_chunk_per_proc);
 
-    if(dxpl_id==H5P_DEFAULT)
+    if(dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
 
     /* Check arguments */
-    if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
+    if(NULL == (plist = (H5P_genplist_t *)H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
 
     /* Set the transfer mode */
@@ -713,11 +711,11 @@ H5Pset_dxpl_mpio_chunk_opt_ratio(hid_t dxpl_id, unsigned percent_num_proc_per_ch
     FUNC_ENTER_API(H5Pset_dxpl_mpio_chunk_opt_ratio, FAIL)
     H5TRACE2("e", "iIu", dxpl_id, percent_num_proc_per_chunk);
 
-    if(dxpl_id==H5P_DEFAULT)
+    if(dxpl_id == H5P_DEFAULT)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
 
     /* Check arguments */
-    if(NULL == (plist = H5P_object_verify(dxpl_id,H5P_DATASET_XFER)))
+    if(NULL == (plist = (H5P_genplist_t *)H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a dxpl")
 
     /* Set the transfer mode */
@@ -761,19 +759,18 @@ H5FD_mpio_fapl_get(H5FD_t *_file)
 
     FUNC_ENTER_NOAPI(H5FD_mpio_fapl_get, NULL)
 
-    assert(file);
-    assert(H5FD_MPIO==file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIO == file->pub.driver_id);
 
-    if (NULL==(fa=H5MM_calloc(sizeof(H5FD_mpio_fapl_t))))
+    if(NULL == (fa = (H5FD_mpio_fapl_t *)H5MM_calloc(sizeof(H5FD_mpio_fapl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Duplicate communicator and Info object. */
-    if (FAIL==H5FD_mpi_comm_info_dup(file->comm, file->info,
-					&fa->comm, &fa->info))
+    if(FAIL == H5FD_mpi_comm_info_dup(file->comm, file->info, &fa->comm, &fa->info))
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed")
 
     /* Set return value */
-    ret_value=fa;
+    ret_value = fa;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -809,15 +806,14 @@ if (H5FD_mpio_Debug[(int)'t'])
 fprintf(stderr, "enter H5FD_mpio_fapl_copy\n");
 #endif
 
-    if (NULL==(new_fa=H5MM_malloc(sizeof(H5FD_mpio_fapl_t))))
+    if(NULL == (new_fa = (H5FD_mpio_fapl_t *)H5MM_malloc(sizeof(H5FD_mpio_fapl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the general information */
     HDmemcpy(new_fa, old_fa, sizeof(H5FD_mpio_fapl_t));
 
     /* Duplicate communicator and Info object. */
-    if (FAIL==H5FD_mpi_comm_info_dup(old_fa->comm, old_fa->info,
-					&new_fa->comm, &new_fa->info))
+    if(FAIL == H5FD_mpi_comm_info_dup(old_fa->comm, old_fa->info, &new_fa->comm, &new_fa->info))
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOPY, NULL, "Communicator/Info duplicate failed")
     ret_value = new_fa;
 
@@ -956,14 +952,14 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 #endif
 
     /* Obtain a pointer to mpio-specific file access properties */
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+    if(NULL == (plist = (H5P_genplist_t *)H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if (H5P_FILE_ACCESS_DEFAULT==fapl_id || H5FD_MPIO!=H5P_get_driver(plist)) {
+    if(H5P_FILE_ACCESS_DEFAULT == fapl_id || H5FD_MPIO != H5P_get_driver(plist)) {
 	_fa.comm = MPI_COMM_SELF; /*default*/
 	_fa.info = MPI_INFO_NULL; /*default*/
 	fa = &_fa;
     } else {
-	fa = H5P_get_driver_info(plist);
+	fa = (const H5FD_mpio_fapl_t *)H5P_get_driver_info(plist);
 	assert(fa);
     }
 
@@ -998,7 +994,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 #endif
 
     /*OKAY: CAST DISCARDS CONST*/
-    if (MPI_SUCCESS != (mpi_code=MPI_File_open(comm_dup, (char*)name, mpi_amode, info_dup, &fh)))
+    if(MPI_SUCCESS != (mpi_code = MPI_File_open(comm_dup, (char*)name, mpi_amode, info_dup, &fh)))
         HMPI_GOTO_ERROR(NULL, "MPI_File_open failed", mpi_code)
     file_opened=1;
 
@@ -1009,7 +1005,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
         HMPI_GOTO_ERROR(NULL, "MPI_Comm_size failed", mpi_code)
 
     /* Build the return value and initialize it */
-    if (NULL==(file=H5MM_calloc(sizeof(H5FD_mpio_t))))
+    if(NULL == (file = (H5FD_mpio_t *)H5MM_calloc(sizeof(H5FD_mpio_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     file->f = fh;
     file->comm = comm_dup;
@@ -1034,7 +1030,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     } /* end if */
 
     /* Broadcast file size */
-    if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&size, sizeof(MPI_Offset), MPI_BYTE, 0, comm_dup)))
+    if(MPI_SUCCESS != (mpi_code = MPI_Bcast(&size, (int)sizeof(MPI_Offset), MPI_BYTE, 0, comm_dup)))
         HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
 
     /* Determine if the file should be truncated */
@@ -1454,9 +1450,9 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
         H5FD_mpio_xfer_t            xfer_mode;   /* I/O tranfer mode */
 
         /* Obtain the data transfer properties */
-        if(NULL == (plist = H5I_object(dxpl_id)))
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-        xfer_mode=(H5FD_mpio_xfer_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
+        xfer_mode = (H5FD_mpio_xfer_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_MODE_NAME);
 
         /*
          * Set up for a fancy xfer using complex types, or single byte block. We
@@ -1499,10 +1495,10 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
 	    fprintf(stdout, "H5FD_mpio_read: using MPIO collective mode\n");
 #endif
         /* Peek the collective_opt property to check whether the application wants to do IO individually. */
-        coll_opt_mode=(H5FD_mpio_collective_opt_t)H5P_peek_unsigned(plist,H5D_XFER_MPIO_COLLECTIVE_OPT_NAME);
+        coll_opt_mode = (H5FD_mpio_collective_opt_t)H5P_peek_unsigned(plist, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME);
 
        /* Peek the xfer_opt_mode property to check whether the application wants to do IO individually. */
-        xfer_opt_mode=(H5FD_mpio_collective_opt_t)H5P_peek_unsigned(plist,H5D_XFER_IO_XFER_OPT_MODE_NAME);
+        xfer_opt_mode = (H5FD_mpio_collective_opt_t)H5P_peek_unsigned(plist, H5D_XFER_IO_XFER_OPT_MODE_NAME);
      
         if(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO && xfer_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 #ifdef H5FDmpio_DEBUG
@@ -1528,10 +1524,10 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
          * Reset the file view when we used MPI derived types
          */
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-        if (MPI_SUCCESS != (mpi_code=MPI_File_set_view(file->f, 0, MPI_BYTE, MPI_BYTE, H5FD_mpi_native_g,  file->info)))
+        if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, H5FD_mpi_native_g, file->info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } else {
-        if (MPI_SUCCESS!= (mpi_code=MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
+        if(MPI_SUCCESS != (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
     }
 
@@ -1738,7 +1734,7 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 #endif
 
     /* Obtain the data transfer properties */
-    if(NULL == (plist = H5I_object(dxpl_id)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
     if(type==H5FD_MEM_DRAW) {
@@ -1830,15 +1826,12 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
             fprintf(stdout, "H5FD_mpio_write: using MPIO collective mode\n");
 #endif
         /* Peek the collective_opt property to check whether the application wants to do IO individually. */
-        coll_opt_mode=(H5FD_mpio_collective_opt_t)H5P_peek_unsigned(plist,H5D_XFER_MPIO_COLLECTIVE_OPT_NAME);
+        coll_opt_mode = (H5FD_mpio_collective_opt_t)H5P_peek_unsigned(plist,H5D_XFER_MPIO_COLLECTIVE_OPT_NAME);
 
          /* Peek the xfer_opt_mode property to check whether the application wants to do IO individually. */
-        xfer_opt_mode=(H5FD_mpio_collective_opt_t)H5P_peek_unsigned(plist,H5D_XFER_IO_XFER_OPT_MODE_NAME);
-
-        
+        xfer_opt_mode = (H5FD_mpio_collective_opt_t)H5P_peek_unsigned(plist,H5D_XFER_IO_XFER_OPT_MODE_NAME);
 
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-
         if(coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO && xfer_opt_mode == H5FD_MPIO_COLLECTIVE_IO ) {
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_Debug[(int)'t'])
@@ -1865,11 +1858,11 @@ if (MPI_SUCCESS != (mpi_code=MPI_File_write_at_all(file->f, mpi_off, (void*)buf,
          * Reset the file view when we used MPI derived types
          */
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-        if (MPI_SUCCESS != (mpi_code=MPI_File_set_view(file->f, 0, MPI_BYTE, MPI_BYTE, H5FD_mpi_native_g,  file->info)))
+        if(MPI_SUCCESS != (mpi_code = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE, H5FD_mpi_native_g,  file->info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
     } else {
         /*OKAY: CAST DISCARDS CONST QUALIFIER*/
-        if (MPI_SUCCESS != (mpi_code=MPI_File_write_at(file->f, mpi_off, (void*)buf, size_i, buf_type, &mpi_stat)))
+        if(MPI_SUCCESS != (mpi_code = MPI_File_write_at(file->f, mpi_off, (void*)buf, size_i, buf_type, &mpi_stat)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_write_at failed", mpi_code)
     }
 
@@ -1908,8 +1901,8 @@ done:
     /* if only one process writes, need to broadcast the ret_value to 
      * other processes 
      */
-    if (type!=H5FD_MEM_DRAW) {
-	if (MPI_SUCCESS != (mpi_code=MPI_Bcast(&ret_value, sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))
+    if(type != H5FD_MEM_DRAW) {
+	if(MPI_SUCCESS != (mpi_code = MPI_Bcast(&ret_value, (int)sizeof(ret_value), MPI_BYTE, H5_PAR_META_WRITE, file->comm)))
 	    HMPI_DONE_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
     } /* end if */
 #endif /* JRM */

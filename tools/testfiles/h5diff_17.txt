@@ -21,6 +21,8 @@ file1     file2
     x           /g1/fp1        
     x           /g1/fp15       
     x           /g1/fp16       
+    x           /g1/fp17       
+    x           /g1/fp18       
     x           /g1/fp2        
            x    /g2            
 

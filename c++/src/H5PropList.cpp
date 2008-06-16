@@ -25,6 +25,8 @@
 #include "H5Exception.h"
 #include "H5IdComponent.h"
 #include "H5PropList.h"
+#include "H5private.h"          // for HDfree
+
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -426,7 +428,7 @@ H5std_string PropList::getClassName() const
    if (temp_str != NULL)
    {
       H5std_string class_name = H5std_string(temp_str);
-      free(temp_str);
+      HDfree(temp_str);
       return(class_name);
    }
    else

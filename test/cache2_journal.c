@@ -1646,13 +1646,13 @@ open_exiting_file_for_journaling(const char * hdf_file_name,
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    /* call H5Pset_latest_format() on the fapl_id */
+    /* call H5Pset_libver_bounds() on the fapl_id */
     if ( pass2 ) {
 
-	if ( H5Pset_latest_format(fapl_id, TRUE) < 0 ) {
+	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Pset_latest_format() failed.\n";
+            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
         }
     }
 
@@ -1913,13 +1913,13 @@ setup_cache_for_journaling(const char * hdf_file_name,
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    /* call H5Pset_latest_format() on the fapl_id */
+    /* call H5Pset_libver_bounds() on the fapl_id */
     if ( pass2 ) {
 
-	if ( H5Pset_latest_format(fapl_id, TRUE) < 0 ) {
+	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Pset_latest_format() failed.\n";
+            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
         }
     }
 
@@ -3982,13 +3982,13 @@ check_mdj_config_block_IO(void)
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    /* call H5Pset_latest_format() on the fapl_id */
+    /* call H5Pset_libver_bounds() on the fapl_id */
     if ( pass2 ) {
 
-	if ( H5Pset_latest_format(fapl_id, TRUE) < 0 ) {
+	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Pset_latest_format() failed.\n";
+            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
         }
     }
 
@@ -4619,13 +4619,13 @@ check_superblock_extensions(void)
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-    /* call H5Pset_latest_format() on the fapl_id */
+    /* call H5Pset_libver_bounds() on the fapl_id */
     if ( pass2 ) {
 
-	if ( H5Pset_latest_format(fapl_id, TRUE) < 0 ) {
+	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Pset_latest_format() failed.\n";
+            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
         }
     }
 

@@ -229,6 +229,15 @@ typedef struct H5FD_free_t {
     struct H5FD_free_t	*next;
 } H5FD_free_t;
 
+/* Structure for metadata & "small [raw] data" block aggregation fields */
+typedef struct H5FD_blk_aggr_t {
+    unsigned long       feature_flag;   /* Feature flag type */
+    hsize_t             alloc_size;     /* Size for allocating new blocks */
+    hsize_t             tot_size;       /* Total amount of bytes aggregated into block */
+    hsize_t             size;           /* Current size of block left */
+    haddr_t             addr;           /* Location of block left */
+} H5FD_blk_aggr_t;
+
 /*
  * The main datatype for each driver. Public fields common to all drivers
  * are declared here and the driver appends private fields in memory.
@@ -241,27 +250,11 @@ struct H5FD_t {
     hsize_t             threshold;      /* Threshold for alignment  */
     hsize_t             alignment;      /* Allocation alignment     */
 
-    /* Metadata aggregation fields */
-    hsize_t             def_meta_block_size;  /* Metadata allocation
-                                               * block size (if
-                                               * aggregating metadata) */
-    hsize_t             cur_meta_block_size;  /* Current size of metadata
-                                               * allocation region left */
-    haddr_t             eoma;                 /* End of metadata
-                                               * allocated region */
-                                              /* (ie. beginning of space available) */
-
-    /* "Small data" aggregation fields */
-    hsize_t             def_sdata_block_size; /* "Small data"
-                                               * allocation block size
-                                               * (if aggregating "small
-                                               * data") */
-    hsize_t             cur_sdata_block_size; /* Current size of "small
-                                               * data" allocation
-                                               * region left */
-    haddr_t             eosda;                /* End of "small data"
-                                               * allocated region */
-                                              /* (ie. beginning of space available) */
+    /* Block aggregation info */
+    H5FD_blk_aggr_t     meta_aggr;      /* Metadata aggregation info */
+                                        /* (if aggregating metadata allocations) */
+    H5FD_blk_aggr_t     sdata_aggr;     /* "Small data" aggregation info */
+                                        /* (if aggregating "small data" allocations) */
 
     /* Metadata accumulator fields */
     unsigned char      *meta_accum;     /* Buffer to hold the accumulated metadata */
@@ -311,3 +304,4 @@ H5_DLL herr_t H5FDflush(H5FD_t *file, hid_t dxpl_id, unsigned closing);
 }
 #endif
 #endif
+

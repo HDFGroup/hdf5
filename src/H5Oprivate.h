@@ -93,6 +93,10 @@ typedef struct H5O_t H5O_t;
 #define H5O_BOGUS_MSG_FLAGS_NAME        "bogus msg flags"       /* Flags for 'bogus' message */
 #define H5O_BOGUS_MSG_FLAGS_SIZE        sizeof(uint8_t)
 #endif /* H5O_ENABLE_BOGUS */
+#ifdef H5O_ENABLE_BAD_MESG_COUNT
+#define H5O_BAD_MESG_COUNT_NAME         "bad message count"       /* Flag setting bad message count */
+#define H5O_BAD_MESG_COUNT_SIZE         sizeof(hbool_t)
+#endif /* H5O_ENABLE_BAD_MESG_COUNT */
 
 /* ========= Object Copy properties ============ */
 #define H5O_CPY_OPTION_NAME 		"copy object"           /* Copy options */
@@ -571,13 +575,13 @@ H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
 H5_DLL herr_t H5O_open(H5O_loc_t *loc);
 H5_DLL herr_t H5O_close(H5O_loc_t *loc);
 H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id);
-H5_DLL struct H5O_t *H5O_protect(H5O_loc_t *loc, hid_t dxpl_id);
-H5_DLL herr_t H5O_unprotect(H5O_loc_t *loc, struct H5O_t *oh);
+H5_DLL H5O_t *H5O_protect(H5O_loc_t *loc, hid_t dxpl_id);
+H5_DLL herr_t H5O_unprotect(H5O_loc_t *loc, H5O_t *oh);
 H5_DLL herr_t H5O_touch(H5O_loc_t *loc, hbool_t force, hid_t dxpl_id);
-H5_DLL herr_t H5O_touch_oh(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh,
+H5_DLL herr_t H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     hbool_t force);
 #ifdef H5O_ENABLE_BOGUS
-H5_DLL herr_t H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, unsigned mesg_flags);
+H5_DLL herr_t H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags);
 #endif /* H5O_ENABLE_BOGUS */
 H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5O_get_info(H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info,
@@ -588,14 +592,17 @@ H5_DLL hid_t H5O_open_name(H5G_loc_t *loc, const char *name, hid_t lapl_id);
 H5_DLL herr_t H5O_get_nlinks(const H5O_loc_t *loc, hid_t dxpl_id, hsize_t *nlinks);
 H5_DLL void *H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id);
 H5_DLL haddr_t H5O_get_oh_addr(const H5O_t *oh);
+H5_DLL herr_t H5O_get_rc_and_type(const H5O_loc_t *oloc, hid_t dxpl_id, unsigned *rc, H5O_type_t *otype);
 
 /* Object header message routines */
 H5_DLL herr_t H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
     unsigned update_flags, void *mesg, hid_t dxpl_id);
-H5_DLL herr_t H5O_msg_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, unsigned type_id,
+H5_DLL herr_t H5O_msg_append_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     unsigned mesg_flags, unsigned update_flags, void *mesg);
-H5_DLL herr_t H5O_msg_write(const H5O_loc_t *loc, unsigned type_id, unsigned flags,
-    unsigned update_flags, void *mesg, hid_t dxpl_id);
+H5_DLL herr_t H5O_msg_write(const H5O_loc_t *loc, unsigned type_id,
+    unsigned mesg_flags, unsigned update_flags, void *mesg, hid_t dxpl_id);
+H5_DLL herr_t H5O_msg_write_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    unsigned type_id, unsigned mesg_flags, unsigned update_flags, void *mesg);
 H5_DLL void *H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
     hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_reset(unsigned type_id, void *native);

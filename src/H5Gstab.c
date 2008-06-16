@@ -484,8 +484,7 @@ done:
  */
 herr_t
 H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
-    hsize_t skip, hsize_t *last_lnk, hid_t gid,
-    H5G_link_iterate_t *lnk_op, void *op_data)
+    hsize_t skip, hsize_t *last_lnk, H5G_lib_iterate_t op, void *op_data)
 {
     H5HL_t              *heap = NULL;           /* Local heap for group */
     H5O_stab_t		stab;		        /* Info about symbol table */
@@ -496,7 +495,7 @@ H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
 
     /* Sanity check */
     HDassert(oloc);
-    HDassert(lnk_op && lnk_op->u.app_op);
+    HDassert(op);
 
     /* Get the B-tree info */
     if(NULL == H5O_msg_read(oloc, H5O_STAB_ID, &stab, dxpl_id))
@@ -512,11 +511,10 @@ H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
         H5G_bt_it_it_t	udata;                  /* User data to pass to B-tree callback */
 
         /* Build udata to pass through H5B_iterate() to H5G_node_iterate() */
-        udata.group_id = gid;
         udata.heap = heap;
         udata.skip = skip;
         udata.final_ent = last_lnk;
-        udata.lnk_op = lnk_op;
+        udata.op = op;
         udata.op_data = op_data;
 
         /* Iterate over the group members */
@@ -550,7 +548,7 @@ H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
             HGOTO_ERROR(H5E_SYM, H5E_CANTSORT, FAIL, "error sorting link messages")
 
         /* Iterate over links in table */
-        if((ret_value = H5G_link_iterate_table(&ltable, skip, last_lnk, gid, lnk_op, op_data)) < 0)
+        if((ret_value = H5G_link_iterate_table(&ltable, skip, last_lnk, op, op_data)) < 0)
             HERROR(H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
     } /* end else */
 

@@ -265,14 +265,16 @@ H5_DLL herr_t H5Pset_sieve_buf_size(hid_t fapl_id, size_t size);
 H5_DLL herr_t H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size/*out*/);
 H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
 H5_DLL herr_t H5Pget_small_data_block_size(hid_t fapl_id, hsize_t *size/*out*/);
-H5_DLL herr_t H5Pset_latest_format(hid_t plist_id, hbool_t latest);
-H5_DLL herr_t H5Pget_latest_format(hid_t plist_id, hbool_t *latest);
+H5_DLL herr_t H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low,
+    H5F_libver_t high);
+H5_DLL herr_t H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low,
+    H5F_libver_t *high);
 H5_DLL herr_t H5Pset_journal(hid_t fapl_id, const char *journal_file);
 
 /* Dataset creation property list (DCPL) routines */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
 H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
-H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[]);
+H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/]);
 H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/);
 H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset,
           hsize_t size);

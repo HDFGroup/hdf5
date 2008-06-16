@@ -513,7 +513,6 @@ H5O_linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     /* Check for copying dense link storage */
     if(H5F_addr_defined(linfo_src->fheap_addr)) {
         H5O_linfo_postcopy_ud_t udata;          /* User data for iteration callback */
-        H5G_link_iterate_t lnk_op;              /* Link operator */
 
         /* Set up dense link iteration user data */
         udata.src_oloc = src_oloc;
@@ -522,12 +521,8 @@ H5O_linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
         udata.dxpl_id = dxpl_id;
         udata.cpy_info = cpy_info;
 
-        /* Build iterator operator */
-        lnk_op.op_type = H5G_LINK_OP_LIB;
-        lnk_op.u.lib_op = H5O_linfo_post_copy_file_cb;
-
         /* Iterate over the links in the group, building a table of the link messages */
-        if(H5G_dense_iterate(src_oloc->file, dxpl_id, linfo_src, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, (hid_t)0, &lnk_op, &udata) < 0)
+        if(H5G_dense_iterate(src_oloc->file, dxpl_id, linfo_src, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, H5O_linfo_post_copy_file_cb, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
     } /* end if */
 

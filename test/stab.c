@@ -1128,8 +1128,8 @@ main(void)
         /* Copy the file access property list */
         if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
-        /* Set the "use the latest version of the format" flag for creating objects in the file */
-        if(H5Pset_latest_format(fapl2, TRUE) < 0) TEST_ERROR
+        /* Set the "use the latest version of the format" bounds for creating objects in the file */
+        if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
         /* Loop over using new group format */
         for(new_format = FALSE; new_format <= TRUE; new_format++) {

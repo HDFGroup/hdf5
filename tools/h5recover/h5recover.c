@@ -621,7 +621,7 @@ main (int argc, const char *argv[])
                 pread(hdf5_fd, compare_buf, size, address);
 
                 /* do a quick string compare on two items */
-                if (HDstrcmp(body, compare_buf) != 0) {
+                if (HDstrcmp((const char *)body, (const char *)compare_buf) != 0) {
                     error_msg(progname, "Entry incorrectly written into HDF5 file. Exiting.\n");
                     printf("Address %llx:\n", address);
                     printf(" -- from journal:   %llx\n", body);
@@ -706,7 +706,7 @@ main (int argc, const char *argv[])
     } /* end if */
 
     /* obtain H5F_t pointer */
-    if ((f = H5I_object(fid)) == -1) {
+    if (NULL == (f = H5I_object(fid))) {
 
         error_msg(progname, "Could not obtain H5F_t pointer from file id");
         leave( EXIT_FAILURE );

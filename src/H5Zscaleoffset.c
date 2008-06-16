@@ -93,7 +93,6 @@ H5Z_class_t H5Z_SCALEOFFSET[1] = {{
 }};
 
 /* Local macros */
-#define H5Z_SCALEOFFSET_USER_NPARMS      2    /* Number of parameters that users can set */
 #define H5Z_SCALEOFFSET_TOTAL_NPARMS     20   /* Total number of parameters for filter */
 #define H5Z_SCALEOFFSET_PARM_SCALETYPE   0    /* "User" parameter for scale type */
 #define H5Z_SCALEOFFSET_PARM_SCALEFACTOR 1    /* "User" parameter for scale factor */

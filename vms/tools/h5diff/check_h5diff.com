@@ -18,6 +18,12 @@ $ ! This command file tests h5diff utility. The command file has to
 $ ! run in the [hdf5-top.tools.testfiles] directory.
 $ !
 $ !
+$ type sys$input
+
+===================================
+       Testing h5diff utiltity
+===================================
+
 $ ! Define h5diff symbol
 $ !
 $! set message/notext/nofacility/noidentification/noseverity
@@ -27,47 +33,43 @@ $ temp = F$EXTRACT(0, len-10, current_dir)
 $ h5diff_dir = temp + "H5DIFF]"
 $ h5diff :== $sys$disk:'h5diff_dir'h5diff.exe
 $ !
-$ ! Define output for diff command that compares expected and actual
-$ ! outputs of h5diff
-$ !
-$ create h5diff.log
+
 $ !
 $ ! h5diff tests
 $ !
 $
-
 $!# 1.0
 $ CALL TOOLTEST h5diff_10.txt "-h"
 $!
 $!# 1.1 normal mode
-$ CALL TOOLTEST h5diff_11.txt  "file1.h5 file2.h5" 
+$ CALL TOOLTEST h5diff_11.txt  "h5diff_basic1.h5 h5diff_basic2.h5" 
 $!
 $!# 1.2 normal mode with objects
-$ CALL TOOLTEST h5diff_12.txt  "file1.h5 file2.h5  g1/dset1 g1/dset2"
+$ CALL TOOLTEST h5diff_12.txt  "h5diff_basic1.h5 h5diff_basic2.h5  g1/dset1 g1/dset2"
 $!
 $!# 1.3 report mode
-$ CALL TOOLTEST h5diff_13.txt "file1.h5 file2.h5 -r"
+$ CALL TOOLTEST h5diff_13.txt "-r h5diff_basic1.h5 h5diff_basic2.h5"
 $!
 $!# 1.4 report  mode with objects
-$ CALL TOOLTEST h5diff_14.txt  "file1.h5 file2.h5  -r g1/dset1 g1/dset2"
+$ CALL TOOLTEST h5diff_14.txt  "-r h5diff_basic1.h5 h5diff_basic2.h5 g1/dset1 g1/dset2"
 $!
 $!# 1.5 with -d
-$ CALL TOOLTEST h5diff_15.txt "file1.h5 file2.h5 -r -d 5 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_15.txt " --report --delta=5 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
-$!# 1.6 with -p
-$ CALL TOOLTEST h5diff_16.txt "file1.h5 file2.h5 -r -p 0.05 g1/dset3 g1/dset4"
+$!# 1.6.1 with -p (int)
+$ CALL TOOLTEST h5diff_16_1.txt "-v -p 0.02 h5diff_basic1.h5 h5diff_basic1.h5 g1/dset5 g1/dset6"
+$!
+$!# 1.6.2 with -p (unsigned long long)
+$ CALL TOOLTEST h5diff_16_2.txt "--verbose --relative=0.02 h5diff_basic1.h5 h5diff_basic1.h5 g1/dset7 g1/dset8"
+$!
+$!# 1.6.3 with -p (int)
+$ CALL TOOLTEST h5diff_16_3.txt "-v -p 0.02 h5diff_basic1.h5 h5diff_basic1.h5 g1/dset9 g1/dset10"
 $!
 $!# 1.7 verbose mode
-$ CALL TOOLTEST h5diff_17.txt "file1.h5 file2.h5 -v"  
+$ CALL TOOLTEST h5diff_17.txt "-v h5diff_basic1.h5 h5diff_basic2.h5"  
 $!
 $!# 1.8 quiet mode 
-$ CALL TOOLTEST h5diff_18.txt "file1.h5 file2.h5 -q"
-$!
-$!# 1.9.1 with -p (int)
-$ CALL TOOLTEST h5diff_191.txt "file1.h5 file1.h5 -v -p 0.02 g1/dset5 g1/dset6"
-$!
-$!# 1.9.2 with -p (unsigned long_long)
-$ CALL TOOLTEST h5diff_192.txt "file1.h5 file1.h5 -v -p 0.02 g1/dset7 g1/dset8"
+$ CALL TOOLTEST h5diff_18.txt "-q h5diff_basic1.h5 h5diff_basic2.h5"
 $!
 $!
 $!# ##############################################################################
@@ -75,35 +77,35 @@ $!# # not comparable types
 $!# ##############################################################################
 $!
 $!# 2.0
-$ CALL TOOLTEST h5diff_20.txt "file3.h5 file3.h5 -v dset g1"
+$ CALL TOOLTEST h5diff_20.txt "-v h5diff_types.h5 h5diff_types.h5 dset g1"
 $
 $!# 2.1
-$ CALL TOOLTEST h5diff_21.txt "file3.h5 file3.h5 -v dset l1"
+$ CALL TOOLTEST h5diff_21.txt "-v h5diff_types.h5 h5diff_types.h5 dset l1"
 $!
 $!# 2.2
-$ CALL TOOLTEST h5diff_22.txt "file3.h5 file3.h5 -v dset t1"
+$ CALL TOOLTEST h5diff_22.txt "-v h5diff_types.h5 h5diff_types.h5 dset t1"
 $!
 $!# ##############################################################################
 $!# # compare groups, types, links (no differences and differences)
 $!# ##############################################################################
 $!
 $!# 2.3
-$ CALL TOOLTEST h5diff_23.txt "file3.h5 file3.h5 -v g1 g1"
+$ CALL TOOLTEST h5diff_23.txt "-v h5diff_types.h5 h5diff_types.h5 g1 g1"
 $!
 $!# 2.4
-$ CALL TOOLTEST h5diff_24.txt "file3.h5 file3.h5 -v t1 t1"
+$ CALL TOOLTEST h5diff_24.txt "-v h5diff_types.h5 h5diff_types.h5 t1 t1"
 $!
 $!# 2.5
-$ CALL TOOLTEST h5diff_25.txt "file3.h5 file3.h5 -v l1 l1" 
+$ CALL TOOLTEST h5diff_25.txt "-v h5diff_types.h5 h5diff_types.h5 l1 l1" 
 $!
 $!# 2.6
-$ CALL TOOLTEST h5diff_26.txt "file3.h5 file3.h5 -v g1 g2"
+$ CALL TOOLTEST h5diff_26.txt "-v h5diff_types.h5 h5diff_types.h5 g1 g2"
 $!
 $!# 2.7
-$ CALL TOOLTEST h5diff_27.txt "file3.h5 file3.h5 -v t1 t2"
+$ CALL TOOLTEST h5diff_27.txt "-v h5diff_types.h5 h5diff_types.h5 t1 t2"
 $!
 $!# 2.8
-$ CALL TOOLTEST h5diff_28.txt "file3.h5 file3.h5 -v l1 l2"
+$ CALL TOOLTEST h5diff_28.txt "-v h5diff_types.h5 h5diff_types.h5 l1 l2"
 $!
 $!
 $!
@@ -112,31 +114,31 @@ $!# # Dataset types
 $!# ##############################################################################
 $
 $!# 5.0
-$ CALL TOOLTEST h5diff_50.txt "file4.h5 file4.h5 -v dset0a dset0b"
+$ CALL TOOLTEST h5diff_50.txt "-v h5diff_dtypes.h5 h5diff_dtypes.h5 dset0a dset0b"
 $!
 $!# 5.1
-$ CALL TOOLTEST h5diff_51.txt "file4.h5 file4.h5 -v dset1a dset1b"
+$ CALL TOOLTEST h5diff_51.txt "-v h5diff_dtypes.h5 h5diff_dtypes.h5 dset1a dset1b"
 $!
 $!# 5.2
-$ CALL TOOLTEST h5diff_52.txt "file4.h5 file4.h5 -v dset2a dset2b"
+$ CALL TOOLTEST h5diff_52.txt "-v h5diff_dtypes.h5 h5diff_dtypes.h5 dset2a dset2b"
 $!
 $!# 5.3
-$ CALL TOOLTEST h5diff_53.txt "file4.h5 file4.h5 -v dset3a dset4b"
+$ CALL TOOLTEST h5diff_53.txt "-v h5diff_dtypes.h5 h5diff_dtypes.h5 dset3a dset4b"
 $!
 $!# 5.4
-$ CALL TOOLTEST h5diff_54.txt "file4.h5 file4.h5 -v dset4a dset4b"
+$ CALL TOOLTEST h5diff_54.txt "-v h5diff_dtypes.h5 h5diff_dtypes.h5 dset4a dset4b"
 $!
 $!# 5.5
-$ CALL TOOLTEST h5diff_55.txt "file4.h5 file4.h5 -v dset5a dset5b"
+$ CALL TOOLTEST h5diff_55.txt "-v h5diff_dtypes.h5 h5diff_dtypes.h5 dset5a dset5b"
 $!
 $!# 5.6
-$ CALL TOOLTEST h5diff_56.txt "file4.h5 file4.h5 -v dset6a dset6b"
+$ CALL TOOLTEST h5diff_56.txt "-v h5diff_dtypes.h5 h5diff_dtypes.h5 dset6a dset6b"
 $!
 $!# 5.7
-$ CALL TOOLTEST h5diff_57.txt "file4.h5 file4.h5 -v dset7a dset7b"
+$ CALL TOOLTEST h5diff_57.txt "-v h5diff_dtypes.h5 h5diff_dtypes.h5 dset7a dset7b"
 $!
-$#! 5.8 (region reference)
-$ CALL TOOLTEST h5diff_58.txt "file7.h5 file8.h5 -v refreg"
+$!# 5.8 (region reference)
+$ CALL TOOLTEST h5diff_58.txt "-v h5diff_dset1.h5 h5diff_dset2.h5 refreg"
 $!
 $!# ##############################################################################
 $!# # Error messages
@@ -144,41 +146,38 @@ $!# ############################################################################
 $!
 $!
 $!# 6.0: Check if the command line number of arguments is less than 3
-$ CALL TOOLTEST h5diff_600.txt "file1.h5" 
-$!
-$!# 6.1: Check for invalid options
-$ CALL TOOLTEST h5diff_601.txt "file1.h5 file2.h5 -x" 
+$ CALL TOOLTEST h5diff_600.txt "h5diff_basic1.h5" 
 $!
 $!# ##############################################################################
 $!# # -d 
 $!# ##############################################################################
 $!
 $!# 6.2: no value
-$ CALL TOOLTEST h5diff_602.txt "file1.h5 file2.h5  -d g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_602.txt "-d h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.3: negative value
-$ CALL TOOLTEST h5diff_603.txt "file1.h5 file2.h5  -d -4 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_603.txt "-d -4 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.4: zero
-$ CALL TOOLTEST h5diff_604.txt "file1.h5 file2.h5  -d 0 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_604.txt "-d 0 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.5: non number
-$ CALL TOOLTEST h5diff_605.txt "file1.h5 file2.h5  -d u g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_605.txt "-d u h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.6: hexadecimal
-$ CALL TOOLTEST h5diff_606.txt "file1.h5 file2.h5 -d 0x1 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_606.txt "-d 0x1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.7: string
-$ CALL TOOLTEST h5diff_607.txt "file1.h5 file2.h5  -d "1" g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_607.txt "-d """1""" h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.8: repeated option
-$ CALL TOOLTEST h5diff_608.txt "file1.h5 file2.h5  -d 1 -d 2 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_608.txt "-d 1 -d 2 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.9: number larger than biggest difference
-$ CALL TOOLTEST h5diff_609.txt "file1.h5 file2.h5  -d 200 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_609.txt "-d 200 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.10: number smaller than smallest difference
-$ CALL TOOLTEST h5diff_610.txt "file1.h5 file2.h5  -d 1 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_610.txt "-d 1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!
 $!# ##############################################################################
@@ -187,31 +186,31 @@ $!# ############################################################################
 $!
 $!
 $!# 6.11: no value
-$ CALL TOOLTEST h5diff_611.txt "file1.h5 file2.h5 -r -p g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_611.txt "-r -p h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.12: negative value
-$ CALL TOOLTEST h5diff_612.txt "file1.h5 file2.h5 -p -4 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_612.txt "-p -4 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.13: zero
-$ CALL TOOLTEST h5diff_613.txt "file1.h5 file2.h5 -p 0 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_613.txt "-p 0 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.14: non number
-$ CALL TOOLTEST h5diff_614.txt "file1.h5 file2.h5 -p u g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_614.txt "-p u h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.15: hexadecimal
-$ CALL TOOLTEST h5diff_615.txt "file1.h5 file2.h5 -p 0x1 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_615.txt "-p 0x1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.16: string
-$ CALL TOOLTEST h5diff_616.txt "file1.h5 file2.h5 -p "0.21" g1/dset3 g1/dset4"
+$! CALL TOOLTEST h5diff_616.txt "-p """0.21""" h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.17: repeated option
-$ CALL TOOLTEST h5diff_617.txt "file1.h5 file2.h5 -p 0.21 -p 0.22 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_617.txt "-p 0.21 -p 0.22 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.18: number larger than biggest difference
-$ CALL TOOLTEST h5diff_618.txt "file1.h5 file2.h5 -p 2 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_618.txt "-p 2 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.19: number smaller than smallest difference
-$ CALL TOOLTEST h5diff_619.txt "file1.h5 file2.h5 -p 0.005 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_619.txt "-p 0.005 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!
 $!
@@ -221,31 +220,31 @@ $!# ############################################################################
 $!
 $!
 $!# 6.20: no value
-$ CALL TOOLTEST h5diff_620.txt "file1.h5 file2.h5 -n g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_620.txt "-n h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.21: negative value
-$ CALL TOOLTEST h5diff_621.txt "file1.h5 file2.h5 -n -4 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_621.txt "-n -4 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.22: zero
-$ CALL TOOLTEST h5diff_622.txt "file1.h5 file2.h5 -n 0 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_622.txt "-n 0 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.23: non number
-$ CALL TOOLTEST h5diff_623.txt "file1.h5 file2.h5 -n u g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_623.txt "-n u h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.24: hexadecimal
-$ CALL TOOLTEST h5diff_624.txt "file1.h5 file2.h5 -n 0x1 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_624.txt "-n 0x1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.25: string
-$ CALL TOOLTEST h5diff_625.txt "file1.h5 file2.h5 -n "2" g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_625.txt "-n """2""" h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.26: repeated option
-$ CALL TOOLTEST h5diff_626.txt "file1.h5 file2.h5 -n 2 -n 3 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_626.txt "-n 2 -n 3 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.27: number larger than biggest difference
-$ CALL TOOLTEST h5diff_627.txt "file1.h5 file2.h5 -n 200 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_627.txt "--count=200 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# 6.28: number smaller than smallest difference
-$ CALL TOOLTEST h5diff_628.txt "file1.h5 file2.h5 -n 1 g1/dset3 g1/dset4"
+$ CALL TOOLTEST h5diff_628.txt "-n 1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4"
 $!
 $!# ##############################################################################
 $!# 6.29  non valid files
@@ -257,26 +256,33 @@ $!# ############################################################################
 $!# 7.  attributes
 $!# ##############################################################################
 $!
-$ CALL TOOLTEST h5diff_70.txt "file5.h5 file6.h5 -v"
+$ CALL TOOLTEST h5diff_70.txt "-v h5diff_attr1.h5 h5diff_attr2.h5"
 $!
 $!# ##############################################################################
 $!# 8.  all dataset datatypes
 $!# ##############################################################################
 $!
-$ CALL TOOLTEST h5diff_80.txt "file7.h5 file8.h5 -v"
+$ CALL TOOLTEST h5diff_80.txt "-v h5diff_dset1.h5 h5diff_dset2.h5"
 $!
 $!# 9. compare a file with itself
 $!
-$ CALL TOOLTEST h5diff_90.txt "file1.h5 file1.h5"
+$ CALL TOOLTEST h5diff_90.txt "-v h5diff_basic2.h5 h5diff_basic2.h5"
+$!
+$! 10. read by hyperslab, print indexes
+$ CALL TOOLTEST h5diff_100.txt "-v h5diff_hyper1.h5 h5diff_hyper2.h5"
+$!
+$! 11. floating point comparison
+$ CALL TOOLTEST h5diff_101.txt "-v h5diff_basic1.h5 h5diff_basic1.h5 g1/d1  g1/d2"
+$ CALL TOOLTEST h5diff_102.txt "-v h5diff_basic1.h5 h5diff_basic1.h5 g1/fp1  g1/fp2"
 $!
 $!
 $!
 $TOOLTEST: SUBROUTINE
 $
 $ len =  F$LENGTH(P1)
-$ base = F$EXTRACT(0,len-2,P1)
-$ actual = base + "out"
-$ actual_err = base + "err"
+$ base = F$EXTRACT(0,len-3,P1)
+$ actual = base + "h5diffout"
+$ actual_err = base + "h5differr"
 $
 $ begin = "Testing h5diff "
 $ !
@@ -295,7 +301,7 @@ $ if F$SEARCH(actual_err) .NES. ""
 $ then
 $ set message/notext/nofacility/noidentification/noseverity
 $    append 'actual_err' 'actual'
-$ set message/ntext/facility/identification/severity
+$ set message/text/facility/identification/severity
 $ endif
 $ !
 $ ! Compare the results
@@ -324,12 +330,17 @@ $  write sys$output line
 $ ! 
 $ ! Append the result to the log file 
 $ !
-$ append h5diff_temp.dif h5diff.log
+$ append/new_version h5diff_temp.dif h5diff.log
+$ append/new_version 'actual'        h5diff_output.txt
 $ !
 $ ! Delete temporary files
 $ !
-$! del *.out;*
-$! del *.dif;*
+$ if F$SEARCH(actual_err)  .NES. ""
+$ then
+$  del *.h5differr;*
+$ endif
+$  del *.h5diffout;*
+$  del h5diff_temp.dif;*
 $ !
 $ENDSUBROUTINE
 

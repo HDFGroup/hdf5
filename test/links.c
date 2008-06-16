@@ -32,6 +32,9 @@
 #define H5G_TESTING
 #include "H5Gpkg.h"		/* Groups 				*/
 
+/* File for external link test.  Created with gen_udlinks.c */
+#define LINKED_FILE  "be_extlink2.h5"
+
 const char *FILENAME[] = {
     "links0",
     "links1",
@@ -42,6 +45,7 @@ const char *FILENAME[] = {
     "links4c",
     "links4d",
     "links5",
+    "links6",
     NULL
 };
 
@@ -94,6 +98,156 @@ typedef struct {
     size_t max_visit;           /* Size of "visited link" flag array */
     hbool_t *visited;           /* Pointer to array of "visited link" flags */
 } link_iter_info_t;
+
+/* Link visit structs */
+typedef struct {
+    const char *path;           /* Path to link */
+    H5L_type_t type;            /* Type of link */
+} link_visit_t;
+static const link_visit_t lvisit0[] = {
+    {"Dataset_zero", 0},
+    {"Group1", 0},
+    {"Group1/Dataset_one", 0},
+    {"Group1/Group2", 0},
+    {"Group1/Group2/Dataset_two", 0},
+    {"Group1/Group2/Type_two", 0},
+    {"Group1/Group2/hard_zero", 0},
+    {"Group1/Type_one", 0},
+    {"Group1/hard_one", 0},
+    {"Type_zero", 0},
+    {"ext_dangle", 64},
+    {"ext_one", 64},
+    {"hard_one", 0},
+    {"hard_two", 0},
+    {"hard_zero", 0},
+    {"soft_dangle", 1},
+    {"soft_one", 1},
+    {"soft_two", 1}
+};
+static const link_visit_t lvisit1[] = {
+    {"Dataset_one", 0},
+    {"Group2", 0},
+    {"Group2/Dataset_two", 0},
+    {"Group2/Type_two", 0},
+    {"Group2/hard_zero", 0},
+    {"Group2/hard_zero/Dataset_zero", 0},
+    {"Group2/hard_zero/Group1", 0},
+    {"Group2/hard_zero/Type_zero", 0},
+    {"Group2/hard_zero/ext_dangle", 64},
+    {"Group2/hard_zero/ext_one", 64},
+    {"Group2/hard_zero/hard_one", 0},
+    {"Group2/hard_zero/hard_two", 0},
+    {"Group2/hard_zero/hard_zero", 0},
+    {"Group2/hard_zero/soft_dangle", 1},
+    {"Group2/hard_zero/soft_one", 1},
+    {"Group2/hard_zero/soft_two", 1},
+    {"Type_one", 0},
+    {"hard_one", 0}
+};
+static const link_visit_t lvisit2[] = {
+    {"Dataset_two", 0},
+    {"Type_two", 0},
+    {"hard_zero", 0},
+    {"hard_zero/Dataset_zero", 0},
+    {"hard_zero/Group1", 0},
+    {"hard_zero/Group1/Dataset_one", 0},
+    {"hard_zero/Group1/Group2", 0},
+    {"hard_zero/Group1/Type_one", 0},
+    {"hard_zero/Group1/hard_one", 0},
+    {"hard_zero/Type_zero", 0},
+    {"hard_zero/ext_dangle", 64},
+    {"hard_zero/ext_one", 64},
+    {"hard_zero/hard_one", 0},
+    {"hard_zero/hard_two", 0},
+    {"hard_zero/hard_zero", 0},
+    {"hard_zero/soft_dangle", 1},
+    {"hard_zero/soft_one", 1},
+    {"hard_zero/soft_two", 1}
+};
+
+typedef struct {
+    unsigned idx;               /* Index in link visit structure */
+    const link_visit_t *info;   /* Pointer to the link visit structure to use */
+} lvisit_ud_t;
+
+
+/* Object visit structs */
+typedef struct {
+    const char *path;           /* Path to object */
+    H5O_type_t type;            /* Type of object */
+} obj_visit_t;
+static const obj_visit_t ovisit0_old[] = {
+    {".", 0},
+    {"Dataset_zero", 1},
+    {"Group1", 0},
+    {"Group1/Dataset_one", 1},
+    {"Group1/Group2", 0},
+    {"Group1/Group2/Dataset_two", 1},
+    {"Group1/Group2/Type_two", 2},
+    {"Group1/Type_one", 2},
+    {"Type_zero", 2}
+};
+static const obj_visit_t ovisit0_new[] = {
+    {".", 0},
+    {"Dataset_zero", 1},
+    {"Group1", 0},
+    {"Group1/Dataset_one", 1},
+    {"Group1/Group2", 0},
+    {"Group1/Group2/Dataset_two", 1},
+    {"Group1/Group2/Type_two", 2},
+    {"Group1/Type_one", 2},
+    {"Type_zero", 2}
+};
+static const obj_visit_t ovisit1_old[] = {
+    {".", 0},
+    {"Dataset_one", 1},
+    {"Group2", 0},
+    {"Group2/Dataset_two", 1},
+    {"Group2/Type_two", 2},
+    {"Group2/hard_zero", 0},
+    {"Group2/hard_zero/Dataset_zero", 1},
+    {"Group2/hard_zero/Type_zero", 2},
+    {"Type_one", 2}
+};
+static const obj_visit_t ovisit1_new[] = {
+    {".", 0},
+    {"Dataset_one", 1},
+    {"Group2", 0},
+    {"Group2/Dataset_two", 1},
+    {"Group2/Type_two", 2},
+    {"Group2/hard_zero", 0},
+    {"Group2/hard_zero/Dataset_zero", 1},
+    {"Group2/hard_zero/Type_zero", 2},
+    {"Type_one", 2}
+};
+static const obj_visit_t ovisit2_old[] = {
+    {".", 0},
+    {"Dataset_two", 1},
+    {"Type_two", 2},
+    {"hard_zero", 0},
+    {"hard_zero/Dataset_zero", 1},
+    {"hard_zero/Group1", 0},
+    {"hard_zero/Group1/Dataset_one", 1},
+    {"hard_zero/Group1/Type_one", 2},
+    {"hard_zero/Type_zero", 2}
+};
+static const obj_visit_t ovisit2_new[] = {
+    {".", 0},
+    {"Dataset_two", 1},
+    {"Type_two", 2},
+    {"hard_zero", 0},
+    {"hard_zero/Dataset_zero", 1},
+    {"hard_zero/Group1", 0},
+    {"hard_zero/Group1/Dataset_one", 1},
+    {"hard_zero/Group1/Type_one", 2},
+    {"hard_zero/Type_zero", 2}
+};
+
+typedef struct {
+    unsigned idx;               /* Index in object visit structure */
+    const obj_visit_t *info;    /* Pointer to the object visit structure to use */
+} ovisit_ud_t;
+
 
 
 /*-------------------------------------------------------------------------
@@ -5164,6 +5318,473 @@ error:
     return -1;
 } /* end check_all_closed() */
 
+
+
+/*-------------------------------------------------------------------------
+ * Function:    build_visit_file
+ *
+ * Purpose:     Build an "interesting" file to use for visiting links & objects
+ *
+ * Return:      Success:        >0, File ID for file built
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, November 24, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+build_visit_file(hid_t fapl)
+{
+    hid_t fid = -1;                     /* File ID */
+    hid_t gid = -1, gid2 = -1;          /* Group IDs */
+    hid_t sid = (-1);                   /* Dataspace ID */
+    hid_t did = (-1);                   /* Dataset ID */
+    hid_t tid = (-1);                   /* Datatype ID */
+    char filename[NAME_BUF_SIZE];
+    char pathname[1024];                /* Path of external link file */
+    char *srcdir = getenv("srcdir");    /* where the src code is located */
+
+    h5_fixname(FILENAME[9], fapl, filename, sizeof filename);
+    
+    /* Create file for visiting */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create group */
+    if((gid = H5Gcreate2(fid, "/Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create nested group */
+    if((gid2 = H5Gcreate2(gid, "Group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Close groups */
+    if(H5Gclose(gid2) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+
+
+    /* Create soft links to groups created */
+    if(H5Lcreate_soft("/Group1", fid, "/soft_one", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcreate_soft("/Group1/Group2", fid, "/soft_two", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Create dangling soft link */
+    if(H5Lcreate_soft("nowhere", fid, "/soft_dangle", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+
+    /* Create hard links to all groups */
+    if(H5Lcreate_hard(fid, "/", fid, "hard_zero", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcreate_hard(fid, "/Group1", fid, "hard_one", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcreate_hard(fid, "/Group1/Group2", fid, "hard_two", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Create loops w/hard links */
+    if(H5Lcreate_hard(fid, "/Group1", fid, "/Group1/hard_one", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Lcreate_hard(fid, "/", fid, "/Group1/Group2/hard_zero", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Create external link to existing file */
+    pathname[0] = '\0';
+    /* Generate correct name for test file by prepending the source path */
+    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(LINKED_FILE) + 1) < sizeof(pathname))) {
+        HDstrcpy(pathname, srcdir);
+        HDstrcat(pathname, "/");
+    }
+    HDstrcat(pathname, LINKED_FILE);
+
+    if(H5Lcreate_external(pathname, "/group", fid, "/ext_one", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Create dangling external link to non-existant file */
+    if(H5Lcreate_external("foo.h5", "/group", fid, "/ext_dangle", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Create dataset in each group */
+    if((sid = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
+
+    if((did = H5Dcreate2(fid, "/Dataset_zero", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    if((did = H5Dcreate2(fid, "/Group1/Dataset_one", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    if((did = H5Dcreate2(fid, "/Group1/Group2/Dataset_two", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+
+    if(H5Sclose(sid) < 0) TEST_ERROR
+
+    /* Create named datatype in each group */
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if(H5Tcommit2(fid, "/Type_zero", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if(H5Tcommit2(fid, "/Group1/Type_one", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if(H5Tcommit2(fid, "/Group1/Group2/Type_two", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(H5Tclose(tid) < 0) TEST_ERROR
+
+    return(fid);
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end build_visit_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    visit_link_cb
+ *
+ * Purpose:     Callback routine for visiting links in a file
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, November 24, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+visit_link_cb(hid_t UNUSED group_id, const char *name, const H5L_info_t *linfo,
+    void *_op_data)
+{
+    lvisit_ud_t *op_data = (lvisit_ud_t *)_op_data;
+
+    /* Check for correct link information */
+    if(HDstrcmp(op_data->info[op_data->idx].path, name)) return(H5_ITER_ERROR);
+    if(op_data->info[op_data->idx].type != linfo->type) return(H5_ITER_ERROR);
+
+    /* Advance to next location in expected output */
+    op_data->idx++;
+
+    return(H5_ITER_CONT);
+} /* end visit_link_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    link_visit
+ *
+ * Purpose:     Test the link visiting routine
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, November 24, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+link_visit(hid_t fapl, hbool_t new_format)
+{
+    lvisit_ud_t udata;          /* User-data for visiting */
+    hid_t fid = -1;
+    hid_t gid = -1;             /* Group ID */
+
+    if(new_format)
+        TESTING("link visiting (w/new group format)")
+    else
+        TESTING("link visiting")
+
+    /* Construct "interesting" file to visit */
+    if((fid = build_visit_file(fapl)) < 0) TEST_ERROR
+
+    /* Visit all the links reachable from the root group (with file ID) */
+    udata.idx = 0;
+    udata.info = lvisit0;
+    if(H5Lvisit(fid, H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata) < 0) FAIL_STACK_ERROR
+
+    /* Visit all the links reachable from the root group (with group ID) */
+    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = lvisit0;
+    if(H5Lvisit(gid, H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    /* Visit all the links reachable from each internal group */
+    if((gid = H5Gopen2(fid, "/Group1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = lvisit1;
+    if(H5Lvisit(gid, H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+    if((gid = H5Gopen2(fid, "/Group1/Group2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = lvisit2;
+    if(H5Lvisit(gid, H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    /* Close file created */
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(gid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end link_visit() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    link_visit_by_name
+ *
+ * Purpose:     Test the link visiting "by name" routine
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, November 24, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+link_visit_by_name(hid_t fapl, hbool_t new_format)
+{
+    lvisit_ud_t udata;          /* User-data for visiting */
+    hid_t fid = -1;
+    hid_t gid = -1;             /* Group ID */
+
+    if(new_format)
+        TESTING("link visiting by name (w/new group format)")
+    else
+        TESTING("link visiting by name")
+
+    /* Construct "interesting" file to visit */
+    if((fid = build_visit_file(fapl)) < 0) TEST_ERROR
+
+    /* Visit all the links reachable from the root group (with file ID) */
+    udata.idx = 0;
+    udata.info = lvisit0;
+    if(H5Lvisit_by_name(fid, "/", H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    /* Visit all the links reachable from the root group (with group ID) */
+    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = lvisit0;
+    if(H5Lvisit_by_name(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    /* Visit all the links reachable from each internal group */
+    udata.idx = 0;
+    udata.info = lvisit1;
+    if(H5Lvisit_by_name(fid, "/Group1", H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    if((gid = H5Gopen2(fid, "/Group1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = lvisit1;
+    if(H5Lvisit_by_name(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+    udata.idx = 0;
+    udata.info = lvisit2;
+    if(H5Lvisit_by_name(fid, "/Group1/Group2", H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    if((gid = H5Gopen2(fid, "/Group1/Group2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = lvisit2;
+    if(H5Lvisit_by_name(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_link_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    /* Close file created */
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(gid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end link_visit_by_name() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    visit_obj_cb
+ *
+ * Purpose:     Callback routine for visiting objects in a file
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Sunday, November 25, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+visit_obj_cb(hid_t UNUSED group_id, const char *name, const H5O_info_t *oinfo,
+    void *_op_data)
+{
+    ovisit_ud_t *op_data = (ovisit_ud_t *)_op_data;
+
+    /* Check for correct object information */
+    if(HDstrcmp(op_data->info[op_data->idx].path, name)) return(H5_ITER_ERROR);
+    if(op_data->info[op_data->idx].type != oinfo->type) return(H5_ITER_ERROR);
+
+    /* Advance to next location in expected output */
+    op_data->idx++;
+
+    return(H5_ITER_CONT);
+} /* end visit_obj_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    obj_visit
+ *
+ * Purpose:     Test the object visiting routine
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Sunday, November 25, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+obj_visit(hid_t fapl, hbool_t new_format)
+{
+    ovisit_ud_t udata;          /* User-data for visiting */
+    hid_t fid = -1;
+    hid_t gid = -1;             /* Group ID */
+
+    if(new_format)
+        TESTING("object visiting (w/new group format)")
+    else
+        TESTING("object visiting")
+
+    /* Construct "interesting" file to visit */
+    if((fid = build_visit_file(fapl)) < 0) TEST_ERROR
+
+    /* Visit all the objects reachable from the root group (with file ID) */
+    udata.idx = 0;
+    udata.info = new_format ? ovisit0_new : ovisit0_old;
+    if(H5Ovisit(fid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata) < 0) FAIL_STACK_ERROR
+
+    /* Visit all the objects reachable from the root group (with group ID) */
+    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = new_format ? ovisit0_new : ovisit0_old;
+    if(H5Ovisit(gid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    /* Visit all the objects reachable from each internal group */
+    if((gid = H5Gopen2(fid, "/Group1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = new_format ? ovisit1_new : ovisit1_old;
+    if(H5Ovisit(gid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+    if((gid = H5Gopen2(fid, "/Group1/Group2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = new_format ? ovisit2_new : ovisit2_old;
+    if(H5Ovisit(gid, H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    /* Close file created */
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(gid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end obj_visit() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    obj_visit_by_name
+ *
+ * Purpose:     Test the object visiting "by name" routine
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Sunday, November 25, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+obj_visit_by_name(hid_t fapl, hbool_t new_format)
+{
+    ovisit_ud_t udata;          /* User-data for visiting */
+    hid_t fid = -1;
+    hid_t gid = -1;             /* Group ID */
+
+    if(new_format)
+        TESTING("object visiting by name (w/new group format)")
+    else
+        TESTING("object visiting by name")
+
+    /* Construct "interesting" file to visit */
+    if((fid = build_visit_file(fapl)) < 0) TEST_ERROR
+
+    /* Visit all the objects reachable from the root group (with file ID) */
+    udata.idx = 0;
+    udata.info = new_format ? ovisit0_new : ovisit0_old;
+    if(H5Ovisit_by_name(fid, "/", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    /* Visit all the objects reachable from the root group (with group ID) */
+    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = new_format ? ovisit0_new : ovisit0_old;
+    if(H5Ovisit_by_name(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    /* Visit all the objects reachable from each internal group */
+    udata.idx = 0;
+    udata.info = new_format ? ovisit1_new : ovisit1_old;
+    if(H5Ovisit_by_name(fid, "/Group1", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    if((gid = H5Gopen2(fid, "/Group1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = new_format ? ovisit1_new : ovisit1_old;
+    if(H5Ovisit_by_name(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    udata.idx = 0;
+    udata.info = new_format ? ovisit2_new : ovisit2_old;
+    if(H5Ovisit_by_name(fid, "/Group1/Group2", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
+    if((gid = H5Gopen2(fid, "/Group1/Group2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    udata.idx = 0;
+    udata.info = new_format ? ovisit2_new : ovisit2_old;
+    if(H5Ovisit_by_name(gid, ".", H5_INDEX_NAME, H5_ITER_INC, visit_obj_cb, &udata, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+
+    /* Close file created */
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(gid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end obj_visit_by_name() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    corder_create_empty
@@ -9590,49 +10211,57 @@ main(void)
         /* Copy the file access property list */
         if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
-        /* Set the "use the latest version of the format" flag for creating objects in the file */
-        if(H5Pset_latest_format(fapl2, TRUE) < 0) TEST_ERROR
+        /* Set the "use the latest version of the format" bounds for creating objects in the file */
+        if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
         /* Loop over using new group format */
         for(new_format = FALSE; new_format <= TRUE; new_format++) {
+            hid_t my_fapl;
+
+            /* Check for FAPL to use */
+            if(new_format)
+                my_fapl = fapl2;
+            else
+                my_fapl = fapl;
+
             /* General tests... (on both old & new format groups */
-            nerrors += mklinks((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += cklinks((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += new_links((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += ck_new_links((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += long_links((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += toomany((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
+            nerrors += mklinks(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += cklinks(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += new_links(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += ck_new_links(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += long_links(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += toomany(my_fapl, new_format) < 0 ? 1 : 0;
 
             /* Test new H5L link creation routine */
-            nerrors += test_lcpl((new_format ? fapl2 : fapl), new_format);
-            nerrors += test_move((new_format ? fapl2 : fapl), new_format);
-            nerrors += test_copy((new_format ? fapl2 : fapl), new_format);
-            nerrors += test_move_preserves((new_format ? fapl2 : fapl), new_format);
+            nerrors += test_lcpl(my_fapl, new_format);
+            nerrors += test_move(my_fapl, new_format);
+            nerrors += test_copy(my_fapl, new_format);
+            nerrors += test_move_preserves(my_fapl, new_format);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-            nerrors += test_deprec((new_format ? fapl2 : fapl), new_format);
+            nerrors += test_deprec(my_fapl, new_format);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 #ifndef H5_CANNOT_OPEN_TWICE
-            nerrors += external_link_root((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
+            nerrors += external_link_root(my_fapl, new_format) < 0 ? 1 : 0;
 #endif /* H5_CANNOT_OPEN_TWICE */
-            nerrors += external_link_path((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += external_link_mult((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
+            nerrors += external_link_path(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_link_mult(my_fapl, new_format) < 0 ? 1 : 0;
 #ifndef H5_CANNOT_OPEN_TWICE
-            nerrors += external_link_self((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += external_link_pingpong((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += external_link_toomany((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
+            nerrors += external_link_self(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_link_pingpong(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_link_toomany(my_fapl, new_format) < 0 ? 1 : 0;
 #endif /* H5_CANNOT_OPEN_TWICE */
-            nerrors += external_link_dangling((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += external_link_recursive((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += external_link_query((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += external_link_unlink_compact((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += external_link_unlink_dense((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += external_link_move((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += external_link_ride((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
+            nerrors += external_link_dangling(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_link_recursive(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_link_query(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_link_unlink_compact(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_link_unlink_dense(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_link_move(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_link_ride(my_fapl, new_format) < 0 ? 1 : 0;
 #ifndef H5_CANNOT_OPEN_TWICE
-            nerrors += external_link_closing((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
+            nerrors += external_link_closing(my_fapl, new_format) < 0 ? 1 : 0;
 #endif /* H5_CANNOT_OPEN_TWICE */
-            nerrors += external_link_endian((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += external_link_strong((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
+            nerrors += external_link_endian(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_link_strong(my_fapl, new_format) < 0 ? 1 : 0;
 
             /* These tests assume that external links are a form of UD links,
              * so assume that everything that passed for external links
@@ -9642,13 +10271,20 @@ main(void)
                 nerrors += ud_hard_links(fapl2) < 0 ? 1 : 0;     /* requires new format groups */
                 nerrors += ud_link_reregister(fapl2) < 0 ? 1 : 0;        /* requires new format groups */
             } /* end if */
-            nerrors += ud_callbacks((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += ud_link_errors((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += lapl_udata((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += lapl_nlinks((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
-            nerrors += linkinfo((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
+            nerrors += ud_callbacks(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += ud_link_errors(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += lapl_udata(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += lapl_nlinks(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += linkinfo(my_fapl, new_format) < 0 ? 1 : 0;
 
-            nerrors += check_all_closed((new_format ? fapl2 : fapl), new_format) < 0 ? 1 : 0;
+            /* Misc. extra tests, useful for both new & old format files */
+            nerrors += link_visit(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += link_visit_by_name(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += obj_visit(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += obj_visit_by_name(my_fapl, new_format) < 0 ? 1 : 0;
+
+            /* Keep this test last, it's testing files that are used above */
+            nerrors += check_all_closed(my_fapl, new_format) < 0 ? 1 : 0;
         } /* end for */
 
         /* New group revision feature tests */

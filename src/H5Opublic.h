@@ -52,13 +52,13 @@
  * but we need to assign each kind of message to a different bit so that
  * one index can hold multiple types.)
  */
-#define H5O_MESG_NONE_FLAG     0x0000          /* No shared messages */
-#define H5O_MESG_SDSPACE_FLAG  0x0001          /* Simple Dataspace Message.  */
-#define H5O_MESG_DTYPE_FLAG    0x0002          /* Datatype Message.  */
-#define H5O_MESG_FILL_FLAG     0x0004          /* Fill Value Message. */
-#define H5O_MESG_PLINE_FLAG    0x0008          /* Filter pipeline message.  */
-#define H5O_MESG_ATTR_FLAG     0x0010          /* Attribute Message.  */
-#define H5O_MESG_ALL_FLAG      (H5O_MESG_SDSPACE_FLAG | H5O_MESG_DTYPE_FLAG | H5O_MESG_FILL_FLAG | H5O_MESG_PLINE_FLAG | H5O_MESG_ATTR_FLAG)
+#define H5O_SHMESG_NONE_FLAG    0x0000          /* No shared messages */
+#define H5O_SHMESG_SDSPACE_FLAG ((unsigned)1 << 0x0001) /* Simple Dataspace Message.  */
+#define H5O_SHMESG_DTYPE_FLAG   ((unsigned)1 << 0x0003) /* Datatype Message.  */
+#define H5O_SHMESG_FILL_FLAG    ((unsigned)1 << 0x0005) /* Fill Value Message. */
+#define H5O_SHMESG_PLINE_FLAG   ((unsigned)1 << 0x000b) /* Filter pipeline message.  */
+#define H5O_SHMESG_ATTR_FLAG    ((unsigned)1 << 0x000c) /* Attribute Message.  */
+#define H5O_SHMESG_ALL_FLAG     (H5O_SHMESG_SDSPACE_FLAG | H5O_SHMESG_DTYPE_FLAG | H5O_SHMESG_FILL_FLAG | H5O_SHMESG_PLINE_FLAG | H5O_SHMESG_ATTR_FLAG)
 
 /* Object header status flag definitions */
 #define H5O_HDR_CHUNK0_SIZE             0x03    /* 2-bit field indicating # of bytes to store the size of chunk 0's data */
@@ -124,6 +124,10 @@ typedef struct H5O_info_t {
 /* Typedef for message creation indexes */
 typedef uint32_t H5O_msg_crt_idx_t;
 
+/* Prototype for H5Ovisit/H5Ovisit_by_name() operator */
+typedef herr_t (*H5O_iterate_t)(hid_t obj, const char *name, const H5O_info_t *info,
+    void *op_data);
+
 
 /********************/
 /* Public Variables */
@@ -159,6 +163,11 @@ H5_DLL herr_t H5Oset_comment_by_name(hid_t loc_id, const char *name,
 H5_DLL ssize_t H5Oget_comment(hid_t obj_id, char *comment, size_t bufsize);
 H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name,
     char *comment, size_t bufsize, hid_t lapl_id);
+H5_DLL herr_t H5Ovisit(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order,
+    H5O_iterate_t op, void *op_data);
+H5_DLL herr_t H5Ovisit_by_name(hid_t loc_id, const char *obj_name,
+    H5_index_t idx_type, H5_iter_order_t order, H5O_iterate_t op,
+    void *op_data, hid_t lapl_id);
 H5_DLL herr_t H5Oclose(hid_t object_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.

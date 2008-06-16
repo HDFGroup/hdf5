@@ -29,9 +29,8 @@
 #define _H5MFprivate_H
 
 /* Private headers needed by this file */
-#include "H5private.h"
-#include "H5Fprivate.h"
-#include "H5FDprivate.h"	/*file driver				  */
+#include "H5Fprivate.h"         /* File access				*/
+#include "H5FDprivate.h"	/* File Drivers				*/
 
 /*
  * Feature: Define H5MF_DEBUG on the compiler command line if you want to
@@ -49,10 +48,10 @@ H5_DLL herr_t H5MF_xfree(const H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t
 			  hsize_t size);
 H5_DLL haddr_t H5MF_realloc(H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr,
 			     hsize_t old_size, hsize_t new_size);
-H5_DLL hbool_t H5MF_alloc_overflow(const H5F_t *f, hsize_t size);
 H5_DLL htri_t H5MF_can_extend(H5F_t *f, H5FD_mem_t type, haddr_t addr,
     hsize_t size, hsize_t extra_requested);
 H5_DLL herr_t H5MF_extend(H5F_t *f, H5FD_mem_t type, haddr_t addr, hsize_t size,
     hsize_t extra_requested);
 
-#endif
+#endif /* end _H5MFprivate_H */
+

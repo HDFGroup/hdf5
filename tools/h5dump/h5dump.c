@@ -610,7 +610,7 @@ usage(const char *prog)
     fprintf(stdout, "  OPTIONS\n");
     fprintf(stdout, "     -h, --help           Print a usage message and exit\n");
     fprintf(stdout, "     -n, --contents       Print a list of the file contents and exit\n");
-    fprintf(stdout, "     -B, --bootblock      Print the content of the boot block\n");
+    fprintf(stdout, "     -B, --superblock     Print the content of the super block\n");
     fprintf(stdout, "     -H, --header         Print the header only; no data is displayed\n");
     fprintf(stdout, "     -A, --onlyattr       Print the header and value of attributes\n");
     fprintf(stdout, "     -i, --object-ids     Print the object ids\n");
@@ -620,7 +620,7 @@ usage(const char *prog)
     fprintf(stdout, "     -a P, --attribute=P  Print the specified attribute\n");
     fprintf(stdout, "     -d P, --dataset=P    Print the specified dataset\n");
     fprintf(stdout, "     -y, --noindex        Do not print array indices with the data\n");
-    fprintf(stdout, "     -p,   --properties   Print dataset filters, storage layout and fill value\n");
+    fprintf(stdout, "     -p, --properties     Print dataset filters, storage layout and fill value\n");
     fprintf(stdout, "     -f D, --filedriver=D Specify which driver to open the file with\n");
     fprintf(stdout, "     -g P, --group=P      Print the specified group and all members\n");
     fprintf(stdout, "     -l P, --soft-link=P  Print the value(s) of the specified soft link\n");
@@ -2756,7 +2756,7 @@ static void
 dump_fcpl(hid_t fid)
 {
     hid_t    fcpl;      /* file creation property list ID */
-    hid_t         fapl;      /* file access property list ID */
+    hid_t    fapl;      /* file access property list ID */
     hsize_t  userblock; /* userblock size retrieved from FCPL */
     size_t   off_size;  /* size of offsets in the file */
     size_t   len_size;  /* size of lengths in the file */
@@ -2764,7 +2764,7 @@ dump_fcpl(hid_t fid)
     unsigned freelist;  /* free list version # */
     unsigned stab;      /* symbol table entry version # */
     unsigned shhdr;     /* shared object header version # */
-    hid_t    fdriver;    /* file driver */
+    hid_t    fdriver;   /* file driver */
     char     dname[32]; /* buffer to store driver name */
     unsigned sym_lk;    /* symbol table B-tree leaf 'K' value */
     unsigned sym_ik;    /* symbol table B-tree internal 'K' value */
@@ -2781,7 +2781,7 @@ dump_fcpl(hid_t fid)
     fdriver=H5Pget_driver(fapl);
     H5Pclose(fapl);
 
-    /*-------------------------------------------------------------------------
+   /*-------------------------------------------------------------------------
     * SUPER_BLOCK
     *-------------------------------------------------------------------------
     */
@@ -3181,6 +3181,8 @@ parse_subset_params(char *dset)
  *              Tuesday, 9. January 2001
  *
  * Modifications:
+ *  Pedro Vicente, Tuesday, January 15, 2008
+ *  check for block overlap
  *
  *-------------------------------------------------------------------------
  */
@@ -3251,6 +3253,38 @@ handle_datasets(hid_t fid, char *dset, void *data)
 
             H5Sclose(sid);
         }
+    }
+
+    
+   /*-------------------------------------------------------------------------
+    * check for block overlap
+    *-------------------------------------------------------------------------
+    */
+
+    if(sset) 
+    {
+        hid_t sid = H5Dget_space(dsetid);
+        unsigned int ndims = H5Sget_simple_extent_ndims(sid);
+        unsigned int i;
+        
+        for ( i = 0; i < ndims; i++)
+        {
+            if ( sset->count[i] > 1 )
+            {
+                
+                if ( sset->stride[i] < sset->block[i] )
+                {
+                    error_msg(progname, "wrong subset selection; blocks overlap\n");
+                    d_status = EXIT_FAILURE;
+                    return;
+                    
+                }                                
+                
+            }
+            
+        } 
+        H5Sclose(sid);
+        
     }
 
     H5Oget_info(dsetid, &oinfo);
@@ -3952,7 +3986,7 @@ main(int argc, const char *argv[])
     /* allocate and initialize internal data structure */
     init_prefix(&prefix, prefix_len);
 
-    /* find all objects that might be targets of a reference */
+    /* Prepare to find objects that might be targets of a reference */
     fill_ref_path_table(fid);
 
     if(doxml) {
@@ -4094,7 +4128,6 @@ done:
     free_table(type_table);
 
     HDfree(prefix);
-    HDfree(info.prefix);
     HDfree(fname);
 
     /* To Do:  clean up XML table */
@@ -5342,8 +5375,7 @@ xml_dump_group(hid_t gid, const char *name)
 
     if(HDstrcmp(name, "/") == 0) {
         isRoot = 1;
-        tmp = HDmalloc(2);
-        HDstrcpy(tmp, "/");
+        tmp = HDstrdup("/");
     } else {
         tmp = HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
         HDstrcpy(tmp, prefix);
@@ -5401,8 +5433,8 @@ xml_dump_group(hid_t gid, const char *name)
                 ptrstr = malloc(100);
                 t_objname = xml_escape_the_name(found_obj->objname);
                 par_name = xml_escape_the_name(par);
-                xml_name_to_XID(par,parentxid,100,1);
-                xml_name_to_XID(found_obj->objname,ptrstr,100,1);
+                xml_name_to_XID(found_obj->objname, ptrstr, 100, 1);
+                xml_name_to_XID(par, parentxid, 100, 1);
                 printf("<%sGroupPtr OBJ-XID=\"%s\" H5Path=\"%s\" "
                             "Parents=\"%s\" H5ParentPaths=\"%s\" />\n",
                             xmlnsprefix,

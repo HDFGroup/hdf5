@@ -692,7 +692,7 @@ H5_DLL herr_t H5HF_man_iter_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter,
 H5_DLL hbool_t H5HF_man_iter_ready(H5HF_block_iter_t *biter);
 
 /* Free space manipulation routines */
-H5_DLL herr_t H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id);
+H5_DLL herr_t H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id, hbool_t may_create);
 H5_DLL herr_t H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *node, unsigned flags);
 H5_DLL htri_t H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request,

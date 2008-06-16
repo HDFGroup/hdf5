@@ -647,6 +647,26 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                     }
                     break;
 
+                case 'v':
+                    if(ptr) {
+                        if(vp)
+                            fprintf(out, "0x%lx", (unsigned long)vp);
+                        else
+                            fprintf(out, "NULL");
+                    } else {
+                        H5F_libver_t libver_vers = va_arg(ap, H5F_libver_t); /*lint !e64 Type mismatch not really occuring */
+
+                        switch(libver_vers) {
+                            case H5F_LIBVER_EARLIEST:
+                                fprintf(out, "H5F_LIBVER_EARLIEST");
+                                break;
+                            case H5F_LIBVER_LATEST:
+                                fprintf(out, "H5F_LIBVER_LATEST");
+                                break;
+                        }
+                    }
+                    break;
+
                 default:
                     fprintf(out, "BADTYPE(F%c)", type[1]);
                     goto error;

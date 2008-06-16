@@ -213,87 +213,91 @@ H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     size_t		free_block = H5HL_FREE_NULL;
     H5HL_t		*ret_value;
 
-    FUNC_ENTER_NOAPI(H5HL_load, NULL);
+    FUNC_ENTER_NOAPI(H5HL_load, NULL)
 
     /* check arguments */
-    assert(f);
-    assert(H5F_addr_defined(addr));
-    assert(!udata1);
-    assert(!udata2);
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(!udata1);
+    HDassert(!udata2);
 
     /* Cache this for later */
-    sizeof_hdr= H5HL_SIZEOF_HDR(f);
-    assert(sizeof_hdr <= sizeof(hdr));
+    sizeof_hdr = H5HL_SIZEOF_HDR(f);
+    HDassert(sizeof_hdr <= sizeof(hdr));
 
     /* Get the local heap's header */
-    if (H5F_block_read(f, H5FD_MEM_LHEAP, addr, sizeof_hdr, dxpl_id, hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read heap header");
+    if(H5F_block_read(f, H5FD_MEM_LHEAP, addr, sizeof_hdr, dxpl_id, hdr) < 0)
+	HGOTO_ERROR(H5E_HEAP, H5E_READERROR, NULL, "unable to read heap header")
     p = hdr;
 
     /* Check magic number */
     if(HDmemcmp(hdr, H5HL_MAGIC, (size_t)H5HL_SIZEOF_MAGIC))
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap signature");
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap signature")
     p += H5HL_SIZEOF_MAGIC;
 
     /* Version */
-    if (H5HL_VERSION!=*p++)
-	HGOTO_ERROR (H5E_HEAP, H5E_CANTLOAD, NULL, "wrong version number in global heap");
+    if(H5HL_VERSION != *p++)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong version number in global heap")
 
     /* Reserved */
     p += 3;
 
     /* Allocate space in memory for the heap */
-    if (NULL==(heap = H5FL_CALLOC(H5HL_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (heap = H5FL_CALLOC(H5HL_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* heap data size */
     H5F_DECODE_LENGTH(f, p, heap->heap_alloc);
 
     /* free list head */
     H5F_DECODE_LENGTH(f, p, free_block);
-    if (free_block != H5HL_FREE_NULL && free_block >= heap->heap_alloc)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list");
+    if(free_block != H5HL_FREE_NULL && free_block >= heap->heap_alloc)
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list")
 
     /* data */
     H5F_addr_decode(f, &p, &(heap->addr));
-    if (NULL==(heap->chunk = H5FL_BLK_CALLOC(heap_chunk,(sizeof_hdr + heap->heap_alloc))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    if (heap->heap_alloc &&
+    if(NULL == (heap->chunk = H5FL_BLK_CALLOC(heap_chunk, (sizeof_hdr + heap->heap_alloc))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    if(heap->heap_alloc &&
             H5F_block_read(f, H5FD_MEM_LHEAP, heap->addr, heap->heap_alloc, dxpl_id, heap->chunk + sizeof_hdr) < 0)
-	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to read heap data");
+	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to read heap data")
 
     /* Build free list */
-    while (H5HL_FREE_NULL != free_block) {
-	if (free_block >= heap->heap_alloc)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list");
-	if (NULL==(fl = H5FL_MALLOC(H5HL_free_t)))
-	    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    while(H5HL_FREE_NULL != free_block) {
+	if(free_block >= heap->heap_alloc)
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list")
+	if(NULL == (fl = H5FL_MALLOC(H5HL_free_t)))
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 	fl->offset = free_block;
 	fl->prev = tail;
 	fl->next = NULL;
-	if (tail) tail->next = fl;
+	if(tail)
+            tail->next = fl;
 	tail = fl;
-	if (!heap->freelist) heap->freelist = fl;
+	if(!heap->freelist)
+            heap->freelist = fl;
 
 	p = heap->chunk + sizeof_hdr + free_block;
-	H5F_DECODE_LENGTH(f, p, free_block);
-	H5F_DECODE_LENGTH(f, p, fl->size);
 
+	H5F_DECODE_LENGTH(f, p, free_block);
+	if(free_block == 0)
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "free block size is zero?")
+
+	H5F_DECODE_LENGTH(f, p, fl->size);
 	if (fl->offset + fl->size > heap->heap_alloc)
-	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list");
-    }
+	    HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap free list")
+    } /* end while */
 
     /* Set return value */
     ret_value = heap;
 
 done:
-    if (!ret_value && heap) {
-        if(H5HL_dest(f,heap)<0)
-	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy local heap collection");
-    }
+    if(!ret_value && heap)
+        if(H5HL_dest(f,heap) < 0)
+	    HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy local heap collection")
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HL_load() */
 
 
 /*-------------------------------------------------------------------------
@@ -963,6 +967,45 @@ H5HL_insert(H5F_t *f, hid_t dxpl_id, H5HL_t *heap, size_t buf_size, const void *
             need_more = need_size;
 
 	new_heap_alloc = heap->heap_alloc + need_more;
+#if 0 /* JRM */ /* delete this once we are convinced that the general 
+		 * fix will do the job.
+		 */
+/*
+ * XXX: This is a _total_ hack, a real kludge. :-/  The metadata cache currently
+ *      responds very poorly when an object is inserted into the cache (or
+ *      resized) that is larger than the current cache size.  It waits through
+ *      an entire 'epoch' of cache operations to resize the cache larger (getting
+ *      _very_ poor performance), instead of immediately accommodating the large
+ *      object by increasing the cache size.
+ *
+ *      So, what we are doing here is to look at the current cache size, check
+ *      if the new local heap will overwhelm the cache and, if so, resize the
+ *      cache to be large enough to hold the new local heap block along with
+ *      leaving room for other objects in the cache.
+ *
+ *      John will be working on a fix inside the cache itself, so this special
+ *      case code here can be removed when he's finished.  - QAK, 2007/12/21
+ */
+{
+	H5AC_cache_config_t mdc_config;
+
+        /* Retrieve the current cache information */
+	mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
+	if(H5AC_get_cache_auto_resize_config(f->shared->cache, &mdc_config) < 0)
+	    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (size_t)-1, "H5AC_get_cache_auto_resize_config() failed.")
+
+        /* Check if the current cache will get blown out by adding this heap
+         * block and resize it if so.
+         */
+	if((2 * new_heap_alloc) >= mdc_config.initial_size) {
+	    mdc_config.set_initial_size = TRUE;
+	    mdc_config.initial_size = 2 * new_heap_alloc;
+
+	    if(H5AC_set_cache_auto_resize_config(f->shared->cache, &mdc_config) < 0)
+	        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, (size_t)-1, "H5AC_set_cache_auto_resize_config() failed.")
+        } /* end if */
+}
+#endif /* JRM */
 	HDassert(heap->heap_alloc < new_heap_alloc);
 	H5_CHECK_OVERFLOW(heap->heap_alloc, size_t, hsize_t);
 	H5_CHECK_OVERFLOW(new_heap_alloc, size_t, hsize_t);

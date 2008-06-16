@@ -24,24 +24,25 @@
 typedef struct trav_addr_t {
     size_t      nalloc;
     size_t      nused;
-    haddr_t     *addrs;
+    struct {
+        haddr_t addr;
+        char *path;
+    } *objs;
 } trav_addr_t;
 
 typedef struct {
-    herr_t (*visit_obj)(const char *path_name, const H5O_info_t *oinfo, hbool_t already_visited, void *udata);
-    herr_t (*visit_lnk)(const char *path_name, const H5L_info_t *linfo, void *udata);
+    h5trav_obj_func_t visit_obj;        /* Callback for visiting objects */
+    h5trav_lnk_func_t visit_lnk;        /* Callback for visiting links */
     void *udata;                /* User data to pass to callbacks */
 } trav_visitor_t;
 
 typedef struct {
     trav_addr_t *seen;              /* List of addresses seen already */
-    const char *curr_path;          /* Current path to parent group */
     const trav_visitor_t *visitor;  /* Information for visiting each link/object */
 } trav_ud_traverse_t;
 
 typedef struct {
     hid_t fid;                      /* File ID being traversed */
-    trav_table_t *table;            /* Table for tracking name of objects with >1 hard link */
 } trav_print_udata_t;
 
 /*-------------------------------------------------------------------------
@@ -52,10 +53,8 @@ static void trav_table_add(trav_table_t *table,
                         const char *objname,
                         const H5O_info_t *oinfo);
 
-static size_t trav_table_search(const trav_table_t *table, haddr_t objno);
-
 static void trav_table_addlink(trav_table_t *table,
-                        size_t j /* the object index */,
+                        haddr_t objno,
                         const char *path);
 
 /*-------------------------------------------------------------------------
@@ -78,19 +77,20 @@ static void trav_table_addlink(trav_table_t *table,
  *-------------------------------------------------------------------------
  */
 static void
-trav_addr_add(trav_addr_t *visited, haddr_t addr)
+trav_addr_add(trav_addr_t *visited, haddr_t addr, const char *path)
 {
     size_t idx;         /* Index of address to use */
 
     /* Allocate space if necessary */
     if(visited->nused == visited->nalloc) {
         visited->nalloc = MAX(1, visited->nalloc * 2);;
-        visited->addrs = (haddr_t *)HDrealloc(visited->addrs, visited->nalloc * sizeof(haddr_t));
+        visited->objs = HDrealloc(visited->objs, visited->nalloc * sizeof(visited->objs[0]));
     } /* end if */
 
     /* Append it */
     idx = visited->nused++;
-    visited->addrs[idx] = addr;
+    visited->objs[idx].addr = addr;
+    visited->objs[idx].path = HDstrdup(path);
 } /* end trav_addr_add() */
 
 
@@ -107,7 +107,7 @@ trav_addr_add(trav_addr_t *visited, haddr_t addr)
  *
  *-------------------------------------------------------------------------
  */
-static hbool_t
+static const char *
 trav_addr_visited(trav_addr_t *visited, haddr_t addr)
 {
     size_t u;           /* Local index variable */
@@ -115,11 +115,11 @@ trav_addr_visited(trav_addr_t *visited, haddr_t addr)
     /* Look for address */
     for(u = 0; u < visited->nused; u++)
         /* Check for address already in array */
-        if(visited->addrs[u] == addr)
-            return(TRUE);
+        if(visited->objs[u].addr == addr)
+            return(visited->objs[u].path);
 
     /* Didn't find address */
-    return(FALSE);
+    return(NULL);
 } /* end trav_addr_visited() */
 
 
@@ -135,68 +135,44 @@ trav_addr_visited(trav_addr_t *visited, haddr_t addr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-traverse_cb(hid_t loc_id, const char *link_name, const H5L_info_t *linfo,
+traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
     void *_udata)
 {
     trav_ud_traverse_t *udata = (trav_ud_traverse_t *)_udata;     /* User data */
-    hbool_t is_group = FALSE;           /* If the object is a group */
-    hbool_t already_visited = FALSE;    /* Whether the link/object was already visited */
-    char *link_path;            /* Full path name of a link */
+    char *full_name;
+    const char *already_visited = NULL; /* Whether the link/object was already visited */
 
-    /* Construct the full path name of this link */
-    link_path = (char*)HDmalloc(HDstrlen(udata->curr_path) + HDstrlen(link_name) + 2);
-    HDassert(link_path);
-    HDstrcpy(link_path, udata->curr_path);
-    HDstrcat(link_path, "/");
-    HDstrcat(link_path, link_name);
+    /* Create the full path name for the link */
+    full_name = HDmalloc(HDstrlen(path) + 2);
+    *full_name = '/';
+    HDstrcpy(full_name + 1, path);
 
     /* Perform the correct action for different types of links */
     if(linfo->type == H5L_TYPE_HARD) {
         H5O_info_t oinfo;
 
         /* Get information about the object */
-        if(H5Oget_info_by_name(loc_id, link_name, &oinfo, H5P_DEFAULT) < 0)
+        if(H5Oget_info_by_name(loc_id, path, &oinfo, H5P_DEFAULT) < 0)
             return(H5_ITER_ERROR);
 
         /* If the object has multiple links, add it to the list of addresses
          *  already visited, if it isn't there already
          */
-        if(oinfo.rc > 1) {
-            already_visited = trav_addr_visited(udata->seen, oinfo.addr);
-            if(!already_visited)
-                trav_addr_add(udata->seen, oinfo.addr);
-        } /* end if */
-
-        /* Check if object is a group, for later */
-        is_group = (oinfo.type == H5O_TYPE_GROUP) ? TRUE : FALSE;
+        if(oinfo.rc > 1)
+            if(NULL == (already_visited = trav_addr_visited(udata->seen, oinfo.addr)))
+                trav_addr_add(udata->seen, oinfo.addr, full_name);
 
         /* Make 'visit object' callback */
         if(udata->visitor->visit_obj)
-            (*udata->visitor->visit_obj)(link_path, &oinfo, already_visited, udata->visitor->udata);
+            (*udata->visitor->visit_obj)(full_name, &oinfo, already_visited, udata->visitor->udata);
     } /* end if */
     else {
         /* Make 'visit link' callback */
         if(udata->visitor->visit_lnk)
-            (*udata->visitor->visit_lnk)(link_path, linfo, udata->visitor->udata);
+            (*udata->visitor->visit_lnk)(full_name, linfo, udata->visitor->udata);
     } /* end else */
 
-    /* Check for group that we haven't visited yet & recurse */
-    if(is_group && !already_visited) {
-        const char *prev_path = udata->curr_path;     /* Previous path to link's parent group */
-
-        /* Set current path to this object */
-        udata->curr_path = link_path;
-
-        /* Iterate over all links in group object */
-        if(H5Literate_by_name(loc_id, link_name, H5_INDEX_NAME, H5_ITER_INC, NULL, traverse_cb, udata, H5P_DEFAULT) < 0)
-            return(H5_ITER_ERROR);
-
-        /* Restore path in udata */
-        udata->curr_path = prev_path;
-    } /* end if */
-
-    /* Free path name for current link/object */
-    HDfree(link_path);
+    HDfree(full_name);
 
     return(H5_ITER_CONT);
 } /* end traverse_cb() */
@@ -217,39 +193,58 @@ traverse_cb(hid_t loc_id, const char *link_name, const H5L_info_t *linfo,
  *-------------------------------------------------------------------------
  */
 static int
-traverse(hid_t file_id, const trav_visitor_t *visitor)
+traverse(hid_t file_id, const char *grp_name, hbool_t visit_start,
+    hbool_t recurse, const trav_visitor_t *visitor)
 {
-    H5O_info_t  oinfo;          /* Object info for root group */
-    trav_addr_t seen;           /* List of addresses seen */
-    trav_ud_traverse_t udata;   /* User data for iteration callback */
+    H5O_info_t  oinfo;          /* Object info for starting group */
 
-    /* Get info for root group */
-    if(H5Oget_info(file_id, &oinfo) < 0)
+    /* Get info for starting object */
+    if(H5Oget_info_by_name(file_id, grp_name, &oinfo, H5P_DEFAULT) < 0)
         return -1;
 
-    /* Visit the root group of the file */
-    (*visitor->visit_obj)("/", &oinfo, FALSE, visitor->udata);
+    /* Visit the starting object */
+    if(visit_start && visitor->visit_obj)
+        (*visitor->visit_obj)(grp_name, &oinfo, NULL, visitor->udata);
 
-    /* Init addresses seen */
-    seen.nused = seen.nalloc = 0;
-    seen.addrs = NULL;
+    /* Go visiting, if the object is a group */
+    if(oinfo.type == H5O_TYPE_GROUP) {
+        trav_addr_t seen;           /* List of addresses seen */
+        trav_ud_traverse_t udata;   /* User data for iteration callback */
 
-    /* Check for multiple links to root group */
-    if(oinfo.rc > 1)
-        trav_addr_add(&seen, oinfo.addr);
+        /* Init addresses seen */
+        seen.nused = seen.nalloc = 0;
+        seen.objs = NULL;
 
-    /* Set up user data structure */
-    udata.seen = &seen;
-    udata.curr_path = "";
-    udata.visitor = visitor;
+        /* Check for multiple links to top group */
+        if(oinfo.rc > 1)
+            trav_addr_add(&seen, oinfo.addr, grp_name);
 
-    /* Iterate over all links in root group */
-    if(H5Literate(file_id, H5_INDEX_NAME, H5_ITER_INC, NULL, traverse_cb, &udata) < 0)
-        return -1;
+        /* Set up user data structure */
+        udata.seen = &seen;
+        udata.visitor = visitor;
 
-    /* Free visited addresses table */
-    if(seen.addrs)
-        HDfree(seen.addrs);
+        /* Check for iteration of links vs. visiting all links recursively */
+        if(recurse) {
+            /* Visit all links in group, recursively */
+            if(H5Lvisit_by_name(file_id, grp_name, H5_INDEX_NAME, H5_ITER_INC, traverse_cb, &udata, H5P_DEFAULT) < 0)
+                return -1;
+        } /* end if */
+        else {
+            /* Iterate over links in group */
+            if(H5Literate_by_name(file_id, grp_name, H5_INDEX_NAME, H5_ITER_INC, NULL, traverse_cb, &udata, H5P_DEFAULT) < 0)
+                return -1;
+        } /* end else */
+
+        /* Free visited addresses table */
+        if(seen.objs) {
+            size_t u;       /* Local index variable */
+
+            /* Free paths to objects */
+            for(u = 0; u < seen.nused; u++)
+                HDfree(seen.objs[u].path);
+            HDfree(seen.objs);
+        } /* end if */
+    } /* end if */
 
     return 0;
 }
@@ -301,7 +296,7 @@ trav_info_add(trav_info_t *info, const char *path, h5trav_type_t obj_type)
  */
 static int
 trav_info_visit_obj(const char *path, const H5O_info_t *oinfo,
-    hbool_t UNUSED already_visited, void *udata)
+    const char UNUSED *already_visited, void *udata)
 {
     /* Add the object to the 'info' struct */
     /* (object types map directly to "traversal" types) */
@@ -359,7 +354,7 @@ h5trav_getinfo(hid_t file_id, trav_info_t *info)
     info_visitor.udata = info;
 
     /* Traverse all objects in the file, visiting each object & link */
-    if(traverse(file_id, &info_visitor) < 0)
+    if(traverse(file_id, "/", TRUE, TRUE, &info_visitor) < 0)
         return -1;
 
     return 0;
@@ -470,24 +465,17 @@ trav_info_free(trav_info_t *info)
  */
 static int
 trav_table_visit_obj(const char *path, const H5O_info_t *oinfo,
-    hbool_t already_visited, void *udata)
+    const char *already_visited, void *udata)
 {
     trav_table_t *table = (trav_table_t *)udata;
 
     /* Check if we've already seen this object */
-    if(!already_visited)
+    if(NULL == already_visited)
         /* add object to table */
         trav_table_add(table, path, oinfo);
-    else {
-        size_t found;           /* Index of original object seen */
-
-        /* Look for object in existing table */
-        found = trav_table_search(table, oinfo->addr);
-        HDassert(found < table->nobjs);
-
+    else
         /* Add alias for object to table */
-        trav_table_addlink(table, found, path);
-    } /* end else */
+        trav_table_addlink(table, oinfo->addr, path);
 
     return(0);
 } /* end trav_table_visit_obj() */
@@ -541,7 +529,7 @@ h5trav_gettable(hid_t fid, trav_table_t *table)
     table_visitor.udata = table;
 
     /* Traverse all objects in the file, visiting each object & link */
-    if(traverse(fid, &table_visitor) < 0)
+    if(traverse(fid, "/", TRUE, TRUE, &table_visitor) < 0)
         return -1;
     return 0;
 }
@@ -670,25 +658,33 @@ trav_table_add(trav_table_t *table,
  */
 
 static void
-trav_table_addlink(trav_table_t *table,
-                        size_t j /* the object index */,
-                        const char *path)
+trav_table_addlink(trav_table_t *table, haddr_t objno, const char *path)
 {
-    size_t new;
+    size_t i;           /* Local index variable */
 
-    /* already inserted */
-    if(HDstrcmp(table->objs[j].name, path) == 0)
-        return;
+    for(i = 0; i < table->nobjs; i++) {
+        if(table->objs[i].objno == objno) {
+            size_t n;
 
-    /* allocate space if necessary */
-    if(table->objs[j].nlinks == (unsigned)table->objs[j].sizelinks) {
-        table->objs[j].sizelinks = MAX(1, table->objs[j].sizelinks * 2);
-        table->objs[j].links = (trav_link_t*)HDrealloc(table->objs[j].links, table->objs[j].sizelinks * sizeof(trav_link_t));
-    } /* end if */
+            /* already inserted? */
+            if(HDstrcmp(table->objs[i].name, path) == 0)
+                return;
 
-    /* insert it */
-    new = table->objs[j].nlinks++;
-    table->objs[j].links[new].new_name = (char *)HDstrdup(path);
+            /* allocate space if necessary */
+            if(table->objs[i].nlinks == (unsigned)table->objs[i].sizelinks) {
+                table->objs[i].sizelinks = MAX(1, table->objs[i].sizelinks * 2);
+                table->objs[i].links = (trav_link_t*)HDrealloc(table->objs[i].links, table->objs[i].sizelinks * sizeof(trav_link_t));
+            } /* end if */
+
+            /* insert it */
+            n = table->objs[i].nlinks++;
+            table->objs[i].links[n].new_name = (char *)HDstrdup(path);
+
+            return;
+        } /* end for */
+    } /* end for */
+
+    HDassert(0 && "object not in table?!?");
 }
 
 
@@ -809,10 +805,8 @@ void trav_table_free( trav_table_t *table )
  */
 static int
 trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
-    hbool_t already_visited, void *udata)
+    const char *already_visited, void UNUSED *udata)
 {
-    trav_print_udata_t *print_udata = (trav_print_udata_t *)udata;
-
     /* Print the name of the object */
     /* (no new-line, so that objects that we've encountered before can print
      *  the name of the original object)
@@ -836,26 +830,12 @@ trav_print_visit_obj(const char *path, const H5O_info_t *oinfo,
     } /* end switch */
 
     /* Check if we've already seen this object */
-    if(!already_visited) {
+    if(NULL == already_visited)
         /* Finish printing line about object */
         printf("\n");
-
-        /* Check if we will encounter another hard link to this object */
-        if(oinfo->rc > 1) {
-            /* Add object to table */
-            trav_table_add(print_udata->table, path, oinfo);
-        } /* end if */
-    } /* end if */
-    else {
-        size_t found;           /* Index of original object seen */
-
-        /* Locate object in table */
-        found = trav_table_search(print_udata->table, oinfo->addr);
-        HDassert(found < print_udata->table->nobjs);
-
-        /* Print the link's destination */
-        printf(" -> %s\n", print_udata->table->objs[found].name);
-    } /* end else */
+    else
+        /* Print the link's original name */
+        printf(" -> %s\n", already_visited);
 
     return(0);
 } /* end trav_print_visit_obj() */
@@ -938,16 +918,11 @@ trav_print_visit_lnk(const char *path, const H5L_info_t *linfo, void *udata)
 int
 h5trav_print(hid_t fid)
 {
-    trav_table_t *table = NULL;         /* Table for objects w/multiple hard links */
     trav_print_udata_t print_udata;     /* User data for traversal */
     trav_visitor_t print_visitor;       /* Visitor structure for printing objects */
 
-    /* Initialize the table */
-    trav_table_init(&table);
-
     /* Init user data for printing */
     print_udata.fid = fid;
-    print_udata.table = table;
 
     /* Init visitor structure */
     print_visitor.visit_obj = trav_print_visit_obj;
@@ -955,11 +930,42 @@ h5trav_print(hid_t fid)
     print_visitor.udata = &print_udata;
 
     /* Traverse all objects in the file, visiting each object & link */
-    if(traverse(fid, &print_visitor) < 0)
+    if(traverse(fid, "/", TRUE, TRUE, &print_visitor) < 0)
         return -1;
 
-    /* Free table */
-    trav_table_free(table);
+    return 0;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: h5trav_visit
+ *
+ * Purpose: Generic traversal routine for visiting objects and links
+ *
+ * Return: 0, -1 on error
+ *
+ * Programmer: Quincey Koziol, koziol@hdfgroup.org
+ *
+ * Date: November 6, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+
+int
+h5trav_visit(hid_t fid, const char *grp_name, hbool_t visit_start,
+    hbool_t recurse, h5trav_obj_func_t visit_obj, h5trav_lnk_func_t visit_lnk,
+    void *udata)
+{
+    trav_visitor_t visitor;             /* Visitor structure for objects */
+
+    /* Init visitor structure */
+    visitor.visit_obj = visit_obj;
+    visitor.visit_lnk = visit_lnk;
+    visitor.udata = udata;
+
+    /* Traverse all objects in the file, visiting each object & link */
+    if(traverse(fid, grp_name, visit_start, recurse, &visitor) < 0)
+        return -1;
 
     return 0;
 }

@@ -109,13 +109,15 @@ Build HDF5 on MinGW
         
         - ./tools/h5diff/Makefile.in: "testh5diff.sh"
         
-        - ./tools/misc/Makefile.in: "testh5stat.sh" and "testh5mkgrp.sh"
+        - ./tools/misc/Makefile.in: "testh5mkgrp.sh"
         
         - ./tools/h5jam/Makefile.in: "testh5jam.sh"
         
         - ./tools/h5copy/Makefile.in: "testh5copy.sh"
         
         - ./tools/h5ls/Makefile.in: "testh5ls.sh"
+        
+        - ./tools/h5stat/Makefile.in: "testh5stat.sh"
    
         
 5. Configuring 

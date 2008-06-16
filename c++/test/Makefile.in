@@ -65,14 +65,14 @@ am__EXEEXT_1 = dsets$(EXEEXT) testhdf5$(EXEEXT)
 am_dsets_OBJECTS = dsets.$(OBJEXT) h5cpputil.$(OBJEXT)
 dsets_OBJECTS = $(am_dsets_OBJECTS)
 dsets_LDADD = $(LDADD)
-dsets_DEPENDENCIES = $(LIBH5CPP) $(LIBH5TEST) $(LIBHDF5)
+dsets_DEPENDENCIES = $(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
 am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tattr.$(OBJEXT) \
 	tcompound.$(OBJEXT) tfile.$(OBJEXT) tfilter.$(OBJEXT) \
 	th5s.$(OBJEXT) trefer.$(OBJEXT) ttypes.$(OBJEXT) \
 	tvlstr.$(OBJEXT) h5cpputil.$(OBJEXT)
 testhdf5_OBJECTS = $(am_testhdf5_OBJECTS)
 testhdf5_LDADD = $(LDADD)
-testhdf5_DEPENDENCIES = $(LIBH5CPP) $(LIBH5TEST) $(LIBHDF5)
+testhdf5_DEPENDENCIES = $(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
 DEFAULT_INCLUDES = -I. -I$(top_builddir)/src@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp
 am__depfiles_maybe = depfiles
@@ -208,6 +208,7 @@ SET_MAKE = @SET_MAKE@
 SHELL = /bin/sh
 SIZE_T = @SIZE_T@
 STATIC_SHARED = @STATIC_SHARED@
+STRICT_FORMAT_CHECKS = @STRICT_FORMAT_CHECKS@
 STRIP = @STRIP@
 TESTPARALLEL = @TESTPARALLEL@
 TIME = @TIME@
@@ -329,7 +330,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/c++/src
 TEST_PROG = dsets testhdf5
 
 # The tests depend on the hdf5 library, test library, and the c++ library
-LDADD = $(LIBH5CPP) $(LIBH5TEST) $(LIBHDF5)
+LDADD = $(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
 dsets_SOURCES = dsets.cpp h5cpputil.cpp
 testhdf5_SOURCES = testhdf5.cpp tattr.cpp tcompound.cpp tfile.cpp tfilter.cpp \
 	th5s.cpp trefer.cpp ttypes.cpp tvlstr.cpp h5cpputil.cpp

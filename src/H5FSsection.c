@@ -187,6 +187,9 @@ H5FS_sinfo_pin(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace)
     H5FS_sinfo_t *ret_value;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FS_sinfo_pin)
+#ifdef QAK
+HDfprintf(stderr, "%s: Called, fspace->sect_addr = %a\n", FUNC, fspace->sect_addr);
+#endif /* QAK */
 
     /* Check arguments. */
     HDassert(f);
@@ -194,6 +197,9 @@ H5FS_sinfo_pin(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace)
 
     /* Create new section info, if it doesn't exist yet */
     if(!H5F_addr_defined(fspace->sect_addr)) {
+#ifdef QAK
+HDfprintf(stderr, "%s: Allocating new section info\n", FUNC);
+#endif /* QAK */
         /* Sanity check */
         HDassert(fspace->tot_sect_count == 0);
         HDassert(fspace->serial_sect_count == 0);
@@ -208,6 +214,9 @@ H5FS_sinfo_pin(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace)
         fspace->alloc_sect_size = (size_t)fspace->sect_size;
         if(HADDR_UNDEF == (fspace->sect_addr = H5MF_alloc(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, fspace->alloc_sect_size)))
             HGOTO_ERROR(H5E_STORAGE, H5E_NOSPACE, NULL, "file allocation failed for free space sections")
+#ifdef QAK
+HDfprintf(stderr, "%s: New section info, addr = %a, size = %Hu\n", FUNC, fspace->sect_addr, fspace->alloc_sect_size);
+#endif /* QAK */
 
         /* Cache the new free space section info (pinned) */
         if(H5AC_set(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, sinfo, H5AC__PIN_ENTRY_FLAG) < 0)
@@ -1209,12 +1218,6 @@ HDfprintf(stderr, "%s: request = %Hu\n", FUNC, request);
     HDassert(request);
     HDassert(node);
 
-    /* Check if we need to go get the sections */
-    if(fspace->sinfo == NULL) {
-        if(NULL == (fspace->sinfo = H5FS_sinfo_pin(f, dxpl_id, fspace)))
-            HGOTO_ERROR(H5E_FSPACE, H5E_CANTDECODE, FAIL, "can't pin sections")
-    } /* end if */
-
     /* Check for any sections on free space list */
 #ifdef QAK
 HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", FUNC, fspace->tot_sect_count);
@@ -1222,6 +1225,12 @@ HDfprintf(stderr, "%s: fspace->serial_sect_count = %Hu\n", FUNC, fspace->serial_
 HDfprintf(stderr, "%s: fspace->ghost_sect_count = %Hu\n", FUNC, fspace->ghost_sect_count);
 #endif /* QAK */
     if(fspace->tot_sect_count > 0) {
+        /* Check if we need to go get the sections */
+        if(fspace->sinfo == NULL) {
+            if(NULL == (fspace->sinfo = H5FS_sinfo_pin(f, dxpl_id, fspace)))
+                HGOTO_ERROR(H5E_FSPACE, H5E_CANTDECODE, FAIL, "can't pin sections")
+        } /* end if */
+
         /* Look for node in bins */
         if((ret_value = H5FS_sect_find_node(fspace, request, node)) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "can't remove section from bins")

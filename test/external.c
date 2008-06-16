@@ -841,7 +841,6 @@ test_4 (hid_t fapl)
     hid_t       fid, gid, xid, xid2;
     char	filename[1024];		/*file name			*/
     char        pathname[1024];
-    char        linked_pathname[1024];
     char       *srcdir = getenv("srcdir"); /*where the src code is located*/
     const char *envval = NULL;
 
@@ -879,7 +878,7 @@ test_4 (hid_t fapl)
 	    goto error;
 
         /* Reopen the file */
-        if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
 	    goto error;
 
         /* Open the external link */

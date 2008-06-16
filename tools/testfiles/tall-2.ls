@@ -1,6 +1,7 @@
 #############################
  output for 'h5ls -w80 -r -d tall.h5'
 #############################
+/                        Group
 /g1                      Group
 /g1/g1.1                 Group
 /g1/g1.1/dset1.1.1       Dataset {10, 10}

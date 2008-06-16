@@ -887,7 +887,7 @@ H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_ty
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
     /* Get name, length, etc. */
-    if((ret_value = H5G_get_refobj_name(file_id, lapl_id, dxpl_id, &oloc, name, size)) < 0)
+    if((ret_value = H5G_get_name_by_addr(file_id, lapl_id, dxpl_id, &oloc, name, size)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't determine name")
 
 done:

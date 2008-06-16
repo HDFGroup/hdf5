@@ -580,10 +580,25 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     if(merged_null_msgs)
 	oh->cache_info.is_dirty = TRUE;
 
+/* Don't check for the incorrect # of object header messages bug unless we've
+ * enabled strict format checking.  This allows for older files, created with
+ * a version of the library that had a bug in tracking the correct # of header
+ * messages to be read in without the library fussing about things. -QAK
+ */
+#ifdef H5_STRICT_FORMAT_CHECKS
     /* Sanity check for the correct # of messages in object header */
     if(oh->version == H5O_VERSION_1)
         if((oh->nmesgs + merged_null_msgs) != nmesgs)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - too few messages")
+#else /* H5_STRICT_FORMAT_CHECKS */
+    /* Check for incorrect # of messages in object header and if we have write
+     * access on the file, flag the object header as dirty, so it gets fixed. 
+     */
+    if(oh->version == H5O_VERSION_1)
+        if((oh->nmesgs + merged_null_msgs) != nmesgs &&
+                (H5F_get_intent(f) & H5F_ACC_RDWR))
+            oh->cache_info.is_dirty = TRUE;
+#endif /* H5_STRICT_FORMAT_CHECKS */
 
 #ifdef H5O_DEBUG
 H5O_assert(oh);
@@ -710,7 +725,12 @@ H5O_assert(oh);
             *p++ = 0;
 
             /* Number of messages */
-            UINT16ENCODE(p, oh->nmesgs);
+#ifdef H5O_ENABLE_BAD_MESG_COUNT
+            if(oh->store_bad_mesg_count)
+                UINT16ENCODE(p, (oh->nmesgs - 1))
+            else
+#endif /* H5O_ENABLE_BAD_MESG_COUNT */
+                UINT16ENCODE(p, oh->nmesgs);
 
             /* Link count */
             UINT32ENCODE(p, oh->nlink);

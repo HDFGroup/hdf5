@@ -234,7 +234,11 @@ static const H5FD_class_t H5FD_log_g = {
     H5FD_log_flush,				/*flush			*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
+#ifdef OLD_WAY
     H5FD_FLMAP_NOLIST 				/*fl_map		*/
+#else /* OLD_WAY */
+    H5FD_FLMAP_SINGLE 				/*fl_map		*/
+#endif /* OLD_WAY */
 };
 
 

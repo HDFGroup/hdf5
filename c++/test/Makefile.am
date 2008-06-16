@@ -35,7 +35,7 @@ TEST_PROG=dsets testhdf5
 check_PROGRAMS=$(TEST_PROG)
 
 # The tests depend on the hdf5 library, test library, and the c++ library
-LDADD=$(LIBH5CPP) $(LIBH5TEST) $(LIBHDF5)
+LDADD=$(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
 
 dsets_SOURCES=dsets.cpp h5cpputil.cpp
 testhdf5_SOURCES=testhdf5.cpp tattr.cpp tcompound.cpp tfile.cpp tfilter.cpp \

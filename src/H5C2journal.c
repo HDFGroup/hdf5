@@ -3517,7 +3517,7 @@ H5Pset_journal(hid_t fapl_id, const char *journal_file)
     HDstrcpy(mdj_config.journal_file_path, journal_file);
 
     /* set latest format */
-    if (H5Pset_latest_format(fapl_id, TRUE) < 0)
+    if (H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format'")
 
     /* set cache config struct information */

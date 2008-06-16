@@ -661,7 +661,7 @@ H5D_contig_writevv(const H5D_io_info_t *io_info,
     H5F_t *file = io_info->dset->oloc.file;        /* File for dataset */
     H5D_rdcdc_t *dset_contig=&(io_info->dset->shared->cache.contig); /* Cached information about contiguous data */
     const H5D_contig_storage_t *store_contig=&(io_info->store->contig);    /* Contiguous storage info for this I/O operation */
-    const unsigned char *buf=_buf;      /* Pointer to buffer to fill */
+    const unsigned char *buf=(const unsigned char *)_buf;      /* Pointer to buffer to fill */
     haddr_t addr;               /* Actual address to read */
     size_t total_size=0;        /* Size of sequence in bytes */
     size_t size;                /* Size of sequence in bytes */
@@ -1204,11 +1204,11 @@ done:
         if(H5I_dec_ref(tid_mem) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(buf)
-        H5FL_BLK_FREE(type_conv, buf);
+        (void)H5FL_BLK_FREE(type_conv, buf);
     if(reclaim_buf)
-        H5FL_BLK_FREE(type_conv, reclaim_buf);
+        (void)H5FL_BLK_FREE(type_conv, reclaim_buf);
     if(bkg)
-        H5FL_BLK_FREE(type_conv, bkg);
+        (void)H5FL_BLK_FREE(type_conv, bkg);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_contig_copy() */

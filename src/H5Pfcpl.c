@@ -757,7 +757,7 @@ H5Pset_shared_mesg_index(hid_t plist_id, unsigned index_num, unsigned mesg_type_
     H5TRACE4("e", "iIuIuIu", plist_id, index_num, mesg_type_flags, min_mesg_size);
 
     /* Check arguments */
-    if(mesg_type_flags > H5O_MESG_ALL_FLAG)
+    if(mesg_type_flags > H5O_SHMESG_ALL_FLAG)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "unrecognized flags in mesg_type_flags");
 
     /* Get the plist structure */

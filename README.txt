@@ -1,4 +1,4 @@
-HDF5 version 1.8.0-beta4post1 released on Mon Nov 19 22:20:37 CST 2007
+HDF5 version 1.8.0 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
@@ -10,7 +10,7 @@ file contains instructions on installing the parallel version of the
 library.  The INSTALL* files can be found in the release_docs/ directory.
 
 Documentation for this release can be found at the following URL:
-http://hdfgroup.org/HDF5/release/alpha/obtain518.html
+http://www.hdfgroup.uiuc.edu/HDF5/release/beta/obtain518.html
 
 Four mailing lists are currently set up for use with the HDF5
 library.

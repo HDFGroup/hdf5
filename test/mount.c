@@ -1170,6 +1170,7 @@ test_mount_after_close(hid_t fapl)
     if((gidABMX = H5Gopen2(gidAB, "M/X", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check name */
+    *objname = '\0';
     if(H5Iget_name(gidABMX, objname, (size_t)NAME_BUF_SIZE) < 0) FAIL_STACK_ERROR
     if(HDstrcmp(objname, "/A/B/M/X")) TEST_ERROR
 
@@ -1180,6 +1181,7 @@ test_mount_after_close(hid_t fapl)
     if((gidABC = H5Gopen2(gidAB, "C", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check name */
+    *objname = '\0';
     if(H5Iget_name(gidABC, objname, (size_t)NAME_BUF_SIZE) < 0) FAIL_STACK_ERROR
     if(HDstrcmp(objname, "/A/B/C")) TEST_ERROR
 
@@ -1190,6 +1192,7 @@ test_mount_after_close(hid_t fapl)
     if((gidABT = H5Gopen2(gidAB, "T", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check name */
+    *objname = '\0';
     if(H5Iget_name(gidABT, objname, (size_t)NAME_BUF_SIZE) < 0) FAIL_STACK_ERROR
     if(HDstrcmp(objname, "/A/B/T")) TEST_ERROR
 
@@ -1200,6 +1203,7 @@ test_mount_after_close(hid_t fapl)
     if((didABMXYD = H5Dopen2(gidAB, "M/X/Y/D", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Check name */
+    *objname = '\0';
     if(H5Iget_name(didABMXYD, objname, (size_t)NAME_BUF_SIZE) < 0) FAIL_STACK_ERROR
     if(HDstrcmp(objname, "/A/B/M/X/Y/D")) TEST_ERROR
 
@@ -1370,6 +1374,7 @@ test_mount_after_unmount(hid_t fapl)
         TEST_ERROR
 
     /* Check name */
+    *objname = '\0';
     if(H5Iget_name( gidAMXX, objname, (size_t)NAME_BUF_SIZE ) < 0)
         TEST_ERROR
     if(HDstrcmp(objname, "/A/M/X/X"))
@@ -1389,6 +1394,7 @@ test_mount_after_unmount(hid_t fapl)
         TEST_ERROR
 
     /* Check name */
+    *objname = '\0';
     if(H5Iget_name( gidAMXMY, objname, (size_t)NAME_BUF_SIZE ) < 0)
         TEST_ERROR
     if(HDstrcmp(objname, "/A/M/X/M/Y"))
@@ -1435,6 +1441,7 @@ test_mount_after_unmount(hid_t fapl)
         TEST_ERROR
 
     /* Check name */
+    *objname = '\0';
     if(H5Iget_name( gidBMZ, objname, (size_t)NAME_BUF_SIZE ) < 0)
         TEST_ERROR
     if(HDstrcmp(objname, "/B/M/Z"))
@@ -2721,6 +2728,7 @@ test_mult_mount(hid_t fapl)
         TEST_ERROR
 
     /* Check name */
+    *name = '\0';
     if(H5Iget_name(gidAMT, name, (size_t)NAME_BUF_SIZE ) < 0)
         TEST_ERROR
     if(HDstrcmp(name, "/A/M/T"))
@@ -2738,6 +2746,7 @@ test_mult_mount(hid_t fapl)
         TEST_ERROR
 
     /* Check name */
+    *name = '\0';
     if(H5Iget_name(gidBS, name, (size_t)NAME_BUF_SIZE ) < 0)
         TEST_ERROR
     if(HDstrcmp(name, "/B/S"))
@@ -2924,6 +2933,7 @@ test_nested_survive(hid_t fapl)
         TEST_ERROR
 
     /* Check name */
+    *name = '\0';
     if((name_len = H5Iget_name(gidAM, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
     if(name_len == 0 || HDstrcmp(name, "/A/M"))
@@ -2934,9 +2944,10 @@ test_nested_survive(hid_t fapl)
         TEST_ERROR
 
     /* Check name */
+    *name = '\0';
     if((name_len = H5Iget_name(gidAM, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
-    if(name_len == 0 || HDstrcmp(name, "/M"))
+    if(name_len != 0 || HDstrcmp(name, ""))
         TEST_ERROR
 
     /* Open object in file #3 through file #1 mount path (should fail) */
@@ -2951,6 +2962,7 @@ test_nested_survive(hid_t fapl)
         TEST_ERROR
 
     /* Check name */
+    *name = '\0';
     if(H5Iget_name(gidMS, name, (size_t)NAME_BUF_SIZE ) < 0)
         TEST_ERROR
     if(HDstrcmp(name, "/M/S"))
@@ -2969,6 +2981,7 @@ test_nested_survive(hid_t fapl)
         TEST_ERROR
 
     /* Check name */
+    *name = '\0';
     if(H5Iget_name(gidAMS, name, (size_t)NAME_BUF_SIZE ) < 0)
         TEST_ERROR
     if(HDstrcmp(name, "/A/M/S"))
@@ -3122,6 +3135,7 @@ test_close_parent(hid_t fapl)
         TEST_ERROR
 
     /* Check the name of "M" is still defined */
+    *name = '\0';
     if((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
     if(name_len == 0 || HDstrcmp(name, "/A/M"))
@@ -3132,6 +3146,7 @@ test_close_parent(hid_t fapl)
         TEST_ERROR
 
     /* Check the name of "M" is defined in its file */
+    *name = '\0';
     if((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
     if(name_len == 0 || HDstrcmp(name, "/M"))
@@ -3407,6 +3422,7 @@ test_cut_graph(hid_t fapl)
         TEST_ERROR
 
     /* Check name */
+    *name = '\0';
     if((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
     if(name_len == 0 || HDstrcmp(name, "/A/E/M"))
@@ -3417,6 +3433,7 @@ test_cut_graph(hid_t fapl)
         TEST_ERROR
 
     /* Check name */
+    *name = '\0';
     if((name_len = H5Iget_name(gidQ, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
     if(name_len == 0 || HDstrcmp(name, "/B/I/Q"))
@@ -3477,6 +3494,7 @@ test_cut_graph(hid_t fapl)
         TEST_ERROR
 
     /* Check the name of "K" is correct */
+    *name = '\0';
     if((name_len = H5Iget_name(gidK, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
     if(name_len == 0 || HDstrcmp(name, "/D/K"))
@@ -3497,6 +3515,7 @@ test_cut_graph(hid_t fapl)
         TEST_ERROR
 
     /* Check the name of "O" is correct */
+    *name = '\0';
     if((name_len = H5Iget_name(gidO, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
     if(name_len == 0 || HDstrcmp(name, "/B/H/O"))
@@ -3506,12 +3525,14 @@ test_cut_graph(hid_t fapl)
         TEST_ERROR
 
     /* Check the name of "M" is defined in its file */
+    *name = '\0';
     if((name_len = H5Iget_name(gidM, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
     if(name_len == 0 || HDstrcmp(name, "/E/M"))
         TEST_ERROR
 
     /* Check the name of "Q" is still defined */
+    *name = '\0';
     if((name_len = H5Iget_name(gidQ, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
     if(name_len == 0 || HDstrcmp(name, "/B/I/Q"))
@@ -3539,6 +3560,7 @@ test_cut_graph(hid_t fapl)
         TEST_ERROR
 
     /* Check the name of "Q" is defined in its file */
+    *name = '\0';
     if((name_len = H5Iget_name(gidQ, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
     if(name_len == 0 || HDstrcmp(name, "/I/Q"))
@@ -3549,6 +3571,7 @@ test_cut_graph(hid_t fapl)
         TEST_ERROR
 
     /* Check the name of "O" is correct */
+    *name = '\0';
     if((name_len = H5Iget_name(gidO, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
     if(name_len == 0 || HDstrcmp(name, "/H/O"))
@@ -3719,6 +3742,7 @@ test_symlink(hid_t fapl)
         TEST_ERROR
 
     /* Check the name of "L" is correct */
+    *name = '\0';
     if((name_len = H5Iget_name(gidL, name, (size_t)NAME_BUF_SIZE )) < 0)
         TEST_ERROR
     if(name_len == 0 || HDstrcmp(name, "/L"))

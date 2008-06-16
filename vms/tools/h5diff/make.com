@@ -19,27 +19,27 @@ $!
 $! ccopt = "/float=ieee_float"
 $
 $ ccc := cc 'ccopt /include=([-.-.src], [-.lib])
-$ type sys$input
-       Creating h5diff  
 $!
 $ cobj= "h5diff_main, h5diff_common, h5diffgentest"
 
 $!                               
 $ ccc 'cobj 
 $ type sys$input
-       Creating h5diffgentest
+       Creating h5diffgentest ...
 $ link/exe=h5diffgentest.exe -
            h5diffgentest, -
            [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib 
 $ type sys$input
-       Created  h5difftest
+       Finished  h5difftest
+
 $
 $ type sys$input
-       Creating h5diff
+       Creating h5diff ...
 $ link/exe=h5diff.exe -
            h5diff_main, h5diff_common, -
            [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
-       Created  h5diff
+       Finished  h5diff
+
 $!
 $ exit

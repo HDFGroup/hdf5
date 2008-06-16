@@ -394,7 +394,6 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 {
     H5HF_hdr_t	*hdr = NULL;            /* Fractal heap header info */
     H5HF_direct_t *dblock = NULL;       /* Fractal heap direct block info */
-    H5HF_debug_iter_ud1_t udata;        /* User data for callbacks */
     size_t	blk_prefix_size;        /* Size of prefix for block */
     size_t	amount_free;            /* Amount of free space in block */
     uint8_t	*marker = NULL;         /* Track free space for block */
@@ -450,36 +449,43 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize the free space information for the heap */
-    if(H5HF_space_start(hdr, dxpl_id) < 0)
+    if(H5HF_space_start(hdr, dxpl_id, FALSE) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space")
 
-    /* Prepare user data for section iteration callback */
-    udata.stream = stream;
-    udata.indent = indent;
-    udata.fwidth = fwidth;
-    udata.dblock_addr = dblock->block_off;
-    udata.dblock_size = block_size;
-    udata.marker = marker;
-    udata.sect_count = 0;
-    udata.amount_free = 0;
+    /* If there is a free space manager for the heap, check for sections that overlap this block */
+    if(hdr->fspace) {
+        H5HF_debug_iter_ud1_t udata;        /* User data for callbacks */
 
-    /* Print header */
-    HDfprintf(stream, "%*sFree Blocks (offset, size):\n", indent, "");
+        /* Prepare user data for section iteration callback */
+        udata.stream = stream;
+        udata.indent = indent;
+        udata.fwidth = fwidth;
+        udata.dblock_addr = dblock->block_off;
+        udata.dblock_size = block_size;
+        udata.marker = marker;
+        udata.sect_count = 0;
+        udata.amount_free = 0;
 
-    /* Iterate over the free space sections, to detect overlaps with this block */
-    if(H5FS_sect_iterate(f, dxpl_id, hdr->fspace, H5HF_dblock_debug_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
+        /* Print header */
+        HDfprintf(stream, "%*sFree Blocks (offset, size):\n", indent, "");
 
-    /* Close the free space information */
-    if(H5HF_space_close(hdr, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info")
+        /* Iterate over the free space sections, to detect overlaps with this block */
+        if(H5FS_sect_iterate(f, dxpl_id, hdr->fspace, H5HF_dblock_debug_cb, &udata) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
 
-    /* Keep the amount of space free */
-    amount_free = udata.amount_free;
+        /* Close the free space information */
+        if(H5HF_space_close(hdr, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info")
 
-    /* Check for no free space */
-    if(amount_free == 0)
-        HDfprintf(stream, "%*s<none>\n", indent + 3, "");
+        /* Keep the amount of space free */
+        amount_free = udata.amount_free;
+
+        /* Check for no free space */
+        if(amount_free == 0)
+            HDfprintf(stream, "%*s<none>\n", indent + 3, "");
+    } /* end if */
+    else
+        amount_free = 0;
 
     HDfprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth,
             "Percent of available space for data used:",
@@ -709,7 +715,6 @@ H5HF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr,
     FILE *stream, int indent, int fwidth)
 {
     H5HF_hdr_t	*hdr = NULL;            /* Fractal heap header info */
-    H5HF_debug_iter_ud2_t udata;        /* User data for callbacks */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5HF_sects_debug, FAIL)
@@ -730,22 +735,27 @@ H5HF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr,
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
 
     /* Initialize the free space information for the heap */
-    if(H5HF_space_start(hdr, dxpl_id) < 0)
+    if(H5HF_space_start(hdr, dxpl_id, FALSE) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space")
 
-    /* Prepare user data for section iteration callback */
-    udata.fspace = hdr->fspace;
-    udata.stream = stream;
-    udata.indent = indent;
-    udata.fwidth = fwidth;
+    /* If there is a free space manager for the heap, iterate over them */
+    if(hdr->fspace) {
+        H5HF_debug_iter_ud2_t udata;        /* User data for callbacks */
 
-    /* Iterate over all the free space sections */
-    if(H5FS_sect_iterate(f, dxpl_id, hdr->fspace, H5HF_sects_debug_cb, &udata) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
+        /* Prepare user data for section iteration callback */
+        udata.fspace = hdr->fspace;
+        udata.stream = stream;
+        udata.indent = indent;
+        udata.fwidth = fwidth;
 
-    /* Close the free space information */
-    if(H5HF_space_close(hdr, dxpl_id) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info")
+        /* Iterate over all the free space sections */
+        if(H5FS_sect_iterate(f, dxpl_id, hdr->fspace, H5HF_sects_debug_cb, &udata) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
+
+        /* Close the free space information */
+        if(H5HF_space_close(hdr, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't release free space info")
+    } /* end if */
 
 done:
     if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)

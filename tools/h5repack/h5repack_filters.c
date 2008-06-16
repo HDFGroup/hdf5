@@ -122,7 +122,7 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
         {
             /* assign the global filter */
             tmp.nfilters=1;
-            tmp.filter[0]=options->filter_g;
+            tmp.filter[0]=options->filter_g[0];
         } /* if all */
         else
         {
@@ -144,9 +144,12 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
         
         if (options->all_filter)
         {
-            /* assign the global filter */
-            tmp.nfilters=1;
-            tmp.filter[0]=options->filter_g;
+            int k;
+
+            /* assign the global filters */
+            tmp.nfilters=options->n_filter_g;
+            for ( k = 0; k < options->n_filter_g; k++)
+                tmp.filter[k]=options->filter_g[k];
         }
         if (options->all_layout)
         {
@@ -168,8 +171,7 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
     *obj = tmp;
     return 1;
     
-}
-                   
+}       
 
 
 /*-------------------------------------------------------------------------
@@ -191,7 +193,7 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
 int apply_filters(const char* name,    /* object name from traverse list */
                   int rank,            /* rank of dataset */
                   hsize_t *dims,       /* dimensions of dataset */
-                  hid_t dcpl_id,       /* (IN,OUT) dataset creation property list */
+                  hid_t dcpl_id,       /* dataset creation property list */
                   pack_opt_t *options, /* repack options */
                   int *has_filter)     /* (OUT) object NAME has a filter */
 
@@ -262,12 +264,12 @@ int apply_filters(const char* name,    /* object name from traverse list */
     /*-------------------------------------------------------------------------
     * the type of filter and additional parameter
     * type can be one of the filters
-    * H5Z_FILTER_NONE       0,  uncompress if compressed
-    * H5Z_FILTER_DEFLATE      1 , deflation like gzip
-    * H5Z_FILTER_SHUFFLE    2 , shuffle the data
-    * H5Z_FILTER_FLETCHER32 3 , fletcher32 checksum of EDC
-    * H5Z_FILTER_SZIP       4 , szip compression
-    * H5Z_FILTER_NBIT       5 , nbit compression
+    * H5Z_FILTER_NONE        0 , uncompress if compressed
+    * H5Z_FILTER_DEFLATE     1 , deflation like gzip
+    * H5Z_FILTER_SHUFFLE     2 , shuffle the data
+    * H5Z_FILTER_FLETCHER32  3 , fletcher32 checksum of EDC
+    * H5Z_FILTER_SZIP        4 , szip compression
+    * H5Z_FILTER_NBIT        5 , nbit compression
     * H5Z_FILTER_SCALEOFFSET 6 , scaleoffset compression
     *-------------------------------------------------------------------------
     */
@@ -275,10 +277,10 @@ int apply_filters(const char* name,    /* object name from traverse list */
     if (obj.nfilters)
     {
         
-    /*-------------------------------------------------------------------------
+   /*-------------------------------------------------------------------------
     * filters require CHUNK layout; if we do not have one define a default
     *-------------------------------------------------------------------------
-        */
+    */
         if (obj.layout==-1)
         {
             obj.chunk.rank=rank;
@@ -408,51 +410,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
         }
         
     }
-
- return 0;
-}
-
-/*-------------------------------------------------------------------------
- * Function: print_filters
- *
- * Purpose: print the filters in DCPL
- *
- * Return: 0, ok, -1 no
- *
- *-------------------------------------------------------------------------
- */
-
-int print_filters(hid_t dcpl_id)
-{
- int          nfilters;       /* number of filters */
- unsigned     filt_flags;     /* filter flags */
- H5Z_filter_t filtn;          /* filter identification number */
- unsigned     cd_values[20];  /* filter client data values */
- size_t       cd_nelmts;      /* filter client number of values */
- size_t       cd_num;         /* filter client data counter */
- char         f_name[256];    /* filter name */
- char         s[64];          /* temporary string buffer */
- int          i;
-
- /* get information about filters */
- if((nfilters = H5Pget_nfilters(dcpl_id)) < 0)
-  return -1;
-
- for(i = 0; i < nfilters; i++) {
-  cd_nelmts = NELMTS(cd_values);
-  filtn = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts,
-   cd_values, sizeof(f_name), f_name, NULL);
-
-  f_name[sizeof(f_name)-1] = '\0';
-  sprintf(s, "Filter-%d:", i);
-  printf("    %-10s %s-%u %s {", s,
-   f_name[0] ? f_name : "method",
-   (unsigned)filtn,
-   filt_flags & H5Z_FLAG_OPTIONAL?"OPT":"");
-  for(cd_num = 0; cd_num < cd_nelmts; cd_num++)
-   printf("%s%u", cd_num?", ":"", cd_values[cd_num]);
-  printf("}\n");
- }
 
  return 0;
 }

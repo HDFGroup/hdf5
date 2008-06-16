@@ -5,7 +5,7 @@ usage: h5dump [OPTIONS] file
   OPTIONS
      -h, --help           Print a usage message and exit
      -n, --contents       Print a list of the file contents and exit
-     -B, --bootblock      Print the content of the boot block
+     -B, --superblock     Print the content of the super block
      -H, --header         Print the header only; no data is displayed
      -A, --onlyattr       Print the header and value of attributes
      -i, --object-ids     Print the object ids
@@ -15,7 +15,7 @@ usage: h5dump [OPTIONS] file
      -a P, --attribute=P  Print the specified attribute
      -d P, --dataset=P    Print the specified dataset
      -y, --noindex        Do not print array indices with the data
-     -p,   --properties   Print dataset filters, storage layout and fill value
+     -p, --properties     Print dataset filters, storage layout and fill value
      -f D, --filedriver=D Specify which driver to open the file with
      -g P, --group=P      Print the specified group and all members
      -l P, --soft-link=P  Print the value(s) of the specified soft link

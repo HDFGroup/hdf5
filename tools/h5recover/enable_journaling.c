@@ -159,11 +159,11 @@ main (int ac, char **av)
 	    H5Pclose(faccpl);
 	}
 
-	dataset=H5Dopen(file, DATASETNAME, H5P_DEFAULT);
+	dataset=H5Dopen2(file, DATASETNAME, H5P_DEFAULT);
 	/* extend the dataset to 2NX rows. */
 	dimsf[0] = 2*NX;
 	dimsf[1] = NY;
-	H5Dextend(dataset, dimsf);
+	H5Dset_extent(dataset, dimsf);
 
 	if (!pmode){
 	    /* write data to new rows and crash */
