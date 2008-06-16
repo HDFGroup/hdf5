@@ -1522,6 +1522,9 @@
 ./tools/h52jpeg/Makefile.am
 ./tools/h52jpeg/h52jpeg.c
 ./tools/h52jpeg/h52jpegtst.c
+./tools/h52jpeg/image24pixel.txt
+./tools/h52jpeg/image8.txt
+
 
 # high level libraries
 ./hl/COPYING
