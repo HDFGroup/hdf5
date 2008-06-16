@@ -37,9 +37,10 @@ h52jpegtst_SOURCES=h52jpegtst.c
 
 # Programs all depend on the hdf5 library, the tools library, and the HL
 # library.
-LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
+LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5) -ljpeg
+
 
 CHECK_CLEANFILES+=*.h5
-CHECK_CLEANFILES+=*.jpg
+CHECK_CLEANFILES+=*.jpeg
 
 include $(top_srcdir)/config/conclude.am
