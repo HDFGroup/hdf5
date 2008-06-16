@@ -1520,11 +1520,12 @@
 #h52jpeg
 ./tools/h52jpeg/Makefile.in
 ./tools/h52jpeg/Makefile.am
+./tools/h52jpeg/h52jpeg.sh
 ./tools/h52jpeg/h52jpeg.c
 ./tools/h52jpeg/h52jpegtst.c
 ./tools/h52jpeg/image24pixel.txt
 ./tools/h52jpeg/image8.txt
-
+./tools/testfiles/h52jpegtst.h5
 
 # high level libraries
 ./hl/COPYING
