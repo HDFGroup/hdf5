@@ -52,9 +52,10 @@ host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
+check_PROGRAMS = $(am__EXEEXT_1)
 bin_PROGRAMS = h52jpeg$(EXEEXT)
 noinst_PROGRAMS = h52jpegtst$(EXEEXT)
-TESTS = $(am__EXEEXT_1)
+TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 subdir = tools/h52jpeg
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -65,6 +66,7 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h
 CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
+am__EXEEXT_1 = h52jpegtst$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 am_h52jpeg_OBJECTS = h52jpeg.$(OBJEXT)
 h52jpeg_OBJECTS = $(am_h52jpeg_OBJECTS)
@@ -90,7 +92,6 @@ SOURCES = $(h52jpeg_SOURCES) $(h52jpegtst_SOURCES)
 DIST_SOURCES = $(h52jpeg_SOURCES) $(h52jpegtst_SOURCES)
 ETAGS = etags
 CTAGS = ctags
-am__EXEEXT_1 =
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = /home1/packages/automake/automake-1.9.6/bin/aclocal-1.9 -I /afs/ncsa/projects/hdf/packages/libtool_1.5.14/Linux_2.4/share/aclocal
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
@@ -343,9 +344,9 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.h5 *.jpeg
 # Include src and tools/lib directories
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src
 
-# These are our main targets, the tools
-
-#TEST_SCRIPT=$(srcdir)/h52jpeg.sh
+# These are our main targets
+TEST_PROG = h52jpegtst
+TEST_SCRIPT = $(srcdir)/h52jpeg.sh
 check_SCRIPTS = $(TEST_SCRIPT)
 h52jpeg_SOURCES = h52jpeg.c 
 h52jpegtst_SOURCES = h52jpegtst.c 
@@ -426,6 +427,13 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	@list='$(bin_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  echo " rm -f $$p $$f"; \
+	  rm -f $$p $$f ; \
+	done
+
+clean-checkPROGRAMS:
+	@list='$(check_PROGRAMS)'; for p in $$list; do \
 	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
@@ -554,7 +562,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) $(check_SCRIPTS)
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS) $(check_SCRIPTS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(PROGRAMS) all-local
@@ -588,8 +596,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstPROGRAMS mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -648,19 +656,20 @@ uninstall-am: uninstall-binPROGRAMS
 .MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am all-local check check-TESTS check-am \
-	clean clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstPROGRAMS ctags distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	mostlyclean-local pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-binPROGRAMS
+	clean clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstPROGRAMS ctags distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-binPROGRAMS install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
+	pdf-am ps ps-am tags uninstall uninstall-am \
+	uninstall-binPROGRAMS
 
 
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.

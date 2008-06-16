@@ -23,22 +23,22 @@ include $(top_srcdir)/config/commence.am
 # Include src and tools/lib directories
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/src
 
-# These are our main targets, the tools
+# These are our main targets
+TEST_PROG=h52jpegtst
+TEST_SCRIPT=$(srcdir)/h52jpeg.sh
 
-#TEST_SCRIPT=$(srcdir)/h52jpeg.sh
 check_SCRIPTS=$(TEST_SCRIPT)
+check_PROGRAMS=$(TEST_PROG)
 
 bin_PROGRAMS=h52jpeg
 noinst_PROGRAMS=h52jpegtst
 
 h52jpeg_SOURCES=h52jpeg.c 
-
 h52jpegtst_SOURCES=h52jpegtst.c 
 
 # Programs all depend on the hdf5 library, the tools library, and the HL
 # library.
 LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5) -ljpeg
-
 
 CHECK_CLEANFILES+=*.h5
 CHECK_CLEANFILES+=*.jpeg
