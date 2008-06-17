@@ -277,7 +277,7 @@ H5T_get_native_type(H5T_t *dtype, H5T_direction_t direction, size_t *struct_alig
 
                 /* Construct child compound type and retrieve a list of their IDs, offsets, total size, and alignment for compound type. */
                 for(i=0; i<nmemb; i++) {
-                    if((memb_type = H5T_get_member_type(dtype, i))==NULL)
+                    if((memb_type = H5T_get_member_type(dtype, i, H5T_COPY_TRANSIENT))==NULL)
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "member type retrieval failed")
 
                     if((comp_mname[i] = H5T_get_member_name(dtype, i))==NULL)

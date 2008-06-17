@@ -215,7 +215,7 @@ H5Tget_member_type(hid_t type_id, unsigned membno)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound datatype")
     if (membno >= dt->shared->u.compnd.nmembs)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid member number")
-    if ((memb_dt=H5T_get_member_type(dt, membno))==NULL)
+    if ((memb_dt=H5T_get_member_type(dt, membno, H5T_COPY_REOPEN))==NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to retrieve member type")
     if ((ret_value = H5I_register(H5I_DATATYPE, memb_dt)) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable register datatype atom")
@@ -251,7 +251,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5T_t *
-H5T_get_member_type(const H5T_t *dt, unsigned membno)
+H5T_get_member_type(const H5T_t *dt, unsigned membno, H5T_copy_t method)
 {
     H5T_t	*ret_value = NULL;
 
@@ -261,7 +261,7 @@ H5T_get_member_type(const H5T_t *dt, unsigned membno)
     assert(membno < dt->shared->u.compnd.nmembs);
 
     /* Copy datatype into an atom */
-    if (NULL == (ret_value = H5T_copy(dt->shared->u.compnd.memb[membno].type, H5T_COPY_REOPEN)))
+    if (NULL == (ret_value = H5T_copy(dt->shared->u.compnd.memb[membno].type, method)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy member datatype")
 
 done:
