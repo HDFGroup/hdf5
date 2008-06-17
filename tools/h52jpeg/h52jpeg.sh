@@ -20,19 +20,10 @@ TOOL=h52jpeg               # The tool name
 TOOL_BIN=`pwd`/$TOOL       # The path of the tool binary
 
 SRCFILE=h52jpegtst.h5
-INDIR=$srcdir/../testfiles
+INDIR=$srcdir/testfiles
 TESTFILE="$INDIR/$SRCFILE"
 
-CMP='cmp -s'
-DIFF='diff -c'
-
 nerrors=0
-verbose=yes
-
-# The build (current) directory might be different than the source directory.
-if test -z "$srcdir"; then
-   srcdir=.
-fi
 
 
 # Print a line-line message left justified in a field of 70 characters
@@ -44,6 +35,7 @@ TESTING() {
 }
 
 # Just call the tool binary with the command line parameters
+# and use the return value of main to print FAILED or PASSED 
 #
 TOOLTEST() 
 {
