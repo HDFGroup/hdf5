@@ -515,7 +515,7 @@ H5Dget_type(hid_t dset_id)
     if(H5T_set_loc(copied_type, NULL, H5T_LOC_MEMORY) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "invalid datatype location")
 
-    /* Unlock copied type */
+    /* Lock copied type */
     if(H5T_lock (copied_type, FALSE) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
 

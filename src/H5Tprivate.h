@@ -129,7 +129,7 @@ H5_DLL herr_t H5T_update_shared(H5T_t *type);
 
 /* Field functions (for both compound & enumerated types) */
 H5_DLL int H5T_get_nmembers(const H5T_t *dt);
-H5_DLL H5T_t *H5T_get_member_type(const H5T_t *dt, unsigned membno);
+H5_DLL H5T_t *H5T_get_member_type(const H5T_t *dt, unsigned membno, H5T_copy_t method);
 H5_DLL size_t H5T_get_member_offset(const H5T_t *dt, unsigned membno);
 
 /* Atomic functions */

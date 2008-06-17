@@ -340,9 +340,9 @@ typedef struct H5T_array_t {
 } H5T_array_t;
 
 typedef enum H5T_state_t {
-    H5T_STATE_TRANSIENT, 		/*type is a modifiable transient     */
-    H5T_STATE_RDONLY,			/*transient, not modifiable, closable*/
-    H5T_STATE_IMMUTABLE,		/*constant, not closable	     */
+    H5T_STATE_TRANSIENT, 		/*type is a modifiable, closable transient */
+    H5T_STATE_RDONLY,			/*transient, not modifiable, closable */
+    H5T_STATE_IMMUTABLE,		/*transient, not modifiable, not closable */
     H5T_STATE_NAMED,			/*named constant, not open	     */
     H5T_STATE_OPEN			/*named constant, open object header */
 } H5T_state_t;
