@@ -149,6 +149,8 @@ H5B2_shared_init (H5F_t *f, H5B2_t *bt2, const H5B2_class_t *type,
     unsigned split_percent, unsigned merge_percent)
 {
     H5B2_shared_t *shared = NULL;       /* Shared B-tree information */
+    size_t sz_max_nrec;                 /* Temporary variable for range checking */
+    unsigned u_max_nrec_size;           /* Temporary variable for range checking */
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -182,7 +184,8 @@ HDmemset(shared->page, 0, shared->node_size);
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Initialize leaf node info */
-    shared->node_info[0].max_nrec = H5B2_NUM_LEAF_REC(shared->node_size, shared->rrec_size);
+    sz_max_nrec = H5B2_NUM_LEAF_REC(shared->node_size, shared->rrec_size);
+    H5_ASSIGN_OVERFLOW(/* To: */ shared->node_info[0].max_nrec, /* From: */ sz_max_nrec, /* From: */ size_t, /* To: */ unsigned)
     shared->node_info[0].split_nrec = (shared->node_info[0].max_nrec * shared->split_percent) / 100;
     shared->node_info[0].merge_nrec = (shared->node_info[0].max_nrec * shared->merge_percent) / 100;
     shared->node_info[0].cum_max_nrec = shared->node_info[0].max_nrec;
@@ -203,13 +206,15 @@ HDmemset(shared->page, 0, shared->node_size);
 
     /* Compute size to store # of records in each node */
     /* (uses leaf # of records because its the largest) */
-    shared->max_nrec_size = H5V_limit_enc_size((uint64_t)shared->node_info[0].max_nrec);
+    u_max_nrec_size = H5V_limit_enc_size((uint64_t)shared->node_info[0].max_nrec);
+    H5_ASSIGN_OVERFLOW(/* To: */ shared->max_nrec_size, /* From: */ u_max_nrec_size, /* From: */ unsigned, /* To: */ unsigned char)
     HDassert(shared->max_nrec_size <= H5B2_SIZEOF_RECORDS_PER_NODE);
 
     /* Initialize internal node info */
     if(depth > 0) {
         for(u = 1; u < (depth + 1); u++) {
-            shared->node_info[u].max_nrec = H5B2_NUM_INT_REC(f, shared, u);
+            sz_max_nrec = H5B2_NUM_INT_REC(f, shared, u);
+            H5_ASSIGN_OVERFLOW(/* To: */ shared->node_info[u].max_nrec, /* From: */ sz_max_nrec, /* From: */ size_t, /* To: */ unsigned)
             HDassert(shared->node_info[u].max_nrec <= shared->node_info[u - 1].max_nrec);
 
             shared->node_info[u].split_nrec = (shared->node_info[u].max_nrec * shared->split_percent) / 100;
@@ -217,7 +222,8 @@ HDmemset(shared->page, 0, shared->node_size);
 
             shared->node_info[u].cum_max_nrec = ((shared->node_info[u].max_nrec + 1) * 
                 shared->node_info[u - 1].cum_max_nrec) + shared->node_info[u].max_nrec;
-            shared->node_info[u].cum_max_nrec_size = H5V_limit_enc_size((uint64_t)shared->node_info[u].cum_max_nrec);
+            u_max_nrec_size = H5V_limit_enc_size((uint64_t)shared->node_info[u].cum_max_nrec);
+            H5_ASSIGN_OVERFLOW(/* To: */ shared->node_info[u].cum_max_nrec_size, /* From: */ u_max_nrec_size, /* From: */ unsigned, /* To: */ unsigned char)
 
             if((shared->node_info[u].nat_rec_fac = H5FL_fac_init(shared->type->nrec_size * shared->node_info[u].max_nrec)) == NULL)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
@@ -551,6 +557,8 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, unsigned *bt2_flags_ptr)
     H5B2_shared_t *shared;              /* Pointer to B-tree's shared information */
     unsigned new_root_flags = H5AC__NO_FLAGS_SET;   /* Cache flags for new root node */
     H5B2_node_ptr_t old_root_ptr;       /* Old node pointer to root node in B-tree */
+    size_t sz_max_nrec;                 /* Temporary variable for range checking */
+    unsigned u_max_nrec_size;           /* Temporary variable for range checking */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5B2_split_root)
@@ -571,12 +579,14 @@ H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2, unsigned *bt2_flags_ptr)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Update node info for new depth of tree */
-    shared->node_info[shared->depth].max_nrec = H5B2_NUM_INT_REC(f, shared, shared->depth);
+    sz_max_nrec = H5B2_NUM_INT_REC(f, shared, shared->depth);
+    H5_ASSIGN_OVERFLOW(/* To: */ shared->node_info[shared->depth].max_nrec, /* From: */ sz_max_nrec, /* From: */ size_t, /* To: */ unsigned)
     shared->node_info[shared->depth].split_nrec = (shared->node_info[shared->depth].max_nrec * shared->split_percent) / 100;
     shared->node_info[shared->depth].merge_nrec = (shared->node_info[shared->depth].max_nrec * shared->merge_percent) / 100;
     shared->node_info[shared->depth].cum_max_nrec = ((shared->node_info[shared->depth].max_nrec + 1) * 
         shared->node_info[shared->depth - 1].cum_max_nrec) + shared->node_info[shared->depth].max_nrec;
-    shared->node_info[shared->depth].cum_max_nrec_size = H5V_limit_enc_size((uint64_t)shared->node_info[shared->depth].cum_max_nrec);
+    u_max_nrec_size = H5V_limit_enc_size((uint64_t)shared->node_info[shared->depth].cum_max_nrec);
+    H5_ASSIGN_OVERFLOW(/* To: */ shared->node_info[shared->depth].cum_max_nrec_size, /* From: */ u_max_nrec_size, /* From: */ unsigned, /* To: */ unsigned char)
     if((shared->node_info[shared->depth].nat_rec_fac = H5FL_fac_init(shared->type->nrec_size * shared->node_info[shared->depth].max_nrec)) == NULL)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create node native key block factory")
     if((shared->node_info[shared->depth].node_ptr_fac = H5FL_fac_init(sizeof(H5B2_node_ptr_t) * (shared->node_info[shared->depth].max_nrec + 1))) == NULL)
@@ -731,20 +741,20 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
 
         /* Handle node pointers, if we have an internal node */
         if(depth>1) {
-            hsize_t moved_nrec=move_nrec;   /* Total number of records moved, for internal redistrib */
+            hsize_t moved_nrec = move_nrec;   /* Total number of records moved, for internal redistrib */
             unsigned u;             /* Local index variable */
 
             /* Count the number of records being moved */
-            for(u=0; u<move_nrec; u++)
+            for(u = 0; u < move_nrec; u++)
                 moved_nrec += right_node_ptrs[u].all_nrec;
-            left_moved_nrec = moved_nrec;
-            right_moved_nrec -= moved_nrec;
+            H5_ASSIGN_OVERFLOW(/* To: */ left_moved_nrec, /* From: */ moved_nrec, /* From: */ hsize_t, /* To: */ hssize_t)
+            right_moved_nrec -= (hssize_t)moved_nrec;
 
             /* Copy node pointers from right node to left */
-            HDmemcpy(&(left_node_ptrs[*left_nrec+1]),&(right_node_ptrs[0]),sizeof(H5B2_node_ptr_t)*move_nrec);
+            HDmemcpy(&(left_node_ptrs[*left_nrec + 1]), &(right_node_ptrs[0]), sizeof(H5B2_node_ptr_t) * move_nrec);
 
             /* Slide node pointers in right node down */
-            HDmemmove(&(right_node_ptrs[0]),&(right_node_ptrs[move_nrec]),sizeof(H5B2_node_ptr_t)*(new_right_nrec+1));
+            HDmemmove(&(right_node_ptrs[0]), &(right_node_ptrs[move_nrec]), sizeof(H5B2_node_ptr_t) * (new_right_nrec + 1));
         } /* end if */
 
         /* Update number of records in child nodes */
@@ -786,8 +796,8 @@ H5B2_redistribute2(H5F_t *f, hid_t dxpl_id, unsigned depth, H5B2_internal_t *int
             /* Count the number of records being moved */
             for(u=0; u<move_nrec; u++)
                 moved_nrec += right_node_ptrs[u].all_nrec;
-            left_moved_nrec -= moved_nrec;
-            right_moved_nrec = moved_nrec;
+            left_moved_nrec -= (hssize_t)moved_nrec;
+            H5_ASSIGN_OVERFLOW(/* To: */ right_moved_nrec, /* From: */ moved_nrec, /* From: */ hsize_t, /* To: */ hssize_t)
         } /* end if */
 
         /* Update number of records in child nodes */
