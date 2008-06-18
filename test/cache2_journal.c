@@ -2621,24 +2621,24 @@ mdj_smoke_check_00(void)
     const char * fcn_name = "mdj_smoke_check_00()";
     const char * testfiles[] = 
     {
-        "testfiles/cache2_journal_sc00_000.jnl",
-        "testfiles/cache2_journal_sc00_001.jnl",
-        "testfiles/cache2_journal_sc00_002.jnl",
-        "testfiles/cache2_journal_sc00_003.jnl",
-        "testfiles/cache2_journal_sc00_004.jnl",
-        "testfiles/cache2_journal_sc00_005.jnl",
-        "testfiles/cache2_journal_sc00_006.jnl",
-        "testfiles/cache2_journal_sc00_007.jnl",
-        "testfiles/cache2_journal_sc00_008.jnl",
-        "testfiles/cache2_journal_sc00_009.jnl",
-        "testfiles/cache2_journal_sc00_010.jnl",
-        "testfiles/cache2_journal_sc00_011.jnl",
-        "testfiles/cache2_journal_sc00_012.jnl",
-        "testfiles/cache2_journal_sc00_013.jnl",
-        "testfiles/cache2_journal_sc00_014.jnl",
-        "testfiles/cache2_journal_sc00_015.jnl",
-        "testfiles/cache2_journal_sc00_016.jnl",
-        "testfiles/cache2_journal_sc00_017.jnl",
+        "cache2_journal_sc00_000.jnl",
+        "cache2_journal_sc00_001.jnl",
+        "cache2_journal_sc00_002.jnl",
+        "cache2_journal_sc00_003.jnl",
+        "cache2_journal_sc00_004.jnl",
+        "cache2_journal_sc00_005.jnl",
+        "cache2_journal_sc00_006.jnl",
+        "cache2_journal_sc00_007.jnl",
+        "cache2_journal_sc00_008.jnl",
+        "cache2_journal_sc00_009.jnl",
+        "cache2_journal_sc00_010.jnl",
+        "cache2_journal_sc00_011.jnl",
+        "cache2_journal_sc00_012.jnl",
+        "cache2_journal_sc00_013.jnl",
+        "cache2_journal_sc00_014.jnl",
+        "cache2_journal_sc00_015.jnl",
+        "cache2_journal_sc00_016.jnl",
+        "cache2_journal_sc00_017.jnl",
 	NULL
     };
     char filename[512];
@@ -3598,8 +3598,8 @@ mdj_smoke_check_01(void)
     const char * fcn_name = "mdj_smoke_check_01()";
     const char * testfiles[] = 
     {
-        "testfiles/cache2_journal_sc01_000.jnl",
-        "testfiles/cache2_journal_sc01_001.jnl",
+        "cache2_journal_sc01_000.jnl",
+        "cache2_journal_sc01_001.jnl",
 	NULL
     };
     char filename[512];
