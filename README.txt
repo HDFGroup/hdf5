@@ -1,4 +1,4 @@
-HDF5 version 1.8.0 currently under development
+HDF5 version 1.9.0 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
@@ -9,8 +9,8 @@ instructions on compiling and installing the library.  The INSTALL_parallel
 file contains instructions on installing the parallel version of the
 library.  The INSTALL* files can be found in the release_docs/ directory.
 
-Documentation for this release can be found at the following URL:
-http://www.hdfgroup.uiuc.edu/HDF5/release/beta/obtain518.html
+Documentation for this snapshot can be found at the following URL:
+http://www.hdfgroup.uiuc.edu/HDF5/doc_dev_snapshot/H5_dev/
 
 Four mailing lists are currently set up for use with the HDF5
 library.

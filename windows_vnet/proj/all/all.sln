@@ -663,6 +663,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hdf5_cppdll", "..\hdf5_cppd
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hdf5_hl", "..\hdf5_hl\hdf5_hl.vcproj", "{4FC6670C-1339-4C34-9A5D-08D06A644256}"
 	ProjectSection(ProjectDependencies) = postProject
+		{BB439F14-D29D-4A05-9AB0-0B08682721DE} = {BB439F14-D29D-4A05-9AB0-0B08682721DE}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hdf5_hl_cpp", "..\hdf5_hl_cpp\hdf5_hl_cpp.vcproj", "{CFCAEA96-B431-4EED-BE7B-C22FA99C6157}"

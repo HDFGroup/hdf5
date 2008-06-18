@@ -683,8 +683,7 @@ deserialize(haddr_t addr,
                           (int)(*(((const char *)image_ptr) + 2)));
                 HDfprintf(stdout, "expected *image_ptr = 0x%x\n",
                           (int)(idx & 0xFF),
-                          (int)((idx & 0xFF00)>>8),
-                          (int)(idx & 0xFF));
+                          (int)((idx & 0xFF00)>>8));
             }
 	    HDassert( (*((const char *)image_ptr)) == (char)(type & 0xFF) );
 	    HDassert( (*(((const char *)image_ptr) + 1)) == 

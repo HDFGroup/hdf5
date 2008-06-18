@@ -19,6 +19,15 @@ position        string of </>   string of </>   difference
 [ 1 ]          d                z                
 [ 1 ]          e                z                
 4 differences found
+attribute: <VLstring of </>> and <VLstring of </>>
+size:           [2]           [2]
+position        VLstring of </> VLstring of </> difference          
+------------------------------------------------------------
+[ 0 ]          a                z                
+[ 0 ]          b                z                
+[ 1 ]          d                z                
+[ 1 ]          e                z                
+4 differences found
 attribute: <bitfield of </>> and <bitfield of </>>
 size:           [2]           [2]
 position        bitfield of </> bitfield of </> difference          
@@ -85,6 +94,23 @@ position        float of </>    float of </>    difference
 attribute: <string2D of </>> and <string2D of </>>
 size:           [3x2]           [3x2]
 position        string2D of </> string2D of </> difference          
+------------------------------------------------------------
+[ 0 0 ]          a                z                
+[ 0 0 ]          b                z                
+[ 0 1 ]          c                z                
+[ 0 1 ]          d                z                
+[ 1 0 ]          e                z                
+[ 1 0 ]          f                z                
+[ 1 1 ]          g                z                
+[ 1 1 ]          h                z                
+[ 2 0 ]          i                z                
+[ 2 0 ]          j                z                
+[ 2 1 ]          k                z                
+[ 2 1 ]          l                z                
+12 differences found
+attribute: <VLstring2D of </>> and <VLstring2D of </>>
+size:           [3x2]           [3x2]
+position        VLstring2D of </> VLstring2D of </> difference          
 ------------------------------------------------------------
 [ 0 0 ]          a                z                
 [ 0 0 ]          b                z                
@@ -213,6 +239,58 @@ position        float2D of </>  float2D of </>  difference
 attribute: <string3D of </>> and <string3D of </>>
 size:           [4x3x2]           [4x3x2]
 position        string3D of </> string3D of </> difference          
+------------------------------------------------------------
+[ 0 0 0 ]          a                z                
+[ 0 0 0 ]          b                z                
+[ 0 0 1 ]          c                z                
+[ 0 0 1 ]          d                z                
+[ 0 1 0 ]          e                z                
+[ 0 1 0 ]          f                z                
+[ 0 1 1 ]          g                z                
+[ 0 1 1 ]          h                z                
+[ 0 2 0 ]          i                z                
+[ 0 2 0 ]          j                z                
+[ 0 2 1 ]          k                z                
+[ 0 2 1 ]          l                z                
+[ 1 0 0 ]          m                z                
+[ 1 0 0 ]          n                z                
+[ 1 0 1 ]          p                z                
+[ 1 0 1 ]          q                z                
+[ 1 1 0 ]          r                z                
+[ 1 1 0 ]          s                z                
+[ 1 1 1 ]          t                z                
+[ 1 1 1 ]          u                z                
+[ 1 2 0 ]          v                z                
+[ 1 2 0 ]          w                z                
+[ 1 2 1 ]          x                z                
+[ 2 0 0 ]          A                z                
+[ 2 0 0 ]          B                z                
+[ 2 0 1 ]          C                z                
+[ 2 0 1 ]          D                z                
+[ 2 1 0 ]          E                z                
+[ 2 1 0 ]          F                z                
+[ 2 1 1 ]          G                z                
+[ 2 1 1 ]          H                z                
+[ 2 2 0 ]          I                z                
+[ 2 2 0 ]          J                z                
+[ 2 2 1 ]          K                z                
+[ 2 2 1 ]          L                z                
+[ 3 0 0 ]          M                z                
+[ 3 0 0 ]          N                z                
+[ 3 0 1 ]          P                z                
+[ 3 0 1 ]          Q                z                
+[ 3 1 0 ]          R                z                
+[ 3 1 0 ]          S                z                
+[ 3 1 1 ]          T                z                
+[ 3 1 1 ]          U                z                
+[ 3 2 0 ]          V                z                
+[ 3 2 0 ]          W                z                
+[ 3 2 1 ]          X                z                
+[ 3 2 1 ]          Z                z                
+47 differences found
+attribute: <VLstring3D of </>> and <VLstring3D of </>>
+size:           [4x3x2]           [4x3x2]
+position        VLstring3D of </> VLstring3D of </> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          a                z                
 [ 0 0 0 ]          b                z                
@@ -612,6 +690,15 @@ position        string of </dset> string of </dset> difference
 [ 1 ]          d                z                
 [ 1 ]          e                z                
 4 differences found
+attribute: <VLstring of </dset>> and <VLstring of </dset>>
+size:           [2]           [2]
+position        VLstring of </dset> VLstring of </dset> difference          
+------------------------------------------------------------
+[ 0 ]          a                z                
+[ 0 ]          b                z                
+[ 1 ]          d                z                
+[ 1 ]          e                z                
+4 differences found
 attribute: <bitfield of </dset>> and <bitfield of </dset>>
 size:           [2]           [2]
 position        bitfield of </dset> bitfield of </dset> difference          
@@ -680,6 +767,23 @@ position        float of </dset> float of </dset> difference
 attribute: <string2D of </dset>> and <string2D of </dset>>
 size:           [3x2]           [3x2]
 position        string2D of </dset> string2D of </dset> difference          
+------------------------------------------------------------
+[ 0 0 ]          a                z                
+[ 0 0 ]          b                z                
+[ 0 1 ]          c                z                
+[ 0 1 ]          d                z                
+[ 1 0 ]          e                z                
+[ 1 0 ]          f                z                
+[ 1 1 ]          g                z                
+[ 1 1 ]          h                z                
+[ 2 0 ]          i                z                
+[ 2 0 ]          j                z                
+[ 2 1 ]          k                z                
+[ 2 1 ]          l                z                
+12 differences found
+attribute: <VLstring2D of </dset>> and <VLstring2D of </dset>>
+size:           [3x2]           [3x2]
+position        VLstring2D of </dset> VLstring2D of </dset> difference          
 ------------------------------------------------------------
 [ 0 0 ]          a                z                
 [ 0 0 ]          b                z                
@@ -810,6 +914,58 @@ position        float2D of </dset> float2D of </dset> difference
 attribute: <string3D of </dset>> and <string3D of </dset>>
 size:           [4x3x2]           [4x3x2]
 position        string3D of </dset> string3D of </dset> difference          
+------------------------------------------------------------
+[ 0 0 0 ]          a                z                
+[ 0 0 0 ]          b                z                
+[ 0 0 1 ]          c                z                
+[ 0 0 1 ]          d                z                
+[ 0 1 0 ]          e                z                
+[ 0 1 0 ]          f                z                
+[ 0 1 1 ]          g                z                
+[ 0 1 1 ]          h                z                
+[ 0 2 0 ]          i                z                
+[ 0 2 0 ]          j                z                
+[ 0 2 1 ]          k                z                
+[ 0 2 1 ]          l                z                
+[ 1 0 0 ]          m                z                
+[ 1 0 0 ]          n                z                
+[ 1 0 1 ]          p                z                
+[ 1 0 1 ]          q                z                
+[ 1 1 0 ]          r                z                
+[ 1 1 0 ]          s                z                
+[ 1 1 1 ]          t                z                
+[ 1 1 1 ]          u                z                
+[ 1 2 0 ]          v                z                
+[ 1 2 0 ]          w                z                
+[ 1 2 1 ]          x                z                
+[ 2 0 0 ]          A                z                
+[ 2 0 0 ]          B                z                
+[ 2 0 1 ]          C                z                
+[ 2 0 1 ]          D                z                
+[ 2 1 0 ]          E                z                
+[ 2 1 0 ]          F                z                
+[ 2 1 1 ]          G                z                
+[ 2 1 1 ]          H                z                
+[ 2 2 0 ]          I                z                
+[ 2 2 0 ]          J                z                
+[ 2 2 1 ]          K                z                
+[ 2 2 1 ]          L                z                
+[ 3 0 0 ]          M                z                
+[ 3 0 0 ]          N                z                
+[ 3 0 1 ]          P                z                
+[ 3 0 1 ]          Q                z                
+[ 3 1 0 ]          R                z                
+[ 3 1 0 ]          S                z                
+[ 3 1 1 ]          T                z                
+[ 3 1 1 ]          U                z                
+[ 3 2 0 ]          V                z                
+[ 3 2 0 ]          W                z                
+[ 3 2 1 ]          X                z                
+[ 3 2 1 ]          Z                z                
+47 differences found
+attribute: <VLstring3D of </dset>> and <VLstring3D of </dset>>
+size:           [4x3x2]           [4x3x2]
+position        VLstring3D of </dset> VLstring3D of </dset> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          a                z                
 [ 0 0 0 ]          b                z                
@@ -1200,12 +1356,21 @@ position        float3D of </dset> float3D of </dset> difference
 [ 3 2 0 ]          23              0               23             
 [ 3 2 1 ]          24              0               24             
 24 differences found
-456 differences found
+519 differences found
 group  : </g1> and </g1>
 0 differences found
 attribute: <string of </g1>> and <string of </g1>>
 size:           [2]           [2]
 position        string of </g1> string of </g1> difference          
+------------------------------------------------------------
+[ 0 ]          a                z                
+[ 0 ]          b                z                
+[ 1 ]          d                z                
+[ 1 ]          e                z                
+4 differences found
+attribute: <VLstring of </g1>> and <VLstring of </g1>>
+size:           [2]           [2]
+position        VLstring of </g1> VLstring of </g1> difference          
 ------------------------------------------------------------
 [ 0 ]          a                z                
 [ 0 ]          b                z                
@@ -1278,6 +1443,23 @@ position        float of </g1>  float of </g1>  difference
 attribute: <string2D of </g1>> and <string2D of </g1>>
 size:           [3x2]           [3x2]
 position        string2D of </g1> string2D of </g1> difference          
+------------------------------------------------------------
+[ 0 0 ]          a                z                
+[ 0 0 ]          b                z                
+[ 0 1 ]          c                z                
+[ 0 1 ]          d                z                
+[ 1 0 ]          e                z                
+[ 1 0 ]          f                z                
+[ 1 1 ]          g                z                
+[ 1 1 ]          h                z                
+[ 2 0 ]          i                z                
+[ 2 0 ]          j                z                
+[ 2 1 ]          k                z                
+[ 2 1 ]          l                z                
+12 differences found
+attribute: <VLstring2D of </g1>> and <VLstring2D of </g1>>
+size:           [3x2]           [3x2]
+position        VLstring2D of </g1> VLstring2D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 ]          a                z                
 [ 0 0 ]          b                z                
@@ -1406,6 +1588,58 @@ position        float2D of </g1> float2D of </g1> difference
 attribute: <string3D of </g1>> and <string3D of </g1>>
 size:           [4x3x2]           [4x3x2]
 position        string3D of </g1> string3D of </g1> difference          
+------------------------------------------------------------
+[ 0 0 0 ]          a                z                
+[ 0 0 0 ]          b                z                
+[ 0 0 1 ]          c                z                
+[ 0 0 1 ]          d                z                
+[ 0 1 0 ]          e                z                
+[ 0 1 0 ]          f                z                
+[ 0 1 1 ]          g                z                
+[ 0 1 1 ]          h                z                
+[ 0 2 0 ]          i                z                
+[ 0 2 0 ]          j                z                
+[ 0 2 1 ]          k                z                
+[ 0 2 1 ]          l                z                
+[ 1 0 0 ]          m                z                
+[ 1 0 0 ]          n                z                
+[ 1 0 1 ]          p                z                
+[ 1 0 1 ]          q                z                
+[ 1 1 0 ]          r                z                
+[ 1 1 0 ]          s                z                
+[ 1 1 1 ]          t                z                
+[ 1 1 1 ]          u                z                
+[ 1 2 0 ]          v                z                
+[ 1 2 0 ]          w                z                
+[ 1 2 1 ]          x                z                
+[ 2 0 0 ]          A                z                
+[ 2 0 0 ]          B                z                
+[ 2 0 1 ]          C                z                
+[ 2 0 1 ]          D                z                
+[ 2 1 0 ]          E                z                
+[ 2 1 0 ]          F                z                
+[ 2 1 1 ]          G                z                
+[ 2 1 1 ]          H                z                
+[ 2 2 0 ]          I                z                
+[ 2 2 0 ]          J                z                
+[ 2 2 1 ]          K                z                
+[ 2 2 1 ]          L                z                
+[ 3 0 0 ]          M                z                
+[ 3 0 0 ]          N                z                
+[ 3 0 1 ]          P                z                
+[ 3 0 1 ]          Q                z                
+[ 3 1 0 ]          R                z                
+[ 3 1 0 ]          S                z                
+[ 3 1 1 ]          T                z                
+[ 3 1 1 ]          U                z                
+[ 3 2 0 ]          V                z                
+[ 3 2 0 ]          W                z                
+[ 3 2 1 ]          X                z                
+[ 3 2 1 ]          Z                z                
+47 differences found
+attribute: <VLstring3D of </g1>> and <VLstring3D of </g1>>
+size:           [4x3x2]           [4x3x2]
+position        VLstring3D of </g1> VLstring3D of </g1> difference          
 ------------------------------------------------------------
 [ 0 0 0 ]          a                z                
 [ 0 0 0 ]          b                z                
