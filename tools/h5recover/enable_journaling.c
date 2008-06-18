@@ -29,14 +29,43 @@
 
 #define H5FILE_NAME        	"JournalEG.h5"
 #define H5JournalFILE_NAME 	H5FILE_NAME".jnl"
+#define H5recovertoolname 	"h5recover"
+#define H5dumptoolname 		"h5dump"
+#define ProgName	 	"enable_journaling"	/* program name */
 #define DATASETNAME "IntArray"
 #define NX     20                      /* dataset initial dimensions */
 #define NY     20
-#define CHUNKX 10			/* chunk dimensions */
-#define CHUNKY 10
+#define CHUNKX 2			/* chunk dimensions */
+#define CHUNKY 2
 #define RANK   2
 
+/* Global variables */
+
+/* protocols */
 int writedata(hid_t dataset, int begin, int end);
+void helppage(void);
+
+/* Display the online help page */
+void
+helppage(void)
+{
+    printf(
+	"Usage:\n"
+	"%s -[c|r|p]\n"
+	"\t-c\tCreate a new file (%s)\n"
+	"\t-r\tReopen the file with Journaling (%s) for crash test\n"
+	"\t-p\tPatch it with metadta of the added rows\n\n",
+	ProgName, H5FILE_NAME, H5JournalFILE_NAME
+    );
+    printf("To try this program, run:\n");
+    printf("\t%s -c\n", ProgName);
+    printf("\t%s %s\n", H5dumptoolname, H5FILE_NAME);
+    printf("\t%s -r\n", ProgName);
+    printf("\t%s %s (This should fail)\n", H5dumptoolname, H5FILE_NAME);
+    printf("\t%s -j %s %s\n", H5recovertoolname, H5JournalFILE_NAME, H5FILE_NAME);
+    printf("\t%s -p\n", ProgName);
+    printf("\t%s %s (This should show more data)\n", H5dumptoolname, H5FILE_NAME);
+}
 
 int
 main (int ac, char **av)
@@ -49,8 +78,8 @@ main (int ac, char **av)
     hsize_t     chunk[RANK]={CHUNKX, CHUNKY};	/* chunk dimensions */
     hid_t       dsetpl;			/* Dataset property list */
     hid_t       faccpl;			/* File access property list */
-    herr_t      status;
     pid_t	mypid;
+    int		cmode=0;		/* Create mode, overrides the others. */
     int		pmode=0;		/* patch mode, default no. */
     int		rmode=0;		/* Reopen mod, default no. */
 
@@ -69,10 +98,18 @@ main (int ac, char **av)
      * Then JournalEG.h5 should have all the expected written rows and data.
      * 
      */
+    if (ac<=1){
+	helppage();
+	return 1;
+    }
     while (ac > 1){
 	ac--;
 	av++;
-        if (strcmp("-p", *av) == 0){
+        if (strcmp("-c", *av) == 0){
+	    cmode++;
+	    printf("Create mode\n");
+	}else
+	if (strcmp("-p", *av) == 0){
 	    pmode++;
 	    rmode++;
 	    printf("Patch mode on\n");
@@ -82,23 +119,32 @@ main (int ac, char **av)
 	    printf("Reopen mode\n");
 	}else{
 	    fprintf(stderr, "Unknown option (%s)\n", *av);
+	    helppage();
 	    return 1 ;
 	}
     }
 
-    if (!rmode){
+    if (cmode){
 	/*===================================================
 	 * Default:
-	 * Create a new file, create a new dataset of unlimited dimension,
-	 * initialize size to NX*NY, write data, close file.
+	 * Create a new file with latest lib version, create a new dataset
+	 * of unlimited dimension, initialize size to NX*NY, write data,
+         * close file.
+         * Needs the latest lib version in order to allow Journaling later.
 	 *===================================================*/
-
 	/*
 	 * Create a new file using H5F_ACC_TRUNC access,
-	 * default file creation properties, and default file
+	 * default file creation properties, and latest lib version file
 	 * access properties.
 	 */
-	file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+	faccpl = H5Pcreate(H5P_FILE_ACCESS);
+	if (H5Pset_libver_bounds(faccpl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0){
+	    fprintf(stderr, "H5Pset_libver_bounds on data file failed\n");
+	    H5Pclose(faccpl);
+	    return(-1);
+	}
+	file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, faccpl);
+	H5Pclose(faccpl);
 
 	/*
 	 * create the data space for fixed size dataset.
@@ -123,14 +169,17 @@ main (int ac, char **av)
 	writedata(dataset, 0, NX-1);
 
 	H5Sclose(dataspace);
-	H5Dclose(dataset);
 	H5Pclose(dsetpl);
+	H5Dclose(dataset);
 	H5Fclose(file);
-    }else{
+	return(0);
+    }
+    if (rmode || pmode){
 	/*===================================================
 	 * rmode:
 	 *    Reopen a previous file with Journaling on, extend the dataset
 	 *    to 2NX rows, write data, crash.
+	 *    Need to turn off H5Pset_sieve_buf_size( hid_t fapl_id, hsize_t size  ) so that raw data will be flushed immediately.
 	 * pmode:
 	 *    Patch mode (similar to rmode but no data write nor crash).
 	 *    Reopen a restored file, extend the dataset to 2NX rows,
@@ -146,6 +195,13 @@ main (int ac, char **av)
 	    faccpl = H5Pcreate(H5P_FILE_ACCESS);
 	    if (H5Pset_journal(faccpl, H5JournalFILE_NAME) < 0){
 		fprintf(stderr, "H5Pset_journal on data file failed\n");
+		H5Pclose(faccpl);
+		return(-1);
+	    }
+	    /* Turn off data sieving to get raw data flushed to file */
+            /* immediately.                                          */
+	    if (H5Pset_sieve_buf_size(faccpl, 0) < 0){
+		fprintf(stderr, "H5Pset_sieve_buf_size on data file failed\n");
 		H5Pclose(faccpl);
 		return(-1);
 	    }
@@ -168,12 +224,14 @@ main (int ac, char **av)
 	if (!pmode){
 	    /* write data to new rows and crash */
 	    writedata(dataset, NX, 2*NX-1);
-	    /* simulate a crash ending of the application */
+	    /* simulate a crash ending of the aiplication */
+	    fprintf(stderr, "going to crash myself\n");
 	    mypid = getpid();
 	    kill(mypid, SIGTERM);	/* Terminate myself */
 	}else{
 	    H5Dclose(dataset);
 	    H5Fclose(file);
+	    return(0);
 	}
     }
 }
@@ -187,8 +245,8 @@ writedata(hid_t dataset, int begin, int end)
 {
     int         data[NX][NY];          /* data to write */
     int         nrows, i, j;
-    hid_t	dataspace;
-    hsize_t	start[RANK], count[RANK];
+    hid_t	memspace, dataspace;
+    hsize_t	dims[RANK], start[RANK], count[RANK];
     herr_t	retcode;
 
 
@@ -202,6 +260,10 @@ writedata(hid_t dataset, int begin, int end)
 	    begin, end, NX);
 	return(-1);
     }
+
+    dims[0]=NX;
+    dims[1]=NY;
+    memspace = H5Screate_simple(RANK, dims, NULL);
 
     dataspace = H5Dget_space(dataset);
     start[0]=begin;
@@ -222,7 +284,9 @@ writedata(hid_t dataset, int begin, int end)
     /*
      * Write the data to the dataset using default transfer properties.
      */
-    retcode = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, dataspace, H5P_DEFAULT, data);
+    retcode = H5Dwrite(dataset, H5T_NATIVE_INT, memspace, dataspace, H5P_DEFAULT, data);
+    
+    H5Sclose(memspace);
+    H5Sclose(dataspace);
     return(retcode);
-
 }
