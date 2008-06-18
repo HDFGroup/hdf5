@@ -149,6 +149,7 @@ typedef struct H5F_mtab_t {
 struct H5F_t {
     unsigned		intent;		/* The flags passed to H5F_open()*/
     char		*name;		/* Name used to open file	*/
+    char               	*extpath;       /* Path for searching target external link file */
     H5F_file_t		*shared;	/* The shared file info		*/
     unsigned		nopen_objs;	/* Number of open object headers*/
     H5FO_t              *obj_count;     /* # of time each object is opened through top file structure */

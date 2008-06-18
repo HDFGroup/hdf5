@@ -1,4 +1,4 @@
-HDF5 version 1.9.0 currently under development
+HDF5 version 1.9.2 currently under development
 ================================================================================
 
 
@@ -70,6 +70,14 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+        - Fixed possible file corruption bug when encoding datatype
+            descriptions for compound datatypes whose size was between
+            256 & 511 bytes and the file was opened with the "use the
+            latest format" property enabled (with H5Pset_libver_bounds).
+            (QAK - 2008/03/13)
+        - Fixed bug in H5Aget_num_attrs() routine to handle invalid location
+            ID correctly.  (QAK - 2008/03/11)
+
 
     Configuration
     -------------

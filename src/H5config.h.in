@@ -368,6 +368,9 @@
 /* Define to 1 if you have the `waitpid' function. */
 #undef HAVE_WAITPID
 
+/* Define if your system has window style path name. */
+#undef HAVE_WINDOW_PATH
+
 /* Define to 1 if you have the <winsock.h> header file. */
 #undef HAVE_WINSOCK_H
 

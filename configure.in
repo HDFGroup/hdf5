@@ -26,7 +26,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.9.0], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.2], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
@@ -1729,7 +1729,7 @@ AC_MSG_RESULT([no]))
 dnl Check whether the global variable `timezone' is defined.
 AC_MSG_CHECKING([for global timezone variable])
 
-case "'uname'" in
+case "`uname`" in
   CYGWIN*)
     AC_MSG_RESULT([disabled in CYGWIN])
     ;;
@@ -2813,6 +2813,24 @@ if test ${hdf5_cv_convert_float_llong_not_works} = "yes"; then
 else
   AC_MSG_RESULT([false])
 fi
+
+dnl ----------------------------------------------------------------------
+dnl Set the flag to indicate that the machine has window style pathname,
+dnl that is, "drive-letter:\" (e.g. "C:") or "drive-letter:/" (e.g. "C:/").
+dnl (This flag should be _unset_ for all machines, except for Windows, where
+dnl it's set in the custom Windows H5pubconf.h file)
+dnl
+AC_MSG_CHECKING([if the machine has window style path name])
+AC_CACHE_VAL([hdf5_have_window_path], [hdf5_have_window_path=no])
+
+if test ${hdf5_have_window_path} = "yes"; then
+  AC_DEFINE([HAVE_WINDOW_PATH], [1],
+            [Define if your system has window style path name.])
+  AC_MSG_RESULT([true])
+else
+  AC_MSG_RESULT([false])
+fi
+
 
 dnl -----------------------------------------------------------------------
 dnl Set flag to indicate that the machine can handle conversion from 

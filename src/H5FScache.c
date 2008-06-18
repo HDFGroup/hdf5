@@ -606,7 +606,7 @@ HDfprintf(stderr, "%s: fspace->addr = %a, fs_addr = %a\n", FUNC, fspace->addr, f
         unsigned sect_cnt_size;         /* The size of the section size counts */
 
         /* Compute the size of the section counts */
-        sect_cnt_size = MAX(1, (H5V_log2_gen(fspace->serial_sect_count) + 7) / 8);
+        sect_cnt_size = H5V_limit_enc_size((uint64_t)fspace->serial_sect_count);
 #ifdef QAK
 HDfprintf(stderr, "%s: sect_cnt_size = %u\n", FUNC, sect_cnt_size);
 HDfprintf(stderr, "%s: fspace->sect_len_size = %u\n", FUNC, fspace->sect_len_size);
@@ -905,7 +905,7 @@ HDfprintf(stderr, "%s: sinfo->fspace->addr = %a\n", FUNC, sinfo->fspace->addr);
         /* Set up user data for iterator */
         udata.sinfo = sinfo;
         udata.p = &p;
-        udata.sect_cnt_size = MAX(1, (H5V_log2_gen(sinfo->fspace->serial_sect_count) + 7) / 8);
+        udata.sect_cnt_size = H5V_limit_enc_size((uint64_t)sinfo->fspace->serial_sect_count);
 #ifdef QAK
 HDfprintf(stderr, "%s: udata.sect_cnt_size = %u\n", FUNC, udata.sect_cnt_size);
 #endif /* QAK */

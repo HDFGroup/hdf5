@@ -254,7 +254,6 @@ int test_basic(const char *fname1,
     */
     {
 
-#if 1
         float data15[6];
         float data16[6];
 
@@ -274,48 +273,9 @@ int test_basic(const char *fname1,
 
         write_dset(gid1,1,dims1,"fp15",H5T_NATIVE_FLOAT,data15);
         write_dset(gid1,1,dims1,"fp16",H5T_NATIVE_FLOAT,data16);
-#else
-
-#define NU_ELMTS 1000000
-
-        hsize_t i;
-
-        hsize_t dims2[1] = { NU_ELMTS };
-
-        float *data15 = malloc (NU_ELMTS * sizeof(float) );
-        float *data16 = malloc (NU_ELMTS * sizeof(float) );
-
-        data15[0] = (float) sqrt( (double)-1 );
-        data15[1] = 1;
-        data15[2] = (float) sqrt( (double)-1 );
-        data15[3] = 1;
-        data15[4] = 1;
-        data15[5] = 1;
-
-        data16[0] = (float) sqrt( (double)-1 );
-        data16[1] = (float) sqrt( (double)-1 );
-        data16[2] = 1;
-        data16[3] = 1;
-        data16[4] = 1;
-        data16[5] = 1;
-
-        for ( i = 6; i < NU_ELMTS; i++ )
-        {
-            data15[i] = /*data15[0];*/ 2;
-            data16[i] = 1;
-        }
-
-        write_dset(gid1,1,dims2,"fp15",H5T_NATIVE_FLOAT,data15);
-        write_dset(gid1,1,dims2,"fp16",H5T_NATIVE_FLOAT,data16);
-
-        free( data15 );
-        free( data16 );
-#endif
 
     }
-
        
-        
    /*-------------------------------------------------------------------------
     * NaNs in H5T_NATIVE_DOUBLE
     *-------------------------------------------------------------------------
@@ -343,9 +303,7 @@ int test_basic(const char *fname1,
         write_dset(gid1,1,dims1,"fp18",H5T_NATIVE_DOUBLE,data18);
 
     }
-        
-
-  
+ 
     
    /*-------------------------------------------------------------------------
     * close
@@ -772,13 +730,13 @@ int test_datasets(const char *file,
 
     write_dset_in(gid,"/dset",fid,make_diffs);
 
-    /* Close */
+    /* close */
     status = H5Dclose(did);
     assert(status >= 0);
     status = H5Gclose(gid);
     assert(status >= 0);
 
-    /* Close file */
+    /* close file */
     status = H5Fclose(fid);
     assert(status >= 0);
     return status;
@@ -2655,31 +2613,35 @@ int write_attr(hid_t loc_id,
                hid_t tid,
                void *buf)
 {
- hid_t   aid;
- hid_t   sid;
-
- /* create a space  */
- if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
-     goto out;
-
- /* create the attribute */
- if((aid = H5Acreate2(loc_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-     goto out;
-
- /* write */
- if(buf)
-   if(H5Awrite(aid, tid, buf) < 0)
-      goto out;
-
- /* close */
- H5Aclose(aid);
- H5Sclose(sid);
-
- return SUCCEED;
-
+    hid_t   aid=-1;
+    hid_t   sid=-1;
+    
+    /* create a space  */
+    if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
+        goto out;
+    
+    /* create the attribute */
+    if((aid = H5Acreate2(loc_id, name, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    
+    /* write */
+    if(buf)
+    {
+        if(H5Awrite(aid, tid, buf) < 0)
+            goto out;
+    }
+        
+    /* close */
+    H5Aclose(aid);
+    H5Sclose(sid);
+        
+    return SUCCEED;
+        
 out:
- 
- return FAIL;
+    
+    H5Aclose(aid);
+    H5Sclose(sid);
+    return FAIL;
 }
 
 /*-------------------------------------------------------------------------
@@ -2697,8 +2659,8 @@ int write_dset( hid_t loc_id,
                 hid_t tid,
                 void *buf )
 {
-    hid_t   did;
-    hid_t   sid;
+    hid_t   did=-1;
+    hid_t   sid=-1;
 
     /* create a space  */
     if((sid = H5Screate_simple(rank, dims, NULL)) < 0)
@@ -2710,8 +2672,10 @@ int write_dset( hid_t loc_id,
 
     /* write */
     if(buf)
+    {
         if(H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
             goto out;
+    }
 
     /* close */
     H5Dclose(did);
@@ -2720,6 +2684,9 @@ int write_dset( hid_t loc_id,
     return SUCCEED;
 
 out:
+
+    H5Dclose(did);
+    H5Sclose(sid);
     return FAIL;
 }
 

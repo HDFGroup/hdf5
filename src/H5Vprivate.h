@@ -410,5 +410,25 @@ H5V_log2_of2(uint32_t n)
     return(MultiplyDeBruijnBitPosition[(n * (uint32_t)0x077CB531UL) >> 27]);
 } /* H5V_log2_of2() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    H5V_limit_enc_size
+ *
+ * Purpose:     Determine the # of bytes needed to encode values within a
+ *              range from 0 to a given limit
+ *
+ * Return:      Number of bytes needed
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, March 13, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5_inline unsigned UNUSED
+H5V_limit_enc_size(uint64_t limit)
+{
+    return (H5V_log2_gen(limit) / 8) + 1;
+} /* end H5V_limit_enc_size() */
+
 #endif /* H5Vprivate_H */
 
