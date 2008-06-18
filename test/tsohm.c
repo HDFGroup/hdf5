@@ -121,9 +121,9 @@ const int ENUM_VAL[] = {
     20480,  10,
     -1001,    -10
 };
-#define SIZE2_RANK1 10
-#define SIZE2_RANK2 20
-#define SIZE2_DIMS {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+#define SIZE2_RANK1 6
+#define SIZE2_RANK2 10
+#define SIZE2_DIMS {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 
 #define LONG_STRING "00 index.  A long string used for testing. To create new strings, set the first two characters to be some ASCII number other than 00, such as 01."
 
@@ -1376,7 +1376,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     /* Constants used in this function */
     const int rank1 = SIZE2_RANK1;
     const int rank2 = SIZE2_RANK2;
-    const hsize_t dims[20] = SIZE2_DIMS;
+    const hsize_t dims[SIZE2_RANK2] = SIZE2_DIMS;
     dtype1_struct fill1;
     char fill2[DTYPE2_SIZE];
 
@@ -1745,8 +1745,8 @@ static void size2_verify(void)
     char attr_correct_string[NAME_BUF_SIZE];
     char attr_name[NAME_BUF_SIZE];
     int ndims;
-    hsize_t dims[20];
-    hsize_t correct_dims[20] = SIZE2_DIMS;
+    hsize_t dims[SIZE2_RANK2];
+    hsize_t correct_dims[SIZE2_RANK2] = SIZE2_DIMS;
 
     file_id = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK_I(file_id, "H5Fopen");

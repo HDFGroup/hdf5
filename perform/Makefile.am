@@ -24,7 +24,10 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 
 if BUILD_PARALLEL_CONDITIONAL
+  bin_PROGRAMS=h5perf
   TEST_PROG_PARA=h5perf perf
+else
+  bin_PROGRAMS=h5perf h5perf_serial
 endif
 
 # Some programs are not built or run by default, but can be built by hand or by
@@ -58,5 +61,7 @@ perf_LDADD=$(LIBH5TEST) $(LIBHDF5)
 iopipe_LDADD=$(LIBH5TEST) $(LIBHDF5)
 zip_perf_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 perf_meta_LDADD=$(LIBH5TEST) $(LIBHDF5)
+
+check-perform: check
 
 include $(top_srcdir)/config/conclude.am

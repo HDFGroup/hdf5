@@ -68,11 +68,10 @@ const char *FILENAME[] = {
     "tmp/extlinks10",	/* 30: */ 
     "tmp/extlinks11",	/* 31: */ 
     "tmp/extlinks12",	/* 32: */ 
-    "extlinks13",	/* 33: */ 
+    "extlinks13",	/* 33: */
     "tmp/extlinks13",	/* 34: */ 
-    "extlinks14",	/* 35: */ 
-    "tmp/extlinks14",	/* 36: */ 
-    "tmp/extlinks15",	/* 37: */ 
+    "tmp/extlinks14",	/* 35: */ 
+    "tmp/extlinks15",	/* 36: */ 
     NULL
 };
 
@@ -3443,7 +3442,7 @@ external_link_chdir(hid_t fapl, hbool_t new_format)
  *   		1. target link: "/CWD/tmp/extlinks10"
  *		2. main file: "extlinks0"
  *		3. target file: "extlinks10"
- *		Should be able to find the target file via main file's CWD
+ *		Should be able to find the target file via main file's current drive/rel path
  *
  * Return:      Success:        0
  *              Failure:        -1
@@ -3467,9 +3466,9 @@ external_link_win1(hid_t fapl, hbool_t new_format)
                 cwdpath[NAME_BUF_SIZE];
 
     if(new_format)
-        TESTING("external links via main file's CWD (windows)(w/new group format)")
+        TESTING("external links via main file's current drive/rel path(windows)(w/new group format)")
     else
-        TESTING("external links via main file's CWD (windows)")
+        TESTING("external links via main file's current drive/rel path(windows)")
 
     /* set up name for main file: "extlinks0" */
     h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
@@ -3536,7 +3535,7 @@ external_link_win1(hid_t fapl, hbool_t new_format)
  *   		1. target link: "/CWD/tmp/extlinks11"
  *		2. main file: "extlinks0"
  *		3. target file: "tmp/extlinks11"
- *		Should be able to access the target file directly
+ *		Should be able to access the target file directly (rel drive/abs path)
  *
  * Return:      Success:        0
  *              Failure:        -1
@@ -3560,9 +3559,9 @@ external_link_win2(hid_t fapl, hbool_t new_format)
                 cwdpath[NAME_BUF_SIZE];
 
     if(new_format)
-        TESTING("external links via target's rel drive/abs path (windows)(w/new group format)")
+        TESTING("external links via target's rel drive/abs path directly(windows)(w/new group format)")
     else
-        TESTING("external links via target's rel drive/abs path (windows)")
+        TESTING("external links via target's rel drive/abs path directly(windows)")
 
     /* set up name for main file: "extlinks0" */
     h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
@@ -3630,7 +3629,7 @@ external_link_win2(hid_t fapl, hbool_t new_format)
  *   		1. target link: "<cur drive>:tmp/extlinks12"
  *		2. main file: "extlinks0"
  *		3. target file: "tmp/extlinks12"
- *		Should be able to access the target file directly
+ *		Should be able to access the target file directly (abs drive/rel path)
  *
  * Return:      Success:        0
  *              Failure:        -1
@@ -3654,9 +3653,9 @@ external_link_win3(hid_t fapl, hbool_t new_format)
 		tmpname[NAME_BUF_SIZE];
 
     if(new_format)
-        TESTING("external links via target's abs drive/rel path (windows)(w/new group format)")
+        TESTING("external links via target's abs drive/rel path directly (windows)(w/new group format)")
     else
-        TESTING("external links via target's abs drive/rel path (windows)")
+        TESTING("external links via target's abs drive/rel path directly (windows)")
 
     /* set up name for main file: "extlinks0" */
     h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
@@ -3719,10 +3718,10 @@ external_link_win3(hid_t fapl, hbool_t new_format)
  * Function:    external_link_win4
  *
  * Purpose:     
- *   		1. target link: "<cur drive>:tmp/extlinks13"
- *		2. main file: "<cur-drive>:extlinks0"
- *		3. target file: extlinks13
- *		Should be able to access the target file via main file's CWD
+ *   		1. target link: "<cur drive>:extlinks13"
+ *		2. main file: "<cur-drive>:tmp/extlinks0"
+ *		3. target file: tmp/extlinks13
+ *		Should be able to access the target file via main file's abs drive/rel path
  *
  * Return:      Success:        0
  *              Failure:        -1
@@ -3750,17 +3749,17 @@ external_link_win4(hid_t fapl, hbool_t new_format)
     else
         TESTING("external links via main file's abs drive/rel path (windows)")
 
-    /* set up name for main file: "<drive-letter>:extlinks0" */
+    /* set up name for main file: "<drive-letter>:tmp/extlinks0" */
     drive = HDgetdrive();
-    sprintf(tmpname, "%c:%s", (drive+'A'-1), FILENAME[12]);
+    sprintf(tmpname, "%c:%s", (drive+'A'-1), FILENAME[13]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
 
-    /* set up name for target link: "<drive-letter>:tmp/extlinks13" */
-    sprintf(tmpname, "%c:%s", (drive+'A'-1), FILENAME[34]);
+    /* set up name for target link: "<drive-letter>:extlinks13" */
+    sprintf(tmpname, "%c:%s", (drive+'A'-1), FILENAME[33]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
-    /* set up name for target file: "extlinks13" */
-    h5_fixname(FILENAME[33], fapl, filename3, sizeof filename3);
+    /* set up name for target file: "tmp/extlinks13" */
+    h5_fixname(FILENAME[34], fapl, filename3, sizeof filename3);
 
     /* Create the target file */
     if((fid=H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
@@ -3809,9 +3808,9 @@ external_link_win4(hid_t fapl, hbool_t new_format)
  * Function:    external_link_win5
  *
  * Purpose:     
- *   		1. target link: "<cur drive>:tmp/extlinks14"
+ *   		1. target link: "<cur drive+1>:tmp/extlinks14"
  *		2. main file: "/CWD/extlinks0"
- *		3. target file: "extlinks14"
+ *		3. target file: "tmp/extlinks14"
  *		Should be able to access the target file via main file's relative drive/absolute path
  *
  * Return:      Success:        0
@@ -3851,11 +3850,11 @@ external_link_win5(hid_t fapl, hbool_t new_format)
     HDstrcat(tmpname, FILENAME[12]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
 
-    /* set up name for target link: "<drive-letter>:tmp/extlinks14" */
-    sprintf(tmpname, "%c:%s", (drive+'A'-1), FILENAME[36]);
+    /* set up name for target link: "<drive-letter+1>:tmp/extlinks14" */
+    sprintf(tmpname, "%c:%s", ((drive+1)+'A'-1), FILENAME[35]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
-    /* set up name for target file: "extlinks14" */
+    /* set up name for target file: "tmp/extlinks14" */
     h5_fixname(FILENAME[35], fapl, filename3, sizeof filename3);
 
     /* Create the target file */
@@ -3908,7 +3907,7 @@ external_link_win5(hid_t fapl, hbool_t new_format)
  *   		1. target link: "<cur drive+1>:tmp/extlinks15"
  *		2. main file: "extlinks0"
  *		3. target file: "tmp/extlinks15"
- *		Should be able to access the target file via target's rel path in the current drive
+ *		Should be able to access the target file via target's current drive/rel path
  *
  * Return:      Success:        0
  *              Failure:        -1
@@ -3932,9 +3931,9 @@ external_link_win6(hid_t fapl, hbool_t new_format)
 		tmpname[NAME_BUF_SIZE];
 
     if(new_format)
-        TESTING("external links via target's rel path in current drive(windows)(w/new group format)")
+        TESTING("external links via target's current drive/rel path (windows)(w/new group format)")
     else
-        TESTING("external links via target's rel path in current drive(windows)")
+        TESTING("external links via target's current drive/rel path (windows)")
 
     /* create tmp directory */
     if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
@@ -3945,11 +3944,11 @@ external_link_win6(hid_t fapl, hbool_t new_format)
     h5_fixname(FILENAME[12], fapl, filename1, sizeof filename1);
 
     /* set up name for target link: "<drive-letter+1>:tmp/extlinks15" */
-    sprintf(tmpname, "%c:%s", ((drive+1)+'A'-1), FILENAME[37]);
+    sprintf(tmpname, "%c:%s", ((drive+1)+'A'-1), FILENAME[36]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
     /* set up name for target file: "tmp/extlinks15" */
-    h5_fixname(FILENAME[37], fapl, filename3, sizeof filename3);
+    h5_fixname(FILENAME[36], fapl, filename3, sizeof filename3);
 
     /* Create the target file */
     if((fid=H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
@@ -11723,8 +11722,8 @@ main(void)
             nerrors += external_link_win1(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_win2(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_win3(my_fapl, new_format) < 0 ? 1 : 0;
-           // nerrors += external_link_win4(my_fapl, new_format) < 0 ? 1 : 0;
-           // nerrors += external_link_win5(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_link_win4(my_fapl, new_format) < 0 ? 1 : 0;
+            nerrors += external_link_win5(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_win6(my_fapl, new_format) < 0 ? 1 : 0;
 #endif
 

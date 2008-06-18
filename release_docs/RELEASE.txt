@@ -1,4 +1,4 @@
-HDF5 version 1.9.5 currently under development
+HDF5 version 1.9.6 currently under development
 ================================================================================
 
 
@@ -40,6 +40,18 @@ New Features
     Configuration:
     -------------
 
+    - Configuration suite now uses Autoconf 2.61, Automake 1.10.1, and 
+      Libtool 2.2.2 (MAM - 2008/05/05)
+
+    - There is a new build command, 'make check-perform', which will
+      run the tests in the perform directory. This is an optional step
+      afer 'make check' in the build process. (MAM - 2008/05/12)
+
+    - The new configure option "--disable-sharedlib-rpath" disables
+      embedding the '-Wl,-rpath' information into executables when
+      shared libraries are produced, and instead solely relies on the
+      information in LD_LIBRARY_PATH. (MAM - 2008/05/15)
+
     Library:
     --------
 
@@ -55,6 +67,15 @@ New Features
 
     Tools:
     ------
+
+     - h5dump: added a printing of the compression ratio of uncompressed and compressed 
+         sizes for cases where compression  filters are present. (PVN - 2008/05/01)
+     - h5dump: added an option to allow a user defined formatting string for printf 
+         regarding floating point numbers. (PVN - 2008/05/06)
+     - h5dump: support for external links, display the object that the external link 
+         points to. (PVN - 2008/05/12)
+
+
 
     High-Level APIs:
     ------
@@ -74,12 +95,12 @@ Bug Fixes since HDF5-1.8.0 release
 	  The searching pattern will depend on whether the target file's
 	  pathname is an absolute or a relative path. Please see the description
 	  in the RM for H5Lcreate_external().  (VC - 4/8/08)
-        - Fixed possible file corruption bug when encoding datatype
+      - Fixed possible file corruption bug when encoding datatype
             descriptions for compound datatypes whose size was between
             256 & 511 bytes and the file was opened with the "use the
             latest format" property enabled (with H5Pset_libver_bounds).
             (QAK - 2008/03/13)
-        - Fixed bug in H5Aget_num_attrs() routine to handle invalid location
+      - Fixed bug in H5Aget_num_attrs() routine to handle invalid location
             ID correctly.  (QAK - 2008/03/11)
 
 

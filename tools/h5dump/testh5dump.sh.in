@@ -496,6 +496,10 @@ TOOLTEST torderattr3.ddl -H --sort_by=creation_order --sort_order=ascending tord
 TOOLTEST torderattr4.ddl -H --sort_by=creation_order --sort_order=descending torderattr.h5
 
 
+# tests for floating point user defined printf format
+TOOLTEST tfpformat.ddl -m %.7f tfpformat.h5
+
+
 
 if test $nerrors -eq 0 ; then
    echo "All $DUMPER tests passed."

@@ -1183,7 +1183,7 @@ if(H5DEBUG(D))
                 H5D_io_info_t *chk_io_info;     /* Pointer to I/O info object for this chunk */
                 H5D_istore_ud1_t udata;         /* B-tree pass-through	*/
                 void *chunk;                    /* Pointer to the data chunk in cache */
-                size_t accessed_bytes;          /* Total accessed size in a chunk */
+                uint32_t accessed_bytes;          /* Total accessed size in a chunk */
                 unsigned idx_hint = 0;          /* Cache index hint      */
                 haddr_t caddr;                  /* Address of the cached chunk */
 
@@ -1203,9 +1203,11 @@ if(H5DEBUG(D))
                 /* Load the chunk into cache and lock it. */
                 if(H5D_chunk_cacheable(io_info, caddr)) {
                     hbool_t entire_chunk = TRUE;         /* Whether whole chunk is selected */
+                    size_t tmp_accessed_bytes;           /* Total accessed size in a chunk */
 
                     /* Compute # of bytes accessed in chunk */
-                    accessed_bytes = chunk_info->chunk_points * type_info->src_type_size;
+                    tmp_accessed_bytes = chunk_info->chunk_points * type_info->src_type_size;
+                    H5_ASSIGN_OVERFLOW(accessed_bytes, tmp_accessed_bytes, size_t, uint32_t);
 
                     /* Determine if we will access all the data in the chunk */
                     if(((io_info->op_type == H5D_IO_OP_WRITE) && (accessed_bytes != ctg_store.contig.dset_size))
@@ -1419,7 +1421,7 @@ if(H5DEBUG(D)) {
         if(make_ind) {
             void *chunk;                /* Pointer to the data chunk in cache */
             H5D_io_info_t *chk_io_info;     /* Pointer to I/O info object for this chunk */
-            size_t accessed_bytes = 0;  /* Total accessed size in a chunk */
+            uint32_t accessed_bytes = 0;  /* Total accessed size in a chunk */
             unsigned idx_hint = 0;      /* Cache index hint      */
 
             /* Switch to independent I/O */
@@ -1429,9 +1431,11 @@ if(H5DEBUG(D)) {
             /* Load the chunk into cache and lock it. */
             if(H5D_chunk_cacheable(io_info, chunk_addr)) {
                 hbool_t entire_chunk = TRUE;         /* Whether whole chunk is selected */
+                size_t tmp_accessed_bytes;           /* Total accessed size in a chunk */
 
                 /* Compute # of bytes accessed in chunk */
-                accessed_bytes = chunk_info->chunk_points * type_info->src_type_size;
+                tmp_accessed_bytes = chunk_info->chunk_points * type_info->src_type_size;
+                H5_ASSIGN_OVERFLOW(accessed_bytes, tmp_accessed_bytes, size_t, uint32_t);
 
                 /* Determine if we will access all the data in the chunk */
                 if(((io_info->op_type == H5D_IO_OP_WRITE) && (accessed_bytes != ctg_store.contig.dset_size))

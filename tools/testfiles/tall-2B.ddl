@@ -45,7 +45,6 @@ GROUP "/" {
       }
       GROUP "g1.2" {
          EXTERNAL_LINK "extlink" {
-            LINKCLASS 64
             TARGETFILE "somefile"
             TARGETPATH "somepath"
          }

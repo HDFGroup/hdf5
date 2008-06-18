@@ -1174,6 +1174,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         case H5D_CHUNKED:
             {
                 hsize_t	max_dim[H5O_LAYOUT_NDIMS];      /* Maximum size of data in elements */
+                uint64_t chunk_size;                    /* Size of chunk in bytes */
 
                 /* Set up layout information */
                 if((ndims = H5S_GET_EXTENT_NDIMS(new_dset->shared->space)) < 0)
@@ -1208,8 +1209,17 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
                         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "chunk size must be <= maximum dimension size for fixed-sized dimensions")
 
                 /* Compute the total size of a chunk */
-                for(u = 1, new_dset->shared->layout.u.chunk.size = new_dset->shared->layout.u.chunk.dim[0]; u < new_dset->shared->layout.u.chunk.ndims; u++)
-                    new_dset->shared->layout.u.chunk.size *= new_dset->shared->layout.u.chunk.dim[u];
+                /* (Use 64-bit value to ensure that we can detect >4GB chunks) */
+                for(u = 1, chunk_size = (uint64_t)new_dset->shared->layout.u.chunk.dim[0]; u < new_dset->shared->layout.u.chunk.ndims; u++)
+                    chunk_size *= (uint64_t)new_dset->shared->layout.u.chunk.dim[u];
+
+                /* Check for chunk larger than can be represented in 32-bits */
+                /* (Chunk size is encoded in 32-bit value in v1 B-tree records) */
+                if(chunk_size > (uint64_t)0xffffffff)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "chunk size must be < 4GB")
+
+                /* Retain computed chunk size */
+                H5_ASSIGN_OVERFLOW(new_dset->shared->layout.u.chunk.size, chunk_size, uint64_t, uint32_t);
 
                 /* Initialize the chunk cache for the dataset */
                 if(H5D_istore_init(file, new_dset) < 0)

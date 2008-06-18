@@ -52,11 +52,10 @@ if test gcc = "$cc_vendor" -a "$cc_vers_all" -lt 2008001; then
     cat <<EOF
     **
     ** This compiler may be unable to properly compile the long long
-    ** data type used extensively by hdf5, although specifying
-    ** --disable-hsizet for configure may work around those bugs.
-    ** There may be other code generation problems also, especially
-    ** when optimizations are enabled.  Please upgrade to at least GNU
-    ** gcc version 2.8.1 before reporting bugs to the HDF5 team.
+    ** data type used extensively by hdf5. There may be other code 
+    ** generation problems also, especially when optimizations are 
+    ** enabled.  Please upgrade to at least GNU gcc version 2.8.1 
+    ** before reporting bugs to the HDF5 team.
     **
 EOF
     sleep 5
@@ -77,16 +76,13 @@ EOF
 # Current EGCS compilers have problems with `long long' and register
 # allocation when optimizations are turned on for x86 systems.
 elif test egcs = "$cc_vendor" -a "$cc_vers_all" -le 2091066; then
-    if test "$HSIZET" != "large"; then
        cat <<EOF
     **
     ** This compiler may have problems allocating registers when
-    ** optimizations are enabled on some platforms. Specifying
-    ** --disable-hsizet usually avoids the bug.
+    ** optimizations are enabled on some platforms.
     **
 EOF
        sleep 5
-    fi
 
 # All current versions of PGCC have problems also.
 elif test pgcc = "$cc_vendor" -a "$cc_vers_all" -le 2091066; then	    
@@ -188,10 +184,10 @@ esac
 # the information from the previous version and adding modifications to that.
 case "$cc_vendor-$cc_version" in
 
-# Closer to the gcc 4.2 release, we should check for additional flags to
+# Closer to the gcc 4.4 release, we should check for additional flags to
 # include and break it out into it's own section, like the other versions
 # below. -QAK
-  gcc-4.[12]*)
+  gcc-4.[123]*)
     # Replace -ansi flag with -std=c99 flag
     H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
 

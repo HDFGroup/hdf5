@@ -22,7 +22,7 @@ rem .                    in the environment, rather than the IDE.
 rem .  /?                Help information
 rem By Xuan Bai
 rem Created: Aug. 16, 2004
-rem Last Updated: July 13, 2007
+rem Last Updated: May 13, 2008
 
 rem This batch file makes the following assumptions:
 rem    - The appropriate version of Visual Studio is installed and setup
@@ -33,6 +33,8 @@ rem    - szip and zlib DLLs are already placed in an accessible directory
 rem    - hdf5_ext_szip or hdf5_ext_zlib have been set accordingly
 rem    - if building with the /useenv option, szip and zlib paths have been added
 rem      to %include% and %libpath% as necessary.
+rem    - The target platform architecture is specified in the environment
+rem      variable PROCESSOR_ARCHITECTURE
 
 rem By default, only C and C++ libraries are built.
 
@@ -40,6 +42,7 @@ setlocal enabledelayedexpansion
 pushd %~dp0
 
 set nerrors=0
+if "%1"=="/?" goto help
 goto main
 
 rem Print a help message
@@ -101,6 +104,17 @@ rem Setup our environment
     )
     
     
+    rem Make sure PROCESSOR_ARCHITECURE is set to either x86 or AMD64
+    if "%PROCESSOR_ARCHITECTURE%"=="x86" (
+        set hdf5_platform=Win32
+    ) else if "%PROCESSOR_ARCHITECTURE%"=="AMD64" (
+        set hdf5_platform=x64
+    ) else (
+        echo.Error: Environment variable PROCESSOR_ARCHITECTURE should contain
+        echo.either x86 or AMD64
+        exit /b 1
+    )
+
     rem Setup Visual Studio environment.  By default, use the Visual Studio 
     rem 2005 environment.
     
@@ -112,7 +126,12 @@ rem Setup our environment
     if not defined hdf5_enablefortran (
         if defined vs80comntools (
             rem This sets the Visual Studio path and environment variables
-            call "%vs80comntools%\vsvars32.bat"
+            if %hdf5_platform%==Win32 (
+                call "%vs80comntools%\..\..\VC\vcvarsall.bat" x86
+            ) else (
+                call "%vs80comntools%\..\..\VC\vcvarsall.bat" x86_amd64
+            )
+
         ) else (
             echo.Error: Cannot setup Visual Studio 2005 environment.  Please
             echo.make sure VS80COMNTOOLS is defined in the environment.
@@ -126,8 +145,11 @@ rem Setup our environment
             rem This sets the Intel Fortran 9.1 environment, as well as
             rem setting the appropriate Visual Studio environment
             
-            rem Assume 32-bit environment
-            call "%ifort_compiler91%\IA32\Bin\ifortvars.bat"
+            if %hdf5_platform%==Win32 (
+                call "%ifort_compiler91%\IA32\Bin\ifortvars.bat"
+            ) else (
+                call "%ifort_compiler91%\em64t\Bin\ifortvars.bat"
+            )
         ) else (
             echo.Error: Cannot setup Intel Fortran 9.1 environment.  Please
             echo.make sure IFORT_COMPILER91 is defined in the environment.
@@ -157,8 +179,8 @@ rem Build the HDF5 libraries.  By default, C and C++ libraries are built.
 
     rem Build both debug and release versions
     for %%a in (debug release) DO (
-        echo.Building %%a libraries...
-        devenv %hdf5_sln% %ccflags% /rebuild %%a
+        echo.Building %hdf5_platform% %%a libraries...
+        devenv %hdf5_sln% %ccflags% /rebuild "%%a|%hdf5_platform%"
         if !errorlevel! neq 0 exit /b
     )
 

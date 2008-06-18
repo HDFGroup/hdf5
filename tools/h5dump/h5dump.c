@@ -62,6 +62,7 @@ static size_t       prefix_len = 1024;
 static char         *prefix;
 static const char   *driver = NULL;      /* The driver to open the file with. */
 static const h5dump_header_t *dump_header_format;
+static const char   *fp_format = NULL;
 
 /* things to display or which are set via command line parameters */
 static int          display_all       = TRUE;
@@ -105,6 +106,7 @@ static void     init_prefix(char **prfx, size_t prfx_len);
 static void     add_prefix(char **prfx, size_t *prfx_len, const char *name);
 /* callback function used by H5Literate() */
 static herr_t   dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void *op_data);
+static int      dump_extlink(const char *filename, const char *targname);
 
 
 static h5tool_format_t         dataformat = {
@@ -357,7 +359,7 @@ static char            *xml_escape_the_name(const char *);
 
 /* a structure for handling the order command-line parameters come in */
 struct handler_t {
-    void (*func)(hid_t, char *, void *);
+    void (*func)(hid_t, const char *, void *, int);
     char *obj;
     struct subset_t *subset_info;
 };
@@ -367,7 +369,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b:F:s:S:Aq:z:";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b:F:s:S:Aq:z:m:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -478,6 +480,7 @@ static struct long_options l_opts[] = {
     { "form", require_arg, 'F' },
     { "sort_by", require_arg, 'q' },
     { "sort_order", require_arg, 'z' },
+    { "format", require_arg, 'm' },
     { NULL, 0, '\0' }
 };
 
@@ -628,6 +631,7 @@ usage(const char *prog)
     fprintf(stdout, "     -b B, --binary=B     Binary file output, of form B\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named datatype\n");
     fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
+    fprintf(stdout, "     -m T, --format=T     Set the floating point output format\n");
     fprintf(stdout, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
     fprintf(stdout, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
@@ -657,6 +661,7 @@ usage(const char *prog)
     fprintf(stdout, "  F - is a filename.\n");
     fprintf(stdout, "  P - is the full path from the root group to the object.\n");
     fprintf(stdout, "  N - is an integer greater than 1.\n");
+    fprintf(stdout, "  T - is a string containing the floating point format, e.g '%%.3f'\n");
     fprintf(stdout, "  L - is a list of integers the number of which are equal to the\n");
     fprintf(stdout, "        number of dimensions in the dataspace being queried\n");
     fprintf(stdout, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
@@ -1374,6 +1379,9 @@ dump_selected_attr(hid_t loc_id, const char *name)
  *  RMcG, November 2000
  *   Added XML support. Also, optionally checks the op_data argument
  *
+ *  PVN, May 2008
+ *   Dump external links
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1658,11 +1666,15 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
                     else {
                         if(!doxml) {
                             indentation(indent + COL);
-                            printf("LINKCLASS %d\n", linfo->type);
-                            indentation(indent + COL);
                             printf("TARGETFILE \"%s\"\n", filename);
                             indentation(indent + COL);
                             printf("TARGETPATH \"%s\"\n", targname);
+
+
+                            /* dump the external link */
+                            dump_extlink(filename,targname);
+
+
                         } /* end if */
                         /* XML */
                         else {
@@ -2189,6 +2201,12 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     int         depth;
     int         stdindent = COL;    /* should be 3 */
 
+    if (fp_format)
+    {
+        outputformat->fmt_double = fp_format;
+        outputformat->fmt_float = fp_format;
+    }
+
     outputformat->line_ncols = nCols;
     outputformat->do_escape=display_escape;
     /* print the matrix indices */
@@ -2507,7 +2525,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
             int ndims = H5Sget_simple_extent_dims( sid, dims, NULL);  
             hsize_t nelmts = 1;
             hsize_t size;
-            double per = 0;
+            double ratio = 0;
             hssize_t a, b;
             int ok = 0;
 
@@ -2539,13 +2557,13 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
                 size = nelmts * datum_size;
 
                 a = size; b = storage_size;
-                if (a!=0)
-                    per = (double) (b-a)/a;
-                
-                per = -per;
-                per *=100;
 
-                HDfprintf(stdout, "SIZE %Hu (%.1f%%COMPRESSION)\n ", storage_size, per);
+                /* compression ratio = uncompressed size /  compressed size */
+
+                if (b!=0)
+                    ratio = (double) a / (double) b;
+              
+                HDfprintf(stdout, "SIZE %Hu (%.3f:1 COMPRESSION)\n ", storage_size, ratio);
                 
             }
             else
@@ -3107,11 +3125,13 @@ set_sort_order(const char *form)
  *              Tuesday, 9. January 2001
  *
  * Modifications:
+ *  PVN, May 2008
+ *   add an extra parameter PE, to allow printing/not printing of error messages
  *
  *-------------------------------------------------------------------------
  */
 static void
-handle_attributes(hid_t fid, char *attr, void UNUSED * data)
+handle_attributes(hid_t fid, const char *attr, void UNUSED * data, int pe)
 {
     dump_selected_attr(fid, attr);
 }
@@ -3252,26 +3272,36 @@ parse_subset_params(char *dset)
  *              Tuesday, 9. January 2001
  *
  * Modifications:
- *  Pedro Vicente, Tuesday, January 15, 2008
+ *  Pedro Vicente, January 15, 2008
  *  check for block overlap
+ *
+ *  Pedro Vicente, May 8, 2008
+ *   added a flag PE that prints/not prints error messages
+ *   added for cases of external links not found, to avoid printing of 
+ *    objects not found, since external links are dumped on a trial error basis
  *
  *-------------------------------------------------------------------------
  */
 static void
-handle_datasets(hid_t fid, char *dset, void *data)
+handle_datasets(hid_t fid, const char *dset, void *data, int pe)
 {
     H5O_info_t       oinfo;
     hid_t            dsetid;
     struct subset_t *sset = (struct subset_t *)data;
 
-    if((dsetid = H5Dopen2(fid, dset, H5P_DEFAULT)) < 0) {
-        begin_obj(dump_header_format->datasetbegin, dset,
-                  dump_header_format->datasetblockbegin);
-        indentation(COL);
-        error_msg(progname, "unable to open dataset \"%s\"\n", dset);
-        end_obj(dump_header_format->datasetend,
+    if((dsetid = H5Dopen2(fid, dset, H5P_DEFAULT)) < 0) 
+    {
+        if (pe)
+        {
+            begin_obj(dump_header_format->datasetbegin, dset,
+                dump_header_format->datasetblockbegin);
+            indentation(COL);
+            error_msg(progname, "unable to open dataset \"%s\"\n", dset);
+            end_obj(dump_header_format->datasetend,
                 dump_header_format->datasetblockend);
-        d_status = EXIT_FAILURE;
+            d_status = EXIT_FAILURE;
+        }
+        
         return;
     } /* end if */
 
@@ -3398,24 +3428,35 @@ handle_datasets(hid_t fid, char *dset, void *data)
  * Programmer:  Bill Wendling
  *              Tuesday, 9. January 2001
  *
- * Modifications: Pedro Vicente, September 26, 2007
+ * Modifications: 
+ *
+ * Pedro Vicente, September 26, 2007
  *  handle creation order
+ *
+ * Pedro Vicente, May 8, 2008
+ *   added a flag PE that prints/not prints error messages
+ *   added for cases of external links not found, to avoid printing of 
+ *    objects not found, since external links are dumped on a trial error basis
  *
  *-------------------------------------------------------------------------
  */
 static void
-handle_groups(hid_t fid, char *group, void UNUSED * data)
+handle_groups(hid_t fid, const char *group, void UNUSED * data, int pe)
 {
     hid_t      gid;
    
     
     if((gid = H5Gopen2(fid, group, H5P_DEFAULT)) < 0) 
     {
-        begin_obj(dump_header_format->groupbegin, group, dump_header_format->groupblockbegin);
-        indentation(COL);
-        error_msg(progname, "unable to open group \"%s\"\n", group);
-        end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
-        d_status = EXIT_FAILURE;
+        if ( pe )
+        {
+            begin_obj(dump_header_format->groupbegin, group, dump_header_format->groupblockbegin);
+            indentation(COL);
+            error_msg(progname, "unable to open group \"%s\"\n", group);
+            end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
+            d_status = EXIT_FAILURE;
+        }
+        
     } 
     else 
     {
@@ -3451,7 +3492,7 @@ handle_groups(hid_t fid, char *group, void UNUSED * data)
  *-------------------------------------------------------------------------
  */
 static void
-handle_links(hid_t fid, char *links, void UNUSED * data)
+handle_links(hid_t fid, const char *links, void UNUSED * data, int pe)
 {
     H5L_info_t linfo;
 
@@ -3491,8 +3532,6 @@ handle_links(hid_t fid, char *links, void UNUSED * data)
                     const char *elink_path;
 
                     if(H5Lunpack_elink_val(buf, linfo.u.val_size, NULL, &elink_file, &elink_path)>=0) {
-                        indentation(COL);
-                        printf("LINKCLASS %d\n", linfo.type);
                         indentation(COL);
                         printf("TARGETFILE \"%s\"\n", elink_file);
                         indentation(COL);
@@ -3537,18 +3576,25 @@ handle_links(hid_t fid, char *links, void UNUSED * data)
  *
  * Modifications:
  *
+ *  Pedro Vicente, May 8, 2008
+ *   added a flag PE that prints/not prints error messages
+ *   added for cases of external links not found, to avoid printing of 
+ *    objects not found, since external links are dumped on a trial error basis
+ *
  *-------------------------------------------------------------------------
  */
 static void
-handle_datatypes(hid_t fid, char *type, void UNUSED * data)
+handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe)
 {
     hid_t       type_id;
 
-    if((type_id = H5Topen2(fid, type, H5P_DEFAULT)) < 0) {
+    if((type_id = H5Topen2(fid, type, H5P_DEFAULT)) < 0) 
+    {
         /* check if type is unamed datatype */
         unsigned idx = 0;
 
-        while(idx < type_table->nobjs ) {
+        while(idx < type_table->nobjs ) 
+        {
             char name[128];
 
             if(!type_table->objs[idx].recorded) {
@@ -3562,23 +3608,32 @@ handle_datatypes(hid_t fid, char *type, void UNUSED * data)
             idx++;
         } /* end while */
 
-        if(idx == type_table->nobjs) {
-            /* unknown type */
-            begin_obj(dump_header_format->datatypebegin, type,
-                      dump_header_format->datatypeblockbegin);
-            indentation(COL);
-            error_msg(progname, "unable to open datatype \"%s\"\n", type);
-            end_obj(dump_header_format->datatypeend,
+        if(idx == type_table->nobjs) 
+        {
+            if ( pe )
+            {
+                /* unknown type */
+                begin_obj(dump_header_format->datatypebegin, type,
+                    dump_header_format->datatypeblockbegin);
+                indentation(COL);
+                error_msg(progname, "unable to open datatype \"%s\"\n", type);
+                end_obj(dump_header_format->datatypeend,
                     dump_header_format->datatypeblockend);
-            d_status = EXIT_FAILURE;
-        } else {
+                d_status = EXIT_FAILURE;
+            }
+            
+        } 
+        else 
+        {
             hid_t dsetid = H5Dopen2(fid, type_table->objs[idx].objname, H5P_DEFAULT);
             type_id = H5Dget_type(dsetid);
             dump_named_datatype(type_id, type);
             H5Tclose(type_id);
             H5Dclose(dsetid);
         }
-    } else {
+    } 
+    else 
+    {
         dump_named_datatype(type_id, type);
 
         if(H5Tclose(type_id) < 0)
@@ -3821,6 +3876,12 @@ parse_start:
             /* To Do: check format of this value?  */
             xml_dtd_uri = opt_arg;
             break;
+
+        case 'm':
+            /* specify alternative floating point printing format */
+            fp_format = opt_arg;
+            break;
+
         case 'X':
             /* specify XML namespace (default="hdf5:"), or none */
             /* To Do: check format of this value?  */
@@ -4178,7 +4239,7 @@ main(int argc, const char *argv[])
 
         for(i = 0; i < argc; i++)
             if(hand[i].func)
-                hand[i].func(fid, hand[i].obj, hand[i].subset_info);
+                hand[i].func(fid, hand[i].obj, hand[i].subset_info, 1);
     }
 
     if (!doxml) {
@@ -6614,3 +6675,50 @@ add_prefix(char **prfx, size_t *prfx_len, const char *name)
     HDstrcat(HDstrcat(*prfx, "/"), name);
 } /* end add_prefix */
 
+
+/*-------------------------------------------------------------------------
+ * Function:    dump_extlink
+ *
+ * made by: PVN
+ *
+ * Purpose:     Dump an external link
+ *  Since external links are soft links, they are dumped on a trial error 
+ *   basis, attempting to dump as a dataset, as a group and as a named datatype
+ *   Error messages are supressed
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static int dump_extlink(const char *filename, const char *targname)
+{
+    hid_t fid;
+    
+    
+    fid = h5tools_fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT, driver, NULL, 0);
+   
+    if (fid < 0) 
+    {
+        goto fail;
+    }
+    
+    /* add some indentation to distinguish that these objects are external */
+    indent += 2*COL;
+    
+    handle_datasets(fid, targname, NULL, 0);
+    handle_groups(fid, targname, NULL, 0);
+    handle_datatypes(fid, targname, NULL, 0);
+    
+    indent -= 2*COL;
+    
+    
+    if (H5Fclose(fid) < 0)
+        d_status = EXIT_FAILURE;
+    
+    
+    return SUCCEED;
+    
+fail:
+
+    return FAIL;
+    
+}

@@ -162,9 +162,6 @@
 /* Define to 1 if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
-/* Define if it's safe to use `long long' for hsize_t and hssize_t */
-#undef HAVE_LARGE_HSIZET
-
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #undef HAVE_LIBDMALLOC
 
@@ -417,6 +414,10 @@
 /* Define if your system can convert (unsigned) long long to long double
    values correctly. */
 #undef LLONG_TO_LDOUBLE_CORRECT
+
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
 
 /* Define if the metadata trace file code is to be compiled in */
 #undef METADATA_TRACE_FILE

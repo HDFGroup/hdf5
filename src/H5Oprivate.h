@@ -337,8 +337,8 @@ typedef struct H5O_layout_contig_t {
 typedef struct H5O_layout_chunk_t {
     haddr_t	addr;			/* File address of B-tree            */
     unsigned	ndims;			/* Num dimensions in chunk           */
-    size_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
-    size_t      size;                   /* Size of chunk in bytes            */
+    uint32_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
+    uint32_t    size;                   /* Size of chunk in bytes            */
     H5RC_t     *btree_shared;           /* Ref-counted info for B-tree nodes */
 } H5O_layout_chunk_t;
 

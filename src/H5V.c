@@ -399,33 +399,34 @@ done:
  */
 htri_t
 H5V_hyper_disjointp(unsigned n,
-		    const hsize_t *offset1, const size_t *size1,
-		    const hsize_t *offset2, const size_t *size2)
+    const hsize_t *offset1, const uint32_t *size1,
+    const hsize_t *offset2, const uint32_t *size2)
 {
     unsigned	u;
-    htri_t      ret_value=FALSE;        /* Return value */
+    htri_t      ret_value = FALSE;        /* Return value */
 
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5V_hyper_disjointp)
 
-    if (!n || !size1 || !size2)	HGOTO_DONE(TRUE)
+    if(!n || !size1 || !size2)
+        HGOTO_DONE(TRUE)
 
-    for (u=0; u<n; u++) {
-        assert (size1[u]<HSIZET_MAX);
-        assert (size2[u]<HSIZET_MAX);
+    for(u = 0; u < n; u++) {
+        HDassert(size1[u] < HSIZET_MAX);
+        HDassert(size2[u] < HSIZET_MAX);
 
-        if (0==size1[u] || 0==size2[u])
+        if(0 == size1[u] || 0 == size2[u])
             HGOTO_DONE(TRUE)
-        if (((offset1?offset1[u]:0) < (offset2?offset2[u]:0) &&
-             ((offset1?offset1[u]:0) + size1[u] <= (offset2?offset2[u]:0))) ||
-            ((offset2?offset2[u]:0) < (offset1?offset1[u]:0) &&
-             ((offset2?offset2[u]:0) + size2[u] <= (offset1?offset1[u]:0))))
+        if(((offset1 ? offset1[u] : 0) < (offset2 ? offset2[u] : 0) &&
+                    ((offset1 ? offset1[u] : 0) + size1[u] <= (offset2 ? offset2[u] : 0))) ||
+                ((offset2 ? offset2[u] : 0) < (offset1 ? offset1[u] : 0) &&
+                    ((offset2 ? offset2[u] : 0) + size2[u] <= (offset1 ? offset1[u] : 0))))
             HGOTO_DONE(TRUE)
-    }
+    } /* end for */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5V_hyper_disjointp() */
 
 
 /*-------------------------------------------------------------------------
@@ -1225,7 +1226,7 @@ H5V_array_calc(hsize_t offset, unsigned n, const hsize_t *total_size, hsize_t *c
  *-------------------------------------------------------------------------
  */
 herr_t
-H5V_chunk_index(unsigned ndims, const hsize_t *coord, const size_t *chunk,
+H5V_chunk_index(unsigned ndims, const hsize_t *coord, const uint32_t *chunk,
     const hsize_t *down_nchunks, hsize_t *chunk_idx)
 {
     hsize_t	scaled_coord[H5V_HYPER_NDIMS];	/* Scaled, coordinates, in terms of chunks */

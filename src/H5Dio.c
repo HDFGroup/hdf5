@@ -292,6 +292,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_chunk_map_t fm;                 /* Chunk file<->memory mapping */
     H5D_io_info_t io_info;              /* Dataset I/O info     */
     H5D_type_info_t type_info;          /* Datatype info for operation */
+    hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
     hssize_t	snelmts;                /*total number of elmts	(signed) */
     hsize_t	nelmts;                 /*total number of elmts	*/
@@ -323,6 +324,7 @@ H5D_read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* Set up datatype info for operation */
     if(H5D_typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, FALSE, &type_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
+    type_info_init = TRUE;
 
 #ifdef H5_HAVE_PARALLEL
     /* Collective access is not permissible without a MPI based VFD */
@@ -416,7 +418,7 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
     /* Shut down datatype info for operation */
-    if(H5D_typeinfo_term(&type_info) < 0)
+    if(type_info_init && H5D_typeinfo_term(&type_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -443,6 +445,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     H5D_chunk_map_t fm;                 /* Chunk file<->memory mapping */
     H5D_io_info_t io_info;              /* Dataset I/O info     */
     H5D_type_info_t type_info;          /* Datatype info for operation */
+    hbool_t type_info_init = FALSE;     /* Whether the datatype info has been initialized */
     H5D_storage_t store;                /*union of EFL and chunk pointer in file space */
     hssize_t	snelmts;                /*total number of elmts	(signed) */
     hsize_t	nelmts;                 /*total number of elmts	*/
@@ -478,6 +481,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
     /* Set up datatype info for operation */
     if(H5D_typeinfo_init(dataset, dxpl_cache, dxpl_id, mem_type_id, TRUE, &type_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up type info")
+    type_info_init = TRUE;
 
     /* Various MPI based checks */
 #ifdef H5_HAVE_PARALLEL
@@ -603,7 +607,7 @@ done:
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "can't shut down io_info")
 #endif /*H5_HAVE_PARALLEL*/
     /* Shut down datatype info for operation */
-    if(H5D_typeinfo_term(&type_info) < 0)
+    if(type_info_init && H5D_typeinfo_term(&type_info) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to shut down type info")
 
     FUNC_LEAVE_NOAPI(ret_value)

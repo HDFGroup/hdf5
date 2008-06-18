@@ -1162,7 +1162,7 @@ H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *
 
             /* Append the rest of the path */
             /* (less one character, for the initial path separator) */
-            HDstrncat(name, udata.path, (size - 1));
+            HDstrncat(name, udata.path, (size - 2));
             if((size_t)ret_value >= size)
                 name[size - 1] = '\0';
         } /* end if */

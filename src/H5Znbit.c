@@ -439,7 +439,7 @@ H5Z_set_parms_atomic(const H5T_t *type, unsigned cd_values[])
     int dtype_offset;           /* Atomic datatype's offset (in bits) */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_set_parms_atomic, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5Z_set_parms_atomic)
 
     /* Set datatype class code */
     cd_values[cd_values_index++] = H5Z_NBIT_ATOMIC;
@@ -799,6 +799,7 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     /* Get total number of elements in the chunk */
     if((npoints = H5S_GET_EXTENT_NPOINTS(ds)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get number of points in the dataspace")
+    HDassert(npoints);
 
     /* Initialize index for cd_values array starting from the third entry */
     cd_values_index = 2;

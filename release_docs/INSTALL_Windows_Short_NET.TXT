@@ -7,6 +7,11 @@ Notes: This short instruction is written for users who want to quickly
        build HDF5 library and tools from the HDF5 source code package
        with Microsoft Visual Studio .NET 2003 but do not want to know 
        HDF5 building and installation details on Windows XP.
+       
+       Visual Studio .NET 2003 is NOT supported on Windows Vista, as Microsoft
+       has ended their support.  Also, we do not support building 64-bit
+       libraries or Fortran libraries with Visual Studio .NET 2003.  If you
+       need any of these features, please upgrade to Visual STudio 2005.
          
        For detailed HDF5 build and install information, or if you have
        trouble following any steps in the instructions, please refer to
@@ -14,7 +19,8 @@ Notes: This short instruction is written for users who want to quickly
       
        For users who would like to build and test HDF5 package from the
        command line, please refer to
-       INSATLL_Windows_From_Command_Line.txt.
+       INSATLL_Windows_From_Command_Line.txt.  Note, however, that building
+       from the command line requires Visual Studio 2005.
 
 WARNINGS:
 
@@ -136,19 +142,12 @@ HDF5 libraries and tools should be tested to make sure that they were
 built correctly. c:\MyHDFstuff\hdf5\hdf5check.bat was provided to test
 HDF5 libraries and tools.
 
-hdf5check.bat has four options:
+hdf5check.bat has the following options:
    
    hdf5check                     test HDF5 C library and tools only
       
    hdf5check enablecpp           test HDF5 C/C++ libraries and tools
-         
-   hdf5check enablefortran       test HDF5 C/Fortran libraries and tools
-         
-   hdf5check enableall           test HDF5 C/C++/Fortran libraries and tools
-   
 
-Notes: Users who only build HDF5 C/C++ libraries ONLY have the first 
-       two options.
 
 Invoke a command prompt window and run hdf5check with appropriate option.
 Users are encouraged to pipe the test output into a file.  You should find

@@ -38,6 +38,8 @@ rem    - if building with the /useenv option, szip and zlib paths have been adde
 rem      to %include% and %libpath% as necessary.
 rem    - if using the /log option, hdf5build_log and hdf5_check log should be defined
 rem    - in the environment.
+rem    - The target platform architecture is specified in the environment
+rem      variable PROCESSOR_ARCHITECTURE
 
 rem By default, only C and C++ libraries are built and tested.
 

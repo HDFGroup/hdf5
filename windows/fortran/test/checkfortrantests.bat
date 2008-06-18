@@ -79,6 +79,8 @@ rem on it for sending parameters.  --SJW 9/6/07
     call :add_test testhdf5_fortran%2 .\testhdf5_fortran%2\%1
     call :add_test flush1_fortran%2 .\flush1_fortran%2\%1
     call :add_test flush2_fortran%2 .\flush2_fortran%2\%1
+    call :add_test testhdf5_fortran_1_8%2 .\testhdf5_fortran_1_8%2\%1
+
     
     
     rem Run the tests, passing in which version to run

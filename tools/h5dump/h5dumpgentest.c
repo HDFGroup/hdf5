@@ -87,6 +87,11 @@
 #define FILE57  "thyperslab.h5"
 #define FILE58  "tordergr.h5"
 #define FILE59  "torderattr.h5"
+#define FILE60  "tfpformat.h5"
+#define FILE61  "textlinksrc.h5"
+#define FILE62  "textlinktar.h5"
+
+
 
 
 /*-------------------------------------------------------------------------
@@ -5542,14 +5547,14 @@ error:
  *              Contains:
  *              1) an integer dataset
  *              2) a float dataset
- *              4) a double dataset
+ *              3) a double dataset
  *
  *-------------------------------------------------------------------------
  */
 static void
 gent_binary(void)
 {
- hid_t    fid, sid, did, tid;
+ hid_t    fid, sid, did;
  hsize_t  dims[1]  = {6};
  int      ibuf[6]  = {1,2,3,4,5,6};
  float    fbuf[6]  = {1,2,3,4,5,6};
@@ -6128,6 +6133,110 @@ out:
     
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    gent_fpformat
+ *
+ * Purpose:     Generate a file to be used in the floating point format test 
+ *              Contains:
+ *              1) a float dataset
+ *              2) a double dataset
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_fpformat(void)
+{
+ hid_t    fid, sid, did;
+ hsize_t  dims[1]  = {6};
+ double   dbuf[6]  = {-0.1234567, 0.1234567, 0, 0, 0, 0};
+ float    fbuf[6]  = {-0.1234567f, 0.1234567f, 0, 0, 0, 0};
+
+ fid = H5Fcreate(FILE60, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ sid = H5Screate_simple(1, dims, NULL);
+
+/*-------------------------------------------------------------------------
+ * double
+ *-------------------------------------------------------------------------
+ */
+ did = H5Dcreate2(fid, "double", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ H5Dwrite(did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
+ H5Dclose(did);
+
+
+/*-------------------------------------------------------------------------
+ * float
+ *-------------------------------------------------------------------------
+ */
+ did = H5Dcreate2(fid, "float", H5T_NATIVE_FLOAT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ H5Dwrite(did, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, fbuf);
+ H5Dclose(did);
+
+
+ /* close */
+ H5Sclose(sid);
+ H5Fclose(fid);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    gent_extlinks
+ *
+ * Purpose:     Generate 2 files to be used in the external links test 
+ *   External links point from one HDF5 file to an object (Group, Dataset, or
+ *    committed Datatype) in another file.
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_extlinks(void)
+{
+ hid_t    source_fid, target_fid, sid, did, gid, tid;
+ hsize_t  dims[1]  = {6};
+ int      buf[6]  = {1, 2, 3, 4, 5, 6};
+
+ /* create two files, a source and a target */
+ source_fid = H5Fcreate(FILE61, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ target_fid = H5Fcreate(FILE62, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ 
+
+/*-------------------------------------------------------------------------
+ * create a Group, a Dataset, and a committed Datatype in the target
+ *-------------------------------------------------------------------------
+ */
+
+ gid = H5Gcreate2(target_fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ sid = H5Screate_simple(1, dims, NULL);
+ did = H5Dcreate2(gid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+ H5Dclose(did);
+ H5Sclose(sid);
+ H5Gclose(gid);
+
+
+ sid = H5Screate_simple(1, dims, NULL);
+ did = H5Dcreate2(target_fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+ H5Dclose(did);
+ H5Sclose(sid);
+
+ tid = H5Tcopy(H5T_NATIVE_INT);
+ H5Tcommit2(target_fid, "type", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ H5Tclose(tid);
+
+/*-------------------------------------------------------------------------
+ * create external links in the source file pointing to the target objects
+ *-------------------------------------------------------------------------
+ */
+
+ H5Lcreate_external(FILE62, "group", source_fid, "ext_link1", H5P_DEFAULT, H5P_DEFAULT);
+ H5Lcreate_external(FILE62, "dset", source_fid, "ext_link2", H5P_DEFAULT, H5P_DEFAULT);
+ H5Lcreate_external(FILE62, "type", source_fid, "ext_link3", H5P_DEFAULT, H5P_DEFAULT);
+
+ /* close */
+ H5Fclose(source_fid);
+ H5Fclose(target_fid);
+}
+
+
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -6196,6 +6305,8 @@ int main(void)
     gent_hyperslab();
     gent_group_creation_order();
     gent_attr_creation_order();
+    gent_fpformat();
+    gent_extlinks();
 
 
     return 0;

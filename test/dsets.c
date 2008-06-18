@@ -41,8 +41,11 @@ const char *FILENAME[] = {
     "max_compact_dataset",
     "simple",
     "set_local",
+    "random_chunks",
+    "huge_chunks",
     NULL
 };
+#define FILENAME_BUF_SIZE       1024
 
 #define FILE_DEFLATE_NAME       "deflate.h5"
 
@@ -142,7 +145,22 @@ const char *FILENAME[] = {
 
 /* Names for random chunks test */
 #define NPOINTS         50
-#define RC_FILENAME "random_chunks.h5"
+
+/* Parameters for huge chunks test */
+#define HUGE_DATASET            "Dataset"
+#define HUGE_DIM                ((hsize_t)16 * 1024 * 1024 * 1024)
+#define HUGE_CHUNK_DIM          ((hsize_t)2 * 1024 * 1024 * 1024)
+#define TOO_HUGE_CHUNK_DIM      ((hsize_t)4 * 1024 * 1024 * 1024)
+#define HUGE_DATASET2           "Dataset2"
+#define HUGE_DIM2_0             ((hsize_t)16 * 1024)
+#define HUGE_DIM2_1             ((hsize_t)16 * 1024)
+#define HUGE_DIM2_2             ((hsize_t)16 * 1024)
+#define HUGE_CHUNK_DIM2_0       ((hsize_t)2 * 1024)
+#define HUGE_CHUNK_DIM2_1       ((hsize_t)1024)
+#define HUGE_CHUNK_DIM2_2       ((hsize_t)1024)
+#define TOO_HUGE_CHUNK_DIM2_0   ((hsize_t)4 * 1024)
+#define TOO_HUGE_CHUNK_DIM2_1   ((hsize_t)1024)
+#define TOO_HUGE_CHUNK_DIM2_2   ((hsize_t)1024)
 
 /* Shared global arrays */
 #define DSET_DIM1       100
@@ -339,7 +357,7 @@ test_create(hid_t file)
 static herr_t
 test_simple_io(hid_t fapl)
 {
-    char                filename[32];
+    char                filename[FILENAME_BUF_SIZE];
     hid_t		file, dataset, space, xfer;
     int			i, j, n;
     hsize_t		dims[2];
@@ -453,7 +471,7 @@ error:
 static herr_t
 test_userblock_offset(hid_t fapl)
 {
-    char                filename[32];
+    char                filename[FILENAME_BUF_SIZE];
     hid_t		file, fcpl, dataset, space;
     int			i, j;
     hsize_t		dims[2];
@@ -543,7 +561,7 @@ test_compact_io(hid_t fapl)
     hid_t       file, dataset, space, plist;
     hsize_t     dims[2];
     int         wbuf[16][8], rbuf[16][8];
-    char	filename[1024];
+    char	filename[FILENAME_BUF_SIZE];
     int         i, j, n;
 
     TESTING("compact dataset I/O");
@@ -645,7 +663,7 @@ test_max_compact(hid_t fapl)
     hsize_t     compact_size;
     herr_t      status;
     int         *wbuf, *rbuf;
-    char	filename[1024];
+    char	filename[FILENAME_BUF_SIZE];
     int         i,  n;
 
     TESTING("compact dataset of maximal size");
@@ -1940,8 +1958,6 @@ UNUSED
     data_corrupt[1] = 33;
     data_corrupt[2] = 27;
 
-    /* Temporarily disable this test because the changes in chunk caching conflicts with
-     * the way this test is conducted. -slu 2007/7/20 */
     if(H5Zregister (H5Z_CORRUPT) < 0) goto error;
     if(H5Pset_filter(dc, H5Z_FILTER_CORRUPT, 0, (size_t)3, data_corrupt) < 0) goto error;
     if(test_filter_internal(file,DSET_FLETCHER32_NAME_3,dc,DISABLE_FLETCHER32,DATA_CORRUPTED,&fletcher32_size) < 0) goto error;
@@ -2525,8 +2541,8 @@ test_nbit_int(hid_t file)
 {
 #ifdef H5_HAVE_FILTER_NBIT
     hid_t               dataset, datatype, mem_datatype, space, dc;
-    const hsize_t       size[2] = {2, 5};
-    const hsize_t       chunk_size[2] = {2,5};
+    hsize_t             size[2] = {2, 5};
+    hsize_t             chunk_size[2] = {2,5};
     int                 orig_data[2][5];
     int                 new_data[2][5];
     unsigned int        mask;
@@ -5139,7 +5155,7 @@ const H5Z_class_t H5Z_SET_LOCAL_TEST[1] = {{
 static herr_t
 test_set_local(hid_t fapl)
 {
-    char        filename[32];
+    char        filename[FILENAME_BUF_SIZE];
     hid_t       file;           /* File ID */
     hid_t       dsid;           /* Dataset ID */
     hid_t       sid;            /* Dataspace ID */
@@ -5968,8 +5984,9 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_random_chunks(void)
+test_random_chunks(hid_t fapl)
 {
+    char        filename[FILENAME_BUF_SIZE];
     hid_t       s=-1, m=-1, d=-1, dcpl=-1, file=-1;
     int         wbuf[NPOINTS],
                 rbuf[NPOINTS],
@@ -5986,8 +6003,10 @@ test_random_chunks(void)
 
     assert(NPOINTS < 100);
 
+    h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
+
     /* Create file for first test */
-    if((file = H5Fcreate(RC_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create dataspace */
     if((s = H5Screate_simple(2, dsize, NULL)) < 0) TEST_ERROR;
@@ -6038,7 +6057,7 @@ test_random_chunks(void)
     if(H5Fclose(file) < 0) TEST_ERROR;
 
     /* Open file again */
-    if((file = H5Fopen(RC_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Open dataset */
     if((d = H5Dopen2(file, dname, H5P_DEFAULT)) < 0) TEST_ERROR;
@@ -6069,12 +6088,9 @@ test_random_chunks(void)
     if(H5Dclose(d) < 0) TEST_ERROR;
     if(H5Fclose(file) < 0) TEST_ERROR;
 
-    /* Remove file */
-    HDremove(RC_FILENAME);
-
 
     /* Create file for second test */
-    if((file = H5Fcreate(RC_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Create dataspace with unlimited maximum dimensions */
     if((s = H5Screate_simple(2, dsize, dmax)) < 0) TEST_ERROR;
@@ -6131,7 +6147,7 @@ test_random_chunks(void)
     if(H5Fclose(file) < 0) TEST_ERROR;
 
     /* Open file again */
-    if((file = H5Fopen(RC_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     /* Open dataset */
     if((d = H5Dopen2(file, dname, H5P_DEFAULT)) < 0) TEST_ERROR;
@@ -6160,9 +6176,6 @@ test_random_chunks(void)
     if(H5Sclose(m) < 0) TEST_ERROR;
     if(H5Dclose(d) < 0) TEST_ERROR;
     if(H5Fclose(file) < 0) TEST_ERROR;
-
-    /* Remove file */
-    HDremove(RC_FILENAME);
 
     PASSED();
     return 0;
@@ -6361,6 +6374,118 @@ test_deprec(hid_t file)
 
 
 /*-------------------------------------------------------------------------
+ * Function: test_huge_chunks
+ *
+ * Purpose: Tests that datasets with chunks >4GB can't be created.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, May  1, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_huge_chunks(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       /* File ID */
+    hid_t       dcpl = -1;      /* Dataset creation property list ID */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hid_t       dsid = -1;      /* Dataset ID */
+    hsize_t     dim, chunk_dim; /* Dataset and chunk dimensions */
+    hsize_t     dim2[3], chunk_dim2[3];  /* Dataset and chunk dimensions */
+    herr_t      ret;            /* Generic return value */
+
+    TESTING("creating dataset with >4GB chunks");
+
+    h5_fixname(FILENAME[7], fapl, filename, sizeof filename);
+
+    /* Create file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+
+    /* Try to set too large of a chunk for 1-D dataset (# of elements) */
+    chunk_dim = TOO_HUGE_CHUNK_DIM;
+    H5E_BEGIN_TRY {
+        ret = H5Pset_chunk(dcpl, 1, &chunk_dim);
+    } H5E_END_TRY;
+    if(ret >= 0)
+	FAIL_PUTS_ERROR("    Set chunk size with too large of chunk dimensions.")
+
+    /* Try to set too large of a chunk for n-D dataset (# of elements) */
+    chunk_dim2[0] = TOO_HUGE_CHUNK_DIM2_0;
+    chunk_dim2[1] = TOO_HUGE_CHUNK_DIM2_1;
+    chunk_dim2[2] = TOO_HUGE_CHUNK_DIM2_2;
+    H5E_BEGIN_TRY {
+        ret = H5Pset_chunk(dcpl, 3, chunk_dim2);
+    } H5E_END_TRY;
+    if(ret >= 0)
+	FAIL_PUTS_ERROR("    Set chunk size with too large of chunk dimensions.")
+
+    /* Set 1-D chunk size */
+    chunk_dim = HUGE_CHUNK_DIM;
+    if(H5Pset_chunk(dcpl, 1, &chunk_dim) < 0) FAIL_STACK_ERROR
+
+    /* Create 1-D dataspace */
+    dim = HUGE_DIM;
+    if((sid = H5Screate_simple(1, &dim, NULL)) < 0) FAIL_STACK_ERROR
+
+    /* Try to create dataset */
+    H5E_BEGIN_TRY {
+        dsid = H5Dcreate2(fid, HUGE_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(dsid >= 0)
+	FAIL_PUTS_ERROR("    1-D Dataset with too large of chunk dimensions created.")
+
+    /* Close 1-D dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+
+
+    /* Set n-D chunk size */
+    chunk_dim2[0] = HUGE_CHUNK_DIM2_0;
+    chunk_dim2[1] = HUGE_CHUNK_DIM2_1;
+    chunk_dim2[2] = HUGE_CHUNK_DIM2_2;
+    if(H5Pset_chunk(dcpl, 3, chunk_dim2) < 0) FAIL_STACK_ERROR
+
+    /* Create n-D dataspace */
+    dim2[0] = HUGE_DIM2_0;
+    dim2[1] = HUGE_DIM2_1;
+    dim2[2] = HUGE_DIM2_2;
+    if((sid = H5Screate_simple(3, dim2, NULL)) < 0) FAIL_STACK_ERROR
+
+    /* Try to create dataset */
+    H5E_BEGIN_TRY {
+        dsid = H5Dcreate2(fid, HUGE_DATASET2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(dsid >= 0)
+	FAIL_PUTS_ERROR("    n-D Dataset with too large of chunk dimensions created.")
+
+    /* Close n-D dataspace */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+
+    /* Close everything else */
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_huge_chunks() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests the dataset interface (H5D)
@@ -6387,7 +6512,7 @@ main(void)
     if(envval == NULL)
         envval = "nomatch";
     if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
-        char		filename[1024];
+        char		filename[FILENAME_BUF_SIZE];
         hid_t		file, grp, fapl, fapl2;
         hbool_t new_format;
         int mdc_nelmts;
@@ -6395,12 +6520,19 @@ main(void)
         size_t rdcc_nbytes;
         double rdcc_w0;
 
+	/* Set the random # seed */
+	HDsrandom((unsigned long)HDtime(NULL));
+
 	/* Testing setup */
 	h5_reset();
 	fapl = h5_fileaccess();
 
-	/* Set the random # seed */
-	HDsrandom((unsigned long)HDtime(NULL));
+        /* Turn off the chunk cache, so all the chunks are immediately written to disk */
+        if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
+            goto error;
+        rdcc_nbytes = 0;
+        if(H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
+            goto error;
 
         /* Copy the file access property list */
         if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
@@ -6423,13 +6555,6 @@ main(void)
                 puts("Testing with old file format:");
                 my_fapl = fapl;
             } /* end else */
-
-            /* Turn off the chunk cache, so all the chunks are immediately written to disk */
-            if(H5Pget_cache(my_fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
-                goto error;
-            rdcc_nbytes = 0;
-            if(H5Pset_cache(my_fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
-                goto error;
 
             /* Create the file for this test */
             if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
@@ -6476,10 +6601,11 @@ main(void)
             nerrors += (test_filters_endianess(my_fapl) < 0	? 1 : 0);
             nerrors += (test_zero_dims(file) < 0		? 1 : 0);
             nerrors += (test_missing_chunk(file) < 0		? 1 : 0);
-            nerrors += (test_random_chunks() < 0		? 1 : 0);
+            nerrors += (test_random_chunks(my_fapl) < 0		? 1 : 0);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             nerrors += (test_deprec(file) < 0			? 1 : 0);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+            nerrors += (test_huge_chunks(my_fapl) < 0		? 1 : 0);
             
             if(H5Fclose(file) < 0)
                 goto error;
