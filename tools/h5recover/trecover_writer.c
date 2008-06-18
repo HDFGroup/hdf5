@@ -26,7 +26,7 @@
 #define SZDATASETNAME "IntArraySZCompressed" 
 
 int
-create_files(char *filename, char *ctl_filename, char *jnl_filename)
+create_files(const char *filename, const char *ctl_filename, const char *jnl_filename)
 {
     /*
      * Create a new file and the control file using H5F_ACC_TRUNC access,
@@ -60,7 +60,7 @@ close_file(hid_t fid)
 }
 
 void
-writer(hid_t file, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
+writer(hid_t f, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
 {
     hid_t       dataset;         /* dataset handle */
     hid_t       dataspace, plist;      /* handles */
@@ -80,7 +80,7 @@ writer(hid_t file, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
      * Describe the size of the array and create the data space for fixed
      * size dataset. 
      */
-    dataspace = H5Screate_simple(RANK, dims, NULL); 
+    dataspace = H5Screate_simple(rank, dims, NULL); 
 
     if (dstype & DSContig) {
     /* =============================================================
@@ -88,7 +88,7 @@ writer(hid_t file, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
      * datatype and default dataset creation properties.
      * =============================================================
      */
-    dataset = H5Dcreate2(file, DATASETNAME, H5T_STD_I32LE, dataspace,
+    dataset = H5Dcreate2(f, DATASETNAME, H5T_STD_I32LE, dataspace,
 			H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     /*
@@ -110,8 +110,8 @@ writer(hid_t file, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
      * =============================================================
      */
     plist     = H5Pcreate(H5P_DATASET_CREATE);
-                H5Pset_chunk(plist, RANK, dimschunk);
-    dataset = H5Dcreate2(file, CHUNKDATASETNAME, H5T_STD_I32LE,
+                H5Pset_chunk(plist, rank, dimschunk);
+    dataset = H5Dcreate2(f, CHUNKDATASETNAME, H5T_STD_I32LE,
                         dataspace, H5P_DEFAULT, plist, H5P_DEFAULT);
     /*
      * Write the data to the dataset using default transfer properties.
@@ -136,9 +136,9 @@ writer(hid_t file, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
      * =============================================================
      */
     plist     = H5Pcreate(H5P_DATASET_CREATE);
-                H5Pset_chunk(plist, RANK, dimschunk);
+                H5Pset_chunk(plist, rank, dimschunk);
                 H5Pset_deflate( plist, 6);
-    dataset = H5Dcreate2(file, ZDATASETNAME, H5T_STD_I32LE,
+    dataset = H5Dcreate2(f, ZDATASETNAME, H5T_STD_I32LE,
                         dataspace, H5P_DEFAULT, plist, H5P_DEFAULT);
     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
 		      H5P_DEFAULT, data);
@@ -165,9 +165,9 @@ writer(hid_t file, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk)
      * =============================================================
      */
     plist     = H5Pcreate(H5P_DATASET_CREATE);
-                H5Pset_chunk(plist, RANK, dimschunk);
+                H5Pset_chunk(plist, rank, dimschunk);
 		H5Pset_szip (plist, H5_SZIP_NN_OPTION_MASK, 8);
-    dataset = H5Dcreate2(file, SZDATASETNAME, H5T_STD_I32LE,
+    dataset = H5Dcreate2(f, SZDATASETNAME, H5T_STD_I32LE,
                         dataspace, H5P_DEFAULT, plist, H5P_DEFAULT);
     status = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
 		      H5P_DEFAULT, data);

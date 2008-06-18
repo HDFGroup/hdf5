@@ -13,12 +13,14 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include "hdf5.h"
+#include <unistd.h>
 #include <signal.h>
 #include <sys/time.h>
 #include <math.h>
 #include <stdlib.h>
 
 /*
+#include <unistd.h>
  * Header file for the trecover test program.
  *
  * Creator: Albert Cheng, Jan 28, 2008.
@@ -61,10 +63,10 @@ extern hid_t		file, ctl_file;    /* file id and control file id*/
 
 /* protocol definitions */
 void crasher(int crash_mode, CrasherParam_t *crash_param);
-void writer(hid_t file, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk);
+void writer(hid_t f, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk);
 void wakeup(int signum);
 void parser(int ac, char **av);	/* command option parser */
 void init(void);		/* initialization */
 void help(void);		/* initialization */
-int create_files(char *filename, char *ctl_filename, char *jnl_filename);
+int create_files(const char *filename, const char *ctl_filename, const char *jnl_filename);
 int close_file(hid_t fid);
