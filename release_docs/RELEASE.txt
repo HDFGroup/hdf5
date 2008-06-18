@@ -1,4 +1,4 @@
-HDF5 version 1.9.2 currently under development
+HDF5 version 1.9.5 currently under development
 ================================================================================
 
 
@@ -70,6 +70,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+	- Fixed the problem with the searching of target file for H5Lcreate_external().
+	  The searching pattern will depend on whether the target file's
+	  pathname is an absolute or a relative path. Please see the description
+	  in the RM for H5Lcreate_external().  (VC - 4/8/08)
         - Fixed possible file corruption bug when encoding datatype
             descriptions for compound datatypes whose size was between
             256 & 511 bytes and the file was opened with the "use the
@@ -90,13 +94,15 @@ Bug Fixes since HDF5-1.8.0 release
         - Fixed bug in h5diff that prevented datasets & attributes with
             variable-length string elements from comparing correctly.
             (QAK - 2008/02/28)
-
         - h5import bug on Windows w/binary datasets. fread in windows needs a
             binary file to be open with 'rb' instead of 'r' otherwise it
             terminates execution if an end of file character is found on the
             input file. Besides that the binary file generated needs to be open
             with 'wb' , otherwise an end of line character is read twice.
             (PVN - 2008/02/19)
+        - Fixed bug in h5dump that caused binary output to be made only for the first 
+           dataset, when several datasets were requested. (PVN - 2008/04/07)
+
 
 
     Documentation 
@@ -105,6 +111,14 @@ Bug Fixes since HDF5-1.8.0 release
 
     F90 APIs
     --------
+
+
+    C++ APIs
+    --------
+        - Fixed bug that caused segfaults in Attribute::read. (BMR - 2008/04/20)
+        - Fixed bug in PropList::getClassName to use portable HDfree instead
+            of free. (BMR - 2008/04/20)
+
 
 Platforms Tested
 ================

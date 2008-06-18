@@ -4554,7 +4554,7 @@ H5T_path_compound_subset(const H5T_path_t *p)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_path_compound_subset);
 
-    assert(p);
+    HDassert(p);
 
     if(p->are_compounds)
         ret_value = H5T_conv_struct_subset(&(p->cdata));

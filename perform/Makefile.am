@@ -39,10 +39,11 @@ endif
 
 # These are the programs that `make all' or `make tests' will build and which
 # `make check' will run. List them in the order they should be run.
-TEST_PROG = iopipe chunk overhead zip_perf perf_meta $(BUILD_ALL_PROGS)
+TEST_PROG = iopipe chunk overhead zip_perf perf_meta h5perf_serial $(BUILD_ALL_PROGS)
 check_PROGRAMS=$(TEST_PROG_PARA) $(TEST_PROG)
 
 h5perf_SOURCES=pio_perf.c pio_engine.c pio_timer.c
+h5perf_serial_SOURCES=sio_perf.c sio_engine.c sio_timer.c
 
 # These are the files that `make clean' (and derivatives) will remove from
 # this directory.
@@ -52,6 +53,7 @@ CLEANFILES=*.h5 *.raw *.dat x-gnuplot
 # depend on test or tools library.
 LDADD=$(LIBHDF5)
 h5perf_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
+h5perf_serial_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 perf_LDADD=$(LIBH5TEST) $(LIBHDF5)
 iopipe_LDADD=$(LIBH5TEST) $(LIBHDF5)
 zip_perf_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)

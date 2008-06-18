@@ -138,6 +138,10 @@ in the file file_io.win32.c and including it on the projects
 
 #endif /* H5_HAVE_WINDOWS */
 
+/* This definition is used for alterative handelling and testing of Windows
+paths.  This shouldn't need to be commented or removed. */
+#define H5_HAVE_WINDOW_PATH 1
+
 /* comment the following line out if you are not using N-bit filter*/
 /* #define H5_HAVE_FILTER_NBIT 1*/
 

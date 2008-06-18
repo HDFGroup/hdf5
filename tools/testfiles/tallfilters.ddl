@@ -7,7 +7,7 @@ DATASET "all" {
    DATASPACE  SIMPLE { ( 20, 10 ) / ( 20, 10 ) }
    STORAGE_LAYOUT {
       CHUNKED ( 10, 5 )
-      SIZE 458
+      SIZE 458 (42.8%COMPRESSION)
     }
    FILTERS {
       PREPROCESSING SHUFFLE

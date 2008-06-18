@@ -45,6 +45,7 @@ setlocal enabledelayedexpansion
 pushd %~dp0
 
 set nerrors=0
+if "%1"=="/?" goto help
 goto main
 
 rem Print a help message

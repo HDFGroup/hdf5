@@ -46,10 +46,10 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5AC.c H5AC2.c H5B.c H5Bcache.c \
         H5B2.c H5B2cache.c H5B2dbg.c H5B2int.c H5B2stat.c H5B2test.c \
         H5C.c H5C2.c H5C2journal.c H5CS.c \
-        H5D.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
+        H5D.c H5Dchunk.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
         H5Ddeprec.c H5Defl.c H5Dfill.c H5Dint.c \
         H5Dio.c \
-        H5Distore.c H5Dmpio.c H5Doh.c H5Dselect.c H5Dtest.c \
+        H5Distore.c H5Dmpio.c H5Doh.c H5Dscatgath.c H5Dselect.c H5Dtest.c \
         H5E.c H5Edeprec.c H5Eint.c \
         H5F.c H5Fdbg.c H5Ffake.c H5Fmount.c H5Fsfile.c H5Fsuper.c H5Ftest.c \
         H5FD.c H5FDcore.c  \
