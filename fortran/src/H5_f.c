@@ -484,6 +484,8 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
       h5t_flags[28] = (int_f)H5T_STR_ERROR;
       h5t_flags[29] = (int_f)H5T_VLEN;
       h5t_flags[30] = (int_f)H5T_ARRAY;
+      h5t_flags[31] = (int_f)H5T_DIR_ASCEND;
+      h5t_flags[32] = (int_f)H5T_DIR_DESCEND;
 /*
  *  H5Z flags
  */
