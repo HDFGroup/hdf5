@@ -29,6 +29,7 @@
 ## test file names 
 ###############################################################################
 
+
 FILE1=h5diff_basic1.h5
 FILE2=h5diff_basic2.h5
 FILE3=h5diff_types.h5
@@ -56,7 +57,7 @@ if test -z "$srcdir"; then
    srcdir=.
 fi
 
-test -d ../testfiles || mkdir ../testfiles
+test -d ./testfiles || mkdir ./testfiles
 
 # Parse option
 #   -p   run ph5diff tests
@@ -171,9 +172,9 @@ STDERR_FILTER() {
 # that throws the shell script off.
 #
 TOOLTEST() {
-    expect="$srcdir/../testfiles/$1"
-    actual="../testfiles/`basename $1 .txt`.out"
-    actual_err="../testfiles/`basename $1 .txt`.err"
+    expect="$srcdir/testfiles/$1"
+    actual="./testfiles/`basename $1 .txt`.out"
+    actual_err="./testfiles/`basename $1 .txt`.err"
     actual_sav=${actual}-sav
     actual_err_sav=${actual_err}-sav
     shift
@@ -191,7 +192,7 @@ TOOLTEST() {
 	echo "#############################"
 	echo "Expected output for '$H5DIFF $@'" 
 	echo "#############################"
-	cd $srcdir/../testfiles
+	cd $srcdir/testfiles
 	if [ "`uname -s`" = "TFLOPS O/S" ]; then
 	    eval $RUNCMD $H5DIFF_BIN $@
 	else
