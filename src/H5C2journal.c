@@ -2897,7 +2897,7 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
     char * hexdata = NULL;
     size_t hexlength;
     herr_t ret_value = SUCCEED;
-    uint8_t * bodydata = strdup(body);
+    uint8_t * bodydata;
 
     FUNC_ENTER_NOAPI(H5C2_jb__journal_entry, FAIL)
 #if 0 /* JRM */
@@ -2908,6 +2908,15 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
     HDassert(struct_ptr);
     HDassert(bodydata);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+
+    /* Make a copy of body data */
+    if ( (bodydata = H5MM_malloc(length)) == NULL ) {
+
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                   "allocation of assembly buffer failed.");
+    }
+
+    HDmemcpy(bodydata, body, length);
 	
     /* Verify that the supplied transaction is in progress */
     if ( ( struct_ptr->trans_in_prog != TRUE ) ||
