@@ -3078,6 +3078,10 @@ H5C2_mark_pinned_entry_dirty(H5F_t * f,
     /* update for change in entry size if necessary */
     if ( ( size_changed ) && ( entry_ptr->size != new_size ) ) {
 
+        /* Release the current image */
+        if( entry_ptr->image_ptr )
+            entry_ptr->image_ptr = H5MM_xfree(entry_ptr->image_ptr);
+
         /* do a flash cache size increase if appropriate */
         if ( cache_ptr->flash_size_increase_possible ) {
 
@@ -3567,6 +3571,10 @@ H5C2_resize_pinned_entry(H5F_t * f,
 
     /* update for change in entry size if necessary */
     if ( entry_ptr->size != new_size ) {
+
+        /* Release the current image */
+        if( entry_ptr->image_ptr )
+            entry_ptr->image_ptr = H5MM_xfree(entry_ptr->image_ptr);
 
         /* do a flash cache size increase if appropriate */
         if ( cache_ptr->flash_size_increase_possible ) {
@@ -5630,6 +5638,10 @@ H5C2_unprotect(H5F_t *		    f,
 
         /* update for change in entry size if necessary */
         if ( ( size_changed ) && ( entry_ptr->size != new_size ) ) {
+
+	    /* Release the current image */
+	    if( entry_ptr->image_ptr )
+		entry_ptr->image_ptr = H5MM_xfree(entry_ptr->image_ptr);
 
             /* do a flash cache size increase if appropriate */
             if ( cache_ptr->flash_size_increase_possible ) {

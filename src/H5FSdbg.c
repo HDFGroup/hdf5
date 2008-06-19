@@ -93,6 +93,7 @@ H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int 
     H5FS_t	*fspace = NULL;         /* Free space header info */
     H5FS_prot_t fs_prot;                /* Information for protecting free space manager */
     herr_t      ret_value = SUCCEED;    /* Return value */
+    H5FS_hdr_cache_ud_t cache_udata;    /* User-data for cache callback */
 
     FUNC_ENTER_NOAPI(H5FS_debug, FAIL)
 
@@ -109,11 +110,13 @@ H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int 
     fs_prot.nclasses = 0;
     fs_prot.classes = NULL;
     fs_prot.cls_init_udata = NULL;
+    cache_udata.fs_prot = &fs_prot;
+    cache_udata.f = f;
 
     /*
      * Load the free space header.
      */
-    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, addr, &fs_prot, NULL, H5AC_READ)))
+    if(NULL == (fspace = H5AC2_protect(f, dxpl_id, H5AC2_FSPACE_HDR, addr, H5FS_HEADER_SIZE(f), &cache_udata, H5AC2_READ)))
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "unable to load free space header")
 
     /* Print opening message */
@@ -163,7 +166,7 @@ H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int 
 	      fspace->alloc_sect_size);
 
 done:
-    if(fspace && H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, addr, fspace, H5AC__NO_FLAGS_SET) < 0)
+    if(fspace && H5AC2_unprotect(f, dxpl_id, H5AC2_FSPACE_HDR, addr, (size_t)0, fspace, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_PROTECT, FAIL, "unable to release free space header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -230,6 +233,7 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int
     H5FS_prot_t fs_prot;                /* Information for protecting free space manager */
     H5FS_client_t client;               /* The client of the free space */
     herr_t      ret_value = SUCCEED;    /* Return value */
+    H5FS_hdr_cache_ud_t cache_udata;    /* User-data for cache callback */
 
     FUNC_ENTER_NOAPI(H5FS_sects_debug, FAIL)
 
@@ -248,18 +252,20 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int
     fs_prot.nclasses = 0;
     fs_prot.classes = NULL;
     fs_prot.cls_init_udata = NULL;
+    cache_udata.fs_prot = &fs_prot;
+    cache_udata.f = f;
 
     /*
      * Load the free space header.
      */
-    if(NULL == (fspace = H5AC_protect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, &fs_prot, NULL, H5AC_READ)))
+    if(NULL == (fspace = H5AC2_protect(f, dxpl_id, H5AC2_FSPACE_HDR, fs_addr, H5FS_HEADER_SIZE(f), &cache_udata, H5AC2_READ)))
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, FAIL, "unable to load free space header")
 
     /* Retrieve the client id */
     client = fspace->client;
 
     /* Release the free space header */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC2_unprotect(f, dxpl_id, H5AC2_FSPACE_HDR, fs_addr, (size_t)0, fspace, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_PROTECT, FAIL, "unable to release free space header")
     fspace = NULL;
 
@@ -281,7 +287,7 @@ H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t UNUSED addr, FILE *stream, int
     } /* end switch */
 
 done:
-    if(fspace && H5AC_unprotect(f, dxpl_id, H5AC_FSPACE_HDR, fs_addr, fspace, H5AC__NO_FLAGS_SET) < 0)
+    if(fspace && H5AC2_unprotect(f, dxpl_id, H5AC2_FSPACE_HDR, fs_addr, (size_t)0, fspace, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_FSPACE, H5E_PROTECT, FAIL, "unable to release free space header")
 
     FUNC_LEAVE_NOAPI(ret_value)

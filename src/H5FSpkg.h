@@ -35,7 +35,7 @@
 #include "H5FSprivate.h"	/* File free space                      */
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 #include "H5SLprivate.h"	/* Skip lists				*/
 
 /**************************/
@@ -101,6 +101,19 @@ typedef struct H5FS_prot_t {
     void *cls_init_udata;                       /* Pointer to class init user data */
 } H5FS_prot_t;
 
+/* Callback info for loading a free space header into the cache */
+typedef struct H5FS_hdr_cache_ud_t {
+    H5F_t *f;                  /* File that free space header is within */
+    H5FS_prot_t * fs_prot;     /* user data for protecting */
+} H5FS_hdr_cache_ud_t;
+
+/* Callback info for loading free space section info into the cache */
+typedef struct H5FS_sinfo_cache_ud_t {
+    H5F_t *f;                  /* File that free space section info is within */
+    H5FS_t *fspace;            /* free space manager */
+    hid_t dxpl_id;
+} H5FS_sinfo_cache_ud_t;
+
 /* Free space section bin info */
 typedef struct H5FS_bin_t {
     size_t tot_sect_count;      /* Total # of sections in this bin */
@@ -120,7 +133,7 @@ typedef struct H5FS_node_t {
 /* Information about sections managed */
 typedef struct H5FS_sinfo_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
-    H5AC_info_t cache_info;
+    H5AC2_info_t cache_info;
 
 /* Stored information */
     H5FS_bin_t *bins;           /* Array of lists of lists of free sections   */
@@ -143,7 +156,7 @@ typedef struct H5FS_sinfo_t {
 /* Main free space info */
 struct H5FS_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
-    H5AC_info_t cache_info;
+    H5AC2_info_t cache_info;
 
 /* Stored information */
     /* Statistics about sections managed */
@@ -179,10 +192,10 @@ struct H5FS_t {
 /*****************************/
 
 /* H5FS header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FSPACE_HDR[1];
+H5_DLLVAR const H5AC2_class_t H5AC2_FSPACE_HDR[1];
 
 /* H5FS section info inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_FSPACE_SINFO[1];
+H5_DLLVAR const H5AC2_class_t H5AC2_FSPACE_SINFO[1];
 
 /* Declare a free list to manage the H5FS_node_t struct */
 H5FL_EXTERN(H5FS_node_t);
@@ -215,8 +228,8 @@ H5_DLL herr_t H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, haddr_t fs_addr, haddr_t client_addr);
 
 /* Metadata cache callbacks */
-H5_DLL herr_t H5FS_cache_hdr_dest(H5F_t *f, H5FS_t *hdr);
-H5_DLL herr_t H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo);
+H5_DLL herr_t H5FS_cache_hdr_dest(H5FS_t *hdr);
+H5_DLL herr_t H5FS_cache_sinfo_dest(H5FS_sinfo_t *sinfo);
 
 /* Sanity check routines */
 #ifdef H5FS_DEBUG
