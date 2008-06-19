@@ -178,11 +178,11 @@ main (int ac, char **av)
 	/*===================================================
 	 * rmode:
 	 *    Reopen a previous file with Journaling on, extend the dataset
-	 *    to 2NX rows, write data, crash.
+	 *    to 4NX rows, write data, crash.
 	 *    Need to turn off H5Pset_sieve_buf_size( hid_t fapl_id, hsize_t size  ) so that raw data will be flushed immediately.
 	 * pmode:
 	 *    Patch mode (similar to rmode but no data write nor crash).
-	 *    Reopen a restored file, extend the dataset to 2NX rows,
+	 *    Reopen a restored file, extend the dataset to 4NX rows,
 	 *    do not write data, close file.
 	 *===================================================*/
 
@@ -216,14 +216,17 @@ main (int ac, char **av)
 	}
 
 	dataset=H5Dopen2(file, DATASETNAME, H5P_DEFAULT);
-	/* extend the dataset to 2NX rows. */
-	dimsf[0] = 2*NX;
+	/* extend the dataset to 4NX rows. */
+	dimsf[0] = 4*NX;
 	dimsf[1] = NY;
 	H5Dset_extent(dataset, dimsf);
 
 	if (!pmode){
 	    /* write data to new rows and crash */
+	    /* Do 3 writes to generate at least 3 transactions. */
 	    writedata(dataset, NX, 2*NX-1);
+	    writedata(dataset, 2*NX, 3*NX-1);
+	    writedata(dataset, 3*NX, 4*NX-1);
 	    /* simulate a crash ending of the aiplication */
 	    fprintf(stderr, "going to crash myself\n");
 	    mypid = getpid();
