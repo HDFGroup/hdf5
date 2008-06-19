@@ -26,6 +26,7 @@ rem ############################################################################
 rem test file names 
 rem ############################################################################
 
+
 set file1=h5diff_basic1.h5
 set file2=h5diff_basic2.h5
 set file3=h5diff_types.h5
@@ -48,7 +49,7 @@ set verbose=yes
 rem default to run h5diff tests
 set pmode=
 
-if not exist ..\testfiles mkdir ..\testfiles
+if not exist .\testfiles mkdir .\testfiles
 
 rem Parse options
 rem On Windows, we don't parse, because we only want to worry about
@@ -98,9 +99,9 @@ rem `.out'.  The actual output is not removed if HDF5_NOCLEANUP has a
 rem non-zero value.
 rem
 :tooltest
-    set expect=%CD%\..\testfiles\%1
-    set actual=%CD%\..\testfiles\%~n1.out
-    set actual_err=%CD%\..\testfiles\~n1.err
+    set expect=%CD%\testfiles\%1
+    set actual=%CD%\testfiles\%~n1.out
+    set actual_err=%CD%\testfiles\~n1.err
     set actual_sav=%actual%-sav
     set actual_err_sav=%actual_err%-sav
     
@@ -125,7 +126,7 @@ rem
         rem Remove quotes here, because Linux 'echo' command strips them
         echo.Expected output for 'h5diff %params:"=%'
         echo.#############################
-        pushd ..\testfiles
+        pushd testfiles
         %h5diff_bin% %params%
         popd
     ) > %actual% 2> %actual_err%
