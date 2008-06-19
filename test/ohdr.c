@@ -213,7 +213,7 @@ main(void)
      */
     TESTING("object header overflow in memory");
     for (i=0; i<40; i++) {
-        time_new = (i+1)*1000+1;
+        time_new = (i+1)*1000+1000000;
         if (H5O_modify(&oh_ent, H5O_MTIME_ID, H5O_NEW_MESG, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT)<0) {
 	    H5_FAILED();
 	    H5Eprint(stdout);
