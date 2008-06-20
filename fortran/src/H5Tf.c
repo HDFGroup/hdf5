@@ -1840,3 +1840,29 @@ nh5tcompiler_conv_c ( hid_t_f *src_id, hid_t_f *dst_id, int_f *c_flag)
   ret_value = 0;
   return ret_value;
 }
+
+/*----------------------------------------------------------------------------
+ * Name:        h5tget_native_type_c
+ * Purpose:     Call H5Tget_native_type
+ * Inputs:    
+ *              dtype_id         - Datatype identifier for the dataset datatype.
+ *              direction        - Direction of search.
+ * Outputs:     native_dtype_id  - The native datatype identifier for the specified dataset datatype
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M.S. Breitenfeld
+ *              June 18, 2008
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f
+nh5tget_native_type_c(hid_t_f *dtype_id, int_f *direction, hid_t_f *native_dtype_id)
+{
+  int ret_value = -1;
+  hid_t status;
+
+  status = H5Tget_native_type( (hid_t)*dtype_id, (H5T_direction_t)*direction);
+  if ( status < 0  ) return ret_value;
+  *native_dtype_id = (hid_t_f)status;
+  ret_value = 0;
+  return ret_value;
+}

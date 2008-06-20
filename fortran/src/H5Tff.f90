@@ -3646,4 +3646,61 @@ CONTAINS
 
   END SUBROUTINE h5tcompiler_conv_f
 
+!----------------------------------------------------------------------
+! Name:		h5tget_native_type_f 
+!
+! Purpose:  	Returns the native datatype of a specified datatype.
+!		
+! Inputs:  
+!		dtype_id   - Datatype identifier for the dataset datatype.
+!                        *
+!               direction  - Direction of search: 
+!                    H5T_DIR_DEFAULT     = 0,    /*default direction is inscendent */
+!                    H5T_DIR_ASCEND      = 1,    /*in inscendent order             */
+!                    H5T_DIR_DESCEND     = 2     /*in descendent order             */
+!               * NOTE: In C it is defined as a structure: H5T_direction_t
+!
+! Outputs:  
+!               native_dtype_id  - The native datatype identifier for the specified dataset datatype
+!		hdferr:          - Error code		
+!				     Success:  0
+!				     Failure: -1   
+! Optional parameters:
+!				NONE			
+!
+! Programmer:	M.S. Breitenfeld
+!		June 18, 2008	
+!
+! Modifications:  N/A
+!
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5tget_native_type_f(dtype_id, direction, native_dtype_id, hdferr) 
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5tget_native_type_f
+!DEC$endif
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dtype_id  ! Datatype identifier
+    INTEGER, INTENT(IN) :: direction  ! Direction of search:
+                                      ! H5T_DIR_ASCEND_F      = 1  in inscendent order
+                                      ! H5T_DIR_DESCEND_F     = 2  in descendent order
+    INTEGER(HID_T), INTENT(OUT) :: native_dtype_id  ! The native datatype identifier
+    INTEGER, INTENT(OUT) :: hdferr    ! Error code:
+                                      ! 0 on success and -1 on failure
+    INTERFACE
+       INTEGER FUNCTION h5tget_native_type_c(dtype_id, direction, native_dtype_id)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TGET_NATIVE_TYPE_C'::h5tget_native_type_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: dtype_id 
+         INTEGER, INTENT(IN) :: direction
+         INTEGER(HID_T), INTENT(OUT) :: native_dtype_id
+       END FUNCTION h5tget_native_type_c
+    END INTERFACE
+    
+    hdferr = h5tget_native_type_c(dtype_id, direction, native_dtype_id)
+  END SUBROUTINE h5tget_native_type_f
+
 END MODULE H5T

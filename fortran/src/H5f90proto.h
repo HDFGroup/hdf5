@@ -666,6 +666,7 @@ H5_FCDLL int_f nh5arename_c( hid_t_f *loc_id,
 #   define nh5tencode_c    H5_FC_FUNC_(h5tencode_c, H5TENCODE_C)
 #   define nh5tget_create_plist_c H5_FC_FUNC_(h5tget_create_plist_c, H5TGET_CREATE_PLIST_C)
 #   define nh5tcompiler_conv_c H5_FC_FUNC_(h5tcompiler_conv_c, H5TCOMPILER_CONV_C)
+#   define nh5tget_native_type_c H5_FC_FUNC_(h5tget_native_type_c, H5TGET_NATIVE_TYPE_C)
 
 H5_FCDLL int_f nh5tcreate_c(int_f *class, size_t_f *size, hid_t_f *type_id);
 H5_FCDLL int_f nh5topen_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f *tapl_id );
@@ -728,7 +729,7 @@ H5_FCDLL int_f nh5tdecode_c ( _fcd buf, hid_t_f *obj_id );
 H5_FCDLL int_f nh5tencode_c (_fcd buf, hid_t_f *obj_id, size_t_f *nalloc );
 H5_FCDLL int_f nh5tget_create_plist_c ( hid_t_f *dtype_id,  hid_t_f *dtpl_id);
 H5_FCDLL int_f nh5tcompiler_conv_c ( hid_t_f *src_id, hid_t_f *dst_id, int_f *c_flag);
-
+H5_FCDLL int_f nh5tget_native_type_c(hid_t_f *dtype_id, int_f *direction, hid_t_f *native_dtype_id);
 
 /*
  * Functions from H5Of.c
