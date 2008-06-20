@@ -1,6 +1,3 @@
-#############################
-Expected output for 'h5diff -h'
-#############################
 usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]] 
   file1                    File name of the first HDF5 file
   file2                    File name of the second HDF5 file
