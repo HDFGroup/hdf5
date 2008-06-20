@@ -45,7 +45,7 @@ set /a nerrors=0
 set verbose=yes
 
 set srcfile=h5copytst.h5
-set indir=%CD%\..\testfiles
+set indir=%CD%\testfiles
 set outdir=%CD%\..\testfiles
 
 if not exist %outdir% mkdir %outdir%
