@@ -2906,7 +2906,6 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
 #endif /* JRM */	
     /* Check Arguments */
     HDassert(struct_ptr);
-    HDassert(bodydata);
     HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
 
     /* Make a copy of body data */
