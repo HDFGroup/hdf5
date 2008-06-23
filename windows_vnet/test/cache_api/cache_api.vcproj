@@ -32,7 +32,7 @@
 				ProgramDataBaseFileName=".\../../../test/cache_api/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -42,7 +42,7 @@
 				OutputFile=".\../../../test/cache_api/Debug/cache_api.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/cache_api/Debug/cache_api.pdb"
 				SubSystem="1"
@@ -105,7 +105,7 @@
 				OutputFile=".\../../../test/cache_api/Release/cache_api.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../test/cache_api/Release/cache_api.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>

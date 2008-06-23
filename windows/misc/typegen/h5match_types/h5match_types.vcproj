@@ -19,7 +19,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\fortran\src"
+			OutputDirectory="..\..\..\..\fortran\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
@@ -58,7 +58,7 @@
 				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool
@@ -106,12 +106,12 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
-				CommandLine="$(TargetPath)"
+				CommandLine="cd $(TargetDir)..\.. &amp;&amp; $(TargetPath)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\..\..\fortran\src"
+			OutputDirectory="..\..\..\..\fortran\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
@@ -199,12 +199,12 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
-				CommandLine="$(TargetPath)"
+				CommandLine="cd $(TargetDir)..\.. &amp;&amp; $(TargetPath)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\fortran\src"
+			OutputDirectory="..\..\..\..\fortran\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
@@ -290,12 +290,12 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
-				CommandLine="$(TargetPath)"
+				CommandLine="cd $(TargetDir)..\.. &amp;&amp; $(TargetPath)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\..\..\fortran\src"
+			OutputDirectory="..\..\..\..\fortran\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
@@ -382,7 +382,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
-				CommandLine="$(TargetPath)"
+				CommandLine="cd $(TargetDir)..\.. &amp;&amp; $(TargetPath)"
 			/>
 		</Configuration>
 	</Configurations>

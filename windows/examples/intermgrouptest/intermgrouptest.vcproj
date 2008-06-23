@@ -57,7 +57,7 @@
 				ProgramDataBaseFileName=".\../../../examples/intermgrouptest/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool
@@ -78,7 +78,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\..\proj\hdf5\debug,..\..\..\hdf5lib\debug\lib"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\../../../examples/intermgrouptest/Debug/intermgrouptest.pdb"
 				SubSystem="1"
@@ -172,7 +172,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\..\proj\hdf5\debug,..\..\..\hdf5lib\debug\lib"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\../../../examples/intermgrouptest/Debug/intermgrouptest.pdb"
 				SubSystem="1"

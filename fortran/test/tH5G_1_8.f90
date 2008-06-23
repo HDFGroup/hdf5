@@ -22,7 +22,7 @@ SUBROUTINE group_test(cleanup, total_error)
 
   INTEGER(HID_T) :: fapl, fapl2, my_fapl ! /* File access property lists */
   
-  INTEGER :: error
+  INTEGER :: error, ret_total_error
 
 !  WRITE(*,*) "TESTING GROUPS"
   CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl, error)
@@ -40,19 +40,60 @@ SUBROUTINE group_test(cleanup, total_error)
   my_fapl = fapl2
 
   
-  CALL mklinks(fapl2, total_error)
-  CALL cklinks(fapl2, total_error)
+  ret_total_error = 0
+  CALL mklinks(fapl2, ret_total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing building a file with assorted links', &
+       total_error)
 
-  CALL group_info(cleanup, fapl2,total_error)
+  ret_total_error = 0
+  CALL cklinks(fapl2, ret_total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing links are correct and building assorted links', &
+       total_error)
+
+  ret_total_error = 0
+  CALL group_info(cleanup, fapl2, ret_total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing create group with creation order indices, test querying group info', &
+       total_error)
+
 ! CALL ud_hard_links(fapl2,total_error)
-  CALL timestamps(cleanup, fapl2, total_error)
-  CALL test_move_preserves(fapl2, total_error)
-  CALL delete_by_idx(cleanup,fapl2, total_error)
-  CALL test_lcpl(cleanup, fapl, total_error)
+  ret_total_error = 0
+  CALL timestamps(cleanup, fapl2, ret_total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing disabling tracking timestamps for an object', &
+       total_error)
 
-  CALL objcopy(fapl, total_error)
+  ret_total_error = 0
+  CALL test_move_preserves(fapl2, ret_total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing moving and renaming links preserves their properties', &
+       total_error)
 
-  CALL lifecycle(cleanup, fapl2, total_error)
+  ret_total_error = 0
+  CALL delete_by_idx(cleanup,fapl2,ret_total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing deleting links by index', &
+       total_error)
+  
+  ret_total_error = 0
+  CALL test_lcpl(cleanup, fapl, ret_total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing link creation property lists', &
+       total_error)
+
+  ret_total_error = 0
+  CALL objcopy(fapl, ret_total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing object copy', &
+       total_error)
+
+  ret_total_error = 0
+  CALL lifecycle(cleanup, fapl2, ret_total_error)
+  CALL write_test_status(ret_total_error, &
+       ' Testing adding links to a group follow proper "lifecycle"', &
+       total_error)
 
   IF(cleanup) CALL h5_cleanup_f("TestLinks", H5P_DEFAULT_F, error)
   CALL check("h5_cleanup_f", error, total_error)
@@ -668,7 +709,6 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
     INTEGER(HID_T):: group_id
     INTEGER(HID_T):: fcpl_id ! /* Group creation property list ID */
     INTEGER(HID_T):: lcpl_id
-    INTEGER(HID_T):: lcpl2_id
     !H5O_info_t oinfo;
     !H5L_info_t linfo;
     INTEGER :: old_cset
@@ -877,18 +917,13 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 
   INTEGER(HID_T) :: fid            !/* File ID */
   INTEGER(HID_T) :: gid            !/* Group ID */
-  INTEGER(HID_T) :: gid2           !/* Datatype ID */
   INTEGER(HID_T) :: gcpl           !/* Group creation property list ID */
   INTEGER(size_t) :: lheap_size_hint !/* Local heap size hint */
   INTEGER :: max_compact            !/* Maximum # of links to store in group compactly */
   INTEGER :: min_dense              !/* Minimum # of links to store in group "densely" */
   INTEGER :: est_num_entries	!/* Estimated # of entries in group */
   INTEGER :: est_name_len		!/* Estimated length of entry name */
-  INTEGER :: nmsgs		        !/* Number of messages in group's header */
-  CHARACTER(LEN=NAME_BUF_SIZE) :: objname ! /* Object name */
   CHARACTER(LEN=NAME_BUF_SIZE) :: filename = 'fixx.h5'
-  INTEGER :: empty_size             ! /* Size of an empty file */
-  INTEGER :: u                      ! /* Local index variable */
   INTEGER(SIZE_T) :: LIFECYCLE_LOCAL_HEAP_SIZE_HINT = 256
   INTEGER :: LIFECYCLE_MAX_COMPACT = 4
   INTEGER :: LIFECYCLE_MIN_DENSE = 3
@@ -1030,7 +1065,6 @@ SUBROUTINE lifecycle(cleanup, fapl2, total_error)
 !    H5L_info_t		linfo2;
 
   CHARACTER(LEN=12), PARAMETER :: filename ='TestLinks.h5'
-  CHARACTER(LEN=12) :: linkval
 
 !  TYPE(C_PTR) :: linkval
 
@@ -1106,7 +1140,6 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
 
   CHARACTER(LEN=7) :: objname   ! /* Object name */
   CHARACTER(LEN=8) :: filename = 'file0.h5' ! /* File name */
-  CHARACTER(LEN=7) :: tmpname   ! /* Temporary link name */
   CHARACTER(LEN=12), PARAMETER :: CORDER_GROUP_NAME = "corder_group"
 
   LOGICAL :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute 
@@ -1124,11 +1157,8 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
   !
   !
   !
-  CHARACTER(LEN=6)  :: filename1 
-  CHARACTER(LEN=6)  :: filename2
   CHARACTER(LEN=80) :: fix_filename1
   CHARACTER(LEN=80) :: fix_filename2
-  INTEGER(SIZE_T) :: size_tmp
   INTEGER(HSIZE_T) :: htmp
 
   LOGICAL :: cleanup
@@ -1332,7 +1362,6 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   CHARACTER(LEN=10) :: tmpname_big !/* to big temporary link name */
 
   CHARACTER(LEN=7) :: valname     !/* Link value name */
-  CHARACTER(LEN=7) :: tmpval      !/* Temporary link value */
   CHARACTER(LEN=2) :: chr2
   INTEGER(SIZE_T) :: size_tmp
   INTEGER :: error
@@ -1439,7 +1468,6 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
      	                              !  H5L_LINK_ERROR _F    - Error
   INTEGER :: address  ! If the link is a hard link, address specifies the file address that the link points to
   INTEGER(HSIZE_T) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value
-  INTEGER(HSIZE_T) :: data_size   ! Indicates the size, in the number of characters, of the attribute
 
   CHARACTER(LEN=1024) :: filename = 'tempfile.h5'
   INTEGER, PARAMETER :: TEST6_DIM1 = 8, TEST6_DIM2 = 7
@@ -1795,14 +1823,13 @@ SUBROUTINE lapl_nlinks( fapl, total_error)
   INTEGER(HID_T) :: fid = (-1) !/* File ID */
   INTEGER(HID_T) :: gid = (-1), gid2 = (-1) !/* Group IDs */
   INTEGER(HID_T) :: plist = (-1) ! /* lapl ID */
-  INTEGER(HID_T) :: tid = (-1), sid = (-1), did = (-1) ! /* Other IDs */
+  INTEGER(HID_T) :: tid = (-1) ! /* Other IDs */
   INTEGER(HID_T) :: gapl = (-1), dapl = (-1), tapl = (-1) ! /* Other property lists */
   
   CHARACTER(LEN=7) :: objname ! /* Object name */
   INTEGER(size_t) :: name_len ! /* Length of object name */
   CHARACTER(LEN=12) :: filename = 'TestLinks.h5'
   INTEGER(size_t) ::              nlinks ! /* nlinks for H5Pset_nlinks */
-  INTEGER(hsize_t), DIMENSION(2) :: dims
   INTEGER(size_t) :: buf_size = 7
   
 !  WRITE(*,*) "adjusting nlinks with LAPL (w/new group format)"

@@ -148,7 +148,7 @@
 				ProgramDataBaseFileName=".\../../../test/mount/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -158,7 +158,7 @@
 				OutputFile=".\../../../test/mount/Debug/mount.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/mount/Debug/mount.pdb"
@@ -222,7 +222,7 @@
 				OutputFile=".\../../../test/mount/Release/mount.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/mount/Release/mount.pdb"
 				SubSystem="1"

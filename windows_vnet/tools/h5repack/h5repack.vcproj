@@ -43,7 +43,7 @@
 				OutputFile=".\../../../tools/h5repack/Release/h5repack.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../tools/h5repack/Release/h5repack.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -95,7 +95,7 @@
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -106,7 +106,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories=""
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../tools/h5repack/Debug/h5repack.pdb"
 				SubSystem="1"

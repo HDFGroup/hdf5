@@ -77,8 +77,8 @@ int     opt_iter      = 1;
 int     opt_stripe    = -1;
 int     opt_correct   = 0;
 int     amode         = O_RDWR | O_CREAT;
-char    opt_file[256] = "/tmp/test.out\0";
-char    opt_pvfstab[256] = "notset\0";
+char    opt_file[256] = "perftest.out";
+char    opt_pvfstab[256] = "notset";
 int     opt_pvfstab_set = 0;
 
 /* function prototypes */
@@ -372,6 +372,8 @@ die_jar_jar_die:
 
 	free(tmp);
 	if (opt_correct) free(tmp2);
+	/* Close down the HDF5 library before MPI_Finalize. */
+	H5close();
 	MPI_Finalize();
 	return(0);
 }

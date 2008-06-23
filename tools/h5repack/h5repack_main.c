@@ -30,12 +30,14 @@ static void read_info(const char *filename,pack_opt_t *options);
 /* module-scoped variables */
 const char *progname = "h5repack";
 int d_status = EXIT_SUCCESS;
+static int has_i_o = 0;
+
 
 /*
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:i:s:";
+static const char *s_opts = "hVvf:l:m:e:nLc:d:s:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -47,7 +49,7 @@ static struct long_options l_opts[] = {
     { "native", no_arg, 'n' },
     { "latest", no_arg, 'L' },
     { "compact", require_arg, 'c' },
-    { "indexed", require_arg, 'i' },
+    { "indexed", require_arg, 'd' },
     { "ssize", require_arg, 's' },
     { NULL, 0, '\0' }
 };
@@ -80,7 +82,9 @@ static struct long_options l_opts[] = {
  *    adopted the syntax h5repack [OPTIONS]  file1 file2
  *   PVN, November 28, 2007
  *    added support for multiple global filters
- *-------------------------------------------------------------------------
+ *   PVN, May 16, 2008
+ *    added  backward compatibility for -i infile -o outfile 
+  *-------------------------------------------------------------------------
  */
 int main(int argc, char **argv)
 {
@@ -88,31 +92,196 @@ int main(int argc, char **argv)
     char          *outfile = NULL;
     pack_opt_t    options;            /*the global options */
     int           ret;
+    int           i;
     
     /* initialize options  */
     h5repack_init (&options,0);
 
-    parse_command_line(argc, argv, &options);
-    
-    if ( argv[ opt_ind ] != NULL && argv[ opt_ind + 1 ] != NULL ) 
+    /* detect -i or -o for file names */
+    for ( i = 1; i < argc; i++)
     {
-        infile = argv[ opt_ind ];
-        outfile = argv[ opt_ind + 1 ];
-
-        if ( strcmp( infile, outfile ) == 0 )
+        
+        if (strcmp(argv[i], "-i") == 0) 
         {
-            error_msg(progname, "file names cannot be the same\n");
-            usage(progname);
-            exit(EXIT_FAILURE);
-            
+            has_i_o = 1;
         }
+        if (strcmp(argv[i], "-o") == 0)
+        {
+            has_i_o = 1;
+        }
+    }
+
+    if (has_i_o)
+    {
+        
+        for ( i = 1; i < argc; i++)
+        {
+            if (strcmp(argv[i], "-h") == 0) 
+            {
+                usage(progname);
+                exit(0);
+            }
+            if (strcmp(argv[i], "-i") == 0) 
+            {
+                infile = argv[++i];
+            }
+            else if (strcmp(argv[i], "-o") == 0) 
+            {
+                outfile = argv[++i];
+            }
+            else if (strcmp(argv[i], "-v") == 0) 
+            {
+                options.verbose = 1;
+            }
+            else if (strcmp(argv[i], "-f") == 0) 
+            {
+                
+                /* add the -f filter option */
+                if (h5repack_addfilter(argv[i+1],&options)<0)
+                {
+                    error_msg(progname, "in parsing filter\n");
+                    exit(1);
+                }
+                
+                /* jump to next */
+                ++i;
+            }
+            else if (strcmp(argv[i], "-l") == 0) 
+            {
+                
+                /* parse the -l layout option */
+                if (h5repack_addlayout(argv[i+1],&options)<0)
+                {
+                    error_msg(progname, "in parsing layout\n");
+                    exit(1);
+                }
+                
+                /* jump to next */
+                ++i;
+            }
+            
+            else if (strcmp(argv[i], "-m") == 0) 
+            {
+                options.threshold = parse_number(argv[i+1]);
+                if ((int)options.threshold==-1) 
+                {
+                    error_msg(progname, "invalid treshold size <%s>\n",argv[i+1]);
+                    exit(1);
+                }
+                ++i;
+            }
+            
+            else if (strcmp(argv[i], "-e") == 0) 
+            {
+                read_info(argv[++i],&options);
+            }
+            else if (strcmp(argv[i], "-n") == 0) 
+            {
+                options.use_native = 1;
+            }
+
+            else if (strcmp(argv[i], "-L") == 0) 
+            {
+                options.latest = 1;
+            }
+            else if (strcmp(argv[i], "-c") == 0) 
+            {
+                options.grp_compact = atoi( argv[++i] );
+                if (options.grp_compact>0)
+                    options.latest = 1; /* must use latest format */ 
+            }
+            else if (strcmp(argv[i], "-d") == 0) 
+            {
+                options.grp_indexed = atoi( argv[++i] );
+                if (options.grp_indexed>0)
+                    options.latest = 1; /* must use latest format */ 
+            }
+            else if (strcmp(argv[i], "-s") == 0) 
+            {
+                
+                char *s = argv[++i];
+                int idx = 0;
+                int ssize = 0;
+                char *msgPtr = strchr( s, ':');
+                options.latest = 1; /* must use latest format */
+                if (msgPtr == NULL) 
+                {
+                    ssize = atoi( s );
+                    for (idx=0; idx<5; idx++)
+                        options.msg_size[idx] = ssize; 
+                }
+                else 
+                {
+                    char msgType[10];
+                    strcpy(msgType, msgPtr+1);
+                    msgPtr[0] = '\0';
+                    ssize = atoi( s );
+                    if (strncmp(msgType, "dspace",6) == 0) {
+                        options.msg_size[0] = ssize;
+                    }
+                    else if (strncmp(msgType, "dtype",5) == 0) {
+                        options.msg_size[1] = ssize;
+                    }
+                    else if (strncmp(msgType, "fill",4) == 0) {
+                        options.msg_size[2] = ssize;
+                    }
+                    else if (strncmp(msgType, "pline",5) == 0) {
+                        options.msg_size[3] = ssize;
+                    }
+                    else if (strncmp(msgType, "attr",4) == 0) {
+                        options.msg_size[4] = ssize;
+                    }
+                }            
+                
+            }
+
+  
+            
+            else if (argv[i][0] == '-') {
+                error_msg(progname, " - is not a valid argument\n");
+                usage(progname);
+                exit(1);
+            }
+        }
+        
+        if (infile == NULL || outfile == NULL)
+        {
+            error_msg(progname, "file names missing\n");
+            usage(progname);
+            exit(1);
+        }
+        
     }
     
     else
+        
     {
-        error_msg(progname, "file names missing\n");
-        usage(progname);
-        exit(EXIT_FAILURE);
+        
+        parse_command_line(argc, argv, &options);
+        
+        
+        
+        if ( argv[ opt_ind ] != NULL && argv[ opt_ind + 1 ] != NULL ) 
+        {
+            infile = argv[ opt_ind ];
+            outfile = argv[ opt_ind + 1 ];
+            
+            if ( strcmp( infile, outfile ) == 0 )
+            {
+                error_msg(progname, "file names cannot be the same\n");
+                usage(progname);
+                exit(EXIT_FAILURE);
+                
+            }
+        }
+        
+        else
+        {
+            error_msg(progname, "file names missing\n");
+            usage(progname);
+            exit(EXIT_FAILURE);
+        }
+        
     }
 
   
@@ -151,7 +320,7 @@ static void usage(const char *prog)
  printf("   -n, --native            Use a native HDF5 type when repacking\n");
  printf("   -L, --latest            Use latest version of file format\n");
  printf("   -c L1, --compact=L1     Maximum number of links in header messages\n");
- printf("   -i L2, --indexed=L2     Minimum number of links in the indexed format\n");
+ printf("   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
  printf("   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
  printf("   -m T, --threshold=T     Do not apply the filter to datasets smaller than T\n");
  printf("   -e M, --file=M          Name of file M with the -f and -l options\n");
@@ -162,6 +331,7 @@ static void usage(const char *prog)
 
  printf("  T - is an integer greater than 1, size of dataset in bytes \n");
  printf("  M - is a filename.\n");
+ printf("  S - is an integer\n");
  printf("  F - is the shared object header message type, any of <dspace|dtype|fill|\n");
  printf("        pline|attr>. If F is not specified, S applies to all messages\n");
 
@@ -313,7 +483,7 @@ static void parse_command_line(int argc, const char* argv[], pack_opt_t* options
             break;
         
         
-        case 'i':
+        case 'd':
 
             options->grp_indexed = atoi( opt_arg );
             if (options->grp_indexed>0)

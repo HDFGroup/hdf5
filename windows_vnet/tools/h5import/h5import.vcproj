@@ -40,7 +40,7 @@
 				OutputFile=".\../../../tools/h5import/Release/h5import.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../tools/h5import/Release/h5import.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -207,7 +207,7 @@
 				ProgramDataBaseFileName=".\../../../tools/h5import/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -217,7 +217,7 @@
 				OutputFile=".\../../../tools/h5import/Debug/h5import.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../tools/h5import/Debug/h5import.pdb"
 				SubSystem="1"

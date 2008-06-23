@@ -960,7 +960,9 @@ AC_ARG_ENABLE([sharedlib-rpath],
 case "X-$RPATH" in
   X-no)
     AC_MSG_RESULT([no])
-    hardcode_libdir_flag_spec=''
+    runpath_var=
+    hardcode_libdir_flag_spec=
+    hardcode_libdir_flag_spec_ld=
     ;;
   X-|X-yes)
     AC_MSG_RESULT([yes])

@@ -32,7 +32,7 @@
 				ProgramDataBaseFileName=".\../../../examples/intermgrouptest/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -43,7 +43,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\..\proj\hdf5\debug,..\..\..\hdf5lib\debug\lib"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../examples/intermgrouptest/Debug/intermgrouptest.pdb"
 				SubSystem="1"

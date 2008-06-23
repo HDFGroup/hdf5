@@ -276,7 +276,9 @@ H5E_walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
         } /* end block */
 #elif defined(H5_HAVE_THREADSAFE)
 #ifdef _WIN32
-        fprintf(stream, "some thread: no way to know the thread number from pthread on windows");
+		/* use GetCurrentThreadId because pthread_self return cannot be cast */
+		/* as an unsigned long on Windows                                    */
+        fprintf(stream, "thread %lu", (unsigned long)GetCurrentThreadId());
 #else
         fprintf(stream, "thread %lu", (unsigned long)pthread_self());
 #endif
@@ -396,7 +398,9 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         } /* end block */
 #elif defined(H5_HAVE_THREADSAFE)
 #ifdef _WIN32
-        fprintf(stream, "some thread: no way to know the thread number from pthread on windows");
+		/* use GetCurrentThreadId because pthread_self return cannot be cast */
+		/* as an unsigned long on Windows                                    */
+        fprintf(stream, "thread %lu", (unsigned long)GetCurrentThreadId());
 #else
         fprintf(stream, "thread %lu", (unsigned long)pthread_self());
 #endif

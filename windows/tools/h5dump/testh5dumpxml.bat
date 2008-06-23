@@ -63,6 +63,7 @@ rem non-zero value.
 rem
 :tooltest
     set expect=%CD%\..\testfiles\%1
+    set expect_eol=%CD%\..\testfiles\%~n1.eol
     set actual=%CD%\..\testfiles\%~n1.out
     set actual_err=%CD%\..\testfiles\%~n1.err
     
@@ -93,15 +94,23 @@ rem
         if !errorlevel! equ 0 (
             call :testing PASSED %params%
         ) else (
-            call :testing *FAILED* %params%
-            echo.    Expected results ^(*.ddl^) differs from actual results ^(*.out^)
-            set /a nerrors=!nerrors!+1
-            if "yes"=="%verbose%" fc /w %expect% %actual%
+            rem First, check if the error is caused by Unix-style EOL, because
+            rem FC can fail incorrectly when comparing them. --SJW 5/30/08
+            more < %expect% > %expect_eol%
+            fc /w %expect_eol% %actual% > nul
+            if !errorlevel! equ 0 (
+                call :testing PASSED %params%
+            ) else (
+                call :testing *FAILED* %params%
+                echo.    Expected results ^(*.ddl^) differs from actual results ^(*.out^)
+                set /a nerrors=!nerrors!+1
+                if "yes"=="%verbose%" fc /w %expect% %actual%
+            )
         )
     )
     
     rem Clean up output file
-    if not defined HDF5_NOCLEANUP del /f %actual% %actual_err%
+    if not defined HDF5_NOCLEANUP del /f %expect_eol% %actual% %actual_err% 
     
     exit /b
     

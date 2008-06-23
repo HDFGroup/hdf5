@@ -89,7 +89,7 @@
 				ProgramDataBaseFileName=".\../../../../tools/testfiles/binread/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"/>
+				DebugInformationFormat="3"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool

@@ -3041,7 +3041,7 @@ CONTAINS
 !  MS FORTRAN needs explicit interface for C functions called here.
 !
             INTERFACE
-              INTEGER FUNCTION h5tset_tag_c(type_id, tag, namelen)
+              INTEGER FUNCTION h5tset_tag_c(type_id, tag, taglen)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
               !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TSET_TAG_C'::h5tset_tag_c

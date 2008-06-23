@@ -20862,7 +20862,9 @@ case "X-$RPATH" in
   X-no)
     { echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6; }
-    hardcode_libdir_flag_spec=''
+    runpath_var=
+    hardcode_libdir_flag_spec=
+    hardcode_libdir_flag_spec_ld=
     ;;
   X-|X-yes)
     { echo "$as_me:$LINENO: result: yes" >&5

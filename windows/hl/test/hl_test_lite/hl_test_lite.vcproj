@@ -241,7 +241,7 @@
 				ProgramDataBaseFileName=".\../../../../hl/test/hl_test_lite/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool
@@ -261,7 +261,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\../../../../hl/test/hl_test_lite/Debug/hl_test_lite.pdb"
 				SubSystem="1"
@@ -354,7 +354,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\../../../../hl/test/hl_test_lite/Debug/hl_test_lite.pdb"
 				SubSystem="1"

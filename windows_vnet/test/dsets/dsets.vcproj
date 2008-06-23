@@ -160,7 +160,7 @@
 				OutputFile=".\../../../test/dsets/Release/dsets.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ForceSymbolReferences="_gethostname@8"
 				ProgramDatabaseFile=".\../../../test/dsets/Release/dsets.pdb"
 				SubSystem="1"
@@ -211,7 +211,7 @@
 				ProgramDataBaseFileName=".\../../../test/dsets/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -221,7 +221,7 @@
 				OutputFile=".\../../../test/dsets/Debug/dsets.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				ForceSymbolReferences="_gethostname@8"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/dsets/Debug/dsets.pdb"

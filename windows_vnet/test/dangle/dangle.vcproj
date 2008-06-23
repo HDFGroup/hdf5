@@ -43,7 +43,7 @@
 				OutputFile=".\../../../test/dangle/Release/dangle.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../test/dangle/Release/dangle.pdb"
 				SubSystem="1"
 				TargetMachine="1"/>
@@ -94,7 +94,7 @@
 				ProgramDataBaseFileName=".\../../../test/dangle/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -104,7 +104,7 @@
 				OutputFile=".\../../../test/dangle/Debug/dangle.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				IgnoreDefaultLibraryNames="libc.lib"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\../../../test/dangle/Debug/dangle.pdb"
 				SubSystem="1"

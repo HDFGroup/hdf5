@@ -58,7 +58,7 @@
 				ProgramDataBaseFileName=".\../../../test/objcopy/Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool
@@ -262,7 +262,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../test/objcopy/Release/objcopy.pdb"
 				SubSystem="1"
 				TargetMachine="1"
@@ -355,7 +355,7 @@
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="0"
 				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="libcd.lib"
+				IgnoreDefaultLibraryNames=""
 				ProgramDatabaseFile=".\../../../test/objcopy/Release/objcopy.pdb"
 				SubSystem="1"
 				TargetMachine="17"
