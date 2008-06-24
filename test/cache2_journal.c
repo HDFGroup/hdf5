@@ -2702,6 +2702,8 @@ mdj_smoke_check_00(void)
 		  fcn_name, journal_filename); 
     }
 
+    /* clean out any existing journal file */
+    HDremove(journal_filename);
     setup_cache_for_journaling(filename, journal_filename, &file_id,
                                &file_ptr, &cache_ptr, FALSE);
 
@@ -3670,6 +3672,8 @@ mdj_smoke_check_01(void)
 		  fcn_name, journal_filename); 
     }
 
+    /* clean out any existing journal file */
+    HDremove(journal_filename);
     setup_cache_for_journaling(filename, journal_filename, &file_id,
                                &file_ptr, &cache_ptr, TRUE);
 
