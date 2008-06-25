@@ -70,8 +70,12 @@ TOOLTEST()
 
 
 # Test for traversing the file and export all images/datasets to jpeg
-TESTING  $TOOL $SRCFILE myjpeg
-TOOLTEST $TESTFILE myjpeg 
+TESTING  $TOOL $SRCFILE myjpeg1
+TOOLTEST $TESTFILE myjpeg1
+
+# Test for reading an image path
+TESTING  $TOOL -i image8bit $SRCFILE myjpeg2
+TOOLTEST -i image8bit $TESTFILE myjpeg2  
 
 
 

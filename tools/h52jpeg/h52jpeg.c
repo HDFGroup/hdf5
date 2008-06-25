@@ -109,6 +109,21 @@ int main(int argc, const char *argv[])
             break;
         case 't':
             image_type = opt_arg;
+            
+            if ( HDstrcmp( image_type, "gray" ) == 0 )
+            {
+                opt.image_type = 0;
+            }
+            else if ( HDstrcmp( image_type, "true" ) == 0 )
+            {
+                opt.image_type = 1;
+            }
+            else 
+            {
+                printf("<%s> is an invalid image type\n", image_type); 
+                exit(EXIT_FAILURE);
+            }
+            
             break;
             
         } /* switch */
@@ -155,7 +170,7 @@ static void usage(const char *prog)
     printf("  OPTIONS\n");
     printf("   -h, --help              Print a usage message and exit\n");
     printf("   -v, --verbose           Verbose mode, print object information\n");
-    printf("   -V, --version           Print version number and exit\n");
+    printf("   -V, --version           Print HDF5 version number and exit\n");
     printf("   -i, --image             Image name (full path in HDF5 file)\n");
     printf("   -t T, --type=T          Type of image (graycolor or truecolor)\n");
     
@@ -168,7 +183,7 @@ static void usage(const char *prog)
 /*-------------------------------------------------------------------------
  * Function: h52jpeg
  *
- * Parameters: options at command line
+ * Parameters: OPT, options at command line
  *
  * Purpose: traverse the HDF5 file, save HDF5 images to jpeg files, translate
  *  2D datasets of classes H5T_INTEGER and H5T_FLOAT to image data and save them
@@ -277,7 +292,7 @@ out:
 /*-------------------------------------------------------------------------
  * Function: do_image
  *
- * Parameters: OPT, command line options
+ * Parameters: HDF5 file id, command line options, an image name
  *
  * Purpose: read HDF5 image/dataset, save jpeg image
  *
@@ -337,6 +352,7 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
         if ( H5IMread_image( fid, name, buf ) < 0 )
             goto out;
         
+        /* write the jpeg file */
         write_JPEG_file (jpeg_name, 
             buf,	               
             (int) height,	       
@@ -391,7 +407,16 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
                 goto out;                  
             if ( H5Dread(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0 )
                 goto out;
-            
+
+            height = dims[0];
+            width  = dims[1];
+
+            if ( opt.image_type == 0 )
+                planes = 1;
+            else if ( opt.image_type == 1 )
+                planes = 3;                
+
+                       
             
             free( buf );
             buf = NULL;
