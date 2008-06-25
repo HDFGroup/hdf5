@@ -64,7 +64,9 @@ typedef struct
 
 /* prototypes */
 static void usage(const char *prog);
-static int h52jpeg(h52jpeg_opt_t options);
+static int h52jpeg(h52jpeg_opt_t opt);
+static void make_jpeg_name( const char* template_name, const char* image_name, char* jpeg_name);
+static int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name);
 static void write_JPEG_file(char *filename, JSAMPLE *image_buffer, int image_height, int image_width, int planes);               
 
 
@@ -81,17 +83,17 @@ static void write_JPEG_file(char *filename, JSAMPLE *image_buffer, int image_hei
  */
 int main(int argc, const char *argv[])
 {
-    h52jpeg_opt_t options;
+    h52jpeg_opt_t opt;
     const char    *image_type = NULL;
-    int           opt;
+    int           op;
 
     /* initialze options to 0 */
-    memset(&options,0,sizeof(h52jpeg_opt_t));
+    memset(&opt,0,sizeof(h52jpeg_opt_t));
     
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) 
+    while ((op = get_option(argc, argv, s_opts, l_opts)) != EOF) 
     {
-        switch ((char)opt) 
+        switch ((char)op) 
         {
         case 'h':
             usage(progname);
@@ -100,10 +102,10 @@ int main(int argc, const char *argv[])
             print_version(progname);
             exit(EXIT_SUCCESS);
         case 'v':
-            options.verbose = 1;
+            opt.verbose = 1;
             break;        
         case 'i':
-            options.image_name = opt_arg;
+            opt.image_name = opt_arg;
             break;
         case 't':
             image_type = opt_arg;
@@ -117,8 +119,8 @@ int main(int argc, const char *argv[])
     /* check for file names to be processed */
     if ( argv[ opt_ind ] != NULL && argv[ opt_ind + 1 ] != NULL ) 
     {
-        options.file_name = argv[ opt_ind ];
-        options.template_name = argv[ opt_ind + 1 ];    
+        opt.file_name = argv[ opt_ind ];
+        opt.template_name = argv[ opt_ind + 1 ];    
     }
     
     else
@@ -127,7 +129,7 @@ int main(int argc, const char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    if ( h52jpeg(options) < 0 )
+    if ( h52jpeg(opt) < 0 )
         return 1;
     
     
@@ -178,8 +180,114 @@ static void usage(const char *prog)
  */
 static int h52jpeg(h52jpeg_opt_t opt)
 {
-    hid_t          fid;
-    trav_table_t   *travt = NULL;
+    hid_t         fid;
+    trav_table_t  *travt = NULL;
+    size_t        i;
+   
+
+    /* open the HDF5 file */
+    if (( fid = h5tools_fopen(opt.file_name, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) 
+    {
+        error_msg(progname, "cannot open file <%s>\n", opt.file_name );
+        return -1;
+    }
+
+    /*-------------------------------------------------------------------------
+    * image/dataset name was specified at command line
+    *-------------------------------------------------------------------------
+    */
+    
+    if ( opt.image_name )
+    {
+
+        /* read HDF5 image/dataset, save jpeg image */
+        do_image(fid, opt, opt.image_name);
+        
+    }
+    
+    /*-------------------------------------------------------------------------
+    * image name was not specified; traverse the file
+    *-------------------------------------------------------------------------
+    */
+    
+    else
+        
+    {
+        
+        /* initialize traversal table */
+        trav_table_init(&travt);
+        
+        /* get the list of objects in the file */
+        if ( h5trav_gettable(fid, travt) < 0 )
+            goto out;
+        
+        /* search for images/datasets in file */
+        for ( i = 0; i < travt->nobjs; i++) 
+        {
+            
+            switch ( travt->objs[i].type ) 
+            {
+            default:
+                goto out;
+                
+            case H5TRAV_TYPE_GROUP:
+            case H5TRAV_TYPE_NAMED_DATATYPE:
+            case H5TRAV_TYPE_LINK:
+            case H5TRAV_TYPE_UDLINK:
+                
+                break;
+                
+            case H5TRAV_TYPE_DATASET:
+
+                /* read HDF5 image/dataset, save jpeg image */
+                do_image(fid, opt, travt->objs[i].name);
+
+                break; /* H5TRAV_TYPE_DATASET */                               
+                
+        } /* switch */                
+        
+    } /* i */    
+    
+    
+    /* free table */
+    trav_table_free(travt);
+    
+    } /* image_name */
+    
+    
+    /* close */
+    if ( H5Fclose(fid) < 0 )
+        return -1;
+    
+    return 0;
+    
+out:
+    H5E_BEGIN_TRY 
+    {
+       H5Fclose(fid);
+        
+    } H5E_END_TRY;
+
+    
+    return -1;
+}
+
+
+
+/*-------------------------------------------------------------------------
+ * Function: do_image
+ *
+ * Parameters: OPT, command line options
+ *
+ * Purpose: read HDF5 image/dataset, save jpeg image
+ *
+ * Return: int
+ *
+ *-------------------------------------------------------------------------
+ */
+static
+int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
+{
     hsize_t        width;
     hsize_t        height;
     hsize_t        planes;
@@ -195,216 +303,179 @@ static int h52jpeg(h52jpeg_opt_t opt)
     hsize_t        maxdim[H5S_MAX_RANK];
     size_t         size;
     hsize_t        nelmts;
-    char*          name;
-    size_t         i;
+    const char*    name;
     int            j;
     int            done;
     char           jpeg_name[1024];
-    int            len;
 
-
-    /* open the HDF5 file */
-    if (( fid = h5tools_fopen(opt.file_name, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) 
+    name = image_name;
+    
+    /* build the jpeg file name */
+    make_jpeg_name( opt.template_name, image_name, jpeg_name);
+    
+    done = 0;
+    
+    if ( opt.verbose)
     {
-        error_msg(progname, "cannot open file <%s>\n", opt.file_name );
-        return -1;
+        printf("%s ...", name );
     }
     
-    /* initialize traversal table */
-    trav_table_init(&travt);
+    /*-------------------------------------------------------------------------
+    * HDF5 Image
+    *-------------------------------------------------------------------------
+    */
     
-    /* get the list of objects in the file */
-    if ( h5trav_gettable(fid, travt) < 0 )
-        goto out;
-
-    /* search for images/datasets in file */
-    for ( i = 0; i < travt->nobjs; i++) 
+    if ( H5IMis_image( fid, name ) )
     {
         
-        switch ( travt->objs[i].type ) 
-        {
-        default:
+        if ( H5IMget_image_info( fid, name, &width, &height, &planes, interlace, &npals ) < 0 )
             goto out;
-            
-        case H5TRAV_TYPE_GROUP:
-        case H5TRAV_TYPE_NAMED_DATATYPE:
-        case H5TRAV_TYPE_LINK:
-        case H5TRAV_TYPE_UDLINK:
-            
-            break;
-            
-        case H5TRAV_TYPE_DATASET:
-
-            name = travt->objs[i].name;
-
-            HDstrcpy( jpeg_name, opt.template_name );
-            HDstrcat( jpeg_name, name );
-            HDstrcat( jpeg_name, ".jpeg" );
-            len = HDstrlen( jpeg_name);
-
-            /* HDF5 path names might contain '/', replace with '_' */
-            for (j = 0; j < len; j++)
-            {
-                if (jpeg_name[j] == '/')
-                {  
-                    jpeg_name[j] = '_'; 
-                }
-            }
-
-
         
-            done = 0;
-
-            if ( opt.verbose)
-                printf("%s ...", name );
+        if (NULL == (buf = HDmalloc( (size_t)width * (size_t)height * (size_t)planes ))) 
+            goto out;
+        
+        if ( H5IMread_image( fid, name, buf ) < 0 )
+            goto out;
+        
+        write_JPEG_file (jpeg_name, 
+            buf,	               
+            (int) height,	       
+            (int) width,           
+            (int) planes);         
+        
+        
+        free( buf );
+        buf = NULL;
+        
+        done = 1;
+        
+        
+        
+    }
+    
+    /*-------------------------------------------------------------------------
+    * regular dataset
+    *-------------------------------------------------------------------------
+    */
+    
+    else
+    {
+        
+        if (( did = H5Dopen2( fid, name, H5P_DEFAULT )) < 0) 
+            goto out;
+        if (( sid = H5Dget_space( did )) < 0 )
+            goto out;
+        if (( rank = H5Sget_simple_extent_ndims(sid)) < 0 )
+            goto out;
+        if (( tid = H5Dget_type( did )) < 0 )
+            goto out;
+        if (( tclass = H5Tget_class(tid)) < 0)
+            goto out;
+        
+        if ( ( H5T_FLOAT == tclass || H5T_INTEGER == tclass) &&
+            ( rank == 2 ) )
+        {
             
-            /*-------------------------------------------------------------------------
-            * HDF5 Image
-            *-------------------------------------------------------------------------
-            */
-
-            if ( H5IMis_image( fid, name ) )
+            if ( H5Sget_simple_extent_dims( sid, dims, maxdim ) < 0 )
+                goto out;
+            
+            size =  H5Tget_size( tid );
+            
+            nelmts = 1;
+            for ( j = 0; j < rank; j++)
             {
-                
-                if ( H5IMget_image_info( fid, name, &width, &height, &planes, interlace, &npals ) < 0 )
-                    goto out;
-                
-                if (NULL == (buf = HDmalloc( (size_t)width * (size_t)height * (size_t)planes ))) 
-                    goto out;
-                
-                if ( H5IMread_image( fid, name, buf ) < 0 )
-                    goto out;
-                
-                write_JPEG_file (jpeg_name, 
-                     buf,	               
-                    (int) height,	       
-                    (int) width,           
-                    (int) planes);         
-                
-                
-                free( buf );
-                buf = NULL;
-
-                done = 1;
-                
-                
-                
-            }
-
-            /*-------------------------------------------------------------------------
-            * regular dataset
-            *-------------------------------------------------------------------------
-            */
-
-            else
-            {
-
-                if (( did = H5Dopen2( fid, name, H5P_DEFAULT )) < 0) 
-                    goto out;
-                if (( sid = H5Dget_space( did )) < 0 )
-                    goto out;
-                if (( rank = H5Sget_simple_extent_ndims(sid)) < 0 )
-                    goto out;
-                if (( tid = H5Dget_type( did )) < 0 )
-                    goto out;
-                if (( tclass = H5Tget_class(tid)) < 0)
-                    goto out;
-
-                if ( ( H5T_FLOAT == tclass || H5T_INTEGER == tclass) &&
-                    ( rank == 2 ) )
-                {
-                    
-                    if ( H5Sget_simple_extent_dims( sid, dims, maxdim ) < 0 )
-                        goto out;
-                    
-                    size =  H5Tget_size( tid );
-                    
-                    nelmts = 1;
-                    for ( j = 0; j < rank; j++)
-                    {
-                        nelmts *= dims[j];
-                    }
-                    
-                    if ( NULL == (buf = HDmalloc( (size_t)nelmts * size ))) 
-                        goto out;                  
-                    if ( H5Dread(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0 )
-                        goto out;
-                    
-                    
-                    free( buf );
-                    buf = NULL;
-                    
-                }
-                
-                
-                
-                H5Sclose(sid);
-                H5Tclose(tid);
-                H5Dclose(did);
-
-              
-                
-                
-            } /* else */
-            
-            
-            if ( opt.verbose)
-            {                
-                if ( done )
-                {
-                    printf("saved to %s\n", jpeg_name );
-                }
-                else
-                {
-                    printf("\n");
-                }
-                
+                nelmts *= dims[j];
             }
             
+            if ( NULL == (buf = HDmalloc( (size_t)nelmts * size ))) 
+                goto out;                  
+            if ( H5Dread(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0 )
+                goto out;
             
             
-            break; /* H5TRAV_TYPE_DATASET */
+            free( buf );
+            buf = NULL;
             
-            
-            
-        } /* switch */
+        }
         
         
         
-    } /* i */
-
+        H5Sclose(sid);
+        H5Tclose(tid);
+        H5Dclose(did);
+        
+        
+        
+        
+    } /* else */
     
     
-    /* free table */
-    trav_table_free(travt);
-    
-    
-    /* close */
-    if ( H5Fclose(fid) < 0 )
-        return -1;
+    if ( opt.verbose)
+    {                
+        if ( done )
+        {
+            printf("saved to %s\n", jpeg_name );
+        }
+        else
+        {
+            printf("\n");
+        }
+        
+    }
     
     return 0;
     
 out:
     H5E_BEGIN_TRY 
     {
-
+        
         H5Sclose(sid);
         H5Tclose(tid);
         H5Dclose(did);
-        H5Fclose(fid);
         
     } H5E_END_TRY;
-
+    
     if ( buf != NULL )
         free( buf );
     
     
     return -1;
+    
 }
 
+/*-------------------------------------------------------------------------
+ * Function: make_jpeg_name
+ *
+ * Parameters: template name (IN), image name (IN), jpeg name (IN/OUT)
+ *
+ * Purpose: build a name for the jpeg image file upon a template name
+ *  and the HDF5 image name
+ *
+ * Return: void
+ *
+ *-------------------------------------------------------------------------
+ */
+static
+void make_jpeg_name( const char* template_name, const char* image_name, char* jpeg_name)
+{
+    int j;
+    int len;
 
-
+    HDstrcpy( jpeg_name, template_name );
+    HDstrcat( jpeg_name, image_name );
+    HDstrcat( jpeg_name, ".jpeg" );
+    len = HDstrlen( jpeg_name);
+    
+    /* HDF5 path names might contain '/', replace with '_' */
+    for (j = 0; j < len; j++)
+    {
+        if (jpeg_name[j] == '/')
+        {  
+            jpeg_name[j] = '_'; 
+        }
+    }
+    
+}
 
 /*
  * Sample routine for JPEG compression.  We assume that the target file name
