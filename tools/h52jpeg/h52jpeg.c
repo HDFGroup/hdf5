@@ -139,6 +139,21 @@ int main(int argc, const char *argv[])
                 exit(EXIT_FAILURE);
             }
             
+            
+            if ( HDstrcmp( image_type, "gray" ) == 0 )
+            {
+                opt.image_type = 0;
+            }
+            else if ( HDstrcmp( image_type, "true" ) == 0 )
+            {
+                opt.image_type = 1;
+            }
+            else 
+            {
+                printf("<%s> is an invalid image type\n", image_type); 
+                exit(EXIT_FAILURE);
+            }
+            
             break;
             
         } /* switch */
