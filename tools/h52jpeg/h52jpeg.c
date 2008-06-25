@@ -124,6 +124,21 @@ int main(int argc, const char *argv[])
                 exit(EXIT_FAILURE);
             }
             
+            
+            if ( HDstrcmp( image_type, "gray" ) == 0 )
+            {
+                opt.image_type = 0;
+            }
+            else if ( HDstrcmp( image_type, "true" ) == 0 )
+            {
+                opt.image_type = 1;
+            }
+            else 
+            {
+                printf("<%s> is an invalid image type\n", image_type); 
+                exit(EXIT_FAILURE);
+            }
+            
             break;
             
         } /* switch */
@@ -353,6 +368,7 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
             goto out;
         
         /* write the jpeg file */
+        /* write the jpeg file */
         write_JPEG_file (jpeg_name, 
             buf,	               
             (int) height,	       
@@ -406,7 +422,7 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
             if ( NULL == (buf = HDmalloc( (size_t)nelmts * size ))) 
                 goto out;                  
             if ( H5Dread(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0 )
-                goto out;
+                goto out;                     
 
             height = dims[0];
             width  = dims[1];
@@ -503,8 +519,7 @@ void make_jpeg_name( const char* template_name, const char* image_name, char* jp
 }
 
 /*
- * Sample routine for JPEG compression.  We assume that the target file name
- * and a compression quality factor are passed in.
+ * Sample routine for JPEG compression.  
  *
  * IMAGE DATA FORMATS:
  *
@@ -517,8 +532,7 @@ void make_jpeg_name( const char* template_name, const char* image_name, char* jp
  *
  * For this example, we'll assume that this data structure matches the way
  * our application has stored the image in memory, so we can just pass a
- * pointer to our image buffer.  In particular, let's say that the image is
- * RGB color and is described by:
+ * pointer to our image buffer. 
  */
 
 static 
