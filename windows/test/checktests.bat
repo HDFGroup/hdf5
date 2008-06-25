@@ -99,7 +99,10 @@ rem on it for sending parameters.  --SJW 9/6/07
     call :add_test unlink%2 .\unlink%2\%1
     call :add_test big%2 .\big%2\%1
     call :add_test mtime%2 .\mtime%2\%1
-    call :add_test fillval%2 .\fillval%2\%1
+    rem Teset commented because fillval produces spurious errors sporatically.
+    rem There is a bug filed (1155), and we will re-enable it when this is
+    rem fixed.  -SJW 6/25/08
+    rem call :add_test fillval%2 .\fillval%2\%1
     call :add_test mount%2 .\mount%2\%1
     call :add_test flush1%2 .\flush1%2\%1
     call :add_test flush2%2 .\flush2%2\%1
