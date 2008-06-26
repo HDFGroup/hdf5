@@ -42,13 +42,17 @@
 
 /* Dataset default dimensions. Intentional small for easier dumping of data. */
 #define RANK   2
-#define NX     800                    /* dataset dimensions */
-#define NY     16
-#define ChunkX 8		    /* Dataset chunk sizes */
-#define ChunkY 8
+#define NX     10                    /* dataset dimensions */
+#define NY     10
+#define ChunkX 2		    /* Dataset chunk sizes */
+#define ChunkY 2
 #define H5FILE_NAME        "trecover.h5"
 #define CTL_H5FILE_NAME    "CTL"H5FILE_NAME	/* control file name */
 #define JNL_H5FILE_NAME    H5FILE_NAME".jnl"	/* journal file name */
+#define DATASETNAME "IntArray" 
+#define CHUNKDATASETNAME "IntArrayChunked" 
+#define ZDATASETNAME "IntArrayZCompressed" 
+#define SZDATASETNAME "IntArraySZCompressed" 
 
 /* Data Structures */
 typedef union CrasherParam_t {
@@ -59,14 +63,20 @@ typedef union CrasherParam_t {
 /* Global variables */
 extern CrasherParam_t	AsyncCrashParam;
 extern int		CrashMode;
-extern hid_t		file, ctl_file;    /* file id and control file id*/
+extern hid_t		datafile, ctl_file;    /* data and control file ids */
+extern char *		dsetname;		/* dataset name */
+extern int		PatchMode;		/* dataset name */
 
 /* protocol definitions */
 void crasher(int crash_mode, CrasherParam_t *crash_param);
-void writer(hid_t f, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk);
+void create_dataset(hid_t f, int dstype, int rank, hsize_t *dims, hsize_t *dimschunk);
+int writedata(hid_t dataset, int begin, int end);
+int extend_dataset(hid_t f, int begin, int end, int patch);
 void wakeup(int signum);
 void parser(int ac, char **av);	/* command option parser */
 void init(void);		/* initialization */
 void help(void);		/* initialization */
-int create_files(const char *filename, const char *ctl_filename, const char *jnl_filename);
+int create_files(const char *filename, const char *ctl_filename);
+int journal_files(const char *filename, const char *ctl_filename, const char *jnl_filename, int patch);
+
 int close_file(hid_t fid);

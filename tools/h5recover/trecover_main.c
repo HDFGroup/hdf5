@@ -32,14 +32,17 @@
 /* Global variables */
 CrasherParam_t	AsyncCrashParam;
 int		CrashMode = SyncCrash;	/* default to synchronous crash */
-hid_t		file, ctl_file;         /* file id and control file id*/
+hid_t		datafile, ctl_file;    /* data and control file ids */
 
 /* local variables */
 #if 0
 static int	DSTypes=DSNone;		/* set to none first. */
+char *		dsetname=null;		/* dataset name */
 #else
 static int	DSTypes=DSChunked;	/* set to Chunked temp. first. */
+char *		dsetname=CHUNKDATASETNAME;		/* dataset name */
 #endif
+extern int	PatchMode=0;		/* patch mode, default no. */
 
 /* Command arguments parser.
  * 	-a <seconds>	Do Async crash with a floating value of seconds
@@ -67,18 +70,24 @@ parser(int ac, char **av)
 		    switch (**av){
 		    case 'C':
 			DSTypes=DSTypes|DSContig;
+			dsetname=DATASETNAME;
 			break;
 		    case 'K':
 			DSTypes=DSTypes|DSChunked;
+			dsetname=CHUNKDATASETNAME;
 			break;
 		    case 'G':
 			DSTypes=DSTypes|DSZip;
+			dsetname=ZDATASETNAME;
 			break;
 		    case 'S':
 			DSTypes=DSTypes|DSSZip;
+			dsetname=SZDATASETNAME;
 			break;
 		    case 'A':
 			DSTypes=DSTypes|DSAll;
+			fprintf(stderr, "option A temporary disabled\n");
+			exit(1);
 			break;
 		    default:
 			fprintf(stderr, "Unknown Dataset type (%c)\n", **av);
@@ -90,6 +99,9 @@ parser(int ac, char **av)
 		    help();
 		    exit(1);
 		}
+		break;
+	    case 'p':	/* patch option */
+		PatchMode=1;
 		break;
 	    case 'h':	/* -h help option */
 		help();
@@ -148,26 +160,44 @@ main (int ac, char **av)
     init();
     parser(ac, av);
 
-    /* create/open both files. */
-    create_files(H5FILE_NAME, CTL_H5FILE_NAME, JNL_H5FILE_NAME);
+    if (!PatchMode){
+	/* create/open both files. */
+	create_files(H5FILE_NAME, CTL_H5FILE_NAME);
 
-    /* create datasets in Control file first. */
-    writer(ctl_file, DSTypes, RANK, dims, dimschunk);
-    close_file(ctl_file);
+	/* Create datasets in both Control file and data files.  Close both. */
+	create_dataset(ctl_file, DSTypes, RANK, dims, dimschunk);
+	close_file(ctl_file);
+	create_dataset(datafile, DSTypes, RANK, dims, dimschunk);
+	close_file(datafile);
+    }
 
-    /* Schedule Async crash if requested. */
-    if (AsyncCrashParam.tinterval > 0)
-	crasher(AsyncCrash, &AsyncCrashParam);
-
-    /* create datasets in data file. */
-    writer(file, DSTypes, RANK, dims, dimschunk);
+    /* Open data file with Journaling and control file without. */
+    journal_files(H5FILE_NAME, CTL_H5FILE_NAME, JNL_H5FILE_NAME, PatchMode);
     
-    /* Do a sync crash. */
-    if (AsyncCrashParam.tinterval == 0)
-	CRASH;
+    if (PatchMode){
+	/* extend the datafile again without writing data, then close it. */
+	extend_dataset(datafile, NX, 4*NX-1, PatchMode);
+	close_file(datafile);
+	close_file(ctl_file);
+    }else{
+	/* Extend control file, then close it. */
+	extend_dataset(ctl_file, NX, 4*NX-1, 0);
+	close_file(ctl_file);
 
-    /* Close file only if Async crash is scheduled but has not occurred yet. */
-    close_file(file);
+	/* Schedule Async crash if requested. */
+	if (AsyncCrashParam.tinterval > 0)
+	    crasher(AsyncCrash, &AsyncCrashParam);
+
+	/* Extend datafile, then close it. */
+	extend_dataset(datafile, NX, 4*NX-1, 0);
+
+	/* Do a sync crash. */
+	if (AsyncCrashParam.tinterval == 0)
+	    CRASH;
+
+	/* Close file only if Async crash is scheduled but has not occurred yet. */
+	close_file(datafile);
+    }
 
     return(0);
 }     
