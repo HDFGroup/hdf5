@@ -33,8 +33,8 @@
 #define H5dumptoolname 		"h5dump"
 #define ProgName	 	"enable_journaling"	/* program name */
 #define DATASETNAME "IntArray"
-#define NX     20                      /* dataset initial dimensions */
-#define NY     20
+#define NX     10                      /* dataset initial dimensions */
+#define NY     10
 #define CHUNKX 2			/* chunk dimensions */
 #define CHUNKY 2
 #define RANK   2
