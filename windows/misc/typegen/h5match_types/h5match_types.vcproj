@@ -106,7 +106,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
-				CommandLine="cd $(TargetDir)..\.. &amp;&amp; $(TargetPath)"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5f90i_gen.h&quot; (cd &quot;$(TargetDir)..\..&quot; &amp;&amp; &quot;$(TargetPath)&quot;)"
 			/>
 		</Configuration>
 		<Configuration
@@ -199,7 +199,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
-				CommandLine="cd $(TargetDir)..\.. &amp;&amp; $(TargetPath)"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5f90i_gen.h&quot; (cd &quot;$(TargetDir)..\..&quot; &amp;&amp; &quot;$(TargetPath)&quot;)"
 			/>
 		</Configuration>
 		<Configuration
@@ -290,7 +290,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
-				CommandLine="cd $(TargetDir)..\.. &amp;&amp; $(TargetPath)"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5f90i_gen.h&quot; (cd &quot;$(TargetDir)..\..&quot; &amp;&amp; &quot;$(TargetPath)&quot;)"
 			/>
 		</Configuration>
 		<Configuration
@@ -382,7 +382,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
-				CommandLine="cd $(TargetDir)..\.. &amp;&amp; $(TargetPath)"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5f90i_gen.h&quot; (cd &quot;$(TargetDir)..\..&quot; &amp;&amp; &quot;$(TargetPath)&quot;)"
 			/>
 		</Configuration>
 	</Configurations>
