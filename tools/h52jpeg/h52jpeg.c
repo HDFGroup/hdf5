@@ -69,7 +69,6 @@ static void make_jpeg_name( const char* template_name, const char* image_name, c
 static int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name);
 static void write_JPEG_file(char *filename, JSAMPLE *image_buffer, int image_height, int image_width, int planes);               
 
-
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -111,7 +110,7 @@ int main(int argc, const char *argv[])
             image_type = opt_arg;
             
             
-            if ( HDstrcmp( image_type, "gray" ) == 0 )
+            if ( HDstrcmp( image_type, "grey" ) == 0 )
             {
                 opt.image_type = 0;
             }
@@ -177,7 +176,7 @@ static void usage(const char *prog)
     
     printf("\n");
     
-    printf("  T - is a string, either <gray> or <true>\n");
+    printf("  T - is a string, either <grey> or <true>\n");
     
 }
 
@@ -309,7 +308,7 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
     hsize_t        planes;
     char           interlace[20];
     hssize_t       npals;
-    void           *buf=NULL;
+    unsigned char* buf=NULL;
     H5T_class_t    tclass;
     hid_t          sid;
     hid_t          did;
@@ -320,6 +319,7 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
     size_t         size;
     hsize_t        nelmts;
     const char*    name;
+    size_t         i;
     int            j;
     int            done;
     char           jpeg_name[1024];
@@ -354,7 +354,6 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
             goto out;
         
         /* write the jpeg file */
-        /* write the jpeg file */
         write_JPEG_file (jpeg_name, 
             buf,	               
             (int) height,	       
@@ -370,6 +369,16 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
         
         
     }
+
+    /*-------------------------------------------------------------------------
+    * HDF5 Image palette, ignore
+    *-------------------------------------------------------------------------
+    */
+    
+    else if ( H5IMis_palette( fid, name ) )
+    {
+        
+    }
     
     /*-------------------------------------------------------------------------
     * regular dataset
@@ -378,6 +387,8 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
     
     else
     {
+
+        unsigned char* image_buffer = NULL;
         
         if (( did = H5Dopen2( fid, name, H5P_DEFAULT )) < 0) 
             goto out;
@@ -416,12 +427,53 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
             if ( opt.image_type == 0 )
                 planes = 1;
             else if ( opt.image_type == 1 )
-                planes = 3;                
+                planes = 3; 
 
-                       
             
+            if ( NULL == (image_buffer = HDmalloc( (size_t)nelmts * sizeof (unsigned char) ))) 
+            {
+                goto out; 
+            }
+
+            /*-------------------------------------------------------------------------
+            * convert the data to unsigned char
+            *
+            *-------------------------------------------------------------------------
+            */
+            
+            {
+                double min = DBL_MAX;
+                double max = -DBL_MAX;
+                double ratio;
+                
+                /* search for the minimum and maximum */
+                for ( i = 0; i < nelmts; i++)
+                {
+                    if ( buf[i] < min) min = buf[i];
+                    if ( buf[i] > max) max = buf[i];
+                }
+                /* converts the data based on the ratio to a 0-255 range */
+                ratio = (min == max) ? 1.0 : (double)(255.0/(max-min));
+                for ( i = 0; i < nelmts; i++)
+                {
+                    image_buffer[i] = (unsigned char)ceil( (( buf[i] - min ) / ratio) );         
+                }
+                
+            }
+
+            /* write the jpeg file */
+            write_JPEG_file (jpeg_name, 
+                image_buffer,	               
+                (int) height,	       
+                (int) width,           
+                (int) planes);     
+            
+            
+            free( image_buffer );
             free( buf );
             buf = NULL;
+            image_buffer = NULL;
+            done = 1;
             
         }
         
@@ -503,6 +555,8 @@ void make_jpeg_name( const char* template_name, const char* image_name, char* jp
     }
     
 }
+
+
 
 /*
  * Sample routine for JPEG compression.  
