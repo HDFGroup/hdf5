@@ -32,7 +32,7 @@
 #include "H5B2private.h"
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC2private.h"       /* Metadata cache                       */
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5RCprivate.h"	/* Reference counted object functions	*/
 
@@ -126,6 +126,27 @@ typedef struct {
     hsize_t     all_nrec;       /* Number of records in node pointed to and all it's children */
 } H5B2_node_ptr_t;
 
+/* Callback info for loading a free space header into the cache */
+typedef struct H5B2_hdr_cache_ud_t {
+    H5F_t *f;                   /* File that v2 b-tree header is within */
+    const H5B2_class_t *type;   /* User-data for protecting */
+} H5B2_hdr_cache_ud_t;
+
+/* Callback info for loading a free space internal node into the cache */
+typedef struct H5B2_internal_cache_ud_t {
+    H5F_t *f;                   /* File that v2 b-tree header is within */
+    H5RC_t *bt2_shared;         /* Ref counter for shared B-tree info */
+    unsigned nrec;              /* Number of records in node to load */
+    unsigned depth;             /* Depth of node to load */
+} H5B2_internal_cache_ud_t;
+
+/* Callback info for loading a free space leaf node into the cache */
+typedef struct H5B2_leaf_cache_ud_t {
+    H5F_t *f;                   /* File that v2 b-tree header is within */
+    const unsigned *nrec;             /* Number of records in node to load */ 
+    H5RC_t *bt2_shared;         /* Ref counter for shared B-tree info */
+} H5B2_leaf_cache_ud_t;
+
 /* Information about a node at a given depth */
 typedef struct {
     unsigned    max_nrec;       /* Max. number of records in node */
@@ -163,7 +184,7 @@ typedef struct H5B2_shared_t {
 /* The B-tree information */
 typedef struct H5B2_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
-    H5AC_info_t cache_info;
+    H5AC2_info_t cache_info;
 
     /* Internal B-tree information */
     H5B2_node_ptr_t root;       /* Node pointer to root node in B-tree        */
@@ -173,7 +194,7 @@ typedef struct H5B2_t {
 /* B-tree leaf node information */
 typedef struct H5B2_leaf_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
-    H5AC_info_t cache_info;
+    H5AC2_info_t cache_info;
 
     /* Internal B-tree information */
     H5RC_t	*shared;	/* Ref-counted shared info	              */
@@ -184,7 +205,7 @@ typedef struct H5B2_leaf_t {
 /* B-tree internal node information */
 typedef struct H5B2_internal_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
-    H5AC_info_t cache_info;
+    H5AC2_info_t cache_info;
 
     /* Internal B-tree information */
     H5RC_t	*shared;	/* Ref-counted shared info	              */
@@ -215,13 +236,13 @@ typedef struct {
 /*****************************/
 
 /* H5B2 header inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_BT2_HDR[1];
+H5_DLLVAR const H5AC2_class_t H5AC2_BT2_HDR[1];
 
 /* H5B2 internal node inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_BT2_INT[1];
+H5_DLLVAR const H5AC2_class_t H5AC2_BT2_INT[1];
 
 /* H5B2 leaf node inherits cache-like properties from H5AC */
-H5_DLLVAR const H5AC_class_t H5AC_BT2_LEAF[1];
+H5_DLLVAR const H5AC2_class_t H5AC2_BT2_LEAF[1];
 
 /* Declare a free list to manage the H5B2_t struct */
 H5FL_EXTERN(H5B2_t);
@@ -250,7 +271,7 @@ H5_DLL herr_t H5B2_shared_init(H5F_t *f, H5B2_t *bt2, const H5B2_class_t *type,
 /* Routines for operating on internal nodes */
 H5_DLL H5B2_internal_t *H5B2_protect_internal(H5F_t *f, hid_t dxpl_id,
     H5RC_t *bt2_shared, haddr_t addr, unsigned nrec, unsigned depth,
-    H5AC_protect_t rw);
+    H5AC2_protect_t rw);
 
 /* Routines for allocating nodes */
 H5_DLL herr_t H5B2_split_root(H5F_t *f, hid_t dxpl_id, H5B2_t *bt2,
@@ -284,14 +305,14 @@ H5_DLL herr_t H5B2_neighbor_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
 
 /* Routines for removing records */
 H5_DLL herr_t H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
-    hbool_t *depth_decreased, void *swap_loc, unsigned depth, H5AC_info_t *parent_cache_info,
+    hbool_t *depth_decreased, void *swap_loc, unsigned depth, H5AC2_info_t *parent_cache_info,
     hbool_t * parent_cache_info_dirtied_ptr, H5B2_node_ptr_t *curr_node_ptr, void *udata,
     H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     H5B2_node_ptr_t *curr_node_ptr, void *udata, H5B2_remove_t op,
     void *op_data);
 H5_DLL herr_t H5B2_remove_internal_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
-    hbool_t *depth_decreased, void *swap_loc, unsigned depth, H5AC_info_t *parent_cache_info,
+    hbool_t *depth_decreased, void *swap_loc, unsigned depth, H5AC2_info_t *parent_cache_info,
     hbool_t * parent_cache_info_dirtied_ptr, H5B2_node_ptr_t *curr_node_ptr, hsize_t idx,
     H5B2_remove_t op, void *op_data);
 H5_DLL herr_t H5B2_remove_leaf_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
@@ -304,9 +325,9 @@ H5_DLL herr_t H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
     void *op_data);
 
 /* Metadata cache callbacks */
-H5_DLL herr_t H5B2_cache_hdr_dest(H5F_t *f, H5B2_t *b);
-H5_DLL herr_t H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *l);
-H5_DLL herr_t H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *i);
+H5_DLL herr_t H5B2_cache_hdr_dest(H5B2_t *b);
+H5_DLL herr_t H5B2_cache_leaf_dest(H5B2_leaf_t *l);
+H5_DLL herr_t H5B2_cache_internal_dest(H5B2_internal_t *i);
 
 /* Debugging routines for dumping file structures */
 H5_DLL herr_t H5B2_hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
