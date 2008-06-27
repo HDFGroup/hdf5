@@ -105,7 +105,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5tinit.c"
-				CommandLine="$(TargetPath) &gt;$(TargetDir)..\..\H5tinit.c"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5tinit.c&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5tinit.c&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -197,7 +197,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5tinit.c"
-				CommandLine="$(TargetPath) &gt;$(TargetDir)..\..\H5tinit.c"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5tinit.c&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5tinit.c&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -288,7 +288,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5tinit.c"
-				CommandLine="$(TargetPath) &gt;$(TargetDir)..\..\H5tinit.c"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5tinit.c&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5tinit.c&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -380,7 +380,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5tinit.c"
-				CommandLine="$(TargetPath) &gt;$(TargetDir)..\..\H5tinit.c"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5tinit.c&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5tinit.c&quot;"
 			/>
 		</Configuration>
 	</Configurations>
