@@ -56,7 +56,7 @@ check_PROGRAMS = $(am__EXEEXT_1)
 bin_PROGRAMS = h52jpeg$(EXEEXT)
 noinst_PROGRAMS = h52jpegtst$(EXEEXT)
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
-subdir = tools/h52jpeg
+subdir = hl/tools/h52jpeg
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -383,9 +383,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  tools/h52jpeg/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  hl/tools/h52jpeg/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  tools/h52jpeg/Makefile
+	  $(AUTOMAKE) --foreign  hl/tools/h52jpeg/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

@@ -3853,6 +3853,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  hl/test/Makefile
                  hl/tools/Makefile
                  hl/tools/gif2h5/Makefile
+				 hl/tools/h52jpeg/Makefile
                  hl/examples/Makefile
                  hl/c++/Makefile
                  hl/c++/src/Makefile
