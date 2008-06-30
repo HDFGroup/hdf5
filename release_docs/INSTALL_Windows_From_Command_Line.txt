@@ -78,7 +78,11 @@ notes in INSTALL_Windows.txt before starting below procedures.
          from command line.
 
         hdf5bt file takes the following options:
+              /vs7              Build HDF5 using Visual Studio .NET 2003 
+                                Note: Default is Visual Studio 2005
               /fort             Build and test HDF5 with Fortran libraries
+              /ivf101           Build HDF5 Fortran using Intel Visual Fortran 10.1
+                                Note: Default is Intel Visual Fortran 9.1
               /useenv           Build HDF5 using compiler settings defined
                                 in the environment, rather than the IDE.
               /?                Help information
@@ -103,7 +107,11 @@ notes in INSTALL_Windows.txt before starting below procedures.
             tools from command line.
 
         hdf55build takes the following options:
+              /vs7              Build HDF5 using Visual Studio .NET 2003 
+                                Note: Default is Visual Studio 2005
               /fort             Build HDF5 with Fortran libraries
+              /ivf101           Build HDF5 Fortran using Intel Visual Fortran 10.1
+                                Note: Default is Intel Visual Fortran 9.1
               /useenv           Build HDF5 using compiler settings defined
                                 in the environment, rather than the IDE.
               /?                Help information

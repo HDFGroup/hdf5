@@ -39,8 +39,8 @@ Preconditions:
       Visual Studio .NET.  For simple Visual Studio .NET instructions, see the
       document INSTALL_Windows_NET.TXT.
    
-   2. (Optional) Installed Intel Compiler 9.1 if you want to build HDF5 Fortran 
-      libraries.
+   2. (Optional) Installed Intel Compiler 9.1 or 10.1 if you want to build HDF5 
+      Fortran libraries.
       
    3. Install Winzip or 7-zip for extracting source tarball.
 
@@ -180,9 +180,9 @@ Notes:
       any more. To obtain HDF4 related tools, please check
       http://hdfgroup.org/h4toh5/ and ftp://ftp.hdfgroup.org/HDF5/h4toh5
 
-   6. For Fortran users, Intel fortran Compiler 9.1 is currently supported-- 
-      please see Section VI.  Intel Compiler verion 7.x and 8.x are no longer 
-      supported.
+   6. For Fortran users, Intel fortran Compiler 9.1 and 10.1 is currently 
+      supported-- please see Section VI.  Intel Compiler verion 7.x and 8.x are 
+      no longer supported.
 
    7. For users who would like to build Muti-threaded version of HDF5 library, 
       please read Section VII.
@@ -1112,9 +1112,9 @@ Warning: When you modify the H5pubconf.h file as described below, DO NOT just
           Section VI: How to build HDF5 with Fortran Support
 ========================================================================
 
-Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
-        supported-- please see below.  Intel Compiler verion 7.x and 8.x are no 
-        longer supported.
+Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 and 10.1 are 
+        currently supported-- please see below.  Intel Compiler verion 7.x and 
+        8.x are no longer supported.
 
         2. The Compaq Fortran Compiler is no longer supported for HDF5 1.8.
 
@@ -1145,7 +1145,7 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
         1) Invoke Microsoft Visual Studio 2005.  
         
         2) From the main menu, Go to Tools > Options > Intel(R) Fortran. In the 
-           right panel, make sure your "Selected Compiler" is Intel Fortran 9.1.
+           right panel, make sure your "Selected Compiler" is Intel Fortran.
       
         3) Select the right-most box for "Libraries", and add Zlib and Szip 
            library paths (c:\zlib123\lib, c:\szip\dll for example).
@@ -1156,11 +1156,11 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 is currently
         5) Then click "OK".
 
       
-1. Build with Intel Fortran Compiler 9.1 under Visual Studio 2005
+1. Build with Intel Fortran Compiler 9.1 or 10.1 under Visual Studio 2005
 
   Note: This step will build HDF5 Static and DLL C and C++ Library using
         Visual Studio 2005 Compiler as well as HDF5 Static and High Level 
-        Fortran Library using Intel Fortran 9.1 Compiler.
+        Fortran Library using Intel Fortran 9.1 or 10.1 Compiler.
 
   1.1 Open all_fortran.sln
 
