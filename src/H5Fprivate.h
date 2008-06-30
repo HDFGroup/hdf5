@@ -309,6 +309,7 @@ typedef struct H5F_t H5F_t;
     case 4: UINT32ENCODE(p,l); break;					      \
     case 8: UINT64ENCODE(p,l); break;					      \
     case 2: UINT16ENCODE(p,l); break;					      \
+    default: HDassert("bad sizeof size" && 0);				      \
 }
 
 #define H5F_ENCODE_LENGTH(f,p,l) H5F_ENCODE_LENGTH_LEN(p,l,H5F_SIZEOF_SIZE(f))
@@ -317,6 +318,7 @@ typedef struct H5F_t H5F_t;
     case 4: UINT32DECODE(p,l); break;					      \
     case 8: UINT64DECODE(p,l); break;					      \
     case 2: UINT16DECODE(p,l); break;					      \
+    default: HDassert("bad sizeof size" && 0);				      \
 }
 
 #define H5F_DECODE_LENGTH(f,p,l) H5F_DECODE_LENGTH_LEN(p,l,H5F_SIZEOF_SIZE(f))

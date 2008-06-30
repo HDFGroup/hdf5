@@ -1282,7 +1282,7 @@ H5B2_iterate_size(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t add
     cache_udata.type = type;
 
     /* Look up the B-tree header */
-    if(NULL == (bt2 = H5AC2_protect(f, dxpl_id, H5AC2_BT2_HDR, addr, (size_t)H5B2_HEADER_SIZE(f), &cache_udata, H5AC2_READ)))
+    if(NULL == (bt2 = (H5B2_t *)H5AC2_protect(f, dxpl_id, H5AC2_BT2_HDR, addr, (size_t)H5B2_HEADER_SIZE(f), &cache_udata, H5AC2_READ)))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTPROTECT, FAIL, "unable to load B-tree header")
 
     /* Safely grab pointer to reference counted shared B-tree info, so we can release the B-tree header if necessary */
@@ -1291,7 +1291,7 @@ H5B2_iterate_size(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t add
     incr_rc = TRUE;
 
     /* Get the pointer to the shared B-tree info */
-    shared = H5RC_GET_OBJ(bt2->shared);
+    shared = (H5B2_shared_t *)H5RC_GET_OBJ(bt2->shared);
     HDassert(shared);
 
     /* Add size of header to B-tree metadata total */

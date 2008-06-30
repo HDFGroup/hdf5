@@ -33,10 +33,10 @@ H5REPACK_BIN=`pwd`/$H5REPACK    # The path of the tool binary
 H5DIFF=../h5diff/h5diff         # The h5diff tool name 
 H5DIFF_BIN=`pwd`/$H5DIFF        # The path of the h5diff  tool binary
 
-H5DETECTSZIP=testh5repack_detect_szip               # The tool name
-H5DETECTSZIP_BIN=`pwd`/$H5DETECTSZIP    # The path of the tool binary
+H5DETECTSZIP=testh5repack_detect_szip              
+H5DETECTSZIP_BIN=`pwd`/$H5DETECTSZIP    
 
-INFO_FILE=../testfiles/info.h5repack
+INFO_FILE=testfiles/h5repack.info
 
 FILE0=h5repack_fill.h5
 FILE1=h5repack_objs.h5
@@ -62,7 +62,7 @@ if test -z "$srcdir"; then
    srcdir=.
 fi
 
-test -d ../testfiles || mkdir ../testfiles
+
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
@@ -116,7 +116,7 @@ TOOLTEST()
     # case of missing file name).  Changed it to use $@ till Tflops fixes it.
     TESTING $H5REPACK $@
 
-    infile=$srcdir/../testfiles/$1
+    infile=$srcdir/testfiles/$1
     path=`pwd`
     outfile=$path/out.$1
     shift
@@ -144,7 +144,7 @@ TOOLTEST0()
     # case of missing file name).  Changed it to use $@ till Tflops fixes it.
     TESTING $H5REPACK $@
 
-    infile=$srcdir/../testfiles/$1
+    infile=$srcdir/testfiles/$1
     path=`pwd`
     outfile=$path/out.$1
     shift

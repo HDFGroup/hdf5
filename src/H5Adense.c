@@ -504,7 +504,7 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
     udata.common.shared_fheap = shared_fheap;
     udata.common.name = attr->name;
     udata.common.name_hash = H5_checksum_lookup3(attr->name, HDstrlen(attr->name), 0);
-    udata.common.flags = mesg_flags;
+    H5_ASSIGN_OVERFLOW(udata.common.flags, mesg_flags, unsigned, uint8_t);
     udata.common.corder = attr->crt_idx;
     udata.common.found_op = NULL;
     udata.common.found_op_data = NULL;
@@ -1034,6 +1034,13 @@ H5A_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
             case H5A_ATTR_OP_LIB:
                 /* Call the library's callback */
                 ret_value = (bt2_udata->attr_op->u.lib_op)(fh_udata.attr, bt2_udata->op_data);
+                break;
+
+            default:
+                HDassert("unknown attribute op type" && 0);
+#ifdef NDEBUG
+                HGOTO_ERROR(H5E_ATTR, H5E_UNSUPPORTED, FAIL, "unsupported attribute op type")
+#endif /* NDEBUG */
         } /* end switch */
 
         /* Release the space allocated for the attribute */

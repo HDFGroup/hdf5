@@ -153,7 +153,7 @@ main(void)
          */
         TESTING("object header overflow in memory");
         for(i = 0; i < 40; i++) {
-            time_new = (i + 1) * 1000 + 1;
+            time_new = (i + 1) * 1000 + 1000000;
             if(H5O_msg_create(&oh_loc, H5O_MTIME_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
                 FAIL_STACK_ERROR
         } /* end for */

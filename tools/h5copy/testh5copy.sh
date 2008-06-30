@@ -31,7 +31,7 @@ nerrors=0
 verbose=yes
 
 SRCFILE=h5copytst.h5
-INDIR=$srcdir/../testfiles
+INDIR=$srcdir/testfiles
 OUTDIR=../testfiles
 CMP='cmp -s'
 DIFF='diff -c'

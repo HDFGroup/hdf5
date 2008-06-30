@@ -322,8 +322,10 @@ H5B2_cache_hdr_serialize(const H5F_t *f, haddr_t UNUSED addr, size_t UNUSED len,
     UINT16ENCODE(p, shared->depth);
 
     /* Split & merge %s */
-    *p++ = shared->split_percent;
-    *p++ = shared->merge_percent;
+    H5_CHECK_OVERFLOW(shared->split_percent, /* From: */ unsigned, /* To: */ uint8_t);
+    *p++ = (uint8_t)shared->split_percent;
+    H5_CHECK_OVERFLOW(shared->merge_percent, /* From: */ unsigned, /* To: */ uint8_t);
+    *p++ = (uint8_t)shared->merge_percent;
 
     /* Root node pointer */
     H5F_addr_encode(f, &p, bt2->root.addr);
