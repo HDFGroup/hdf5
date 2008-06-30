@@ -1199,11 +1199,7 @@ static void gent_many(void)
                     for(i0 = 0; i0 < 2; i0++) {
                         dset1[j].a[i3][i2][i1][i0] = i0+j;
                         dset1[j].b[i3][i2][i1][i0] = (double)(i0+j);
-#ifdef _WIN32
-                        dset1[j].c[i3][i2][i1][i0] = (double)(i0+j+(signed __int64)sdim);
-#else
                         dset1[j].c[i3][i2][i1][i0] = (double)(i0+j+sdim);
-#endif
                     }
                 }
             }
@@ -5554,7 +5550,7 @@ error:
 static void
 gent_binary(void)
 {
- hid_t    fid, sid, did;
+ hid_t    fid, sid, did, aid;
  hsize_t  dims[1]  = {6};
  int      ibuf[6]  = {1,2,3,4,5,6};
  float    fbuf[6]  = {1,2,3,4,5,6};
@@ -5587,6 +5583,9 @@ gent_binary(void)
  */
  did = H5Dcreate2(fid, "double", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
  H5Dwrite(did, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
+ /* create an attribute */
+ aid = H5Acreate2(did, "attr", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT);
+ H5Aclose(aid);
  H5Dclose(did);
  
 

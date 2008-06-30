@@ -113,6 +113,7 @@ TOOLTEST help-3.ls 0 -w80 -?
 TOOLTEST tall-1.ls 0 -w80 tall.h5
 TOOLTEST tall-2.ls 0 -w80 -r -d tall.h5
 TOOLTEST tgroup.ls 0 -w80 tgroup.h5
+TOOLTEST tgroup-3.ls 0 -w80 tgroup.h5/g1
 
 # test for displaying groups
 # The following combination of arguments is expected to return an error message

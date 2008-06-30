@@ -1883,8 +1883,8 @@ test_extend(hid_t fapl, const char *base_name, H5D_layout_t layout)
         hsize_t	nelmts;
 
 	nelmts = max_size[0]*max_size[1]*max_size[2]*max_size[3]*max_size[4];
-	if((fd=open(FILE_NAME_RAW, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0 ||
-	    close(fd) < 0) goto error;
+	if((fd=HDopen(FILE_NAME_RAW, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0 ||
+	    HDclose(fd) < 0) goto error;
 	if(H5Pset_external(dcpl, FILE_NAME_RAW, (off_t)0, (hsize_t)nelmts*sizeof(int)) < 0)
 	    goto error;
     }

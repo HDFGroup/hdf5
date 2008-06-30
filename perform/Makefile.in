@@ -52,7 +52,7 @@ host_triplet = @host@
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
-@BUILD_PARALLEL_CONDITIONAL_FALSE@bin_PROGRAMS = h5perf$(EXEEXT) \
+@BUILD_PARALLEL_CONDITIONAL_FALSE@bin_PROGRAMS =  \
 @BUILD_PARALLEL_CONDITIONAL_FALSE@	h5perf_serial$(EXEEXT)
 @BUILD_PARALLEL_CONDITIONAL_TRUE@bin_PROGRAMS = h5perf$(EXEEXT)
 check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_4)

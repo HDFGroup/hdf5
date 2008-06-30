@@ -184,7 +184,7 @@ int main(void)
     H5Tclose(cmp3);
     H5Pclose(plist);
     H5Fclose(fil);
-    unlink(fname);
+    HDunlink(fname);
     fflush(stdout);
     return result;
 }

@@ -3556,7 +3556,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5P_get(H5P_genplist_t *plist, const char *name, void *value)
+H5P_get(const H5P_genplist_t *plist, const char *name, void *value)
 {
     H5P_genclass_t *tclass;     /* Temporary class pointer */
     H5P_genprop_t *prop;        /* Temporary property pointer */

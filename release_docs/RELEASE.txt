@@ -1,4 +1,4 @@
-HDF5 version 1.9.6 currently under development
+HDF5 version 1.9.7 currently under development
 ================================================================================
 
 
@@ -108,6 +108,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed bug in h5ls that prevented relative group listings (like
+            "h5ls foo.h5/bar") from working correctly (QAK - 2008/06/03)
         - Fixed bug in h5diff that prevented datasets & attributes with
             variable-length string elements from comparing correctly.
             (QAK - 2008/02/28)
@@ -119,6 +121,10 @@ Bug Fixes since HDF5-1.8.0 release
             (PVN - 2008/02/19)
         - Fixed bug in h5dump that caused binary output to be made only for the first 
            dataset, when several datasets were requested. (PVN - 2008/04/07)
+        - h5dump: when doing binary output (-b), the stdout printing of attributes 
+           was done incorrectly. Removed printing of attributes when doing binary 
+           output. PVN - 2008/06/05
+
 
 
 

@@ -751,6 +751,7 @@
 ./src/Makefile.in
 ./src/hdf5.h
 ./src/libhdf5.settings.in
+./src/H5win32defs.h
 
 ./test/COPYING
 ./test/Makefile.am
@@ -1296,6 +1297,7 @@
 ./tools/testfiles/tdset-1.ls
 ./tools/testfiles/tgroup-1.ls
 ./tools/testfiles/tgroup-2.ls
+./tools/testfiles/tgroup-3.ls
 ./tools/testfiles/tgroup.ls
 ./tools/testfiles/thlink-1.ls
 ./tools/testfiles/tloop-1.ls
@@ -1519,6 +1521,8 @@
 ./tools/testfiles/h5mkgrp_version.ls
 
 #h52jpeg
+./tools/h52jpeg/Makefile.in
+./tools/h52jpeg/Makefile.am
 ./tools/h52jpeg/h52jpeg.c
 ./tools/h52jpeg/h52jpegtst.c
 
