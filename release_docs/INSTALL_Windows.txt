@@ -151,8 +151,8 @@ Preconditions:
 
       6.3 Find the box "Show directories for", choose "Library files".  If you 
           cannot find your Zlib and Szip library path (for example, 
-          c:\zlib123\lib, c:\szip\dll) from the directory list, add the library 
-          path (c:\zlib123\lib, c:\szip\dll) to the library directories.
+          c:\zlib123\dll, c:\szip\dll) from the directory list, add the library 
+          path (c:\zlib123\dll, c:\szip\dll) to the library directories.
           
       6.4 If building Fortran libraries, you will also need to setup the path
           for the Intel Fortran compiler.  Please see Section VI.
@@ -942,7 +942,7 @@ project, you may choose one of the following two methods.
        HDF5, Zlib, and Szip library files directories.  For example:
 
           c:\MyHDFstuff\hdf5\hdf5lib\release\lib
-          c:\zlib123\lib
+          c:\zlib123\dll
           c:\szip\dll
           
       Note: To link with HDF5 DLLs rathern that static libraries, simply
@@ -961,7 +961,7 @@ project, you may choose one of the following two methods.
        example,
 
           c:\MyHDFstuff\hdf5\hdf5lib\release\lib
-          c:\zlib123\lib
+          c:\zlib123\dll
           c:\szip\dll
           
        Note: To link with HDF5 DLLs rathern that static libraries, simply
@@ -1148,7 +1148,7 @@ Notes:  1. For Intel Compiler users, Intel fortran Compiler 9.1 and 10.1 are
            right panel, make sure your "Selected Compiler" is Intel Fortran.
       
         3) Select the right-most box for "Libraries", and add Zlib and Szip 
-           library paths (c:\zlib123\lib, c:\szip\dll for example).
+           library paths (c:\zlib123\dll, c:\szip\dll for example).
       
         4) Select right-most box for "Includes", and add Zlib and Szip header 
            paths (c:\zlib123\include c:\szip\include, for example).
