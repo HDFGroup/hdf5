@@ -30,7 +30,7 @@
 /* Number of elements in each test */
 #define NTESTELEM	100000
 
-/* For test_compound_10 */
+/* For test_compound_8 and test_compound_10 */
 #define ARRAY_DIM       4
 
 /* Epsilon for floating-point comparisons */
@@ -1354,7 +1354,10 @@ test_compound_7(void)
  *              Wednesday, January  7, 1998
  *
  * Modifications:
- *
+ *              Raymond Lu
+ *              27 June 2008
+ *              Added verification of compound type size for H5Tpack and
+ *              test for array of nested compound type.
  *-------------------------------------------------------------------------
  */
 static int
@@ -1370,11 +1373,16 @@ test_compound_8(void)
         s1      d;
     } s2;
 
-    hid_t  tid1, tid2, tid3;
+    hid_t  tid1,  tid1_copy, tid2, tid2_copy, tid3, arr_tid;
+    size_t tsize;
+    hsize_t dims[1] = {ARRAY_DIM};
     herr_t ret;
 
     TESTING("packing compound datatypes");
 
+    /*------------------------------------------------------------
+     *    Test H5Tpack for compound type
+     */
     /* Create first compound datatype */
     if((tid1 = H5Tcreate( H5T_COMPOUND, sizeof(struct s1))) < 0) {
         H5_FAILED(); AT();
@@ -1391,6 +1399,13 @@ test_compound_8(void)
     if(H5Tinsert(tid1,"b",HOFFSET(struct s1,b),H5T_NATIVE_INT) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'b'\n");
+        goto error;
+    } /* end if */
+
+    /* Make a copy of the type for later use */
+    if((tid1_copy = H5Tcopy(tid1)) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't copy type #1\n");
         goto error;
     } /* end if */
 
@@ -1414,7 +1429,22 @@ test_compound_8(void)
         goto error;
     } /* end if */
 
+    /* Verify the size of packed compound type */
+    if((tsize = H5Tget_size(tid1)) == 0) {
+        H5_FAILED(); AT();
+        printf("Can't get size of the compound datatype\n");
+        goto error;
+    } /* end if */
+ 
+    if(tsize != (sizeof(char) + sizeof(int))) {
+        H5_FAILED(); AT();
+        printf("The size of the packed compound datatype is incorrect\n");
+        goto error;
+    } /* end if */
 
+    /*------------------------------------------------------------
+     *    Test H5Tpack for nested compound type
+     */
     /* Create second compound datatype */
     if((tid2 = H5Tcreate( H5T_COMPOUND, sizeof(struct s2))) < 0) {
         H5_FAILED(); AT();
@@ -1428,7 +1458,8 @@ test_compound_8(void)
         goto error;
     } /* end if */
 
-    if(H5Tinsert(tid2,"d",HOFFSET(struct s2,d),tid1) < 0) {
+    /* Insert the member of unpacked compound type */
+    if(H5Tinsert(tid2,"d",HOFFSET(struct s2,d),tid1_copy) < 0) {
         H5_FAILED(); AT();
         printf("Can't insert field 'd'\n");
         goto error;
@@ -1436,6 +1467,13 @@ test_compound_8(void)
 
     /* Make a copy of the type for later */
     if((tid3=H5Tcopy(tid2)) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't copy type #2\n");
+        goto error;
+    } /* end if */
+
+    /* Make a copy of the type for later */
+    if((tid2_copy = H5Tcopy(tid2)) < 0) {
         H5_FAILED(); AT();
         printf("Can't copy type #2\n");
         goto error;
@@ -1475,6 +1513,68 @@ test_compound_8(void)
     if(ret>=0) {
         H5_FAILED(); AT();
         printf("Packing locked datatype worked?\n");
+        goto error;
+    } /* end if */
+
+    /* Verify the size of packed compound type */
+    if((tsize = H5Tget_size(tid2)) == 0) {
+        H5_FAILED(); AT();
+        printf("Can't get size of the compound datatype\n");
+        goto error;
+    } /* end if */
+
+    if(tsize != (sizeof(char) + sizeof(char) + sizeof(int))) {
+        H5_FAILED(); AT();
+        printf("The size of the packed compound datatype is incorrect\n");
+        goto error;
+    } /* end if */
+
+    /*------------------------------------------------------------
+     *    Test H5Tpack for array type of nested compound type
+     */
+    /* Create an array type of compound type */
+    if((arr_tid = H5Tarray_create(tid2_copy, 1, dims)) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't create an array datatype\n");
+        goto error;
+    } /* end if */
+
+    /* Test H5Tpack for the array type */
+    if(H5Tpack(arr_tid) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't pack the array datatype\n");
+        goto error;
+    } /* end if */
+
+    /* Verify the size of packed compound type */
+    if((tsize = H5Tget_size(arr_tid)) == 0) {
+        H5_FAILED(); AT();
+        printf("Can't get size of the array datatype\n");
+        goto error;
+    } /* end if */
+
+    if(tsize != ARRAY_DIM * (sizeof(char) + sizeof(char) + sizeof(int))) {
+        H5_FAILED(); AT();
+        printf("The size of the packed array datatype is incorrect\n");
+        goto error;
+    } /* end if */
+
+
+    if(H5Tclose(tid1_copy) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't close the compound datatype\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tclose(tid2_copy) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't close the compound datatype\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tclose(arr_tid) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't close the array datatype\n");
         goto error;
     } /* end if */
 
