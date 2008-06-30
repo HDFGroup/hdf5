@@ -31,7 +31,7 @@
 #include "H5Tpkg.h"		/*data-type functions			  */
 
 /* Static local functions */
-static herr_t H5T_pack(const H5T_t *dt, size_t *new_size);
+static herr_t H5T_pack(const H5T_t *dt);
 
 
 /*--------------------------------------------------------------------------
@@ -386,7 +386,7 @@ H5Tpack(hid_t type_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a compound datatype")
 
     /* Pack */
-    if (H5T_pack(dt, NULL) < 0)
+    if (H5T_pack(dt) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack compound datatype")
 
 done:
@@ -524,7 +524,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_pack(const H5T_t *dt, size_t *new_size)
+H5T_pack(const H5T_t *dt)
 {
     unsigned	i;
     size_t	offset;
@@ -544,7 +544,7 @@ H5T_pack(const H5T_t *dt, size_t *new_size)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "datatype is read-only")
 
         if(dt->shared->parent) {
-            if (H5T_pack(dt->shared->parent, NULL) < 0)
+            if (H5T_pack(dt->shared->parent) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack parent of datatype")
 
             /* Adjust size of datatype appropriately */
@@ -555,9 +555,13 @@ H5T_pack(const H5T_t *dt, size_t *new_size)
         } /* end if */
         else if(dt->shared->type==H5T_COMPOUND) {
             /* Recursively pack the members */
-            for (i=0; i<dt->shared->u.compnd.nmembs; i++)
-                if (H5T_pack(dt->shared->u.compnd.memb[i].type, &(dt->shared->u.compnd.memb[i].size)) < 0)
+            for (i=0; i<dt->shared->u.compnd.nmembs; i++) {
+                if (H5T_pack(dt->shared->u.compnd.memb[i].type) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack part of a compound datatype")
+
+                /* Update the member size */
+                dt->shared->u.compnd.memb[i].size = dt->shared->u.compnd.memb[i].type->shared->size;
+	    }
 
             /* Remove padding between members */
             if(H5T_sort_value(dt, NULL)<0)
@@ -570,10 +574,6 @@ H5T_pack(const H5T_t *dt, size_t *new_size)
             /* Change total size */
             dt->shared->size = MAX(1, offset);
 
-            /* Update the member size of compound type in higher level */
-            if(new_size)
-                *new_size = MAX(1, offset);
-            
             /* Mark the type as packed now */
             dt->shared->u.compnd.packed=TRUE;
         } /* end if */
