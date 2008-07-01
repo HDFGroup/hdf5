@@ -1533,7 +1533,7 @@ test_compound_8(void)
      *    Test H5Tpack for array type of nested compound type
      */
     /* Create an array type of compound type */
-    if((arr_tid = H5Tarray_create(tid2_copy, 1, dims)) < 0) {
+    if((arr_tid = H5Tarray_create2(tid2_copy, 1, dims)) < 0) {
         H5_FAILED(); AT();
         printf("Can't create an array datatype\n");
         goto error;
