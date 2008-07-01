@@ -308,22 +308,10 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
     hsize_t        planes;
     char           interlace[20];
     hssize_t       npals;
-    unsigned char* buf=NULL;
-    H5T_class_t    tclass;
-    hid_t          sid;
-    hid_t          did;
-    hid_t          tid;
-    int            rank;
-    hsize_t        dims[H5S_MAX_RANK];
-    hsize_t        maxdim[H5S_MAX_RANK];
-    size_t         size;
-    hsize_t        nelmts;
     const char*    name;
-    size_t         i;
-    int            j;
     int            done;
     char           jpeg_name[1024];
-
+    
     name = image_name;
     
     /* build the jpeg file name */
@@ -343,6 +331,8 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
     
     if ( H5IMis_image( fid, name ) )
     {
+        
+        unsigned char* buf=NULL;
         
         if ( H5IMget_image_info( fid, name, &width, &height, &planes, interlace, &npals ) < 0 )
             goto out;
@@ -369,7 +359,7 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
         
         
     }
-
+    
     /*-------------------------------------------------------------------------
     * HDF5 Image palette, ignore
     *-------------------------------------------------------------------------
@@ -386,103 +376,7 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
     */
     
     else
-    {
-
-        unsigned char* image_buffer = NULL;
-        
-        if (( did = H5Dopen2( fid, name, H5P_DEFAULT )) < 0) 
-            goto out;
-        if (( sid = H5Dget_space( did )) < 0 )
-            goto out;
-        if (( rank = H5Sget_simple_extent_ndims(sid)) < 0 )
-            goto out;
-        if (( tid = H5Dget_type( did )) < 0 )
-            goto out;
-        if (( tclass = H5Tget_class(tid)) < 0)
-            goto out;
-        
-        if ( ( H5T_FLOAT == tclass || H5T_INTEGER == tclass) &&
-            ( rank == 2 ) )
-        {
-            
-            if ( H5Sget_simple_extent_dims( sid, dims, maxdim ) < 0 )
-                goto out;
-            
-            size =  H5Tget_size( tid );
-            
-            nelmts = 1;
-            for ( j = 0; j < rank; j++)
-            {
-                nelmts *= dims[j];
-            }
-            
-            if ( NULL == (buf = HDmalloc( (size_t)nelmts * size ))) 
-                goto out;                  
-            if ( H5Dread(did,tid,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0 )
-                goto out;                     
-
-            height = dims[0];
-            width  = dims[1];
-
-            if ( opt.image_type == 0 )
-                planes = 1;
-            else if ( opt.image_type == 1 )
-                planes = 3; 
-
-            
-            if ( NULL == (image_buffer = HDmalloc( (size_t)nelmts * sizeof (unsigned char) ))) 
-            {
-                goto out; 
-            }
-
-            /*-------------------------------------------------------------------------
-            * convert the data to unsigned char
-            *
-            *-------------------------------------------------------------------------
-            */
-            
-            {
-                double min = DBL_MAX;
-                double max = -DBL_MAX;
-                double ratio;
-                
-                /* search for the minimum and maximum */
-                for ( i = 0; i < nelmts; i++)
-                {
-                    if ( buf[i] < min) min = buf[i];
-                    if ( buf[i] > max) max = buf[i];
-                }
-                /* converts the data based on the ratio to a 0-255 range */
-                ratio = (min == max) ? 1.0 : (double)(255.0/(max-min));
-                for ( i = 0; i < nelmts; i++)
-                {
-                    image_buffer[i] = (unsigned char)ceil( (( buf[i] - min ) / ratio) );         
-                }
-                
-            }
-
-            /* write the jpeg file */
-            write_JPEG_file (jpeg_name, 
-                image_buffer,	               
-                (int) height,	       
-                (int) width,           
-                (int) planes);     
-            
-            
-            free( image_buffer );
-            free( buf );
-            buf = NULL;
-            image_buffer = NULL;
-            done = 1;
-            
-        }
-        
-        
-        
-        H5Sclose(sid);
-        H5Tclose(tid);
-        H5Dclose(did);
-        
+    {  
         
         
         
@@ -505,17 +399,6 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
     return 0;
     
 out:
-    H5E_BEGIN_TRY 
-    {
-        
-        H5Sclose(sid);
-        H5Tclose(tid);
-        H5Dclose(did);
-        
-    } H5E_END_TRY;
-    
-    if ( buf != NULL )
-        free( buf );
     
     
     return -1;
