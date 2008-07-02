@@ -6,10 +6,10 @@ Note: This instruction is written for users who would like to build HDF5
       libraries and tools from the HDF5 source code package on command
       line.
          
-      Currently, we support 
+      Currently, we support:
       
       1. Building and testing HDF5 C/C++/Fortran libraries on command line with 
-         Microsoft Visual Studio 2005 for 32- or 64-bit Windows.
+         Microsoft Visual Studio .NET, 2005 or 2008 for 32- or 64-bit Windows.
       
       For all other Windows development tools, HDF5 should be built in
       the development environment.  Please refer to INSTALL_Windows.txt
@@ -25,12 +25,12 @@ notes in INSTALL_Windows.txt before starting below procedures.
 
 ========================================================================
    Section I: Building and testing HDF5 on command line with Microsoft 
-              Visual Studio 2005
+              Visual Studio
 ========================================================================
     
 1. Preconditions: 
 
-   1.1 Verify environment for Visual Studio 2005
+   1.1 Verify environment for Visual Studio
    
    Building from the command line requires environment variables for Visual
    Studio.  These are generally setup when Visual Studio is installed, but you
@@ -41,6 +41,9 @@ notes in INSTALL_Windows.txt before starting below procedures.
     This should output a path similar to:
     
         C:\Program Files\Microsoft Visual Studio 8\Common7\Tools\
+        
+    If you are using Visual Studio .NET, replace "vs80comntools" with
+    "vs71comntools".  For Visual Studio 2008, use "vs90comntools"
       
    1.2 Run batch file copy_hdf.bat.
 
@@ -55,9 +58,9 @@ notes in INSTALL_Windows.txt before starting below procedures.
    From the command prompt that you will be building HDF5 from, issue the
    following command:
    
-        set HDF5_EXT_ZLIB=zdll.lib
+        set HDF5_EXT_ZLIB=zlib1.lib
         
-    replacing "zdll.lib" with the name of the zlib library on your system.
+    replacing "zlib1.lib" with the name of the zlib library on your system.
     Similarly, set HDF5_EXT_SZIP to the name of the szip library on your system.
     
     (Optional) If you will be building using the /useenv switch, you must also
@@ -79,6 +82,8 @@ notes in INSTALL_Windows.txt before starting below procedures.
 
         hdf5bt file takes the following options:
               /vs7              Build HDF5 using Visual Studio .NET 2003 
+                                Note: Default is Visual Studio 2005
+              /vs9              Build HDF5 using Visual Studio 2008
                                 Note: Default is Visual Studio 2005
               /fort             Build and test HDF5 with Fortran libraries
               /ivf101           Build HDF5 Fortran using Intel Visual Fortran 10.1
@@ -108,6 +113,8 @@ notes in INSTALL_Windows.txt before starting below procedures.
 
         hdf55build takes the following options:
               /vs7              Build HDF5 using Visual Studio .NET 2003 
+                                Note: Default is Visual Studio 2005
+              /vs9              Build HDF5 using Visual Studio 2008
                                 Note: Default is Visual Studio 2005
               /fort             Build HDF5 with Fortran libraries
               /ivf101           Build HDF5 Fortran using Intel Visual Fortran 10.1
