@@ -44,25 +44,20 @@ class H5_DLLCPP IdComponent {
 	// Assignment operator.
 	IdComponent& operator=( const IdComponent& rhs );
 
-        void reference(void* ref, const char* name, const DataSpace& dataspace,
-                        H5R_type_t ref_type = H5R_DATASET_REGION) const;
-        void reference(void* ref, const char* name) const;
-        void reference(void* ref, const H5std_string& name) const;
+	// Opens the HDF5 object referenced.
+	hid_t p_dereference(void* ref);
 
-	// Open a referenced HDF5 object.
-	void dereference(IdComponent& obj, void* ref);
+	// Gets the identifier of this object.
+	virtual hid_t getId () const = 0;
 
 	// Sets the identifier of this object to a new value.
-	void setId(const hid_t new_id);
+	virtual void setId(const hid_t new_id) = 0;
 
 	// Creates an object to hold an HDF5 identifier.
 	IdComponent( const hid_t h5_id );
 
 	// Copy constructor: makes copy of the original IdComponent object.
 	IdComponent( const IdComponent& original );
-
-	// Gets the value of IdComponent's data member.
-	virtual hid_t getId () const;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 	// Pure virtual function for there are various H5*close for the
@@ -83,7 +78,6 @@ class H5_DLLCPP IdComponent {
 
    protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-	hid_t id;	// HDF5 object id
 
 	// Default constructor.
 	IdComponent();
@@ -91,23 +85,8 @@ class H5_DLLCPP IdComponent {
 	// Gets the name of the file, in which an HDF5 object belongs.
 	H5std_string p_get_file_name() const;
 
-	// Gets the id of the H5 file in which the given object is located.
-	hid_t p_get_file_id();
-
-	// Creates a reference to an HDF5 object or a dataset region.
-	void p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const;
-	void* p_reference(const char* name, hid_t space_id, H5R_type_t ref_type) const; // will be removed
-
-#ifndef H5_NO_DEPRECATED_SYMBOLS
-	// Retrieves the type of object that an object reference points to.
-	H5G_obj_t p_get_obj_type(void *ref, H5R_type_t ref_type) const;
-#endif /* H5_NO_DEPRECATED_SYMBOLS */
-
-	// Retrieves a dataspace with the region pointed to selected.
-	hid_t p_get_region(void *ref, H5R_type_t ref_type) const;
-
 	// Verifies that the given id is valid.
-	bool p_valid_id(const hid_t obj_id) const;
+	static bool p_valid_id(const hid_t obj_id);
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

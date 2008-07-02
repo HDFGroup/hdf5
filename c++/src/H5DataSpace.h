@@ -112,8 +112,15 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	// Copy constructor: makes a copy of the original DataSpace object.
 	DataSpace(const DataSpace& original);
 
+	// Gets the dataspace id.
+	virtual hid_t getId() const;
+	virtual void setId(const hid_t new_id);
+
 	// Destructor: properly terminates access to this dataspace.
 	virtual ~DataSpace();
+
+   private:
+	hid_t id;       // HDF5 dataspace id
 };
 #ifndef H5_NO_NAMESPACE
 }

@@ -30,7 +30,8 @@ class H5_DLLCPP DataType : public H5Object {
 	DataType( const DataType& original );
 
 	// Creates a datatype by way of dereference.
-	DataType(IdComponent& obj, void* ref);
+	DataType(H5Object& obj, void* ref);
+	DataType(H5File& file, void* ref);
 
 	// Closes this datatype.
 	virtual void close();
@@ -99,14 +100,6 @@ class H5_DLLCPP DataType : public H5Object {
 	// Checks whether this datatype is a variable-length string.
 	bool isVariableStr() const;
 
-	// Creates a reference to a named HDF5 object or to a dataset region
-	// in this object.
-	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const; // will be obsolete
-
-	// Creates a reference to a named HDF5 object in this object.
-	void* Reference(const char* name) const; // will be obsolete
-	void* Reference(const H5std_string& name) const; // will be obsolete
-
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Retrieves the type of object that an object reference points to.
 	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type = H5R_OBJECT) const;
@@ -124,8 +117,15 @@ class H5_DLLCPP DataType : public H5Object {
 	// Default constructor
 	DataType();
 
+	// Gets the datatype id.
+	virtual hid_t getId() const;
+	virtual void setId(const hid_t new_id);
+
 	// Destructor: properly terminates access to this datatype.
 	virtual ~DataType();
+
+   protected:
+	hid_t id;	// HDF5 datatype id
    private:
 	void p_commit(hid_t loc_id, const char* name);
 };
