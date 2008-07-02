@@ -28,10 +28,13 @@
 #include "H5PropList.h"
 #include "H5DxferProp.h"
 #include "H5DcreatProp.h"
+#include "H5FaccProp.h"
+#include "H5FcreatProp.h"
 #include "H5CommonFG.h"
 #include "H5DataType.h"
 #include "H5DataSpace.h"
 #include "H5AbstractDs.h"
+#include "H5File.h"
 #include "H5DataSet.h"
 
 #ifndef H5_NO_NAMESPACE
@@ -47,7 +50,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub DataSet.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet() : AbstractDs() {}
+DataSet::DataSet() : AbstractDs(), H5Object(), id(0) {}
 
 //--------------------------------------------------------------------------
 // Function:	DataSet overloaded constructor
@@ -55,7 +58,10 @@ DataSet::DataSet() : AbstractDs() {}
 ///\param	existing_id - IN: Id of an existing dataset
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet(const hid_t existing_id) : AbstractDs(existing_id) {}
+DataSet::DataSet(const hid_t existing_id) : AbstractDs(), H5Object()
+{
+    id = existing_id;
+}
 
 //--------------------------------------------------------------------------
 // Function:	DataSet copy constructor
@@ -63,7 +69,12 @@ DataSet::DataSet(const hid_t existing_id) : AbstractDs(existing_id) {}
 ///\param	original - IN: DataSet instance to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet( const DataSet& original ) : AbstractDs( original ) {}
+DataSet::DataSet(const DataSet& original) : AbstractDs(original), H5Object()
+{
+    id = original.getId();
+    incRefCount(); // increment number of references to this id
+
+}
 
 //--------------------------------------------------------------------------
 // Function:	DataSet overload constructor - dereference
@@ -77,9 +88,14 @@ DataSet::DataSet( const DataSet& original ) : AbstractDs( original ) {}
 ///		is a datatype that has been named by DataType::commit.
 // Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
-DataSet::DataSet(IdComponent& obj, void* ref) : AbstractDs()
+DataSet::DataSet(H5Object& obj, void* ref) : AbstractDs(), H5Object()
 {
-   IdComponent::dereference(obj, ref);
+   id = obj.p_dereference(ref);
+}
+
+DataSet::DataSet(H5File& h5file, void* ref) : AbstractDs(), H5Object()
+{
+   id = h5file.p_dereference(ref);
 }
 
 //--------------------------------------------------------------------------
@@ -455,52 +471,6 @@ void DataSet::fillMemBuf(void *buf, DataType& buf_type, DataSpace& space)
     }
 }
 
-//--------------------------------------------------------------------------
-// Function:	DataSet::Reference
-///\brief	Important!!! - This functions may not work correctly, it 
-///		will be removed in the near future.  Please use 
-///		DataSet::reference instead!
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-void* DataSet::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
-{
-   try {
-      return(p_reference(name, dataspace.getId(), ref_type));
-   }
-   catch (IdComponentException E) {
-      throw DataSetIException("DataSet::Reference", E.getDetailMsg());
-   }
-}
-
-//--------------------------------------------------------------------------
-// Function:	DataSet::Reference
-///\brief	Important!!! - This functions may not work correctly, it 
-///		will be removed in the near future.  Please use similar
-///		DataSet::reference instead!
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-void* DataSet::Reference(const char* name) const
-{
-   try {
-      return(p_reference(name, -1, H5R_OBJECT));
-   }
-   catch (IdComponentException E) {
-      throw DataSetIException("DataSet::Reference", E.getDetailMsg());
-   }
-}
-
-//--------------------------------------------------------------------------
-// Function:	DataSet::Reference
-///\brief	Important!!! - This functions may not work correctly, it 
-///		will be removed in the near future.  Please use similar
-///		DataSet::reference instead!
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-void* DataSet::Reference(const H5std_string& name) const
-{
-   return(Reference(name.c_str()));
-}
-
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 //--------------------------------------------------------------------------
 // Function:	DataSet::getObjType
@@ -547,6 +517,49 @@ DataSpace DataSet::getRegion(void *ref, H5R_type_t ref_type) const
    catch (IdComponentException E) {
       throw DataSetIException("DataSet::getRegion", E.getDetailMsg());
    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataSet::getId
+// Purpose:     Get the id of this attribute
+// Description:
+//              Class hierarchy is revised to address bugzilla 1068.  Class
+//              AbstractDs and Attribute are moved out of H5Object.  In
+//              addition, member IdComponent::id is moved into subclasses, and
+//              IdComponent::getId now becomes pure virtual function.
+// Programmer   Binh-Minh Ribler - May, 2008
+//--------------------------------------------------------------------------
+hid_t DataSet::getId() const
+{
+   return(id);
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataSet::setId
+///\brief       Sets the identifier of this object to a new value.
+///
+///\exception   H5::IdComponentException when the attempt to close the HDF5
+///             object fails
+// Description:
+//              The underlaying reference counting in the C library ensures
+//              that the current valid id of this object is properly closed.
+//              Then the object's id is reset to the new id.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void DataSet::setId(const hid_t new_id)
+{
+    // handling references to this old id
+    try {
+        close();
+    }
+    catch (Exception close_error) {
+        throw DataSetIException(inMemFunc("setId"), close_error.getDetailMsg());
+    }
+   // reset object's id to the given id
+   id = new_id;
+
+   // increment the reference counter of the new id
+   incRefCount();
 }
 
 //--------------------------------------------------------------------------

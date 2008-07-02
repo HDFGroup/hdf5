@@ -47,7 +47,7 @@ const DataSpace DataSpace::ALL( H5S_ALL );
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSpace::DataSpace( H5S_class_t type ) : IdComponent(0)
+DataSpace::DataSpace(H5S_class_t type) : IdComponent()
 {
    id = H5Screate( type );
    if( id < 0 )
@@ -65,7 +65,7 @@ DataSpace::DataSpace( H5S_class_t type ) : IdComponent(0)
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSpace::DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims) : IdComponent(0)
+DataSpace::DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims) : IdComponent()
 {
    id = H5Screate_simple( rank, dims, maxdims );
    if( id < 0 )
@@ -82,7 +82,10 @@ DataSpace::DataSpace( int rank, const hsize_t * dims, const hsize_t * maxdims) :
 ///\exception	H5::DataSpaceIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSpace::DataSpace(const hid_t existing_id) : IdComponent(existing_id) {}
+DataSpace::DataSpace(const hid_t existing_id) : IdComponent()
+{
+    id = existing_id;
+}
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace copy constructor
@@ -90,7 +93,11 @@ DataSpace::DataSpace(const hid_t existing_id) : IdComponent(existing_id) {}
 ///\param	original - IN: DataSpace object to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSpace::DataSpace( const DataSpace& original ) : IdComponent( original ) {}
+DataSpace::DataSpace(const DataSpace& original) : IdComponent(original)
+{
+    id = original.getId();
+    incRefCount(); // increment number of references to this id
+}
 
 //--------------------------------------------------------------------------
 // Function:	DataSpace::copy
@@ -548,6 +555,50 @@ void DataSpace::selectHyperslab( H5S_seloper_t op, const hsize_t *count, const h
 }
 
 //--------------------------------------------------------------------------
+// Function:    DataSpace::getId
+// Purpose:     Get the id of this attribute
+// Modification:
+//	May 2008 - BMR
+//              Class hierarchy is revised to address bugzilla 1068.  Class
+//              AbstractDS and Attribute are moved out of H5Object.  In
+//              addition, member IdComponent::id is moved into subclasses, and
+//              IdComponent::getId now becomes pure virtual function.
+// Programmer   Binh-Minh Ribler - May, 2008
+//--------------------------------------------------------------------------
+hid_t DataSpace::getId() const
+{
+   return(id);
+}
+
+//--------------------------------------------------------------------------
+// Function:    DataSpace::setId
+///\brief       Sets the identifier of this object to a new value.
+///
+///\exception   H5::IdComponentException when the attempt to close the HDF5
+///             object fails
+// Description:
+//              The underlaying reference counting in the C library ensures
+//              that the current valid id of this object is properly closed.
+//              Then the object's id is reset to the new id.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void DataSpace::setId(const hid_t new_id)
+{
+    // handling references to this old id
+    try {
+        close();
+    }
+    catch (Exception close_error) {
+        throw DataSpaceIException(inMemFunc("setId"), close_error.getDetailMsg());
+    }
+   // reset object's id to the given id
+   id = new_id;
+
+   // increment the reference counter of the new id
+   incRefCount();
+}
+
+//--------------------------------------------------------------------------
 // Function:	DataSpace::close
 ///\brief	Closes this dataspace.
 ///
@@ -581,11 +632,16 @@ void DataSpace::close()
 //--------------------------------------------------------------------------
 DataSpace::~DataSpace()
 {
-    try {
-	close();
-    }
-    catch (Exception close_error) {
-	cerr << "DataSpace::~DataSpace - " << close_error.getDetailMsg() << endl;
+    int counter = getCounter(id);
+    if (counter > 1)
+	decRefCount(id);
+    else if (counter == 1)
+    {
+	try {
+	    close();
+	} catch (Exception close_error) {
+	    cerr << "DataSpace::~DataSpace - " << close_error.getDetailMsg() << endl;
+	}
     }
 }
 

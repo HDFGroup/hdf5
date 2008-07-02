@@ -26,12 +26,14 @@
 #include "H5PropList.h"
 #include "H5Object.h"
 #include "H5AbstractDs.h"
-#include "H5Attribute.h"
+#include "H5FaccProp.h"
+#include "H5FcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5CommonFG.h"
 #include "H5DataType.h"
 #include "H5DataSpace.h"
-#include "H5private.h"
+#include "H5File.h"
+#include "H5Attribute.h"
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -46,7 +48,7 @@ namespace H5 {
 ///\brief	Default constructor: Creates a stub attribute
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-Attribute::Attribute() : AbstractDs() {}
+Attribute::Attribute() : AbstractDs(), IdComponent(), id(0) {}
 
 //--------------------------------------------------------------------------
 // Function:	Attribute copy constructor
@@ -54,7 +56,11 @@ Attribute::Attribute() : AbstractDs() {}
 ///\param	original  - IN: Original Attribute object to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute::Attribute( const Attribute& original ) : AbstractDs( original ) {}
+Attribute::Attribute(const Attribute& original) : AbstractDs(), IdComponent()
+{
+    id = original.getId();
+    incRefCount(); // increment number of references to this id
+}
 
 //--------------------------------------------------------------------------
 // Function:	Attribute overloaded constructor
@@ -64,7 +70,10 @@ Attribute::Attribute( const Attribute& original ) : AbstractDs( original ) {}
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Attribute::Attribute(const hid_t existing_id) : AbstractDs(existing_id) {}
+Attribute::Attribute(const hid_t existing_id) : AbstractDs(), IdComponent()
+{
+   id = existing_id;
+}
 
 //--------------------------------------------------------------------------
 // Function:	Attribute::write
@@ -208,6 +217,23 @@ hid_t Attribute::p_get_type() const
 }
 
 //--------------------------------------------------------------------------
+// Function:	Attribute::getFileName
+///\brief	Gets the name of the file, in which this attribute belongs.
+///\return	File name
+///\exception	H5::IdComponentException
+// Programmer	Binh-Minh Ribler - Jul, 2004
+//--------------------------------------------------------------------------
+H5std_string Attribute::getFileName() const
+{
+   try {
+      return(p_get_file_name());
+   }
+   catch (IdComponentException E) {
+      throw FileIException("Attribute::getFileName", E.getDetailMsg());
+   }
+}
+
+//--------------------------------------------------------------------------
 // Function:	Attribute::getName
 ///\brief	Gets the name of this attribute, returning its length.
 ///\param	buf_size  -  IN: Desired length of the name
@@ -294,6 +320,70 @@ hsize_t Attribute::getStorageSize() const
 {
    hsize_t storage_size = H5Aget_storage_size(id);
    return (storage_size);
+}
+
+//--------------------------------------------------------------------------
+// Function:    Attribute::dereference
+// Purpose      Dereference a ref into a DataSet object.
+// Parameters
+//              ref - IN: Reference pointer
+// Exception    H5::IdComponentException
+// Programmer   Binh-Minh Ribler - Oct, 2006
+// Modification
+//      May 2008 - BMR
+//              Moved from IdComponent into H5File, H5Object, and Attribute
+//--------------------------------------------------------------------------
+Attribute::Attribute(H5Object& obj, void* ref) : AbstractDs(), IdComponent()
+{
+   id = obj.p_dereference(ref);
+}
+
+Attribute::Attribute(H5File& h5file, void* ref) : AbstractDs(), IdComponent()
+{
+   id = h5file.p_dereference(ref);
+}
+
+//--------------------------------------------------------------------------
+// Function:    Attribute::getId
+// Purpose:     Get the id of this attribute
+// Description:
+//		Class hierarchy is revised to address bugzilla 1068.  Class
+//		AbstractDS and Attribute are moved out of H5Object.  In 
+//		addition, member IdComponent::id is moved into subclasses, and
+//		IdComponent::getId now becomes pure virtual function.
+// Programmer   Binh-Minh Ribler - May, 2008
+//--------------------------------------------------------------------------
+hid_t Attribute::getId() const
+{
+   return(id);
+}
+
+//--------------------------------------------------------------------------
+// Function:    Attribute::setId
+///\brief       Sets the identifier of this object to a new value.
+///
+///\exception   H5::IdComponentException when the attempt to close the HDF5
+///             object fails
+// Description:
+//              The underlaying reference counting in the C library ensures
+//              that the current valid id of this object is properly closed.
+//              Then the object's id is reset to the new id.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void Attribute::setId(const hid_t new_id)
+{
+    // handling references to this old id
+    try {
+        close();
+    }
+    catch (Exception close_error) {
+        throw AttributeIException("Attribute::setId", close_error.getDetailMsg());
+    }
+   // reset object's id to the given id
+   id = new_id;
+
+   // increment the reference counter of the new id
+   incRefCount();
 }
 
 //--------------------------------------------------------------------------
