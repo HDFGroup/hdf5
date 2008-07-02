@@ -40,13 +40,14 @@ const char *progname = "h52jpeg";
 int d_status = EXIT_SUCCESS;
 
 /* command-line options: The user can specify short or long-named parameters */
-static const char *s_opts = "hVvi:t:";
+static const char *s_opts = "hVvi:t:c:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
     { "verbose", no_arg, 'v' },
     { "image", require_arg, 'i' },
     { "type", require_arg, 't' },
+    { "convert", require_arg, 'c' },
     { NULL, 0, '\0' }
 };
 
@@ -58,6 +59,7 @@ typedef struct
  const char  *template_name;
  const char  *image_name;
  int         image_type;
+ int         convert_type;
  int         verbose;
 } h52jpeg_opt_t;
 
@@ -84,6 +86,7 @@ int main(int argc, const char *argv[])
 {
     h52jpeg_opt_t opt;
     const char    *image_type = NULL;
+    const char    *convert_type = NULL;
     int           op;
 
     /* initialze options to 0 */
@@ -117,6 +120,25 @@ int main(int argc, const char *argv[])
             else if ( HDstrcmp( image_type, "true" ) == 0 )
             {
                 opt.image_type = 1;
+            }
+            else 
+            {
+                printf("<%s> is an invalid image type\n", image_type); 
+                exit(EXIT_FAILURE);
+            }
+            
+            break;
+        case 'c':
+            convert_type = opt_arg;
+            
+            
+            if ( HDstrcmp( convert_type, "grey" ) == 0 )
+            {
+                opt.convert_type = 0;
+            }
+            else if ( HDstrcmp( convert_type, "true" ) == 0 )
+            {
+                opt.convert_type = 1;
             }
             else 
             {
@@ -172,7 +194,8 @@ static void usage(const char *prog)
     printf("   -v, --verbose           Verbose mode, print object information\n");
     printf("   -V, --version           Print HDF5 version number and exit\n");
     printf("   -i, --image             Image name (full path in HDF5 file)\n");
-    printf("   -t T, --type=T          Type of image (graycolor or truecolor)\n");
+    printf("   -t T, --type=T          Type of image to read (graycolor or truecolor)\n");
+    printf("   -c T, --convert=T       Convert image to type T (graycolor or truecolor)\n");
     
     printf("\n");
     
@@ -296,7 +319,7 @@ out:
  *
  * Purpose: read HDF5 image/dataset, save jpeg image
  *
- * Return: int
+ * Return: 0, all is fine, -1 not all is fine
  *
  *-------------------------------------------------------------------------
  */
@@ -411,7 +434,8 @@ out:
  * Parameters: template name (IN), image name (IN), jpeg name (IN/OUT)
  *
  * Purpose: build a name for the jpeg image file upon a template name
- *  and the HDF5 image name
+ *  and the HDF5 image name. Replace the special characters 
+ *  "%", "@", "$", "/", ":", "&", and "*" with "_"
  *
  * Return: void
  *
@@ -431,7 +455,14 @@ void make_jpeg_name( const char* template_name, const char* image_name, char* jp
     /* HDF5 path names might contain '/', replace with '_' */
     for (j = 0; j < len; j++)
     {
-        if (jpeg_name[j] == '/')
+        if ( (jpeg_name[j] == '/') ||
+             (jpeg_name[j] == '%') ||
+             (jpeg_name[j] == '@') ||
+             (jpeg_name[j] == '$') ||
+             (jpeg_name[j] == '/') ||
+             (jpeg_name[j] == ':') ||
+             (jpeg_name[j] == '&') ||
+             (jpeg_name[j] == '*') )
         {  
             jpeg_name[j] = '_'; 
         }
