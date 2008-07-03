@@ -13,7 +13,7 @@
 # http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
-# Tests for the h5dump tool
+# Tests for the h5jam/h5unjam tools
 
 # Determine which filters are available
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
@@ -39,9 +39,8 @@ verbose=yes
 if test -z "$srcdir"; then
    srcdir=.
 fi
-TESTFILES="$srcdir/../testfiles"
+TESTFILES="$srcdir/testfiles"
 
-#test -d ../testfiles || mkdir ../testfiles
 
 # Print a line-line message left justified in a field of 70 characters
 # beginning with the word "Testing".
