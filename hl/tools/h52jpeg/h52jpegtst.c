@@ -16,26 +16,21 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 #include "H5private.h"
+#include "hdf5_hl.h"
+#include "h52jpegtst.h"
 #include <stdlib.h>
 #include <string.h>
 
-#define DATA_FILE1   "image8.txt"
-#define DATA_FILE2   "image24pixel.txt"
-#define IMAGE1_NAME  "image8bit"
-#define IMAGE2_NAME  "image24bitpixel"
-#define PAL_NAME     "palette"
-#define PAL_ENTRIES  256
-
 
 static int make_images( hid_t fid );
-static int read_data(const char* file_name, hsize_t *width, hsize_t *height );
-unsigned char *gbuf = 0;  /* global buffer for image data */
+static int read_data(const char* fname, hsize_t *width, hsize_t *height );
+unsigned char *gbuf = NULL;  /* global buffer for image data */
 
 
 /*-------------------------------------------------------------------------
  * Function: main
  *
- * Purpose: h52jpegtst main program. Generate images and datasets to be used
+ * Purpose: h52jpegtst main program. Generate images to be used
  *  by h52jpeg tests
  *
  * Programmer: Pedro Vicente, pvn@hdfgroup.org
@@ -79,50 +74,67 @@ static int make_images( hid_t fid )
 {
     hsize_t        width;                         /* width of image */
     hsize_t        height;                        /* height of image */
-    unsigned char  pal[ PAL_ENTRIES * 3 ];        /* palette array */
     hsize_t        pal_dims[2] = {PAL_ENTRIES,3}; /* palette dimensions */
+    unsigned char  pal[ PAL_ENTRIES * 3 ];        /* palette array */
     int            i, n;
     
+    /*-------------------------------------------------------------------------
+    * indexed image  
+    *-------------------------------------------------------------------------
+    */
+    
     /* read first data file */
-    if ( read_data( DATA_FILE1, &width, &height ) < 0 )
+    if ( read_data( "image8.txt", &width, &height ) < 0 )
         goto out;
     
     /* make the image */
-    if ( H5IMmake_image_8bit( fid, IMAGE1_NAME, width, height, gbuf ) < 0 )
+    if ( H5IMmake_image_8bit( fid, "img8", width, height, gbuf ) < 0 )
         goto out;
     
-    /*-------------------------------------------------------------------------
-     * define a palette, blue to red tones
-     *-------------------------------------------------------------------------
-     */
-    for ( i=0, n=0; i<PAL_ENTRIES*3; i+=3, n++)
-    {
-        pal[i]  =n;      /* red */
-        pal[i+1]=0;      /* green */
-        pal[i+2]=255-n;  /* blue */
-    }
-    
     /* make a palette */
-    if ( H5IMmake_palette( fid, PAL_NAME, pal_dims, pal ) < 0 )
+    if ( H5IMmake_palette( fid, "pal1", pal_dims, pal_rgb ) < 0 )
         goto out;
     
     /* attach the palette to the image */
-    if ( H5IMlink_palette( fid, IMAGE1_NAME, PAL_NAME ) < 0 )
+    if ( H5IMlink_palette( fid, "img8", "pal1" ) < 0 )
+    {
         goto out;
+    }
     
     /*-------------------------------------------------------------------------
-     * true color image example with pixel interlace in RGB type
-     *-------------------------------------------------------------------------
-     */
+    * define another palette, green tones
+    *-------------------------------------------------------------------------
+    */
+    for ( i = 0, n = 0; i < PAL_ENTRIES*3; i+=3, n++)
+    {
+        pal[i]  =0;      /* red */
+        pal[i+1]=n;      /* green */
+        pal[i+2]=0;      /* blue */
+    }
+
+    /* save the palette */
+    if ( H5IMmake_palette( fid, "pal2", pal_dims, pal ) < 0 )
+        goto out;
+    
+    /* attach the palette to the image */
+    if ( H5IMlink_palette( fid, "img8", "pal2" ) < 0 )
+    {
+        goto out;
+    }  
+    
+    /*-------------------------------------------------------------------------
+    * true color image with pixel interlace in RGB type
+    *-------------------------------------------------------------------------
+    */
     
     /* read second data file */
-    if ( read_data( DATA_FILE2, &width, &height ) < 0 )
+    if ( read_data( "image24pixel.txt", &width, &height ) < 0 )
         goto out;
     
     /* make dataset */
-    if ( H5IMmake_image_24bit( fid, IMAGE2_NAME, width, height, "INTERLACE_PIXEL", gbuf ) < 0 )
+    if ( H5IMmake_image_24bit( fid, "img24", width, height, "INTERLACE_PIXEL", gbuf ) < 0 )
         goto out;
-      
+    
     return 0;
     
 out:    

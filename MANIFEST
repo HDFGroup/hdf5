@@ -1518,15 +1518,15 @@
 ./tools/testfiles/h5mkgrp_version.ls
 
 #h52jpeg
-./hl/tools/h52jpeg/testfiles/h52jpegtst.h5
+./hl/tools/h52jpeg/h52jpegtst.h
 ./hl/tools/h52jpeg/h52jpegtst.c
-./hl/tools/h52jpeg/Makefile.in
 ./hl/tools/h52jpeg/h52jpeg.c
 ./hl/tools/h52jpeg/image24pixel.txt
 ./hl/tools/h52jpeg/image8.txt
 ./hl/tools/h52jpeg/Makefile.am
+./hl/tools/h52jpeg/Makefile.in
 ./hl/tools/h52jpeg/h52jpeg.sh
-
+./hl/tools/h52jpeg/testfiles/h52jpegtst.h5
 
 # high level libraries
 ./hl/COPYING
