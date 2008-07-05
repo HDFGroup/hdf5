@@ -60,14 +60,14 @@ typedef struct {
 /* General stuff */
 static herr_t H5D_init_storage(H5D_t *dataset, hbool_t full_overwrite, hid_t dxpl_id);
 static herr_t H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
-static H5D_shared_t *H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type);
+static H5D_shared_t *H5D_new(const H5F_t *file, hid_t dcpl_id, hbool_t creating,
+    hbool_t vl_type);
 static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
     const H5T_t *type);
 static herr_t H5D_init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t H5D_set_io_ops(H5D_t *dataset);
 static herr_t H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset);
 static herr_t H5D_open_oid(H5D_t *dataset, hid_t dxpl_id);
-static herr_t H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 
 
 /*********************/
@@ -516,13 +516,18 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5D_shared_t *
-H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
+H5D_new(const H5F_t *file, hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
 {
-    H5P_genplist_t  *plist;             /* Property list created */
     H5D_shared_t    *new_dset = NULL;   /* New dataset object */
+    H5P_genplist_t  *plist;             /* Property list created */
+    htri_t journaling_enabled;          /* Whether journaling is enabled on the file */
     H5D_shared_t    *ret_value;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_new)
+
+    /* Check whether journaling is enabled on this file */
+    if((journaling_enabled = H5F_is_journaling_enabled(file)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't check journaling status")
 
     /* Allocate new shared dataset structure */
     if(NULL == (new_dset = H5FL_MALLOC(H5D_shared_t)))
@@ -530,6 +535,9 @@ H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
 
     /* Copy the default dataset information */
     HDmemcpy(new_dset, &H5D_def_dset, sizeof(H5D_shared_t));
+
+    /* Remember whether journaling is enabled, to help managed future behavior */
+    new_dset->journaling_enabled = journaling_enabled;
 
     /* If we are using the default dataset creation property list, during creation
      * don't bother to copy it, just increment the reference count
@@ -1046,7 +1054,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     H5G_loc_reset(&dset_loc);
 
     /* Initialize the shared dataset space */
-    if(NULL == (new_dset->shared = H5D_new(dcpl_id, TRUE, has_vl_type)))
+    if(NULL == (new_dset->shared = H5D_new(file, dcpl_id, TRUE, has_vl_type)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy & initialize datatype for dataset */
@@ -1313,7 +1321,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
     HDassert(dataset);
 
     /* (Set the 'vl_type' parameter to FALSE since it doesn't matter from here) */
-    if(NULL == (dataset->shared = H5D_new(H5P_DATASET_CREATE_DEFAULT, FALSE, FALSE)))
+    if(NULL == (dataset->shared = H5D_new(dataset->oloc.file, H5P_DATASET_CREATE_DEFAULT, FALSE, FALSE)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Open the dataset object */
@@ -1904,7 +1912,9 @@ H5D_alloc_storage(H5D_t *dset/*in,out*/, hid_t dxpl_id, H5D_time_alloc_t time_al
          *      operation just sets the address and makes it constant)
          */
         if(time_alloc != H5D_ALLOC_CREATE && addr_set)
-            dset->shared->layout_dirty = TRUE;
+            /* Mark the layout as dirty, for later writing to the file */
+            if(H5D_mark(dset, dxpl_id, H5D_MARK_LAYOUT) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark dataspace as dirty")
     } /* end if */
 
 done:
@@ -2392,7 +2402,8 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
         } /* end if */
 
         /* Mark the dataspace as dirty, for later writing to the file */
-        dset->shared->space_dirty = TRUE;
+        if(H5D_mark(dset, dxpl_id, H5D_MARK_SPACE) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to mark dataspace as dirty")
     } /* end if */
 
 done:
@@ -2413,7 +2424,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, unsigned flags)
 {
     H5O_t *oh = NULL;                   /* Pointer to dataset's object header */
@@ -2503,6 +2514,46 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_flush_real() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D_mark
+ *
+ * Purpose:     Mark some aspect of a dataset as dirty
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:  Quincey Koziol
+ *              July 4, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_mark(H5D_t *dataset, hid_t dxpl_id, unsigned flags)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_mark)
+
+    /* Check args */
+    HDassert(dataset);
+    HDassert(!(flags & (unsigned)~(H5D_MARK_SPACE | H5D_MARK_LAYOUT)));
+
+    /* Mark aspects of the dataset as dirty */
+    if(flags & H5D_MARK_SPACE)
+        dataset->shared->space_dirty = TRUE;
+    if(flags & H5D_MARK_LAYOUT)
+        dataset->shared->layout_dirty = TRUE;
+
+    /* Check if journaling is enabled on this file and flush the metadata now */
+    if(dataset->shared->journaling_enabled)
+        if(H5D_flush_real(dataset, dxpl_id, (unsigned)H5F_FLUSH_NONE) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_mark() */
 
 
 /*-------------------------------------------------------------------------

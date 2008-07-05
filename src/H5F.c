@@ -3283,6 +3283,41 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F_is_journaling enabled
+ *
+ * Purpose:     Checks if metadata cache journaling is enabled currently for
+ *              a file.
+ *
+ * Return:      Success:        TRUE/FALSE
+ *              Failure:        FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              7/3/08
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5F_is_journaling_enabled(const H5F_t *f)
+{
+    H5AC2_cache_config_t mdc_config;    /* Current cache configuration */
+    htri_t     ret_value;               /* Return value */
+
+    FUNC_ENTER_NOAPI(H5F_is_journaling_enabled, FAIL)
+
+    /* Retrieve the current cache information */
+    mdc_config.version = H5AC2__CURR_CACHE_CONFIG_VERSION;
+    if(H5AC2_get_cache_auto_resize_config(f->shared->cache2, &mdc_config) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve cache configuration")
+
+    /* Set return value */
+    ret_value = mdc_config.enable_journaling;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5F_is_journaling_enabled() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5Fget_mdc_config
  *
  * Purpose:     Retrieves the current automatic cache resize configuration
@@ -3705,3 +3740,4 @@ H5Fget_info(hid_t obj_id, H5F_info_t *finfo)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Fget_info() */
+

@@ -213,7 +213,7 @@ done:
  */
 herr_t
 H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
-	 hid_t file_space_id, hid_t plist_id, const void *buf)
+	 hid_t file_space_id, hid_t dxpl_id, const void *buf)
 {
     H5D_t		   *dset = NULL;
     const H5S_t		   *mem_space = NULL;
@@ -223,7 +223,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
 
     FUNC_ENTER_API_META(H5Dwrite, dset_id, FAIL)
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id,
-             plist_id, buf);
+             dxpl_id, buf);
 
     /* check arguments */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
@@ -248,10 +248,10 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     } /* end if */
 
     /* Get the default dataset transfer property list if the user didn't provide one */
-    if(H5P_DEFAULT == plist_id)
-        plist_id= H5P_DATASET_XFER_DEFAULT;
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id= H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
     if(!buf && H5S_GET_SELECT_NPOINTS(file_space) != 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no output buffer")
@@ -264,8 +264,13 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
         buf = &fake_char;
 
     /* write raw data */
-    if(H5D_write(dset, mem_type_id, mem_space, file_space, plist_id, buf) < 0)
+    if(H5D_write(dset, mem_type_id, mem_space, file_space, dxpl_id, buf) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
+
+    /* Check if journaling is enabled on this file and flush the metadata now */
+    if(dset->shared->journaling_enabled)
+        if(H5D_flush_real(dset, dxpl_id, (unsigned)H5F_FLUSH_NONE) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
 
 done:
     FUNC_LEAVE_API_META(ret_value)

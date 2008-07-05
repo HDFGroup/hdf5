@@ -485,6 +485,9 @@ H5_DLL herr_t H5F_sfile_assert_num(unsigned n);
 H5_DLL H5F_t *H5F_fake_alloc(size_t sizeof_size);
 H5_DLL herr_t H5F_fake_free(H5F_t *f);
 
+/* Metadata cache query routines */
+H5_DLL htri_t H5F_is_journaling_enabled(const H5F_t *f);
+
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE * stream, int indent, int fwidth);
 

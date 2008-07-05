@@ -2999,8 +2999,8 @@ H5AC2_get_cache_auto_resize_config(H5AC2_t * cache_ptr,
     config_ptr->jbrb_human_readable  = FALSE;
 
     result = H5C2_get_journal_config(cache_ptr,
-		                     NULL,
 		                     &(config_ptr->enable_journaling),
+		                     NULL,
                                      &(config_ptr->journal_file_path[0]),
 				     &(config_ptr->jbrb_buf_size),
 				     &(config_ptr->jbrb_num_bufs),
