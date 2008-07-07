@@ -7226,6 +7226,7 @@ main(void)
             nerrors += test_copy_dataset_simple_empty(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_dataset_compound(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_dataset_chunked(fcpl_src, fcpl_dst, my_fapl);
+
             nerrors += test_copy_dataset_chunked_empty(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_dataset_chunked_sparse(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_dataset_compressed(fcpl_src, fcpl_dst, my_fapl);
@@ -7236,6 +7237,7 @@ main(void)
             nerrors += test_copy_dataset_named_dtype_hier_outside(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_dataset_multi_ohdr_chunks(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_dataset_attr_named_dtype(fcpl_src, fcpl_dst, my_fapl);
+
             nerrors += test_copy_dataset_contig_vl(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_dataset_chunked_vl(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_dataset_compact_vl(fcpl_src, fcpl_dst, my_fapl);

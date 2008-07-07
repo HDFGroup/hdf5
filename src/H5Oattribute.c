@@ -136,7 +136,8 @@ typedef struct {
 static herr_t H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc,
     hid_t dxpl_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t skip,
     hsize_t *last_attr, const H5A_attr_iter_op_t *attr_op, void *op_data);
-
+static htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, 
+    const char* name_to_open);
 
 /*********************/
 /* Package Variables */
@@ -306,11 +307,11 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTINC, FAIL, "attribute creation index can't be incremented")
 
             /* Set the creation order index on the attribute & incr. creation order index */
-            attr->crt_idx = ainfo.max_crt_idx++;
+            attr->shared->crt_idx = ainfo.max_crt_idx++;
         } /* end if */
         else
             /* Set "bogus" creation index for attribute */
-            attr->crt_idx = H5O_MAX_CRT_ORDER_IDX;
+            attr->shared->crt_idx = H5O_MAX_CRT_ORDER_IDX;
 
         /* Add the attribute information message, if one is needed */
         if(new_ainfo) {
@@ -325,7 +326,7 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     } /* end if */
     else {
         /* Set "bogus" creation index for attribute */
-        attr->crt_idx = H5O_MAX_CRT_ORDER_IDX;
+        attr->shared->crt_idx = H5O_MAX_CRT_ORDER_IDX;
 
         /* Set attribute info value to get attribute into object header */
         ainfo.fheap_addr = HADDR_UNDEF;
@@ -342,6 +343,12 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
         if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_ATTR, 0, 0, attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to create new attribute in header")
     } /* end else */
+
+    /* Increment reference count for shared attribute object for the 
+     * object handle created by the caller function H5A_create.  The count
+     * for the cached object header has been incremented in the step above
+     * (in H5O_msg_append_real).  The dense storage doesn't need a count. */ 
+    attr->shared->nrefs += 1;
 
     /* Was new attribute shared? */
     if((shared_mesg = H5O_msg_is_shared(H5O_ATTR_ID, attr)) > 0) {
@@ -426,14 +433,14 @@ H5O_attr_open_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, unsigned sequence,
     HDassert(!udata->attr);
 
     /* Check for correct attribute message to modify */
-    if(HDstrcmp(((H5A_t *)mesg->native)->name, udata->name) == 0) {
+    if(HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
         /* Make a copy of the attribute to return */
         if(NULL == (udata->attr = H5A_copy(NULL, (H5A_t *)mesg->native)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "unable to copy attribute")
 
         /* Assign [somewhat arbitrary] creation order value, for older versions of the format */
         if(oh->version == H5O_VERSION_1)
-            udata->attr->crt_idx = sequence;
+            udata->attr->shared->crt_idx = sequence;
 
         /* Stop iterating */
         ret_value = H5_ITER_STOP;
@@ -454,6 +461,11 @@ done:
  * Programmer:	Quincey Koziol
  *		Monday, December 11, 2006
  *
+ * Modification:Raymond Lu
+ *              23 June 2008
+ *              If the attribute is in dense storage and has already been 
+ *              opened, make a copy of already opened object to share some
+ *              object information.
  *-------------------------------------------------------------------------
  */
 H5A_t *
@@ -481,8 +493,17 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
     /* Check for opening attribute with dense storage */
     if(H5F_addr_defined(ainfo.fheap_addr)) {
-        /* Open attribute in dense storage */
-        if(NULL == (ret_value = H5A_dense_open(loc->file, dxpl_id, &ainfo, name)))
+        H5A_t *exist_attr = NULL;
+        htri_t found_open_attr = FALSE;
+
+        /* If found the attribute is already opened, make a copy of it to share the  
+           object information.  If not, open attribute in dense storage */
+        if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, name)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
+        else if(found_open_attr == TRUE) {
+            if(NULL == (ret_value = H5A_copy(NULL, exist_attr)))
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute")
+        } else if(NULL == (ret_value = H5A_dense_open(loc->file, dxpl_id, &ainfo, name)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "can't open attribute")
     } /* end if */
     else {
@@ -542,7 +563,7 @@ H5O_attr_open_by_idx_cb(const H5A_t *attr, void *_ret_attr)
     HDassert(attr);
     HDassert(ret_attr);
 
-    /* Copy attribute information */
+    /* Copy attribute information.  Shared some attribute information. */
     if(NULL == (*ret_attr = H5A_copy(NULL, attr)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
 
@@ -562,6 +583,11 @@ done:
  * Programmer:	Quincey Koziol
  *		Monday, December 18, 2006
  *
+ * Modification:Raymond Lu
+ *              23 June 2008
+ *              After opening the attribute, check whether it's in dense
+ *              storage and has already been opened.  If it has, close the
+ *              opened object and make a copy of already opened object.
  *-------------------------------------------------------------------------
  */
 H5A_t *
@@ -569,7 +595,11 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, hid_t dxpl_id)
 {
     H5A_attr_iter_op_t attr_op;         /* Attribute operator */
+    H5A_t *exist_attr = NULL;
+    htri_t found_open_attr = FALSE;
     H5A_t *ret_value = NULL;            /* Return value */
+    H5O_t *oh = NULL;                   /* Object header */
+    H5O_ainfo_t ainfo;                  /* Attribute information for object */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_open_by_idx)
 
@@ -584,9 +614,100 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     if(H5O_attr_iterate_real((hid_t)-1, loc, dxpl_id, idx_type, order, n, NULL, &attr_op, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADITER, NULL, "can't locate attribute")
 
+
+    /* Protect the object header to iterate over */
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, NULL, "unable to load object header")
+
+    /* Check for attribute info stored */
+    ainfo.fheap_addr = HADDR_UNDEF;
+    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo))
+        /* Clear error stack from not finding attribute info */
+        H5E_clear_stack(NULL);
+
+    /* If the opened attribute is in dense storage, find out whether it has already been 
+     * opened.  If it has, close the object and make a copy of the already opened object
+     * to share the object info. */
+    if(H5F_addr_defined(ainfo.fheap_addr) && ret_value) {
+        if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, 
+            ret_value->shared->name)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
+
+        /* If found that the attribute is already opened, make a copy of it 
+           and close the object just opened. */
+        if(found_open_attr && exist_attr) {
+            if(H5A_close(ret_value) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, NULL, "can't close attribute")
+
+            if(NULL == (ret_value = H5A_copy(NULL, exist_attr)))
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute")
+        }
+    }
+
 done:
+    if(oh && H5AC_unprotect(loc->file, H5AC_ind_dxpl_id, H5AC_OHDR, loc->addr, oh, 
+        H5AC__NO_FLAGS_SET) < 0)
+	HDONE_ERROR(H5E_ATTR, H5E_PROTECT, NULL, "unable to release object header")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_open_by_idx() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5O_attr_find_opened_attr
+ *
+ * Purpose:	Find out whether an attribute has been opened by giving
+ *              the name.  Return the pointer to the object if found.
+ *
+ * Return:	TRUE:	found the already opened object
+ *              FALSE:  didn't find the opened object 
+ *              FAIL:	function failed.
+ *
+ * Programmer:	Raymond Lu
+ *		23 June 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static
+htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char* name_to_open)
+{
+    htri_t ret_value = FALSE;
+    int num_open_attr = 0;
+    ssize_t name_len = 0;
+    hid_t *attr_id_list = NULL;
+    int i;
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_find_opened_attr)
+
+    /* Count all opened attributes */
+    if((num_open_attr = H5F_get_obj_count(loc->file, H5F_OBJ_ATTR)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "can't get number of opened attributes")
+
+    /* Find out whether the attribute has been opened */
+    if(num_open_attr) { 
+        attr_id_list = (hid_t*)H5MM_malloc(num_open_attr*sizeof(hid_t));
+
+        /* Retrieve the IDs of all opened attributes */
+        if(H5F_get_obj_ids(loc->file, H5F_OBJ_ATTR, num_open_attr, attr_id_list) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't IDs of opened attributes")
+
+        for(i=0; i<num_open_attr; i++) {
+            if(NULL == (*attr = (H5A_t *)H5I_object_verify(attr_id_list[i], H5I_ATTR)))
+                HGOTO_ERROR(H5E_ATTR, H5E_BADTYPE, FAIL, "not an attribute")
+
+            /* Verify whether it's the right object */  
+            if(!strcmp(name_to_open, (*attr)->shared->name) && loc->addr == 
+                (*attr)->shared->oloc.addr) {
+                ret_value = TRUE;
+                break;
+            }
+        }
+        H5MM_free(attr_id_list);
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_attr_find_opened_attr */
 
 
 /*-------------------------------------------------------------------------
@@ -677,6 +798,10 @@ done:
  *		koziol@hdfgroup.org
  *		Dec  4 2006
  *
+ * Modification:Raymond Lu
+ *              4 June 2008
+ *              Took out the data copying part because the attribute data
+ *              is shared between attribute handle and object header. 
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -694,18 +819,7 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     HDassert(!udata->found);
 
     /* Check for correct attribute message to modify */
-    if(HDstrcmp(((H5A_t *)mesg->native)->name, udata->attr->name) == 0) {
-        /* Allocate storage for the message's data, if necessary */
-        if(((H5A_t *)mesg->native)->data == NULL)
-            if(NULL == (((H5A_t *)mesg->native)->data = H5FL_BLK_MALLOC(attr_buf, udata->attr->data_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed")
-
-        /* Copy the data into the header message */
-        /* (Needs to occur before updating the shared message, or the hash
-         *      value on the old & new messages will be the same)
-         */
-        HDmemcpy(((H5A_t *)mesg->native)->data, udata->attr->data, udata->attr->data_size);
-
+    if(HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->attr->shared->name) == 0) {
         /* Update the shared attribute in the SOHM storage */
         if(mesg->flags & H5O_MSG_FLAG_SHARED)
             if(H5O_attr_update_shared(udata->f, udata->dxpl_id, oh, udata->attr, (H5O_shared_t *)mesg->native) < 0)
@@ -836,7 +950,7 @@ H5O_attr_rename_chk_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     HDassert(!udata->found);
 
     /* Check for existing attribute with new name */
-    if(HDstrcmp(((H5A_t *)mesg->native)->name, udata->new_name) == 0) {
+    if(HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->new_name) == 0) {
         /* Indicate that we found an existing attribute with the new name*/
         udata->found = TRUE;
 
@@ -882,12 +996,12 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     HDassert(!udata->found);
 
     /* Find correct attribute message to rename */
-    if(HDstrcmp(((H5A_t *)mesg->native)->name, udata->old_name) == 0) {
-        unsigned old_version = ((H5A_t *)mesg->native)->version;        /* Old version of the attribute */
+    if(HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->old_name) == 0) {
+        unsigned old_version = ((H5A_t *)mesg->native)->shared->version;        /* Old version of the attribute */
 
         /* Change the name for the attribute */
-        H5MM_xfree(((H5A_t *)mesg->native)->name);
-        ((H5A_t *)mesg->native)->name = H5MM_xstrdup(udata->new_name);
+        H5MM_xfree(((H5A_t *)mesg->native)->shared->name);
+        ((H5A_t *)mesg->native)->shared->name = H5MM_xstrdup(udata->new_name);
 
         /* Recompute the version to encode the attribute with */
         if(H5A_set_version(udata->f, ((H5A_t *)mesg->native)) < 0)
@@ -908,7 +1022,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 
             /* Check for attribute message changing size */
             if(HDstrlen(udata->new_name) != HDstrlen(udata->old_name) ||
-                    old_version != ((H5A_t *)mesg->native)->version) {
+                    old_version != ((H5A_t *)mesg->native)->shared->version) {
                 H5A_t *attr;            /* Attribute to re-add */
 
                 /* Take ownership of the message's native info (the attribute) 
@@ -939,8 +1053,8 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
                 /* Sanity check */
                 HDassert(H5O_msg_is_shared(H5O_ATTR_ID, attr) == FALSE);
 
-                /* Release the local copy of the attribute */
-                H5O_msg_free_real(H5O_MSG_ATTR, attr);
+                /* Close the local copy of the attribute */
+                H5A_close(attr);
             } /* end if */
         } /* end else */
 
@@ -1184,6 +1298,13 @@ done:
  * Programmer:	Quincey Koziol
  *		Wednesday, February 14, 2007
  *
+ * Modification:Raymond Lu
+ *              24 June 2008
+ *              When converting storage from dense to compact, if found 
+ *              the attribute is already opened, use the opened message 
+ *              to insert.  If not, still use the message in the attribute 
+ *              table. This will guarantee that the attribute message is
+ *              shared. 
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1217,35 +1338,51 @@ H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo,
          * can't fit into an object header message)
          */
         for(u = 0; u < ainfo->nattrs; u++)
-            if(H5O_msg_size_oh(loc->file, oh, H5O_ATTR_ID, &(atable.attrs[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
+            if(H5O_msg_size_oh(loc->file, oh, H5O_ATTR_ID, (atable.attrs[u]), (size_t)0) >= H5O_MESG_MAX_SIZE) {
                 can_convert = FALSE;
                 break;
             } /* end if */
 
         /* If ok, insert attributes as object header messages */
         if(can_convert) {
+            H5A_t *exist_attr = NULL;
+            htri_t found_open_attr = FALSE;
+
             /* Iterate over attributes, to put them into header */
             for(u = 0; u < ainfo->nattrs; u++) {
                 htri_t shared_mesg;             /* Should this message be stored in the Shared Message table? */
 
                 /* Check if attribute is shared */
-                if((shared_mesg = H5O_msg_is_shared(H5O_ATTR_ID, &(atable.attrs[u]))) < 0)
+                if((shared_mesg = H5O_msg_is_shared(H5O_ATTR_ID, (atable.attrs[u]))) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "error determining if message is shared")
                 else if(shared_mesg == 0) {
                     /* Increment reference count on attribute components */
                     /* (so that they aren't deleted when the dense attribute storage is deleted) */
-                    if(H5O_attr_link(loc->file, dxpl_id, oh, &(atable.attrs[u])) < 0)
+                    if(H5O_attr_link(loc->file, dxpl_id, oh, (atable.attrs[u])) < 0)
                         HGOTO_ERROR(H5E_ATTR, H5E_LINKCOUNT, FAIL, "unable to adjust attribute link count")
                 } /* end if */
                 else {
                     /* Reset 'shared' status, so attribute will be shared again */
-                    atable.attrs[u].sh_loc.type = H5O_SHARE_TYPE_UNSHARED;
+                    (atable.attrs[u])->sh_loc.type = H5O_SHARE_TYPE_UNSHARED;
                 } /* end else */
 
-                /* Insert attribute message into object header */
-                /* (Will increment reference count on shared attributes) */
-                if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_ATTR, 0, 0, &(atable.attrs[u])) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't create message")
+                /* Insert attribute message into object header (Will increment 
+                   reference count on shared attributes) */
+                /* Find out whether the attribute has been opened */
+                if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, 
+                    (atable.attrs[u])->shared->name)) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
+
+                /* If found the attribute is already opened, use the opened message to insert.
+                   If not, still use the message in the attribute table. */ 
+                if(found_open_attr && exist_attr) {
+                    if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_ATTR, 0, 0, exist_attr) < 0)
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't create message")
+
+                } else {
+                    if(H5O_msg_append_real(loc->file, dxpl_id, oh, H5O_MSG_ATTR, 0, 0, (atable.attrs[u])) < 0)
+                        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "can't create message")
+                }
             } /* end for */
 
             /* Remove the dense storage */
@@ -1304,7 +1441,7 @@ H5O_attr_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     HDassert(!udata->found);
 
     /* Check for correct attribute message to modify */
-    if(HDstrcmp(((H5A_t *)mesg->native)->name, udata->name) == 0) {
+    if(HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
         /* Convert message into a null message (i.e. delete it) */
         if(H5O_release_mesg(udata->f, udata->dxpl_id, oh, mesg, TRUE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, H5_ITER_ERROR, "unable to convert into null message")
@@ -1468,7 +1605,7 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
         /* Set up user data for callback, to remove the attribute by name */
         udata.f = loc->file;
         udata.dxpl_id = dxpl_id;
-        udata.name = atable.attrs[n].name;
+        udata.name = ((atable.attrs[n])->shared)->name;
         udata.found = FALSE;
 
         /* Iterate over attributes, to locate correct one to delete */
@@ -1582,7 +1719,7 @@ H5O_attr_exists_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     HDassert(!udata->found);
 
     /* Check for correct attribute message */
-    if(HDstrcmp(((H5A_t *)mesg->native)->name, udata->name) == 0) {
+    if(HDstrcmp(((H5A_t *)mesg->native)->shared->name, udata->name) == 0) {
         /* Indicate that this message is the attribute sought */
         udata->found = TRUE;
 

@@ -974,13 +974,16 @@ static void sohm_attr_helper(hid_t fcpl_id)
     hid_t type_id;
     hid_t space_id;
     hid_t group_id;
-    hid_t attr_id;
+    hid_t attr_id, attr_id2;
     hsize_t dims = 2;
     int wdata[2] = {7, 42};
     int rdata[2];
     herr_t ret;
     size_t x;
 
+    /*----------------------------------------------------------------------------
+     *    Test attribute with transient datatype
+     */
     /* Create a file using the fcpl */
     file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
     CHECK_I(file_id, "H5Fcreate");
@@ -1021,6 +1024,9 @@ static void sohm_attr_helper(hid_t fcpl_id)
     ret = H5Aclose(attr_id);
     CHECK_I(ret, "H5Aclose");
 
+    /*----------------------------------------------------------------------------
+     *    Test attribute with committed datatype
+     */
     /* Repeat with a committed datatype */
     type_id = H5Tcopy(H5T_NATIVE_INT);
     CHECK_I(type_id, "H5Tcopy");
@@ -1056,6 +1062,47 @@ static void sohm_attr_helper(hid_t fcpl_id)
     /* Cleanup */
     ret = H5Aclose(attr_id);
     CHECK_I(ret, "H5Aclose");
+
+    /*----------------------------------------------------------------------------
+     *    Test attribute operation with two ID handles
+     */
+    /* Create and verify an attribute */
+    group_id = H5Gcreate2(file_id, "yet_another_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(group_id, "H5Gcreate2");
+
+    attr_id = H5Acreate2(group_id, "attribute", H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK_I(attr_id, "H5Acreate2");
+    
+    /* Open the attribute to get another handle */
+    attr_id2 = H5Aopen(group_id, "attribute", H5P_DEFAULT);
+    CHECK_I(attr_id2, "H5Aopen");
+
+    ret = H5Awrite(attr_id, H5T_NATIVE_INT, wdata);
+    CHECK_I(ret, "H5Awrite");
+
+    /* Close the group */
+    ret = H5Gclose(group_id);
+    CHECK_I(ret, "H5Gclose");
+
+    /* Flush the file to force data to be written */
+    ret = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
+    CHECK_I(ret, "H5Fflush");
+
+    /* Verify the data with another ID handle */
+    memset(rdata, 0, sizeof(rdata));
+    ret = H5Aread(attr_id2, H5T_NATIVE_INT, rdata);
+    CHECK_I(ret, "H5Aread");
+
+    for(x=0; x<(size_t)dims; ++x) {
+        VERIFY(rdata[x], wdata[x], "H5Aread");
+    }
+
+    /* Cleanup */
+    ret = H5Aclose(attr_id);
+    CHECK_I(ret, "H5Aclose");
+    ret = H5Aclose(attr_id2);
+    CHECK_I(ret, "H5Aclose");
+
     ret = H5Sclose(space_id);
     CHECK_I(ret, "H5Sclose");
     ret = H5Fclose(file_id);

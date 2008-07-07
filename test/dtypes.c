@@ -1525,7 +1525,7 @@ test_compound_8(void)
 
     if(tsize != (sizeof(char) + sizeof(char) + sizeof(int))) {
         H5_FAILED(); AT();
-        printf("The size of the packed compound datatype is incorrect\n");
+        printf("The size of the packed compound datatype is incorrect: tsize=%d\n", tsize);
         goto error;
     } /* end if */
 
@@ -5042,6 +5042,7 @@ main(void)
     nerrors += test_detect();
     nerrors += test_compound_1();
     nerrors += test_query();
+
     nerrors += test_transient(fapl);
     nerrors += test_named(fapl);
     nerrors += test_encode();

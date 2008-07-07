@@ -139,7 +139,7 @@ H5A_get_shared_rc_test(hid_t attr_id, hsize_t *ref_count)
     HDassert(H5O_msg_is_shared(H5O_ATTR_ID, attr));
 
     /* Retrieve ref count for shared or shareable attribute */
-    if(H5SM_get_refcount(attr->oloc.file, H5AC_ind_dxpl_id, H5O_ATTR_ID,
+    if(H5SM_get_refcount(attr->shared->oloc.file, H5AC_ind_dxpl_id, H5O_ATTR_ID,
             &attr->sh_loc, ref_count) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve shared message ref count")
 

@@ -99,7 +99,11 @@ Bug Fixes since HDF5-1.8.1
 
         Library
         -------
-        - None
+        - when an attribute was opened twice and data was written with one of the handles, 
+          the file didn't have the data.  It happened because each handle had its own 
+          object structure, and the empty one overwrote the data with fill value.  This is
+          fixed by making some attribute information like the data be shared in the 
+          attribute structure.  SLU - 2008/07/07
 
         Parallel Library
         ----------------

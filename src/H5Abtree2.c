@@ -172,7 +172,7 @@ H5A_dense_fh_name_cmp(const void *obj, size_t UNUSED obj_len, void *_udata)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "can't decode attribute")
 
     /* Compare the string values */
-    udata->cmp = HDstrcmp(udata->name, attr->name);
+    udata->cmp = HDstrcmp(udata->name, attr->shared->name);
 
     /* Check for correct attribute & callback to make */
     if(udata->cmp == 0 && udata->found_op) {
@@ -181,7 +181,7 @@ H5A_dense_fh_name_cmp(const void *obj, size_t UNUSED obj_len, void *_udata)
             H5SM_reconstitute(&(attr->sh_loc), udata->f, H5O_ATTR_ID, udata->record->id);
 
         /* Set the creation order index for the attribute */
-        attr->crt_idx = udata->record->corder;
+        attr->shared->crt_idx = udata->record->corder;
 
         /* Make callback */
         if((udata->found_op)(attr, &took_ownership, udata->found_op_data) < 0)
