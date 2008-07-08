@@ -894,7 +894,7 @@ print_datatype(hid_t type,unsigned in_group)
                 is_vlstr = H5Tis_variable_str(tmp_type);
 
                 printf("H5T_STRING %s\n", dump_header_format->strblockbegin);
-                /*indent += COL;*/
+                indent += COL;
 
                 indentation(indent + COL);
                 if(is_vlstr)
@@ -983,8 +983,8 @@ print_datatype(hid_t type,unsigned in_group)
                 H5Tclose(str_type);
                 H5Tclose(tmp_type);
 
-                /*indent -= COL;*/
-                indentation(indent/* + COL*/);
+                indent -= COL;
+                indentation(indent + COL);
                 printf("%s", dump_header_format->strblockend);
                 break;
 
@@ -1029,12 +1029,12 @@ print_datatype(hid_t type,unsigned in_group)
                     mtype = H5Tget_member_type(type, i);
                     indentation(indent + COL);
 
-                    /*if (H5Tget_class(mtype) == H5T_COMPOUND)*/
+                    if (H5Tget_class(mtype) == H5T_COMPOUND)
                         indent += COL;
 
                     print_datatype(mtype,0);
 
-                    /*if (H5Tget_class(mtype) == H5T_COMPOUND)*/
+                    if (H5Tget_class(mtype) == H5T_COMPOUND)
                         indent -= COL;
 
                     printf(" \"%s\";\n", mname);
@@ -1051,23 +1051,21 @@ print_datatype(hid_t type,unsigned in_group)
 
             case H5T_ENUM:
                 printf("H5T_ENUM %s\n", dump_header_format->enumblockbegin);
-                /*indent += COL;*/
+                indent += COL;
                 indentation(indent + COL);
                 super = H5Tget_super(type);
                 print_datatype(super,0);
                 printf(";\n");
                 print_enum(type);
-                /*indent -= COL;*/
-                indentation(indent/* + COL*/);
+                indent -= COL;
+                indentation(indent + COL);
                 printf("%s", dump_header_format->enumblockend);
                 break;
 
             case H5T_VLEN:
                 printf("H5T_VLEN %s ", dump_header_format->vlenblockbegin);
                 super = H5Tget_super(type);
-                indent += COL;
                 print_datatype(super,0);
-                indent -= COL;
                 H5Tclose(super);
 
                 /* Print closing */
@@ -1092,9 +1090,7 @@ print_datatype(hid_t type,unsigned in_group)
                 printf(" ");
 
                 /* Print base type */
-                indent += COL;
                 print_datatype(super,0);
-                indent -= COL;
 
                 /* Close array base type */
                 H5Tclose(super);
