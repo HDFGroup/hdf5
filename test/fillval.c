@@ -1722,6 +1722,9 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
     /* Verify the element read in is the value written out */
     if(verify_rtn((unsigned)__LINE__, hs_offset, val_rd, buf) < 0) TEST_ERROR
 
+    /* Set the element back to fillval */
+    if(H5Dwrite(dset, dtype, mspace, fspace, H5P_DEFAULT, fillval) < 0) TEST_ERROR
+
     /* Release any VL components */
     if(H5Dvlen_reclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
 
@@ -1740,9 +1743,6 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
 
     /* Verify the element read in is the fill-value */
     if(verify_rtn((unsigned)__LINE__, hs_offset, val_rd, fillval) < 0) TEST_ERROR
-
-    /* Set the element back to fillval */
-    if(H5Dwrite(dset, dtype, mspace, fspace, H5P_DEFAULT, fillval) < 0) TEST_ERROR
 
     /* Release any VL components */
     if(H5Dvlen_reclaim(dtype, mspace, H5P_DEFAULT, val_rd) < 0) TEST_ERROR
