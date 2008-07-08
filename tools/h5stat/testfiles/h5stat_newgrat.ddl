@@ -16,7 +16,7 @@ Object header size: (total/unused)
 Storage information:
 	Groups:
 		B-tree/List: 470054
-		Heap: 739128
+		Heap: 739102
 	Attributes:
 		B-tree/List: 2598
 		Heap: 4442
