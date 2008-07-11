@@ -76,8 +76,10 @@ main(int argc, char *argv[])
     AddTest("file", test_file, cleanup_file, "File I/O Operations", NULL);
     // testing dataspace functionalities in th5s.cpp
     AddTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces", NULL);
+#ifdef TMP
     // testing attribute functionalities in tattr.cpp
     AddTest("attr", test_attr, cleanup_attr,  "Attributes", NULL);
+#endif
     // testing reference functionalities in trefer.cpp
     AddTest("reference", test_reference, cleanup_reference,  "References", NULL);
     // testing variable-length strings in tvlstr.cpp
