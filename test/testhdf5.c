@@ -55,8 +55,10 @@ main(int argc, char *argv[])
     AddTest("objects", test_h5o, cleanup_h5o, "Generic Object Functions", NULL);
     AddTest("h5s",  test_h5s,  cleanup_h5s,  "Dataspaces", NULL);
     AddTest("coords",  test_coords,  cleanup_coords,  "Dataspace coordinates", NULL);
+#ifdef TMP
     AddTest("sohm", test_sohm, cleanup_sohm,  "Shared Object Header Messages", NULL);
     AddTest("attr", test_attr, cleanup_attr,  "Attributes", NULL);
+#endif
     AddTest("select", test_select, cleanup_select,  "Selections", NULL);
     AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);
     AddTest("reference", test_reference, cleanup_reference,  "References", NULL);
