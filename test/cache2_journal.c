@@ -14,7 +14,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Programmer:  John Mainzer
- *              11/10/05
+ *              3/08
  *
  *		This file contains tests for the metadata journaling
  *		features implemented in H5C2.c and friends.
@@ -61,6 +61,8 @@ static void end_trans(H5F_t * file_ptr,
                       hbool_t verbose,
                       uint64_t trans_num,
                       const char * trans_name);
+
+static hbool_t file_exists(const char * file_path_ptr);
 
 static void flush_journal(H5C2_t * cache_ptr);
 
@@ -123,12 +125,16 @@ static void jrnl_row_major_scan_forward2(H5F_t * file_ptr,
                                          int dirty_unprotects,
 			                 uint64_t trans_num);
 #endif /* JRM */
-static void open_exiting_file_for_journaling(const char * hdf_file_name,
-                                             const char * journal_file_name,
-                                             hid_t * file_id_ptr,
-                                             H5F_t ** file_ptr_ptr,
-                                             H5C2_t ** cache_ptr_ptr, 
-				             hbool_t use_core_driver_if_avail);
+static void open_existing_file_for_journaling(const char * hdf_file_name,
+                                              const char * journal_file_name,
+                                              hid_t * file_id_ptr,
+                                              H5F_t ** file_ptr_ptr,
+                                              H5C2_t ** cache_ptr_ptr); 
+
+static void open_existing_file_without_journaling(const char * hdf_file_name,
+                                                  hid_t * file_id_ptr,
+                                                  H5F_t ** file_ptr_ptr,
+                                                  H5C2_t ** cache_ptr_ptr);
 
 static void setup_cache_for_journaling(const char * hdf_file_name,
                                        const char * journal_file_name,
@@ -165,6 +171,18 @@ static void write_noflush_verify(H5C2_jbrb_t * struct_ptr,
                                  int repeats);
 
 static void check_mdj_config_block_IO(void);
+
+static void check_mdj_file_marking(void);
+
+static void verify_mdj_file_marking_after_open(void);
+
+static void verify_mdj_file_marking_on_create(void);
+
+static void verify_mdj_file_marking_on_open(void);
+
+static void verify_mdj_file_unmarking_on_file_close(void);
+
+static void verify_mdj_file_unmarking_on_journaling_shutdown(void);
 
 static void test_mdj_conf_blk_read_write_discard(H5F_t * file_ptr,
 		                                 const char * jrnl_file_path);
@@ -510,6 +528,85 @@ end_trans(H5F_t * file_ptr,
     return;
 
 } /* end_trans() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    file_exists()
+ *
+ * Purpose:     If pass2 is true on entry, stat the target file, and 
+ * 		return TRUE if it exists, and FALSE if it does not.
+ *
+ * 		If any errors are detected in this process, set pass2 
+ * 		to FALSE and set failure_mssg2 to point to an appropriate 
+ * 		error message.
+ *
+ *              Do nothing and return FALSE if pass2 is FALSE on entry.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              5//08
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static hbool_t
+file_exists(const char * file_path_ptr)
+{
+    const char * fcn_name = "file_exists()";
+    hbool_t ret_val = FALSE; /* will set to TRUE if necessary */
+    hbool_t verbose = FALSE;
+    h5_stat_t buf;
+
+    if ( pass2 ) {
+
+	if ( file_path_ptr == NULL ) {
+
+            failure_mssg2 = "file_path_ptr NULL on entry?!?",
+            pass2 = FALSE;
+	}
+    }
+
+    if ( pass2 ) {
+
+	if ( HDstat(file_path_ptr, &buf) == 0 ) {
+
+	    if ( verbose ) {
+
+	        HDfprintf(stdout, "%s: HDstat(%s) succeeded.\n", fcn_name,
+			  file_path_ptr);
+	    }
+
+	    ret_val = TRUE;
+
+        } else if ( errno == ENOENT ) {
+
+	    if ( verbose ) {
+
+	        HDfprintf(stdout, "%s: HDstat(%s) failed with ENOENT\n", 
+			  fcn_name, file_path_ptr);
+	    }
+	    
+	} else {
+
+	    if ( verbose ) {
+
+	        HDfprintf(stdout, 
+			  "%s: HDstat() failed with unexpected errno = %d.\n",
+                          fcn_name, errno);
+	    }
+
+	    failure_mssg2 = "HDstat() returned unexpected value.";
+	    pass2 = FALSE;
+
+	} 
+    }
+
+    return(ret_val);
+
+} /* file_exists() */
 
 
 /*-------------------------------------------------------------------------
@@ -1581,14 +1678,13 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
  */
 
 static void
-open_exiting_file_for_journaling(const char * hdf_file_name,
-                                 const char * journal_file_name,
-                                 hid_t * file_id_ptr,
-                                 H5F_t ** file_ptr_ptr,
-                                 H5C2_t ** cache_ptr_ptr, 
-				 hbool_t use_core_driver_if_avail)
+open_existing_file_for_journaling(const char * hdf_file_name,
+                                  const char * journal_file_name,
+                                  hid_t * file_id_ptr,
+                                  H5F_t ** file_ptr_ptr,
+                                  H5C2_t ** cache_ptr_ptr) 
 {
-    const char * fcn_name = "open_exiting_file_for_journaling()";
+    const char * fcn_name = "open_existing_file_for_journaling()";
     hbool_t show_progress = FALSE;
     hbool_t verbose = FALSE;
     int cp = 0;
@@ -1608,7 +1704,7 @@ open_exiting_file_for_journaling(const char * hdf_file_name,
 	     ( cache_ptr_ptr == NULL ) ) {
 
             failure_mssg2 = 
-                "Bad param(s) on entry to open_exiting_file_for_journaling().\n";
+               "Bad param(s) on entry to open_existing_file_for_journaling().\n";
 	    pass2 = FALSE;
         }
 	else if ( strlen(journal_file_name) > H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
@@ -1785,6 +1881,168 @@ open_exiting_file_for_journaling(const char * hdf_file_name,
 
 
 /*-------------------------------------------------------------------------
+ * Function:    open_existing_file_without_journaling()
+ *
+ * Purpose:     If pass2 is true on entry, open the specified a HDF5 file 
+ * 		with journaling disabled.  Return pointers to the cache 
+ * 		data structure and file data structures, and verify that 
+ * 		it contains the expected data.
+ *
+ *              On failure, set pass2 to FALSE, and set failure_mssg2 
+ *              to point to an appropriate failure message.
+ *
+ *              Do nothing if pass2 is FALSE on entry.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              7/10/08
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+open_existing_file_without_journaling(const char * hdf_file_name,
+                                      hid_t * file_id_ptr,
+                                      H5F_t ** file_ptr_ptr,
+                                      H5C2_t ** cache_ptr_ptr)
+{
+    const char * fcn_name = "open_existing_file_without_journaling()";
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = FALSE;
+    int cp = 0;
+    hid_t fapl_id = -1;
+    hid_t file_id = -1;
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
+
+    if ( pass2 )
+    {
+        if ( ( hdf_file_name == NULL ) ||
+	     ( file_id_ptr == NULL ) ||
+	     ( file_ptr_ptr == NULL ) ||
+	     ( cache_ptr_ptr == NULL ) ) {
+
+            failure_mssg2 = 
+           "Bad param(s) on entry to open_existing_file_without_journaling().\n";
+	    pass2 = FALSE;
+
+        } else {
+
+            if ( verbose ) {
+
+                HDfprintf(stdout, "%s: HDF file name = \"%s\".\n", 
+			  fcn_name, hdf_file_name);
+	    }
+	}
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* create a file access propertly list. */
+    if ( pass2 ) {
+
+        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+        if ( fapl_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pcreate() failed.\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* call H5Pset_libver_bounds() on the fapl_id */
+    if ( pass2 ) {
+
+	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+				  H5F_LIBVER_LATEST) < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+
+    /**************************************/
+    /* open the file with the fapl above. */
+    /**************************************/
+
+    /* open the file using fapl_id */
+    if ( pass2 ) {
+
+        file_id = H5Fopen(hdf_file_name, H5F_ACC_RDWR, fapl_id);
+
+        if ( file_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fopen() failed.\n";
+
+        } else {
+
+            file_ptr = H5I_object_verify(file_id, H5I_FILE);
+
+            if ( file_ptr == NULL ) {
+
+                pass2 = FALSE;
+                failure_mssg2 = "Can't get file_ptr.";
+
+                if ( verbose ) {
+                    HDfprintf(stdout, "%s: Can't get file_ptr.\n", fcn_name);
+                }
+            }
+        }
+    }
+
+    /* At least within the context of the cache2 test code, there should be
+     * no need to allocate space for test entries since we are re-opening
+     * the file, and any needed space allocation should have been done at 
+     * file creation.
+     */
+
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* get a pointer to the files internal data structure and then 
+     * to the cache structure
+     */
+    if ( pass2 ) {
+
+        if ( file_ptr->shared->cache2 == NULL ) {
+	
+	    pass2 = FALSE;
+	    failure_mssg2 = "can't get cache2 pointer(1).\n";
+
+	} else {
+
+	    cache_ptr = file_ptr->shared->cache2;
+	}
+    }
+
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    if ( pass2 ) {
+
+        *file_id_ptr = file_id;
+	*file_ptr_ptr = file_ptr;
+	*cache_ptr_ptr = cache_ptr;
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s: cp = %d -- exiting.\n", fcn_name, cp++);
+
+    return;
+
+} /* open_existing_file_without_journaling() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    setup_cache_for_journaling()
  *
  * Purpose:     If pass2 is true on entry, create a HDF5 file with 
@@ -1813,7 +2071,11 @@ setup_cache_for_journaling(const char * hdf_file_name,
                            hid_t * file_id_ptr,
                            H5F_t ** file_ptr_ptr,
                            H5C2_t ** cache_ptr_ptr,
+#if USE_CORE_DRIVER
 			   hbool_t use_core_driver_if_avail)
+#else /* USE_CORE_DRIVER */
+			   hbool_t UNUSED use_core_driver_if_avail)
+#endif /* USE_CORE_DRIVER */
 {
     const char * fcn_name = "setup_cache_for_journaling()";
     hbool_t show_progress = FALSE;
@@ -1878,8 +2140,8 @@ setup_cache_for_journaling(const char * hdf_file_name,
                 "Bad param(s) on entry to setup_cache_for_journaling().\n";
 	    pass2 = FALSE;
         }
-	else if ( strlen(journal_file_name) > H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
-
+	else if ( strlen(journal_file_name) > H5AC2__MAX_JOURNAL_FILE_NAME_LEN )
+	{
             failure_mssg2 = "journal file name too long.\n";
 	    pass2 = FALSE;
 
@@ -2008,7 +2270,8 @@ setup_cache_for_journaling(const char * hdf_file_name,
             failure_mssg2 = "actual_base_addr > BASE_ADDR";
 
             if ( verbose ) {
-                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", fcn_name);
+                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", 
+			  fcn_name);
             }
         }
     }
@@ -2034,6 +2297,18 @@ setup_cache_for_journaling(const char * hdf_file_name,
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     reset_entries2();
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    /* close the fapl */
+    if ( pass2 ) {
+
+        if ( H5Pclose(fapl_id) < 0 ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "error closing fapl.\n";
+	}
+    }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
@@ -2080,7 +2355,7 @@ takedown_cache_after_journaling(hid_t file_id,
     
     if ( file_id >= 0 ) {
 
-	if ( H5Fclose(file_id) ) {
+	if ( H5Fclose(file_id) < 0 ) {
 
 	    if ( pass2 ) {
 
@@ -2224,7 +2499,12 @@ verify_journal_contents(const char * journal_file_path_ptr,
 	    } else {
                 
 	        expected_len = (size_t)(buf.st_size);
-	
+
+		if ( verbose ) {
+
+		    HDfprintf(stdout, "%s: expected_len = %d.\n", 
+		              fcn_name, (int)expected_len);
+		}
             }
 	} 
     }
@@ -2273,14 +2553,14 @@ verify_journal_contents(const char * journal_file_path_ptr,
     if ( pass2 ) {
 
         first_line_len = 1;
-	read_result = read(journal_file_fd, &ch, 1);
+	read_result = HDread(journal_file_fd, &ch, 1);
 
 	while ( ( ch != '\n' ) && 
 		( first_line_len < 128 ) &&
 	        ( read_result == 1 ) ) {
 
 	    first_line_len++;
-	    read_result = read(journal_file_fd, &ch, 1);
+	    read_result = HDread(journal_file_fd, &ch, 1);
 	}
 
 	if ( ch != '\n' ) {
@@ -2302,14 +2582,14 @@ verify_journal_contents(const char * journal_file_path_ptr,
     if ( pass2 ) {
 
         first_line_len = 1;
-	read_result = read(expected_file_fd, &ch, 1);
+	read_result = HDread(expected_file_fd, &ch, 1);
 
 	while ( ( ch != '\n' ) && 
 		( first_line_len < 128 ) &&
 	        ( read_result == 1 ) ) {
 
 	    first_line_len++;
-	    read_result = read(expected_file_fd, &ch, 1);
+	    read_result = HDread(expected_file_fd, &ch, 1);
 	}
 
 	if ( ch != '\n' ) {
@@ -2397,6 +2677,12 @@ verify_journal_contents(const char * journal_file_path_ptr,
         if ( pass2 ) {
 
             if ( HDstrcmp(journal_buf, expected_buf) != 0 ) {
+
+		if ( verbose ) {
+
+                    HDfprintf(stdout, "expected_buf = \"%s\"\n", expected_buf);
+                    HDfprintf(stdout, "journal_buf  = \"%s\"\n", journal_buf);
+                }
 
                 failure_mssg2 = "Unexpected journal file contents(2).";
                 pass2 = FALSE;
@@ -2603,7 +2889,18 @@ verify_journal_empty(const char * journal_file_path_ptr)
  *                 journaling is working.
  *
  *              4) Close the file, and verify that the journal is deleted.
- *                 Then delete the file.
+ *
+ *              5) Re-open the file with journaling disabled.  Do a 
+ *                 transaction or two, and verify that the transactions
+ *                 took place, and that there is no journal file.
+ *
+ *              6) Enable journaling on the open file.  Do a transaction
+ *                 or two to verify that journaling is working.  
+ *
+ *              7) Disable journaling on the open file.  Verify that the
+ *                 journal file has been deleted.
+ *
+ *              8) Close and delete the file.
  *
  * Return:      void
  *
@@ -2621,35 +2918,39 @@ mdj_smoke_check_00(void)
     const char * fcn_name = "mdj_smoke_check_00()";
     const char * testfiles[] = 
     {
-        "cache2_journal_sc00_000.jnl",
-        "cache2_journal_sc00_001.jnl",
-        "cache2_journal_sc00_002.jnl",
-        "cache2_journal_sc00_003.jnl",
-        "cache2_journal_sc00_004.jnl",
-        "cache2_journal_sc00_005.jnl",
-        "cache2_journal_sc00_006.jnl",
-        "cache2_journal_sc00_007.jnl",
-        "cache2_journal_sc00_008.jnl",
-        "cache2_journal_sc00_009.jnl",
-        "cache2_journal_sc00_010.jnl",
-        "cache2_journal_sc00_011.jnl",
-        "cache2_journal_sc00_012.jnl",
-        "cache2_journal_sc00_013.jnl",
-        "cache2_journal_sc00_014.jnl",
-        "cache2_journal_sc00_015.jnl",
-        "cache2_journal_sc00_016.jnl",
-        "cache2_journal_sc00_017.jnl",
+        "testfiles/cache2_journal_sc00_000.jnl",
+        "testfiles/cache2_journal_sc00_001.jnl",
+        "testfiles/cache2_journal_sc00_002.jnl",
+        "testfiles/cache2_journal_sc00_003.jnl",
+        "testfiles/cache2_journal_sc00_004.jnl",
+        "testfiles/cache2_journal_sc00_005.jnl",
+        "testfiles/cache2_journal_sc00_006.jnl",
+        "testfiles/cache2_journal_sc00_007.jnl",
+        "testfiles/cache2_journal_sc00_008.jnl",
+        "testfiles/cache2_journal_sc00_009.jnl",
+        "testfiles/cache2_journal_sc00_010.jnl",
+        "testfiles/cache2_journal_sc00_011.jnl",
+        "testfiles/cache2_journal_sc00_012.jnl",
+        "testfiles/cache2_journal_sc00_013.jnl",
+        "testfiles/cache2_journal_sc00_014.jnl",
+        "testfiles/cache2_journal_sc00_015.jnl",
+        "testfiles/cache2_journal_sc00_016.jnl",
+        "testfiles/cache2_journal_sc00_017.jnl",
+        "testfiles/cache2_journal_sc00_018.jnl",
 	NULL
     };
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    hbool_t testfile_missing = FALSE;
     hbool_t show_progress = FALSE;
     hbool_t verbose = FALSE;
-    hbool_t update_architypes = TRUE;
+    hbool_t update_architypes = FALSE;
+    herr_t result;
     int cp = 0;
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
     H5C2_t * cache_ptr = NULL;
+    H5AC2_cache_config_t mdj_config;
     
     TESTING("mdj smoke check 00 -- general coverage");
 
@@ -2734,8 +3035,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[0]);
     }
+    
+    if ( file_exists(testfiles[0]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[0]);
+        verify_journal_contents(journal_filename, testfiles[0]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
@@ -2807,8 +3115,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[1]);
     }
+    
+    if ( file_exists(testfiles[1]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[1]);
+        verify_journal_contents(journal_filename, testfiles[1]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
@@ -2848,8 +3163,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[2]);
     }
+    
+    if ( file_exists(testfiles[2]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[2]);
+        verify_journal_contents(journal_filename, testfiles[2]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
 
 
@@ -2879,8 +3201,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[3]);
     }
+    
+    if ( file_exists(testfiles[3]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[3]);
+        verify_journal_contents(journal_filename, testfiles[3]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -2920,8 +3249,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[4]);
     }
+    
+    if ( file_exists(testfiles[4]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[4]);
+        verify_journal_contents(journal_filename, testfiles[4]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -2966,8 +3302,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[5]);
     }
+    
+    if ( file_exists(testfiles[5]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[5]);
+        verify_journal_contents(journal_filename, testfiles[5]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -2998,8 +3341,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[6]);
     }
+    
+    if ( file_exists(testfiles[6]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[6]);
+        verify_journal_contents(journal_filename, testfiles[6]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -3042,8 +3392,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[7]);
     }
+    
+    if ( file_exists(testfiles[7]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[7]);
+        verify_journal_contents(journal_filename, testfiles[7]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -3098,8 +3455,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[8]);
     }
+    
+    if ( file_exists(testfiles[8]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[8]);
+        verify_journal_contents(journal_filename, testfiles[8]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -3157,8 +3521,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[9]);
     }
+    
+    if ( file_exists(testfiles[9]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[9]);
+        verify_journal_contents(journal_filename, testfiles[9]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -3220,8 +3591,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[10]);
     }
+    
+    if ( file_exists(testfiles[10]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[10]);
+        verify_journal_contents(journal_filename, testfiles[10]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -3268,8 +3646,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[11]);
     }
+    
+    if ( file_exists(testfiles[11]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[11]);
+        verify_journal_contents(journal_filename, testfiles[11]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
 
     /* g-2) Now setup flush operations on some entries to dirty, resize,
@@ -3362,8 +3747,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[12]);
     }
+    
+    if ( file_exists(testfiles[12]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[12]);
+        verify_journal_contents(journal_filename, testfiles[12]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
 
     /* g-4) Now dirty (MICRO_ENTRY_TYPE, 24), which dirties 
@@ -3384,8 +3776,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[13]);
     }
+    
+    if ( file_exists(testfiles[13]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[13]);
+        verify_journal_contents(journal_filename, testfiles[13]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
 
     /* g-4) Now dirty (MICRO_ENTRY_TYPE, 25), which dirties 
@@ -3408,8 +3807,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[14]);
     }
+    
+    if ( file_exists(testfiles[14]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[14]);
+        verify_journal_contents(journal_filename, testfiles[14]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
@@ -3455,8 +3861,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[15]);
     }
+    
+    if ( file_exists(testfiles[15]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[15]);
+        verify_journal_contents(journal_filename, testfiles[15]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -3479,8 +3892,15 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[16]);
     }
+    
+    if ( file_exists(testfiles[16]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[16]);
+        verify_journal_contents(journal_filename, testfiles[16]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -3520,8 +3940,8 @@ mdj_smoke_check_00(void)
 
 
     /* c) Re-open the hdf5 file. */
-    open_exiting_file_for_journaling(filename, journal_filename, &file_id,
-                                     &file_ptr, &cache_ptr, FALSE);
+    open_existing_file_for_journaling(filename, journal_filename, &file_id,
+                                      &file_ptr, &cache_ptr);
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -3543,25 +3963,243 @@ mdj_smoke_check_00(void)
 
         copy_file(journal_filename, testfiles[17]);
     }
+    
+    if ( file_exists(testfiles[17]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[17]);
+        verify_journal_contents(journal_filename, testfiles[17]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
 
+    /**************************************************************/
+    /* 4) Close the file, and verify that the journal is deleted. */
+    /**************************************************************/
 
-    /*******************************************************/
-    /* 4) Close and discard the file and the journal file. */
-    /*******************************************************/
+    /* Close the hdf5 file. */
+    if ( pass2 ) {
 
-    takedown_cache_after_journaling(file_id, filename, journal_filename, FALSE);
+	if ( H5Fclose(file_id) < 0 ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "temporary H5Fclose() failed.\n";
+
+	} else {
+	    file_id = -1;
+	    file_ptr = NULL;
+	    cache_ptr = NULL;
+	}
+    }
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
 
-    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+
+    /* b) Verify that the journal file has been deleted. */
+    verify_journal_deleted(journal_filename);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+
+    /************************************************************/
+    /* 5) Re-open the file with journaling disabled.  Do a      */
+    /*    transaction or two, and verify that the transactions  */
+    /*    took place, and that there is no journal file.        */
+    /************************************************************/
+
+    /* re-open the file without journaling enabled */
+
+    open_existing_file_without_journaling(filename, &file_id, 
+                                          &file_ptr, &cache_ptr);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+
+    /* do a transaction to verify that journaling is disabled.  
+     *
+     * Note that we will only get a transaction number of zero if 
+     * journaling is disabled -- thus the following begin/end trans
+     * calls should fail if journaling is enabled.
+     */
+
+    begin_trans(cache_ptr, verbose, (uint64_t)0, "transaction 1.6");
+
+    insert_entry2(file_ptr, 0, 10, FALSE, H5C2__NO_FLAGS_SET); 
+    protect_entry2(file_ptr, 0, 0);
+    unprotect_entry2(file_ptr, 0, 0, TRUE, H5C2__NO_FLAGS_SET);
+
+    end_trans(file_ptr, cache_ptr, verbose, (uint64_t)0, "transaction 1.6");
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    if ( ( pass2 ) && ( cache_ptr->mdj_enabled ) ) {
+
+        pass2 = FALSE;
+        failure_mssg2 = "journaling is enabled?!?!(1).\n";
+    }
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    /* note that flush_journal() will throw an exception if journaling
+     * is not enabled, so we don't call it here.  Instead, just call
+     * verify_journal_deleted() to verify that there is no journal file.
+     */
+
+    verify_journal_deleted(journal_filename);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+ 
+    /************************************************************/
+    /* 6) Enable journaling on the open file.  Do a transaction */
+    /*    or two to verify that journaling is working.          */
+    /************************************************************/
+
+    /* now enable journaling */
+    if ( pass2 ) {
+
+        mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+
+        result = H5Fget_mdc_config(file_id, (H5AC_cache_config_t *)&mdj_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fget_mdc_config() failed.\n";
+        }
+
+        /* set journaling config fields to taste */
+        mdj_config.enable_journaling       = TRUE;
+
+        strcpy(mdj_config.journal_file_path, journal_filename);
+
+        mdj_config.journal_recovered       = FALSE;
+        mdj_config.jbrb_buf_size           = (8 * 1024);
+        mdj_config.jbrb_num_bufs           = 2;
+        mdj_config.jbrb_use_aio            = FALSE;
+        mdj_config.jbrb_human_readable     = TRUE;
+    }
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    if ( pass2 ) {
+
+        result = H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mdj_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fset_mdc_config() failed.\n";
+        }
+    }
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    /* do a transaction or to to verify that journaling is working. */
+
+    begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.7");
+
+    insert_entry2(file_ptr, 0, 20, FALSE, H5C2__NO_FLAGS_SET); 
+    protect_entry2(file_ptr, 0, 0);
+    unprotect_entry2(file_ptr, 0, 0, TRUE, H5C2__NO_FLAGS_SET);
+
+    end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.7");
+
+    flush_journal(cache_ptr);
+
+    if ( update_architypes ) {
+
+        copy_file(journal_filename, testfiles[18]);
+    }
+    
+    if ( file_exists(testfiles[18]) ) {
+
+        verify_journal_contents(journal_filename, testfiles[18]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
+
+    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+ 
+    /************************************************************/
+    /* 7) Disable journaling on the open file.  Verify that the */
+    /*    journal file has been deleted.                        */
+    /************************************************************/
+
+    /* disable journaling */
+    if ( pass2 ) {
+
+        mdj_config.enable_journaling       = FALSE;
+
+        result = H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mdj_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fset_mdc_config() failed.\n";
+        }
+    }
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    verify_journal_deleted(journal_filename);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+ 
+    /*********************************/
+    /* 8) Close and delete the file. */
+    /*********************************/
+ 
+    if ( pass2 ) {
+
+        if ( H5Fclose(file_id) < 0 ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5Fclose(file_id) failed.\n";
+
+	}
+    }
+
+    HDremove(journal_filename);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    if ( pass2 ) { 
+	    
+        PASSED(); 
+
+	if ( testfile_missing ) {
+
+	    puts("	WARNING: One or more missing test files."); 
+	    fflush(stdout);
+        }
+    } else { 
+	    
+        H5_FAILED(); 
+    }
 
     if ( ! pass2 ) {
 
@@ -3600,16 +4238,17 @@ mdj_smoke_check_01(void)
     const char * fcn_name = "mdj_smoke_check_01()";
     const char * testfiles[] = 
     {
-        "cache2_journal_sc01_000.jnl",
-        "cache2_journal_sc01_001.jnl",
+        "testfiles/cache2_journal_sc01_000.jnl",
+        "testfiles/cache2_journal_sc01_001.jnl",
 	NULL
     };
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    hbool_t testfile_missing = FALSE;
     hbool_t show_progress = FALSE;
     hbool_t dirty_inserts = FALSE;
     hbool_t verbose = FALSE;
-    hbool_t update_architypes = TRUE;
+    hbool_t update_architypes = FALSE;
     int dirty_unprotects = FALSE;
     int dirty_destroys = FALSE;
     hbool_t display_stats = FALSE;
@@ -3713,8 +4352,15 @@ mdj_smoke_check_01(void)
 
         copy_file(journal_filename, testfiles[0]);
     }
+    
+    if ( file_exists(testfiles[0]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[0]);
+        verify_journal_contents(journal_filename, testfiles[0]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
@@ -3751,8 +4397,15 @@ mdj_smoke_check_01(void)
 
         copy_file(journal_filename, testfiles[1]);
     }
+    
+    if ( file_exists(testfiles[1]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[1]);
+        verify_journal_contents(journal_filename, testfiles[1]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
@@ -3789,8 +4442,15 @@ mdj_smoke_check_01(void)
 
         copy_file(journal_filename, testfiles[2]);
     }
+    
+    if ( file_exists(testfiles[2]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[2]);
+        verify_journal_contents(journal_filename, testfiles[2]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
@@ -3822,8 +4482,15 @@ mdj_smoke_check_01(void)
 
         copy_file(journal_filename, testfiles[0]);
     }
+    
+    if ( file_exists(testfiles[0]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[0]);
+        verify_journal_contents(journal_filename, testfiles[0]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
@@ -3855,8 +4522,15 @@ mdj_smoke_check_01(void)
 
         copy_file(journal_filename, testfiles[1]);
     }
+    
+    if ( file_exists(testfiles[1]) ) {
 
-    verify_journal_contents(journal_filename, testfiles[1]);
+        verify_journal_contents(journal_filename, testfiles[1]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -3876,7 +4550,19 @@ mdj_smoke_check_01(void)
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
 
-    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+    if ( pass2 ) { 
+	    
+        PASSED(); 
+
+	if ( testfile_missing ) {
+
+	    puts("	WARNING: One or more missing test files."); 
+	    fflush(stdout);
+        }
+    } else { 
+	    
+        H5_FAILED(); 
+    }
 
     if ( ! pass2 ) {
 
@@ -3989,7 +4675,8 @@ check_mdj_config_block_IO(void)
     /* call H5Pset_libver_bounds() on the fapl_id */
     if ( pass2 ) {
 
-	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) {
+	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+				  H5F_LIBVER_LATEST) < 0 ) {
 
             pass2 = FALSE;
             failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
@@ -4149,7 +4836,7 @@ check_mdj_config_block_IO(void)
     /* close the file. */
     if ( pass2 ) {
 
-	if ( H5Fclose(file_id) ) {
+	if ( H5Fclose(file_id) < 0 ) {
 
             pass2 = FALSE;
 	    failure_mssg2 = "file close failed (1).";
@@ -4266,7 +4953,7 @@ check_mdj_config_block_IO(void)
     
     if ( pass2 ) {
 
-	if ( H5Fclose(file_id) ) {
+	if ( H5Fclose(file_id) < 0 ) {
 
             pass2 = FALSE;
 	    failure_mssg2 = "file close failed (5).";
@@ -4525,6 +5212,8 @@ test_mdj_conf_blk_read_write_discard(H5F_t * file_ptr,
  *-------------------------------------------------------------------------
  */
 
+extern hbool_t H5C2__check_for_journaling;
+
 static void
 check_superblock_extensions(void)
 {
@@ -4539,7 +5228,7 @@ check_superblock_extensions(void)
     hid_t dataset_id = -1;
     hid_t dataspace_id = -1;
     H5F_t * file_ptr = NULL;
-    hsize_t             dims[2];
+    hsize_t dims[2];
 
 
     TESTING("superblock extensions");
@@ -4709,7 +5398,7 @@ check_superblock_extensions(void)
         /* close the data set, the data space, and the file */
 	if ( ( H5Dclose(dataset_id) < 0 ) ||
 	     ( H5Sclose(dataspace_id) < 0 ) ||
-	     ( H5Fclose(file_id) ) ) {
+	     ( H5Fclose(file_id) < 0 ) ) {
 
             pass2 = FALSE;
 	    failure_mssg2 = "data set, data space, or file close failed.";
@@ -4787,7 +5476,7 @@ check_superblock_extensions(void)
     /* close the file again. */
     if ( pass2 ) {
 
-	if ( H5Fclose(file_id) ) {
+	if ( H5Fclose(file_id) < 0 ) {
 
             pass2 = FALSE;
 	    failure_mssg2 = "file close failed (1).";
@@ -4802,10 +5491,14 @@ check_superblock_extensions(void)
     /*    extension indicates that the file is being journaled.      */
     /*****************************************************************/
 
-    /* open the file r/w using the default FAPL */
+    /* open the file r/w using the default FAPL -- turn off journaling
+     * in progress check during the open.
+     * */
     if ( pass2 ) {
 
+	H5C2__check_for_journaling = FALSE;
         file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+	H5C2__check_for_journaling = TRUE;
 
         if ( file_id < 0 ) {
 
@@ -4874,7 +5567,7 @@ check_superblock_extensions(void)
     /* close the file again. */
     if ( pass2 ) {
 
-	if ( H5Fclose(file_id) ) {
+	if ( H5Fclose(file_id) < 0 ) {
 
             pass2 = FALSE;
 	    failure_mssg2 = "file close failed (2).";
@@ -4964,7 +5657,7 @@ check_superblock_extensions(void)
     /* close the file again. */
     if ( pass2 ) {
 
-	if ( H5Fclose(file_id) ) {
+	if ( H5Fclose(file_id) < 0 ) {
 
             pass2 = FALSE;
 	    failure_mssg2 = "file close failed (3).";
@@ -4979,10 +5672,14 @@ check_superblock_extensions(void)
     /*     above took.                                             */
     /***************************************************************/
 
-    /* open the file r/w using the default FAPL */
+    /* open the file r/w using the default FAPL -- turn off journaling
+     * in progress check during the open.
+     */
     if ( pass2 ) {
 
+	H5C2__check_for_journaling = FALSE;
         file_id = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+	H5C2__check_for_journaling = TRUE;
 
         if ( file_id < 0 ) {
 
@@ -5052,7 +5749,7 @@ check_superblock_extensions(void)
     /* close the file again. */
     if ( pass2 ) {
 
-	if ( H5Fclose(file_id) ) {
+	if ( H5Fclose(file_id) < 0 ) {
 
             pass2 = FALSE;
 	    failure_mssg2 = "file close failed (4).";
@@ -5109,7 +5806,7 @@ check_superblock_extensions(void)
     
     if ( pass2 ) {
 
-	if ( H5Fclose(file_id) ) {
+	if ( H5Fclose(file_id) < 0 ) {
 
             pass2 = FALSE;
 	    failure_mssg2 = "file close failed (5).";
@@ -5134,6 +5831,2004 @@ check_superblock_extensions(void)
 
 } /* check_superblock_extensions() */
 
+
+/*** Check metadata journaling file marking ***/
+
+/***************************************************************************
+ * Function: 	check_mdj_file_marking
+ *
+ * Purpose:  	Verify that HDF5 file is marked as having journaling 
+ *              in progress when journaling is enabled, and that it is 
+ *              unmarked when journaling is shut down, or when the file
+ *              is closed normally.
+ *
+ *              Do nothing if pass2 is false on entry.
+ *
+ *              On failure, set pass2 to false, and failure_mssg2 to an
+ *              appropriate error string.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              7/2/08
+ * 
+ **************************************************************************/
+
+/* xyzzy */
+
+static void 
+check_mdj_file_marking(void)
+{
+    const char * fcn_name = "check_mdj_file_marking():";
+
+    TESTING("metadata journaling file marking");
+
+    verify_mdj_file_marking_on_create();
+
+    verify_mdj_file_marking_on_open();
+
+    verify_mdj_file_marking_after_open();
+
+    verify_mdj_file_unmarking_on_file_close();
+
+    verify_mdj_file_unmarking_on_journaling_shutdown();
+
+    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass2 ) {
+
+	failures2++;
+        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
+                  fcn_name, failure_mssg2);
+    }
+
+    return;
+
+} /* check_mdj_file_marking() */
+
+
+/***************************************************************************
+ * Function: 	verify_mdj_file_marking_on_create
+ *
+ * Purpose:  	Verify that HDF5 file is marked as having journaling 
+ *              in progress when journaling is enabled at file creation
+ *              time.
+ *
+ *              Do this by forking a child process, creating a test file
+ *              in the child with metadata journaling enabled, and then
+ *              exiting from the child without closing the file.
+ *
+ *              When the child exits, try to open the child's test file.
+ *              Open should fail, as the file should be marked as journaling
+ *              in progress.
+ *
+ *              On either success or failure, clean up the test file and
+ *              the associated journal file.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              7/2/08
+ * 
+ **************************************************************************/
+
+static void 
+verify_mdj_file_marking_on_create(void)
+{
+    const char * fcn_name = "verify_mdj_file_marking_on_create():";
+    char * tag = "pre-fork:";
+    char filename[512];
+    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    hbool_t child = FALSE;
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = FALSE;
+    int cp = 0;
+    int wait_status;
+    uint64_t trans_num;
+    pid_t child_id;
+    pid_t wait_result;
+    hid_t file_id = -1;
+    hid_t fapl_id = -1;
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+	                sizeof(filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (1).\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%s%d cp = %d.\n", fcn_name, tag,  pass2, cp++);
+	HDfflush(stdout);
+    }
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s%s filename = \"%s\".\n", fcn_name, tag,filename); 
+	HDfflush(stdout);
+    }
+
+    /* setup the journal file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+                        sizeof(journal_filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (2).\n";
+        }
+        else if ( strlen(journal_filename) >= 
+			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "journal file name too long.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%s%d cp = %d.\n", 
+		  fcn_name, tag, (int)pass2, cp++);
+	HDfflush(stdout);
+    }
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s%s journal filename = \"%s\".\n", 
+	          fcn_name, tag, journal_filename); 
+	HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        child_id = HDfork();
+
+        if ( child_id == -1 ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5fork() failed.";
+
+	} else if ( child_id == 0 ) {
+
+	    child = TRUE;
+	    tag = "child:";
+
+	} else {
+
+            child = FALSE;
+	    tag = "parent:";
+	}
+    }
+
+    if ( pass2 ) {
+
+        if ( show_progress ) {
+
+	    HDfprintf(stdout, "%s%s%d: cp = %d fork() succeeded.\n", 
+		      fcn_name, tag, (int)pass2, cp++);
+	    HDfflush(stdout);
+	}
+
+	if ( child ) {
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d child starting.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            /* clean out any existing journal file */
+            HDremove(journal_filename);
+            setup_cache_for_journaling(filename, journal_filename, &file_id,
+                                       &file_ptr, &cache_ptr, FALSE);
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+	    /* run a dummy transaction to fource metadata journaling
+	     * initialization.
+	     */
+	    H5C2_begin_transaction(cache_ptr, &trans_num, "dummy");
+	    H5C2_end_transaction(file_ptr, cache_ptr, trans_num, "dummy");
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( ( verbose ) && ( ! pass2 ) ) {
+                HDfprintf(stdout, "%s%s%d failure_mssg = \"%s\".\n", 
+			  fcn_name, tag, pass2, failure_mssg2);
+		HDfflush(stdout);
+            } 
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d cp = %d child exiting.\n", 
+			  fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+	    abort();
+
+	} else {
+
+	    /* wait for the child to exit */
+	    wait_result = HDwaitpid(child_id, &wait_status, 0);
+
+	    HDsleep(10);
+
+            if ( wait_result != child_id ) {
+
+	        pass2 = FALSE;
+		failure_mssg2 = "unexpected waitpid() result.";
+
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, 
+			      "%s%s:%d: wait_result = %ld, wait_status = %d.\n", 
+			      fcn_name, tag, (int)pass2, 
+			      (long)wait_result, wait_status);
+		    HDfflush(stdout);
+	        }
+            } else {
+
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, 
+			      "%s%s:%d: cp = %d  child exited as expected.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* create a file access propertly list. */
+                if ( pass2 ) {
+
+                    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+                    if ( fapl_id < 0 ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "H5Pcreate() failed.\n";
+                    }
+                }
+
+                if ( show_progress ) {
+		    HDfprintf(stdout, "%s%s:%d cp = %d.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* call H5Pset_libver_bounds() on the fapl_id */
+                if ( pass2 ) {
+
+	            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+					      H5F_LIBVER_LATEST) < 0 ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                    }
+                }
+
+                if ( show_progress ) {
+		    HDfprintf(stdout, "%s%s%d cp = %d.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+		/* attempt to open the file -- should fail as the child
+		 * exited without closing the file properly, and thus 
+		 * the file should still be marked as having journaling
+		 * in progress.
+		 */
+
+		if ( pass2 ) { 
+
+		    H5E_BEGIN_TRY {
+
+		        file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+
+		    } H5E_END_TRY;
+
+		    if ( file_id >= 0 ) {
+
+                        pass2 = FALSE;
+		        failure_mssg2 = "H5Fopen() succeeded.";
+		    }
+		}
+
+                if ( show_progress ) {
+
+                    HDfprintf(stdout, "%s%s%d: cp = %d.\n", 
+                              fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* delete the HDF5 file and journal file */
+#if 1
+                HDremove(filename);
+                HDremove(journal_filename);
+#endif
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, "%s%s%d cp = %d parent done.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+		}
+	    }
+        }
+    } 
+
+    return;
+
+} /* verify_mdj_file_marking_on_create() */
+
+
+/***************************************************************************
+ * Function: 	verify_mdj_file_marking_after_open
+ *
+ * Purpose:  	Verify that HDF5 file is marked as having journaling 
+ *              in progress when journaling is enabled on an open file.
+ *
+ *              Do this by forking a child process and: 
+ *
+ *              1) creating a test file in the child, 
+ *
+ *              2) writing some data to it, 
+ *
+ *              3) enable journaling on the open file via a call to
+ *                 H5Fset_mdc_config()
+ *
+ *              4) exiting from the child without closing the file.
+ *
+ *              When the child exits, try to open the child's test file.
+ *              Open should fail, as the file should be marked as journaling
+ *              in progress.
+ *
+ *              On either success or failure, clean up the test file and
+ *              the associated journal file.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              7/9/08
+ * 
+ **************************************************************************/
+
+static void 
+verify_mdj_file_marking_after_open(void)
+{
+    const char * fcn_name = "verify_mdj_file_marking_after_open():";
+    char * tag = "pre-fork:";
+    char filename[512];
+    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    hbool_t child = FALSE;
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = FALSE;
+    herr_t result;
+    int cp = 0;
+    int wait_status;
+    pid_t child_id;
+    pid_t wait_result;
+    hid_t file_id = -1;
+    hid_t fapl_id = -1;
+    hid_t dataset_id = -1;
+    hid_t dataspace_id = -1;
+    hsize_t dims[2];
+    H5AC2_cache_config_t mdj_config;
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+	                sizeof(filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (1).\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%s%d cp = %d.\n", fcn_name, tag,  pass2, cp++);
+	HDfflush(stdout);
+    }
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s%s filename = \"%s\".\n", fcn_name, tag,filename); 
+	HDfflush(stdout);
+    }
+
+    /* setup the journal file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+                        sizeof(journal_filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (2).\n";
+        }
+        else if ( strlen(journal_filename) >= 
+			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "journal file name too long.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%s%d cp = %d.\n", 
+		  fcn_name, tag, (int)pass2, cp++);
+	HDfflush(stdout);
+    }
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s%s journal filename = \"%s\".\n", 
+	          fcn_name, tag, journal_filename); 
+	HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        child_id = HDfork();
+
+        if ( child_id == -1 ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5fork() failed.";
+
+	} else if ( child_id == 0 ) {
+
+	    child = TRUE;
+	    tag = "child:";
+
+	} else {
+
+            child = FALSE;
+	    tag = "parent:";
+	}
+    }
+
+    if ( pass2 ) {
+
+	/* reset the check point */
+	cp = 0;
+
+        if ( show_progress ) {
+
+	    HDfprintf(stdout, "%s%s%d: cp = %d fork() succeeded.\n", 
+		      fcn_name, tag, (int)pass2, cp++);
+	    HDfflush(stdout);
+	}
+
+	if ( child ) {
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d child starting.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            /* create a file access propertly list. */
+            if ( pass2 ) {
+
+                fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+                if ( fapl_id < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Pcreate() failed.\n";
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            /* call H5Pset_libver_bounds() on the fapl_id */
+            if ( pass2 ) {
+
+	        if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+					  H5F_LIBVER_LATEST) < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                }
+            }
+
+	    /* open the file with a fapl indicating latest version of 
+	     * the file format.
+	     */
+            if ( pass2 ) {
+
+                file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, 
+				    fapl_id);
+
+                if ( file_id < 0 ) {
+
+	            pass2 = FALSE;
+                    failure_mssg2 = "H5Fcreate() failed.\n";
+	        }
+	    }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( pass2 ) {
+
+                dims[0] = 4;
+                dims[1] = 6;
+                dataspace_id = H5Screate_simple(2, dims, NULL);
+
+	        if ( dataspace_id < 0 ) {
+
+	            pass2 = FALSE;
+	            failure_mssg2 = "H5Screate_simple() failed.";
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( pass2 ) {
+
+                /* Create the dataset. */
+                dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE, 
+				        dataspace_id, H5P_DEFAULT, 
+					H5P_DEFAULT, H5P_DEFAULT);
+
+	        if ( dataspace_id < 0 ) {
+
+	            pass2 = FALSE;
+	            failure_mssg2 = "H5Dcreate2() failed.";
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+	    /* now enable journaling */
+	    if ( pass2 ) {
+
+                mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+
+                result = H5Fget_mdc_config(file_id, 
+				           (H5AC_cache_config_t *)&mdj_config);
+
+                if ( result < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Fget_mdc_config() failed.\n";
+                }
+
+	        /* set journaling config fields to taste */
+                mdj_config.enable_journaling       = TRUE;
+
+                strcpy(mdj_config.journal_file_path, journal_filename);
+
+                mdj_config.journal_recovered       = FALSE;
+                mdj_config.jbrb_buf_size           = (8 * 1024);
+                mdj_config.jbrb_num_bufs           = 2;
+                mdj_config.jbrb_use_aio            = FALSE;
+                mdj_config.jbrb_human_readable     = TRUE;
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( pass2 ) {
+
+                result = H5Fset_mdc_config(file_id, 
+				           (H5AC_cache_config_t *)&mdj_config);
+
+                if ( result < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Fset_mdc_config() failed.\n";
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( ( verbose ) && ( ! pass2 ) ) {
+                HDfprintf(stdout, "%s%s%d failure_mssg = \"%s\".\n", 
+			  fcn_name, tag, pass2, failure_mssg2);
+		HDfflush(stdout);
+            } 
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d cp = %d child exiting.\n", 
+			  fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+	    abort();
+
+	} else {
+
+	    /* wait for the child to exit */
+	    wait_result = HDwaitpid(child_id, &wait_status, 0);
+
+	    HDsleep(10);
+
+            if ( wait_result != child_id ) {
+
+	        pass2 = FALSE;
+		failure_mssg2 = "unexpected waitpid() result.";
+
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, 
+			      "%s%s:%d: wait_result = %ld, wait_status = %d.\n", 
+			      fcn_name, tag, (int)pass2, 
+			      (long)wait_result, wait_status);
+		    HDfflush(stdout);
+	        }
+            } else {
+
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, 
+			      "%s%s:%d: cp = %d  child exited as expected.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* create a file access propertly list. */
+                if ( pass2 ) {
+
+                    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+                    if ( fapl_id < 0 ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "H5Pcreate() failed.\n";
+                    }
+                }
+
+                if ( show_progress ) {
+		    HDfprintf(stdout, "%s%s:%d cp = %d.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* call H5Pset_libver_bounds() on the fapl_id */
+                if ( pass2 ) {
+
+	            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+					      H5F_LIBVER_LATEST) < 0 ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                    }
+                }
+
+                if ( show_progress ) {
+		    HDfprintf(stdout, "%s%s%d cp = %d.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+		/* attempt to open the file -- should fail as the child
+		 * exited without closing the file properly, and thus 
+		 * the file should still be marked as having journaling
+		 * in progress.
+		 */
+
+		if ( pass2 ) {
+  
+		    H5E_BEGIN_TRY {
+
+		        file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+
+		    } H5E_END_TRY;
+
+		    if ( file_id >= 0 ) {
+
+                        pass2 = FALSE;
+		        failure_mssg2 = "H5Fopen() succeeded.";
+		    }
+		}
+
+                if ( show_progress ) {
+
+                    HDfprintf(stdout, "%s%s%d: cp = %d.\n", 
+                              fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* delete the HDF5 file and journal file */
+#if 1
+                HDremove(filename);
+                HDremove(journal_filename);
+#endif
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, "%s%s%d cp = %d parent done.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+		}
+	    }
+        }
+    } 
+
+    return;
+
+} /* verify_mdj_file_marking_after_open() */
+
+
+/***************************************************************************
+ * Function: 	verify_mdj_file_marking_on_open
+ *
+ * Purpose:  	Verify that HDF5 file is marked as having journaling 
+ *              in progress when journaling is enabled at file open
+ *              time.
+ *
+ *              Do this by forking a child process and: 
+ *
+ *              1) creating a test file in the child, 
+ *
+ *              2) writing some data to it, 
+ *
+ *              3) closing the test file.
+ *
+ *              4) re-openting the test file with metadata journaling 
+ *                 enabled, and then
+ *
+ *              5) exiting from the child without closing the file.
+ *
+ *              When the child exits, try to open the child's test file.
+ *              Open should fail, as the file should be marked as journaling
+ *              in progress.
+ *
+ *              On either success or failure, clean up the test file and
+ *              the associated journal file.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              7/2/08
+ * 
+ **************************************************************************/
+
+static void 
+verify_mdj_file_marking_on_open(void)
+{
+    const char * fcn_name = "verify_mdj_file_marking_on_open():";
+    char * tag = "pre-fork:";
+    char filename[512];
+    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    hbool_t child = FALSE;
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = FALSE;
+    herr_t result;
+    int cp = 0;
+    int wait_status;
+    pid_t child_id;
+    pid_t wait_result;
+    hid_t file_id = -1;
+    hid_t fapl_id = -1;
+    hid_t dataset_id = -1;
+    hid_t dataspace_id = -1;
+    hsize_t dims[2];
+    H5F_t * file_ptr = NULL;
+    H5AC2_cache_config_t mdj_config;
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+	                sizeof(filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (1).\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%s%d cp = %d.\n", fcn_name, tag,  pass2, cp++);
+	HDfflush(stdout);
+    }
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s%s filename = \"%s\".\n", fcn_name, tag,filename); 
+	HDfflush(stdout);
+    }
+
+    /* setup the journal file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+                        sizeof(journal_filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (2).\n";
+        }
+        else if ( strlen(journal_filename) >= 
+			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "journal file name too long.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%s%d cp = %d.\n", 
+		  fcn_name, tag, (int)pass2, cp++);
+	HDfflush(stdout);
+    }
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s%s journal filename = \"%s\".\n", 
+	          fcn_name, tag, journal_filename); 
+	HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        child_id = HDfork();
+
+        if ( child_id == -1 ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5fork() failed.";
+
+	} else if ( child_id == 0 ) {
+
+	    child = TRUE;
+	    tag = "child:";
+
+	} else {
+
+            child = FALSE;
+	    tag = "parent:";
+	}
+    }
+
+    if ( pass2 ) {
+
+	/* reset the check point */
+	cp = 0;
+
+        if ( show_progress ) {
+
+	    HDfprintf(stdout, "%s%s%d: cp = %d fork() succeeded.\n", 
+		      fcn_name, tag, (int)pass2, cp++);
+	    HDfflush(stdout);
+	}
+
+	if ( child ) {
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d child starting.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+#if 0 /* JRM */
+	    /* Quincey:
+	     *
+	     * It looks like we may have a bug here -- 
+	     *
+	     * In the original version of this test, I:
+	     *
+	     * 	1) created a file using the default FAPL, 
+	     *
+	     * 	2) added a data set to the file
+	     *
+	     * 	3) closed it,
+	     *
+	     * 	4) tried to re-open it using a FAPL that set the 
+	     * 	   latest format, and enabled journaling.
+	     *
+	     * I hit an assertion failure on step 4.  
+	     *
+	     * I then modified the above to select the latest file 
+	     * format on file create, and the problem went away.
+	     *
+	     * Is this as it should be, or do we have a bug here?
+	     *
+	     *                              JRM -- 7/9/08
+	     */
+
+            if ( pass2 ) {
+
+                file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, 
+				    H5P_DEFAULT);
+
+                if ( file_id < 0 ) {
+
+	            pass2 = FALSE;
+                    failure_mssg2 = "H5Fcreate() failed.\n";
+	        }
+	    }
+#else /* JRM */
+
+            /* create a file access propertly list. */
+            if ( pass2 ) {
+
+                fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+                if ( fapl_id < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Pcreate() failed.\n";
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            /* call H5Pset_libver_bounds() on the fapl_id */
+            if ( pass2 ) {
+
+	        if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+					  H5F_LIBVER_LATEST) < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                }
+            }
+
+	    /* open the file with a fapl indicating latest version of 
+	     * the file format.
+	     */
+            if ( pass2 ) {
+
+                file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, 
+				    fapl_id);
+
+                if ( file_id < 0 ) {
+
+	            pass2 = FALSE;
+                    failure_mssg2 = "H5Fcreate() failed.\n";
+	        }
+	    }
+#endif /* JRM */
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( pass2 ) {
+
+                dims[0] = 4;
+                dims[1] = 6;
+                dataspace_id = H5Screate_simple(2, dims, NULL);
+
+	        if ( dataspace_id < 0 ) {
+
+	            pass2 = FALSE;
+	            failure_mssg2 = "H5Screate_simple() failed.";
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( pass2 ) {
+
+                /* Create the dataset. */
+                dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE, 
+				        dataspace_id, H5P_DEFAULT, 
+					H5P_DEFAULT, H5P_DEFAULT);
+
+	        if ( dataspace_id < 0 ) {
+
+	            pass2 = FALSE;
+	            failure_mssg2 = "H5Dcreate2() failed.";
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( pass2 ) {
+
+                /* close the data set, the data space, and the file */
+	        if ( ( H5Dclose(dataset_id) < 0 ) ||
+	             ( H5Sclose(dataspace_id) < 0 ) ||
+#if 1 /* JRM */
+                     ( H5Pclose(fapl_id) < 0 ) ||
+#endif /* JRM */
+	             ( H5Fclose(file_id) < 0 ) ) {
+
+                    pass2 = FALSE;
+	            failure_mssg2 = 
+			    "data set, data space, or file close failed.";
+	        }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            /* create a file access propertly list. */
+            if ( pass2 ) {
+
+                fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+                if ( fapl_id < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Pcreate() failed.\n";
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            /* call H5Pset_libver_bounds() on the fapl_id */
+            if ( pass2 ) {
+
+	        if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+					  H5F_LIBVER_LATEST) < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( pass2 ) {
+
+                mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+
+                result = H5Pget_mdc_config(fapl_id, 
+				           (H5AC_cache_config_t *)&mdj_config);
+
+                if ( result < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+                }
+
+	        /* set journaling config fields to taste */
+                mdj_config.enable_journaling       = TRUE;
+
+                strcpy(mdj_config.journal_file_path, journal_filename);
+
+                mdj_config.journal_recovered       = FALSE;
+                mdj_config.jbrb_buf_size           = (8 * 1024);
+                mdj_config.jbrb_num_bufs           = 2;
+                mdj_config.jbrb_use_aio            = FALSE;
+                mdj_config.jbrb_human_readable     = TRUE;
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( pass2 ) {
+
+                result = H5Pset_mdc_config(fapl_id, 
+				           (H5AC_cache_config_t *)&mdj_config);
+
+                if ( result < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: *cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            /* open the file using fapl_id */
+            if ( pass2 ) {
+
+                file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+
+                if ( file_id < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Fopen() failed.\n";
+
+                } else {
+
+                    file_ptr = H5I_object_verify(file_id, H5I_FILE);
+
+                    if ( file_ptr == NULL ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "Can't get file_ptr.";
+
+                        if ( verbose ) {
+                            HDfprintf(stdout, "%s: Can't get file_ptr.\n", 
+				      fcn_name);
+                        }
+                    }
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( ( verbose ) && ( ! pass2 ) ) {
+                HDfprintf(stdout, "%s%s%d failure_mssg = \"%s\".\n", 
+			  fcn_name, tag, pass2, failure_mssg2);
+		HDfflush(stdout);
+            } 
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d cp = %d child exiting.\n", 
+			  fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+	    abort();
+
+	} else {
+
+	    /* wait for the child to exit */
+	    wait_result = HDwaitpid(child_id, &wait_status, 0);
+
+	    HDsleep(10);
+
+            if ( wait_result != child_id ) {
+
+	        pass2 = FALSE;
+		failure_mssg2 = "unexpected waitpid() result.";
+
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, 
+			      "%s%s:%d: wait_result = %ld, wait_status = %d.\n", 
+			      fcn_name, tag, (int)pass2, 
+			      (long)wait_result, wait_status);
+		    HDfflush(stdout);
+	        }
+            } else {
+
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, 
+			      "%s%s:%d: cp = %d  child exited as expected.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* create a file access propertly list. */
+                if ( pass2 ) {
+
+                    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+                    if ( fapl_id < 0 ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "H5Pcreate() failed.\n";
+                    }
+                }
+
+                if ( show_progress ) {
+		    HDfprintf(stdout, "%s%s:%d cp = %d.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* call H5Pset_libver_bounds() on the fapl_id */
+                if ( pass2 ) {
+
+	            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+					      H5F_LIBVER_LATEST) < 0 ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                    }
+                }
+
+                if ( show_progress ) {
+		    HDfprintf(stdout, "%s%s%d cp = %d.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+		/* attempt to open the file -- should fail as the child
+		 * exited without closing the file properly, and thus 
+		 * the file should still be marked as having journaling
+		 * in progress.
+		 */
+
+		if ( pass2 ) {
+
+		    H5E_BEGIN_TRY {
+
+		        file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+
+                    } H5E_END_TRY;
+
+		    if ( file_id >= 0 ) {
+
+                        pass2 = FALSE;
+		        failure_mssg2 = "H5Fopen() succeeded.";
+		    }
+                }
+
+                if ( show_progress ) {
+
+                    HDfprintf(stdout, "%s%s%d: cp = %d.\n", 
+                              fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* delete the HDF5 file and journal file */
+#if 1
+                HDremove(filename);
+                HDremove(journal_filename);
+#endif
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, "%s%s%d cp = %d parent done.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+		}
+	    }
+        }
+    } 
+
+    return;
+
+} /* verify_mdj_file_marking_on_open() */
+
+
+/***************************************************************************
+ * Function: 	verify_mdj_file_unmarking_on_file_close
+ *
+ * Purpose:  	Verify that HDF5 file on which journaling is enabled is 
+ * 		marked as having not haveing journaling in progress when 
+ * 		the file is closed.
+ *
+ *              Do this as follows:
+ *
+ *                  1) create a test file with metadata journaling 
+ *                     enabled, 
+ *
+ *                  2) perform some operation(s) that dirty metadata
+ *                     and result in journal activity.
+ *
+ * 		    3) close the file.
+ *
+ * 		    4) attempt to re-open the file -- should succeed.
+ *
+ *              On either success or failure, clean up the test file and
+ *              the associated journal file.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              7/10/08
+ * 
+ **************************************************************************/
+
+static void 
+verify_mdj_file_unmarking_on_file_close(void)
+{
+    const char * fcn_name = "verify_mdj_file_unmarking_on_file_close():";
+    char filename[512];
+    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = FALSE;
+    int cp = 0;
+    hid_t file_id = -1;
+    hid_t fapl_id = -1;
+    hid_t dataset_id = -1;
+    hid_t dataspace_id = -1;
+    hsize_t dims[2];
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d -- entering.\n", fcn_name, pass2, cp++);
+	HDfflush(stdout);
+    }
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+	                sizeof(filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (1).\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+	HDfflush(stdout);
+    }
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename); 
+	HDfflush(stdout);
+    }
+
+    /* setup the journal file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+                        sizeof(journal_filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (2).\n";
+        }
+        else if ( strlen(journal_filename) >= 
+			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "journal file name too long.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+	HDfflush(stdout);
+    }
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n", 
+		  fcn_name, journal_filename); 
+	HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        /* clean out any existing journal file */
+        setup_cache_for_journaling(filename, journal_filename, &file_id,
+                                   &file_ptr, &cache_ptr, FALSE);
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* create a data set so as to force a bit of journaling */
+    if ( pass2 ) {
+
+        dims[0] = 4;
+        dims[1] = 6;
+        dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        if ( dataspace_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Screate_simple() failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        /* Create the dataset. */
+        dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE, 
+			        dataspace_id, H5P_DEFAULT, 
+				H5P_DEFAULT, H5P_DEFAULT);
+
+        if ( dataspace_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Dcreate2() failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* now close the file... */
+
+    if ( pass2 ) {
+
+	if ( ( H5Dclose(dataset_id) < 0 ) ||
+	     ( H5Sclose(dataspace_id) < 0 ) ||
+	     ( H5Fclose(file_id) < 0 ) ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "dataset, dataspace, or file close failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* ... and attempt to re-open it.  Should succeed */
+
+    /* create a file access propertly list. */
+    if ( pass2 ) {
+
+        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+        if ( fapl_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pcreate() failed.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* call H5Pset_libver_bounds() on the fapl_id */
+    if ( pass2 ) {
+
+        if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+                                  H5F_LIBVER_LATEST) < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d: *cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* attempt to open the file -- should succeed as the close should 
+     * shutdown journaling.
+     */
+
+    if ( pass2 ) {
+
+        file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+
+	if ( file_id < 0 ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5Fopen() failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* close the file and fapl */
+
+    if ( pass2 ) {
+
+        if ( ( H5Pclose(fapl_id) < 0 ) ||
+             ( H5Fclose(file_id) < 0 ) ) {
+
+                pass2 = FALSE;
+                failure_mssg2 = "fapl or file close failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* delete the HDF5 file and journal file */
+#if 1
+    HDremove(filename);
+    HDremove(journal_filename);
+#endif
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    return;
+
+} /* verify_mdj_file_unmarking_on_file_close() */
+
+
+/***************************************************************************
+ * Function: 	verify_mdj_file_unmarking_on_journaling_shutdown
+ *
+ * Purpose:  	Verify that HDF5 file on which journaling is enabled is 
+ * 		marked as having not haveing journaling in progress when 
+ * 		journaling is disabled via the H5Fset_mdc_config() API
+ * 		call.
+ *
+ *              Do this by:
+ *
+ *                  1) forking a child process, 
+ *
+ *                  2) creating a test file in the child with metadata 
+ *                     journaling enabled, 
+ *
+ *                  3) performing some operation(s) that dirty metadata
+ *                     and result in journal activity.
+ *
+ *                  4) using the H5Fset_mdc_config() to disable journaling.
+ *
+ *                  5) exiting from the child without closing the file.
+ *
+ *              When the child exits, try to open the child's test file.
+ *              Open should succeed, as the file should be marked as 
+ *              journaling not in progress.
+ *
+ *              Note that the file will be synced out as part of the 
+ *              journaling shutdown process, so the metadata should be 
+ *              in a consistant state.  Strictly speaking, this is not
+ *              necessary for this test, for as long as the the file is
+ *              not marked as having journaling in progress, we should
+ *              pass.  However, testing this without using the HDF5 
+ *              library to open the file would be inconvenient -- hence
+ *              we make use of the sync on journal shutdown to make the
+ *              test easier to implement.
+ *
+ *              On either success or failure, clean up the test file and
+ *              the associated journal file.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              7/9/08
+ * 
+ **************************************************************************/
+
+static void 
+verify_mdj_file_unmarking_on_journaling_shutdown(void)
+{
+    const char * fcn_name = 
+	    "verify_mdj_file_unmarking_on_journaling_shutdown():";
+    char * tag = "pre-fork:";
+    char filename[512];
+    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    hbool_t child = FALSE;
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = FALSE;
+    herr_t result;
+    int cp = 0;
+    int wait_status;
+    pid_t child_id;
+    pid_t wait_result;
+    hid_t file_id = -1;
+    hid_t fapl_id = -1;
+    hid_t dataset_id = -1;
+    hid_t dataspace_id = -1;
+    hsize_t dims[2];
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
+    H5AC2_cache_config_t mdj_config;
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+	                sizeof(filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (1).\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%s%d cp = %d.\n", fcn_name, tag,  pass2, cp++);
+	HDfflush(stdout);
+    }
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s%s filename = \"%s\".\n", fcn_name, tag,filename); 
+	HDfflush(stdout);
+    }
+
+    /* setup the journal file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+                        sizeof(journal_filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (2).\n";
+        }
+        else if ( strlen(journal_filename) >= 
+			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "journal file name too long.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%s%d cp = %d.\n", 
+		  fcn_name, tag, (int)pass2, cp++);
+	HDfflush(stdout);
+    }
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s%s journal filename = \"%s\".\n", 
+	          fcn_name, tag, journal_filename); 
+	HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        child_id = HDfork();
+
+        if ( child_id == -1 ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5fork() failed.";
+
+	} else if ( child_id == 0 ) {
+
+	    child = TRUE;
+	    tag = "child:";
+
+	} else {
+
+            child = FALSE;
+	    tag = "parent:";
+	}
+    }
+
+    if ( pass2 ) {
+
+        if ( show_progress ) {
+
+	    HDfprintf(stdout, "%s%s%d: cp = %d fork() succeeded.\n", 
+		      fcn_name, tag, (int)pass2, cp++);
+	    HDfflush(stdout);
+	}
+
+	if ( child ) {
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d child starting.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            /* clean out any existing journal file */
+            setup_cache_for_journaling(filename, journal_filename, &file_id,
+                                       &file_ptr, &cache_ptr, FALSE);
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+	    /* create a data set so as to force a bit of journaling */
+            if ( pass2 ) {
+
+                dims[0] = 4;
+                dims[1] = 6;
+                dataspace_id = H5Screate_simple(2, dims, NULL);
+
+	        if ( dataspace_id < 0 ) {
+
+	            pass2 = FALSE;
+	            failure_mssg2 = "H5Screate_simple() failed.";
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( pass2 ) {
+
+                /* Create the dataset. */
+                dataset_id = H5Dcreate2(file_id, "/dset", H5T_STD_I32BE, 
+				        dataspace_id, H5P_DEFAULT, 
+					H5P_DEFAULT, H5P_DEFAULT);
+
+	        if ( dataspace_id < 0 ) {
+
+	            pass2 = FALSE;
+	            failure_mssg2 = "H5Dcreate2() failed.";
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+	    /* now dis-able journaling */
+	    if ( pass2 ) {
+
+                mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+
+                result = H5Fget_mdc_config(file_id, 
+				           (H5AC_cache_config_t *)&mdj_config);
+
+                if ( result < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Fget_mdc_config() failed.\n";
+                }
+
+                mdj_config.enable_journaling       = FALSE;
+
+		/* until we disable the old cache, we need to set 
+		 * these fields too, as until then, H5Fget_mdc_config()
+		 * will return data from the old cache -- and fail to 
+		 * initialize the journaling fields.
+		 */
+
+                strcpy(mdj_config.journal_file_path, journal_filename);
+
+                mdj_config.journal_recovered       = FALSE;
+                mdj_config.jbrb_buf_size           = (8 * 1024);
+                mdj_config.jbrb_num_bufs           = 2;
+                mdj_config.jbrb_use_aio            = FALSE;
+                mdj_config.jbrb_human_readable     = TRUE;
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( pass2 ) {
+
+                result = H5Fset_mdc_config(file_id, 
+				           (H5AC_cache_config_t *)&mdj_config);
+
+                if ( result < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Fset_mdc_config() failed.\n";
+                }
+            }
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            if ( ( verbose ) && ( ! pass2 ) ) {
+                HDfprintf(stdout, "%s%s%d failure_mssg = \"%s\".\n", 
+			  fcn_name, tag, pass2, failure_mssg2);
+		HDfflush(stdout);
+            } 
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d cp = %d child exiting.\n", 
+			  fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+	    abort();
+
+	} else {
+
+	    /* wait for the child to exit */
+	    wait_result = HDwaitpid(child_id, &wait_status, 0);
+
+	    HDsleep(10);
+
+            if ( wait_result != child_id ) {
+
+	        pass2 = FALSE;
+		failure_mssg2 = "unexpected waitpid() result.";
+
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, 
+			      "%s%s:%d: wait_result = %ld, wait_status = %d.\n", 
+			      fcn_name, tag, (int)pass2, 
+			      (long)wait_result, wait_status);
+		    HDfflush(stdout);
+	        }
+            } else {
+
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, 
+			      "%s%s:%d: cp = %d  child exited as expected.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* create a file access propertly list. */
+                if ( pass2 ) {
+
+                    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+                    if ( fapl_id < 0 ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "H5Pcreate() failed.\n";
+                    }
+                }
+
+                if ( show_progress ) {
+		    HDfprintf(stdout, "%s%s:%d cp = %d.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* call H5Pset_libver_bounds() on the fapl_id */
+                if ( pass2 ) {
+
+	            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+					      H5F_LIBVER_LATEST) < 0 ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                    }
+                }
+
+                if ( show_progress ) {
+		    HDfprintf(stdout, "%s%s%d cp = %d.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+		/* attempt to open the file -- should succeed as the child
+		 * disabled journaling just before exiting, which should have
+		 * had the dual effect of marking the file as not having
+		 * journaling in progress, and syncing the file out to disk.
+		 */
+
+		file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+
+		if ( file_id < 0 ) {
+
+                    pass2 = FALSE;
+		    failure_mssg2 = "H5Fopen() failed.";
+		}
+
+                if ( show_progress ) {
+
+                    HDfprintf(stdout, "%s%s%d: cp = %d.\n", 
+                              fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+		/* close the file and fapl */
+
+                if ( pass2 ) {
+
+	            if ( ( H5Pclose(fapl_id) < 0 ) ||
+	                 ( H5Fclose(file_id) < 0 ) ) {
+
+                        pass2 = FALSE;
+	                failure_mssg2 = "fapl or file close failed.";
+	            }
+                }
+
+                if ( show_progress ) {
+
+                    HDfprintf(stdout, "%s%s%d: cp = %d.\n", 
+                              fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* delete the HDF5 file and journal file */
+#if 1
+                HDremove(filename);
+                HDremove(journal_filename);
+#endif
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, "%s%s%d cp = %d parent done.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+		}
+	    }
+        }
+    } 
+
+    return;
+
+} /* verify_mdj_file_unmarking_on_journaling_shutdown() */
 
 
 /***************************************************************************
@@ -7210,9 +9905,15 @@ main(void)
     check_legal_calls();
     check_message_format();
     check_transaction_tracking();
+#endif
+#if 1
     check_superblock_extensions();
-
+#endif 
+#if 1
     check_mdj_config_block_IO();
+#endif 
+#if 1
+    check_mdj_file_marking();
 #endif
 
     return(failures2);

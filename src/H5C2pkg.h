@@ -805,38 +805,6 @@ struct H5C2_jbrb_t
  * mdj_jbrb:    Instance of H5C2_jbrb_t used to manage logging of journal
  * 		entries to the journal file.
  *
- * If journaling is requested at file creation time, we must make note of
- * the request, and delay implementing it until receipt of the first 
- * begin transaction message.  This is necessary as the file structure will
- * not have been fully initialized at the point the request is received.
- *
- * The following fields support this facility.
- *
- * mdj_startup_pending: Boolean flag used to indicate that we must 
- * 		do setup for journaling on the next begin transaction 
- * 		call.
- *
- * mdj_startup_f: Pointer to the instance of H5F_t used in the metadata
- * 		journaling startup.
- *
- * mdj_startup_dxpl_id: dxpl_id used in the metadata journaling startup.
- *
- * mdj_startup_jrnl_file_name:  Pointer to a string containing the name of
- * 		the journal file.
- *
- * mdj_startup_buf_size: Size of the buffers used in the metadata journal
- * 		buffer ring buffer.
- *
- * mdj_startup_num_bufs: Number of buffers in the metadata journal buffer
- * 		ring buffer.
- *
- * mdj_startup_use_aio: use_aio parameter used when setting up metadata 
- * 		journaling.
- *
- * mdj_startup_human_readable:  human_readable parameter used when setting 
- * 		up metadata journaling.
- *
- *
  * While a transaction is in progress, we must maintain a list of the 
  * entries that have been modified during the transaction so we can
  * generate the appropriate journal entries.  The following fields are
@@ -1239,15 +1207,6 @@ struct H5C2_t
     H5C2_cache_entry_t *	jwipl_head_ptr;
     H5C2_cache_entry_t *	jwipl_tail_ptr;
     
-    hbool_t			mdj_startup_pending;
-    H5F_t * 		        mdj_startup_f;
-    hid_t                       mdj_startup_dxpl_id;
-    char *			mdj_startup_jrnl_file_name;
-    size_t			mdj_startup_buf_size;
-    int				mdj_startup_num_bufs;
-    hbool_t                     mdj_startup_use_aio;
-    hbool_t			mdj_startup_human_readable;
-
 #if H5C2_COLLECT_CACHE_STATS
 
     /* stats fields */

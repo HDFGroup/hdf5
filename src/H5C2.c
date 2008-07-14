@@ -434,21 +434,23 @@ done:
  * 		journaling in progress, and fail if it does unless 
  * 		the journal_recovered parameter is TRUE.
  *
+ * 		JRM -- 7/10/08
+ * 		Removed the f, dxpl_id, and journal_recovered parameters,
+ * 		as checking for journaling in progress is no longer handled
+ * 		in H5C2_create().  
+ *
  *-------------------------------------------------------------------------
  */
 
 H5C2_t *
-H5C2_create(H5F_t *                     f,
-	    hid_t                       dxpl_id,
-	    size_t		        max_cache_size,
+H5C2_create(size_t		        max_cache_size,
             size_t		        min_clean_size,
             int			        max_type_id,
 	    const char *                (* type_name_table_ptr),
             H5C2_write_permitted_func_t check_write_permitted,
             hbool_t		        write_permitted,
             H5C2_log_flush_func_t       log_flush,
-            void *                      aux_ptr,
-	    hbool_t			journal_recovered)
+            void *                      aux_ptr)
 {
     int i;
     H5C2_t * cache_ptr = NULL;
@@ -648,16 +650,6 @@ H5C2_create(H5F_t *                     f,
     cache_ptr->jwipl_head_ptr                            = NULL;
     cache_ptr->jwipl_tail_ptr                            = NULL;
 
-    cache_ptr->mdj_startup_pending			 = FALSE;
-    cache_ptr->mdj_startup_f				 = NULL;
-    cache_ptr->mdj_startup_dxpl_id			 = -1;
-    cache_ptr->mdj_startup_jrnl_file_name		 = NULL;
-    cache_ptr->mdj_startup_buf_size			 = 0;
-    cache_ptr->mdj_startup_num_bufs			 = 0;
-    cache_ptr->mdj_startup_use_aio			 = FALSE;
-    cache_ptr->mdj_startup_human_readable		 = FALSE;
-
-
     if ( H5C2_reset_cache_hit_rate_stats(cache_ptr) != SUCCEED ) {
 
         /* this should be impossible... */
@@ -671,18 +663,16 @@ H5C2_create(H5F_t *                     f,
     cache_ptr->skip_dxpl_id_checks		= FALSE;
     cache_ptr->prefix[0]			= '\0';  /* empty string */
 
-    /* test to see if there is a metadata journal that must be recovered
-     * before we can access the file.  Do this now after the cache is 
-     * initialized, as the code for this test assumes a functional 
-     * cache.
+    /* We used to check for journaling here, but the super block hasn't 
+     * been read in yet at cache creation time -- thus the check for 
+     * journaling has been moved to H5AC2_check_for_journaling(), which 
+     * is simply a * wrapper for H5C2_check_for_journaling().
+     *
+     * H5AC2_check_for_journaling() is called at the end of H5Fopen() --
+     * at which point the superblock has been read.
+     * 
+     * Note that H5Fopen() is called by both H5Fcreate() and H5Fopen().
      */
-
-    if ( H5C2_check_for_journaling(f, dxpl_id, cache_ptr, journal_recovered)
-		    != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, \
-                    "H5C2_check_for_journaling() reports failure.")
-    }
 
     /* Set return value */
     ret_value = cache_ptr;
@@ -946,6 +936,15 @@ H5C2_dest(H5F_t * f,
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+
+    if ( cache_ptr->mdj_enabled ) {
+
+	if ( H5C2_end_journaling(f, dxpl_id, cache_ptr) != SUCCEED ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
+			    "H5C2_end_journaling() failed.")
+	}
+    }
 
     if ( H5C2_flush_cache(f, dxpl_id,
                           H5C2__FLUSH_INVALIDATE_FLAG) < 0 ) {

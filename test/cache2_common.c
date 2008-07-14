@@ -2794,17 +2794,14 @@ setup_cache2(size_t max_cache_size,
 
 	file_ptr->shared->cache2 = NULL;
 
-        cache_ptr = H5C2_create(file_ptr,
-			        H5P_DATASET_XFER_DEFAULT,
-			        max_cache_size,
+        cache_ptr = H5C2_create(max_cache_size,
                                 min_clean_size,
                                 (NUMBER_OF_ENTRY_TYPES - 1),
 				(const char **)entry_type_names2,
                                 check_write_permitted2,
                                 TRUE,
                                 NULL,
-                                NULL,
-				FALSE);
+                                NULL);
 
         file_ptr->shared->cache2 = cache_ptr;
     }

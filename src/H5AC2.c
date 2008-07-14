@@ -201,6 +201,13 @@ static herr_t H5AC2_log_renamed_entry(H5F_t * f,
                                      haddr_t new_addr);
 #endif /* H5_HAVE_PARALLEL */
 
+static herr_t H5AC2_set_non_journaling_cache_config(H5F_t * f,
+                                              hid_t dxpl_id,
+                                              H5AC2_cache_config_t *config_ptr);
+
+static herr_t H5AC2_validate_journaling_config(
+		H5AC2_cache_config_t * config_ptr);
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5AC2_init
@@ -485,6 +492,11 @@ H5AC2_term_interface(void)
  *		list changes in H5C2_create().
  *						JRM - 3/26/08
  *
+ *		Updated code for the removal of the f, dxpl_id, and 
+ *		journal_recovered parameters for H5C2_create().
+ *
+ *						JRM 7/10/08
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -622,23 +634,18 @@ H5AC2_create(H5F_t * f,
 
             if ( aux_ptr->mpi_rank == 0 ) {
 
-                f->shared->cache2 = H5C2_create(f,
-				         dxpl_id,
-				         H5AC2__DEFAULT_MAX_CACHE_SIZE,
+                f->shared->cache2 = H5C2_create(H5AC2__DEFAULT_MAX_CACHE_SIZE,
                                          H5AC2__DEFAULT_MIN_CLEAN_SIZE,
                                          (H5AC2_NTYPES - 1),
                                          (const char **)H5AC2_entry_type_names,
                                          H5AC2_check_if_write_permitted,
                                          TRUE,
                                          H5AC2_log_flushed_entry,
-                                         (void *)aux_ptr,
-					 config_ptr->journal_recovered);
+                                         (void *)aux_ptr);
 
             } else {
 
-                f->shared->cache2 = H5C2_create(f,
-				         dxpl_id,
-				         H5AC2__DEFAULT_MAX_CACHE_SIZE,
+                f->shared->cache2 = H5C2_create(H5AC2__DEFAULT_MAX_CACHE_SIZE,
                                          H5AC2__DEFAULT_MIN_CLEAN_SIZE,
                                          (H5AC2_NTYPES - 1),
                                          (const char **)H5AC2_entry_type_names,
@@ -649,23 +656,19 @@ H5AC2_create(H5F_t * f,
 #else /* JRM */
                                          NULL,
 #endif /* JRM */
-                                         (void *)aux_ptr,
-                                         config_ptr->journal_recovered);
+                                         (void *)aux_ptr);
             }
 
         } else {
 
-            f->shared->cache2 = H5C2_create(f,
-				        dxpl_id,
-			                H5AC2__DEFAULT_MAX_CACHE_SIZE,
+            f->shared->cache2 = H5C2_create(H5AC2__DEFAULT_MAX_CACHE_SIZE,
                                         H5AC2__DEFAULT_MIN_CLEAN_SIZE,
                                         (H5AC2_NTYPES - 1),
                                         (const char **)H5AC2_entry_type_names,
                                         H5AC2_check_if_write_permitted,
                                         TRUE,
                                         NULL,
-                                        NULL,
-                                        config_ptr->journal_recovered);
+                                        NULL);
         }
     } else {
 #endif /* H5_HAVE_PARALLEL */
@@ -674,17 +677,14 @@ H5AC2_create(H5F_t * f,
          *                                             -- JRM
          */
 
-        f->shared->cache2 = H5C2_create(f,
-				        dxpl_id,
-			                H5AC2__DEFAULT_MAX_CACHE_SIZE,
+        f->shared->cache2 = H5C2_create(H5AC2__DEFAULT_MAX_CACHE_SIZE,
                                         H5AC2__DEFAULT_MIN_CLEAN_SIZE,
                                         (H5AC2_NTYPES - 1),
                                         (const char **)H5AC2_entry_type_names,
                                         H5AC2_check_if_write_permitted,
                                         TRUE,
                                         NULL,
-                                        NULL,
-                                        config_ptr->journal_recovered);
+                                        NULL);
 #ifdef H5_HAVE_PARALLEL
     }
 #endif /* H5_HAVE_PARALLEL */
@@ -707,9 +707,9 @@ H5AC2_create(H5F_t * f,
     }
 #endif /* H5_HAVE_PARALLEL */
 
-    result = H5AC2_set_cache_auto_resize_config(f, 
-		                                dxpl_id, 
-		                                config_ptr);
+    result = H5AC2_set_non_journaling_cache_config(f, 
+		                                   dxpl_id, 
+		                                   config_ptr);
 
     if ( result != SUCCEED ) {
 
@@ -994,6 +994,90 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC2_begin_transaction() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC2_check_for_journaling()
+ *
+ * Purpose:	Check the newly opened file for ongoing journaling.
+ *              Fail if it exists and the journal recovered flag is
+ *              not set.
+ *
+ * 		This function is just a wrapper for 
+ * 		H5C2_check_for_journaling().
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              7/4/08
+ *
+ * Modifications:
+ *		
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC2_check_for_journaling(H5F_t * f,
+                           hid_t dxpl_id,
+                           H5C2_t * cache_ptr,
+			   hbool_t journal_recovered)
+{
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+#if H5AC2__TRACE_FILE_ENABLED
+    char                trace[256] = "";
+    FILE *              trace_file_ptr = NULL;
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    FUNC_ENTER_NOAPI(H5AC2_check_for_journaling, FAIL)
+
+    HDassert( f );
+    HDassert( cache_ptr );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+
+#if H5AC2__TRACE_FILE_ENABLED
+    /* For the end transaction call, only the journal_recovered
+     * parameter is really needed.  Write the return value to catch 
+     * occult errors.
+     */
+    if ( ( cache_ptr != NULL ) &&
+         ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
+         ( trace_file_ptr != NULL ) ) {
+
+        sprintf(trace, "H5AC2_check_for_journaling %d ", 
+		(int)journal_recovered);
+    }
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    /* test to see if there is a metadata journal that must be recovered
+     * before we can access the file.  Do this at the end of file open,
+     * as the data we need for the check is not available at cache creation
+     * time.
+     */
+
+    result = H5C2_check_for_journaling(f, dxpl_id, cache_ptr, 
+		                       journal_recovered);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, \
+                    "H5C2_check_for_journaling() reports failure.")
+    }
+
+done:
+
+#if H5AC2__TRACE_FILE_ENABLED
+    if ( trace_file_ptr != NULL ) {
+
+	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+    }
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC2_end_transaction() */
 
 
 /*-------------------------------------------------------------------------
@@ -2079,7 +2163,7 @@ done:
  */
 herr_t
 H5AC2_pin_protected_entry(H5F_t * f,
-                         void *	 thing)
+                          void * thing)
 {
     herr_t	result;
     herr_t      ret_value = SUCCEED;    /* Return value */
@@ -3211,8 +3295,6 @@ H5AC2_set_cache_auto_resize_config(H5F_t * f,
     H5AC2_t *           cache_ptr;
     herr_t              result;
     herr_t              ret_value = SUCCEED;      /* Return value */
-    hbool_t		mdj_enabled = FALSE;
-    H5C2_auto_size_ctl_t internal_config;
 #if H5AC2__TRACE_FILE_ENABLED
     H5AC2_cache_config_t trace_config = H5AC2__DEFAULT_CACHE_CONFIG;
     FILE *              trace_file_ptr = NULL;
@@ -3236,6 +3318,305 @@ H5AC2_set_cache_auto_resize_config(H5F_t * f,
 
     }
 #endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    if ( ( cache_ptr == NULL )
+#ifdef H5_HAVE_PARALLEL
+         ||
+         ( ( cache_ptr->aux_ptr != NULL )
+           &&
+           (
+             ((H5AC2_aux_t *)(cache_ptr->aux_ptr))->magic
+             !=
+             H5AC2__H5AC2_AUX_T_MAGIC
+           )
+         )
+#endif /* H5_HAVE_PARALLEL */
+       ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry.")
+    }
+
+    result = H5AC2_validate_config(config_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad cache configuration");
+    }
+
+
+    result = H5AC2_set_non_journaling_cache_config(f, dxpl_id, config_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5AC2_set_non_journaling_cache_config() failed.")
+    }
+
+
+    result = H5AC2_set_cache_journaling_config(f, dxpl_id, config_ptr, FALSE);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5AC2_set_cache_journaling_config() failed.")
+    }
+
+done:
+
+#if H5AC2__TRACE_FILE_ENABLED
+    /* For the set cache auto resize config call, only the contents 
+     * of the config is necessary in the trace file. Write the return 
+     * value to catch occult errors.
+     */
+    if ( ( cache_ptr != NULL ) &&
+         ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
+         ( trace_file_ptr != NULL ) ) {
+
+	HDfprintf(trace_file_ptr, 
+                  "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %d %d %f %f %d %f %f %d %d %d %d %f %d %d \"%s\" %d %d %d %d %d %d\n",
+		  "H5AC2_set_cache_auto_resize_config",
+		  trace_config.version,
+		  (int)(trace_config.rpt_fcn_enabled),
+		  (int)(trace_config.open_trace_file),
+		  (int)(trace_config.close_trace_file),
+		  trace_config.trace_file_name,
+		  (int)(trace_config.evictions_enabled),
+		  (int)(trace_config.set_initial_size),
+		  (int)(trace_config.initial_size),
+		  trace_config.min_clean_fraction,
+		  (int)(trace_config.max_size),
+		  (int)(trace_config.min_size),
+		  trace_config.epoch_length,
+		  (int)(trace_config.incr_mode),
+		  trace_config.lower_hr_threshold,
+		  trace_config.increment,
+		  (int)(trace_config.apply_max_increment),
+		  (int)(trace_config.max_increment),
+		  (int)(trace_config.flash_incr_mode),
+		  trace_config.flash_multiple,
+                  trace_config.flash_threshold,
+		  (int)(trace_config.decr_mode),
+		  trace_config.upper_hr_threshold,
+		  trace_config.decrement,
+		  (int)(trace_config.apply_max_decrement),
+		  (int)(trace_config.max_decrement),
+		  trace_config.epochs_before_eviction,
+		  (int)(trace_config.apply_empty_reserve),
+		  trace_config.empty_reserve,
+		  trace_config.dirty_bytes_threshold,
+                  (int)(config_ptr->enable_journaling),
+                  config_ptr->journal_file_path,
+                  (int)(config_ptr->journal_recovered),
+                  (int)(config_ptr->jbrb_buf_size),
+                  config_ptr->jbrb_num_bufs,
+                  (int)(config_ptr->jbrb_use_aio),
+                  (int)(config_ptr->jbrb_human_readable),
+		  (int)ret_value);
+    }
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC2_set_cache_auto_resize_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC2_set_cache_journaling_config
+ *
+ * Purpose:     Handle changes in journaling configuration.
+ *
+ * 		This code used to reside in 
+ * 		H5AC2_set_cache_auto_resize_config(), but it has been 
+ * 		split out, as on startup, we need to be able to run 
+ * 		it separately from the rest of the cache configuration
+ * 		code.
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              7/6/08
+ *
+ * Modifications:
+ *
+ * 		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC2_set_cache_journaling_config(H5F_t * f,
+		                  hid_t dxpl_id,
+                                  H5AC2_cache_config_t *config_ptr,
+#if H5AC2__TRACE_FILE_ENABLED
+                                  hbool_t show_trace)
+#else /* H5AC2__TRACE_FILE_ENABLED */
+				  hbool_t UNUSED show_trace)
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+{
+    /* const char *        fcn_name = "H5AC2_set_cache_journaling_config"; */
+    H5AC2_t *           cache_ptr;
+    herr_t              result;
+    herr_t              ret_value = SUCCEED;      /* Return value */
+    hbool_t		mdj_enabled = FALSE;
+#if H5AC2__TRACE_FILE_ENABLED
+    H5AC2_cache_config_t trace_config = H5AC2__DEFAULT_CACHE_CONFIG;
+    FILE *              trace_file_ptr = NULL;
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    FUNC_ENTER_NOAPI(H5AC2_set_cache_journaling_config, FAIL)
+
+    HDassert( f );
+    HDassert( f->shared );
+    HDassert( f->shared->cache2 );
+
+    cache_ptr = (H5AC2_t *)f->shared->cache2;
+
+#if H5AC2__TRACE_FILE_ENABLED
+    /* Make note of the new configuration.
+     */
+    if ( ( show_trace ) && ( config_ptr != NULL ) ) {
+
+        trace_config = *config_ptr;
+
+    }
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    if ( ( cache_ptr == NULL )
+#ifdef H5_HAVE_PARALLEL
+         ||
+         ( ( cache_ptr->aux_ptr != NULL )
+           &&
+           (
+             ((H5AC2_aux_t *)(cache_ptr->aux_ptr))->magic
+             !=
+             H5AC2__H5AC2_AUX_T_MAGIC
+           )
+         )
+#endif /* H5_HAVE_PARALLEL */
+       ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry.")
+    }
+
+    result = H5AC2_validate_journaling_config(config_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "Bad journaling configuration");
+    }
+
+    result = H5C2_get_journal_config((H5C2_t *)cache_ptr, &mdj_enabled,
+		                     NULL, NULL, NULL, NULL, NULL, NULL);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5C2_get_journal_config() failed.")
+    }
+
+    if ( config_ptr->enable_journaling != mdj_enabled ) {
+
+        /* we have work to do -- start or stop journaling as requested */
+	
+	if ( config_ptr->enable_journaling ) {
+
+	    result = H5C2_begin_journaling(f,
+			                   dxpl_id,
+					   cache_ptr,
+					   &(config_ptr->journal_file_path[0]),
+                                           config_ptr->jbrb_buf_size,
+                                           config_ptr->jbrb_num_bufs,
+                                           config_ptr->jbrb_use_aio,
+                                           config_ptr->jbrb_human_readable);
+	    if ( result < 0 ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+	                    "H5C2_begin_journaling() failed.")
+	    }
+	} else {
+
+	    result = H5C2_end_journaling(f, dxpl_id, cache_ptr);
+
+	    if ( result < 0 ) {
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+	                    "H5C2_end_journaling() failed.")
+	    }
+	}
+    }
+
+done:
+
+#if H5AC2__TRACE_FILE_ENABLED
+    /* For the set cache journaling config call, only the fields 
+     * of the config that pretain to journaling are necessary in 
+     * the trace file. Write the return value to catch occult errors.
+     */
+    if ( ( show_trace ) &&
+	 ( cache_ptr != NULL ) &&
+         ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
+         ( trace_file_ptr != NULL ) ) {
+
+	HDfprintf(trace_file_ptr, 
+                  "%s %d %d \"%s\" %d %d %d %d %d %d\n",
+		  "H5AC2_set_cache_journaling_config",
+		  trace_config.version,
+                  (int)(config_ptr->enable_journaling),
+                  config_ptr->journal_file_path,
+                  (int)(config_ptr->journal_recovered),
+                  (int)(config_ptr->jbrb_buf_size),
+                  config_ptr->jbrb_num_bufs,
+                  (int)(config_ptr->jbrb_use_aio),
+                  (int)(config_ptr->jbrb_human_readable),
+		  (int)ret_value);
+    }
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC2_set_cache_journaling_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC2_set_non_journaling_cache_config
+ *
+ * Purpose:     Handle all non-journaling related configuration switches
+ * 		in an instance of H5AC2_cache_config_t.  
+ *
+ * 		This function is needed, as journaling cannot be set
+ * 		at cache creation time.
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              7/7/08
+ *
+ * Modifications:
+ *
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC2_set_non_journaling_cache_config(H5F_t * f,
+		                      hid_t UNUSED dxpl_id,
+                                      H5AC2_cache_config_t *config_ptr)
+{
+    /* const char *        fcn_name = "H5AC2_set_non_journaling_cache_config"; */
+    H5AC2_t *           cache_ptr;
+    herr_t              result;
+    herr_t              ret_value = SUCCEED;      /* Return value */
+    H5C2_auto_size_ctl_t internal_config;
+
+    FUNC_ENTER_NOAPI(H5AC2_set_non_journaling_cache_config, FAIL)
+
+    HDassert( f );
+    HDassert( f->shared );
+    HDassert( f->shared->cache2 );
+
+    cache_ptr = (H5AC2_t *)f->shared->cache2;
 
     if ( ( cache_ptr == NULL )
 #ifdef H5_HAVE_PARALLEL
@@ -3341,47 +3722,6 @@ H5AC2_set_cache_auto_resize_config(H5F_t * f,
                     "H5C2_set_evictions_enabled() failed.")
     }
 
-    result = H5C2_get_journal_config((H5C2_t *)cache_ptr, &mdj_enabled,
-		                     NULL, NULL, NULL, NULL, NULL, NULL);
-
-    if ( result < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5C2_get_journal_config() failed.")
-    }
-
-    if ( config_ptr->enable_journaling != mdj_enabled ) {
-
-        /* we have work to do -- start or stop journaling as requested */
-	
-	if ( config_ptr->enable_journaling ) {
-
-	    result = H5C2_begin_journaling(f,
-			                   dxpl_id,
-					   cache_ptr,
-					   &(config_ptr->journal_file_path[0]),
-                                           config_ptr->jbrb_buf_size,
-                                           config_ptr->jbrb_num_bufs,
-                                           config_ptr->jbrb_use_aio,
-                                           config_ptr->jbrb_human_readable);
-	    if ( result < 0 ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-	                    "H5C2_begin_journaling() failed.")
-	    }
-	} else {
-
-	    result = H5C2_end_journaling(f, dxpl_id, cache_ptr);
-
-	    if ( result < 0 ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-	                    "H5C2_end_journaling() failed.")
-	    }
-	}
-    }
-
-
 #ifdef H5_HAVE_PARALLEL
     if ( cache_ptr->aux_ptr != NULL ) {
 
@@ -3392,61 +3732,9 @@ H5AC2_set_cache_auto_resize_config(H5F_t * f,
 
 done:
 
-#if H5AC2__TRACE_FILE_ENABLED
-    /* For the set cache auto resize config call, only the contents 
-     * of the config is necessary in the trace file. Write the return 
-     * value to catch occult errors.
-     */
-    if ( ( cache_ptr != NULL ) &&
-         ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
-         ( trace_file_ptr != NULL ) ) {
-
-	HDfprintf(trace_file_ptr, 
-                  "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %d %d %f %f %d %f %f %d %d %d %d %f %d %d \"%s\" %d %d %d %d %d %d\n",
-		  "H5AC2_set_cache_auto_resize_config",
-		  trace_config.version,
-		  (int)(trace_config.rpt_fcn_enabled),
-		  (int)(trace_config.open_trace_file),
-		  (int)(trace_config.close_trace_file),
-		  trace_config.trace_file_name,
-		  (int)(trace_config.evictions_enabled),
-		  (int)(trace_config.set_initial_size),
-		  (int)(trace_config.initial_size),
-		  trace_config.min_clean_fraction,
-		  (int)(trace_config.max_size),
-		  (int)(trace_config.min_size),
-		  trace_config.epoch_length,
-		  (int)(trace_config.incr_mode),
-		  trace_config.lower_hr_threshold,
-		  trace_config.increment,
-		  (int)(trace_config.apply_max_increment),
-		  (int)(trace_config.max_increment),
-		  (int)(trace_config.flash_incr_mode),
-		  trace_config.flash_multiple,
-                  trace_config.flash_threshold,
-		  (int)(trace_config.decr_mode),
-		  trace_config.upper_hr_threshold,
-		  trace_config.decrement,
-		  (int)(trace_config.apply_max_decrement),
-		  (int)(trace_config.max_decrement),
-		  trace_config.epochs_before_eviction,
-		  (int)(trace_config.apply_empty_reserve),
-		  trace_config.empty_reserve,
-		  trace_config.dirty_bytes_threshold,
-                  (int)(config_ptr->enable_journaling),
-                  config_ptr->journal_file_path,
-                  (int)(config_ptr->journal_recovered),
-                  (int)(config_ptr->jbrb_buf_size),
-                  config_ptr->jbrb_num_bufs,
-                  (int)(config_ptr->jbrb_use_aio),
-                  (int)(config_ptr->jbrb_human_readable),
-		  (int)ret_value);
-    }
-#endif /* H5AC2__TRACE_FILE_ENABLED */
-
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5AC2_set_cache_auto_resize_config() */
+} /* H5AC2_set_non_journaling_cache_config() */
 
 
 /*-------------------------------------------------------------------------
@@ -3585,6 +3873,13 @@ H5AC2_validate_config(H5AC2_cache_config_t * config_ptr)
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "H5AC2_ext_config_2_int_config() failed.")
+    }
+
+    result = H5AC2_validate_journaling_config(config_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error(s) in new config.")
     }
 
     result = H5C2_validate_resize_config(&internal_config,
@@ -5190,5 +5485,127 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC2_receive_and_apply_clean_list() */
+
 #endif /* H5_HAVE_PARALLEL */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC2_validate_journaling_config()
+ *
+ * Purpose:     Run a sanity check on the contents of the journaling 
+ *              related fields of the supplied instance of 
+ *              H5AC2_cache_config_t.
+ *
+ *              Do nothing and return SUCCEED if no errors are detected,
+ *              and flag an error and return FAIL otherwise.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              7/6/08
+ *
+ * Modifications:
+ *
+ *            - None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC2_validate_journaling_config(H5AC2_cache_config_t * config_ptr)
+
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+    int		        name_len;
+
+    FUNC_ENTER_NOAPI(H5AC2_validate_journaling_config, FAIL)
+
+    if ( config_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
+    }
+
+    if ( config_ptr->version != H5AC2__CURR_CACHE_CONFIG_VERSION ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
+    }
+
+    if ( ( config_ptr->enable_journaling != TRUE ) &&
+         ( config_ptr->enable_journaling != FALSE ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                "config_ptr->enable_journaling must be either TRUE or FALSE.")
+    }
+
+    if ( ( config_ptr->journal_recovered != TRUE ) &&
+         ( config_ptr->journal_recovered != FALSE ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                "config_ptr->journal_recovered must be either TRUE or FALSE.")
+    }
+
+    if ( ( config_ptr->enable_journaling ) &&
+         ( config_ptr->journal_recovered ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                "config_ptr->journal_recovered must be either TRUE or FALSE.")
+    }
+
+    /* don't bother to test journal_file_path unless enable_journaling is TRUE */
+    if ( config_ptr->enable_journaling ) {
+
+	/* Can't really test the journal_file_path field without trying to 
+	 * open the file, so we will content ourselves with a couple of
+	 * sanity checks on the length of the file name.
+	 */
+	name_len = HDstrlen(config_ptr->journal_file_path);
+
+	if ( name_len <= 0 ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                        "config_ptr->journal_file_path is empty.")
+
+        } else if ( name_len > H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                        "config_ptr->journal_file_path too long.")
+	}
+    }
+
+    if ( ( config_ptr->jbrb_buf_size < H5AC2__MIN_JBRB_BUF_SIZE ) ||
+         ( config_ptr->jbrb_buf_size > H5AC2__MAX_JBRB_BUF_SIZE ) ) {
+#if 1 /* JRM */
+	HDfprintf(stdout, "config_ptr->jbrb_buf_size = %d.\n", 
+	          (int)(config_ptr->jbrb_buf_size));
+#endif /* JRM */
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "config_ptr->jbrb_buf_size out of range.")
+    }
+
+    if ( ( config_ptr->jbrb_num_bufs < H5AC2__MIN_JBRB_NUM_BUFS ) ||
+         ( config_ptr->jbrb_num_bufs > H5AC2__MAX_JBRB_NUM_BUFS ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "config_ptr->jbrb_num_bufs out of range.")
+    }
+
+    if ( ( config_ptr->jbrb_use_aio != FALSE ) &&
+         ( config_ptr->jbrb_use_aio != TRUE ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                "config_ptr->jbrb_use_aio must be either TRUE or FALSE.")
+    }
+
+    if ( ( config_ptr->jbrb_human_readable != FALSE ) &&
+         ( config_ptr->jbrb_human_readable != TRUE ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                "config_ptr->jbrb_human_readable must be either TRUE or FALSE.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC2_validate_journaling_config() */
 

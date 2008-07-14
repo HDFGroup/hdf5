@@ -182,6 +182,15 @@ extern hid_t H5AC2_dxpl_id;
 extern hid_t H5AC2_ind_dxpl_id;
 
 
+/* Cache config field limit #defines */
+
+#define H5AC2__MIN_JBRB_BUF_SIZE        H5C2__MIN_JBRB_BUF_SIZE
+#define H5AC2__MAX_JBRB_BUF_SIZE        H5C2__MAX_JBRB_BUF_SIZE
+
+#define H5AC2__MIN_JBRB_NUM_BUFS        H5C2__MIN_JBRB_NUM_BUFS
+#define H5AC2__MAX_JBRB_NUM_BUFS        H5C2__MAX_JBRB_NUM_BUFS
+
+
 /* Default cache configuration. */
 
 #define H5AC2__DEFAULT_CACHE_CONFIG                                           \
@@ -262,6 +271,10 @@ extern hid_t H5AC2_ind_dxpl_id;
 /* external function declarations: */
 
 H5_DLL herr_t H5AC2_init(void);
+H5_DLL herr_t H5AC2_check_for_journaling(H5F_t * f,
+                                         hid_t dxpl_id,
+                                         H5C2_t * cache_ptr,
+                                         hbool_t journal_recovered);
 H5_DLL herr_t H5AC2_create(H5F_t *f, 
 		           hid_t dxpl_id, 
 			   H5AC2_cache_config_t *config_ptr);
@@ -330,6 +343,11 @@ H5_DLL herr_t H5AC2_reset_cache_hit_rate_stats(H5AC2_t * cache_ptr);
 H5_DLL herr_t H5AC2_set_cache_auto_resize_config(H5F_t * f,
                                                  hid_t dxpl_id,
                                                  H5AC2_cache_config_t *config_ptr);
+
+H5_DLL herr_t H5AC2_set_cache_journaling_config(H5F_t * f,
+                                                hid_t dxpl_id,
+                                                H5AC2_cache_config_t *config_ptr,
+                                                hbool_t show_trace);
 
 H5_DLL herr_t H5AC2_validate_config(H5AC2_cache_config_t * config_ptr);
 

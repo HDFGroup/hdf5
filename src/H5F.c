@@ -1188,8 +1188,17 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
  *		multiple Boolean flags.
  *
  *		Vailin Choi, 2008-04-02
- *		To formulate path for later searching of target file for external link
- *		via H5_build_extpath().
+ *		To formulate path for later searching of target file for 
+ *		external link via H5_build_extpath().
+ *
+ *		John Mainzer, 2008-07-07
+ *		Added calls to H5AC2_check_for_journaling() and 
+ *		H5AC2_set_cache_journaling_config() at the end of 
+ *		H5F_open().  For now at least, both of these operations
+ *		must be done juct before H5F_open() returns, as the 
+ *		required information is not available when the metadata
+ *		cache is created.
+ *
  *-------------------------------------------------------------------------
  */
 H5F_t *
@@ -1389,7 +1398,27 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     /* formulate the absolute path for later search of target file for external link */
     if (H5_build_extpath(name, &file->extpath) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build extpath")
-    
+
+    {
+        H5AC2_cache_config_t * config_ptr = NULL;
+
+	config_ptr = ((H5AC2_cache_config_t *)&(file->shared->mdc_initCacheCfg));
+
+        if ( H5AC2_check_for_journaling(file, dxpl_id, file->shared->cache2, 
+                                        config_ptr->journal_recovered) < 0 ) {
+
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, \
+                        "H5AC2_check_for_journaling() reports failure.")
+        }
+
+	if ( H5AC2_set_cache_journaling_config(file, dxpl_id, 
+				               config_ptr, TRUE) < 0 ) {
+
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, \
+                        "H5AC2_set_cache_journaling_config() failed.")
+	}
+    }
+
     /* Success */
     ret_value = file;
 
@@ -1744,8 +1773,10 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
                 nerrors++;
 
     /* Flush any cached dataset storage raw data */
+
     if(H5D_flush(f, dxpl_id, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
+
 
     /* flush (and invalidate, if requested) the entire metadata cache */
     H5AC_flags = 0;
@@ -1770,6 +1801,7 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     } /* end if */
 
     /* Write the superblock to disk */
+
     if(H5F_super_write(f, dxpl_id) != SUCCEED)
         HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to write superblock to file")
 

@@ -1179,6 +1179,12 @@ typedef struct H5C2_cache_entry_t
 #define H5C2__DEF_AR_EPOCH_LENGTH		50000
 #define H5C2__MAX_AR_EPOCH_LENGTH		1000000
 
+#define H5C2__MIN_JBRB_BUF_SIZE			((size_t)(1))
+#define H5C2__MAX_JBRB_BUF_SIZE			((size_t)(2 * 1024 * 1024))
+
+#define H5C2__MIN_JBRB_NUM_BUFS			1
+#define H5C2__MAX_JBRB_NUM_BUFS			100
+
 enum H5C2_resize_status
 {
     in_spec2,
@@ -1314,17 +1320,14 @@ typedef struct H5C2_auto_size_ctl_t
 #define H5C2__READ_ONLY_FLAG			0x0400
 #define H5C2__CHECK_SIZE_FLAG			0x0800
 
-H5_DLL H5C2_t * H5C2_create(H5F_t *                     f,
-                            hid_t                       dxpl_id,
-		            size_t                      max_cache_size,
+H5_DLL H5C2_t * H5C2_create(size_t                      max_cache_size,
                             size_t                      min_clean_size,
                             int                         max_type_id,
 			    const char *                (* type_name_table_ptr),
                             H5C2_write_permitted_func_t check_write_permitted,
                             hbool_t                     write_permitted,
                             H5C2_log_flush_func_t       log_flush,
-                            void *                      aux_ptr,
-			    hbool_t                     journal_recovered);
+                            void *                      aux_ptr);
 
 H5_DLL void H5C2_def_auto_resize_rpt_fcn(H5C2_t * cache_ptr,
                                          int32_t version,
@@ -1501,15 +1504,6 @@ H5_DLL herr_t H5C2_journal_pre_flush(H5C2_t * cache_ptr);
 
 H5_DLL herr_t H5C2_journal_transaction(H5F_t * f,
                                        H5C2_t * cache_ptr);
-
-H5_DLL herr_t H5C2_queue_begin_journaling(H5F_t * f,
-                                          hid_t dxpl_id,
-                                          H5C2_t * cache_ptr,
-                                          char * journal_file_name_ptr,
-                                          size_t buf_size,
-                                          int num_bufs,
-                                          hbool_t use_aio,
-                                          hbool_t human_readable);
 
 H5_DLL herr_t H5C2_update_for_new_last_trans_on_disk(H5C2_t * cache_ptr,
                                              uint64_t new_last_trans_on_disk);
