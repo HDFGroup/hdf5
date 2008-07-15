@@ -40,14 +40,15 @@ const char *progname = "h52jpeg";
 int d_status = EXIT_SUCCESS;
 
 /* command-line options: The user can specify short or long-named parameters */
-static const char *s_opts = "hVvi:t:c:";
+static const char *s_opts = "hVvi:t:cp:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
     { "verbose", no_arg, 'v' },
     { "image", require_arg, 'i' },
     { "type", require_arg, 't' },
-    { "convert", require_arg, 'c' },
+    { "convert", no_arg, 'c' },
+    { "palette", require_arg, 'p' },
     { NULL, 0, '\0' }
 };
 
@@ -59,7 +60,8 @@ typedef struct
  const char  *template_name;
  const char  *image_name;
  int         image_type;
- int         convert_type;
+ int         convert_true;
+ int         idx_palette;
  int         verbose;
 } h52jpeg_opt_t;
 
@@ -68,8 +70,10 @@ typedef struct
 static void usage(const char *prog);
 static int h52jpeg(h52jpeg_opt_t opt);
 static void make_jpeg_name( const char* template_name, const char* image_name, char* jpeg_name);
-static int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name);
+static int do_object(hid_t fid, h52jpeg_opt_t opt, const char* image_name);
+static int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name, char* jpeg_name);
 static void write_JPEG_file(char *filename, JSAMPLE *image_buffer, int image_height, int image_width, int planes);               
+static void convert_to_true( hsize_t width, hsize_t height, unsigned char* ibuf, unsigned char* pbuf, unsigned char* tbuf);
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -86,12 +90,11 @@ int main(int argc, const char *argv[])
 {
     h52jpeg_opt_t opt;
     const char    *image_type = NULL;
-    const char    *convert_type = NULL;
     int           op;
 
     /* initialze options to 0 */
     memset(&opt,0,sizeof(h52jpeg_opt_t));
-    
+   
     /* parse command line options */
     while ((op = get_option(argc, argv, s_opts, l_opts)) != EOF) 
     {
@@ -110,8 +113,7 @@ int main(int argc, const char *argv[])
             opt.image_name = opt_arg;
             break;
         case 't':
-            image_type = opt_arg;
-            
+            image_type = opt_arg;            
             
             if ( HDstrcmp( image_type, "grey" ) == 0 )
             {
@@ -129,23 +131,11 @@ int main(int argc, const char *argv[])
             
             break;
         case 'c':
-            convert_type = opt_arg;
+            opt.convert_true = 1;
             
-            
-            if ( HDstrcmp( convert_type, "grey" ) == 0 )
-            {
-                opt.convert_type = 0;
-            }
-            else if ( HDstrcmp( convert_type, "true" ) == 0 )
-            {
-                opt.convert_type = 1;
-            }
-            else 
-            {
-                printf("<%s> is an invalid image type\n", image_type); 
-                exit(EXIT_FAILURE);
-            }
-            
+            break;
+        case 'p':
+            opt.idx_palette = atoi(opt_arg);
             break;
             
         } /* switch */
@@ -194,12 +184,13 @@ static void usage(const char *prog)
     printf("   -v, --verbose           Verbose mode, print object information\n");
     printf("   -V, --version           Print HDF5 version number and exit\n");
     printf("   -i, --image             Image name (full path in HDF5 file)\n");
-    printf("   -t T, --type=T          Type of image to read (graycolor or truecolor)\n");
-    printf("   -c T, --convert=T       Convert image to type T (graycolor or truecolor)\n");
+    printf("   -c, --convert           Convert image from graycolor to truecolor\n");
+    printf("   -p P, --palette=P       Use HDF5 palette index P in conversion -c\n");
     
     printf("\n");
     
     printf("  T - is a string, either <grey> or <true>\n");
+    printf("  P - is an integer, the palette index in the HDF5 image. Default is 0\n");
     
 }
 
@@ -231,20 +222,19 @@ static int h52jpeg(h52jpeg_opt_t opt)
     }
 
     /*-------------------------------------------------------------------------
-    * image/dataset name was specified at command line
+    * object name was specified at command line
     *-------------------------------------------------------------------------
     */
     
     if ( opt.image_name )
     {
-
-        /* read HDF5 image/dataset, save jpeg image */
-        do_image(fid, opt, opt.image_name);
+        /* read object, save jpeg image */
+        do_object(fid, opt, opt.image_name);
         
     }
     
     /*-------------------------------------------------------------------------
-    * image name was not specified; traverse the file
+    * object name was not specified; traverse the file
     *-------------------------------------------------------------------------
     */
     
@@ -277,8 +267,8 @@ static int h52jpeg(h52jpeg_opt_t opt)
                 
             case H5TRAV_TYPE_DATASET:
 
-                /* read HDF5 image/dataset, save jpeg image */
-                do_image(fid, opt, travt->objs[i].name);
+                /* read object, save jpeg image */
+                do_object(fid, opt, travt->objs[i].name);
 
                 break; /* H5TRAV_TYPE_DATASET */                               
                 
@@ -290,7 +280,7 @@ static int h52jpeg(h52jpeg_opt_t opt)
     /* free table */
     trav_table_free(travt);
     
-    } /* image_name */
+    } /* opt.image_name */
     
     
     /* close */
@@ -311,40 +301,29 @@ out:
 }
 
 
-
 /*-------------------------------------------------------------------------
- * Function: do_image
+ * Function: do_object
  *
- * Parameters: HDF5 file id, command line options, an image name
+ * Parameters: HDF5 file id, command line options, an object name
  *
- * Purpose: read HDF5 image/dataset, save jpeg image
+ * Purpose: read HDF5 object, save jpeg image
  *
  * Return: 0, all is fine, -1 not all is fine
  *
  *-------------------------------------------------------------------------
  */
 static
-int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
+int do_object(hid_t fid, h52jpeg_opt_t opt, const char* object_name)
 {
-    hsize_t        width;
-    hsize_t        height;
-    hsize_t        planes;
-    char           interlace[20];
-    hssize_t       npals;
-    const char*    name;
-    int            done;
-    char           jpeg_name[1024];
-    
-    name = image_name;
-    
+    int  done=0; /* return value from do_image */
+    char jpeg_name[1024];
+        
     /* build the jpeg file name */
-    make_jpeg_name( opt.template_name, image_name, jpeg_name);
-    
-    done = 0;
-    
+    make_jpeg_name( opt.template_name, object_name, jpeg_name);
+        
     if ( opt.verbose)
     {
-        printf("%s ...", name );
+        printf("%s ...", object_name );
     }
     
     /*-------------------------------------------------------------------------
@@ -352,35 +331,10 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
     *-------------------------------------------------------------------------
     */
     
-    if ( H5IMis_image( fid, name ) )
+    if ( H5IMis_image( fid, object_name ) )
     {
-        
-        unsigned char* buf=NULL;
-        
-        if ( H5IMget_image_info( fid, name, &width, &height, &planes, interlace, &npals ) < 0 )
-            goto out;
-        
-        if (NULL == (buf = HDmalloc( (size_t)width * (size_t)height * (size_t)planes ))) 
-            goto out;
-        
-        if ( H5IMread_image( fid, name, buf ) < 0 )
-            goto out;
-        
-        /* write the jpeg file */
-        write_JPEG_file (jpeg_name, 
-            buf,	               
-            (int) height,	       
-            (int) width,           
-            (int) planes);         
-        
-        
-        free( buf );
-        buf = NULL;
-        
-        done = 1;
-        
-        
-        
+        /* read image, save jpeg image */
+        done = do_image(fid, opt, object_name, jpeg_name);
     }
     
     /*-------------------------------------------------------------------------
@@ -388,7 +342,7 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
     *-------------------------------------------------------------------------
     */
     
-    else if ( H5IMis_palette( fid, name ) )
+    else if ( H5IMis_palette( fid, object_name ) )
     {
         
     }
@@ -400,7 +354,6 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
     
     else
     {  
-        
         
         
     } /* else */
@@ -420,6 +373,163 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name)
     }
     
     return 0;
+
+    
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: do_image
+ *
+ * Parameters: HDF5 file id, command line options, an image name
+ *
+ * Purpose: read HDF5 image, save jpeg image
+ *
+ * Return: 0, all is fine, -1 not all is fine
+ *
+ *-------------------------------------------------------------------------
+ */
+static
+int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name, char* jpeg_name)
+{
+    hsize_t        width;
+    hsize_t        height;
+    hsize_t        planes;
+    char           interlace[20];
+    hssize_t       npals;
+    const char*    name;
+    int            done;
+    unsigned char* ibuf=NULL;
+    
+    name = image_name;
+    
+    done = 0;  
+    
+    if ( H5IMget_image_info( fid, name, &width, &height, &planes, interlace, &npals ) < 0 )
+        goto out;
+    
+    if (NULL == (ibuf = HDmalloc( (size_t)width * (size_t)height * (size_t)planes ))) 
+        goto out;
+    
+    if ( H5IMread_image( fid, name, ibuf ) < 0 )
+    {
+        goto out;
+    }
+    
+    /*-------------------------------------------------------------------------
+    * no conversion to true color requested or true color image, just save what we found
+    * this will result either in
+    *
+    * 24bit HDF5 ---> true color jpeg
+    * 8bit HDF5 ---> grey color jpeg
+    *
+    *-------------------------------------------------------------------------
+    */
+    if ( planes == 3 || !opt.convert_true )
+    {
+        /* write the jpeg file */
+        write_JPEG_file (jpeg_name, 
+            ibuf,	               
+            (int) height,	       
+            (int) width,           
+            (int) planes); 
+        
+        done = 1;
+    }
+    /*-------------------------------------------------------------------------
+    * conversion to truecolor
+    * this will result  in
+    *
+    * 8bit HDF5 ---> true color jpeg
+    *
+    *-------------------------------------------------------------------------
+    */
+    else if (opt.convert_true && planes == 1  )
+    {
+        hssize_t      npals;     /* number of palettes */
+        hsize_t       pdims[2];  /* palette dimensions */
+        unsigned char *pbuf=NULL;/* palette array */
+        unsigned char *tbuf=NULL;/* true color array */
+        int           ipal;      /* palette to use */
+        
+        if ( H5IMget_npalettes( fid, name, &npals ) < 0 )
+        {
+            goto out;
+        }
+        
+        /*-------------------------------------------------------------------------
+        * there are palettes
+        *-------------------------------------------------------------------------
+        */
+        if ( npals > 0  )
+        {
+            /* use either the default (0) palette or a requested one */
+            ipal = ( opt.idx_palette > 0 ) ? opt.idx_palette : 0;
+
+            /* the requested palette may not exist . use the default */
+            if ( opt.idx_palette >= npals )
+            {
+                ipal = 0;
+                
+                if ( opt.verbose )
+                {                
+                    printf("palette index <%d> does not exist. Using default...", 
+                        ipal );
+                }
+            }
+                
+            
+            if ( H5IMget_palette_info( fid, name, ipal, pdims ) < 0 )
+                goto out;
+            
+            if (NULL == (pbuf = HDmalloc( (size_t)pdims[0] * (size_t)pdims[1] ))) 
+                goto out;
+            
+            if (NULL == (tbuf = HDmalloc( (size_t)width * (size_t)height * 3 ))) 
+                goto out;
+            
+            if ( H5IMget_palette( fid, name, ipal, pbuf ) < 0 )
+                goto out;
+            
+            /* convert indexed image to true color image */
+            convert_to_true(width, height, ibuf, pbuf, tbuf);
+            
+            /* write the jpeg file */
+            write_JPEG_file (jpeg_name, 
+                tbuf,	               
+                (int) height,	       
+                (int) width,           
+                3); 
+            
+            done = 1;
+            
+            free( pbuf );
+            free( tbuf );
+            pbuf = NULL;
+            tbuf = NULL;  
+        }
+        /*-------------------------------------------------------------------------
+        * there are no palettes
+        *-------------------------------------------------------------------------
+        */
+        else
+        {    
+            done = 0;
+            if ( opt.verbose )
+            {                
+                printf("image <%s> has no palette...", name );
+            }
+        } /* no palettes */
+        
+    } /* conversion to truecolor  */
+    
+    free( ibuf );
+    ibuf = NULL;
+    
+    
+       
+    
+    return done;
     
 out:
     
@@ -470,6 +580,46 @@ void make_jpeg_name( const char* template_name, const char* image_name, char* jp
     
 }
 
+/*-------------------------------------------------------------------------
+ * Function: convert_to_true
+ *
+ * Parameters: 
+ *
+ * Purpose: convert a greycolor buffer to a true color using a palette buffer
+ *
+ * Return: 
+ *
+ *-------------------------------------------------------------------------
+ */
+static
+void convert_to_true( hsize_t width, hsize_t height, unsigned char* ibuf, unsigned char* pbuf, unsigned char* tbuf)
+{
+    hsize_t  i, j;
+   
+    for ( i = 0, j = 0; i < width * height; i++, j += 3) 
+    {
+        unsigned char idx;
+        unsigned char r;
+        unsigned char g;
+        unsigned char b;
+
+        /* get the index from the grey image */
+        idx = ibuf[i];
+
+        /* get the RGB color */
+        r = pbuf[3*idx];
+        g = pbuf[3*idx+1];
+        b = pbuf[3*idx+2];
+
+        /* define the color buffer */
+        tbuf[j] = r;
+        tbuf[j+1] = g;
+        tbuf[j+2] = b;
+        
+    }
+    
+    
+}
 
 
 /*

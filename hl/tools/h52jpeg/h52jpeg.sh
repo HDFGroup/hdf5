@@ -69,13 +69,22 @@ TOOLTEST()
 ##############################################################################
 
 
-# Test for traversing the file and export all images/datasets to jpeg
+
+# Test for traversing the file and export all images using defaults
 TESTING  $TOOL $SRCFILE myjpeg1
 TOOLTEST $TESTFILE myjpeg1
 
-# Test for reading an image path
-TESTING  $TOOL -i image8bit $SRCFILE myjpeg2
-TOOLTEST -i image8bit $TESTFILE myjpeg2  
+# Test for reading an image path 
+TESTING  $TOOL -i im8_1pal $SRCFILE myjpeg2
+TOOLTEST -i im8_1pal $TESTFILE myjpeg2  
+
+# Test for conversion HDF5 8bit ---> jpeg true,  use the default palette
+TESTING  $TOOL -c $SRCFILE myjpeg3
+TOOLTEST -c $TESTFILE myjpeg3  
+
+# Test for conversion HDF5 8bit ---> jpeg true,  use a palette
+TESTING  $TOOL -c -p 1 $SRCFILE myjpeg4
+TOOLTEST -c -p 1 $TESTFILE myjpeg4 
 
 
 

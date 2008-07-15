@@ -16,11 +16,14 @@
 #include "hdf5.h"
 #include "hdf5_hl.h"
 #include "H5private.h"
-#include "hdf5_hl.h"
 #include "h52jpegtst.h"
 #include <stdlib.h>
 #include <string.h>
 
+#define IM_1PAL "im8_1pal"
+#define IM_2PAL "im8_2pal"
+#define PAL1 "pal1"
+#define PAL2 "pal2"
 
 static int make_images( hid_t fid );
 static int read_data(const char* fname, hsize_t *width, hsize_t *height );
@@ -72,6 +75,7 @@ out:
 
 static int make_images( hid_t fid )
 {
+    hid_t          gid;
     hsize_t        width;                         /* width of image */
     hsize_t        height;                        /* height of image */
     hsize_t        pal_dims[2] = {PAL_ENTRIES,3}; /* palette dimensions */
@@ -79,7 +83,7 @@ static int make_images( hid_t fid )
     int            i, n;
     
     /*-------------------------------------------------------------------------
-    * indexed image  
+    * indexed image with 1 palette 
     *-------------------------------------------------------------------------
     */
     
@@ -88,15 +92,30 @@ static int make_images( hid_t fid )
         goto out;
     
     /* make the image */
-    if ( H5IMmake_image_8bit( fid, "img8", width, height, gbuf ) < 0 )
+    if ( H5IMmake_image_8bit( fid, IM_1PAL, width, height, gbuf ) < 0 )
         goto out;
     
     /* make a palette */
-    if ( H5IMmake_palette( fid, "pal1", pal_dims, pal_rgb ) < 0 )
+    if ( H5IMmake_palette( fid, PAL1, pal_dims, pal_rgb ) < 0 )
         goto out;
     
-    /* attach the palette to the image */
-    if ( H5IMlink_palette( fid, "img8", "pal1" ) < 0 )
+    /* attach the 1st palette to the image */
+    if ( H5IMlink_palette( fid, IM_1PAL, PAL1 ) < 0 )
+    {
+        goto out;
+    }
+
+     /*-------------------------------------------------------------------------
+    * indexed image with 2 palettes
+    *-------------------------------------------------------------------------
+    */
+
+    /* make the image */
+    if ( H5IMmake_image_8bit( fid, IM_2PAL, width, height, gbuf ) < 0 )
+        goto out;
+
+    /* attach the 1st palette to the image */
+    if ( H5IMlink_palette( fid, IM_2PAL, PAL1 ) < 0 )
     {
         goto out;
     }
@@ -113,14 +132,29 @@ static int make_images( hid_t fid )
     }
 
     /* save the palette */
-    if ( H5IMmake_palette( fid, "pal2", pal_dims, pal ) < 0 )
+    if ( H5IMmake_palette( fid, PAL2, pal_dims, pal ) < 0 )
         goto out;
     
     /* attach the palette to the image */
-    if ( H5IMlink_palette( fid, "img8", "pal2" ) < 0 )
+    if ( H5IMlink_palette( fid, IM_2PAL, PAL2 ) < 0 )
     {
         goto out;
     }  
+
+    /*-------------------------------------------------------------------------
+    * make another image, in a group and no palette
+    *-------------------------------------------------------------------------
+    */
+
+    if (( gid = H5Gcreate2(fid, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 )
+        goto out;
+
+    /* make the image with a name with "%", "@", "$", "/", ":", "&", and "*" */
+    if ( H5IMmake_image_8bit( gid, "1%2@3$45:6&7*", width, height, gbuf ) < 0 )
+        goto out;
+
+    H5Gclose(gid);
+
     
     /*-------------------------------------------------------------------------
     * true color image with pixel interlace in RGB type
