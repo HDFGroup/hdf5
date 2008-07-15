@@ -40,13 +40,12 @@ const char *progname = "h52jpeg";
 int d_status = EXIT_SUCCESS;
 
 /* command-line options: The user can specify short or long-named parameters */
-static const char *s_opts = "hVvi:t:cp:";
+static const char *s_opts = "hVvi:cp:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
     { "verbose", no_arg, 'v' },
     { "image", require_arg, 'i' },
-    { "type", require_arg, 't' },
     { "convert", no_arg, 'c' },
     { "palette", require_arg, 'p' },
     { NULL, 0, '\0' }
@@ -89,7 +88,6 @@ static void convert_to_true( hsize_t width, hsize_t height, unsigned char* ibuf,
 int main(int argc, const char *argv[])
 {
     h52jpeg_opt_t opt;
-    const char    *image_type = NULL;
     int           op;
 
     /* initialze options to 0 */
@@ -112,24 +110,7 @@ int main(int argc, const char *argv[])
         case 'i':
             opt.image_name = opt_arg;
             break;
-        case 't':
-            image_type = opt_arg;            
-            
-            if ( HDstrcmp( image_type, "grey" ) == 0 )
-            {
-                opt.image_type = 0;
-            }
-            else if ( HDstrcmp( image_type, "true" ) == 0 )
-            {
-                opt.image_type = 1;
-            }
-            else 
-            {
-                printf("<%s> is an invalid image type\n", image_type); 
-                exit(EXIT_FAILURE);
-            }
-            
-            break;
+       
         case 'c':
             opt.convert_true = 1;
             
@@ -189,7 +170,6 @@ static void usage(const char *prog)
     
     printf("\n");
     
-    printf("  T - is a string, either <grey> or <true>\n");
     printf("  P - is an integer, the palette index in the HDF5 image. Default is 0\n");
     
 }
@@ -446,7 +426,6 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name, char* jpeg_na
     */
     else if (opt.convert_true && planes == 1  )
     {
-        hssize_t      npals;     /* number of palettes */
         hsize_t       pdims[2];  /* palette dimensions */
         unsigned char *pbuf=NULL;/* palette array */
         unsigned char *tbuf=NULL;/* true color array */
