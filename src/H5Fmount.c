@@ -135,7 +135,7 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
     HDassert(child);
     HDassert(TRUE == H5P_isa_class(plist_id, H5P_FILE_MOUNT));
 
-    /* Set up dataset location to fill in */
+    /* Set up group location to fill in */
     mp_loc.oloc = &mp_oloc;
     mp_loc.path = &mp_path;
     H5G_loc_reset(&mp_loc);
@@ -160,6 +160,10 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
     /* Open the mount point group */
     if(NULL == (mount_point = H5G_open(&mp_loc, dxpl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
+
+    /* Check if the proposed mount point group is already a mount point */
+    if(H5G_MOUNTED(mount_point))
+	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use")
 
     /* Retrieve information from the mount point group */
     /* (Some of which we had before but was reset in mp_loc when the group

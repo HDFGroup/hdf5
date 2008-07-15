@@ -168,9 +168,9 @@ test_basic(hid_t fapl)
 static int
 test_illegal(hid_t fapl)
 {
-    hid_t	file1 = -1, file2 = -1, file3 = -1, mnt = -1;
-    herr_t	status;
+    hid_t	file1 = -1, file2 = -1, file3 = -1, file4 = -1, mnt = -1;
     char	filename1[1024], filename2[1024], filename3[1024];
+    herr_t	status;
 
     TESTING("illegal mount operations");
     h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
@@ -182,6 +182,8 @@ test_illegal(hid_t fapl)
     if((file1 = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0 ||
             (file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0 ||
             (file3 = H5Fopen(filename3, H5F_ACC_RDONLY, fapl)) < 0)
+	FAIL_STACK_ERROR
+    if((file4 = H5Fopen(filename3, H5F_ACC_RDONLY, fapl)) < 0)
 	FAIL_STACK_ERROR
 
     /* Try mounting a file on itself */
@@ -212,11 +214,32 @@ test_illegal(hid_t fapl)
     if(H5Funmount(mnt, ".") < 0) FAIL_STACK_ERROR
     if(H5Gclose(mnt) < 0) FAIL_STACK_ERROR
 
+    /*
+     * Try mounting the same file opened twice at the same place.
+     *
+     * We have to open the mount point before we mount the first file or we'll
+     * end up mounting file4 at the root of file3 and the mount will succeed.
+     */
+    if((mnt = H5Gopen2(file1, "/mnt1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Fmount(mnt, ".", file3, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    H5E_BEGIN_TRY {
+	status = H5Fmount(mnt, ".", file4, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(status >= 0) {
+	H5_FAILED();
+	puts("    Mounting same file opened twice at one mount point should have failed.");
+	TEST_ERROR
+    } /* end if */
+    if(H5Funmount(mnt, ".") < 0) FAIL_STACK_ERROR
+    if(H5Gclose(mnt) < 0) FAIL_STACK_ERROR
+
+
 
     /* Close everything and return */
     if(H5Fclose(file1) < 0) FAIL_STACK_ERROR
     if(H5Fclose(file2) < 0) FAIL_STACK_ERROR
     if(H5Fclose(file3) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file4) < 0) FAIL_STACK_ERROR
 
     PASSED();
     return 0;
@@ -227,9 +250,120 @@ error:
 	H5Fclose(file1);
 	H5Fclose(file2);
 	H5Fclose(file3);
+	H5Fclose(file4);
     } H5E_END_TRY;
     return 1;
 } /* end test_illegal() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_samefile
+ *
+ * Purpose:	Test opening the same file twice and then mounting another
+ *              file on each.
+ *
+ * Return:	Success:	0
+ *		Failure:	number of errors
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, July 15, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_samefile(hid_t fapl)
+{
+    hid_t	file1a = -1, file1b = -1, file2 = -1, file3 = -1;
+    hid_t	mnt1a = -1, mnt1b = -1;
+    char	filename1[1024], filename2[1024], filename3[1024];
+    H5G_info_t  grp_info;
+    herr_t	status;
+
+    TESTING("same file mount operations");
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
+
+
+    /* Open the files */
+    if((file1a = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0)
+	FAIL_STACK_ERROR
+    if((file1b = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0)
+	FAIL_STACK_ERROR
+    if((file2 = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0)
+	FAIL_STACK_ERROR
+    if((file3 = H5Fopen(filename3, H5F_ACC_RDONLY, fapl)) < 0)
+	FAIL_STACK_ERROR
+
+    /*
+     * Try mounting different files at the same place in each of the "top"
+     *  files.
+     *
+     * We have to open the mount point before we mount the first file or we'll
+     * end up mounting file4 at the root of file3 and the mount will succeed.
+     */
+    if((mnt1a = H5Gopen2(file1a, "/mnt1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gget_info(mnt1a, &grp_info) < 0) FAIL_STACK_ERROR
+    if(grp_info.mounted) FAIL_PUTS_ERROR("    Group shouldn't have 'mounted' flag set.")
+    if((mnt1b = H5Gopen2(file1b, "/mnt1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gget_info(mnt1b, &grp_info) < 0) FAIL_STACK_ERROR
+    if(grp_info.mounted) FAIL_PUTS_ERROR("    Group shouldn't have 'mounted' flag set.")
+    if(H5Fmount(mnt1a, ".", file2, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Gget_info(mnt1a, &grp_info) < 0) FAIL_STACK_ERROR
+    if(!grp_info.mounted) FAIL_PUTS_ERROR("    Group should have 'mounted' flag set.")
+    H5E_BEGIN_TRY {
+	status = H5Fmount(mnt1b, ".", file3, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(status >= 0) FAIL_PUTS_ERROR("    Mounting different files at one mount point should have failed.")
+    if(H5Funmount(mnt1a, ".") < 0) FAIL_STACK_ERROR
+    if(H5Gclose(mnt1a) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(mnt1b) < 0) FAIL_STACK_ERROR
+
+    /*
+     * Try mounting same files at the same place in each of the "top"
+     *  files.
+     *
+     * We have to open the mount point before we mount the first file or we'll
+     * end up mounting file4 at the root of file3 and the mount will succeed.
+     */
+    if((mnt1a = H5Gopen2(file1a, "/mnt1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gget_info(mnt1a, &grp_info) < 0) FAIL_STACK_ERROR
+    if(grp_info.mounted) FAIL_PUTS_ERROR("    Group shouldn't have 'mounted' flag set.")
+    if((mnt1b = H5Gopen2(file1b, "/mnt1", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gget_info(mnt1b, &grp_info) < 0) FAIL_STACK_ERROR
+    if(grp_info.mounted) FAIL_PUTS_ERROR("    Group shouldn't have 'mounted' flag set.")
+    if(H5Fmount(mnt1a, ".", file2, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    if(H5Gget_info(mnt1a, &grp_info) < 0) FAIL_STACK_ERROR
+    if(!grp_info.mounted) FAIL_PUTS_ERROR("    Group should have 'mounted' flag set.")
+    H5E_BEGIN_TRY {
+	status = H5Fmount(mnt1b, ".", file2, H5P_DEFAULT);
+    } H5E_END_TRY;
+    if(status >= 0) FAIL_PUTS_ERROR("    Mounting same files at one mount point should have failed.")
+    if(H5Funmount(mnt1a, ".") < 0) FAIL_STACK_ERROR
+    if(H5Gclose(mnt1a) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(mnt1b) < 0) FAIL_STACK_ERROR
+
+
+    /* Close everything and return */
+    if(H5Fclose(file1a) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file1b) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file2) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file3) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Gclose(mnt1a);
+	H5Gclose(mnt1b);
+	H5Fclose(file1a);
+	H5Fclose(file1b);
+	H5Fclose(file2);
+	H5Fclose(file3);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_samefile() */
 
 
 /*-------------------------------------------------------------------------
@@ -3817,6 +3951,7 @@ main(void)
 
 	nerrors += test_basic(fapl);
 	nerrors += test_illegal(fapl);
+	nerrors += test_samefile(fapl);
 	nerrors += test_hide(fapl);
 	nerrors += test_assoc(fapl);
 	nerrors += test_mntlnk(fapl);

@@ -101,6 +101,12 @@
                                                     H5G_CRT_GINFO_EST_NAME_LEN \
                                                 }
 
+/* If the module using this macro is allowed access to the private variables, access them directly */
+#ifdef H5G_PACKAGE
+#define H5G_MOUNTED(G)              ((G)->shared->mounted)
+#else /* H5G_PACKAGE */
+#define H5G_MOUNTED(G)              (H5G_mounted(G))
+#endif /* H5G_PACKAGE */
 
 /* Type of operation being performed for call to H5G_name_replace() */
 typedef enum {
@@ -158,6 +164,7 @@ H5_DLL herr_t H5G_close(H5G_t *grp);
 H5_DLL herr_t H5G_free_grp_name(H5G_t *grp);
 H5_DLL herr_t H5G_get_shared_count(H5G_t *grp);
 H5_DLL herr_t H5G_mount(H5G_t *grp);
+H5_DLL hbool_t H5G_mounted(H5G_t *grp);
 H5_DLL herr_t H5G_unmount(H5G_t *grp);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 H5_DLL H5G_obj_t H5G_map_obj_type(H5O_type_t obj_type);
