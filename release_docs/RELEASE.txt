@@ -63,7 +63,7 @@ New Features
 
         Library
         -------
-        - None
+        - Added 'mounted' field to H5G_info_t struct. (QAK - 2008/07/15)
 
         Parallel Library
         ----------------
@@ -99,6 +99,8 @@ Bug Fixes since HDF5-1.8.1
 
         Library
         -------
+        - Fixed issue where a group could have a file mounted on it twice.
+            (QAK - 2008/07/15)
         - when an attribute was opened twice and data was written with one of the handles, 
           the file didn't have the data.  It happened because each handle had its own 
           object structure, and the empty one overwrote the data with fill value.  This is
