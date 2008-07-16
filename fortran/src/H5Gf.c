@@ -725,14 +725,18 @@ done:
  *
  *                  nlinks - Number of links in group
  *              max_corder - Current maximum creation order value for group
+ *                 mounted - Whether group has a file mounted on it (0 = false, 1 = true)
  *
  * Returns:     0 on success, -1 on failure
  * Programmer:  M.S. Breitenfeld
  *              February 15, 2008
- * Modifications: N/A
+ * Modifications:     
+ *          - Added 'mounted' paramater
+ *            M.S. Breitenfeld
+ *            July 16, 2008
  *---------------------------------------------------------------------------*/
 int_f
-nh5gget_info_c (hid_t_f *group_id, int_f *storage_type, int_f *nlinks, int_f *max_corder)
+nh5gget_info_c (hid_t_f *group_id, int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted )
 {
 
     int_f ret_value = 0;          /* Return value */
@@ -749,6 +753,8 @@ nh5gget_info_c (hid_t_f *group_id, int_f *storage_type, int_f *nlinks, int_f *ma
     *storage_type = (int_f)ginfo.storage_type;
     *nlinks = (int_f)ginfo.nlinks;
     *max_corder = (int_f)ginfo.max_corder;
+    *mounted = 0;
+    if(ginfo.mounted) *mounted = 1;
 
 done:
     return ret_value;
@@ -774,16 +780,20 @@ done:
  *
  *                  nlinks - Number of links in group
  *              max_corder - Current maximum creation order value for group
+ *                 mounted - Whether group has a file mounted on it (0 = false, 1 = true)
  *
  * Returns:     0 on success, -1 on failure
  * Programmer:  M.S. Breitenfeld
  *              February 18, 2008
- * Modifications: N/A
+ * Modifications:      
+ *          - Added 'mounted' paramater
+ *            M.S. Breitenfeld
+ *            July 16, 2008
  *---------------------------------------------------------------------------*/
 int_f
 nh5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
 		      int_f *index_type, int_f *order, hsize_t_f *n, hid_t_f *lapl_id, 
-		      int_f *storage_type, int_f *nlinks, int_f *max_corder)
+		      int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted )
 
 {
   char *c_group_name = NULL;          /* Buffer to hold group name C string */
@@ -807,6 +817,8 @@ nh5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
   *storage_type = (int_f)ginfo.storage_type;
   *nlinks = (int_f)ginfo.nlinks;
   *max_corder = (int_f)ginfo.max_corder;
+  *mounted = 0;
+  if(ginfo.mounted) *mounted = 1;
 
  done:
   if(c_group_name)
@@ -830,15 +842,19 @@ nh5gget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
  *
  *                  nlinks - Number of links in group
  *              max_corder - Current maximum creation order value for group
+ *                 mounted - Whether group has a file mounted on it (0 = false, 1 = true)
  *
  * Returns:     0 on success, -1 on failure
  * Programmer:  M.S. Breitenfeld
  *              February 18, 2008
- * Modifications: N/A
+ * Modifications:      
+ *          - Added 'mounted' paramater
+ *            M.S. Breitenfeld
+ *            July 16, 2008
  *---------------------------------------------------------------------------*/
 int_f
 nh5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, hid_t_f *lapl_id, 
-		       int_f *storage_type, int_f *nlinks, int_f *max_corder)
+		       int_f *storage_type, int_f *nlinks, int_f *max_corder, int_f *mounted)
 
 {
   char *c_group_name = NULL;          /* Buffer to hold group name C string */
@@ -861,6 +877,8 @@ nh5gget_info_by_name_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen
   *storage_type = (int_f)ginfo.storage_type;
   *nlinks = (int_f)ginfo.nlinks;
   *max_corder = (int_f)ginfo.max_corder;
+  *mounted = 0;
+  if(ginfo.mounted) *mounted = 1;
 
  done:
   if(c_group_name)
