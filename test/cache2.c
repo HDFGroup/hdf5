@@ -28855,6 +28855,7 @@ main(void)
     printf("Internal cache tests\n");
     printf("        express_test = %d\n", express_test2);
     printf("        skip_long_tests = %d\n", (int)skip_long_tests2);
+    printf("        use_core_driver = %d\n", USE_CORE_DRIVER);
     printf("===================================\n");
 
 #if 1

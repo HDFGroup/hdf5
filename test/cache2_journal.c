@@ -184,6 +184,8 @@ static void verify_mdj_file_unmarking_on_file_close(void);
 
 static void verify_mdj_file_unmarking_on_journaling_shutdown(void);
 
+static void verify_mdj_file_unmarking_on_recovery(void);
+
 static void test_mdj_conf_blk_read_write_discard(H5F_t * file_ptr,
 		                                 const char * jrnl_file_path);
 
@@ -1790,19 +1792,6 @@ open_existing_file_for_journaling(const char * hdf_file_name,
             failure_mssg2 = "H5Pset_mdc_config() failed.\n";
         }
     }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-#if USE_CORE_DRIVER
-    if ( ( pass2 ) && ( use_core_driver_if_avail ) ) {
-
-        if ( H5Pset_fapl_core(fapl_id, 64 * 1024 * 1024, FALSE) < 0 ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "H5P_set_fapl_core() failed.\n";
-        }
-    }
-#endif /* USE_CORE_DRIVER */
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
@@ -4313,8 +4302,20 @@ mdj_smoke_check_01(void)
 
     /* clean out any existing journal file */
     HDremove(journal_filename);
+
+    /* Unfortunately, we get different journal output depending on the 
+     * file driver, as at present we are including the end of address
+     * space in journal entries, and the end of address space seems to 
+     * be in part a function of the file driver.  
+     *
+     * Thus, if we want to use the core file driver when available, we 
+     * will either have to remove the end of address space from the 
+     * journal entries, get the different file drivers to aggree on 
+     * end of address space, or maintain different sets of architype
+     * files for the different file drivers.
+     */
     setup_cache_for_journaling(filename, journal_filename, &file_id,
-                               &file_ptr, &cache_ptr, TRUE);
+                               &file_ptr, &cache_ptr, FALSE);
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -4539,7 +4540,7 @@ mdj_smoke_check_01(void)
     /* Close and discard the file and the journal file. */
     /****************************************************/
 
-    takedown_cache_after_journaling(file_id, filename, journal_filename, TRUE);
+    takedown_cache_after_journaling(file_id, filename, journal_filename, FALSE);
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -5873,6 +5874,8 @@ check_mdj_file_marking(void)
 
     verify_mdj_file_unmarking_on_journaling_shutdown();
 
+    verify_mdj_file_unmarking_on_recovery();
+
     if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
 
     if ( ! pass2 ) {
@@ -6068,7 +6071,7 @@ verify_mdj_file_marking_on_create(void)
 	    /* wait for the child to exit */
 	    wait_result = HDwaitpid(child_id, &wait_status, 0);
 
-	    HDsleep(10);
+	    HDsleep(3);
 
             if ( wait_result != child_id ) {
 
@@ -6488,7 +6491,7 @@ verify_mdj_file_marking_after_open(void)
 	    /* wait for the child to exit */
 	    wait_result = HDwaitpid(child_id, &wait_status, 0);
 
-	    HDsleep(10);
+	    HDsleep(3);
 
             if ( wait_result != child_id ) {
 
@@ -7043,7 +7046,7 @@ verify_mdj_file_marking_on_open(void)
 	    /* wait for the child to exit */
 	    wait_result = HDwaitpid(child_id, &wait_status, 0);
 
-	    HDsleep(10);
+	    HDsleep(3);
 
             if ( wait_result != child_id ) {
 
@@ -7711,7 +7714,7 @@ verify_mdj_file_unmarking_on_journaling_shutdown(void)
 	    /* wait for the child to exit */
 	    wait_result = HDwaitpid(child_id, &wait_status, 0);
 
-	    HDsleep(10);
+	    HDsleep(3);
 
             if ( wait_result != child_id ) {
 
@@ -7829,6 +7832,476 @@ verify_mdj_file_unmarking_on_journaling_shutdown(void)
     return;
 
 } /* verify_mdj_file_unmarking_on_journaling_shutdown() */
+
+
+/***************************************************************************
+ * Function: 	verify_mdj_file_unmarking_on_recovery
+ *
+ * Purpose:  	Verify that HDF5 file that is marked as as having journaling 
+ *              in progress is unmarked when the file is opened with the 
+ *              journal_recovered flag set in the cache configuration 
+ *              structure in the file access property list.
+ *
+ *              Do this by forking a child process, creating a test file
+ *              in the child with metadata journaling enabled, and then
+ *              exiting from the child without closing the file.  Note that
+ *              we must flush the file before exiting, as we want the file
+ *              to be readable, but be marked as journaling in progress.
+ *
+ *              When the child exits, try to open the child's test file.
+ *              Open should fail, as the file should be marked as journaling
+ *              in progress.
+ *
+ *              Try to open again with the journal_recovered flag set.  This
+ *              should succeed.  Close and open again without the 
+ *              journal recovered flag set to verify that the file is 
+ *              no longer marked as having journaling in progress.
+ *
+ *              On either success or failure, clean up the test file and
+ *              the associated journal file.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              7/14/08
+ * 
+ **************************************************************************/
+
+static void 
+verify_mdj_file_unmarking_on_recovery(void)
+{
+    const char * fcn_name = "verify_mdj_file_unmarking_on_recovery():";
+    char * tag = "pre-fork:";
+    char filename[512];
+    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    hbool_t child = FALSE;
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = FALSE;
+    herr_t result;
+    int cp = 0;
+    int wait_status;
+    uint64_t trans_num;
+    pid_t child_id;
+    pid_t wait_result;
+    hid_t file_id = -1;
+    hid_t fapl_id = -1;
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
+    H5AC2_cache_config_t mdj_config;
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, 
+	                sizeof(filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (1).\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%s%d cp = %d.\n", fcn_name, tag,  pass2, cp++);
+	HDfflush(stdout);
+    }
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s%s filename = \"%s\".\n", fcn_name, tag,filename); 
+	HDfflush(stdout);
+    }
+
+    /* setup the journal file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+                        sizeof(journal_filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (2).\n";
+        }
+        else if ( strlen(journal_filename) >= 
+			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "journal file name too long.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%s%d cp = %d.\n", 
+		  fcn_name, tag, (int)pass2, cp++);
+	HDfflush(stdout);
+    }
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s%s journal filename = \"%s\".\n", 
+	          fcn_name, tag, journal_filename); 
+	HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        child_id = HDfork();
+
+        if ( child_id == -1 ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5fork() failed.";
+
+	} else if ( child_id == 0 ) {
+
+	    child = TRUE;
+	    tag = "child:";
+
+	} else {
+
+            child = FALSE;
+	    tag = "parent:";
+	}
+    }
+
+    if ( pass2 ) {
+
+        if ( show_progress ) {
+
+	    HDfprintf(stdout, "%s%s%d: cp = %d fork() succeeded.\n", 
+		      fcn_name, tag, (int)pass2, cp++);
+	    HDfflush(stdout);
+	}
+
+	if ( child ) {
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d child starting.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+            /* clean out any existing journal file */
+            HDremove(journal_filename);
+            setup_cache_for_journaling(filename, journal_filename, &file_id,
+                                       &file_ptr, &cache_ptr, FALSE);
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+	    /* run a dummy transaction to fource metadata journaling
+	     * initialization.
+	     */
+	    H5C2_begin_transaction(cache_ptr, &trans_num, "dummy");
+	    H5C2_end_transaction(file_ptr, cache_ptr, trans_num, "dummy");
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		          fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+	    /* flush the file to ensure that it is in a readable state */
+	    if ( pass2 ) {
+
+	        if ( H5Fflush(file_id, H5F_SCOPE_GLOBAL) < 0 ) {
+
+		    if ( verbose ) {
+
+			HDfprintf(stdout, "%s:%s: H5Fflush() failed.\n", 
+				  fcn_name, tag);
+	                HDfflush(stdout);
+		    }
+		    pass2 = FALSE;
+		    failure_mssg2 = "H5Fflush() failed.";
+	        }
+	    }
+
+            if ( ( verbose ) && ( ! pass2 ) ) {
+                HDfprintf(stdout, "%s%s%d failure_mssg = \"%s\".\n", 
+			  fcn_name, tag, pass2, failure_mssg2);
+		HDfflush(stdout);
+            } 
+
+            if ( show_progress ) {
+
+	        HDfprintf(stdout, "%s%s%d cp = %d child exiting.\n", 
+			  fcn_name, tag, (int)pass2, cp++);
+		HDfflush(stdout);
+	    }
+
+	    abort();
+
+	} else {
+
+	    /* wait for the child to exit */
+	    wait_result = HDwaitpid(child_id, &wait_status, 0);
+
+	    HDsleep(3);
+
+            if ( wait_result != child_id ) {
+
+	        pass2 = FALSE;
+		failure_mssg2 = "unexpected waitpid() result.";
+
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, 
+			      "%s%s:%d: wait_result = %ld, wait_status = %d.\n", 
+			      fcn_name, tag, (int)pass2, 
+			      (long)wait_result, wait_status);
+		    HDfflush(stdout);
+	        }
+            } else {
+
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, 
+			      "%s%s:%d: cp = %d  child exited as expected.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* create a file access propertly list. */
+                if ( pass2 ) {
+
+                    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+                    if ( fapl_id < 0 ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "H5Pcreate() failed.\n";
+                    }
+                }
+
+                if ( show_progress ) {
+		    HDfprintf(stdout, "%s%s:%d cp = %d.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* call H5Pset_libver_bounds() on the fapl_id */
+                if ( pass2 ) {
+
+	            if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+					      H5F_LIBVER_LATEST) < 0 ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+                    }
+                }
+
+                if ( show_progress ) {
+		    HDfprintf(stdout, "%s%s%d cp = %d.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+		/* attempt to open the file -- should fail as the child
+		 * exited without closing the file properly, and thus 
+		 * the file should still be marked as having journaling
+		 * in progress.
+		 */
+
+		if ( pass2 ) { 
+
+		    H5E_BEGIN_TRY {
+
+		        file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+
+		    } H5E_END_TRY;
+
+		    if ( file_id >= 0 ) {
+
+                        pass2 = FALSE;
+		        failure_mssg2 = "H5Fopen() succeeded.";
+		    }
+		}
+
+                if ( show_progress ) {
+
+                    HDfprintf(stdout, "%s%s%d: cp = %d.\n", 
+                              fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+		/* now set the file recovered flag in the cache config 
+		 * structure in the fapl, and try to open again.  Should
+		 * succeed, and the file should not be marked as haveing
+		 * journaling in progress.
+		 */
+	        if ( pass2 ) {
+
+                    mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+
+                    result = H5Pget_mdc_config(fapl_id, 
+				           (H5AC_cache_config_t *)&mdj_config);
+
+                    if ( result < 0 ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "H5Pget_mdc_config() failed.\n";
+                    }
+
+		    /* until we disable the old cache, we need to initialize 
+		     * all journaling fields, as until then, H5Fget_mdc_config()
+		     * will return data from the old cache -- and fail to 
+		     * initialize them.
+		     */
+
+                    mdj_config.enable_journaling       = FALSE;
+
+                    strcpy(mdj_config.journal_file_path, journal_filename);
+
+                    mdj_config.journal_recovered       = TRUE;
+                    mdj_config.jbrb_buf_size           = (8 * 1024);
+                    mdj_config.jbrb_num_bufs           = 2;
+                    mdj_config.jbrb_use_aio            = FALSE;
+                    mdj_config.jbrb_human_readable     = TRUE;
+                }
+
+                if ( show_progress ) {
+
+	            HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		              fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                if ( pass2 ) {
+
+                    result = H5Pset_mdc_config(fapl_id, 
+				           (H5AC_cache_config_t *)&mdj_config);
+
+                    if ( result < 0 ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "H5Pset_mdc_config() failed(1).\n";
+                    }
+                }
+
+                if ( show_progress ) {
+
+	            HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		              fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+		if ( pass2 ) { 
+
+		    file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+
+		    if ( file_id < 0 ) {
+
+                        pass2 = FALSE;
+		        failure_mssg2 = "H5Fopen() failed(1).";
+		    }
+		}
+
+                if ( show_progress ) {
+
+	            HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		              fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+		if ( pass2 ) {
+
+		    if ( H5Fclose(file_id) < 0 ) {
+
+                        pass2 = FALSE;
+		        failure_mssg2 = "H5Fclose() failed(1).";
+		    }
+		}
+
+                if ( show_progress ) {
+
+	            HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		              fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+		/* now, turn off the journal recovered flag, and try to 
+		 * open the file again.  Should succeed.
+		 */
+
+                if ( pass2 ) {
+
+                    mdj_config.journal_recovered       = FALSE;
+
+                    result = H5Pset_mdc_config(fapl_id, 
+				           (H5AC_cache_config_t *)&mdj_config);
+
+                    if ( result < 0 ) {
+
+                        pass2 = FALSE;
+                        failure_mssg2 = "H5Pset_mdc_config() failed(2).\n";
+                    }
+                }
+
+                if ( show_progress ) {
+
+	            HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		              fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+		if ( pass2 ) { 
+
+		    file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+
+		    if ( file_id < 0 ) {
+
+                        pass2 = FALSE;
+		        failure_mssg2 = "H5Fopen() failed(2).";
+		    }
+		}
+
+                if ( show_progress ) {
+
+	            HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		              fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+		if ( pass2 ) {
+
+		    if ( ( H5Fclose(file_id) < 0 ) || 
+			 ( H5Pclose(fapl_id) < 0 ) ) {
+
+                        pass2 = FALSE;
+		        failure_mssg2 = "H5Fclose() or H5Pclose() failed(2).";
+		    }
+		}
+
+                if ( show_progress ) {
+
+	            HDfprintf(stdout, "%s%s%d: cp = %d.\n",
+		              fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+	        }
+
+                /* delete the HDF5 file and journal file */
+#if 1
+                HDremove(filename);
+                HDremove(journal_filename);
+#endif
+		if ( show_progress ) {
+
+	            HDfprintf(stdout, "%s%s%d cp = %d parent done.\n", 
+			      fcn_name, tag, (int)pass2, cp++);
+		    HDfflush(stdout);
+		}
+	    }
+        }
+    } 
+
+    return;
+
+} /* verify_mdj_file_unmarking_on_recovery() */
 
 
 /***************************************************************************

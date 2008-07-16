@@ -31,9 +31,9 @@
 
 #include "H5Fpkg.h"
 
-#define NO_CHANGE       -1
+#define NO_CHANGE       	-1
 
-#define USE_CORE_DRIVER 0
+#define USE_CORE_DRIVER 	FALSE
 
 /* with apologies for the abuse of terminology... */
 
