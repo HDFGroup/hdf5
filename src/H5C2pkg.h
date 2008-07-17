@@ -4443,8 +4443,7 @@ if ( cache_ptr->mdj_enabled )                                          \
  *
  *              If it is, see if the target entry is in the transaction
  *              list.  If it is, remove it from the list, and set its 
- *              last_trans field to the current transaction number minus
- *              1.
+ *              last_trans field to zero.
  *
  * Return:      N/A
  *
@@ -4469,7 +4468,7 @@ if ( cache_ptr->mdj_enabled )                                           \
                                (cache_ptr->tl_tail_ptr),                \
                                (cache_ptr->tl_len),                     \
                                (cache_ptr->tl_size), (fail_val));       \
-        entry_ptr->last_trans = cache_ptr->trans_num - 1;               \
+        entry_ptr->last_trans = 0;                                      \
     }                                                                   \
 } /* H5C2__UPDATE_TL_FOR_ENTRY_CLEAR */
 

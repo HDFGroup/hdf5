@@ -5545,7 +5545,7 @@ H5C2_unprotect(H5F_t *		    f,
         HDassert( entry_ptr->is_read_only );
 
 	if ( dirtied ) {
-
+	    
             HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, \
                         "Read only entry modified(1)??")
 	}
@@ -5770,6 +5770,38 @@ H5C2_unprotect(H5F_t *		    f,
                             "hash table contains multiple entries for addr?!?.")
             }
 
+	    if ( cache_ptr->mdj_enabled ) {
+
+		/* if journaling is enabled, we have a bit of house keeping
+		 * to do before we delete the entry.
+		 *
+		 * First, if a transaction is in progress, it is possible
+		 * that the target entry is on the transaction list.  If it is
+		 * it must be removed before the flush destroy.
+		 *
+		 * Second, if the target entry is on the journal write in
+		 * in progress list, it must be removed from that list as
+		 * well.
+		 */
+
+		hbool_t entry_on_jwip_list = ( entry_ptr->last_trans != 0 );
+
+                if ( cache_ptr->trans_in_progress ) {
+
+	            H5C2__UPDATE_TL_FOR_ENTRY_CLEAR((cache_ptr), \
+				                    (entry_ptr), \
+						    FAIL)
+		}
+
+		if ( entry_on_jwip_list ) {
+
+		    entry_ptr->last_trans = 0;
+                    H5C2__UPDATE_RP_FOR_JOURNAL_WRITE_COMPLETE((cache_ptr), \
+				                               (entry_ptr), \
+							       FAIL)
+                }
+	    }
+
             if ( H5C2_flush_single_entry(f,
                                          dxpl_id,
                                          cache_ptr,
@@ -5781,9 +5813,6 @@ H5C2_unprotect(H5F_t *		    f,
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't flush.")
             }
-
-	    /* delete the entry from the transaction list if appropriate */
-	    H5C2__UPDATE_TL_FOR_ENTRY_CLEAR((cache_ptr), (entry_ptr), FAIL)
         }
 #ifdef H5_HAVE_PARALLEL
         else if ( clear_entry ) {
@@ -5813,9 +5842,6 @@ H5C2_unprotect(H5F_t *		    f,
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't clear.")
             }
-
-	    /* delete the entry from the transaction list if appropriate */
-	    H5C2__UPDATE_TL_FOR_ENTRY_CLEAR((cache_ptr), (entry_ptr), FAIL)
         }
 #endif /* H5_HAVE_PARALLEL */
     }
@@ -8107,7 +8133,7 @@ done:
  */
 
 static herr_t
-H5C2_flush_single_entry(const H5F_t *		     f,
+H5C2_flush_single_entry(const H5F_t *	     f,
                         hid_t 		     dxpl_id,
                         H5C2_t *	     cache_ptr,
                         const H5C2_class_t * type_ptr,
@@ -8139,8 +8165,10 @@ H5C2_flush_single_entry(const H5F_t *		     f,
     destroy = ( (flags & H5C2__FLUSH_INVALIDATE_FLAG) != 0 );
     clear_only = ( (flags & H5C2__FLUSH_CLEAR_ONLY_FLAG) != 0);
 
+
     /* attempt to find the target entry in the hash table */
     H5C2__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
+
 
 #if H5C2_DO_SANITY_CHECKS
     if ( entry_ptr != NULL ) {
@@ -8180,6 +8208,7 @@ H5C2_flush_single_entry(const H5F_t *		     f,
 #endif
 #endif /* H5C2_DO_SANITY_CHECKS */
 
+
     if ( ( entry_ptr != NULL ) && ( entry_ptr->is_protected ) )
     {
 
@@ -8187,6 +8216,7 @@ H5C2_flush_single_entry(const H5F_t *		     f,
         HGOTO_ERROR(H5E_CACHE, H5E_PROTECT, FAIL, \
                     "Attempt to flush a protected entry.")
     }
+
 
     if ( ( entry_ptr != NULL ) &&
          ( ( type_ptr == NULL ) || ( type_ptr->id == entry_ptr->type->id ) ) )
@@ -8278,6 +8308,7 @@ H5C2_flush_single_entry(const H5F_t *		     f,
                 H5C2__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr)
             }
         }
+
 
         /* Update the replacement policy for the flush or eviction. */
         if ( destroy ) { /* AKA eviction */
@@ -8733,6 +8764,7 @@ H5C2_flush_single_entry(const H5F_t *		     f,
             entry_ptr->is_dirty = FALSE;
         }
 
+
         if ( destroy ) /* time to discard the entry */
         {
 	    /* start by freeing the buffer for the on disk image */
@@ -8769,6 +8801,7 @@ H5C2_flush_single_entry(const H5F_t *		     f,
 	{
 	    entry_ptr->flush_in_progress = FALSE;
         }
+
 
         if ( cache_ptr->log_flush ) {
 

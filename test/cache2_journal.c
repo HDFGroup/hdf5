@@ -89,8 +89,7 @@ static void jrnl_col_major_scan_forward2(H5F_t * file_ptr,
                                          hbool_t dirty_inserts,
                                          int dirty_unprotects,
 			                 uint64_t trans_num);
-#if 0 /* JRM */
-/* these functions are in-op at present */
+
 static void jrnl_row_major_scan_backward2(H5F_t * file_ptr,
                                           int32_t max_index,
                                           int32_t lag,
@@ -124,7 +123,7 @@ static void jrnl_row_major_scan_forward2(H5F_t * file_ptr,
                                          int dirty_destroys,
                                          int dirty_unprotects,
 			                 uint64_t trans_num);
-#endif /* JRM */
+
 static void open_existing_file_for_journaling(const char * hdf_file_name,
                                               const char * journal_file_name,
                                               hid_t * file_id_ptr,
@@ -200,6 +199,8 @@ static void check_transaction_tracking(void);
 static void mdj_smoke_check_00(void);
 
 static void mdj_smoke_check_01(void);
+
+static void mdj_smoke_check_02(void);
 
 static void write_verify_trans_num(H5C2_jbrb_t * struct_ptr, 
                                    uint64_t trans_num, 
@@ -953,8 +954,6 @@ jrnl_col_major_scan_forward2(H5F_t * file_ptr,
 
 } /* jrnl_col_major_scan_forward2() */
 
-#if 0 /* JRM */
-/* this code commented out as it is in-op at present */
 
 /*-------------------------------------------------------------------------
  * Function:	jrnl_row_major_scan_backward2()
@@ -1003,6 +1002,8 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
     int32_t type;
     int32_t idx;
     int32_t local_max_index;
+    int32_t lower_bound;
+    int32_t upper_bound;
 
     if ( verbose )
         HDfprintf(stdout, "%s(): Entering.\n", fcn_name);
@@ -1022,261 +1023,354 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
 
         idx = local_max_index + lag;
 
+	upper_bound = local_max_index;
+	lower_bound = upper_bound - 8;
+
         while ( ( pass2 ) && ( idx >= -lag ) )
         {
-	    trans_num++;
+	    if ( idx == ( upper_bound + lag ) ) {
 
-            begin_trans(cache_ptr, verbose, trans_num, 
-			"jrnl_row_major_scan_backward inner loop");
-	    
-	    if ( verbose ) {
+	        trans_num++;
 
-                HDfprintf(stdout, "%lld:%d:%d: ", trans_num, type, idx);
+                begin_trans(cache_ptr, verbose, trans_num, 
+			    "jrnl_row_major_scan_backward inner loop");
+
+		if ( verbose )
+		    HDfprintf(stdout, "begin trans %lld.\n", 
+			      (long long)trans_num);
+
+	        if ( verbose )
+	            HDfprintf(stdout, "(%d, %d)\n", lower_bound, upper_bound);
 	    }
+
+	    while ( ( pass2 ) && ( idx >= lower_bound - lag ) ) 
+            {
+	        if ( verbose ) {
+
+                    HDfprintf(stdout, "%lld:%d:%d: ", trans_num, type, idx);
+	        }
 	    
-            if ( ( pass2 ) && ( do_inserts ) && ( (idx - lag) >= 0 ) &&
-                 ( (idx - lag) <= local_max_index ) &&
-                 ( ((idx - lag) % 2) == 1 ) &&
-                 ( ! entry_in_cache2(cache_ptr, type, (idx - lag)) ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "(i, %d, %d) ", type, (idx - lag));
-
-                insert_entry2(file_ptr, type, (idx - lag), dirty_inserts,
-                              H5C2__NO_FLAGS_SET);
-            }
-
-
-            if ( ( pass2 ) && ( (idx - lag + 1) >= 0 ) &&
-                 ( (idx - lag + 1) <= local_max_index ) &&
-                 ( ( (idx - lag + 1) % 3 ) == 0 ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "(p, %d, %d) ", type, (idx - lag + 1));
-
-                protect_entry2(file_ptr, type, (idx - lag + 1));
-            }
-
-            if ( ( pass2 ) && ( (idx - lag + 2) >= 0 ) &&
-                 ( (idx - lag + 2) <= local_max_index ) &&
-                 ( ( (idx - lag + 2) % 3 ) == 0 ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag + 2));
-
-                unprotect_entry2(file_ptr, type, idx-lag+2, NO_CHANGE,
-                                H5C2__NO_FLAGS_SET);
-            }
-
-
-            if ( ( pass2 ) && ( do_renames ) && ( (idx - lag + 2) >= 0 ) &&
-                 ( (idx - lag + 2) <= local_max_index ) &&
-                 ( ( (idx - lag + 2) % 3 ) == 0 ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "(r, %d, %d, %d) ", 
-			      type, (idx + lag + 2), (int)rename_to_main_addr);
-
-                rename_entry2(cache_ptr, type, (idx - lag + 2),
-                             rename_to_main_addr);
-            }
-
-
-            if ( ( pass2 ) && ( (idx - lag + 3) >= 0 ) &&
-                 ( (idx - lag + 3) <= local_max_index ) &&
-                 ( ( (idx - lag + 3) % 5 ) == 0 ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "(p, %d, %d) ", type, (idx - lag + 3));
-
-                protect_entry2(file_ptr, type, (idx - lag + 3));
-            }
-
-            if ( ( pass2 ) && ( (idx - lag + 5) >= 0 ) &&
-                 ( (idx - lag + 5) <= local_max_index ) &&
-                 ( ( (idx - lag + 5) % 5 ) == 0 ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx - lag + 5));
-
-                unprotect_entry2(file_ptr, type, idx-lag+5, NO_CHANGE,
-                                H5C2__NO_FLAGS_SET);
-            }
-
-	    if ( do_mult_ro_protects )
-	    {
-		if ( ( pass2 ) && ( (idx - lag + 5) >= 0 ) &&
-		     ( (idx - lag + 5) < local_max_index ) &&
-		     ( (idx - lag + 5) % 9 == 0 ) ) {
+                if ( ( pass2 ) && ( do_inserts ) && 
+		     ( (idx - lag) >= 0 ) &&
+		     ( (idx - lag) >= lower_bound ) &&
+                     ( (idx - lag) <= local_max_index ) &&
+                     ( (idx - lag) <= upper_bound ) &&
+                     ( ((idx - lag) % 2) == 1 ) &&
+                     ( ! entry_in_cache2(cache_ptr, type, (idx - lag)) ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
-				  (idx - lag + 5));
+                        HDfprintf(stdout, "(i, %d, %d) ", type, (idx - lag));
 
-		    protect_entry_ro2(file_ptr, type, (idx - lag + 5));
-		}
+                    insert_entry2(file_ptr, type, (idx - lag), dirty_inserts,
+                                  H5C2__NO_FLAGS_SET);
+                }
 
-		if ( ( pass2 ) && ( (idx - lag + 6) >= 0 ) &&
-		     ( (idx - lag + 6) < local_max_index ) &&
-		     ( (idx - lag + 6) % 11 == 0 ) ) {
 
-                    if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
-				  (idx - lag + 6));
-
-		    protect_entry_ro2(file_ptr, type, (idx - lag + 6));
-		}
-
-		if ( ( pass2 ) && ( (idx - lag + 7) >= 0 ) &&
-		     ( (idx - lag + 7) < local_max_index ) &&
-		     ( (idx - lag + 7) % 13 == 0 ) ) {
+                if ( ( pass2 ) && 
+		     ( (idx - lag + 1) >= 0 ) &&
+		     ( (idx - lag + 1) >= lower_bound ) &&
+                     ( (idx - lag + 1) <= local_max_index ) &&
+                     ( (idx - lag + 1) <= upper_bound ) &&
+                     ( ( (idx - lag + 1) % 3 ) == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
-				  (idx - lag + 7));
+                        HDfprintf(stdout, "(p, %d, %d) ", 
+				  type, (idx - lag + 1));
 
-		    protect_entry_ro2(file_ptr, type, (idx - lag + 7));
-		}
+                    protect_entry2(file_ptr, type, (idx - lag + 1));
+                }
 
-		if ( ( pass2 ) && ( (idx - lag + 7) >= 0 ) &&
-		     ( (idx - lag + 7) < local_max_index ) &&
-		     ( (idx - lag + 7) % 9 == 0 ) ) {
-
-                    if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
-				  (idx - lag + 7));
-
-		    unprotect_entry2(file_ptr, type, (idx - lag + 7),
-				    FALSE, H5C2__NO_FLAGS_SET);
-		}
-
-		if ( ( pass2 ) && ( (idx - lag + 8) >= 0 ) &&
-		     ( (idx - lag + 8) < local_max_index ) &&
-		     ( (idx - lag + 8) % 11 == 0 ) ) {
+                if ( ( pass2 ) && 
+		     ( (idx - lag + 2) >= 0 ) &&
+		     ( (idx - lag + 2) >= lower_bound ) &&
+                     ( (idx - lag + 2) <= local_max_index ) &&
+                     ( (idx - lag + 2) <= upper_bound ) &&
+                     ( ( (idx - lag + 2) % 3 ) == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
-				  (idx - lag + 8));
+                        HDfprintf(stdout, "(u, %d, %d) ", 
+				  type, (idx - lag + 2));
 
-		    unprotect_entry2(file_ptr, type, (idx - lag + 8),
-				    FALSE, H5C2__NO_FLAGS_SET);
-		}
+                    unprotect_entry2(file_ptr, type, idx-lag+2, NO_CHANGE,
+                                     H5C2__NO_FLAGS_SET);
+                }
 
-		if ( ( pass2 ) && ( (idx - lag + 9) >= 0 ) &&
-		     ( (idx - lag + 9) < local_max_index ) &&
-		     ( (idx - lag + 9) % 13 == 0 ) ) {
+
+                if ( ( pass2 ) && ( do_renames ) && 
+		     ( (idx - lag + 2) >= 0 ) &&
+		     ( (idx - lag + 2) >= lower_bound ) &&
+                     ( (idx - lag + 2) <= local_max_index ) &&
+                     ( (idx - lag + 2) <= upper_bound ) &&
+                     ( ( (idx - lag + 2) % 3 ) == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
-				  (idx - lag + 9));
+                        HDfprintf(stdout, "(r, %d, %d, %d) ", 
+			          type, (idx - lag + 2), 
+				  (int)rename_to_main_addr);
 
-		    unprotect_entry2(file_ptr, type, (idx - lag + 9),
-				    FALSE, H5C2__NO_FLAGS_SET);
-		}
-	    } /* if ( do_mult_ro_protects ) */
-
-            if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= local_max_index ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "(p, %d, %d) ", type, idx);
-
-                protect_entry2(file_ptr, type, idx);
-            }
+                    rename_entry2(cache_ptr, type, (idx - lag + 2),
+                                  rename_to_main_addr);
+                }
 
 
-            if ( ( pass2 ) && ( (idx + lag - 2) >= 0 ) &&
-                 ( (idx + lag - 2) <= local_max_index ) &&
-                 ( ( (idx + lag - 2) % 7 ) == 0 ) ) {
+                if ( ( pass2 ) && 
+		     ( (idx - lag + 3) >= 0 ) &&
+		     ( (idx - lag + 3) >= lower_bound ) &&
+                     ( (idx - lag + 3) <= local_max_index ) &&
+                     ( (idx - lag + 3) <= upper_bound ) &&
+                     ( ( (idx - lag + 3) % 5 ) == 0 ) ) {
 
-                if ( verbose )
-                    HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag - 2));
+                    if ( verbose )
+                        HDfprintf(stdout, "(p, %d, %d) ", 
+				  type, (idx - lag + 3));
 
-                unprotect_entry2(file_ptr, type, idx+lag-2, NO_CHANGE,
-                                H5C2__NO_FLAGS_SET);
-            }
+                    protect_entry2(file_ptr, type, (idx - lag + 3));
+                }
 
-            if ( ( pass2 ) && ( (idx + lag - 1) >= 0 ) &&
-                 ( (idx + lag - 1) <= local_max_index ) &&
-                 ( ( (idx + lag - 1) % 7 ) == 0 ) ) {
+                if ( ( pass2 ) && 
+		     ( (idx - lag + 5) >= 0 ) &&
+		     ( (idx - lag + 5) >= lower_bound ) &&
+                     ( (idx - lag + 5) <= local_max_index ) &&
+                     ( (idx - lag + 5) <= upper_bound ) &&
+                     ( ( (idx - lag + 5) % 5 ) == 0 ) ) {
 
-                if ( verbose )
-                    HDfprintf(stdout, "(p, %d, %d) ", type, (idx + lag - 1));
+                    if ( verbose )
+                        HDfprintf(stdout, "(u, %d, %d) ", 
+				  type, (idx - lag + 5));
 
-                protect_entry2(file_ptr, type, (idx + lag - 1));
-            }
+                    unprotect_entry2(file_ptr, type, idx-lag+5, NO_CHANGE,
+                                     H5C2__NO_FLAGS_SET);
+                }
+
+	        if ( do_mult_ro_protects )
+	        {
+		    if ( ( pass2 ) && 
+		         ( (idx - lag + 5) >= 0 ) &&
+		         ( (idx - lag + 5) >= lower_bound ) &&
+		         ( (idx - lag + 5) < local_max_index ) &&
+		         ( (idx - lag + 5) < upper_bound ) &&
+		         ( (idx - lag + 5) % 9 == 0 ) ) {
+
+                        if ( verbose )
+                            HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+				      (idx - lag + 5));
+
+		        protect_entry_ro2(file_ptr, type, (idx - lag + 5));
+		    }
+
+		    if ( ( pass2 ) && 
+		         ( (idx - lag + 6) >= 0 ) &&
+		         ( (idx - lag + 6) >= lower_bound ) &&
+		         ( (idx - lag + 6) < local_max_index ) &&
+		         ( (idx - lag + 6) < upper_bound ) &&
+		         ( (idx - lag + 6) % 11 == 0 ) ) {
+
+                        if ( verbose )
+                            HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+				      (idx - lag + 6));
+
+		        protect_entry_ro2(file_ptr, type, (idx - lag + 6));
+		    }
+
+		    if ( ( pass2 ) && 
+		         ( (idx - lag + 7) >= 0 ) &&
+		         ( (idx - lag + 7) >= lower_bound ) &&
+		         ( (idx - lag + 7) < local_max_index ) &&
+		         ( (idx - lag + 7) < upper_bound ) &&
+		         ( (idx - lag + 7) % 13 == 0 ) ) {
+
+                        if ( verbose )
+                            HDfprintf(stdout, "(p-ro, %d, %d) ", type, 
+				      (idx - lag + 7));
+
+		        protect_entry_ro2(file_ptr, type, (idx - lag + 7));
+		    }
+
+		    if ( ( pass2 ) && 
+		         ( (idx - lag + 7) >= 0 ) &&
+		         ( (idx - lag + 7) >= lower_bound ) &&
+		         ( (idx - lag + 7) < local_max_index ) &&
+		         ( (idx - lag + 7) < upper_bound ) &&
+		         ( (idx - lag + 7) % 9 == 0 ) ) {
+
+                        if ( verbose )
+                            HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+				      (idx - lag + 7));
+
+		        unprotect_entry2(file_ptr, type, (idx - lag + 7),
+				         FALSE, H5C2__NO_FLAGS_SET);
+		    }
+
+		    if ( ( pass2 ) && 
+		         ( (idx - lag + 8) >= 0 ) &&
+		         ( (idx - lag + 8) >= lower_bound ) &&
+		         ( (idx - lag + 8) < local_max_index ) &&
+		         ( (idx - lag + 8) < upper_bound ) &&
+		         ( (idx - lag + 8) % 11 == 0 ) ) {
+
+                        if ( verbose )
+                            HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+				      (idx - lag + 8));
+
+		        unprotect_entry2(file_ptr, type, (idx - lag + 8),
+				         FALSE, H5C2__NO_FLAGS_SET);
+		    }
+
+		    if ( ( pass2 ) && 
+		         ( (idx - lag + 9) >= 0 ) &&
+		         ( (idx - lag + 9) >= lower_bound ) &&
+		         ( (idx - lag + 9) < local_max_index ) &&
+		         ( (idx - lag + 9) < upper_bound ) &&
+		         ( (idx - lag + 9) % 13 == 0 ) ) {
+
+                        if ( verbose )
+                            HDfprintf(stdout, "(u-ro, %d, %d) ", type, 
+				      (idx - lag + 9));
+
+		        unprotect_entry2(file_ptr, type, (idx - lag + 9),
+				         FALSE, H5C2__NO_FLAGS_SET);
+		    }
+	        } /* if ( do_mult_ro_protects ) */
+
+                if ( ( pass2 ) && 
+		     ( idx >= 0 ) && 
+		     ( idx >= lower_bound ) && 
+		     ( idx <= local_max_index ) &&
+		     ( idx <= upper_bound ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "(p, %d, %d) ", type, idx);
+
+                    protect_entry2(file_ptr, type, idx);
+                }
 
 
-            if ( do_destroys ) {
+                if ( ( pass2 ) && 
+		     ( (idx + lag - 2) >= 0 ) &&
+		     ( (idx + lag - 2) >= lower_bound ) &&
+                     ( (idx + lag - 2) <= local_max_index ) &&
+                     ( (idx + lag - 2) <= upper_bound ) &&
+                     ( ( (idx + lag - 2) % 7 ) == 0 ) ) {
 
-                if ( ( pass2 ) && ( (idx + lag) >= 0 ) &&
-                     ( ( idx + lag) <= local_max_index ) ) {
+                    if ( verbose )
+                        HDfprintf(stdout, "(u, %d, %d) ", 
+				  type, (idx + lag - 2));
 
-                    switch ( (idx + lag) %4 ) {
+                    unprotect_entry2(file_ptr, type, idx+lag-2, NO_CHANGE,
+                                     H5C2__NO_FLAGS_SET);
+                }
 
-                        case 0:
-                            if ( (entries2[type])[idx+lag].is_dirty ) {
+                if ( ( pass2 ) && 
+		     ( (idx + lag - 1) >= 0 ) &&
+		     ( (idx + lag - 1) >= lower_bound ) &&
+                     ( (idx + lag - 1) <= local_max_index ) &&
+                     ( (idx + lag - 1) <= upper_bound ) &&
+                     ( ( (idx + lag - 1) % 7 ) == 0 ) ) {
 
+                    if ( verbose )
+                        HDfprintf(stdout, "(p, %d, %d) ", 
+				  type, (idx + lag - 1));
+
+                    protect_entry2(file_ptr, type, (idx + lag - 1));
+                }
+
+
+                if ( do_destroys ) {
+
+                    if ( ( pass2 ) && 
+	                 ( (idx + lag) >= 0 ) &&
+	                 ( (idx + lag) >= lower_bound ) &&
+                         ( ( idx + lag) <= local_max_index ) &&
+                         ( ( idx + lag) <= upper_bound ) ) {
+
+                        switch ( (idx + lag) %4 ) {
+
+                            case 0:
+                                if ( (entries2[type])[idx+lag].is_dirty ) {
+
+                                    unprotect_entry2(file_ptr, type, idx + lag,
+                                                     NO_CHANGE, 
+						     H5C2__NO_FLAGS_SET);
+                                } else {
+
+                                    unprotect_entry2(file_ptr, type, idx + lag,
+                                                     dirty_unprotects,
+                                                     H5C2__NO_FLAGS_SET);
+                                }
+                                break;
+
+                            case 1: /* we just did an insert */
                                 unprotect_entry2(file_ptr, type, idx + lag,
-                                                 NO_CHANGE, H5C2__NO_FLAGS_SET);
-                            } else {
+                                                 NO_CHANGE, 
+						 H5C2__NO_FLAGS_SET);
+                                break;
 
+                            case 2:
+                                if ( (entries2[type])[idx + lag].is_dirty ) {
+
+                                    unprotect_entry2(file_ptr, type, idx + lag,
+                                                     NO_CHANGE, 
+						     H5C2__DELETED_FLAG);
+                                } else {
+
+                                    unprotect_entry2(file_ptr, type, idx + lag,
+                                                     dirty_destroys,
+                                                     H5C2__DELETED_FLAG);
+                                }
+                                break;
+
+                            case 3: /* we just did an insrt */
                                 unprotect_entry2(file_ptr, type, idx + lag,
-                                                dirty_unprotects,
-                                                H5C2__NO_FLAGS_SET);
-                            }
-                            break;
+                                                 NO_CHANGE, 
+						 H5C2__DELETED_FLAG);
+                                break;
 
-                        case 1: /* we just did an insert */
-                            unprotect_entry2(file_ptr, type, idx + lag,
-                                            NO_CHANGE, H5C2__NO_FLAGS_SET);
-                            break;
+                            default:
+                                HDassert(0); /* this can't happen... */
+                                break;
+                        }
+                    }
+                } else {
 
-                        case 2:
-                            if ( (entries2[type])[idx + lag].is_dirty ) {
+                    if ( ( pass2 ) && 
+		         ( (idx + lag) >= 0 ) &&
+		         ( (idx + lag) >= lower_bound ) &&
+                         ( ( idx + lag) <= local_max_index ) &&
+                         ( ( idx + lag) <= upper_bound ) ) {
 
-                                unprotect_entry2(file_ptr, type, idx + lag,
-                                                NO_CHANGE, H5C2__DELETED_FLAG);
-                            } else {
+                        if ( verbose )
+                            HDfprintf(stdout, 
+				      "(u, %d, %d) ", type, (idx + lag));
 
-                                unprotect_entry2(file_ptr, type, idx + lag,
-                                                dirty_destroys,
-                                                H5C2__DELETED_FLAG);
-                            }
-                            break;
-
-                        case 3: /* we just did an insrt */
-                            unprotect_entry2(file_ptr, type, idx + lag,
-                                            NO_CHANGE, H5C2__DELETED_FLAG);
-                            break;
-
-                        default:
-                            HDassert(0); /* this can't happen... */
-                            break;
+                        unprotect_entry2(file_ptr, type, idx + lag,
+                                         dirty_unprotects, 
+					 H5C2__NO_FLAGS_SET);
                     }
                 }
-            } else {
 
-                if ( ( pass2 ) && ( (idx + lag) >= 0 ) &&
-                     ( ( idx + lag) <= local_max_index ) ) {
+		idx--;
 
-                    if ( verbose )
-                        HDfprintf(stdout, "(u, %d, %d) ", type, (idx + lag));
+		if ( verbose )
+		    HDfprintf(stdout, "\n");
 
-                    unprotect_entry2(file_ptr, type, idx + lag,
-                                    dirty_unprotects, H5C2__NO_FLAGS_SET);
-                }
-            }
+            } /* while ( ( pass2 ) && ( idx >= lower_bound - lag ) ) */
 
 	    end_trans(file_ptr, cache_ptr, verbose, trans_num, 
                       "jrnl_row_major_scan_backward inner loop");
 
-            if ( verbose )
-                HDfprintf(stdout, "\n");
+	    if ( verbose )
+	        HDfprintf(stdout, "end trans %lld.\n", (long long)trans_num);
 
-            idx--;
-        }
+	    upper_bound = lower_bound - (2 * lag) - 2;
+            lower_bound = upper_bound - 8;
+
+	    idx = upper_bound + lag;
+
+        } /* while ( ( pass2 ) && ( idx >= -lag ) ) */
+
         type--;
-    }
+
+    } /* while ( ( pass2 ) && ( type >= 0 ) ) */
 
     if ( ( pass2 ) && ( display_stats ) ) {
 
@@ -1287,10 +1381,6 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
 
 } /* jrnl_row_major_scan_backward2() */
 
-#endif /* JRM */
-
-#if 0 /* JRM */
-/* this code commented out as it is in-op at present */
 
 /*-------------------------------------------------------------------------
  * Function:	jrnl_row_major_scan_forward2()
@@ -1339,6 +1429,8 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
     int32_t type;
     int32_t idx;
     int32_t local_max_index;
+    int32_t lower_bound;
+    int32_t upper_bound;
 
     if ( verbose )
         HDfprintf(stdout, "%s(): entering.\n", fcn_name);
@@ -1358,291 +1450,401 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 
         local_max_index = MIN(max_index, max_indices2[type]);
 
+	lower_bound = 0;
+	upper_bound = lower_bound + 8;
+
         while ( ( pass2 ) && ( idx <= (local_max_index + lag) ) )
         {
-	    trans_num++;
+	    if ( idx == ( lower_bound - lag ) ) {
 
-            begin_trans(cache_ptr, verbose, trans_num, 
-			"jrnl_row_major_scan_forward inner loop");
-	    
-	    if ( verbose ) {
+	        trans_num++;
 
-                HDfprintf(stdout, "%lld:%d:%d: ", trans_num, type, idx);
+                begin_trans(cache_ptr, verbose, trans_num, 
+			    "jrnl_row_major_scan_forward inner loop");
+
+		if ( verbose )
+		    HDfprintf(stdout, "begin trans %lld.\n", 
+			      (long long)trans_num);
+
+	        if ( verbose )
+	            HDfprintf(stdout, "(%d, %d)\n", lower_bound, upper_bound);
 	    }
 
-            if ( ( pass2 ) && ( do_inserts ) && ( (idx + lag) >= 0 ) &&
-                 ( (idx + lag) <= local_max_index ) &&
-                 ( ((idx + lag) % 2) == 0 ) &&
-                 ( ! entry_in_cache2(cache_ptr, type, (idx + lag)) ) ) {
+	    while ( ( pass2 ) && ( idx <= upper_bound + lag ) ) 
+            {
+	    
+	        if ( verbose ) {
 
-                if ( verbose )
-                    HDfprintf(stdout, "1(i, %d, %d) ", type, (idx + lag));
+                    HDfprintf(stdout, "%lld:%d:%d: ", trans_num, type, idx);
+	        }
 
-                insert_entry2(file_ptr, type, (idx + lag), dirty_inserts,
-                              H5C2__NO_FLAGS_SET);
-            }
-
-
-            if ( ( pass2 ) && ( (idx + lag - 1) >= 0 ) &&
-                 ( (idx + lag - 1) <= local_max_index ) &&
-                 ( ( (idx + lag - 1) % 3 ) == 0 ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "2(p, %d, %d) ", type, (idx + lag - 1));
-
-                protect_entry2(file_ptr, type, (idx + lag - 1));
-            }
-
-            if ( ( pass2 ) && ( (idx + lag - 2) >= 0 ) &&
-                 ( (idx + lag - 2) <= local_max_index ) &&
-                 ( ( (idx + lag - 2) % 3 ) == 0 ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "3(u, %d, %d) ", type, (idx + lag - 2));
-
-                unprotect_entry2(file_ptr, type, idx+lag-2, NO_CHANGE,
-                                 H5C2__NO_FLAGS_SET);
-            }
-
-
-            if ( ( pass2 ) && ( do_renames ) && ( (idx + lag - 2) >= 0 ) &&
-                 ( (idx + lag - 2) <= local_max_index ) &&
-                 ( ( (idx + lag - 2) % 3 ) == 0 ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "4(r, %d, %d, %d) ", 
-			      type, (idx + lag - 2), (int)rename_to_main_addr);
-
-                rename_entry2(cache_ptr, type, (idx + lag - 2),
-                             rename_to_main_addr);
-            }
-
-
-            if ( ( pass2 ) && ( (idx + lag - 3) >= 0 ) &&
-                 ( (idx + lag - 3) <= local_max_index ) &&
-                 ( ( (idx + lag - 3) % 5 ) == 0 ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "5(p, %d, %d) ", type, (idx + lag - 3));
-
-                protect_entry2(file_ptr, type, (idx + lag - 3));
-            }
-
-            if ( ( pass2 ) && ( (idx + lag - 5) >= 0 ) &&
-                 ( (idx + lag - 5) <= local_max_index ) &&
-                 ( ( (idx + lag - 5) % 5 ) == 0 ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "6(u, %d, %d) ", type, (idx + lag - 5));
-
-                unprotect_entry2(file_ptr, type, idx+lag-5, NO_CHANGE,
-                                 H5C2__NO_FLAGS_SET);
-            }
-
-	    if ( do_mult_ro_protects )
-	    {
-		if ( ( pass2 ) && ( (idx + lag - 5) >= 0 ) &&
-		     ( (idx + lag - 5) < local_max_index ) &&
-		     ( (idx + lag - 5) % 9 == 0 ) ) {
+                if ( ( pass2 ) && ( do_inserts ) && 
+		     ( (idx + lag) >= 0 ) &&
+		     ( (idx + lag) >= lower_bound ) &&
+                     ( (idx + lag) <= local_max_index ) &&
+                     ( (idx + lag) <= upper_bound ) &&
+                     ( ((idx + lag) % 2) == 0 ) &&
+                     ( ! entry_in_cache2(cache_ptr, type, (idx + lag)) ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "7(p-ro, %d, %d) ", type, 
-				  (idx + lag - 5));
+                        HDfprintf(stdout, "1(i, %d, %d) ", type, (idx + lag));
 
-		    protect_entry_ro2(file_ptr, type, (idx + lag - 5));
-		}
+		    /*** insert entry idx + lag (if not already present *** */
+                    insert_entry2(file_ptr, type, (idx + lag), dirty_inserts,
+                                  H5C2__NO_FLAGS_SET);
+                }
 
-		if ( ( pass2 ) && ( (idx + lag - 6) >= 0 ) &&
-		     ( (idx + lag - 6) < local_max_index ) &&
-		     ( (idx + lag - 6) % 11 == 0 ) ) {
 
-                    if ( verbose )
-                        HDfprintf(stdout, "8(p-ro, %d, %d) ", type, 
-				  (idx + lag - 6));
-
-		    protect_entry_ro2(file_ptr, type, (idx + lag - 6));
-		}
-
-		if ( ( pass2 ) && ( (idx + lag - 7) >= 0 ) &&
-		     ( (idx + lag - 7) < local_max_index ) &&
-		     ( (idx + lag - 7) % 13 == 0 ) ) {
+                if ( ( pass2 ) && 
+		     ( (idx + lag - 1) >= 0 ) &&
+		     ( (idx + lag - 1) >= lower_bound ) &&
+                     ( (idx + lag - 1) <= local_max_index ) &&
+                     ( (idx + lag - 1) <= upper_bound ) &&
+                     ( ( (idx + lag - 1) % 3 ) == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "9(p-ro, %d, %d) ", type, 
-				  (idx + lag - 7));
+                        HDfprintf(stdout, 
+				  "2(p, %d, %d) ", type, (idx + lag - 1));
 
-		    protect_entry_ro2(file_ptr, type, (idx + lag - 7));
-		}
+		    /*** protect entry idx + lag - 1 ***/
+                    protect_entry2(file_ptr, type, (idx + lag - 1));
+                }
 
-		if ( ( pass2 ) && ( (idx + lag - 7) >= 0 ) &&
-		     ( (idx + lag - 7) < local_max_index ) &&
-		     ( (idx + lag - 7) % 9 == 0 ) ) {
-
-                    if ( verbose )
-                        HDfprintf(stdout, "10(u-ro, %d, %d) ", type, 
-				  (idx + lag - 7));
-
-		    unprotect_entry2(file_ptr, type, (idx + lag - 7),
-				     FALSE, H5C2__NO_FLAGS_SET);
-		}
-
-		if ( ( pass2 ) && ( (idx + lag - 8) >= 0 ) &&
-		     ( (idx + lag - 8) < local_max_index ) &&
-		     ( (idx + lag - 8) % 11 == 0 ) ) {
+                if ( ( pass2 ) && 
+		     ( (idx + lag - 2) >= 0 ) &&
+		     ( (idx + lag - 2) >= lower_bound ) &&
+                     ( (idx + lag - 2) <= local_max_index ) &&
+                     ( (idx + lag - 2) <= upper_bound ) &&
+                     ( ( (idx + lag - 2) % 3 ) == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "11(u-ro, %d, %d) ", type, 
-				  (idx + lag - 8));
+                        HDfprintf(stdout, "3(u, %d, %d) ", 
+				  type, (idx + lag - 2));
 
-		    unprotect_entry2(file_ptr, type, (idx + lag - 8),
-				    FALSE, H5C2__NO_FLAGS_SET);
-		}
+		    /*** unprotect entry idx + lag - 2 ***/
+                    unprotect_entry2(file_ptr, type, idx+lag-2, NO_CHANGE,
+                                     H5C2__NO_FLAGS_SET);
+                }
 
-		if ( ( pass2 ) && ( (idx + lag - 9) >= 0 ) &&
-		     ( (idx + lag - 9) < local_max_index ) &&
-		     ( (idx + lag - 9) % 13 == 0 ) ) {
+
+                if ( ( pass2 ) && ( do_renames ) && 
+		     ( (idx + lag - 2) >= 0 ) &&
+		     ( (idx + lag - 2) >= lower_bound ) &&
+                     ( (idx + lag - 2) <= local_max_index ) &&
+                     ( (idx + lag - 2) <= upper_bound ) &&
+                     ( ( (idx + lag - 2) % 3 ) == 0 ) ) {
 
                     if ( verbose )
-                        HDfprintf(stdout, "12(u-ro, %d, %d) ", type, 
-				  (idx + lag - 9));
+                        HDfprintf(stdout, "4(r, %d, %d, %d) ", 
+			          type, (idx + lag - 2), 
+				  (int)rename_to_main_addr);
 
-		    unprotect_entry2(file_ptr, type, (idx + lag - 9),
-				     FALSE, H5C2__NO_FLAGS_SET);
-		}
-	    } /* if ( do_mult_ro_protects ) */
-
-            if ( ( pass2 ) && ( idx >= 0 ) && ( idx <= local_max_index ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "13(p, %d, %d) ", type, idx);
-
-                protect_entry2(file_ptr, type, idx);
-            }
-
-            if ( ( pass2 ) && ( (idx - lag + 2) >= 0 ) &&
-                 /*( (idx - lag + 2) <= max_indices2[type] ) && */
-                 ( (idx - lag + 2) <= local_max_index ) &&
-                 ( ( (idx - lag + 2) % 7 ) == 0 ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "14(u, %d, %d) ", type, (idx - lag + 2));
-
-                unprotect_entry2(file_ptr, type, idx-lag+2, NO_CHANGE,
-                                H5C2__NO_FLAGS_SET);
-            }
-
-            if ( ( pass2 ) && ( (idx - lag + 1) >= 0 ) &&
-                 /*( (idx - lag + 1) <= max_indices2[type] ) && */
-                 ( (idx - lag + 1) <= local_max_index ) &&
-                 ( ( (idx - lag + 1) % 7 ) == 0 ) ) {
-
-                if ( verbose )
-                    HDfprintf(stdout, "15(p, %d, %d) ", type, (idx - lag + 1));
-
-                protect_entry2(file_ptr, type, (idx - lag + 1));
-            }
+		    /*** rename entry idx + lag -2 ***/
+                    rename_entry2(cache_ptr, type, (idx + lag - 2),
+                                  rename_to_main_addr);
+                }
 
 
-            if ( do_destroys ) {
+                if ( ( pass2 ) && 
+		     ( (idx + lag - 3) >= 0 ) &&
+		     ( (idx + lag - 3) >= lower_bound ) &&
+                     ( (idx + lag - 3) <= local_max_index ) &&
+                     ( (idx + lag - 3) <= upper_bound ) &&
+                     ( ( (idx + lag - 3) % 5 ) == 0 ) ) {
 
-                if ( ( pass2 ) && ( (idx - lag) >= 0 ) &&
-                     ( ( idx - lag) <= local_max_index ) ) {
+                    if ( verbose )
+                        HDfprintf(stdout, "5(p, %d, %d) ", 
+				  type, (idx + lag - 3));
 
-                    switch ( (idx - lag) %4 ) {
+		    /*** protect entry idx + lag - 3 ***/
+                    protect_entry2(file_ptr, type, (idx + lag - 3));
+                }
 
-                        case 0: /* we just did an insert */
+                if ( ( pass2 ) && 
+		     ( (idx + lag - 5) >= 0 ) &&
+		     ( (idx + lag - 5) >= lower_bound ) &&
+                     ( (idx + lag - 5) <= local_max_index ) &&
+                     ( (idx + lag - 5) <= upper_bound ) &&
+                     ( ( (idx + lag - 5) % 5 ) == 0 ) ) {
 
-                            if ( verbose )
-                                HDfprintf(stdout, 
-					 "16(u, %d, %d) ", type, (idx - lag));
+                    if ( verbose )
+                        HDfprintf(stdout, "6(u, %d, %d) ", 
+				  type, (idx + lag - 5));
 
-                            unprotect_entry2(file_ptr, type, idx - lag,
-                                            NO_CHANGE, H5C2__NO_FLAGS_SET);
-                            break;
 
-                        case 1:
-                            if ( (entries2[type])[idx-lag].is_dirty ) {
+		    /*** unprotect entry idx + lag - 5 ***/
+                    unprotect_entry2(file_ptr, type, idx+lag-5, NO_CHANGE,
+                                     H5C2__NO_FLAGS_SET);
+                }
 
-                            if ( verbose )
-                                HDfprintf(stdout, 
-					 "17(u, %d, %d) ", type, (idx - lag));
+	        if ( do_mult_ro_protects )
+	        {
+		    if ( ( pass2 ) && 
+		         ( (idx + lag - 5) >= 0 ) &&
+		         ( (idx + lag - 5) >= lower_bound ) &&
+		         ( (idx + lag - 5) < local_max_index ) &&
+		         ( (idx + lag - 5) < upper_bound ) &&
+		         ( (idx + lag - 5) % 9 == 0 ) ) {
 
-                                unprotect_entry2(file_ptr, type, idx - lag,
-                                                NO_CHANGE, H5C2__NO_FLAGS_SET);
-                            } else {
+                        if ( verbose )
+                            HDfprintf(stdout, "7(p-ro, %d, %d) ", type, 
+				      (idx + lag - 5));
 
-                            if ( verbose )
-                                HDfprintf(stdout, 
-					 "18(u, %d, %d) ", type, (idx - lag));
+		        /*** protect ro entry idx + lag - 5 ***/
+		        protect_entry_ro2(file_ptr, type, (idx + lag - 5));
+		    }
 
-                                unprotect_entry2(file_ptr, type, idx - lag,
-                                                dirty_unprotects,
-                                                H5C2__NO_FLAGS_SET);
-                            }
-                            break;
+		    if ( ( pass2 ) && 
+		         ( (idx + lag - 6) >= 0 ) &&
+		         ( (idx + lag - 6) >= lower_bound ) &&
+		         ( (idx + lag - 6) < local_max_index ) &&
+		         ( (idx + lag - 6) < upper_bound ) &&
+		         ( (idx + lag - 6) % 11 == 0 ) ) {
 
-                        case 2: /* we just did an insrt */
+                        if ( verbose )
+                            HDfprintf(stdout, "8(p-ro, %d, %d) ", type, 
+				      (idx + lag - 6));
 
-                            if ( verbose )
-                                HDfprintf(stdout, 
-				      "19(u-del, %d, %d) ", type, (idx - lag));
+		        /*** protect ro entry idx + lag - 6 ***/
+		        protect_entry_ro2(file_ptr, type, (idx + lag - 6));
+		    }
 
-                            unprotect_entry2(file_ptr, type, idx - lag,
-                                            NO_CHANGE, H5C2__DELETED_FLAG);
-                            break;
+		    if ( ( pass2 ) && 
+		         ( (idx + lag - 7) >= 0 ) &&
+		         ( (idx + lag - 7) >= lower_bound ) &&
+		         ( (idx + lag - 7) < local_max_index ) &&
+		         ( (idx + lag - 7) < upper_bound ) &&
+		         ( (idx + lag - 7) % 13 == 0 ) ) {
 
-                        case 3:
-                            if ( (entries2[type])[idx-lag].is_dirty ) {
+                        if ( verbose )
+                            HDfprintf(stdout, "9(p-ro, %d, %d) ", type, 
+				      (idx + lag - 7));
+
+		        /*** protect ro entry idx + lag - 7 ***/
+		        protect_entry_ro2(file_ptr, type, (idx + lag - 7));
+		    }
+
+		    if ( ( pass2 ) && 
+		         ( (idx + lag - 7) >= 0 ) &&
+		         ( (idx + lag - 7) >= lower_bound ) &&
+		         ( (idx + lag - 7) < local_max_index ) &&
+		         ( (idx + lag - 7) < upper_bound ) &&
+		         ( (idx + lag - 7) % 9 == 0 ) ) {
+
+                        if ( verbose )
+                            HDfprintf(stdout, "10(u-ro, %d, %d) ", type, 
+				      (idx + lag - 7));
+
+		        /*** unprotect ro entry idx + lag - 7 ***/
+		        unprotect_entry2(file_ptr, type, (idx + lag - 7),
+				         FALSE, H5C2__NO_FLAGS_SET);
+		    }
+
+		    if ( ( pass2 ) && 
+		         ( (idx + lag - 8) >= 0 ) &&
+		         ( (idx + lag - 8) >= lower_bound ) &&
+		         ( (idx + lag - 8) < local_max_index ) &&
+		         ( (idx + lag - 8) < upper_bound ) &&
+		         ( (idx + lag - 8) % 11 == 0 ) ) {
+
+                        if ( verbose )
+                            HDfprintf(stdout, "11(u-ro, %d, %d) ", type, 
+				      (idx + lag - 8));
+
+		        /*** unprotect ro entry idx + lag - 8 ***/
+		        unprotect_entry2(file_ptr, type, (idx + lag - 8),
+				         FALSE, H5C2__NO_FLAGS_SET);
+		    }
+
+		    if ( ( pass2 ) && 
+		         ( (idx + lag - 9) >= 0 ) &&
+		         ( (idx + lag - 9) >= lower_bound ) &&
+		         ( (idx + lag - 9) < local_max_index ) &&
+		         ( (idx + lag - 9) < upper_bound ) &&
+		         ( (idx + lag - 9) % 13 == 0 ) ) {
+
+                        if ( verbose )
+                            HDfprintf(stdout, "12(u-ro, %d, %d) ", type, 
+				      (idx + lag - 9));
+
+		        /*** unprotect ro entry idx + lag - 9 ***/
+		        unprotect_entry2(file_ptr, type, (idx + lag - 9),
+				         FALSE, H5C2__NO_FLAGS_SET);
+		    }
+	        } /* if ( do_mult_ro_protects ) */
+
+                if ( ( pass2 ) && 
+		     ( idx >= 0 ) && 
+		     ( idx >= lower_bound ) && 
+		     ( idx <= local_max_index ) &&
+		     ( idx <= upper_bound ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "13(p, %d, %d) ", type, idx);
+
+		    /*** protect entry idx ***/
+                    protect_entry2(file_ptr, type, idx);
+                }
+
+                if ( ( pass2 ) && 
+		     ( (idx - lag + 2) >= 0 ) &&
+		     ( (idx - lag + 2) >= lower_bound ) &&
+                     ( (idx - lag + 2) <= local_max_index ) &&
+                     ( (idx - lag + 2) <= upper_bound ) &&
+                     ( ( (idx - lag + 2) % 7 ) == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "14(u, %d, %d) ", 
+				  type, (idx - lag + 2));
+
+		    /*** unprotect entry idx - lag + 2 ***/
+                    unprotect_entry2(file_ptr, type, idx-lag+2, NO_CHANGE,
+                                     H5C2__NO_FLAGS_SET);
+                }
+
+                if ( ( pass2 ) && 
+		     ( (idx - lag + 1) >= 0 ) &&
+		     ( (idx - lag + 1) >= lower_bound ) &&
+                     ( (idx - lag + 1) <= local_max_index ) &&
+                     ( (idx - lag + 1) <= upper_bound ) &&
+                     ( ( (idx - lag + 1) % 7 ) == 0 ) ) {
+
+                    if ( verbose )
+                        HDfprintf(stdout, "15(p, %d, %d) ", 
+				  type, (idx - lag + 1));
+
+		    /*** protect entry idx - lag + 1 ***/
+                    protect_entry2(file_ptr, type, (idx - lag + 1));
+                }
+
+
+                if ( do_destroys ) {
+
+                    if ( ( pass2 ) && 
+		         ( (idx - lag) >= 0 ) &&
+		         ( (idx - lag) >= lower_bound ) &&
+                         ( ( idx - lag) <= local_max_index ) &&
+                         ( ( idx - lag) <= upper_bound ) ) {
+
+                        switch ( (idx - lag) %4 ) {
+
+                            case 0: /* we just did an insert */
 
                                 if ( verbose )
-                                    HDfprintf(stdout, 
-					      "20(u-del, %d, %d) ", 
+                                    HDfprintf(stdout, "16(u, %d, %d) ", 
 					      type, (idx - lag));
 
+			        /*** unprotect entry NC idx - lag ***/
                                 unprotect_entry2(file_ptr, type, idx - lag,
-                                                NO_CHANGE, H5C2__DELETED_FLAG);
-                            } else {
+                                                 NO_CHANGE, H5C2__NO_FLAGS_SET);
+                                break;
+
+                            case 1:
+                                if ( (entries2[type])[idx-lag].is_dirty ) {
+
+                                    if ( verbose )
+                                        HDfprintf(stdout, "17(u, %d, %d) ", 
+						  type, (idx - lag));
+
+			            /*** unprotect entry NC idx - lag ***/
+                                    unprotect_entry2(file_ptr, type, idx - lag,
+                                                     NO_CHANGE, 
+						     H5C2__NO_FLAGS_SET);
+                                } else {
+
+                                    if ( verbose )
+                                        HDfprintf(stdout, "18(u, %d, %d) ", 
+						  type, (idx - lag));
+
+			            /*** unprotect entry idx - lag ***/
+                                    unprotect_entry2(file_ptr, type, idx - lag,
+                                                     dirty_unprotects,
+                                                     H5C2__NO_FLAGS_SET);
+                                }
+                                break;
+
+                            case 2: /* we just did an insrt */
 
                                 if ( verbose )
-                                    HDfprintf(stdout, 
-					      "21(u-del, %d, %d) ", 
+                                    HDfprintf(stdout, "19(u-del, %d, %d) ", 
 					      type, (idx - lag));
 
+			        /*** unprotect delete idx - lag ***/
                                 unprotect_entry2(file_ptr, type, idx - lag,
-                                                dirty_destroys,
-                                                H5C2__DELETED_FLAG);
-                            }
-                            break;
+                                                 NO_CHANGE, H5C2__DELETED_FLAG);
+                                break;
 
-                        default:
-                            HDassert(0); /* this can't happen... */
-                            break;
+                            case 3:
+                                if ( (entries2[type])[idx-lag].is_dirty ) {
+
+                                    if ( verbose )
+                                        HDfprintf(stdout, "20(u-del, %d, %d) ", 
+					          type, (idx - lag));
+
+				    /*** unprotect delete idx - lag ***/
+                                    unprotect_entry2(file_ptr, type, idx - lag,
+                                                     NO_CHANGE, 
+						     H5C2__DELETED_FLAG);
+                                } else {
+
+                                    if ( verbose )
+                                        HDfprintf(stdout, "21(u-del, %d, %d) ", 
+					          type, (idx - lag));
+
+				    /*** unprotect delete idx - lag ***/
+                                    unprotect_entry2(file_ptr, type, idx - lag,
+                                                     dirty_destroys,
+                                                     H5C2__DELETED_FLAG);
+                                }
+                                break;
+
+                            default:
+                                HDassert(0); /* this can't happen... */
+                                break;
+                        }
+                    }
+
+                } else {
+
+                    if ( ( pass2 ) && 
+		         ( (idx - lag) >= 0 ) &&
+		         ( (idx - lag) >= lower_bound ) &&
+                         ( ( idx - lag) <= local_max_index ) &&
+                         ( ( idx - lag) <= upper_bound ) ) {
+
+                        if ( verbose )
+                            HDfprintf(stdout, "22(u, %d, %d) ", 
+				      type, (idx - lag));
+
+		        /*** unprotect idx - lag ***/
+                        unprotect_entry2(file_ptr, type, idx - lag,
+                                         dirty_unprotects, H5C2__NO_FLAGS_SET);
                     }
                 }
 
-            } else {
+		idx++;
 
-                if ( ( pass2 ) && ( (idx - lag) >= 0 ) &&
-                     ( ( idx - lag) <= local_max_index ) ) {
+		if ( verbose )
+		    HDfprintf(stdout, "\n");
 
-                    if ( verbose )
-                        HDfprintf(stdout, "22(u, %d, %d) ", type, (idx - lag));
-
-                    unprotect_entry2(file_ptr, type, idx - lag,
-                                    dirty_unprotects, H5C2__NO_FLAGS_SET);
-                }
-            }
+	    } /* while ( ( pass2 ) && ( idx <= upper_bound ) ) */
 
 	    end_trans(file_ptr, cache_ptr, verbose, trans_num, 
                       "jrnl_row_major_scan_forward inner loop");
 
-            if ( verbose )
-                HDfprintf(stdout, "\n");
+	    if ( verbose )
+	        HDfprintf(stdout, "end trans %lld.\n", (long long)trans_num);
 
-            idx++;
-        }
+            lower_bound = upper_bound + (2 * lag) + 2;
+	    upper_bound = lower_bound + 8;
+
+	    idx = lower_bound - lag;
+
+        } /* while ( ( pass2 ) && ( idx <= (local_max_index + lag) ) ) */
+
         type++;
-    }
+
+    } /* while ( ( pass2 ) && ( type < NUMBER_OF_ENTRY_TYPES ) ) */
 
     if ( ( pass2 ) && ( display_stats ) ) {
 
@@ -1652,8 +1854,6 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
     return;
 
 } /* jrnl_row_major_scan_forward2() */
-
-#endif /* JRM */
 
 
 /*-------------------------------------------------------------------------
@@ -4208,8 +4408,8 @@ mdj_smoke_check_00(void)
  * Purpose:     Run a cut down version of smoke_check_1 in cache2.c, with
  * 		journaling enabled.  Check the journal files generated,
  * 		and verify that the journal output matches the architype
- * 		test files.  Skip the test if these architypes are not
- * 		present.
+ * 		test files.  Skip the comparison and generate a warning
+ * 		if an architype file is missing.
  *
  * Return:      void
  *
@@ -4229,6 +4429,9 @@ mdj_smoke_check_01(void)
     {
         "testfiles/cache2_journal_sc01_000.jnl",
         "testfiles/cache2_journal_sc01_001.jnl",
+        "testfiles/cache2_journal_sc01_002.jnl",
+        "testfiles/cache2_journal_sc01_003.jnl",
+        "testfiles/cache2_journal_sc01_004.jnl",
 	NULL
     };
     char filename[512];
@@ -4249,7 +4452,7 @@ mdj_smoke_check_01(void)
     H5F_t * file_ptr = NULL;
     H5C2_t * cache_ptr = NULL;
     
-    TESTING("mdj smoke check 01 -- jrnl ins, prot, unprot");
+    TESTING("mdj smoke check 01 -- jrnl clean ins, prot, unprot, del, ren");
 
     pass2 = TRUE;
 
@@ -4326,7 +4529,7 @@ mdj_smoke_check_01(void)
     /******************************************/
 
     trans_num = 0;
-#if 0 /* JRM */ /* this section is in-op at present */
+
     jrnl_row_major_scan_forward2(/* file_ptr               */ file_ptr,
                                  /* max_index              */ max_index,
                                  /* lag                    */ lag,
@@ -4455,9 +4658,9 @@ mdj_smoke_check_01(void)
 
     flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
 
-    verify_journal_empty(journal_filename);
-#endif /* JRM */
     trans_num = 0;
+
+    verify_journal_empty(journal_filename);
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -4481,12 +4684,12 @@ mdj_smoke_check_01(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[0]);
+        copy_file(journal_filename, testfiles[3]);
     }
     
-    if ( file_exists(testfiles[0]) ) {
+    if ( file_exists(testfiles[3]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[0]);
+        verify_journal_contents(journal_filename, testfiles[3]);
 
     } else {
 
@@ -4521,12 +4724,12 @@ mdj_smoke_check_01(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[1]);
+        copy_file(journal_filename, testfiles[4]);
     }
     
-    if ( file_exists(testfiles[1]) ) {
+    if ( file_exists(testfiles[4]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[1]);
+        verify_journal_contents(journal_filename, testfiles[4]);
 
     } else {
 
@@ -4575,6 +4778,384 @@ mdj_smoke_check_01(void)
     return;
 
 } /* mdj_smoke_check_01() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    mdj_smoke_check_02()
+ *
+ * Purpose:     Run a cut down version of smoke_check_2 in cache2.c, with
+ * 		journaling enabled.  Check the journal files generated,
+ * 		and verify that the journal output matches the architype
+ * 		test files.  Skip the comparison and generate a warning
+ * 		if an architype file is missing.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              5/19/08
+ *
+ * Changes:	None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+mdj_smoke_check_02(void)
+{
+    const char * fcn_name = "mdj_smoke_check_02()";
+    const char * testfiles[] = 
+    {
+        "testfiles/cache2_journal_sc02_000.jnl",
+        "testfiles/cache2_journal_sc02_001.jnl",
+        "testfiles/cache2_journal_sc02_002.jnl",
+        "testfiles/cache2_journal_sc02_003.jnl",
+        "testfiles/cache2_journal_sc02_004.jnl",
+	NULL
+    };
+    char filename[512];
+    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    hbool_t testfile_missing = FALSE;
+    hbool_t show_progress = FALSE;
+    hbool_t dirty_inserts = TRUE;
+    hbool_t verbose = FALSE;
+    hbool_t update_architypes = FALSE;
+    int dirty_unprotects = TRUE;
+    int dirty_destroys = TRUE;
+    hbool_t display_stats = FALSE;
+    int32_t lag = 10;
+    int cp = 0;
+    int32_t max_index = 128;
+    uint64_t trans_num = 0;
+    hid_t file_id = -1;
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
+    
+    TESTING("mdj smoke check 02 -- jrnl dirty ins, prot, unprot, del, ren");
+
+    pass2 = TRUE;
+
+    /********************************************************************/
+    /* Create a file with cache configuration set to enable journaling. */
+    /********************************************************************/
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
+				            == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (1).\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s: filename = \"%s\".\n", fcn_name, filename); 
+    }
+
+    /* setup the journal file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+                        sizeof(journal_filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (2).\n";
+        }
+	else if ( strlen(journal_filename) >= 
+			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "journal file name too long.\n";
+        }
+    }
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s: journal filename = \"%s\".\n", 
+		  fcn_name, journal_filename); 
+    }
+
+    /* clean out any existing journal file */
+    HDremove(journal_filename);
+
+    /* Unfortunately, we get different journal output depending on the 
+     * file driver, as at present we are including the end of address
+     * space in journal entries, and the end of address space seems to 
+     * be in part a function of the file driver.  
+     *
+     * Thus, if we want to use the core file driver when available, we 
+     * will either have to remove the end of address space from the 
+     * journal entries, get the different file drivers to aggree on 
+     * end of address space, or maintain different sets of architype
+     * files for the different file drivers.
+     */
+    setup_cache_for_journaling(filename, journal_filename, &file_id,
+                               &file_ptr, &cache_ptr, FALSE);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+ 
+
+    /******************************************/
+    /* Run a small, fairly simple stress test */
+    /******************************************/
+
+    trans_num = 0;
+
+    jrnl_row_major_scan_forward2(/* file_ptr               */ file_ptr,
+                                 /* max_index              */ max_index,
+                                 /* lag                    */ lag,
+                                 /* verbose                */ verbose,
+                                 /* reset_stats            */ TRUE,
+                                 /* display_stats          */ display_stats,
+                                 /* display_detailed_stats */ FALSE,
+                                 /* do_inserts             */ TRUE,
+                                 /* dirty_inserts          */ dirty_inserts,
+                                 /* do_renames             */ TRUE,
+                                 /* rename_to_main_addr    */ FALSE,
+                                 /* do_destroys            */ TRUE,
+                                 /* do_mult_ro_protects    */ TRUE,
+                                 /* dirty_destroys         */ dirty_destroys,
+                                 /* dirty_unprotects       */ dirty_unprotects,
+                                 /* trans_num              */ trans_num);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    flush_journal(cache_ptr);
+
+    if ( update_architypes ) {
+
+        copy_file(journal_filename, testfiles[0]);
+    }
+    
+    if ( file_exists(testfiles[0]) ) {
+
+        verify_journal_contents(journal_filename, testfiles[0]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
+
+    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+
+    verify_journal_empty(journal_filename);
+
+    trans_num = 0;
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    jrnl_row_major_scan_backward2(/* file_ptr               */ file_ptr,
+                                  /* max_index              */ max_index,
+                                  /* lag                    */ lag,
+                                  /* verbose                */ verbose,
+                                  /* reset_stats            */ TRUE,
+                                  /* display_stats          */ display_stats,
+                                  /* display_detailed_stats */ FALSE,
+                                  /* do_inserts             */ FALSE,
+                                  /* dirty_inserts          */ dirty_inserts,
+                                  /* do_renames             */ TRUE,
+                                  /* rename_to_main_addr    */ TRUE,
+                                  /* do_destroys            */ FALSE,
+                                  /* do_mult_ro_protects    */ TRUE,
+                                  /* dirty_destroys         */ dirty_destroys,
+                                  /* dirty_unprotects       */ dirty_unprotects,
+                                  /* trans_num              */ trans_num);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    flush_journal(cache_ptr);
+
+    if ( update_architypes ) {
+
+        copy_file(journal_filename, testfiles[1]);
+    }
+    
+    if ( file_exists(testfiles[1]) ) {
+
+        verify_journal_contents(journal_filename, testfiles[1]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
+
+    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+
+    verify_journal_empty(journal_filename);
+
+    trans_num = 0;
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    jrnl_row_major_scan_forward2(/* file_ptr               */ file_ptr,
+                                 /* max_index              */ max_index,
+                                 /* lag                    */ lag,
+                                 /* verbose                */ verbose,
+                                 /* reset_stats            */ TRUE,
+                                 /* display_stats          */ display_stats,
+                                 /* display_detailed_stats */ FALSE,
+                                 /* do_inserts             */ TRUE,
+                                 /* dirty_inserts          */ dirty_inserts,
+                                 /* do_renames             */ TRUE,
+                                 /* rename_to_main_addr    */ FALSE,
+                                 /* do_destroys            */ FALSE,
+                                 /* do_mult_ro_protects    */ TRUE,
+                                 /* dirty_destroys         */ dirty_destroys,
+                                 /* dirty_unprotects       */ dirty_unprotects,
+                                 /* trans_num              */ trans_num);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    flush_journal(cache_ptr);
+
+    if ( update_architypes ) {
+
+        copy_file(journal_filename, testfiles[2]);
+    }
+    
+    if ( file_exists(testfiles[2]) ) {
+
+        verify_journal_contents(journal_filename, testfiles[2]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
+
+    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+
+    trans_num = 0;
+
+    verify_journal_empty(journal_filename);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    jrnl_col_major_scan_forward2(/* file_ptr               */ file_ptr,
+                                 /* max_index              */ max_index,
+                                 /* lag                    */ lag,
+                                 /* verbose                */ verbose,
+                                 /* reset_stats            */ TRUE,
+                                 /* display_stats          */ display_stats,
+                                 /* display_detailed_stats */ TRUE,
+                                 /* do_inserts             */ TRUE,
+                                 /* dirty_inserts          */ dirty_inserts,
+                                 /* dirty_unprotects       */ dirty_unprotects,
+                                 /* trans_num              */ trans_num);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    flush_journal(cache_ptr);
+
+    if ( update_architypes ) {
+
+        copy_file(journal_filename, testfiles[3]);
+    }
+    
+    if ( file_exists(testfiles[3]) ) {
+
+        verify_journal_contents(journal_filename, testfiles[3]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
+
+    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+
+    verify_journal_empty(journal_filename);
+
+    trans_num = 0;
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    jrnl_col_major_scan_backward2(/* file_ptr               */ file_ptr,
+                                  /* max_index              */ max_index,
+                                  /* lag                    */ lag,
+                                  /* verbose                */ verbose,
+                                  /* reset_stats            */ TRUE,
+                                  /* display_stats          */ display_stats,
+                                  /* display_detailed_stats */ TRUE,
+                                  /* do_inserts             */ TRUE,
+                                  /* dirty_inserts          */ dirty_inserts,
+                                  /* dirty_unprotects       */ dirty_unprotects,
+                                  /* trans_num              */ trans_num);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    flush_journal(cache_ptr);
+
+    if ( update_architypes ) {
+
+        copy_file(journal_filename, testfiles[4]);
+    }
+    
+    if ( file_exists(testfiles[4]) ) {
+
+        verify_journal_contents(journal_filename, testfiles[4]);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    /****************************************************/
+    /* Close and discard the file and the journal file. */
+    /****************************************************/
+
+    takedown_cache_after_journaling(file_id, filename, journal_filename, FALSE);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    verify_clean2();
+    verify_unprotected2();
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    if ( pass2 ) { 
+	    
+        PASSED(); 
+
+	if ( testfile_missing ) {
+
+	    puts("	WARNING: One or more missing test files."); 
+	    fflush(stdout);
+        }
+    } else { 
+	    
+        H5_FAILED(); 
+    }
+
+    if ( ! pass2 ) {
+
+	failures2++;
+        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
+                  fcn_name, failure_mssg2);
+    }
+
+    return;
+
+} /* mdj_smoke_check_02() */
 
 
 /*** metatada journaling config block I/O test code ***/
@@ -10372,6 +10953,9 @@ main(void)
 #endif
 #if 1
     mdj_smoke_check_01();
+#endif
+#if 1
+    mdj_smoke_check_02();
 #endif
 #if 1
     check_buffer_writes();

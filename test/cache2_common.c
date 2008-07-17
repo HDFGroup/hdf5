@@ -3199,7 +3199,7 @@ insert_entry2(H5F_t * file_ptr,
             pass2 = FALSE;
             failure_mssg2 = "error in H5C2_insert().";
 
-#if 1 /* This is useful debugging code.  Lets keep it around. */
+#if 0 /* This is useful debugging code.  Lets keep it around. */
 
             HDfprintf(stdout, "result = %d\n", (int)result);
             HDfprintf(stdout, "entry_ptr->header.is_protected = %d\n",
@@ -3522,7 +3522,7 @@ rename_entry2(H5C2_t * cache_ptr,
 	         ( ( ! ( entry_ptr->header.destroy_in_progress ) ) &&
 	           ( entry_ptr->header.addr != new_addr ) ) ) {
 
-#if 1 /* JRM */
+#if 0 /* JRM */
 	        if ( result < 0 ) {
 	            HDfprintf(stdout, "%s: H5C2_rename_entry() failed.\n", 
                               fcn_name);
@@ -3711,7 +3711,7 @@ protect_entry2(H5F_t * file_ptr,
              ( entry_ptr->size != entry_ptr->header.size ) ||
              ( entry_ptr->addr != entry_ptr->header.addr ) ) {
 
-#if 1
+#if 0
             /* I've written the following debugging code several times
              * now.  Lets keep it around so I don't have to write it
              * again.
@@ -4029,6 +4029,26 @@ unprotect_entry2(H5F_t * file_ptr,
             pass2 = FALSE;
             failure_mssg2 = "error in H5C2_unprotect().";
 
+	    if ( verbose ) {
+                HDfprintf(stdout, "%s: error in H5C2_unprotect():\n", fcn_name);
+
+		if ( result < 0 )
+		    HDfprintf(stdout, "	result = %d.\n", (int)result);
+
+		if ( ( entry_ptr->header.is_protected ) &&
+                     ( ( ! ( entry_ptr->is_read_only ) ) ||
+                       ( entry_ptr->ro_ref_count <= 0 ) ) )
+		    HDfprintf(stdout, "	R/O sanity check failed.\n");
+
+		if ( entry_ptr->header.type != &(types2[type]) )
+		    HDfprintf(stdout, "	Type mismatch.\n");
+
+		if ( entry_ptr->size != entry_ptr->header.size )
+		    HDfprintf(stdout, "	size mismatch.\n");
+
+		if ( entry_ptr->addr != entry_ptr->header.addr )
+		    HDfprintf(stdout, "	addr mismatch.\n");
+	    }
         }
         else
         {
@@ -4036,15 +4056,25 @@ unprotect_entry2(H5F_t * file_ptr,
 
 		entry_ptr->ro_ref_count--;
 
+		if ( verbose ) 
+                    HDfprintf(stdout, "%s: decremented ro ref count to %d.\n",
+			      fcn_name, entry_ptr->ro_ref_count);
+
 	    } else if ( entry_ptr->ro_ref_count == 1 ) {
 
 		entry_ptr->is_protected = FALSE;
 		entry_ptr->is_read_only = FALSE;
 		entry_ptr->ro_ref_count = 0;
 
+		if ( verbose ) 
+                    HDfprintf(stdout, "%s: r/o unprotected.\n", fcn_name);
+
 	    } else {
             
 		entry_ptr->is_protected = FALSE;
+
+		if ( verbose ) 
+                    HDfprintf(stdout, "%s: r/w unprotected.\n", fcn_name);
 
 	    }
 
@@ -4069,6 +4099,17 @@ unprotect_entry2(H5F_t * file_ptr,
             HDassert( entry_ptr->header.is_dirty );
             HDassert( entry_ptr->is_dirty );
         }
+
+#if 0 /* JRM */
+	if ( entry_ptr->header.is_protected != entry_ptr->is_protected ) {
+
+	    HDfprintf(stdout, 
+	      "(%d, %d, %d): header.is_protected = %d != is_protected = %d.\n",
+	      type, idx, entry_ptr->ro_ref_count, 
+	      (int)(entry_ptr->header.is_protected),
+	      (int)(entry_ptr->is_protected));
+        } 
+#endif /* JRM */
 
 	HDassert( entry_ptr->header.is_protected == entry_ptr->is_protected );
 	HDassert( entry_ptr->header.is_read_only == entry_ptr->is_read_only );
