@@ -453,7 +453,7 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name, char* jpeg_na
                 if ( opt.verbose )
                 {                
                     printf("palette index <%d> does not exist. Using default...", 
-                        ipal );
+                        opt.idx_palette );
                 }
             }
                 
