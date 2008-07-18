@@ -26,7 +26,6 @@
 #include "H5PropList.h"
 #include "H5Object.h"
 #include "H5AbstractDs.h"
-#include "H5Attribute.h"
 #include "H5FaccProp.h"
 #include "H5FcreatProp.h"
 #include "H5DcreatProp.h"
@@ -34,6 +33,8 @@
 #include "H5DataType.h"
 #include "H5DataSpace.h"
 #include "H5File.h"
+#include "H5Attribute.h"
+#include "H5private.h"          // for HDfree
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -147,29 +148,46 @@ void Attribute::read( const DataType& mem_type, void *buf ) const
 //--------------------------------------------------------------------------
 void Attribute::read( const DataType& mem_type, H5std_string& strg ) const
 {
-   // Get the attribute size and allocate temporary C-string for C API
-   hsize_t attr_size = H5Aget_storage_size(id);
-   if (attr_size <= 0)
-   {
-      throw AttributeIException("Attribute::read", "Unable to get attribute size before reading");
-   }
-   char* strg_C = new char [attr_size+1];
-   if (strg_C == NULL)
-   {
-      throw AttributeIException("Attribute::read", "Unable to allocate buffer to read the attribute");
-   }
+    // Get the size of the attribute data.
+    hsize_t attr_size = H5Aget_storage_size(id);
+    if (attr_size <= 0)
+    {
+	throw AttributeIException("Attribute::read", "Unable to get attribute size before reading");
+    }
 
-   // Call C API to get the attribute data, a string of chars
-   herr_t ret_value = H5Aread(id, mem_type.getId(), &strg_C);
-   if( ret_value < 0 )
-   {
-      throw AttributeIException("Attribute::read", "H5Aread failed");
-   }
+    // Check if this attribute has variable-len string or fixed-len string and
+    // proceed appropriately.
+    bool is_variable_len = H5Tis_variable_str(mem_type.getId());
+    char *strg_C;
+    void *ptr;
+    if (!is_variable_len)	// only allocate for fixed-len string
+    {
+	strg_C = new char [attr_size+1];
+	ptr = strg_C;
+    }
+    else
+    {
+	// no allocation for variable-len string; C library will
+	ptr = &strg_C;
+    }
 
-   // Get 'string' from the C char* and release resource
-   strg_C[attr_size] = '\0';
-   strg = strg_C;
-   delete []strg_C;
+    // Call C API to get the attribute data, a string of chars
+    herr_t ret_value = H5Aread(id, mem_type.getId(), ptr);
+
+    // Get string from the C char* and release resource allocated locally
+    if (!is_variable_len)
+    {
+	strg_C[attr_size] = '\0';
+	strg = strg_C;
+	delete []strg_C;
+    }
+    // Get string from the C char* and release resource allocated by C API
+    else
+    {
+	strg = strg_C;
+	HDfree(strg_C);
+    }
+    ptr = NULL;
 }
 
 //--------------------------------------------------------------------------
@@ -217,11 +235,11 @@ hid_t Attribute::p_get_type() const
 }
 
 //--------------------------------------------------------------------------
-// Function:    Attribute::getFileName
-///\brief       Gets the name of the file, in which this attribute belongs.
-///\return      File name
-///\exception   H5::IdComponentException
-// Programmer   Binh-Minh Ribler - Jul, 2004
+// Function:	Attribute::getFileName
+///\brief	Gets the name of the file, in which this attribute belongs.
+///\return	File name
+///\exception	H5::IdComponentException
+// Programmer	Binh-Minh Ribler - Jul, 2004
 //--------------------------------------------------------------------------
 H5std_string Attribute::getFileName() const
 {
@@ -381,9 +399,6 @@ void Attribute::setId(const hid_t new_id)
     }
    // reset object's id to the given id
    id = new_id;
-
-   // increment the reference counter of the new id
-   incRefCount();
 }
 
 //--------------------------------------------------------------------------
@@ -402,8 +417,10 @@ void Attribute::close()
 	{
 	    throw AttributeIException("Attribute::close", "H5Aclose failed");
 	}
-	// reset the id because the attribute that it represents is now closed
-	id = 0;
+	// reset the id when the attribute that it represents is no longer
+	// referenced
+	if (getCounter() == 0)
+	    id = 0;
     }
 }
 
@@ -419,18 +436,11 @@ void Attribute::close()
 //--------------------------------------------------------------------------
 Attribute::~Attribute()
 {
-    int counter = getCounter(id);
-    if (counter > 1)
-    {
-	decRefCount(id);
+    try {
+	close();
     }
-    else if (counter == 1)
-    {
-	try {
-	    close();
-	} catch (Exception close_error) {
-	    cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
-	}
+    catch (Exception close_error) {
+	cerr << "Attribute::~Attribute - " << close_error.getDetailMsg() << endl;
     }
 }
 

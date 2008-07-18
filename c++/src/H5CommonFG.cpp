@@ -15,11 +15,6 @@
 
 #include <string>
 
-// remove when done
-#include <iostream>
-    using std::cerr;
-    using std::endl;
-
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"

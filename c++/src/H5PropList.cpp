@@ -53,7 +53,7 @@ PropList::PropList() : IdComponent(), id(0) {}
 ///\param	original - IN: The original property list to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PropList::PropList(const PropList& original) : IdComponent(original) 
+PropList::PropList(const PropList& original) : IdComponent(original)
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id
@@ -245,9 +245,6 @@ void PropList::setId(const hid_t new_id)
     }
    // reset object's id to the given id
    id = new_id;
-
-   // increment the reference counter of the new id
-   incRefCount();
 }
 
 //--------------------------------------------------------------------------
@@ -266,8 +263,10 @@ void PropList::close()
 	{
 	    throw PropListIException(inMemFunc("close"), "H5Pclose failed");
 	}
-	// reset the id because the property list that it represents is now closed
-	id = 0;
+	// reset the id when the property list that it represents is no longer
+	// referenced
+	if (getCounter() == 0)
+	    id = 0;
     }
 }
 

@@ -593,9 +593,6 @@ void DataSpace::setId(const hid_t new_id)
     }
    // reset object's id to the given id
    id = new_id;
-
-   // increment the reference counter of the new id
-   incRefCount();
 }
 
 //--------------------------------------------------------------------------
@@ -615,8 +612,10 @@ void DataSpace::close()
 	{
 	    throw DataSpaceIException("DataSpace::close", "H5Sclose failed");
 	}
-	// reset the id because the dataspace that it represents is now closed
-	id = 0;
+	// reset the id when the dataspace that it represents is no longer
+	// referenced
+	if (getCounter() == 0)
+	    id = 0;
     }
 }
 
@@ -632,16 +631,10 @@ void DataSpace::close()
 //--------------------------------------------------------------------------
 DataSpace::~DataSpace()
 {
-    int counter = getCounter(id);
-    if (counter > 1)
-	decRefCount(id);
-    else if (counter == 1)
-    {
-	try {
-	    close();
-	} catch (Exception close_error) {
-	    cerr << "DataSpace::~DataSpace - " << close_error.getDetailMsg() << endl;
-	}
+    try {
+	close();
+    } catch (Exception close_error) {
+	cerr << "DataSpace::~DataSpace - " << close_error.getDetailMsg() << endl;
     }
 }
 

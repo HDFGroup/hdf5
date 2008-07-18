@@ -717,9 +717,6 @@ void DataType::setId(const hid_t new_id)
     }
    // reset object's id to the given id
    id = new_id;
-
-   // increment the reference counter of the new id
-   incRefCount();
 }
 
 //--------------------------------------------------------------------------
@@ -738,8 +735,10 @@ void DataType::close()
 	{
 	    throw DataTypeIException(inMemFunc("close"), "H5Tclose failed");
 	}
-	// reset the id because the datatype that it represents is now closed
-	id = 0;
+	// reset the id when the datatype that it represents is no longer
+	// referenced
+	if (getCounter() == 0)
+	    id = 0;
     }
 }
 
@@ -755,19 +754,11 @@ void DataType::close()
 //--------------------------------------------------------------------------
 DataType::~DataType()
 {
-    int counter = getCounter(id);
-    if (counter > 1)
-    {
-	decRefCount(id);
-    }
-    else if (counter == 1)
-    {
 	try {
 	    close();
 	} catch (Exception close_error) {
 	    cerr << inMemFunc("~DataType - ") << close_error.getDetailMsg() << endl;
 	}
-    }
 }
 #ifndef H5_NO_NAMESPACE
 } // end namespace
