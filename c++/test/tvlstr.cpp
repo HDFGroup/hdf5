@@ -416,7 +416,7 @@ static void test_vlstring_type()
 	file1 = new H5File(FILENAME, H5F_ACC_RDWR);
 
 	// Open the variable-length string datatype just created
-	vlstr_type.setId((file1->openStrType(VLSTR_TYPE)).getId());
+	vlstr_type = file1->openStrType(VLSTR_TYPE);
 
 	// Verify character set and padding
 	cset = vlstr_type.getCset();

@@ -379,7 +379,7 @@ static void test_attr_compound_write()
 
     try {
 	// Create file
-	H5File fid1(FILENAME, H5F_ACC_TRUNC);
+	H5File fid1(FILENAME.c_str(), H5F_ACC_TRUNC);
 
 	// Create dataspace for dataset
 	hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
@@ -1050,6 +1050,11 @@ static void test_attr_dtype_shared()
 	// Open the file again
 	fid1.openFile(FILENAME, H5F_ACC_RDWR);
 
+	// Enclosing to work around the issue of unused variables and/or
+	// objects created by copy constructors stay around until end of 
+	// scope, causing incorrect number of ref counts.
+	{ // First enclosed block
+
 	// Create a datatype to commit and use
 	IntType dtype(PredType::NATIVE_INT);
 
@@ -1065,13 +1070,6 @@ static void test_attr_dtype_shared()
 	// Create dataspace for dataset
 	DataSpace dspace;
 
-	// Enclose the following so that all temporary objects can be
-	// destroyed before testing reference count - this is to overcome
-	// the different time when the temporary objects are to be destroyed
-	// by different compilers.
-	{
-
-	// Create dataset
 	DataSet dset = fid1.createDataSet(DSET1_NAME, dtype, dspace);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -1089,8 +1087,8 @@ static void test_attr_dtype_shared()
 	verify_val((int)statbuf.nlink, 3, "DataSet::getObjinfo", __LINE__, __FILE__);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-	// Close attribute
-	attr.close();
+        // Close attribute
+        attr.close();
 
 	// Delete attribute
 	dset.removeAttr(ATTR1_NAME);
@@ -1101,8 +1099,8 @@ static void test_attr_dtype_shared()
 	verify_val((int)statbuf.nlink, 2, "DataSet::getObjinfo after DataSet::removeAttr", __LINE__, __FILE__);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-	// Create attribute on dataset
-	attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
+        // Create attribute on dataset
+        attr = dset.createAttribute(ATTR1_NAME,dtype,dspace);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Check reference count on named datatype
@@ -1118,10 +1116,14 @@ static void test_attr_dtype_shared()
 	dset.close();
 	dspace.close();
 	dtype.close();
+	} // end of first enclosing
+
 	fid1.close();
 
 	// Open the file again
 	fid1.openFile(FILENAME, H5F_ACC_RDWR);
+
+	{ // Second enclosed block...
 
 	// Open dataset
 	DataSet *dset2 = new DataSet (fid1.openDataSet(DSET1_NAME));
@@ -1142,11 +1144,10 @@ static void test_attr_dtype_shared()
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val((int)statbuf.nlink, 3, "DataSet::openAttribute", __LINE__, __FILE__);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+	} // end of second enclosing
 
 	// Unlink the dataset
 	fid1.unlink(DSET1_NAME);
-
-        } // end of enclosing to test reference counts
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Check reference count on named datatype
