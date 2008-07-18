@@ -2328,7 +2328,7 @@ H5A_copy(H5A_t *_new_attr, const H5A_t *old_attr)
 
     /* Deep copy of the group hierarchy path */
     if(H5G_name_copy(&(new_attr->path), &(old_attr->path), H5_COPY_DEEP) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "unable to copy path")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "unable to copy path")
 
     /* Share some attribute information */
     new_attr->shared = old_attr->shared;
