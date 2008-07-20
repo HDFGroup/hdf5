@@ -441,10 +441,10 @@ typedef struct H5C2_t H5C2_t;
 typedef void *(*H5C2_deserialize_func_t)(haddr_t addr,
                                          size_t len,
                                          const void * image_ptr,
-                                         const void * udata_ptr,
+                                         void * udata_ptr,
 					 hbool_t * dirty_ptr);
  
-typedef herr_t (*H5C2_image_len_func_t)(void *thing,
+typedef herr_t (*H5C2_image_len_func_t)(const void *thing,
                                         size_t *image_len_ptr);
 
 #define H5C2__SERIALIZE_RESIZED_FLAG	0x1
@@ -1279,7 +1279,6 @@ typedef struct H5C2_auto_size_ctl_t
  * These flags apply to H5C2_protect()
  *
  * 	H5C2__READ_ONLY_FLAG
- * 	H5C2__CHECK_SIZE_FLAG
  *
  * These flags apply to H5C2_unprotect():
  *
@@ -1318,7 +1317,6 @@ typedef struct H5C2_auto_size_ctl_t
 #define H5C2__FLUSH_MARKED_ENTRIES_FLAG		0x0100
 #define H5C2__FLUSH_IGNORE_PROTECTED_FLAG	0x0200
 #define H5C2__READ_ONLY_FLAG			0x0400
-#define H5C2__CHECK_SIZE_FLAG			0x0800
 
 H5_DLL H5C2_t * H5C2_create(size_t                      max_cache_size,
                             size_t                      min_clean_size,
@@ -1397,34 +1395,30 @@ H5_DLL herr_t H5C2_mark_entries_as_clean(H5F_t *  f,
                                          int32_t   ce_array_len,
                                          haddr_t * ce_array_ptr);
 
-H5_DLL herr_t H5C2_mark_pinned_entry_dirty(H5F_t * f,
-	                                  void *  thing,
+H5_DLL herr_t H5C2_mark_pinned_entry_dirty(void *  thing,
 					  hbool_t size_changed,
 					  size_t  new_size);
 
-H5_DLL herr_t H5C2_mark_pinned_or_protected_entry_dirty(H5F_t * f,
-                                                       void *  thing);
+H5_DLL herr_t H5C2_mark_pinned_or_protected_entry_dirty(void *  thing);
 
 H5_DLL herr_t H5C2_rename_entry(H5C2_t *             cache_ptr,
                                const H5C2_class_t * type,
                                haddr_t             old_addr,
                                haddr_t             new_addr);
 
-H5_DLL herr_t H5C2_pin_protected_entry(H5F_t * f,
-                                      void *  thing);
+H5_DLL herr_t H5C2_pin_protected_entry(void *  thing);
 
 H5_DLL void * H5C2_protect(H5F_t *              f,
 		           hid_t                dxpl_id,
 			   const H5C2_class_t * type,
                            haddr_t              addr,
 			   size_t		len,
-                           const void *         udata,
+                           void *               udata,
                            unsigned             flags);
 
 H5_DLL herr_t H5C2_reset_cache_hit_rate_stats(H5C2_t * cache_ptr);
 
-H5_DLL herr_t H5C2_resize_pinned_entry(H5F_t * f,
-                                      void *  thing,
+H5_DLL herr_t H5C2_resize_pinned_entry(void *  thing,
                                       size_t  new_size);
 
 H5_DLL herr_t H5C2_set_cache_auto_resize_config(const H5F_t * f,

@@ -593,6 +593,9 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
  * independent access, causing the metadata cache to get corrupted. Its been
  * disabled for all types of access (serial as well as parallel) to make the
  * modification time consistent for all programs. -QAK
+ *
+ * We should set a value in the dataset's shared information instead and flush
+ * it to the file when the dataset is being closed. -QAK
  */
     /*
      * Update modification time.  We have to do this explicitly because

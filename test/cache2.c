@@ -14254,7 +14254,7 @@ check_multiple_read_protect(void)
 
 	    entry_ptr = &((entries2[0])[4]);
 
-	    if ( H5C2_pin_protected_entry(file_ptr, (void *)entry_ptr) < 0 ) {
+	    if ( H5C2_pin_protected_entry((void *)entry_ptr) < 0 ) {
 
 	        pass2 = FALSE;
 	        failure_mssg2 = "H5C2_pin_protected_entry() failed.\n";
@@ -14635,7 +14635,7 @@ check_pin_protected_entry(void)
         base_addr = entries2[0];
         entry_ptr = &(base_addr[0]);
 
-	result = H5C2_pin_protected_entry(file_ptr, (void *)entry_ptr);
+	result = H5C2_pin_protected_entry((void *)entry_ptr);
 
 	if ( result < 0 ) {
 
@@ -14971,7 +14971,7 @@ check_resize_entry(void)
 
     if ( pass2 ) {
 
-        result = H5C2_resize_pinned_entry(file_ptr, (void *)entry_ptr, 
+        result = H5C2_resize_pinned_entry((void *)entry_ptr, 
 			                 (LARGE_ENTRY_SIZE / 4));
 
 	if ( result < 0 ) {
@@ -15032,7 +15032,7 @@ check_resize_entry(void)
 
     if ( pass2 ) {
 
-        result = H5C2_resize_pinned_entry(file_ptr, (void *)entry_ptr, 
+        result = H5C2_resize_pinned_entry((void *)entry_ptr, 
 			                 LARGE_ENTRY_SIZE);
 
 	if ( result < 0 ) {
@@ -15400,7 +15400,7 @@ check_resize_entry(void)
 
     if ( pass2 ) {
 
-        result = H5C2_resize_pinned_entry(file_ptr, (void *)entry_ptr, 
+        result = H5C2_resize_pinned_entry((void *)entry_ptr, 
 			                 (LARGE_ENTRY_SIZE / 4));
 
 	if ( result < 0 ) {
@@ -15463,7 +15463,7 @@ check_resize_entry(void)
 
     if ( pass2 ) {
 
-        result = H5C2_resize_pinned_entry(file_ptr, (void *)entry_ptr, 
+        result = H5C2_resize_pinned_entry((void *)entry_ptr, 
 			                 LARGE_ENTRY_SIZE);
 
 	if ( result < 0 ) {
@@ -17014,7 +17014,7 @@ check_pin_entry_errs(void)
 
     if ( pass2 ) {
 
-        result = H5C2_pin_protected_entry(file_ptr, (void *)entry_ptr);
+        result = H5C2_pin_protected_entry((void *)entry_ptr);
 
         if ( result > 0 ) {
 
@@ -17034,7 +17034,7 @@ check_pin_entry_errs(void)
 
     if ( pass2 ) {
 
-        result = H5C2_pin_protected_entry(file_ptr, (void *)entry_ptr);
+        result = H5C2_pin_protected_entry((void *)entry_ptr);
 
         if ( result > 0 ) {
 
@@ -17311,7 +17311,7 @@ check_mark_entry_dirty_errs(void)
 
     if ( pass2 ) {
 
-	result = H5C2_mark_pinned_entry_dirty(file_ptr, (void *)entry_ptr,
+	result = H5C2_mark_pinned_entry_dirty((void *)entry_ptr,
 			                     FALSE, (size_t)0);
 
         if ( result > 0 ) {
@@ -17328,7 +17328,7 @@ check_mark_entry_dirty_errs(void)
 
     if ( pass2 ) {
 
-	result = H5C2_mark_pinned_entry_dirty(file_ptr, (void *)entry_ptr,
+	result = H5C2_mark_pinned_entry_dirty((void *)entry_ptr,
 			                     FALSE, (size_t)0);
 
 
@@ -17342,8 +17342,7 @@ check_mark_entry_dirty_errs(void)
 
     if ( pass2 ) {
 
-	result = H5C2_mark_pinned_or_protected_entry_dirty(file_ptr,
-			                                  (void *)entry_ptr);
+	result = H5C2_mark_pinned_or_protected_entry_dirty((void *)entry_ptr);
 
 
         if ( result > 0 ) {
@@ -17552,7 +17551,7 @@ check_resize_entry_errs(void)
 
     if ( pass2 ) {
 
-	result = H5C2_resize_pinned_entry(file_ptr, (void *)entry_ptr, (size_t)1);
+	result = H5C2_resize_pinned_entry((void *)entry_ptr, (size_t)1);
 
         if ( result > 0 ) {
 
@@ -17569,7 +17568,7 @@ check_resize_entry_errs(void)
 
     if ( pass2 ) {
 
-	result = H5C2_resize_pinned_entry(file_ptr, (void *)entry_ptr, 
+	result = H5C2_resize_pinned_entry((void *)entry_ptr, 
 			                  (size_t)0);
 
         if ( result > 0 ) {

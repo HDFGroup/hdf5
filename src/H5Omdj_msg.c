@@ -33,7 +33,6 @@
  */
 
 #define H5O_PACKAGE             /*suppress error about including H5Opkg   */
-#define H5C2_PACKAGE            /*suppress error about including H5C2pkg  */
 
 #include "H5private.h"          /* Generic Functions                    */
 #include "H5Eprivate.h"         /* Error handling                       */

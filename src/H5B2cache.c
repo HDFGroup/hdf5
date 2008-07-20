@@ -48,9 +48,6 @@
 #define H5B2_INT_VERSION 0              /* Internal node */
 #define H5B2_LEAF_VERSION 0             /* Leaf node */
 
-/* Size of stack buffer for serialized headers */
-#define H5B2_HDR_BUF_SIZE               128
-
 
 /******************/
 /* Local Typedefs */
@@ -68,21 +65,21 @@
 
 /* Metadata cache callbacks */
 static void *H5B2_cache_hdr_deserialize(haddr_t addr, size_t len,
-    const void *image, const void *udata, hbool_t *dirty);
+    const void *image, void *udata, hbool_t *dirty);
 static herr_t H5B2_cache_hdr_serialize(const H5F_t *f, haddr_t addr, size_t len,
     void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
 static herr_t H5B2_cache_hdr_free_icr(haddr_t addr, size_t len, void *thing);
 
 static void *H5B2_cache_internal_deserialize(haddr_t addr, size_t len,
-    const void *image, const void *udata, hbool_t *dirty);
+    const void *image, void *udata, hbool_t *dirty);
 static herr_t H5B2_cache_internal_serialize(const H5F_t *f, haddr_t addr, size_t len,
     void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
 static herr_t H5B2_cache_internal_free_icr(haddr_t addr, size_t len, void *thing);
 
 static void *H5B2_cache_leaf_deserialize(haddr_t addr, size_t len,
-    const void *image, const void *udata, hbool_t *dirty);
+    const void *image, void *udata, hbool_t *dirty);
 static herr_t H5B2_cache_leaf_serialize(const H5F_t *f, haddr_t addr, size_t len,
     void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
@@ -161,9 +158,9 @@ const H5AC2_class_t H5AC2_BT2_LEAF[1] = {{
  */
 static void *
 H5B2_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len, 
-    const void *image, const void *_udata, hbool_t UNUSED *dirty)
+    const void *image, void *_udata, hbool_t UNUSED *dirty)
 {
-    const H5B2_hdr_cache_ud_t *udata = (const H5B2_hdr_cache_ud_t *)_udata;
+    H5B2_hdr_cache_ud_t *udata = (H5B2_hdr_cache_ud_t *)_udata;
     unsigned depth;                     /* Depth of B-tree */
     size_t node_size, rrec_size;        /* Size info for B-tree */
     uint8_t split_percent, merge_percent;      /* Split & merge %s for B-tree */
@@ -171,13 +168,14 @@ H5B2_cache_hdr_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
     size_t		size;           /* Header size */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
-    uint8_t		*p;             /* Pointer into raw data buffer */
+    const uint8_t	*p;             /* Pointer into raw data buffer */
     H5B2_t		*ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_hdr_deserialize, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_hdr_deserialize)
 
     /* Check arguments */
     HDassert(image);
+    HDassert(udata);
 
     /* Allocate space for the B-tree data structure */
     if(NULL == (bt2 = H5FL_MALLOC(H5B2_t)))
@@ -278,13 +276,12 @@ H5B2_cache_hdr_serialize(const H5F_t *f, haddr_t UNUSED addr, size_t UNUSED len,
     size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5B2_t *bt2 = (H5B2_t *)_thing;      /* Pointer to the b-tree header */
-    herr_t      ret_value = SUCCEED;    /* Return value */
     H5B2_shared_t *shared;  /* Shared B-tree information */
     uint8_t *p;             /* Pointer into raw data buffer */
     size_t	size;           /* Header size on disk */
     uint32_t metadata_chksum; /* Computed metadata checksum value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_hdr_serialize, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_hdr_serialize)
 
     /* check arguments */
     HDassert(f);
@@ -344,8 +341,7 @@ H5B2_cache_hdr_serialize(const H5F_t *f, haddr_t UNUSED addr, size_t UNUSED len,
     /* Sanity check */
     HDassert((size_t)((const uint8_t *)p - (const uint8_t *)image) <= len);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_cache_hdr_serialize() */
 
 
@@ -400,20 +396,20 @@ H5B2_cache_hdr_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
  */
 static void *
 H5B2_cache_internal_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
-    const void *image, const void *_udata, hbool_t UNUSED *dirty)
+    const void *image, void *_udata, hbool_t UNUSED *dirty)
 {
+    H5B2_internal_cache_ud_t *udata = (H5B2_internal_cache_ud_t *)_udata;     /* Pointer to user data */
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
     H5B2_internal_t	*internal = NULL;       /* Internal node read */
-    uint8_t		*p;             /* Pointer into raw data buffer */
+    const uint8_t	*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native record info */
     H5B2_node_ptr_t	*int_node_ptr;  /* Pointer to node pointer info */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
     H5B2_internal_t	*ret_value;     /* Return value */
-    const H5B2_internal_cache_ud_t *udata = (const H5B2_internal_cache_ud_t *)_udata;     /* Pointer to user data */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_internal_deserialize, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_internal_deserialize)
 
     /* Check arguments */
     HDassert(image);
@@ -505,6 +501,7 @@ H5B2_cache_internal_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 done:
     if(!ret_value && internal)
         (void)H5B2_cache_internal_dest(internal);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_internal_deserialize() */ /*lint !e818 Can't make udata a pointer to const */
 
@@ -538,7 +535,6 @@ H5B2_cache_internal_serialize(const H5F_t *f, haddr_t UNUSED addr,
     size_t UNUSED len, void *image, void *_thing, unsigned *flags,
     haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
-    herr_t      ret_value = SUCCEED;    /* Return value */
     H5B2_shared_t *shared;  /* Shared B-tree information */
     uint8_t *p;             /* Pointer into raw data buffer */
     uint8_t *native;        /* Pointer to native record info */
@@ -546,8 +542,9 @@ H5B2_cache_internal_serialize(const H5F_t *f, haddr_t UNUSED addr,
     uint32_t metadata_chksum; /* Computed metadata checksum value */
     unsigned u;             /* Local index variable */
     H5B2_internal_t *internal = (H5B2_internal_t *)_thing;      /* Pointer to the b-tree internal node */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_internal_serialize, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_internal_serialize)
 
     /* check arguments */
     HDassert(f);
@@ -665,22 +662,23 @@ H5B2_cache_internal_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing
  */
 static void *
 H5B2_cache_leaf_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
-    const void *image, const void *_udata, hbool_t UNUSED *dirty)
+    const void *image, void *_udata, hbool_t UNUSED *dirty)
 {
+    H5B2_leaf_cache_ud_t *udata = (H5B2_leaf_cache_ud_t *)_udata;
     H5B2_shared_t 	*shared;        /* Shared B-tree information */
     H5B2_leaf_t		*leaf = NULL;   /* Pointer to lead node loaded */
-    uint8_t		*p;             /* Pointer into raw data buffer */
+    const uint8_t	*p;             /* Pointer into raw data buffer */
     uint8_t		*native;        /* Pointer to native keys */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     unsigned		u;              /* Local index variable */
     H5B2_leaf_t		*ret_value;     /* Return value */
-    const H5B2_leaf_cache_ud_t *udata = (const H5B2_leaf_cache_ud_t *)_udata;
 
-    FUNC_ENTER_NOAPI(H5B2_cache_leaf_deserialize, NULL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_leaf_deserialize)
 
     /* Check arguments */
     HDassert(image);
+    HDassert(udata);
 
     if(NULL == (leaf = H5FL_MALLOC(H5B2_leaf_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
@@ -750,6 +748,7 @@ H5B2_cache_leaf_deserialize(haddr_t UNUSED addr, size_t UNUSED len,
 done:
     if(!ret_value && leaf)
         (void)H5B2_cache_leaf_dest(leaf);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_cache_leaf_deserialize() */ /*lint !e818 Can't make udata a pointer to const */
 
@@ -784,15 +783,15 @@ H5B2_cache_leaf_serialize(const H5F_t *f, haddr_t UNUSED addr, size_t UNUSED len
     void *image, void *_thing, unsigned *flags, haddr_t UNUSED *new_addr,
     size_t UNUSED *new_len, void UNUSED **new_image)
 {
-    herr_t      ret_value = SUCCEED;    /* Return value */
     H5B2_shared_t *shared;  /* Shared B-tree information */
     uint8_t *p;             /* Pointer into raw data buffer */
     uint8_t *native;        /* Pointer to native keys */
     uint32_t metadata_chksum; /* Computed metadata checksum value */
-    unsigned u;             /* Local index variable */
     H5B2_leaf_t *leaf = (H5B2_leaf_t *)_thing;      /* Pointer to the b-tree leaf node  */
+    unsigned u;             /* Local index variable */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5B2_cache_leaf_serialize, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_leaf_serialize)
 
     /* check arguments */
     HDassert(f);
@@ -874,3 +873,4 @@ H5B2_cache_leaf_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_cache_leaf_free_icr() */
+

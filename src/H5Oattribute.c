@@ -220,7 +220,6 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
     H5O_ainfo_t ainfo;                  /* Attribute information for object */
-    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     htri_t shared_mesg;                 /* Should this message be stored in the Shared Message table? */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -231,8 +230,16 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     HDassert(attr);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_WRITE)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+
+    /* Pin the object header */
+    if(H5O_pin(oh) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header")
+
+    /* Unprotect the object header */
+    if(H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header")
 
     /* Check if this object already has attribute information */
     if(oh->version > H5O_VERSION_1) {
@@ -386,12 +393,9 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
 
-    /* Indicate that the object header was modified */
-    oh_flags |= H5AC__DIRTIED_FLAG;
-
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_create() */
@@ -470,8 +474,8 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     HDassert(name);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, NULL, "unable to load object header")
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_READ)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, NULL, "unable to load object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -509,8 +513,8 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     } /* end else */
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, NULL, "unable to release object header")
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_open_by_name() */
@@ -684,6 +688,8 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned UNUSED sequence, hbool_t *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_wrt_t *udata = (H5O_iter_wrt_t *)_udata;   /* Operator user data */
+    H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
+    unsigned chk_flags = H5AC2__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_write_cb)
@@ -695,6 +701,10 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
 
     /* Check for correct attribute message to modify */
     if(HDstrcmp(((H5A_t *)mesg->native)->name, udata->attr->name) == 0) {
+        /* Protect chunk */
+        if(NULL == (chk_proxy = H5O_chunk_protect(udata->f, udata->dxpl_id, oh, mesg->chunkno)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load object header chunk")
+
         /* Allocate storage for the message's data, if necessary */
         if(((H5A_t *)mesg->native)->data == NULL)
             if(NULL == (((H5A_t *)mesg->native)->data = H5FL_BLK_MALLOC(attr_buf, udata->attr->data_size)))
@@ -706,13 +716,19 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
          */
         HDmemcpy(((H5A_t *)mesg->native)->data, udata->attr->data, udata->attr->data_size);
 
+        /* Mark the message as modified */
+        mesg->dirty = TRUE;
+        chk_flags |= H5AC2__DIRTIED_FLAG;
+
+        /* Release chunk */
+        if(H5O_chunk_unprotect(udata->f, udata->dxpl_id, oh, chk_proxy, chk_flags) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk")
+        chk_proxy = NULL;
+
         /* Update the shared attribute in the SOHM storage */
         if(mesg->flags & H5O_MSG_FLAG_SHARED)
             if(H5O_attr_update_shared(udata->f, udata->dxpl_id, oh, udata->attr, (H5O_shared_t *)mesg->native) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, H5_ITER_ERROR, "unable to update attribute in shared storage")
-
-        /* Mark message as dirty */
-        mesg->dirty = TRUE;
 
         /* Indicate that the object header was modified */
         *oh_modified = TRUE;
@@ -725,6 +741,10 @@ H5O_attr_write_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     } /* end if */
 
 done:
+    /* Release chunk, if not already done */
+    if(chk_proxy && H5O_chunk_unprotect(udata->f, udata->dxpl_id, oh, chk_proxy, chk_flags) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_write_cb() */
 
@@ -746,7 +766,6 @@ H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
     H5O_ainfo_t ainfo;                  /* Attribute information for object */
-    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_write)
@@ -756,8 +775,16 @@ H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     HDassert(attr);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_WRITE)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+
+    /* Pin the object header */
+    if(H5O_pin(oh) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header")
+
+    /* Unprotect the object header */
+    if(H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -796,12 +823,9 @@ H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
     if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
 
-    /* Indicate that the object header was modified */
-    oh_flags |= H5AC__DIRTIED_FLAG;
-
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_write */
@@ -872,6 +896,8 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned UNUSED sequence, hbool_t *oh_modified, void *_udata/*in,out*/)
 {
     H5O_iter_ren_t *udata = (H5O_iter_ren_t *)_udata;   /* Operator user data */
+    H5O_chunk_proxy_t *chk_proxy = NULL;        /* Chunk that message is in */
+    unsigned chk_flags = H5AC2__NO_FLAGS_SET;   /* Flags for unprotecting chunk */
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_rename_mod_cb)
@@ -885,6 +911,10 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     if(HDstrcmp(((H5A_t *)mesg->native)->name, udata->old_name) == 0) {
         unsigned old_version = ((H5A_t *)mesg->native)->version;        /* Old version of the attribute */
 
+        /* Protect chunk */
+        if(NULL == (chk_proxy = H5O_chunk_protect(udata->f, udata->dxpl_id, oh, mesg->chunkno)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, H5_ITER_ERROR, "unable to load object header chunk")
+
         /* Change the name for the attribute */
         H5MM_xfree(((H5A_t *)mesg->native)->name);
         ((H5A_t *)mesg->native)->name = H5MM_xstrdup(udata->new_name);
@@ -893,8 +923,14 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         if(H5A_set_version(udata->f, ((H5A_t *)mesg->native)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5_ITER_ERROR, "unable to update attribute version")
 
-        /* Mark message as dirty */
+        /* Mark the message as modified */
         mesg->dirty = TRUE;
+        chk_flags |= H5AC2__DIRTIED_FLAG;
+
+        /* Release chunk */
+        if(H5O_chunk_unprotect(udata->f, udata->dxpl_id, oh, chk_proxy, chk_flags) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk")
+        chk_proxy = NULL;
 
         /* Check for shared message */
         if(mesg->flags & H5O_MSG_FLAG_SHARED) {
@@ -955,6 +991,10 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     } /* end if */
 
 done:
+    /* Release chunk, if not already done */
+    if(chk_proxy && H5O_chunk_unprotect(udata->f, udata->dxpl_id, oh, chk_proxy, chk_flags) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, H5_ITER_ERROR, "unable to unprotect object header chunk")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_rename_mod_cb() */
 
@@ -977,7 +1017,6 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name,
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
     H5O_ainfo_t ainfo;                  /* Attribute information for object */
-    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_rename)
@@ -988,8 +1027,16 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name,
     HDassert(new_name);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_WRITE)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+
+    /* Pin the object header */
+    if(H5O_pin(oh) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header")
+
+    /* Unprotect the object header */
+    if(H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -1039,12 +1086,9 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name,
     if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
 
-    /* Indicate that the object header was modified */
-    oh_flags |= H5AC__DIRTIED_FLAG;
-
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_rename */
@@ -1081,8 +1125,8 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
     HDassert(attr_op);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_READ)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -1097,8 +1141,8 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
 
         /* Release the object header */
-        if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+        if(H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
         oh = NULL;
 
         /* Iterate over attributes in dense storage */
@@ -1112,8 +1156,8 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "error building attribute table")
 
         /* Release the object header */
-        if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+        if(H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
         oh = NULL;
 
         /* Check for skipping too many attributes */
@@ -1127,8 +1171,8 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
 
 done:
     /* Release resources */
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
     if(atable.attrs && H5A_attr_release_table(&atable) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
 
@@ -1342,7 +1386,6 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
     H5O_ainfo_t ainfo;                  /* Attribute information for object */
     H5O_ainfo_t *ainfo_ptr = NULL;      /* Pointer to attribute information for object */
-    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_remove)
@@ -1352,8 +1395,16 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     HDassert(name);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_WRITE)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+
+    /* Pin the object header */
+    if(H5O_pin(oh) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header")
+
+    /* Unprotect the object header */
+    if(H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -1397,12 +1448,9 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
 
-    /* Indicate that the object header was modified */
-    oh_flags |= H5AC__DIRTIED_FLAG;
-
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_remove() */
@@ -1428,7 +1476,6 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
     H5O_ainfo_t ainfo;                  /* Attribute information for object */
     H5O_ainfo_t *ainfo_ptr = NULL;      /* Pointer to attribute information for object */
-    unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1438,8 +1485,16 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     HDassert(loc);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_WRITE)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
+
+    /* Pin the object header */
+    if(H5O_pin(oh) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTPIN, FAIL, "unable to pin object header")
+
+    /* Unprotect the object header */
+    if(H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to unprotect object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -1491,12 +1546,9 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     if(H5O_touch_oh(loc->file, dxpl_id, oh, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update time on object")
 
-    /* Indicate that the object header was modified */
-    oh_flags |= H5AC__DIRTIED_FLAG;
-
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, oh_flags) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(oh && H5O_unpin(oh) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
     if(atable.attrs && H5A_attr_release_table(&atable) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute table")
 
@@ -1620,8 +1672,8 @@ H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     HDassert(name);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_READ)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
@@ -1656,8 +1708,8 @@ H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     } /* end else */
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_exists */
@@ -1758,15 +1810,15 @@ H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id)
     HDassert(loc);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
-	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    if(NULL == (oh = H5O_protect(loc, dxpl_id, H5AC2_READ)))
+	HGOTO_ERROR(H5E_ATTR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Retrieve # of attributes on object */
     ret_value = (int)H5O_attr_count_real(loc->file, dxpl_id, oh);
 
 done:
-    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_PROTECT, FAIL, "unable to release object header")
+    if(oh && H5O_unprotect(loc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_count */

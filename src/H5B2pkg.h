@@ -235,13 +235,13 @@ typedef struct {
 /* Package Private Variables */
 /*****************************/
 
-/* H5B2 header inherits cache-like properties from H5AC */
+/* H5B2 header inherits cache-like properties from H5AC2 */
 H5_DLLVAR const H5AC2_class_t H5AC2_BT2_HDR[1];
 
-/* H5B2 internal node inherits cache-like properties from H5AC */
+/* H5B2 internal node inherits cache-like properties from H5AC2 */
 H5_DLLVAR const H5AC2_class_t H5AC2_BT2_INT[1];
 
-/* H5B2 leaf node inherits cache-like properties from H5AC */
+/* H5B2 leaf node inherits cache-like properties from H5AC2 */
 H5_DLLVAR const H5AC2_class_t H5AC2_BT2_LEAF[1];
 
 /* Declare a free list to manage the H5B2_t struct */

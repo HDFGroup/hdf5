@@ -223,7 +223,7 @@ HDfprintf(stderr, "%s: New section info, addr = %a, size = %Hu\n", FUNC, fspace-
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, NULL, "can't add free space sections to cache")
 
         /* Mark free space header as dirty */
-        if(H5AC2_mark_pinned_or_protected_entry_dirty(f, fspace) < 0)
+        if(H5AC2_mark_pinned_or_protected_entry_dirty(fspace) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, NULL, "unable to mark free space header as dirty")
     } /* end if */
     else {
@@ -240,7 +240,7 @@ HDfprintf(stderr, "%s: Reading in existing sections, fspace->sect_addr = %a\n", 
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space sections")
 
         /* Pin them in the cache */
-        if(H5AC2_pin_protected_entry(f, sinfo) < 0)
+        if(H5AC2_pin_protected_entry(sinfo) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTPIN, NULL, "unable to pin free space sections")
 
         /* Unlock free space sections, now pinned */
@@ -321,7 +321,7 @@ HDfprintf(stderr, "%s: cls->serial_size = %Zu\n", FUNC, cls->serial_size);
     } /* end else */
 
     /* Mark free space header as dirty */
-    if(H5AC2_mark_pinned_or_protected_entry_dirty(f, fspace) < 0)
+    if(H5AC2_mark_pinned_or_protected_entry_dirty(fspace) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
 
 done:
@@ -384,7 +384,7 @@ HDfprintf(stderr, "%s: cls->serial_size = %Zu\n", FUNC, cls->serial_size);
     } /* end else */
 
     /* Mark free space header as dirty */
-    if(H5AC2_mark_pinned_or_protected_entry_dirty(f, fspace) < 0)
+    if(H5AC2_mark_pinned_or_protected_entry_dirty(fspace) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
 
 done:
@@ -589,7 +589,7 @@ HDfprintf(stderr, "%s: fspace->tot_space = %Hu\n", FUNC, fspace->tot_space);
     fspace->tot_space -= sect->size;
 
     /* Mark free space sections as changed */
-    if(H5AC2_mark_pinned_or_protected_entry_dirty(f, fspace->sinfo) < 0)
+    if(H5AC2_mark_pinned_or_protected_entry_dirty(fspace->sinfo) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space sections as dirty")
 
 done:
@@ -1101,7 +1101,7 @@ HDfprintf(stderr, "%s: fspace->hdr->tot_space = %Hu\n", FUNC, fspace->tot_space)
     /* Mark free space sections as changed */
     /* (if adding sections while deserializing sections, don't set the flag) */
     if(!(flags & H5FS_ADD_DESERIALIZING)) {
-        if(H5AC2_mark_pinned_or_protected_entry_dirty(f, fspace->sinfo) < 0)
+        if(H5AC2_mark_pinned_or_protected_entry_dirty(fspace->sinfo) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space sections as dirty")
     } /* end if */
 
@@ -1370,7 +1370,7 @@ HDfprintf(stderr, "%s: old_addr = %a, fspace->sect_addr = %a\n", FUNC, old_addr,
 
         /* Resize pinned section info in the cache, if its changed size */
         if(old_alloc_sect_size != fspace->alloc_sect_size) {
-            if(H5AC2_resize_pinned_entry(f, fspace->sinfo, (size_t)fspace->alloc_sect_size) < 0)
+            if(H5AC2_resize_pinned_entry(fspace->sinfo, (size_t)fspace->alloc_sect_size) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTRESIZE, FAIL, "unable to resize free space section info")
         } /* end if */
 
@@ -1381,12 +1381,12 @@ HDfprintf(stderr, "%s: old_addr = %a, fspace->sect_addr = %a\n", FUNC, old_addr,
         } /* end if */
         else {
             /* Mark free space section as dirty */
-            if(H5AC2_mark_pinned_or_protected_entry_dirty(f, fspace->sinfo) < 0)
+            if(H5AC2_mark_pinned_or_protected_entry_dirty(fspace->sinfo) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space section info as dirty")
         } /* end else */
 
         /* Mark free space header as dirty */
-        if(H5AC2_mark_pinned_or_protected_entry_dirty(f, fspace) < 0)
+        if(H5AC2_mark_pinned_or_protected_entry_dirty(fspace) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
     } /* end if */
     else {
@@ -1435,7 +1435,7 @@ HDfprintf(stderr, "%s: Allocating space for smaller serialized sections, new_siz
 
             /* Resize pinned section info in the cache, if its changed size */
             if(old_alloc_sect_size != fspace->alloc_sect_size) {
-                if(H5AC2_resize_pinned_entry(f, fspace->sinfo, (size_t)fspace->alloc_sect_size) < 0)
+                if(H5AC2_resize_pinned_entry(fspace->sinfo, (size_t)fspace->alloc_sect_size) < 0)
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTRESIZE, FAIL, "unable to resize free space section info")
             } /* end if */
 
@@ -1446,12 +1446,12 @@ HDfprintf(stderr, "%s: Allocating space for smaller serialized sections, new_siz
             } /* end if */
             else {
                 /* Mark free space section as dirty */
-                if(H5AC2_mark_pinned_or_protected_entry_dirty(f, fspace->sinfo) < 0)
+                if(H5AC2_mark_pinned_or_protected_entry_dirty(fspace->sinfo) < 0)
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space section info as dirty")
             } /* end else */
 
             /* Mark free space header as dirty */
-            if(H5AC2_mark_pinned_or_protected_entry_dirty(f, fspace) < 0)
+            if(H5AC2_mark_pinned_or_protected_entry_dirty(fspace) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
         } /* end if */
     } /* end else */
@@ -1790,7 +1790,7 @@ HDfprintf(stderr, "%s: removing object from merge list, sect->type = %u\n", FUNC
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTCOMPUTE, FAIL, "can't adjust free space section size on disk")
     
     /* Mark free space sections as dirty */
-    if(H5AC2_mark_pinned_or_protected_entry_dirty(f, fspace->sinfo) < 0)
+    if(H5AC2_mark_pinned_or_protected_entry_dirty(fspace->sinfo) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space sections as dirty")
 
 done:

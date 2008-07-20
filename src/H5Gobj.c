@@ -864,8 +864,16 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
                     HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
 
                 /* Get a pointer to the object header itself */
-                if((oh = H5O_protect(oloc, dxpl_id)) == NULL)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to protect dataset object header")
+                if((oh = H5O_protect(oloc, dxpl_id, H5AC2_WRITE)) == NULL)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to protect group object header")
+
+                /* Pin the object header */
+                if(H5O_pin(oh) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTPIN, FAIL, "unable to pin group object header")
+
+                /* Unprotect the object header */
+                if(H5O_unprotect(oloc, dxpl_id, oh, H5AC2__NO_FLAGS_SET) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTUNPROTECT, FAIL, "unable to unprotect group object header")
 
                 /* Inspect links in table for ones that can't be converted back
                  * into link message form (currently only links which can't fit
@@ -883,8 +891,8 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
                     for(u = 0; u < linfo->nlinks; u++)
                         if(H5O_msg_append_oh(oloc->file, dxpl_id, oh, H5O_LINK_ID, 0, H5O_UPDATE_TIME, &(ltable.lnks[u])) < 0) {
                             /* Release object header */
-                            if(H5O_unprotect(oloc, oh) < 0)
-                                HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
+                            if(H5O_unpin(oh) < 0)
+                                HDONE_ERROR(H5E_SYM, H5E_CANTUNPIN, FAIL, "unable to unpin group object header")
 
                             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create message")
                         } /* end if */
@@ -895,8 +903,8 @@ H5G_obj_remove_update_linfo(H5O_loc_t *oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
                 } /* end if */
 
                 /* Release object header */
-                if(H5O_unprotect(oloc, oh) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to unprotect dataset object header")
+                if(H5O_unpin(oh) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTUNPIN, FAIL, "unable to unpin group object header")
 
                 /* Free link table information */
                 if(H5G_link_release_table(&ltable) < 0)

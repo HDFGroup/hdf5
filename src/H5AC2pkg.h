@@ -42,15 +42,12 @@
 #ifndef _H5AC2pkg_H
 #define _H5AC2pkg_H
 
-#define H5C2_PACKAGE            /*suppress error about including H5C2pkg  */
-
 /* Get package's private header */
-#include "H5AC2private.h"
-#include "H5C2private.h"
+#include "H5AC2private.h"	/* Metadata cache			*/
 
 
 /* Get needed headers */
-#include "H5C2pkg.h"            /* Cache                                */
+#include "H5C2private.h"        /* Cache                                */
 #include "H5SLprivate.h"        /* Skip lists */
 
 
@@ -332,4 +329,5 @@ typedef struct H5AC2_aux_t
 
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* _H5C2pkg_H */
+#endif /* _H5AC2pkg_H */
+

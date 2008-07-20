@@ -32,6 +32,7 @@
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 
 /* Other private headers needed by this file */
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5B2private.h"        /* B-trees                              */
 #include "H5HFprivate.h"        /* Fractal heaps		  	*/
 

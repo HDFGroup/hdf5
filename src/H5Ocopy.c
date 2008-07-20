@@ -34,6 +34,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
 #include "H5Iprivate.h"		/* IDs			  		*/
@@ -43,7 +44,6 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"         /* Property lists                       */
-#include "H5AC2private.h"       /* Metadata cache                       */
 
 
 /****************/
@@ -317,8 +317,8 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     HDassert(cpy_info);
 
     /* Get source object header */
-    if(NULL == (oh_src = (H5O_t *)H5AC_protect(oloc_src->file, dxpl_id, H5AC_OHDR, oloc_src->addr, NULL, NULL, H5AC_READ)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
+    if(NULL == (oh_src = H5O_protect(oloc_src, dxpl_id, H5AC2_READ)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header")
 
     /* Get pointer to object class for this object */
     if(NULL == (obj_class = H5O_obj_class_real(oh_src)))
@@ -453,7 +453,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         if(cpy_info->preserve_null && deleted[mesgno]) {
             mesg_dst->type = H5O_MSG_NULL;
             mesg_dst->flags = 0;
-            mesg_dst->dirty = 1;
+            mesg_dst->dirty = TRUE;
         } /* end if */
 
         /* Check for message class to operate on */
@@ -576,7 +576,6 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
     /* Set dest. chunk information */
-    oh_dst->chunk[0].dirty = TRUE;
     oh_dst->chunk[0].size = (size_t)dst_oh_size;
     oh_dst->chunk[0].gap = dst_oh_gap;
 
@@ -721,8 +720,9 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     } /* end if */
 
     /* Insert destination object header in cache */
-    if(H5AC_set(oloc_dst->file, dxpl_id, H5AC_OHDR, oloc_dst->addr, oh_dst, H5AC__DIRTIED_FLAG) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to cache object header")
+    if(H5AC2_set(oloc_dst->file, dxpl_id, H5AC2_OHDR, oloc_dst->addr, (size_t)dst_oh_size, oh_dst, H5AC2__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "unable to cache object header")
+    oh_dst = NULL;
 
 done:
     /* Free deleted array */
@@ -730,17 +730,12 @@ done:
         HDfree(deleted);
 
     /* Release pointer to source object header and its derived objects */
-    if(oh_src != NULL) {
-        /* Unprotect the source object header */
-        if(H5AC_unprotect(oloc_src->file, dxpl_id, H5AC_OHDR, oloc_src->addr, oh_src, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
-    } /* end if */
+    if(oh_src && H5O_unprotect(oloc_src, dxpl_id, oh_src, H5AC2__NO_FLAGS_SET) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header")
 
     /* Release pointer to destination object header */
-    if(ret_value < 0 && oh_dst) {
-        if(H5O_dest(oloc_dst->file, oh_dst) < 0)
-	    HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
-    } /* end if */
+    if(ret_value < 0 && oh_dst && H5O_dest(oh_dst) < 0)
+        HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to destroy object header data")
 
     /* Release user data for particular type of object to copy */
     if(udata) {

@@ -172,8 +172,7 @@ static void * H5C2_load_entry(H5F_t *              f,
                               const H5C2_class_t * type,
                               haddr_t              addr,
 		              size_t		   len,
-		              hbool_t		   chk_len,
-                              const void *         udata_ptr);
+                              void *         udata_ptr);
 
 static herr_t H5C2_make_space_in_cache(H5F_t *  f,
                                        hid_t	dxpl_id,
@@ -208,9 +207,9 @@ static herr_t H5C2_verify_not_in_index(H5C2_t * cache_ptr,
 static void * H5C2_epoch_marker_deserialize(haddr_t addr,
 		                            size_t len,
                                             const void * image_ptr,
-			                    const void * udata_ptr,
+			                    void * udata_ptr,
 			                    hbool_t * dirty_ptr);
-static herr_t H5C2_epoch_marker_image_len(void * thing,
+static herr_t H5C2_epoch_marker_image_len(const void * thing,
 		                          size_t *image_len_ptr);
 static herr_t H5C2_epoch_marker_serialize(const H5F_t *f,
                                           haddr_t addr,
@@ -254,7 +253,7 @@ static void *
 H5C2_epoch_marker_deserialize(haddr_t UNUSED addr,
 		              size_t UNUSED len,
                               const void UNUSED * image_ptr,
-			      const void UNUSED * udata_ptr,
+			      void UNUSED * udata_ptr,
 			      hbool_t UNUSED * dirty_ptr)
 {
     void * ret_value = NULL;      /* Return value */
@@ -269,7 +268,7 @@ done:
 }
 
 static herr_t
-H5C2_epoch_marker_image_len(void UNUSED *thing,
+H5C2_epoch_marker_image_len(const void UNUSED *thing,
 		            size_t UNUSED *image_len_ptr)
 {
     herr_t ret_value = FAIL;      /* Return value */
@@ -3031,23 +3030,22 @@ done:
  */
 
 herr_t
-H5C2_mark_pinned_entry_dirty(H5F_t * f,
-                             void *  thing,
+H5C2_mark_pinned_entry_dirty(void *  thing,
 			     hbool_t size_changed,
                              size_t  new_size)
 {
     H5C2_t *            cache_ptr;
-    herr_t              ret_value = SUCCEED;    /* Return value */
-    herr_t              result;
+    H5C2_cache_entry_t * entry_ptr = (H5C2_cache_entry_t *)thing;
     size_t              size_increase;
-    H5C2_cache_entry_t *	entry_ptr;
+    herr_t              result;
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_mark_pinned_entry_dirty, FAIL)
 
-    HDassert( f );
-    HDassert( f->shared );
+    HDassert( entry_ptr );
+    HDassert( H5F_addr_defined(entry_ptr->addr) );
 
-    cache_ptr = f->shared->cache2;
+    cache_ptr = entry_ptr->cache_ptr;
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
@@ -3189,22 +3187,25 @@ done:
  * 		Updated function to maintain the transaction list when
  * 		journaling is enabled.
  *
+ * 		QAK -- 7/13/08
+ *		Dropped file pointer parameter and retrieve cache pointer from
+ *		entry.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_mark_pinned_or_protected_entry_dirty(H5F_t * f,
-                                          void *   thing)
+H5C2_mark_pinned_or_protected_entry_dirty(void *   thing)
 {
     H5C2_t *            cache_ptr;
+    H5C2_cache_entry_t * entry_ptr = (H5C2_cache_entry_t *)thing;
     herr_t              ret_value = SUCCEED;    /* Return value */
-    H5C2_cache_entry_t *	entry_ptr;
 
     FUNC_ENTER_NOAPI(H5C2_mark_pinned_or_protected_entry_dirty, FAIL)
 
-    HDassert( f );
-    HDassert( f->shared );
+    HDassert( entry_ptr );
+    HDassert( H5F_addr_defined(entry_ptr->addr) );
 
-    cache_ptr = f->shared->cache2;
+    cache_ptr = entry_ptr->cache_ptr;
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
@@ -3517,26 +3518,28 @@ done:
  *              appropriate.
  *                                              JRM -- 1/11/08
  *
+ * 		QAK -- 7/13/08
+ *		Dropped file pointer parameter and retrieve cache pointer from
+ *		entry.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C2_resize_pinned_entry(H5F_t * f,
-                         void *  thing,
+H5C2_resize_pinned_entry(void *  thing,
                          size_t  new_size)
 {
-    /* const char *     fcn_name = "H5C2_resize_pinned_entry()"; */
     H5C2_t *            cache_ptr;
-    herr_t              ret_value = SUCCEED;    /* Return value */
+    H5C2_cache_entry_t * entry_ptr = (H5C2_cache_entry_t *)thing;
+    size_t             	size_increase;
     herr_t              result;
-    H5C2_cache_entry_t *	entry_ptr;
-    size_t              	size_increase;
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_resize_pinned_entry, FAIL)
 
-    HDassert( f );
-    HDassert( f->shared );
+    HDassert( entry_ptr );
+    HDassert( H5F_addr_defined(entry_ptr->addr) );
 
-    cache_ptr = f->shared->cache2;
+    cache_ptr = entry_ptr->cache_ptr;
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
@@ -3679,31 +3682,29 @@ done:
  *		Undid change of 2/16/08, as we can use the f parameter
  *		in production mode.  
  *
+ * 		QAK -- 7/13/08
+ *		Dropped file pointer parameter and retrieve cache pointer from
+ *		entry.
+ *
  *-------------------------------------------------------------------------
  */
 
 herr_t
-H5C2_pin_protected_entry(H5F_t * f,
-                         void *	  thing)
+H5C2_pin_protected_entry(void *	  thing)
 {
     H5C2_t *             cache_ptr;
+    H5C2_cache_entry_t * entry_ptr = (H5C2_cache_entry_t *)thing;
     herr_t               ret_value = SUCCEED;    /* Return value */
-    H5C2_cache_entry_t * entry_ptr;
 
     FUNC_ENTER_NOAPI(H5C2_pin_protected_entry, FAIL)
 
-    HDassert( f );
-    HDassert( f->shared );
+    HDassert( entry_ptr );
+    HDassert( H5F_addr_defined(entry_ptr->addr) );
 
-    cache_ptr = f->shared->cache2;
+    cache_ptr = entry_ptr->cache_ptr;
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( thing );
-
-    entry_ptr = (H5C2_cache_entry_t *)thing;
-
-    HDassert( H5F_addr_defined(entry_ptr->addr) );
 
     if ( ! ( entry_ptr->is_protected ) ) {
 
@@ -3831,7 +3832,7 @@ H5C2_protect(H5F_t *		  f,
              const H5C2_class_t * type,
              haddr_t 	          addr,
 	     size_t		  len,
-             const void *         udata,
+             void *               udata,
 	     unsigned		  flags)
 {
     /* const char *	fcn_name = "H5C2_protect()"; */
@@ -3841,7 +3842,6 @@ H5C2_protect(H5F_t *		  f,
     hbool_t		have_write_permitted = FALSE;
     hbool_t		read_only = FALSE;
     hbool_t		write_permitted;
-    hbool_t		chk_len = FALSE;
     herr_t		result;
     void *		thing;
     H5C2_cache_entry_t *	entry_ptr;
@@ -3876,11 +3876,6 @@ H5C2_protect(H5F_t *		  f,
 	read_only = TRUE;
     }
 
-    if ( (flags & H5C2__CHECK_SIZE_FLAG) != 0 )
-    {
-	chk_len = TRUE;
-    }
-
     /* first check to see if the target is in cache */
     H5C2__SEARCH_INDEX(cache_ptr, addr, entry_ptr, NULL)
 
@@ -3895,8 +3890,7 @@ H5C2_protect(H5F_t *		  f,
 
         hit = FALSE;
 
-        thing = H5C2_load_entry(f, dxpl_id, type, 
-			        addr, len, chk_len, udata);
+        thing = H5C2_load_entry(f, dxpl_id, type, addr, len, udata);
 
         if ( thing == NULL ) {
 
@@ -8880,8 +8874,7 @@ H5C2_load_entry(H5F_t *              f,
                 const H5C2_class_t * type,
                 haddr_t              addr,
 		size_t		     len,
-		hbool_t		     chk_len,
-                const void *         udata_ptr)
+                void *         udata_ptr)
 {
     /* const char *		fcn_name = "H5C2_load_entry()"; */
     hbool_t			dirty = FALSE;
@@ -8889,7 +8882,6 @@ H5C2_load_entry(H5F_t *              f,
     void *			thing = NULL;
     void *			ret_value = NULL;
     H5C2_cache_entry_t *	entry_ptr = NULL;
-    size_t			new_len;
 
     FUNC_ENTER_NOAPI_NOINIT(H5C2_load_entry)
 
@@ -8900,7 +8892,41 @@ H5C2_load_entry(H5F_t *              f,
     HDassert( H5F_addr_defined(addr) );
     HDassert( len > 0 );
     HDassert( type->deserialize );
-    HDassert( ( ! chk_len ) || ( type->image_len ) );
+
+    /* Check for possible speculative read off the end of the file */
+    /* (Assume speculative reads will only occur if an image_len callback is defined) */
+    if ( type->image_len )
+    {
+
+        haddr_t eoa;                /* End-of-allocation in the file */
+        haddr_t base_addr;          /* Base address of file data */
+
+        /* Get the file's end-of-allocation value */
+        eoa = H5F_get_eoa(f);
+        HDassert(H5F_addr_defined(eoa));
+
+        /* Get the file's base address */
+        base_addr = H5F_BASE_ADDR(f);
+        HDassert(H5F_addr_defined(base_addr));
+
+        /* Check for bad address in general */
+        if ( (addr + base_addr) > eoa )
+        {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, \
+                        "address of object past end of allocation")
+
+        }
+
+        /* Check if the amount of data to read will be past the eoa */
+        if ( ( addr + base_addr + len ) > eoa )
+        {
+
+            /* Trim down the length of the metadata */
+            len = eoa - (addr + base_addr);
+
+        }
+    }
 
     image_ptr = H5MM_malloc(len);
 
@@ -8932,8 +8958,11 @@ H5C2_load_entry(H5F_t *              f,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't deserialize image")
     }
 
-    if ( chk_len ) 
+    /* If the client's cache has an image_len callback, check it */
+    if ( type->image_len ) 
     {
+        size_t			new_len;
+
         if ( type->image_len(thing, &new_len) != SUCCEED )
         {
 #if 0 /* JRM */
@@ -8941,36 +8970,57 @@ H5C2_load_entry(H5F_t *              f,
 #endif /* JRM */
 	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "image_len() failed.\n");
 	}
-	else if ( new_len > len )
+	else if ( new_len == 0 )
 	{
 #if 0 /* JRM */
-            HDfprintf(stdout, "new_len > len.\n.");
+            HDfprintf(stdout, "new_len == 0\n.");
 #endif /* JRM */
-	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "new_len > len.\n");
+	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "new_len == 0\n")
 	}
-	else if ( new_len <= 0 )
+	else if ( new_len != len)
 	{
-#if 0 /* JRM */
-            HDfprintf(stdout, "new_len <= 0.\n.");
-#endif /* JRM */
-	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "new_len <= 0.\n")
-	}
-	else if ( new_len < len )
-	{
-	    thing = H5MM_realloc(thing, new_len);
+	    image_ptr = H5MM_realloc(image_ptr, new_len);
 
-	    if ( thing == NULL )
+	    if ( image_ptr == NULL )
 	    {
 #if 0 /* JRM */
-                HDfprintf(stdout, "thing null after H5MM_realloc().\n");
+                HDfprintf(stdout, "image_ptr null after H5MM_realloc().\n");
 #endif /* JRM */
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, \
-                            "thing null after H5MM_realloc().")
+                            "image_ptr null after H5MM_realloc().")
 	    }
-	    else
-	    {
-	        len = new_len;
+
+            /* If the thing's image needs to be bigger, free the thing and retry with new length */
+            if ( new_len > len)
+            {
+                if ( type->free_icr(addr, len, thing) != SUCCEED )
+                {
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, NULL, \
+                                "free_icr callback failed.")
+                }
+
+                if ( H5F_block_read(f, type->mem_type, addr, new_len, dxpl_id, image_ptr) < 0 )
+                {
+#if 0 /* JRM */
+                    HDfprintf(stdout, "can't read image.\n.");
+#endif /* JRM */
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image")
+                }
+
+                thing = type->deserialize(addr, new_len, image_ptr, udata_ptr, &dirty);
+
+                if ( thing == NULL )
+                {
+#if 0 /* JRM */
+                    HDfprintf(stdout, "can't deserialize image.\n.");
+#endif /* JRM */
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't deserialize image")
+                }
+
             }
+
+            /* Retain adjusted size */
+            len = new_len;
 	}
     }
 
@@ -8995,7 +9045,7 @@ H5C2_load_entry(H5F_t *              f,
      * metadata cache.
      */
 
-    HDassert( ( dirty == FALSE ) || ( type->id == 4 ) );
+    HDassert( ( dirty == FALSE ) || ( type->id == 4 || type->id == 5) );
     HDassert( entry_ptr->size < H5C2_MAX_ENTRY_SIZE );
 #ifndef NDEBUG
     entry_ptr->magic                = H5C2__H5C2_CACHE_ENTRY_T_MAGIC;

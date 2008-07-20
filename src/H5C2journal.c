@@ -309,6 +309,16 @@ H5C2_end_journaling(H5F_t * f,
 
 	HDassert( cache_ptr->mdj_enabled );
 
+        /* Turn off journaling now, before attempting to modify the superblock
+         *      extension (which is really an object header) and having the
+         *      object header code call into the cache, which gets confused
+         *      because there's no transaction in progress. -QAK
+         */
+        cache_ptr->mdj_enabled = FALSE;
+
+        /* Remove the journal configuration information from the superblock
+         *      extension.
+         */
         result = H5C2_unmark_journaling_in_progress(f, dxpl_id, cache_ptr);
 
         if ( result < 0 ) {
@@ -324,8 +334,6 @@ H5C2_end_journaling(H5F_t * f,
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                         "H5C2_jb__takedown() failed.")
         }
-
-        cache_ptr->mdj_enabled = FALSE;
     }
 
 done:
@@ -975,7 +983,7 @@ H5C2_journal_transaction(H5F_t * f,
 	 */
 	if ( ( ! resized ) && ( ! renamed ) ) {
                 
-            if(HADDR_UNDEF==(eoa = H5FDget_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
+            if(HADDR_UNDEF == (eoa = H5FDget_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
                 HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, \
                                    "file get eoa request failed")
 
@@ -1622,8 +1630,7 @@ H5C2_load_journal_config_block(const H5F_t * f,
     p += H5C2__JOURNAL_MAGIC_LEN;
 
     /* get the version of the config block */
-    HDmemcpy(&version, p, 1);
-    p++;
+    version = *p++;
 
     if ( version != H5C2__JOURNAL_CONF_VERSION ) {
 
@@ -1900,22 +1907,6 @@ H5C2_unmark_journaling_in_progress(H5F_t * f,
     }
 
     /* Finally, flush the file to ensure that changes made it to disk. */
-
-    /* Quincey: Two issues here:
-     *
-     * 		First, there is the simple matter of using H5Fflush().
-     * 		Given the curent plans for implementing beging/end 
-     * 		transaction, we have the problem of a flush triggering
-     * 		a transaction here -- not what we want.  We could get
-     * 		around this by calling H5F_flush(), but presently that
-     * 		function is local to H5F.c
-     *
-     * 		Second, there is the matter of the scope parameter:
-     * 		At present, I am passing H5F_SCOPE_GLOBAL here -- is 
-     * 		this appropriate?  I guess this comes down to how we 
-     * 		are going to handle journaling in the case of multiple 
-     * 		files -- a point we haven't discussed.  We should do so.
-     */
 
 #if 0 /* JRM */
     HDfprintf(stdout, "%s: calling H5F_flush().\n", FUNC);

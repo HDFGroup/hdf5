@@ -2189,6 +2189,7 @@ resize_pinned_entry2(H5F_t * file_ptr,
 
             HDassert( entry_ptr->index == idx );
             HDassert( entry_ptr->type == type );
+            HDassert( entry_ptr->cache_ptr == cache_ptr );
             HDassert( entry_ptr == entry_ptr->self );
 
             if ( ! ( (entry_ptr->header).is_pinned ) ) {
@@ -2200,8 +2201,7 @@ resize_pinned_entry2(H5F_t * file_ptr,
 
                 entry_ptr->size = new_size;
 
-                result = H5C2_resize_pinned_entry(file_ptr,
-                                                  (void *)entry_ptr,
+                result = H5C2_resize_pinned_entry((void *)entry_ptr,
                                                    new_size);
 		entry_ptr->is_dirty = TRUE;
 
@@ -3299,8 +3299,7 @@ mark_pinned_entry_dirty2(H5F_t * file_ptr,
             entry_ptr->size = new_size;
         }
 
-        result = H5C2_mark_pinned_entry_dirty(file_ptr,
-		 	                      (void *)entry_ptr,
+        result = H5C2_mark_pinned_entry_dirty((void *)entry_ptr,
 				 	      size_changed,
 					      new_size);
 
@@ -3391,8 +3390,7 @@ mark_pinned_or_protected_entry_dirty2(H5F_t * file_ptr,
 
 	entry_ptr->is_dirty = TRUE;
 
-        result = H5C2_mark_pinned_or_protected_entry_dirty(file_ptr,
-		 	                                   (void *)entry_ptr);
+        result = H5C2_mark_pinned_or_protected_entry_dirty((void *)entry_ptr);
 
         if ( ( result < 0 )
 	     ||
@@ -3603,7 +3601,7 @@ pin_protected_entry2(H5F_t * file_ptr,
         HDassert( entry_ptr->header.is_protected );
 	HDassert( ! entry_ptr->header.is_pinned );
 
-        result = H5C2_pin_protected_entry(file_ptr, (void *)entry_ptr);
+        result = H5C2_pin_protected_entry((void *)entry_ptr);
 
         if ( ( result < 0 )
 	     ||

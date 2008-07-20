@@ -112,6 +112,8 @@ main(void)
         time_new = 11111111;
         if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
             FAIL_STACK_ERROR
+        if(H5AC2_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
+            FAIL_STACK_ERROR
         if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
             FAIL_STACK_ERROR
         if(NULL == H5O_msg_read(&oh_loc, H5O_MTIME_NEW_ID, &ro, H5P_DATASET_XFER_DEFAULT))
@@ -127,6 +129,8 @@ main(void)
         TESTING("message modification");
         time_new = 33333333;
         if(H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
+            FAIL_STACK_ERROR
+        if(H5AC2_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
             FAIL_STACK_ERROR
         if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
             FAIL_STACK_ERROR
@@ -157,6 +161,8 @@ main(void)
             if(H5O_msg_create(&oh_loc, H5O_MTIME_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
                 FAIL_STACK_ERROR
         } /* end for */
+        if(H5AC2_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
+            FAIL_STACK_ERROR
         if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
             FAIL_STACK_ERROR
 
@@ -205,6 +211,8 @@ main(void)
             time_new = (i + 1) * 1000 + 10;
             if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
                 FAIL_STACK_ERROR
+            if(H5AC2_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
+                FAIL_STACK_ERROR
             if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
                 FAIL_STACK_ERROR
         } /* end for */
@@ -232,6 +240,8 @@ main(void)
         TESTING("constant message handling");
         time_new = 22222222;
         if(H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
+            FAIL_STACK_ERROR
+        if(H5AC2_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
             FAIL_STACK_ERROR
         if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
             FAIL_STACK_ERROR
@@ -264,6 +274,8 @@ main(void)
             envval = "nomatch";
         if(HDstrcmp(envval, "multi") && HDstrcmp(envval, "split") && HDstrcmp(envval, "family")) {
             hid_t file2;                    /* File ID for 'bogus' object file */
+            hid_t sid;                      /* Dataspace ID */
+            hid_t aid;                      /* Attribute ID */
             char testpath[512] = "";
             char testfile[512] = "";
             char *srcdir = HDgetenv("srcdir");
@@ -343,6 +355,24 @@ main(void)
             /* Open the dataset with the "mark if unknown" message */
             if((dset = H5Dopen2(file, "/Dataset3", H5P_DEFAULT)) < 0)
                 TEST_ERROR
+
+            /* Create data space */
+            if((sid = H5Screate(H5S_SCALAR)) < 0)
+                FAIL_STACK_ERROR
+
+            /* Create an attribute, to get the object header into write access */
+            if((aid = H5Acreate2(dset, "Attr", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                FAIL_STACK_ERROR
+
+            /* Close dataspace */
+            if(H5Sclose(sid) < 0)
+                FAIL_STACK_ERROR
+
+            /* Close attribute */
+            if(H5Aclose(aid) < 0)
+                FAIL_STACK_ERROR
+
+            /* Close the dataset */
             if(H5Dclose(dset) < 0)
                 TEST_ERROR
 

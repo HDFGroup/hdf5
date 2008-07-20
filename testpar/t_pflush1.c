@@ -121,7 +121,6 @@ int
 main(int argc, char* argv[])
 {
     hid_t file1, file2, fapl;
-    MPI_File	mpifh=-2;
     int		*mpifh_p = NULL;
     char	name[1024];
     const char  *envval = NULL;

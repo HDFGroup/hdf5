@@ -41,9 +41,8 @@
 
 /* Pivate headers needed by this header */
 #include "H5private.h"		/* Generic Functions			*/
-#include "H5Oprivate.h"         /* Object headers                       */
+#include "H5C2private.h"	/* Cache				*/
 #include "H5Fprivate.h"		/* File access				*/
-#include "H5C2private.h"	/* cache				*/
 
 #ifdef H5_METADATA_TRACE_FILE
 #define H5AC2__TRACE_FILE_ENABLED	1
@@ -58,6 +57,7 @@ typedef enum {
     H5AC2_LHEAP_ID,	  /*local heap				       */
     H5AC2_GHEAP_ID,	  /*global heap				       */
     H5AC2_OHDR_ID,	  /*object header			       */
+    H5AC2_OHDR_CHK_ID,	  /*object header chunk			       */
     H5AC2_BT2_HDR_ID,	  /*v2 B-tree header			       */
     H5AC2_BT2_INT_ID,	  /*v2 B-tree internal node		       */
     H5AC2_BT2_LEAF_ID,	  /*v2 B-tree leaf node			       */
@@ -268,6 +268,9 @@ extern hid_t H5AC2_ind_dxpl_id;
 #define H5AC2_ES__IS_PINNED	0x0008
 
 
+/* Forward declaration of structs used below */
+struct H5O_loc_t;               /* Defined in H5Oprivate.h */
+
 /* external function declarations: */
 
 H5_DLL herr_t H5AC2_init(void);
@@ -280,13 +283,13 @@ H5_DLL herr_t H5AC2_create(H5F_t *f,
 			   H5AC2_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC2_begin_transaction(hid_t id,
                                       hbool_t * do_transaction_ptr,
-                                      H5O_loc_t * id_oloc_ptr,
+                                      struct H5O_loc_t * id_oloc_ptr,
                                       hbool_t * id_oloc_open_ptr,
                                       hbool_t * transaction_begun_ptr,
                                       uint64_t * trans_num_ptr,
                                       const char * api_call_name);
 H5_DLL herr_t H5AC2_end_transaction(hbool_t do_transaction,
-                                    H5O_loc_t * id_oloc_ptr,
+                                    struct H5O_loc_t * id_oloc_ptr,
                                     hbool_t id_oloc_open,
                                     hbool_t transaction_begun,
                                     uint64_t trans_num,
@@ -296,24 +299,21 @@ H5_DLL herr_t H5AC2_get_entry_status(H5F_t * f, haddr_t addr,
 H5_DLL herr_t H5AC2_set(H5F_t *f, hid_t dxpl_id, const H5AC2_class_t *type,
                         haddr_t addr, size_t len, void *thing, 
 			unsigned int flags);
-H5_DLL herr_t H5AC2_pin_protected_entry(H5F_t * f, void *  thing);
+H5_DLL herr_t H5AC2_pin_protected_entry(void *  thing);
 H5_DLL void * H5AC2_protect(H5F_t *f, hid_t dxpl_id, const H5AC2_class_t *type,
-                           haddr_t addr, size_t len, const void *udata,
+                           haddr_t addr, size_t len, void *udata,
                            H5AC2_protect_t rw);
-H5_DLL herr_t H5AC2_resize_pinned_entry(H5F_t * f,
-                                       void *  thing,
+H5_DLL herr_t H5AC2_resize_pinned_entry(void *  thing,
                                        size_t  new_size);
 H5_DLL herr_t H5AC2_unpin_entry(void * thing);
 H5_DLL herr_t H5AC2_unprotect(H5F_t *f, hid_t dxpl_id,
                              const H5AC2_class_t *type, haddr_t addr,
 			     size_t new_size, void *thing, unsigned flags);
 H5_DLL herr_t H5AC2_flush(H5F_t *f, hid_t dxpl_id, unsigned flags);
-H5_DLL herr_t H5AC2_mark_pinned_entry_dirty(H5F_t * f,
-		                           void *  thing,
+H5_DLL herr_t H5AC2_mark_pinned_entry_dirty(void *  thing,
 					   hbool_t size_changed,
                                            size_t  new_size);
-H5_DLL herr_t H5AC2_mark_pinned_or_protected_entry_dirty(H5F_t * f,
-		                                        void *  thing);
+H5_DLL herr_t H5AC2_mark_pinned_or_protected_entry_dirty(void *  thing);
 H5_DLL herr_t H5AC2_rename(H5F_t *f, const H5AC2_class_t *type,
 			   haddr_t old_addr, haddr_t new_addr);
 

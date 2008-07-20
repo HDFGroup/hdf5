@@ -1409,7 +1409,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
             success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout,
-                          "%d:%s: data[i].len = %d != mssg->len = %d.\n",
+                          "%d:%s: data[i].len = %Zu != mssg->len = %d.\n",
                            world_mpi_rank, fcn_name,
                            data[target_index].len, mssg_ptr->len);
             }
@@ -1421,7 +1421,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
                 HDfprintf(stdout,
                   "%d:%s: proc %d read invalid entry. idx/base_addr = %d/%a.\n",
                          world_mpi_rank, fcn_name,
-                         mssg_ptr->src, target_index,
+                         mssg_ptr->src, 
 			target_index,
 			data[target_index].base_addr);
             }
@@ -1586,7 +1586,7 @@ serve_write_request(struct mssg_t * mssg_ptr)
             success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout,
-                          "%d:%s: data[i].len = %d != mssg->len = %d.\n",
+                          "%d:%s: data[i].len = %Zu != mssg->len = %d.\n",
                           world_mpi_rank, fcn_name,
                           data[target_index].len, mssg_ptr->len);
             }
@@ -3520,9 +3520,11 @@ setup_rand(void)
             }
         } else {
             seed = (unsigned)tv.tv_usec;
-	    HDfprintf(stdout, "%d:%s: seed = %d.\n",
-                      world_mpi_rank, fcn_name, seed);
-	    fflush(stdout);
+            if ( verbose ) {
+                HDfprintf(stdout, "%d:%s: seed = %d.\n",
+                          world_mpi_rank, fcn_name, seed);
+                fflush(stdout);
+            }
             HDsrand(seed);
         }
     }

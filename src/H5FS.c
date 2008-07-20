@@ -209,7 +209,7 @@ HDfprintf(stderr, "%s: fspace->sinfo = %p\n", FUNC, fspace->sinfo);
     /* (could still be pinned from it's section info still hanging around in the cache) */
     if(!(fspace_status & H5AC2_ES__IS_PINNED)) {
         /* Pin free space header in the cache */
-        if(H5AC2_pin_protected_entry(f, fspace) < 0)
+        if(H5AC2_pin_protected_entry(fspace) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTPIN, NULL, "unable to pin free space header")
     } /* end if */
 
@@ -376,7 +376,7 @@ HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", FUNC, fspace->tot_sect_c
             fspace->alloc_sect_size = fspace->sect_size = 0;
 
             /* Mark free space header as dirty */
-            if(H5AC2_mark_pinned_or_protected_entry_dirty(f, fspace) < 0)
+            if(H5AC2_mark_pinned_or_protected_entry_dirty(fspace) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space header as dirty")
 
             /* Evict the section info from the metadata cache */

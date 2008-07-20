@@ -55,7 +55,7 @@
 
 /* Metadata cache callbacks */
 static void *H5B_deserialize(haddr_t addr, size_t len, const void *image,
-    const void *udata, hbool_t *dirty);
+    void *udata, hbool_t *dirty);
 static herr_t H5B_serialize(const H5F_t *f, haddr_t addr, size_t len, void *image,
     void *thing, unsigned *flags, haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5B_free_icr(haddr_t addr, size_t len, void *thing);
@@ -98,11 +98,11 @@ const H5AC2_class_t H5AC2_BT[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5B_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image, const void *_udata,
-    hbool_t UNUSED *dirty)
+H5B_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
+    void *_udata, hbool_t UNUSED *dirty)
 {
     H5B_t *bt = NULL;           /* Pointer to the deserialized B-tree node */
-    const H5B_cache_ud_t *udata = (const H5B_cache_ud_t *)_udata;       /* User data for callback */
+    H5B_cache_ud_t *udata = (H5B_cache_ud_t *)_udata;       /* User data for callback */
     H5B_shared_t *shared;       /* Pointer to shared B-tree info */
     const uint8_t *p;           /* Pointer into image buffer */
     uint8_t *native;            /* Pointer to native keys */
@@ -113,6 +113,7 @@ H5B_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image, const
 
     /* check arguments */
     HDassert(image);
+    HDassert(udata);
 
     /* Allocate the B-tree node in memory */
     if(NULL == (bt = H5FL_MALLOC(H5B_t)))

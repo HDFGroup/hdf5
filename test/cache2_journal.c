@@ -2539,7 +2539,7 @@ takedown_cache_after_journaling(hid_t file_id,
 				hbool_t 
 				use_core_driver_if_avail)
 {
-    hbool_t verbose = TRUE;
+    hbool_t verbose = FALSE;
     int error;
     
     if ( file_id >= 0 ) {
@@ -6500,7 +6500,7 @@ static void
 verify_mdj_file_marking_on_create(void)
 {
     const char * fcn_name = "verify_mdj_file_marking_on_create():";
-    char * tag = "pre-fork:";
+    const char * tag = "pre-fork:";
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t child = FALSE;
@@ -6795,7 +6795,7 @@ static void
 verify_mdj_file_marking_after_open(void)
 {
     const char * fcn_name = "verify_mdj_file_marking_after_open():";
-    char * tag = "pre-fork:";
+    const char * tag = "pre-fork:";
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t child = FALSE;
@@ -7218,7 +7218,7 @@ static void
 verify_mdj_file_marking_on_open(void)
 {
     const char * fcn_name = "verify_mdj_file_marking_on_open():";
-    char * tag = "pre-fork:";
+    const char * tag = "pre-fork:";
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t child = FALSE;
@@ -8054,7 +8054,7 @@ verify_mdj_file_unmarking_on_journaling_shutdown(void)
 {
     const char * fcn_name = 
 	    "verify_mdj_file_unmarking_on_journaling_shutdown():";
-    char * tag = "pre-fork:";
+    const char * tag = "pre-fork:";
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t child = FALSE;
@@ -8452,7 +8452,7 @@ static void
 verify_mdj_file_unmarking_on_recovery(void)
 {
     const char * fcn_name = "verify_mdj_file_unmarking_on_recovery():";
-    char * tag = "pre-fork:";
+    const char * tag = "pre-fork:";
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t child = FALSE;

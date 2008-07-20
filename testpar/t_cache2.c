@@ -1444,7 +1444,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
             success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout,
-                          "%d:%s: data[i].len = %d != mssg->len = %d.\n",
+                          "%d:%s: data[i].len = %Zu != mssg->len = %d.\n",
                            world_mpi_rank, fcn_name,
                            data[target_index].len, mssg_ptr->len);
             }
@@ -1456,7 +1456,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
                 HDfprintf(stdout,
                   "%d:%s: proc %d read invalid entry. idx/base_addr = %d/%a.\n",
                          world_mpi_rank, fcn_name,
-                         mssg_ptr->src, target_index,
+                         mssg_ptr->src, 
 			target_index,
 			data[target_index].base_addr);
             }
@@ -1621,7 +1621,7 @@ serve_write_request(struct mssg_t * mssg_ptr)
             success = FALSE;
             if ( verbose ) {
                 HDfprintf(stdout,
-                          "%d:%s: data[i].len = %d != mssg->len = %d.\n",
+                          "%d:%s: data[i].len = %Zu != mssg->len = %d.\n",
                           world_mpi_rank, fcn_name,
                           data[target_index].len, mssg_ptr->len);
             }
@@ -2842,8 +2842,7 @@ mark_pinned_entry_dirty(H5C2_t * cache_ptr,
         (entry_ptr->ver)++;
         entry_ptr->dirty = TRUE;
 
-	result = H5AC2_mark_pinned_entry_dirty(file_ptr,
-	                                      (void *)entry_ptr,
+	result = H5AC2_mark_pinned_entry_dirty( (void *)entry_ptr,
                                               size_changed,
                                               new_size);
 
@@ -2907,8 +2906,7 @@ mark_pinned_or_protected_entry_dirty(H5C2_t * cache_ptr,
         (entry_ptr->ver)++;
         entry_ptr->dirty = TRUE;
 
-	result = H5AC2_mark_pinned_or_protected_entry_dirty(file_ptr,
-	                                                   (void *)entry_ptr);
+	result = H5AC2_mark_pinned_or_protected_entry_dirty( (void *)entry_ptr);
 
         if ( result < 0 ) {
 
@@ -3042,7 +3040,7 @@ pin_protected_entry(H5C2_t * cache_ptr,
 
     if ( nerrors == 0 ) {
 
-	result = H5AC2_pin_protected_entry(file_ptr, (void *)entry_ptr);
+	result = H5AC2_pin_protected_entry((void *)entry_ptr);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.type != &(types[0]) ) ||
@@ -3239,8 +3237,7 @@ resize_entry(H5C2_t * cache_ptr,
 	HDassert( new_size > 0 );
 	HDassert( new_size <= entry_ptr->len );
 
-	result = H5AC2_resize_pinned_entry(file_ptr, (void *)entry_ptr, 
-			                  new_size);
+	result = H5AC2_resize_pinned_entry((void *)entry_ptr, new_size);
 
         if ( result < 0 ) {
 
@@ -3618,9 +3615,11 @@ setup_rand(void)
             }
         } else {
             seed = (unsigned)tv.tv_usec;
-	    HDfprintf(stdout, "%d:%s: seed = %d.\n",
-                      world_mpi_rank, fcn_name, seed);
-	    fflush(stdout);
+            if ( verbose ) {
+                HDfprintf(stdout, "%d:%s: seed = %d.\n",
+                          world_mpi_rank, fcn_name, seed);
+                fflush(stdout);
+            }
             HDsrand(seed);
         }
     }

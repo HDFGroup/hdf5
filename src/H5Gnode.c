@@ -65,19 +65,18 @@ typedef struct H5G_node_t {
     H5G_entry_t *entry;         /*array of symbol table entries      */
 } H5G_node_t;
 
+
 /* Private macros */
 #define H5G_NODE_VERS   1               /*symbol table node version number   */
 #define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
 
-/* Size of stack buffer for serialized nodes */
-#define H5G_NODE_BUF_SIZE       512
 
 /* PRIVATE PROTOTYPES */
 static size_t H5G_node_size_real(const H5F_t *f);
 
 /* Metadata cache callbacks */
 static void *H5G_node_deserialize(haddr_t addr, size_t len, const void *image,
-    const void *udata, hbool_t *dirty);
+    void *udata, hbool_t *dirty);
 static herr_t H5G_node_serialize(const H5F_t *f, haddr_t addr, size_t len,
     void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
@@ -289,8 +288,6 @@ H5G_node_debug_key(FILE *stream, H5F_t *f, hid_t UNUSED dxpl_id, int indent,
  *		matzke@llnl.gov
  *		Jun 23 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
@@ -300,7 +297,7 @@ H5G_node_size_real(const H5F_t *f)
 
     FUNC_LEAVE_NOAPI(H5G_NODE_SIZEOF_HDR(f) +
                      (2 * H5F_SYM_LEAF_K(f)) * H5G_SIZEOF_ENTRY(f));
-}
+} /* end H5G_node_size_real() */
 
 
 /*-------------------------------------------------------------------------
@@ -319,7 +316,7 @@ H5G_node_size_real(const H5F_t *f)
 static herr_t
 H5G_node_dest(H5G_node_t *sym)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_dest);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_dest)
 
     /*
      * Check arguments.
@@ -333,7 +330,7 @@ H5G_node_dest(H5G_node_t *sym)
         sym->entry = H5FL_SEQ_FREE(H5G_entry_t, sym->entry);
     H5FL_FREE(H5G_node_t,sym);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_node_dest() */
 
 
@@ -353,10 +350,10 @@ H5G_node_dest(H5G_node_t *sym)
  */
 static void *
 H5G_node_deserialize(haddr_t UNUSED addr, size_t UNUSED len, const void *image,
-    const void *udata, hbool_t UNUSED *dirty)
+    void *udata, hbool_t UNUSED *dirty)
 {
     H5G_node_t *sym = NULL;     /* Pointer to the deserialized symbol table node */
-    const H5F_t *f = (const H5F_t *)udata;     /* Get file pointer from user data */
+    H5F_t *f = (H5F_t *)udata;  /* Get file pointer from user data */
     const uint8_t *p;           /* Pointer into image buffer */
     H5G_node_t *ret_value;      /* Return value */
 
@@ -568,13 +565,13 @@ H5G_node_create(H5F_t *f, hid_t dxpl_id, H5B_ins_t UNUSED op, void *_lt_key,
     hsize_t		    size = 0;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5G_node_create);
+    FUNC_ENTER_NOAPI_NOINIT(H5G_node_create)
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(H5B_INS_FIRST == op);
+    HDassert(f);
+    HDassert(H5B_INS_FIRST == op);
 
     if(NULL == (sym = H5FL_CALLOC(H5G_node_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -608,8 +605,8 @@ done:
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_node_create() */
 
 
 /*-------------------------------------------------------------------------
@@ -1370,7 +1367,7 @@ H5G_node_by_idx(H5F_t *f, hid_t dxpl_id, const void UNUSED *_lt_key, haddr_t add
     H5G_node_t		*sn = NULL;
     int                 ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_NOAPI(H5G_node_by_idx, H5_ITER_ERROR);
+    FUNC_ENTER_NOAPI(H5G_node_by_idx, H5_ITER_ERROR)
 
     /*
      * Check arguments.
@@ -1405,7 +1402,7 @@ done:
     if(sn && H5AC2_unprotect(f, dxpl_id, H5AC2_SNODE, addr, (size_t)0, sn, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_SYM, H5E_PROTECT, H5_ITER_ERROR, "unable to release object header")
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_node_by_idx() */
 
 
@@ -1430,7 +1427,7 @@ H5G_node_init(H5F_t *f)
     size_t	sizeof_rkey;	        /* Size of raw (disk) key	     */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_node_init, FAIL);
+    FUNC_ENTER_NOAPI(H5G_node_init, FAIL)
 
     /* Check arguments. */
     HDassert(f);
@@ -1450,7 +1447,7 @@ H5G_node_init(H5F_t *f)
 	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, FAIL, "can't create ref-count wrapper for shared B-tree info")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_node_init() */
 
 
@@ -1475,13 +1472,13 @@ H5G_node_close(const H5F_t *f)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_node_close)
 
     /* Check arguments. */
-    assert(f);
+    HDassert(f);
 
     /* Free the raw B-tree node buffer */
-    if (H5F_GRP_BTREE_SHARED(f))
+    if(H5F_GRP_BTREE_SHARED(f))
         H5RC_DEC(H5F_GRP_BTREE_SHARED(f));
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_node_close */
 
 

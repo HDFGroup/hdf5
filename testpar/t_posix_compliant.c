@@ -725,7 +725,7 @@ static void vrfy_elements(int* a, int* b, int size, int rank)
 
 /* print an explanation message by MAIN (0) process.
  */
-header_msg(void)
+void header_msg(void)
 {
     printf(
 "Purpose:\n"

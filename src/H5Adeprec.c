@@ -43,11 +43,11 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"		/* Attributes				*/
+#include "H5ACprivate.h"	/* Metadata cache                       */
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5Opkg.h"             /* Object headers			*/
-#include "H5AC2private.h"       /* Metadata cache                       */
 
 
 /****************/

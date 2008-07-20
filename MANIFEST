@@ -626,6 +626,7 @@
 ./src/H5Obogus.c
 ./src/H5Obtreek.c
 ./src/H5Ocache.c
+./src/H5Ochunk.c
 ./src/H5Ocont.c
 ./src/H5Ocopy.c
 ./src/H5Odbg.c

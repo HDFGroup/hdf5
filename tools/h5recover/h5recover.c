@@ -19,6 +19,7 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 #include "H5private.h"
+#include "H5Iprivate.h"
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
@@ -103,8 +104,9 @@ leave(int ret)
  *
  *-------------------------------------------------------------------------
  */
-int 
-file_copy(char * file_from, char * file_to){
+static int 
+file_copy(char * file_from, char * file_to)
+{
 
     FILE * from;
     FILE * to;
@@ -191,7 +193,7 @@ main (int argc, const char *argv[])
     int              last_trans_found = 0; /* bool */
     char *           tok[11];     /* string tokens */
     int              i; /* iterator */
-    haddr_t          address; /* address to write to */
+    off_t            address; /* address to write to */
     haddr_t          eoa; /* end of address of file */
     uint8_t *        body; /* body of journal entry */
     size_t           size; /* size of journal entry body */
@@ -623,9 +625,9 @@ main (int argc, const char *argv[])
                 /* do a quick string compare on two items */
                 if (HDstrcmp((const char *)body, (const char *)compare_buf) != 0) {
                     error_msg(progname, "Entry incorrectly written into HDF5 file. Exiting.\n");
-                    printf("Address %llx:\n", address);
-                    printf(" -- from journal:   %llx\n", body);
-                    printf(" -- from HDF5 file: %llx\n", compare_buf);
+                    printf("Address %llx:\n", (unsigned long_long)address);
+                    printf(" -- from journal:   '%s'\n", body);
+                    printf(" -- from HDF5 file: '%s'\n", compare_buf);
                     leave( EXIT_FAILURE );
                 } /* end if */
 
@@ -633,7 +635,7 @@ main (int argc, const char *argv[])
                 for (i=0; i<size; i++) {
                     if (body[i] != compare_buf[i]) {
                         error_msg(progname, "Entry incorrectly written into HDF5 file. Exiting.\n");
-                        printf("Address %d\n", address + i);
+                        printf("Address %llx\n", (unsigned long_long)(address + i));
                         printf(" -- from journal:   %d\n", body[i]);
                         printf(" -- from HDF5 file: %d\n", compare_buf[i]);
                         leave( EXIT_FAILURE );
@@ -736,6 +738,4 @@ main (int argc, const char *argv[])
     return 1;
     
 } /* end main */
-
-
 

@@ -1093,7 +1093,7 @@ struct H5C2_jbrb_t
  ****************************************************************************/
 
 #define H5C2__H5C2_T_MAGIC		0x005CAC0F
-#define H5C2__MAX_NUM_TYPE_IDS		16
+#define H5C2__MAX_NUM_TYPE_IDS		17
 #define H5C2__PREFIX_LEN		32
 #define H5C2__MAX_API_NAME_LEN		128
 
