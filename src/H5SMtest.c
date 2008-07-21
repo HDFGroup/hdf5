@@ -81,6 +81,7 @@ H5SM_get_mesg_count_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
 {    
     H5SM_master_table_t *table = NULL;  /* SOHM master table */
     herr_t ret_value = SUCCEED;         /* Return value */
+    hsize_t table_size;                 /* Size of SOHM master table in file */
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_get_mesg_count_test)
 
@@ -93,8 +94,11 @@ H5SM_get_mesg_count_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
         H5SM_index_header_t *header;        /* Index header for message type */
         ssize_t index_num;                  /* Table index for message type */
 
+        /* Determine size of table in file */
+        table_size = (hsize_t) H5SM_TABLE_SIZE(f) + (hsize_t)(f->shared->sohm_nindexes * H5SM_INDEX_HEADER_SIZE(f));
+
         /* Look up the master SOHM table */
-        if(NULL == (table = (H5SM_master_table_t *)H5AC_protect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, NULL, NULL, H5AC_READ)))
+        if(NULL == (table = (H5SM_master_table_t *)H5AC2_protect(f, dxpl_id, H5AC2_SOHM_TABLE, f->shared->sohm_addr, (size_t)table_size, f, H5AC2_READ)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
         /* Find the correct index for this message type */
@@ -111,7 +115,7 @@ H5SM_get_mesg_count_test(H5F_t *f, hid_t dxpl_id, unsigned type_id,
 
 done:
     /* Release resources */
-    if(table && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_TABLE, f->shared->sohm_addr, table, H5AC__NO_FLAGS_SET) < 0)
+    if(table && H5AC2_unprotect(f, dxpl_id, H5AC2_SOHM_TABLE, f->shared->sohm_addr, (size_t)0, table, H5AC2__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_CACHE, H5E_CANTRELEASE, FAIL, "unable to close SOHM master table")
 
     FUNC_LEAVE_NOAPI(ret_value)
