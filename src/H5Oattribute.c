@@ -40,6 +40,8 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Fprivate.h"		/* File 			        */ 
 
 
 /****************/
@@ -474,6 +476,8 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
     H5O_ainfo_t ainfo;                  /* Attribute information for object */
     H5A_t *ret_value;                   /* Return value */
+    H5A_t *exist_attr = NULL;           /* Opened attribute object */
+    htri_t found_open_attr = FALSE;     /* Whether opened object is found */ 
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_open_by_name)
 
@@ -491,43 +495,40 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
         /* Clear error stack from not finding attribute info */
         H5E_clear_stack(NULL);
 
-    /* Check for opening attribute with dense storage */
-    if(H5F_addr_defined(ainfo.fheap_addr)) {
-        H5A_t *exist_attr = NULL;
-        htri_t found_open_attr = FALSE;
+    /* If found the attribute is already opened, make a copy of it to share the
+       object information.  If not, open attribute as a new object */
+    if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, name)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
+    else if(found_open_attr == TRUE) {
+        if(NULL == (ret_value = H5A_copy(NULL, exist_attr)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute")
+    } else {
+        if(H5F_addr_defined(ainfo.fheap_addr)) { /* Open attribute with dense storage */
+            if(NULL == (ret_value = H5A_dense_open(loc->file, dxpl_id, &ainfo, name)))
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "can't open attribute")
+        } else { /* Open attribute in compact storage */
+            H5O_iter_opn_t udata;           /* User data for callback */
+            H5O_mesg_operator_t op;         /* Wrapper for operator */
 
-        /* If found the attribute is already opened, make a copy of it to share the  
-           object information.  If not, open attribute in dense storage */
-        if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, name)) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
-        else if(found_open_attr == TRUE) {
-            if(NULL == (ret_value = H5A_copy(NULL, exist_attr)))
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute")
-        } else if(NULL == (ret_value = H5A_dense_open(loc->file, dxpl_id, &ainfo, name)))
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "can't open attribute")
-    } /* end if */
-    else {
-        H5O_iter_opn_t udata;           /* User data for callback */
-        H5O_mesg_operator_t op;         /* Wrapper for operator */
+            /* Set up user data for callback */
+            udata.name = name;
+            udata.attr = NULL;
 
-        /* Set up user data for callback */
-        udata.name = name;
-        udata.attr = NULL;
+            /* Iterate over attributes, to locate correct one to open */
+            op.op_type = H5O_MESG_OP_LIB;
+            op.u.lib_op = H5O_attr_open_cb;
+            if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, &op, &udata, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "error updating attribute")
 
-        /* Iterate over attributes, to locate correct one to open */
-        op.op_type = H5O_MESG_OP_LIB;
-        op.u.lib_op = H5O_attr_open_cb;
-        if(H5O_msg_iterate_real(loc->file, oh, H5O_MSG_ATTR, &op, &udata, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "error updating attribute")
+            /* Check that we found the attribute */
+            if(!udata.attr)
+                HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't locate attribute")
 
-        /* Check that we found the attribute */
-        if(!udata.attr)
-            HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't locate attribute")
-
-        /* Get attribute opened from object header */
-        HDassert(udata.attr);
-        ret_value = udata.attr;
-    } /* end else */
+            /* Get attribute opened from object header */
+            HDassert(udata.attr);
+            ret_value = udata.attr;
+        } /* end else */
+    }
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
@@ -595,8 +596,8 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, hid_t dxpl_id)
 {
     H5A_attr_iter_op_t attr_op;         /* Attribute operator */
-    H5A_t *exist_attr = NULL;
-    htri_t found_open_attr = FALSE;
+    H5A_t *exist_attr = NULL;           /* Opened attribute object */
+    htri_t found_open_attr = FALSE;     /* Whether opened object is found */ 
     H5A_t *ret_value = NULL;            /* Return value */
     H5O_t *oh = NULL;                   /* Object header */
     H5O_ainfo_t ainfo;                  /* Attribute information for object */
@@ -625,10 +626,9 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
         /* Clear error stack from not finding attribute info */
         H5E_clear_stack(NULL);
 
-    /* If the opened attribute is in dense storage, find out whether it has already been 
-     * opened.  If it has, close the object and make a copy of the already opened object
-     * to share the object info. */
-    if(H5F_addr_defined(ainfo.fheap_addr) && ret_value) {
+    /* Find out whether it has already been opened.  If it has, close the object 
+     * and make a copy of the already opened object to share the object info. */
+    if(ret_value) {
         if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, 
             ret_value->shared->name)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
@@ -673,14 +673,18 @@ htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char*
 {
     htri_t ret_value = FALSE;
     int num_open_attr = 0;
-    ssize_t name_len = 0;
     hid_t *attr_id_list = NULL;
+    unsigned long loc_fnum, attr_fnum;
     int i;
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_find_opened_attr)
 
+    /* Get file serial number for the location of attribute */
+    if(H5F_get_fileno(loc->file, &loc_fnum) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "can't get file serial number")
+
     /* Count all opened attributes */
-    if((num_open_attr = H5F_get_obj_count(loc->file, H5F_OBJ_ATTR)) < 0)
+    if((num_open_attr = H5F_get_obj_count(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "can't get number of opened attributes")
 
     /* Find out whether the attribute has been opened */
@@ -688,16 +692,23 @@ htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char*
         attr_id_list = (hid_t*)H5MM_malloc(num_open_attr*sizeof(hid_t));
 
         /* Retrieve the IDs of all opened attributes */
-        if(H5F_get_obj_ids(loc->file, H5F_OBJ_ATTR, num_open_attr, attr_id_list) < 0)
+        if(H5F_get_obj_ids(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, num_open_attr, attr_id_list) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't IDs of opened attributes")
 
         for(i=0; i<num_open_attr; i++) {
-            if(NULL == (*attr = (H5A_t *)H5I_object_verify(attr_id_list[i], H5I_ATTR)))
+            if(NULL == (*attr = (H5A_t *)H5I_object(attr_id_list[i])))
                 HGOTO_ERROR(H5E_ATTR, H5E_BADTYPE, FAIL, "not an attribute")
 
-            /* Verify whether it's the right object */  
-            if(!strcmp(name_to_open, (*attr)->shared->name) && loc->addr == 
-                (*attr)->shared->oloc.addr) {
+            /* Get file serial number for attribute */
+            if(H5F_get_fileno((*attr)->shared->oloc.file, &attr_fnum) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "can't get file serial number")
+
+            /* Verify whether it's the right object.  The attribute name, object address
+             * to which the attribute is attached, and file serial number should all
+             * match. */
+            if(!strcmp(name_to_open, (*attr)->shared->name) && 
+                loc->addr == (*attr)->shared->oloc.addr &&
+                loc_fnum == attr_fnum) {
                 ret_value = TRUE;
                 break;
             }
@@ -1304,7 +1315,8 @@ done:
  *              the attribute is already opened, use the opened message 
  *              to insert.  If not, still use the message in the attribute 
  *              table. This will guarantee that the attribute message is
- *              shared. 
+ *              shared between the object in metadata cache and the opened
+ *              object. 
  *-------------------------------------------------------------------------
  */
 static herr_t

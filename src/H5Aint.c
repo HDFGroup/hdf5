@@ -140,10 +140,14 @@ H5A_compact_build_table_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
         size_t n = MAX(1, 2 * udata->atable->nattrs);
         H5A_t **table = (H5A_t **)H5FL_SEQ_CALLOC(H5A_t_ptr, n);
 
-        /* Use attribute functions for operation */
+        /* Use attribute functions for operation to manage memory properly */
         for(i=0; i<udata->atable->nattrs; i++) {
             table[i] = (H5A_t *)H5FL_CALLOC(H5A_t);
-            HDmemcpy(&(table[i]), &(udata->atable->attrs[i]), sizeof(H5A_t*));
+
+            if(NULL == H5A_copy(table[i], udata->atable->attrs[i]))
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
+            if(H5A_close(udata->atable->attrs[i]) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "can't close attribute")
         }
 
         if(udata->atable->nattrs)

@@ -2417,14 +2417,12 @@ done:
 herr_t
 H5A_close(H5A_t *attr)
 {
-    H5O_t *oh = NULL;                     /* Pointer to attr's object header */
-    unsigned free_failed = FALSE;
     herr_t ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_NOAPI(H5A_close, FAIL)
 
     HDassert(attr);
-    HDassert(attr->shared>0);
+    HDassert(attr->shared);
 
     /* Close the object's symbol-table entry */
     if(attr->obj_opened && (H5O_close(&(attr->shared->oloc)) < 0))

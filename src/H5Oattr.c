@@ -468,8 +468,6 @@ H5O_attr_size(const H5F_t UNUSED *f, const void *_mesg)
 herr_t
 H5O_attr_reset(void *_mesg)
 {
-    H5A_t                  *attr = (H5A_t *)_mesg;
-
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_reset)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
