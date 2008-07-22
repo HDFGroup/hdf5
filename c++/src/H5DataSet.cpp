@@ -69,11 +69,10 @@ DataSet::DataSet(const hid_t existing_id) : AbstractDs(), H5Object()
 ///\param	original - IN: DataSet instance to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSet::DataSet(const DataSet& original) : AbstractDs(original), H5Object()
+DataSet::DataSet(const DataSet& original) : AbstractDs(original), H5Object(original)
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id
-
 }
 
 //--------------------------------------------------------------------------
@@ -559,7 +558,7 @@ void DataSet::setId(const hid_t new_id)
    id = new_id;
 
    // increment the reference counter of the new id
-   incRefCount();
+   //incRefCount();
 }
 
 //--------------------------------------------------------------------------
@@ -578,8 +577,10 @@ void DataSet::close()
 	{
 	    throw DataSetIException("DataSet::close", "H5Dclose failed");
 	}
-	// reset the id because the dataset that it represents is now closed
-	id = 0;
+	// reset the id when the dataset that it represents is no longer
+	// referenced
+	if (getCounter() == 0)
+	    id = 0;
     }
 }
 

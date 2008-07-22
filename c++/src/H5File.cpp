@@ -754,9 +754,6 @@ void H5File::setId(const hid_t new_id)
     }
    // reset object's id to the given id
    id = new_id;
-
-   // increment the reference counter of the new id
-   incRefCount();
 }
 
 //--------------------------------------------------------------------------
@@ -775,8 +772,10 @@ void H5File::close()
 	{
 	    throw FileIException("H5File::close", "H5Fclose failed");
 	}
-	// reset the id because the file that it represents is now closed
-	id = 0;
+	// reset the id when the file that it represents is no longer
+	// referenced
+	if (getCounter() == 0)
+	    id = 0;
     }
 }
 
@@ -813,18 +812,10 @@ void H5File::throwException(const H5std_string& func_name, const H5std_string& m
 //--------------------------------------------------------------------------
 H5File::~H5File()
 {
-    int counter = getCounter(id);
-    if (counter > 1)
-    {
-	decRefCount(id);
-    }
-    else if (counter == 1)
-    {
-	try {
-	    close();
-	} catch (Exception close_error) {
-	    cerr << "H5File::~H5File - " << close_error.getDetailMsg() << endl;
-	}
+    try {
+	close();
+    } catch (Exception close_error) {
+	cerr << "H5File::~H5File - " << close_error.getDetailMsg() << endl;
     }
 }
 

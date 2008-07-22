@@ -5041,6 +5041,7 @@ main(void)
     nerrors += test_detect();
     nerrors += test_compound_1();
     nerrors += test_query();
+
     nerrors += test_transient(fapl);
     nerrors += test_named(fapl);
     nerrors += test_encode();

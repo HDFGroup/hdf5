@@ -560,8 +560,8 @@ H5T_pack(const H5T_t *dt)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to pack part of a compound datatype")
 
                 /* Update the member size */
-                dt->shared->u.compnd.memb[i].size = dt->shared->u.compnd.memb[i].type->shared->size;
-	    }
+                dt->shared->u.compnd.memb[i].size = (dt->shared->u.compnd.memb[i].type)->shared->size;
+            }
 
             /* Remove padding between members */
             if(H5T_sort_value(dt, NULL)<0)

@@ -87,4 +87,4 @@ main(int argc, char *argv[])
         TestCleanup();
 
     return (GetTestNumErrs());
-}                               /* end main() */
+}   /* end main() */

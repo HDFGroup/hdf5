@@ -192,9 +192,6 @@ void Group::setId(const hid_t new_id)
     }
    // reset object's id to the given id
    id = new_id;
-
-   // increment the reference counter of the new id
-   incRefCount();
 }
 
 //--------------------------------------------------------------------------
@@ -206,8 +203,6 @@ void Group::setId(const hid_t new_id)
 //--------------------------------------------------------------------------
 void Group::close()
 {
- /* cerr << "Group::close/p_valid_id" << endl;
- */ 
     if (p_valid_id(id))
     {
 	herr_t ret_value = H5Gclose( id );
@@ -215,8 +210,10 @@ void Group::close()
 	{
 	    throw GroupIException("Group::close", "H5Gclose failed");
 	}
-	// reset the id because the group that it represents is now closed
-	id = 0;
+	// reset the id when the group that it represents is no longer
+	// referenced
+	if (getCounter() == 0)
+	    id = 0;
     }
 }
 
