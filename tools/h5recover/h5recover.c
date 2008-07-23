@@ -175,9 +175,9 @@ int
 main (int argc, const char *argv[])
 {
 
-    /***********************
-    * Variable declarations
-    ***********************/    
+    /* ===================== */
+    /* Variable Declarations */
+    /* ===================== */
 
     hid_t            fid = -1; /* file id number */
     hid_t            fapl = -1; /* file access property list */
@@ -211,9 +211,9 @@ main (int argc, const char *argv[])
     char             temp[100]; /* temporary buffer */
     H5F_t *          f; /* File pointer */
 
-    /**********************
-    * Command line parsing 
-    **********************/
+    /* ==================== */
+    /* Command Line Parsing */
+    /* ==================== */
 
     /* initialize h5tools lib */
     h5tools_init();
@@ -297,11 +297,55 @@ main (int argc, const char *argv[])
 
     } /* end if */
 
-    /* =================== */
-    /* Main H5recover code */
-    /* =================== */
+    /* ========================================== */
+    /* Open HDF5 File with Journal Recovered Flag */
+    /* ========================================== */
 
- 
+    /* set up appropriate fapl */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    
+    if ( fapl == -1 ) {
+    
+        error_msg(progname, "Could not create FAPL.\n");
+        leave( EXIT_FAILURE );
+    
+    } /* end if */
+    
+    config.version = 1; /* should be H5C2__CURR_AUTO_SIZE_CTL_VER */
+    
+    /* get H5AC_cache_config_t configuration from fapl */
+    if ( H5Pget_mdc_config(fapl, &config) == -1) {
+    
+        error_msg(progname, "Could not get mdc config from FAPL.\n");
+        leave( EXIT_FAILURE );
+    
+    }
+            
+    /* make sure journal recovered field is set to TRUE in mdc_config */
+    config.journal_recovered = TRUE;
+    
+    /* set H5AC_cache_config_t configuration with file recovered */
+    if ( H5Pset_mdc_config(fapl, &config) == -1) {
+    
+        error_msg(progname, "Could not set mdc config on FAPL.\n");
+        leave( EXIT_FAILURE );
+    
+    } /* end if */
+
+    /* open HDF5 file with provided fapl */
+    fid = H5Fopen(file_name, H5F_ACC_RDWR, fapl);    
+       
+    if ( fid == -1 ) {
+    
+        error_msg(progname, "Could not open recovered HDF5 file.\n");
+        leave( EXIT_FAILURE );
+    
+    } /* end if */
+
+    /* =============================== */
+    /* Make a Backup Copy of HDF5 File */
+    /* =============================== */
+
     if ( verbose ) printf("\n==============================================\n");
 
     if (no_copy == 0) {
@@ -325,6 +369,10 @@ main (int argc, const char *argv[])
         } /* end else */
 
     } /* end if */
+
+    /* =========================== */
+    /* Open HDF5 and Journal Files */
+    /* =========================== */
 
     /* open the journal file for reading */
     journal_fp = fopen(journal_name, "r");
@@ -363,6 +411,7 @@ main (int argc, const char *argv[])
     /* ====================================================== */
     /* Find the last complete transaction in the journal file */
     /* ====================================================== */
+
     fseek(journal_fp, 0, SEEK_END);
 
     while (last_trans_found == 0) {
@@ -398,8 +447,9 @@ main (int argc, const char *argv[])
     } /* end while */
 
     /* ======================================= */
-    /* determine size of biggest journal entry */
+    /* Determine Size of Biggest Journal Entry */
     /* ======================================= */
+
     fseek(journal_fp, 0, SEEK_END);
     pos_end = ftell(journal_fp);
 
@@ -502,7 +552,7 @@ main (int argc, const char *argv[])
     
             } /* end if */
 
-            /* if ( verbose ) printf("  token[0] : <%s>\n", tok[0]); */
+            if ( verbose ) printf("  token[0] : <%s>\n", tok[0]);
 
             for (i=1; i<10; i++) {
 
@@ -514,7 +564,7 @@ main (int argc, const char *argv[])
 
                 } /* end if */
 
-            /* if ( verbose ) printf("  token[%d] : <%s>\n", i, tok[i]); */
+                if ( verbose ) printf("  token[%d] : <%s>\n", i, tok[i]);
 
             } /* end for */
 
@@ -528,7 +578,7 @@ main (int argc, const char *argv[])
 
             } /* end if */
 
-            /* if ( verbose ) printf("  token[8] : <%s>\n", tok[8]); */
+            if ( verbose ) printf("  token[8] : <hexadecimal body data>\n");
 
             /* ================================== */
             /* Convert Items from Character Array */
@@ -545,7 +595,7 @@ main (int argc, const char *argv[])
 
             } /* end if */
 
-            /* if ( verbose ) printf("  address: %llx\n", address); */
+            if ( verbose ) printf("  address  : %llx\n", address);
 
             /* convert size from character string*/
             size = HDstrtod(tok[6], NULL);
@@ -565,10 +615,10 @@ main (int argc, const char *argv[])
 
             } /* end if */
 
-            /* if ( verbose ) printf("  size: %d\n", size); */
+            if ( verbose ) printf("  length   : %d\n", size);
 
             /* transform body out of hexadecimal character string */
-            body = HDmalloc(size);
+            body = HDmalloc(size + 1);
             if (body == NULL) {
 
                 error_msg(progname, "Could not allocate space for body\n");
@@ -587,7 +637,7 @@ main (int argc, const char *argv[])
 
             body[i] = 0;
 
-            /* if ( verbose ) printf("  body: %s\n", body); */
+            if ( verbose ) printf("  body     : binary body data\n");
 
             /* ================================================ */
             /* Write into HDF5 file the recovered journal entry */
@@ -613,7 +663,7 @@ main (int argc, const char *argv[])
 
                 if ( verbose ) printf("Verifying success of write");
             
-                compare_buf = HDmalloc(size);
+                compare_buf = HDmalloc(size + 1);
     
                 if (compare_buf == NULL) {
                     error_msg(progname, "Could not allocate space\n");
@@ -642,7 +692,7 @@ main (int argc, const char *argv[])
                     }
                 }
 
-                if ( verbose ) printf(" .... SUCCESS!\n");
+                if ( verbose ) printf(" .... SUCCESS!\n\n");
                 free(compare_buf);
 
             }
@@ -659,53 +709,9 @@ main (int argc, const char *argv[])
     free(readback);
     free(journal_name);
 
-    /************************
-    * Mark HDF5 File as Recoverd *
-    ************************/
-
-    if ( verbose ) printf("Marking HDF5 File as recovered.\n");
-    if ( verbose ) printf("==============================================\n\n");
-
-    /* set up appropriate fapl */
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
-    
-    if ( fapl == -1 ) {
-    
-        error_msg(progname, "Could not create FAPL.\n");
-        leave( EXIT_FAILURE );
-    
-    } /* end if */
-    
-    config.version = 1; /* should be H5C2__CURR_AUTO_SIZE_CTL_VER */
-    
-    /* get H5AC_cache_config_t configuration from fapl */
-    if ( H5Pget_mdc_config(fapl, &config) == -1) {
-    
-        error_msg(progname, "Could not get mdc config from FAPL.\n");
-        leave( EXIT_FAILURE );
-    
-    }
-            
-    /* make sure journal recovered field is set to TRUE in mdc_config */
-    config.journal_recovered = TRUE;
-    
-    /* set H5AC_cache_config_t configuration with file recovered */
-    if ( H5Pset_mdc_config(fapl, &config) == -1) {
-    
-        error_msg(progname, "Could not set mdc config on FAPL.\n");
-        leave( EXIT_FAILURE );
-    
-    } /* end if */
-
-    /* open HDF5 file with provided fapl */
-    fid = H5Fopen(file_name, H5F_ACC_RDWR, fapl);    
-       
-    if ( fid == -1 ) {
-    
-        error_msg(progname, "Could not open recovered HDF5 file.\n");
-        leave( EXIT_FAILURE );
-    
-    } /* end if */
+    /* =========================================== */
+    /* Set EOA Value and Close Recovered HDF5 File */
+    /* =========================================== */
 
     /* obtain H5F_t pointer */
     if (NULL == (f = H5I_object(fid))) {
@@ -730,12 +736,19 @@ main (int argc, const char *argv[])
         leave( EXIT_FAILURE );
     
     } /* end if */
-    
-    printf("HDF5 file successfuly recovered.\n");
+ 
+    /* ================ */
+    /* Cleanup and Exit */
+    /* ================ */
+   
+    /* MIKE: Should I remove journal file here, or should that happen
+       on file close? */
 
+    printf("HDF5 file successfuly recovered.\n");
+    if ( verbose ) printf("==============================================\n\n");
     free(file_name);
 
-    return 1;
+    return 0;
     
 } /* end main */
 
