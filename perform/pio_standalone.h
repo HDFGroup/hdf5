@@ -48,31 +48,32 @@
  * define these in terms of macros.
  */
 #ifdef _WIN32
-#define HDstrdup(S)				   _strdup(S)
+#define HDstrdup(S)		   _strdup(S)
 #else /* _WIN32 */
 
 #if !defined strdup && !defined H5_HAVE_STRDUP
 extern char *strdup(const char *s);
 #endif
 
-#define HDstrdup(S)				  strdup(S)
+#define HDstrdup(S)		  strdup(S)
 
 #endif /* _WIN32 */
 
-#define HDstrcmp(S,T)			  strcmp(S,T)
-#define HDstrlen(S)				  strlen(S)
-#define HDstrncmp(S,T,L)		  strncmp(S,T,L)
-#define HDstrncpy(X,Y,Z)		  strncpy(X,Y,Z)
-#define HDstrchr(S,C)			  strchr(S,C)
-#define HDfree(M)				  free(M)
+H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
+#define HDstrcmp(S,T)		  strcmp(S,T)
+#define HDstrlen(S)		  strlen(S)
+#define HDstrncmp(S,T,L)	  strncmp(S,T,L)
+#define HDstrncpy(X,Y,Z)	  strncpy(X,Y,Z)
+#define HDstrchr(S,C)		  strchr(S,C)
+#define HDfree(M)		  free(M)
 
 
 #ifdef _O_BINARY
-#define HDopen(S,F,M)			  open(S,F|_O_BINARY,M)
+#define HDopen(S,F,M)		  open(S,F|_O_BINARY,M)
 #else
-#define HDopen(S,F,M)			  open(S,F,M)
+#define HDopen(S,F,M)		  open(S,F,M)
 #endif
-#define HDclose(F)				  close(F)
+#define HDclose(F)		  close(F)
 
 #ifdef _WIN32
      #ifdef __MWERKS__
@@ -81,7 +82,7 @@ extern char *strdup(const char *s);
         #define HDlseek(F,O,W)  _lseeki64(F,O,W)
      #endif
 #else
-#define HDlseek(F,O,W)			 lseek(F,O,W)
+#define HDlseek(F,O,W)		 lseek(F,O,W)
 #endif
 
 #if defined (__MWERKS__)
@@ -97,9 +98,9 @@ extern char *strdup(const char *s);
 
 #ifdef _WIN32
      #ifdef __MWERKS__
-     #define HDstat(S,B)   stat(S,B)
+     #define HDstat(S,B)   	stat(S,B)
      #else /*MSVC*/
-     #define HDstat(S,B)		_stati64(S,B)
+     #define HDstat(S,B)	_stati64(S,B)
      #endif
 #else
 #define HDstat(S,B)  stat(S,B)
@@ -108,16 +109,16 @@ extern char *strdup(const char *s);
 #ifdef _WIN32
      #ifdef __MWERKS__
      #define HDfstat(F,B)       fstat(F,B)
-     typedef struct stat		h5_stat_t;
+     typedef struct stat	h5_stat_t;
      typedef off_t              h5_stat_size_t;
      #else /*MSVC*/
-     #define HDfstat(F,B)		_fstati64(F,B)
+     #define HDfstat(F,B)	_fstati64(F,B)
      typedef struct _stati64	h5_stat_t;
      typedef __int64            h5_stat_size_t;
      #endif
 #else
 #define HDfstat(F,B)            fstat(F,B)
-typedef struct stat				h5_stat_t;
+typedef struct stat		h5_stat_t;
 typedef off_t                   h5_stat_size_t;
 #endif
 
@@ -187,4 +188,10 @@ typedef struct long_options {
 
 extern int    get_option(int argc, const char **argv, const char *opt,
                          const struct long_options *l_opt);
+
+extern int     nCols;               /*max number of columns for outputting  */
+
+/* Definitions of useful routines */
+extern void     print_version(const char *progname);
+
 #endif
