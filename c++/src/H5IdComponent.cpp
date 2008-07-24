@@ -177,10 +177,41 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 
 	// copy the data members from the rhs object
 	setId(rhs.getId());
-	incRefCount(getId()); // a = b, so there are two objects with the same
+//	incRefCount(getId()); // a = b, so there are two objects with the same
 			      // hdf5 id
     }
     return *this;
+}
+
+//--------------------------------------------------------------------------
+// Function:	IdComponent::setId
+///\brief	Sets the identifier of this object to a new value.
+///
+///\exception	H5::IdComponentException when the attempt to close the HDF5
+///		object fails
+// Description:
+//		The underlaying reference counting in the C library ensures
+//		that the current valid id of this object is properly closed.
+//		Then the object's id is reset to the new id.
+// Programmer	Binh-Minh Ribler - 2000
+// Modification
+//	2008/7/23 - BMR
+//		Changed all subclasses' setId to p_setId and put back setId
+//		here.  p_setId is used in the library where the id provided
+//		by a C API passed on to user's application in the form of a
+//		C++ API object, which will be destroyed properly, and so 
+//		p_setId does not call incRefCount.  On the other hand, the
+//		public version setId is used by other applications, in which 
+//		the id passed to setId already has a reference count, so setId
+//		must call incRefCount.
+//--------------------------------------------------------------------------
+void IdComponent::setId(const hid_t new_id)
+{
+   // set to new_id
+   p_setId(new_id);
+
+   // increment the reference counter of the new id
+   incRefCount();
 }
 
 //--------------------------------------------------------------------------

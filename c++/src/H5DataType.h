@@ -119,7 +119,7 @@ class H5_DLLCPP DataType : public H5Object {
 
 	// Gets the datatype id.
 	virtual hid_t getId() const;
-	virtual void setId(const hid_t new_id);
+	virtual void p_setId(const hid_t new_id);
 
 	// Destructor: properly terminates access to this datatype.
 	virtual ~DataType();

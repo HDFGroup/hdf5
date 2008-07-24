@@ -111,7 +111,7 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 
 	// Gets/Sets the HDF5 file id.
 	virtual hid_t getId() const;
-	virtual void setId(const hid_t new_id);
+	virtual void p_setId(const hid_t new_id);
 
 	// H5File destructor.
 	virtual ~H5File();

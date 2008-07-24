@@ -441,9 +441,7 @@ void H5Object::dereference(H5File& h5file, void* ref)
    }
 
    // No failure, set id to the object
-    /* obj.setId(temp_id);
- */ 
-   setId(temp_id);
+   p_setId(temp_id);
 }
 
 void H5Object::dereference(H5Object& obj, void* ref)
@@ -457,7 +455,7 @@ void H5Object::dereference(H5Object& obj, void* ref)
    }
 
    // No failure, set id to the object
-   setId(temp_id);
+   p_setId(temp_id);
 }
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS

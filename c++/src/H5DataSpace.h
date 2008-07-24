@@ -114,7 +114,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
 
 	// Gets the dataspace id.
 	virtual hid_t getId() const;
-	virtual void setId(const hid_t new_id);
+	virtual void p_setId(const hid_t new_id);
 
 	// Destructor: properly terminates access to this dataspace.
 	virtual ~DataSpace();

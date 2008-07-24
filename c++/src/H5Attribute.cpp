@@ -377,7 +377,7 @@ hid_t Attribute::getId() const
 }
 
 //--------------------------------------------------------------------------
-// Function:    Attribute::setId
+// Function:    Attribute::p_setId
 ///\brief       Sets the identifier of this object to a new value.
 ///
 ///\exception   H5::IdComponentException when the attempt to close the HDF5
@@ -388,14 +388,14 @@ hid_t Attribute::getId() const
 //              Then the object's id is reset to the new id.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Attribute::setId(const hid_t new_id)
+void Attribute::p_setId(const hid_t new_id)
 {
     // handling references to this old id
     try {
         close();
     }
     catch (Exception close_error) {
-        throw AttributeIException("Attribute::setId", close_error.getDetailMsg());
+        throw AttributeIException("Attribute::p_setId", close_error.getDetailMsg());
     }
    // reset object's id to the given id
    id = new_id;
