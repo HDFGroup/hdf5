@@ -85,12 +85,12 @@ class H5_DLLCPP IdComponent {
 	// Gets the name of the file, in which an HDF5 object belongs.
 	H5std_string p_get_file_name() const;
 
+	// Verifies that the given id is valid.
+	static bool p_valid_id(const hid_t obj_id);
+
 	// Sets the identifier of this object to a new value. - this one
 	// doesn't increment reference count
 	virtual void p_setId(const hid_t new_id) = 0;
-
-	// Verifies that the given id is valid.
-	static bool p_valid_id(const hid_t obj_id);
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

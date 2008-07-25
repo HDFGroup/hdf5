@@ -55,7 +55,6 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 
 	// Gets the group id.
 	virtual hid_t getId() const;
-	virtual void p_setId(const hid_t new_id);
 
 	// Destructor
 	virtual ~Group();
@@ -65,6 +64,10 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 
    private:
 	hid_t id;	// HDF5 group id
+
+   protected:
+	// Sets the group id.
+	virtual void p_setId(const hid_t new_id);
 };
 #ifndef H5_NO_NAMESPACE
 }
