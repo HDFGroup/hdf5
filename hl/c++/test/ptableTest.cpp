@@ -22,13 +22,6 @@ using namespace H5;
 #define TEST_FILE "packettest.h5"
 
 /* Main test function */
-#ifndef TMP
-int main(void)
-{
-      printf("Test skipped because of some error - remember to fix it\n");
-      return 0;
-}
-#else
 int main(void)
 {
     herr_t err;
@@ -80,7 +73,6 @@ int main(void)
       /* ERRORS */
       return -1;
 }
-#endif
 
 int BasicTest()
 {
