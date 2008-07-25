@@ -16,9 +16,6 @@
 /*
  * This example shows how to use the Journaling feature. It also simulates a
  * crash without closing the file first.
- * The patch mode reopens the file, defines the dataset again without writing
- * any data, then close the file.  This is a temporary fix till the object header
- * coding is working.
  */
 
 #include "hdf5.h"
@@ -34,9 +31,9 @@
 #define ProgName	 	"enable_journaling"	/* program name */
 #define DATASETNAME "IntArray"
 #define NX     10                      /* dataset initial dimensions */
-#define NY     10
+#define NY     100
 #define CHUNKX 2			/* chunk dimensions */
-#define CHUNKY 2
+#define CHUNKY 10
 #define RANK   2
 
 /* Global variables */
@@ -54,7 +51,6 @@ helppage(void)
 	"%s -[c|r|p]\n"
 	"\t-c\tCreate a new file (%s)\n"
 	"\t-r\tReopen the file with Journaling (%s) for crash test\n"
-	"\t-p\tPatch it with metadta of the added rows\n\n",
 	ProgName, H5FILE_NAME, H5JournalFILE_NAME
     );
     printf("To try this program, run:\n");
@@ -80,21 +76,19 @@ main (int ac, char **av)
     hid_t       faccpl;			/* File access property list */
     pid_t	mypid;
     int		cmode=0;		/* Create mode, overrides the others. */
-    int		pmode=0;		/* patch mode, default no. */
     int		rmode=0;		/* Reopen mod, default no. */
+    int		zmode=0;		/* Turn off all caching, default cache on. */
 
 
     /* Parse different options:
      * Default: Create a new file and new dataset.
      * rmode: Reopen an existing file with Journaling.
-     * pmode: Patch mode (implies rmode but no data write nor crash).
      *
      * How to use this:
      * ./enable_journaling	# create JournalEG.h5 file
      * ./enable_journaling -r	# reopen JournalEG.h5 with Journaling on and
      *			        # add more rows, then crash.
      * ./h5recover -j JournalEG.h5.jnl JournalEG.h5	# to recover the file.
-     * ./enable_journaling -p	# patch it with metadata of the added rows.
      * Then JournalEG.h5 should have all the expected written rows and data.
      * 
      */
@@ -108,15 +102,12 @@ main (int ac, char **av)
         if (strcmp("-c", *av) == 0){
 	    cmode++;
 	    printf("Create mode\n");
-	}else
-	if (strcmp("-p", *av) == 0){
-	    pmode++;
-	    rmode++;
-	    printf("Patch mode on\n");
-	}else
-        if (strcmp("-r", *av) == 0){
+	}else if (strcmp("-r", *av) == 0){
 	    rmode++;
 	    printf("Reopen mode\n");
+	}else if (strcmp("-z", *av) == 0){
+	    zmode++;
+	    printf("zmode on => all caching off\n");
 	}else{
 	    fprintf(stderr, "Unknown option (%s)\n", *av);
 	    helppage();
@@ -174,68 +165,88 @@ main (int ac, char **av)
 	H5Fclose(file);
 	return(0);
     }
-    if (rmode || pmode){
+    if (rmode){
 	/*===================================================
 	 * rmode:
 	 *    Reopen a previous file with Journaling on, extend the dataset
 	 *    to 4NX rows, write data, crash.
 	 *    Need to turn off H5Pset_sieve_buf_size( hid_t fapl_id, hsize_t size  ) so that raw data will be flushed immediately.
-	 * pmode:
-	 *    Patch mode (similar to rmode but no data write nor crash).
-	 *    Reopen a restored file, extend the dataset to 4NX rows,
-	 *    do not write data, close file.
 	 *===================================================*/
 
-	if (pmode){
-	    /* just reopen the file to patch it. */
-	    file = H5Fopen(H5FILE_NAME, H5F_ACC_RDWR, H5P_DEFAULT);
-	}else{
-	    /* reopen the file with Journaling on. */
-	    /* Setup file access property list with journaling */
-	    faccpl = H5Pcreate(H5P_FILE_ACCESS);
-	    if (H5Pset_journal(faccpl, H5JournalFILE_NAME) < 0){
-		fprintf(stderr, "H5Pset_journal on data file failed\n");
-		H5Pclose(faccpl);
-		return(-1);
-	    }
+	/* reopen the file with Journaling on. */
+	/* Setup file access property list with journaling */
+	faccpl = H5Pcreate(H5P_FILE_ACCESS);
+#if 1
+	if (H5Pset_journal(faccpl, H5JournalFILE_NAME) < 0){
+	    fprintf(stderr, "H5Pset_journal on data file failed\n");
+	    H5Pclose(faccpl);
+	    return(-1);
+	}
+#endif
+	if (zmode){
+	    printf("turning cache off\n");
 	    /* Turn off data sieving to get raw data flushed to file */
-            /* immediately.                                          */
+	    /* immediately.                                          */
 	    if (H5Pset_sieve_buf_size(faccpl, 0) < 0){
 		fprintf(stderr, "H5Pset_sieve_buf_size on data file failed\n");
 		H5Pclose(faccpl);
 		return(-1);
 	    }
-	    /* Delete the journal file since journal code does not allow */
-	    /* existed journal file. */
-	    remove(H5JournalFILE_NAME);
-	    /* open the file with journaling property list */
-	    file = H5Fopen(H5FILE_NAME, H5F_ACC_RDWR, faccpl);
+	    /* Turn off chunk cache to get chunk raw data flushed to file */
+	    /* immediately.                                          */
+	    {
+	    int mdc_nelmts;
+	    size_t rdcc_nelmts;
+	    size_t rdcc_nbytes;
+	    double rdcc_w0;
 
-	    /* close handle not needed any more. */
-	    H5Pclose(faccpl);
+	    if(H5Pget_cache(faccpl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0){
+		fprintf(stderr, "H5Pget_cache on data file failed\n");
+		H5Pclose(faccpl);
+		return(-1);
+	    }
+	    mdc_nelmts = 0;
+	    rdcc_nelmts = 0;
+	    rdcc_nbytes = 0;
+	    if(H5Pset_cache(faccpl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0) {
+		fprintf(stderr, "H5Pset_cache on data file failed\n");
+		H5Pclose(faccpl);
+		return(-1);
+	    }
+	    }
 	}
 
+	/* Delete the journal file since journal code does not allow */
+	/* existed journal file. */
+	remove(H5JournalFILE_NAME);
+	/* open the file with journaling property list */
+	file = H5Fopen(H5FILE_NAME, H5F_ACC_RDWR, faccpl);
+
+	/* close handle not needed any more. */
+	H5Pclose(faccpl);
+
+	/* Open dataset for modifications. */
 	dataset=H5Dopen2(file, DATASETNAME, H5P_DEFAULT);
 	/* extend the dataset to 4NX rows. */
 	dimsf[0] = 4*NX;
 	dimsf[1] = NY;
 	H5Dset_extent(dataset, dimsf);
 
-	if (!pmode){
-	    /* write data to new rows and crash */
-	    /* Do 3 writes to generate at least 3 transactions. */
-	    writedata(dataset, NX, 2*NX-1);
-	    writedata(dataset, 2*NX, 3*NX-1);
-	    writedata(dataset, 3*NX, 4*NX-1);
-	    /* simulate a crash ending of the aiplication */
-	    fprintf(stderr, "going to crash myself\n");
-	    mypid = getpid();
-	    kill(mypid, SIGTERM);	/* Terminate myself */
-	}else{
-	    H5Dclose(dataset);
-	    H5Fclose(file);
-	    return(0);
-	}
+	/* write data to new rows and crash */
+	/* Do 3 writes to generate at least 3 transactions. */
+	writedata(dataset, NX, 2*NX-1);
+	writedata(dataset, 2*NX, 3*NX-1);
+	writedata(dataset, 3*NX, 4*NX-1);
+	/* simulate a crash ending of the aiplication */
+#if 1
+	fprintf(stderr, "going to crash myself\n");
+	mypid = getpid();
+	kill(mypid, SIGTERM);	/* Terminate myself */
+#endif
+	/* Will execute these only when not terminated. */
+	H5Dclose(dataset);
+	H5Fclose(file);
+	return(0);
     }
 }
 
