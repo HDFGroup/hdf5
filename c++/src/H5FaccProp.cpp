@@ -225,7 +225,7 @@ void FileAccPropList::getFamily(hsize_t& memb_size, FileAccPropList& memb_plist)
    {
       throw PropListIException("FileAccPropList::getFamily", "H5Pget_fapl_family failed");
    }
-   memb_plist.setId(memb_plist_id);
+   memb_plist.p_setId(memb_plist_id);
 }
 
 //--------------------------------------------------------------------------

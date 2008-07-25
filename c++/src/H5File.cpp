@@ -732,7 +732,7 @@ hid_t H5File::getId() const
 }
 
 //--------------------------------------------------------------------------
-// Function:    H5File::setId
+// Function:    H5File::p_setId
 ///\brief       Sets the identifier of this object to a new value.
 ///
 ///\exception   H5::IdComponentException when the attempt to close the HDF5
@@ -743,14 +743,14 @@ hid_t H5File::getId() const
 //              Then the object's id is reset to the new id.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5File::setId(const hid_t new_id)
+void H5File::p_setId(const hid_t new_id)
 {
     // handling references to this old id
     try {
         close();
     }
     catch (Exception E) {
-        throw FileIException("H5File::setId", E.getDetailMsg());
+        throw FileIException("H5File::p_setId", E.getDetailMsg());
     }
    // reset object's id to the given id
    id = new_id;

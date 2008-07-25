@@ -64,12 +64,15 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
 	// Default constructor
 	Attribute();
 
-	// Gets/Sets the attribute id.
+	// Gets the attribute id.
 	virtual hid_t getId() const;
-	virtual void setId(const hid_t new_id);
 
 	// Destructor: properly terminates access to this attribute.
 	virtual ~Attribute();
+
+   protected:
+	// Sets the attribute id.
+	virtual void p_setId(const hid_t new_id);
 
    private:
 	hid_t id;	// HDF5 attribute id

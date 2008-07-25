@@ -170,7 +170,7 @@ hid_t Group::getId() const
 }
 
 //--------------------------------------------------------------------------
-// Function:    Group::setId
+// Function:    Group::p_setId
 ///\brief       Sets the identifier of this object to a new value.
 ///
 ///\exception   H5::IdComponentException when the attempt to close the HDF5
@@ -181,14 +181,14 @@ hid_t Group::getId() const
 //              Then the object's id is reset to the new id.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void Group::setId(const hid_t new_id)
+void Group::p_setId(const hid_t new_id)
 {
     // handling references to this old id
     try {
         close();
     }
     catch (Exception close_error) {
-        throw GroupIException("Group::setId", close_error.getDetailMsg());
+        throw GroupIException("Group::p_setId", close_error.getDetailMsg());
     }
    // reset object's id to the given id
    id = new_id;
