@@ -13,21 +13,20 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* From jpeg documentation 
- *
- * Include file for users of JPEG library.
- * You will need to have included system headers that define at least
- * the typedefs FILE and size_t before you can include jpeglib.h.
- * (stdio.h is sufficient on ANSI-conforming systems.)
- * You may also wish to include "jerror.h".
- */
+
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <memory.h>
+
+/* 
+ * Include file for users of JPEG library.
+ * system headers that define at least the typedefs FILE and size_t are needed before
+ */
 
 #include "jpeglib.h"
 #include "jerror.h"
+
+/* Tools library and HDF5 Image headers */
 
 #include "H5private.h"
 #include "h5tools.h"
@@ -58,7 +57,6 @@ typedef struct
  const char  *file_name;
  const char  *template_name;
  const char  *image_name;
- int         image_type;
  int         convert_true;
  int         idx_palette;
  int         verbose;
@@ -79,7 +77,11 @@ static void convert_to_true( hsize_t width, hsize_t height, unsigned char* ibuf,
  *
  * Purpose: h52jpeg main program
  *
+ * main reads command line options and calls h52jpeg 
+ *
  * Programmer: Pedro Vicente, pvn@hdfgroup.org
+ *
+ * Return: 1, error, 0 success
  *
  * Date: May 30, 2008
  *
@@ -87,8 +89,8 @@ static void convert_to_true( hsize_t width, hsize_t height, unsigned char* ibuf,
  */
 int main(int argc, const char *argv[])
 {
-    h52jpeg_opt_t opt;
-    int           op;
+    h52jpeg_opt_t opt; /* command line options for h52jpeg */
+    int           op;  /* option got from command line */
 
     /* initialze options to 0 */
     memset(&opt,0,sizeof(h52jpeg_opt_t));
@@ -98,15 +100,19 @@ int main(int argc, const char *argv[])
     {
         switch ((char)op) 
         {
+
         case 'h':
             usage(progname);
             exit(EXIT_SUCCESS);
+
         case 'V':
             print_version(progname);
             exit(EXIT_SUCCESS);
+
         case 'v':
             opt.verbose = 1;
-            break;        
+            break;  
+            
         case 'i':
             opt.image_name = opt_arg;
             break;
@@ -171,6 +177,28 @@ static void usage(const char *prog)
     printf("\n");
     
     printf("  P - is an integer, the palette index in the HDF5 image. Default is 0\n");
+    printf("  template - is a string used to name the jpeg file name; this name is made\n");
+    printf("             by concatenating this template with the HDF5 image name\n");
+
+    printf("\n");
+
+    printf("Examples of use:\n");
+    printf("\n");
+    printf("1) h52jpeg -v file.h5 myjpeg\n");
+    printf("\n");
+    printf("   Exports all images found on file.h5 to jpeg images, giving output information\n");
+
+    printf("\n");
+    printf("2) h52jpeg -v -i image file.h5 myjpeg\n");
+    printf("\n");
+    printf("   Exports the HDF5 image named <image> to a jpeg file\n");
+
+    printf("\n");
+    printf("2) h52jpeg -v -c p 1 -i image file.h5 myjpeg\n");
+    printf("\n");
+    printf("   Exports the HDF5 image named <image> to a true color jpeg image, using\n");
+    printf("    the palette of index 1 in that image to do the conversion\n");
+    
     
 }
 
@@ -179,11 +207,9 @@ static void usage(const char *prog)
  *
  * Parameters: OPT, options at command line
  *
- * Purpose: traverse the HDF5 file, save HDF5 images to jpeg files, translate
- *  2D datasets of classes H5T_INTEGER and H5T_FLOAT to image data and save them
- *  to jpeg files
+ * Purpose: traverse the HDF5 file, save HDF5 images to jpeg files
  *
- * Return: 0, all is fine, -1 not all is fine
+ * Return: 0, success, -1 error
  *
  *-------------------------------------------------------------------------
  */
@@ -236,6 +262,7 @@ static int h52jpeg(h52jpeg_opt_t opt)
             switch ( travt->objs[i].type ) 
             {
             default:
+                printf( "unknown object. Exiting ...\n" );
                 goto out;
                 
             case H5TRAV_TYPE_GROUP:
@@ -257,7 +284,7 @@ static int h52jpeg(h52jpeg_opt_t opt)
     } /* i */    
     
     
-    /* free table */
+    /* HDfree table */
     trav_table_free(travt);
     
     } /* opt.image_name */
@@ -276,6 +303,8 @@ out:
         
     } H5E_END_TRY;
 
+    trav_table_free(travt);
+
     
     return -1;
 }
@@ -284,11 +313,14 @@ out:
 /*-------------------------------------------------------------------------
  * Function: do_object
  *
- * Parameters: HDF5 file id, command line options, an object name
+ * Parameters: FID: HDF5 file id
+ *             OPT: command line options
+ *             OBJECT_NAME: the name of the object (type H5TRAV_TYPE_DATASET)
  *
- * Purpose: read HDF5 object, save jpeg image
+ * Purpose: make the jpeg file name, read HDF5 image, save the jpeg image
  *
- * Return: 0, all is fine, -1 not all is fine
+ *
+ * Return: 0, success, -1 error
  *
  *-------------------------------------------------------------------------
  */
@@ -316,28 +348,7 @@ int do_object(hid_t fid, h52jpeg_opt_t opt, const char* object_name)
         /* read image, save jpeg image */
         done = do_image(fid, opt, object_name, jpeg_name);
     }
-    
-    /*-------------------------------------------------------------------------
-    * HDF5 Image palette, ignore
-    *-------------------------------------------------------------------------
-    */
-    
-    else if ( H5IMis_palette( fid, object_name ) )
-    {
-        
-    }
-    
-    /*-------------------------------------------------------------------------
-    * regular dataset
-    *-------------------------------------------------------------------------
-    */
-    
-    else
-    {  
-        
-        
-    } /* else */
-    
+           
     
     if ( opt.verbose)
     {                
@@ -361,11 +372,14 @@ int do_object(hid_t fid, h52jpeg_opt_t opt, const char* object_name)
 /*-------------------------------------------------------------------------
  * Function: do_image
  *
- * Parameters: HDF5 file id, command line options, an image name
+ * Parameters: FID: HDF5 file id
+ *             OPT: command line options
+ *             OBJECT_NAME: the name of the HDF5 image
+ *             JPEG_NAME: the name of the jpeg image
  *
  * Purpose: read HDF5 image, save jpeg image
  *
- * Return: 0, all is fine, -1 not all is fine
+ * Return: 0, success, -1 error
  *
  *-------------------------------------------------------------------------
  */
@@ -388,7 +402,7 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name, char* jpeg_na
     if ( H5IMget_image_info( fid, name, &width, &height, &planes, interlace, &npals ) < 0 )
         goto out;
     
-    if (NULL == (ibuf = HDmalloc( (size_t)width * (size_t)height * (size_t)planes ))) 
+    if (NULL == (ibuf = HDmalloc( (int)width * (int)height * (int)planes ))) 
         goto out;
     
     if ( H5IMread_image( fid, name, ibuf ) < 0 )
@@ -464,7 +478,7 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name, char* jpeg_na
             if (NULL == (pbuf = HDmalloc( (size_t)pdims[0] * (size_t)pdims[1] ))) 
                 goto out;
             
-            if (NULL == (tbuf = HDmalloc( (size_t)width * (size_t)height * 3 ))) 
+            if (NULL == (tbuf = HDmalloc( (int)width * (int)height * 3 ))) 
                 goto out;
             
             if ( H5IMget_palette( fid, name, ipal, pbuf ) < 0 )
@@ -482,8 +496,8 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name, char* jpeg_na
             
             done = 1;
             
-            free( pbuf );
-            free( tbuf );
+            HDfree( pbuf );
+            HDfree( tbuf );
             pbuf = NULL;
             tbuf = NULL;  
         }
@@ -502,16 +516,12 @@ int do_image(hid_t fid, h52jpeg_opt_t opt, const char* image_name, char* jpeg_na
         
     } /* conversion to truecolor  */
     
-    free( ibuf );
+    HDfree( ibuf );
     ibuf = NULL;
-    
-    
-       
-    
+ 
     return done;
     
 out:
-    
     
     return -1;
     
@@ -524,7 +534,7 @@ out:
  *
  * Purpose: build a name for the jpeg image file upon a template name
  *  and the HDF5 image name. Replace the special characters 
- *  "%", "@", "$", "/", ":", "&", and "*" with "_"
+ *  '%', '@', '$', '/', ':', '&', ' ', and '*' with '_'
  *
  * Return: void
  *
@@ -551,6 +561,7 @@ void make_jpeg_name( const char* template_name, const char* image_name, char* jp
              (jpeg_name[j] == '/') ||
              (jpeg_name[j] == ':') ||
              (jpeg_name[j] == '&') ||
+             (jpeg_name[j] == ' ') ||
              (jpeg_name[j] == '*') )
         {  
             jpeg_name[j] = '_'; 
@@ -562,11 +573,15 @@ void make_jpeg_name( const char* template_name, const char* image_name, char* jp
 /*-------------------------------------------------------------------------
  * Function: convert_to_true
  *
- * Parameters: 
+ * Parameters: WIDTH (IN):    width of image
+ *             HEIGHT (IN):   height of image
+ *             IBUF (IN):     indexed image buffer
+ *             PBUF (IN):     palette buffer
+ *             TBUF (IN/OUT): true color image buffer
  *
- * Purpose: convert a greycolor buffer to a true color using a palette buffer
+ * Purpose: convert a greycolor buffer to a true color buffer using a palette buffer
  *
- * Return: 
+ * Return: void
  *
  *-------------------------------------------------------------------------
  */
@@ -601,10 +616,10 @@ void convert_to_true( hsize_t width, hsize_t height, unsigned char* ibuf, unsign
 }
 
 
-/*
- * Sample routine for JPEG compression.  
+/*-------------------------------------------------------------------------
+ * Function: write_JPEG_file (adapted from example.c of jpeg distribution)
  *
- * IMAGE DATA FORMATS:
+ * Purpose: save a jpeg file named FILENAME, using the image buffer IMAGE_BUFFER
  *
  * The standard input image format is a rectangular array of pixels, with
  * each pixel having the same number of "component" values (color channels).
@@ -613,13 +628,13 @@ void convert_to_true( hsize_t width, hsize_t height, unsigned char* ibuf, unsign
  * must be adjacent in the row; for example, R,G,B,R,G,B,R,G,B,... for 24-bit
  * RGB color.
  *
- * For this example, we'll assume that this data structure matches the way
- * our application has stored the image in memory, so we can just pass a
- * pointer to our image buffer. 
+ * Return: void, exits on error
+ *
+ *-------------------------------------------------------------------------
  */
 
 static 
-void write_JPEG_file(char *filename, 
+void write_JPEG_file(char *filename,        /* JPEG file name */
                      JSAMPLE *image_buffer, /* Points to large array of R,G,B-order data */
                      int image_height,      /* Number of rows in image */
                      int image_width,       /* Number of columns in image */
