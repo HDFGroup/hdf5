@@ -19,7 +19,7 @@
 
    EXTERNAL ROUTINES/VARIABLES:
      These routines are in the test directory of the C library:
-        h5_fileaccess() -- in h5test.c, returns a file access template
+	h5_fileaccess() -- in h5test.c, returns a file access template
 
  ***************************************************************************/
 
@@ -41,7 +41,7 @@
 #include "H5Cpp.h"	// C++ API header file
 
 #ifndef H5_NO_NAMESPACE
-using namespace H5;
+    using namespace H5;
 #endif
 
 #include "h5cpputil.h"	// C++ utilility header file
@@ -94,7 +94,7 @@ const H5std_string    FILE4("tfile4.h5");
  * Return:      None
  *
  * Programmer:  Binh-Minh Ribler (use C version)
- *              January, 2001
+ *		January, 2001
  *
  * Modifications:
  *	January, 2005: C tests' macro VERIFY casts values to 'long' for all
@@ -106,11 +106,10 @@ const H5std_string    FILE4("tfile4.h5");
  *
  *-------------------------------------------------------------------------
  */
-static void
-test_file_create(void)
+static void test_file_create(void)
 {
     // Output message about test being performed
-    MESSAGE(5, ("Testing File Creation I/O\n"));
+    SUBTEST("Testing File Creation I/O");
 
     // Test create with various sequences of H5F_ACC_EXCL and
     // H5F_ACC_TRUNC flags
@@ -182,7 +181,7 @@ test_file_create(void)
 	hsize_t ublock = tmpl1.getUserblock();
 	verify_val((long)ublock, (long)F1_USERBLOCK_SIZE, "FileCreatPropList::getUserblock", __LINE__, __FILE__);
 
-    	size_t  parm1, parm2;	// file-creation parameters
+    	size_t  parm1, parm2;		// file-creation parameters
 	tmpl1.getSizes( parm1, parm2);
 	verify_val(parm1, F1_OFFSET_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
 	verify_val(parm2, F1_LENGTH_SIZE, "FileCreatPropList::getSizes", __LINE__, __FILE__);
@@ -205,17 +204,17 @@ test_file_create(void)
 
     catch (InvalidActionException E)
     {
-        cerr << " FAILED" << endl;
-        cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
-        if (file1 != NULL) // clean up
-            delete file1;
+	cerr << " FAILED" << endl;
+	cerr << "    <<<  " << E.getDetailMsg() << "  >>>" << endl << endl;
+	if (file1 != NULL) // clean up
+	    delete file1;
     }
     // catch all other exceptions
     catch (Exception E)
     {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
-        if (file1 != NULL) // clean up
-            delete file1;
+	issue_fail_msg("test_file_create()", __LINE__, __FILE__, E.getCDetailMsg());
+	if (file1 != NULL) // clean up
+	    delete file1;
     }
 
     // Setting this to NULL for cleaning up in failure situations
@@ -291,11 +290,12 @@ test_file_create(void)
 
 	// Release file-creation template
 	delete tmpl1;
+	PASSED();
     }
     // catch all exceptions
     catch (Exception E)
     {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_file_create()", __LINE__, __FILE__, E.getCDetailMsg());
 	if (tmpl1 != NULL)  // clean up
 	    delete tmpl1;
     }
@@ -310,7 +310,7 @@ test_file_create(void)
  * Return:      None
  *
  * Programmer:  Binh-Minh Ribler (use C version)
- *              January, 2001
+ *		January, 2001
  *
  * Modifications:
  *	January, 2005: C tests' macro VERIFY casts values to 'long' for all
@@ -322,11 +322,10 @@ test_file_create(void)
  *
  *-------------------------------------------------------------------------
  */
-static void
-test_file_open(void)
+static void test_file_open(void)
 {
     // Output message about test being performed
-    MESSAGE(5, ("Testing File Opening I/O\n"));
+    SUBTEST("Testing File Opening I/O");
 
     try {
 
@@ -354,10 +353,11 @@ test_file_open(void)
 	tmpl1.getSymk( iparm1, iparm2);
 	verify_val(iparm1, F2_SYM_INTERN_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
 	verify_val(iparm2, F2_SYM_LEAF_K, "FileCreatPropList::getSymk", __LINE__, __FILE__);
+	PASSED();
     }   // end of try block
 
     catch( Exception E ) {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_file_open()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_file_open()
 
@@ -370,44 +370,44 @@ test_file_open(void)
  * Return:      None
  *
  * Programmer:  Raymond Lu
- *              June, 2004
+ *		June, 2004
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-static void
-test_file_size(void)
+static void test_file_size(void)
 {
     // Output message about test being performed
-    MESSAGE(5, ("Testing File Size\n"));
+    SUBTEST("Testing File Size");
 
     hid_t	fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
 
     try {
-        // Use the file access template id to create a file access prop.
-        // list object to pass in H5File::H5File
-        FileAccPropList fapl(fapl_id);
+	// Use the file access template id to create a file access prop.
+	// list object to pass in H5File::H5File
+	FileAccPropList fapl(fapl_id);
 
     	// Set to sec2 driver.  Do we want to test other file drivers?
-        // They're not tested in C++.
-        // File drivers seem not implemented.
+	// They're not tested in C++.
+	// File drivers seem not implemented.
 	// fapl.setSec2();
 
-        // Create a file
+	// Create a file
 	H5File file4( FILE4, H5F_ACC_TRUNC, FileCreatPropList::DEFAULT, fapl);
 
-        // Get file size
-        hsize_t file_size = file4.getFileSize();
+	// Get file size
+	hsize_t file_size = file4.getFileSize();
 
-        // Check if file size is reasonable.  It's supposed to be 2KB now.
-        if(file_size<1*KB || file_size>4*KB)
-            issue_fail_msg("H5File::getFileSize", __LINE__, __FILE__);
+	// Check if file size is reasonable.  It's supposed to be 2KB now.
+	if(file_size<1*KB || file_size>4*KB)
+	    issue_fail_msg("H5File::getFileSize", __LINE__, __FILE__);
+	PASSED();
     }   // end of try block
 
     catch( Exception E ) {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_file_size()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
     // use C test utility routine to close property list.
@@ -424,7 +424,7 @@ test_file_size(void)
  * Return:      None
  *
  * Programmer:  Binh-Minh Ribler
- *              July, 2004
+ *		July, 2004
  *
  * Modifications:
  *
@@ -444,19 +444,18 @@ typedef struct s1_t {
     float        b;
 } s1_t;
 
-static void
-test_file_name()
+static void test_file_name(void)
 {
     // Output message about test being performed
-    MESSAGE(5, ("Testing File Name\n"));
+    SUBTEST("Testing File Name");
 
     H5std_string file_name;
     try {
-        // Create a file using default properties.
+	// Create a file using default properties.
 	H5File file4(FILE4, H5F_ACC_TRUNC);
 
-        // Get file name from the file instance.
-        file_name = file4.getFileName();
+	// Get file name from the file instance.
+	file_name = file4.getFileName();
 	verify_val(file_name, FILE4, "H5File::getFileName", __LINE__, __FILE__);
 
 	// Create a group in the root group
@@ -497,10 +496,11 @@ test_file_name()
 	// Get and verify file name
 	comp_type.getFileName();
 	verify_val(file_name, FILE4, "CompType::getFileName", __LINE__, __FILE__);
+	PASSED();
     }   // end of try block
 
     catch (Exception E) {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_file_name()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
 }   // test_file_name()
@@ -514,14 +514,16 @@ test_file_name()
  * Return:      None
  *
  * Programmer:  Binh-Minh Ribler (use C version)
- *              January 2001
+ *		January 2001
  *
  * Modifications:
  *
  *-------------------------------------------------------------------------
  */
-void
-test_file(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void test_file(void)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing File I/O operations\n"));
@@ -546,11 +548,13 @@ test_file(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-cleanup_file(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void cleanup_file(void)
 {
-    remove(FILE1.c_str());
-    remove(FILE2.c_str());
-    remove(FILE3.c_str());
-    remove(FILE4.c_str());
+    HDremove(FILE1.c_str());
+    HDremove(FILE2.c_str());
+    HDremove(FILE3.c_str());
+    HDremove(FILE4.c_str());
 }   // cleanup_file

@@ -20,7 +20,6 @@
 
    EXTERNAL ROUTINES/VARIABLES:
      These routines are in the test directory of the C library:
-	h5_reset() -- in h5test.c, resets the library by closing it
 	h5_fileaccess() -- in h5test.c, returns a file access template
 
  ***************************************************************************/
@@ -43,7 +42,7 @@
 #include "H5Cpp.h"	// C++ API header file
 
 #ifndef H5_NO_NAMESPACE
-using namespace H5;
+    using namespace H5;
 #endif
 
 #include "h5cpputil.h"	// C++ utilility header file
@@ -61,7 +60,6 @@ const int H5Z_FILTER_BOGUS = 305;
 // Local prototypes
 static size_t bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
-void cleanup_dsets(void);
 
 
 /*-------------------------------------------------------------------------
@@ -80,8 +78,7 @@ void cleanup_dsets(void);
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_create( H5File& file)
+static herr_t test_create( H5File& file)
 {
     TESTING("create, open, close");
 
@@ -173,7 +170,7 @@ test_create( H5File& file)
     // catch all other exceptions
     catch (Exception E)
     {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__);
+	issue_fail_msg("test_create", __LINE__, __FILE__);
 
 	// clean up and return with failure
 	if (dataset != NULL)
@@ -181,7 +178,6 @@ test_create( H5File& file)
 	return -1;
     }
 }   // test_create
-
 
 /*-------------------------------------------------------------------------
  * Function:	test_simple_io
@@ -201,8 +197,7 @@ test_create( H5File& file)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_simple_io( H5File& file)
+static herr_t test_simple_io( H5File& file)
 {
 
     TESTING("simple I/O");
@@ -286,8 +281,7 @@ test_simple_io( H5File& file)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_tconv( H5File& file)
+static herr_t test_tconv( H5File& file)
 {
     // Prepare buffers for input/output
     char	*out=NULL, *in=NULL;
@@ -336,7 +330,7 @@ test_tconv( H5File& file)
 	// clean up and return with success
 	delete [] out;
 	delete [] in;
-	cerr << " PASSED" << endl;
+	PASSED();
 	return 0;
     }  // end try
 
@@ -410,8 +404,7 @@ bogus(unsigned int flags, size_t cd_nelmts,
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_compression(H5File& file)
+static herr_t test_compression(H5File& file)
 {
     const char		*not_supported;
     not_supported = "    Deflate compression is not enabled.";
@@ -698,8 +691,7 @@ test_compression(H5File& file)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_multiopen (H5File& file)
+static herr_t test_multiopen (H5File& file)
 {
 
     TESTING("multi-open with extending");
@@ -780,8 +772,7 @@ test_multiopen (H5File& file)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
-test_types(H5File& file)
+static herr_t test_types(H5File& file)
 {
     TESTING("various datatypes");
 
@@ -975,11 +966,8 @@ test_types(H5File& file)
  *
  *-------------------------------------------------------------------------
  */
-int
-main(void)
+int main(void)
 {
-    h5_reset(); // in h5test.c, resets the library by closing it
-
     hid_t	fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
 
@@ -1034,9 +1022,11 @@ main(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-cleanup_dsets(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void cleanup_dsets(void)
 {
-    remove(FILE1.c_str());
+    HDremove(FILE1.c_str());
 } // cleanup_dsets
 

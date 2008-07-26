@@ -15,7 +15,7 @@
 
 /*****************************************************************************
    FILE
-   ttypes.cpp - HDF5 C++ testing the general data type functionality
+   ttypes.cpp - HDF5 C++ testing the general datatype functionality
 
  ***************************************************************************/
 
@@ -61,7 +61,7 @@ const H5std_string      DATAFILE("ttypes.h5");
 
 /*
  * Define if you want to test alignment code on a machine that doesn't
- * normally require alignment. When set, all native data types must be aligned
+ * normally require alignment. When set, all native datatypes must be aligned
  * on a byte boundary equal to the data size.
  */
 
@@ -131,7 +131,7 @@ static int noverflows_g = 0;
 /*-------------------------------------------------------------------------
  * Function:	overflow_handler
  *
- * Purpose:	Gets called for all data type conversion overflows.
+ * Purpose:	Gets called for all datatype conversion overflows.
  *
  * Return:	Success:	0
  *
@@ -160,9 +160,7 @@ overflow_handler(hid_t UNUSED src_id, hid_t UNUSED dst_id,
  *
  * Purpose:     Test type classes
  *
- * Return:      Success:        0
- *
- *              Failure:        number of errors
+ * Return:      None
  *
  * Programmer:  Binh-Minh Ribler (using C version)
  *		January, 2007
@@ -173,27 +171,27 @@ overflow_handler(hid_t UNUSED src_id, hid_t UNUSED dst_id,
  */
 static void test_classes(void)
 {
+    // Output message about test being performed
     SUBTEST("PredType::getClass()");
+
     try {
 	// PredType::NATIVE_INT should be in H5T_INTEGER class
 	H5T_class_t tcls = PredType::NATIVE_INT.getClass();
 	if (H5T_INTEGER!=tcls) {
-	    H5_FAILED();
-	    puts("    Invalid type class for H5T_NATIVE_INT");
+	    verify_val(tcls, H5T_INTEGER, "test_class: invalid type class for NATIVE_INTEGER -", __LINE__, __FILE__);
 	}
 
 	// PredType::NATIVE_DOUBLE should be in H5T_FLOAT class
 	tcls = PredType::NATIVE_DOUBLE.getClass();
 	if (H5T_FLOAT!=tcls) {
-	    H5_FAILED();
-	    puts("    Invalid type class for H5T_NATIVE_DOUBLE");
+	    verify_val(tcls, H5T_FLOAT, "test_class: invalid type class for NATIVE_DOUBLE -", __LINE__, __FILE__);
 	}
 	PASSED();
     }   // end of try block
-    catch (DataTypeIException E) { 
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+    catch (Exception E) { 
+	issue_fail_msg("test_classes()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-}
+}  // test_classes()
 
 /*-------------------------------------------------------------------------
  * Function:    test_copy
@@ -213,7 +211,9 @@ static void test_classes(void)
  */
 static void test_copy(void)
 {
+    // Output message about test being performed
     SUBTEST("DataType::copy() and DataType::operator=");
+
     try {
 	// Test copying from a predefined datatype using DataType::operator=
 	DataType assigned_type;
@@ -244,11 +244,11 @@ static void test_copy(void)
         another_int_type = new_int_type;
 
 	PASSED();
-    } 
-    catch (DataTypeIException E) { 
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+    }   // end of try block
+    catch (Exception E) { 
+	issue_fail_msg("test_copy()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-}
+}  // test_copy()
 
 
 /*-------------------------------------------------------------------------
@@ -273,18 +273,18 @@ const H5std_string EnumT_NAME("Enum_type");
 
 static void test_query(void)
 {
+    short	enum_val;
     typedef struct {
 	int    a;
 	float  b;
 	long   c;
 	double d;
     } s_type_t;
-    short	enum_val;
 
     // Output message about test being performed
     SUBTEST("Query functions of compound and enumeration types");
-    try
-    {
+
+    try {
 	// Create File
 	H5File file(FILENAME[2], H5F_ACC_TRUNC);
 
@@ -327,9 +327,8 @@ static void test_query(void)
 	tid2.commit(file, EnumT_NAME);
 	tid2.close();
 
-	// Open the datatype for query
+	// Open the datatypes for query
 	tid1 = file.openCompType(CompT_NAME);
-
 	tid2 = file.openEnumType(EnumT_NAME);
 
 	// Query member number and member index by name, for compound type
@@ -346,15 +345,15 @@ static void test_query(void)
 	index = tid2.getMemberIndex("ORANGE");
 	verify_val(index, 3, "EnumType::getMemberIndex()", __LINE__, __FILE__);
 
-	// Close data types and file
+	// Close datatypes and file
 	tid1.close();
 	tid2.close();
 	file.close();
 
-    PASSED();
+	PASSED();
     }   // end of try block
     catch (Exception E) {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_query()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_query
  
@@ -362,7 +361,7 @@ static void test_query(void)
 /*-------------------------------------------------------------------------
  * Function:	test_transient
  *
- * Purpose:	Tests transient data types.
+ * Purpose:	Tests transient datatypes.
  *
  * Return:	Success:	0
  *
@@ -375,34 +374,35 @@ static void test_query(void)
  *
  *-------------------------------------------------------------------------
  */
-const H5std_string filename1("dtypes1.h5");
-static void test_transient ()
+const H5std_string FILENAME1("dtypes1.h5");
+static void test_transient (void)
 {
     static hsize_t	ds_size[2] = {10, 20};
     
-    SUBTEST("Transient data types");
-    try {
+    // Output message about test being performed
+    SUBTEST("Transient datatypes");
 
-	H5File file(filename1, H5F_ACC_TRUNC);
+    try {
+	// Create the file and the dataspace.
+	H5File file(FILENAME1, H5F_ACC_TRUNC);
 	DataSpace space(2, ds_size, ds_size);
 
 	// Predefined types cannot be modified or closed
-	// PredType::NATIVE_INT is a constant and cannot make a call, 
-	// don't need these tests
+	// PredType::NATIVE_INT is a constant and cannot make a call,
+	// don't need these C tests in C++ API.
 
 	// Copying a predefined type results in a modifiable copy
 	IntType type(PredType::NATIVE_INT);
 	type.setPrecision(256);
 
-	// It should not be possible to create an attribute for a transient 
-	// type 
+	// It should not be possible to create an attribute for a transient type
 	try {
 	    Attribute attr(type.createAttribute("attr1", PredType::NATIVE_INT, space));
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("H5Object::createAttribute", "Attempted to commit a predefined datatype.");
-	} catch (AttributeIException err) {}
+	} catch (AttributeIException err) {}	// do nothing, failure expected
 
-	// Create a dataset from a transient data type
+	// Create a dataset from a transient datatype
 	type.copy(PredType::NATIVE_INT);
 	DataSet dset(file.createDataSet("dset1", type, space));
 
@@ -412,35 +412,27 @@ static void test_transient ()
 	    itype.setPrecision(256);
 
 	    // Should FAIL but didn't, so throw an invalid action exception
-	    throw InvalidActionException("PredType::setPrecision", "Dataset data types should not be modifiable!");
+	    throw InvalidActionException("PredType::setPrecision", "Dataset datatypes should not be modifiable!");
 	} catch (DataTypeIException err) {}
 
 	itype.close();
 
-	//
- 	// Get the dataset data type by applying H5Tcopy() to the dataset. The
- 	// result should be modifiable.
- 	///
+	// Get a copy of the dataset's datatype by applying DataType::copy()
+	// to the dataset. The resulted datatype should be modifiable.
 	itype.copy(dset);
 	itype.setPrecision(256);
 
-	//
- 	// Close the dataset and reopen it, testing that its type is still
- 	// read-only. <--- how come modifiable below?
- 	///
+	// Close the dataset and reopen it, testing that its type is still
+	// read-only.  (Note that a copy of it is modifiable.)
 	dset.close();
-    //if (H5Dclose (dset)<0) printf("goto error in C\n");
 	dset = file.openDataSet("dset1");
-    //if ((dset=H5Dopen (file, "dset1"))<0) printf("goto error in C\n");
 
-	//
- 	// Get the dataset data type by applying H5Tcopy() to the dataset. The
- 	// result should be modifiable.
- 	///
+	// Get the dataset's datatype by applying H5Tcopy() to the dataset. The
+	// result should be modifiable.
 	itype.copy(dset);
 	itype.setPrecision(256);
 	itype.close();
-    
+
 	// Close objects and file.
 	dset.close();
 	file.close();
@@ -449,7 +441,7 @@ static void test_transient ()
 	PASSED();
     }   // end of try block
     catch (Exception E) {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_transient()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_transient
 
@@ -457,7 +449,7 @@ static void test_transient ()
 /*-------------------------------------------------------------------------
  * Function:	test_named
  *
- * Purpose:	Tests named data types.
+ * Purpose:	Tests named datatypes.
  *
  * Return:	Success:	0
  *
@@ -470,23 +462,24 @@ static void test_transient ()
  *
  *-------------------------------------------------------------------------
  */
-const H5std_string filename2("dtypes2.h5");
-static void test_named ()
+const H5std_string FILENAME2("dtypes2.h5");
+static void test_named (void)
 {
     static hsize_t	ds_size[2] = {10, 20};
     hsize_t		i;
     unsigned 		attr_data[10][20];
-    
-    //MESSAGE(5, ("named data types"));
-    SUBTEST("Named data types");
-    try {
-	// Create the file
-	H5File file(filename2, H5F_ACC_TRUNC);
 
-	// Create simple dataspace
+    // Output message about test being performed
+    SUBTEST("Named datatypes");
+
+    try {
+	// Create the file.
+	H5File file(FILENAME2, H5F_ACC_TRUNC);
+
+	// Create a simple dataspace.
 	DataSpace space(2, ds_size, ds_size);
 
-	// Predefined types cannot be committed
+	// Predefined types cannot be committed.
 	try {
 	    PredType nativeint(PredType::NATIVE_INT);
 	    nativeint.commit(file, "test_named_1 (should not exist)");
@@ -495,15 +488,17 @@ static void test_named ()
 	    throw InvalidActionException("PredType::commit", "Attempted to commit a predefined datatype.");
 	} catch (DataTypeIException err) {}
 
-	// Copy a predefined data type and commit the copy
+	// Copy a predefined datatype and commit the copy.
         IntType itype(PredType::NATIVE_INT);
         itype.commit(file, "native-int");
+
+	// Check that it is committed.
 	if (itype.committed() <= (bool)0)
 	    cerr << "IntType::committed() returned false" << endl;
 
 	// We should not be able to modify a type after it has been committed.
 	try {
-	    itype.setPrecision(256);
+	    itype.setPrecision(256);	// attempt an invalid action...
 
 	    // Should FAIL but didn't, so throw an invalid action exception
 	    throw InvalidActionException("IntType::setPrecision", "Attempted to modify a committed datatype.");
@@ -514,8 +509,8 @@ static void test_named ()
 	    itype.commit(file, "test_named_2 (should not exist)");
 
 	    // Should FAIL but didn't, so throw an invalid action exception
-	    throw InvalidActionException("IntType::commit", "Attempted to re-commit a committed data type.");
-	} catch (DataTypeIException err) {}
+	    throw InvalidActionException("IntType::commit", "Attempted to re-commit a committed datatype.");
+	} catch (DataTypeIException err) {} // do nothing, failure expected
 
 	// It should be possible to define an attribute for the named type
 	Attribute attr1 = itype.createAttribute("attr1", PredType::NATIVE_UCHAR, space);
@@ -526,21 +521,20 @@ static void test_named ()
 	attr1.write(PredType::NATIVE_UINT, attr_data);
 	attr1.close();
 
-	// Copying a committed type should result in a transient type which 
-	// is not locked.
+	// Copying a committed type should result in a transient type which is
+	// not locked.
 	IntType trans_type;
 	trans_type.copy(itype);
 	bool iscommitted = trans_type.committed();
-	verify_val(iscommitted, (bool)0, "DataType::committed() - Copying a named type should result in a transient type!", __LINE__, __FILE__);
-
+	verify_val(iscommitted, 0, "DataType::committed() - Copying a named type should result in a transient type!", __LINE__, __FILE__);
 	trans_type.setPrecision(256);
 	trans_type.close();
 
-	// Close the committed type and reopen it.  It should return a 
+	// Close the committed type and reopen it.  It should return a
 	// named type.
 
-	/* This had something to do with the way IntType was returned and 
-	   assigned and caused itype.committed not working correctly.  So, 
+	/* This had something to do with the way IntType was returned and
+	   assigned and caused itype.committed not working correctly.  So,
 	   use another_type for now.  Need to address it later - BMR 01/2007
 	itype = file.openIntType("native-int");
 	iscommitted = itype.committed();
@@ -550,46 +544,44 @@ static void test_named ()
 	if (!iscommitted)
 	    throw InvalidActionException("IntType::committed()", "Opened named types should be named types!");
 
-	// Create a dataset that uses the named type
-	DataSet dset = file.createDataSet("dset1", itype, space);
-
-	// Get the dataset's data type and make sure it's a named type
+	// Create a dataset that uses the named type, then get the dataset's
+	// datatype and make sure it's a named type.
+	DataSet dset = file.createDataSet("dset1", another_type, space);
 	DataType *ds_type = new DataType(dset.getDataType());
 	iscommitted = ds_type->committed();
 	if (!iscommitted)
 	    throw InvalidActionException("IntType::committed()", "1 Dataset type should be named type!");
 
-	// Close the dataset, then close its type, then reopen the dataset
+	// Close the dataset and its type
 	dset.close();
 	ds_type->close();
 
+	// Reopen the dataset and its type, then make sure the type is
+	// a named type.
 	dset = file.openDataSet("dset1");
-
-	// Get the dataset's data type and make sure it's a named type
 	ds_type = new DataType(dset.getDataType());
 	iscommitted = ds_type->committed();
 	if (!iscommitted)
 	    throw InvalidActionException("IntType::committed()", "Dataset type should be named type!");
 
-	// Close the dataset and create another with the type returned 
-	// from the first dataset.
+	// Close the dataset and create another with the type returned from
+	// the first dataset.
 	dset.close();
 	dset = file.createDataSet("dset2", *ds_type, space);
-
-	// Close then reopen the second dataset and make sure the type is 
-	// shared
 	ds_type->close();
 	dset.close();
+
+	// Reopen the second dataset and make sure the type is shared
 	dset = file.openDataSet("dset2");
 	ds_type = new DataType(dset.getDataType());
 	iscommitted = ds_type->committed();
 	if (!iscommitted)
-	    throw InvalidActionException("IntType::committed()", "Dataset type should be named type!");
+	    throw InvalidActionException("DataType::iscommitted()", "Dataset type should be named type!");
 
 	ds_type->close();
     
-	// Get the dataset data type by way of copying via the dataset. The
-	// result should be modifiable.
+	// Get the dataset's datatype by applying DataType::copy() to the
+	// dataset. The resulted datatype should be modifiable.
 	IntType copied_type;
 	copied_type.copy(dset);
 	copied_type.setPrecision(256);	// modifiable
@@ -600,19 +592,22 @@ static void test_named ()
 	itype.close();
 	space.close();
 	file.close();
-    PASSED();
+	PASSED();
     }   // end of try block
     catch (Exception E) {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_named()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_named
 
 
 /****************************************************************
 **
-**  test_types(): Main data types testing routine.
+**  test_types(): Main datatypes testing routine.
 **
 ****************************************************************/
+#ifdef __cplusplus
+extern "C"
+#endif
 void test_types(void)
 {
     // Output message about test being performed
@@ -642,9 +637,11 @@ void test_types(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-cleanup_types(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void cleanup_types(void)
 {
     for (int i = 0; i < 3; i++)
 	HDremove(FILENAME[i]);
-}
+}  // cleanup_types

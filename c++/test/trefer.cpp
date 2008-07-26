@@ -76,14 +76,13 @@ typedef struct s1_t {
 **      Tests references to various kinds of objects
 **
 ****************************************************************/
-static void
-test_reference_obj(void)
+static void test_reference_obj(void)
 {
     int    i;          // counting variables
     const  H5std_string write_comment="Foo!"; // Comments for group
 
     // Output message about test being performed
-    MESSAGE(5, ("Testing Object Reference Functions\n"));
+    SUBTEST("Testing Object Reference Functions");
 
     H5File* file1 = NULL;
     try {
@@ -93,9 +92,9 @@ test_reference_obj(void)
 
 	// Allocate write & read buffers
 	int temp_size = MAX(sizeof(unsigned),sizeof(hobj_ref_t));
-	wbuf=(hobj_ref_t*)malloc(temp_size*SPACE1_DIM1);
-	rbuf=(hobj_ref_t*)malloc(temp_size*SPACE1_DIM1);
-	tbuf=(hobj_ref_t*)malloc(temp_size*SPACE1_DIM1);
+	wbuf=(hobj_ref_t*)HDmalloc(temp_size*SPACE1_DIM1);
+	rbuf=(hobj_ref_t*)HDmalloc(temp_size*SPACE1_DIM1);
+	tbuf=(hobj_ref_t*)HDmalloc(temp_size*SPACE1_DIM1);
 
         // Create file FILE1
         file1 = new H5File (FILE1, H5F_ACC_TRUNC);
@@ -255,12 +254,14 @@ test_reference_obj(void)
 	file1->close();
 
 	// Free memory buffers
-	free(wbuf);
-	free(rbuf);
-	free(tbuf);
+	HDfree(wbuf);
+	HDfree(rbuf);
+	HDfree(tbuf);
+
+	PASSED();
     } // end try
     catch (Exception E) {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_reference_obj()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_reference_obj()
 
@@ -269,8 +270,10 @@ test_reference_obj(void)
 **  test_reference(): Main reference testing routine.
 **
 ****************************************************************/
-void
-test_reference(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void test_reference(void)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing References\n"));
@@ -285,9 +288,11 @@ test_reference(void)
 ** Purpose:	Cleanup temporary test files
 ** Return:	none
 ****************************************************************/
-void
-cleanup_reference(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void cleanup_reference(void)
 {
-    remove(FILE1.c_str());
+    HDremove(FILE1.c_str());
 }
 

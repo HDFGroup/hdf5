@@ -13,13 +13,13 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/***********************************************************
-*
-* Test program:	 tvlstr
-*
-* Test the variable length string functionality
-*
-*************************************************************/
+/*****************************************************************************
+   FILE
+   tvlstr.cpp - HDF5 C++ testing the Variable-Length String functionality
+
+   EXTERNAL ROUTINES/VARIABLES:
+
+ ***************************************************************************/
 
 #ifdef OLD_HEADER_FILENAME
 #include <iostream.h>
@@ -39,30 +39,18 @@
 #include "H5Cpp.h"      // C++ API header file
 
 #ifndef H5_NO_NAMESPACE
-using namespace H5;
+    using namespace H5;
 #endif
 
 #include "h5cpputil.h"  // C++ utilility header file
 
-const H5std_string      DATAFILE("tvlstr.h5");
-const H5std_string      DATAFILE2("tvlstr2.h5");
+// Data file used in most test functions
+const H5std_string FILENAME("tvlstr.h5");
 
 // 1-D dataset with fixed dimensions
 const int SPACE1_RANK = 1;
 const hsize_t SPACE1_DIM1 = 4;
 
-const H5std_string      VLSTR_TYPE("vl_string_type");
-
-// Definitions for the VL re-writing test
-const int REWRITE_NDATASETS = 32;
-
-/***********************************************************
-*
-* Test program:	 tvlstr
-*
-* Test the Variable-Length String functionality
-*
-*************************************************************/
 
 void *test_vlstr_alloc_custom(size_t size, void *info);
 void test_vlstr_free_custom(void *mem, void *info);
@@ -70,9 +58,11 @@ void test_vlstr_free_custom(void *mem, void *info);
 /****************************************************************
 **
 **  test_vlstr_alloc_custom(): Test VL datatype custom memory
-**      allocation routines.  This routine just uses malloc to
-**      allocate the memory and increments the amount of memory
-**      allocated.
+**	allocation routines.  This routine just uses malloc to
+**	allocate the memory and increments the amount of memory
+**	allocated.  It is passed into setVlenMemManager.
+**
+**  Note: exact copy from the C version.
 **
 ****************************************************************/
 void *test_vlstr_alloc_custom(size_t size, void *info)
@@ -124,14 +114,19 @@ void test_vlstr_free_custom(void *_mem, void *info)
     } // end if
 }
 
-/****************************************************************
-**
-**  test_vlstrings_basic(): Test basic VL string code.
-**      Tests simple VL string I/O
-**
-****************************************************************/
-static void
-test_vlstrings_basic(void)
+/*-------------------------------------------------------------------------
+ * Function:    test_vlstrings_basic
+ *
+ * Purpose:     Test simple VL string I/O.
+ *
+ * Return:      None
+ *
+ * Programmer:  Binh-Minh Ribler (use C version)
+ *              January, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_vlstrings_basic(void)
 {
     const char *wdata[SPACE1_DIM1]= {
         "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
@@ -141,12 +136,12 @@ test_vlstrings_basic(void)
         };   // Information to write
 
     // Output message about test being performed
-    MESSAGE(5, ("Testing Basic VL String Functionality\n"));
+    SUBTEST("Testing Basic VL String Functionality");
 
     H5File* file1 = NULL;
     try {
         // Create file.
-        file1 = new H5File (DATAFILE, H5F_ACC_TRUNC);
+        file1 = new H5File (FILENAME, H5F_ACC_TRUNC);
 
 	// Create dataspace for datasets.
 	hsize_t	dims1[] = {SPACE1_DIM1};
@@ -223,36 +218,44 @@ test_vlstrings_basic(void)
 	sid1.close();
 	xfer.close();
 	file1->close();
+
+	PASSED();
     } // end try
 
     // Catch all exceptions.
     catch (Exception E)
     {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_vlstrings_basic()", __LINE__, __FILE__, E.getCDetailMsg());
         if (file1 != NULL) // clean up
             delete file1;
     }
 } // end test_vlstrings_basic()
 
-/****************************************************************
-**
-**  test_vlstrings_special(): Test VL string code for special
-**      string cases, nil and zero-sized.
-**
-****************************************************************/
-static void
-test_vlstrings_special(void)
+/*-------------------------------------------------------------------------
+ * Function:    test_vlstrings_special
+ *
+ * Purpose:     Test VL string code for special string cases, nil and
+ *              zero-sized.
+ *
+ * Return:      None
+ *
+ * Programmer:  Binh-Minh Ribler (use C version)
+ *              January, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_vlstrings_special(void)
 {
     const char *wdata[SPACE1_DIM1] = {"one", "two", "", "four"};
     const char *wdata2[SPACE1_DIM1] = {NULL, NULL, NULL, NULL};
     char *rdata[SPACE1_DIM1];   // Information read in
 
     // Output message about test being performed.
-    MESSAGE(5, ("Testing Special VL Strings\n"));
+    SUBTEST("Testing Special VL Strings");
 
     try {
 	// Create file.
-	H5File file1(DATAFILE, H5F_ACC_TRUNC);
+	H5File file1(FILENAME, H5F_ACC_TRUNC);
 
         // Create dataspace for datasets.
         hsize_t dims1[] = {SPACE1_DIM1};
@@ -333,30 +336,39 @@ test_vlstrings_special(void)
 	tid1.close();
 	sid1.close();
 	file1.close();
+
+	PASSED();
     } // end try
 
     // Catch all exceptions.
     catch (Exception E)
     {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_vlstrings_special()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_vlstrings_special
 
-/****************************************************************
-**
-**  test_vlstring_type(): Test VL string type.
-**      Tests if VL string is treated as string.
-**
-****************************************************************/
+/*-------------------------------------------------------------------------
+ * Function:    test_vlstring_type
+ *
+ * Purpose:     Test if VL string is treated as string.
+ *
+ * Return:      None
+ *
+ * Programmer:  Binh-Minh Ribler (use C version)
+ *              January, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+const H5std_string      VLSTR_TYPE("vl_string_type");
 static void test_vlstring_type(void)
 {
     // Output message about test being performed.
-    MESSAGE(5, ("Testing VL String type\n"));
+    SUBTEST("Testing VL String type");
 
     H5File* file1 = NULL;
     try {
 	// Open file.
-	file1 = new H5File(DATAFILE, H5F_ACC_RDWR);
+	file1 = new H5File(FILENAME, H5F_ACC_RDWR);
 
 	// Create a datatype to refer to.
 	StrType vlstr_type(PredType::C_S1);
@@ -395,9 +407,9 @@ static void test_vlstring_type(void)
 	file1->close();
 
 	// Open file.
-	file1 = new H5File(DATAFILE, H5F_ACC_RDWR);
+	file1 = new H5File(FILENAME, H5F_ACC_RDWR);
 
-    //fid = H5Fopen(DATAFILE.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+    //fid = H5Fopen(FILENAME.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
 
 	// Open the variable-length string datatype just created
 	vlstr_type.setId((file1->openStrType(VLSTR_TYPE)).getId());
@@ -414,12 +426,14 @@ static void test_vlstring_type(void)
 	// Close datatype and file
 	vlstr_type.close();
 	file1->close();
+
+	PASSED();
     } // end try
 
     // Catch all exceptions.
     catch (Exception E)
     {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_vlstring_type()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // end test_vlstring_type()
 
@@ -429,18 +443,17 @@ static void test_vlstring_type(void)
 **      compact datasets.
 **
 ****************************************************************/
-static void
-test_compact_vlstring(void)
+static void test_compact_vlstring(void)
 {
     const char *wdata[SPACE1_DIM1] = {"one", "two", "three", "four"};
     char *rdata[SPACE1_DIM1];   // Information read in
 
 	// Output message about test being performed
-    MESSAGE(5, ("Testing VL Strings in compact dataset\n"));
+    SUBTEST("Testing VL Strings in compact dataset");
 
     try {
 	// Create file
-	H5File file1(DATAFILE, H5F_ACC_TRUNC);
+	H5File file1(FILENAME, H5F_ACC_TRUNC);
 
 	// Create dataspace for datasets
         hsize_t dims1[] = {SPACE1_DIM1};
@@ -484,37 +497,45 @@ test_compact_vlstring(void)
 	sid1.close();
 	plist.close();
 	file1.close();
+
+	PASSED();
     } // end try
 
     // Catch all exceptions.
     catch (Exception E)
     {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_compact_vlstrings()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_compact_vlstrings
 
-/****************************************************************
-**
-**  test_write_vl_string_attribute(): Test basic VL string code.
-**      Tests writing VL strings as attributes
-**
-****************************************************************/
+/*-------------------------------------------------------------------------
+ * Function:	test_write_vl_string_attribute
+ *
+ * Purpose:	Test writing VL strings as attributes.
+ *
+ * Return:	None
+ *
+ * Programmer:	Binh-Minh Ribler (use C version)
+ *		January, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
 // String for testing attributes
+static const char *string_att = "This is the string for the attribute";
 static char *string_att_write=NULL;
 
 // Info for a string attribute
 const H5std_string ATTRSTR_NAME("String_attr");
 const H5std_string ATTRSTR_DATA("String Attribute");
 
-static void 
-test_write_vl_string_attribute(void)
+static void test_write_vl_string_attribute()
 {
     // Output message about test being performed
-    MESSAGE(5, ("Testing writing VL String as attributes\n"));
+    SUBTEST("Testing writing VL String as attributes");
 
     try {
 	// Open the file
-	H5File file1(DATAFILE, H5F_ACC_RDWR);
+	H5File file1(FILENAME, H5F_ACC_RDWR);
 
 	// Create a datatype to refer to.
 	StrType tid1(0, H5T_VARIABLE);
@@ -554,16 +575,17 @@ test_write_vl_string_attribute(void)
 	string_att_write = (char*)HDcalloc(8192, sizeof(char));
 	HDmemset(string_att_write, 'A', 8191);
 
-	// Write data to the attribute.
+	// Write data to the attribute, then read it back.
 	gr_attr.write(tid1, &string_att_write);
-
 	gr_attr.read(tid1, &string_att_check);
 
+	// Verify data read.
 	if(HDstrcmp(string_att_check,string_att_write)!=0)
 	    TestErrPrintf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",string_att_write,string_att_check);
-
 	HDfree(string_att_check);
+	gr_attr.close();
 
+	// Open attribute ATTRSTR_NAME again.
 	gr_attr = root.openAttribute(ATTRSTR_NAME);
 
 	// The attribute string written is freed below, in the 
@@ -572,53 +594,58 @@ test_write_vl_string_attribute(void)
 	// Close attribute and file
 	gr_attr.close();
 	file1.close();
+
+	PASSED();
     } // end try block
 
     // Catch all exceptions.
     catch (Exception E) {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_string_attr()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-}   // test_string_attr()
+}   // test_write_vl_string_attribute()
 
-/****************************************************************
-**
-**  test_read_vl_string_attribute(): Test basic VL string code.
-**      Tests reading VL strings from attributes
-**
-****************************************************************/
-static void test_read_vl_string_attribute(void)
+/*-------------------------------------------------------------------------
+ * Function:	test_read_vl_string_attribute
+ *
+ * Purpose:	Test reading VL strings from attributes.
+ *
+ * Return:	None
+ *
+ * Programmer:	Binh-Minh Ribler (use C version)
+ *		January, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static void test_read_vl_string_attribute()
 {
-    char *string_att_check;
+
+    // Output message about test being performed
+    SUBTEST("Testing reading VL String as attributes");
 
     try {
 	// Open file
-	H5File file1(DATAFILE, H5F_ACC_RDONLY);
+	H5File file1(FILENAME, H5F_ACC_RDONLY);
 
 	// Create a datatype to refer to.
 	StrType tid1(0, H5T_VARIABLE);
 
+	// Open the root group and its attribute named ATTRSTR_NAME.
 	Group root = file1.openGroup("/");
-
 	Attribute att = root.openAttribute(ATTRSTR_NAME);
 
 	// Test reading "normal" sized string attribute
+	char *string_att_check;
 	att.read(tid1, &string_att_check);
-
 	if(HDstrcmp(string_att_check,ATTRSTR_DATA.c_str())!=0)
 	    TestErrPrintf("VL string attributes don't match!, string_att=%s, string_att_check=%s\n",ATTRSTR_DATA.c_str(),string_att_check);
-
 	HDfree(string_att_check);
-
-	// Close this attribute.
 	att.close();
 
 	// Test reading "large" sized string attribute
 	att = root.openAttribute("test_scalar_large");
 	att.read(tid1, &string_att_check);
-
 	if(HDstrcmp(string_att_check,string_att_write)!=0)
 	    TestErrPrintf("VL string attributes don't match!, string_att_write=%s, string_att_check=%s\n",string_att_write,string_att_check);
-
 	HDfree(string_att_check);
 	HDfree(string_att_write);   // Free string allocated in test_write_vl_string_attribute
 
@@ -627,13 +654,16 @@ static void test_read_vl_string_attribute(void)
 	tid1.close();
 	root.close();
 	file1.close();
+
+	PASSED();
     } // end try
 
     // Catch all exceptions.
     catch (Exception E) {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_read_vl_string_attribute()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // test_read_vl_string_attribute
+
 
 /* Helper routine for test_vl_rewrite() */
 static void write_scalar_dset(H5File& file, DataType& type, DataSpace& space, char *name, char *data)
@@ -682,12 +712,17 @@ static void read_scalar_dset(H5File& file, DataType& type, DataSpace& space, cha
 **      have been linked/unlinked.
 **
 ****************************************************************/
+const H5std_string FILENAME2("tvlstr2.h5");
+const int REWRITE_NDATASETS = 32;
 static void test_vl_rewrite(void)
 {
+    // Output message about test being performed
+    SUBTEST("Testing I/O on VL strings with link/unlink");
+
     try {
 	// Create the files.
-	H5File file1(DATAFILE, H5F_ACC_TRUNC);
-	H5File file2(DATAFILE2, H5F_ACC_TRUNC);
+	H5File file1(FILENAME, H5F_ACC_TRUNC);
+	H5File file2(FILENAME2, H5F_ACC_TRUNC);
 
 	// Create the VL string datatype.
 	StrType type(0, H5T_VARIABLE);
@@ -734,11 +769,13 @@ static void test_vl_rewrite(void)
 	space.close();
 	file1.close();
 	file2.close();
+
+	PASSED();
     } // end try
 
     // Catch all exceptions.
     catch (Exception E) {
-	issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+	issue_fail_msg("test_vl_rewrite()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 } // end test_vl_rewrite()
 
@@ -747,10 +784,13 @@ static void test_vl_rewrite(void)
 **  test_vlstrings(): Main VL string testing routine.
 **
 ****************************************************************/
+#ifdef __cplusplus
+extern "C"
+#endif
 void test_vlstrings(void)
 {
     // Output message about test being performed
-    MESSAGE(5, ("Testing Variable-Length Strings\n"));
+    MESSAGE(5, ("Testing Variable-Length Strings"));
 
     // These tests use the same file
     // Test basic VL string datatype
@@ -783,10 +823,12 @@ void test_vlstrings(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-cleanup_vlstrings(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void cleanup_vlstrings(void)
 {
-    HDremove(DATAFILE.c_str());
-    HDremove(DATAFILE2.c_str());
+    HDremove(FILENAME.c_str());
+    HDremove(FILENAME2.c_str());
 }
 

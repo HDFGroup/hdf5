@@ -95,6 +95,10 @@ main(int argc, char *argv[])
 
 Comment out tests that are not done yet */
 
+/* Tentative - BMR 2007/1/12
+    AddTest("datatypes", test_dtypes, cleanup_dtypes,  "Data Types", NULL);
+    AddTest("enum", test_enum, cleanup_enum,  "Enum Data Types", NULL);
+*/
     /* Display testing information */
     TestInfo(argv[0]);
 

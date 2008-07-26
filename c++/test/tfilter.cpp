@@ -72,35 +72,6 @@ const H5Z_class_t H5Z_BOGUS[1] = {{
     filter_bogus,               /* The actual filter function   */
 }};
 
-#ifndef H5_WANT_H5_V1_4_COMPAT
-static herr_t can_apply_bogus(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-
-/*-------------------------------------------------------------------------
- * Function:    can_apply_bogus
- *
- * Purpose:     A bogus 'can apply' callback that returns 0 for H5T_NATIVE_DOUBLE
- *              dataype, but returns 1 for all other datatypes
- *
- * Return:      Success:        Described above
- *              Failure:        0
- *
- * Programmer:  Quincey Koziol
- *              Friday, April  5, 2003
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-can_apply_bogus(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
-{
-    if(H5Tequal(type_id,H5T_NATIVE_DOUBLE))
-        return 0;
-    else
-        return 1;
-}
-#endif
-
 /*-------------------------------------------------------------------------
  * Function:    filter_bogus
  *
@@ -147,10 +118,9 @@ const hsize_t chunk_size[2] = {FILTER_CHUNK_DIM1, FILTER_CHUNK_DIM2};
 static void test_null_filter(void)
 {
     // Output message about test being performed
-    SUBTEST("'Null' filter");
+    SUBTEST("Testing 'Null' Filter");
 
-    try
-    {
+    try {
 	//hsize_t  null_size;          // Size of dataset with null filter
 
 	// Prepare dataset create property list
@@ -181,7 +151,7 @@ static void test_null_filter(void)
     // catch all other exceptions
     catch (Exception E)
     {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_null_filter()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }  // test_null_filter
 
@@ -207,16 +177,15 @@ void test_szip_filter(H5File& file1)
 {
 #ifdef H5_HAVE_FILTER_SZIP
     int      points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
-    //hsize_t  szip_size;       /* Size of dataset with szip filter */
     unsigned szip_options_mask=H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block=4;
 
     // Output message about test being performed
-    SUBTEST("szip filter (with encoder)");
+    SUBTEST("Testing SZIP Filter (With Encoder)");
+
     if ( h5_szip_can_encode() == 1) {
     char* tconv_buf = new char [1000];
-    try
-    {
+    try {
         const hsize_t   size[2] = {DSET_DIM1, DSET_DIM2};
 
         // Create the data space
@@ -265,9 +234,9 @@ void test_szip_filter(H5File& file1)
     // catch all other exceptions
     catch (Exception E)
     {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_szip_filter()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-    } 
+    } // if szip presents 
     else {
 	SKIPPED();
     }
@@ -286,6 +255,9 @@ void test_szip_filter(H5File& file1)
 **
 ****************************************************************/
 const H5std_string      FILE1("tfilters.h5");
+#ifdef __cplusplus
+extern "C"
+#endif
 void test_filters(void)
 {
     // Output message about test being performed
@@ -294,8 +266,8 @@ void test_filters(void)
     hid_t       fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
 
-    try
-    {
+    int         nerrors=0;      // keep track of number of failures occurr
+    try {
         // Use the file access template id to create a file access prop. list
         FileAccPropList fapl(fapl_id);
 
@@ -307,7 +279,7 @@ void test_filters(void)
     }
     catch (Exception E)
     {
-        issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
+        issue_fail_msg("test_filters()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_filters()
 
@@ -325,8 +297,10 @@ void test_filters(void)
  *
  *-------------------------------------------------------------------------
  */
-void
-cleanup_filters(void)
+#ifdef __cplusplus
+extern "C"
+#endif
+void cleanup_filters(void)
 {
     HDremove(FILE1.c_str());
 }
