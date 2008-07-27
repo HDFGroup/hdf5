@@ -68,6 +68,9 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	void getObjIDs(unsigned types, int max_objs, hid_t *oid_list) const;
 
 	// Retrieves the type of object that an object reference points to.
+	H5G_obj_t getRefObjType(void *ref, H5R_type_t ref_type = H5R_OBJECT) const;
+
+	// Deprecated in favor of getRefObjType
 	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type = H5R_OBJECT) const;
 
 	// Retrieves a dataspace with the region pointed to selected.
@@ -87,11 +90,10 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 
 	// Creates a reference to a named HDF5 object or to a dataset region
 	// in this object.
-	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
-
-	// Creates a reference to a named Hdf5 object in this object.
-	void* Reference(const char* name) const; // will be obsolete
-	void* Reference(const H5std_string& name) const; // will be obsolete
+	void reference(void* ref, const char* name, const DataSpace& dataspace,
+			H5R_type_t ref_type = H5R_DATASET_REGION) const;
+	void reference(void* ref, const char* name) const;
+	void reference(void* ref, const H5std_string& name) const;
 
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("H5File"); }
@@ -108,13 +110,37 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 	// Copy constructor: makes a copy of the original H5File object.
 	H5File(const H5File& original);
 
+	// Gets the HDF5 file id.
+	virtual hid_t getId() const;
+
 	// H5File destructor.
 	virtual ~H5File();
 
+   protected:
+	// Sets the HDF5 file id.
+	virtual void p_setId(const hid_t new_id);
+
    private:
+	hid_t id;	// HDF5 file id
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
 	// This function is private and contains common code between the
 	// constructors taking a string or a char*
 	void p_get_file( const char* name, unsigned int flags, const FileCreatPropList& create_plist, const FileAccPropList& access_plist );
+
+	// Creates a reference to an HDF5 object or a dataset region.
+	void p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const;
+
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+	// Retrieves the type of object that an object reference points to.
+	H5G_obj_t p_get_obj_type(void *ref, H5R_type_t ref_type) const;
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
+	// Retrieves a dataspace with the region pointed to selected.
+	hid_t p_get_region(void *ref, H5R_type_t ref_type) const;
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 };
 #ifndef H5_NO_NAMESPACE

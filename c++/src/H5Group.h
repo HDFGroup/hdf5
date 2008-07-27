@@ -32,14 +32,6 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
-	// Creates a reference to a named Hdf5 object or to a dataset region
-	// in this object.
-	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const; // will be obsolete
-
-	// Creates a reference to a named Hdf5 object in this object.
-	void* Reference(const char* name) const; // will be obsolete
-	void* Reference(const H5std_string& name) const; // will be obsolete
-
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("Group"); }
 
@@ -50,7 +42,8 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	virtual hid_t getLocId() const;
 
 	// Creates a group by way of dereference.
-	Group(IdComponent& obj, void* ref);
+	Group(H5Object& obj, void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	Group(H5File& obj, void* ref, H5R_type_t ref_type = H5R_OBJECT);
 
 	// default constructor
 	Group();
@@ -58,12 +51,21 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	// Copy constructor: makes a copy of the original object
 	Group(const Group& original);
 
-	// Destructor
-	virtual ~Group();
+	// Gets the group id.
+	virtual hid_t getId() const;
 
 	// Creates a copy of an existing group using its id.
 	Group( const hid_t group_id );
 
+	// Destructor
+	virtual ~Group();
+
+   protected:
+	// Sets the group id.
+	virtual void p_setId(const hid_t new_id);
+
+   private:
+	hid_t id;	// HDF5 group id
 };
 #ifndef H5_NO_NAMESPACE
 }

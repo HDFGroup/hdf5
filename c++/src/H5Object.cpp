@@ -21,10 +21,15 @@
 #include "H5PropList.h"
 #include "H5Object.h"
 #include "H5DcreatProp.h"
+#include "H5DxferProp.h"
+#include "H5FaccProp.h"
+#include "H5FcreatProp.h"
 #include "H5CommonFG.h"
 #include "H5DataType.h"
 #include "H5DataSpace.h"
 #include "H5AbstractDs.h"
+#include "H5File.h"
+#include "H5DataSet.h"
 #include "H5Attribute.h"
 
 #ifndef H5_NO_NAMESPACE
@@ -102,7 +107,7 @@ Attribute H5Object::createAttribute( const char* name, const DataType& data_type
    hid_t type_id = data_type.getId();
    hid_t space_id = data_space.getId();
    hid_t plist_id = create_plist.getId();
-   hid_t attr_id = H5Acreate( id, name, type_id, space_id, plist_id );
+   hid_t attr_id = H5Acreate(getId(), name, type_id, space_id, plist_id );
 
    // If the attribute id is valid, create and return the Attribute object
    if( attr_id > 0 )
@@ -138,7 +143,7 @@ Attribute H5Object::createAttribute( const H5std_string& name, const DataType& d
 //--------------------------------------------------------------------------
 Attribute H5Object::openAttribute( const char* name ) const
 {
-   hid_t attr_id = H5Aopen_name( id, name );
+   hid_t attr_id = H5Aopen_name(getId(), name );
    if( attr_id > 0 )
    {
       Attribute attr( attr_id );
@@ -172,7 +177,7 @@ Attribute H5Object::openAttribute( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 Attribute H5Object::openAttribute( const unsigned int idx ) const
 {
-   hid_t attr_id = H5Aopen_idx( id, idx );
+   hid_t attr_id = H5Aopen_idx(getId(), idx );
    if( attr_id > 0 )
    {
       Attribute attr( attr_id );
@@ -210,7 +215,7 @@ int H5Object::iterateAttrs( attr_operator_t user_op, unsigned * idx, void *op_da
    userData->object = this;
 
    // call the C library routine H5Aiterate to iterate the attributes
-   int ret_value = H5Aiterate( id, idx, userAttrOpWrpr, (void *) userData );
+   int ret_value = H5Aiterate(getId(), idx, userAttrOpWrpr, (void *) userData );
    // release memory
    delete userData;
 
@@ -231,7 +236,7 @@ int H5Object::iterateAttrs( attr_operator_t user_op, unsigned * idx, void *op_da
 //--------------------------------------------------------------------------
 int H5Object::getNumAttrs() const
 {
-   int num_attrs = H5Aget_num_attrs( id );
+   int num_attrs = H5Aget_num_attrs(getId());
    if( num_attrs < 0 )
    {
       throw AttributeIException(inMemFunc("getNumAttrs"),
@@ -250,11 +255,9 @@ int H5Object::getNumAttrs() const
 //--------------------------------------------------------------------------
 void H5Object::removeAttr( const char* name ) const
 {
-   herr_t ret_value = H5Adelete( id, name );
+   herr_t ret_value = H5Adelete(getId(), name);
    if( ret_value < 0 )
-   {
       throw AttributeIException(inMemFunc("removeAttr"), "H5Adelete failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -279,11 +282,9 @@ void H5Object::removeAttr( const H5std_string& name ) const
 //--------------------------------------------------------------------------
 void H5Object::renameAttr(const char* oldname, const char* newname) const
 {
-   herr_t ret_value = H5Arename(id, oldname, newname);
+   herr_t ret_value = H5Arename(getId(), oldname, newname);
    if (ret_value < 0)
-   {
       throw AttributeIException(inMemFunc("renameAttr"), "H5Arename failed");
-   }
 }
 
 //--------------------------------------------------------------------------
@@ -310,9 +311,9 @@ void H5Object::renameAttr(const H5std_string& oldname, const H5std_string& newna
 ///		This object is used to identify the file to be flushed.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-void H5Object::flush(H5F_scope_t scope ) const
+void H5Object::flush(H5F_scope_t scope) const
 {
-   herr_t ret_value = H5Fflush( id, scope );
+   herr_t ret_value = H5Fflush(getId(), scope);
    if( ret_value < 0 )
    {
       throw FileIException(inMemFunc("flush"), "H5Fflush failed");
@@ -336,6 +337,232 @@ H5std_string H5Object::getFileName() const
    }
 }
 
+//--------------------------------------------------------------------------
+// Function:    H5Object::p_reference (protected)
+// Purpose      Creates a reference to an HDF5 object or a dataset region.
+// Parameters
+//              name - IN: Name of the object to be referenced
+//              dataspace - IN: Dataspace with selection
+//              ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
+// Exception    H5::IdComponentException
+// Programmer   Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void H5Object::p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const
+{
+   herr_t ret_value = H5Rcreate(ref, getId(), name, ref_type, space_id);
+   if (ret_value < 0)
+   {
+      throw IdComponentException("", "H5Rcreate failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Object::reference
+///\brief       Creates a reference to an HDF5 object or a dataset region.
+///\param       ref - IN: Reference pointer
+///\param       name - IN: Name of the object to be referenced
+///\param       dataspace - IN: Dataspace with selection
+///\param       ref_type - IN: Type of reference to query, valid values are:
+///             \li \c H5R_OBJECT \tReference is an object reference.
+///             \li \c H5R_DATASET_REGION \tReference is a dataset region
+///                     reference. - this is the default
+///\exception   H5::IdComponentException
+// Programmer   Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void H5Object::reference(void* ref, const char* name, const DataSpace& dataspace, H5R_type_t ref_type) const
+{
+   try {
+      p_reference(ref, name, dataspace.getId(), ref_type);
+   }
+   catch (IdComponentException E) {
+      throw IdComponentException("H5Object::reference", E.getDetailMsg());
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Object::reference
+///\brief       This is an overloaded function, provided for your convenience.
+///             It differs from the above function in that it only creates
+///             a reference to an HDF5 object, not to a dataset region.
+///\param       ref - IN: Reference pointer
+///\param       name - IN: Name of the object to be referenced - \c char pointer
+///\exception   H5::IdComponentException
+///\par Description
+//              This function passes H5R_OBJECT and -1 to the protected
+//              function for it to pass to the C API H5Rcreate
+//              to create a reference to the named object.
+// Programmer   Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void H5Object::reference(void* ref, const char* name) const
+{
+   try {
+      p_reference(ref, name, -1, H5R_OBJECT);
+   }
+   catch (IdComponentException E) {
+      throw IdComponentException("H5Object::reference", E.getDetailMsg());
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Object::reference
+///\brief       This is an overloaded function, provided for your convenience.
+///             It differs from the above function in that it takes an
+///             \c H5std_string for the object's name.
+///\param       ref - IN: Reference pointer
+///\param       name - IN: Name of the object to be referenced - \c H5std_string
+// Programmer   Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+void H5Object::reference(void* ref, const H5std_string& name) const
+{
+   reference(ref, name.c_str());
+}
+
+//--------------------------------------------------------------------------
+// Function:    H5Object::dereference
+// Purpose      Dereference a ref into a DataSet object.
+// Parameters
+//              ref - IN: Reference pointer
+// Exception    H5::IdComponentException
+// Programmer   Binh-Minh Ribler - Oct, 2006
+// Modification
+//	May 2008 - BMR
+//		Moved from IdComponent into H5File and H5Object
+//--------------------------------------------------------------------------
+#if 0
+void H5Object::dereference(H5File& h5file, void* ref)
+{
+   hid_t temp_id;
+   try {
+      temp_id = p_dereference(h5file.getId(), ref);
+   }
+   catch (ReferenceException ref_err) {
+      throw (inMemFunc("dereference"), ref_err.getDetailMsg());
+   }
+
+   // No failure, set id to the object
+   p_setId(temp_id);
+}
+void H5Object::dereference(H5Object& obj, void* ref)
+{
+   hid_t temp_id;
+   try {
+      temp_id = p_dereference(obj.getId(), ref);
+   }
+   catch (ReferenceException ref_err) {
+      throw (inMemFunc("dereference"), ref_err.getDetailMsg());
+   }
+
+   // No failure, set id to the object
+   p_setId(temp_id);
+}
+
+#endif
+void H5Object::dereference(H5Object& obj, void* ref, H5R_type_t ref_type)
+{
+   hid_t temp_id;
+   temp_id = H5Rdereference(obj.getId(), ref_type, ref);
+   if (temp_id < 0)
+   {
+      throw (inMemFunc("dereference"), "H5Rdereference failed");
+   }
+
+   // No failure, set id to the object
+   p_setId(temp_id);
+}
+
+void H5Object::dereference(H5File& h5file, void* ref, H5R_type_t ref_type)
+{
+   hid_t temp_id;
+   temp_id = H5Rdereference(h5file.getId(), ref_type, ref);
+   if (temp_id < 0)
+   {
+      throw (inMemFunc("dereference"), "H5Rdereference failed");
+   }
+
+   // No failure, set id to the object
+   p_setId(temp_id);
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5Object::getRefObjType
+///\brief	Retrieves the type of object that an object reference points to.
+///\param	ref	 - IN: Reference to query
+///\param	ref_type - IN: Type of reference to query, valid values are:
+///		\li \c H5R_OBJECT \tReference is an object reference.
+///		\li \c H5R_DATASET_REGION \tReference is a dataset region reference.
+///\return	An object type, which can be one of the following:
+///		\li \c H5G_LINK (0) \tObject is a symbolic link.
+///		\li \c H5G_GROUP (1) \tObject is a group.
+///		\li \c H5G_DATASET (2) \tObject is a dataset.
+///		\li \c H5G_TYPE Object (3) \tis a named datatype
+///\exception	H5::IdComponentException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+H5G_obj_t H5Object::getRefObjType(void *ref, H5R_type_t ref_type) const
+{
+   try {
+      return(p_get_refobj_type(ref, ref_type));
+   }
+   catch (IdComponentException E) {
+      throw IdComponentException("H5Object::getRefObjType", E.getDetailMsg());
+   }
+}
+
+#if 0
+//--------------------------------------------------------------------------
+// Function:	H5Object::p_get_refobj_type (protected)
+// Purpose	Retrieves the type of object that an object reference points to.
+// Parameters
+//		ref      - IN: Reference to query
+//		ref_type - IN: Type of reference to query
+// Return	An object type, which can be one of the following:
+//			H5G_LINK Object is a symbolic link.
+//			H5G_GROUP Object is a group.
+//			H5G_DATASET   Object is a dataset.
+//			H5G_TYPE Object is a named datatype
+// Exception	H5::IdComponentException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+H5G_obj_t H5Object::p_get_refobj_type(void *ref, H5R_type_t ref_type) const
+{
+#ifdef H5_WANT_H5_V1_4_COMPAT
+   H5G_obj_t obj_type = H5Rget_object_type(getId(), ref);
+#else
+   H5G_obj_t obj_type = H5Rget_obj_type(getId(), ref_type, ref);
+#endif
+
+   if (obj_type == H5G_UNKNOWN)
+   {
+#ifdef H5_WANT_H5_V1_4_COMPAT
+      throw IdComponentException("", "H5Rget_object_type failed");
+#else
+      throw IdComponentException("", "H5Rget_obj_type failed");
+#endif
+   }
+   return(obj_type);
+}
+#endif
+
+//--------------------------------------------------------------------------
+// Function:    H5Object::p_get_region (protected)
+// Purpose      Retrieves a dataspace with the region pointed to selected.
+// Parameters
+//              ref_type - IN: Type of reference to get region of - default
+//                              to H5R_DATASET_REGION
+//              ref      - IN: Reference to get region of
+// Return       Dataspace id
+// Exception    H5::IdComponentException
+// Programmer   Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+hid_t H5Object::p_get_region(void *ref, H5R_type_t ref_type) const
+{
+   hid_t space_id = H5Rget_region(getId(), ref_type, ref);
+   if (space_id < 0)
+   {
+      throw IdComponentException("", "H5Rget_region failed");
+   }
+   return(space_id);
+}
 //--------------------------------------------------------------------------
 // Function:	H5Object destructor
 ///\brief	Noop destructor.

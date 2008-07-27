@@ -34,21 +34,21 @@ namespace H5 {
 ///\brief	Default constructor
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-AbstractDs::AbstractDs() : H5Object() {}
+AbstractDs::AbstractDs(){}
 
 //--------------------------------------------------------------------------
 // Function:	AbstractDs default constructor
 ///\brief	Creates an AbstractDs instance using an existing id.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-AbstractDs::AbstractDs( const hid_t ds_id ) : H5Object( ds_id ) {}
+//AbstractDs::AbstractDs(const hid_t ds_id){}
 
 //--------------------------------------------------------------------------
 // Function:	AbstractDs copy constructor
 ///\brief	Copy constructor: makes a copy of the original AbstractDs object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-AbstractDs::AbstractDs( const AbstractDs& original ) : H5Object( original ) {}
+AbstractDs::AbstractDs(const AbstractDs& original){}
 
 //--------------------------------------------------------------------------
 // Function:	AbstractDs::getTypeClass
@@ -80,8 +80,10 @@ H5T_class_t AbstractDs::getTypeClass() const
       return( type_class );
    else
    {
-      throw DataTypeIException(inMemFunc("getTypeClass"),
-		"H5Tget_class returns H5T_NO_CLASS");
+      if (fromClass() == "DataSet")
+	 throw DataTypeIException("DataSet::getTypeClass", "H5Tget_class returns H5T_NO_CLASS");
+      else if (fromClass() == "Attribute")
+	 throw DataTypeIException("Attribute::getTypeClass", "H5Tget_class returns H5T_NO_CLASS");
    }
 }
 

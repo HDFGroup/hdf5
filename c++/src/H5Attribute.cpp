@@ -26,12 +26,14 @@
 #include "H5PropList.h"
 #include "H5Object.h"
 #include "H5AbstractDs.h"
-#include "H5Attribute.h"
+#include "H5FaccProp.h"
+#include "H5FcreatProp.h"
 #include "H5DcreatProp.h"
 #include "H5CommonFG.h"
 #include "H5DataType.h"
 #include "H5DataSpace.h"
-#include "H5private.h"
+#include "H5File.h"
+#include "H5Attribute.h"
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -45,16 +47,26 @@ namespace H5 {
 // Function:	Attribute default constructor
 ///\brief	Default constructor: Creates a stub attribute
 // Programmer	Binh-Minh Ribler - May, 2004
+// Modification
+//	Jul, 08 No longer inherit data member 'id' from IdComponent.
+//		- bugzilla 1068
 //--------------------------------------------------------------------------
-Attribute::Attribute() : AbstractDs() {}
+Attribute::Attribute() : AbstractDs(), IdComponent(), id(0) {}
 
 //--------------------------------------------------------------------------
 // Function:	Attribute copy constructor
 ///\brief	Copy constructor: makes a copy of the original Attribute object.
 ///\param	original  - IN: Original Attribute object to copy
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//	Jul, 08 No longer inherit data member 'id' from IdComponent.
+//		- bugzilla 1068
 //--------------------------------------------------------------------------
-Attribute::Attribute( const Attribute& original ) : AbstractDs( original ) {}
+Attribute::Attribute( const Attribute& original ) : AbstractDs(), IdComponent()
+{
+    id = original.getId();
+    incRefCount(); // increment number of references to this id
+}
 
 //--------------------------------------------------------------------------
 // Function:	Attribute overloaded constructor
@@ -63,8 +75,14 @@ Attribute::Attribute( const Attribute& original ) : AbstractDs( original ) {}
 ///\param	existing_id - IN: Id of an existing attribute
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//	Jul, 08 No longer inherit data member 'id' from IdComponent.
+//		- bugzilla 1068
 //--------------------------------------------------------------------------
-Attribute::Attribute(const hid_t existing_id) : AbstractDs(existing_id) {}
+Attribute::Attribute(const hid_t existing_id) : AbstractDs(), IdComponent()
+{
+   id = existing_id;
+}
 
 //--------------------------------------------------------------------------
 // Function:	Attribute::write
@@ -135,8 +153,8 @@ void Attribute::read( const DataType& mem_type, void *buf ) const
 // Programmer	Binh-Minh Ribler - Apr, 2003
 // Modification
 //	Mar 2008
-//		Corrected a misunderstanding that H5Aread would allocate 
-//		space for the buffer.  Obtained the attribute size and 
+//		Corrected a misunderstanding that H5Aread would allocate
+//		space for the buffer.  Obtained the attribute size and
 //		allocated memory properly. - BMR
 //--------------------------------------------------------------------------
 void Attribute::read( const DataType& mem_type, H5std_string& strg ) const
@@ -207,6 +225,23 @@ hid_t Attribute::p_get_type() const
    else
    {
       throw AttributeIException("", "H5Aget_type failed");
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:	Attribute::getFileName
+///\brief	Gets the name of the file, in which this attribute belongs.
+///\return	File name
+///\exception	H5::IdComponentException
+// Programmer	Binh-Minh Ribler - Jul, 2004
+//--------------------------------------------------------------------------
+H5std_string Attribute::getFileName() const
+{
+   try {
+      return(p_get_file_name());
+   }
+   catch (IdComponentException E) {
+      throw FileIException("Attribute::getFileName", E.getDetailMsg());
    }
 }
 
@@ -293,6 +328,73 @@ H5std_string Attribute::getName() const
    return(attr_name);
 }
 
+#if 0
+//--------------------------------------------------------------------------
+// Function:	Attribute::getObjType
+///\brief	Retrieves the type of object that an object reference points to.
+///\param	ref	 - IN: Reference to query
+///\param	ref_type - IN: Type of reference to query, valid values are:
+///		\li \c H5R_OBJECT \tReference is an object reference.
+///		\li \c H5R_DATASET_REGION \tReference is a dataset region reference.
+///\return	An object type, which can be one of the following:
+///		\li \c H5G_LINK (0) \tObject is a symbolic link.
+///		\li \c H5G_GROUP (1) \tObject is a group.
+///		\li \c H5G_DATASET (2) \tObject is a dataset.
+///		\li \c H5G_TYPE Object (3) \tis a named datatype
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - Jul, 2008
+// Note:
+//		H5G_loc checks args in H5Rget_obj_type, so attribute must
+//		also be included.
+//--------------------------------------------------------------------------
+H5G_obj_t Attribute::getObjType(void *ref, H5R_type_t ref_type) const
+{
+   try {
+      return(p_get_refobj_type(ref, ref_type));
+   }
+   catch (IdComponentException E) {
+      throw AttributeIException("Attribute::getObjType", E.getDetailMsg());
+   }
+}
+#endif
+
+//--------------------------------------------------------------------------
+// Function:	Attribute::getRefObjType
+///\brief	Retrieves the type of object that an object reference points to.
+///\param	ref	 - IN: Reference to query
+///\param	ref_type - IN: Type of reference to query, valid values are:
+///		\li \c H5R_OBJECT \tReference is an object reference.
+///		\li \c H5R_DATASET_REGION \tReference is a dataset region reference.
+///\return	An object type, which can be one of the following:
+///		\li \c H5G_LINK (0) \tObject is a symbolic link.
+///		\li \c H5G_GROUP (1) \tObject is a group.
+///		\li \c H5G_DATASET (2) \tObject is a dataset.
+///		\li \c H5G_TYPE Object (3) \tis a named datatype
+///\exception	H5::AttributeIException
+// Programmer	Binh-Minh Ribler - May, 2004
+//--------------------------------------------------------------------------
+H5G_obj_t Attribute::getRefObjType(void *ref, H5R_type_t ref_type) const
+{
+   try {
+      return(p_get_refobj_type(ref, ref_type));
+   }
+   catch (IdComponentException E) {
+      throw AttributeIException("Attribute::getRefObjType", E.getDetailMsg());
+   }
+}
+
+//--------------------------------------------------------------------------
+// Function:    Attribute::getObjType
+///\brief       This function was misnamed and will be deprecated in favor of
+///             Attribute::getRefObjType; please use getRefObjType instead.
+// Programmer   Binh-Minh Ribler - May, 2004
+// Note:        Replaced by getRefObjType. - BMR - Jul, 2008
+//--------------------------------------------------------------------------
+H5G_obj_t Attribute::getObjType(void *ref, H5R_type_t ref_type) const
+{
+    return(getRefObjType(ref, ref_type));
+}
+
 //--------------------------------------------------------------------------
 // Function:	Attribute::getStorageSize
 ///\brief	Returns the amount of storage size required for this attribute.
@@ -306,6 +408,50 @@ hsize_t Attribute::getStorageSize() const
 {
    hsize_t storage_size = H5Aget_storage_size(id);
    return (storage_size);
+}
+
+//--------------------------------------------------------------------------
+// Function:	Attribute::getId
+// Purpose:	Get the id of this group
+// Modification:
+//	May 2008 - BMR
+//		Class hierarchy is revised to address bugzilla 1068.  Class
+//		AbstractDS and Attribute are moved out of H5Object.  In
+//		addition, member IdComponent::id is moved into subclasses, and
+//		IdComponent::getId now becomes pure virtual function.
+// Programmer	Binh-Minh Ribler - May, 2008
+//--------------------------------------------------------------------------
+hid_t Attribute::getId() const
+{
+   return(id);
+}
+
+//--------------------------------------------------------------------------
+// Function:	Attribute::p_setId
+///\brief	Sets the identifier of this group to a new value.
+///
+///\exception	H5::IdComponentException when the attempt to close the 
+///		currently open group fails
+// Description:
+//		The underlaying reference counting in the C library ensures
+//		that the current valid id of this object is properly closed.
+//		Then the object's id is reset to the new id.
+// Programmer	Binh-Minh Ribler - 2000
+// Modification
+//	Jul, 08 No longer inherit data member 'id' from IdComponent.
+//		- bugzilla 1068
+//--------------------------------------------------------------------------
+void Attribute::p_setId(const hid_t new_id)
+{
+    // handling references to this old id
+    try {
+	close();
+    }
+    catch (Exception close_error) {
+	throw AttributeIException("Attribute::p_setId", close_error.getDetailMsg());
+    }
+    // reset object's id to the given id
+    id = new_id;
 }
 
 //--------------------------------------------------------------------------

@@ -54,7 +54,7 @@ DSetCreatPropList::DSetCreatPropList( const DSetCreatPropList& orig ) : PropList
 ///		existing dataset creation property list.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetCreatPropList::DSetCreatPropList(const hid_t plist_id) : PropList( plist_id ) {}
+DSetCreatPropList::DSetCreatPropList(const hid_t plist_id) : PropList(plist_id) {}
 
 //--------------------------------------------------------------------------
 // Function:	DSetCreatPropList::setChunk

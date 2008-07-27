@@ -33,7 +33,7 @@ class FloatType;
 class IntType;
 class StrType;
 class VarLenType;
-class H5_DLLCPP AbstractDs : public H5Object {
+class H5_DLLCPP AbstractDs {
    public:
 	// Gets a copy the datatype of that this abstract dataset uses.
 	// Note that this datatype is a generic one and can only be accessed
@@ -62,6 +62,9 @@ class H5_DLLCPP AbstractDs : public H5Object {
 	// dataset - pure virtual.
 	virtual hsize_t getStorageSize() const = 0;
 
+	// Returns this class name
+	virtual H5std_string fromClass() const = 0;
+
 	// Copy constructor
 	AbstractDs( const AbstractDs& original );
 
@@ -73,7 +76,7 @@ class H5_DLLCPP AbstractDs : public H5Object {
 	AbstractDs();
 
 	// Constructor that takes an attribute id or a dataset id.
-	AbstractDs( const hid_t ds_id );
+	//AbstractDs( const hid_t ds_id );
 
    private:
 	// This member function is implemented by DataSet and Attribute.

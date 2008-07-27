@@ -21,10 +21,13 @@
 namespace H5 {
 #endif
 
-class H5_DLLCPP Attribute : public AbstractDs {
+class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
    public:
 	// Closes this attribute.
 	virtual void close();
+
+	// Gets the name of the file, in which this attribute belongs.
+	H5std_string getFileName() const;
 
 	// Gets the name of this attribute.
 	ssize_t getName( size_t buf_size, H5std_string& attr_name ) const;
@@ -45,11 +48,17 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	void write(const DataType& mem_type, const void *buf ) const;
 	void write(const DataType& mem_type, const H5std_string& strg ) const;
 
+	// Retrieves the type of object that an object reference points to.
+        H5G_obj_t getRefObjType(void *ref, H5R_type_t ref_type = H5R_OBJECT) const;
+
+	// Deprecated in favor of getRefObjType.
+	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type = H5R_OBJECT) const;
+
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("Attribute"); }
 
-        // Creates a copy of an existing attribute using the attribute id
-        Attribute( const hid_t attr_id );
+	// Creates a copy of an existing attribute using the attribute id
+	Attribute( const hid_t attr_id );
 
 	// Copy constructor: makes a copy of an existing Attribute object.
 	Attribute( const Attribute& original );
@@ -57,21 +66,24 @@ class H5_DLLCPP Attribute : public AbstractDs {
 	// Default constructor
 	Attribute();
 
+	// Gets the attribute id.
+	virtual hid_t getId() const;
+
 	// Destructor: properly terminates access to this attribute.
 	virtual ~Attribute();
 
+   protected:
+	// Sets the attribute id.
+	virtual void p_setId(const hid_t new_id);
+
    private:
+	hid_t id;	// HDF5 attribute id
+
 	// This function contains the common code that is used by
 	// getTypeClass and various API functions getXxxType
 	// defined in AbstractDs for generic datatype and specific
 	// sub-types
 	virtual hid_t p_get_type() const;
-
-	// do not inherit H5Object::iterateAttrs
-	int iterateAttrs() { return 0; }
-
-	// do not inherit H5Object::renameAttr
-	void renameAttr() {}
 };
 #ifndef H5_NO_NAMESPACE
 }

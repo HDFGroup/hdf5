@@ -23,7 +23,7 @@
 namespace H5 {
 #endif
 
-class H5_DLLCPP DataSet : public AbstractDs {
+class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
    public:
 	// Close this dataset.
 	virtual void close();
@@ -62,16 +62,16 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	// The memory and file dataspaces and the transferring property list
 	// can be defaults.
 	void read( void* buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
-        void read( H5std_string& buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
+	void read( H5std_string& buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
 
 	// Writes the buffered data to this dataset.
 	// The memory and file dataspaces and the transferring property list
 	// can be defaults.
 	void write( const void* buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
-        void write( const H5std_string& buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
+	void write( const H5std_string& buf, const DataType& mem_type, const DataSpace& mem_space = DataSpace::ALL, const DataSpace& file_space = DataSpace::ALL, const DSetMemXferPropList& xfer_plist = DSetMemXferPropList::DEFAULT ) const;
 
 	// Iterates the selected elements in the specified dataspace - not implemented in C++ style yet
-        int iterateElems( void* buf, const DataType& type, const DataSpace& space, H5D_operator_t op, void* op_data = NULL );
+	int iterateElems( void* buf, const DataType& type, const DataSpace& space, H5D_operator_t op, void* op_data = NULL );
 
 	// Retrieves the type of object that an object reference points to.
 	H5G_obj_t getObjType(void *ref, H5R_type_t ref_type = H5R_OBJECT) const;
@@ -79,19 +79,12 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
-	// Creates a reference to a named Hdf5 object or to a dataset region
-	// in this object.
-	void* Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
-
-	// Creates a reference to a named Hdf5 object in this object.
-	void* Reference(const char* name) const; // will be obsolete
-	void* Reference(const H5std_string& name) const; // will be obsolete
-
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("DataSet"); }
 
 	// Creates a dataset by way of dereference.
-	DataSet(IdComponent& obj, void* ref);
+	DataSet(H5Object& obj, void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	DataSet(H5File& file, void* ref, H5R_type_t ref_type = H5R_OBJECT);
 
 	// Default constructor.
 	DataSet();
@@ -102,14 +95,23 @@ class H5_DLLCPP DataSet : public AbstractDs {
 	// Creates a copy of an existing DataSet using its id.
 	DataSet(const hid_t existing_id);
 
+	// Gets the dataset id.
+	virtual hid_t getId() const;
+
 	// Destructor: properly terminates access to this dataset.
 	virtual ~DataSet();
 
+   protected:
+	// Sets the dataset id.
+	virtual void p_setId(const hid_t new_id);
+
    private:
-        // This function contains the common code that is used by
-        // getTypeClass and various API functions getXxxType
-        // defined in AbstractDs for generic datatype and specific
-        // sub-types
+	hid_t id;	// HDF5 dataset id
+
+	// This function contains the common code that is used by
+	// getTypeClass and various API functions getXxxType
+	// defined in AbstractDs for generic datatype and specific
+	// sub-types
 	virtual hid_t p_get_type() const;
 };
 #ifndef H5_NO_NAMESPACE

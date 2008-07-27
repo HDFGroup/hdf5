@@ -32,7 +32,7 @@ namespace H5 {
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IdComponent::IdComponent(const hid_t h5_id) : id(h5_id) {}
+IdComponent::IdComponent(const hid_t h5_id) {}
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent copy constructor
@@ -40,11 +40,7 @@ IdComponent::IdComponent(const hid_t h5_id) : id(h5_id) {}
 ///\param	original - IN: IdComponent instance to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IdComponent::IdComponent( const IdComponent& original )
-{
-    id = original.id;
-    incRefCount(); // increment number of references to this id
-}
+IdComponent::IdComponent( const IdComponent& original ) {}
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::incRefCount
@@ -65,7 +61,7 @@ void IdComponent::incRefCount(const hid_t obj_id) const
 //--------------------------------------------------------------------------
 void IdComponent::incRefCount() const
 {
-    incRefCount(id);
+    incRefCount(getId());
 }
 
 //--------------------------------------------------------------------------
@@ -95,7 +91,7 @@ void IdComponent::decRefCount(const hid_t obj_id) const
 //--------------------------------------------------------------------------
 void IdComponent::decRefCount() const
 {
-    decRefCount(id);
+    decRefCount(getId());
 }
 
 //--------------------------------------------------------------------------
@@ -124,7 +120,7 @@ int IdComponent::getCounter(const hid_t obj_id) const
 //--------------------------------------------------------------------------
 int IdComponent::getCounter() const
 {
-    return (getCounter(id));
+    return (getCounter(getId()));
 }
 
 //--------------------------------------------------------------------------
@@ -177,10 +173,9 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 	}
 
 	// copy the data members from the rhs object
-	id = rhs.id;
-
-	// increment the reference counter
-	incRefCount();
+	p_setId(rhs.getId());
+	incRefCount(getId()); // a = b, so there are two objects with the same
+			      // hdf5 id
     }
     return *this;
 }
@@ -192,37 +187,28 @@ IdComponent& IdComponent::operator=( const IdComponent& rhs )
 ///\exception	H5::IdComponentException when the attempt to close the HDF5
 ///		object fails
 // Description:
-// 		The underlaying reference counting in the C library ensures
-// 		that the current valid id of this object is properly closed.
-// 		Then the object's id is reset to the new id.
+//		The underlaying reference counting in the C library ensures
+//		that the current valid id of this object is properly closed.
+//		Then the object's id is reset to the new id.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//	2008/7/23 - BMR
+//		Changed all subclasses' setId to p_setId and put back setId
+//		here.  p_setId is used in the library where the id provided
+//		by a C API passed on to user's application in the form of a
+//		C++ API object, which will be destroyed properly, and so
+//		p_setId does not call incRefCount.  On the other hand, the
+//		public version setId is used by other applications, in which
+//		the id passed to setId already has a reference count, so setId
+//		must call incRefCount.
 //--------------------------------------------------------------------------
 void IdComponent::setId(const hid_t new_id)
 {
-    // handling references to this old id
-    try {
-	close();
-    }
-    catch (Exception close_error) {
-	throw IdComponentException(inMemFunc("copy"), close_error.getDetailMsg());
-    }
-
-   // reset object's id to the given id
-   id = new_id;
+   // set to new_id
+   p_setId(new_id);
 
    // increment the reference counter of the new id
    incRefCount();
-}
-
-//--------------------------------------------------------------------------
-// Function:	IdComponent::getId
-///\brief	Returns the id of this object
-///\return	HDF5 id
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-hid_t IdComponent::getId () const
-{
-   return(id);
 }
 
 //--------------------------------------------------------------------------
@@ -263,7 +249,7 @@ H5std_string IdComponent::inMemFunc(const char* func_name) const
 ///\brief	Default constructor.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-IdComponent::IdComponent() : id(-1) {}
+IdComponent::IdComponent() {}
 
 //--------------------------------------------------------------------------
 // Function:	IdComponent::p_get_file_name (protected)
@@ -277,10 +263,12 @@ IdComponent::IdComponent() : id(-1) {}
 //--------------------------------------------------------------------------
 H5std_string IdComponent::p_get_file_name() const
 {
-   // Preliminary call to H5Fget_name to get the length of the file name
-   ssize_t name_size = H5Fget_name(id, NULL, 0);
+   hid_t temp_id = getId();
 
-   // If H5Aget_name returns a negative value, raise an exception,
+   // Preliminary call to H5Fget_name to get the length of the file name
+   ssize_t name_size = H5Fget_name(temp_id, NULL, 0);
+
+   // If H5Fget_name returns a negative value, raise an exception,
    if( name_size < 0 )
    {
       throw IdComponentException("", "H5Fget_name failed");
@@ -288,7 +276,7 @@ H5std_string IdComponent::p_get_file_name() const
 
    // Call H5Fget_name again to get the actual file name
    char* name_C = new char[name_size+1];  // temporary C-string for C API
-   name_size = H5Fget_name(id, name_C, name_size+1);
+   name_size = H5Fget_name(temp_id, name_C, name_size+1);
 
    // Check for failure again
    if( name_size < 0 )
@@ -303,131 +291,27 @@ H5std_string IdComponent::p_get_file_name() const
 }
 
 //--------------------------------------------------------------------------
-// Function:	IdComponent::p_reference (protected)
-// Purpose	Creates a reference to an HDF5 object or a dataset region.
-// Parameters
-//		name - IN: Name of the object to be referenced
-//		dataspace - IN: Dataspace with selection
-//		ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
-// Exception	H5::IdComponentException
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-void IdComponent::p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const
-{
-   herr_t ret_value = H5Rcreate(ref, id, name, ref_type, space_id);
-   if (ret_value < 0)
-   {
-      throw IdComponentException("", "H5Rcreate failed");
-   }
-}
-
-//--------------------------------------------------------------------------
-// Function:    IdComponent::reference
-///\brief       Creates a reference to an HDF5 object or a dataset region.
-///\param       ref - IN: Reference pointer
-///\param       name - IN: Name of the object to be referenced
-///\param       dataspace - IN: Dataspace with selection
-///\param       ref_type - IN: Type of reference to query, valid values are:
-///             \li \c H5R_OBJECT \tReference is an object reference.
-///             \li \c H5R_DATASET_REGION \tReference is a dataset region
-///                     reference. - this is the default
-///\exception   H5::IdComponentException
-// Programmer   Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-void IdComponent::reference(void* ref, const char* name, const DataSpace& dataspace, H5R_type_t ref_type) const
-{
-   try {
-      p_reference(ref, name, dataspace.getId(), ref_type);
-   }
-   catch (IdComponentException E) {
-      throw IdComponentException("IdComponent::reference", E.getDetailMsg());
-   }
-}
-
-//--------------------------------------------------------------------------
-// Function:    IdComponent::reference
-///\brief       This is an overloaded function, provided for your convenience.
-///             It differs from the above function in that it only creates
-///             a reference to an HDF5 object, not to a dataset region.
-///\param       ref - IN: Reference pointer
-///\param       name - IN: Name of the object to be referenced - \c char pointer
-///\exception   H5::IdComponentException
-///\par Description
-//              This function passes H5R_OBJECT and -1 to the protected
-//              function for it to pass to the C API H5Rcreate
-//              to create a reference to the named object.
-// Programmer   Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-void IdComponent::reference(void* ref, const char* name) const
-{
-   try {
-      p_reference(ref, name, -1, H5R_OBJECT);
-   }
-   catch (IdComponentException E) {
-      throw IdComponentException("IdComponent::reference", E.getDetailMsg());
-   }
-}
-
-//--------------------------------------------------------------------------
-// Function:    IdComponent::reference
-///\brief       This is an overloaded function, provided for your convenience.
-///             It differs from the above function in that it takes an
-///             \c H5std_string for the object's name.
-///\param       ref - IN: Reference pointer
-///\param       name - IN: Name of the object to be referenced - \c H5std_string
-// Programmer   Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-void IdComponent::reference(void* ref, const H5std_string& name) const
-{
-   reference(ref, name.c_str());
-}
-
-//--------------------------------------------------------------------------
-// Function:	IdComponent::p_reference (protected)
-// Purpose	Creates a reference to an HDF5 object or a dataset region.
-// Parameters
-//		name - IN: Name of the object to be referenced
-//		dataspace - IN: Dataspace with selection
-//		ref_type - IN: Type of reference; default to \c H5R_DATASET_REGION
-// Return	A reference
-// Exception	H5::IdComponentException
-// Notes	This function is incorrect, and will be removed in the near
-//		future after notifying users of the new APIs ::reference's.
-//		BMR - Oct 8, 2006
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-void* IdComponent::p_reference(const char* name, hid_t space_id, H5R_type_t ref_type) const
-{
-   hobj_ref_t ref;
-   herr_t ret_value = H5Rcreate(&ref, id, name, ref_type, space_id);
-   if (ret_value < 0)
-   {
-      throw IdComponentException("", "H5Rcreate failed");
-   }
-   return (reinterpret_cast<void*>(ref));
-}
-
-//--------------------------------------------------------------------------
-// Function:	IdComponent::dereference
+// Function:	IdComponent::p_dereference (protected)
 // Purpose	Opens the HDF5 object referenced.
 // Parameters
-//		obj - IN: Dataset reference object is in or location of
-//                            object that the dataset is located within.
 //		ref - IN: Reference pointer
 // Exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
-void IdComponent::dereference(IdComponent& obj, void* ref)
+#if 0
+hid_t IdComponent::p_dereference(hid_t obj_id, void* ref) const
 {
-   id = H5Rdereference(obj.getId(), H5R_OBJECT, ref);
-   if (id < 0)
+   hid_t temp_id = H5Rdereference(obj_id, H5R_OBJECT, ref);
+   if (temp_id < 0)
    {
-      throw IdComponentException("", "H5Rdereference failed");
+      throw ReferenceException("", "H5Rdereference failed");
    }
+   return(temp_id);
 }
+#endif
 
 //--------------------------------------------------------------------------
-// Function:	IdComponent::p_get_obj_type (protected)
+// Function:	IdComponent::p_get_refobj_type (protected)
 // Purpose	Retrieves the type of object that an object reference points to.
 // Parameters
 //		ref      - IN: Reference to query
@@ -435,17 +319,17 @@ void IdComponent::dereference(IdComponent& obj, void* ref)
 // Return	An object type, which can be one of the following:
 //			H5G_LINK Object is a symbolic link.
 //			H5G_GROUP Object is a group.
-//			H5G_DATASET   Object is a dataset.
+//			H5G_DATASET Object is a dataset.
 //			H5G_TYPE Object is a named datatype
 // Exception	H5::IdComponentException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-H5G_obj_t IdComponent::p_get_obj_type(void *ref, H5R_type_t ref_type) const
+H5G_obj_t IdComponent::p_get_refobj_type(void *ref, H5R_type_t ref_type) const
 {
 #ifdef H5_WANT_H5_V1_4_COMPAT
-   H5G_obj_t obj_type = H5Rget_object_type(id, ref);
+   H5G_obj_t obj_type = H5Rget_object_type(getId(), ref);
 #else
-   H5G_obj_t obj_type = H5Rget_obj_type(id, ref_type, ref);
+   H5G_obj_t obj_type = H5Rget_obj_type(getId(), ref_type, ref);
 #endif
 
    if (obj_type == H5G_UNKNOWN)
@@ -459,27 +343,6 @@ H5G_obj_t IdComponent::p_get_obj_type(void *ref, H5R_type_t ref_type) const
    return(obj_type);
 }
 
-//--------------------------------------------------------------------------
-// Function:	IdComponent::p_get_region (protected)
-// Purpose	Retrieves a dataspace with the region pointed to selected.
-// Parameters
-//		ref_type - IN: Type of reference to get region of - default
-//				to H5R_DATASET_REGION
-//		ref      - IN: Reference to get region of
-// Return	Dataspace id
-// Exception	H5::IdComponentException
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-hid_t IdComponent::p_get_region(void *ref, H5R_type_t ref_type) const
-{
-   hid_t space_id = H5Rget_region(id, ref_type, ref);
-   if (space_id < 0)
-   {
-      throw IdComponentException("", "H5Rget_region failed");
-   }
-   return(space_id);
-}
-
 //
 // Local functions used in this class
 //
@@ -491,7 +354,7 @@ hid_t IdComponent::p_get_region(void *ref, H5R_type_t ref_type) const
 // Return	true if id is valid, false, otherwise
 // Programmer	Binh-Minh Ribler - May, 2005
 //--------------------------------------------------------------------------
-bool IdComponent::p_valid_id(const hid_t obj_id) const
+bool IdComponent::p_valid_id(const hid_t obj_id)
 {
     H5I_type_t id_type = H5Iget_type(obj_id);
     if (id_type <= H5I_BADID || id_type >= H5I_NGROUPS)
