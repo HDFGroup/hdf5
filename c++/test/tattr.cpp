@@ -1048,6 +1048,11 @@ static void test_attr_dtype_shared(void)
 	// Open the file again
 	fid1.openFile(FILENAME, H5F_ACC_RDWR);
 
+	// Enclosing to work around the issue of unused variables and/or
+	// objects created by copy constructors stay around until end of
+	// scope, causing incorrect number of ref counts.
+	{ // First enclosed block
+
 	// Create a datatype to commit and use
 	IntType dtype(PredType::NATIVE_INT);
 
@@ -1061,11 +1066,6 @@ static void test_attr_dtype_shared(void)
 	// Create dataspace for dataset
 	DataSpace dspace;
 
-	// Enclose the following so that all temporary objects can be
-	// destroyed before testing reference count - this is to overcome
-	// the different time when the temporary objects are to be destroyed
-	// by different compilers.
-	{
 	// Create dataset
 	DataSet dset = fid1.createDataSet(DSET1_NAME, dtype, dspace);
 
@@ -1105,10 +1105,14 @@ static void test_attr_dtype_shared(void)
 	dset.close();
 	dspace.close();
 	dtype.close();
+	} // end of first enclosing
+
 	fid1.close();
 
 	// Open the file again
 	fid1.openFile(FILENAME, H5F_ACC_RDWR);
+
+	{ // Second enclosed block...
 
 	// Open dataset
 	DataSet *dset2 = new DataSet (fid1.openDataSet(DSET1_NAME));
@@ -1128,10 +1132,10 @@ static void test_attr_dtype_shared(void)
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
 	verify_val((int)statbuf.nlink, 3, "DataSet::openAttribute", __LINE__, __FILE__);
 
+	} // end of second enclosing
+
 	// Unlink the dataset
 	fid1.unlink(DSET1_NAME);
-
-	} // end of enclosing to test reference counts
 
 	// Check reference count on named datatype
 	fid1.getObjinfo(TYPE1_NAME, statbuf);
