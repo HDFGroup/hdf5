@@ -25,7 +25,7 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
 
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
-  INTEGER, INTENT(OUT) :: total_error 
+  INTEGER, INTENT(INOUT) :: total_error 
   
   CHARACTER(LEN=5), PARAMETER :: filename = "atest"    !File name
   CHARACTER(LEN=9), PARAMETER :: dsetname = "atestdset"        !Dataset name
@@ -2561,7 +2561,7 @@ SUBROUTINE test_attr_dense_open( fcpl, fapl, total_error)
 
   INTEGER(HID_T), INTENT(IN) :: fcpl
   INTEGER(HID_T), INTENT(IN) :: fapl
-  INTEGER, INTENT(IN) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   CHARACTER(LEN=8) :: FileName = "tattr.h5"
   INTEGER(HID_T) :: fid
   INTEGER(HID_T) :: dcpl
@@ -2824,7 +2824,7 @@ SUBROUTINE test_attr_corder_create_basic( fcpl, fapl, total_error )
 
   INTEGER(HID_T), INTENT(IN) :: fcpl
   INTEGER(HID_T), INTENT(IN) :: fapl
-  INTEGER, INTENT(IN) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   CHARACTER(LEN=8) :: FileName = "tattr.h5"
   INTEGER(HID_T) :: fid
   INTEGER(HID_T) :: dcpl
@@ -3150,7 +3150,7 @@ SUBROUTINE test_attr_many(new_format, fcpl, fapl, total_error)
   LOGICAL, INTENT(IN) :: new_format
   INTEGER(HID_T), INTENT(IN) :: fcpl
   INTEGER(HID_T), INTENT(IN) :: fapl
-  INTEGER, INTENT(IN) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   CHARACTER(LEN=8) :: FileName = "tattr.h5"
   INTEGER(HID_T) :: fid
   INTEGER(HID_T) :: sid
