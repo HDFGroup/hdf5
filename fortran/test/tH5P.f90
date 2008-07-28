@@ -191,7 +191,7 @@
           memb_map(H5FD_MEM_OHDR_F)  = H5FD_MEM_OHDR_F
           memb_addr(H5FD_MEM_OHDR_F) = 0.4
 
-          memb_name = ''
+          memb_name = ' '
           memb_name(H5FD_MEM_SUPER_F) = '%s-s.h5'
           memb_name(H5FD_MEM_BTREE_F) = '%s-b.h5'
           memb_name(H5FD_MEM_DRAW_F)  = '%s-r.h5'
