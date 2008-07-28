@@ -510,19 +510,19 @@ static void parse_command_line(int argc, const char* argv[], pack_opt_t* options
                     strcpy(msgType, msgPtr+1);
                     msgPtr[0] = '\0';
                     ssize = atoi( opt_arg );
-                    if (strcmp(msgType, "dspace") == 0) {
+                    if (strncmp(msgType, "dspace",6) == 0) {
                         options->msg_size[0] = ssize;
                     }
-                    else if (strcmp(msgType, "dtype") == 0) {
+                    else if (strncmp(msgType, "dtype", 5) == 0) {
                         options->msg_size[1] = ssize;
                     }
-                    else if (strcmp(msgType, "fill") == 0) {
+                    else if (strncmp(msgType, "fill", 4) == 0) {
                         options->msg_size[2] = ssize;
                     }
-                    else if (strcmp(msgType, "pline") == 0) {
+                    else if (strncmp(msgType, "pline", 5) == 0) {
                         options->msg_size[3] = ssize;
                     }
-                    else if (strcmp(msgType, "attr") == 0) {
+                    else if (strncmp(msgType, "attr", 4) == 0) {
                         options->msg_size[4] = ssize;
                     }
                 }            
