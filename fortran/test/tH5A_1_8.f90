@@ -25,7 +25,7 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
         
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
-  INTEGER, INTENT(OUT) :: total_error 
+  INTEGER, INTENT(INOUT) :: total_error 
   
   CHARACTER(LEN=5), PARAMETER :: filename = "atest"    !File name
   CHARACTER(LEN=9), PARAMETER :: dsetname = "atestdset"        !Dataset name
@@ -126,11 +126,11 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
 !!$              CALL test_attr_corder_create_reopen(my_fcpl, my_fapl)
 !!$              CALL test_attr_corder_transition(my_fcpl, my_fapl)
 !!$              CALL test_attr_corder_delete(my_fcpl, my_fapl)
-           CALL test_attr_info_by_idx(new_format, my_fcpl, my_fapl, total_error)
-           CALL test_attr_delete_by_idx(new_format, my_fcpl, my_fapl, total_error)
-!!$              CALL test_attr_iterate2(new_format, my_fcpl, my_fapl)
-!!$              CALL test_attr_open_by_idx(new_format, my_fcpl, my_fapl)
-!!$              CALL test_attr_open_by_name(new_format, my_fcpl, my_fapl)
+           CALL test_attr_info_by_idx(new_format(i), my_fcpl, my_fapl, total_error)
+           CALL test_attr_delete_by_idx(new_format(i), my_fcpl, my_fapl, total_error)
+!!$              CALL test_attr_iterate2(new_format(i), my_fcpl, my_fapl)
+!!$              CALL test_attr_open_by_idx(new_format(i), my_fcpl, my_fapl)
+!!$              CALL test_attr_open_by_name(new_format(i), my_fcpl, my_fapl)
            CALL test_attr_create_by_name(new_format(i), my_fcpl, my_fapl, total_error)
              ! /* More complex tests with both "new format" and "shared" attributes */
            IF( use_shared(j) ) THEN
@@ -145,13 +145,13 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
 !!$           CALL test_attr_big(fcpl, my_fapl)
 !!$           CALL test_attr_null_space(fcpl, my_fapl)
 !!$           CALL test_attr_deprec(fcpl, my_fapl)
-!!$           CALL test_attr_many(new_format, fcpl, my_fapl)
-!!$           CALL test_attr_info_by_idx(new_format, fcpl, my_fapl)
-!!$           CALL test_attr_delete_by_idx(new_format, fcpl, my_fapl)
-!!$           CALL test_attr_iterate2(new_format, fcpl, my_fapl)
-!!$           CALL test_attr_open_by_idx(new_format, fcpl, my_fapl)
-!!$           CALL test_attr_open_by_name(new_format, fcpl, my_fapl)
-!!$           CALL test_attr_create_by_name(new_format, fcpl, my_fapl)
+!!$           CALL test_attr_many(new_format(i), fcpl, my_fapl)
+!!$           CALL test_attr_info_by_idx(new_format(i), fcpl, my_fapl)
+!!$           CALL test_attr_delete_by_idx(new_format(i), fcpl, my_fapl)
+!!$           CALL test_attr_iterate2(new_format(i), fcpl, my_fapl)
+!!$           CALL test_attr_open_by_idx(new_format(i), fcpl, my_fapl)
+!!$           CALL test_attr_open_by_name(new_format(i), fcpl, my_fapl)
+!!$           CALL test_attr_create_by_name(new_format(i), fcpl, my_fapl)
 !!$           CALL test_attr_bug1(fcpl, my_fapl)
 
      END IF
@@ -732,7 +732,7 @@ SUBROUTINE test_attr_create_by_name(new_format,fcpl,fapl, total_error)
            CALL check("h5aclose_f",error,total_error)
 
            ! /* Verify information for NEW attribute */
-           CALL attr_info_by_idx_check(my_dataset, attrname, INT(u,HSIZE_T), use_index, total_error)
+           CALL attr_info_by_idx_check(my_dataset, attrname, INT(u,HSIZE_T), use_index(i), total_error)
          !   CALL check("FAILED IN attr_info_by_idx_check",total_error)
         ENDDO
 
@@ -795,7 +795,7 @@ SUBROUTINE test_attr_create_by_name(new_format,fcpl,fapl, total_error)
 !!$                } /* end if */
 !!$
 !!$                /* Verify information for new attribute */
-!!$                ret = attr_info_by_idx_check(my_dataset, attrname, (hsize_t)u, use_index);
+!!$                ret = attr_info_by_idx_check(my_dataset, attrname, (hsize_t)u, use_index(i));
 !!$                CHECK(ret, FAIL, "attr_info_by_idx_check");
         ENDDO
 
@@ -812,7 +812,7 @@ SUBROUTINE test_attr_create_by_name(new_format,fcpl,fapl, total_error)
 !!$                /* Retrieve & verify # of records in the name & creation order indices */
 !!$                ret = H5O_attr_dense_info_test(my_dataset, &name_count, &corder_count);
 !!$                CHECK(ret, FAIL, "H5O_attr_dense_info_test");
-!!$                if(use_index)
+!!$                if(use_index(i))
 !!$                    VERIFY(name_count, corder_count, "H5O_attr_dense_info_test");
 !!$                VERIFY(name_count, (max_compact * 2), "H5O_attr_dense_info_test");
 !!$            } /* end if */
@@ -2897,7 +2897,7 @@ SUBROUTINE test_attr_dense_open( fcpl, fapl, total_error)
 
   INTEGER(HID_T), INTENT(IN) :: fcpl
   INTEGER(HID_T), INTENT(IN) :: fapl
-  INTEGER, INTENT(IN) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   CHARACTER(LEN=8) :: FileName = "tattr.h5"
   INTEGER(HID_T) :: fid
   INTEGER(HID_T) :: dcpl
@@ -3166,7 +3166,7 @@ SUBROUTINE test_attr_corder_create_basic( fcpl, fapl, total_error )
 
   INTEGER(HID_T), INTENT(IN) :: fcpl
   INTEGER(HID_T), INTENT(IN) :: fapl
-  INTEGER, INTENT(IN) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   CHARACTER(LEN=8) :: FileName = "tattr.h5"
   INTEGER(HID_T) :: fid
   INTEGER(HID_T) :: dcpl
@@ -3503,7 +3503,7 @@ SUBROUTINE test_attr_many(new_format, fcpl, fapl, total_error)
   LOGICAL, INTENT(IN) :: new_format
   INTEGER(HID_T), INTENT(IN) :: fcpl
   INTEGER(HID_T), INTENT(IN) :: fapl
-  INTEGER, INTENT(IN) :: total_error
+  INTEGER, INTENT(INOUT) :: total_error
   CHARACTER(LEN=8) :: FileName = "tattr.h5"
   INTEGER(HID_T) :: fid
   INTEGER(HID_T) :: sid
