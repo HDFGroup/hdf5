@@ -419,7 +419,7 @@ void H5Object::reference(void* ref, const H5std_string& name) const
 
 //--------------------------------------------------------------------------
 // Function:    H5Object::dereference
-// Purpose      Dereference a ref into a DataSet object.
+// Purpose      Dereference a ref into an hdf5 object.
 // Parameters
 //              ref - IN: Reference pointer
 // Exception    H5::IdComponentException
@@ -428,35 +428,6 @@ void H5Object::reference(void* ref, const H5std_string& name) const
 //	May 2008 - BMR
 //		Moved from IdComponent into H5File and H5Object
 //--------------------------------------------------------------------------
-#if 0
-void H5Object::dereference(H5File& h5file, void* ref)
-{
-   hid_t temp_id;
-   try {
-      temp_id = p_dereference(h5file.getId(), ref);
-   }
-   catch (ReferenceException ref_err) {
-      throw (inMemFunc("dereference"), ref_err.getDetailMsg());
-   }
-
-   // No failure, set id to the object
-   p_setId(temp_id);
-}
-void H5Object::dereference(H5Object& obj, void* ref)
-{
-   hid_t temp_id;
-   try {
-      temp_id = p_dereference(obj.getId(), ref);
-   }
-   catch (ReferenceException ref_err) {
-      throw (inMemFunc("dereference"), ref_err.getDetailMsg());
-   }
-
-   // No failure, set id to the object
-   p_setId(temp_id);
-}
-
-#endif
 void H5Object::dereference(H5Object& obj, void* ref, H5R_type_t ref_type)
 {
    hid_t temp_id;

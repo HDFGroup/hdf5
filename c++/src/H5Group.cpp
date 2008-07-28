@@ -115,33 +115,6 @@ Group::Group(H5File& h5file, void* ref, H5R_type_t ref_type) : H5Object()
    dereference(h5file, ref, ref_type);
 }
 
-#if 0 // remove after verifying with tests
-//--------------------------------------------------------------------------
-// Function:	Group::getObjType
-///\brief	Retrieves the type of object that an object reference points to.
-///\param	ref      - IN: Reference to query
-///		ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT \tReference is an object reference.
-///		\li \c H5R_DATASET_REGION \tReference is a dataset region reference.
-///\return	An object type, which can be one of the following:
-///			H5G_LINK Object is a symbolic link.
-///			H5G_GROUP Object is a group.
-///			H5G_DATASET   Object is a dataset.
-///			H5G_TYPE Object is a named datatype
-///\exception	H5::GroupIException
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-H5G_obj_t Group::getObjType(void *ref, H5R_type_t ref_type) const
-{
-   try {
-      return(p_get_obj_type(ref, ref_type));
-   }
-   catch (IdComponentException E) {
-      throw GroupIException("Group::getObjType", E.getDetailMsg());
-   }
-}
-#endif
-
 //--------------------------------------------------------------------------
 // Function:	H5File::getObjType
 ///\brief	This function was misnamed and will be deprecated in favor of
