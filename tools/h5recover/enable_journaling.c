@@ -33,8 +33,10 @@
 #define NX     10                      /* dataset initial dimensions */
 #define NY     100
 #define CHUNKX 2			/* chunk dimensions */
-#define CHUNKY 10
+#define CHUNKY 100
 #define RANK   2
+#define THRESHOLD       256
+#define ALIGNMENT       512
 
 /* Global variables */
 
@@ -50,7 +52,7 @@ helppage(void)
 	"Usage:\n"
 	"%s -[c|r|p]\n"
 	"\t-c\tCreate a new file (%s)\n"
-	"\t-r\tReopen the file with Journaling (%s) for crash test\n"
+	"\t-r\tReopen the file with Journaling (%s) for crash test\n",
 	ProgName, H5FILE_NAME, H5JournalFILE_NAME
     );
     printf("To try this program, run:\n");
@@ -115,6 +117,20 @@ main (int ac, char **av)
 	}
     }
 
+    /* Create a file access property list to be used by both create and */
+    /* reopen modes. */
+    faccpl = H5Pcreate(H5P_FILE_ACCESS);
+    if (H5Pset_libver_bounds(faccpl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0){
+	fprintf(stderr, "H5Pset_libver_bounds on data file failed\n");
+	H5Pclose(faccpl);
+	return(-1);
+    }
+    if(H5Pset_alignment(faccpl, (hsize_t)THRESHOLD, (hsize_t)ALIGNMENT) < 0){
+	fprintf(stderr, "H5Pset_alignment on data file failed\n");
+	H5Pclose(faccpl);
+	return(-1);
+    }
+
     if (cmode){
 	/*===================================================
 	 * Default:
@@ -128,12 +144,6 @@ main (int ac, char **av)
 	 * default file creation properties, and latest lib version file
 	 * access properties.
 	 */
-	faccpl = H5Pcreate(H5P_FILE_ACCESS);
-	if (H5Pset_libver_bounds(faccpl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0){
-	    fprintf(stderr, "H5Pset_libver_bounds on data file failed\n");
-	    H5Pclose(faccpl);
-	    return(-1);
-	}
 	file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, faccpl);
 	H5Pclose(faccpl);
 
@@ -175,7 +185,6 @@ main (int ac, char **av)
 
 	/* reopen the file with Journaling on. */
 	/* Setup file access property list with journaling */
-	faccpl = H5Pcreate(H5P_FILE_ACCESS);
 #if 1
 	if (H5Pset_journal(faccpl, H5JournalFILE_NAME) < 0){
 	    fprintf(stderr, "H5Pset_journal on data file failed\n");
