@@ -1251,7 +1251,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
 
               ! /* Verify link information for new link */
               CALL link_info_by_idx_check(group_id, objname, u, &
-                   .TRUE., use_index, total_error)
+                   .TRUE., use_index(i), total_error)
            ENDDO
 
            ! /* Verify state of group (compact) */
