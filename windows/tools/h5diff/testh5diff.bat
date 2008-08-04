@@ -38,6 +38,7 @@ set srcfile7=h5diff_dset1.h5
 set srcfile8=h5diff_dset2.h5
 set srcfile9=h5diff_hyper1.h5
 set srcfile10=h5diff_hyper2.h5
+set srcfile11=h5diff_empty.h5
 
 set file1=%indir%\h5diff_basic1.h5
 set file2=%indir%\h5diff_basic2.h5
@@ -49,6 +50,7 @@ set file7=%indir%\h5diff_dset1.h5
 set file8=%indir%\h5diff_dset2.h5
 set file9=%indir%\h5diff_hyper1.h5
 set file10=%indir%\h5diff_hyper2.h5
+set file11=%indir%\h5diff_empty.h5
 
 
 rem The tool name
@@ -247,6 +249,10 @@ rem ############################################################################
     call :testing %h5diff% -q %srcfile1% %srcfile2%
     call :tooltest h5diff_18.txt -q %file1% %file2% 
 
+    rem 1.9 contents mode 
+    call :testing %h5diff% -v -c %srcfile1% %srcfile11%
+    call :tooltest h5diff_19.txt -v -c %file1% %file11%
+    
     rem ##############################################################################
     rem # not comparable types
     rem ##############################################################################

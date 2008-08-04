@@ -114,7 +114,7 @@ rem was unavailable)
 rem Call the h5diff tool
 rem
 :difftest
-    %h5diff_bin% -q %*
+    %h5diff_bin% -q -c %*
     if %errorlevel% neq 0 (
         call :verify *FAILED* %*
         set /a nerrors=!nerrors!+1
