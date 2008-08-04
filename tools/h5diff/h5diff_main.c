@@ -89,6 +89,10 @@ int main(int argc, const char *argv[])
     */
 
     ret = (nfound == 0 ? 0 : 1 );
+
+    if ( options.m_contents && options.contents == 0 )
+        ret = 1;
+
     if(options.err_stat)
         ret = -1;
     return ret;

@@ -41,6 +41,7 @@ SRCFILE7=h5diff_dset1.h5
 SRCFILE8=h5diff_dset2.h5
 SRCFILE9=h5diff_hyper1.h5
 SRCFILE10=h5diff_hyper2.h5
+SRCFILE11=h5diff_empty.h5
 
 FILE1="$INDIR/$SRCFILE1"
 FILE2="$INDIR/$SRCFILE2"
@@ -52,6 +53,7 @@ FILE7="$INDIR/$SRCFILE7"
 FILE8="$INDIR/$SRCFILE8"
 FILE9="$INDIR/$SRCFILE9"
 FILE10="$INDIR/$SRCFILE10"
+FILE11="$INDIR/$SRCFILE11"
 
 
 H5DIFF=h5diff               # The tool name
@@ -326,6 +328,10 @@ TOOLTEST h5diff_17.txt -v $FILE1 $FILE2
 # 1.8 quiet mode 
 TESTING $H5DIFF -q $SRCFILE1 $SRCFILE2
 TOOLTEST h5diff_18.txt -q $FILE1 $FILE2 
+
+# 1.9 contents mode 
+TESTING $H5DIFF -v -c $SRCFILE1 $SRCFILE11
+TOOLTEST h5diff_19.txt -v -c $FILE1 $FILE11 
 
 # ##############################################################################
 # # not comparable types
