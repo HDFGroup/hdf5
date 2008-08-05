@@ -39,6 +39,7 @@ FILE7=h5diff_dset1.h5
 FILE8=h5diff_dset2.h5
 FILE9=h5diff_hyper1.h5
 FILE10=h5diff_hyper2.h5
+FILE11=h5diff_empty.h5
 
 
 H5DIFF=h5diff               # The tool name
@@ -300,6 +301,9 @@ TOOLTEST h5diff_17.txt -v $FILE1 $FILE2
 
 # 1.8 quiet mode 
 TOOLTEST h5diff_18.txt -q $FILE1 $FILE2 
+
+# 1.9 contents mode 
+TOOLTEST h5diff_19.txt -v -c $FILE1 $FILE11 
 
 # ##############################################################################
 # # not comparable types
