@@ -36,6 +36,7 @@ set file7=h5diff_dset1.h5
 set file8=h5diff_dset2.h5
 set file9=h5diff_hyper1.h5
 set file10=h5diff_hyper2.h5
+set file11=h5diff_empty.h5
 
 
 rem The tool name
@@ -211,6 +212,10 @@ rem ############################################################################
 
     rem 1.8 quiet mode 
     call :tooltest h5diff_18.txt -q %file1% %file2% 
+    
+    rem 1.9 contents mode 
+    call :tooltest h5diff_19.txt -v -c %file1% %file11% 
+
 
     rem ##############################################################################
     rem # not comparable types
