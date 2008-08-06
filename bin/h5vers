@@ -363,24 +363,25 @@ sub gen_h5pubconf {
 	if ($contents[$i] =~ /\#\s*define\s+H5_PACKAGE\s+/) {
 	    $contents[$i] = "\#define H5_PACKAGE \"$namelc\"\n";
 	} elsif ($contents[$i] =~ /\#\s*define\s+H5_PACKAGE_NAME\s+/) {
-	    $contents[$i] = "\#define H5_PACKAGE_NAME \"$namelc\"\n";
+	    $contents[$i] = "\#define H5_PACKAGE_NAME \"$nameuc\"\n";
 	} elsif ($contents[$i] =~ /\#\s*define\s+H5_PACKAGE_STRING\s+/) {
-	    $contents[$i] = sprintf("\#define H5_PACKAGE_STRING \"$nameuc %d.%d.%d\"\n",
-				    @vers[0,1,2]);
+	    $contents[$i] = sprintf("\#define H5_PACKAGE_STRING \"$nameuc %d.%d.%d%s\"\n",
+				    @vers[0,1,2],
+				    $newver[3] eq "" ? "" : "-".$newver[3]);
 	} elsif ($contents[$i] =~ /\#\s*define\s+H5_PACKAGE_TARNAME\s+/) {
 	    $contents[$i] = "\#define H5_PACKAGE_TARNAME \"$namelc\"\n";
 	} elsif ($contents[$i] =~ /\#\s*define\s+H5_PACKAGE_VERSION\s+/) {
-	    $contents[$i] = sprintf("\#define H5_PACKAGE_VERSION \"%d.%d.%d\"\n",
-				    @vers[0,1,2]);
+	    $contents[$i] = sprintf("\#define H5_PACKAGE_VERSION \"%d.%d.%d%s\"\n",
+				    @vers[0,1,2],
+				    $newver[3] eq "" ? "" : "-".$newver[3]);
 	} elsif ($contents[$i] =~ /\#\s*define\s+H5_VERSION\s+/) {
-	    $contents[$i] = sprintf("\#define H5_VERSION \"%d.%d.%d\"\n",
-				    @vers[0,1,2]);
+	    $contents[$i] = sprintf("\#define H5_VERSION \"%d.%d.%d%s\"\n",
+				    @vers[0,1,2],
+				    $newver[3] eq "" ? "" : "-".$newver[3]);
 	}
     }
 
-    printf("opening file for writing");
     open FILE, ">$pubconf" or die "$pubconf: $!\n";
-    print FILE "this is a test";
     print FILE @contents;
     close FILE;
 }
