@@ -1868,7 +1868,7 @@ get_width(void)
     {
         /* Win32 C */
         CONSOLE_SCREEN_BUFFER_INFO scr;
-        GetConsoleScreenBufferInfo(con_out, &scr);
+        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &scr);
         width = scr.srWindow.Right - scr.srWindow.Left + 1;
     }
 #elif defined(H5_HAVE__SCRSIZE)
