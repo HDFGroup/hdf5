@@ -12,6 +12,7 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
    -r, --report            Report mode. Print differences
    -v, --verbose           Verbose mode. Print differences, list of objects
    -q, --quiet             Quiet mode. Do not do output
+   -c, --contents          Contents mode. Objects in both files must match
    -n C, --count=C         Print differences up to C number
    -d D, --delta=D         Print difference when greater than limit D
    -p R, --relative=R      Print difference when greater than relative limit R
@@ -26,6 +27,19 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
   -r Report mode: print the above plus the differences
   -v Verbose mode: print the above plus a list of objects and warnings
   -q Quiet mode: do not print output
+  -c Contents mode: objects in both files must match
+
+ Compare criteria
+
+ If no objects [obj1[obj2]] are specified, h5diff only compares objects
+   with the same absolute path in both files. However,
+   when the -c flag is present, (contents mode) the objects in file1
+   must match exactly the objects in file2
+
+ The compare criteria is:
+   1) datasets: numerical array differences 2) groups: name string difference
+   3) datatypes: the return value of H5Tequal 2) links: name string difference
+   of the linked value
 
  Return exit code:
 
@@ -51,9 +65,4 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
 
     to compare '/g1/dset1' and '/g1/dset2' in the same file
 
- If no objects [obj1[obj2]] are specified, h5diff only compares objects
-   with the same absolute path in both files. The compare criteria is:
-   1) datasets: numerical array differences 2) groups: name string difference
-   3) datatypes: the return value of H5Tequal 2) links: name string difference
-   of the linked value
 h5diff error: missing file names

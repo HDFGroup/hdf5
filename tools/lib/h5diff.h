@@ -25,18 +25,20 @@
  */
 
 typedef struct {
- int    m_quiet;   /* quiet mide: no output at all */
- int    m_report;  /* report mode: print the data */
- int    m_verbose; /* verbose mode: print the data, list of objcets, warnings */
- int    d;         /* delta, absolute value to compare */
- double delta;     /* delta value */
- int    p;         /* relative error to compare*/
- double percent;   /* relative error value */
- int    n;         /* count, compare up to count */
- hsize_t count;    /* count value */
- int    err_stat;  /* an error ocurred (1, error, 0, no error) */
- int    cmn_objs;  /* do we have comparable objects */
- int    not_cmp;   /* are the objects comparable */
+    int    m_quiet;   /* quiet mide: no output at all */
+    int    m_report;  /* report mode: print the data */
+    int    m_verbose; /* verbose mode: print the data, list of objcets, warnings */
+    int    d;         /* delta, absolute value to compare */
+    double delta;     /* delta value */
+    int    p;         /* relative error to compare*/
+    double percent;   /* relative error value */
+    int    n;         /* count, compare up to count */
+    hsize_t count;    /* count value */
+    int    err_stat;  /* an error ocurred (1, error, 0, no error) */
+    int    cmn_objs;  /* do we have comparable objects */
+    int    not_cmp;   /* are the objects comparable */
+    int    m_contents;/* contents mode */
+    int    contents;  /* equal contents */
 } diff_opt_t;
 
 
