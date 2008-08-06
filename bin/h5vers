@@ -73,6 +73,8 @@ use strict;
 # something like: This is hdf5-1.2.3-pre1 currently under development.
 # The AC_INIT macro in configure.in will also change in this case to be
 # something like: AC_INIT([HDF5], [hdf5-1.2.3-pre1], [help@hdfgroup.org])
+# Version changes are also reflected in the Windows-maintained H5pubconf.h
+# file.
 #
 # Whenever the version changes, this script will increment the revision
 # field in HDF5's libtool shared library version in config/lt_vers.am,
@@ -157,9 +159,10 @@ while ($_ = shift) {
 die "mutually exclusive options given\n" if $set && $inc;
 
 # Determine file to use as H5public.h, README.txt,
-# release_docs/RELEASE.txt, configure.in, and config/lt_vers.am. The
-# README.txt, release_docs/RELEASE.txt, configure.in, and
-# config/lt_vers.am files are always in the directory above H5public.h
+# release_docs/RELEASE.txt, configure.in, windows/src/H5pubconf.h,
+# and config/lt_vers.am. The README.txt, release_docs/RELEASE.txt, 
+# configure.in, windows/src/H5pubconf.h, and config/lt_vers.am 
+# files are always in the directory above H5public.h
 unless ($file) {
   for (@files) {
     ($file=$_,last) if -f $_;
@@ -183,6 +186,10 @@ die "unable to read file: $RELEASE\n" unless -r $file;
 my $CONFIGURE = $file;
 $CONFIGURE =~ s/[^\/]*$/..\/configure.in/;
 die "unable to read file: $CONFIGURE\n" unless -r $file;
+# windows/src/H5pubconf.h
+my $H5PUBCONF = $file;
+$H5PUBCONF =~ s/[^\/]*$/..\/windows\/src\/H5pubconf.h/;
+die "unable to read file: $H5PUBCONF\n" unless -r $file;
 
 # Get the current version number.
 open FILE, $file or die "unable to open $file: $!\n";
@@ -230,6 +237,7 @@ if ($set) {
   $README = "";
   $RELEASE = "";
   $CONFIGURE = "";
+  $H5PUBCONF = "";
   $LT_VERS = "";
   @newver = @curver;
 }
@@ -341,6 +349,45 @@ sub gen_configure {
 # Update the configure.in files and regenerate them
 gen_configure("HDF5", $CONFIGURE) if $CONFIGURE;
 
+sub gen_h5pubconf {
+    my ($name, $pubconf, @vers) = @_;
+
+    my $namelc = lc($name);
+    my $nameuc = uc($name);
+
+    open FILE, $pubconf or die "$pubconf: $!\n";
+    my @contents = <FILE>;
+    close FILE;
+
+    for (my $i = 0; $i < $#contents; ++$i) {
+	if ($contents[$i] =~ /\#\s*define\s+H5_PACKAGE\s+/) {
+	    $contents[$i] = "\#define H5_PACKAGE \"$namelc\"\n";
+	} elsif ($contents[$i] =~ /\#\s*define\s+H5_PACKAGE_NAME\s+/) {
+	    $contents[$i] = "\#define H5_PACKAGE_NAME \"$namelc\"\n";
+	} elsif ($contents[$i] =~ /\#\s*define\s+H5_PACKAGE_STRING\s+/) {
+	    $contents[$i] = sprintf("\#define H5_PACKAGE_STRING \"$nameuc %d.%d.%d\"\n",
+				    @vers[0,1,2]);
+	} elsif ($contents[$i] =~ /\#\s*define\s+H5_PACKAGE_TARNAME\s+/) {
+	    $contents[$i] = "\#define H5_PACKAGE_TARNAME \"$namelc\"\n";
+	} elsif ($contents[$i] =~ /\#\s*define\s+H5_PACKAGE_VERSION\s+/) {
+	    $contents[$i] = sprintf("\#define H5_PACKAGE_VERSION \"%d.%d.%d\"\n",
+				    @vers[0,1,2]);
+	} elsif ($contents[$i] =~ /\#\s*define\s+H5_VERSION\s+/) {
+	    $contents[$i] = sprintf("\#define H5_VERSION \"%d.%d.%d\"\n",
+				    @vers[0,1,2]);
+	}
+    }
+
+    printf("opening file for writing");
+    open FILE, ">$pubconf" or die "$pubconf: $!\n";
+    print FILE "this is a test";
+    print FILE @contents;
+    close FILE;
+}
+
+# Update the Windows-maintained H5pubconf.h file
+gen_h5pubconf("HDF5", $H5PUBCONF, @newver) if $H5PUBCONF;
+    
 # Print the new version number
 if ($verbose) {
   printf("version %d.%d release %d%s\n", @newver[0,1,2],
