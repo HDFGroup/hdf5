@@ -1360,8 +1360,8 @@ H5G_rootof(H5F_t *f)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_rootof)
 
-    while(f->mtab.parent)
-        f = f->mtab.parent;
+    while(f->parent)
+        f = f->parent;
 
     FUNC_LEAVE_NOAPI(f->shared->root_grp)
 } /* end H5G_rootof() */

@@ -1058,6 +1058,10 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
 
+        /* Free mount table */
+        f->shared->mtab.child = H5MM_xfree(f->shared->mtab.child);
+        f->shared->mtab.nalloc = 0;
+
         /* Destroy shared file struct */
         f->shared = H5FL_FREE(H5F_file_t,f->shared);
 
@@ -1072,8 +1076,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
     /* Free the non-shared part of the file */
     f->name = H5MM_xfree(f->name);
     f->extpath = H5MM_xfree(f->extpath);
-    f->mtab.child = H5MM_xfree(f->mtab.child);
-    f->mtab.nalloc = 0;
     if(H5FO_top_dest(f) < 0)
         HDONE_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "problems closing file")
     f->shared = NULL;
@@ -1701,14 +1703,14 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
 
     /* Flush other files, depending on scope */
     if(H5F_SCOPE_GLOBAL == scope) {
-	while(f->mtab.parent)
-            f = f->mtab.parent;
+	while(f->parent)
+            f = f->parent;
 
 	scope = H5F_SCOPE_DOWN;
     } /* end while */
     if(H5F_SCOPE_DOWN == scope)
-        for(i = 0; i < f->mtab.nmounts; i++)
-            if(H5F_flush(f->mtab.child[i].file, dxpl_id, scope, flags) < 0)
+        for(i = 0; i < f->shared->mtab.nmounts; i++)
+            if(H5F_flush(f->shared->mtab.child[i].file, dxpl_id, scope, flags) < 0)
                 nerrors++;
 
     /* Flush any cached dataset storage raw data */
@@ -1938,8 +1940,8 @@ H5F_try_close(H5F_t *f)
     /* Check if this is a child file in a mounting hierarchy & proceed up the
      * hierarchy if so.
      */
-    if(f->mtab.parent)
-        if(H5F_try_close(f->mtab.parent) < 0)
+    if(f->parent)
+        if(H5F_try_close(f->parent) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close parent file")
 
     /* Unmount and close each child before closing the current file. */

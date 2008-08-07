@@ -80,19 +80,23 @@ H5F_close_mounts(H5F_t *f)
     HDassert(f);
 
     /* Unmount all child files */
-    for (u = 0; u < f->mtab.nmounts; u++) {
-        /* Detach the child file from the parent file */
-        f->mtab.child[u].file->mtab.parent = NULL;
+    for (u = 0; u < f->shared->mtab.nmounts; u++) {
+        /* Only unmount children mounted to this top level file structure */
+        if(f->shared->mtab.child[u].file->parent == f) {
+            /* Detach the child file from the parent file */
+            f->shared->mtab.child[u].file->parent = NULL;
 
-        /* Close the internal group maintaining the mount point */
-        if(H5G_close(f->mtab.child[u].group) < 0)
+            /* Close the internal group maintaining the mount point */
+            if(H5G_close(f->shared->mtab.child[u].group) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "can't close child group")
 
-        /* Close the child file */
-        if(H5F_try_close(f->mtab.child[u].file) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close child file")
+            /* Close the child file */
+            if(H5F_try_close(f->shared->mtab.child[u].file) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close child file")
+        }
     } /* end if */
-    f->mtab.nmounts = 0;
+    f->shared->mtab.nmounts -= f->nmounts;
+    f->nmounts = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -146,7 +150,7 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
      * the parent & child files have the same file close degree, and
      * that the mount wouldn't introduce a cycle in the mount tree.
      */
-    if(child->mtab.parent)
+    if(child->parent)
         HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "file is already mounted")
     if(H5G_loc_find(loc, name, &mp_loc/*out*/, H5P_DEFAULT, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
@@ -175,8 +179,8 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
     HDassert(mp_loc.oloc);
     mp_loc.path = H5G_nameof(mount_point);
     HDassert(mp_loc.path);
-    for(ancestor = parent; ancestor; ancestor = ancestor->mtab.parent) {
-	if(ancestor == child)
+    for(ancestor = parent; ancestor; ancestor = ancestor->parent) {
+	if(ancestor->shared == child->shared)
 	    HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle")
     } /* end for */
 
@@ -190,13 +194,13 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
      * `md' will be the index where the child should be inserted.
      */
     lt = md = 0;
-    rt = parent->mtab.nmounts;
+    rt = parent->shared->mtab.nmounts;
     cmp = -1;
     while(lt < rt && cmp) {
         H5O_loc_t	*oloc;		/*temporary symbol table entry	*/
 
 	md = (lt + rt) / 2;
-	oloc = H5G_oloc(parent->mtab.child[md].group);
+	oloc = H5G_oloc(parent->shared->mtab.child[md].group);
 	cmp = H5F_addr_cmp(mp_loc.oloc->addr, oloc->addr);
 	if(cmp < 0)
 	    rt = md;
@@ -209,26 +213,27 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
 	HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point is already in use")
 
     /* Make room in the table */
-    if(parent->mtab.nmounts >= parent->mtab.nalloc) {
-	unsigned n = MAX(16, 2 * parent->mtab.nalloc);
-	H5F_mount_t *x = H5MM_realloc(parent->mtab.child,
-				      n * sizeof(parent->mtab.child[0]));
+    if(parent->shared->mtab.nmounts >= parent->shared->mtab.nalloc) {
+	unsigned n = MAX(16, 2 * parent->shared->mtab.nalloc);
+	H5F_mount_t *x = H5MM_realloc(parent->shared->mtab.child,
+				      n * sizeof(parent->shared->mtab.child[0]));
 	if(!x)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for mount table")
-	parent->mtab.child = x;
-	parent->mtab.nalloc = n;
+	parent->shared->mtab.child = x;
+	parent->shared->mtab.nalloc = n;
     } /* end if */
 
     /* Insert into table */
-    HDmemmove(parent->mtab.child + md + 1, parent->mtab.child + md,
-            (parent->mtab.nmounts-md) * sizeof(parent->mtab.child[0]));
-    parent->mtab.nmounts++;
-    parent->mtab.child[md].group = mount_point;
-    parent->mtab.child[md].file = child;
-    child->mtab.parent = parent;
+    HDmemmove(parent->shared->mtab.child + md + 1, parent->shared->mtab.child + md,
+            (parent->shared->mtab.nmounts-md) * sizeof(parent->shared->mtab.child[0]));
+    parent->shared->mtab.nmounts++;
+    parent->nmounts++;
+    parent->shared->mtab.child[md].group = mount_point;
+    parent->shared->mtab.child[md].file = child;
+    child->parent = parent;
 
     /* Set the group's mountpoint flag */
-    if(H5G_mount(parent->mtab.child[md].group) < 0)
+    if(H5G_mount(parent->shared->mtab.child[md].group) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to set group mounted flag")
 
     /* Get the group location for the root group in the file to unmount */
@@ -315,16 +320,16 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
     mnt_oloc = H5G_oloc(child->shared->root_grp);
     child_idx = -1;
 
-    if(child->mtab.parent && H5F_addr_eq(mp_oloc.addr, mnt_oloc->addr)) {
+    if(child->parent && H5F_addr_eq(mp_oloc.addr, mnt_oloc->addr)) {
         unsigned	u;		/*counters			*/
 
 	/*
 	 * We've been given the root group of the child.  We do a reverse
 	 * lookup in the parent's mount table to find the correct entry.
 	 */
-	parent = child->mtab.parent;
-	for(u = 0; u < parent->mtab.nmounts; u++) {
-	    if(parent->mtab.child[u].file == child) {
+	parent = child->parent;
+	for(u = 0; u < parent->shared->mtab.nmounts; u++) {
+	    if(parent->shared->mtab.child[u].file->shared == child->shared) {
                 /* Found the correct index */
                 child_idx = u;
                 break;
@@ -340,11 +345,11 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
 	 */
 	parent = child; /*we guessed wrong*/
 	lt = 0;
-        rt = parent->mtab.nmounts;
+	rt = parent->shared->mtab.nmounts;
 	cmp = -1;
 	while(lt < rt && cmp) {
 	    md = (lt + rt) / 2;
-	    mnt_oloc = H5G_oloc(parent->mtab.child[md].group);
+	    mnt_oloc = H5G_oloc(parent->shared->mtab.child[md].group);
 	    cmp = H5F_addr_cmp(mp_oloc.addr, mnt_oloc->addr);
 	    if (cmp<0)
 		rt = md;
@@ -359,13 +364,17 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
         H5G_loc_free(&mp_loc);
         mp_loc_setup = FALSE;
         mp_loc.oloc = mnt_oloc;
-        mp_loc.path = H5G_nameof(parent->mtab.child[md].group);
-        child = parent->mtab.child[child_idx].file;
+        mp_loc.path = H5G_nameof(parent->shared->mtab.child[md].group);
+        child = parent->shared->mtab.child[child_idx].file;
+
+        /* Set the parent to be the actual parent of the discovered child.
+         * Could be different due to the shared mount table. */
+        parent = child->parent;
     } /* end else */
     HDassert(child_idx >= 0);
 
     /* Save the information about the child from the mount table */
-    child_group = parent->mtab.child[child_idx].group;
+    child_group = parent->shared->mtab.child[child_idx].group;
 
     /* Get the group location for the root group in the file to unmount */
     if(NULL == (root_loc.oloc = H5G_oloc(child->shared->root_grp)))
@@ -380,9 +389,10 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name")
 
     /* Eliminate the mount point from the table */
-    HDmemmove(parent->mtab.child + child_idx, parent->mtab.child + child_idx + 1,
-            (parent->mtab.nmounts-child_idx) * sizeof(parent->mtab.child[0]));
-    parent->mtab.nmounts -= 1;
+    HDmemmove(parent->shared->mtab.child + child_idx, parent->shared->mtab.child + child_idx + 1,
+            (parent->shared->mtab.nmounts-child_idx) * sizeof(parent->shared->mtab.child[0]));
+    parent->shared->mtab.nmounts -= 1;
+    parent->nmounts -= 1;
 
     /* Unmount the child file from the parent file */
     if(H5G_unmount(child_group) < 0)
@@ -391,7 +401,7 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close unmounted group")
 
     /* Detach child file from parent & see if it should close */
-    child->mtab.parent = NULL;
+    child->parent = NULL;
     if(H5F_try_close(child) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close unmounted file")
 
@@ -402,37 +412,6 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_unmount() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_has_mount
- *
- * Purpose:	Check if a file has mounted files within it.
- *
- * Return:	Success:	TRUE/FALSE
- *		Failure:	(can't happen)
- *
- * Programmer:	Quincey Koziol
- *              Thursday, January  2, 2002
- *
- *-------------------------------------------------------------------------
- */
-hbool_t
-H5F_has_mount(const H5F_t *file)
-{
-    hbool_t ret_value;   /* Return value */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_has_mount)
-
-    HDassert(file);
-
-    if(file->mtab.nmounts > 0)
-        ret_value = TRUE;
-    else
-        ret_value = FALSE;
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_has_mount() */
 
 
 /*-------------------------------------------------------------------------
@@ -457,7 +436,7 @@ H5F_is_mount(const H5F_t *file)
 
     HDassert(file);
 
-    if(file->mtab.parent != NULL)
+    if(file->parent != NULL)
         ret_value = TRUE;
     else
         ret_value = FALSE;
@@ -587,15 +566,18 @@ H5F_mount_count_ids_recurse(H5F_t *f, unsigned *nopen_files, unsigned *nopen_obj
      * (Reduced by number of mounted files, we'll add back in the mount point's
      *  groups later, if they are open)
      */
-    *nopen_objs += (f->nopen_objs - f->mtab.nmounts);
+    *nopen_objs += (f->nopen_objs - f->nmounts);
 
     /* Iterate over files mounted in this file and add in their open ID counts also */
-    for(u = 0; u < f->mtab.nmounts; u++) {
-        /* Increment the open object count if the mount point group has an open ID */
-        if(H5G_get_shared_count(f->mtab.child[u].group) > 1)
-            *nopen_objs += 1;
+    for(u = 0; u < f->shared->mtab.nmounts; u++) {
+        /* Only recurse on children mounted to this top level file structure */
+        if(f->shared->mtab.child[u].file->parent == f) {
+            /* Increment the open object count if the mount point group has an open ID */
+            if(H5G_get_shared_count(f->shared->mtab.child[u].group) > 1)
+                *nopen_objs += 1;
 
-        H5F_mount_count_ids_recurse(f->mtab.child[u].file, nopen_files, nopen_objs);
+            H5F_mount_count_ids_recurse(f->shared->mtab.child[u].file, nopen_files, nopen_objs);
+        }
     } /* end for */
 
     FUNC_LEAVE_NOAPI_VOID
@@ -627,8 +609,8 @@ H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs)
     HDassert(nopen_objs);
 
     /* Find the top file in the mounting hierarchy */
-    while(f->mtab.parent)
-        f = f->mtab.parent;
+    while(f->parent)
+        f = f->parent;
 
     /* Count open IDs in the hierarchy */
     H5F_mount_count_ids_recurse(f, nopen_files, nopen_objs);
