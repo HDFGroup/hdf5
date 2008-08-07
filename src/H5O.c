@@ -1375,7 +1375,7 @@ H5O_close(H5O_loc_t *loc)
      * If the file open object count has reached the number of open mount points
      * (each of which has a group open in the file) attempt to close the file.
      */
-    if(loc->file->nopen_objs == loc->file->mtab.nmounts)
+    if(loc->file->nopen_objs == loc->file->nmounts)
         /* Attempt to close down the file hierarchy */
         if(H5F_try_close(loc->file) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCLOSEFILE, FAIL, "problem attempting file close")

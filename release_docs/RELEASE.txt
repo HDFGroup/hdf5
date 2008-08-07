@@ -99,6 +99,12 @@ Bug Fixes since HDF5-1.8.1
 
         Library
         -------
+        - Fixed an issue where mount point traversal would fail when using
+            multiple handles for the child.  (NAF - 2008/08/07)
+        - Fixed an issue where mount points were inaccessible when using multiple
+            file handles for the parent.  The mount table is now in the shared
+            file structure (the parent pointer is still in the top structure).
+            (NAF - 2008/08/07)
         - Fixed issue where a group could have a file mounted on it twice.
             (QAK - 2008/07/15)
         - when an attribute was opened twice and data was written with one of the handles, 
