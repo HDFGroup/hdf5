@@ -347,8 +347,16 @@ out:
  *
  * Date: May 9, 2003
  *
- * Modifications: Jan 2005 Leon Arber, larber@uiuc.edu
+ * Modifications: 
+ *
+ * Jan 2005 Leon Arber, larber@uiuc.edu
  *    Added support for parallel diffing
+ *
+ * Aug 2008 Pedro Vicente, pvn@hdfgroup.org
+ *    Added a "contents" mode check.
+ *    If this mode is present, objects in both files must match (must be exactly the same)
+ *    If this does not happen, the tool returns an error code of 1 
+ *    (instead of the success code of 0)
  *
  *-------------------------------------------------------------------------
  */

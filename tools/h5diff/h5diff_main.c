@@ -62,6 +62,12 @@
  *  November 19, 2007
  *    adopted the syntax h5diff  [OPTIONS]  file1 file2  [obj1[obj2]]
  *
+ * Aug 2008 
+ *    Added a "contents" mode check.
+ *    If this mode is present, objects in both files must match (must be exactly the same)
+ *    If this does not happen, the tool returns an error code of 1 
+ *    (instead of the success code of 0)
+ *
  *-------------------------------------------------------------------------
  */
 
