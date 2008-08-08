@@ -440,9 +440,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
+H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt, htri_t *has_array)
 {
-    htri_t has_array=FALSE;       /* Whether a compound datatype has an array inside it */
     unsigned		flags = 0;
     char		*hdr = (char *)*pp;
     unsigned		i, j;
@@ -633,7 +632,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
 
         case H5T_COMPOUND:
             /* Check for an array datatype somewhere within the compound type */
-            if((has_array=H5T_detect_class(dt,H5T_ARRAY))<0)
+            if((*has_array=H5T_detect_class(dt,H5T_ARRAY))<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't detect array class");
 
             /*
@@ -641,6 +640,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
              */
             flags = dt->shared->u.compnd.nmembs & 0xffff;
             for (i=0; i<dt->shared->u.compnd.nmembs; i++) {
+                htri_t has_array_local=FALSE;   /* Whether the member has an array */
 
                 /* Name, multiple of eight bytes */
                 HDstrcpy((char*)(*pp), dt->shared->u.compnd.memb[i].name);
@@ -656,7 +656,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                  * member information, for better backward compatibility
                  * Write out all zeros for the array information, though...
                  */
-                if(!has_array) {
+                if(!(*has_array)) {
                     /* Dimensionality */
                     *(*pp)++ = 0;
 
@@ -677,7 +677,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 } /* end if */
 
                 /* Subtype */
-                if (H5O_dtype_encode_helper(pp, dt->shared->u.compnd.memb[i].type)<0)
+                if (H5O_dtype_encode_helper(pp, dt->shared->u.compnd.memb[i].type, &has_array_local)<0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode member type");
             }
             break;
@@ -689,7 +689,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             flags = dt->shared->u.enumer.nmembs & 0xffff;
 
             /* Parent type */
-            if (H5O_dtype_encode_helper(pp, dt->shared->parent)<0)
+            if (H5O_dtype_encode_helper(pp, dt->shared->parent, has_array)<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode parent datatype");
 
             /* Names, each a multiple of eight bytes */
@@ -732,7 +732,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
             } /* end if */
 
             /* Encode base type of VL information */
-            if (H5O_dtype_encode_helper(pp, dt->shared->parent)<0)
+            if (H5O_dtype_encode_helper(pp, dt->shared->parent, has_array)<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode VL parent type");
             break;
 
@@ -770,8 +770,10 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
                 UINT32ENCODE(*pp, dt->shared->u.array.perm[j]);
 
             /* Encode base type of array's information */
-            if (H5O_dtype_encode_helper(pp, dt->shared->parent)<0)
+            if (H5O_dtype_encode_helper(pp, dt->shared->parent, has_array)<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "unable to encode VL parent type");
+
+            *has_array = TRUE;
             break;
 
         default:
@@ -780,7 +782,7 @@ H5O_dtype_encode_helper(uint8_t **pp, const H5T_t *dt)
     }
 
     /* Encode the type's class, version and bit field */
-    *hdr++ = ((unsigned)(dt->shared->type) & 0x0f) | (((dt->shared->type==H5T_COMPOUND && has_array) ? H5O_DTYPE_VERSION_UPDATED : H5O_DTYPE_VERSION_COMPAT )<<4);
+    *hdr++ = ((unsigned)(dt->shared->type) & 0x0f) | ((*has_array ? H5O_DTYPE_VERSION_UPDATED : H5O_DTYPE_VERSION_COMPAT )<<4);
     *hdr++ = (flags >> 0) & 0xff;
     *hdr++ = (flags >> 8) & 0xff;
     *hdr++ = (flags >> 16) & 0xff;
@@ -862,6 +864,7 @@ static herr_t
 H5O_dtype_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
 {
     const H5T_t		   *dt = (const H5T_t *) mesg;
+    htri_t has_array=FALSE;       /* Whether a compound datatype has an array inside it */
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_encode);
@@ -872,7 +875,7 @@ H5O_dtype_encode(H5F_t UNUSED *f, uint8_t *p, const void *mesg)
     assert(dt);
 
     /* encode */
-    if (H5O_dtype_encode_helper(&p, dt) < 0)
+    if (H5O_dtype_encode_helper(&p, dt, &has_array) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTENCODE, FAIL, "can't encode type");
 
 done:

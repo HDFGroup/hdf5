@@ -93,7 +93,8 @@ Bug Fixes since HDF5-1.6.7 Release
 
     Library
     -------
-     None
+     - Fixed issue where datatypes were being saved with the wrong version
+        numbers.  (NAF - 2008/08/08)
 
     Configuration
     -------------
