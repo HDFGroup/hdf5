@@ -444,25 +444,6 @@ typedef struct H5AC_cache_config_t
     /* parallel configuration fields: */
     int                      dirty_bytes_threshold;
 
-    /* The following fields are not used in H5AC or H5C.  They are
-     * added because they are used in H5AC2 and H5C2, and putting 
-     * them here allows us to avoid duplicating the functions involved
-     * in metadata cache configuration at the user API level.
-     *
-     * The old H5AC and H5C code simply ignores them.
-     *
-     * 						-- JRM
-     */
-    /* metadata journaling configuration fields: */
-    hbool_t                   enable_journaling;
-    char                      journal_file_path[
-	    				H5AC__MAX_JOURNAL_FILE_NAME_LEN];
-    hbool_t                   journal_recovered;
-    size_t                    jbrb_buf_size;
-    int                       jbrb_num_bufs;
-    hbool_t                   jbrb_use_aio;
-    hbool_t                   jbrb_human_readable;
-
 } H5AC_cache_config_t;
 
 

@@ -196,6 +196,8 @@ check_fapl_mdc_api_calls(void)
 {
     const char * fcn_name = "check_fapl_mdc_api_calls()";
     char filename[512];
+    hbool_t show_progress = FALSE;
+    int cp = 0;
     herr_t result;
     hid_t fapl_id = -1;
     hid_t test_fapl_id = -1;
@@ -205,8 +207,7 @@ check_fapl_mdc_api_calls(void)
     H5AC2_cache_config_t default_config = H5AC2__DEFAULT_CACHE_CONFIG;
     H5AC2_cache_config_t mod_config =
     {
-      /* int         version                = */
-                                              H5AC2__CURR_CACHE_CONFIG_VERSION,
+      /* int         version                 = */ H5AC2__CURR_CACHE_CONFIG_VERSION,
       /* hbool_t     rpt_fcn_enabled         = */ FALSE,
       /* hbool_t     open_trace_file         = */ FALSE,
       /* hbool_t     close_trace_file        = */ FALSE,
@@ -235,14 +236,7 @@ check_fapl_mdc_api_calls(void)
       /* int         epochs_before_eviction  = */ 4,
       /* hbool_t     apply_empty_reserve     = */ TRUE,
       /* double      empty_reserve           = */ 0.05,
-      /* int         dirty_bytes_threshold   = */ (256 * 1024),
-      /* hbool_t     enable_journaling       = */ FALSE,
-      /* char        journal_file_path[]     = */ "",
-      /* hbool_t     journal_recovered       = */ FALSE,
-      /* size_t      jbrb_buf_size           = */ (64 * 1024),
-      /* int         jbrb_num_bufs           = */ 4,
-      /* hbool_t     jbrb_use_aio            = */ FALSE,
-      /* hbool_t     jbrb_human_readable     = */ FALSE
+      /* int         dirty_bytes_threshold   = */ (256 * 1024)
     };
     H5AC2_cache_config_t scratch;
     H5C2_auto_size_ctl_t default_auto_size_ctl;
@@ -250,10 +244,14 @@ check_fapl_mdc_api_calls(void)
 
     TESTING("MDC/FAPL related API calls");
 
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
     pass2 = TRUE;
 
     XLATE_EXT_TO_INT_MDC_CONFIG(default_auto_size_ctl, default_config)
     XLATE_EXT_TO_INT_MDC_CONFIG(mod_auto_size_ctl, mod_config)
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* Create a FAPL and verify that it contains the default
      * initial mdc configuration
@@ -269,6 +267,8 @@ check_fapl_mdc_api_calls(void)
             failure_mssg2 = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
 	}
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     if ( pass2 ) {
 
@@ -288,6 +288,8 @@ check_fapl_mdc_api_calls(void)
         }
     }
 
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
 
     /* Modify the initial mdc configuration in a FAPL, and verify that
      * the changes can be read back
@@ -303,6 +305,8 @@ check_fapl_mdc_api_calls(void)
 	    failure_mssg2 = "H5Pset_mdc_config() failed.\n";
         }
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     if ( pass2 ) {
 
@@ -322,6 +326,8 @@ check_fapl_mdc_api_calls(void)
         }
     }
 
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
     if ( pass2 ) {
 
         if ( H5Pclose(fapl_id) < 0 ) {
@@ -330,6 +336,8 @@ check_fapl_mdc_api_calls(void)
 	    failure_mssg2 = "H5Pclose() failed.\n";
         }
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* Open a file using the default FAPL.  Verify that the resulting
      * metadata cache uses the default configuration as well.  Get a
@@ -349,6 +357,8 @@ check_fapl_mdc_api_calls(void)
         }
     }
 
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
     /* create the file using the default FAPL */
     if ( pass2 ) {
 
@@ -360,6 +370,8 @@ check_fapl_mdc_api_calls(void)
             failure_mssg2 = "H5Fcreate() failed.\n";
         }
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* get a pointer to the files internal data structure */
     if ( pass2 ) {
@@ -376,6 +388,9 @@ check_fapl_mdc_api_calls(void)
 	    cache_ptr = file_ptr->shared->cache2;
         }
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
 #if 0 /* JRM */
     /* since this is the test cache, must build the cache explicitly */
     /* remove this when we start using the new cache                 */
@@ -391,6 +406,8 @@ check_fapl_mdc_api_calls(void)
 	    cache_ptr = file_ptr->shared->cache2;
 	}
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 #endif /* JRM */
     /* verify that we can access the internal version of the cache config */
     if ( pass2 ) {
@@ -404,6 +421,8 @@ check_fapl_mdc_api_calls(void)
         }
     }
 
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
     /* conpare the cache's internal configuration with the expected value */
     if ( pass2 ) {
 
@@ -416,6 +435,8 @@ check_fapl_mdc_api_calls(void)
         }
     }
 
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
     /* get a copy of the files FAPL */
     if ( pass2 ) {
 
@@ -427,6 +448,8 @@ check_fapl_mdc_api_calls(void)
             failure_mssg2 = "H5Fget_access_plist() failed.\n";
         }
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* compare the initial cache config from the copy of the file's FAPL
      * to the expected value.  If all goes well, close the copy of the FAPL.
@@ -454,6 +477,8 @@ check_fapl_mdc_api_calls(void)
         }
     }
 
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
     /* close the file and delete it */
     if ( pass2 ) {
 
@@ -468,6 +493,8 @@ check_fapl_mdc_api_calls(void)
 	    failure_mssg2 = "HDremove() failed.\n";
         }
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
 
     /* Open a file using a FAPL with a modified initial metadata cache
@@ -489,6 +516,8 @@ check_fapl_mdc_api_calls(void)
 	}
     }
 
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
     /* Modify the initial mdc configuration in the FAPL. */
 
     if ( pass2 ) {
@@ -502,6 +531,8 @@ check_fapl_mdc_api_calls(void)
         }
     }
 
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
     /* setup the file name */
     if ( pass2 ) {
 
@@ -512,6 +543,8 @@ check_fapl_mdc_api_calls(void)
             failure_mssg2 = "h5_fixname() failed.\n";
         }
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* create the file using the modified FAPL */
     if ( pass2 ) {
@@ -524,6 +557,8 @@ check_fapl_mdc_api_calls(void)
             failure_mssg2 = "H5Fcreate() failed.\n";
         }
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* get a pointer to the files internal data structure */
     if ( pass2 ) {
@@ -540,6 +575,9 @@ check_fapl_mdc_api_calls(void)
             cache_ptr = file_ptr->shared->cache2;
         }
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
 #if 0 /* JRM */
     /* since this is the test cache, must build the cache explicitly */
     /* remove this when we start using the new cache                 */
@@ -555,6 +593,8 @@ check_fapl_mdc_api_calls(void)
 	    cache_ptr = file_ptr->shared->cache2;
 	}
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 #endif /* JRM */
     /* verify that we can access the internal version of the cache config */
     if ( pass2 ) {
@@ -568,6 +608,8 @@ check_fapl_mdc_api_calls(void)
         }
     }
 
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
     /* conpare the cache's internal configuration with the expected value */
     if ( pass2 ) {
 
@@ -580,6 +622,8 @@ check_fapl_mdc_api_calls(void)
         }
     }
 
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
     /* get a copy of the files FAPL */
     if ( pass2 ) {
 
@@ -591,6 +635,8 @@ check_fapl_mdc_api_calls(void)
             failure_mssg2 = "H5Fget_access_plist() failed.\n";
         }
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* compare the initial cache config from the copy of the file's FAPL
      * to the expected value.  If all goes well, close the copy of the FAPL.
@@ -619,6 +665,8 @@ check_fapl_mdc_api_calls(void)
         }
     }
 
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
     /* close the fapl used to create the file */
     if ( pass2 ) {
 
@@ -628,6 +676,8 @@ check_fapl_mdc_api_calls(void)
 	    failure_mssg2 = "H5Pclose() failed.\n";
         }
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     /* close the file and delete it */
     if ( pass2 ) {
@@ -643,6 +693,8 @@ check_fapl_mdc_api_calls(void)
 	    failure_mssg2 = "HDremove() failed.\n";
         }
     }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
 
@@ -844,14 +896,7 @@ check_file_mdc_api_calls(void)
       /* int         epochs_before_eviction  = */ 4,
       /* hbool_t     apply_empty_reserve     = */ TRUE,
       /* double      empty_reserve           = */ 0.05,
-      /* int         dirty_bytes_threshold   = */ (256 * 1024),
-      /* hbool_t     enable_journaling       = */ FALSE,
-      /* char        journal_file_path[]     = */ "",
-      /* hbool_t     journal_recovered       = */ FALSE,
-      /* size_t      jbrb_buf_size           = */ (64 * 1024),
-      /* int         jbrb_num_bufs           = */ 4,
-      /* hbool_t     jbrb_use_aio            = */ FALSE,
-      /* hbool_t     jbrb_human_readable     = */ FALSE
+      /* int         dirty_bytes_threshold   = */ (256 * 1024)
     };
     H5AC2_cache_config_t mod_config_2 =
     {
@@ -884,14 +929,7 @@ check_file_mdc_api_calls(void)
       /* int         epochs_before_eviction  = */ 4,
       /* hbool_t     apply_empty_reserve     = */ TRUE,
       /* double      empty_reserve           = */ 0.05,
-      /* int         dirty_bytes_threshold   = */ (256 * 1024),
-      /* hbool_t     enable_journaling       = */ FALSE,
-      /* char        journal_file_path[]     = */ "",
-      /* hbool_t     journal_recovered       = */ FALSE,
-      /* size_t      jbrb_buf_size           = */ (64 * 1024),
-      /* int         jbrb_num_bufs           = */ 4,
-      /* hbool_t     jbrb_use_aio            = */ FALSE,
-      /* hbool_t     jbrb_human_readable     = */ FALSE
+      /* int         dirty_bytes_threshold   = */ (256 * 1024)
     };
     H5AC2_cache_config_t mod_config_3 =
     {
@@ -924,14 +962,7 @@ check_file_mdc_api_calls(void)
       /* int         epochs_before_eviction  = */ 3,
       /* hbool_t     apply_empty_reserve     = */ FALSE,
       /* double      empty_reserve           = */ 0.05,
-      /* int         dirty_bytes_threshold   = */ (256 * 1024),
-      /* hbool_t     enable_journaling       = */ FALSE,
-      /* char        journal_file_path[]     = */ "",
-      /* hbool_t     journal_recovered       = */ FALSE,
-      /* size_t      jbrb_buf_size           = */ (64 * 1024),
-      /* int         jbrb_num_bufs           = */ 4,
-      /* hbool_t     jbrb_use_aio            = */ FALSE,
-      /* hbool_t     jbrb_human_readable     = */ FALSE
+      /* int         dirty_bytes_threshold   = */ (256 * 1024)
     };
     H5AC2_cache_config_t mod_config_4 =
     {
@@ -965,14 +996,7 @@ check_file_mdc_api_calls(void)
       /* int         epochs_before_eviction  = */ 3,
       /* hbool_t     apply_empty_reserve     = */ TRUE,
       /* double      empty_reserve           = */ 0.1,
-      /* int         dirty_bytes_threshold   = */ (256 * 1024),
-      /* hbool_t     enable_journaling       = */ FALSE,
-      /* char        journal_file_path[]     = */ "",
-      /* hbool_t     journal_recovered       = */ FALSE,
-      /* size_t      jbrb_buf_size           = */ (64 * 1024),
-      /* int         jbrb_num_bufs           = */ 4,
-      /* hbool_t     jbrb_use_aio            = */ FALSE,
-      /* hbool_t     jbrb_human_readable     = */ FALSE
+      /* int         dirty_bytes_threshold   = */ (256 * 1024)
     };
 
     TESTING("MDC/FILE related API calls");
@@ -2270,14 +2294,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 1 -- bad rpt_fcn_enabled */
@@ -2310,14 +2327,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 2 -- bad open_trace_file */
@@ -2350,14 +2360,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 3 -- bad close_trace_file */
@@ -2390,14 +2393,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 4 -- open_trace_file == TRUE and empty trace_file_name */
@@ -2430,14 +2426,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 5 -- bad set_initial_size */
@@ -2470,14 +2459,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 6 -- max_size too big */
@@ -2510,14 +2492,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 7 -- min_size too small */
@@ -2550,14 +2525,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 8 -- min_size > max_size */
@@ -2590,14 +2558,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 9 -- initial size out of range (too big) */
@@ -2630,14 +2591,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 10 -- initial_size out of range (too small) */
@@ -2670,14 +2624,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 11 -- min_clean_fraction too big */
@@ -2710,14 +2657,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 12 -- min_clean_fraction too small */
@@ -2750,14 +2690,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 13 -- epoch_length too small */
@@ -2790,14 +2723,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 14 -- epoch_length too big */
@@ -2830,14 +2756,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 15 -- invalid incr_mode */
@@ -2870,14 +2789,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 16 -- lower_hr_threshold too small */
@@ -2910,14 +2822,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 17 -- lower_hr_threshold too big */
@@ -2950,14 +2855,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 18 -- increment too small */
@@ -2990,14 +2888,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 19 -- bad apply_max_increment */
@@ -3030,14 +2921,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 20 -- invalid flash_incr_mode */
@@ -3070,14 +2954,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 21 -- flash_multiple too small */
@@ -3110,14 +2987,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 22 -- flash_multiple too big */
@@ -3150,14 +3020,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 23 -- flash_threshold too small */
@@ -3190,14 +3053,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 24 -- flash_threshold too big */
@@ -3230,14 +3086,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 25 -- bad decr_mode */
@@ -3270,14 +3119,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 26 -- upper_hr_threshold too big */
@@ -3310,14 +3152,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 27 -- decrement too small */
@@ -3350,14 +3185,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 28 -- decrement too big */
@@ -3390,14 +3218,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 29 -- epochs_before_eviction too small */
@@ -3430,14 +3251,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 0,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 30 -- epochs_before_eviction too big */
@@ -3470,14 +3284,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ H5C2__MAX_EPOCH_MARKERS + 1,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 31 -- invalid apply_empty_reserve */
@@ -3510,14 +3317,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ 2,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 32 -- empty_reserve too small */
@@ -3550,14 +3350,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ -0.0000000001,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 33 -- empty_reserve too big */
@@ -3590,14 +3383,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 1.00000000001,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 34 -- upper_hr_threshold too small */
@@ -3630,14 +3416,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 35 -- upper_hr_threshold too big */
@@ -3670,14 +3449,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 36 -- upper_hr_threshold <= lower_hr_threshold */
@@ -3710,14 +3482,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 37 -- dirty_bytes_threshold too small */
@@ -3750,14 +3515,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (H5C2__MIN_MAX_CACHE_SIZE / 2) - 1,
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (H5C2__MIN_MAX_CACHE_SIZE / 2) - 1
   },
   {
     /* 38 -- dirty_bytes_threshold too big */
@@ -3790,14 +3548,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (H5C2__MAX_MAX_CACHE_SIZE / 4) + 1,
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (H5C2__MAX_MAX_CACHE_SIZE / 4) + 1
   },
   {
     /* 39 -- attempt to disable evictions when auto incr enabled */
@@ -3830,14 +3581,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   },
   {
     /* 40 -- attempt to disable evictions when auto decr enabled */
@@ -3870,14 +3614,7 @@ H5AC2_cache_config_t invalid_configs[NUM_INVALID_CONFIGS] =
     /* int         epochs_before_eviction = */ 3,
     /* hbool_t     apply_empty_reserve    = */ TRUE,
     /* double      empty_reserve          = */ 0.1,
-    /* int         dirty_bytes_threshold  = */ (256 * 1024),
-    /* hbool_t     enable_journaling       = */ FALSE,
-    /* char        journal_file_path[]     = */ "",
-    /* hbool_t     journal_recovered       = */ FALSE,
-    /* size_t      jbrb_buf_size           = */ (64 * 1024),
-    /* int         jbrb_num_bufs           = */ 4,
-    /* hbool_t     jbrb_use_aio            = */ FALSE,
-    /* hbool_t     jbrb_human_readable     = */ FALSE
+    /* int         dirty_bytes_threshold  = */ (256 * 1024)
   }
 };
 

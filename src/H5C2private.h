@@ -1484,7 +1484,6 @@ H5_DLL herr_t H5C2_end_transaction(H5F_t * f,
 
 H5_DLL herr_t H5C2_get_journal_config(H5C2_t * cache_ptr,
                                       hbool_t * journaling_enabled_ptr,
-                                      hbool_t * startup_pending_ptr,
                                       char * journal_file_path_ptr,
                                       size_t * jbrb_buf_size_ptr,
                                       int * jbrb_num_bufs_ptr,

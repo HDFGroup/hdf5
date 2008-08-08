@@ -195,7 +195,8 @@ extern hid_t H5AC2_ind_dxpl_id;
 
 #define H5AC2__DEFAULT_CACHE_CONFIG                                           \
 {                                                                             \
-  /* int         version                 = */ H5C2__CURR_AUTO_SIZE_CTL_VER,   \
+  /* int         version                 = */                                 \
+	                                   H5AC2__CURR_CACHE_CONFIG_VERSION,  \
   /* hbool_t     rpt_fcn_enabled         = */ FALSE,                          \
   /* hbool_t     open_trace_file         = */ FALSE,                          \
   /* hbool_t     close_trace_file        = */ FALSE,                          \
@@ -225,7 +226,15 @@ extern hid_t H5AC2_ind_dxpl_id;
   /* int         epochs_before_eviction  = */ 3,                              \
   /* hbool_t     apply_empty_reserve     = */ TRUE,                           \
   /* double      empty_reserve           = */ 0.1,                            \
-  /* int	 dirty_bytes_threshold   = */ (256 * 1024),                   \
+  /* int	 dirty_bytes_threshold   = */ (256 * 1024)                    \
+}
+
+
+/* Default journal configuration. */
+
+#define H5AC2__DEFAULT_JNL_CONFIG                                             \
+{                                                                             \
+  /* int         version                 = */ H5AC2__CURR_JNL_CONFIG_VER,     \
   /* hbool_t     enable_journaling       = */ FALSE,                          \
   /* char        journal_file_path[]     = */ "",                             \
   /* hbool_t     journal_recovered       = */ FALSE,                          \
@@ -279,7 +288,6 @@ H5_DLL herr_t H5AC2_check_for_journaling(H5F_t * f,
                                          H5C2_t * cache_ptr,
                                          hbool_t journal_recovered);
 H5_DLL herr_t H5AC2_create(H5F_t *f, 
-		           hid_t dxpl_id, 
 			   H5AC2_cache_config_t *config_ptr);
 H5_DLL herr_t H5AC2_begin_transaction(hid_t id,
                                       hbool_t * do_transaction_ptr,
@@ -338,18 +346,21 @@ H5_DLL herr_t H5AC2_get_cache_size(H5AC2_t * cache_ptr,
 H5_DLL herr_t H5AC2_get_cache_hit_rate(H5AC2_t * cache_ptr,
                                       double * hit_rate_ptr);
 
+H5_DLL herr_t H5AC2_get_jnl_config(H5AC2_t * cache_ptr,
+                                   H5AC2_jnl_config_t * config_ptr);
+
 H5_DLL herr_t H5AC2_reset_cache_hit_rate_stats(H5AC2_t * cache_ptr);
 
 H5_DLL herr_t H5AC2_set_cache_auto_resize_config(H5F_t * f,
-                                                 hid_t dxpl_id,
-                                                 H5AC2_cache_config_t *config_ptr);
+                                             H5AC2_cache_config_t *config_ptr);
 
-H5_DLL herr_t H5AC2_set_cache_journaling_config(H5F_t * f,
-                                                hid_t dxpl_id,
-                                                H5AC2_cache_config_t *config_ptr,
-                                                hbool_t show_trace);
+H5_DLL herr_t H5AC2_set_jnl_config(H5F_t * f,
+                                   hid_t dxpl_id,
+                                   H5AC2_jnl_config_t *config_ptr);
 
 H5_DLL herr_t H5AC2_validate_config(H5AC2_cache_config_t * config_ptr);
+
+H5_DLL herr_t H5AC2_validate_jnl_config(H5AC2_jnl_config_t * config_ptr);
 
 H5_DLL herr_t H5AC2_close_trace_file(H5AC2_t * cache_ptr);
 

@@ -3375,8 +3375,8 @@ setup_cache_for_test(hid_t * fid_ptr,
 
             config.rpt_fcn_enabled = TRUE;
 
-            if ( H5AC2_set_cache_auto_resize_config(file_ptr, 
-                                 H5P_DATASET_XFER_DEFAULT, &config) != SUCCEED ) {
+            if ( H5AC2_set_cache_auto_resize_config(file_ptr, &config) 
+		 != SUCCEED ) {
 
 	        HDfprintf(stdout,
                          "%d:%s: H5AC2_set_cache_auto_resize_config() failed.\n",
@@ -5577,28 +5577,28 @@ trace_file_check(void)
     const char * expected_output[] =
     {
       "### HDF5 metadata cache trace file version 2 ###\n",
-      "H5AC2_set_cache_auto_resize_config 1 0 1 0 \"t_cache2_trace.txt\" 1 0 1048576 0.500000 16777216 1048576 50000 1 0.900000 2.000000 1 4194304 1 1.000000 0.250000 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0 \"\" 0 4096 1 0 0 0\n",
-      "H5AC2_set 0x400 2 15 0x0 2 0\n",
-      "H5AC2_set 0x402 2 15 0x0 2 0\n",
-      "H5AC2_set 0x404 4 15 0x0 4 0\n",
-      "H5AC2_set 0x408 6 15 0x0 6 0\n",
-      "H5AC2_protect 0x400 2 15 H5AC2_WRITE 2 1\n",
+      "H5AC2_set_cache_auto_resize_config 1 0 1 0 \"t_cache2_trace.txt\" 1 0 1048576 0.500000 16777216 1048576 50000 1 0.900000 2.000000 1 4194304 1 1.000000 0.250000 3 0.999000 0.900000 1 1048576 3 1 0.100000 262144 0\n",
+      "H5AC2_set 0x400 2 16 0x0 2 0\n",
+      "H5AC2_set 0x402 2 16 0x0 2 0\n",
+      "H5AC2_set 0x404 4 16 0x0 4 0\n",
+      "H5AC2_set 0x408 6 16 0x0 6 0\n",
+      "H5AC2_protect 0x400 2 16 H5AC2_WRITE 2 1\n",
       "H5AC2_mark_pinned_or_protected_entry_dirty 0x400 0\n",
-      "H5AC2_unprotect 0x400 15 2 0 0\n",
-      "H5AC2_protect 0x402 2 15 H5AC2_WRITE 2 1\n",
+      "H5AC2_unprotect 0x400 16 2 0 0\n",
+      "H5AC2_protect 0x402 2 16 H5AC2_WRITE 2 1\n",
       "H5AC2_pin_protected_entry 0x402 0\n",
-      "H5AC2_unprotect 0x402 15 2 0 0\n",
+      "H5AC2_unprotect 0x402 16 2 0 0\n",
       "H5AC2_unpin_entry 0x402 0\n",
-      "H5AC2_expunge_entry 0x402 15 0\n",
-      "H5AC2_protect 0x404 4 15 H5AC2_WRITE 4 1\n",
+      "H5AC2_expunge_entry 0x402 16 0\n",
+      "H5AC2_protect 0x404 4 16 H5AC2_WRITE 4 1\n",
       "H5AC2_pin_protected_entry 0x404 0\n",
-      "H5AC2_unprotect 0x404 15 4 0 0\n",
+      "H5AC2_unprotect 0x404 16 4 0 0\n",
       "H5AC2_mark_pinned_entry_dirty 0x404 0 0 0\n",
       "H5AC2_resize_pinned_entry 0x404 2 0\n",
       "H5AC2_resize_pinned_entry 0x404 4 0\n",
       "H5AC2_unpin_entry 0x404 0\n",
-      "H5AC2_rename 0x400 0x8e65 15 0\n",
-      "H5AC2_rename 0x8e65 0x400 15 0\n",
+      "H5AC2_rename 0x400 0x8e65 16 0\n",
+      "H5AC2_rename 0x8e65 0x400 16 0\n",
       "H5AC2_flush 0x0 0\n",
       NULL
     };
@@ -5672,8 +5672,8 @@ trace_file_check(void)
                 config.open_trace_file = TRUE;
 		strcpy(config.trace_file_name, "t_cache2_trace.txt");
 
-                if ( H5AC2_set_cache_auto_resize_config(file_ptr, 
-			H5P_DATASET_XFER_DEFAULT, &config) != SUCCEED ) {
+                if ( H5AC2_set_cache_auto_resize_config(file_ptr, &config) 
+			!= SUCCEED ) {
 
 		    nerrors++;
 	            HDfprintf(stdout, 
@@ -5736,8 +5736,8 @@ trace_file_check(void)
                 config.close_trace_file = TRUE;
 		config.trace_file_name[0] = '\0';
 
-                if ( H5AC2_set_cache_auto_resize_config(file_ptr, 
-			H5P_DATASET_XFER_DEFAULT, &config) != SUCCEED ) {
+                if ( H5AC2_set_cache_auto_resize_config(file_ptr, &config) 
+			!= SUCCEED ) {
 
 		    nerrors++;
 	            HDfprintf(stdout, 

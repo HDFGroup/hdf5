@@ -25,6 +25,7 @@
 /* Public headers needed by this file */
 #include "H5public.h"
 #include "H5Cpublic.h"
+#include "H5AC2public.h"
 #include "H5Dpublic.h"
 #include "H5Fpublic.h"
 #include "H5FDpublic.h"
@@ -255,6 +256,10 @@ H5_DLL herr_t H5Pset_mdc_config(hid_t    plist_id,
        H5AC_cache_config_t * config_ptr);
 H5_DLL herr_t H5Pget_mdc_config(hid_t     plist_id,
        H5AC_cache_config_t * config_ptr);	/* out */
+H5_DLL herr_t H5Pset_jnl_config(hid_t    plist_id,
+       H5AC2_jnl_config_t * config_ptr);
+H5_DLL herr_t H5Pget_jnl_config(hid_t     plist_id,
+       H5AC2_jnl_config_t * config_ptr);	/* out */
 H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);
 H5_DLL herr_t H5Pget_gc_references(hid_t fapl_id, unsigned *gc_ref/*out*/);
 H5_DLL herr_t H5Pset_fclose_degree(hid_t fapl_id, H5F_close_degree_t degree);

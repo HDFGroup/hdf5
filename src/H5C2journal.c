@@ -522,10 +522,7 @@ done:
  *
  * Changes:
  *
- * 		John Mainzer -- 4/2/08
- *              Modified function to report the pending journaling
- *              status if journaling has been enabled, but not yet
- *              configured.
+ *              None.
  *
  *-------------------------------------------------------------------------
  */
@@ -533,7 +530,6 @@ done:
 herr_t
 H5C2_get_journal_config(H5C2_t * cache_ptr,
 		        hbool_t * journaling_enabled_ptr,
-			hbool_t * startup_pending_ptr,
 			char * journal_file_path_ptr,
 			size_t * jbrb_buf_size_ptr,
 			int * jbrb_num_bufs_ptr,
@@ -553,15 +549,9 @@ H5C2_get_journal_config(H5C2_t * cache_ptr,
                     "journaling_enabled_ptr NULL on entry!?!.")
     }
 
-
     if ( cache_ptr->mdj_enabled ) {
 
         *journaling_enabled_ptr = TRUE;
-
-	if ( startup_pending_ptr != NULL ) {
-
-	    *startup_pending_ptr = FALSE;
-	}
 
 	if ( journal_file_path_ptr != NULL ) {
 
@@ -3411,14 +3401,27 @@ H5C2_jb__bin2hex(const uint8_t * buf,
  *
  * Modifications:
  *
+ * 		John Mainzer -- 8/4/08
+ * 		Reworked the function to use the new H5AC2_jnl_config_t
+ * 		structure and the associated utilities. 
+ *
+ * 		I can't but observe that this function really doesn't 
+ * 		belong in this file.  Also, it used (and still uses)
+ * 		API calls -- which really shouldn't happen in the 
+ * 		library.
+ *
+ * 		We must address these issues eventually, but for now my 
+ * 		objective is simply to avoid breaking Albert's test code.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_journal(hid_t fapl_id, const char *journal_file)
+H5Pset_journal(hid_t fapl_id, 
+	       const char *journal_file)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED; /* set to SUCCEED for now. */
-    H5AC2_cache_config_t mdj_config;
+    H5AC2_jnl_config_t config;
 
     FUNC_ENTER_API(H5Pset_journal, FAIL)
     H5TRACE2("e", "i*s", fapl_id, journal_file);
@@ -3432,28 +3435,31 @@ H5Pset_journal(hid_t fapl_id, const char *journal_file)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file name too long")
 
     /* setup cache config struct to enable journaling */
-    mdj_config.version = H5AC2__CURR_CACHE_CONFIG_VERSION;
+    config.version = H5AC2__CURR_JNL_CONFIG_VER;
 
     /* get cache config struct information */
-    H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&mdj_config);
+    H5Pget_jnl_config(fapl_id, &config);
 
     /* set enable journaling field to true */
-    mdj_config.enable_journaling = TRUE;    /* turn on journaling */
-    mdj_config.jbrb_buf_size = 8*1024;	    /* multiples of system buffer size*/
-    mdj_config.jbrb_num_bufs = 2;	
-    mdj_config.jbrb_use_aio = FALSE;	    /* only sync IO is supported */
-    mdj_config.jbrb_human_readable = TRUE;  /* only readable form is supported */
+    config.enable_journaling = TRUE;    /* turn on journaling */
+    config.journal_recovered = FALSE;
+    config.jbrb_buf_size = 8*1024;	    /* multiples of system buffer size*/
+    config.jbrb_num_bufs = 2;	
+    config.jbrb_use_aio = FALSE;	    /* only sync IO is supported */
+    config.jbrb_human_readable = TRUE;  /* only readable form is supported */
     /* specify name of journal file */
-    HDstrcpy(mdj_config.journal_file_path, journal_file);
+    HDstrcpy(config.journal_file_path, journal_file);
 
     /* set latest format */
     if (H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format'")
 
     /* set cache config struct information */
-    ret_value = H5Pset_mdc_config(fapl_id, (H5AC_cache_config_t *)&mdj_config);
+    ret_value = H5Pset_jnl_config(fapl_id, &config);
 
 done:
+
     FUNC_LEAVE_API(ret_value)
-}
+
+} /* H5Pset_journal() */
 

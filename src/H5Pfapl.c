@@ -35,6 +35,7 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5ACprivate.h"	/* Metadata cache			*/
+#include "H5AC2private.h"	/* Metadata cache2			*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fprivate.h"		/* Files		  	*/
@@ -58,6 +59,8 @@
 /* Definitions for the initial metadata cache resize configuration */
 #define H5F_ACS_META_CACHE_INIT_CONFIG_SIZE	sizeof(H5AC_cache_config_t)
 #define H5F_ACS_META_CACHE_INIT_CONFIG_DEF	H5AC__DEFAULT_CACHE_CONFIG
+#define H5F_ACS_JNL_INIT_CONFIG_SIZE		sizeof(H5AC2_jnl_config_t)
+#define H5F_ACS_JNL_INIT_CONFIG_DEF		H5AC2__DEFAULT_JNL_CONFIG
 /* Definitions for size of raw data chunk cache(elements) */
 #define H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE       sizeof(size_t)
 #define H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF        521
@@ -188,6 +191,7 @@ static herr_t
 H5P_facc_reg_prop(H5P_genclass_t *pclass)
 {
     H5AC_cache_config_t mdc_initCacheCfg = H5F_ACS_META_CACHE_INIT_CONFIG_DEF;  /* Default metadata cache settings */
+    H5AC2_jnl_config_t initJnlCfg = H5F_ACS_JNL_INIT_CONFIG_DEF; /* Default journaling config settings */
     size_t rdcc_nelmts = H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF;      /* Default raw data chunk cache # of elements */
     size_t rdcc_nbytes = H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF;      /* Default raw data chunk cache # of bytes */
     double rdcc_w0 = H5F_ACS_PREEMPT_READ_CHUNKS_DEF;           /* Default raw data chunk cache dirty ratio */
@@ -212,6 +216,11 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
     /* Register the initial metadata cache resize configuration */
     if(H5P_register(pclass, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_CONFIG_SIZE, &mdc_initCacheCfg, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the initial journaling configuration */
+    if(H5P_register(pclass, H5F_ACS_JNL_INIT_CONFIG_NAME, H5F_ACS_JNL_INIT_CONFIG_SIZE, &initJnlCfg, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
 
     /* Register the size of raw data chunk cache (elements) */
     if(H5P_register(pclass, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE, &rdcc_nelmts, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -1433,6 +1442,133 @@ done:
     FUNC_LEAVE_API(ret_value);
 
 } /* H5Pget_mdc_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_jnl_config
+ *
+ * Purpose:	Set the initial journaling configuration in the
+ *		target FAPL.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	J. Mainzer
+ *              Thursday, July 31, 2008
+ *
+ * Modifications:
+ *
+ *		Done.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_jnl_config(hid_t                plist_id,
+                  H5AC2_jnl_config_t * config_ptr)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value=SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pset_jnl_config, FAIL);
+    H5TRACE2("e", "i*x", plist_id, config_ptr);
+
+    /* Get the plist structure */
+    if( NULL == ( plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS) ) ) {
+
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+    }
+
+    /* validate the new configuration */
+    if ( H5AC2_validate_jnl_config(config_ptr) < 0 ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "invalid journaling configuration");
+    }
+
+    /* set the modified config */
+
+    /* If we ever support multiple versions of H5AC_jnl_config_t, we
+     * will have to test the version and do translation here.
+     */
+
+    if(H5P_set(plist, H5F_ACS_JNL_INIT_CONFIG_NAME, config_ptr)<0) {
+
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, \
+                    "can't set initial journaling config");
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value);
+
+} /* H5Pset_jnl_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_mdc_config
+ *
+ * Purpose:	Retrieve the journaling initial configuration
+ *		from the target FAPL.
+ *
+ *		Observe that the function will fail if config_ptr is
+ *		NULL, or if config_ptr->version specifies an unknown
+ *		version of H5AC_jnl_config_t.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	J. Mainzer
+ *              Thursday, July 31, 2008
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5Pget_jnl_config(hid_t                plist_id,
+                  H5AC2_jnl_config_t * config_ptr)
+{
+    H5P_genplist_t *plist;      /* Property list pointer */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_API(H5Pget_jnl_config, FAIL);
+    H5TRACE2("e", "i*x", plist_id, config_ptr);
+
+    /* Get the plist structure */
+    if ( NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)) ) {
+
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
+    }
+
+    /* validate the config_ptr */
+    if ( config_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
+    }
+
+    if ( config_ptr->version != H5AC2__CURR_JNL_CONFIG_VER ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
+    }
+
+    /* If we ever support multiple versions of H5AC_jnl_config_t, we
+     * will have to get the cannonical version here, and then translate
+     * to the version of the structure supplied.
+     */
+
+    /* Get the current initial metadata cache resize configuration */
+    if ( H5P_get(plist, H5F_ACS_JNL_INIT_CONFIG_NAME, config_ptr) < 0 ) {
+
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, \
+                    "can't get initial journaling config");
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value);
+
+} /* H5Pget_jnl_config() */
 
 
 /*-------------------------------------------------------------------------

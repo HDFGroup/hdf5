@@ -201,7 +201,7 @@ main (int argc, const char *argv[])
     char *           p; /* pointer */
     hbool_t          custom_name = 0; /* bool indicating custom backup name */
     hbool_t          no_copy = 0; /* bool indicating not to make backup */
-    H5AC_cache_config_t config; /* cache configuration */
+    H5AC2_jnl_config_t config; /* journaling configuration */
     hbool_t          check_file = 1; /* boolean indicating whether to check */
     uint8_t *        compare_buf; /* buffer to read into from hdf5 file */
     hid_t            status = -1; /* status indicator for retval checking */
@@ -314,7 +314,7 @@ main (int argc, const char *argv[])
     config.version = 1; /* should be H5C2__CURR_AUTO_SIZE_CTL_VER */
     
     /* get H5AC_cache_config_t configuration from fapl */
-    if ( H5Pget_mdc_config(fapl, &config) == -1) {
+    if ( H5Pget_jnl_config(fapl, &config) == -1) {
     
         error_msg(progname, "Could not get mdc config from FAPL.\n");
         leave( EXIT_FAILURE );
@@ -325,9 +325,9 @@ main (int argc, const char *argv[])
     config.journal_recovered = TRUE;
     
     /* set H5AC_cache_config_t configuration with file recovered */
-    if ( H5Pset_mdc_config(fapl, &config) == -1) {
+    if ( H5Pset_jnl_config(fapl, &config) == -1) {
     
-        error_msg(progname, "Could not set mdc config on FAPL.\n");
+        error_msg(progname, "Could not set jnl config on FAPL.\n");
         leave( EXIT_FAILURE );
     
     } /* end if */

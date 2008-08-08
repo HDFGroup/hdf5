@@ -366,6 +366,7 @@ typedef struct H5F_t H5F_t;
 
 /* ========= File Access properties ============ */
 #define H5F_ACS_META_CACHE_INIT_CONFIG_NAME	"mdc_initCacheCfg" /* Initial metadata cache resize configuration */
+#define H5F_ACS_JNL_INIT_CONFIG_NAME		"initJnlCfg"    /* Initial journaling configuration */
 #define H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME       "rdcc_nelmts"   /* Size of raw data chunk cache(elements) */
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME       "rdcc_nbytes"   /* Size of raw data chunk cache(bytes) */
 #define H5F_ACS_PREEMPT_READ_CHUNKS_NAME        "rdcc_w0"       /* Preemption read chunks first */

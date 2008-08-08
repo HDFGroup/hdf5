@@ -99,6 +99,11 @@ typedef struct H5F_file_t {
                                 /* metadata cache.  This structure is   */
                                 /* fixed at creation time and should    */
                                 /* not change thereafter.               */
+    H5AC2_jnl_config_t
+	    	initJnlCfg;	/* Initial journaling configuration for */
+				/* the file.  At least in its initial   */
+    				/* incarnation, this structure contains */
+    				/* only metadata journaling config data */
     hid_t       fcpl_id;	/* File creation property list ID 	*/
     H5F_close_degree_t fc_degree;   /* File close behavior degree	*/
     size_t	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/

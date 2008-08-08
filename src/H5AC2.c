@@ -200,12 +200,8 @@ static herr_t H5AC2_log_renamed_entry(H5F_t * f,
                                      haddr_t new_addr);
 #endif /* H5_HAVE_PARALLEL */
 
-static herr_t H5AC2_set_non_journaling_cache_config(H5F_t * f,
-                                              hid_t dxpl_id,
-                                              H5AC2_cache_config_t *config_ptr);
-
-static herr_t H5AC2_validate_journaling_config(
-		H5AC2_cache_config_t * config_ptr);
+static herr_t H5AC2_set_cache_config(H5F_t * f,
+                                     H5AC2_cache_config_t *config_ptr);
 
 
 /*-------------------------------------------------------------------------
@@ -522,7 +518,6 @@ static const char * H5AC2_entry_type_names[H5AC2_NTYPES] =
 
 herr_t
 H5AC2_create(H5F_t * f,
-	     hid_t dxpl_id,
              H5AC2_cache_config_t *config_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
@@ -707,9 +702,7 @@ H5AC2_create(H5F_t * f,
     }
 #endif /* H5_HAVE_PARALLEL */
 
-    result = H5AC2_set_non_journaling_cache_config(f, 
-		                                   dxpl_id, 
-		                                   config_ptr);
+    result = H5AC2_set_cache_config(f, config_ptr);
 
     if ( result != SUCCEED ) {
 
@@ -2945,6 +2938,11 @@ done:
  *              JRM -- 4/12/08
  *              Added support for the new journaling control fields.
  *
+ *              JRM - 8/1/08 
+ *              Removed support for the new journaling control fields.
+ *              This functionality is now handled through the
+ *              H5AC2_jnl_config_t structure and the related calls.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -3051,8 +3049,68 @@ H5AC2_get_cache_auto_resize_config(H5AC2_t * cache_ptr,
     }
 #endif /* H5_HAVE_PARALLEL */
 
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC2_get_cache_auto_resize_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC2_get_jnl_config
+ *
+ * Purpose:     Get the current journaling configuration and load it into 
+ * 		the supplied instance of H5AC2_jnl_config_t.
+ *
+ * 		For the moment, the only journaling we do is metadata 
+ * 		journaling, so in effect this function is a wrapper 
+ * 		function for H5C2_get_journal_config(). 
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              7/31/08
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC2_get_jnl_config(H5AC2_t * cache_ptr,
+                     H5AC2_jnl_config_t * config_ptr)
+{
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5AC2_get_jnl_config, FAIL)
+
+    if ( ( cache_ptr == NULL )
+         ||
+#ifdef H5_HAVE_PARALLEL
+         ( ( cache_ptr->aux_ptr != NULL )
+           &&
+           ( ((H5AC2_aux_t *)(cache_ptr->aux_ptr))->magic
+             !=
+             H5AC2__H5AC2_AUX_T_MAGIC
+           )
+         )
+         ||
+#endif /* H5_HAVE_PARALLEL */
+         ( config_ptr == NULL )
+         ||
+         ( config_ptr->version != H5AC2__CURR_CACHE_CONFIG_VERSION )
+       )
+    {
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "Bad cache_ptr or config_ptr on entry.")
+
+    }
+
     /* get the current journal configuration.  Start by setting defaults,
-     * which may be changed shortly.
+     * which will typically be changed shortly.
      */
 
     config_ptr->enable_journaling    = FALSE;
@@ -3065,7 +3123,6 @@ H5AC2_get_cache_auto_resize_config(H5AC2_t * cache_ptr,
 
     result = H5C2_get_journal_config(cache_ptr,
 		                     &(config_ptr->enable_journaling),
-		                     NULL,
                                      &(config_ptr->journal_file_path[0]),
 				     &(config_ptr->jbrb_buf_size),
 				     &(config_ptr->jbrb_num_bufs),
@@ -3082,7 +3139,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5AC2_get_cache_auto_resize_config() */
+} /* H5AC2_get_jnl_config() */
 
 
 /*-------------------------------------------------------------------------
@@ -3264,12 +3321,15 @@ done:
  *              Added code to allow control of metadata journaling.
  *              This required the addition of the dxpl_id parameter.
  *
+ *              John Mainzer -- 8/1/08
+ *              Pulled journaling configuration back out of the 
+ *              function, and teh dxpl_id parameter with it.
+ *
  *-------------------------------------------------------------------------
  */
 
 herr_t
 H5AC2_set_cache_auto_resize_config(H5F_t * f,
-		                   hid_t dxpl_id,
                                    H5AC2_cache_config_t *config_ptr)
 {
     /* const char *        fcn_name = "H5AC2_set_cache_auto_resize_config"; */
@@ -3325,21 +3385,12 @@ H5AC2_set_cache_auto_resize_config(H5F_t * f,
     }
 
 
-    result = H5AC2_set_non_journaling_cache_config(f, dxpl_id, config_ptr);
+    result = H5AC2_set_cache_config(f, config_ptr);
 
     if ( result < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC2_set_non_journaling_cache_config() failed.")
-    }
-
-
-    result = H5AC2_set_cache_journaling_config(f, dxpl_id, config_ptr, FALSE);
-
-    if ( result < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC2_set_cache_journaling_config() failed.")
+                    "H5AC2_set_cache_config() failed.")
     }
 
 done:
@@ -3354,7 +3405,7 @@ done:
          ( trace_file_ptr != NULL ) ) {
 
 	HDfprintf(trace_file_ptr, 
-                  "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %d %d %f %f %d %f %f %d %d %d %d %f %d %d \"%s\" %d %d %d %d %d %d\n",
+                  "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %d %d %f %f %d %f %f %d %d %d %d %f %d %d\n",
 		  "H5AC2_set_cache_auto_resize_config",
 		  trace_config.version,
 		  (int)(trace_config.rpt_fcn_enabled),
@@ -3385,13 +3436,6 @@ done:
 		  (int)(trace_config.apply_empty_reserve),
 		  trace_config.empty_reserve,
 		  trace_config.dirty_bytes_threshold,
-                  (int)(config_ptr->enable_journaling),
-                  config_ptr->journal_file_path,
-                  (int)(config_ptr->journal_recovered),
-                  (int)(config_ptr->jbrb_buf_size),
-                  config_ptr->jbrb_num_bufs,
-                  (int)(config_ptr->jbrb_use_aio),
-                  (int)(config_ptr->jbrb_human_readable),
 		  (int)ret_value);
     }
 #endif /* H5AC2__TRACE_FILE_ENABLED */
@@ -3402,20 +3446,18 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC2_set_cache_journaling_config
+ * Function:    H5AC2_set_jnl_config
  *
- * Purpose:     Handle changes in journaling configuration.
+ * Purpose:     Manage changes in journaling configuration.
  *
- * 		This code used to reside in 
- * 		H5AC2_set_cache_auto_resize_config(), but it has been 
- * 		split out, as on startup, we need to be able to run 
- * 		it separately from the rest of the cache configuration
- * 		code.
+ * 		At present, metadata journaling is the only journaling we
+ * 		do, so this function can be thought of as a wrapper for 
+ *		H5C2_begin_journaling() and H5C2_end_journaling().
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
  * Programmer:  John Mainzer
- *              7/6/08
+ *              7/31/08
  *
  * Modifications:
  *
@@ -3425,26 +3467,21 @@ done:
  */
 
 herr_t
-H5AC2_set_cache_journaling_config(H5F_t * f,
-		                  hid_t dxpl_id,
-                                  H5AC2_cache_config_t *config_ptr,
-#if H5AC2__TRACE_FILE_ENABLED
-                                  hbool_t show_trace)
-#else /* H5AC2__TRACE_FILE_ENABLED */
-				  hbool_t UNUSED show_trace)
-#endif /* H5AC2__TRACE_FILE_ENABLED */
+H5AC2_set_jnl_config(H5F_t * f,
+                     hid_t dxpl_id,
+                     H5AC2_jnl_config_t *config_ptr)
 {
-    /* const char *        fcn_name = "H5AC2_set_cache_journaling_config"; */
+    /* const char *        fcn_name = "H5AC2_set_jnl_config"; */
     H5AC2_t *           cache_ptr;
     herr_t              result;
     herr_t              ret_value = SUCCEED;      /* Return value */
     hbool_t		mdj_enabled = FALSE;
 #if H5AC2__TRACE_FILE_ENABLED
-    H5AC2_cache_config_t trace_config = H5AC2__DEFAULT_CACHE_CONFIG;
+    H5AC2_jnl_config_t  trace_config = H5AC2__DEFAULT_JNL_CONFIG;
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC2__TRACE_FILE_ENABLED */
 
-    FUNC_ENTER_NOAPI(H5AC2_set_cache_journaling_config, FAIL)
+    FUNC_ENTER_NOAPI(H5AC2_set_jnl_config, FAIL)
 
     HDassert( f );
     HDassert( f->shared );
@@ -3455,11 +3492,7 @@ H5AC2_set_cache_journaling_config(H5F_t * f,
 #if H5AC2__TRACE_FILE_ENABLED
     /* Make note of the new configuration.
      */
-    if ( ( show_trace ) && ( config_ptr != NULL ) ) {
-
-        trace_config = *config_ptr;
-
-    }
+    trace_config = *config_ptr;
 #endif /* H5AC2__TRACE_FILE_ENABLED */
 
     if ( ( cache_ptr == NULL )
@@ -3479,7 +3512,7 @@ H5AC2_set_cache_journaling_config(H5F_t * f,
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry.")
     }
 
-    result = H5AC2_validate_journaling_config(config_ptr);
+    result = H5AC2_validate_jnl_config(config_ptr);
 
     if ( result != SUCCEED ) {
 
@@ -3488,7 +3521,7 @@ H5AC2_set_cache_journaling_config(H5F_t * f,
     }
 
     result = H5C2_get_journal_config((H5C2_t *)cache_ptr, &mdj_enabled,
-		                     NULL, NULL, NULL, NULL, NULL, NULL);
+		                     NULL, NULL, NULL, NULL, NULL);
 
     if ( result < 0 ) {
 
@@ -3534,14 +3567,13 @@ done:
      * of the config that pretain to journaling are necessary in 
      * the trace file. Write the return value to catch occult errors.
      */
-    if ( ( show_trace ) &&
-	 ( cache_ptr != NULL ) &&
+    if ( ( cache_ptr != NULL ) &&
          ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
 	HDfprintf(trace_file_ptr, 
                   "%s %d %d \"%s\" %d %d %d %d %d %d\n",
-		  "H5AC2_set_cache_journaling_config",
+		  "H5AC2_set_jnl_config",
 		  trace_config.version,
                   (int)(config_ptr->enable_journaling),
                   config_ptr->journal_file_path,
@@ -3556,17 +3588,14 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5AC2_set_cache_journaling_config() */
+} /* H5AC2_set_jnl_config() */
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5AC2_set_non_journaling_cache_config
+ * Function:    H5AC2_set_cache_config
  *
- * Purpose:     Handle all non-journaling related configuration switches
- * 		in an instance of H5AC2_cache_config_t.  
- *
- * 		This function is needed, as journaling cannot be set
- * 		at cache creation time.
+ * Purpose:     Handle all configuration switches in an instance of 
+ * 		H5AC2_cache_config_t.  
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
@@ -3581,17 +3610,16 @@ done:
  */
 
 herr_t
-H5AC2_set_non_journaling_cache_config(H5F_t * f,
-		                      hid_t UNUSED dxpl_id,
-                                      H5AC2_cache_config_t *config_ptr)
+H5AC2_set_cache_config(H5F_t * f,
+                       H5AC2_cache_config_t *config_ptr)
 {
-    /* const char *        fcn_name = "H5AC2_set_non_journaling_cache_config"; */
+    /* const char *        fcn_name = "H5AC2_set_cache_config"; */
     H5AC2_t *           cache_ptr;
     herr_t              result;
     herr_t              ret_value = SUCCEED;      /* Return value */
     H5C2_auto_size_ctl_t internal_config;
 
-    FUNC_ENTER_NOAPI(H5AC2_set_non_journaling_cache_config, FAIL)
+    FUNC_ENTER_NOAPI(H5AC2_set_cache_config, FAIL)
 
     HDassert( f );
     HDassert( f->shared );
@@ -3715,7 +3743,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5AC2_set_non_journaling_cache_config() */
+} /* H5AC2_set_cache_config() */
 
 
 /*-------------------------------------------------------------------------
@@ -3756,6 +3784,10 @@ done:
  *              Modified code in support of revised cache API needed 
  *              to permit journaling.
  *              					JRM - 10/18/07
+ *
+ *              Pulled journaling related code out of this function.
+ *
+ *              					JRM - 8/1/08
  *
  *-------------------------------------------------------------------------
  */
@@ -3856,13 +3888,6 @@ H5AC2_validate_config(H5AC2_cache_config_t * config_ptr)
                     "H5AC2_ext_config_2_int_config() failed.")
     }
 
-    result = H5AC2_validate_journaling_config(config_ptr);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error(s) in new config.")
-    }
-
     result = H5C2_validate_resize_config(&internal_config,
                                         H5C2_RESIZE_CFG__VALIDATE_ALL);
 
@@ -3876,6 +3901,137 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC2_validate_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC2_validate_jnl_config()
+ *
+ * Purpose:     Run a sanity check on the contents of the supplied 
+ * 		instance of H5AC2_jnl_config_t.
+ *
+ *              Do nothing and return SUCCEED if no errors are detected,
+ *              and flag an error and return FAIL otherwise.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              7/31/08
+ *
+ * Modifications:
+ *
+ *            - None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC2_validate_jnl_config(H5AC2_jnl_config_t * config_ptr)
+
+{
+    herr_t	ret_value = SUCCEED;    /* Return value */
+    int	        name_len;
+
+    FUNC_ENTER_NOAPI(H5AC2_validate_jnl_config, FAIL)
+
+    if ( config_ptr == NULL ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
+    }
+
+    if ( config_ptr->version != H5AC2__CURR_JNL_CONFIG_VER ) {
+
+#if 0 /* JRM */
+	HDfprintf(stdout, "version = %d(%d).\n", config_ptr->version,
+		  H5AC2__CURR_JNL_CONFIG_VER);
+	HDfprintf(stdout, "enable_journaling = %d.\n", 
+		  (int)(config_ptr->enable_journaling));
+	HDfprintf(stdout, "journal_recovered = %d\n", 
+		  (int)(config_ptr->journal_recovered));
+	HDfprintf(stdout, "jbrb_buf_size = %ld\n",
+		  (long)(config_ptr->jbrb_buf_size));
+	HDfprintf(stdout, "jbrb_num_bufs = %d\n", config_ptr->jbrb_num_bufs);
+	HDfprintf(stdout, "jbrb_use_aio = %d\n", (int)(config_ptr->jbrb_use_aio));
+	HDfprintf(stdout, "jbrb_human_readable = %d\n",
+		  (int)(config_ptr->jbrb_human_readable));
+#endif /* JRM */
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
+    }
+
+    if ( ( config_ptr->enable_journaling != TRUE ) &&
+         ( config_ptr->enable_journaling != FALSE ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                "config_ptr->enable_journaling must be either TRUE or FALSE.")
+    }
+
+    if ( ( config_ptr->journal_recovered != TRUE ) &&
+         ( config_ptr->journal_recovered != FALSE ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                "config_ptr->journal_recovered must be either TRUE or FALSE.")
+    }
+
+    if ( ( config_ptr->enable_journaling ) &&
+         ( config_ptr->journal_recovered ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                "enable_journaling and journal_recovered can't both be TRUE.")
+    }
+
+    /* don't test journal_file_path unless enable_journaling is TRUE */
+    if ( config_ptr->enable_journaling ) {
+
+	/* Can't really test the journal_file_path field without trying to 
+	 * open the file, so we will content ourselves with a couple of
+	 * sanity checks on the length of the file name.
+	 */
+	name_len = HDstrlen(config_ptr->journal_file_path);
+
+	if ( name_len <= 0 ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                        "config_ptr->journal_file_path is empty.")
+
+        } else if ( name_len > H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                        "config_ptr->journal_file_path too long.")
+	}
+    }
+
+    if ( ( config_ptr->jbrb_buf_size < H5AC2__MIN_JBRB_BUF_SIZE ) ||
+         ( config_ptr->jbrb_buf_size > H5AC2__MAX_JBRB_BUF_SIZE ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "config_ptr->jbrb_buf_size out of range.")
+    }
+
+    if ( ( config_ptr->jbrb_num_bufs < H5AC2__MIN_JBRB_NUM_BUFS ) ||
+         ( config_ptr->jbrb_num_bufs > H5AC2__MAX_JBRB_NUM_BUFS ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "config_ptr->jbrb_num_bufs out of range.")
+    }
+
+    if ( ( config_ptr->jbrb_use_aio != FALSE ) &&
+         ( config_ptr->jbrb_use_aio != TRUE ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                "config_ptr->jbrb_use_aio must be either TRUE or FALSE.")
+    }
+
+    if ( ( config_ptr->jbrb_human_readable != FALSE ) &&
+         ( config_ptr->jbrb_human_readable != TRUE ) ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                "config_ptr->jbrb_human_readable must be either TRUE or FALSE.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC2_validate_jnl_config() */
 
 
 /*-------------------------------------------------------------------------
@@ -5472,125 +5628,4 @@ done:
 } /* H5AC2_receive_and_apply_clean_list() */
 
 #endif /* H5_HAVE_PARALLEL */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5AC2_validate_journaling_config()
- *
- * Purpose:     Run a sanity check on the contents of the journaling 
- *              related fields of the supplied instance of 
- *              H5AC2_cache_config_t.
- *
- *              Do nothing and return SUCCEED if no errors are detected,
- *              and flag an error and return FAIL otherwise.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              7/6/08
- *
- * Modifications:
- *
- *            - None.
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t
-H5AC2_validate_journaling_config(H5AC2_cache_config_t * config_ptr)
-
-{
-    herr_t              ret_value = SUCCEED;    /* Return value */
-    int		        name_len;
-
-    FUNC_ENTER_NOAPI(H5AC2_validate_journaling_config, FAIL)
-
-    if ( config_ptr == NULL ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
-    }
-
-    if ( config_ptr->version != H5AC2__CURR_CACHE_CONFIG_VERSION ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
-    }
-
-    if ( ( config_ptr->enable_journaling != TRUE ) &&
-         ( config_ptr->enable_journaling != FALSE ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                "config_ptr->enable_journaling must be either TRUE or FALSE.")
-    }
-
-    if ( ( config_ptr->journal_recovered != TRUE ) &&
-         ( config_ptr->journal_recovered != FALSE ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                "config_ptr->journal_recovered must be either TRUE or FALSE.")
-    }
-
-    if ( ( config_ptr->enable_journaling ) &&
-         ( config_ptr->journal_recovered ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                "config_ptr->journal_recovered must be either TRUE or FALSE.")
-    }
-
-    /* don't bother to test journal_file_path unless enable_journaling is TRUE */
-    if ( config_ptr->enable_journaling ) {
-
-	/* Can't really test the journal_file_path field without trying to 
-	 * open the file, so we will content ourselves with a couple of
-	 * sanity checks on the length of the file name.
-	 */
-	name_len = HDstrlen(config_ptr->journal_file_path);
-
-	if ( name_len <= 0 ) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                        "config_ptr->journal_file_path is empty.")
-
-        } else if ( name_len > H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
-
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                        "config_ptr->journal_file_path too long.")
-	}
-    }
-
-    if ( ( config_ptr->jbrb_buf_size < H5AC2__MIN_JBRB_BUF_SIZE ) ||
-         ( config_ptr->jbrb_buf_size > H5AC2__MAX_JBRB_BUF_SIZE ) ) {
-#if 1 /* JRM */
-	HDfprintf(stdout, "config_ptr->jbrb_buf_size = %d.\n", 
-	          (int)(config_ptr->jbrb_buf_size));
-#endif /* JRM */
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "config_ptr->jbrb_buf_size out of range.")
-    }
-
-    if ( ( config_ptr->jbrb_num_bufs < H5AC2__MIN_JBRB_NUM_BUFS ) ||
-         ( config_ptr->jbrb_num_bufs > H5AC2__MAX_JBRB_NUM_BUFS ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "config_ptr->jbrb_num_bufs out of range.")
-    }
-
-    if ( ( config_ptr->jbrb_use_aio != FALSE ) &&
-         ( config_ptr->jbrb_use_aio != TRUE ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                "config_ptr->jbrb_use_aio must be either TRUE or FALSE.")
-    }
-
-    if ( ( config_ptr->jbrb_human_readable != FALSE ) &&
-         ( config_ptr->jbrb_human_readable != TRUE ) ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                "config_ptr->jbrb_human_readable must be either TRUE or FALSE.")
-    }
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5AC2_validate_journaling_config() */
 

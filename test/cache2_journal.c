@@ -1891,7 +1891,7 @@ open_existing_file_for_journaling(const char * hdf_file_name,
     hbool_t verbose = FALSE;
     int cp = 0;
     herr_t result;
-    H5AC2_cache_config_t mdj_config;
+    H5AC2_jnl_config_t jnl_config;
     hid_t fapl_id = -1;
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
@@ -1914,17 +1914,12 @@ open_existing_file_for_journaling(const char * hdf_file_name,
             failure_mssg2 = "journal file name too long.\n";
 	    pass2 = FALSE;
 
-        } else {
+        } else  if ( verbose ) {
 
-	    strcpy(mdj_config.journal_file_path, journal_file_name);
-
-            if ( verbose ) {
-
-                HDfprintf(stdout, "%s: HDF file name = \"%s\".\n", 
-			  fcn_name, hdf_file_name);
-                HDfprintf(stdout, "%s: journal file name = \"%s\".\n", 
-			  fcn_name, journal_file_name);
-	    }
+            HDfprintf(stdout, "%s: HDF file name = \"%s\".\n", 
+		      fcn_name, hdf_file_name);
+            HDfprintf(stdout, "%s: journal file name = \"%s\".\n", 
+		      fcn_name, journal_file_name);
 	}
     }
 
@@ -1947,7 +1942,8 @@ open_existing_file_for_journaling(const char * hdf_file_name,
     /* call H5Pset_libver_bounds() on the fapl_id */
     if ( pass2 ) {
 
-	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) {
+	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) 
+		< 0 ) {
 
             pass2 = FALSE;
             failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
@@ -1958,43 +1954,42 @@ open_existing_file_for_journaling(const char * hdf_file_name,
 
     if ( pass2 ) {
 
-        mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
 
-        result = H5Pget_mdc_config(fapl_id, (H5AC_cache_config_t *)&mdj_config);
+        result = H5Pget_jnl_config(fapl_id, &jnl_config);
 
         if ( result < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+            failure_mssg2 = "H5Pget_jnl_config() failed.\n";
         }
 
 	/* set journaling config fields to taste */
-        mdj_config.enable_journaling       = TRUE;
+        jnl_config.enable_journaling       = TRUE;
 
-        strcpy(mdj_config.journal_file_path, journal_file_name);
+        strcpy(jnl_config.journal_file_path, journal_file_name);
 
-        mdj_config.journal_recovered       = FALSE;
-        mdj_config.jbrb_buf_size           = (8 * 1024);
-        mdj_config.jbrb_num_bufs           = 2;
-        mdj_config.jbrb_use_aio            = FALSE;
-        mdj_config.jbrb_human_readable     = TRUE;
+        jnl_config.journal_recovered       = FALSE;
+        jnl_config.jbrb_buf_size           = (8 * 1024);
+        jnl_config.jbrb_num_bufs           = 2;
+        jnl_config.jbrb_use_aio            = FALSE;
+        jnl_config.jbrb_human_readable     = TRUE;
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     if ( pass2 ) {
 
-        result = H5Pset_mdc_config(fapl_id, (H5AC_cache_config_t *)&mdj_config);
+        result = H5Pset_jnl_config(fapl_id, &jnl_config);
 
         if ( result < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+            failure_mssg2 = "H5Pset_jnl_config() failed.\n";
         }
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
  
     /**************************************/
     /* open the file with the fapl above. */
@@ -2008,7 +2003,7 @@ open_existing_file_for_journaling(const char * hdf_file_name,
         if ( file_id < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed.\n";
+            failure_mssg2 = "H5Fopen() failed (1).\n";
 
         } else {
 
@@ -2170,7 +2165,7 @@ open_existing_file_without_journaling(const char * hdf_file_name,
         if ( file_id < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed.\n";
+            failure_mssg2 = "H5Fopen() failed (2).\n";
 
         } else {
 
@@ -2302,7 +2297,11 @@ setup_cache_for_journaling(const char * hdf_file_name,
       /* int         epochs_before_eviction  = */ 3,
       /* hbool_t     apply_empty_reserve     = */ TRUE,
       /* double      empty_reserve           = */ 0.1,
-      /* int         dirty_bytes_threshold   = */ (8 * 1024),
+      /* int         dirty_bytes_threshold   = */ (8 * 1024)
+    };
+    H5AC2_jnl_config_t jnl_config =
+    {
+      /* int         version                 = */ H5AC2__CURR_JNL_CONFIG_VER,
       /* hbool_t     enable_journaling       = */ TRUE,
       /* char        journal_file_path[]     = */ "",
       /* hbool_t     journal_recovered       = */ FALSE,
@@ -2336,7 +2335,7 @@ setup_cache_for_journaling(const char * hdf_file_name,
 
         } else {
 
-	    strcpy(mdj_config.journal_file_path, journal_file_name);
+	    strcpy(jnl_config.journal_file_path, journal_file_name);
 
             if ( verbose ) {
 
@@ -2367,7 +2366,8 @@ setup_cache_for_journaling(const char * hdf_file_name,
     /* call H5Pset_libver_bounds() on the fapl_id */
     if ( pass2 ) {
 
-	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) {
+	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+				  H5F_LIBVER_LATEST) < 0 ) {
 
             pass2 = FALSE;
             failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
@@ -2379,6 +2379,19 @@ setup_cache_for_journaling(const char * hdf_file_name,
     if ( pass2 ) {
 
         result = H5Pset_mdc_config(fapl_id, (H5AC_cache_config_t *)&mdj_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+        }
+    }
+
+    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
+
+    if ( pass2 ) {
+
+        result = H5Pset_jnl_config(fapl_id, &jnl_config);
 
         if ( result < 0 ) {
 
@@ -3139,7 +3152,7 @@ mdj_smoke_check_00(void)
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
     H5C2_t * cache_ptr = NULL;
-    H5AC2_cache_config_t mdj_config;
+    H5AC2_jnl_config_t jnl_config;
     
     TESTING("mdj smoke check 00 -- general coverage");
 
@@ -4258,26 +4271,26 @@ mdj_smoke_check_00(void)
     /* now enable journaling */
     if ( pass2 ) {
 
-        mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
 
-        result = H5Fget_mdc_config(file_id, (H5AC_cache_config_t *)&mdj_config);
+        result = H5Fget_jnl_config(file_id, &jnl_config);
 
         if ( result < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Fget_mdc_config() failed.\n";
+            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
         }
 
         /* set journaling config fields to taste */
-        mdj_config.enable_journaling       = TRUE;
+        jnl_config.enable_journaling       = TRUE;
 
-        strcpy(mdj_config.journal_file_path, journal_filename);
+        strcpy(jnl_config.journal_file_path, journal_filename);
 
-        mdj_config.journal_recovered       = FALSE;
-        mdj_config.jbrb_buf_size           = (8 * 1024);
-        mdj_config.jbrb_num_bufs           = 2;
-        mdj_config.jbrb_use_aio            = FALSE;
-        mdj_config.jbrb_human_readable     = TRUE;
+        jnl_config.journal_recovered       = FALSE;
+        jnl_config.jbrb_buf_size           = (8 * 1024);
+        jnl_config.jbrb_num_bufs           = 2;
+        jnl_config.jbrb_use_aio            = FALSE;
+        jnl_config.jbrb_human_readable     = TRUE;
     }
 
     if ( show_progress )
@@ -4285,12 +4298,12 @@ mdj_smoke_check_00(void)
 
     if ( pass2 ) {
 
-        result = H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mdj_config);
+        result = H5Fset_jnl_config(file_id, &jnl_config);
 
         if ( result < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Fset_mdc_config() failed.\n";
+            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
         }
     }
 
@@ -4337,14 +4350,14 @@ mdj_smoke_check_00(void)
     /* disable journaling */
     if ( pass2 ) {
 
-        mdj_config.enable_journaling       = FALSE;
+        jnl_config.enable_journaling       = FALSE;
 
-        result = H5Fset_mdc_config(file_id, (H5AC_cache_config_t *)&mdj_config);
+        result = H5Fset_jnl_config(file_id, &jnl_config);
 
         if ( result < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Fset_mdc_config() failed.\n";
+            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
         }
     }
 
@@ -5435,7 +5448,7 @@ check_mdj_config_block_IO(void)
         if ( file_id < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (2).\n";
+            failure_mssg2 = "H5Fopen() failed (3).\n";
         }
     }
 
@@ -6002,7 +6015,7 @@ check_superblock_extensions(void)
         if ( file_id < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (1).\n";
+            failure_mssg2 = "H5Fopen() failed (4).\n";
         }
     }
 
@@ -6085,7 +6098,7 @@ check_superblock_extensions(void)
         if ( file_id < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (2).\n";
+            failure_mssg2 = "H5Fopen() failed (5).\n";
         }
     }
 
@@ -6172,7 +6185,7 @@ check_superblock_extensions(void)
         if ( file_id < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (3).\n";
+            failure_mssg2 = "H5Fopen() failed (6).\n";
         }
     }
 
@@ -6266,7 +6279,7 @@ check_superblock_extensions(void)
         if ( file_id < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (4).\n";
+            failure_mssg2 = "H5Fopen() failed (7).\n";
         }
     }
 
@@ -6354,7 +6367,7 @@ check_superblock_extensions(void)
         if ( file_id < 0 ) {
 
             pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (5).\n";
+            failure_mssg2 = "H5Fopen() failed (8).\n";
         }
     }
 
@@ -6729,7 +6742,7 @@ verify_mdj_file_marking_on_create(void)
 		    if ( file_id >= 0 ) {
 
                         pass2 = FALSE;
-		        failure_mssg2 = "H5Fopen() succeeded.";
+		        failure_mssg2 = "H5Fopen() succeeded - 1.";
 		    }
 		}
 
@@ -6811,7 +6824,7 @@ verify_mdj_file_marking_after_open(void)
     hid_t dataset_id = -1;
     hid_t dataspace_id = -1;
     hsize_t dims[2];
-    H5AC2_cache_config_t mdj_config;
+    H5AC2_jnl_config_t jnl_config;
 
     /* setup the file name */
     if ( pass2 ) {
@@ -7003,27 +7016,26 @@ verify_mdj_file_marking_after_open(void)
 	    /* now enable journaling */
 	    if ( pass2 ) {
 
-                mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+                jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
 
-                result = H5Fget_mdc_config(file_id, 
-				           (H5AC_cache_config_t *)&mdj_config);
+                result = H5Fget_jnl_config(file_id, &jnl_config);
 
                 if ( result < 0 ) {
 
                     pass2 = FALSE;
-                    failure_mssg2 = "H5Fget_mdc_config() failed.\n";
+                    failure_mssg2 = "H5Fget_jnl_config() failed.\n";
                 }
 
 	        /* set journaling config fields to taste */
-                mdj_config.enable_journaling       = TRUE;
+                jnl_config.enable_journaling       = TRUE;
 
-                strcpy(mdj_config.journal_file_path, journal_filename);
+                strcpy(jnl_config.journal_file_path, journal_filename);
 
-                mdj_config.journal_recovered       = FALSE;
-                mdj_config.jbrb_buf_size           = (8 * 1024);
-                mdj_config.jbrb_num_bufs           = 2;
-                mdj_config.jbrb_use_aio            = FALSE;
-                mdj_config.jbrb_human_readable     = TRUE;
+                jnl_config.journal_recovered       = FALSE;
+                jnl_config.jbrb_buf_size           = (8 * 1024);
+                jnl_config.jbrb_num_bufs           = 2;
+                jnl_config.jbrb_use_aio            = FALSE;
+                jnl_config.jbrb_human_readable     = TRUE;
             }
 
             if ( show_progress ) {
@@ -7035,13 +7047,12 @@ verify_mdj_file_marking_after_open(void)
 
             if ( pass2 ) {
 
-                result = H5Fset_mdc_config(file_id, 
-				           (H5AC_cache_config_t *)&mdj_config);
+                result = H5Fset_jnl_config(file_id, &jnl_config);
 
                 if ( result < 0 ) {
 
                     pass2 = FALSE;
-                    failure_mssg2 = "H5Fset_mdc_config() failed.\n";
+                    failure_mssg2 = "H5Fset_jnl_config() failed.\n";
                 }
             }
 
@@ -7149,7 +7160,7 @@ verify_mdj_file_marking_after_open(void)
 		    if ( file_id >= 0 ) {
 
                         pass2 = FALSE;
-		        failure_mssg2 = "H5Fopen() succeeded.";
+		        failure_mssg2 = "H5Fopen() succeeded - 2.";
 		    }
 		}
 
@@ -7235,7 +7246,7 @@ verify_mdj_file_marking_on_open(void)
     hid_t dataspace_id = -1;
     hsize_t dims[2];
     H5F_t * file_ptr = NULL;
-    H5AC2_cache_config_t mdj_config;
+    H5AC2_jnl_config_t jnl_config;
 
     /* setup the file name */
     if ( pass2 ) {
@@ -7524,27 +7535,26 @@ verify_mdj_file_marking_on_open(void)
 
             if ( pass2 ) {
 
-                mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+                jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
 
-                result = H5Pget_mdc_config(fapl_id, 
-				           (H5AC_cache_config_t *)&mdj_config);
+                result = H5Pget_jnl_config(fapl_id, &jnl_config);
 
                 if ( result < 0 ) {
 
                     pass2 = FALSE;
-                    failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+                    failure_mssg2 = "H5Pget_jnl_config() failed.\n";
                 }
 
 	        /* set journaling config fields to taste */
-                mdj_config.enable_journaling       = TRUE;
+                jnl_config.enable_journaling       = TRUE;
 
-                strcpy(mdj_config.journal_file_path, journal_filename);
+                strcpy(jnl_config.journal_file_path, journal_filename);
 
-                mdj_config.journal_recovered       = FALSE;
-                mdj_config.jbrb_buf_size           = (8 * 1024);
-                mdj_config.jbrb_num_bufs           = 2;
-                mdj_config.jbrb_use_aio            = FALSE;
-                mdj_config.jbrb_human_readable     = TRUE;
+                jnl_config.journal_recovered       = FALSE;
+                jnl_config.jbrb_buf_size           = (8 * 1024);
+                jnl_config.jbrb_num_bufs           = 2;
+                jnl_config.jbrb_use_aio            = FALSE;
+                jnl_config.jbrb_human_readable     = TRUE;
             }
 
             if ( show_progress ) {
@@ -7556,13 +7566,12 @@ verify_mdj_file_marking_on_open(void)
 
             if ( pass2 ) {
 
-                result = H5Pset_mdc_config(fapl_id, 
-				           (H5AC_cache_config_t *)&mdj_config);
+                result = H5Pset_jnl_config(fapl_id, &jnl_config);
 
                 if ( result < 0 ) {
 
                     pass2 = FALSE;
-                    failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+                    failure_mssg2 = "H5Pset_jnl_config() failed.\n";
                 }
             }
 
@@ -7581,7 +7590,7 @@ verify_mdj_file_marking_on_open(void)
                 if ( file_id < 0 ) {
 
                     pass2 = FALSE;
-                    failure_mssg2 = "H5Fopen() failed.\n";
+                    failure_mssg2 = "H5Fopen() failed (9).\n";
 
                 } else {
 
@@ -7704,7 +7713,7 @@ verify_mdj_file_marking_on_open(void)
 		    if ( file_id >= 0 ) {
 
                         pass2 = FALSE;
-		        failure_mssg2 = "H5Fopen() succeeded.";
+		        failure_mssg2 = "H5Fopen() succeeded - 3.";
 		    }
                 }
 
@@ -7958,7 +7967,7 @@ verify_mdj_file_unmarking_on_file_close(void)
 	if ( file_id < 0 ) {
 
             pass2 = FALSE;
-	    failure_mssg2 = "H5Fopen() failed.";
+	    failure_mssg2 = "H5Fopen() failed (10).";
         }
     }
 
@@ -8072,7 +8081,7 @@ verify_mdj_file_unmarking_on_journaling_shutdown(void)
     hsize_t dims[2];
     H5F_t * file_ptr = NULL;
     H5C2_t * cache_ptr = NULL;
-    H5AC2_cache_config_t mdj_config;
+    H5AC2_jnl_config_t jnl_config;
 
     /* setup the file name */
     if ( pass2 ) {
@@ -8221,32 +8230,17 @@ verify_mdj_file_unmarking_on_journaling_shutdown(void)
 	    /* now dis-able journaling */
 	    if ( pass2 ) {
 
-                mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+                jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
 
-                result = H5Fget_mdc_config(file_id, 
-				           (H5AC_cache_config_t *)&mdj_config);
+                result = H5Fget_jnl_config(file_id, &jnl_config);
 
                 if ( result < 0 ) {
 
                     pass2 = FALSE;
-                    failure_mssg2 = "H5Fget_mdc_config() failed.\n";
+                    failure_mssg2 = "H5Fget_jnl_config() failed.\n";
                 }
 
-                mdj_config.enable_journaling       = FALSE;
-
-		/* until we disable the old cache, we need to set 
-		 * these fields too, as until then, H5Fget_mdc_config()
-		 * will return data from the old cache -- and fail to 
-		 * initialize the journaling fields.
-		 */
-
-                strcpy(mdj_config.journal_file_path, journal_filename);
-
-                mdj_config.journal_recovered       = FALSE;
-                mdj_config.jbrb_buf_size           = (8 * 1024);
-                mdj_config.jbrb_num_bufs           = 2;
-                mdj_config.jbrb_use_aio            = FALSE;
-                mdj_config.jbrb_human_readable     = TRUE;
+                jnl_config.enable_journaling       = FALSE;
             }
 
             if ( show_progress ) {
@@ -8258,13 +8252,12 @@ verify_mdj_file_unmarking_on_journaling_shutdown(void)
 
             if ( pass2 ) {
 
-                result = H5Fset_mdc_config(file_id, 
-				           (H5AC_cache_config_t *)&mdj_config);
+                result = H5Fset_jnl_config(file_id, &jnl_config);
 
                 if ( result < 0 ) {
 
                     pass2 = FALSE;
-                    failure_mssg2 = "H5Fset_mdc_config() failed.\n";
+                    failure_mssg2 = "H5Fset_jnl_config() failed.\n";
                 }
             }
 
@@ -8366,7 +8359,7 @@ verify_mdj_file_unmarking_on_journaling_shutdown(void)
 		if ( file_id < 0 ) {
 
                     pass2 = FALSE;
-		    failure_mssg2 = "H5Fopen() failed.";
+		    failure_mssg2 = "H5Fopen() failed (11).";
 		}
 
                 if ( show_progress ) {
@@ -8468,7 +8461,7 @@ verify_mdj_file_unmarking_on_recovery(void)
     hid_t fapl_id = -1;
     H5F_t * file_ptr = NULL;
     H5C2_t * cache_ptr = NULL;
-    H5AC2_cache_config_t mdj_config;
+    H5AC2_jnl_config_t jnl_config;
 
     /* setup the file name */
     if ( pass2 ) {
@@ -8699,7 +8692,7 @@ verify_mdj_file_unmarking_on_recovery(void)
 		    if ( file_id >= 0 ) {
 
                         pass2 = FALSE;
-		        failure_mssg2 = "H5Fopen() succeeded.";
+		        failure_mssg2 = "H5Fopen() succeeded - 4.";
 		    }
 		}
 
@@ -8710,39 +8703,25 @@ verify_mdj_file_unmarking_on_recovery(void)
 		    HDfflush(stdout);
 	        }
 
-		/* now set the file recovered flag in the cache config 
+
+		/* now set the file recovered flag in the journal config 
 		 * structure in the fapl, and try to open again.  Should
-		 * succeed, and the file should not be marked as haveing
+		 * succeed, and the file should not be marked as having
 		 * journaling in progress.
 		 */
 	        if ( pass2 ) {
 
-                    mdj_config.version = H5C2__CURR_AUTO_SIZE_CTL_VER;
+                    jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
 
-                    result = H5Pget_mdc_config(fapl_id, 
-				           (H5AC_cache_config_t *)&mdj_config);
+                    result = H5Pget_jnl_config(fapl_id, &jnl_config);
 
                     if ( result < 0 ) {
 
                         pass2 = FALSE;
-                        failure_mssg2 = "H5Pget_mdc_config() failed.\n";
+                        failure_mssg2 = "H5Pget_jnl_config() failed.\n";
                     }
 
-		    /* until we disable the old cache, we need to initialize 
-		     * all journaling fields, as until then, H5Fget_mdc_config()
-		     * will return data from the old cache -- and fail to 
-		     * initialize them.
-		     */
-
-                    mdj_config.enable_journaling       = FALSE;
-
-                    strcpy(mdj_config.journal_file_path, journal_filename);
-
-                    mdj_config.journal_recovered       = TRUE;
-                    mdj_config.jbrb_buf_size           = (8 * 1024);
-                    mdj_config.jbrb_num_bufs           = 2;
-                    mdj_config.jbrb_use_aio            = FALSE;
-                    mdj_config.jbrb_human_readable     = TRUE;
+                    jnl_config.journal_recovered       = TRUE;
                 }
 
                 if ( show_progress ) {
@@ -8754,13 +8733,12 @@ verify_mdj_file_unmarking_on_recovery(void)
 
                 if ( pass2 ) {
 
-                    result = H5Pset_mdc_config(fapl_id, 
-				           (H5AC_cache_config_t *)&mdj_config);
+                    result = H5Pset_jnl_config(fapl_id, &jnl_config);
 
                     if ( result < 0 ) {
 
                         pass2 = FALSE;
-                        failure_mssg2 = "H5Pset_mdc_config() failed(1).\n";
+                        failure_mssg2 = "H5Pset_jnl_config() failed(1).\n";
                     }
                 }
 
@@ -8778,7 +8756,7 @@ verify_mdj_file_unmarking_on_recovery(void)
 		    if ( file_id < 0 ) {
 
                         pass2 = FALSE;
-		        failure_mssg2 = "H5Fopen() failed(1).";
+		        failure_mssg2 = "H5Fopen() failed (12).";
 		    }
 		}
 
@@ -8811,15 +8789,14 @@ verify_mdj_file_unmarking_on_recovery(void)
 
                 if ( pass2 ) {
 
-                    mdj_config.journal_recovered       = FALSE;
+                    jnl_config.journal_recovered       = FALSE;
 
-                    result = H5Pset_mdc_config(fapl_id, 
-				           (H5AC_cache_config_t *)&mdj_config);
+                    result = H5Pset_jnl_config(fapl_id, &jnl_config);
 
                     if ( result < 0 ) {
 
                         pass2 = FALSE;
-                        failure_mssg2 = "H5Pset_mdc_config() failed(2).\n";
+                        failure_mssg2 = "H5Pset_jnl_config() failed(2).\n";
                     }
                 }
 
@@ -8837,7 +8814,7 @@ verify_mdj_file_unmarking_on_recovery(void)
 		    if ( file_id < 0 ) {
 
                         pass2 = FALSE;
-		        failure_mssg2 = "H5Fopen() failed(2).";
+		        failure_mssg2 = "H5Fopen() failed (13).";
 		    }
 		}
 

@@ -23,6 +23,7 @@
 #include "H5public.h"
 #include "H5Cpublic.h"
 #include "H5ACpublic.h"
+#include "H5AC2public.h"
 #include "H5Ipublic.h"
 
 /* When this header is included from a private header, don't make calls to H5check() */
@@ -136,6 +137,10 @@ H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
 H5_DLL herr_t H5Funmount(hid_t loc, const char *name);
 H5_DLL hssize_t H5Fget_freespace(hid_t file_id);
 H5_DLL herr_t H5Fget_filesize(hid_t file_id, hsize_t *size);
+H5_DLL herr_t H5Fget_jnl_config(hid_t file_id,
+                                H5AC2_jnl_config_t *config_ptr);
+H5_DLL herr_t H5Fset_jnl_config(hid_t file_id,
+                                H5AC2_jnl_config_t *config_ptr);
 H5_DLL herr_t H5Fget_mdc_config(hid_t file_id,
 				H5AC_cache_config_t * config_ptr);
 H5_DLL herr_t H5Fset_mdc_config(hid_t file_id,

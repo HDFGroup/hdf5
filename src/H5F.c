@@ -309,6 +309,8 @@ H5F_get_access_plist(H5F_t *f)
     /* Copy properties of the file access property list */
     if(H5P_set(new_plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, &(f->shared->mdc_initCacheCfg)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set initial metadata cache resize config.")
+    if(H5P_set(new_plist, H5F_ACS_JNL_INIT_CONFIG_NAME, &(f->shared->initJnlCfg)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set initial journaling config.")
     if(H5P_set(new_plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &(f->shared->rdcc_nelmts)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache element size")
     if(H5P_set(new_plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(f->shared->rdcc_nbytes)) < 0)
@@ -883,6 +885,8 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not file access property list")
         if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, &(f->shared->mdc_initCacheCfg)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial metadata cache resize config")
+        if(H5P_get(plist, H5F_ACS_JNL_INIT_CONFIG_NAME, &(f->shared->initJnlCfg)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get initial journaling config")
         if(H5P_get(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &(f->shared->rdcc_nelmts)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get data cache element size")
         if(H5P_get(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(f->shared->rdcc_nbytes)) < 0)
@@ -939,11 +943,8 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	/* Create a metadata cache with modified API along side the regular
 	 * version.  For now, this is just for testing.  Once we get it 
 	 * fully in use, we will delete the old version.
-	 *
-	 * Note the use of H5P_DATASET_XFER_DEFAULT for the dxpl_id parameter
-	 * of H5AC2_create().  We may want to change this.
 	 */
-	if(H5AC2_create(f, H5P_DATASET_XFER_DEFAULT,
+	if(H5AC2_create(f, 
 		(H5AC2_cache_config_t *)&(f->shared->mdc_initCacheCfg)) < 0)
 
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to create meta data cache2")
@@ -1195,7 +1196,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
  *		Added calls to H5AC2_check_for_journaling() and 
  *		H5AC2_set_cache_journaling_config() at the end of 
  *		H5F_open().  For now at least, both of these operations
- *		must be done juct before H5F_open() returns, as the 
+ *		must be done just before H5F_open() returns, as the 
  *		required information is not available when the metadata
  *		cache is created.
  *
@@ -1400,9 +1401,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build extpath")
 
     {
-        H5AC2_cache_config_t * config_ptr = NULL;
+        H5AC2_jnl_config_t * config_ptr = NULL;
 
-	config_ptr = ((H5AC2_cache_config_t *)&(file->shared->mdc_initCacheCfg));
+	config_ptr = &(file->shared->initJnlCfg);
 
         if ( H5AC2_check_for_journaling(file, dxpl_id, file->shared->cache2, 
                                         config_ptr->journal_recovered) < 0 ) {
@@ -1411,11 +1412,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
                         "H5AC2_check_for_journaling() reports failure.")
         }
 
-	if ( H5AC2_set_cache_journaling_config(file, dxpl_id, 
-				               config_ptr, TRUE) < 0 ) {
+	if ( H5AC2_set_jnl_config(file, dxpl_id, config_ptr) < 0 ) {
 
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, \
-                        "H5AC2_set_cache_journaling_config() failed.")
+                        "H5AC2_set_jnl_config() failed.")
 	}
     }
 
@@ -3326,27 +3326,148 @@ done:
  * Programmer:  Quincey Koziol
  *              7/3/08
  *
+ * Changes:	John Mainzer
+ * 		8/4/08
+ * 		Reworked function to use the new H5AC2_jnl_config_t 
+ * 		structure and H5AC2_get_jnl_config().
+ *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5F_is_journaling_enabled(const H5F_t *f)
 {
-    H5AC2_cache_config_t mdc_config;    /* Current cache configuration */
+    H5AC2_jnl_config_t config;    	/* Current journaling configuration */
     htri_t     ret_value;               /* Return value */
 
     FUNC_ENTER_NOAPI(H5F_is_journaling_enabled, FAIL)
 
     /* Retrieve the current cache information */
-    mdc_config.version = H5AC2__CURR_CACHE_CONFIG_VERSION;
-    if(H5AC2_get_cache_auto_resize_config(f->shared->cache2, &mdc_config) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve cache configuration")
+    config.version = H5AC2__CURR_JNL_CONFIG_VER;
+    if(H5AC2_get_jnl_config(f->shared->cache2, &config) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, \
+		    "can't retrieve journaling configuration")
 
     /* Set return value */
-    ret_value = mdc_config.enable_journaling;
+    ret_value = config.enable_journaling;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5F_is_journaling_enabled() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fget_jnl_config
+ *
+ * Purpose:     Retrieves the current journaling configuration, and 
+ * 		return it in *config_ptr.
+ *
+ *		Note that the version field of *config_Ptr must be correctly
+ *		filled in by the caller.  This allows us to adapt for
+ *		obsolete versions of the structure.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              8/1/08
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5Fget_jnl_config(hid_t file_id,
+		  H5AC2_jnl_config_t *config_ptr)
+{
+    H5F_t      *file=NULL;      /* File object for file ID */
+    herr_t     ret_value = SUCCEED;      /* Return value */
+    herr_t     result;
+
+    FUNC_ENTER_API(H5Fget_jnl_config, FAIL)
+    H5TRACE2("e", "i*x", file_id, config_ptr);
+
+    /* Check args */
+    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
+
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    }
+
+    if ( ( NULL == config_ptr ) ||
+         ( config_ptr->version != H5AC2__CURR_JNL_CONFIG_VER ) ) {
+
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
+    }
+
+    /* Go get the journaling configuration */
+    result = H5AC2_get_jnl_config(file->shared->cache2, config_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "H5AC_get_jnl_config() failed.");
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* H5Fget_jnl_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Fset_jnl_config
+ *
+ * Purpose:     Sets the current journaling configuration, using the 
+ * 		contents of the instance of H5AC2_jnl_config_t pointed 
+ * 		to by config_ptr.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              8/1/08
+ *
+ * Modifications:
+ *
+ *		None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5Fset_jnl_config(hid_t file_id,
+		  H5AC2_jnl_config_t *config_ptr)
+{
+    H5F_t      *file=NULL;      /* File object for file ID */
+    herr_t     ret_value = SUCCEED;      /* Return value */
+    herr_t     result;
+
+    FUNC_ENTER_API(H5Fset_jnl_config, FAIL)
+    H5TRACE2("e", "i*x", file_id, config_ptr);
+
+    /* Check args */
+    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
+
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+    }
+
+    /* set the resize configuration  */
+    result = H5AC2_set_jnl_config(file, H5P_DATASET_XFER_DEFAULT, config_ptr);
+
+    if ( result != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+                    "H5AC2_set_jnl_config() failed.");
+    }
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* H5Fset_jnl_config() */
 
 
 /*-------------------------------------------------------------------------
@@ -3460,7 +3581,6 @@ H5Fset_mdc_config(hid_t file_id,
 
     /* pass the resize configuration to the modified cache as well. */
     result = H5AC2_set_cache_auto_resize_config(file, 
-                                            H5P_DATASET_XFER_DEFAULT,
 		                            (H5AC2_cache_config_t *)config_ptr);
 
     if ( result != SUCCEED ) {

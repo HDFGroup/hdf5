@@ -2282,7 +2282,7 @@ H5C2_get_trace_file_ptr_from_entry(const H5C2_cache_entry_t *entry_ptr,
 {
     const H5C2_t        *cache_ptr;             /* Cache pointer, from entry */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5C2_get_trace_file_ptr)
+    FUNC_ENTER_NOAPI_NOFUNC(H5C2_get_trace_file_ptr_from_entry)
 
     /* Sanity checks */
     HDassert( entry_ptr );

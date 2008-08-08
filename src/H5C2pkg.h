@@ -3617,7 +3617,7 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
     } else if ( (entry_ptr)->last_trans != 0 ) {                          \
 	                                                                  \
         HDassert( (cache_ptr)->mdj_enabled );                             \
-	HDassert( (cache_ptr)->trans_in_progress );                       \
+        HDassert( (entry_ptr)->is_dirty );                                \
         H5C2__DLL_REMOVE((entry_ptr),                                     \
                          ((cache_ptr)->jwipl_head_ptr),                   \
                          ((cache_ptr)->jwipl_tail_ptr),                   \
