@@ -1055,11 +1055,11 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             f->shared->root_grp = NULL;
         } /* end if */
 
-        if(H5AC2_dest(f, dxpl_id))
+        if(H5AC_dest(f, dxpl_id))
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
-	/* also destroy the old cache */
-        if(H5AC_dest(f, dxpl_id))
+        /* also destroy the new cache */
+        if(H5AC2_dest(f, dxpl_id))
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
         if(H5FO_dest(f) < 0)
@@ -1782,10 +1782,10 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     H5AC_flags = 0;
     if((flags & H5F_FLUSH_INVALIDATE) != 0 )
         H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
-    if(H5AC2_flush(f, dxpl_id, H5AC_flags) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache2")
     if(H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
+    if(H5AC2_flush(f, dxpl_id, H5AC_flags) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache2")
 
     /*
      * If we are invalidating everything (which only happens just before

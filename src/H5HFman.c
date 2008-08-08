@@ -261,7 +261,6 @@ H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id,
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_op_real)
-
     /*
      * Check arguments.
      */
@@ -333,7 +332,7 @@ HDfprintf(stderr, "%s: entry address = %a\n", FUNC, iblock->ents[entry].addr);
         /* Check for offset of invalid direct block */
         if(!H5F_addr_defined(dblock_addr)) {
             /* Unlock indirect block */
-            if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+            if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC2__NO_FLAGS_SET, did_protect) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
 
             HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap ID not in allocated direct block")
@@ -342,14 +341,14 @@ HDfprintf(stderr, "%s: entry address = %a\n", FUNC, iblock->ents[entry].addr);
         /* Lock direct block */
         if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, iblock, entry, dblock_access))) {
             /* Unlock indirect block */
-            if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+            if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC2__NO_FLAGS_SET, did_protect) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
 
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap direct block")
         } /* end if */
 
         /* Unlock indirect block */
-        if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+        if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC2__NO_FLAGS_SET, did_protect) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
         iblock = NULL;
     } /* end else */
@@ -623,7 +622,7 @@ HDfprintf(stderr, "%s: sec_node->u.single.par_entry = %u\n", FUNC, sec_node->u.s
 
     /* Unlock indirect block */
     if(iblock) {
-        if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+        if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC2__NO_FLAGS_SET, did_protect) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
         iblock = NULL;
     } /* end if */
@@ -642,7 +641,7 @@ HDfprintf(stderr, "%s: sec_node->u.single.par_entry = %u\n", FUNC, sec_node->u.s
 done:
     if(ret_value < 0) {
         /* Unlock indirect block */
-        if(iblock && H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+        if(iblock && H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC2__NO_FLAGS_SET, did_protect) < 0)
             HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
     } /* end if */
 

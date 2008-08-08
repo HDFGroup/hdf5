@@ -582,7 +582,7 @@ H5HF_sect_single_locate_parent(H5HF_hdr_t *hdr, hid_t dxpl_id, hbool_t refresh,
     sect->u.single.par_entry = sec_entry;
 
     /* Unlock indirect block */
-    if(H5HF_man_iblock_unprotect(sec_iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+    if(H5HF_man_iblock_unprotect(sec_iblock, dxpl_id, H5AC2__NO_FLAGS_SET, did_protect) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
     sec_iblock = NULL;
 
@@ -2735,7 +2735,7 @@ HDfprintf(stderr, "%s: child_iblock_addr = %a\n", FUNC, child_iblock_addr);
 
                     /* If the child indirect block's address is defined, protect it */
                     if(H5F_addr_defined(child_iblock_addr)) {
-                        if(NULL == (child_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, child_iblock_addr, child_nrows, sect->u.indirect.u.iblock, curr_entry, FALSE, H5AC_WRITE, &did_protect)))
+                        if(NULL == (child_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, child_iblock_addr, child_nrows, sect->u.indirect.u.iblock, curr_entry, FALSE, H5AC2_WRITE, &did_protect)))
                             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
                     } /* end if */
                     else
@@ -2758,7 +2758,7 @@ HDfprintf(stderr, "%s: child_iblock_addr = %a\n", FUNC, child_iblock_addr);
                 /* If we have a valid child indirect block, release it now */
                 /* (will be pinned, if rows reference it) */
                 if(child_iblock)
-                    if(H5HF_man_iblock_unprotect(child_iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+                    if(H5HF_man_iblock_unprotect(child_iblock, dxpl_id, H5AC2__NO_FLAGS_SET, did_protect) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
 
                 /* Attach child section to this section */
@@ -2991,7 +2991,7 @@ HDfprintf(stderr, "%s: sect->u.indirect.u.iblock_off = %Hu\n", FUNC, sect->u.ind
             sect->u.indirect.u.iblock->max_rows;
 
     /* Unlock indirect block */
-    if(H5HF_man_iblock_unprotect(sec_iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+    if(H5HF_man_iblock_unprotect(sec_iblock, dxpl_id, H5AC2__NO_FLAGS_SET, did_protect) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
     sec_iblock = NULL;
 

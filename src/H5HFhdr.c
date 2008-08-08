@@ -131,7 +131,7 @@ H5HF_hdr_alloc(H5F_t *f)
 done:
     if(!ret_value)
         if(hdr)
-            (void)H5HF_cache_hdr_dest(f, hdr);
+            (void)H5HF_cache_hdr_dest(hdr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_alloc() */
@@ -501,7 +501,7 @@ HDfprintf(stderr, "%s: hdr->id_len = %Zu\n", FUNC, hdr->id_len);
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed for fractal heap header")
 
     /* Cache the new fractal heap header */
-    if(H5AC_set(f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC2_set(f, dxpl_id, H5AC2_FHEAP_HDR, hdr->heap_addr, (size_t)hdr->heap_size, hdr, H5AC2__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't add fractal heap header to cache")
 
     /* Set address of heap header to return */
@@ -510,7 +510,7 @@ HDfprintf(stderr, "%s: hdr->id_len = %Zu\n", FUNC, hdr->id_len);
 done:
     if(!H5F_addr_defined(ret_value))
         if(hdr)
-            (void)H5HF_cache_hdr_dest(NULL, hdr);
+            (void)H5HF_cache_hdr_dest(hdr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_create() */
@@ -541,7 +541,7 @@ H5HF_hdr_incr(H5HF_hdr_t *hdr)
 
     /* Mark header as un-evictable when a block is depending on it */
     if(hdr->rc == 0)
-        if(H5AC_pin_protected_entry(hdr->f, hdr) < 0)
+        if(H5AC2_pin_protected_entry(hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPIN, FAIL, "unable to pin fractal heap header")
 
     /* Increment reference count on shared header */
@@ -582,7 +582,7 @@ H5HF_hdr_decr(H5HF_hdr_t *hdr)
     /* Mark header as evictable again when no child blocks depend on it */
     if(hdr->rc == 0) {
         HDassert(hdr->file_rc == 0);
-        if(H5AC_unpin_entry(hdr->f, hdr) < 0)
+        if(H5AC2_unpin_entry(hdr) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin fractal heap header")
     } /* end if */
 
@@ -674,8 +674,14 @@ HDfprintf(stderr, "%s: Marking heap header as dirty\n", FUNC);
     /* Sanity check */
     HDassert(hdr);
 
+    /* Resize pinned header in cache if I/O filter is present. */
+    if (hdr->filter_len > 0) {
+        if(H5AC2_resize_pinned_entry(hdr, (size_t)hdr->heap_size) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTRESIZE, FAIL, "unable to resize fractal heap header")
+    }
+
     /* Mark header as dirty in cache */
-    if(H5AC_mark_pinned_or_protected_entry_dirty(hdr->f, hdr) < 0)
+    if(H5AC2_mark_pinned_or_protected_entry_dirty(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTMARKDIRTY, FAIL, "unable to mark fractal heap header as dirty")
 
     /* Set the dirty flags for the heap header */
@@ -1164,7 +1170,7 @@ HDfprintf(stderr, "%s: Allocating new child indirect block\n", FUNC);
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't allocate fractal heap indirect block")
 
                     /* Lock new indirect block */
-                    if(NULL == (new_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, new_iblock_addr, child_nrows, iblock, next_entry, FALSE, H5AC_WRITE, &did_protect)))
+                    if(NULL == (new_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, new_iblock_addr, child_nrows, iblock, next_entry, FALSE, H5AC2_WRITE, &did_protect)))
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
 
                     /* Move iterator down one level (pins indirect block) */
@@ -1187,7 +1193,7 @@ HDfprintf(stderr, "%s: Skipping rows in new child indirect block - new_entry = %
                     } /* end if */
 
                     /* Unprotect child indirect block */
-                    if(H5HF_man_iblock_unprotect(new_iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+                    if(H5HF_man_iblock_unprotect(new_iblock, dxpl_id, H5AC2__NO_FLAGS_SET, did_protect) < 0)
                         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
                 } /* end else */
 
@@ -1400,7 +1406,7 @@ HDfprintf(stderr, "%s: Walking down into child block\n", FUNC);
                 child_nrows = H5HF_dtable_size_to_rows(&hdr->man_dtable, hdr->man_dtable.row_block_size[row]);
 
                 /* Lock child indirect block */
-                if(NULL == (child_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock->ents[curr_entry].addr, child_nrows, iblock, curr_entry, FALSE, H5AC_WRITE, &did_protect)))
+                if(NULL == (child_iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock->ents[curr_entry].addr, child_nrows, iblock, curr_entry, FALSE, H5AC2_WRITE, &did_protect)))
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap indirect block")
 
                 /* Set the current location of the iterator */
@@ -1421,7 +1427,7 @@ HDfprintf(stderr, "%s: curr_entry = %u\n", FUNC, curr_entry);
 #endif /* QAK */
 
                 /* Unprotect child indirect block */
-                if(H5HF_man_iblock_unprotect(child_iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
+                if(H5HF_man_iblock_unprotect(child_iblock, dxpl_id, H5AC2__NO_FLAGS_SET, did_protect) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
 
                 /* Note that we walked down */
@@ -1520,12 +1526,12 @@ H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
     unsigned hdr_status = 0;         /* Heap header's status in the metadata cache */
 
     /* Check the heap header's status in the metadata cache */
-    if(H5AC_get_entry_status(hdr->f, hdr->heap_addr, &hdr_status) < 0)
+    if(H5AC2_get_entry_status(hdr->f, hdr->heap_addr, &hdr_status) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to check metadata cache status for heap header")
 
     /* Sanity checks on heap header */
-    HDassert(hdr_status & H5AC_ES__IN_CACHE);
-    HDassert(hdr_status & H5AC_ES__IS_PROTECTED);
+    HDassert(hdr_status & H5AC2_ES__IN_CACHE);
+    HDassert(hdr_status & H5AC2_ES__IS_PROTECTED);
 } /* end block */
 #endif /* NDEBUG */
 
@@ -1590,13 +1596,13 @@ HDfprintf(stderr, "%s: hdr->huge_bt2_addr = %a\n", FUNC, hdr->huge_bt2_addr);
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap header")
 
     /* Finished deleting header */
-    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
+    if(H5AC2_unprotect(hdr->f, dxpl_id, H5AC2_FHEAP_HDR, hdr->heap_addr, (size_t)0, hdr, H5AC2__DIRTIED_FLAG|H5AC2__DELETED_FLAG) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
     hdr = NULL;
 
 done:
     /* Unprotect the header, if an error occurred */
-    if(hdr && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC2_unprotect(hdr->f, dxpl_id, H5AC2_FHEAP_HDR, hdr->heap_addr, (size_t)0, hdr, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -154,6 +154,7 @@ H5HF_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
     H5HF_hdr_t *hdr = NULL;     /* The fractal heap header information */
     haddr_t fh_addr;            /* Heap header address */
     H5HF_t *ret_value;          /* Return value */
+    H5HF_hdr_cache_ud_t cache_udata; /* User-data for callback */
 
     FUNC_ENTER_NOAPI(H5HF_create, NULL)
 #ifdef QAK
@@ -174,15 +175,17 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     if(NULL == (fh = H5FL_MALLOC(H5HF_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fractal heap info")
 
+    cache_udata.f = f;
+    cache_udata.dxpl_id = dxpl_id;
     /* Lock the heap header into memory */
-    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_WRITE)))
+
+    if(NULL == (hdr = H5AC2_protect(f, dxpl_id, H5AC2_FHEAP_HDR, fh_addr, (size_t)H5HF_SPEC_READ_SIZE(f), &cache_udata, H5AC2_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to load fractal heap header")
 
     /* Point fractal heap wrapper at header and bump it's ref count */
     fh->hdr = hdr;
     if(H5HF_hdr_incr(fh->hdr) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
-
     /* Increment # of files using this heap header */
     if(H5HF_hdr_fuse_incr(fh->hdr) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
@@ -194,7 +197,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     ret_value = fh;
 
 done:
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC2_unprotect(f, dxpl_id, H5AC2_FHEAP_HDR, fh_addr, (size_t)0, hdr, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header")
     if(!ret_value) {
         if(fh)
@@ -225,6 +228,7 @@ H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
     H5HF_t *fh = NULL;          /* Pointer to new fractal heap */
     H5HF_hdr_t *hdr = NULL;     /* The fractal heap header information */
     H5HF_t *ret_value;          /* Return value */
+    H5HF_hdr_cache_ud_t cache_udata; /* User-data for callback */
 
     FUNC_ENTER_NOAPI(H5HF_open, NULL)
 
@@ -234,11 +238,15 @@ H5HF_open(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
     HDassert(f);
     HDassert(H5F_addr_defined(fh_addr));
 
+    cache_udata.f = f;
+    cache_udata.dxpl_id = dxpl_id;
+
+
     /* Load the heap header into memory */
 #ifdef QAK
 HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
 #endif /* QAK */
-    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (hdr = H5AC2_protect(f, dxpl_id, H5AC2_FHEAP_HDR, fh_addr, (size_t)H5HF_SPEC_READ_SIZE(f), &cache_udata, H5AC2_READ)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load fractal heap header")
 #ifdef QAK
 HDfprintf(stderr, "%s: hdr->rc = %u, hdr->fspace = %p\n", FUNC, hdr->rc, hdr->fspace);
@@ -268,7 +276,7 @@ HDfprintf(stderr, "%s: hdr->rc = %u, hdr->fspace = %p\n", FUNC, hdr->rc, hdr->fs
     ret_value = fh;
 
 done:
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC2_unprotect(f, dxpl_id, H5AC2_FHEAP_HDR, fh_addr, (size_t)0, hdr, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, NULL, "unable to release fractal heap header")
     if(!ret_value) {
         if(fh)
@@ -788,6 +796,7 @@ H5HF_close(H5HF_t *fh, hid_t dxpl_id)
     hbool_t pending_delete = FALSE;     /* Whether the heap is pending deletion */
     haddr_t heap_addr = HADDR_UNDEF;    /* Address of heap (for deletion) */
     herr_t ret_value = SUCCEED;
+    H5HF_hdr_cache_ud_t cache_udata; /* User-data for callback */
 
     FUNC_ENTER_NOAPI(H5HF_close, FAIL)
 
@@ -795,7 +804,6 @@ H5HF_close(H5HF_t *fh, hid_t dxpl_id)
      * Check arguments.
      */
     HDassert(fh);
-
     /* Decrement file reference & check if this is the last open fractal heap using the shared heap header */
     if(0 == H5HF_hdr_fuse_decr(fh->hdr)) {
         /* Set the shared heap header's file context for this operation */
@@ -854,8 +862,11 @@ HDfprintf(stderr, "%s; After iterator reset fh->hdr->rc = %Zu\n", FUNC, fh->hdr-
     if(pending_delete) {
         H5HF_hdr_t *hdr;            /* Another pointer to fractal heap header */
 
+        cache_udata.f = fh->f;
+        cache_udata.dxpl_id = dxpl_id;
+
         /* Lock the heap header into memory */
-        if(NULL == (hdr = H5AC_protect(fh->f, dxpl_id, H5AC_FHEAP_HDR, heap_addr, NULL, NULL, H5AC_WRITE)))
+        if(NULL == (hdr = H5AC2_protect(fh->f, dxpl_id, H5AC2_FHEAP_HDR, heap_addr, (size_t)H5HF_SPEC_READ_SIZE(fh->f), &cache_udata, H5AC2_WRITE)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
 
         /* Set the shared heap header's file context for this operation */
@@ -892,6 +903,7 @@ H5HF_delete(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
 {
     H5HF_hdr_t *hdr = NULL;             /* The fractal heap header information */
     herr_t ret_value = SUCCEED;
+    H5HF_hdr_cache_ud_t cache_udata; /* User-data for callback */
 
     FUNC_ENTER_NOAPI(H5HF_delete, FAIL)
 
@@ -901,11 +913,14 @@ H5HF_delete(H5F_t *f, hid_t dxpl_id, haddr_t fh_addr)
     HDassert(f);
     HDassert(H5F_addr_defined(fh_addr));
 
+    cache_udata.f = f;
+    cache_udata.dxpl_id = dxpl_id;
+
     /* Lock the heap header into memory */
 #ifdef QAK
 HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
 #endif /* QAK */
-    if(NULL == (hdr = H5AC_protect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (hdr = H5AC2_protect(f, dxpl_id, H5AC2_FHEAP_HDR, fh_addr, (size_t)H5HF_SPEC_READ_SIZE(f), &cache_udata, H5AC2_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap header")
 
     /* Check for files using shared heap header */
@@ -920,9 +935,102 @@ HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
 
 done:
     /* Unprotect the header, if an error occurred */
-    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_HDR, fh_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    if(hdr && H5AC2_unprotect(f, dxpl_id, H5AC2_FHEAP_HDR, fh_addr, (size_t)0, hdr, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_cache_hdr_dest
+ *
+ * Purpose:	Destroys a fractal heap header in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 24 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+herr_t
+H5HF_cache_hdr_dest(H5HF_hdr_t *hdr)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_hdr_dest)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(hdr->rc == 0);
+
+    /* Free the block size lookup table for the doubling table */
+    H5HF_dtable_dest(&hdr->man_dtable);
+
+    /* Release any I/O pipeline filter information */
+    if(hdr->pline.nused)
+        H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline));
+
+    /* Free the shared info itself */
+    H5FL_FREE(H5HF_hdr_t, hdr);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_cache_hdr_dest() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_cache_iblock_dest
+ *
+ * Purpose:	Destroys a fractal heap indirect block in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Mar  6 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+herr_t
+H5HF_cache_iblock_dest(H5HF_indirect_t *iblock)
+{
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_cache_iblock_dest)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(iblock);
+    HDassert(iblock->rc == 0);
+#ifdef QAK
+HDfprintf(stderr, "%s: Destroying indirect block\n", FUNC);
+#endif /* QAK */
+
+    /* Decrement reference count on shared info */
+    HDassert(iblock->hdr);
+    if(H5HF_hdr_decr(iblock->hdr) < 0)
+        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
+    if(iblock->parent)
+        if(H5HF_iblock_decr(iblock->parent) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared indirect block")
+
+    /* Release entry tables */
+    if(iblock->ents)
+        H5FL_SEQ_FREE(H5HF_indirect_ent_t, iblock->ents);
+    if(iblock->filt_ents)
+        H5FL_SEQ_FREE(H5HF_indirect_filt_ent_t, iblock->filt_ents);
+    if(iblock->child_iblocks)
+        H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
+
+    /* Free fractal heap indirect block info */
+    H5FL_FREE(H5HF_indirect_t, iblock);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5HF_cache_iblock_dest() */
 
