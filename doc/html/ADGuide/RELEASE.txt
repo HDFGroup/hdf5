@@ -1,4 +1,4 @@
-HDF5 version 1.6.7-snap13 released on Sun Aug  3 16:36:42 CDT 2008
+HDF5 version 1.6.7-snap14 released on Sun Aug 10 17:15:32 CDT 2008
 ================================================================================
 
 INTRODUCTION
@@ -93,7 +93,8 @@ Bug Fixes since HDF5-1.6.7 Release
 
     Library
     -------
-     None
+     - Fixed issue where datatypes were being saved with the wrong version
+        numbers.  (NAF - 2008/08/08)
 
     Configuration
     -------------
