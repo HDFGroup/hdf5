@@ -315,7 +315,8 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
     HDassert(cpy_info);
 
     /* Get source object header */
-    if(NULL == (oh_src = (H5O_t *)H5AC_protect(oloc_src->file, dxpl_id, H5AC_OHDR, oloc_src->addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh_src = (H5O_t *)H5AC_protect(oloc_src->file, dxpl_id, H5AC_OHDR, oloc_src->addr, NULL, NULL,
+        (H5F_get_intent(oloc_src->file) & H5F_ACC_RDWR) ? H5AC_WRITE : H5AC_READ)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Get pointer to object class for this object */
@@ -396,7 +397,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
 
         if(copy_type->pre_copy_file) {
             /* Decode the message if necessary. */
-            H5O_LOAD_NATIVE(oloc_src->file, dxpl_id, oh_src, mesg_src, FAIL)
+            H5O_LOAD_NATIVE(oloc_src->file, dxpl_id, 0, oh_src, mesg_src, FAIL)
 
             /* Perform "pre copy" operation on message */
             if((copy_type->pre_copy_file)(oloc_src->file, mesg_src->native, &(deleted[mesgno]), cpy_info, udata) < 0)
@@ -467,7 +468,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
             hbool_t recompute_size;     /* Whether copy_file callback created a shared message */
 
             /* Decode the message if necessary. */
-            H5O_LOAD_NATIVE(oloc_src->file, dxpl_id, oh_src, mesg_src, FAIL)
+            H5O_LOAD_NATIVE(oloc_src->file, dxpl_id, 0, oh_src, mesg_src, FAIL)
 
             /* Copy the source message */
             recompute_size = FALSE;

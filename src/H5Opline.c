@@ -33,7 +33,8 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_pline_encode(H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_pline_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void *H5O_pline_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static void *H5O_pline_copy(const void *_mesg, void *_dest);
 static size_t H5O_pline_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_pline_reset(void *_mesg);
@@ -107,7 +108,7 @@ H5FL_DEFINE(H5O_pline_t);
  */
 static void *
 H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_pline_t		*pline = NULL;          /* Pipeline message */
     H5Z_filter_info_t   *filter;                /* Filter to decode */

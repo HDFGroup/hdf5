@@ -484,7 +484,8 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
     HDassert(type_id < NELMTS(H5O_msg_class_g));
 
     /* Get the object header */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL,
+        (H5F_get_intent(loc->file) & H5F_ACC_RDWR) ? H5AC_WRITE : H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header")
 
     /* Call the "real" read routine */
@@ -550,7 +551,7 @@ H5O_msg_read_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
      * Decode the message if necessary.  If the message is shared then retrieve
      * native message through the shared interface.
      */
-    H5O_LOAD_NATIVE(f, dxpl_id, oh, &(oh->mesg[idx]), NULL)
+    H5O_LOAD_NATIVE(f, dxpl_id, 0, oh, &(oh->mesg[idx]), NULL)
 
     /*
      * The object header caches the native message (along with
@@ -1230,7 +1231,8 @@ H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id,
     HDassert(op);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL,
+        (H5F_get_intent(loc->file) & H5F_ACC_RDWR) ? H5AC_WRITE : H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Call the "real" iterate routine */
@@ -1299,7 +1301,7 @@ H5O_msg_iterate_real(H5F_t *f, H5O_t *oh, const H5O_msg_class_t *type,
     for(sequence = 0, idx = 0, idx_msg = &oh->mesg[0]; idx < oh->nmesgs && !ret_value; idx++, idx_msg++) {
 	if(type == idx_msg->type) {
             /* Decode the message if necessary.  */
-            H5O_LOAD_NATIVE(f, dxpl_id, oh, idx_msg, FAIL)
+            H5O_LOAD_NATIVE(f, dxpl_id, 0, oh, idx_msg, FAIL)
 
             /* Check for making an "internal" (i.e. within the H5O package) callback */
             if(op->op_type == H5O_MESG_OP_LIB)
@@ -1811,6 +1813,7 @@ H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, const unsigned char *b
 {
     const H5O_msg_class_t   *type;      /* Actual H5O class type for the ID */
     void *ret_value;                    /* Return value */
+    unsigned ioflags = 0;               /* Flags for decode routine */
 
     FUNC_ENTER_NOAPI(H5O_msg_decode, NULL)
 
@@ -1821,7 +1824,7 @@ H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, const unsigned char *b
     HDassert(type);
 
     /* decode */
-    if((ret_value = (type->decode)(f, dxpl_id, 0, buf)) == NULL)
+    if((ret_value = (type->decode)(f, dxpl_id, 0, &ioflags, buf)) == NULL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode message")
 
 done:
@@ -2076,7 +2079,7 @@ H5O_delete_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg)
     /* Check if there is a file space deletion callback for this type of message */
     if(type->del) {
         /* Decode the message if necessary. */
-        H5O_LOAD_NATIVE(f, dxpl_id, oh, mesg, FAIL)
+        H5O_LOAD_NATIVE(f, dxpl_id, H5O_DECODEIO_NOCHANGE, oh, mesg, FAIL)
 
         if((type->del)(f, dxpl_id, oh, mesg->native) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")

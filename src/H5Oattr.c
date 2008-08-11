@@ -30,7 +30,8 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_attr_encode(H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void *H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static void *H5O_attr_copy(const void *_mesg, void *_dest);
 static size_t H5O_attr_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_attr_free(void *mesg);
@@ -124,7 +125,7 @@ H5FL_EXTERN(H5S_extent_t);
 --------------------------------------------------------------------------*/
 static void *
 H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned *ioflags, const uint8_t *p)
 {
     H5A_t		*attr = NULL;
     H5S_extent_t	*extent;	/*extent dimensionality information  */
@@ -184,7 +185,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
         p += name_len;    /* advance the memory pointer */
 
     /* Decode the attribute's datatype */
-    if((attr->shared->dt = (H5T_t *)(H5O_MSG_DTYPE->decode)(f, dxpl_id, ((flags & H5O_ATTR_FLAG_TYPE_SHARED) ? H5O_MSG_FLAG_SHARED : 0), p)) == NULL)
+    if((attr->shared->dt = (H5T_t *)(H5O_MSG_DTYPE->decode)(f, dxpl_id, ((flags & H5O_ATTR_FLAG_TYPE_SHARED) ? H5O_MSG_FLAG_SHARED : 0), ioflags, p)) == NULL)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
     if(attr->shared->version < H5O_ATTR_VERSION_2)
         p += H5O_ALIGN_OLD(attr->shared->dt_size);
@@ -198,7 +199,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Decode attribute's dataspace extent */
-    if((extent = (H5S_extent_t *)(H5O_MSG_SDSPACE->decode)(f, dxpl_id, ((flags & H5O_ATTR_FLAG_SPACE_SHARED) ? H5O_MSG_FLAG_SHARED : 0), p)) == NULL)
+    if((extent = (H5S_extent_t *)(H5O_MSG_SDSPACE->decode)(f, dxpl_id, ((flags & H5O_ATTR_FLAG_SPACE_SHARED) ? H5O_MSG_FLAG_SHARED : 0), ioflags, p)) == NULL)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute dataspace")
 
     /* Copy the extent information to the dataspace */

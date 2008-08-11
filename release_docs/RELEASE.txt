@@ -99,6 +99,8 @@ Bug Fixes since HDF5-1.8.1
 
         Library
         -------
+        - Fixed assertion failure caused by incorrect array datatype version.
+            (NAF - 2008/08/08)
         - Fixed an issue where mount point traversal would fail when using
             multiple handles for the child.  (NAF - 2008/08/07)
         - Fixed an issue where mount points were inaccessible when using multiple
@@ -371,7 +373,8 @@ Known Problems
 
 * On Mac OS 10.4, test/dt_arith.c has some errors in conversion from long
   double to (unsigned) long long and from (unsigned) long long to long double. 
-
++       - Fixed assertion failure caused by incorrect array datatype version.
++             (NAF - 2008/08/04)
 * On Altix SGI with Intel 9.0, testmeta.c would not compile with -O3
   optimization flag.
 

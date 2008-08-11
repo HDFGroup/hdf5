@@ -159,8 +159,11 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
         H5O_info_t oinfo;
 
         /* Get information about the object */
-        if(H5Oget_info_by_name(loc_id, path, &oinfo, H5P_DEFAULT) < 0)
+        if(H5Oget_info_by_name(loc_id, path, &oinfo, H5P_DEFAULT) < 0) {
+            if(new_name)
+                HDfree(new_name);
             return(H5_ITER_ERROR);
+        }
 
         /* If the object has multiple links, add it to the list of addresses
          *  already visited, if it isn't there already
@@ -171,12 +174,20 @@ traverse_cb(hid_t loc_id, const char *path, const H5L_info_t *linfo,
 
         /* Make 'visit object' callback */
         if(udata->visitor->visit_obj)
-            (*udata->visitor->visit_obj)(full_name, &oinfo, already_visited, udata->visitor->udata);
+            if((*udata->visitor->visit_obj)(full_name, &oinfo, already_visited, udata->visitor->udata) < 0) {
+                if(new_name)
+                    HDfree(new_name);
+                return(H5_ITER_ERROR);
+            }
     } /* end if */
     else {
         /* Make 'visit link' callback */
         if(udata->visitor->visit_lnk)
-            (*udata->visitor->visit_lnk)(full_name, linfo, udata->visitor->udata);
+            if((*udata->visitor->visit_lnk)(full_name, linfo, udata->visitor->udata) < 0) {
+                if(new_name)
+                    HDfree(new_name);
+                return(H5_ITER_ERROR);
+            }
     } /* end else */
 
     if(new_name)

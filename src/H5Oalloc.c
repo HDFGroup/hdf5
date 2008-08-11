@@ -1482,12 +1482,7 @@ H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
                 for(v = 0, cont_msg = &oh->mesg[0]; v < oh->nmesgs; v++, cont_msg++) {
                     if(H5O_CONT_ID == cont_msg->type->id) {
                         /* Decode current continuation message if necessary */
-                        if(NULL == cont_msg->native) {
-                            HDassert(H5O_MSG_CONT->decode);
-                            cont_msg->native = (H5O_MSG_CONT->decode)(f, dxpl_id, 0, cont_msg->raw);
-                            if(NULL == cont_msg->native)
-                                HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message")
-                        } /* end if */
+                        H5O_LOAD_NATIVE(f, dxpl_id, 0, oh, cont_msg, FAIL)
 
                         /* Check for correct chunk to delete */
                         if(oh->chunk[null_msg->chunkno].addr == ((H5O_cont_t *)(cont_msg->native))->addr)
@@ -1545,12 +1540,7 @@ H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
                     /* Check for continuation message */
                     if(H5O_CONT_ID == curr_msg->type->id) {
                         /* Decode current continuation message if necessary */
-                        if(NULL == curr_msg->native) {
-                            HDassert(H5O_MSG_CONT->decode);
-                            curr_msg->native = (H5O_MSG_CONT->decode)(f, dxpl_id, 0, curr_msg->raw);
-                            if(NULL == curr_msg->native)
-                                HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, FAIL, "unable to decode message")
-                        } /* end if */
+                        H5O_LOAD_NATIVE(f, dxpl_id, 0, oh, curr_msg, FAIL)
 
                         /* Check for pointer to chunk after deleted chunk */
                         if(((H5O_cont_t *)(curr_msg->native))->chunkno > deleted_chunkno)
