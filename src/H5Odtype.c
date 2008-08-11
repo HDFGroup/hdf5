@@ -831,14 +831,6 @@ H5O_dtype_decode(H5F_t *f, hid_t UNUSED dxpl_id, const uint8_t *p)
     ret_value=dt;
 
 done:
-    if(ret_value==NULL) {
-        if(dt != NULL) {
-            if(dt->shared != NULL)
-                H5FL_FREE(H5T_shared_t, dt->shared);
-            H5FL_FREE(H5T_t, dt);
-        } /* end if */
-    } /* end if */
-
     FUNC_LEAVE_NOAPI(ret_value);
 }
 
