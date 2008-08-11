@@ -33,10 +33,12 @@
 #include "H5Sprivate.h"		/* Dataspaces				*/
 
 
-static void  *H5O_fill_old_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void  *H5O_fill_old_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_fill_old_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_fill_old_size(const H5F_t *f, const void *_mesg);
-static void  *H5O_fill_new_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void  *H5O_fill_new_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_fill_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_fill_new_size(const H5F_t *f, const void *_mesg);
 static void  *H5O_fill_copy(const void *_mesg, void *_dest);
@@ -181,7 +183,7 @@ H5FL_BLK_EXTERN(type_conv);
  */
 static void *
 H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_fill_t	*fill = NULL;
     void	*ret_value;
@@ -295,7 +297,7 @@ done:
  */
 static void *
 H5O_fill_old_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_fill_t *fill = NULL;		/* Decoded fill value message */
     void *ret_value;                    /* Return value */

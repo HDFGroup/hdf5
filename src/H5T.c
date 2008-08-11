@@ -5150,6 +5150,11 @@ H5T_upgrade_version_cb(H5T_t *dt, void *op_value)
                 dt->shared->version = *(unsigned *)op_value;
             break;
 
+        case H5T_VLEN:
+            if(dt->shared->parent->shared->version > dt->shared->version)
+                dt->shared->version = dt->shared->parent->shared->version;
+            break;
+
         default:
             break;
     } /* end switch */

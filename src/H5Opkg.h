@@ -174,16 +174,28 @@
 #define H5O_SIZEOF_CHKSUM_OH(O)						      \
     H5O_SIZEOF_CHKSUM_VERS((O)->version)
 
+/* Input/output flags for decode functions */
+#define H5O_DECODEIO_NOCHANGE           0x01u   /* IN: do not modify values */
+#define H5O_DECODEIO_DIRTY              0x02u   /* OUT: message has been changed */
+
 /* Load native information for a message, if it's not already present */
 /* (Only works for messages with decode callback) */
-#define H5O_LOAD_NATIVE(F, DXPL, OH, MSG, ERR)                                \
+#define H5O_LOAD_NATIVE(F, DXPL, IOF, OH, MSG, ERR)                           \
     if(NULL == (MSG)->native) {                                               \
         const H5O_msg_class_t	*msg_type = (MSG)->type;                      \
+        unsigned                ioflags = (IOF);                              \
                                                                               \
         /* Decode the message */                                              \
         HDassert(msg_type->decode);                                           \
-        if(NULL == ((MSG)->native = (msg_type->decode)((F), (DXPL), (MSG)->flags, (MSG)->raw))) \
+        if(NULL == ((MSG)->native = (msg_type->decode)((F), (DXPL), (MSG)->flags, &ioflags, (MSG)->raw))) \
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, ERR, "unable to decode message") \
+                                                                              \
+        /* Mark the object header dirty if the message was changed by decoding */ \
+        if((ioflags & H5O_DECODEIO_DIRTY) && (H5F_get_intent((F)) & H5F_ACC_RDWR)) { \
+            (MSG)->dirty = TRUE;                                              \
+            if(H5AC_mark_pinned_or_protected_entry_dirty((F), (OH)) < 0)      \
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, ERR, "unable to mark object header as dirty") \
+        }                                                                     \
                                                                               \
         /* Set the message's "shared info", if it's shareable */	      \
         if((MSG)->flags & H5O_MSG_FLAG_SHAREABLE) {                           \
@@ -209,7 +221,7 @@ struct H5O_msg_class_t {
     const char	*name;				/*for debugging             */
     size_t	native_size;			/*size of native message    */
     unsigned    share_flags;			/* Message sharing settings */
-    void	*(*decode)(H5F_t*, hid_t, unsigned, const uint8_t *);
+    void	*(*decode)(H5F_t*, hid_t, unsigned, unsigned *, const uint8_t *);
     herr_t	(*encode)(H5F_t*, hbool_t, uint8_t*, const void *);
     void	*(*copy)(const void *, void *);	/*copy native value         */
     size_t	(*raw_size)(const H5F_t *, hbool_t, const void *);/*sizeof encoded message	*/
@@ -502,7 +514,8 @@ H5_DLL herr_t H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     H5O_mesg_t *mesg, hbool_t adj_link);
 
 /* Shared object operators */
-H5_DLL void * H5O_shared_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *buf, const H5O_msg_class_t *type);
+H5_DLL void * H5O_shared_decode(H5F_t *f, hid_t dxpl_id, unsigned *ioflags, 
+    const uint8_t *buf, const H5O_msg_class_t *type);
 H5_DLL herr_t H5O_shared_encode(const H5F_t *f, uint8_t *buf/*out*/, const H5O_shared_t *sh_mesg);
 H5_DLL size_t H5O_shared_size(const H5F_t *f, const H5O_shared_t *sh_mesg);
 H5_DLL herr_t H5O_shared_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,

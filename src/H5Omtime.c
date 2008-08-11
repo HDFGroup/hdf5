@@ -28,11 +28,13 @@
 #include "H5Opkg.h"             /* Object headers			*/
 
 
-static void *H5O_mtime_new_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void *H5O_mtime_new_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_mtime_new_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static size_t H5O_mtime_new_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 
-static void *H5O_mtime_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void *H5O_mtime_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_mtime_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_mtime_copy(const void *_mesg, void *_dest);
 static size_t H5O_mtime_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -118,7 +120,7 @@ H5FL_DEFINE(time_t);
  */
 static void *
 H5O_mtime_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     time_t	*mesg;
     uint32_t    tmp_time;       /* Temporary copy of the time */
@@ -171,7 +173,7 @@ done:
  */
 static void *
 H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     time_t	*mesg, the_time;
     int	i;

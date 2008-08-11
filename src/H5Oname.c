@@ -33,7 +33,8 @@
 
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_name_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void *H5O_name_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_name_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_name_copy(const void *_mesg, void *_dest);
 static size_t H5O_name_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -84,7 +85,7 @@ const H5O_msg_class_t H5O_MSG_NAME[1] = {{
  */
 static void *
 H5O_name_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_name_t          *mesg;
     void                *ret_value;     /* Return value */

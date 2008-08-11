@@ -104,6 +104,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed assertion failure caused by incorrect array datatype version.
+            (NAF - 2008/08/08)
       - Fixed an issue where mount point traversal would fail when using
             multiple handles for the child.  (NAF - 2008/08/07)
       - Fixed an issue where mount points were inaccessible when using multiple

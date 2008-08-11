@@ -536,9 +536,10 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             /* Check if next message to examine is a continuation message */
             if(H5O_CONT_ID == oh->mesg[curmesg].type->id) {
                 H5O_cont_t *cont;
+                unsigned ioflags = 0;   /* Flags for decode routine */
 
                 /* Decode continuation message */
-                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(f, dxpl_id, 0, oh->mesg[curmesg].raw);
+                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(f, dxpl_id, 0, &ioflags, oh->mesg[curmesg].raw);
                 cont->chunkno = oh->nchunks;	/*the next chunk to allocate */
 
                 /* Save 'native' form of continuation message */
@@ -547,14 +548,21 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                 /* Set up to read in next chunk */
                 chunk_addr = cont->addr;
                 chunk_size = cont->size;
+
+                /* Mark the object header as dirty if the message was changed by decoding */
+                if((ioflags & H5O_DECODEIO_DIRTY) && (H5F_get_intent(f) & H5F_ACC_RDWR)) {
+                    oh->mesg[curmesg].dirty = TRUE;
+                    oh->cache_info.is_dirty = TRUE;
+	            }
             } /* end if */
             /* Check if next message to examine is a ref. count message */
             else if(H5O_REFCOUNT_ID == oh->mesg[curmesg].type->id) {
                 H5O_refcount_t *refcount;
+                unsigned ioflags = 0;   /* Flags for decode routine */
 
                 /* Decode ref. count message */
                 HDassert(oh->version > H5O_VERSION_1);
-                refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(f, dxpl_id, 0, oh->mesg[curmesg].raw);
+                refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(f, dxpl_id, 0, &ioflags, oh->mesg[curmesg].raw);
 
                 /* Save 'native' form of ref. count message */
                 oh->mesg[curmesg].native = refcount;
@@ -562,6 +570,12 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                 /* Set object header values */
                 oh->has_refcount_msg = TRUE;
                 oh->nlink = *refcount;
+
+                /* Mark the object header as dirty if the message was changed by decoding */
+                if((ioflags & H5O_DECODEIO_DIRTY) && (H5F_get_intent(f) & H5F_ACC_RDWR)) {
+                    oh->mesg[curmesg].dirty = TRUE;
+                    oh->cache_info.is_dirty = TRUE;
+	            }
             } /* end if */
             /* Check if next message to examine is a link message */
             else if(H5O_LINK_ID == oh->mesg[curmesg].type->id) {

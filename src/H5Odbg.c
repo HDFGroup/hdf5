@@ -488,7 +488,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	/* decode the message */
 	debug_type = oh->mesg[i].type;
 	if(NULL == oh->mesg[i].native && debug_type->decode)
-            H5O_LOAD_NATIVE(f, dxpl_id, oh, &oh->mesg[i], FAIL)
+            H5O_LOAD_NATIVE(f, dxpl_id, H5O_DECODEIO_NOCHANGE, oh, &oh->mesg[i], FAIL)
 
 	/* print the message */
 	HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
