@@ -541,11 +541,11 @@ H5std_string CommonFG::getComment (const H5std_string& name) const
 
    // temporary C-string for the object's comment
    char* comment_C = new char[bufsize+1];
-   herr_t ret_value = H5Oget_comment_by_name(loc_id, name.c_str(), comment_C, bufsize, H5P_DEFAULT);
+   ssize_t ret_value = H5Oget_comment_by_name(loc_id, name.c_str(), comment_C, bufsize, H5P_DEFAULT);
 
    // if the actual length of the comment is longer than the anticipated
    // value, then call H5Oget_comment_by_name again with the correct value
-   if (ret_value > bufsize)
+   if ((size_t)ret_value > bufsize)
    {
 	bufsize = ret_value;
 	delete []comment_C;

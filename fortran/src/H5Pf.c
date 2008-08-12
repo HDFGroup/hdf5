@@ -4199,12 +4199,12 @@ int_f
 nh5pset_fapl_direct_c(hid_t_f *fapl_id, size_t_f *alignment, size_t_f *block_size, size_t_f *cbuf_size )
 {
   int ret_value = -1;
+#ifdef H5_HAVE_DIRECT
   herr_t ret;
 
   /*
    * Call H5Pset_link_phase_change function.
    */
-#ifdef H5_HAVE_DIRECT
   ret = H5Pset_fapl_direct((hid_t)*fapl_id, (size_t)*alignment, (size_t)*block_size, (size_t)*cbuf_size );
     if (ret < 0) return ret_value;
 
@@ -4233,6 +4233,7 @@ int_f
 nh5pget_fapl_direct_c(hid_t_f *fapl_id, size_t_f *alignment, size_t_f *block_size, size_t_f *cbuf_size )
 {
   int ret_value = -1;
+#ifdef H5_HAVE_DIRECT
   herr_t ret;
   size_t c_alignment;
   size_t c_block_size;
@@ -4241,7 +4242,6 @@ nh5pget_fapl_direct_c(hid_t_f *fapl_id, size_t_f *alignment, size_t_f *block_siz
   /*
    * Call H5Pget_link_phase_change function.
    */
-#ifdef H5_HAVE_DIRECT
   ret = H5Pget_fapl_direct((hid_t)*fapl_id, &c_alignment, &c_block_size, &c_cbuf_size );
   if (ret < 0) return ret_value;
   

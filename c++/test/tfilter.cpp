@@ -118,7 +118,7 @@ static void test_null_filter()
     // Output message about test being performed
     SUBTEST("'Null' filter");
     try {
-	hsize_t  null_size;          // Size of dataset with null filter
+	//hsize_t  null_size;          // Size of dataset with null filter
 
 	// Prepare dataset create property list
 	DSetCreatPropList dsplist;
@@ -168,7 +168,6 @@ void test_szip_filter(H5File& file1)
 {
 #ifdef H5_HAVE_FILTER_SZIP
     int      points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
-    hsize_t  szip_size;       /* Size of dataset with szip filter */
     unsigned szip_options_mask=H5_SZIP_NN_OPTION_MASK;
     unsigned szip_pixels_per_block=4;
 
@@ -203,7 +202,7 @@ void test_szip_filter(H5File& file1)
         {
             for (j=0; j<size[1]; j++)
             {
-                points[i][j] = n++;
+                points[i][j] = (int)n++;
             }
         }
 

@@ -802,7 +802,8 @@ H5D_compound_opt_read(size_t nelmts, const H5S_t *space,
 
             /* Get the number of bytes and offset in sequence */
             curr_len = len[curr_seq];
-            curr_off = off[curr_seq];
+            H5_CHECK_OVERFLOW(off[curr_seq], hsize_t, size_t);
+            curr_off = (size_t)off[curr_seq];
 
             /* Decide the number of elements and position in the buffer. */
             curr_nelmts = curr_len / dst_stride;

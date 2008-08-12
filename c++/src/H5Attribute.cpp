@@ -162,7 +162,7 @@ void Attribute::read( const DataType& mem_type, H5std_string& strg ) const
     void *ptr;
     if (!is_variable_len)	// only allocate for fixed-len string
     {
-	strg_C = new char [attr_size+1];
+	strg_C = new char [(size_t)attr_size+1];
 	ptr = strg_C;
     }
     else
