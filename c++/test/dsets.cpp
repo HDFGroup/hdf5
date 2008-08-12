@@ -423,7 +423,7 @@ test_compression(H5File& file)
     for (i = n = 0; i < 100; i++)
     {
 	for (j = 0; j < 200; j++) {
-	    points[i][j] = n++;
+	    points[i][j] = (int)n++;
 	}
     }
     char* tconv_buf = new char [1000];
@@ -487,7 +487,7 @@ test_compression(H5File& file)
 	{
 	    for (j=0; j<size[1]; j++)
 	    {
-		points[i][j] = n++;
+		points[i][j] = (int)n++;
 	    }
 	}
 

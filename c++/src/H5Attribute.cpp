@@ -153,7 +153,7 @@ void Attribute::read( const DataType& mem_type, H5std_string& strg ) const
    {
       throw AttributeIException("Attribute::read", "Unable to get attribute size before reading");
    }
-   char* strg_C = new char [attr_size+1];
+   char* strg_C = new char [(size_t)attr_size+1];
    if (strg_C == NULL)
    {
       throw AttributeIException("Attribute::read", "Unable to allocate buffer to read the attribute");

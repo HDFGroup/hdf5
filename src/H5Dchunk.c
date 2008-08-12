@@ -3266,7 +3266,8 @@ H5D_chunk_prune_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
         /* The number of bytes accessed in the chunk */
         /* (i.e. the bytes replaced with fill values) */
-        bytes_accessed = sel_nelmts * layout->u.chunk.dim[rank];
+        H5_CHECK_OVERFLOW(sel_nelmts, hssize_t, uint32_t);
+        bytes_accessed = (uint32_t)sel_nelmts * layout->u.chunk.dim[rank];
 
         /* Release lock on chunk */
         if(H5D_chunk_unlock(io_info, TRUE, idx_hint, chunk, bytes_accessed) < 0)

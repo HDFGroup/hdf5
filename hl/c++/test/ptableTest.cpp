@@ -78,7 +78,7 @@ int BasicTest()
 {
     herr_t err;
     int myRecord;
-    int count;
+    hsize_t count;
     int error;
 
     TESTING("basic funtionality")
@@ -133,7 +133,7 @@ out:
 int TestCompoundDatatype()
 {
     hid_t dtypeID;
-    int count;
+    hsize_t count;
     int error;
 
     TESTING("compound datatypes")
@@ -439,7 +439,7 @@ int SystemTest()
     TESTING("multiple datatypes")
 
     hid_t dtypeID1, dtypeID2;
-    unsigned int count;
+    hsize_t count;
     int error;
 
     /* Creating two inter-related datatypes.  Create two datasets and put
