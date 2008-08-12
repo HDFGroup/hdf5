@@ -438,7 +438,6 @@ H5_DLL unsigned H5F_decr_nopen_objs(H5F_t *f);
 
 /* Functions than check file mounting information */
 H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
-H5_DLL hbool_t H5F_has_mount(const H5F_t *file);
 
 /* Functions than retrieve values set from the FCPL */
 H5_DLL hid_t H5F_get_fcpl(const H5F_t *f);
