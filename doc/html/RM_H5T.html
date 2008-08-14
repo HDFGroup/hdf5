@@ -2115,10 +2115,14 @@ END SUBROUTINE h5tget_member_value_f
 	determine the native datatype of a dataset prior to reading it 
 	into memory.     
         It can be used not only to determine 
-	the native datatype for atomic datatypes, 
-	but also to determine the native datatypes of the individual components of 
-	a compound datatype, an enumerated datatype, an array datatype, or 
+        the native datatype for atomic datatypes, 
+        but also to determine the native datatypes of the individual components 
+        of a compound datatype, an enumerated datatype, an array datatype, or 
         a variable-length datatype.
+        For example, if <code>dtype_id</code> is a compound datatype,
+        the returned datatype identifier will be for 
+        a similar compound datatype with
+        each element converted to the corresponding native datatype.
         <p>
 	<code>H5Tget_native_type</code> selects the matching native datatype 
 	from the following list:
@@ -4276,7 +4280,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 24 July 2008");
+document.writeln("Last modified: 14 August 2008");
 -->
 </SCRIPT>
  
