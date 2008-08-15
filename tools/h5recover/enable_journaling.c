@@ -50,15 +50,15 @@ helppage(void)
 {
     printf(
 	"Usage:\n"
-	"%s -[c|r|p]\n"
+	"%s -[c|w]\n"
 	"\t-c\tCreate a new file (%s)\n"
-	"\t-r\tReopen the file with Journaling (%s) for crash test\n",
+	"\t-w\tWrite more rows to the file with Journaling (%s) for crash test\n",
 	ProgName, H5FILE_NAME, H5JournalFILE_NAME
     );
     printf("To try this program, run:\n");
     printf("\t%s -c\n", ProgName);
     printf("\t%s %s\n", H5dumptoolname, H5FILE_NAME);
-    printf("\t%s -r\n", ProgName);
+    printf("\t%s -w\n", ProgName);
     printf("\t%s %s (This should fail)\n", H5dumptoolname, H5FILE_NAME);
     printf("\t%s -j %s %s\n", H5recovertoolname, H5JournalFILE_NAME, H5FILE_NAME);
     printf("\t%s %s (This should succeed)\n", H5dumptoolname, H5FILE_NAME);
@@ -77,17 +77,16 @@ main (int ac, char **av)
     hid_t       faccpl;			/* File access property list */
     pid_t	mypid;
     int		cmode=0;		/* Create mode, overrides the others. */
-    int		rmode=0;		/* Reopen mod, default no. */
-    int		zmode=0;		/* Turn off all caching, default cache on. */
+    int		wmode=0;		/* write mod, default no. */
 
 
     /* Parse different options:
      * Default: Create a new file and new dataset.
-     * rmode: Reopen an existing file with Journaling.
+     * wmode: write more rows to an existing file with Journaling.
      *
      * How to use this:
      * ./enable_journaling	# create JournalEG.h5 file
-     * ./enable_journaling -r	# reopen JournalEG.h5 with Journaling on and
+     * ./enable_journaling -w	# reopen JournalEG.h5 with Journaling on and
      *			        # add more rows, then crash. JournalEG.h5
      *				# is not readable as an HDF5 file.
      * ./h5recover -j JournalEG.h5.jnl JournalEG.h5	# Recover the file.
@@ -104,12 +103,9 @@ main (int ac, char **av)
         if (strcmp("-c", *av) == 0){
 	    cmode++;
 	    printf("Create mode\n");
-	}else if (strcmp("-r", *av) == 0){
-	    rmode++;
-	    printf("Reopen mode\n");
-	}else if (strcmp("-z", *av) == 0){
-	    zmode++;
-	    printf("zmode on => all caching off\n");
+	}else if (strcmp("-w", *av) == 0){
+	    wmode++;
+	    printf("write mode\n");
 	}else{
 	    fprintf(stderr, "Unknown option (%s)\n", *av);
 	    helppage();
@@ -173,12 +169,11 @@ main (int ac, char **av)
 	H5Fclose(file);
 	return(0);
     }
-    if (rmode){
+    if (wmode){
 	/*===================================================
-	 * rmode:
+	 * wmode:
 	 *    Reopen a previous file with Journaling on, extend the dataset
 	 *    to 4NX rows, write data, crash.
-	 *    Need to turn off H5Pset_sieve_buf_size( hid_t fapl_id, hsize_t size  ) so that raw data will be flushed immediately.
 	 *===================================================*/
 
 	/* reopen the file with Journaling on. */
