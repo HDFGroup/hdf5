@@ -31,9 +31,9 @@
 #define ProgName	 	"enable_journaling"	/* program name */
 #define DATASETNAME "IntArray"
 #define NX     10                      /* dataset initial dimensions */
-#define NY     100
+#define NY     10
 #define CHUNKX 2			/* chunk dimensions */
-#define CHUNKY 100
+#define CHUNKY 10
 #define RANK   2
 #define THRESHOLD       256
 #define ALIGNMENT       512
@@ -61,8 +61,7 @@ helppage(void)
     printf("\t%s -r\n", ProgName);
     printf("\t%s %s (This should fail)\n", H5dumptoolname, H5FILE_NAME);
     printf("\t%s -j %s %s\n", H5recovertoolname, H5JournalFILE_NAME, H5FILE_NAME);
-    printf("\t%s -p\n", ProgName);
-    printf("\t%s %s (This should show more data)\n", H5dumptoolname, H5FILE_NAME);
+    printf("\t%s %s (This should succeed)\n", H5dumptoolname, H5FILE_NAME);
 }
 
 int
@@ -89,9 +88,10 @@ main (int ac, char **av)
      * How to use this:
      * ./enable_journaling	# create JournalEG.h5 file
      * ./enable_journaling -r	# reopen JournalEG.h5 with Journaling on and
-     *			        # add more rows, then crash.
-     * ./h5recover -j JournalEG.h5.jnl JournalEG.h5	# to recover the file.
-     * Then JournalEG.h5 should have all the expected written rows and data.
+     *			        # add more rows, then crash. JournalEG.h5
+     *				# is not readable as an HDF5 file.
+     * ./h5recover -j JournalEG.h5.jnl JournalEG.h5	# Recover the file.
+     * 
      * 
      */
     if (ac<=1){
@@ -117,14 +117,18 @@ main (int ac, char **av)
 	}
     }
 
-    /* Create a file access property list to be used by both create and */
-    /* reopen modes. */
+    /* Create a file access property list to be used by both create and 
+     * reopen modes.
+     * Use latest lib version needed by the Journaling feature.
+     */
     faccpl = H5Pcreate(H5P_FILE_ACCESS);
     if (H5Pset_libver_bounds(faccpl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0){
 	fprintf(stderr, "H5Pset_libver_bounds on data file failed\n");
 	H5Pclose(faccpl);
 	return(-1);
     }
+    /* Use alignment so that it is easier to octo dump the data file for */
+    /* debugging purpose. */
     if(H5Pset_alignment(faccpl, (hsize_t)THRESHOLD, (hsize_t)ALIGNMENT) < 0){
 	fprintf(stderr, "H5Pset_alignment on data file failed\n");
 	H5Pclose(faccpl);
@@ -134,16 +138,10 @@ main (int ac, char **av)
     if (cmode){
 	/*===================================================
 	 * Default:
-	 * Create a new file with latest lib version, create a new dataset
+	 * Create a new file, create a new dataset
 	 * of unlimited dimension, initialize size to NX*NY, write data,
          * close file.
-         * Needs the latest lib version in order to allow Journaling later.
 	 *===================================================*/
-	/*
-	 * Create a new file using H5F_ACC_TRUNC access,
-	 * default file creation properties, and latest lib version file
-	 * access properties.
-	 */
 	file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, faccpl);
 	H5Pclose(faccpl);
 
@@ -192,39 +190,6 @@ main (int ac, char **av)
 	    return(-1);
 	}
 #endif
-	if (zmode){
-	    printf("turning cache off\n");
-	    /* Turn off data sieving to get raw data flushed to file */
-	    /* immediately.                                          */
-	    if (H5Pset_sieve_buf_size(faccpl, 0) < 0){
-		fprintf(stderr, "H5Pset_sieve_buf_size on data file failed\n");
-		H5Pclose(faccpl);
-		return(-1);
-	    }
-	    /* Turn off chunk cache to get chunk raw data flushed to file */
-	    /* immediately.                                          */
-	    {
-	    int mdc_nelmts;
-	    size_t rdcc_nelmts;
-	    size_t rdcc_nbytes;
-	    double rdcc_w0;
-
-	    if(H5Pget_cache(faccpl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0){
-		fprintf(stderr, "H5Pget_cache on data file failed\n");
-		H5Pclose(faccpl);
-		return(-1);
-	    }
-	    mdc_nelmts = 0;
-	    rdcc_nelmts = 0;
-	    rdcc_nbytes = 0;
-	    if(H5Pset_cache(faccpl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0) {
-		fprintf(stderr, "H5Pset_cache on data file failed\n");
-		H5Pclose(faccpl);
-		return(-1);
-	    }
-	    }
-	}
-
 	/* Delete the journal file since journal code does not allow */
 	/* existed journal file. */
 	remove(H5JournalFILE_NAME);
