@@ -1582,8 +1582,6 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     H5HF_t         *fheap = NULL;       /* Fractal heap that contains the message */
     size_t          buf_size;           /* Size of the encoded message (out) */
     void            *encoding_buf = NULL; /* The encoded message (out) */
-    H5O_loc_t       oloc;               /* Object location for message in object header */
-    H5O_t           *oh = NULL;         /* Object header for message in object header */
     unsigned        type_id;            /* Message type to operate on */
     herr_t          ret_value = SUCCEED;
 
@@ -1716,15 +1714,6 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     } /* end if */
 
 done:
-    /* Unprotect & close the object header if we opened one */
-    if(oh && oh != open_oh) {
-        if(H5AC_unprotect(oloc.file, dxpl_id, H5AC_OHDR, oloc.addr, oh, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
-
-        if(H5O_close(&oloc) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "unable to close object header")
-    } /* end if */
-
     /* Release the SOHM list */
     if(list && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, list, H5AC__DIRTIED_FLAG) < 0)
 	HDONE_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to close SOHM index")
