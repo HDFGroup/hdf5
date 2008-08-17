@@ -1,4 +1,4 @@
-HDF5 version 1.6.7-snap15 currently under development
+HDF5 version 1.6.7-snap16 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 January 28, 2007
