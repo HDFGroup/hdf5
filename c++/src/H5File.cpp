@@ -252,7 +252,7 @@ void H5File::openFile(const H5std_string& name, unsigned int flags, const FileAc
 //		If this object has represented another HDF5 file, the previous
 //		HDF5 file need to be closed first.
 // Programmer	Binh-Minh Ribler - 2000
-// Note:        This wrapper doesn't seem right regarding the 'id' and should
+// Note:	This wrapper doesn't seem right regarding the 'id' and should
 //              be investigated.  BMR - 2/20/2005
 // Modification
 //		- Replaced resetIdComponent() with decRefCount() to use C
@@ -586,7 +586,7 @@ hsize_t H5File::getFileSize() const
 
 //--------------------------------------------------------------------------
 // Function:    H5File::p_reference (protected)
-// Purpose      Creates a reference to an HDF5 object or a dataset region.
+// Purpose:	Creates a reference to an HDF5 object or a dataset region.
 // Parameters
 //              name - IN: Name of the object to be referenced
 //              dataspace - IN: Dataspace with selection
@@ -667,7 +667,7 @@ void H5File::reference(void* ref, const H5std_string& name) const
 #if 0
 //--------------------------------------------------------------------------
 // Function:    H5File::p_get_obj_type (protected)
-// Purpose      Retrieves the type of object that an object reference points to.
+// Purpose:	Retrieves the type of object that an object reference points to.
 // Parameters
 //              ref      - IN: Reference to query
 //              ref_type - IN: Type of reference to query
@@ -700,7 +700,7 @@ H5G_obj_t H5Object::p_get_obj_type(void *ref, H5R_type_t ref_type) const
 #endif
 //--------------------------------------------------------------------------
 // Function:    H5File::p_get_region (protected)
-// Purpose      Retrieves a dataspace with the region pointed to selected.
+// Purpose:	Retrieves a dataspace with the region pointed to selected.
 // Parameters
 //              ref_type - IN: Type of reference to get region of - default
 //                              to H5R_DATASET_REGION
@@ -789,8 +789,10 @@ void H5File::close()
 	{
 	    throw FileIException("H5File::close", "H5Fclose failed");
 	}
-	// reset the id because the file that it represents is now closed
-	id = 0;
+	// reset the id when the file that it represents is no longer
+	// referenced
+	if (getCounter() == 0)
+	    id = 0;
     }
 }
 

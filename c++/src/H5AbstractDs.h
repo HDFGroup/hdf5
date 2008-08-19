@@ -75,9 +75,6 @@ class H5_DLLCPP AbstractDs {
 	// Default constructor
 	AbstractDs();
 
-	// Constructor that takes an attribute id or a dataset id.
-	//AbstractDs( const hid_t ds_id );
-
    private:
 	// This member function is implemented by DataSet and Attribute.
 	virtual hid_t p_get_type() const = 0;

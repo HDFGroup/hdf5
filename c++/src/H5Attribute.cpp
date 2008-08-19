@@ -62,7 +62,7 @@ Attribute::Attribute() : AbstractDs(), IdComponent(), id(0) {}
 //	Jul, 08 No longer inherit data member 'id' from IdComponent.
 //		- bugzilla 1068
 //--------------------------------------------------------------------------
-Attribute::Attribute( const Attribute& original ) : AbstractDs(), IdComponent()
+Attribute::Attribute(const Attribute& original) : AbstractDs(), IdComponent()
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id
@@ -160,6 +160,7 @@ void Attribute::read( const DataType& mem_type, void *buf ) const
 void Attribute::read( const DataType& mem_type, H5std_string& strg ) const
 {
    // Get the attribute size and allocate temporary C-string for C API
+   // NOTE: will be changed to use dataspace information instead of this API
    hsize_t attr_size = H5Aget_storage_size(id);
    if (attr_size <= 0)
    {
@@ -287,6 +288,7 @@ H5std_string Attribute::getName( size_t buf_size ) const
    H5std_string attr_name;
    ssize_t name_size = getName( buf_size, attr_name );
    return( attr_name );
+   // let caller catch exception if any
 }
 
 //--------------------------------------------------------------------------
@@ -300,7 +302,6 @@ H5std_string Attribute::getName( size_t buf_size ) const
 //--------------------------------------------------------------------------
 H5std_string Attribute::getName() const
 {
-
    // Try with 0 and NULL to get the name size
    ssize_t name_size = H5Aget_name(id, 0, NULL);
 
@@ -327,36 +328,6 @@ H5std_string Attribute::getName() const
    delete []name_C;
    return(attr_name);
 }
-
-#if 0
-//--------------------------------------------------------------------------
-// Function:	Attribute::getObjType
-///\brief	Retrieves the type of object that an object reference points to.
-///\param	ref	 - IN: Reference to query
-///\param	ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT \tReference is an object reference.
-///		\li \c H5R_DATASET_REGION \tReference is a dataset region reference.
-///\return	An object type, which can be one of the following:
-///		\li \c H5G_LINK (0) \tObject is a symbolic link.
-///		\li \c H5G_GROUP (1) \tObject is a group.
-///		\li \c H5G_DATASET (2) \tObject is a dataset.
-///		\li \c H5G_TYPE Object (3) \tis a named datatype
-///\exception	H5::AttributeIException
-// Programmer	Binh-Minh Ribler - Jul, 2008
-// Note:
-//		H5G_loc checks args in H5Rget_obj_type, so attribute must
-//		also be included.
-//--------------------------------------------------------------------------
-H5G_obj_t Attribute::getObjType(void *ref, H5R_type_t ref_type) const
-{
-   try {
-      return(p_get_refobj_type(ref, ref_type));
-   }
-   catch (IdComponentException E) {
-      throw AttributeIException("Attribute::getObjType", E.getDetailMsg());
-   }
-}
-#endif
 
 //--------------------------------------------------------------------------
 // Function:	Attribute::getRefObjType
@@ -470,8 +441,10 @@ void Attribute::close()
 	{
 	    throw AttributeIException("Attribute::close", "H5Aclose failed");
 	}
-	// reset the id because the attribute that it represents is now closed
-	id = 0;
+	// reset the id when the attribute that it represents is no longer
+	// referenced
+	if (getCounter() == 0)
+	    id = 0;
     }
 }
 

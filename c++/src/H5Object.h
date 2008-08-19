@@ -83,16 +83,20 @@ class H5_DLLCPP H5Object : public IdComponent {
 	void renameAttr(const char* oldname, const char* newname) const;
 	void renameAttr(const H5std_string& oldname, const H5std_string& newname) const;
 
-	// Creates a reference to a named Hdf5 object or to a dataset region
-	// in this object.
+	// Creates a reference to a dataset region in this object.
 	void reference(void* ref, const char* name, const DataSpace& dataspace,
-			H5R_type_t ref_type = H5R_DATASET_REGION) const;
+		H5R_type_t ref_type = H5R_DATASET_REGION) const;
+	void reference(void* ref, const H5std_string& name, const DataSpace& 
+		dataspace, H5R_type_t ref_type = H5R_DATASET_REGION) const;
+
+	// Creates a reference to a named HDF5 object.
 	void reference(void* ref, const char* name) const;
 	void reference(void* ref, const H5std_string& name) const;
 
 	// Open a referenced HDF5 object.
 	void dereference(H5File& h5file, void* ref, H5R_type_t ref_type = H5R_OBJECT);
 	void dereference(H5Object& obj, void* ref, H5R_type_t ref_type = H5R_OBJECT);
+        void dereference(Attribute& attr, void* ref, H5R_type_t ref_type = H5R_OBJECT);
 
 	// Copy constructor: makes copy of an H5Object object.
 	H5Object(const H5Object& original);
@@ -105,17 +109,17 @@ class H5_DLLCPP H5Object : public IdComponent {
 	// Default constructor
 	H5Object();
 
-	// Creates a copy of an existing object giving the object id
-	H5Object( const hid_t object_id );
-
 	// Gets the id of the H5 file in which the given object is located.
 	hid_t p_get_file_id();
 
 	// Creates a reference to an HDF5 object or a dataset region.
 	void p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const;
 
+	// Dereferences a ref into an hdf5 object.
+	hid_t p_dereference(hid_t loc_id, void* ref, H5R_type_t ref_type);
+
 	// Retrieves the type of object that an object reference points to.
-	//H5G_obj_t p_get_refobj_type(void *ref, H5R_type_t ref_type) const;
+//	H5G_obj_t p_get_refobj_type(void *ref, H5R_type_t ref_type) const;
 
 	// Retrieves a dataspace with the region pointed to selected.
 	hid_t p_get_region(void *ref, H5R_type_t ref_type) const;

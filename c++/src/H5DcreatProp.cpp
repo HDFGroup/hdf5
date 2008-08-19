@@ -343,14 +343,14 @@ int DSetCreatPropList::getNfilters() const
 //--------------------------------------------------------------------------
 // Function:	DSetCreatPropList::getFilter
 ///\brief	Returns information about a filter in a pipeline
-///\param	filter_number  - IN: Filter to get, range [0..N-1], where
-///				     N is returned by H5Pget_nfilters()
-///\param	flags         - OUT: General properties of the filter
-///\param	cd_nelmts  - IN/OUT: Number of elements in \a cd_values /Number
-///				     of values defined by the filter
-///\param	cd_values     - OUT: Array to hold the data; allocated by the user
-///\param	namelen       - OUT: Length of \a name
-///\param	name          - OUT: Name of the filter
+///\param	filter_number - IN: Filter to get, range [0..N-1], where
+///				N is returned by H5Pget_nfilters()
+///\param	flags     - OUT: General properties of the filter
+///\param	cd_nelmts - IN/OUT: Number of elements in \a cd_values /Number
+///				of values defined by the filter
+///\param	cd_values - OUT: Array to hold the data; allocated by the user
+///\param	namelen   - OUT: Length of \a name
+///\param	name      - OUT: Name of the filter
 ///\return	Filter id
 ///\exception	H5::PropListIException
 ///\par Description

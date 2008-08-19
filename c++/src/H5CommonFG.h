@@ -69,6 +69,11 @@ class H5_DLLCPP CommonFG {
 	// Returns the number of objects in this group.
 	hsize_t getNumObjs() const;
 
+	// Retrieves the name of an object in this group, given the
+	// object's index.
+	ssize_t getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) const;
+	H5std_string getObjnameByIdx(hsize_t idx) const;
+
 	// Returns the type of an object in this group, given the
 	// object's index.
 	H5G_obj_t getObjTypeByIdx(hsize_t idx) const;
@@ -80,11 +85,6 @@ class H5_DLLCPP CommonFG {
 	void getObjinfo(const H5std_string& name, hbool_t follow_link, H5G_stat_t& statbuf) const;
 	void getObjinfo(const char* name, H5G_stat_t& statbuf) const;
 	void getObjinfo(const H5std_string& name, H5G_stat_t& statbuf) const;
-
-	// Retrieves the name of an object in this group, given the
-	// object's index.
-	ssize_t getObjnameByIdx(hsize_t idx, H5std_string& name, size_t size) const;
-	H5std_string getObjnameByIdx(hsize_t idx) const;
 
 	// Iterates over the elements of this group - not implemented in
 	// C++ style yet.

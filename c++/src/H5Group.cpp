@@ -33,6 +33,7 @@
 #include "H5DataSpace.h"
 #include "H5DataSet.h"
 #include "H5CommonFG.h"
+#include "H5Attribute.h"
 #include "H5Group.h"
 #include "H5File.h"
 #include "H5Alltypes.h"
@@ -50,7 +51,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub Group.
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
-//	2008 08	No longer inherit data member 'id' from IdComponent.
+//	Jul, 08	No longer inherit data member 'id' from IdComponent.
 //		- bugzilla 1068
 //--------------------------------------------------------------------------
 Group::Group() : H5Object(), id(0) {}
@@ -97,22 +98,62 @@ Group::Group(const hid_t existing_id) : H5Object()
 
 //--------------------------------------------------------------------------
 // Function:	Group overload constructor - dereference
-///\brief	Given a reference to some object or a file, returns that group
-///\param	obj - IN: Location reference object is in
-///		ref - IN: Reference pointer
+///\brief	Given a reference, ref, to an hdf5 group, creates a Group object
+///\param	obj - IN: Specifying location referenced object is in
+///\param	ref - IN: Reference pointer
+///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\exception	H5::ReferenceException
 ///\par Description
-///		\c obj can be DataSet, Group, H5File, or named DataType, that 
+///		\c obj can be DataSet, Group, or named DataType, that 
 ///		is a datatype that has been named by DataType::commit.
 // Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
 Group::Group(H5Object& obj, void* ref, H5R_type_t ref_type) : H5Object()
 {
-   dereference(obj, ref, ref_type);
+    try {
+	id = p_dereference(obj.getId(), ref, ref_type);
+    } catch (ReferenceException deref_error) {
+	throw ReferenceException("Group constructor - located by an H5Object",
+		deref_error.getDetailMsg());
+    }
 }
 
+//--------------------------------------------------------------------------
+// Function:	Group overload constructor - dereference
+///\brief	Given a reference, ref, to an hdf5 group, creates a Group object
+///\param	h5file - IN: Location referenced object is in
+///\param	ref - IN: Reference pointer
+///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\exception	H5::ReferenceException
+// Programmer	Binh-Minh Ribler - Oct, 2006
+//--------------------------------------------------------------------------
 Group::Group(H5File& h5file, void* ref, H5R_type_t ref_type) : H5Object()
 {
-   dereference(h5file, ref, ref_type);
+    try {
+	id = p_dereference(h5file.getId(), ref, ref_type);
+    } catch (ReferenceException deref_error) {
+	throw ReferenceException("Group constructor - located by an H5File",
+		deref_error.getDetailMsg());
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	Group overload constructor - dereference
+///\brief	Given a reference, ref, to an hdf5 group, creates a Group object
+///\param	attr - IN: Specifying location where the referenced object is in
+///\param	ref - IN: Reference pointer
+///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\exception	H5::ReferenceException
+// Programmer	Binh-Minh Ribler - Oct, 2006
+//--------------------------------------------------------------------------
+Group::Group(Attribute& attr, void* ref, H5R_type_t ref_type) : H5Object()
+{
+    try {
+	id = p_dereference(attr.getId(), ref, ref_type);
+    } catch (ReferenceException deref_error) {
+	throw ReferenceException("Group constructor - located by an Attribute",
+		deref_error.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -204,8 +245,10 @@ void Group::close()
 	{
 	    throw GroupIException("Group::close", "H5Gclose failed");
 	}
-	// reset the id because the group that it represents is now closed
-	id = 0;
+	// reset the id when the group that it represents is no longer
+	// referenced
+	if (getCounter() == 0)
+	    id = 0;
     }
 }
 

@@ -31,7 +31,7 @@ namespace H5 {
 const DSetMemXferPropList DSetMemXferPropList::DEFAULT;
 
 //--------------------------------------------------------------------------
-// Function     DSetMemXferPropList default constructor
+// Function	DSetMemXferPropList default constructor
 ///\brief	Default constructor: creates a stub dataset memory and
 ///		transfer property list object.
 // Programmer:	Binh-Minh Ribler - 2000

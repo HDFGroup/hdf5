@@ -84,7 +84,8 @@ class H5_DLLCPP DataSet : public H5Object, public AbstractDs {
 
 	// Creates a dataset by way of dereference.
 	DataSet(H5Object& obj, void* ref, H5R_type_t ref_type = H5R_OBJECT);
-	DataSet(H5File& file, void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	DataSet(H5File& h5file, void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	DataSet(Attribute& attr, void* ref, H5R_type_t ref_type = H5R_OBJECT);
 
 	// Default constructor.
 	DataSet();

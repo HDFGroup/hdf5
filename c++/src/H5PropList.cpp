@@ -263,8 +263,10 @@ void PropList::close()
 	{
 	    throw PropListIException(inMemFunc("close"), "H5Pclose failed");
 	}
-	// reset the id because the property list that it represents is now closed
-	id = 0;
+	// reset the id when the property list that it represents is no longer
+	// referenced
+	if (getCounter() == 0)
+	    id = 0;
     }
 }
 

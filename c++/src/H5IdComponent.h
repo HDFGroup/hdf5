@@ -74,9 +74,6 @@ class H5_DLLCPP IdComponent {
 	virtual ~IdComponent();
 
    protected:
- /* 	hid_t p_dereference(hid_t obj_id, void* ref) const;
-	hid_t p_dereference(void* ref) const {return 0;};
- */ 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 	// Default constructor.
@@ -84,6 +81,9 @@ class H5_DLLCPP IdComponent {
 
 	// Gets the name of the file, in which an HDF5 object belongs.
 	H5std_string p_get_file_name() const;
+
+	// Retrieves the type of object that an object reference points to.
+	H5G_obj_t p_get_refobj_type(void *ref, H5R_type_t ref_type) const;
 
 	// Verifies that the given id is valid.
 	static bool p_valid_id(const hid_t obj_id);
@@ -93,9 +93,6 @@ class H5_DLLCPP IdComponent {
 	virtual void p_setId(const hid_t new_id) = 0;
 
 	// Opens the HDF5 object referenced.
-
-	// Retrieves the type of object that an object reference points to.
-	H5G_obj_t p_get_refobj_type(void *ref, H5R_type_t ref_type) const;
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

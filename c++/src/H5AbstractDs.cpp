@@ -37,13 +37,6 @@ namespace H5 {
 AbstractDs::AbstractDs(){}
 
 //--------------------------------------------------------------------------
-// Function:	AbstractDs default constructor
-///\brief	Creates an AbstractDs instance using an existing id.
-// Programmer	Binh-Minh Ribler - 2000
-//--------------------------------------------------------------------------
-//AbstractDs::AbstractDs(const hid_t ds_id){}
-
-//--------------------------------------------------------------------------
 // Function:	AbstractDs copy constructor
 ///\brief	Copy constructor: makes a copy of the original AbstractDs object.
 // Programmer	Binh-Minh Ribler - 2000

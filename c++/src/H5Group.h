@@ -43,7 +43,8 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 
 	// Creates a group by way of dereference.
 	Group(H5Object& obj, void* ref, H5R_type_t ref_type = H5R_OBJECT);
-	Group(H5File& obj, void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	Group(H5File& h5file, void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	Group(Attribute& attr, void* ref, H5R_type_t ref_type = H5R_OBJECT);
 
 	// default constructor
 	Group();
