@@ -104,6 +104,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+        - Fixed problem where library could cause a segmentation fault when
+            an invalid location ID was given to H5Giterate(). (QAK - 2008/08/19)
       - Fixed improper shutdown when objects have reference count > 1.  The
             library now tracks reference count due to the application separately
             from that due to internal library routines.  (NAF - 2008/08/19)
