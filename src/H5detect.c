@@ -621,7 +621,7 @@ H5TN_init_interface(void)\n\
 
 	/* Atomize the type */
 	printf("\
-    if ((H5T_NATIVE_%s_g = H5I_register (H5I_DATATYPE, dt))<0)\n\
+    if ((H5T_NATIVE_%s_g = H5I_register (H5I_DATATYPE, dt, FALSE))<0)\n\
         HGOTO_ERROR (H5E_DATATYPE, H5E_CANTINIT, FAIL,\"can't initialize type system (atom registration failure\");\n",
 	       d[i].varname);
 	printf("    H5T_NATIVE_%s_ALIGN_g = %lu;\n",

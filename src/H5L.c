@@ -1743,7 +1743,7 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
             /* Set up location for user-defined callback */
             if((grp = H5G_open(&temp_loc, udata->dxpl_id)) == NULL)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-            if((grp_id = H5I_register(H5I_GROUP, grp)) < 0)
+            if((grp_id = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register ID for group")
 
             /* Make callback */
@@ -1755,7 +1755,7 @@ H5L_link_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t UNUSED 
 done:
     /* Close the location given to the user callback if it was created */
     if(grp_id >= 0) {
-        if(H5I_dec_ref(grp_id) < 0)
+        if(H5I_dec_ref(grp_id, TRUE) < 0)
             HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
     } /* end if */
     else if(grp != NULL) {
@@ -2440,7 +2440,7 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
             /* Set up location for user-defined callback */
             if((grp = H5G_open(&temp_loc, udata->dxpl_id)) == NULL)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
-            if((grp_id = H5I_register(H5I_GROUP, grp)) < 0)
+            if((grp_id = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group ID")
 
             if(udata->copy) {
@@ -2457,7 +2457,7 @@ H5L_move_dest_cb(H5G_loc_t *grp_loc/*in*/, const char *name,
 done:
     /* Close the location given to the user callback if it was created */
     if(grp_id >= 0) {
-        if(H5I_dec_ref(grp_id) < 0)
+        if(H5I_dec_ref(grp_id, TRUE) < 0)
             HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
     } /* end if */
     else if(grp != NULL) {
@@ -2657,7 +2657,7 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
     else {
         if(NULL == (la_plist = (H5P_genplist_t *)H5I_object(lapl_id)))
             HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a valid access PL")
-        if((lapl_copy = H5P_copy_plist(la_plist)) < 0)
+        if((lapl_copy = H5P_copy_plist(la_plist, FALSE)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy access properties")
     } /* end else */
 

@@ -777,17 +777,17 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_ty
             size_t buf_size;            /* Size of copy buffer */
 
             /* Create datatype ID for src datatype */
-            if((tid_src = H5I_register(H5I_DATATYPE, attr_src->shared->dt)) < 0)
+            if((tid_src = H5I_register(H5I_DATATYPE, attr_src->shared->dt, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register source file datatype")
 
             /* create a memory copy of the variable-length datatype */
             if(NULL == (dt_mem = H5T_copy(attr_src->shared->dt, H5T_COPY_TRANSIENT)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy")
-            if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem)) < 0)
+            if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register memory datatype")
 
             /* create variable-length datatype at the destinaton file */
-            if((tid_dst = H5I_register(H5I_DATATYPE, attr_dst->shared->dt)) < 0)
+            if((tid_dst = H5I_register(H5I_DATATYPE, attr_dst->shared->dt, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register destination file datatype")
 
             /* Set up the conversion functions */
@@ -821,7 +821,7 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_ty
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, NULL, "can't create simple dataspace")
 
             /* Atomize */
-            if((buf_sid = H5I_register(H5I_DATASPACE, buf_space)) < 0) {
+            if((buf_sid = H5I_register(H5I_DATASPACE, buf_space, FALSE)) < 0) {
                 H5S_close(buf_space);
                 HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to register dataspace ID")
             } /* end if */
@@ -869,7 +869,7 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_ty
 
 done:
     if(buf_sid > 0)
-        if(H5I_dec_ref(buf_sid) < 0)
+        if(H5I_dec_ref(buf_sid, FALSE) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary dataspace ID")
     if(tid_src > 0)
         /* Don't decrement ID, we want to keep underlying datatype */
@@ -881,7 +881,7 @@ done:
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
     if(tid_mem > 0)
         /* Decrement the memory datatype ID, it's transient */
-        if(H5I_dec_ref(tid_mem) < 0)
+        if(H5I_dec_ref(tid_mem, FALSE) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
     if(buf)
         buf = H5FL_BLK_FREE(attr_buf, buf);

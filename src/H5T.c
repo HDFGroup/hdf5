@@ -487,7 +487,7 @@ static H5T_t *H5T_decode(const unsigned char *buf);
     H5_GLUE3(H5T_INIT_TYPE_,GUTS,_CORE)					      \
 									      \
     /* Atomize result */						      \
-    if((GLOBAL = H5I_register(H5I_DATATYPE, dt)) < 0)			      \
+    if((GLOBAL = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)			      \
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom") \
 }
 
@@ -1322,7 +1322,7 @@ H5T_init_interface(void)
     /* Only register the default property list if it hasn't been created yet */
     if(H5P_LST_DATATYPE_CREATE_g==(-1)) {
         /* Register the default datatype creation property list */
-        if((H5P_LST_DATATYPE_CREATE_g = H5P_create_id(crt_pclass))<0)
+        if((H5P_LST_DATATYPE_CREATE_g = H5P_create_id(crt_pclass, FALSE))<0)
              HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
     } /* end if */
 
@@ -1599,7 +1599,7 @@ H5Tcreate(H5T_class_t type, size_t size)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to create type");
 
     /* Make it an atom */
-    if ((ret_value = H5I_register(H5I_DATATYPE, dt)) < 0)
+    if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type atom");
 
 done:
@@ -1666,7 +1666,7 @@ H5Tcopy(hid_t type_id)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy");
 
     /* Atomize result */
-    if ((ret_value = H5I_register(H5I_DATATYPE, new_dt)) < 0)
+    if ((ret_value = H5I_register(H5I_DATATYPE, new_dt, TRUE)) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type atom");
 
 done:
@@ -1709,7 +1709,7 @@ H5Tclose(hid_t type_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "immutable data type");
 
     /* When the reference count reaches zero the resources are freed */
-    if (H5I_dec_ref(type_id) < 0)
+    if (H5I_dec_ref(type_id, TRUE) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
 
 done:
@@ -2179,7 +2179,7 @@ H5Tget_super(hid_t type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type");
     if((super=H5T_get_super(dt))==NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "not a data type");
-    if ((ret_value=H5I_register(H5I_DATATYPE, super))<0)
+    if ((ret_value=H5I_register(H5I_DATATYPE, super, TRUE))<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register parent data type");
 
 done:
@@ -2323,15 +2323,15 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
                     old_path->dst->shared->type!=dst->shared->type) {
                 continue;
             }
-            if ((tmp_sid = H5I_register(H5I_DATATYPE, H5T_copy(old_path->src, H5T_COPY_ALL)))<0 ||
-                    (tmp_did = H5I_register(H5I_DATATYPE, H5T_copy(old_path->dst, H5T_COPY_ALL)))<0)
+            if ((tmp_sid = H5I_register(H5I_DATATYPE, H5T_copy(old_path->src, H5T_COPY_ALL), FALSE))<0 ||
+                    (tmp_did = H5I_register(H5I_DATATYPE, H5T_copy(old_path->dst, H5T_COPY_ALL), FALSE))<0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data types for conv query");
             HDmemset(&cdata, 0, sizeof cdata);
             cdata.command = H5T_CONV_INIT;
             if ((func)(tmp_sid, tmp_did, &cdata, (size_t)0, (size_t)0, (size_t)0,
                     NULL, NULL, dxpl_id)<0) {
-                H5I_dec_ref(tmp_sid);
-                H5I_dec_ref(tmp_did);
+                H5I_dec_ref(tmp_sid, FALSE);
+                H5I_dec_ref(tmp_did, FALSE);
                 tmp_sid = tmp_did = -1;
                 H5E_clear_stack(NULL);
                 continue;
@@ -2371,8 +2371,8 @@ H5T_register(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst,
             H5FL_FREE(H5T_path_t,old_path);
 
             /* Release temporary atoms */
-            H5I_dec_ref(tmp_sid);
-            H5I_dec_ref(tmp_did);
+            H5I_dec_ref(tmp_sid, FALSE);
+            H5I_dec_ref(tmp_did, FALSE);
             tmp_sid = tmp_did = -1;
 
             /* We don't care about any failures during the freeing process */
@@ -2390,9 +2390,9 @@ done:
             H5FL_FREE(H5T_path_t,new_path);
 	} /* end if */
 	if (tmp_sid>=0)
-            H5I_dec_ref(tmp_sid);
+            H5I_dec_ref(tmp_sid, FALSE);
 	if (tmp_did>=0)
-            H5I_dec_ref(tmp_did);
+            H5I_dec_ref(tmp_did, FALSE);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2824,7 +2824,7 @@ H5Tdecode(const void *buf)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "can't decode object")
 
     /* Register the type and return the ID */
-    if((ret_value = H5I_register(H5I_DATATYPE, dt)) < 0)
+    if((ret_value = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type")
 
 done:
@@ -4360,17 +4360,17 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	assert(path!=table);
 	assert(NULL==path->func);
 	if (path->src && (src_id=H5I_register(H5I_DATATYPE,
-                  H5T_copy(path->src, H5T_COPY_ALL)))<0)
+                  H5T_copy(path->src, H5T_COPY_ALL), FALSE))<0)
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register source conversion type for query");
 	if (path->dst && (dst_id=H5I_register(H5I_DATATYPE,
-                  H5T_copy(path->dst, H5T_COPY_ALL)))<0)
+                  H5T_copy(path->dst, H5T_COPY_ALL), FALSE))<0)
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register destination conversion type for query");
 	path->cdata.command = H5T_CONV_INIT;
 	if ((func)(src_id, dst_id, &(path->cdata), (size_t)0, (size_t)0, (size_t)0,
                 NULL, NULL, dxpl_id)<0)
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to initialize conversion function");
-	if (src_id>=0) H5I_dec_ref(src_id);
-	if (dst_id>=0) H5I_dec_ref(dst_id);
+	if (src_id>=0) H5I_dec_ref(src_id, FALSE);
+	if (dst_id>=0) H5I_dec_ref(dst_id, FALSE);
 	src_id = dst_id = -1;
 	path->func = func;
 	path->is_hard = TRUE;
@@ -4389,9 +4389,9 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	    continue;
 	}
 	if ((src_id=H5I_register(H5I_DATATYPE,
-				 H5T_copy(path->src, H5T_COPY_ALL)))<0 ||
+				 H5T_copy(path->src, H5T_COPY_ALL), FALSE))<0 ||
                 (dst_id=H5I_register(H5I_DATATYPE,
-				 H5T_copy(path->dst, H5T_COPY_ALL)))<0)
+				 H5T_copy(path->dst, H5T_COPY_ALL), FALSE))<0)
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register conversion types for query");
 	path->cdata.command = H5T_CONV_INIT;
 	if ((H5T_g.soft[i].func) (src_id, dst_id, &(path->cdata),
@@ -4403,8 +4403,8 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
 	    path->func = H5T_g.soft[i].func;
 	    path->is_hard = FALSE;
 	}
-	H5I_dec_ref(src_id);
-	H5I_dec_ref(dst_id);
+	H5I_dec_ref(src_id, FALSE);
+	H5I_dec_ref(dst_id, FALSE);
 	src_id = dst_id = -1;
     }
     if (!path->func)
@@ -4487,8 +4487,8 @@ done:
 	if (path->dst) H5T_close(path->dst);
         H5FL_FREE(H5T_path_t,path);
     }
-    if (src_id>=0) H5I_dec_ref(src_id);
-    if (dst_id>=0) H5I_dec_ref(dst_id);
+    if (src_id>=0) H5I_dec_ref(src_id, FALSE);
+    if (dst_id>=0) H5I_dec_ref(dst_id, FALSE);
 
     FUNC_LEAVE_NOAPI(ret_value);
 }

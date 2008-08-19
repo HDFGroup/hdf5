@@ -746,6 +746,7 @@
 ./test/COPYING
 ./test/Makefile.am
 ./test/Makefile.in
+./test/app_ref.c
 ./test/be_data.h5
 ./test/be_extlink1.h5
 ./test/be_extlink2.h5

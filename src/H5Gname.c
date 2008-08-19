@@ -452,17 +452,17 @@ H5G_get_name(hid_t id, char *name/*out*/, size_t size, hid_t lapl_id,
 	    hid_t	  file;
 
             /* Retrieve file ID for name search */
-	    if((file = H5I_get_file_id(id)) < 0)
+	    if((file = H5I_get_file_id(id, FALSE)) < 0)
 		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
             /* Search for name of object */
 	    if((len = H5G_get_name_by_addr(file, lapl_id, dxpl_id, loc.oloc, name, size)) < 0) {
-                H5I_dec_ref(file);
+                H5I_dec_ref(file, FALSE);
 		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
             } /* end if */
 	
             /* Close file ID used for search */
-	    if(H5I_dec_ref(file) < 0)
+	    if(H5I_dec_ref(file, FALSE) < 0)
 		HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEFILE, FAIL, "can't determine name")
 	} /* end else */
 

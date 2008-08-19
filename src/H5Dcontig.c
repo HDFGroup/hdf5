@@ -1209,7 +1209,7 @@ H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
     /* Create datatype ID for src datatype.  We may or may not use this ID,
      * but this ensures that the src datatype will be freed.
      */
-    if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
+    if((tid_src = H5I_register(H5I_DATATYPE, dt_src, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
 
     /* If there's a VLEN source datatype, set up type conversion information */
@@ -1217,7 +1217,7 @@ H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
         /* create a memory copy of the variable-length datatype */
         if(NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
-        if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem)) < 0)
+        if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem, FALSE)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
 
         /* create variable-length datatype at the destinaton file */
@@ -1225,7 +1225,7 @@ H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
         if(H5T_set_loc(dt_dst, f_dst, H5T_LOC_DISK) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
-        if((tid_dst = H5I_register(H5I_DATATYPE, dt_dst)) < 0)
+        if((tid_dst = H5I_register(H5I_DATATYPE, dt_dst, FALSE)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register destination file datatype")
 
         /* Set up the conversion functions */
@@ -1264,7 +1264,7 @@ H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
         /* Atomize */
-        if((buf_sid = H5I_register(H5I_DATASPACE, buf_space)) < 0) {
+        if((buf_sid = H5I_register(H5I_DATASPACE, buf_space, FALSE)) < 0) {
             H5S_close(buf_space);
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
         } /* end if */
@@ -1383,16 +1383,16 @@ H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
 
 done:
     if(buf_sid > 0)
-        if(H5I_dec_ref(buf_sid) < 0)
+        if(H5I_dec_ref(buf_sid, FALSE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary dataspace ID")
     if(tid_src > 0)
-        if(H5I_dec_ref(tid_src) < 0)
+        if(H5I_dec_ref(tid_src, FALSE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(tid_dst > 0)
-        if(H5I_dec_ref(tid_dst) < 0)
+        if(H5I_dec_ref(tid_dst, FALSE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(tid_mem > 0)
-        if(H5I_dec_ref(tid_mem) < 0)
+        if(H5I_dec_ref(tid_mem, FALSE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(buf)
         (void)H5FL_BLK_FREE(type_conv, buf);

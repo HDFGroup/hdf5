@@ -49,7 +49,7 @@ H5_DLL herr_t H5FD_fapl_close(hid_t driver_id, void *fapl);
 H5_DLL herr_t H5FD_dxpl_open(struct H5P_genplist_t *plist, hid_t driver_id, const void *driver_info);
 H5_DLL herr_t H5FD_dxpl_copy(hid_t driver_id, const void *dxpl, void **copied_dxpl);
 H5_DLL herr_t H5FD_dxpl_close(hid_t driver_id, void *dxpl);
-H5_DLL hid_t H5FD_register(const void *cls, size_t size);
+H5_DLL hid_t H5FD_register(const void *cls, size_t size, hbool_t app_ref);
 H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id,
 		  haddr_t maxaddr);
 H5_DLL herr_t H5FD_close(H5FD_t *file);

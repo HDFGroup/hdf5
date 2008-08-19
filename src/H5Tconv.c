@@ -1781,13 +1781,13 @@ H5T_conv_struct_init (H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
             }
             if (src2dst[i]>=0) {
                 type = H5T_copy (src->shared->u.compnd.memb[i].type, H5T_COPY_ALL);
-                tid = H5I_register (H5I_DATATYPE, type);
+                tid = H5I_register (H5I_DATATYPE, type, FALSE);
                 assert (tid>=0);
                 priv->src_memb_id[i] = tid;
 
                 type = H5T_copy (dst->shared->u.compnd.memb[src2dst[i]].type,
                      H5T_COPY_ALL);
-                tid = H5I_register (H5I_DATATYPE, type);
+                tid = H5I_register (H5I_DATATYPE, type, FALSE);
                 assert (tid>=0);
                 priv->dst_memb_id[src2dst[i]] = tid;
             }
@@ -2890,8 +2890,8 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if (NULL==(tpath=H5T_path_find(src->shared->parent, dst->shared->parent, NULL, NULL, dxpl_id, FALSE))) {
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatypes");
             } else if (!H5T_path_noop(tpath)) {
-                if ((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->shared->parent, H5T_COPY_ALL)))<0 ||
-                        (tdst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->shared->parent, H5T_COPY_ALL)))<0)
+                if ((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->shared->parent, H5T_COPY_ALL), FALSE))<0 ||
+                        (tdst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->shared->parent, H5T_COPY_ALL), FALSE))<0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion");
             } else
                 noop_conv=TRUE;
@@ -3074,9 +3074,9 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
             /* Release the temporary datatype IDs used */
             if (tsrc_id >= 0)
-                H5I_dec_ref(tsrc_id);
+                H5I_dec_ref(tsrc_id, FALSE);
             if (tdst_id >= 0)
-                H5I_dec_ref(tdst_id);
+                H5I_dec_ref(tdst_id, FALSE);
             break;
 
         default:    /* Some other command we don't know about yet.*/
@@ -3195,8 +3195,8 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             if(NULL == (tpath = H5T_path_find(src->shared->parent, dst->shared->parent, NULL, NULL, dxpl_id, FALSE))) {
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert between src and dest datatypes")
             } else if (!H5T_path_noop(tpath)) {
-                if((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->shared->parent, H5T_COPY_ALL))) < 0 ||
-                        (tdst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->shared->parent, H5T_COPY_ALL))) < 0)
+                if((tsrc_id = H5I_register(H5I_DATATYPE, H5T_copy(src->shared->parent, H5T_COPY_ALL), FALSE)) < 0 ||
+                        (tdst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->shared->parent, H5T_COPY_ALL), FALSE)) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
             }
 
@@ -3226,9 +3226,9 @@ H5T_conv_array(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
             /* Release the temporary datatype IDs used */
             if(tsrc_id >= 0)
-                H5I_dec_ref(tsrc_id);
+                H5I_dec_ref(tsrc_id, FALSE);
             if(tdst_id >= 0)
-                H5I_dec_ref(tdst_id);
+                H5I_dec_ref(tdst_id, FALSE);
             break;
 
         default:    /* Some other command we don't know about yet.*/

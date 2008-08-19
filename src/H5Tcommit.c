@@ -534,7 +534,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype")
 
     /* Register the type and return the ID */
-    if((ret_value = H5I_register(H5I_DATATYPE, type)) < 0)
+    if((ret_value = H5I_register(H5I_DATATYPE, type, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register named datatype")
 
 done:
@@ -586,7 +586,7 @@ H5Tget_create_plist(hid_t dtype_id)
     /* Copy the default datatype creation property list */
     if(NULL == (tcpl_plist = H5I_object(H5P_LST_DATATYPE_CREATE_g)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get default creation property list")
-    if((new_tcpl_id = H5P_copy_plist(tcpl_plist)) < 0)
+    if((new_tcpl_id = H5P_copy_plist(tcpl_plist, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to copy the creation property list")
 
     /* Check if the datatype is committed */
@@ -612,7 +612,7 @@ H5Tget_create_plist(hid_t dtype_id)
 done:
     if(ret_value < 0)
         if(new_tcpl_id > 0)
-            (void)H5I_dec_ref(new_tcpl_id);
+            (void)H5I_dec_ref(new_tcpl_id, TRUE);
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Tget_create_plist() */

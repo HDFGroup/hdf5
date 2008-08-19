@@ -260,7 +260,7 @@ H5AC_init_interface(void)
         HGOTO_ERROR(H5E_CACHE, H5E_BADATOM, FAIL, "can't get property list class")
 
     /* Get an ID for the blocking, collective H5AC dxpl */
-    if ((H5AC_dxpl_id=H5P_create_id(xfer_pclass)) < 0)
+    if ((H5AC_dxpl_id=H5P_create_id(xfer_pclass,FALSE)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
     /* Get the property list object */
@@ -282,7 +282,7 @@ H5AC_init_interface(void)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
 
     /* Get an ID for the non-blocking, collective H5AC dxpl */
-    if ((H5AC_noblock_dxpl_id=H5P_create_id(xfer_pclass)) < 0)
+    if ((H5AC_noblock_dxpl_id=H5P_create_id(xfer_pclass,FALSE)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
     /* Get the property list object */
@@ -304,7 +304,7 @@ H5AC_init_interface(void)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
 
     /* Get an ID for the non-blocking, independent H5AC dxpl */
-    if ((H5AC_ind_dxpl_id=H5P_create_id(xfer_pclass)) < 0)
+    if ((H5AC_ind_dxpl_id=H5P_create_id(xfer_pclass,FALSE)) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "unable to register property list")
 
     /* Get the property list object */
@@ -374,9 +374,9 @@ H5AC_term_interface(void)
             n = 1; /* H5I */
 
             /* Close H5AC dxpl */
-            if (H5I_dec_ref(H5AC_dxpl_id) < 0 ||
-                    H5I_dec_ref(H5AC_noblock_dxpl_id) < 0 ||
-                    H5I_dec_ref(H5AC_ind_dxpl_id) < 0)
+            if (H5I_dec_ref(H5AC_dxpl_id, FALSE) < 0 ||
+                    H5I_dec_ref(H5AC_noblock_dxpl_id, FALSE) < 0 ||
+                    H5I_dec_ref(H5AC_ind_dxpl_id, FALSE) < 0)
                 H5E_clear_stack(NULL); /*ignore error*/
             else {
                 /* Reset static IDs */

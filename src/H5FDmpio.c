@@ -201,7 +201,7 @@ H5FD_mpio_init(void)
     FUNC_ENTER_NOAPI(H5FD_mpio_init, FAIL)
 
     if (H5I_VFL!=H5I_get_type(H5FD_MPIO_g))
-        H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g,sizeof(H5FD_class_mpi_t));
+        H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g,sizeof(H5FD_class_mpi_t),FALSE);
 
 #ifdef H5FDmpio_DEBUG
     if (!H5FD_mpio_Debug_inited)

@@ -115,7 +115,7 @@ H5P_open_class_path_test(const char *path)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "unable to find class with full path");
 
     /* Get an atom for the class */
-    if ((ret_value=H5I_register(H5I_GENPROP_CLS, pclass))<0)
+    if ((ret_value=H5I_register(H5I_GENPROP_CLS, pclass, TRUE))<0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class");
 
 done:

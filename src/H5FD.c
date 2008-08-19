@@ -203,7 +203,7 @@ H5FD_term_interface(void)
 
     if(H5_interface_initialize_g) {
 	if((n=H5I_nmembers(H5I_VFL))!=0) {
-	    H5I_clear_type(H5I_VFL, FALSE);
+	    H5I_clear_type(H5I_VFL, FALSE, FALSE);
 
             /* Reset the VFL drivers, if they've been closed */
             if(H5I_nmembers(H5I_VFL)==0) {
@@ -281,7 +281,7 @@ H5FD_free_cls(H5FD_class_t *cls)
  *              Monday, July 26, 1999
  *
  * Modifications:
- *              Copied guts of function info H5FD_register
+ *              Copied guts of function into H5FD_register
  *              Quincey Koziol
  *              Friday, January 30, 2004
  *
@@ -312,7 +312,7 @@ H5FDregister(const H5FD_class_t *cls)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid free-list mapping")
 
     /* Create the new class ID */
-    if((ret_value=H5FD_register(cls, sizeof(H5FD_class_t))) < 0)
+    if((ret_value=H5FD_register(cls, sizeof(H5FD_class_t), TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register file driver ID")
 
 done:
@@ -348,7 +348,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5FD_register(const void *_cls, size_t size)
+H5FD_register(const void *_cls, size_t size, hbool_t app_ref)
 {
     hid_t		ret_value;
     const H5FD_class_t	*cls=(const H5FD_class_t *)_cls;
@@ -372,7 +372,7 @@ H5FD_register(const void *_cls, size_t size)
     HDmemcpy(saved,cls,size);
 
     /* Create the new class ID */
-    if((ret_value=H5I_register(H5I_VFL, saved)) < 0)
+    if((ret_value=H5I_register(H5I_VFL, saved, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register file driver ID")
 
 done:
@@ -416,7 +416,7 @@ H5FDunregister(hid_t driver_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver")
 
     /* The H5FD_class_t struct will be freed by this function */
-    if(H5I_dec_ref(driver_id) < 0)
+    if(H5I_dec_ref(driver_id, TRUE) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to unregister file driver")
 
 done:
@@ -427,7 +427,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5FD_get_class
  *
- * Purpose:	Optains a pointer to the driver struct containing all the
+ * Purpose:	Obtains a pointer to the driver struct containing all the
  *		callback pointers, etc. The PLIST_ID argument can be a file
  *		access property list, a data transfer property list, or a
  *		file driver identifier.
@@ -667,7 +667,7 @@ H5FD_pl_close(hid_t driver_id, herr_t (*free_func)(void *), void *pl)
 	H5MM_xfree(pl);
 
     /* Decrement reference count for driver */
-    if(H5I_dec_ref(driver_id) < 0)
+    if(H5I_dec_ref(driver_id, FALSE) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't decrement reference count for driver")
 
 done:
@@ -743,7 +743,7 @@ H5FD_fapl_open(H5P_genplist_t *plist, hid_t driver_id, const void *driver_info)
     FUNC_ENTER_NOAPI(H5FD_fapl_open, FAIL)
 
     /* Increment the reference count on driver and copy driver info */
-    if(H5I_inc_ref(driver_id) < 0)
+    if(H5I_inc_ref(driver_id, FALSE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver")
     if(H5FD_fapl_copy(driver_id, driver_info, &copied_driver_info) < 0)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VFL driver info")
@@ -860,7 +860,7 @@ H5FD_dxpl_open(H5P_genplist_t *plist, hid_t driver_id, const void *driver_info)
     FUNC_ENTER_NOAPI(H5FD_dxpl_open, FAIL)
 
     /* Increment the reference count on the driver and copy the driver info */
-    if(H5I_inc_ref(driver_id) < 0)
+    if(H5I_inc_ref(driver_id, FALSE) < 0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTINC, FAIL, "can't increment VFL driver ID")
     if(H5FD_dxpl_copy(driver_id, driver_info, &copied_driver_info) < 0)
         HGOTO_ERROR (H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy VFL driver")
@@ -1090,7 +1090,7 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
      * driver ID to prevent it from being freed while this file is open.
      */
     file->driver_id = driver_id;
-    if(H5I_inc_ref(file->driver_id) < 0)
+    if(H5I_inc_ref(file->driver_id, FALSE) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver")
     file->cls = driver;
     file->maxaddr = maxaddr;
@@ -1209,7 +1209,7 @@ H5FD_close(H5FD_t *file)
 
     /* Prepare to close file by clearing all public fields */
     driver = file->cls;
-    if(H5I_dec_ref(file->driver_id) < 0)
+    if(H5I_dec_ref(file->driver_id, FALSE) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTDEC, FAIL, "can't close driver ID")
 
     /*

@@ -176,7 +176,7 @@ H5A_term_interface(void)
 
     if(H5_interface_initialize_g) {
 	if((n = H5I_nmembers(H5I_ATTR))>0) {
-	    (void)H5I_clear_type(H5I_ATTR, FALSE);
+	    (void)H5I_clear_type(H5I_ATTR, FALSE, FALSE);
 	} else {
 	    (void)H5I_dec_type_ref(H5I_ATTR);
 	    H5_interface_initialize_g = 0;
@@ -494,7 +494,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to create attribute in object header")
 
     /* Register the new attribute and get an ID for it */
-    if((ret_value = H5I_register(H5I_ATTR, attr)) < 0)
+    if((ret_value = H5I_register(H5I_ATTR, attr, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
 
     /* Now it's safe to say it's uninitialized */
@@ -556,7 +556,7 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t UNUSED aapl_id)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to initialize attribute")
 
     /* Register the attribute and get an ID for it */
-    if((ret_value = H5I_register(H5I_ATTR, attr)) < 0)
+    if((ret_value = H5I_register(H5I_ATTR, attr, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
 
 done:
@@ -621,7 +621,7 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "can't open attribute")
 
     /* Register the attribute and get an ID for it */
-    if((ret_value = H5I_register(H5I_ATTR, attr)) < 0)
+    if((ret_value = H5I_register(H5I_ATTR, attr, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
 
 done:
@@ -692,7 +692,7 @@ H5Aopen_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
 
     /* Register the attribute and get an ID for it */
-    if((ret_value = H5I_register(H5I_ATTR, attr)) < 0)
+    if((ret_value = H5I_register(H5I_ATTR, attr, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
 
 done:
@@ -991,8 +991,8 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 
         /* Check for type conversion required */
         if(!H5T_path_noop(tpath)) {
-            if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL))) < 0 ||
-                    (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(attr->shared->dt, H5T_COPY_ALL))) < 0)
+            if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL), FALSE)) < 0 ||
+                    (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(attr->shared->dt, H5T_COPY_ALL), FALSE)) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
 
             /* Get the maximum buffer size needed and allocate it */
@@ -1039,9 +1039,9 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
 done:
     /* Release resources */
     if(src_id >= 0)
-        (void)H5I_dec_ref(src_id);
+        (void)H5I_dec_ref(src_id, FALSE);
     if(dst_id >= 0)
-        (void)H5I_dec_ref(dst_id);
+        (void)H5I_dec_ref(dst_id, FALSE);
     if(tconv_buf && !tconv_owned)
         H5FL_BLK_FREE(attr_buf, tconv_buf);
     if(bkg_buf)
@@ -1151,8 +1151,8 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
 
             /* Check for type conversion required */
             if(!H5T_path_noop(tpath)) {
-                if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(attr->shared->dt, H5T_COPY_ALL))) < 0 ||
-                        (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL))) < 0)
+                if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(attr->shared->dt, H5T_COPY_ALL), FALSE)) < 0 ||
+                        (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(mem_type, H5T_COPY_ALL), FALSE)) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
 
                 /* Get the maximum buffer size needed and allocate it */
@@ -1183,9 +1183,9 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
 done:
     /* Release resources */
     if(src_id >= 0)
-        (void)H5I_dec_ref(src_id);
+        (void)H5I_dec_ref(src_id, FALSE);
     if(dst_id >= 0)
-        (void)H5I_dec_ref(dst_id);
+        (void)H5I_dec_ref(dst_id, FALSE);
     if(tconv_buf)
         H5FL_BLK_FREE(attr_buf, tconv_buf);
     if(bkg_buf)
@@ -1230,7 +1230,7 @@ H5Aget_space(hid_t attr_id)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to copy dataspace")
 
     /* Atomize */
-    if((ret_value = H5I_register(H5I_DATASPACE, ds)) < 0)
+    if((ret_value = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
 
 done:
@@ -1288,7 +1288,7 @@ H5Aget_type(hid_t attr_id)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
 
     /* Atomize */
-    if((ret_value = H5I_register(H5I_DATATYPE, dt)) < 0)
+    if((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype atom")
 
 done:
@@ -1339,7 +1339,7 @@ H5Aget_create_plist(hid_t attr_id)
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get default ACPL")
 
     /* Create the property list object to return */
-    if((new_plist_id = H5P_copy_plist(plist)) < 0)
+    if((new_plist_id = H5P_copy_plist(plist, TRUE)) < 0)
 	HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to copy attribute creation properties")
     if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_plist_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "can't get property list")
@@ -2033,7 +2033,7 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     loc_found = TRUE;
 
     /* Open the object */
-    if((obj_loc_id = H5O_open_by_loc(&obj_loc, H5AC_ind_dxpl_id)) < 0)
+    if((obj_loc_id = H5O_open_by_loc(&obj_loc, H5AC_ind_dxpl_id, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open object")
 
     /* Build attribute operator info */
@@ -2052,7 +2052,7 @@ H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
 done:
     /* Release resources */
     if(obj_loc_id > 0) {
-        if(H5I_dec_ref(obj_loc_id) < 0)
+        if(H5I_dec_ref(obj_loc_id, TRUE) < 0)
             HDONE_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "unable to close temporary object")
     } /* end if */
     else if(loc_found && H5G_loc_free(&obj_loc) < 0)
@@ -2276,7 +2276,7 @@ H5Aclose(hid_t attr_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
 
     /* Decrement references to that atom (and close it) */
-    if(H5I_dec_ref(attr_id) < 0)
+    if(H5I_dec_ref(attr_id, TRUE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't close attribute")
 
 done:

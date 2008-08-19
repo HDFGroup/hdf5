@@ -289,7 +289,7 @@ H5FD_log_init(void)
     FUNC_ENTER_NOAPI(H5FD_log_init, FAIL)
 
     if (H5I_VFL!=H5Iget_type(H5FD_LOG_g))
-        H5FD_LOG_g = H5FD_register(&H5FD_log_g,sizeof(H5FD_class_t));
+        H5FD_LOG_g = H5FD_register(&H5FD_log_g,sizeof(H5FD_class_t),FALSE);
 
     /* Set return value */
     ret_value=H5FD_LOG_g;

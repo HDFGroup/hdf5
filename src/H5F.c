@@ -164,7 +164,7 @@ H5F_term_interface(void)
 
     if(H5_interface_initialize_g) {
 	if((n = H5I_nmembers(H5I_FILE)) != 0) {
-            H5I_clear_type(H5I_FILE, FALSE);
+            H5I_clear_type(H5I_FILE, FALSE, FALSE);
 	} else {
             /* Make certain we've cleaned up all the shared file objects */
             H5F_sfile_assert_num(0);
@@ -211,7 +211,7 @@ H5Fget_create_plist(hid_t file_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Create the property list object to return */
-    if((ret_value = H5P_copy_plist(plist)) < 0)
+    if((ret_value = H5P_copy_plist(plist, TRUE)) < 0)
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "unable to copy file creation properties")
 
 done:
@@ -254,7 +254,7 @@ H5Fget_access_plist(hid_t file_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Retrieve the file's access property list */
-    if((ret_value = H5F_get_access_plist(f)) < 0)
+    if((ret_value = H5F_get_access_plist(f, TRUE)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file access property list")
 
 done:
@@ -286,7 +286,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5F_get_access_plist(H5F_t *f)
+H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
 {
     H5P_genplist_t *new_plist;              /* New property list */
     H5P_genplist_t *old_plist;              /* Old property list */
@@ -301,7 +301,7 @@ H5F_get_access_plist(H5F_t *f)
     /* Make a copy of the default file access property list */
     if(NULL == (old_plist = H5I_object(H5P_LST_FILE_ACCESS_g)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-    if((ret_value = H5P_copy_plist(old_plist)) < 0)
+    if((ret_value = H5P_copy_plist(old_plist, app_ref)) < 0)
 	HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy file access property list")
     if(NULL == (new_plist = H5I_object(ret_value)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
@@ -338,7 +338,7 @@ H5F_get_access_plist(H5F_t *f)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't free the old driver information")
 
     /* Increment the reference count on the driver ID and insert it into the property list */
-    if(H5I_inc_ref(f->shared->lf->driver_id) < 0)
+    if(H5I_inc_ref(f->shared->lf->driver_id, FALSE) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver")
     if(H5P_set(new_plist, H5F_ACS_FILE_DRV_ID_NAME, &(f->shared->lf->driver_id)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file driver ID")
@@ -863,7 +863,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	 */
         if(NULL == (plist = H5I_object(fcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not property list")
-        f->shared->fcpl_id = H5P_copy_plist(plist);
+        f->shared->fcpl_id = H5P_copy_plist(plist, FALSE);
 
         /* Get the FCPL values to cache */
         if(H5P_get(plist, H5F_CRT_ADDR_BYTE_NUM_NAME, &f->shared->sizeof_addr) < 0)
@@ -1049,7 +1049,7 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
         if(H5I_GENPROP_LST != H5I_get_type(f->shared->fcpl_id))
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a property list")
-        if(H5I_dec_ref(f->shared->fcpl_id) < 0)
+        if(H5I_dec_ref(f->shared->fcpl_id, FALSE) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close property list")
 
@@ -1481,7 +1481,7 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create file")
 
     /* Get an atom for the file */
-    if((ret_value = H5I_register(H5I_FILE, new_file)) < 0)
+    if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
 
     /* Keep this ID in file object structure */
@@ -1562,7 +1562,7 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open file")
 
     /* Get an atom for the file */
-    if((ret_value = H5I_register(H5I_FILE, new_file)) < 0)
+    if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
     /* Keep this ID in file object structure */
@@ -1919,7 +1919,7 @@ H5F_try_close(H5F_t *f)
             while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_ATTR, (int)(sizeof(objs)/sizeof(objs[0])), objs)) != 0) {
                 /* Try to close all the open objects in this file */
                 for(u = 0; u < obj_count; u++)
-                    if(H5I_dec_ref(objs[u]) < 0)
+                    if(H5I_dec_ref(objs[u], FALSE) < 0)
                         HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object")
             } /* end while */
 
@@ -1931,7 +1931,7 @@ H5F_try_close(H5F_t *f)
             while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATATYPE, (int)(sizeof(objs)/sizeof(objs[0])), objs)) != 0) {
                 /* Try to close all the open objects in this file */
                 for(u = 0; u < obj_count; u++)
-                    if(H5I_dec_ref(objs[u]) < 0)
+                    if(H5I_dec_ref(objs[u], FALSE) < 0)
                         HGOTO_ERROR(H5E_ATOM, H5E_CLOSEERROR, FAIL, "can't close object")
             } /* end while */
         } /* end if */
@@ -2010,7 +2010,7 @@ H5Fclose(hid_t file_id)
      * Decrement reference count on atom.  When it reaches zero the file will
      * be closed.
      */
-    if(H5I_dec_ref(file_id) < 0)
+    if(H5I_dec_ref(file_id, TRUE) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTCLOSEFILE, FAIL, "decrementing file ID failed")
 
 done:
@@ -2064,7 +2064,7 @@ H5Freopen(hid_t file_id)
     /* Duplicate old file's name */
     new_file->name = H5MM_xstrdup(old_file->name);
 
-    if((ret_value = H5I_register(H5I_FILE, new_file)) < 0)
+    if((ret_value = H5I_register(H5I_FILE, new_file, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file handle")
 
     /* Keep this ID in file object structure */
@@ -2510,7 +2510,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5F_get_id(H5F_t *file)
+H5F_get_id(H5F_t *file, hbool_t app_ref)
 {
     hid_t       ret_value;
 
@@ -2520,11 +2520,11 @@ H5F_get_id(H5F_t *file)
 
     if(file->file_id == -1) {
         /* Get an atom for the file */
-        if((file->file_id = H5I_register(H5I_FILE, file)) < 0)
+        if((file->file_id = H5I_register(H5I_FILE, file, app_ref)) < 0)
 	    HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to atomize file")
     } else {
         /* Increment reference count on atom. */
-        if(H5I_inc_ref(file->file_id) < 0)
+        if(H5I_inc_ref(file->file_id, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
     } /* end else */
 
