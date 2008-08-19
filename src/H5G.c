@@ -1649,7 +1649,7 @@ H5G_iterate(hid_t loc_id, const char *group_name,
 {
     H5G_loc_t	loc;            /* Location of parent for group */
     hid_t gid = -1;             /* ID of group to iterate over */
-    H5G_t *grp;                 /* Pointer to group data structure to iterate over */
+    H5G_t *grp = NULL;          /* Pointer to group data structure to iterate over */
     H5G_iter_appcall_ud_t udata; /* User data for callback */
     herr_t ret_value;           /* Return value */
 

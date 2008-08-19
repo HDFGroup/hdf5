@@ -9734,6 +9734,20 @@ link_iterate_old_check(hid_t group_id, H5_iter_order_t order,
     } H5E_END_TRY;
     if(ret >= 0) TEST_ERROR
 
+    /* Check for iteration w/bad location ID */
+    skip = 0;
+    H5E_BEGIN_TRY {
+        ret = H5Literate((-1), H5_INDEX_NAME, order, &skip, link_iterate_fail_cb, NULL);
+    } H5E_END_TRY;
+    if(ret >= 0) TEST_ERROR
+
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    H5E_BEGIN_TRY {
+        ret = H5Giterate((-1), ".", &gskip, group_iterate_old_cb, iter_info);
+    } H5E_END_TRY;
+    if(ret >= 0) TEST_ERROR
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
+
     /* Success */
     return(0);
 
