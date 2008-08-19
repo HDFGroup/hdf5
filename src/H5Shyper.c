@@ -6953,7 +6953,7 @@ H5Scombine_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[],
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to set hyperslab selection");
 
     /* Atomize */
-    if ((ret_value=H5I_register (H5I_DATASPACE, new_space))<0)
+    if ((ret_value=H5I_register (H5I_DATASPACE, new_space, TRUE))<0)
         HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom");
 
 done:
@@ -7081,7 +7081,7 @@ H5Scombine_select(hid_t space1_id, H5S_seloper_t op, hid_t space2_id)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to create hyperslab selection");
 
     /* Atomize */
-    if ((ret_value=H5I_register (H5I_DATASPACE, new_space))<0)
+    if ((ret_value=H5I_register (H5I_DATASPACE, new_space, TRUE))<0)
         HGOTO_ERROR (H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom");
 
 done:

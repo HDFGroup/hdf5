@@ -37,7 +37,8 @@
 /* Static functions */
 static herr_t H5R_create(void *ref, H5G_loc_t *loc, const char *name,
         H5R_type_t ref_type, H5S_t *space, hid_t dxpl_id);
-static hid_t H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref);
+static hid_t H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type,
+    const void *_ref, hbool_t app_ref);
 static H5S_t * H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref);
 static ssize_t H5R_get_name(H5F_t *file, hid_t lapl_id, hid_t dxpl_id, hid_t id,
     H5R_type_t ref_type, const void *_ref, char *name, size_t size);
@@ -123,7 +124,7 @@ H5R_term_interface(void)
 
     if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_REFERENCE))) {
-	    H5I_clear_type(H5I_REFERENCE, FALSE);
+	    H5I_clear_type(H5I_REFERENCE, FALSE, FALSE);
 	} else {
 	    H5I_dec_type_ref(H5I_REFERENCE);
 	    H5_interface_initialize_g = 0;
@@ -359,7 +360,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hid_t
-H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref)
+H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref, hbool_t app_ref)
 {
     H5O_loc_t oloc;             /* Object location */
     H5G_name_t path;            /* Path of object */
@@ -436,7 +437,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found")
 
                 /* Create an atom for the group */
-                if((ret_value = H5I_register(H5I_GROUP, group)) < 0) {
+                if((ret_value = H5I_register(H5I_GROUP, group, app_ref)) < 0) {
                     H5G_close(group);
                     HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "can't register group")
                 } /* end if */
@@ -451,7 +452,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
                     HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found")
 
                 /* Create an atom for the datatype */
-                if((ret_value = H5I_register(H5I_DATATYPE, type)) < 0) {
+                if((ret_value = H5I_register(H5I_DATATYPE, type, app_ref)) < 0) {
                     H5T_close(type);
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "can't register datatype")
                 } /* end if */
@@ -467,7 +468,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
                     HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
 
                 /* Create an atom for the dataset */
-                if((ret_value = H5I_register(H5I_DATASET, dset)) < 0) {
+                if((ret_value = H5I_register(H5I_DATASET, dset, app_ref)) < 0) {
                     H5D_close(dset);
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register dataset")
                 } /* end if */
@@ -527,7 +528,7 @@ H5Rdereference(hid_t id, H5R_type_t ref_type, const void *_ref)
     file = loc.oloc->file;
 
     /* Create reference */
-    if((ret_value = H5R_dereference(file, H5AC_dxpl_id, ref_type, _ref)) < 0)
+    if((ret_value = H5R_dereference(file, H5AC_dxpl_id, ref_type, _ref, TRUE)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable dereference object")
 
 done:
@@ -650,7 +651,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create dataspace")
 
     /* Atomize */
-    if((ret_value = H5I_register (H5I_DATASPACE, space)) < 0)
+    if((ret_value = H5I_register (H5I_DATASPACE, space, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
 
 done:
@@ -881,7 +882,7 @@ H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_ty
     } /* end switch */
 
     /* Retrieve file ID for name search */
-    if((file_id = H5I_get_file_id(id)) < 0)
+    if((file_id = H5I_get_file_id(id, FALSE)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
     /* Get name, length, etc. */
@@ -891,7 +892,7 @@ H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_ty
 done:
     /* Close file ID used for search */
     if(file_id > 0)
-        if(H5I_dec_ref(file_id) < 0)
+        if(H5I_dec_ref(file_id, FALSE) < 0)
             HDONE_ERROR(H5E_REFERENCE, H5E_CANTCLOSEFILE, FAIL, "can't determine name")
 
     FUNC_LEAVE_NOAPI(ret_value)

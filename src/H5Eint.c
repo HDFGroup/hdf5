@@ -722,13 +722,13 @@ H5E_push_stack(H5E_t *estack, const char *file, const char *func, unsigned line,
 
     if(estack->nused < H5E_NSLOTS) {
         /* Increment the IDs to indicate that they are used in this stack */
-        if(H5I_inc_ref(cls_id) < 0)
+        if(H5I_inc_ref(cls_id, FALSE) < 0)
             HGOTO_DONE(FAIL)
 	estack->slot[estack->nused].cls_id = cls_id;
-        if(H5I_inc_ref(maj_id) < 0)
+        if(H5I_inc_ref(maj_id, FALSE) < 0)
             HGOTO_DONE(FAIL)
 	estack->slot[estack->nused].maj_num = maj_id;
-        if(H5I_inc_ref(min_id) < 0)
+        if(H5I_inc_ref(min_id, FALSE) < 0)
             HGOTO_DONE(FAIL)
 	estack->slot[estack->nused].min_num = min_id;
 	if(NULL == (estack->slot[estack->nused].func_name = H5MM_xstrdup(func)))
@@ -778,11 +778,11 @@ H5E_clear_entries(H5E_t *estack, size_t nentries)
 
         /* Decrement the IDs to indicate that they are no longer used by this stack */
         /* (In reverse order that they were incremented, so that reference counts work well) */
-        if(H5I_dec_ref(error->min_num) < 0)
+        if(H5I_dec_ref(error->min_num, FALSE) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message")
-        if(H5I_dec_ref(error->maj_num) < 0)
+        if(H5I_dec_ref(error->maj_num, FALSE) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message")
-        if(H5I_dec_ref(error->cls_id) < 0)
+        if(H5I_dec_ref(error->cls_id, FALSE) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error class")
 
         /* Release strings */

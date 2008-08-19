@@ -228,7 +228,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
      * users can override this callback using H5Lregister.
      */
     intent = H5F_INTENT(loc.oloc->file);
-    if((fapl_id = H5F_get_access_plist(loc.oloc->file)) < 0)
+    if((fapl_id = H5F_get_access_plist(loc.oloc->file, FALSE)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get file access property list")
 
     /* Check for non-"weak" file close degree for parent file */
@@ -340,7 +340,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
         HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "unable to create location for file")
 
     /* Open the object referenced in the external file */
-    if((ext_obj = H5O_open_name(&root_loc, obj_name, lapl_id)) < 0) {
+    if((ext_obj = H5O_open_name(&root_loc, obj_name, lapl_id, FALSE)) < 0) {
         H5F_decr_nopen_objs(ext_file);
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open object")
     } /* end if */
@@ -358,13 +358,13 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
 
 done:
     /* Release resources */
-    if(fapl_id > 0 && H5I_dec_ref(fapl_id) < 0)
+    if(fapl_id > 0 && H5I_dec_ref(fapl_id, FALSE) < 0)
         HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom for file access property list")
     if(ext_file && H5F_try_close(ext_file) < 0)
         HDONE_ERROR(H5E_LINK, H5E_CANTCLOSEFILE, FAIL, "problem closing external file")
 
     /* Close object if it's open and something failed */
-    if(ret_value < 0 && ext_obj >= 0 && H5I_dec_ref(ext_obj) < 0)
+    if(ret_value < 0 && ext_obj >= 0 && H5I_dec_ref(ext_obj, FALSE) < 0)
         HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom for external object")
 
     FUNC_LEAVE_NOAPI(ret_value)

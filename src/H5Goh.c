@@ -46,7 +46,8 @@
 /********************/
 
 static htri_t H5O_group_isa(H5O_t *loc);
-static hid_t H5O_group_open(const H5G_loc_t *obj_loc, hid_t dxpl_id);
+static hid_t H5O_group_open(const H5G_loc_t *obj_loc, hid_t dxpl_id,
+    hbool_t app_ref);
 static void *H5O_group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc,
     hid_t dxpl_id);
 static H5O_loc_t *H5O_group_get_oloc(hid_t obj_id);
@@ -134,7 +135,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5O_group_open(const H5G_loc_t *obj_loc, hid_t dxpl_id)
+H5O_group_open(const H5G_loc_t *obj_loc, hid_t dxpl_id, hbool_t app_ref)
 {
     H5G_t       *grp = NULL;            /* Group opened */
     hid_t	ret_value;              /* Return value */
@@ -148,7 +149,7 @@ H5O_group_open(const H5G_loc_t *obj_loc, hid_t dxpl_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an ID for the group */
-    if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
+    if((ret_value = H5I_register(H5I_GROUP, grp, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
 done:

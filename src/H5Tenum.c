@@ -94,7 +94,7 @@ H5Tenum_create(hid_t parent_id)
     if((dt=H5T_enum_create(parent))==NULL)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "cannot create enum type")
     /* Atomize the type */
-    if ((ret_value=H5I_register(H5I_DATATYPE, dt))<0)
+    if ((ret_value=H5I_register(H5I_DATATYPE, dt, TRUE))<0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register data type atom")
 
 done:

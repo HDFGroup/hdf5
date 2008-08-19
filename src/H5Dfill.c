@@ -229,10 +229,10 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
 
         /* Construct source & destination datatype IDs, if we will need them */
         if(!H5T_path_noop(tpath)) {
-            if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill_type, H5T_COPY_ALL))) < 0)
+            if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill_type, H5T_COPY_ALL), FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
 
-            if((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(buf_type, H5T_COPY_ALL))) < 0)
+            if((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(buf_type, H5T_COPY_ALL), FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
         } /* end if */
 
@@ -332,9 +332,9 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
     } /* end else */
 
 done:
-    if(src_id != (-1) && H5I_dec_ref(src_id) < 0)
+    if(src_id != (-1) && H5I_dec_ref(src_id, FALSE) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
-    if(dst_id != (-1) && H5I_dec_ref(dst_id) < 0)
+    if(dst_id != (-1) && H5I_dec_ref(dst_id, FALSE) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(tmp_buf)
         (void)H5FL_BLK_FREE(type_conv, tmp_buf);
@@ -402,7 +402,7 @@ H5D_fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf,
             /* Create temporary datatype for conversion operation */
             if(NULL == (fb_info->mem_type = H5T_copy(dset_type, H5T_COPY_REOPEN)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy file datatype")
-            if((fb_info->mem_tid = H5I_register(H5I_DATATYPE, fb_info->mem_type)) < 0)
+            if((fb_info->mem_tid = H5I_register(H5I_DATATYPE, fb_info->mem_type, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
 
             /* Retrieve sizes of memory & file datatypes */
@@ -673,7 +673,7 @@ H5D_fill_term(H5D_fill_buf_info_t *fb_info)
     /* Free other resources for vlen fill values */
     if(fb_info->has_vlen_fill_type) {
         if(fb_info->mem_tid > 0)
-            H5I_dec_ref(fb_info->mem_tid);
+            H5I_dec_ref(fb_info->mem_tid, FALSE);
         else if(fb_info->mem_type)
             H5T_close(fb_info->mem_type);
         if(fb_info->bkg_buf)

@@ -419,13 +419,13 @@ H5P_init_interface(void)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register properties")
 
                 /* Register the new class */
-                if((*lib_class->class_id = H5I_register(H5I_GENPROP_CLS, new_pclass)) < 0)
+                if((*lib_class->class_id = H5I_register(H5I_GENPROP_CLS, new_pclass, FALSE)) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register property list class")
 
                 /* Only register the default property list if it hasn't been created yet */
                 if(lib_class->def_plist_id && *lib_class->def_plist_id == (-1)) {
                     /* Register the default property list for the new class*/
-                    if((*lib_class->def_plist_id = H5P_create_id(new_pclass)) < 0)
+                    if((*lib_class->def_plist_id = H5P_create_id(new_pclass, FALSE)) < 0)
                          HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't register default property list for class")
                 } /* end if */
 
@@ -482,7 +482,7 @@ H5P_term_interface(void)
         if(n) {
             /* Clear the lists */
             if(nlist>0) {
-                H5I_clear_type(H5I_GENPROP_LST, FALSE);
+                H5I_clear_type(H5I_GENPROP_LST, FALSE, FALSE);
 
                 /* Reset the default property lists, if they've been closed */
                 if(H5I_nmembers(H5I_GENPROP_LST)==0) {
@@ -505,7 +505,7 @@ H5P_term_interface(void)
 
             /* Only attempt to close the classes after all the lists are closed */
             if(nlist==0 && nclass>0) {
-                H5I_clear_type(H5I_GENPROP_CLS, FALSE);
+                H5I_clear_type(H5I_GENPROP_CLS, FALSE, FALSE);
 
                 /* Reset the default property lists, if they've been closed */
                 if(H5I_nmembers(H5I_GENPROP_CLS)==0) {
@@ -636,7 +636,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5P_copy_plist(H5P_genplist_t *old_plist)
+H5P_copy_plist(H5P_genplist_t *old_plist, hbool_t app_ref)
 {
     H5P_genclass_t *tclass;     /* Temporary class pointer */
     H5P_genplist_t *new_plist=NULL;  /* New property list generated from copy */
@@ -793,7 +793,7 @@ H5P_copy_plist(H5P_genplist_t *old_plist)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't increment class ref count");
 
     /* Get an atom for the property list */
-    if((new_plist_id = H5I_register(H5I_GENPROP_LST, new_plist)) < 0)
+    if((new_plist_id = H5I_register(H5I_GENPROP_LST, new_plist, app_ref)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list");
 
     /* Save the property list ID in the property list struct, for use in the property class's 'close' callback */
@@ -1672,7 +1672,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 hid_t
-H5P_create_id(H5P_genclass_t *pclass)
+H5P_create_id(H5P_genclass_t *pclass, hbool_t app_ref)
 {
     H5P_genplist_t	*plist=NULL;    /* Property list created */
     hid_t plist_id=FAIL;        /* Property list ID */
@@ -1687,7 +1687,7 @@ H5P_create_id(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
 
     /* Get an atom for the property list */
-    if((plist_id = H5I_register(H5I_GENPROP_LST, plist)) < 0)
+    if((plist_id = H5I_register(H5I_GENPROP_LST, plist, app_ref)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list");
 
     /* Save the property list ID in the property list struct, for use in the property class's 'close' callback */

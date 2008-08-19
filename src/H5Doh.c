@@ -48,7 +48,8 @@
 static void *H5O_dset_get_copy_file_udata(void);
 static void H5O_dset_free_copy_file_udata(void *);
 static htri_t H5O_dset_isa(H5O_t *loc);
-static hid_t H5O_dset_open(const H5G_loc_t *obj_loc, hid_t dxpl_id);
+static hid_t H5O_dset_open(const H5G_loc_t *obj_loc, hid_t dxpl_id,
+    hbool_t app_ref);
 static void *H5O_dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc,
     hid_t dxpl_id);
 static H5O_loc_t *H5O_dset_get_oloc(hid_t obj_id);
@@ -219,7 +220,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5O_dset_open(const H5G_loc_t *obj_loc, hid_t dxpl_id)
+H5O_dset_open(const H5G_loc_t *obj_loc, hid_t dxpl_id, hbool_t app_ref)
 {
     H5D_t       *dset = NULL;           /* Dataset opened */
     hid_t	ret_value;              /* Return value */
@@ -233,7 +234,7 @@ H5O_dset_open(const H5G_loc_t *obj_loc, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
 
     /* Register an ID for the dataset */
-    if((ret_value = H5I_register(H5I_DATASET, dset)) < 0)
+    if((ret_value = H5I_register(H5I_DATASET, dset, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataset")
 
 done:

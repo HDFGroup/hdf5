@@ -241,7 +241,7 @@ H5D_term_interface(void)
              *
              * QAK - 5/13/03
              */
-	    H5I_clear_type(H5I_DATASET, TRUE);
+	    H5I_clear_type(H5I_DATASET, TRUE, FALSE);
 	} else {
 	    H5I_dec_type_ref(H5I_DATASET);
 	    H5_interface_initialize_g = 0;
@@ -535,7 +535,7 @@ H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
      * don't bother to copy it, just increment the reference count
      */
     if(!vl_type && creating && dcpl_id == H5P_DATASET_CREATE_DEFAULT) {
-        if(H5I_inc_ref(dcpl_id) < 0)
+        if(H5I_inc_ref(dcpl_id, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "Can't increment default DCPL ID")
         new_dset->dcpl_id = dcpl_id;
     } /* end if */
@@ -544,7 +544,7 @@ H5D_new(hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
         if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
 
-        new_dset->dcpl_id = H5P_copy_plist(plist);
+        new_dset->dcpl_id = H5P_copy_plist(plist, FALSE);
     } /* end else */
 
     /* Set return value */
@@ -554,7 +554,7 @@ done:
     if(ret_value == NULL)
         if(new_dset != NULL) {
             if(new_dset->dcpl_id != 0)
-                (void)H5I_dec_ref(new_dset->dcpl_id);
+                (void)H5I_dec_ref(new_dset->dcpl_id, FALSE);
             H5FL_FREE(H5D_shared_t, new_dset);
         } /* end if */
 
@@ -618,12 +618,12 @@ H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id, const H5T_t *type)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of datatype")
 
         /* Get a datatype ID for the dataset's datatype */
-	if((dset->shared->type_id = H5I_register(H5I_DATATYPE, dset->shared->type)) < 0)
+	if((dset->shared->type_id = H5I_register(H5I_DATATYPE, dset->shared->type, FALSE)) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register type")
     } /* end if */
     /* Not a custom datatype, just use it directly */
     else {
-        if(H5I_inc_ref(type_id) < 0)
+        if(H5I_inc_ref(type_id, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, FAIL, "Can't increment datatype ID")
 
         /* Use existing datatype */
@@ -1161,7 +1161,7 @@ done:
                     HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace")
             } /* end if */
             if(new_dset->shared->type) {
-                if(H5I_dec_ref(new_dset->shared->type_id) < 0)
+                if(H5I_dec_ref(new_dset->shared->type_id, FALSE) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
             } /* end if */
             if(H5F_addr_defined(new_dset->oloc.addr)) {
@@ -1173,7 +1173,7 @@ done:
                 } /* end if */
             } /* end if */
             if(new_dset->shared->dcpl_id != 0) {
-                if(H5I_dec_ref(new_dset->shared->dcpl_id) < 0)
+                if(H5I_dec_ref(new_dset->shared->dcpl_id, FALSE) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
             } /* end if */
             H5FL_FREE(H5D_shared_t, new_dset->shared);
@@ -1327,7 +1327,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load space info from dataset header")
 
     /* Get a datatype ID for the dataset's datatype */
-    if((dataset->shared->type_id = H5I_register(H5I_DATATYPE, dataset->shared->type)) < 0)
+    if((dataset->shared->type_id = H5I_register(H5I_DATATYPE, dataset->shared->type, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register type")
 
     /* Get dataset creation property list object */
@@ -1508,7 +1508,7 @@ done:
         } /* end if */
         if(dataset->shared->type) {
             if(dataset->shared->type_id > 0) {
-                if(H5I_dec_ref(dataset->shared->type_id) < 0)
+                if(H5I_dec_ref(dataset->shared->type_id, FALSE) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release datatype")
             } /* end if */
             else {
@@ -1612,8 +1612,8 @@ H5D_close(H5D_t *dataset)
         * Release datatype, dataspace and creation property list -- there isn't
         * much we can do if one of these fails, so we just continue.
         */
-        free_failed = (H5I_dec_ref(dataset->shared->type_id) < 0 || H5S_close(dataset->shared->space) < 0 ||
-                          H5I_dec_ref(dataset->shared->dcpl_id) < 0);
+        free_failed = (H5I_dec_ref(dataset->shared->type_id, FALSE) < 0 || H5S_close(dataset->shared->space) < 0 ||
+                          H5I_dec_ref(dataset->shared->dcpl_id, FALSE) < 0);
 
         /* Remove the dataset from the list of opened objects in the file */
         if(H5FO_top_decr(dataset->oloc.file, dataset->oloc.addr) < 0)

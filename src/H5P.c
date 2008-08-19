@@ -128,7 +128,7 @@ H5Pcopy(hid_t id)
 
     /* Compare property lists */
     if(H5I_GENPROP_LST == H5I_get_type(id)) {
-        if((ret_value = H5P_copy_plist(obj)) < 0)
+        if((ret_value = H5P_copy_plist(obj, TRUE)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property list");
     } /* end if */
     /* Must be property classes */
@@ -140,7 +140,7 @@ H5Pcopy(hid_t id)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property class");
 
         /* Get an atom for the copied class */
-        if((ret_value = H5I_register(H5I_GENPROP_CLS, copy_class)) < 0) {
+        if((ret_value = H5I_register(H5I_GENPROP_CLS, copy_class, TRUE)) < 0) {
             H5P_close_class(copy_class);
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class");
         } /* end if */
@@ -221,7 +221,7 @@ H5Pcreate_class(hid_t parent, const char *name,
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list class");
 
     /* Get an atom for the class */
-    if((ret_value = H5I_register(H5I_GENPROP_CLS, pclass)) < 0)
+    if((ret_value = H5I_register(H5I_GENPROP_CLS, pclass, TRUE)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class");
 
 done:
@@ -268,7 +268,7 @@ H5Pcreate(hid_t cls_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
     /* Create the new property list */
-    if((ret_value = H5P_create_id(pclass)) < 0)
+    if((ret_value = H5P_create_id(pclass, TRUE)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list");
 
 done:
@@ -856,7 +856,7 @@ H5Pget_class(hid_t plist_id)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't increment class ID ref count");
 
     /* Get an atom for the class */
-    if((ret_value = H5I_register(H5I_GENPROP_CLS, pclass)) < 0)
+    if((ret_value = H5I_register(H5I_GENPROP_CLS, pclass, TRUE)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class");
 
 done:
@@ -1374,7 +1374,7 @@ H5Pclose(hid_t plist_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Close the property list */
-    if(H5I_dec_ref(plist_id) < 0)
+    if(H5I_dec_ref(plist_id, TRUE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
 
 done:
@@ -1465,7 +1465,7 @@ H5Pget_class_parent(hid_t pclass_id)
         HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't increment class ID ref count");
 
     /* Get an atom for the class */
-    if((ret_value = H5I_register(H5I_GENPROP_CLS, parent)) < 0)
+    if((ret_value = H5I_register(H5I_GENPROP_CLS, parent, TRUE)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class");
 
 done:
@@ -1507,7 +1507,7 @@ H5Pclose_class(hid_t cls_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
     /* Close the property list class */
-    if(H5I_dec_ref(cls_id) < 0)
+    if(H5I_dec_ref(cls_id, TRUE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close");
 
 done:

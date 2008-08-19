@@ -46,7 +46,8 @@
 /********************/
 
 static htri_t H5O_dtype_isa(H5O_t *loc);
-static hid_t H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t dxpl_id);
+static hid_t H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t dxpl_id,
+    hbool_t app_ref);
 static void *H5O_dtype_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc,
     hid_t dxpl_id);
 static H5O_loc_t *H5O_dtype_get_oloc(hid_t obj_id);
@@ -127,7 +128,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t dxpl_id)
+H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t dxpl_id, hbool_t app_ref)
 {
     H5T_t       *type = NULL;           /* Datatype opened */
     hid_t	ret_value;              /* Return value */
@@ -141,7 +142,7 @@ H5O_dtype_open(const H5G_loc_t *obj_loc, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open datatype")
 
     /* Register an ID for the datatype */
-    if((ret_value = H5I_register(H5I_DATATYPE, type)) < 0)
+    if((ret_value = H5I_register(H5I_DATATYPE, type, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
 
 done:

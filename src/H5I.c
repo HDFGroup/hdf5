@@ -90,6 +90,7 @@
 typedef struct H5I_id_info_t {
     hid_t	id;		/* ID for this info			    */
     unsigned	count;		/* ref. count for this atom		    */
+    unsigned    app_count;
     void	*obj_ptr;	/* pointer associated with the atom	    */
     struct H5I_id_info_t *next;	/* link to next atom (in case of hash-clash)*/
 } H5I_id_info_t;
@@ -528,7 +529,7 @@ herr_t H5Iclear_type(H5I_type_t type, hbool_t force)
 		HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "cannot call public function on library type");
 	}
 
-	ret_value = H5I_clear_type(type, force);
+	ret_value = H5I_clear_type(type, force, TRUE);
 
 	done:
 		FUNC_LEAVE_API(ret_value);
@@ -561,10 +562,16 @@ herr_t H5Iclear_type(H5I_type_t type, hbool_t force)
  *		things like property lists, files, etc.  Objects that have a
  *		reference count larger than one are not affected unless FORCE
  *		is non-zero.
+ *
+ *      Neil Fortner, 2008-08-08
+ *      Added app_ref parameter.  If app_ref is FALSE, then the
+ *      application reference count is ignored (i.e. subtracted from
+ *      the total reference count) when determining which id's to
+ *      close.
  *-------------------------------------------------------------------------
  */
 herr_t
-H5I_clear_type(H5I_type_t type, hbool_t force)
+H5I_clear_type(H5I_type_t type, hbool_t force, hbool_t app_ref)
 {
     H5I_id_type_t  *type_ptr = NULL;    /* ptr to the atomic type */
     H5I_id_info_t   *cur=NULL;          /* Current node being worked with */
@@ -595,7 +602,7 @@ H5I_clear_type(H5I_type_t type, hbool_t force)
              * Do nothing to the object if the reference count is larger than
              * one and forcing is off.
              */
-            if (!force && cur->count>1) {
+            if (!force && (cur->count - (!app_ref * cur->app_count)) >1) {
                 next=cur->next;
                 continue;
             } /* end if */
@@ -739,7 +746,7 @@ herr_t H5I_destroy_type(H5I_type_t type)
     if (type_ptr == NULL || type_ptr->count <= 0)
 		HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type");
 
-	H5I_clear_type(type, TRUE);
+	H5I_clear_type(type, TRUE, FALSE);
 	H5E_clear_stack(NULL); /*don't care about errors*/
 	H5MM_xfree(type_ptr->id_list);
 
@@ -779,7 +786,7 @@ hid_t H5Iregister(H5I_type_t type, void *object)
 		HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "cannot call public function on library type");
 	}
 
-	ret_value = H5I_register(type, object);
+	ret_value = H5I_register(type, object, TRUE);
 
 	done:
 		FUNC_LEAVE_API(ret_value);
@@ -805,10 +812,15 @@ hid_t H5Iregister(H5I_type_t type, void *object)
  *
  * Modifications:
  *
+ *  Neil Fortner, 7 Aug 2008
+ *  Added app_ref parameter and support for the app_count field, to
+ *  distiguish between reference count from the library and from the
+ *  application.
+ *
  *-------------------------------------------------------------------------
  */
 hid_t
-H5I_register(H5I_type_t type, void *object)
+H5I_register(H5I_type_t type, void *object, hbool_t app_ref)
 {
     H5I_id_type_t	*type_ptr=NULL;	/*ptr to the type		*/
     H5I_id_info_t	*id_ptr=NULL;	/*ptr to the new ID information */
@@ -834,6 +846,7 @@ H5I_register(H5I_type_t type, void *object)
     new_id = H5I_MAKE(type, type_ptr->nextid);
     id_ptr->id = new_id;
     id_ptr->count = 1; /*initial reference count*/
+    id_ptr->app_count = !!app_ref;
     id_ptr->obj_ptr = object;
     id_ptr->next = NULL;
 
@@ -1268,7 +1281,7 @@ H5Idec_ref(hid_t id)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID");
 
     /* Do actual decrement operation */
-    if((ret_value = H5I_dec_ref(id))<0)
+    if((ret_value = H5I_dec_ref(id, TRUE))<0)
         HGOTO_ERROR (H5E_ATOM, H5E_CANTDEC, FAIL, "can't decrement ID ref count");
 
 done:
@@ -1312,10 +1325,15 @@ done:
  *	count 1.  This feature is needed by file close with H5F_CLOSE_SEMI
  *	value.
  *
+ *  Neil Fortner, 7 Aug 2008
+ *  Added app_ref parameter and support for the app_count field, to
+ *  distiguish between reference count from the library and from the
+ *  application.
+ *
  *-------------------------------------------------------------------------
  */
 int
-H5I_dec_ref(hid_t id)
+H5I_dec_ref(hid_t id, hbool_t app_ref)
 {
     H5I_type_t		type;		/*type the object is in*/
     H5I_id_type_t	*type_ptr;	/*ptr to the type	*/
@@ -1357,7 +1375,11 @@ H5I_dec_ref(hid_t id)
             ret_value = FAIL;
         }
     } else {
-        ret_value = --(id_ptr->count);
+        --(id_ptr->count);
+        if (app_ref)
+            --(id_ptr->app_count);
+        HDassert((id_ptr->count >= id_ptr->app_count) && (id_ptr->app_count >= 0));
+        ret_value = app_ref ? id_ptr->app_count : id_ptr->count;
     }
 
 done:
@@ -1393,7 +1415,7 @@ H5Iinc_ref(hid_t id)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID");
 
     /* Do actual increment operation */
-    if((ret_value = H5I_inc_ref(id))<0)
+    if((ret_value = H5I_inc_ref(id, TRUE))<0)
         HGOTO_ERROR (H5E_ATOM, H5E_CANTINC, FAIL, "can't increment ID ref count");
 
 done:
@@ -1415,10 +1437,15 @@ done:
  *
  * Modifications:
  *
+ *  Neil Fortner, 7 Aug 2008
+ *  Added app_ref parameter and support for the app_count field, to
+ *  distiguish between reference count from the library and from the
+ *  application.
+ *
  *-------------------------------------------------------------------------
  */
 int
-H5I_inc_ref(hid_t id)
+H5I_inc_ref(hid_t id, hbool_t app_ref)
 {
     H5I_type_t		type;		/*type the object is in*/
     H5I_id_type_t	*type_ptr;	/*ptr to the type	*/
@@ -1442,8 +1469,12 @@ H5I_inc_ref(hid_t id)
     if (NULL==(id_ptr=H5I_find_id(id)))
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID");
 
+    /* Adjust reference counts */
+    ++(id_ptr->count);
+    if (app_ref)
+        ++(id_ptr->app_count);
     /* Set return value */
-    ret_value=++(id_ptr->count);
+    ret_value = app_ref ? id_ptr->app_count : id_ptr->count;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1478,7 +1509,7 @@ H5Iget_ref(hid_t id)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID");
 
     /* Do actual retrieve operation */
-    if((ret_value = H5I_get_ref(id))<0)
+    if((ret_value = H5I_get_ref(id, TRUE))<0)
         HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "can't get ID ref count");
 
 done:
@@ -1500,10 +1531,15 @@ done:
  *
  * Modifications:
  *
+ *  Neil Fortner, 7 Aug 2008
+ *  Added app_ref parameter and support for the app_count field, to
+ *  distiguish between reference count from the library and from the
+ *  application.
+ *
  *-------------------------------------------------------------------------
  */
 int
-H5I_get_ref(hid_t id)
+H5I_get_ref(hid_t id, hbool_t app_ref)
 {
     H5I_type_t		type;		/*type the object is in*/
     H5I_id_type_t	*type_ptr;	/*ptr to the type	*/
@@ -1528,7 +1564,7 @@ H5I_get_ref(hid_t id)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't locate ID");
 
     /* Set return value */
-    ret_value=id_ptr->count;
+    ret_value = app_ref ? id_ptr->app_count : id_ptr->count;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1802,7 +1838,7 @@ H5I_get_type_ref(H5I_type_t type)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5I_get_ref() */
+} /* end H5I_get_type_ref() */
 
 
 /*-------------------------------------------------------------------------
@@ -2036,7 +2072,7 @@ H5Iget_file_id(hid_t obj_id)
     FUNC_ENTER_API(H5Iget_file_id, FAIL);
     H5TRACE1("i", "i", obj_id);
 
-    if((ret_value = H5I_get_file_id(obj_id))<0)
+    if((ret_value = H5I_get_file_id(obj_id, TRUE))<0)
         HGOTO_ERROR (H5E_ATOM, H5E_CANTGET, FAIL, "can't retrieve file ID");
 
 done:
@@ -2060,7 +2096,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5I_get_file_id(hid_t obj_id)
+H5I_get_file_id(hid_t obj_id, hbool_t app_ref)
 {
     H5G_loc_t loc;              /* Location of object */
     H5I_type_t type;            /* ID type */
@@ -2074,13 +2110,13 @@ H5I_get_file_id(hid_t obj_id)
         ret_value = obj_id;
 
         /* Increment reference count on atom. */
-        if(H5I_inc_ref(ret_value) < 0)
+        if(H5I_inc_ref(ret_value, app_ref) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTSET, FAIL, "incrementing file ID failed")
     }
     else if(type == H5I_DATATYPE || type == H5I_GROUP || type == H5I_DATASET || type == H5I_ATTR) {
         if(H5G_loc(obj_id, &loc) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get object location")
-        if((ret_value = H5F_get_id(loc.oloc->file)) < 0)
+        if((ret_value = H5F_get_id(loc.oloc->file, app_ref)) < 0)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTGET, FAIL, "can't get file ID")
     }
     else

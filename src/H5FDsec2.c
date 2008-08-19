@@ -240,7 +240,7 @@ H5FD_sec2_init(void)
     FUNC_ENTER_NOAPI(H5FD_sec2_init, FAIL)
 
     if(H5I_VFL != H5I_get_type(H5FD_SEC2_g))
-        H5FD_SEC2_g = H5FD_register(&H5FD_sec2_g, sizeof(H5FD_class_t));
+        H5FD_SEC2_g = H5FD_register(&H5FD_sec2_g, sizeof(H5FD_class_t), FALSE);
 
     /* Set return value */
     ret_value = H5FD_SEC2_g;

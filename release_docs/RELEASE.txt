@@ -104,6 +104,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed improper shutdown when objects have reference count > 1.  The
+            library now tracks reference count due to the application separately
+            from that due to internal library routines.  (NAF - 2008/08/19)
       - Fixed assertion failure caused by incorrect array datatype version.
             (NAF - 2008/08/08)
       - Fixed an issue where mount point traversal would fail when using

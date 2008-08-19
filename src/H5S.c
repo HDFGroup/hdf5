@@ -122,7 +122,7 @@ H5S_term_interface(void)
 
     if(H5_interface_initialize_g) {
 	if((n = H5I_nmembers(H5I_DATASPACE))) {
-	    H5I_clear_type(H5I_DATASPACE, FALSE);
+	    H5I_clear_type(H5I_DATASPACE, FALSE, FALSE);
 	} /* end if */
         else {
 	    /* Free data types */
@@ -249,7 +249,7 @@ H5Screate(H5S_class_t type)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create dataspace")
 
     /* Atomize */
-    if((ret_value = H5I_register (H5I_DATASPACE, new_ds)) < 0)
+    if((ret_value = H5I_register (H5I_DATASPACE, new_ds, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space atom")
 
 done:
@@ -360,7 +360,7 @@ H5Sclose(hid_t space_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* When the reference count reaches zero the resources are freed */
-    if (H5I_dec_ref(space_id) < 0)
+    if (H5I_dec_ref(space_id, TRUE) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id")
 
 done:
@@ -403,7 +403,7 @@ H5Scopy(hid_t space_id)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to copy data space")
 
     /* Atomize */
-    if ((ret_value=H5I_register (H5I_DATASPACE, dst))<0)
+    if ((ret_value=H5I_register (H5I_DATASPACE, dst, TRUE))<0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register data space atom")
 
 done:
@@ -1308,7 +1308,7 @@ H5Screate_simple(int rank, const hsize_t dims[/*rank*/],
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
     /* Atomize */
-    if ((ret_value=H5I_register (H5I_DATASPACE, space))<0)
+    if ((ret_value=H5I_register (H5I_DATASPACE, space, TRUE))<0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
 
 done:
@@ -1509,7 +1509,7 @@ H5Sdecode(const void *buf)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDECODE, FAIL, "can't decode object")
 
     /* Register the type and return the ID */
-    if((ret_value = H5I_register(H5I_DATASPACE, ds)) < 0)
+    if((ret_value = H5I_register(H5I_DATASPACE, ds, TRUE)) < 0)
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
 
 done:
