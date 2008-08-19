@@ -322,6 +322,10 @@ Footnotes:
 
 Known Problems
 ==============
+* The library may not shut down correctly if the reference count on an id has
+  been incremented with H5Iinc_ref() and never decremented with H5*close() or
+  H5Idec_ref().  (NAF - 2008/08/19)
+
 * We discovered two problems when running collective IO parallel HDF5 tests
   with chunking storage with the ChaMPIon MPI compiler on tungsten, a Linux
   cluster at NCSA.
