@@ -389,12 +389,11 @@ END SUBROUTINE h5zfilter_avail_f
       Making a new filter available to an application is a two-step 
       process.  The first step is to write
       the three filter callback functions described below:
-      <code>can_apply_func</code>, <code>set_local_func</code>, and
-      <code>filter_func</code>.
+      <code>can_apply</code>, <code>set_local</code>, and <code>filter</code>.
       This call to <code>H5Zregister</code>, 
       <span class="termEmphasis">registering</span> the filter with the
       library, is the second step.  
-      The <code>can_apply_func</code> and <code>set_local_func</code>
+      The <code>can_apply</code> and <code>set_local</code>
       fields can be set to <code>NULL</code> 
       if they are not required for the filter being registered.
       <p>
@@ -402,39 +401,39 @@ END SUBROUTINE h5zfilter_avail_f
       the <code>filter_class</code> data structure, 
       which is defined as follows:
       <pre>
-   &nbsp;   typedef struct H5Z_class_t {
-   &nbsp;       H5Z_filter_t filter_id;
-   &nbsp;       const char  *comment;
-   &nbsp;       H5Z_can_apply_func_t can_apply_func;
-   &nbsp;       H5Z_set_local_func_t set_local_func;
-   &nbsp;       H5Z_func_t filter_func;            
-   &nbsp;   } H5Z_class_t;
+          typedef struct H5Z_class_t {
+              H5Z_filter_t id;
+              const char  *name;
+              H5Z_can_apply_func_t can_apply;
+              H5Z_set_local_func_t set_local;
+              H5Z_func_t filter;            
+          } H5Z_class_t;
       </pre>
         
       <p>
-      <code>filter_id</code> is the identifier for the new filter. 
+      <code>id</code> is the identifier for the new filter. 
       This is a user-defined value between 
       <code>H5Z_FILTER_RESERVED</code> and <code>H5Z_FILTER_MAX</code>, 
       both of which are defined in the HDF5 source file 
       <code>H5Zpublic.h</code>.
       <p>
-      <code>comment</code> is used for debugging, 
+      <code>name</code> is used for debugging, 
       may contain a descriptive name for the filter, 
       and may be the null pointer. 
       <p>
-      <code>can_apply_func</code>, described in detail below, 
+      <code>can_apply</code>, described in detail below, 
       is a user-defined callback function which determines whether 
       the combination of the dataset creation property list values, 
       the datatype, and the dataspace represent a valid combination 
       to apply this filter to.
       <p>
-      <code>set_local_func</code>, described in detail below, 
+      <code>set_local</code>, described in detail below, 
       is a user-defined callback function which sets any parameters that 
       are specific to this dataset, based on the combination of the 
       dataset creation property list values, the datatype, and the 
       dataspace.
       <p>
-      <code>filter_func</code>, described in detail below, 
+      <code>filter</code>, described in detail below, 
       is a user-defined callback function which performs the action 
       of the filter.
       <p>
@@ -716,7 +715,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified:  13 June 2006");
+document.writeln("Last modified: 20 August 2008");
 -->
 </SCRIPT>
  
