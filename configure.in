@@ -3715,6 +3715,16 @@ if test "X${DEFAULT_API_VERSION}" != "Xv18" -a "X${DEPRECATED_SYMBOLS}" = "Xno" 
   AC_MSG_ERROR([Removing old public API symbols not allowed when using them as default public API symbols])
 fi
 
+dnl ----------------------------------------------------------------------
+dnl Unzip large test files
+dnl
+AC_MSG_CHECKING([for and unzipping large test files])
+for f in $srcdir/test/testfiles/*.gz; do
+    if test -f $f; then
+        gunzip -f $f
+    fi
+done
+AC_MSG_RESULT([done])
 
 dnl ----------------------------------------------------------------------
 dnl Enable strict file format checks

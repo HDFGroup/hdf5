@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include "H5Fpkg.h"
 
+#define H5F_MAX_SUPERBLOCK_SIZE 134
+
 const char *    progname="h5recover";
 int             d_status;
 
@@ -48,7 +50,7 @@ static struct long_options l_opts[] = {
  *
  * Return:       void
  *
- * Programmer:   Mike McGreevy <mcgreevy@hdfgroup.org>
+ * Programmer:   Mike McGreevy <mamcgree@hdfgroup.org>
  *               Monday, March 10, 2008
  *
  *-------------------------------------------------------------------------
@@ -99,7 +101,7 @@ leave(int ret)
  *
  * Return:       0 on success
  *
- * Programmer:   Mike McGreevy <mcgreevy@hdfgroup.org>
+ * Programmer:   Mike McGreevy <mamcgree@hdfgroup.org>
  *               Monday, March 10, 2008
  *
  *-------------------------------------------------------------------------
@@ -159,14 +161,92 @@ file_copy(char * file_from, char * file_to)
     return 0;
 
 }
+/*-------------------------------------------------------------------------
+ * Function:     address_decode
+ *
+ * Purpose:      Decodes an address from the buffer pointed to by *pp and
+ *               updates the pointer to point to the next byte after the
+ *               address.
+ *
+ *               If the value read is all 1's, then the address is 
+ *               returned with an undefined value.
+ *
+ * Programmer:   Mike McGreevy (utilizing code from Robb Matzke)
+ *               Thursday, August 7, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+address_decode(size_t sizeof_addr, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*out*/)
+{
+
+    unsigned i;
+    haddr_t tmp;
+    uint8_t c;
+    hbool_t all_zero = TRUE;
+
+    assert(pp && *pp);
+    assert(addr_p);
+
+    *addr_p = 0;
+    
+    for (i=0; i<sizeof_addr; i++) {
+        c = *(*pp)++;
+        if (c != 0xff)
+            all_zero = FALSE;
+
+        if (i<sizeof(*addr_p)) {
+            tmp = c;
+            tmp <<= (i * 8);    /*use tmp to get casting right */
+            *addr_p |= tmp;
+        } else if (!all_zero) {
+            assert(0 == **pp);  /*overflow */
+        }
+    }
+
+    if (all_zero)
+        *addr_p = HADDR_UNDEF;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    address_encode
+ *
+ * Purpose:     Encodes an address into the buffer pointed to by *pp and
+ *              then increments the pointer to the first byte after the
+ *              address. An undefined value is stored as all 1's.
+ *
+ * Programmer:  Mike McGreevy (utilizing code from Robb Matzke)
+ *              Thursday, August 7, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+address_encode(size_t sizeof_addr, uint8_t **pp/*in,out*/, haddr_t addr)
+{
+    unsigned u;
+    
+    HDassert(pp && *pp);
+    
+    for(u = 0; u < sizeof_addr; u++) {
+        *(*pp)++ = (uint8_t)(addr & 0xff);
+        addr >>= 8;
+    } /* end for */
+
+    assert("overflow" && 0 == addr);
+
+}
 
 /*-------------------------------------------------------------------------
  * Function:     main()
  *
  * Purpose:      main h5recover program.
  *
- * Programmer:   Mike McGreevy <mcgreevy@hdfgroup.org>
+ * Programmer:   Mike McGreevy <mamcgree@hdfgroup.org>
  *               Monday, March 10, 2008
+ *
+ * Modifications: 
+ *               Mike McGreevy, August 7, 2008
+ *               Parses superblock to update EOA value
  *
  *-------------------------------------------------------------------------
  */
@@ -194,7 +274,8 @@ main (int argc, const char *argv[])
     char *           tok[11];     /* string tokens */
     int              i; /* iterator */
     off_t            address; /* address to write to */
-    haddr_t          eoa; /* end of address of file */
+    haddr_t          eoa = 0; /* end of address of file */
+    haddr_t          update_eoa = 0; /* new end of address */
     uint8_t *        body; /* body of journal entry */
     size_t           size; /* size of journal entry body */
     size_t           max_size; /* maximum size of journal entry body */
@@ -210,6 +291,24 @@ main (int argc, const char *argv[])
     long             pos_end; /* file descriptor position indicator */
     char             temp[100]; /* temporary buffer */
     H5F_t *          f; /* File pointer */
+    hbool_t          jrnl_has_transactions = TRUE;              
+
+    /* ================================================ */
+    /* Variables needed for superblock parse and update */
+    /* ================================================ */
+
+    int              n; /* iterator */
+    haddr_t          sb_addr; /* address of superblock */
+    uint8_t          buf[H5F_SIGNATURE_LEN]; /* buf to get superblock signature */
+    uint8_t          sbuf[H5F_MAX_SUPERBLOCK_SIZE]; /* buf to store superblock */
+    int              super_vers = 0; /* superblock version number */
+    int              sizeof_addr = 0; /* size of addresses */
+    haddr_t          addr = NULL; /* address buffer to hold haddr_t values */
+    uint8_t *  p_front = NULL; /* reference pointer into superblock buffer */
+    uint8_t *  p_end = NULL; /* reference pointer into superblock buffer */
+    haddr_t          new_eoa; /* new value of EOA to be written into superblock */
+    uint32_t         chksum; /* calculated checksum value */
+    uint32_t         read_chksum; /* checksum value read from superblock */
 
     /* ==================== */
     /* Command Line Parsing */
@@ -297,51 +396,6 @@ main (int argc, const char *argv[])
 
     } /* end if */
 
-    /* ========================================== */
-    /* Open HDF5 File with Journal Recovered Flag */
-    /* ========================================== */
-
-    /* set up appropriate fapl */
-    fapl = H5Pcreate(H5P_FILE_ACCESS);
-    
-    if ( fapl == -1 ) {
-    
-        error_msg(progname, "Could not create FAPL.\n");
-        leave( EXIT_FAILURE );
-    
-    } /* end if */
-    
-    config.version = 1; /* should be H5C2__CURR_AUTO_SIZE_CTL_VER */
-    
-    /* get H5AC_cache_config_t configuration from fapl */
-    if ( H5Pget_jnl_config(fapl, &config) == -1) {
-    
-        error_msg(progname, "Could not get mdc config from FAPL.\n");
-        leave( EXIT_FAILURE );
-    
-    }
-            
-    /* make sure journal recovered field is set to TRUE in mdc_config */
-    config.journal_recovered = TRUE;
-    
-    /* set H5AC_cache_config_t configuration with file recovered */
-    if ( H5Pset_jnl_config(fapl, &config) == -1) {
-    
-        error_msg(progname, "Could not set jnl config on FAPL.\n");
-        leave( EXIT_FAILURE );
-    
-    } /* end if */
-
-    /* open HDF5 file with provided fapl */
-    fid = H5Fopen(file_name, H5F_ACC_RDWR, fapl);    
-       
-    if ( fid == -1 ) {
-    
-        error_msg(progname, "Could not open recovered HDF5 file.\n");
-        leave( EXIT_FAILURE );
-    
-    } /* end if */
-
     /* =============================== */
     /* Make a Backup Copy of HDF5 File */
     /* =============================== */
@@ -420,15 +474,17 @@ main (int argc, const char *argv[])
             
             if (ftell(journal_fp) <= 1) {
 
-                error_msg(progname, "Journal has no complete transactions\n");
-                usage();
-                leave( EXIT_FAILURE );
+                jrnl_has_transactions = FALSE;
+                printf("Journal file has no complete transactions. Nothing to recover!\n");
+                break;
         
             } /* end if */
 
             fseek(journal_fp, -2, SEEK_CUR);
 
         } /* end while */
+
+        if (jrnl_has_transactions == FALSE) break;
 
         if ( fgetc(journal_fp) == '3' ) {
 
@@ -446,287 +502,517 @@ main (int argc, const char *argv[])
 
     } /* end while */
 
-    /* ======================================= */
-    /* Determine Size of Biggest Journal Entry */
-    /* ======================================= */
-
-    fseek(journal_fp, 0, SEEK_END);
-    pos_end = ftell(journal_fp);
-
-    fseek(journal_fp, 0, SEEK_SET);
+    /* ================================================================== */
+    /* Only do the recovery procedure if there is something to recover in */
+    /* the journal file. Otherwise, skip over these steps and mark        */
+    /* the file as recovered.                                             */
+    /* ================================================================== */
     
-    c_new = 0;
-    c_old = 0;
-    max_size = 0;
+    if (jrnl_has_transactions == TRUE) {
 
-    /* while journal is not at end of file */
-    while (ftell(journal_fp) != pos_end) {
+        /* ================================================================= */
+        /* Pre-parse of journal file to pull information needed before doing */
+        /* the recovery.                                                     */
+        /*    - max journal size (for buffer allocation)                     */
+        /*    - max EOA size (for superblock update, to preserve raw data)   */
+        /* ================================================================= */
 
-        c_old = c_new;
-        c_new = fgetc(journal_fp);
+        fseek(journal_fp, 0, SEEK_END);
+        pos_end = ftell(journal_fp);
+
+        fseek(journal_fp, 0, SEEK_SET);
+    
+        c_new = 0;
+        c_old = 0;
+        max_size = 0;
+
+        if ( verbose ) printf("Pre-parsing journal file to pull needed data ... \n");
+
+        /* while journal is not at end of file */
+        while (ftell(journal_fp) != pos_end) {
+
+            c_old = c_new;
+            c_new = fgetc(journal_fp);
         
-        /* if position is at the start of a line */
-        if (c_old == '\n') {
+            /* if position is at the start of a line */
+            if (c_old == '\n') {
 
-            /* if the line starts with a '2', find out size of entry */
-            if (c_new == '2') {
+                /* ========================================================== */
+                /* if the line is a journal entry, determine its size. update */
+                /* max size value if needed.                                  */
+                /* ========================================================== */
+                if (c_new == '2') {
 
-                pos = ftell(journal_fp);
+                    pos = ftell(journal_fp);
 
-                fgets(temp, 100, journal_fp); 
-                tok[0] = HDstrtok(temp, " ");
+                    fgets(temp, 100, journal_fp); 
+                    tok[0] = HDstrtok(temp, " ");
+                    if (tok[0] == NULL) {
+
+                        error_msg(progname, "Could not tokenize entry\n");
+                        leave( EXIT_FAILURE);
+    
+                    } /* end if */
+                    for (i=1; i<8; i++) {
+
+                        tok[i] = HDstrtok(NULL, " ");
+                        if (tok[i] == NULL) {
+
+                            error_msg(progname, "Could not tokenize entry\n");
+                            leave( EXIT_FAILURE);
+
+                        } /* end if */
+
+                    } /* end for */
+                
+                    size = HDstrtod(tok[5], NULL);
+
+                    if (max_size < size) {
+
+                        max_size = size;
+
+                    } /* end if */
+
+                    /* jump back to start of line */
+                    fseek(journal_fp, pos, SEEK_SET);
+
+                } /* end if */
+
+                /* =========================================================== */
+                /* If the line is an EOA entry, determine its value and update */
+                /* if it exceeds the current max length                        */
+                /* =========================================================== */
+
+                if (c_new == 'E') {
+            
+                    pos = ftell(journal_fp);
+
+                    fgets(temp, 100, journal_fp);
+                    p = &temp[11];
+    
+                    eoa = HDstrtod(p, NULL);
+                    if (eoa == 0) {
+    
+                        error_msg(progname, "Could not convert eoa to integer\n");
+                        leave( EXIT_FAILURE);
+
+                    } /* end if */
+        
+                    if (update_eoa < eoa) {
+
+                        update_eoa = eoa;
+
+                    } /* end if */
+
+                    /* jump back to start of line */
+                    fseek(journal_fp, pos, SEEK_SET);
+
+                } /* end if */
+
+            } /* end if */
+
+        } /* end while */
+
+        if ( verbose ) printf(" - Maximum journal entry size = %d\n", max_size);
+        if ( verbose ) printf(" - Journaled EOA value = 0x%llx\n", update_eoa);
+
+        /* =================================== */
+        /* Update EOA value in HDF5 superblock */
+        /* =================================== */
+
+        if (update_eoa != 0) {
+
+            if ( verbose ) printf("\nLooking for HDF5 superblock ... \n");
+            /* Jump through possible locations of superblock */
+            for(n = 8; n < 16; n++) {
+    
+                sb_addr = (8 == n) ? 0 : 1 << n;
+    
+                /* read from HDF5 file */
+                pread(hdf5_fd, buf, H5F_SIGNATURE_LEN, sb_addr);    
+    
+                /* Check to see if superblock has been found. */
+                if(!HDmemcmp(buf, H5F_SIGNATURE, (size_t)H5F_SIGNATURE_LEN)) {
+    
+                    if ( verbose ) printf(" - Superblock signature found at location %d\n", sb_addr);
+    
+                    if ( verbose ) printf(" - Reading in entire superblock\n");
+    
+                    /* Read in entire superblock */
+                    pread(hdf5_fd, sbuf, H5F_MAX_SUPERBLOCK_SIZE, sb_addr/* + H5F_SIGNATURE_LEN */);
+    
+                    /* Use p as a pointer into superblock buffer */
+                    p = sbuf;
+    
+                    /* Skip over signature */
+                    p += H5F_SIGNATURE_LEN;
+
+                    /* Get superblock version number */   
+                    super_vers = *p++;
+    
+                    /* add printfs to verbose */
+                    if ( verbose ) printf(" - Superblock version number = %d\n", super_vers);
+        
+                    /* ==================================== */
+                    /* Point to EOA value in the superblock */ 
+                    /* ==================================== */
+
+                    /* First part of superblock may be of differing versions */
+                    if(super_vers < 2) {
+                        /* skip over unneeded data */
+                        p += 1 +  /* freespace version */
+                             1 +  /* root group version */
+                             1 +  /* reserved byte */
+                             1;   /* shared header version */
+
+                        sizeof_addr = *p++; /* size of file addresses */
+
+                        p += 1 +  /* size of file sizes */
+                             1 +  /* reserved byte */
+                             2 +  /* 1/2 rank for symtable leaf nodes */
+                             2 +  /* 1/2 rank for btree internal nodes */
+                             4 +  /* file status flags */
+                             2;   /* b-tree internal k value */
+                
+                        if (super_vers == 1)
+                            p += 2; /* reserved bytes */
+
+                    } /* end if */
+
+                    /* Superblock version number > 2 */
+                    else {
+            
+                        sizeof_addr = *p++; /* size of file addresses */
+                
+                        p += 1 + /* size of file sizes */
+                             1;  /* file status flags */
+ 
+                        p_front = p;
+                        p_end = p;
+                   
+                    } /* end else */
+                   
+                    /* Skip over various variable portions of superblock */
+                    address_decode(sizeof_addr, &p_end, &addr); /* base address */
+                    address_decode(sizeof_addr, &p_end, &addr); /* extension address */
+
+                    /* ============================ */
+                    /* Update EOA in the superblock */
+                    /* ============================ */
+
+                    p_front = p_end;
+
+                    /* Decode the EOA address */
+                    address_decode(sizeof_addr, &p_end, &addr);
+
+                    if ( verbose ) printf(" - Current value of EOA in superblock is 0x%llx\n", addr);
+                
+                    /* Set the EOA to the address pulled from the journal */
+                    addr = (haddr_t)update_eoa;
+                    p_end = p_front;
+
+                    /* encode new EOA value into superblock buffer */
+                    address_encode(sizeof_addr, &p_end, addr);
+
+                    if ( verbose ) printf(" - EOA value has been updated to 0x%llx in superblock\n", update_eoa);
+
+                    /* skip over root group object header */
+                    address_decode(sizeof_addr, &p_end, &addr); /* root group object header */
+
+                    p_front = p_end;
+
+                    if ( verbose ) printf(" - Updating checksum value of superblock\n");
+
+                    /* decode checksum */
+                    read_chksum = 0;
+                    UINT32DECODE(p_end, read_chksum);
+
+                    p_end = p_front;
+
+                    /* Update the CHECKSUM VALUE */
+                    /* Compute superblock checksum */
+                    chksum = H5_checksum_metadata(sbuf, (size_t)(p_end - sbuf), 0);
+
+                    /* Superblock checksum */
+                    UINT32ENCODE(p_end, chksum);
+
+                    new_eoa = (haddr_t)update_eoa;
+
+                    /* verify new EOA value in buffer is correct */
+                    address_decode(sizeof_addr, &p_front, &addr);
+                
+                    /* Extend file to be EOA bytes */
+                    HDftruncate(hdf5_fd, new_eoa);
+            
+                    /* Write out new updated superblock to the file */
+                    status = pwrite(hdf5_fd, sbuf, (size_t)H5F_MAX_SUPERBLOCK_SIZE, sb_addr /*+ H5F_SIGNATURE_LEN */);
+
+                    if (status == -1) {
+                        error_msg(progname, "pwrite failed when trying to update superblock\n");
+                        leave( EXIT_FAILURE );
+                    } 
+            
+                    if (status == 0) {
+                        error_msg(progname, "pwrite did not write anything to superblock!\n");
+                        leave( EXIT_FAILURE);
+                    }
+
+                    if ( verbose ) printf(" - New superblock written to HDF5 file\n");
+                
+                } /* end if */
+    
+            } /* end for */
+
+        } /* end if (update_eoa != 0)*/
+
+        if ( verbose ) printf("\nBeginning recovery process ... \n\n");
+
+        /* ==================================================================== */
+        /* Main Recovery Procedure:                                             */
+        /* Read through the journal file and recover any journal entries found. */
+        /* ==================================================================== */
+
+        max_size = max_size * 3 + 200;
+
+        /* allocate space large enough to hold largest journal entry */
+        readback = HDmalloc( max_size );
+        if (readback == NULL) {
+
+            error_msg(progname, "Could not allocate space to hold entries\n");
+            leave( EXIT_FAILURE);
+
+        } /* end if */
+
+        /* read through journal file. recover any journal entries found, up
+         * through the last transaction number */
+        fseek(journal_fp, 0, SEEK_SET);
+
+        while ( fgets(readback, max_size, journal_fp) != NULL ) {
+    
+            if (HDstrcmp(readback, last_trans_msg) == 0) {
+    
+                /* done reading from file */
+                break;
+
+            } /* end if */
+    
+            /* ===================================================== */
+            /* If journal entry is found, write entry into HDF5 file */
+            /* ===================================================== */
+
+            if ( readback[0] == '2') { /* journal entry found */
+
+                if ( verbose ) printf("Journal entry found.\n");
+                if ( verbose ) printf("Tokenizing journal entry.\n");
+
+                /* ================================================= */
+                /* Tokenize the journal entry in order to grab data */
+                /* ================================================= */
+
+                /* divide the journal entry into tokens */
+                tok[0] = HDstrtok(readback, " ");
                 if (tok[0] == NULL) {
 
-                    error_msg(progname, "Could not tokenize entry\n");
+                    error_msg(progname, "Could not tokenize journal entry\n");
                     leave( EXIT_FAILURE);
     
                 } /* end if */
+
+                if ( verbose ) printf("  token[0] : <%s>\n", tok[0]);
+
                 for (i=1; i<8; i++) {
 
                     tok[i] = HDstrtok(NULL, " ");
                     if (tok[i] == NULL) {
 
-                        error_msg(progname, "Could not tokenize entry\n");
+                        error_msg(progname, "Could not tokenize journal entry\n");
                         leave( EXIT_FAILURE);
 
                     } /* end if */
 
+                    if ( verbose ) printf("  token[%d] : <%s>\n", i, tok[i]);
+
                 } /* end for */
-                
-                size = HDstrtod(tok[3], NULL);
 
-                if (max_size < size) {
-
-                    max_size = size;
-
-                } /* end if */
-
-                /* jump back to start of line */
-                fseek(journal_fp, pos, SEEK_SET);
-
-            } /* end if */
-
-        } /* end if */
-
-    } /* end while */
-
-    /* ================================================= */
-    /* Tokenize each journal entry in order to grab data */
-    /* ================================================= */
-
-    max_size = max_size * 3 + 200;
-
-    /* allocate space large enough to hold largest journal entry */
-    readback = HDmalloc( max_size );
-    if (readback == NULL) {
-
-        error_msg(progname, "Could not allocate space to hold entries\n");
-        leave( EXIT_FAILURE);
-
-    } /* end if */
-
-    /* read through journal file. recover any journal entries found, up
-     * through the last transaction number */
-    fseek(journal_fp, 0, SEEK_SET);
-
-    while ( fgets(readback, max_size, journal_fp) != NULL ) {
-    
-        if (HDstrcmp(readback, last_trans_msg) == 0) {
-    
-            /* done reading from file */
-            break;
-
-        } /* end if */
-    
-        if ( readback[0] == '2') { /* journal entry found */
-
-        if ( verbose ) printf("Journal entry found.\n");
-        if ( verbose ) printf("Tokenizing journal entry.\n");
-
-            /* divide the journal entry into tokens */
-            tok[0] = HDstrtok(readback, " ");
-            if (tok[0] == NULL) {
-
-                error_msg(progname, "Could not tokenize journal entry\n");
-                leave( EXIT_FAILURE);
-    
-            } /* end if */
-
-            if ( verbose ) printf("  token[0] : <%s>\n", tok[0]);
-
-            for (i=1; i<10; i++) {
-
-                tok[i] = HDstrtok(NULL, " ");
-                if (tok[i] == NULL) {
+                /* put all remaining data into last token. */ 
+                /* This contains all of the journal entry body */
+                tok[8] = HDstrtok(NULL, "\n");
+                if (tok[8] == NULL) {
 
                     error_msg(progname, "Could not tokenize journal entry\n");
                     leave( EXIT_FAILURE);
 
                 } /* end if */
 
-                if ( verbose ) printf("  token[%d] : <%s>\n", i, tok[i]);
+                if ( verbose ) printf("  token[8] : <hexadecimal body data>\n");
 
-            } /* end for */
+                /* =================================== */
+                /* Convert Items from Character Arrays */
+                /* =================================== */
 
-            /* put all remaining data into last token. */ 
-            /* This contains all of the journal entry body */
-            tok[10] = HDstrtok(NULL, "\n");
-            if (tok[10] == NULL) {
+                if ( verbose ) printf("Converting data from character strings.\n");
 
-                error_msg(progname, "Could not tokenize journal entry\n");
-                leave( EXIT_FAILURE);
-
-            } /* end if */
-
-            if ( verbose ) printf("  token[8] : <hexadecimal body data>\n");
-
-            /* ================================== */
-            /* Convert Items from Character Array */
-            /* ================================== */
-
-            if ( verbose ) printf("Converting data from character strings.\n");
-
-            /* convert address from character character string */
-            address = HDstrtod(tok[8], NULL);
-            if (address == 0) {
+                /* convert address from character character string */
+                address = HDstrtod(tok[6], NULL);
+                if (address == 0) {
     
-                error_msg(progname, "Could not convert address to integer\n");
-                leave( EXIT_FAILURE);
-
-            } /* end if */
-
-            if ( verbose ) printf("  address  : %llx\n", address);
-
-            /* convert size from character string*/
-            size = HDstrtod(tok[6], NULL);
-            if (size == 0) {
-
-                error_msg(progname, "Could not convert size to double\n");
-                leave( EXIT_FAILURE);
-
-            } /* end if */
-
-            /* convert eoa from character character string */
-            eoa = HDstrtod(tok[4], NULL);
-            if (eoa == 0) {
-    
-                error_msg(progname, "Could not convert eoa to integer\n");
-                leave( EXIT_FAILURE);
-
-            } /* end if */
-
-            if ( verbose ) printf("  length   : %d\n", size);
-
-            /* transform body out of hexadecimal character string */
-            body = HDmalloc(size + 1);
-            if (body == NULL) {
-
-                error_msg(progname, "Could not allocate space for body\n");
-                leave( EXIT_FAILURE);
-
-            } /* end if */
-            
-            p = &(tok[10])[0];
-            
-            for (i = 0; i < size; i++) {
-            
-                body[i] = HDstrtoul(p, NULL, 16);
-                p = &p[3];
-
-            } /* end for */
-
-            body[i] = 0;
-
-            if ( verbose ) printf("  body     : binary body data\n");
-
-            /* ================================================ */
-            /* Write into HDF5 file the recovered journal entry */
-            /* ================================================ */
-
-            if ( verbose ) printf("Writing entry to HDF5 file.\n");
-            
-            /* perform a write */
-            status = pwrite(hdf5_fd, body, size, address);
-
-            if (status == -1) {
-                error_msg(progname, "pwrite failed\n");
-                leave( EXIT_FAILURE );
-            }
-            
-            if (status == 0) {
-                error_msg(progname, "pwrite did not write anything!\n");
-                leave( EXIT_FAILURE);
-            }
-            
-            /* Verify that write occurred correctly */
-            if ( check_file == 1) {
-
-                if ( verbose ) printf("Verifying success of write");
-            
-                compare_buf = HDmalloc(size + 1);
-    
-                if (compare_buf == NULL) {
-                    error_msg(progname, "Could not allocate space\n");
+                    error_msg(progname, "Could not convert address to integer\n");
                     leave( EXIT_FAILURE);
-                } /* end if */
-                
-                pread(hdf5_fd, compare_buf, size, address);
 
-                /* do a quick string compare on two items */
-                if (HDstrcmp((const char *)body, (const char *)compare_buf) != 0) {
-                    error_msg(progname, "Entry incorrectly written into HDF5 file. Exiting.\n");
-                    printf("Address %llx:\n", (unsigned long_long)address);
-                    printf(" -- from journal:   '%s'\n", body);
-                    printf(" -- from HDF5 file: '%s'\n", compare_buf);
+                } /* end if */
+
+                if ( verbose ) printf("  address  : %llx\n", address);
+
+                /* convert size from character string*/
+                size = HDstrtod(tok[4], NULL);
+                if (size == 0) {
+
+                    error_msg(progname, "Could not convert size to double\n");
+                    leave( EXIT_FAILURE);
+
+                } /* end if */
+
+                if ( verbose ) printf("  length   : %d\n", size);
+
+                /* transform body out of hexadecimal character string */
+                body = HDmalloc(size + 1);
+                if (body == NULL) {
+
+                    error_msg(progname, "Could not allocate space for body\n");
+                    leave( EXIT_FAILURE);
+
+                } /* end if */
+            
+                p = &(tok[8])[0];
+            
+                for (i = 0; i < size; i++) {
+            
+                    body[i] = HDstrtoul(p, NULL, 16);
+                    p = &p[3];
+
+                } /* end for */
+
+                body[i] = 0;
+
+                if ( verbose ) printf("  body     : binary body data\n");
+
+                /* ================================================ */
+                /* Write into HDF5 file the recovered journal entry */
+                /* ================================================ */
+
+                if ( verbose ) printf("Writing entry to HDF5 file.\n");
+ 
+                /* perform a write */
+                status = pwrite(hdf5_fd, body, size, address);
+
+                if (status == -1) {
+                    error_msg(progname, "pwrite failed\n");
                     leave( EXIT_FAILURE );
-                } /* end if */
-
-                /* compare each individual value of entry */
-                for (i=0; i<size; i++) {
-                    if (body[i] != compare_buf[i]) {
-                        error_msg(progname, "Entry incorrectly written into HDF5 file. Exiting.\n");
-                        printf("Address %llx\n", (unsigned long_long)(address + i));
-                        printf(" -- from journal:   %d\n", body[i]);
-                        printf(" -- from HDF5 file: %d\n", compare_buf[i]);
-                        leave( EXIT_FAILURE );
-                    }
+                }
+            
+                if (status == 0) {
+                    error_msg(progname, "pwrite did not write anything!\n");
+                    leave( EXIT_FAILURE);
                 }
 
-                if ( verbose ) printf(" .... SUCCESS!\n\n");
-                free(compare_buf);
+                /* Verify that write occurred correctly */
+                if ( check_file == 1) {
 
-            }
+                    if ( verbose ) printf("Verifying success of write");
+            
+                    compare_buf = HDmalloc(size + 1);
+    
+                    if (compare_buf == NULL) {
+                        error_msg(progname, "Could not allocate space\n");
+                        leave( EXIT_FAILURE);
+                    } /* end if */
+                
+                    pread(hdf5_fd, compare_buf, size, address);
 
-            free(body);
+                    /* do a quick string compare on two items */
+                    if (HDstrcmp((const char *)body, (const char *)compare_buf) != 0) {
+                        error_msg(progname, "Entry incorrectly written into HDF5 file. Exiting.\n");
+                        printf("Address %llx:\n", (unsigned long_long)address);
+                        printf(" -- from journal:   '%s'\n", body);
+                        printf(" -- from HDF5 file: '%s'\n", compare_buf);
+                        leave( EXIT_FAILURE );
+                    } /* end if */
 
-        } /* end if */
+                    /* compare each individual value of entry */
+                    for (i=0; i<size; i++) {
+                        if (body[i] != compare_buf[i]) {
+                            error_msg(progname, "Entry incorrectly written into HDF5 file. Exiting.\n");
+                            printf("Address %llx\n", (unsigned long_long)(address + i));
+                            printf(" -- from journal:   %d\n", body[i]);
+                            printf(" -- from HDF5 file: %d\n", compare_buf[i]);
+                            leave( EXIT_FAILURE );
+                        }
+                    }
 
-    } /* end while */
+                    if ( verbose ) printf(" .... SUCCESS!\n\n");
+                    free(compare_buf);
+
+                }
+
+                free(body);
+
+            } /* end if */
+
+        } /* end while */
+
+        free(readback);
+
+    } /* end if jrnl_has_transactions */
 
     fclose(journal_fp);
     close(hdf5_fd);
     free(last_trans_msg);
-    free(readback);
     free(journal_name);
+    if (file_name_backup != NULL) HDfree(file_name_backup);
 
-    /* =========================================== */
-    /* Set EOA Value and Close Recovered HDF5 File */
-    /* =========================================== */
+    /* =========================== */
+    /* Mark HDF5 File as Recovered */
+    /* =========================== */
 
-    /* obtain H5F_t pointer */
-    if (NULL == (f = H5I_object(fid))) {
-
-        error_msg(progname, "Could not obtain H5F_t pointer from file id");
+    /* set up appropriate fapl */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    
+    if ( fapl == -1 ) {
+    
+        error_msg(progname, "Could not create FAPL.\n");
         leave( EXIT_FAILURE );
-
+    
     } /* end if */
-   
-    /* set the correct value of the eoa */
-    if (H5FDset_eoa(f->shared->lf, H5FD_MEM_DEFAULT, eoa) == -1) {
-
-        error_msg(progname, "Driver set eoa request failed");
+    
+    config.version = 1; /* should be H5C2__CURR_AUTO_SIZE_CTL_VER */
+    
+    /* get H5AC_cache_config_t configuration from fapl */
+    if ( H5Pget_jnl_config(fapl, &config) == -1) {
+    
+        error_msg(progname, "Could not get mdc config from FAPL.\n");
         leave( EXIT_FAILURE );
+    
+    }
+            
+    /* make sure journal recovered field is set to TRUE in mdc_config */
+    config.journal_recovered = TRUE;
+    
+    /* set H5AC_cache_config_t configuration with file recovered */
+    if ( H5Pset_jnl_config(fapl, &config) == -1) {
+    
+        error_msg(progname, "Could not set mdc config on FAPL.\n");
+        leave( EXIT_FAILURE );
+    
+    } /* end if */
 
+    /* open HDF5 file with provided fapl */
+    fid = H5Fopen(file_name, H5F_ACC_RDWR, fapl);    
+       
+    if ( fid == -1 ) {
+    
+        error_msg(progname, "Could not open recovered HDF5 file.\n");
+        leave( EXIT_FAILURE );
+    
     } /* end if */
 
     /* close HDF5 file */
@@ -736,15 +1022,16 @@ main (int argc, const char *argv[])
         leave( EXIT_FAILURE );
     
     } /* end if */
- 
+
     /* ================ */
     /* Cleanup and Exit */
     /* ================ */
-   
-    /* MIKE: Should I remove journal file here, or should that happen
-       on file close? */
 
-    printf("HDF5 file successfuly recovered.\n");
+    if (jrnl_has_transactions == TRUE) 
+        printf("HDF5 file successfuly recovered.\n");
+    else
+        printf("File marked as recovered.\n");
+
     if ( verbose ) printf("==============================================\n\n");
     free(file_name);
 

@@ -788,7 +788,6 @@ H5C2_journal_transaction(H5F_t * f,
     void * new_image_ptr;
     void * thing;
     herr_t result;    
-    haddr_t eoa;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_journal_transaction, FAIL)
@@ -973,13 +972,8 @@ H5C2_journal_transaction(H5F_t * f,
 	 */
 	if ( ( ! resized ) && ( ! renamed ) ) {
                 
-            if(HADDR_UNDEF == (eoa = H5FDget_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
-                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, \
-                                   "file get eoa request failed")
-
             result = H5C2_jb__journal_entry(&(cache_ptr->mdj_jbrb),
                                             cache_ptr->trans_num,
-                                            eoa,
 					    entry_ptr->addr,
 					    entry_ptr->size,
 					    entry_ptr->image_ptr);
@@ -2768,7 +2762,6 @@ done:
 herr_t 
 H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
 			uint64_t trans_num,
-                        haddr_t eoa,
 			haddr_t base_addr,
 			size_t length,
 			const uint8_t * body)
@@ -2821,9 +2814,8 @@ H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
     /* Write journal entry */
     HDsnprintf(temp, 
                (size_t)(length + 100),
-               "2 trans_num %llu eoa 0x%lx length %zu base_addr 0x%lx body ", 
+               "2 trans_num %llu length %zu base_addr 0x%lx body ", 
  	       trans_num, 
-               (unsigned long)eoa,
 	       length, 
 	       (unsigned long)base_addr);
 
@@ -3061,6 +3053,86 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5C2_jb__comment */
+
+
+/******************************************************************************
+ *
+ * Function:		H5C2_jb__eoa
+ *
+ * Programmer:		Mike McGreevy <mamcgree@hdfgroup.org>
+ *			July 29, 2008
+ *
+ * Purpose:		Insert the supplied EOA into the journal file.
+ *
+ * Returns:		SUCCEED on success.
+ *
+ ******************************************************************************/
+
+herr_t 
+H5C2_jb__eoa(H5C2_jbrb_t * struct_ptr,
+		 haddr_t eoa)
+{
+    char temp[40];
+    size_t temp_len = 40;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5C2_jb__eoa, FAIL)
+	
+    /* Check Arguments */
+    HDassert(struct_ptr);
+    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->hdf5_file_name);
+
+    /* Verify that header message is present in journal file or ring buffer. 
+     * If not, write it. 
+     */
+    if ( struct_ptr->header_present == FALSE ) {
+
+	char buf[150];
+        time_t current_date;
+
+        /* Get the current date */
+        current_date = time(NULL);
+
+	HDsnprintf(buf, 
+	(size_t)150,
+	"0 ver_num %ld target_file_name %s creation_date %10.10s human_readable %d\n",
+	    struct_ptr->jvers, 
+	    struct_ptr->hdf5_file_name, 
+	    ctime(&current_date), 
+	    struct_ptr->human_readable);
+
+        if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(buf), buf, 
+				      FALSE, struct_ptr->cur_trans) < 0 ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_jb__write_to_buffer() failed.\n")
+        } /* end if */
+
+	struct_ptr->header_present = 1;
+	struct_ptr->journal_is_empty = 0;
+    } /* end if */
+
+    /* Write EOA message */
+    HDsnprintf(temp, temp_len, "E eoa_value 0x%lx", eoa);
+
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, struct_ptr->cur_trans ) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__write_to_buffer() failed.\n")
+    } /* end if */
+
+    if ( H5C2_jb__write_to_buffer(struct_ptr, 1, "\n", FALSE, struct_ptr->cur_trans ) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__write_to_buffer() failed.\n")
+    } /* end if */
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5C2_jb__eoa */
 
 
 /******************************************************************************

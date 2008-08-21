@@ -28,6 +28,7 @@
 /* Module Setup */
 /****************/
 
+#define H5C2_PACKAGE            /*suppress error about including H5C2pkg  */
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 
 
@@ -35,6 +36,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5C2pkg.h"            /* Metadata cache                       */
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5MFprivate.h"	/* File memory management		*/
@@ -96,7 +98,8 @@ static hbool_t H5MF_alloc_overflow(const H5F_t *f, hsize_t size);
 haddr_t
 H5MF_alloc(const H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
 {
-    haddr_t	ret_value;
+    haddr_t	ret_value, new_eoa;
+    herr_t      result;
 
     FUNC_ENTER_NOAPI(H5MF_alloc, HADDR_UNDEF)
 
@@ -111,6 +114,20 @@ H5MF_alloc(const H5F_t *f, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     /* Allocate space from the virtual file layer */
     if(HADDR_UNDEF == (ret_value = H5FD_alloc(f->shared->lf, type, dxpl_id, size)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed")
+   
+    /* Check for journaling in progress */
+    if (f->shared->cache2->mdj_enabled == 1) {
+    
+        /* get updated EOA value */
+        if (HADDR_UNDEF ==(new_eoa = H5FDget_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, \
+                               "file get eoa request failed")
+
+        /* journal the updated EOA value */
+        if(SUCCEED != H5C2_jb__eoa(&(f->shared->cache2->mdj_jbrb), new_eoa))
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                         "H5C2_jb__eoa() failed.")
+    } /* end if */
 
     /* Convert absolute file address to relative file address */
     HDassert(ret_value >= f->shared->base_addr);
