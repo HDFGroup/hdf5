@@ -103,6 +103,7 @@ rem on it for sending parameters.  --SJW 9/6/07
     call :add_test mount%2 .\mount%2\%1
     call :add_test flush1%2 .\flush1%2\%1
     call :add_test flush2%2 .\flush2%2\%1
+    call :add_test app_ref%2 .\app_ref%2\%1
     call :add_test enum%2 .\enum%2\%1
     call :add_test set_extent%2 .\set_extent%2\%1
     rem Test commented because threadsafe is not built by default on Windows.
