@@ -1405,7 +1405,7 @@ H5FD_realloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsi
         if(HADDR_UNDEF == (new_addr = H5FD_alloc(file, type, dxpl_id, new_size)))
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, HADDR_UNDEF, "file allocation failed")
         H5_CHECK_OVERFLOW(old_size,hsize_t,size_t);
-        if(old_size > sizeof(_buf) && NULL == (buf = H5MM_malloc((size_t)old_size))) {
+        if(old_size > sizeof(_buf) && NULL == (buf = (uint8_t *)H5MM_malloc((size_t)old_size))) {
             (void)H5FD_free(file, type, dxpl_id, new_addr, new_size);
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, HADDR_UNDEF, "memory allocation failed")
         } /* end if */

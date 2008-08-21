@@ -238,8 +238,8 @@ H5E_walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
         stream = eprint->stream;
 
     /* Get descriptions for the major and minor error numbers */
-    maj_ptr = H5I_object_verify(err_desc->maj_num, H5I_ERROR_MSG);
-    min_ptr = H5I_object_verify(err_desc->min_num, H5I_ERROR_MSG);
+    maj_ptr = (H5E_msg_t *)H5I_object_verify(err_desc->maj_num, H5I_ERROR_MSG);
+    min_ptr = (H5E_msg_t *)H5I_object_verify(err_desc->min_num, H5I_ERROR_MSG);
     HDassert(maj_ptr && min_ptr);
     if(maj_ptr->msg)
         maj_str = maj_ptr->msg;
@@ -354,8 +354,8 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         stream = eprint->stream;
 
     /* Get descriptions for the major and minor error numbers */
-    maj_ptr = H5I_object_verify(err_desc->maj_num, H5I_ERROR_MSG);
-    min_ptr = H5I_object_verify(err_desc->min_num, H5I_ERROR_MSG);
+    maj_ptr = (H5E_msg_t *)H5I_object_verify(err_desc->maj_num, H5I_ERROR_MSG);
+    min_ptr = (H5E_msg_t *)H5I_object_verify(err_desc->min_num, H5I_ERROR_MSG);
     HDassert(maj_ptr && min_ptr);
     if(maj_ptr->msg)
         maj_str = maj_ptr->msg;

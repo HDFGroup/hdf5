@@ -677,7 +677,7 @@ H5G_stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
 
     /* Get name offset in heap */
     name_off = ent->name_off;
-    name = H5HL_offset_into(udata->common.f, udata->heap, name_off);
+    name = (const char *)H5HL_offset_into(udata->common.f, udata->heap, name_off);
     HDassert(name);
     udata->name = H5MM_strdup(name);
     HDassert(udata->name);
@@ -896,7 +896,7 @@ H5G_stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     HDassert(udata && udata->heap);
 
     /* Get a pointer to the link name */
-    name = H5HL_offset_into(udata->common.f, udata->heap, ent->name_off);
+    name = (const char *)H5HL_offset_into(udata->common.f, udata->heap, ent->name_off);
     HDassert(name);
 
     /* Convert the entry to a link */

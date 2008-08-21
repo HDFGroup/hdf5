@@ -539,7 +539,7 @@ H5Eget_class_name(hid_t class_id, char *name, size_t size)
     H5TRACE3("Zs", "i*sz", class_id, name, size);
 
     /* Get the error class */
-    if(NULL == (cls = H5I_object_verify(class_id, H5I_ERROR_CLASS)))
+    if(NULL == (cls = (H5E_cls_t *)H5I_object_verify(class_id, H5I_ERROR_CLASS)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error class ID")
 
     /* Retrieve the class name */
@@ -716,7 +716,7 @@ H5Ecreate_msg(hid_t class_id, H5E_type_t msg_type, const char *msg_str)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "message is NULL")
 
     /* Get the error class */
-    if(NULL == (cls = H5I_object_verify(class_id, H5I_ERROR_CLASS)))
+    if(NULL == (cls = (H5E_cls_t *)H5I_object_verify(class_id, H5I_ERROR_CLASS)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error class ID")
 
     /* Create the new error message object */
@@ -797,7 +797,7 @@ H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg_str, size_t size)
     H5TRACE4("Zs", "i*Et*sz", msg_id, type, msg_str, size);
 
     /* Get the message object */
-    if(NULL == (msg = H5I_object_verify(msg_id, H5I_ERROR_MSG)))
+    if(NULL == (msg = (H5E_msg_t *)H5I_object_verify(msg_id, H5I_ERROR_MSG)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error message ID")
 
     /* Get the message's text */
@@ -905,7 +905,7 @@ H5E_get_current_stack(void)
     FUNC_ENTER_NOAPI_NOINIT(H5E_get_current_stack)
 
     /* Get a pointer to the current error stack */
-    if(NULL == (current_stack = H5E_get_my_stack ())) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
+    if(NULL == (current_stack = H5E_get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get current error stack")
 
     /* Allocate a new error stack */
@@ -981,7 +981,7 @@ H5Eset_current_stack(hid_t err_stack)
     H5TRACE1("e", "i", err_stack);
 
     if(err_stack != H5E_DEFAULT) {
-        if(NULL == (estack = H5I_object_verify(err_stack, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
         /* Set the current error stack */
@@ -1158,7 +1158,7 @@ H5Eget_num(hid_t error_stack_id)
         H5E_clear_stack(NULL);
 
         /* Get the error stack to operate on */
-        if(NULL == (estack = H5I_object_verify(error_stack_id, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(error_stack_id, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
 
@@ -1226,7 +1226,7 @@ H5Epop(hid_t err_stack, size_t count)
         H5E_clear_stack(NULL);
 
         /* Get the error stack to operate on */
-        if(NULL == (estack = H5I_object_verify(err_stack, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
 
@@ -1289,14 +1289,14 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
         H5E_clear_stack(NULL);
 
         /* Get the error stack to operate on */
-        if(NULL == (estack = H5I_object_verify(err_stack, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
 
     /* Check for mis-matches in major & minor error classes */
-    if(NULL == (maj_ptr = H5I_object_verify(maj_id, H5I_ERROR_MSG)))
+    if(NULL == (maj_ptr = (H5E_msg_t *)H5I_object_verify(maj_id, H5I_ERROR_MSG)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error message ID")
-    if(NULL == (min_ptr = H5I_object_verify(min_id, H5I_ERROR_MSG)))
+    if(NULL == (min_ptr = (H5E_msg_t *)H5I_object_verify(min_id, H5I_ERROR_MSG)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error message ID")
     if(maj_ptr->cls != min_ptr->cls)
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "major and minor errors not from same error class")
@@ -1387,7 +1387,7 @@ H5Eclear2(hid_t err_stack)
         /* Only clear the error stack if it's not the default stack */
         H5E_clear_stack(NULL);
 
-        if(NULL == (estack = H5I_object_verify(err_stack, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
 
@@ -1434,7 +1434,7 @@ H5Eprint2(hid_t err_stack, FILE *stream)
         /* Only clear the error stack if it's not the default stack */
         H5E_clear_stack(NULL);
 
-        if(NULL == (estack = H5I_object_verify(err_stack, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
 
@@ -1480,7 +1480,7 @@ H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t stack_func, voi
         /* Only clear the error stack if it's not the default stack */
         H5E_clear_stack(NULL);
 
-        if(NULL == (estack = H5I_object_verify(err_stack, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
 
@@ -1525,7 +1525,7 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
     else
-        if(NULL == (estack = H5I_object_verify(estack_id, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
     /* Get the automatic error reporting information */
@@ -1577,7 +1577,7 @@ H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
     else
-        if(NULL == (estack = H5I_object_verify(estack_id, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
     /* Set the automatic error reporting information */
@@ -1620,7 +1620,7 @@ H5Eauto_is_v2(hid_t estack_id, unsigned *is_stack)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
     else
-        if(NULL == (estack = H5I_object_verify(estack_id, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
     /* Check if the error stack reporting function is the "newer" stack type */

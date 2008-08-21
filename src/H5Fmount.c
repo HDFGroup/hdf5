@@ -215,8 +215,8 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
     /* Make room in the table */
     if(parent->shared->mtab.nmounts >= parent->shared->mtab.nalloc) {
 	unsigned n = MAX(16, 2 * parent->shared->mtab.nalloc);
-	H5F_mount_t *x = H5MM_realloc(parent->shared->mtab.child,
-				      n * sizeof(parent->shared->mtab.child[0]));
+	H5F_mount_t *x = (H5F_mount_t *)H5MM_realloc(parent->shared->mtab.child, n * sizeof(parent->shared->mtab.child[0]));
+
 	if(!x)
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for mount table")
 	parent->shared->mtab.child = x;
@@ -463,7 +463,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 {
     H5G_loc_t	loc;
     H5F_t	*child = NULL;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5Fmount, FAIL)
     H5TRACE4("e", "i*sii", loc_id, name, child_id, plist_id);
@@ -473,7 +473,7 @@ H5Fmount(hid_t loc_id, const char *name, hid_t child_id, hid_t plist_id)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-    if(NULL == (child = H5I_object_verify(child_id,H5I_FILE)))
+    if(NULL == (child = (H5F_t *)H5I_object_verify(child_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
     if(H5P_DEFAULT == plist_id)
         plist_id = H5P_FILE_MOUNT_DEFAULT;

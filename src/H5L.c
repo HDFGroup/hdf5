@@ -2071,7 +2071,7 @@ H5L_get_val_real(const H5O_link_t *lnk, void *buf, size_t size)
     if(H5L_TYPE_SOFT == lnk->type) {
         /* Copy to output buffer */
         if(size > 0 && buf) {
-            HDstrncpy(buf, lnk->u.soft.name, size);
+            HDstrncpy((char *)buf, lnk->u.soft.name, size);
             if(HDstrlen(lnk->u.soft.name) >= size)
                 ((char *)buf)[size - 1] = '\0';
         } /* end if */

@@ -350,33 +350,33 @@ done:
 hid_t
 H5FD_register(const void *_cls, size_t size, hbool_t app_ref)
 {
-    hid_t		ret_value;
-    const H5FD_class_t	*cls=(const H5FD_class_t *)_cls;
-    H5FD_class_t	*saved=NULL;
+    const H5FD_class_t	*cls = (const H5FD_class_t *)_cls;
+    H5FD_class_t	*saved = NULL;
     H5FD_mem_t		type;
+    hid_t		ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_register, FAIL)
 
     /* Check arguments */
-    assert(cls);
-    assert(cls->open && cls->close);
-    assert(cls->get_eoa && cls->set_eoa);
-    assert(cls->get_eof);
-    assert(cls->read && cls->write);
-    for (type=H5FD_MEM_DEFAULT; type<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,type))
-        assert(cls->fl_map[type]>=H5FD_MEM_NOLIST && cls->fl_map[type]<H5FD_MEM_NTYPES);
+    HDassert(cls);
+    HDassert(cls->open && cls->close);
+    HDassert(cls->get_eoa && cls->set_eoa);
+    HDassert(cls->get_eof);
+    HDassert(cls->read && cls->write);
+    for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type))
+        HDassert(cls->fl_map[type] >= H5FD_MEM_NOLIST && cls->fl_map[type] < H5FD_MEM_NTYPES);
 
     /* Copy the class structure so the caller can reuse or free it */
-    if(NULL==(saved=H5MM_malloc(size)))
+    if(NULL == (saved = (H5FD_class_t *)H5MM_malloc(size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for file driver class struct")
-    HDmemcpy(saved,cls,size);
+    HDmemcpy(saved, cls, size);
 
     /* Create the new class ID */
-    if((ret_value=H5I_register(H5I_VFL, saved, app_ref)) < 0)
+    if((ret_value = H5I_register(H5I_VFL, saved, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register file driver ID")
 
 done:
-    if(ret_value<0)
+    if(ret_value < 0)
         if(saved)
             H5MM_xfree(saved);
 
@@ -452,13 +452,13 @@ H5FD_get_class(hid_t id)
     FUNC_ENTER_NOAPI(H5FD_get_class, NULL)
 
     if(H5I_VFL == H5I_get_type(id))
-	ret_value = H5I_object(id);
+	ret_value = (H5FD_class_t *)H5I_object(id);
     else {
         H5P_genplist_t *plist;      /* Property list pointer */
         hid_t driver_id = -1;
 
         /* Get the plist structure */
-        if(NULL == (plist = H5I_object(id)))
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
 
         if(TRUE == H5P_isa_class(id, H5P_FILE_ACCESS)) {
@@ -779,17 +779,17 @@ done:
 herr_t
 H5FD_fapl_copy(hid_t driver_id, const void *old_fapl, void **copied_fapl)
 {
-    H5FD_class_t	*driver=NULL;
-    herr_t ret_value=SUCCEED;       /* Return value */
+    H5FD_class_t *driver;
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_fapl_copy, FAIL)
 
     /* Check args */
-    if(NULL==(driver=H5I_object(driver_id)))
+    if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
 
     /* Copy the file access property list */
-    if(H5FD_pl_copy(driver->fapl_copy,driver->fapl_size,old_fapl,copied_fapl) < 0)
+    if(H5FD_pl_copy(driver->fapl_copy, driver->fapl_size, old_fapl, copied_fapl) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "can't copy driver file access property list")
 
 done:
@@ -822,7 +822,7 @@ H5FD_fapl_close(hid_t driver_id, void *fapl)
 
     /* Check args */
     if(driver_id > 0) {
-        if(NULL == (driver = H5I_object(driver_id)))
+        if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
 
         /* Close the driver for the property list */
@@ -896,17 +896,17 @@ done:
 herr_t
 H5FD_dxpl_copy(hid_t driver_id, const void *old_dxpl, void **copied_dxpl)
 {
-    H5FD_class_t	*driver=NULL;
-    herr_t ret_value=SUCCEED;       /* Return value */
+    H5FD_class_t *driver;
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_dxpl_copy, FAIL)
 
     /* Check args */
-    if(NULL==(driver=H5I_object(driver_id)))
+    if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
 
     /* Copy the file access property list */
-    if(H5FD_pl_copy(driver->dxpl_copy,driver->dxpl_size,old_dxpl,copied_dxpl) < 0)
+    if(H5FD_pl_copy(driver->dxpl_copy, driver->dxpl_size, old_dxpl, copied_dxpl) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "can't copy driver data transfer property list")
 
 done:
@@ -932,18 +932,18 @@ done:
 herr_t
 H5FD_dxpl_close(hid_t driver_id, void *dxpl)
 {
-    H5FD_class_t	*driver=NULL;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5FD_class_t *driver;
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_dxpl_close, FAIL)
 
     /* Check args */
-    if(driver_id>0) {
-        if(NULL==(driver=H5I_object(driver_id)))
+    if(driver_id > 0) {
+        if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a driver ID")
 
         /* Close the driver for the property list */
-        if(H5FD_pl_close(driver_id,driver->dxpl_free,dxpl) < 0)
+        if(H5FD_pl_close(driver_id, driver->dxpl_free, dxpl) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver fapl_free request failed")
     } /* end if */
 
@@ -1054,35 +1054,35 @@ H5FD_t *
 H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_class_t	*driver;
-    H5FD_t		*file=NULL;
+    H5FD_t		*file = NULL;
     hid_t               driver_id = -1;
-    hsize_t             meta_block_size=0;
-    hsize_t             sdata_block_size=0;
+    hsize_t             meta_block_size = 0;
+    hsize_t             sdata_block_size = 0;
     H5P_genplist_t *plist;      /* Property list pointer */
     H5FD_t		*ret_value;
 
     FUNC_ENTER_NOAPI(H5FD_open, NULL)
 
     /* Get file access property list */
-    if(NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
 
-    if(0==maxaddr)
+    if(0 == maxaddr)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "zero format address range")
 
     if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID")
 
     /* Get driver info */
-    if(NULL==(driver=H5I_object(driver_id)))
+    if(NULL == (driver = (H5FD_class_t *)H5I_object(driver_id)))
 	HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "invalid driver ID in file access property list")
-    if(NULL==driver->open)
+    if(NULL == driver->open)
 	HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "file driver has no `open' method")
 
     /* Dispatch to file driver */
-    if(HADDR_UNDEF==maxaddr)
+    if(HADDR_UNDEF == maxaddr)
         maxaddr = driver->maxaddr;
-    if(NULL==(file=(driver->open)(name, flags, fapl_id, maxaddr)))
+    if(NULL == (file = (driver->open)(name, flags, fapl_id, maxaddr)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "open failed")
 
     /*
@@ -1114,19 +1114,19 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to query file driver")
 
     /* Increment the global serial number & assign it to this H5FD_t object */
-    if(++file_serial_no==0) {
+    if(++file_serial_no == 0) {
         /* (Just error out if we wrap around for now...) */
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to get file serial number")
     } /* end if */
-    file->fileno=file_serial_no;
+    file->fileno = file_serial_no;
 
     /* Set return value */
-    ret_value=file;
+    ret_value = file;
 
 done:
     /* Can't cleanup 'file' information, since we don't know what type it is */
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_open() */
 
 
 /*-------------------------------------------------------------------------

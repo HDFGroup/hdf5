@@ -323,7 +323,7 @@ H5P_dxfr_create(hid_t dxpl_id, void UNUSED *create_data)
     FUNC_ENTER_NOAPI_NOINIT(H5P_dxfr_create)
 
     /* Check arguments */
-    if(NULL == (plist = H5I_object(dxpl_id)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
     /* Get the driver information */
@@ -372,9 +372,9 @@ H5P_dxfr_copy(hid_t dst_dxpl_id, hid_t src_dxpl_id, void UNUSED *copy_data)
 
     FUNC_ENTER_NOAPI_NOINIT(H5P_dxfr_copy)
 
-    if(NULL == (dst_plist = H5I_object(dst_dxpl_id)))
+    if(NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-    if(NULL == (src_plist = H5I_object(src_dxpl_id)))
+    if(NULL == (src_plist = (H5P_genplist_t *)H5I_object(src_dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Get values from old property list */
@@ -424,7 +424,7 @@ H5P_dxfr_close(hid_t dxpl_id, void UNUSED *close_data)
     FUNC_ENTER_NOAPI_NOINIT(H5P_dxfr_close)
 
     /* Check arguments */
-    if(NULL == (plist = H5I_object(dxpl_id)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
     if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id) < 0)

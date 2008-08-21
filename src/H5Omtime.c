@@ -496,16 +496,16 @@ H5O_mtime_reset(void UNUSED *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_mtime_free (void *mesg)
+H5O_mtime_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_free);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mtime_free)
 
-    assert (mesg);
+    HDassert(mesg);
 
-    H5FL_FREE(time_t,mesg);
+    (void)H5FL_FREE(time_t, mesg);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_mtime_free() */
 
 
 /*-------------------------------------------------------------------------

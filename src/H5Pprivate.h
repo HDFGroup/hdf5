@@ -89,7 +89,7 @@ H5_DLL int H5P_fill_value_cmp(const void *value1, const void *value2,
 
 /* *SPECIAL* Don't make more of these! -QAK */
 H5_DLL htri_t H5P_isa_class(hid_t plist_id, hid_t pclass_id);
-H5_DLL void *H5P_object_verify(hid_t plist_id, hid_t pclass_id);
+H5_DLL H5P_genplist_t *H5P_object_verify(hid_t plist_id, hid_t pclass_id);
 
 /* Private functions to "peek" at properties of a certain type */
 H5_DLL unsigned H5P_peek_unsigned(H5P_genplist_t *plist, const char *name);

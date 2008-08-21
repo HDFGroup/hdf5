@@ -207,9 +207,13 @@ static char *
 my_strdup(const char *s)
 {
     char *x;
-    if (!s) return NULL;
-    if (NULL==(x=malloc(strlen(s)+1))) return NULL;
+
+    if(!s)
+        return NULL;
+    if(NULL == (x = (char *)malloc(strlen(s) + 1)))
+        return NULL;
     strcpy(x, s);
+
     return x;
 }
 
@@ -554,9 +558,9 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
     if(H5I_GENPROP_LST != H5Iget_type(fapl_id) ||
             TRUE != H5Pisa_class(fapl_id, H5P_FILE_ACCESS))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not an access list", -1)
-    if (H5FD_MULTI!=H5Pget_driver(fapl_id))
+    if(H5FD_MULTI != H5Pget_driver(fapl_id))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1)
-    if (NULL==(fa=H5Pget_driver_info(fapl_id)))
+    if(NULL == (fa= (H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id)))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "bad VFL driver info", -1)
 
     if (memb_map)
@@ -572,7 +576,7 @@ H5Pget_fapl_multi(hid_t fapl_id, H5FD_mem_t *memb_map/*out*/,
     if (memb_name) {
 	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
 	    if (fa->memb_name[mt]) {
-		memb_name[mt] = malloc(strlen(fa->memb_name[mt])+1);
+		memb_name[mt] = (char *)malloc(strlen(fa->memb_name[mt])+1);
 		strcpy(memb_name[mt], fa->memb_name[mt]);
 	    } else
 		memb_name[mt] = NULL;
@@ -674,7 +678,7 @@ H5Pget_dxpl_multi(hid_t dxpl_id, hid_t *memb_dxpl/*out*/)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADTYPE, "not a file access property list", -1)
     if (H5FD_MULTI!=H5Pget_driver(dxpl_id))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "incorrect VFL driver", -1)
-    if (NULL==(dx=H5Pget_driver_info(dxpl_id)))
+    if(NULL == (dx = (H5FD_multi_dxpl_t *)H5Pget_driver_info(dxpl_id)))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_PLIST, H5E_BADVALUE, "bad VFL driver info", -1)
 
     if (memb_dxpl) {
@@ -1030,7 +1034,7 @@ static void *
 H5FD_multi_fapl_copy(const void *_old_fa)
 {
     const H5FD_multi_fapl_t *old_fa = (const H5FD_multi_fapl_t*)_old_fa;
-    H5FD_multi_fapl_t *new_fa = malloc(sizeof(H5FD_multi_fapl_t));
+    H5FD_multi_fapl_t *new_fa = (H5FD_multi_fapl_t *)malloc(sizeof(H5FD_multi_fapl_t));
     int nerrors = 0;
     static const char *func="H5FD_multi_fapl_copy";  /* Function Name for error reporting */
 
@@ -1046,7 +1050,7 @@ H5FD_multi_fapl_copy(const void *_old_fa)
 	    if (new_fa->memb_fapl[mt]<0) nerrors++;
 	}
 	if (old_fa->memb_name[mt]) {
-	    new_fa->memb_name[mt] = malloc(strlen(old_fa->memb_name[mt])+1);
+	    new_fa->memb_name[mt] = (char *)malloc(strlen(old_fa->memb_name[mt])+1);
 	    assert(new_fa->memb_name[mt]);
 	    strcpy(new_fa->memb_name[mt], old_fa->memb_name[mt]);
 	}
@@ -1122,7 +1126,7 @@ static void *
 H5FD_multi_dxpl_copy(const void *_old_dx)
 {
     const H5FD_multi_dxpl_t *old_dx = (const H5FD_multi_dxpl_t*)_old_dx;
-    H5FD_multi_dxpl_t *new_dx = malloc(sizeof(H5FD_multi_dxpl_t));
+    H5FD_multi_dxpl_t *new_dx = (H5FD_multi_dxpl_t *)malloc(sizeof(H5FD_multi_dxpl_t));
     int nerrors = 0;
     static const char *func="H5FD_multi_dxpl_copy";  /* Function Name for error reporting */
 
@@ -1227,14 +1231,14 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id,
      * Initialize the file from the file access properties, using default
      * values if necessary.
      */
-    if (NULL==(file=calloc((size_t)1, sizeof(H5FD_multi_t))))
+    if(NULL == (file = (H5FD_multi_t *)calloc((size_t)1, sizeof(H5FD_multi_t))))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL)
-    if (H5P_FILE_ACCESS_DEFAULT==fapl_id || H5FD_MULTI!=H5Pget_driver(fapl_id)) {
+    if(H5P_FILE_ACCESS_DEFAULT==fapl_id || H5FD_MULTI!=H5Pget_driver(fapl_id)) {
         close_fapl = fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         if(H5Pset_fapl_multi(fapl_id, NULL, NULL, NULL, NULL, TRUE)<0)
             H5Epush_goto(func, H5E_ERR_CLS, H5E_FILE, H5E_CANTSET, "can't set property value", error)
     }
-    fa = H5Pget_driver_info(fapl_id);
+    fa = (H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id);
     assert(fa);
     ALL_MEMBERS(mt) {
 	file->fa.memb_map[mt] = fa->memb_map[mt];
@@ -1785,15 +1789,15 @@ H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, siz
     H5Eclear2(H5E_DEFAULT);
 
     /* Get the data transfer properties */
-    if (H5P_FILE_ACCESS_DEFAULT!=dxpl_id && H5FD_MULTI==H5Pget_driver(dxpl_id)) {
-	dx = H5Pget_driver_info(dxpl_id);
-    }
+    if(H5P_FILE_ACCESS_DEFAULT != dxpl_id && H5FD_MULTI == H5Pget_driver(dxpl_id))
+	dx = (H5FD_multi_dxpl_t *)H5Pget_driver_info(dxpl_id);
 
     /* Find the file to which this address belongs */
-    for (mt=H5FD_MEM_SUPER; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+    for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
 	mmt = file->fa.memb_map[mt];
-	if (H5FD_MEM_DEFAULT==mmt) mmt = mt;
-	assert(mmt>0 && mmt<H5FD_MEM_NTYPES);
+	if(H5FD_MEM_DEFAULT == mmt)
+            mmt = mt;
+	assert(mmt > 0 && mmt < H5FD_MEM_NTYPES);
 
 	if (file->fa.memb_addr[mmt]>addr) continue;
 	if (file->fa.memb_addr[mmt]>=start_addr) {
@@ -1840,14 +1844,14 @@ H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, si
     H5Eclear2(H5E_DEFAULT);
 
     /* Get the data transfer properties */
-    if (H5P_FILE_ACCESS_DEFAULT!=dxpl_id && H5FD_MULTI==H5Pget_driver(dxpl_id)) {
-	dx = H5Pget_driver_info(dxpl_id);
-    }
+    if(H5P_FILE_ACCESS_DEFAULT != dxpl_id && H5FD_MULTI == H5Pget_driver(dxpl_id))
+	dx = (H5FD_multi_dxpl_t *)H5Pget_driver_info(dxpl_id);
 
     /* Find the file to which this address belongs */
-    for (mt=H5FD_MEM_SUPER; mt<H5FD_MEM_NTYPES; mt=(H5FD_mem_t)(mt+1)) {
+    for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
 	mmt = file->fa.memb_map[mt];
-	if (H5FD_MEM_DEFAULT==mmt) mmt = mt;
+	if(H5FD_MEM_DEFAULT == mmt)
+            mmt = mt;
 	assert(mmt>0 && mmt<H5FD_MEM_NTYPES);
 
 	if (file->fa.memb_addr[mmt]>addr) continue;

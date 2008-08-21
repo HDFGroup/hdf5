@@ -97,7 +97,7 @@ H5O_drvinfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_f
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
 
     /* Allocate space for message */
-    if(NULL == (mesg = H5MM_calloc(sizeof(H5O_drvinfo_t))))
+    if(NULL == (mesg = (H5O_drvinfo_t *)H5MM_calloc(sizeof(H5O_drvinfo_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for driver info message")
 
     /* Retrieve driver name */
@@ -110,8 +110,8 @@ H5O_drvinfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_f
     HDassert(mesg->len);
 
     /* Allocate space for buffer */
-    if(NULL == (mesg->buf = H5MM_malloc(mesg->len))) {
-        mesg = H5MM_xfree(mesg);
+    if(NULL == (mesg->buf = (uint8_t *)H5MM_malloc(mesg->len))) {
+        mesg = (H5O_drvinfo_t *)H5MM_xfree(mesg);
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for driver info buffer")
     } /* end if */
 
@@ -188,16 +188,16 @@ H5O_drvinfo_copy(const void *_mesg, void *_dest)
     /* Sanity check */
     HDassert(mesg);
 
-    if(!dest && NULL == (dest = H5MM_malloc(sizeof(H5O_drvinfo_t))))
+    if(!dest && NULL == (dest = (H5O_drvinfo_t *)H5MM_malloc(sizeof(H5O_drvinfo_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for shared message table message")
 
     /* Shallow copy the fields */
     *dest = *mesg;
 
     /* Copy the buffer */
-    if(NULL == (dest->buf = H5MM_malloc(mesg->len))) {
+    if(NULL == (dest->buf = (uint8_t *)H5MM_malloc(mesg->len))) {
         if(dest != _dest)
-            dest = H5MM_xfree(dest);
+            dest = (H5O_drvinfo_t *)H5MM_xfree(dest);
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     } /* end if */
     HDmemcpy(dest->buf, mesg->buf, mesg->len);
@@ -270,7 +270,7 @@ H5O_drvinfo_reset(void *_mesg)
     HDassert(mesg);
 
     /* reset */
-    mesg->buf = H5MM_xfree(mesg->buf);
+    mesg->buf = (uint8_t *)H5MM_xfree(mesg->buf);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_drvinfo_reset() */

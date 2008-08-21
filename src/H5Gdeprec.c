@@ -218,7 +218,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
         H5O_ginfo_t     ginfo;          /* Group info property */
 
         /* Get the default property list */
-        if(NULL == (gc_plist = H5I_object(H5P_GROUP_CREATE_DEFAULT)))
+        if(NULL == (gc_plist = (H5P_genplist_t *)H5I_object(H5P_GROUP_CREATE_DEFAULT)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
         /* Make a copy of the default property list */
@@ -226,7 +226,7 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to copy the creation property list")
 
         /* Get pointer to the copied property list */
-        if(NULL == (gc_plist = H5I_object(tmp_gcpl)))
+        if(NULL == (gc_plist = (H5P_genplist_t *)H5I_object(tmp_gcpl)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
         /* Get the group info property */

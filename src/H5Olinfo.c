@@ -166,7 +166,7 @@ H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
 done:
     if(ret_value == NULL)
         if(linfo != NULL)
-            H5FL_FREE(H5O_linfo_t, linfo);
+            (void)H5FL_FREE(H5O_linfo_t, linfo);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_linfo_decode() */
@@ -321,7 +321,7 @@ H5O_linfo_free(void *mesg)
 
     HDassert(mesg);
 
-    H5FL_FREE(H5O_linfo_t, mesg);
+    (void)H5FL_FREE(H5O_linfo_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_linfo_free() */
@@ -391,7 +391,7 @@ H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
     HDassert(cpy_info);
 
     /* Copy the source message */
-    if(NULL == (linfo_dst = H5O_linfo_copy(linfo_src, NULL)))
+    if(NULL == (linfo_dst = (H5O_linfo_t *)H5O_linfo_copy(linfo_src, NULL)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "memory allocation failed")
 
     /* If we are performing a 'shallow hierarchy' copy, and the links in this
@@ -422,7 +422,7 @@ H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
 done:
     if(!ret_value)
         if(linfo_dst)
-            H5FL_FREE(H5O_linfo_t, linfo_dst);
+            (void)H5FL_FREE(H5O_linfo_t, linfo_dst);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_linfo_copy_file() */

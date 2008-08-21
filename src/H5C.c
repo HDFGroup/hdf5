@@ -3062,7 +3062,7 @@ done:
                 H5SL_close(cache_ptr->slist_ptr);
 
             cache_ptr->magic = 0;
-            H5FL_FREE(H5C_t, cache_ptr);
+            (void)H5FL_FREE(H5C_t, cache_ptr);
             cache_ptr = NULL;
 
         } /* end if */
@@ -3323,7 +3323,7 @@ H5C_dest(H5F_t * f,
 
     cache_ptr->magic = 0;
 
-    H5FL_FREE(H5C_t, cache_ptr);
+    (void)H5FL_FREE(H5C_t, cache_ptr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3378,7 +3378,7 @@ H5C_dest_empty(H5C_t * cache_ptr)
 
     cache_ptr->magic = 0;
 
-    H5FL_FREE(H5C_t, cache_ptr);
+    (void)H5FL_FREE(H5C_t, cache_ptr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

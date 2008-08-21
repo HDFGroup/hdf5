@@ -63,18 +63,18 @@ H5P_get_class_path_test(hid_t pclass_id)
     H5P_genclass_t	*pclass;    /* Property class to query */
     char *ret_value;       /* return value */
 
-    FUNC_ENTER_NOAPI(H5P_get_class_path_test, NULL);
+    FUNC_ENTER_NOAPI(H5P_get_class_path_test, NULL)
 
     /* Check arguments. */
-    if (NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
+    if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property class");
 
     /* Get the property list class path */
-    if ((ret_value=H5P_get_class_path(pclass))==NULL)
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "unable to query full path of class");
+    if(NULL == (ret_value = H5P_get_class_path(pclass)))
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "unable to query full path of class")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_get_class_path_test() */
 
 
@@ -149,10 +149,10 @@ H5P_reset_external_file_test(hid_t dcpl_id)
     H5P_genplist_t *plist;              /* Property list */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_reset_external_file_test, FAIL);
+    FUNC_ENTER_NOAPI(H5P_reset_external_file_test, FAIL)
 
     /* Check arguments */
-    if(NULL == (plist = H5I_object(dcpl_id)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
      
     /* get external file list */ 
@@ -168,6 +168,6 @@ H5P_reset_external_file_test(hid_t dcpl_id)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_reset_external_file_test() */
 

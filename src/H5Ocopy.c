@@ -861,7 +861,7 @@ H5O_copy_free_addrmap_cb(void *item, void UNUSED *key, void UNUSED *op_data)
     HDassert(item);
 
     /* Release the item */
-    H5FL_FREE(H5O_addr_map_t, item);
+    (void)H5FL_FREE(H5O_addr_map_t, item);
 
     FUNC_LEAVE_NOAPI(0)
 }   /* H5O_copy_free_addrmap_cb() */

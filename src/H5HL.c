@@ -627,24 +627,24 @@ H5HL_dest(H5F_t UNUSED *f, H5HL_t *heap)
 {
     H5HL_free_t	*fl;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_dest);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_dest)
 
     /* check arguments */
-    assert(heap);
+    HDassert(heap);
 
     /* Verify that node is clean */
-    assert (heap->cache_info.is_dirty==FALSE);
+    HDassert(heap->cache_info.is_dirty == FALSE);
 
     if(heap->chunk)
-        heap->chunk = H5FL_BLK_FREE(heap_chunk,heap->chunk);
-    while (heap->freelist) {
+        heap->chunk = H5FL_BLK_FREE(heap_chunk, heap->chunk);
+    while(heap->freelist) {
         fl = heap->freelist;
         heap->freelist = fl->next;
-        H5FL_FREE(H5HL_free_t,fl);
-    }
-    H5FL_FREE(H5HL_t,heap);
+        (void)H5FL_FREE(H5HL_free_t, fl);
+    } /* end while */
+    (void)H5FL_FREE(H5HL_t, heap);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HL_dest() */
 
 
@@ -758,7 +758,7 @@ H5HL_protect(H5F_t *f, hid_t dxpl_id, haddr_t addr, H5AC_protect_t rw)
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
 
-    if(NULL == (ret_value = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, rw)))
+    if(NULL == (ret_value = (H5HL_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, rw)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "unable to load heap")
 
 done:
@@ -844,8 +844,6 @@ done:
  *		matzke@llnl.gov
  *		Jul 17 1997
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static H5HL_free_t *
@@ -853,13 +851,16 @@ H5HL_remove_free(H5HL_t *heap, H5HL_free_t *fl)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HL_remove_free);
 
-    if (fl->prev) fl->prev->next = fl->next;
-    if (fl->next) fl->next->prev = fl->prev;
+    if(fl->prev)
+        fl->prev->next = fl->next;
+    if(fl->next)
+        fl->next->prev = fl->prev;
 
-    if (!fl->prev) heap->freelist = fl->next;
+    if(!fl->prev)
+        heap->freelist = fl->next;
 
-    FUNC_LEAVE_NOAPI(H5FL_FREE(H5HL_free_t,fl));
-}
+    FUNC_LEAVE_NOAPI((H5HL_free_t *)H5FL_FREE(H5HL_free_t, fl));
+} /* end H5HL_remove_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -1312,7 +1313,7 @@ H5HL_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
     sizeof_hdr= H5HL_SIZEOF_HDR(f);
 
     /* Get heap pointer */
-    if (NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
+    if (NULL == (heap = (H5HL_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap");
 
     /* Check if the heap is contiguous on disk */
@@ -1377,7 +1378,7 @@ H5HL_get_size(H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t *size)
     HDassert(size);
 
     /* Get heap pointer */
-    if(NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (heap = (H5HL_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
 
     /* Set the size to return */
@@ -1419,7 +1420,7 @@ H5HL_heapsize(H5F_t *f, hid_t dxpl_id, haddr_t addr, hsize_t *heap_size)
     HDassert(heap_size);
 
     /* Get heap pointer */
-    if(NULL == (heap = H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (heap = (H5HL_t *)H5AC_protect(f, dxpl_id, H5AC_LHEAP, addr, NULL, NULL, H5AC_READ)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load heap")
 
     /* Get the total size of the local heap */

@@ -805,7 +805,7 @@ HDfprintf(stderr, "%s: new_addr = %a\n", FUNC, new_addr);
                 HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "memory allocation failed for filtered direct entries")
         } /* end if */
         else
-            iblock->child_iblocks = H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
+            iblock->child_iblocks = (H5HF_indirect_ptr_t *)H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
     } /* end if */
 
     /* Mark indirect block as dirty */
@@ -1200,7 +1200,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
         par_info.entry = par_entry;
 
         /* Protect the indirect block */
-        if(NULL == (iblock = H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, &iblock_nrows, &par_info, rw)))
+        if(NULL == (iblock = (H5HF_indirect_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, &iblock_nrows, &par_info, rw)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap indirect block")
         *did_protect = TRUE;
     } /* end if */

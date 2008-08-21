@@ -205,7 +205,7 @@ H5O_cont_free(void *mesg)
 
     HDassert(mesg);
 
-    H5FL_FREE(H5O_cont_t, mesg);
+    (void)H5FL_FREE(H5O_cont_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_cont_free() */

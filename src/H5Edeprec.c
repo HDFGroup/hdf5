@@ -130,7 +130,7 @@ H5Eget_major(H5E_major_t maj)
     FUNC_ENTER_API_NOCLEAR(H5Eget_major, NULL)
 
     /* Get the message object */
-    if(NULL == (msg = H5I_object_verify(maj, H5I_ERROR_MSG)))
+    if(NULL == (msg = (H5E_msg_t *)H5I_object_verify(maj, H5I_ERROR_MSG)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a error message ID")
 
     /* Get the message's text */
@@ -178,7 +178,7 @@ H5Eget_minor(H5E_minor_t min)
     FUNC_ENTER_API_NOCLEAR(H5Eget_minor, NULL)
 
     /* Get the message object */
-    if(NULL == (msg = H5I_object_verify(min, H5I_ERROR_MSG)))
+    if(NULL == (msg = (H5E_msg_t *)H5I_object_verify(min, H5I_ERROR_MSG)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a error message ID")
 
     /* Get the message's text */

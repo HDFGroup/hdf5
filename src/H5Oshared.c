@@ -151,7 +151,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, unsigned *ioflags,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't wrap buffer")
 
         /* Get a pointer to a buffer that's large enough for message */
-        if(NULL == (mesg_ptr = H5WB_actual(wb, mesg_size)))
+        if(NULL == (mesg_ptr = (uint8_t *)H5WB_actual(wb, mesg_size)))
             HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "can't get actual buffer")
 
         /* Retrieve the message from the heap */

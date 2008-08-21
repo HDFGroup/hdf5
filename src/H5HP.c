@@ -235,11 +235,11 @@ H5HP_sink_max(H5HP_t *heap, size_t loc)
     } /* end while */
 
     /* Put object into heap at correct location */
-    heap->heap[loc].val=val;
-    heap->heap[loc].obj=obj;
+    heap->heap[loc].val = val;
+    heap->heap[loc].obj = (H5HP_info_t *)obj;
 
     /* Update heap location for object */
-    heap->heap[loc].obj->heap_loc=loc;
+    heap->heap[loc].obj->heap_loc = loc;
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HP_sink_max() */
@@ -304,11 +304,11 @@ H5HP_sink_min(H5HP_t *heap, size_t loc)
     } /* end while */
 
     /* Put object into heap at correct location */
-    heap->heap[loc].val=val;
-    heap->heap[loc].obj=obj;
+    heap->heap[loc].val = val;
+    heap->heap[loc].obj = (H5HP_info_t *)obj;
 
     /* Update heap location for object */
-    heap->heap[loc].obj->heap_loc=loc;
+    heap->heap[loc].obj->heap_loc = loc;
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HP_sink_min() */
@@ -489,9 +489,9 @@ H5HP_insert(H5HP_t *heap, int val, void *obj)
     } /* end if */
 
     /* Insert new object at end of heap */
-    heap->heap[heap->nobjs].val=val;
-    heap->heap[heap->nobjs].obj=obj;
-    heap->heap[heap->nobjs].obj->heap_loc=heap->nobjs;
+    heap->heap[heap->nobjs].val = val;
+    heap->heap[heap->nobjs].obj = (H5HP_info_t *)obj;
+    heap->heap[heap->nobjs].obj->heap_loc = heap->nobjs;
 
     /* Restore heap condition */
     if(heap->type==H5HP_MAX_HEAP) {

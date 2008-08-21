@@ -148,7 +148,7 @@ H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 done:
     if(ret_value == NULL)
         if(ginfo != NULL)
-            H5FL_FREE(H5O_ginfo_t, ginfo);
+            (void)H5FL_FREE(H5O_ginfo_t, ginfo);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_ginfo_decode() */
@@ -304,7 +304,7 @@ H5O_ginfo_free(void *mesg)
 
     HDassert(mesg);
 
-    H5FL_FREE(H5O_ginfo_t, mesg);
+    (void)H5FL_FREE(H5O_ginfo_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_ginfo_free() */

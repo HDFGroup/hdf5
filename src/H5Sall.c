@@ -825,23 +825,24 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Sselect_all (hid_t spaceid)
+herr_t
+H5Sselect_all(hid_t spaceid)
 {
-    H5S_t	*space = NULL;  /* Dataspace to modify selection of */
-    herr_t ret_value=SUCCEED;  /* return value */
+    H5S_t	*space;         /* Dataspace to modify selection of */
+    herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_API(H5Sselect_all, FAIL);
+    FUNC_ENTER_API(H5Sselect_all, FAIL)
 
     /* Check args */
-    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Call internal routine to do the work */
     if((ret_value = H5S_select_all(space, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Sselect_all() */
 
 

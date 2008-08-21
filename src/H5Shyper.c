@@ -1246,7 +1246,7 @@ H5S_hyper_span_scratch (H5S_hyper_span_info_t *spans, void *scr_value)
     /* Check if we've already set this down span tree */
     if(spans->scratch!=scr_value) {
         /* Set the tree's scratch pointer */
-        spans->scratch=scr_value;
+        spans->scratch = (H5S_hyper_span_info_t *)scr_value;
 
         /* Set the scratch pointers in all the nodes */
         span=spans->head;
@@ -1543,7 +1543,7 @@ H5S_hyper_free_span_info (H5S_hyper_span_info_t *span_info)
         } /* end while */
 
         /* Free this span info */
-        H5FL_FREE(H5S_hyper_span_info_t,span_info);
+        (void)H5FL_FREE(H5S_hyper_span_info_t, span_info);
     } /* end if */
 
 done:
@@ -1586,7 +1586,7 @@ H5S_hyper_free_span (H5S_hyper_span_t *span)
     } /* end if */
 
     /* Free this span */
-    H5FL_FREE(H5S_hyper_span_t,span);
+    (void)H5FL_FREE(H5S_hyper_span_t, span);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1904,22 +1904,22 @@ H5S_get_select_hyper_nblocks(H5S_t *space)
 hssize_t
 H5Sget_select_hyper_nblocks(hid_t spaceid)
 {
-    H5S_t	*space = NULL;      /* Dataspace to modify selection of */
-    hssize_t ret_value;             /* return value */
+    H5S_t *space;               /* Dataspace to modify selection of */
+    hssize_t ret_value;         /* return value */
 
-    FUNC_ENTER_API(H5Sget_select_hyper_nblocks, FAIL);
+    FUNC_ENTER_API(H5Sget_select_hyper_nblocks, FAIL)
     H5TRACE1("Hs", "i", spaceid);
 
     /* Check args */
-    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-    if(H5S_GET_SELECT_TYPE(space)!=H5S_SEL_HYPERSLABS)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection");
+    if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+    if(H5S_GET_SELECT_TYPE(space) != H5S_SEL_HYPERSLABS)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection")
 
     ret_value = H5S_get_select_hyper_nblocks(space);
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Sget_select_hyper_nblocks() */
 
 
@@ -2582,28 +2582,28 @@ herr_t
 H5Sget_select_hyper_blocklist(hid_t spaceid, hsize_t startblock,
     hsize_t numblocks, hsize_t buf[/*numblocks*/])
 {
-    H5S_t	*space = NULL;      /* Dataspace to modify selection of */
-    herr_t ret_value;        /* return value */
+    H5S_t *space;               /* Dataspace to modify selection of */
+    herr_t ret_value;           /* return value */
 
-    FUNC_ENTER_API(H5Sget_select_hyper_blocklist, FAIL);
+    FUNC_ENTER_API(H5Sget_select_hyper_blocklist, FAIL)
     H5TRACE4("e", "ihh*[a2]h", spaceid, startblock, numblocks, buf);
 
     /* Check args */
-    if(buf==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer");
-    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    if(buf == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer")
+    if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
     if(H5S_GET_SELECT_TYPE(space)!=H5S_SEL_HYPERSLABS)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a hyperslab selection")
 
     /* Go get the correct number of blocks */
-    if(numblocks>0)
-        ret_value = H5S_get_select_hyper_blocklist(space,0,startblock,numblocks,buf);
+    if(numblocks > 0)
+        ret_value = H5S_get_select_hyper_blocklist(space, 0, startblock, numblocks, buf);
     else
         ret_value=SUCCEED;      /* Successfully got 0 blocks... */
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Sget_select_hyper_blocklist() */
 
 
@@ -3193,7 +3193,7 @@ H5S_hyper_release (H5S_t *space)
     } /* end if */
 
     /* Release space for the hyperslab selection information */
-    H5FL_FREE(H5S_hyper_sel_t,space->select.sel_info.hslab);
+    (void)H5FL_FREE(H5S_hyper_sel_t, space->select.sel_info.hslab);
     space->select.sel_info.hslab=NULL;
 
 done:
@@ -6264,24 +6264,24 @@ herr_t
 H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t start[],
          const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
-    H5S_t	*space = NULL;  /* Dataspace to modify selection of */
+    H5S_t *space;               /* Dataspace to modify selection of */
     unsigned u;                 /* Local index variable */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(H5Sselect_hyperslab, FAIL);
     H5TRACE6("e", "iSs*h*h*h*h", space_id, op, start, stride, count, block);
 
     /* Check args */
-    if (NULL == (space=H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
-    if (H5S_SCALAR==H5S_GET_EXTENT_TYPE(space))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_SCALAR space");
-    if (H5S_NULL==H5S_GET_EXTENT_TYPE(space))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_NULL space");
-    if(start==NULL || count==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified");
-    if(!(op>H5S_SELECT_NOOP && op<H5S_SELECT_INVALID))
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation");
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
+    if(H5S_SCALAR == H5S_GET_EXTENT_TYPE(space))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_SCALAR space")
+    if(H5S_NULL == H5S_GET_EXTENT_TYPE(space))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "hyperslab doesn't support H5S_NULL space")
+    if(start == NULL || count == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "hyperslab not specified")
+    if(!(op > H5S_SELECT_NOOP && op < H5S_SELECT_INVALID))
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "invalid selection operation")
     if(stride!=NULL) {
         /* Check for 0-sized strides */
         for(u=0; u<space->extent.rank; u++) {

@@ -147,14 +147,14 @@ H5MP_new_page(H5MP_pool_t *mp, size_t page_size)
 
     /* Allocate page */
     if(page_size > mp->page_size) {
-        if(NULL == (new_page = H5MM_malloc(page_size)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for page")
+        if(NULL == (new_page = (H5MP_page_t *)H5MM_malloc(page_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for page")
         new_page->free_size = page_size - H5MP_BLOCK_ALIGN(sizeof(H5MP_page_t));
         new_page->fac_alloc = FALSE;
     } /* end if */
     else {
-        if((new_page = H5FL_FAC_MALLOC(mp->page_fac)) == NULL)
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for page")
+        if(NULL == (new_page = (H5MP_page_t *)H5FL_FAC_MALLOC(mp->page_fac)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for page")
         new_page->free_size = mp->max_size;
         new_page->fac_alloc = TRUE;
     } /* end else */

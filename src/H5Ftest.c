@@ -102,7 +102,7 @@ H5F_get_sohm_mesg_count_test(hid_t file_id, unsigned type_id,
     FUNC_ENTER_NOAPI_NOINIT(H5F_get_sohm_mesg_count_test)
 
     /* Check arguments */
-    if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
     /* Retrieve count for message type */

@@ -402,7 +402,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
     } /* end for */
 
     /* debug each message */
-    if(NULL == (sequence = H5MM_calloc(NELMTS(H5O_msg_class_g) * sizeof(unsigned))))
+    if(NULL == (sequence = (unsigned *)H5MM_calloc(NELMTS(H5O_msg_class_g) * sizeof(unsigned))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     for(i = 0, mesg_total = 0; i < oh->nmesgs; i++) {
         const H5O_msg_class_t  *debug_type;              /* Type of message to use for callbacks */
@@ -498,7 +498,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	else
 	    HDfprintf(stream, "%*s<No info for this message>\n", indent + 6, "");
     } /* end for */
-    sequence = H5MM_xfree(sequence);
+    sequence = (unsigned *)H5MM_xfree(sequence);
 
     if(mesg_total != chunk_total)
 	HDfprintf(stream, "*** TOTAL SIZE DOES NOT MATCH ALLOCATED SIZE!\n");
@@ -536,7 +536,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    if(NULL == (oh = H5AC_protect(f, dxpl_id, H5AC_OHDR, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(f, dxpl_id, H5AC_OHDR, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* debug */

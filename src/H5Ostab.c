@@ -99,32 +99,32 @@ static void *
 H5O_stab_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     unsigned UNUSED *ioflags, const uint8_t *p)
 {
-    H5O_stab_t          *stab=NULL;
+    H5O_stab_t          *stab = NULL;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_decode);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_stab_decode)
 
     /* check args */
-    assert(f);
-    assert(p);
+    HDassert(f);
+    HDassert(p);
 
     /* decode */
-    if (NULL==(stab = H5FL_CALLOC(H5O_stab_t)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (stab = H5FL_CALLOC(H5O_stab_t)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     H5F_addr_decode(f, &p, &(stab->btree_addr));
     H5F_addr_decode(f, &p, &(stab->heap_addr));
 
     /* Set return value */
-    ret_value=stab;
+    ret_value = stab;
 
 done:
-    if(ret_value==NULL) {
-        if(stab!=NULL)
-            H5FL_FREE(H5O_stab_t,stab);
+    if(ret_value == NULL) {
+        if(stab != NULL)
+            (void)H5FL_FREE(H5O_stab_t,stab);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_stab_decode() */
 
 
 /*-------------------------------------------------------------------------
@@ -247,16 +247,16 @@ H5O_stab_size(const H5F_t *f, hbool_t UNUSED disable_shared, const void UNUSED *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_stab_free (void *mesg)
+H5O_stab_free(void *mesg)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_stab_free);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_stab_free)
 
-    assert (mesg);
+    HDassert(mesg);
 
-    H5FL_FREE(H5O_stab_t,mesg);
+    (void)H5FL_FREE(H5O_stab_t, mesg);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_stab_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -283,7 +283,7 @@ H5O_stab_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *mesg)
     HDassert(mesg);
 
     /* Free the file space for the symbol table */
-    if(H5G_stab_delete(f, dxpl_id, mesg) < 0)
+    if(H5G_stab_delete(f, dxpl_id, (const H5O_stab_t *)mesg) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free symbol table")
 
 done:
@@ -339,7 +339,7 @@ H5O_stab_copy_file(H5F_t *file_src, void *native_src, H5F_t *file_dst,
 done:
     if(!ret_value)
         if(stab_dst)
-            H5FL_FREE(H5O_stab_t, stab_dst);
+            (void)H5FL_FREE(H5O_stab_t, stab_dst);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_stab_copy_file() */

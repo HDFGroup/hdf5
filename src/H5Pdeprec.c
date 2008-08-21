@@ -257,7 +257,7 @@ H5Pregister1(hid_t cls_id, const char *name, size_t size, void *def_value,
              prp_set, prp_get, prp_delete, prp_copy, prp_close);
 
     /* Check arguments. */
-    if(NULL == (pclass = H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
+    if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid class name");
@@ -426,7 +426,7 @@ H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
              prp_delete, prp_copy, prp_close);
 
     /* Check arguments. */
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name")
