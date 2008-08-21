@@ -22,9 +22,9 @@
  */
 #include "h5test.h"
 
-#define DSET_NAME "test_dset"
-#define ATTR_NAME "test_attr"
-#define GROUP_NAME "test_grp"
+#define APPREF_DSET "test_dset"
+#define APPREF_ATTR "test_attr"
+#define APPREF_GROUP "test_grp"
 
 #define ERR_WIDTH   40      /* Width of output for the SIGABRT handler */
 #define MAX_NINC    16      /* Maximum increments of a reference count */
@@ -138,21 +138,21 @@ main (void)
     RAND_INC (T_SPACE)
 
     /* Create a dataset */
-    if ((ids[T_DSET] = H5Dcreate2 (ids[T_FILE], DSET_NAME, H5T_NATIVE_INT,
+    if ((ids[T_DSET] = H5Dcreate2 (ids[T_FILE], APPREF_DSET, H5T_NATIVE_INT,
                 ids[T_SPACE], H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     RAND_INC (T_DSET)
 
     /* Create an attribute */
-    if ((ids[T_ATTR] = H5Acreate2 (ids[T_DSET], ATTR_NAME, H5T_NATIVE_INT,
+    if ((ids[T_ATTR] = H5Acreate2 (ids[T_DSET], APPREF_ATTR, H5T_NATIVE_INT,
                 ids[T_SPACE], H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
     RAND_INC (T_ATTR)
 
     /* Create a group */
-    if ((ids[T_GROUP] = H5Gcreate2 (ids[T_FILE], GROUP_NAME, H5P_DEFAULT,
+    if ((ids[T_GROUP] = H5Gcreate2 (ids[T_FILE], APPREF_GROUP, H5P_DEFAULT,
                 H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR
 
