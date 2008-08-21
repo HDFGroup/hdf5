@@ -44,282 +44,294 @@ hsize_t diff_attr(hid_t loc1_id,
                   const char *path2,
                   diff_opt_t *options)
 {
- hid_t      attr1_id=-1;     /* attr ID */
- hid_t      attr2_id=-1;     /* attr ID */
- hid_t      space1_id=-1;    /* space ID */
- hid_t      space2_id=-1;    /* space ID */
- hid_t      ftype1_id=-1;    /* file data type ID */
- hid_t      ftype2_id=-1;    /* file data type ID */
- hid_t      mtype1_id=-1;    /* memory data type ID */
- hid_t      mtype2_id=-1;    /* memory data type ID */
- size_t     msize1;          /* memory size of memory type */
- size_t     msize2;          /* memory size of memory type */
- void       *buf1=NULL;      /* data buffer */
- void       *buf2=NULL;      /* data buffer */
- hsize_t    nelmts1;         /* number of elements in dataset */
- int        rank1;           /* rank of dataset */
- int        rank2;           /* rank of dataset */
- hsize_t    dims1[H5S_MAX_RANK];/* dimensions of dataset */
- hsize_t    dims2[H5S_MAX_RANK];/* dimensions of dataset */
- char       name1[512];
- char       name2[512];
- char       np1[512];
- char       np2[512];
- H5O_info_t oinfo1, oinfo2;     /* Object info */
- unsigned   u;                  /* Local index variable */
- hsize_t    nfound = 0;
- hsize_t    nfound_total = 0;
- int        cmp=1;
-
- if(H5Oget_info(loc1_id, &oinfo1) < 0)
-  goto error;
- if(H5Oget_info(loc2_id, &oinfo2) < 0)
-  goto error;
-
- if(oinfo1.num_attrs != oinfo2.num_attrs)
-  return 1;
-
- for(u = 0; u < (unsigned)oinfo1.num_attrs; u++)
- {
-  /* reset buffers for every attribute, we might goto out and call free */
-  buf1 = NULL;
-  buf2 = NULL;
-
-  /* open attribute */
-  if((attr1_id = H5Aopen_by_idx(loc1_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-   goto error;
-   /* get name */
-  if(H5Aget_name(attr1_id, 255, name1) < 0)
-   goto error;
-
-  /* use the name on the first file to open the second file */
-  H5E_BEGIN_TRY 
-  {
-   if((attr2_id = H5Aopen(loc2_id, name1, H5P_DEFAULT)) < 0)
-    goto error;
-  } H5E_END_TRY;
-
-  /* get name */
-  if(H5Aget_name(attr2_id, 255, name2) < 0)
-   goto error;
-
-  /* get the file datatype  */
-  if((ftype1_id = H5Aget_type(attr1_id)) < 0)
-   goto error;
-  if((ftype2_id = H5Aget_type(attr2_id)) < 0)
-   goto error;
-
-  /* get the dataspace handle  */
-  if((space1_id = H5Aget_space(attr1_id)) < 0)
-   goto error;
-  if((space2_id = H5Aget_space(attr2_id)) < 0)
-   goto error;
-
-  /* get dimensions  */
-  if ( (rank1 = H5Sget_simple_extent_dims(space1_id, dims1, NULL)) < 0 )
-   goto error;
-  if ( (rank2 = H5Sget_simple_extent_dims(space2_id, dims2, NULL)) < 0 )
-   goto error;
-
- /*-------------------------------------------------------------------------
-  * check for comparable TYPE and SPACE
-  *-------------------------------------------------------------------------
-  */
-
-  if (diff_can_type(ftype1_id,
-   ftype2_id,
-   rank1,
-   rank2,
-   dims1,
-   dims2,
-   NULL,
-   NULL,
-   name1,
-   name2,
-   options)!=1)
-  {
-   cmp=0;
-   options->not_cmp=1;
-  }
- /*-------------------------------------------------------------------------
-  * only attempt to compare if possible
-  *-------------------------------------------------------------------------
-  */
-  if (cmp)
-  {
-     int j;
-
-  /*-------------------------------------------------------------------------
-   * read to memory
-   *-------------------------------------------------------------------------
-   */
-   nelmts1=1;
-   for (j=0; j<rank1; j++)
-    nelmts1*=dims1[j];
-
-   if ((mtype1_id=h5tools_get_native_type(ftype1_id))<0)
-    goto error;
-
-   if ((mtype2_id=h5tools_get_native_type(ftype2_id))<0)
-    goto error;
-
-   if ((msize1=H5Tget_size(mtype1_id))==0)
-    goto error;
-   if ((msize2=H5Tget_size(mtype2_id))==0)
-    goto error;
-
-   /*assert(msize1==msize2);*/
-
-   if ( msize1 != msize2)
-   {
-
-       if (options->m_verbose)
-            printf("Comparison not possible: different string sizes for attribute <%s>\n",
-             name1);
-
-       options->not_cmp=1;
-       continue;
-
-
-   }
-
-   buf1=(void *) HDmalloc((unsigned)(nelmts1*msize1));
-   buf2=(void *) HDmalloc((unsigned)(nelmts1*msize2));
-   if ( buf1==NULL || buf2==NULL){
-    printf( "cannot read into memory\n" );
-    goto error;
-   }
-   if (H5Aread(attr1_id,mtype1_id,buf1)<0)
-    goto error;
-   if (H5Aread(attr2_id,mtype2_id,buf2)<0)
-    goto error;
-
-   /* format output string */
-   sprintf(np1,"%s of <%s>",name1,path1);
-   sprintf(np2,"%s of <%s>",name2,path2);
-
-  /*-------------------------------------------------------------------------
-   * array compare
-   *-------------------------------------------------------------------------
-   */
-
-   /* always print name */
-   if (options->m_verbose)
-   {
-    do_print_objname ("attribute", np1, np2);
-    nfound = diff_array(buf1,
-     buf2,
-     nelmts1,
-     (hsize_t)0,
-     rank1,
-     dims1,
-     options,
-     np1,
-     np2,
-     mtype1_id,
-     attr1_id,
-     attr2_id);
-    print_found(nfound);
-
-   }
-   /* check first if we have differences */
-   else
-   {
-    if (options->m_quiet==0)
+    hid_t      attr1_id=-1;     /* attr ID */
+    hid_t      attr2_id=-1;     /* attr ID */
+    hid_t      space1_id=-1;    /* space ID */
+    hid_t      space2_id=-1;    /* space ID */
+    hid_t      ftype1_id=-1;    /* file data type ID */
+    hid_t      ftype2_id=-1;    /* file data type ID */
+    hid_t      mtype1_id=-1;    /* memory data type ID */
+    hid_t      mtype2_id=-1;    /* memory data type ID */
+    size_t     msize1;          /* memory size of memory type */
+    size_t     msize2;          /* memory size of memory type */
+    void       *buf1=NULL;      /* data buffer */
+    void       *buf2=NULL;      /* data buffer */
+    hsize_t    nelmts1;         /* number of elements in dataset */
+    int        rank1;           /* rank of dataset */
+    int        rank2;           /* rank of dataset */
+    hsize_t    dims1[H5S_MAX_RANK];/* dimensions of dataset */
+    hsize_t    dims2[H5S_MAX_RANK];/* dimensions of dataset */
+    char       name1[512];
+    char       name2[512];
+    char       np1[512];
+    char       np2[512];
+    H5O_info_t oinfo1, oinfo2;     /* Object info */
+    unsigned   u;                  /* Local index variable */
+    hsize_t    nfound = 0;
+    hsize_t    nfound_total = 0;
+    int       j;
+    
+    if(H5Oget_info(loc1_id, &oinfo1) < 0)
+        goto error;
+    if(H5Oget_info(loc2_id, &oinfo2) < 0)
+        goto error;
+    
+    if(oinfo1.num_attrs != oinfo2.num_attrs)
+        return 1;
+    
+    for( u = 0; u < (unsigned)oinfo1.num_attrs; u++)
     {
-     /* shut up temporarily */
-     options->m_quiet=1;
-     nfound = diff_array(buf1,
-      buf2,
-      nelmts1,
-      (hsize_t)0,
-      rank1,
-      dims1,
-      options,
-      np1,
-      np2,
-      mtype1_id,
-      attr1_id,
-      attr2_id);
-     /* print again */
-     options->m_quiet=0;
-     if (nfound)
-     {
-      do_print_objname ("attribute", np1, np2);
-      nfound = diff_array(buf1,
-       buf2,
-       nelmts1,
-       (hsize_t)0,
-       rank1,
-       dims1,
-       options,
-       np1,
-       np2,
-       mtype1_id,
-       attr1_id,
-       attr2_id);
-      print_found(nfound);
-     } /*if*/
-    } /*if*/
-    /* in quiet mode, just count differences */
-    else
-    {
-     nfound = diff_array(buf1,
-      buf2,
-      nelmts1,
-      (hsize_t)0,
-      rank1,
-      dims1,
-      options,
-      np1,
-      np2,
-      mtype1_id,
-      attr1_id,
-      attr2_id);
-    } /*else quiet */
-   } /*else verbose */
- }/*cmp*/
+        /* reset buffers for every attribute, we might goto out and call free */
+        buf1 = NULL;
+        buf2 = NULL;
+        
+        /* open attribute */
+        if((attr1_id = H5Aopen_by_idx(loc1_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, (hsize_t)u, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto error;
+        /* get name */
+        if(H5Aget_name(attr1_id, 255, name1) < 0)
+            goto error;
+        
+        /* use the name on the first file to open the second file */
+        H5E_BEGIN_TRY 
+        {
+            if((attr2_id = H5Aopen(loc2_id, name1, H5P_DEFAULT)) < 0)
+                goto error;
+        } H5E_END_TRY;
+        
+        /* get name */
+        if(H5Aget_name(attr2_id, 255, name2) < 0)
+            goto error;
+        
+        /* get the datatypes  */
+        if ((ftype1_id = H5Aget_type(attr1_id)) < 0)
+            goto error;
+        if ((ftype2_id = H5Aget_type(attr2_id)) < 0)
+            goto error;
+        if ((mtype1_id = h5tools_get_native_type(ftype1_id))<0)
+            goto error;
+        if ((mtype2_id = h5tools_get_native_type(ftype2_id))<0)
+            goto error;
+        if ((msize1 = H5Tget_size(mtype1_id))==0)
+            goto error;
+        if ((msize2 = H5Tget_size(mtype2_id))==0)
+            goto error;        
+        
+        /* get the dataspace   */
+        if ((space1_id = H5Aget_space(attr1_id)) < 0)
+            goto error;
+        if ((space2_id = H5Aget_space(attr2_id)) < 0)
+            goto error;
+        
+        /* get dimensions  */
+        if ( (rank1 = H5Sget_simple_extent_dims(space1_id, dims1, NULL)) < 0 )
+            goto error;
+        if ( (rank2 = H5Sget_simple_extent_dims(space2_id, dims2, NULL)) < 0 )
+            goto error;
+        
+        
+       /*-------------------------------------------------------------------------
+        * check for comparable TYPE and SPACE
+        *-------------------------------------------------------------------------
+        */
+        
+        if ( msize1 != msize2
+            || 
+            diff_can_type(ftype1_id,
+            ftype2_id,
+            rank1,
+            rank2,
+            dims1,
+            dims2,
+            NULL,
+            NULL,
+            name1,
+            name2,
+            options)!=1)
+        {
+            
+            if (options->m_verbose)
+                printf("Comparison not possible for attribute <%s>\n",
+                name1);
+            
+            options->not_cmp=1;
+            
+            if (H5Tclose(ftype1_id)<0) 
+                goto error;
+            if (H5Tclose(ftype2_id)<0) 
+                goto error;
+            if (H5Sclose(space1_id)<0) 
+                goto error;
+            if (H5Sclose(space2_id)<0) 
+                goto error;
+            if (H5Aclose(attr1_id)<0) 
+                goto error;
+            if (H5Aclose(attr2_id)<0) 
+                goto error;
+            if (H5Tclose(mtype1_id)<0) 
+                goto error;
+            if (H5Tclose(mtype2_id)<0) 
+                goto error;
 
-
- /*-------------------------------------------------------------------------
-  * close
-  *-------------------------------------------------------------------------
-  */
-
-  if (H5Tclose(ftype1_id)<0) goto error;
-  if (H5Tclose(ftype2_id)<0) goto error;
-  if (H5Tclose(mtype1_id)<0) goto error;
-  if (H5Tclose(mtype2_id)<0) goto error;
-  if (H5Sclose(space1_id)<0) goto error;
-  if (H5Sclose(space2_id)<0) goto error;
-  if (H5Aclose(attr1_id)<0) goto error;
-  if (H5Aclose(attr2_id)<0) goto error;
-  if (buf1)
-   HDfree(buf1);
-  if (buf2)
-   HDfree(buf2);
-
-  nfound_total += nfound;
+            continue;
+            
+            
+        }
+       
+        
+        /*-------------------------------------------------------------------------
+        * read 
+        *-------------------------------------------------------------------------
+        */
+        nelmts1=1;
+        for (j=0; j<rank1; j++)
+            nelmts1*=dims1[j];
+        
+        buf1=(void *) HDmalloc((unsigned)(nelmts1*msize1));
+        buf2=(void *) HDmalloc((unsigned)(nelmts1*msize2));
+        if ( buf1==NULL || buf2==NULL){
+            printf( "cannot read into memory\n" );
+            goto error;
+        }
+        if (H5Aread(attr1_id,mtype1_id,buf1)<0)
+            goto error;
+        if (H5Aread(attr2_id,mtype2_id,buf2)<0)
+            goto error;
+        
+        /* format output string */
+        sprintf(np1,"%s of <%s>",name1,path1);
+        sprintf(np2,"%s of <%s>",name2,path2);
+        
+        /*-------------------------------------------------------------------------
+        * array compare
+        *-------------------------------------------------------------------------
+        */
+        
+        /* always print name */
+        if (options->m_verbose)
+        {
+            do_print_objname ("attribute", np1, np2);
+            nfound = diff_array(buf1,
+                buf2,
+                nelmts1,
+                (hsize_t)0,
+                rank1,
+                dims1,
+                options,
+                np1,
+                np2,
+                mtype1_id,
+                attr1_id,
+                attr2_id);
+            print_found(nfound);
+            
+        }
+        /* check first if we have differences */
+        else
+        {
+            if (options->m_quiet==0)
+            {
+                /* shut up temporarily */
+                options->m_quiet=1;
+                nfound = diff_array(buf1,
+                    buf2,
+                    nelmts1,
+                    (hsize_t)0,
+                    rank1,
+                    dims1,
+                    options,
+                    np1,
+                    np2,
+                    mtype1_id,
+                    attr1_id,
+                    attr2_id);
+                /* print again */
+                options->m_quiet=0;
+                if (nfound)
+                {
+                    do_print_objname ("attribute", np1, np2);
+                    nfound = diff_array(buf1,
+                        buf2,
+                        nelmts1,
+                        (hsize_t)0,
+                        rank1,
+                        dims1,
+                        options,
+                        np1,
+                        np2,
+                        mtype1_id,
+                        attr1_id,
+                        attr2_id);
+                    print_found(nfound);
+                } /*if*/
+            } /*if*/
+            /* in quiet mode, just count differences */
+            else
+            {
+                nfound = diff_array(buf1,
+                    buf2,
+                    nelmts1,
+                    (hsize_t)0,
+                    rank1,
+                    dims1,
+                    options,
+                    np1,
+                    np2,
+                    mtype1_id,
+                    attr1_id,
+                    attr2_id);
+            } /*else quiet */
+        } /*else verbose */
+        
+        
+       /*-------------------------------------------------------------------------
+        * close
+        *-------------------------------------------------------------------------
+        */
+        
+        if (H5Tclose(ftype1_id)<0) 
+            goto error;
+        if (H5Tclose(ftype2_id)<0) 
+            goto error;
+        if (H5Sclose(space1_id)<0) 
+            goto error;
+        if (H5Sclose(space2_id)<0) 
+            goto error;
+        if (H5Aclose(attr1_id)<0) 
+            goto error;
+        if (H5Aclose(attr2_id)<0) 
+            goto error;
+        if (H5Tclose(mtype1_id)<0) 
+            goto error;
+        if (H5Tclose(mtype2_id)<0) 
+            goto error;
+        
+        if (buf1)
+            HDfree(buf1);
+        if (buf2)
+            HDfree(buf2);
+        
+        nfound_total += nfound;
  } /* u */
-
+ 
  return nfound_total;
-
+ 
 error:
  H5E_BEGIN_TRY {
-  H5Tclose(ftype1_id);
-  H5Tclose(ftype2_id);
-  H5Tclose(mtype1_id);
-  H5Tclose(mtype2_id);
-  H5Sclose(space1_id);
-  H5Sclose(space2_id);
-  H5Aclose(attr1_id);
-  H5Aclose(attr2_id);
-  if (buf1)
-   HDfree(buf1);
-  if (buf2)
-   HDfree(buf2);
+     H5Tclose(ftype1_id);
+     H5Tclose(ftype2_id);
+     H5Tclose(mtype1_id);
+     H5Tclose(mtype2_id);
+     H5Sclose(space1_id);
+     H5Sclose(space2_id);
+     H5Aclose(attr1_id);
+     H5Aclose(attr2_id);
+     if (buf1)
+         HDfree(buf1);
+     if (buf2)
+         HDfree(buf2);
  } H5E_END_TRY;
-
+ 
  options->err_stat=1;
  return nfound_total;
 }
