@@ -62,7 +62,7 @@ void test_vlstr_free_custom(void *mem, void *info);
 void *test_vlstr_alloc_custom(size_t size, void *info)
 {
     void *ret_value=NULL;       /* Pointer to return */
-    int *mem_used=(int *)info;  /* Get the pointer to the memory used */
+    size_t *mem_used=(size_t *)info;  /* Get the pointer to the memory used */
     size_t extra;               /* Extra space needed */
 
     /*
@@ -90,7 +90,7 @@ void *test_vlstr_alloc_custom(size_t size, void *info)
 void test_vlstr_free_custom(void *_mem, void *info)
 {
     unsigned char *mem;
-    int *mem_used=(int *)info;  /* Get the pointer to the memory used */
+    size_t *mem_used=(size_t *)info;  /* Get the pointer to the memory used */
     size_t extra;               /* Extra space needed */
 
     /*
@@ -132,8 +132,8 @@ test_vlstrings_basic(void)
     hsize_t		dims1[] = {SPACE1_DIM1};
     hsize_t     size;       /* Number of bytes which will be used */
     unsigned       i;          /* counting variable */
-    int         str_used;   /* String data in memory */
-    int         mem_used=0; /* Memory used during allocation */
+    size_t         str_used;   /* String data in memory */
+    size_t         mem_used=0; /* Memory used during allocation */
     herr_t		ret;		/* Generic return value		*/
 
     /* Output message about test being performed */
@@ -196,26 +196,26 @@ test_vlstrings_basic(void)
     VERIFY(size,(hsize_t)str_used,"H5Dvlen_get_buf_size");
 
     /* Read dataset from disk */
-    ret=H5Dread(dataset,tid1,H5S_ALL,H5S_ALL,xfer_pid,rdata);
+    ret = H5Dread(dataset, tid1, H5S_ALL, H5S_ALL, xfer_pid, rdata);
     CHECK(ret, FAIL, "H5Dread");
 
     /* Make certain the correct amount of memory has been used */
     VERIFY(mem_used,str_used,"H5Dread");
 
     /* Compare data read in */
-    for(i=0; i<SPACE1_DIM1; i++) {
-        if(HDstrlen(wdata[i])!=strlen(rdata[i])) {
+    for(i = 0; i < SPACE1_DIM1; i++) {
+        if(HDstrlen(wdata[i]) != HDstrlen(rdata[i])) {
             TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",(int)i,(int)strlen(wdata[i]),(int)i,(int)strlen(rdata[i]));
             continue;
         } /* end if */
-        if( HDstrcmp(wdata[i],rdata[i]) != 0 ) {
+        if(HDstrcmp(wdata[i], rdata[i]) != 0 ) {
             TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",(int)i,wdata[i],(int)i,rdata[i]);
             continue;
         } /* end if */
     } /* end for */
 
     /* Reclaim the read VL data */
-    ret=H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
+    ret = H5Dvlen_reclaim(tid1,sid1,xfer_pid,rdata);
     CHECK(ret, FAIL, "H5Dvlen_reclaim");
 
     /* Make certain the VL memory has been freed */

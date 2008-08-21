@@ -68,8 +68,8 @@ void test_vlstr_free_custom(void *mem, void *info);
 ****************************************************************/
 void *test_vlstr_alloc_custom(size_t size, void *info)
 {
-    void *ret_value=NULL;   	// Pointer to return
-    int *mem_used=(int *)info;  // Get the pointer to the memory used
+    void *ret_value = NULL;   	// Pointer to return
+    size_t *mem_used = (size_t *)info;  // Get the pointer to the memory used
     size_t extra;           	// Extra space needed
 
     /*
@@ -77,13 +77,14 @@ void *test_vlstr_alloc_custom(size_t size, void *info)
      *  alignment correct - QAK
      */
     
-    extra=MAX(sizeof(void *),sizeof(size_t));
+    extra = MAX(sizeof(void *),sizeof(size_t));
 
-    if((ret_value=HDmalloc(extra+size))!=NULL) {
-        *(size_t *)ret_value=size;
-        *mem_used+=size;
+    if((ret_value = HDmalloc(extra + size)) != NULL) {
+        *(size_t *)ret_value = size;
+        *mem_used += size;
     } // end if
-    ret_value=((unsigned char *)ret_value)+extra;
+    ret_value = ((unsigned char *)ret_value) + extra;
+
     return(ret_value);
 }
 
@@ -100,7 +101,7 @@ void *test_vlstr_alloc_custom(size_t size, void *info)
 void test_vlstr_free_custom(void *_mem, void *info)
 {
     unsigned char *mem;
-    int *mem_used=(int *)info;  // Get the pointer to the memory used
+    size_t *mem_used=(size_t *)info;  // Get the pointer to the memory used
     size_t extra;           	// Extra space needed
 
     /*
@@ -174,14 +175,14 @@ static void test_vlstrings_basic()
 	// Change to the custom memory allocation routines for reading 
 	// VL string.
 	DSetMemXferPropList xfer;
-	int mem_used = 0;	// Memory used during allocation
+	size_t mem_used = 0;	// Memory used during allocation
 	xfer.setVlenMemManager(test_vlstr_alloc_custom, &mem_used, test_vlstr_free_custom, &mem_used);
 
 	// Make certain the correct amount of memory will be used.
 	hsize_t vlsize = dataset.getVlenBufSize(tid1, sid1);
 
 	// Count the actual number of bytes used by the strings.
-	int str_used;   // String data in memory
+	size_t str_used;   // String data in memory
 	hsize_t i;	// counting variable
 	for (i=0,str_used=0; i<SPACE1_DIM1; i++)
 	    str_used+=HDstrlen(wdata[i])+1;
@@ -197,14 +198,14 @@ static void test_vlstrings_basic()
 	verify_val(mem_used, str_used, "DataSet::read", __LINE__, __FILE__);
 
 	// Compare data read in.
-	for (i=0; i<SPACE1_DIM1; i++) {
-	    int wlen = HDstrlen(wdata[i]);
-	    int rlen = HDstrlen(rdata[i]);
+	for(i = 0; i < SPACE1_DIM1; i++) {
+	    size_t wlen = HDstrlen(wdata[i]);
+	    size_t rlen = HDstrlen(rdata[i]);
 	    if(wlen != rlen) {
-		TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i, wlen, (int)i, rlen);
+		TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%u, strlen(rdata[%d])=%u\n", (int)i, (unsigned)wlen, (int)i, (unsigned)rlen);
 		continue;
 	    } // end if
-	    if( HDstrcmp(wdata[i],rdata[i]) != 0 ) {
+	    if(HDstrcmp(wdata[i], rdata[i]) != 0) {
 		TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i], (int)i, rdata[i]);
 		continue;
 	    } // end if
@@ -276,7 +277,7 @@ static void test_vlstrings_special()
 
 	// Check data read in.
 	hsize_t i;      	// counting variable
-	for (i=0; i<SPACE1_DIM1; i++)
+	for(i = 0; i < SPACE1_DIM1; i++)
 	    if(rdata[i] != NULL)
 		TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
 
@@ -285,14 +286,14 @@ static void test_vlstrings_special()
 	dataset.read(rdata, tid1);
 
 	// Compare data read in.
-	for (i=0; i<SPACE1_DIM1; i++) {
-	    int wlen = HDstrlen(wdata[i]);
-	    int rlen = HDstrlen(rdata[i]);
+	for(i = 0; i < SPACE1_DIM1; i++) {
+	    size_t wlen = HDstrlen(wdata[i]);
+	    size_t rlen = HDstrlen(rdata[i]);
 	    if(wlen != rlen) {
-		TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i, wlen, (int)i, rlen);
+		TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%u, strlen(rdata[%d])=%u\n", (int)i, (unsigned)wlen, (int)i, (unsigned)rlen);
 		continue;
 	    } // end if
-	    if( HDstrcmp(wdata[i],rdata[i]) != 0 ) {
+	    if(HDstrcmp(wdata[i],rdata[i]) != 0) {
 		TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i], (int)i, rdata[i]);
 		continue;
 	    } // end if

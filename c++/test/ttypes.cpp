@@ -416,7 +416,7 @@ static void test_named ()
         itype.commit(file, "native-int");
 
 	// Check that it is committed.
-	if (itype.committed() <= 0)
+	if (itype.committed() == false)
 	    cerr << "IntType::committed() returned false" << endl;
 
 	// We should not be able to modify a type after it has been committed.
