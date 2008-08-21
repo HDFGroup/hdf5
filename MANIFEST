@@ -1946,6 +1946,8 @@
 # Library Test Projects
 ./windows/test/checktests.bat
 ./windows/test/testerror.bat
+./windows/test/app_ref/app_ref.vcproj
+./windows/test/app_refdll/app_refdll.vcproj
 ./windows/test/big/big.vcproj
 ./windows/test/bigdll/bigdll.vcproj
 ./windows/test/bittests/bittests.vcproj
@@ -2198,6 +2200,8 @@
 ./windows_vnet/proj/hdf5_hl_cpp/hdf5_hl_cpp.vcproj
 ./windows_vnet/proj/hdf5_hl_cppdll/hdf5_hl_cppdll.vcproj
 ./windows_vnet/proj/hdf5_hldll/hdf5_hldll.vcproj
+./windows_vnet/test/app_ref/app_ref.vcproj
+./windows_vnet/test/app_refdll/app_refdll.vcproj
 ./windows_vnet/test/big/big.vcproj
 ./windows_vnet/test/bigdll/bigdll.vcproj
 ./windows_vnet/test/bittests/bittests.vcproj
