@@ -268,7 +268,7 @@ H5SM_type_to_flag(unsigned type_id, unsigned *type_flag)
             /* Fall through... */
 
         case H5O_SDSPACE_ID:
-        case H5O_DTYPE3_ID:
+        case H5O_DTYPE_ID:
         case H5O_FILL_NEW_ID:
         case H5O_PLINE_ID:
         case H5O_ATTR_ID:

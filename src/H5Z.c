@@ -518,7 +518,7 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                     HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
                 /* Get ID for dataspace to pass to filter routines */
-                if((space_id = H5I_register(H5I_DATASPACE, space, FALE)) < 0) {
+                if((space_id = H5I_register(H5I_DATASPACE, space, FALSE)) < 0) {
                     (void)H5S_close(space);
                     HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
                 } /* end if */

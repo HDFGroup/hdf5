@@ -1283,7 +1283,7 @@ H5Idec_ref(hid_t id)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID")
 
     /* Do actual decrement operation */
-    if((ret_value = H5I_dec_ref(id), TRUE) < 0)
+    if((ret_value = H5I_dec_ref(id, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTDEC, FAIL, "can't decrement ID ref count")
 
 done:
@@ -1417,7 +1417,7 @@ H5Iinc_ref(hid_t id)
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "invalid ID")
 
     /* Do actual increment operation */
-    if((ret_value = H5I_inc_ref(id), TRUE) < 0)
+    if((ret_value = H5I_inc_ref(id, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINC, FAIL, "can't increment ID ref count")
 
 done:
