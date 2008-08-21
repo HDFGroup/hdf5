@@ -434,11 +434,11 @@ H5FD_sec2_close(H5FD_t *_file)
     if (HDclose(file->fd)<0)
         HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
-    H5FL_FREE(H5FD_sec2_t,file);
+    (void)H5FL_FREE(H5FD_sec2_t,file);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_sec2_close() */
 
 
 /*-------------------------------------------------------------------------

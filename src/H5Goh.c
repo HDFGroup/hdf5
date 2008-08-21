@@ -232,7 +232,7 @@ H5O_group_get_oloc(hid_t obj_id)
     FUNC_ENTER_NOAPI_NOINIT(H5O_group_get_oloc)
 
     /* Get the group */
-    if(NULL ==  (grp = H5I_object(obj_id)))
+    if(NULL ==  (grp = (H5G_t *)H5I_object(obj_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
 
     /* Get the group's object header location */

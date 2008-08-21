@@ -406,7 +406,7 @@ H5P_init_interface(void)
                 /* Check for parent class */
                 if(lib_class->par_class_id) {
                     /* Get the pointer to the parent class */
-                    if(NULL == (par_pclass = H5I_object(*lib_class->par_class_id)))
+                    if(NULL == (par_pclass = (H5P_genclass_t *)H5I_object(*lib_class->par_class_id)))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
                 } /* end if */
 
@@ -588,7 +588,7 @@ H5P_copy_pclass(H5P_genclass_t *pclass)
         curr_node=H5SL_first(pclass->props);
         while(curr_node!=NULL) {
             /* Make a copy of the class's property */
-            if((pcopy=H5P_dup_prop(H5SL_item(curr_node),H5P_PROP_WITHIN_CLASS)) == NULL)
+            if(NULL == (pcopy = H5P_dup_prop((H5P_genprop_t *)H5SL_item(curr_node), H5P_PROP_WITHIN_CLASS)))
                 HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, NULL,"Can't copy property");
 
             /* Insert the initialized property into the property list */
@@ -712,11 +712,11 @@ H5P_copy_plist(H5P_genplist_t *old_plist, hbool_t app_ref)
         curr_node=H5SL_first(old_plist->props);
         while(curr_node) {
             /* Get a pointer to the node's property */
-            tmp=H5SL_item(curr_node);
+            tmp = (H5P_genprop_t *)H5SL_item(curr_node);
 
             /* Make a copy of the list's property */
-            if((new_prop=H5P_dup_prop(tmp,H5P_PROP_WITHIN_LIST)) == NULL)
-                HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
+            if(NULL == (new_prop = H5P_dup_prop(tmp, H5P_PROP_WITHIN_LIST)))
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property")
 
             /* Call property copy callback, if it exists */
             if(new_prop->copy) {
@@ -757,7 +757,7 @@ H5P_copy_plist(H5P_genplist_t *old_plist, hbool_t app_ref)
             curr_node=H5SL_first(tclass->props);
             while(curr_node!=NULL) {
                 /* Get pointer to property from node */
-                tmp=H5SL_item(curr_node);
+                tmp = (H5P_genprop_t *)H5SL_item(curr_node);
 
                 /* Only "copy" properties we haven't seen before */
                 if(nseen==0 || H5SL_search(seen,tmp->name) == NULL) {
@@ -848,27 +848,27 @@ done:
 static H5P_genprop_t *
 H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
 {
-    H5P_genprop_t *prop=NULL;        /* Pointer to new property copied */
+    H5P_genprop_t *prop = NULL;      /* Pointer to new property copied */
     H5P_genprop_t *ret_value;        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_dup_prop);
+    FUNC_ENTER_NOAPI_NOINIT(H5P_dup_prop)
 
-    assert(oprop);
-    assert(type!=H5P_PROP_WITHIN_UNKNOWN);
+    HDassert(oprop);
+    HDassert(type != H5P_PROP_WITHIN_UNKNOWN);
 
     /* Allocate the new property */
-    if(NULL==(prop = H5FL_MALLOC (H5P_genprop_t)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (prop = H5FL_MALLOC(H5P_genprop_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy basic property information */
-    HDmemcpy(prop,oprop,sizeof(H5P_genprop_t));
+    HDmemcpy(prop, oprop, sizeof(H5P_genprop_t));
 
     /* Check if we should duplicate the name or share it */
 
     /* Duplicating property for a class */
-    if(type==H5P_PROP_WITHIN_CLASS) {
-        assert(oprop->type==H5P_PROP_WITHIN_CLASS);
-        assert(oprop->shared_name==0);
+    if(type == H5P_PROP_WITHIN_CLASS) {
+        HDassert(oprop->type == H5P_PROP_WITHIN_CLASS);
+        HDassert(oprop->shared_name == 0);
 
         /* Duplicate name */
         prop->name = H5MM_xstrdup(oprop->name);
@@ -878,48 +878,48 @@ H5P_dup_prop(H5P_genprop_t *oprop, H5P_prop_within_t type)
         /* Check if we are duplicating a property from a list or a class */
 
         /* Duplicating a property from a list */
-        if(oprop->type==H5P_PROP_WITHIN_LIST) {
+        if(oprop->type == H5P_PROP_WITHIN_LIST) {
             /* If the old property's name wasn't shared, we have to copy it here also */
             if(!oprop->shared_name)
                 prop->name = H5MM_xstrdup(oprop->name);
         } /* end if */
         /* Duplicating a property from a class */
         else {
-            assert(oprop->type==H5P_PROP_WITHIN_CLASS);
-            assert(oprop->shared_name==0);
+            HDassert(oprop->type == H5P_PROP_WITHIN_CLASS);
+            HDassert(oprop->shared_name == 0);
 
             /* Share the name */
-            prop->shared_name=1;
+            prop->shared_name = 1;
 
             /* Set the type */
-            prop->type=type;
+            prop->type = type;
         } /* end else */
     } /* end else */
 
     /* Duplicate current value, if it exists */
-    if(oprop->value!=NULL) {
-        assert(prop->size>0);
-        if(NULL==(prop->value = H5MM_malloc (prop->size)))
-            HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-        HDmemcpy(prop->value,oprop->value,prop->size);
+    if(oprop->value != NULL) {
+        HDassert(prop->size > 0);
+        if(NULL == (prop->value = H5MM_malloc(prop->size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+        HDmemcpy(prop->value, oprop->value, prop->size);
     } /* end if */
 
     /* Set return value */
-    ret_value=prop;
+    ret_value = prop;
 
 done:
     /* Free any resources allocated */
-    if(ret_value==NULL) {
-        if(prop!=NULL) {
-            if(prop->name!=NULL)
+    if(ret_value == NULL) {
+        if(prop != NULL) {
+            if(prop->name != NULL)
                 H5MM_xfree(prop->name);
-            if(prop->value!=NULL)
+            if(prop->value != NULL)
                 H5MM_xfree(prop->value);
-            H5FL_FREE(H5P_genprop_t,prop);
+            (void)H5FL_FREE(H5P_genprop_t, prop);
         } /* end if */
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_dup_prop() */
 
 
@@ -1014,7 +1014,7 @@ done:
                 H5MM_xfree(prop->name);
             if(prop->value!=NULL)
                 H5MM_xfree(prop->value);
-            H5FL_FREE(H5P_genprop_t,prop);
+            (void)H5FL_FREE(H5P_genprop_t, prop);
         } /* end if */
     } /* end if */
 
@@ -1083,40 +1083,40 @@ H5P_find_prop_plist(H5P_genplist_t *plist, const char *name)
 {
     H5P_genprop_t *ret_value;   /* Property pointer return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_find_prop_plist);
+    FUNC_ENTER_NOAPI_NOINIT(H5P_find_prop_plist)
 
-    assert(plist);
-    assert(name);
+    HDassert(plist);
+    HDassert(name);
 
     /* Check if the property has been deleted from list */
-    if(H5SL_search(plist->del,name)!=NULL) {
-        HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,NULL,"can't find property in skip list");
+    if(H5SL_search(plist->del,name) != NULL) {
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "can't find property in skip list")
     } /* end if */
     else {
         /* Get the property data from the skip list */
-        if((ret_value=H5SL_search(plist->props,name)) == NULL) {
+        if(NULL == (ret_value = (H5P_genprop_t *)H5SL_search(plist->props, name))) {
             H5P_genclass_t *tclass;     /* Temporary class pointer */
 
             /* Couldn't find property in list itself, start searching through class info */
-            tclass=plist->pclass;
-            while(tclass!=NULL) {
+            tclass = plist->pclass;
+            while(tclass != NULL) {
                 /* Find the property in the class */
-                if((ret_value=H5SL_search(tclass->props,name))!=NULL)
+                if(NULL != (ret_value = (H5P_genprop_t *)H5SL_search(tclass->props, name)))
                     /* Got pointer to property - leave now */
                     break;
 
                 /* Go up to parent class */
-                tclass=tclass->parent;
+                tclass = tclass->parent;
             } /* end while */
 
             /* Check if we haven't found the property */
-            if(ret_value==NULL)
-                HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,NULL,"can't find property in skip list");
+            if(ret_value == NULL)
+                HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,NULL,"can't find property in skip list")
         } /* end else */
     } /* end else */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_find_prop_plist() */
 
 
@@ -1143,17 +1143,17 @@ H5P_find_prop_pclass(H5P_genclass_t *pclass, const char *name)
 {
     H5P_genprop_t *ret_value;   /* Property pointer return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_find_prop_pclass);
+    FUNC_ENTER_NOAPI_NOINIT(H5P_find_prop_pclass)
 
-    assert(pclass);
-    assert(name);
+    HDassert(pclass);
+    HDassert(name);
 
     /* Get the property from the skip list */
-    if((ret_value=H5SL_search(pclass->props,name)) == NULL)
-        HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,NULL,"can't find property in skip list");
+    if(NULL == (ret_value = (H5P_genprop_t *)H5SL_search(pclass->props, name)))
+        HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,NULL,"can't find property in skip list")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_find_prop_pclass() */
 
 
@@ -1190,7 +1190,7 @@ H5P_free_prop(H5P_genprop_t *prop)
     if(prop->shared_name==0)
         H5MM_xfree(prop->name);
 
-    H5FL_FREE(H5P_genprop_t,prop);
+    (void)H5FL_FREE(H5P_genprop_t, prop);
 
     FUNC_LEAVE_NOAPI(SUCCEED);
 }   /* H5P_free_prop() */
@@ -1336,7 +1336,8 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
 
         case H5P_MOD_ERR:
         case H5P_MOD_MAX:
-            assert(0 && "Invalid H5P class modification");
+        default:
+            HDassert(0 && "Invalid H5P class modification");
     } /* end switch */
 
     /* Check if we can release the class information now */
@@ -1353,7 +1354,7 @@ H5P_access_class(H5P_genclass_t *pclass, H5P_class_mod_t mod)
             H5SL_destroy(pclass->props,H5P_free_prop_cb,&make_cb);
         } /* end if */
 
-        H5FL_FREE(H5P_genclass_t,pclass);
+        (void)H5FL_FREE(H5P_genclass_t, pclass);
 
         /* Reduce the number of dependent classes on parent class also */
         if(par_class!=NULL)
@@ -1500,7 +1501,7 @@ done:
     /* Free any resources allocated */
     if(ret_value==NULL)
         if(pclass!=NULL)
-            H5FL_FREE(H5P_genclass_t,pclass);
+            (void)H5FL_FREE(H5P_genclass_t, pclass);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_create_class() */
@@ -1586,7 +1587,7 @@ H5P_create(H5P_genclass_t *pclass)
             curr_node=H5SL_first(tclass->props);
             while(curr_node!=NULL) {
                 /* Get pointer to property from node */
-                tmp=H5SL_item(curr_node);
+                tmp = (H5P_genprop_t *)H5SL_item(curr_node);
 
                 /* Only "create" properties we haven't seen before */
                 if(H5SL_search(seen,tmp->name) == NULL) {
@@ -1641,7 +1642,7 @@ done:
                 H5SL_close(plist->del);
 
             /* Release the property list itself */
-            H5FL_FREE(H5P_genplist_t,plist);
+            (void)H5FL_FREE(H5P_genplist_t, plist);
         } /* end if */
     } /* end if */
 
@@ -1908,10 +1909,10 @@ H5P_register(H5P_genclass_t *pclass, const char *name, size_t size,
 
             /* Walk through the properties in the old class */
             curr_node=H5SL_first(pclass->props);
-            while(curr_node!=NULL) {
+            while(curr_node != NULL) {
                 /* Make a copy of the class's property */
-                if((pcopy=H5P_dup_prop(H5SL_item(curr_node),H5P_PROP_WITHIN_CLASS)) == NULL)
-                    HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL,"Can't copy property");
+                if(NULL == (pcopy = H5P_dup_prop((H5P_genprop_t *)H5SL_item(curr_node), H5P_PROP_WITHIN_CLASS)))
+                    HGOTO_ERROR (H5E_PLIST, H5E_CANTCOPY, FAIL, "Can't copy property")
 
                 /* Insert the initialized property into the property list */
                 if(H5P_add_prop(new_class->props,pcopy) < 0)
@@ -1950,7 +1951,7 @@ done:
                 H5MM_xfree(new_prop->name);
             if(new_prop->value!=NULL)
                 H5MM_xfree(new_prop->value);
-            H5FL_FREE(H5P_genprop_t,new_prop);
+            (void)H5FL_FREE(H5P_genprop_t, new_prop);
         } /* end if */
     }  /* end if */
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2162,7 +2163,7 @@ done:
                 H5MM_xfree(new_prop->name);
             if(new_prop->value!=NULL)
                 H5MM_xfree(new_prop->value);
-            H5FL_FREE(H5P_genprop_t,new_prop);
+            (void)H5FL_FREE(H5P_genprop_t, new_prop);
         } /* end if */
     }  /* end if */
 
@@ -2219,7 +2220,7 @@ H5P_set(H5P_genplist_t *plist, const char *name, const void *value)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist");
 
     /* Find property in changed list */
-    if((prop=H5SL_search(plist->props,name))!=NULL) {
+    if(NULL != (prop = (H5P_genprop_t *)H5SL_search(plist->props, name))) {
         /* Check for property size >0 */
         if(prop->size==0)
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size");
@@ -2258,7 +2259,7 @@ H5P_set(H5P_genplist_t *plist, const char *name, const void *value)
         while(tclass!=NULL) {
             if(tclass->nprops>0) {
                 /* Find the property in the class */
-                if((prop=H5SL_search(tclass->props,name))!=NULL) {
+                if((prop = (H5P_genprop_t *)H5SL_search(tclass->props,name))!=NULL) {
                     H5P_genprop_t *pcopy;  /* Copy of property to insert into skip list */
 
                     /* Check for property size >0 */
@@ -2821,8 +2822,8 @@ H5P_cmp_class(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2)
         if(tnode1 != NULL && tnode2 == NULL) HGOTO_DONE(1);
 
         /* Compare the two properties */
-        prop1 = H5SL_item(tnode1);
-        prop2 = H5SL_item(tnode2);
+        prop1 = (H5P_genprop_t *)H5SL_item(tnode1);
+        prop2 = (H5P_genprop_t *)H5SL_item(tnode2);
         if((cmp_value = H5P_cmp_prop(prop1, prop2)) != 0)
             HGOTO_DONE(cmp_value);
 
@@ -2893,8 +2894,8 @@ H5P_cmp_plist(const H5P_genplist_t *plist1, const H5P_genplist_t *plist2)
             if(tnode1 != NULL && tnode2 == NULL) HGOTO_DONE(1);
 
             /* Compare the two deleted properties */
-            name1 = H5SL_item(tnode1);
-            name2 = H5SL_item(tnode2);
+            name1 = (const char *)H5SL_item(tnode1);
+            name2 = (const char *)H5SL_item(tnode2);
             if((cmp_value = HDstrcmp(name1, name2)) != 0)
                 HGOTO_DONE(cmp_value);
 
@@ -2921,8 +2922,8 @@ H5P_cmp_plist(const H5P_genplist_t *plist1, const H5P_genplist_t *plist2)
             if(tnode1 != NULL && tnode2 == NULL) HGOTO_DONE(1);
 
             /* Compare the two properties */
-            prop1 = H5SL_item(tnode1);
-            prop2 = H5SL_item(tnode2);
+            prop1 = (H5P_genprop_t *)H5SL_item(tnode1);
+            prop2 = (H5P_genprop_t *)H5SL_item(tnode2);
             if((cmp_value = H5P_cmp_prop(prop1, prop2)) != 0)
                 HGOTO_DONE(cmp_value);
 
@@ -3027,9 +3028,9 @@ H5P_isa_class(hid_t plist_id, hid_t pclass_id)
     FUNC_ENTER_NOAPI(H5P_isa_class, FAIL);
 
     /* Check arguments. */
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-    if(NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
+    if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
 
     /* Compare the property list's class against the other class */
@@ -3069,23 +3070,23 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-void *
+H5P_genplist_t *
 H5P_object_verify(hid_t plist_id, hid_t pclass_id)
 {
-    void *ret_value;                   /* return value */
+    H5P_genplist_t *ret_value;                   /* return value */
 
-    FUNC_ENTER_NOAPI(H5P_object_verify, NULL);
+    FUNC_ENTER_NOAPI(H5P_object_verify, NULL)
 
     /* Compare the property list's class against the other class */
     if(H5P_isa_class(plist_id, pclass_id) != TRUE)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, NULL, "property list is not a member of the class");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, NULL, "property list is not a member of the class")
 
     /* Get the plist structure */
-    if(NULL == (ret_value = H5I_object(plist_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID");
+    if(NULL == (ret_value = (H5P_genplist_t *)H5I_object(plist_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, NULL, "can't find object for ID")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_object_verify() */
 
 
@@ -3157,7 +3158,7 @@ H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, void *iter_
     HDassert(iter_func);
 
     /* Get the property list object */
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Create the skip list to hold names of properties already seen */
@@ -3169,7 +3170,7 @@ H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, void *iter_
         curr_node = H5SL_first(plist->props);
         while(curr_node != NULL) {
             /* Get pointer to property from node */
-            tmp = H5SL_item(curr_node);
+            tmp = (H5P_genprop_t *)H5SL_item(curr_node);
 
             /* Check if we've found the correctly indexed property */
             if(curr_idx>=*idx) {
@@ -3200,7 +3201,7 @@ H5P_iterate_plist(hid_t plist_id, int *idx, H5P_iterate_t iter_func, void *iter_
             curr_node=H5SL_first(tclass->props);
             while(curr_node!=NULL) {
                 /* Get pointer to property from node */
-                tmp=H5SL_item(curr_node);
+                tmp = (H5P_genprop_t *)H5SL_item(curr_node);
 
                 /* Only call iterator callback for properties we haven't seen
                  * before and that haven't been deleted
@@ -3313,7 +3314,7 @@ H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func, void *ite
     assert(iter_func);
 
     /* Get the property list object */
-    if(NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
+    if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
 
     /* Cycle through the properties and call the callback */
@@ -3322,7 +3323,7 @@ H5P_iterate_pclass(hid_t pclass_id, int *idx, H5P_iterate_t iter_func, void *ite
     while(curr_node!=NULL) {
         if(curr_idx>=*idx) {
             /* Get the property for the node */
-            prop=H5SL_item(curr_node);
+            prop = (H5P_genprop_t *)H5SL_item(curr_node);
 
             /* Call the callback function */
             ret_value=(*iter_func)(pclass_id,prop->name,iter_data);
@@ -3573,7 +3574,7 @@ H5P_get(const H5P_genplist_t *plist, const char *name, void *value)
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property doesn't exist");
 
     /* Find property */
-    if((prop=H5SL_search(plist->props,name))!=NULL) {
+    if((prop = (H5P_genprop_t *)H5SL_search(plist->props,name))!=NULL) {
         /* Check for property size >0 */
         if(prop->size==0)
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "property has zero size");
@@ -3610,7 +3611,7 @@ H5P_get(const H5P_genplist_t *plist, const char *name, void *value)
         while(tclass!=NULL) {
             if(tclass->nprops>0) {
                 /* Find the property in the class */
-                if((prop=H5SL_search(tclass->props,name))!=NULL) {
+                if((prop = (H5P_genprop_t *)H5SL_search(tclass->props,name))!=NULL) {
                     /* Check for property size >0 */
                     if(prop->size==0)
                         HGOTO_ERROR(H5E_PLIST,H5E_BADVALUE,FAIL,"property has zero size");
@@ -3719,7 +3720,7 @@ H5P_remove(hid_t plist_id, H5P_genplist_t *plist, const char *name)
         HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,FAIL,"can't find property in skip list");
 
     /* Get the property node from the changed property skip list */
-    if((prop=H5SL_search(plist->props,name))!=NULL) {
+    if((prop = (H5P_genprop_t *)H5SL_search(plist->props,name))!=NULL) {
         /* Pass value to 'close' callback, if it exists */
         if(prop->del!=NULL) {
             /* Call user's callback */
@@ -3851,7 +3852,7 @@ H5P_copy_prop_plist(hid_t dst_id, hid_t src_id, const char *name)
     assert(name);
 
     /* Get the objects to operate on */
-    if(NULL == (src_plist = H5I_object(src_id)) || NULL == (dst_plist = H5I_object(dst_id)))
+    if(NULL == (src_plist = (H5P_genplist_t *)H5I_object(src_id)) || NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "property object doesn't exist");
 
     /* If the property exists in the destination alread */
@@ -4011,7 +4012,7 @@ H5P_unregister(H5P_genclass_t *pclass, const char *name)
     assert(name);
 
     /* Get the property node from the skip list */
-    if((prop=H5SL_search(pclass->props,name)) == NULL)
+    if((prop = (H5P_genprop_t *)H5SL_search(pclass->props,name)) == NULL)
         HGOTO_ERROR(H5E_PLIST,H5E_NOTFOUND,FAIL,"can't find property in skip list");
 
     /* Remove the property from the skip list */
@@ -4094,7 +4095,7 @@ H5P_close(void *_plist)
         curr_node=H5SL_first(plist->props);
         while(curr_node!=NULL) {
             /* Get pointer to property from node */
-            tmp=H5SL_item(curr_node);
+            tmp = (H5P_genprop_t *)H5SL_item(curr_node);
 
             /* Call property close callback, if it exists */
             if(tmp->close) {
@@ -4127,7 +4128,7 @@ H5P_close(void *_plist)
             curr_node=H5SL_first(tclass->props);
             while(curr_node!=NULL) {
                 /* Get pointer to property from node */
-                tmp=H5SL_item(curr_node);
+                tmp = (H5P_genprop_t *)H5SL_item(curr_node);
 
                 /* Only "delete" properties we haven't seen before
                  * and that haven't already been deleted
@@ -4183,11 +4184,11 @@ H5P_close(void *_plist)
     H5SL_destroy(plist->props,H5P_free_prop_cb,&make_cb);
 
     /* Destroy property list object */
-    H5FL_FREE(H5P_genplist_t,plist);
+    (void)H5FL_FREE(H5P_genplist_t, plist);
 
 done:
     /* Release the skip list of 'seen' properties */
-    if(seen!=NULL)
+    if(seen != NULL)
         H5SL_close(seen);
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -4276,7 +4277,7 @@ H5P_get_class_path(H5P_genclass_t *pclass)
             /* Allocate enough space for the parent class's path, plus the '/'
              * separator, this class's name and the string terminator
              */
-            if(NULL==(ret_value=H5MM_malloc(par_path_len+1+my_path_len+1)))
+            if(NULL == (ret_value = (char *)H5MM_malloc(par_path_len + 1 + my_path_len + 1)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for class name");
 
             /* Build the full path for this class */
@@ -4320,24 +4321,24 @@ done:
 H5P_genclass_t *
 H5P_open_class_path(const char *path)
 {
-    char *tmp_path=NULL;        /* Temporary copy of the path */
+    char *tmp_path = NULL;      /* Temporary copy of the path */
     char *curr_name;            /* Pointer to current component of path name */
     char *delimit;              /* Pointer to path delimiter during traversal */
     H5P_genclass_t *curr_class; /* Pointer to class during path traversal */
     H5P_genclass_t *ret_value;  /* Return value */
     H5P_check_class_t check_info;   /* Structure to hold the information for checking duplicate names */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5P_open_class_path);
+    FUNC_ENTER_NOAPI_NOINIT(H5P_open_class_path)
 
-    assert(path);
+    HDassert(path);
 
     /* Duplicate the path to use */
-    tmp_path=H5MM_xstrdup(path);
-    assert(tmp_path);
+    tmp_path = H5MM_xstrdup(path);
+    HDassert(tmp_path);
 
     /* Find the generic property class with this full path */
-    curr_name=tmp_path;
-    curr_class=NULL;
+    curr_name = tmp_path;
+    curr_class = NULL;
     while((delimit=HDstrchr(curr_name,'/'))!=NULL) {
         /* Change the delimiter to terminate the string */
         *delimit='\0';
@@ -4347,7 +4348,7 @@ H5P_open_class_path(const char *path)
         check_info.name=curr_name;
 
         /* Find the class with this name & parent by iterating over the open classes */
-        if((curr_class=H5I_search(H5I_GENPROP_CLS,H5P_check_class,&check_info)) == NULL)
+        if(NULL == (curr_class = (H5P_genclass_t *)H5I_search(H5I_GENPROP_CLS, H5P_check_class, &check_info)))
             HGOTO_ERROR (H5E_PLIST, H5E_NOTFOUND, NULL, "can't locate class");
 
         /* Advance the pointer in the path to the start of the next component */
@@ -4357,22 +4358,22 @@ H5P_open_class_path(const char *path)
     /* Should be pointing to the last component in the path name now... */
 
     /* Set up the search structure */
-    check_info.parent=curr_class;
-    check_info.name=curr_name;
+    check_info.parent = curr_class;
+    check_info.name = curr_name;
 
     /* Find the class with this name & parent by iterating over the open classes */
-    if((curr_class=H5I_search(H5I_GENPROP_CLS,H5P_check_class,&check_info)) == NULL)
-        HGOTO_ERROR (H5E_PLIST, H5E_NOTFOUND, NULL, "can't locate class");
+    if(NULL == (curr_class = (H5P_genclass_t *)H5I_search(H5I_GENPROP_CLS, H5P_check_class, &check_info)))
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "can't locate class")
 
     /* Copy it */
-    if((ret_value=H5P_copy_pclass(curr_class)) == NULL)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, NULL, "can't copy property class");
+    if(NULL == (ret_value = H5P_copy_pclass(curr_class)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, NULL, "can't copy property class")
 
 done:
     /* Free the duplicated path */
     H5MM_xfree(tmp_path);
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5P_open_class_path() */
 
 

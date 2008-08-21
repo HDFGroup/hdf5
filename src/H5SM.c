@@ -235,7 +235,7 @@ done:
         if(table_addr != HADDR_UNDEF)
             H5MF_xfree(f, H5FD_MEM_SOHM_TABLE, dxpl_id, table_addr, (hsize_t)H5SM_TABLE_SIZE(f));
         if(table != NULL)
-            H5FL_FREE(H5SM_master_table_t, table);
+            (void)H5FL_FREE(H5SM_master_table_t, table);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -268,7 +268,7 @@ H5SM_type_to_flag(unsigned type_id, unsigned *type_flag)
             /* Fall through... */
 
         case H5O_SDSPACE_ID:
-        case H5O_DTYPE_ID:
+        case H5O_DTYPE3_ID:
         case H5O_FILL_NEW_ID:
         case H5O_PLINE_ID:
         case H5O_ATTR_ID:
@@ -638,7 +638,7 @@ done:
         if(list != NULL) {
             if(list->messages != NULL)
                 H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
-            H5FL_FREE(H5SM_list_t, list);
+            (void)H5FL_FREE(H5SM_list_t, list);
         } /* end if */
         if(addr != HADDR_UNDEF)
             H5MF_xfree(f, H5FD_MEM_SOHM_INDEX, dxpl_id, addr, size);
@@ -2246,7 +2246,7 @@ H5SM_read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
 	        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to open object header")
 
             /* Load the object header from the cache */
-            if(NULL == (oh = H5AC_protect(oloc.file, dxpl_id, H5AC_OHDR, oloc.addr, NULL, NULL, H5AC_READ)))
+            if(NULL == (oh = (H5O_t *)H5AC_protect(oloc.file, dxpl_id, H5AC_OHDR, oloc.addr, NULL, NULL, H5AC_READ)))
 	        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
         } /* end if */
         else

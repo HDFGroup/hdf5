@@ -291,7 +291,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
     size = H5HF_HEADER_SIZE(hdr);
 
     /* Get a pointer to a buffer that's large enough for serialized header */
-    if(NULL == (buf = H5WB_actual(wb, size)))
+    if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
         HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read header from disk */
@@ -366,7 +366,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         hdr->heap_size = size + filter_info_size;
 
         /* Re-size current buffer */
-        if(NULL == (buf = H5WB_actual(wb, hdr->heap_size)))
+        if(NULL == (buf = (uint8_t *)H5WB_actual(wb, hdr->heap_size)))
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "can't get actual buffer")
 
         /* Read in I/O filter information */
@@ -490,7 +490,7 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
         size = hdr->heap_size;
 
         /* Get a pointer to a buffer that's large enough for serialized header */
-        if(NULL == (buf = H5WB_actual(wb, size)))
+        if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
         /* Get temporary pointer to serialized header */
@@ -613,7 +613,7 @@ H5HF_cache_hdr_dest(H5F_t UNUSED *f, H5HF_hdr_t *hdr)
         H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline));
 
     /* Free the shared info itself */
-    H5FL_FREE(H5HF_hdr_t, hdr);
+    (void)H5FL_FREE(H5HF_hdr_t, hdr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_cache_hdr_dest() */
@@ -760,7 +760,7 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
     iblock->size = H5HF_MAN_INDIRECT_SIZE(hdr, iblock);
 
     /* Get a pointer to a buffer that's large enough for serialized indirect block */
-    if(NULL == (buf = H5WB_actual(wb, iblock->size)))
+    if(NULL == (buf = (uint8_t *)H5WB_actual(wb, iblock->size)))
         HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read indirect block from disk */
@@ -963,7 +963,7 @@ HDfprintf(stderr, "%s: hdr->man_dtable.cparam.width = %u\n", FUNC, hdr->man_dtab
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't wrap buffer")
 
         /* Get a pointer to a buffer that's large enough for serialized indirect block */
-        if(NULL == (buf = H5WB_actual(wb, iblock->size)))
+        if(NULL == (buf = (uint8_t *)H5WB_actual(wb, iblock->size)))
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
         /* Get temporary pointer to buffer for serialized indirect block */
@@ -1109,7 +1109,7 @@ HDfprintf(stderr, "%s: Destroying indirect block\n", FUNC);
         H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
 
     /* Free fractal heap indirect block info */
-    H5FL_FREE(H5HF_indirect_t, iblock);
+    (void)H5FL_FREE(H5HF_indirect_t, iblock);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1654,7 +1654,7 @@ HDfprintf(stderr, "%s: Destroying direct block, dblock = %p\n", FUNC, dblock);
     dblock->blk = H5FL_BLK_FREE(direct_block, dblock->blk);
 
     /* Free fractal heap direct block info */
-    H5FL_FREE(H5HF_direct_t, dblock);
+    (void)H5FL_FREE(H5HF_direct_t, dblock);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

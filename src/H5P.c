@@ -128,7 +128,7 @@ H5Pcopy(hid_t id)
 
     /* Compare property lists */
     if(H5I_GENPROP_LST == H5I_get_type(id)) {
-        if((ret_value = H5P_copy_plist(obj, TRUE)) < 0)
+        if((ret_value = H5P_copy_plist((H5P_genplist_t *)obj, TRUE)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property list");
     } /* end if */
     /* Must be property classes */
@@ -136,7 +136,7 @@ H5Pcopy(hid_t id)
         H5P_genclass_t *copy_class;      /* Copy of class */
 
         /* Copy the class */
-        if((copy_class = H5P_copy_pclass(obj)) == NULL)
+        if((copy_class = H5P_copy_pclass((H5P_genclass_t *)obj)) == NULL)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property class");
 
         /* Get an atom for the copied class */
@@ -196,39 +196,39 @@ H5Pcreate_class(hid_t parent, const char *name,
     H5P_genclass_t	*pclass = NULL;     /* Property list class created */
     hid_t	ret_value;                  /* Return value		   */
 
-    FUNC_ENTER_API(H5Pcreate_class, FAIL);
+    FUNC_ENTER_API(H5Pcreate_class, FAIL)
     H5TRACE8("i", "i*sx*xx*xx*x", parent, name, cls_create, create_data, cls_copy,
              copy_data, cls_close, close_data);
 
     /* Check arguments. */
     if(H5P_DEFAULT!=parent && (H5I_GENPROP_CLS!=H5I_get_type(parent)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class")
     if(!name || !*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid class name");
-    if((create_data!=NULL && cls_create==NULL)
-            || (copy_data!=NULL && cls_copy==NULL)
-            || (close_data!=NULL && cls_close==NULL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data specified, but no callback provided");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid class name")
+    if((create_data != NULL && cls_create == NULL)
+            || (copy_data != NULL && cls_copy == NULL)
+            || (close_data != NULL && cls_close == NULL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "data specified, but no callback provided")
 
     /* Get the pointer to the parent class */
-    if(parent==H5P_DEFAULT)
-        par_class=NULL;
-    else if(NULL == (par_class = H5I_object(parent)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't retrieve parent class");
+    if(parent == H5P_DEFAULT)
+        par_class = NULL;
+    else if(NULL == (par_class = (H5P_genclass_t *)H5I_object(parent)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't retrieve parent class")
 
     /* Create the new property list class */
-    if(NULL==(pclass=H5P_create_class(par_class, name, 0, cls_create, create_data, cls_copy, copy_data, cls_close, close_data)))
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list class");
+    if(NULL == (pclass = H5P_create_class(par_class, name, 0, cls_create, create_data, cls_copy, copy_data, cls_close, close_data)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCREATE, FAIL, "unable to create property list class")
 
     /* Get an atom for the class */
     if((ret_value = H5I_register(H5I_GENPROP_CLS, pclass, TRUE)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class")
 
 done:
-    if(ret_value<0 && pclass)
+    if(ret_value < 0 && pclass)
         H5P_close_class(pclass);
 
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Pcreate_class() */
 
 
@@ -264,7 +264,7 @@ H5Pcreate(hid_t cls_id)
     H5TRACE1("i", "i", cls_id);
 
     /* Check arguments. */
-    if(NULL == (pclass = H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
+    if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
 
     /* Create the new property list */
@@ -445,7 +445,7 @@ H5Pregister2(hid_t cls_id, const char *name, size_t size, void *def_value,
              prp_set, prp_get, prp_delete, prp_copy, prp_cmp, prp_close);
 
     /* Check arguments. */
-    if(NULL == (pclass = H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
+    if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(cls_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid class name");
@@ -614,7 +614,7 @@ H5Pinsert2(hid_t plist_id, const char *name, size_t size, void *value,
              prp_delete, prp_copy, prp_cmp, prp_close);
 
     /* Check arguments. */
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name")
@@ -671,7 +671,7 @@ H5Pset(hid_t plist_id, const char *name, void *value)
     H5TRACE3("e", "i*s*x", plist_id, name, value);
 
     /* Check arguments. */
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
@@ -727,14 +727,14 @@ H5Pexist(hid_t id, const char *name)
 
     /* Check for the existance of the property in the list or class */
     if(H5I_GENPROP_LST == H5I_get_type(id)) {
-        if(NULL == (plist = H5I_object(id)))
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
         if((ret_value = H5P_exist_plist(plist, name)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property does not exist in list");
     } /* end if */
     else
         if(H5I_GENPROP_CLS == H5I_get_type(id)) {
-            if(NULL == (pclass = H5I_object(id)))
+            if(NULL == (pclass = (H5P_genclass_t *)H5I_object(id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
             if((ret_value = H5P_exist_pclass(pclass, name)) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property does not exist in class");
@@ -789,7 +789,7 @@ H5Pget_size(hid_t id, const char *name, size_t *size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property size");
 
     if(H5I_GENPROP_LST == H5I_get_type(id)) {
-        if(NULL == (plist = H5I_object(id)))
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
         /* Check the property size */
@@ -798,7 +798,7 @@ H5Pget_size(hid_t id, const char *name, size_t *size)
     } /* end if */
     else
         if(H5I_GENPROP_CLS == H5I_get_type(id)) {
-            if(NULL == (pclass = H5I_object(id)))
+            if(NULL == (pclass = (H5P_genclass_t *)H5I_object(id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
             /* Check the property size */
@@ -844,7 +844,7 @@ H5Pget_class(hid_t plist_id)
     H5TRACE1("i", "i", plist_id);
 
     /* Check arguments. */
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
 
     /* Retrieve the property list class */
@@ -907,14 +907,14 @@ H5Pget_nprops(hid_t id, size_t *nprops)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property nprops pointer");
 
     if(H5I_GENPROP_LST == H5I_get_type(id)) {
-        if(NULL == (plist = H5I_object(id)))
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
         if(H5P_get_nprops_plist(plist, nprops) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query # of properties in plist");
     } /* end if */
     else
         if(H5I_GENPROP_CLS == H5I_get_type(id)) {
-            if(NULL == (pclass = H5I_object(id)))
+            if(NULL == (pclass = (H5P_genclass_t *)H5I_object(id)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
             if(H5P_get_nprops_pclass(pclass, nprops, FALSE) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to query # of properties in pclass");
@@ -967,12 +967,12 @@ H5Pequal(hid_t id1, hid_t id2)
 
     /* Compare property lists */
     if(H5I_GENPROP_LST == H5I_get_type(id1)) {
-        if(H5P_cmp_plist(obj1, obj2) == 0)
+        if(H5P_cmp_plist((const H5P_genplist_t *)obj1, (const H5P_genplist_t *)obj2) == 0)
             ret_value = TRUE;
     } /* end if */
     /* Must be property classes */
     else {
-        if(H5P_cmp_class(obj1, obj2) == 0)
+        if(H5P_cmp_class((const H5P_genclass_t *)obj1, (const H5P_genclass_t *)obj2) == 0)
             ret_value = TRUE;
     } /* end else */
 
@@ -1152,7 +1152,7 @@ H5Pget(hid_t plist_id, const char *name, void *value)
     H5TRACE3("e", "i*s*x", plist_id, name, value);
 
     /* Check arguments. */
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
@@ -1204,7 +1204,7 @@ H5Premove(hid_t plist_id, const char *name)
     H5TRACE2("e", "i*s", plist_id, name);
 
     /* Check arguments. */
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
@@ -1283,7 +1283,7 @@ H5Pcopy_prop(hid_t dst_id, hid_t src_id, const char *name)
     } /* end if */
     /* Must be property classes */
     else {
-        if(H5P_copy_prop_pclass(dst_obj, src_obj, name) < 0)
+        if(H5P_copy_prop_pclass((H5P_genclass_t *)dst_obj, (H5P_genclass_t *)src_obj, name) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy property between classes");
     } /* end else */
 
@@ -1323,7 +1323,7 @@ H5Punregister(hid_t pclass_id, const char *name)
     H5TRACE2("e", "i*s", pclass_id, name);
 
     /* Check arguments. */
-    if(NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
+    if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list class");
     if(!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid property name");
@@ -1411,7 +1411,7 @@ H5Pget_class_name(hid_t pclass_id)
     FUNC_ENTER_API(H5Pget_class_name, NULL);
 
     /* Check arguments. */
-    if(NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
+    if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property class");
 
     /* Get the property list class name */
@@ -1446,33 +1446,33 @@ hid_t
 H5Pget_class_parent(hid_t pclass_id)
 {
     H5P_genclass_t	*pclass;    /* Property class to query */
-    H5P_genclass_t	*parent=NULL;   /* Parent's property class */
+    H5P_genclass_t	*parent = NULL;   /* Parent's property class */
     hid_t ret_value;       /* return value */
 
-    FUNC_ENTER_API(H5Pget_class_parent, FAIL);
+    FUNC_ENTER_API(H5Pget_class_parent, FAIL)
     H5TRACE1("i", "i", pclass_id);
 
     /* Check arguments. */
-    if(NULL == (pclass = H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class");
+    if(NULL == (pclass = (H5P_genclass_t *)H5I_object_verify(pclass_id, H5I_GENPROP_CLS)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property class")
 
     /* Retrieve the property class's parent */
-    if((parent = H5P_get_class_parent(pclass)) == NULL)
-        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "unable to query class of property list");
+    if(NULL == (parent = H5P_get_class_parent(pclass)))
+        HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, FAIL, "unable to query class of property list")
 
     /* Increment the outstanding references to the class object */
     if(H5P_access_class(parent, H5P_MOD_INC_REF) < 0)
-        HGOTO_ERROR (H5E_PLIST, H5E_CANTINIT, FAIL,"Can't increment class ID ref count");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL,"Can't increment class ID ref count")
 
     /* Get an atom for the class */
     if((ret_value = H5I_register(H5I_GENPROP_CLS, parent, TRUE)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class");
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "unable to atomize property list class")
 
 done:
-    if(ret_value<0 && parent)
+    if(ret_value < 0 && parent)
         H5P_close_class(parent);
 
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Pget_class_parent() */
 
 

@@ -130,7 +130,7 @@ typedef struct H5FL_reg_head_t {
 #define H5FL_CALLOC(t) (t *)H5FL_reg_calloc(&(H5FL_REG_NAME(t)) H5FL_TRACK_INFO)
 
 /* Free an object of type 't' */
-#define H5FL_FREE(t,obj) H5FL_reg_free(&(H5FL_REG_NAME(t)),obj)
+#define H5FL_FREE(t,obj) (t *)H5FL_reg_free(&(H5FL_REG_NAME(t)),obj)
 
 /* Re-allocating an object of type 't' is not defined, because these free-lists
  * only support fixed sized types, like structs, etc..

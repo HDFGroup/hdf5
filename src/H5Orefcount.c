@@ -118,7 +118,7 @@ H5O_refcount_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_
 
 done:
     if(ret_value == NULL && refcount != NULL)
-        H5FL_FREE(H5O_refcount_t, refcount);
+        (void)H5FL_FREE(H5O_refcount_t, refcount);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_refcount_decode() */
@@ -250,7 +250,7 @@ H5O_refcount_free(void *mesg)
 
     HDassert(mesg);
 
-    H5FL_FREE(H5O_refcount_t, mesg);
+    (void)H5FL_FREE(H5O_refcount_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_refcount_free() */

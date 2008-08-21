@@ -156,7 +156,7 @@ H5O_ainfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
 
 done:
     if(ret_value == NULL && ainfo != NULL)
-        H5FL_FREE(H5O_ainfo_t, ainfo);
+        (void)H5FL_FREE(H5O_ainfo_t, ainfo);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_ainfo_decode() */
@@ -311,7 +311,7 @@ H5O_ainfo_free(void *mesg)
 
     HDassert(mesg);
 
-    H5FL_FREE(H5O_ainfo_t, mesg);
+    (void)H5FL_FREE(H5O_ainfo_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_ainfo_free() */
@@ -433,7 +433,7 @@ H5O_ainfo_copy_file(H5F_t UNUSED *file_src, void *mesg_src,
 done:
     /* Release destination attribute information on failure */
     if(ret_value == NULL && ainfo_dst != NULL)
-        H5FL_FREE(H5O_ainfo_t, ainfo_dst);
+        (void)H5FL_FREE(H5O_ainfo_t, ainfo_dst);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_ainfo_copy_file() */

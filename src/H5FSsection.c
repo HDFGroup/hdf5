@@ -231,7 +231,7 @@ HDfprintf(stderr, "%s: New section info, addr = %a, size = %Hu\n", FUNC, fspace-
 HDfprintf(stderr, "%s: Reading in existing sections, fspace->sect_addr = %a\n", FUNC, fspace->sect_addr);
 #endif /* QAK */
         /* Protect the free space sections */
-        if(NULL == (sinfo = H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, NULL, fspace, H5AC_WRITE)))
+        if(NULL == (sinfo = (H5FS_sinfo_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, NULL, fspace, H5AC_WRITE)))
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, NULL, "unable to load free space sections")
 
         /* Pin them in the cache */
@@ -455,7 +455,7 @@ HDfprintf(stderr, "%s: sinfo->bins[%u].sect_count = %Zu\n", FUNC, bin, sinfo->bi
         HDassert(fspace_node->serial_count == 0);
 
         /* Remove size tracking list from bin */
-        tmp_fspace_node = H5SL_remove(sinfo->bins[bin].bin_list, &fspace_node->sect_size);
+        tmp_fspace_node = (H5FS_node_t *)H5SL_remove(sinfo->bins[bin].bin_list, &fspace_node->sect_size);
         if(tmp_fspace_node == NULL || tmp_fspace_node != fspace_node)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTREMOVE, FAIL, "can't remove free space node from skip list")
 
@@ -513,11 +513,11 @@ H5FS_sect_unlink_size(H5FS_sinfo_t *sinfo, const H5FS_section_class_t *cls,
         HGOTO_ERROR(H5E_FSPACE, H5E_NOTFOUND, FAIL, "node's bin is empty?")
 
     /* Find space node for section's size */
-    if((fspace_node = H5SL_search(sinfo->bins[bin].bin_list, &sect->size)) == NULL)
+    if((fspace_node = (H5FS_node_t *)H5SL_search(sinfo->bins[bin].bin_list, &sect->size)) == NULL)
         HGOTO_ERROR(H5E_FSPACE, H5E_NOTFOUND, FAIL, "can't find section size node")
 
     /* Remove the section's node from the list */
-    tmp_sect_node = H5SL_remove(fspace_node->sect_list, &sect->addr);
+    tmp_sect_node = (H5FS_section_info_t *)H5SL_remove(fspace_node->sect_list, &sect->addr);
     if(tmp_sect_node == NULL || tmp_sect_node != sect)
         HGOTO_ERROR(H5E_FSPACE, H5E_NOTFOUND, FAIL, "can't find section node on size list")
 
@@ -568,7 +568,7 @@ H5FS_sect_unlink_rest(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
 #ifdef QAK
 HDfprintf(stderr, "%s: removing object from merge list, sect->type = %u\n", FUNC, (unsigned)sect->type);
 #endif /* QAK */
-        tmp_sect_node = H5SL_remove(fspace->sinfo->merge_list, &sect->addr);
+        tmp_sect_node = (H5FS_section_info_t *)H5SL_remove(fspace->sinfo->merge_list, &sect->addr);
         if(tmp_sect_node == NULL || tmp_sect_node != sect)
             HGOTO_ERROR(H5E_FSPACE, H5E_NOTFOUND, FAIL, "can't find section node on size list")
     } /* end if */
@@ -677,7 +677,7 @@ HDfprintf(stderr, "%s: sect->size = %Hu, sect->addr = %a\n", FUNC, sect->size, s
     } /* end if */
     else {
         /* Check for node list of the correct size already */
-        fspace_node = H5SL_search(sinfo->bins[bin].bin_list, &sect->size);
+        fspace_node = (H5FS_node_t *)H5SL_search(sinfo->bins[bin].bin_list, &sect->size);
     } /* end else */
 
     /* Check if we need to create a new skip list for nodes of this size */
@@ -883,7 +883,7 @@ H5FS_sect_merge(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
             modified = FALSE;
 
             /* Look for neighboring section before new section */
-            tmp_sect_node = H5SL_less(fspace->sinfo->merge_list, &(*sect)->addr);
+            tmp_sect_node = (H5FS_section_info_t *)H5SL_less(fspace->sinfo->merge_list, &(*sect)->addr);
 
             /* Check for node before new node able to merge with new node */
             if(tmp_sect_node) {
@@ -922,7 +922,7 @@ H5FS_sect_merge(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
             } /* end if */
 
             /* Look for section after new (or merged) section */
-            tmp_sect_node = H5SL_greater(fspace->sinfo->merge_list, &(*sect)->addr);
+            tmp_sect_node = (H5FS_section_info_t *)H5SL_greater(fspace->sinfo->merge_list, &(*sect)->addr);
 
             /* Check for node after new node able to merge with new node */
             if(tmp_sect_node) {
@@ -980,7 +980,7 @@ HDfprintf(stderr, "%s: Can shrink!\n", FUNC);
 #endif /* QAK */
                 /* Look for neighboring section before new section */
                 if(fspace->sinfo->merge_list) {
-                    tmp_sect_node = H5SL_less(fspace->sinfo->merge_list, &(*sect)->addr);
+                    tmp_sect_node = (H5FS_section_info_t *)H5SL_less(fspace->sinfo->merge_list, &(*sect)->addr);
 
                     /* Make certain there isn't a section after the new section */
                     HDassert(H5SL_greater(fspace->sinfo->merge_list, &(*sect)->addr) == NULL);
@@ -1158,11 +1158,11 @@ HDfprintf(stderr, "%s: bin = %u\n", FUNC, bin);
             /* Look for large enough free space section in this bin */
             if(fspace->sinfo->bins[bin].bin_list)
                 /* Check for large enough list of sections on list */
-                if((fspace_node = H5SL_greater(fspace->sinfo->bins[bin].bin_list, &request))) {
+                if((fspace_node = (H5FS_node_t *)H5SL_greater(fspace->sinfo->bins[bin].bin_list, &request))) {
                     const H5FS_section_class_t *cls;    /* Class of section */
 
                     /* Take first node off of the list (ie. node w/lowest address) */
-                    if(NULL == (*node = H5SL_remove_first(fspace_node->sect_list)))
+                    if(NULL == (*node = (H5FS_section_info_t *)H5SL_remove_first(fspace_node->sect_list)))
                         HGOTO_ERROR(H5E_FSPACE, H5E_CANTREMOVE, FAIL, "can't remove free space node from skip list")
 
                     /* Get section's class */
@@ -1676,7 +1676,7 @@ HDfprintf(stderr, "%s: to_ghost = %u\n", FUNC, to_ghost);
         HDassert(fspace->sinfo->bins[bin].bin_list);
 
         /* Get space node for section's size */
-        fspace_node = H5SL_search(fspace->sinfo->bins[bin].bin_list, &sect->size);
+        fspace_node = (H5FS_node_t *)H5SL_search(fspace->sinfo->bins[bin].bin_list, &sect->size);
         HDassert(fspace_node);
 
         /* Adjust serializable/ghost counts */
@@ -1750,7 +1750,7 @@ HDfprintf(stderr, "%s: inserting object into merge list, sect->type = %u\n", FUN
 #ifdef QAK
 HDfprintf(stderr, "%s: removing object from merge list, sect->type = %u\n", FUNC, (unsigned)sect->type);
 #endif /* QAK */
-            tmp_sect_node = H5SL_remove(fspace->sinfo->merge_list, &sect->addr);
+            tmp_sect_node = (H5FS_section_info_t *)H5SL_remove(fspace->sinfo->merge_list, &sect->addr);
             if(tmp_sect_node == NULL || tmp_sect_node != sect)
                 HGOTO_ERROR(H5E_FSPACE, H5E_NOTFOUND, FAIL, "can't find section node on size list")
         } /* end else */

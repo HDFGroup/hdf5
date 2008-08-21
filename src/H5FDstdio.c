@@ -370,7 +370,7 @@ H5FD_stdio_open( const char *name, unsigned flags, hid_t fapl_id,
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_CANTOPENFILE, "fopen failed", NULL)
 
     /* Build the return value */
-    if(NULL==(file = calloc((size_t)1, sizeof(H5FD_stdio_t))))
+    if(NULL == (file = (H5FD_stdio_t *)calloc((size_t)1, sizeof(H5FD_stdio_t))))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_RESOURCE, H5E_NOSPACE, "memory allocation failed", NULL)
     file->fp = f;
     file->op = H5FD_STDIO_OP_SEEK;

@@ -1903,42 +1903,42 @@ H5B_copy(const H5B_t *old_bt)
     /*
      * Check arguments.
      */
-    assert(old_bt);
-    shared=(H5B_shared_t *)H5RC_GET_OBJ(old_bt->rc_shared);
+    HDassert(old_bt);
+    shared = (H5B_shared_t *)H5RC_GET_OBJ(old_bt->rc_shared);
     HDassert(shared);
 
     /* Allocate memory for the new H5B_t object */
-    if (NULL==(new_node = H5FL_MALLOC(H5B_t)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree root node")
+    if(NULL == (new_node = H5FL_MALLOC(H5B_t)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree root node")
 
     /* Copy the main structure */
-    HDmemcpy(new_node,old_bt,sizeof(H5B_t));
+    HDmemcpy(new_node, old_bt, sizeof(H5B_t));
 
-    if ( NULL==(new_node->native=H5FL_BLK_MALLOC(native_block,shared->sizeof_keys)) ||
-            NULL==(new_node->child=H5FL_SEQ_MALLOC(haddr_t,(size_t)shared->two_k)))
-        HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree root node")
+    if(NULL == (new_node->native = H5FL_BLK_MALLOC(native_block, shared->sizeof_keys)) ||
+            NULL == (new_node->child = H5FL_SEQ_MALLOC(haddr_t, (size_t)shared->two_k)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for B-tree root node")
 
     /* Copy the other structures */
-    HDmemcpy(new_node->native,old_bt->native,shared->sizeof_keys);
-    HDmemcpy(new_node->child,old_bt->child,(sizeof(haddr_t)*shared->two_k));
+    HDmemcpy(new_node->native, old_bt->native, shared->sizeof_keys);
+    HDmemcpy(new_node->child, old_bt->child, (sizeof(haddr_t) * shared->two_k));
 
     /* Increment the ref-count on the raw page */
     H5RC_INC(new_node->rc_shared);
 
     /* Set return value */
-    ret_value=new_node;
+    ret_value = new_node;
 
 done:
-    if(ret_value==NULL) {
+    if(NULL == ret_value) {
         if(new_node) {
-	    H5FL_BLK_FREE (native_block,new_node->native);
-	    H5FL_SEQ_FREE (haddr_t,new_node->child);
-	    H5FL_FREE (H5B_t,new_node);
+	    (void)H5FL_BLK_FREE(native_block, new_node->native);
+	    H5FL_SEQ_FREE(haddr_t, new_node->child);
+	    (void)H5FL_FREE(H5B_t, new_node);
         } /* end if */
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-}   /* H5B_copy */
+} /* end H5B_copy() */
 
 
 /*-------------------------------------------------------------------------

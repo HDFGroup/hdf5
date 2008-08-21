@@ -334,7 +334,7 @@ H5B_dest(H5F_t UNUSED *f, H5B_t *bt)
     HDassert(bt->rc_shared);
 
     H5FL_SEQ_FREE(haddr_t,bt->child);
-    H5FL_BLK_FREE(native_block,bt->native);
+    (void)H5FL_BLK_FREE(native_block,bt->native);
     H5RC_DEC(bt->rc_shared);
     H5FL_FREE(H5B_t,bt);
 

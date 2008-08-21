@@ -96,7 +96,7 @@ H5O_btreek_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fl
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for message")
 
     /* Allocate space for message */
-    if(NULL == (mesg = H5MM_calloc(sizeof(H5O_btreek_t))))
+    if(NULL == (mesg = (H5O_btreek_t *)H5MM_calloc(sizeof(H5O_btreek_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for v1 B-tree 'K' message")
 
     /* Retrieve non-default B-tree 'K' values */
@@ -172,7 +172,7 @@ H5O_btreek_copy(const void *_mesg, void *_dest)
     /* Sanity check */
     HDassert(mesg);
 
-    if(!dest && NULL == (dest = H5MM_malloc(sizeof(H5O_btreek_t))))
+    if(!dest && NULL == (dest = (H5O_btreek_t *)H5MM_malloc(sizeof(H5O_btreek_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for shared message table message")
 
     /* All this message requires is a shallow copy */

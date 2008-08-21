@@ -543,9 +543,9 @@ H5O_pline_free(void *mesg)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_free)
 
-    HDassert (mesg);
+    HDassert(mesg);
 
-    H5FL_FREE(H5O_pline_t, mesg);
+    (void)H5FL_FREE(H5O_pline_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_pline_free() */

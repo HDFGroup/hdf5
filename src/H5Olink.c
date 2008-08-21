@@ -198,7 +198,7 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid name length")
 
     /* Get the link's name */
-    if(NULL == (lnk->name = H5MM_malloc(len + 1)))
+    if(NULL == (lnk->name = (char *)H5MM_malloc(len + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDmemcpy(lnk->name, p, len);
     lnk->name[len] = '\0';
@@ -216,7 +216,7 @@ H5O_link_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
             UINT16DECODE(p, len)
             if(len == 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "invalid link length")
-            if(NULL == (lnk->u.soft.name = H5MM_malloc((size_t)len + 1)))
+            if(NULL == (lnk->u.soft.name = (char *)H5MM_malloc((size_t)len + 1)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
             HDmemcpy(lnk->u.soft.name, p, len);
             lnk->u.soft.name[len] = '\0';
@@ -254,7 +254,7 @@ done:
                 H5MM_xfree(lnk->u.soft.name);
             if(lnk->type >= H5L_TYPE_UD_MIN && lnk->u.ud.size > 0 && lnk->u.ud.udata != NULL)
                 H5MM_xfree(lnk->u.ud.udata);
-            H5FL_FREE(H5O_link_t, lnk);
+            (void)H5FL_FREE(H5O_link_t, lnk);
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -535,12 +535,12 @@ H5O_link_reset(void *_mesg)
     if(lnk) {
         /* Free information for link (but don't free link pointer) */
         if(lnk->type == H5L_TYPE_SOFT)
-            lnk->u.soft.name = H5MM_xfree(lnk->u.soft.name);
+            lnk->u.soft.name = (char *)H5MM_xfree(lnk->u.soft.name);
         else if (lnk->type >= H5L_TYPE_UD_MIN) {
             if(lnk->u.ud.size > 0)
                 lnk->u.ud.udata = H5MM_xfree(lnk->u.ud.udata);
         } /* end if */
-        lnk->name = H5MM_xfree(lnk->name);
+        lnk->name = (char *)H5MM_xfree(lnk->name);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -570,7 +570,7 @@ H5O_link_free(void *_mesg)
 
     /* Free information for link */
     H5O_link_reset(lnk);
-    H5FL_FREE(H5O_link_t, lnk);
+    (void)H5FL_FREE(H5O_link_t, lnk);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_link_free() */
@@ -837,7 +837,7 @@ H5O_link_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * 
         default:
             if(lnk->type >= H5L_TYPE_UD_MIN) {
                 if(lnk->type == H5L_TYPE_EXTERNAL) {
-                    const char * objname = (const char *)lnk->u.ud.udata + (HDstrlen(lnk->u.ud.udata) + 1);
+                    const char *objname = (const char *)lnk->u.ud.udata + (HDstrlen((const char *)lnk->u.ud.udata) + 1);
 
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "External File Name:", lnk->u.ud.udata);

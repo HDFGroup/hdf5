@@ -219,7 +219,7 @@ H5F_sfile_remove(H5F_file_t *shared)
 
     /* Release the shared file node struct */
     /* (the shared file info itself is freed elsewhere) */
-    H5FL_FREE(H5F_sfile_node_t, curr);
+    (void)H5FL_FREE(H5F_sfile_node_t, curr);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

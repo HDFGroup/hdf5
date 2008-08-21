@@ -1506,7 +1506,7 @@ H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
                  */
 
                 /* Free memory for chunk image */
-                H5FL_BLK_FREE(chunk_image, oh->chunk[null_msg->chunkno].image);
+                (void)H5FL_BLK_FREE(chunk_image, oh->chunk[null_msg->chunkno].image);
 
                 /* Remove chunk from list of chunks */
                 if(null_msg->chunkno < (oh->nchunks - 1))

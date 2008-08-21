@@ -312,7 +312,7 @@ H5P_facc_create(hid_t fapl_id, void UNUSED *copy_data)
     FUNC_ENTER_NOAPI_NOINIT(H5P_facc_create)
 
     /* Check argument */
-    if(NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Retrieve driver ID property */
@@ -362,7 +362,7 @@ H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void UNUSED *copy_data)
     FUNC_ENTER_NOAPI_NOINIT(H5P_facc_copy)
 
     /* Get driver ID from source property list */
-    if(NULL == (src_plist = H5I_object(src_fapl_id)))
+    if(NULL == (src_plist = (H5P_genplist_t *)H5I_object(src_fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
     if(H5P_get(src_plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
@@ -376,7 +376,7 @@ H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void UNUSED *copy_data)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver info")
 
         /* Set the driver for the destination property list */
-        if(NULL == (dst_plist = H5I_object(dst_fapl_id)))
+        if(NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
         if(H5FD_fapl_open(dst_plist, driver_id, driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
@@ -413,7 +413,7 @@ H5P_facc_close(hid_t fapl_id, void UNUSED *close_data)
     FUNC_ENTER_NOAPI(H5P_facc_close, FAIL)
 
     /* Check argument */
-    if(NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Get driver ID property */
@@ -577,17 +577,17 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
     void *driver_info;          /* VFL driver info */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_set_driver, FAIL);
+    FUNC_ENTER_NOAPI(H5P_set_driver, FAIL)
 
-    if (NULL==H5I_object_verify(new_driver_id, H5I_VFL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID");
+    if(NULL == H5I_object_verify(new_driver_id, H5I_VFL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID")
 
-    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         /* Get the current driver information */
         if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
         if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,"can't get driver info");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,"can't get driver info")
 
         /* Close the driver for the property list */
         if(H5FD_fapl_close(driver_id, driver_info)<0)
@@ -596,26 +596,26 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
         /* Set the driver for the property list */
         if(H5FD_fapl_open(plist, new_driver_id, new_driver_info)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
-    } else if( TRUE == H5P_isa_class(plist->plist_id, H5P_DATASET_XFER) ) {
+    } else if(TRUE == H5P_isa_class(plist->plist_id, H5P_DATASET_XFER)) {
         /* Get the current driver information */
-        if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver ID");
-        if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &driver_info)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver info");
+        if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver ID")
+        if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &driver_info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver info")
 
         /* Close the driver for the property list */
-        if(H5FD_dxpl_close(driver_id, driver_info)<0)
+        if(H5FD_dxpl_close(driver_id, driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset driver")
 
         /* Set the driver for the property list */
-        if(H5FD_dxpl_open(plist, new_driver_id, new_driver_info)<0)
+        if(H5FD_dxpl_open(plist, new_driver_id, new_driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
     } else {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list")
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_set_driver() */
 
 
@@ -650,23 +650,23 @@ herr_t
 H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5Pset_driver, FAIL);
+    FUNC_ENTER_API(H5Pset_driver, FAIL)
     H5TRACE3("e", "ii*x", plist_id, new_driver_id, new_driver_info);
 
     /* Check arguments */
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-    if (NULL==H5I_object_verify(new_driver_id, H5I_VFL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID");
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+    if(NULL == H5I_object_verify(new_driver_id, H5I_VFL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID")
 
     /* Set the driver */
-    if(H5P_set_driver(plist,new_driver_id,new_driver_info)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info");
+    if(H5P_set_driver(plist, new_driver_id, new_driver_info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_driver() */
 
 
@@ -763,17 +763,17 @@ H5Pget_driver(hid_t plist_id)
     H5P_genplist_t *plist;      /* Property list pointer */
     hid_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Pget_driver, FAIL);
+    FUNC_ENTER_API(H5Pget_driver, FAIL)
     H5TRACE1("i", "i", plist_id);
 
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     ret_value = H5P_get_driver(plist);
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_driver() */
 
 
 /*-------------------------------------------------------------------------
@@ -859,14 +859,14 @@ H5Pget_driver_info(hid_t plist_id)
 
     FUNC_ENTER_API(H5Pget_driver_info, NULL);
 
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list");
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
 
-    if((ret_value=H5P_get_driver_info(plist))==NULL)
-        HGOTO_ERROR(H5E_PLIST,H5E_CANTGET,NULL,"can't get driver info");
+    if(NULL == (ret_value = H5P_get_driver_info(plist)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver info")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_driver_info() */
 
 

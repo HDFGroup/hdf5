@@ -63,7 +63,7 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
     HDassert(fwidth >= 0);
 
     /* Get property list */
-    if(NULL == (plist = H5I_object(f->shared->fcpl_id)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(f->shared->fcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Retrieve file creation properties */

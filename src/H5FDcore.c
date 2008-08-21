@@ -297,11 +297,11 @@ H5Pget_fapl_core(hid_t fapl_id, size_t *increment/*out*/,
     FUNC_ENTER_API(H5Pget_fapl_core, FAIL)
     H5TRACE3("e", "ixx", fapl_id, increment, backing_store);
 
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if (H5FD_CORE!=H5P_get_driver(plist))
+    if(H5FD_CORE != H5P_get_driver(plist))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "incorrect VFL driver")
-    if (NULL==(fa=H5P_get_driver_info(plist)))
+    if(NULL == (fa = (H5FD_core_fapl_t *)H5P_get_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
     if (increment)
@@ -334,12 +334,12 @@ static void *
 H5FD_core_fapl_get(H5FD_t *_file)
 {
     H5FD_core_t		*file = (H5FD_core_t*)_file;
-    H5FD_core_fapl_t	*fa = NULL;
+    H5FD_core_fapl_t	*fa;
     void      *ret_value;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_core_fapl_get, NULL)
 
-    if (NULL==(fa=H5MM_calloc(sizeof(H5FD_core_fapl_t))))
+    if(NULL == (fa = (H5FD_core_fapl_t *)H5MM_calloc(sizeof(H5FD_core_fapl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     fa->increment = file->increment;
@@ -395,12 +395,12 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "invalid file name")
     if (0==maxaddr || HADDR_UNDEF==maxaddr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr")
-    if (ADDR_OVERFLOW(maxaddr))
+    if(ADDR_OVERFLOW(maxaddr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "maxaddr overflow")
-    if (H5P_DEFAULT!=fapl_id) {
-        if(NULL == (plist = H5I_object(fapl_id)))
+    if(H5P_DEFAULT != fapl_id) {
+        if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-        fa = H5P_get_driver_info(plist);
+        fa = (H5FD_core_fapl_t *)H5P_get_driver_info(plist);
     } /* end if */
 
     /* Build the open flags */
@@ -417,10 +417,10 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
     }
 
     /* Create the new file struct */
-    if (NULL==(file=H5MM_calloc(sizeof(H5FD_core_t))))
+    if(NULL == (file = (H5FD_core_t *)H5MM_calloc(sizeof(H5FD_core_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
     file->fd = fd;
-    if (name && *name)
+    if(name && *name)
         file->name = H5MM_xstrdup(name);
 
     /*
@@ -820,12 +820,12 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
 
         H5_ASSIGN_OVERFLOW(new_eof,file->increment*((addr+size)/file->increment),hsize_t,size_t);
 
-        if ((addr+size) % file->increment)
+        if((addr + size) % file->increment)
             new_eof += file->increment;
-        if (NULL==file->mem)
-            x = H5MM_malloc(new_eof);
+        if(NULL == file->mem)
+            x = (unsigned char *)H5MM_malloc(new_eof);
         else
-            x = H5MM_realloc(file->mem, new_eof);
+            x = (unsigned char *)H5MM_realloc(file->mem, new_eof);
 #ifdef H5_CLEAR_MEMORY
 HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
 #endif /* H5_CLEAR_MEMORY */

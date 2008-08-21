@@ -1423,7 +1423,7 @@ H5O_msg_size_f(const H5F_t *f, hid_t ocpl_id, unsigned type_id,
     HDassert(mesg);
 
     /* Get the property list */
-    if(NULL == (ocpl = H5I_object(ocpl_id)))
+    if(NULL == (ocpl = (H5P_genplist_t *)H5I_object(ocpl_id)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, 0, "not a property list")
 
     /* Get any object header status flags set by properties */

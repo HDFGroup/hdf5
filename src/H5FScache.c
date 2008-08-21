@@ -181,7 +181,7 @@ HDfprintf(stderr, "%s: Load free space header, addr = %a\n", FUNC, addr);
     size = H5FS_HEADER_SIZE(f);
 
     /* Get a pointer to a buffer that's large enough for header */
-    if(NULL == (hdr = H5WB_actual(wb, size)))
+    if(NULL == (hdr = (uint8_t *)H5WB_actual(wb, size)))
         HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read header from disk */
@@ -320,7 +320,7 @@ HDfprintf(stderr, "%s: Flushing free space header, addr = %a, destroy = %u\n", F
         size = H5FS_HEADER_SIZE(f);
 
         /* Get a pointer to a buffer that's large enough for header */
-        if(NULL == (hdr = H5WB_actual(wb, size)))
+        if(NULL == (hdr = (uint8_t *)H5WB_actual(wb, size)))
             HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
         /* Get temporary pointer to header */
@@ -436,7 +436,7 @@ H5FS_cache_hdr_dest(H5F_t UNUSED *f, H5FS_t *fspace)
 
     /* Release the memory for the free space section classes */
     if(fspace->sect_cls)
-        fspace->sect_cls = H5FL_SEQ_FREE(H5FS_section_class_t, fspace->sect_cls);
+        fspace->sect_cls = (H5FS_section_class_t *)H5FL_SEQ_FREE(H5FS_section_class_t, fspace->sect_cls);
 
     /* Free free space info */
     H5FL_FREE(H5FS_t, fspace);
@@ -713,7 +713,7 @@ HDfprintf(stderr, "%s: fspace->sect_cls[%u].serial_size = %Zu\n", FUNC, sect_typ
 
 done:
     if(buf)
-        H5FL_BLK_FREE(sect_block, buf);
+        (void)H5FL_BLK_FREE(sect_block, buf);
     if(!ret_value && sinfo)
         (void)H5FS_cache_sinfo_dest(f, sinfo);
 
@@ -941,7 +941,7 @@ HDfprintf(stderr, "%s: sinfo->fspace->alloc_sect_size = %Hu\n", FUNC, sinfo->fsp
         if(H5F_block_write(f, H5FD_MEM_FSPACE_SINFO, sinfo->fspace->sect_addr, (size_t)sinfo->fspace->sect_size, dxpl_id, buf) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTFLUSH, FAIL, "unable to save free space sections to disk")
 
-        H5FL_BLK_FREE(sect_block, buf);
+        (void)H5FL_BLK_FREE(sect_block, buf);
 
 	sinfo->cache_info.is_dirty = FALSE;
     } /* end if */
@@ -1057,7 +1057,7 @@ H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo)
         } /* end if */
 
     /* Release bins for skip lists */
-    sinfo->bins = H5FL_SEQ_FREE(H5FS_bin_t, sinfo->bins);
+    sinfo->bins = (H5FS_bin_t *)H5FL_SEQ_FREE(H5FS_bin_t, sinfo->bins);
 
     /* Release skip list for merging sections */
     if(sinfo->merge_list)

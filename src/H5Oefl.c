@@ -100,7 +100,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
     HDassert(f);
     HDassert(p);
 
-    if(NULL == (mesg = H5MM_calloc(sizeof(H5O_efl_t))))
+    if(NULL == (mesg = (H5O_efl_t *)H5MM_calloc(sizeof(H5O_efl_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Version */
@@ -126,7 +126,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
     if(NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr, H5AC_READ)))
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
 
-    s = H5HL_offset_into(f, heap, 0);
+    s = (const char *)H5HL_offset_into(f, heap, 0);
 
     HDassert(s && !*s);
 
@@ -136,7 +136,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
 #endif
 
     /* Decode the file list */
-    mesg->slot = H5MM_calloc(mesg->nalloc * sizeof(H5O_efl_entry_t));
+    mesg->slot = (H5O_efl_entry_t *)H5MM_calloc(mesg->nalloc * sizeof(H5O_efl_entry_t));
     if(NULL == mesg->slot)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -146,7 +146,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
 	/* Name */
 	H5F_DECODE_LENGTH (f, p, mesg->slot[u].name_offset);
 
-        s = H5HL_offset_into(f, heap, mesg->slot[u].name_offset);
+        s = (const char *)H5HL_offset_into(f, heap, mesg->slot[u].name_offset);
 	HDassert(s && *s);
 	mesg->slot[u].name = H5MM_xstrdup (s);
         HDassert(mesg->slot[u].name);
@@ -262,12 +262,12 @@ H5O_efl_copy(const void *_mesg, void *_dest)
     /* check args */
     HDassert(mesg);
     if(!dest) {
-	if(NULL == (dest = H5MM_calloc(sizeof(H5O_efl_t))) ||
-                NULL == (dest->slot = H5MM_malloc(mesg->nalloc * sizeof(H5O_efl_entry_t))))
+	if(NULL == (dest = (H5O_efl_t *)H5MM_calloc(sizeof(H5O_efl_t))) ||
+                NULL == (dest->slot = (H5O_efl_entry_t *)H5MM_malloc(mesg->nalloc * sizeof(H5O_efl_entry_t))))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     } else if(dest->nalloc < mesg->nalloc) {
 	H5MM_xfree(dest->slot);
-	if(NULL == (dest->slot = H5MM_malloc(mesg->nalloc * sizeof(H5O_efl_entry_t))))
+	if(NULL == (dest->slot = (H5O_efl_entry_t *)H5MM_malloc(mesg->nalloc * sizeof(H5O_efl_entry_t))))
 	    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     }
     dest->heap_addr = mesg->heap_addr;
@@ -354,11 +354,11 @@ H5O_efl_reset(void *_mesg)
 
     /* reset */
     for(u = 0; u < mesg->nused; u++)
-	mesg->slot[u].name = H5MM_xfree(mesg->slot[u].name);
+	mesg->slot[u].name = (char *)H5MM_xfree(mesg->slot[u].name);
     mesg->heap_addr = HADDR_UNDEF;
     mesg->nused = mesg->nalloc = 0;
     if(mesg->slot)
-        mesg->slot = H5MM_xfree(mesg->slot);
+        mesg->slot = (H5O_efl_entry_t *)H5MM_xfree(mesg->slot);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_efl_reset() */
@@ -435,7 +435,7 @@ H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
     HDassert(file_dst);
 
     /* Allocate space for the destination efl */
-    if(NULL == (efl_dst = H5MM_calloc(sizeof(H5O_efl_t))))
+    if(NULL == (efl_dst = (H5O_efl_t *)H5MM_calloc(sizeof(H5O_efl_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the "top level" information */
@@ -462,7 +462,7 @@ H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
     /* allocate array of external file entries */
     if(efl_src->nalloc > 0) {
         size = efl_src->nalloc * sizeof(H5O_efl_entry_t);
-        if((efl_dst->slot = H5MM_calloc(size)) == NULL)
+        if((efl_dst->slot = (H5O_efl_entry_t *)H5MM_calloc(size)) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* copy content from the source. Need to update later */

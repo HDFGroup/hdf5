@@ -240,7 +240,7 @@ H5G_ent_to_link(H5F_t *f, H5O_link_t *lnk, const H5HL_t *heap,
     if(ent->type == H5G_CACHED_SLINK) {
         const char *s;          /* Pointer to link value */
 
-        s = H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);
+        s = (const char *)H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);
         HDassert(s);
 
         /* Copy the link value */
@@ -295,7 +295,7 @@ H5G_ent_to_info(H5F_t *f, H5L_info_t *info, const H5HL_t *heap,
     if(ent->type == H5G_CACHED_SLINK) {
         const char *s;          /* Pointer to link value */
 
-        s = H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);
+        s = (const char *)H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);
         HDassert(s);
 
         /* Get the link value size */
@@ -486,7 +486,7 @@ H5G_link_copy_file(H5F_t *dst_file, hid_t dxpl_id, const H5O_link_t *_src_lnk,
         /* Check if the object pointed by the soft link exists in the source file */
         if(H5G_loc_info(&grp_loc, tmp_src_lnk.u.soft.name, FALSE, &oinfo, H5P_DEFAULT, dxpl_id) >= 0) {
             /* Convert soft link to hard link */
-            tmp_src_lnk.u.soft.name = H5MM_xfree(tmp_src_lnk.u.soft.name);
+            tmp_src_lnk.u.soft.name = (char *)H5MM_xfree(tmp_src_lnk.u.soft.name);
             tmp_src_lnk.type = H5L_TYPE_HARD;
             tmp_src_lnk.u.hard.addr = oinfo.addr;
             src_lnk = &tmp_src_lnk;

@@ -1024,7 +1024,7 @@ H5O_attr_rename_mod_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
         /* Check for shared message */
         if(mesg->flags & H5O_MSG_FLAG_SHARED) {
             /* Update the shared attribute in the SOHM storage */
-            if(H5O_attr_update_shared(udata->f, udata->dxpl_id, oh, mesg->native, NULL) < 0)
+            if(H5O_attr_update_shared(udata->f, udata->dxpl_id, oh, (H5A_t *)mesg->native, NULL) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, H5_ITER_ERROR, "unable to update attribute in shared storage")
         } /* end if */
         else {
@@ -1383,8 +1383,8 @@ H5O_attr_remove_update(const H5O_loc_t *loc, H5O_t *oh, H5O_ainfo_t *ainfo,
                    reference count on shared attributes) */
                 /* Find out whether the attribute has been opened */
                 if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, 
-                    (atable.attrs[u])->shared->name)) < 0)
-                    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
+                        (atable.attrs[u])->shared->name)) < 0)
+                    HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "failed in finding opened attribute")
 
                 /* If found the attribute is already opened, use the opened message to insert.
                    If not, still use the message in the attribute table. */ 
