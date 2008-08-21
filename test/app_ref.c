@@ -76,6 +76,8 @@ const char *IDNAME[T_NUMCLASSES] = {
 
 int rc[T_NUMCLASSES];
 
+void Abrt_Handler (int sig);
+
 /* Handler for SIGABRT - prints the reference count on each id */
 void
 Abrt_Handler (int UNUSED sig)
