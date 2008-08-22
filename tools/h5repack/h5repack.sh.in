@@ -490,6 +490,10 @@ else
  TOOLTEST0 $arg
 fi 
 
+# add a userblock to file
+arg="$FILE1 -u ublock.bin -b 2048"
+TOOLTEST $arg
+
 
 if test $nerrors -eq 0 ; then
    echo "All $H5REPACK tests passed."

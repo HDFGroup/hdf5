@@ -106,6 +106,8 @@ typedef struct {
  int             grp_indexed; /* Set the minimum number of links to store in the indexed format */
  int             msg_size[8]; /* Minumum size of shared messages: dataspace, 
                                  datatype, fill value, filter pipleline, attribute */
+ const char      *ublock_filename; /* user block file name */
+ int             ublock_size;      /* user block size */
 } pack_opt_t;
 
 
