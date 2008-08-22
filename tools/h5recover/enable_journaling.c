@@ -44,6 +44,7 @@
 /* protocols */
 int writedata(hid_t file, hid_t dataset, int begin, int end, hid_t timestep);
 void helppage(void);
+int set_journal(hid_t faccpl, const char * journalname);
 
 /* Display the online help page */
 void
@@ -65,6 +66,36 @@ helppage(void)
     printf("\t%s %s (This should succeed)\n", H5dumptoolname, H5FILE_NAME);
 }
 
+
+int
+set_journal(hid_t faccpl, const char * journalname) 
+{
+    H5AC2_jnl_config_t jnl_config;
+
+    /* get current journaling configuration */
+    jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+
+    if ( H5Pget_jnl_config(faccpl, &jnl_config) < 0 ) {
+	fprintf(stderr, "H5Pget_jnl_config on faccpl failed\n");
+	return(-1);
+    }
+
+    jnl_config.enable_journaling = 1;   /* turn on journaling */
+    jnl_config.journal_recovered = 0;
+    jnl_config.jbrb_buf_size = 8*1024;  /* multiples of sys buffer size*/
+    jnl_config.jbrb_num_bufs = 2;
+    jnl_config.jbrb_use_aio = 0;        /* only sync IO is supported */
+    jnl_config.jbrb_human_readable = 1; /* only readable form is supported */
+    strcpy(jnl_config.journal_file_path, journalname);
+
+    if ( H5Pset_jnl_config(faccpl, &jnl_config) < 0 ) {
+	fprintf(stderr, "H5Pset_jnl_config on faccpl failed\n");
+	return(-1);
+    }
+    return(0);
+}
+
+
 int
 main (int ac, char **av)
 {
@@ -77,10 +108,8 @@ main (int ac, char **av)
     hsize_t     chunk[RANK]={CHUNKX, CHUNKY};	/* chunk dimensions */
     hid_t       dsetpl;			/* Dataset property list */
     hid_t       faccpl;			/* File access property list */
-    pid_t	mypid;
     int		cmode=0;		/* Create mode, overrides the others. */
     int		wmode=0;		/* write mod, default no. */
-    H5AC2_jnl_config_t jnl_config;
 
 
     /* Parse different options:
@@ -124,14 +153,14 @@ main (int ac, char **av)
     if (H5Pset_libver_bounds(faccpl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0){
 	fprintf(stderr, "H5Pset_libver_bounds on data file failed\n");
 	H5Pclose(faccpl);
-	return(-1);
+	return(1);
     }
     /* Use alignment so that it is easier to octo dump the data file for */
     /* debugging purpose. */
     if(H5Pset_alignment(faccpl, (hsize_t)THRESHOLD, (hsize_t)ALIGNMENT) < 0){
 	fprintf(stderr, "H5Pset_alignment on data file failed\n");
 	H5Pclose(faccpl);
-	return(-1);
+	return(1);
     }
 
     if (cmode){
@@ -191,40 +220,13 @@ main (int ac, char **av)
 	/* reopen the file with Journaling on. */
 	/* Setup file access property list with journaling */
 
-	/* change it to #if 0 to see the effect of no journaling. */
+	/* change the following 1 to 0 to see the effect of no journaling. */
 #if 1
-
-        /* set latest format */
-        if ( H5Pset_libver_bounds(faccpl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST)
-             < 0 ) {
-
-	    fprintf(stderr, "H5Pset_libver_bounds on data file failed\n");
-	    H5Pclose(faccpl);
-	    return(-1);
-        }
-
-        /* get current journaling configuration */
-        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
-
-        if ( H5Pget_jnl_config(faccpl, &jnl_config) < 0 ) {
-	    fprintf(stderr, "H5Pget_jnl_config on faccpl failed\n");
-	    H5Pclose(faccpl);
-	    return(-1);
-        }
-
-        jnl_config.enable_journaling = 1;   /* turn on journaling */
-        jnl_config.journal_recovered = 0;
-        jnl_config.jbrb_buf_size = 8*1024;  /* multiples of sys buffer size*/
-        jnl_config.jbrb_num_bufs = 2;
-        jnl_config.jbrb_use_aio = 0;        /* only sync IO is supported */
-        jnl_config.jbrb_human_readable = 1; /* only readable form is supported */
-        strcpy(jnl_config.journal_file_path, H5JournalFILE_NAME);
-
-        if ( H5Pset_jnl_config(faccpl, &jnl_config) < 0 ) {
-	    fprintf(stderr, "H5Pset_jnl_config on faccpl failed\n");
-	    H5Pclose(faccpl);
-	    return(-1);
-        }
+	if (set_journal(faccpl, H5JournalFILE_NAME) < 0){
+            fprintf(stderr, "set_journal on data file failed\n");
+            H5Pclose(faccpl);
+	    return(1);
+	}
 #endif
 	/* Delete the journal file since journal code does not allow */
 	/* existed journal file. */
@@ -244,18 +246,14 @@ main (int ac, char **av)
 	writedata(file, dataset, NX, 2*NX-1, timestep);
 	writedata(file, dataset, 2*NX, 3*NX-1, timestep);
 	writedata(file, dataset, 3*NX, 4*NX-1, timestep);
-	/* simulate a crash ending of the aiplication */
-#if 0
-	fprintf(stderr, "going to crash myself\n");
-	mypid = getpid();
-	kill(mypid, SIGTERM);	/* Terminate myself */
-#endif
-	/* Will execute these only when not terminated. */
+
+	/* close all remaining handles. */
 	H5Dclose(dataset);
 	H5Aclose(timestep);
 	H5Fclose(file);
 	return(0);
     }
+    return(0);
 }
 
 
