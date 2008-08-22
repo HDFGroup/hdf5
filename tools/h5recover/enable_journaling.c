@@ -30,6 +30,7 @@
 #define H5dumptoolname 		"h5dump"
 #define ProgName	 	"enable_journaling"	/* program name */
 #define DATASETNAME "IntArray"
+#define TIMESTEPNAME "TimeStep"
 #define NX     10                      /* dataset initial dimensions */
 #define NY     10
 #define CHUNKX 2			/* chunk dimensions */
@@ -41,7 +42,7 @@
 /* Global variables */
 
 /* protocols */
-int writedata(hid_t dataset, int begin, int end);
+int writedata(hid_t file, hid_t dataset, int begin, int end, hid_t timestep);
 void helppage(void);
 
 /* Display the online help page */
@@ -68,7 +69,8 @@ int
 main (int ac, char **av)
 {
     hid_t       file, dataset;         /* file and dataset handles */
-    hid_t       dataspace;   			/* handles */
+    hid_t       dataspace;   			/* data array handle */
+    hid_t       timestep;   			/* timestep handle */
     hsize_t 	maxdims[RANK] = {H5S_UNLIMITED, NY}; /* Dataset dimensions */
 						/* with unlimited rows. */
     hsize_t     dimsf[RANK]={NX, NY};           /* initial dataset dimensions */
@@ -160,12 +162,21 @@ main (int ac, char **av)
 	 */
 	dataset = H5Dcreate2(file, DATASETNAME, H5T_NATIVE_INT, dataspace,
 			    H5P_DEFAULT, dsetpl, H5P_DEFAULT);
-
-	writedata(dataset, 0, NX-1);
-
 	H5Sclose(dataspace);
 	H5Pclose(dsetpl);
+
+	/* Also create a simple 1d file attribute to store the timestep counter. */
+	dimsf[0] = 1;
+	dataspace = H5Screate_simple(1, dimsf, NULL);
+	timestep = H5Acreate2(file, TIMESTEPNAME, H5T_NATIVE_INT, dataspace,
+			    H5P_DEFAULT, H5P_DEFAULT);
+
+	/* write the initial NX rows of data and timestep counter */
+	writedata(file, dataset, 0, NX-1, timestep);
+
+	H5Sclose(dataspace);
 	H5Dclose(dataset);
+	H5Aclose(timestep);
 	H5Fclose(file);
 	return(0);
     }
@@ -178,6 +189,7 @@ main (int ac, char **av)
 
 	/* reopen the file with Journaling on. */
 	/* Setup file access property list with journaling */
+	/* change it to #if 0 to see the effect of no journaling. */
 #if 1
 	if (H5Pset_journal(faccpl, H5JournalFILE_NAME) < 0){
 	    fprintf(stderr, "H5Pset_journal on data file failed\n");
@@ -194,43 +206,42 @@ main (int ac, char **av)
 	/* close handle not needed any more. */
 	H5Pclose(faccpl);
 
-	/* Open dataset for modifications. */
+	/* Open dataset and timestep for modifications. */
 	dataset=H5Dopen2(file, DATASETNAME, H5P_DEFAULT);
-	/* extend the dataset to 4NX rows. */
-	dimsf[0] = 4*NX;
-	dimsf[1] = NY;
-	H5Dset_extent(dataset, dimsf);
+	timestep=H5Aopen(file, TIMESTEPNAME, H5P_DEFAULT);
 
 	/* write data to new rows and crash */
 	/* Do 3 writes to generate at least 3 transactions. */
-	writedata(dataset, NX, 2*NX-1);
-	writedata(dataset, 2*NX, 3*NX-1);
-	writedata(dataset, 3*NX, 4*NX-1);
+	writedata(file, dataset, NX, 2*NX-1, timestep);
+	writedata(file, dataset, 2*NX, 3*NX-1, timestep);
+	writedata(file, dataset, 3*NX, 4*NX-1, timestep);
 	/* simulate a crash ending of the aiplication */
-#if 1
+#if 0
 	fprintf(stderr, "going to crash myself\n");
 	mypid = getpid();
 	kill(mypid, SIGTERM);	/* Terminate myself */
 #endif
 	/* Will execute these only when not terminated. */
 	H5Dclose(dataset);
+	H5Aclose(timestep);
 	H5Fclose(file);
 	return(0);
     }
 }
 
 
-/* writedata():
+/* writedata:
  * write rows of data to dataset starting from begin to end rows inclusive.
  */
 int
-writedata(hid_t dataset, int begin, int end)
+writedata(hid_t file, hid_t dataset, int begin, int end, hid_t timestep)
 {
     int         data[NX][NY];          /* data to write */
     int         nrows, i, j;
     hid_t	memspace, dataspace;
     hsize_t	dims[RANK], start[RANK], count[RANK];
     herr_t	retcode;
+    int		timecounter;
 
 
     if ((end < begin) || (begin < 0)){
@@ -243,7 +254,12 @@ writedata(hid_t dataset, int begin, int end)
 	    begin, end, NX);
 	return(-1);
     }
+    /* extend the dataset to end rows. */
+    dims[0] = end+1;
+    dims[1] = NY;
+    H5Dset_extent(dataset, dims);
 
+    /* setup memory space. */
     dims[0]=NX;
     dims[1]=NY;
     memspace = H5Screate_simple(RANK, dims, NULL);
@@ -266,10 +282,25 @@ writedata(hid_t dataset, int begin, int end)
 
     /*
      * Write the data to the dataset using default transfer properties.
+     * Flush all data.
+     * Finally, write the time step counter.
      */
     retcode = H5Dwrite(dataset, H5T_NATIVE_INT, memspace, dataspace, H5P_DEFAULT, data);
-    
+
+    /* Pause 2 seconds to allow manual abort. */
+    timecounter=end;
+    fprintf(stderr,
+	"After data write for time step %d. Simulate calculation...", timecounter);
+    sleep(2);
+    fprintf(stderr, "\n");
+
     H5Sclose(memspace);
     H5Sclose(dataspace);
+    H5Fflush(file, H5F_SCOPE_GLOBAL);
+    fprintf(stderr, "File data flushed.\n");
+    retcode = H5Awrite(timestep, H5T_NATIVE_INT, &timecounter);
+    fprintf(stderr, "Time step counter updated.\n");
+    
+    
     return(retcode);
 }
