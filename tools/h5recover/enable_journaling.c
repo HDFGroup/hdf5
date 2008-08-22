@@ -80,6 +80,7 @@ main (int ac, char **av)
     pid_t	mypid;
     int		cmode=0;		/* Create mode, overrides the others. */
     int		wmode=0;		/* write mod, default no. */
+    H5AC2_jnl_config_t jnl_config;
 
 
     /* Parse different options:
@@ -189,13 +190,41 @@ main (int ac, char **av)
 
 	/* reopen the file with Journaling on. */
 	/* Setup file access property list with journaling */
+
 	/* change it to #if 0 to see the effect of no journaling. */
 #if 1
-	if (H5Pset_journal(faccpl, H5JournalFILE_NAME) < 0){
-	    fprintf(stderr, "H5Pset_journal on data file failed\n");
+
+        /* set latest format */
+        if ( H5Pset_libver_bounds(faccpl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST)
+             < 0 ) {
+
+	    fprintf(stderr, "H5Pset_libver_bounds on data file failed\n");
 	    H5Pclose(faccpl);
 	    return(-1);
-	}
+        }
+
+        /* get current journaling configuration */
+        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+
+        if ( H5Pget_jnl_config(faccpl, &jnl_config) < 0 ) {
+	    fprintf(stderr, "H5Pget_jnl_config on faccpl failed\n");
+	    H5Pclose(faccpl);
+	    return(-1);
+        }
+
+        jnl_config.enable_journaling = 1;   /* turn on journaling */
+        jnl_config.journal_recovered = 0;
+        jnl_config.jbrb_buf_size = 8*1024;  /* multiples of sys buffer size*/
+        jnl_config.jbrb_num_bufs = 2;
+        jnl_config.jbrb_use_aio = 0;        /* only sync IO is supported */
+        jnl_config.jbrb_human_readable = 1; /* only readable form is supported */
+        strcpy(jnl_config.journal_file_path, H5JournalFILE_NAME);
+
+        if ( H5Pset_jnl_config(faccpl, &jnl_config) < 0 ) {
+	    fprintf(stderr, "H5Pset_jnl_config on faccpl failed\n");
+	    H5Pclose(faccpl);
+	    return(-1);
+        }
 #endif
 	/* Delete the journal file since journal code does not allow */
 	/* existed journal file. */

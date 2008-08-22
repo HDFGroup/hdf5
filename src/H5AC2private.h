@@ -283,12 +283,18 @@ struct H5O_loc_t;               /* Defined in H5Oprivate.h */
 /* external function declarations: */
 
 H5_DLL herr_t H5AC2_init(void);
+
 H5_DLL herr_t H5AC2_check_for_journaling(H5F_t * f,
                                          hid_t dxpl_id,
                                          H5C2_t * cache_ptr,
                                          hbool_t journal_recovered);
+
+H5_DLL herr_t H5AC2_deregister_mdjsc_callback(H5F_t * file_ptr,
+                                              int32_t idx);
+
 H5_DLL herr_t H5AC2_create(H5F_t *f, 
 			   H5AC2_cache_config_t *config_ptr);
+
 H5_DLL herr_t H5AC2_begin_transaction(hid_t id,
                                       hbool_t * do_transaction_ptr,
                                       struct H5O_loc_t * id_oloc_ptr,
@@ -296,14 +302,17 @@ H5_DLL herr_t H5AC2_begin_transaction(hid_t id,
                                       hbool_t * transaction_begun_ptr,
                                       uint64_t * trans_num_ptr,
                                       const char * api_call_name);
+
 H5_DLL herr_t H5AC2_end_transaction(hbool_t do_transaction,
                                     struct H5O_loc_t * id_oloc_ptr,
                                     hbool_t id_oloc_open,
                                     hbool_t transaction_begun,
                                     uint64_t trans_num,
                                     const char * api_call_name);
+
 H5_DLL herr_t H5AC2_get_entry_status(H5F_t * f, haddr_t addr,
 				    unsigned * status_ptr);
+
 H5_DLL herr_t H5AC2_set(H5F_t *f, hid_t dxpl_id, const H5AC2_class_t *type,
                         haddr_t addr, size_t len, void *thing, 
 			unsigned int flags);
@@ -349,6 +358,12 @@ H5_DLL herr_t H5AC2_get_cache_hit_rate(H5AC2_t * cache_ptr,
 H5_DLL herr_t H5AC2_get_jnl_config(H5AC2_t * cache_ptr,
                                    H5AC2_jnl_config_t * config_ptr);
 
+H5_DLL herr_t H5AC2_register_mdjsc_callback(H5F_t * file_ptr,
+                                         H5C2_mdj_status_change_func_t fcn_ptr,
+                                         void * data_ptr,
+                                         int32_t * idx_ptr,
+                                         H5C2_mdj_config_t * config_ptr);
+
 H5_DLL herr_t H5AC2_reset_cache_hit_rate_stats(H5AC2_t * cache_ptr);
 
 H5_DLL herr_t H5AC2_set_cache_auto_resize_config(H5F_t * f,
@@ -356,11 +371,16 @@ H5_DLL herr_t H5AC2_set_cache_auto_resize_config(H5F_t * f,
 
 H5_DLL herr_t H5AC2_set_jnl_config(H5F_t * f,
                                    hid_t dxpl_id,
-                                   H5AC2_jnl_config_t *config_ptr);
+                                   H5AC2_jnl_config_t *config_ptr,
+				   hbool_t initializing);
 
 H5_DLL herr_t H5AC2_validate_config(H5AC2_cache_config_t * config_ptr);
 
 H5_DLL herr_t H5AC2_validate_jnl_config(H5AC2_jnl_config_t * config_ptr);
+
+H5_DLL hbool_t H5AC2_validate_jnl_config_ver(int version_num);
+
+H5_DLL hbool_t H5AC2_validate_cache_config_ver(int version_num);
 
 H5_DLL herr_t H5AC2_close_trace_file(H5AC2_t * cache_ptr);
 

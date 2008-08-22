@@ -186,9 +186,44 @@ static void verify_mdj_file_unmarking_on_journaling_shutdown(void);
 static void verify_mdj_file_unmarking_on_recovery(void);
 
 static void test_mdj_conf_blk_read_write_discard(H5F_t * file_ptr,
-		                                 const char * jrnl_file_path);
+                                                 const char * jrnl_file_path);
 
 static void check_superblock_extensions(void);
+
+static void check_mdjsc_callbacks(void);
+
+static void test_mdjsc_callback(H5C2_mdj_config_t * config_ptr,
+                                void * data_ptr);
+
+static void deregister_mdjsc_callback(H5F_t * file_ptr,
+                                      H5C2_t * cache_ptr,
+                                      int32_t idx);
+
+static void register_mdjsc_callback(H5F_t * file_ptr,
+                                    H5C2_t * cache_ptr,
+                                    H5C2_mdj_status_change_func_t fcn_ptr,
+                                    void * data_ptr,
+                                    int32_t * idx_ptr);
+
+static void verify_mdjsc_table_config(H5C2_t * cache_ptr,
+                                      int32_t table_len,
+                                      int32_t num_entries,
+                                      int32_t max_idx_in_use,
+                                      hbool_t * free_entries);
+
+static void verify_mdjsc_callback_deregistered(H5C2_t * cache_ptr,
+                                               int32_t idx);
+
+static void verify_mdjsc_callback_registered(H5C2_t * cache_ptr,
+                                         H5C2_mdj_status_change_func_t fcn_ptr,
+                                         void * data_ptr,
+                                         int32_t idx);
+
+static void verify_mdjsc_callback_error_rejection(void);
+
+static void verify_mdjsc_callback_execution(void);
+
+static void verify_mdjsc_callback_registration_deregistration(void);
 
 static void check_message_format(void);
 
@@ -205,7 +240,6 @@ static void mdj_smoke_check_02(void);
 static void write_verify_trans_num(H5C2_jbrb_t * struct_ptr, 
                                    uint64_t trans_num, 
                                    uint64_t verify_val);
-
 
 
 /**************************************************************************/
@@ -6449,8 +6483,6 @@ check_superblock_extensions(void)
  * 
  **************************************************************************/
 
-/* xyzzy */
-
 static void 
 check_mdj_file_marking(void)
 {
@@ -7577,7 +7609,7 @@ verify_mdj_file_marking_on_open(void)
 
             if ( show_progress ) {
 
-	        HDfprintf(stdout, "%s%s%d: *cp = %d.\n",
+	        HDfprintf(stdout, "%s%s%d: cp = %d.\n",
 		          fcn_name, tag, (int)pass2, cp++);
 		HDfflush(stdout);
 	    }
@@ -7952,7 +7984,7 @@ verify_mdj_file_unmarking_on_file_close(void)
 
     if ( show_progress ) {
 
-        HDfprintf(stdout, "%s%d: *cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfprintf(stdout, "%s%d: cp = %d.\n", fcn_name, (int)pass2, cp++);
         HDfflush(stdout);
     }
 
@@ -8863,6 +8895,3450 @@ verify_mdj_file_unmarking_on_recovery(void)
 
 
 /***************************************************************************
+ * Function: 	check_mdjsc_callbacks()
+ *
+ * Purpose:  	Verify that the registration and deregistration of 
+ *		metadata journaling status change registration/deregistraion
+ *		works correctly.  
+ *
+ *		Verify that the status change callbacks are called as 
+ *		they should be, and that the cache is clean when the 
+ *		callback is called.
+ *
+ *              On failure, set pass2 to false, and failure_mssg2 to an
+ *              appropriate error string.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              7/2/08
+ * 
+ **************************************************************************/
+
+static void 
+check_mdjsc_callbacks(void)
+{
+    const char * fcn_name = "check_mdjsc_callbacks():";
+
+    TESTING("metadata journaling status change callbacks");
+
+    verify_mdjsc_callback_registration_deregistration();
+
+    verify_mdjsc_callback_execution();
+
+    verify_mdjsc_callback_error_rejection();
+
+    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass2 ) {
+
+	failures2++;
+        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
+                  fcn_name, failure_mssg2);
+    }
+
+    return;
+
+} /* check_mdjsc_callbacks() */
+
+
+/***************************************************************************
+ *
+ * Function: 	test_mdjsc_callback()
+ *
+ * Purpose:  	Test callback function used to test the metadata 
+ *		journaling status change callback facility.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              8/15/08
+ * 
+ **************************************************************************/
+
+static H5C2_t * callback_test_cache_ptr        = NULL;
+static hbool_t callback_test_invalid_cache_ptr = FALSE;
+static hbool_t callback_test_null_config_ptr   = FALSE;
+static hbool_t callback_test_invalid_config    = FALSE;
+static hbool_t callback_test_null_data_ptr     = FALSE;
+static hbool_t callback_test_cache_is_dirty    = FALSE;
+static int callback_test_null_data_ptr_count   = 0;
+
+static void 
+test_mdjsc_callback(H5C2_mdj_config_t * config_ptr,
+                    void * data_ptr)
+{
+    if ( config_ptr == NULL )
+    {
+        callback_test_null_config_ptr = TRUE;
+    }
+    
+    if ( ( callback_test_cache_ptr == NULL ) ||
+         ( callback_test_cache_ptr->magic != H5C2__H5C2_T_MAGIC ) )
+    {
+        callback_test_invalid_cache_ptr = TRUE;
+    }
+    else if ( callback_test_cache_ptr->slist_len > 0 )
+    {
+        callback_test_cache_is_dirty = TRUE;
+    }
+    else if ( ( callback_test_cache_ptr != NULL ) &&
+              ( callback_test_cache_ptr->mdj_enabled != 
+                config_ptr->enable_journaling ) )
+    {
+        callback_test_invalid_config = TRUE;
+    }
+
+    if ( data_ptr == NULL )
+    {
+        callback_test_null_data_ptr = TRUE;
+	callback_test_null_data_ptr_count++;
+    }
+    else
+    {
+        *((int *)data_ptr) += 1;
+    }
+
+    return;
+
+} /* test_mdjsc_callback() */
+
+
+/***************************************************************************
+ *
+ * Function: 	deregister_mdjsc_callback()
+ *
+ * Purpose:  	Attempt to deregister the metadata journaling status change 
+ * 		callback with the supplied index, and verify that the 
+ * 		deregistration took place.
+ *
+ * 		If any error is detected, set pass2 t FALSE, and set the
+ * 		failure_mssg2 to the appropriate error message.
+ *
+ *              Do nothing and return if pass2 is false on entry.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              8/15/08
+ * 
+ **************************************************************************/
+
+static void
+deregister_mdjsc_callback(H5F_t * file_ptr,
+		          H5C2_t * cache_ptr,
+                          int32_t idx)
+{
+    herr_t result;
+
+    if ( pass2 ) 
+    {
+        if ( ( file_ptr == NULL ) ||
+	     ( cache_ptr == NULL ) ||
+	     ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) )
+        {
+	    pass2 = FALSE;
+            failure_mssg2 = 
+		"deregister_mdjsc_callback(): bad param(s) on entry.";
+	}
+    }
+
+    if ( pass2 )
+    {
+	result = H5AC2_deregister_mdjsc_callback(file_ptr, idx);
+
+	if ( result < 0 ) 
+	{
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5AC2_deregister_mdjsc_callback() failed.";
+	}
+
+	verify_mdjsc_callback_deregistered(cache_ptr, idx);
+    }
+
+    return;
+
+} /* deregister_mdjsc_callback() */
+
+
+/***************************************************************************
+ *
+ * Function: 	register_mdjsc_callback()
+ *
+ * Purpose:  	Attempt to register the supplied metadata journaling 
+ * 		status change callback, and verify that the registration
+ * 		took.
+ *
+ * 		If any error is detected, set pass2 t FALSE, and set the
+ * 		failure_mssg2 to the appropriate error message.
+ *
+ *              Do nothing and return if pass2 is false on entry.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              8/15/08
+ * 
+ **************************************************************************/
+
+static void
+register_mdjsc_callback(H5F_t * file_ptr,
+		        H5C2_t * cache_ptr,
+		        H5C2_mdj_status_change_func_t fcn_ptr,
+                        void * data_ptr,
+                        int32_t * idx_ptr)
+{
+    herr_t result;
+    H5C2_mdj_config_t init_config;
+
+    if ( pass2 ) 
+    {
+        if ( ( file_ptr == NULL ) ||
+	     ( cache_ptr == NULL ) ||
+	     ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ||
+	     ( fcn_ptr == NULL ) ||
+	     ( idx_ptr == NULL ) )
+        {
+	    pass2 = FALSE;
+            failure_mssg2 = "register_mdjsc_callback(): bad param(s) on entry.";
+	}
+    }
+
+    if ( pass2 )
+    {
+	result = H5AC2_register_mdjsc_callback(file_ptr, fcn_ptr, data_ptr,
+			                       idx_ptr, &init_config);
+
+	if ( result < 0 ) 
+	{
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5AC2_register_mdjsc_callback() failed.";
+	}
+	else if ( init_config.enable_journaling != cache_ptr->mdj_enabled )
+	{
+	    pass2 = FALSE;
+	    failure_mssg2 = 
+	        "init_config.enable_journaling != cache_ptr->mdj_enabled";
+	}
+
+	verify_mdjsc_callback_registered(cache_ptr, 
+			                 fcn_ptr, 
+			                 data_ptr, 
+					 *idx_ptr);
+    }
+
+    return;
+
+} /* register_mdjsc_callback() */
+
+
+/***************************************************************************
+ *
+ * Function: 	verify_mdjsc_table_config()
+ *
+ * Purpose:  	Verify that the mdjsc callback table is configured as 
+ *		specified.
+ *
+ *		If all is as it should be, do nothing.
+ *
+ *		If anything is not as it should be, set pass2 to FALSE,
+ *              and set failure_mssg2 to the appropriate error message.
+ *
+ *              Do nothing and return if pass2 is false on entry.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              8/15/08
+ * 
+ **************************************************************************/
+
+static void
+verify_mdjsc_table_config(H5C2_t * cache_ptr,
+                          int32_t table_len,
+                          int32_t num_entries,
+                          int32_t max_idx_in_use,
+                          hbool_t * free_entries)
+{
+    const char * fcn_name = "verify_mdjsc_table_config()";
+    hbool_t show_progress = FALSE;
+    int cp = 0;
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass2, cp++);
+
+    if ( pass2 )
+    {
+        if ( ( cache_ptr == NULL ) ||
+             ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) 
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "bad cache_ptr.";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass2, cp++);
+
+    if ( pass2 )
+    {
+        if ( cache_ptr->mdjsc_cb_tbl == NULL )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "cache_ptr->mdjsc_cb_tbl == NULL.";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass2, cp++);
+
+    if ( pass2 )
+    {
+        if ( cache_ptr->mdjsc_cb_tbl_len != table_len )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "mdjsc callback table len mismatch";
+#if 1 /* JRM */
+            HDfprintf(stdout, "cache_ptr->mdjsc_cb_tbl_len = %d(%d).\n",
+		      cache_ptr->mdjsc_cb_tbl_len, table_len);
+#endif /* JRM */
+        }
+        else if ( cache_ptr->num_mdjsc_cbs != num_entries )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "mdjsc callback table num entries mismatch";
+        }
+        else if ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use != max_idx_in_use )
+        {
+#if 1 /* JRM */
+            HDfprintf(stdout, 
+                      "cache_ptr->mdjsc_cb_tbl_max_idx_in_use = %d(%d)\n",
+		      cache_ptr->mdjsc_cb_tbl_max_idx_in_use, max_idx_in_use);
+#endif /* JRM */
+            pass2 = FALSE;
+            failure_mssg2 = "mdjsc callback table max idx in use mismatch";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass2, cp++);
+
+    if ( ( pass2 ) && ( free_entries ) )
+    {
+        int32_t i = 0;
+        int32_t j;
+        H5C2_mdjsc_record_t * record_ptr = NULL;
+
+        while ( ( pass2 ) && ( i < table_len ) )
+        {
+            if ( free_entries[i] )
+            {
+                if ( (( (cache_ptr->mdjsc_cb_tbl)[i]).fcn_ptr != NULL)
+                     ||
+                     (((cache_ptr->mdjsc_cb_tbl)[i]).data_ptr != NULL)
+                   )
+                {
+                    pass2 = FALSE;
+                    failure_mssg2 = 
+                        "mdjsc callback table entry in use that should be free";
+                }
+            } 
+            else 
+            {
+		/* recall that the data_ptr can be NULL when an entry is
+		 * in use.
+		 */
+                if ( ((cache_ptr->mdjsc_cb_tbl)[i]).fcn_ptr == NULL )
+                {
+                    pass2 = FALSE;
+                    failure_mssg2 = 
+                        "mdjsc callback table entry free that shoult be in use";
+                }
+            }
+
+            i++;
+        }
+
+        if ( show_progress ) 
+            HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass2, cp++);
+
+        i = 0;
+        j = cache_ptr->mdjsc_cb_tbl_fl_head;
+
+        while ( ( pass2 ) && 
+                ( i < (table_len - num_entries) ) && 
+                ( j >= 0 ) &&
+                ( j < table_len ) )
+        {
+            record_ptr = &((cache_ptr->mdjsc_cb_tbl)[j]);
+
+            if ( ( record_ptr->fcn_ptr != NULL ) ||
+                 ( record_ptr->data_ptr != NULL ) )
+            {
+                pass2 = FALSE;
+                failure_mssg2 = "mdjsc callback table free list entry in use.";
+            }
+            
+            i++;
+            j = record_ptr->fl_next;
+        }
+
+        if ( show_progress ) 
+            HDfprintf(stdout, "%s:%d: %d.\n", fcn_name, pass2, cp++);
+
+        if ( pass2 )
+        {
+            if ( i != (table_len - num_entries) ) {
+
+                pass2 = FALSE;
+                failure_mssg2 = 
+                    "mdjsc callback table free list shorter than expected.";
+#if 1 /* JRM */
+		HDfprintf(stdout, "i = %d (%d - %d = %d)\n", i,
+			  table_len, num_entries, (table_len - num_entries));
+		HDfprintf(stdout, "cache_ptr->mdjsc_cb_tbl_fl_head = %d.\n",
+			  cache_ptr->mdjsc_cb_tbl_fl_head);
+#endif /* JRM */
+
+            } else if ( ( record_ptr != NULL ) &&
+			( record_ptr->fl_next != -1 ) ) {
+
+                pass2 = FALSE;
+                failure_mssg2 = 
+                    "mdjsc callback table free list longer than expected.";
+
+            }
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s:%d: %d -- done.\n", fcn_name, pass2, cp++);
+
+    return;
+
+} /* verify_mdjsc_table_config() */
+
+
+/***************************************************************************
+ *
+ * Function: 	verify_mdjsc_callback_deregistered()
+ *
+ * Purpose:  	Verify that the suplied mdjsc callback is registerd
+ *		in the metadata journaling status change callback table
+ *		at the specified index and with the specified data ptr.
+ *
+ *		If all is as it should be, do nothing.
+ *
+ *		If anything is not as it should be, set pass2 to FALSE,
+ *              and set failure_mssg2 to the appropriate error message.
+ *
+ *              Do nothing and return if pass2 is false on entry.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              8/15/08
+ * 
+ **************************************************************************/
+
+static void
+verify_mdjsc_callback_deregistered(H5C2_t * cache_ptr,
+                                   int32_t idx)
+{
+    if ( pass2 )
+    {
+        if ( ( cache_ptr == NULL ) ||
+             ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) 
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "bad cache_ptr.";
+        }
+    }
+
+    if ( pass2 )
+    {
+        if ( cache_ptr->mdjsc_cb_tbl == NULL )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "cache_ptr->mdjsc_cb_tbl == NULL.";
+        }
+    }
+
+    if ( ( pass2 ) && ( idx < cache_ptr->mdjsc_cb_tbl_len ) )
+    {
+        if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).fcn_ptr != NULL )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "fcn_ptr mismatch";
+        }
+        else if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).data_ptr != NULL )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "data_ptr mismatch";
+        }
+    }
+
+    return;
+
+} /* verify_mdjsc_callback_deregistered() */
+
+
+/***************************************************************************
+ *
+ * Function: 	verify_mdjsc_callback_registered()
+ *
+ * Purpose:  	Verify that the suplied mdjsc callback is registerd
+ *		in the metadata journaling status change callback table
+ *		at the specified index and with the specified data ptr.
+ *
+ *		If all is as it should be, do nothing.
+ *
+ *		If anything is not as it should be, set pass2 to FALSE,
+ *              and set failure_mssg2 to the appropriate error message.
+ *
+ *              Do nothing and return if pass2 is false on entry.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              8/15/08
+ * 
+ **************************************************************************/
+
+static void
+verify_mdjsc_callback_registered(H5C2_t * cache_ptr,
+                                 H5C2_mdj_status_change_func_t fcn_ptr,
+                                 void * data_ptr,
+                                 int32_t idx)
+{
+    if ( pass2 )
+    {
+        if ( ( cache_ptr == NULL ) ||
+             ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) 
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "bad cache_ptr.";
+        }
+    }
+
+    if ( pass2 )
+    {
+        if ( ( fcn_ptr == NULL ) ||
+             ( idx < 0 ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "bad fcn_ptr and/or negative idx.";
+        }
+    }
+
+    if ( pass2 )
+    {
+        if ( cache_ptr->mdjsc_cb_tbl == NULL )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "cache_ptr->mdjsc_cb_tbl == NULL.";
+        }
+    }
+
+    if ( pass2 )
+    {
+        if ( cache_ptr->mdjsc_cb_tbl_len <= idx )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "idx out of range.";
+        }
+    }
+
+    if ( pass2 )
+    {
+        if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).fcn_ptr != fcn_ptr )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "fcn_ptr mismatch";
+        }
+        else if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).data_ptr != data_ptr )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "data_ptr mismatch";
+        }
+        else if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).fl_next != -1 )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "fl_next != -1";
+        }
+    }
+
+    return;
+
+} /* verify_mdjsc_callback_registered() */
+
+
+/***************************************************************************
+ *
+ * Function: 	verify_mdjsc_callback_error_rejection()
+ *
+ * Purpose:  	Run a variety of tests to verify that the metadata 
+ *		journaling status change callbacks registration and 
+ *		de-registration routines will fail on obviously 
+ *		invalid input.
+ *
+ *		If anything is not as it should be, set pass2 to FALSE,
+ *              and set failure_mssg2 to the appropriate error message.
+ *
+ *              Do nothing and return if pass2 is false on entry.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              8/20/08
+ * 
+ **************************************************************************/
+
+static void
+verify_mdjsc_callback_error_rejection(void)
+{
+    const char * fcn_name = "verify_mdjsc_callback_error_rejection():";
+    char filename[512];
+    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    const int max_callbacks = 1024 * H5C2__MIN_MDJSC_CB_TBL_LEN;
+    int counters[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    int i;
+    int expected_num_entries = 0;
+    int expected_table_len = H5C2__MIN_MDJSC_CB_TBL_LEN;
+    int expected_max_idx = -1;
+    int32_t indicies[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    hbool_t free_entries[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = FALSE;
+    int cp = 0;
+    herr_t result;
+    hid_t file_id = -1;
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
+
+    for ( i = 0; i < max_callbacks; i++ )
+    {
+        counters[i] = 0;
+	free_entries[i] = TRUE;
+	indicies[i] = -1;
+    }
+
+    /* 1) Create a file with journaling enabled.  
+     *
+     * 2) Attempt to register callbacks with a variety of NULL 
+     *    pointers supplied for parameters other than data_ptr.
+     *    All attempts should fail.
+     *
+     * 3) Attempt to deregister a callback in an empty callback table.
+     *    Should fail
+     *
+     * 4) Register a few callbacks.  Attempt to deregister non-existant
+     *    callbacks with indicies both inside and outside the range
+     *    of indicies currently represented in the table.  All should
+     *    fail.
+     *
+     * 5) Deregister the remaining callbacks, and then close and delete
+     *    the file.
+     */
+
+
+    /* 1) Create a file with journaling enabled.
+     */
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
+                        sizeof(filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (1).\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
+        HDfflush(stdout);
+    }
+
+    /* setup the journal file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
+                        sizeof(journal_filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (2).\n";
+        }
+        else if ( strlen(journal_filename) >=
+                        H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "journal file name too long.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+                  fcn_name, journal_filename);
+        HDfflush(stdout);
+    }
+
+    /* clean out any existing journal file */
+    HDremove(journal_filename);
+    setup_cache_for_journaling(filename, journal_filename, &file_id,
+                               &file_ptr, &cache_ptr, FALSE);
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 2) Attempt to register callbacks with a variety of NULL 
+     *    pointers supplied for parameters other than data_ptr.
+     *    All attempts should fail.
+     */
+
+    if ( pass2 )
+    {
+        result = H5AC2_register_mdjsc_callback(NULL,
+				               test_mdjsc_callback, 
+					       NULL, 
+					       &(indicies[0]),
+					       NULL);
+
+        if ( result == SUCCEED )
+        {
+	    pass2 = FALSE;
+	    failure_mssg2 = 
+	        "H5AC2_register_mdjsc_callback() succeeded with NULL file_ptr";
+        }
+    }
+
+    if ( pass2 )
+    {
+        result = H5AC2_register_mdjsc_callback(file_ptr,
+				               NULL, 
+					       NULL, 
+					       &(indicies[0]),
+					       NULL);
+
+        if ( result == SUCCEED )
+        {
+	    pass2 = FALSE;
+	    failure_mssg2 = 
+	        "H5AC2_register_mdjsc_callback() succeeded with NULL fcn_ptr";
+        }
+    }
+
+    if ( pass2 )
+    {
+        result = H5AC2_register_mdjsc_callback(file_ptr,
+				               test_mdjsc_callback, 
+					       NULL, 
+					       NULL,
+					       NULL);
+
+        if ( result == SUCCEED )
+        {
+	    pass2 = FALSE;
+	    failure_mssg2 = 
+	        "H5AC2_register_mdjsc_callback() succeeded with NULL idx_ptr";
+        }
+    }
+
+
+    /* 3) Attempt to deregister a callback in an empty callback table.
+     *    Should fail
+     */
+
+    if ( pass2 )
+    {
+        result = H5AC2_deregister_mdjsc_callback(NULL, 0);
+
+        if ( result == SUCCEED )
+        {
+	    pass2 = FALSE;
+	    failure_mssg2 = 
+	      "H5AC2_deregister_mdjsc_callback() succeeded with NULL file_ptr";
+        }
+    }
+
+    if ( pass2 )
+    {
+        result = H5AC2_deregister_mdjsc_callback(file_ptr, 0);
+
+        if ( result == SUCCEED )
+        {
+	    pass2 = FALSE;
+	    failure_mssg2 = 
+	        "H5AC2_deregister_mdjsc_callback() succeeded with invld idx(1)";
+        }
+    }
+
+
+
+    /* 4) Register a few callbacks.  Attempt to deregister non-existant
+     *    callbacks with indicies both inside and outside the range
+     *    of indicies currently represented in the table.  All should
+     *    fail.
+     */
+
+    register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		            &(counters[0]), &(indicies[0]));
+    register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		            NULL, &(indicies[1]));
+    register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		            &(counters[2]), &(indicies[2]));
+
+    free_entries[0] = FALSE; 
+    free_entries[1] = FALSE; 
+    free_entries[2] = FALSE; 
+    expected_num_entries += 3;
+    expected_max_idx = 2;
+
+    verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		              expected_num_entries, expected_max_idx,
+                              free_entries);
+
+
+    if ( pass2 )
+    {
+        result = H5AC2_deregister_mdjsc_callback(file_ptr, 3);
+
+        if ( result == SUCCEED )
+        {
+	    pass2 = FALSE;
+	    failure_mssg2 = 
+	        "H5AC2_deregister_mdjsc_callback() succeeded with invld idx(2)";
+        }
+    }
+
+    if ( pass2 )
+    {
+        result = H5AC2_deregister_mdjsc_callback(file_ptr, -1);
+
+        if ( result == SUCCEED )
+        {
+	    pass2 = FALSE;
+	    failure_mssg2 = 
+	        "H5AC2_deregister_mdjsc_callback() succeeded with invld idx(3)";
+        }
+    }
+
+    verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		              expected_num_entries, expected_max_idx,
+                              free_entries);
+
+
+    if ( pass2 )
+    {
+        result = H5AC2_deregister_mdjsc_callback(file_ptr, 1);
+
+        if ( result != SUCCEED )
+        {
+	    pass2 = FALSE;
+	    failure_mssg2 = 
+	        "H5AC2_deregister_mdjsc_callback() failed with valid idx";
+        }
+        else
+	{
+            free_entries[1] = TRUE; 
+            expected_num_entries--;
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                      expected_num_entries, expected_max_idx,
+                                      free_entries);
+
+	}
+    }
+
+    if ( pass2 )
+    {
+        result = H5AC2_deregister_mdjsc_callback(file_ptr, -1);
+
+        if ( result == SUCCEED )
+        {
+	    pass2 = FALSE;
+	    failure_mssg2 = 
+	        "H5AC2_deregister_mdjsc_callback() succeeded with invld idx(4)";
+        }
+    }
+
+
+    /* 5) Deregister the remaining callbacks, and then close and delete
+     *    the file.
+     */
+
+    deregister_mdjsc_callback(file_ptr, cache_ptr, 0);
+    deregister_mdjsc_callback(file_ptr, cache_ptr, 2);
+
+    free_entries[0] = TRUE; 
+    free_entries[2] = TRUE; 
+    expected_num_entries -= 2;
+    expected_max_idx = -1;
+
+    verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		              expected_num_entries, expected_max_idx,
+                              free_entries);
+
+
+    /* Close the file, and tidy up.
+     */
+
+    if ( pass2 ) {
+
+        if ( H5Fclose(file_id) < 0 ) {
+
+	    pass2 = FALSE;
+            failure_mssg2 = "H5Fclose() failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* delete the HDF5 file and journal file */
+#if 1
+        HDremove(filename);
+        HDremove(journal_filename);
+#endif
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d done.\n", 
+		  fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    return;
+
+} /* verify_mdjsc_callback_error_rejection() */
+
+
+/***************************************************************************
+ *
+ * Function: 	verify_mdjsc_callback_execution()
+ *
+ * Purpose:  	Run a variety of tests to verify that the metadata 
+ *		journaling status change callbacks are actually performed,
+ *		at the correct time, and that the expected data is passed 
+ *		to the callback function.
+ *
+ *		If anything is not as it should be, set pass2 to FALSE,
+ *              and set failure_mssg2 to the appropriate error message.
+ *
+ *              Do nothing and return if pass2 is false on entry.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              8/15/08
+ * 
+ **************************************************************************/
+
+static void
+verify_mdjsc_callback_execution(void)
+{
+    const char * fcn_name = "verify_mdjsc_callback_execution():";
+    char filename[512];
+    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    const int max_callbacks = 1024 * H5C2__MIN_MDJSC_CB_TBL_LEN;
+    int counters[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    int i;
+    int expected_num_entries = 0;
+    int expected_table_len = H5C2__MIN_MDJSC_CB_TBL_LEN;
+    int expected_max_idx = -1;
+    int32_t indicies[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    hbool_t free_entries[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = FALSE;
+    int cp = 0;
+    herr_t result;
+    hid_t dataset_id = -1;
+    hid_t dataspace_id = -1;
+    hid_t file_id = -1;
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
+    hsize_t dims[2];
+    H5AC2_jnl_config_t jnl_config;
+
+    for ( i = 0; i < max_callbacks; i++ )
+    {
+        counters[i] = 0;
+	free_entries[i] = TRUE;
+	indicies[i] = -1;
+    }
+
+    /*  1) Create a file with journaling enabled.  
+     *
+     *  2) Register a callback.  
+     *
+     *  3) Disable journaling.  Verify that the callback is called,
+     *     that it gets the correct data, and that the cache is clean
+     *     at time of call.
+     *
+     *  4) Enable journaling again.  Verify that the callback is 
+     *     called, that it gets the correct data, and that the cache
+     *     is clear at time of call.
+     *
+     *  5) Perform some writes to the file.  
+     *
+     *  6) Disable journaling.  Verify that the callback is called, 
+     *     that it gets the correct data, and that the cache is 
+     *     clean at time of call.
+     *
+     *  7) Perform some more writes to the file.
+     *
+     *  8) Enable journaling again.  Verify that the callback is
+     *     called, that it gets the correct data, and that the cache
+     *     is clear at time of call.
+     *
+     *  9) Deregister the callback, and close the file.  Recall that
+     *     all metadata journaling status change callbacks must 
+     *     deregister before the metadata cache is destroyed.
+     *
+     * 10) Re-open the file with journaling disabled, and register 
+     *     several callbacks.  Ensure that at least one has NULL
+     *     data_ptr.
+     *
+     * 11) Enable journaling.  Verify that the callbacks are called.
+     *
+     * 12) Perform some writes to the file.
+     *
+     * 13) Register a great number of callbacks.
+     *
+     * 14) Disable journaling.  Verify that the callbacks are called.
+     *
+     * 15) Deregister some of the callbacks.
+     *
+     * 16) Enable journaling.  Verify that the remaining callbacks are
+     *     called.
+     *
+     * 17) Deregister the remaining callbacks, and then close and delete
+     *     the file.
+     */
+
+
+    /* 1) Create a file with journaling enabled.
+     */
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
+                        sizeof(filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (1).\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
+        HDfflush(stdout);
+    }
+
+    /* setup the journal file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
+                        sizeof(journal_filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (2).\n";
+        }
+        else if ( strlen(journal_filename) >=
+                        H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "journal file name too long.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+                  fcn_name, journal_filename);
+        HDfflush(stdout);
+    }
+
+    /* clean out any existing journal file */
+    HDremove(journal_filename);
+    setup_cache_for_journaling(filename, journal_filename, &file_id,
+                               &file_ptr, &cache_ptr, FALSE);
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 2) Register a callback.
+     */
+
+    register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		            &(counters[0]), &(indicies[0]));
+
+    free_entries[0] = FALSE; 
+    expected_num_entries++;
+    expected_max_idx = 0;
+
+    verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		              expected_num_entries, expected_max_idx,
+                              free_entries);
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* 3) Disable journaling.  Verify that the callback is called,
+     *    that it gets the correct data, and that the cache is clean
+     *    at time of call.
+     */
+
+    if ( pass2 ) {
+
+        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+
+        result = H5Fget_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+        }
+
+        /* set journaling config fields to taste */
+        jnl_config.enable_journaling       = FALSE;
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        counters[0]                       = 0;
+        callback_test_cache_ptr           = cache_ptr;
+        callback_test_invalid_cache_ptr   = FALSE;
+        callback_test_null_config_ptr     = FALSE;
+        callback_test_invalid_config      = FALSE;
+        callback_test_null_data_ptr       = FALSE;
+        callback_test_cache_is_dirty      = FALSE;
+	callback_test_null_data_ptr_count = 0;
+
+        result = H5Fset_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        if ( counters[0] != 1 )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "incorrect number of callback calls(1).";
+	}
+        else if ( callback_test_cache_is_dirty )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "callback found dirty cache(1).";
+        }
+        else if ( ( callback_test_invalid_cache_ptr ) ||
+                  ( callback_test_null_config_ptr ) ||
+                  ( callback_test_invalid_config ) ||
+                  ( callback_test_null_data_ptr ) ||
+		  ( callback_test_null_data_ptr_count != 0 ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "Bad parameter(s) to callback(1).";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /*  4) Enable journaling again.  Verify that the callback is 
+     *     called, that it gets the correct data, and that the cache
+     *     is clear at time of call.
+     */
+
+    if ( pass2 ) {
+
+        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+
+        result = H5Fget_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+        }
+
+        /* set journaling config fields to taste */
+        jnl_config.enable_journaling       = TRUE;
+
+        strcpy(jnl_config.journal_file_path, journal_filename);
+
+        jnl_config.journal_recovered       = FALSE;
+        jnl_config.jbrb_buf_size           = (8 * 1024);
+        jnl_config.jbrb_num_bufs           = 2;
+        jnl_config.jbrb_use_aio            = FALSE;
+        jnl_config.jbrb_human_readable     = TRUE;
+
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        counters[0]                       = 0;
+        callback_test_cache_ptr           = cache_ptr;
+        callback_test_invalid_cache_ptr   = FALSE;
+        callback_test_null_config_ptr     = FALSE;
+        callback_test_invalid_config      = FALSE;
+        callback_test_null_data_ptr       = FALSE;
+        callback_test_cache_is_dirty      = FALSE;
+        callback_test_null_data_ptr_count = 0;
+
+
+        result = H5Fset_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        if ( counters[0] != 1 )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "incorrect number of callback calls(2).";
+	}
+        else if ( callback_test_cache_is_dirty )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "callback found dirty cache(2).";
+        }
+        else if ( ( callback_test_invalid_cache_ptr ) ||
+                  ( callback_test_null_config_ptr ) ||
+                  ( callback_test_invalid_config ) ||
+                  ( callback_test_null_data_ptr ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "Bad parameter(s) to callback(2).";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* 5) Perform some writes to the file. */
+
+    if ( pass2 ) {
+
+        dims[0] = 4;
+        dims[1] = 6;
+        dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        if ( dataspace_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Screate_simple() failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        /* Create the dataset. */
+        dataset_id = H5Dcreate2(file_id, "/dset0", H5T_STD_I32BE,
+                                dataspace_id, H5P_DEFAULT,
+                                H5P_DEFAULT, H5P_DEFAULT);
+
+        if ( dataspace_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Dcreate2() failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        /* close the data set, and the data space */
+        if ( ( H5Dclose(dataset_id) < 0 ) ||
+             ( H5Sclose(dataspace_id) < 0 ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "data set, or data space close failed.";
+        }
+    }
+
+    if ( pass2 ) {
+
+        if ( cache_ptr->slist_len <= 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "cache isnt' dirty?!?";
+        }
+    }
+
+
+    /*  6) Disable journaling.  Verify that the callback is called, 
+     *     that it gets the correct data, and that the cache is 
+     *     clean at time of call.
+     */
+
+    if ( pass2 ) {
+
+        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+
+        result = H5Fget_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+        }
+
+        /* set journaling config fields to taste */
+        jnl_config.enable_journaling       = FALSE;
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        counters[0]                     = 0;
+        callback_test_cache_ptr         = cache_ptr;
+        callback_test_invalid_cache_ptr = FALSE;
+        callback_test_null_config_ptr   = FALSE;
+        callback_test_invalid_config    = FALSE;
+        callback_test_null_data_ptr     = FALSE;
+        callback_test_cache_is_dirty    = FALSE;
+
+        result = H5Fset_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        if ( counters[0] != 1 )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "incorrect number of callback calls(3).";
+	}
+        else if ( callback_test_cache_is_dirty )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "callback found dirty cache(3).";
+        }
+        else if ( ( callback_test_invalid_cache_ptr ) ||
+                  ( callback_test_null_config_ptr ) ||
+                  ( callback_test_invalid_config ) ||
+                  ( callback_test_null_data_ptr ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "Bad parameter(s) to callback(3).";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /*  7) Perform some more writes to the file.  */
+
+    if ( pass2 ) {
+
+        dims[0] = 6;
+        dims[1] = 8;
+        dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        if ( dataspace_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Screate_simple() failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        /* Create the dataset. */
+        dataset_id = H5Dcreate2(file_id, "/dset1", H5T_STD_I32BE,
+                                dataspace_id, H5P_DEFAULT,
+                                H5P_DEFAULT, H5P_DEFAULT);
+
+        if ( dataspace_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Dcreate2() failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        /* close the data set, and the data space */
+        if ( ( H5Dclose(dataset_id) < 0 ) ||
+             ( H5Sclose(dataspace_id) < 0 ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "data set, or data space close failed.";
+        }
+    }
+
+    if ( pass2 ) {
+
+        if ( cache_ptr->slist_len <= 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "cache isnt' dirty?!?";
+        }
+    }
+
+
+    /*  8) Enable journaling again.  Verify that the callback is
+     *     called, that it gets the correct data, and that the cache
+     *     is clear at time of call.
+     */
+
+    if ( pass2 ) {
+
+        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+
+        result = H5Fget_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+        }
+
+        /* set journaling config fields to taste */
+        jnl_config.enable_journaling       = TRUE;
+
+        strcpy(jnl_config.journal_file_path, journal_filename);
+
+        jnl_config.journal_recovered       = FALSE;
+        jnl_config.jbrb_buf_size           = (8 * 1024);
+        jnl_config.jbrb_num_bufs           = 2;
+        jnl_config.jbrb_use_aio            = FALSE;
+        jnl_config.jbrb_human_readable     = TRUE;
+
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        counters[0]                       = 0;
+        callback_test_cache_ptr           = cache_ptr;
+        callback_test_invalid_cache_ptr   = FALSE;
+        callback_test_null_config_ptr     = FALSE;
+        callback_test_invalid_config      = FALSE;
+        callback_test_null_data_ptr       = FALSE;
+        callback_test_cache_is_dirty      = FALSE;
+        callback_test_null_data_ptr_count = 0;
+
+        result = H5Fset_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        if ( counters[0] != 1 )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "incorrect number of callback calls(4).";
+	}
+        else if ( callback_test_cache_is_dirty )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "callback found dirty cache(4).";
+        }
+        else if ( ( callback_test_invalid_cache_ptr ) ||
+                  ( callback_test_null_config_ptr ) ||
+                  ( callback_test_invalid_config ) ||
+                  ( callback_test_null_data_ptr ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "Bad parameter(s) to callback(4).";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+     
+    /*  9) Deregister the callback, and close the file.  Recall that
+     *     all metadata journaling status change callbacks must 
+     *     deregister before the metadata cache is destroyed.
+     */
+
+    deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[0]);
+
+    indicies[0] = -1;
+    free_entries[0] = TRUE; 
+    expected_num_entries = 0;
+    expected_max_idx = -1;
+
+    verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		              expected_num_entries, expected_max_idx,
+                              free_entries);
+
+    if ( file_id >= 0 ) {
+
+        if ( H5Fclose(file_id) < 0 ) {
+
+            if ( pass2 ) {
+
+                pass2 = FALSE;
+                failure_mssg2 = "file close failed.";
+            }
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d *cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+
+    /* 10) Re-open the file with journaling disabled, and register 
+     *     several callbacks.  Ensure that at least one has NULL
+     *     data_ptr.
+     */
+
+    open_existing_file_without_journaling(filename, &file_id,
+                                          &file_ptr, &cache_ptr);
+
+
+    register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		            &(counters[0]), &(indicies[0]));
+    register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		            NULL, &(indicies[1]));
+    register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		            &(counters[2]), &(indicies[2]));
+
+    free_entries[0] = FALSE; 
+    free_entries[1] = FALSE; 
+    free_entries[2] = FALSE; 
+    expected_num_entries += 3;
+    expected_max_idx = 2;
+
+    verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		              expected_num_entries, expected_max_idx,
+                              free_entries);
+
+
+    /* 11) Enable journaling.  Verify that the callbacks are called. */
+
+    if ( pass2 ) {
+
+        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+
+        result = H5Fget_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+        }
+
+        /* set journaling config fields to taste */
+        jnl_config.enable_journaling       = TRUE;
+
+        strcpy(jnl_config.journal_file_path, journal_filename);
+
+        jnl_config.journal_recovered       = FALSE;
+        jnl_config.jbrb_buf_size           = (8 * 1024);
+        jnl_config.jbrb_num_bufs           = 2;
+        jnl_config.jbrb_use_aio            = FALSE;
+        jnl_config.jbrb_human_readable     = TRUE;
+
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        counters[0]                       = 0;
+        callback_test_cache_ptr           = cache_ptr;
+        callback_test_invalid_cache_ptr   = FALSE;
+        callback_test_null_config_ptr     = FALSE;
+        callback_test_invalid_config      = FALSE;
+        callback_test_null_data_ptr       = FALSE;
+        callback_test_cache_is_dirty      = FALSE;
+        callback_test_null_data_ptr_count = 0;
+
+
+        result = H5Fset_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        if ( ( counters[0] != 1 ) && 
+	     ( counters[1] != 0 ) && 
+	     ( counters[2] != 1 ) &&
+	     ( counters[3] != 0 ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "incorrect number of callback calls(5).";
+	}
+        else if ( callback_test_cache_is_dirty )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "callback found dirty cache(5).";
+        }
+        else if ( ( callback_test_invalid_cache_ptr ) ||
+                  ( callback_test_null_config_ptr ) ||
+                  ( callback_test_invalid_config ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "Bad parameter(s) to callback(5).";
+        }
+	else if ( ( ! callback_test_null_data_ptr ) ||
+                  ( callback_test_null_data_ptr_count != 1 ) )
+	{
+	    pass2 = FALSE;
+	    failure_mssg2 = "incorrect null data_ptr callbacks.(5)";
+	}
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 12) Perform some writes to the file. */
+
+    if ( pass2 ) {
+
+        dims[0] = 8;
+        dims[1] = 10;
+        dataspace_id = H5Screate_simple(2, dims, NULL);
+
+        if ( dataspace_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Screate_simple() failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        /* Create the dataset. */
+        dataset_id = H5Dcreate2(file_id, "/dset2", H5T_STD_I32BE,
+                                dataspace_id, H5P_DEFAULT,
+                                H5P_DEFAULT, H5P_DEFAULT);
+
+        if ( dataspace_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Dcreate2() failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        /* close the data set, and the data space */
+        if ( ( H5Dclose(dataset_id) < 0 ) ||
+             ( H5Sclose(dataspace_id) < 0 ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "data set, or data space close failed.";
+        }
+    }
+
+    if ( pass2 ) {
+
+        if ( cache_ptr->slist_len <= 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "cache isnt' dirty?!?";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 13) Register a great number of callbacks. */
+
+    for ( i = 3; i < max_callbacks; i++ )
+    {
+	if ( ( pass2 ) && ( free_entries[i] ) )
+	{
+            register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		                    &(counters[i]), &(indicies[i]));
+
+	    HDassert( indicies[i] == i );
+
+            free_entries[i] = FALSE; 
+            expected_num_entries++;
+
+	    if ( i > expected_max_idx ) {
+
+	        expected_max_idx = i;
+	    }
+
+	    if ( expected_num_entries > expected_table_len ) {
+
+	        expected_table_len *= 2;
+	    }
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                      expected_num_entries, expected_max_idx,
+                                      free_entries);
+        }
+    }
+
+    HDassert( expected_num_entries == max_callbacks );
+    HDassert( expected_max_idx == (max_callbacks - 1) );
+    HDassert( expected_table_len == max_callbacks );
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 14) Disable journaling.  Verify that the callbacks are called. */
+
+    if ( pass2 ) {
+
+        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+
+        result = H5Fget_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+        }
+
+        /* set journaling config fields to taste */
+        jnl_config.enable_journaling       = FALSE;
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+	for ( i = 0; i < max_callbacks; i++ )
+	{
+            counters[i]                   = 0;
+	}
+        callback_test_cache_ptr           = cache_ptr;
+        callback_test_invalid_cache_ptr   = FALSE;
+        callback_test_null_config_ptr     = FALSE;
+        callback_test_invalid_config      = FALSE;
+        callback_test_null_data_ptr       = FALSE;
+        callback_test_cache_is_dirty      = FALSE;
+	callback_test_null_data_ptr_count = 0;
+
+        result = H5Fset_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+	int max_counter = 0;
+	int counter_sum = 0;
+
+	for ( i = 0; i < max_callbacks; i++ )
+	{
+	    if ( counters[i] > max_counter )
+	    {
+	        max_counter = counters[i];
+	    }
+	    counter_sum += counters[i];
+	}
+
+        if ( ( counters[1] != 0 ) ||
+	     ( max_counter != 1 ) ||
+	     ( counter_sum != max_callbacks - 1 ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "incorrect number of callback calls(6).";
+	}
+        else if ( callback_test_cache_is_dirty )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "callback found dirty cache(6).";
+        }
+        else if ( ( callback_test_invalid_cache_ptr ) ||
+                  ( callback_test_null_config_ptr ) ||
+                  ( callback_test_invalid_config ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "Bad parameter(s) to callback(6).";
+        }
+	else if ( ( ! callback_test_null_data_ptr ) ||
+                  ( callback_test_null_data_ptr_count != 1 ) )
+	{
+	    pass2 = FALSE;
+	    failure_mssg2 = "incorrect null data_ptr callbacks.(6)";
+	}
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 15) Deregister some of the callbacks. */
+
+    /* working from the top downwards, de-register all entries with 
+     * indicies not divisible by 8.
+     */
+
+    for ( i = max_callbacks - 1;  i >= 0;  i-- )
+    {
+        if ( ( pass2 ) && ( ! free_entries[i] ) && ( (i % 8) != 0 ) )
+	{
+            deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
+
+	    indicies[i] = -1;
+            free_entries[i] = TRUE; 
+            expected_num_entries--;
+
+	    if ( i == expected_max_idx ) 
+	    {
+	        double fraction_in_use;
+
+	        while ( ( free_entries[expected_max_idx] ) &&
+		        ( expected_max_idx >= 0 ) )
+	        {
+	            expected_max_idx--;
+	        }
+
+                fraction_in_use = ((double)expected_num_entries) /
+	                           ((double)expected_table_len);
+
+	        while ( ( expected_max_idx < (expected_table_len / 2) ) 
+	                &&
+	                ( fraction_in_use < 
+			  H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+		        &&
+		        ( (expected_table_len / 2) >= 
+			  H5C2__MIN_MDJSC_CB_TBL_LEN )
+		      )
+                {
+	            expected_table_len /= 2;
+	        }
+	    }
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+	                              expected_num_entries, 
+                                      expected_max_idx,
+                                      free_entries);
+	}
+    }
+
+    HDassert( expected_num_entries == max_callbacks / 8 );
+    HDassert( expected_max_idx == (max_callbacks - 8) );
+    HDassert( expected_table_len == max_callbacks );
+
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 16) Enable journaling.  Verify that the remaining callbacks are
+     *     called.
+     */
+
+    if ( pass2 ) {
+
+        jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+
+        result = H5Fget_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fget_jnl_config() failed.\n";
+        }
+
+        /* set journaling config fields to taste */
+        jnl_config.enable_journaling       = TRUE;
+
+        strcpy(jnl_config.journal_file_path, journal_filename);
+
+        jnl_config.journal_recovered       = FALSE;
+        jnl_config.jbrb_buf_size           = (8 * 1024);
+        jnl_config.jbrb_num_bufs           = 2;
+        jnl_config.jbrb_use_aio            = FALSE;
+        jnl_config.jbrb_human_readable     = TRUE;
+
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+	for ( i = 0; i < max_callbacks; i++ )
+	{
+            counters[i]                   = 0;
+	}
+        callback_test_cache_ptr           = cache_ptr;
+        callback_test_invalid_cache_ptr   = FALSE;
+        callback_test_null_config_ptr     = FALSE;
+        callback_test_invalid_config      = FALSE;
+        callback_test_null_data_ptr       = FALSE;
+        callback_test_cache_is_dirty      = FALSE;
+	callback_test_null_data_ptr_count = 0;
+
+        result = H5Fset_jnl_config(file_id, &jnl_config);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fset_jnl_config() failed.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+	int max_counter = 0;
+	int counter_sum = 0;
+
+	for ( i = 0; i < max_callbacks; i++ )
+	{
+	    if ( counters[i] > max_counter )
+	    {
+	        max_counter = counters[i];
+	    }
+	    counter_sum += counters[i];
+	}
+
+        if ( ( max_counter != 1 ) ||
+	     ( counter_sum != ( max_callbacks / 8 ) ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "incorrect number of callback calls(7).";
+	}
+        else if ( callback_test_cache_is_dirty )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "callback found dirty cache(7).";
+        }
+        else if ( ( callback_test_invalid_cache_ptr ) ||
+                  ( callback_test_null_config_ptr ) ||
+                  ( callback_test_invalid_config ) )
+        {
+            pass2 = FALSE;
+            failure_mssg2 = "Bad parameter(s) to callback(7).";
+        }
+	else if ( ( callback_test_null_data_ptr ) ||
+                  ( callback_test_null_data_ptr_count != 0 ) )
+	{
+	    pass2 = FALSE;
+	    failure_mssg2 = "incorrect null data_ptr callbacks.(6)";
+	}
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 17) Deregister the remaining callbacks, and then close and delete
+     *     the file.
+     */
+
+    for ( i = max_callbacks - 1;  i >= 0;  i-- )
+    {
+        if ( ( pass2 ) && ( ! free_entries[i] ) )
+	{
+            deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
+
+	    indicies[i] = -1;
+            free_entries[i] = TRUE; 
+            expected_num_entries--;
+
+	    if ( i == expected_max_idx ) 
+	    {
+	        double fraction_in_use;
+
+	        while ( ( free_entries[expected_max_idx] ) &&
+		        ( expected_max_idx >= 0 ) )
+	        {
+	            expected_max_idx--;
+	        }
+
+                fraction_in_use = ((double)expected_num_entries) /
+	                           ((double)expected_table_len);
+
+	        while ( ( expected_max_idx < (expected_table_len / 2) ) 
+	                &&
+	                ( fraction_in_use < 
+			  H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+		        &&
+		        ( (expected_table_len / 2) >= 
+			  H5C2__MIN_MDJSC_CB_TBL_LEN )
+		      )
+                {
+	            expected_table_len /= 2;
+	        }
+	    }
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+	                              expected_num_entries, 
+                                      expected_max_idx,
+                                      free_entries);
+	}
+    }
+
+    HDassert( expected_num_entries == 0 );
+    HDassert( expected_max_idx == -1 );
+    HDassert( expected_table_len == H5C2__MIN_MDJSC_CB_TBL_LEN );
+
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* Close the file, and tidy up.
+     */
+
+    if ( pass2 ) {
+
+        if ( H5Fclose(file_id) < 0 ) {
+
+	    pass2 = FALSE;
+            failure_mssg2 = "H5Fclose() failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* delete the HDF5 file and journal file */
+#if 1
+        HDremove(filename);
+        HDremove(journal_filename);
+#endif
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d done.\n", 
+		  fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    return;
+
+} /* verify_mdjsc_callback_execution() */
+
+
+/***************************************************************************
+ *
+ * Function: 	verify_mdjsc_callback_registration_deregistration()
+ *
+ * Purpose:  	Run a variety of tests to verify that the metadata 
+ *		journaling status change callback registration and 
+ *		deregistration works as expected.
+ *
+ *		If all tests pass, do nothing.
+ *
+ *		If anything is not as it should be, set pass2 to FALSE,
+ *              and set failure_mssg2 to the appropriate error message.
+ *
+ *              Do nothing and return if pass2 is false on entry.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              8/15/08
+ * 
+ **************************************************************************/
+
+static void
+verify_mdjsc_callback_registration_deregistration(void)
+{
+    const char * fcn_name = 
+        "verify_mdjsc_callback_registration_deregistration():";
+    char filename[512];
+    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    const int max_callbacks = 1024 * H5C2__MIN_MDJSC_CB_TBL_LEN;
+    int counters[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    int i;
+    int j;
+    int expected_num_entries = 0;
+    int expected_table_len = H5C2__MIN_MDJSC_CB_TBL_LEN;
+    int expected_max_idx = -1;
+    int32_t indicies[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    hbool_t free_entries[1024 * H5C2__MIN_MDJSC_CB_TBL_LEN];
+    hbool_t show_progress = FALSE;
+    hbool_t verbose = FALSE;
+    int cp = 0;
+    hid_t file_id = -1;
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
+
+    for ( i = 0; i < max_callbacks; i++ )
+    {
+        counters[i] = 0;
+	free_entries[i] = TRUE;
+	indicies[i] = -1;
+    }
+
+    /*  1) Open a file for journaling.  It doesn't matter whether
+     *     journaling is enabled or not, as this test is directed purely
+     *     at the issue of whether the callback table is managed correctly.
+     *
+     *  2) Register a callback.  Verify that is is added correctly to
+     *     the metadata journaling status change callback table.
+     *
+     *  3) Deregister the callback.  Verify that it is deleted correctly
+     *     from the metadata journaling status change callback table.
+     *
+     *  4) Register H5C2__MIN_MDJSC_CB_TBL_LEN - 1 callbacks.  Verify that
+     *     they are all correctly added to the table, and that the table
+     *     is of size H5C2__MIN_MDJSC_CB_TBL_LEN, and that it contains
+     *     the expected number of entries.
+     *
+     *  5) Register one more entry.  Verify that it is registered
+     *     correctly, and that the table is now full.
+     *
+     *  6) Register another entry.  Verify that is is correctly registered,
+     *     that the table has doubled in size.
+     *
+     *  7) In LIFO order, deregister (H5C2__MIN_MDJSC_CB_TBL_LEN / 2) + 1
+     *     callbacks in LIFO order.  Verify that the entries are deregistered,
+     *     and that the table has not changed size.
+     * 
+     *  8) Again, in LIFO order, deregister another callback.  Verify that
+     *     the callback is deregistered, and that the table has been reduced
+     *     in size to H5C2__MIN_MDJSC_CB_TBL_LEN.
+     *
+     *  9) Deregister all callbacks.  Verify that the table is empty.
+     *
+     * 10) Register 8 * H5C2__MIN_MDJSC_CB_TBL_LEN + 1 callbacks.  Verify
+     *     that all callbacks are registered, and that the table lenght grows
+     *     to 16 * H5C2__MIN_MDJSC_CB_TBL_LEN.
+     *
+     * 11) Deregister all callbacks with even indicies.  Verify the 
+     *     deregistrations.  Verify that the table does not shrink.
+     *
+     * 12) Register a callback.  Verify that it is place in one of the 
+     *     slots freed by the dergistrations in 11) above.
+     *
+     * 13) Starting with the lowest index, deregister all the callbacks.
+     *     Verify the deregistrations, and also verify that the table 
+     *     does not shrink until the last callback is de-registered.
+     *
+     * 14) Register 8 * H5C2__MIN_MDJSC_CB_TBL_LEN + 1 callbacks.  Verify
+     *     that all callbacks are registered, and that the table length grows
+     *     to 16 * H5C2__MIN_MDJSC_CB_TBL_LEN.
+     *
+     * 15) Starting with the highest index, deregister all entries with 
+     *     index not divisible by H5C2__MIN_MDJSC_CB_TBL_LEN / 2.  Verify
+     *     that the callbacks are de-registers, and that the table does
+     *     not shrink
+     *
+     * 16) Register H5C2__MIN_MDJSC_CB_TBL_LEN / 2 callbacks.  Verify that 
+     *     they are placed in slots freed by the dergistrations in 15) above.
+     *
+     * 17) Starting with the lowest index, deregister all entries with 
+     *     index with index >= H5C2__MIN_MDJSC_CB_TBL_LEN and not divisible 
+     *     by H5C2__MIN_MDJSC_CB_TBL_LEN.  Verify that the callbacks are 
+     *     deregistered, and that the table does not shrink.
+     *
+     * 18) Register a callback.  Verify that it is place in one of the 
+     *     slots freed by the dergistrations in 17) above.
+     *
+     * 19) Starting with the highest index, deregister all callbacks.
+     *     Verify that the table shrinks as expected.
+     *
+     * 20) Do a torture tests -- forcing the number of registered callbacks
+     *     into the thousands.  After each registration and deregistration,
+     *     verify that the table is configured as expected.
+     */
+
+
+    /* 1) Open a file for journaling.  It doesn't matter whether
+     *    journaling is enabled or not, as this test is directed purely
+     *    at the issue of whether the callback table is managed correctly.
+     */
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename,
+                        sizeof(filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (1).\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( verbose ) {
+        HDfprintf(stdout, "%s filename = \"%s\".\n", fcn_name, filename);
+        HDfflush(stdout);
+    }
+
+    /* setup the journal file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
+                        sizeof(journal_filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (2).\n";
+        }
+        else if ( strlen(journal_filename) >=
+                        H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "journal file name too long.\n";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( verbose ) {
+        HDfprintf(stdout, "%s journal filename = \"%s\".\n",
+                  fcn_name, journal_filename);
+        HDfflush(stdout);
+    }
+
+    /* clean out any existing journal file */
+    HDremove(journal_filename);
+    setup_cache_for_journaling(filename, journal_filename, &file_id,
+                               &file_ptr, &cache_ptr, FALSE);
+
+
+    /* 2) Register a callback.  Verify that is is added correctly to
+     *    the metadata journaling status change callback table.
+     */
+    j = 0;
+
+    register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		            &(counters[j]), &(indicies[j]));
+
+    free_entries[j] = FALSE; 
+    expected_num_entries++;
+    expected_max_idx = 0;
+
+    verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		              expected_num_entries, expected_max_idx,
+                              free_entries);
+
+    j++;
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 3) Deregister the callback.  Verify that it is deleted correctly
+     *    from the metadata journaling status change callback table.
+     */
+    j--;
+
+    deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[j]);
+
+    free_entries[j] = TRUE; 
+    expected_num_entries--;
+    expected_max_idx = -1;
+
+    verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		              expected_num_entries, expected_max_idx,
+                              free_entries);
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 4) Register H5C2__MIN_MDJSC_CB_TBL_LEN - 1 callbacks.  Verify that
+     *    they are all correctly added to the table, and that the table
+     *    is of size H5C2__MIN_MDJSC_CB_TBL_LEN, and that it contains
+     *    the expected number of entries.
+     */
+    for ( i = 0; i < H5C2__MIN_MDJSC_CB_TBL_LEN - 1; i++ )
+    {
+        register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		                &(counters[j]), &(indicies[j]));
+
+        free_entries[j] = FALSE; 
+        expected_num_entries++;
+        expected_max_idx++;
+
+        verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                  expected_num_entries, expected_max_idx,
+                                  free_entries);
+
+        j++;
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 5) Register one more entry.  Verify that it is registered
+     *    correctly, and that the table is now full.
+     */
+
+    register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+                            &(counters[j]), &(indicies[j]));
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    free_entries[j] = FALSE; 
+    expected_num_entries++;
+    expected_max_idx++;
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+                              expected_num_entries, expected_max_idx,
+                              free_entries);
+
+    j++;
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    if ( ( pass2 ) && ( expected_num_entries != expected_table_len ) )
+    {
+	pass2 = FALSE;
+	failure_mssg2 = "Unexpected table len(1)";
+    }
+
+
+    /* 6) Register another entry.  Verify that is is correctly registered,
+     *    that the table has doubled in size.
+     */
+
+    register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+                            &(counters[j]), &(indicies[j]));
+
+    free_entries[j] = FALSE; 
+    expected_num_entries++;
+    expected_max_idx++;
+    expected_table_len *= 2;
+
+    verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+                              expected_num_entries, expected_max_idx,
+                              free_entries);
+
+    j++;
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 7) In LIFO order, deregister (H5C2__MIN_MDJSC_CB_TBL_LEN / 2) + 1
+     *    callbacks in LIFO order.  Verify that the entries are deregistered,
+     *    and that the table has not changed size.
+     */
+
+    for ( i = 0; i < (H5C2__MIN_MDJSC_CB_TBL_LEN / 2) + 1; i++ )
+    {
+        j--;
+
+        deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[j]);
+
+        free_entries[j] = TRUE; 
+        expected_num_entries--;
+        expected_max_idx--;
+
+        verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                  expected_num_entries, expected_max_idx,
+                                  free_entries);
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 8) Again, in LIFO order, deregister another callback.  Verify that
+     *    the callback is deregistered, and that the table has been reduced
+     *    in size to H5C2__MIN_MDJSC_CB_TBL_LEN.
+     */
+
+    j--;
+
+    deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[j]);
+
+    free_entries[j] = TRUE; 
+    expected_num_entries--;
+    expected_max_idx--;
+    expected_table_len /= 2;
+
+    verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+                              expected_num_entries, expected_max_idx,
+                              free_entries);
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+     
+    /*  9) Deregister all callbacks.  Verify that the table is empty.
+     */
+
+    while ( expected_num_entries > 0 )
+    {
+        j--;
+
+        deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[j]);
+
+        free_entries[j] = TRUE; 
+        expected_num_entries--;
+        expected_max_idx--;
+
+        verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                  expected_num_entries, expected_max_idx,
+                                  free_entries);
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 10) Register 8 * H5C2__MIN_MDJSC_CB_TBL_LEN + 1 callbacks.  Verify
+     *     that all callbacks are registered, and that the table length grows
+     *     to 16 * H5C2__MIN_MDJSC_CB_TBL_LEN.
+     */
+
+    for ( i = 0; i < ((8 * H5C2__MIN_MDJSC_CB_TBL_LEN) + 1); i++ )
+    {
+        register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		                &(counters[i]), &(indicies[i]));
+
+	HDassert( indicies[i] == i );
+
+        free_entries[i] = FALSE; 
+        expected_num_entries++;
+        expected_max_idx++;
+
+	if ( expected_num_entries > expected_table_len ) {
+
+	    expected_table_len *= 2;
+	}
+
+        verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                  expected_num_entries, expected_max_idx,
+                                  free_entries);
+    }
+
+    HDassert( expected_table_len == 16 * H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( expected_table_len < 1024 );
+    HDassert( expected_max_idx == 8 * H5C2__MIN_MDJSC_CB_TBL_LEN );
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+     
+
+    /* 11) Deregister all callbacks with even indicies.  Verify the 
+     *     deregistrations.  Verify that the table does not shrink.
+     */
+
+    for ( i = 0; i < (8 * H5C2__MIN_MDJSC_CB_TBL_LEN) + 1; i += 2 )
+    {
+        deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
+
+	indicies[i] = -1;
+        free_entries[i] = TRUE; 
+        expected_num_entries--;
+
+	if ( i == expected_max_idx ) {
+            expected_max_idx--;
+	}
+
+        verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                  expected_num_entries, expected_max_idx,
+                                  free_entries);
+
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 12) Register a callback.  Verify that it is place in one of the 
+     *     slots freed by the dergistrations in 11) above.
+     */
+
+    /* The index assigned to the new callback is determined by the 
+     * free list management algorithm.  In the present implementation
+     * freed entries are added to the head of the free list, so the
+     * next index issues will be 8 * H5C2__MIN_MDJSC_CB_TBL_LEN.
+     */
+
+    j = 8 * H5C2__MIN_MDJSC_CB_TBL_LEN;
+
+    register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+                            &(counters[j]), &(indicies[j]));
+
+    HDassert( indicies[j] == j ); /* see comment above */
+    free_entries[j] = FALSE; 
+    expected_num_entries++;
+
+    if ( j > expected_max_idx ) {
+
+        expected_max_idx = j;
+    }
+
+    verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+                              expected_num_entries, expected_max_idx,
+                              free_entries);
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 13) Starting with the lowest index, deregister all the callbacks.
+     *     Verify the deregistrations, and also verify that the table 
+     *     does not shrink until the last callback is de-registered.
+     */
+
+    for ( i = 0; i < (8 * H5C2__MIN_MDJSC_CB_TBL_LEN) + 1; i++ )
+    {
+	if ( ! free_entries[i] ) 
+	{
+            deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
+
+	    indicies[i] = -1;
+            free_entries[i] = TRUE; 
+            expected_num_entries--;
+
+	    if ( i == expected_max_idx ) 
+	    {
+                expected_max_idx = -1;
+		expected_table_len = H5C2__MIN_MDJSC_CB_TBL_LEN;
+	    }
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                      expected_num_entries, expected_max_idx,
+                                      free_entries);
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+     
+
+    /* 14) Register 8 * H5C2__MIN_MDJSC_CB_TBL_LEN + 1 callbacks.  Verify
+     *     that all callbacks are registered, and that the table length grows
+     *     to 16 * H5C2__MIN_MDJSC_CB_TBL_LEN.
+     */
+
+    for ( i = 0; i < ((8 * H5C2__MIN_MDJSC_CB_TBL_LEN) + 1); i++ )
+    {
+        register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		                &(counters[i]), &(indicies[i]));
+
+	HDassert( indicies[i] == i );
+
+        free_entries[i] = FALSE; 
+        expected_num_entries++;
+        expected_max_idx++;
+
+	if ( expected_num_entries > expected_table_len ) {
+
+	    expected_table_len *= 2;
+	}
+
+        verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                  expected_num_entries, expected_max_idx,
+                                  free_entries);
+    }
+
+    HDassert( expected_table_len == 16 * H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( expected_table_len < 1024 );
+    HDassert( expected_max_idx == 8 * H5C2__MIN_MDJSC_CB_TBL_LEN );
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+     
+
+    /* 15) Starting with the highest index, deregister all entries with 
+     *     index not divisible by H5C2__MIN_MDJSC_CB_TBL_LEN / 2.  Verify
+     *     that the callbacks are de-registers, and that the table does
+     *     not shrink
+     */
+
+    for ( i = (8 * H5C2__MIN_MDJSC_CB_TBL_LEN); i >= 0; i-- )
+    {
+	if ( ( ! free_entries[i] ) &&
+	     ( (i % (H5C2__MIN_MDJSC_CB_TBL_LEN /2)) != 0 ) )
+	{
+            deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
+
+	    indicies[i] = -1;
+            free_entries[i] = TRUE; 
+            expected_num_entries--;
+
+	    if ( i == expected_max_idx ) 
+	    {
+                expected_max_idx = -1;
+	    }
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                      expected_num_entries, expected_max_idx,
+                                      free_entries);
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+     
+
+    /* 16) Register H5C2__MIN_MDJSC_CB_TBL_LEN / 2 callbacks.  Verify that 
+     *     they are placed in slots freed by the dergistrations in 15) above.
+     */
+
+    /* The index assigned to the new callback is determined by the 
+     * free list management algorithm.  In the present implementation
+     * freed entries are added to the head of the free list, so the
+     * next index issues will be 1.
+     */
+
+    j = 1;
+
+    for ( i = 0; i < H5C2__MIN_MDJSC_CB_TBL_LEN / 2; i++ )
+    {
+        while ( ! free_entries[j] )
+	{
+	    j++;
+	}
+
+        register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+                                &(counters[j]), &(indicies[j]));
+
+        HDassert( indicies[j] == j ); /* see comment above */
+        free_entries[j] = FALSE; 
+        expected_num_entries++;
+
+        if ( j > expected_max_idx ) {
+
+            expected_max_idx = j;
+        }
+
+        verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+                                  expected_num_entries, expected_max_idx,
+                                  free_entries);
+    }
+
+    HDassert( j == (H5C2__MIN_MDJSC_CB_TBL_LEN / 2) + 1 );
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 17) Starting with the lowest index, deregister all entries with 
+     *     index with index >= H5C2__MIN_MDJSC_CB_TBL_LEN and not divisible 
+     *     by H5C2__MIN_MDJSC_CB_TBL_LEN.  Verify that the callbacks are 
+     *     deregistered, and that the table does not shrink.
+     */
+
+    for ( i = H5C2__MIN_MDJSC_CB_TBL_LEN; 
+          i < (8 * H5C2__MIN_MDJSC_CB_TBL_LEN) + 1; 
+	  i++ )
+    {
+	if ( ( ! free_entries[i] ) &&
+	     ( (i % H5C2__MIN_MDJSC_CB_TBL_LEN) != 0 ) )
+	{
+            deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
+
+	    indicies[i] = -1;
+            free_entries[i] = TRUE; 
+            expected_num_entries--;
+
+	    if ( i == expected_max_idx ) 
+	    {
+                expected_max_idx = -1;
+	    }
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                      expected_num_entries, expected_max_idx,
+                                      free_entries);
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+     
+
+    /* 18) Register a callback.  Verify that it is place in one of the 
+     *     slots freed by the dergistrations in 17) above.
+     */
+
+    /* The index assigned to the new callback is determined by the 
+     * free list management algorithm.  In the present implementation
+     * freed entries are added to the head of the free list, so the
+     * next index issues will be (7 * H5C2__MIN_MDJSC_CB_TBL_LEN) +
+     * (H5C2__MIN_MDJSC_CB_TBL_LEN / 2).
+     */
+
+    j = (7 * H5C2__MIN_MDJSC_CB_TBL_LEN) + (H5C2__MIN_MDJSC_CB_TBL_LEN / 2);
+
+    register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+                            &(counters[j]), &(indicies[j]));
+
+    HDassert( indicies[j] == j ); /* see comment above */
+    free_entries[j] = FALSE; 
+    expected_num_entries++;
+
+    if ( j > expected_max_idx ) {
+
+        expected_max_idx = j;
+    }
+
+    verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+                              expected_num_entries, expected_max_idx,
+                              free_entries);
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* 19) Starting with the highest index, deregister all callbacks.
+     *     Verify that the table shrinks as expected.
+     */
+
+    for ( i = (8 * H5C2__MIN_MDJSC_CB_TBL_LEN); i >= 0; i-- )
+    {
+	if ( ( pass2 ) && ( ! free_entries[i] ) )
+	{
+            deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
+
+	    indicies[i] = -1;
+            free_entries[i] = TRUE; 
+            expected_num_entries--;
+
+	    if ( i == expected_max_idx ) 
+	    {
+		double fraction_in_use;
+
+		while ( ( free_entries[expected_max_idx] ) &&
+			( expected_max_idx >= 0 ) )
+		{
+		    expected_max_idx--;
+		}
+
+                fraction_in_use = ((double)expected_num_entries) /
+	                          ((double)expected_table_len);
+
+
+		if ( ( expected_max_idx < (expected_table_len / 2) ) 
+		     &&
+		     ( fraction_in_use < H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+		     &&
+		     ( (expected_table_len / 2) >= H5C2__MIN_MDJSC_CB_TBL_LEN )
+		   )
+		{
+		    expected_table_len /= 2;
+		}
+	    }
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                      expected_num_entries, expected_max_idx,
+                                      free_entries);
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+     
+
+    /* 20) Do a torture tests -- forcing the number of registered callbacks
+     *     into the thousands.  After each registration and deregistration,
+     *     verify that the table is configured as expected.
+     */
+
+    /* register half the maximum number of callbacks in this test */
+
+    for ( i = 0; i < (max_callbacks / 2); i++ )
+    {
+        register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		                &(counters[i]), &(indicies[i]));
+
+	HDassert( indicies[i] == i );
+
+        free_entries[i] = FALSE; 
+        expected_num_entries++;
+        expected_max_idx++;
+
+	if ( expected_num_entries > expected_table_len ) {
+
+	    expected_table_len *= 2;
+	}
+
+        verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                  expected_num_entries, expected_max_idx,
+                                  free_entries);
+    }
+
+    HDassert( expected_table_len == (max_callbacks / 2) );
+    HDassert( expected_max_idx == ((max_callbacks / 2) - 1) );
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+     
+    /* Starting from 3 * max_callbacks / 8 and working down to 
+     * max_callbacks / 8, deregister the odd index callbacks.
+     */
+    for ( i = (3 * max_callbacks / 8); i >= max_callbacks / 8; i-- )
+    {
+	if ( ( pass2 ) && ( ! free_entries[i] ) && ( (i % 2) == 1 ) )
+	{
+            deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
+
+	    indicies[i] = -1;
+            free_entries[i] = TRUE; 
+            expected_num_entries--;
+
+	    if ( i == expected_max_idx ) 
+	    {
+		double fraction_in_use;
+
+		while ( ( free_entries[expected_max_idx] ) &&
+			( expected_max_idx >= 0 ) )
+		{
+		    expected_max_idx--;
+		}
+
+                fraction_in_use = ((double)expected_num_entries) /
+	                          ((double)expected_table_len);
+
+
+		if ( ( expected_max_idx < (expected_table_len / 2) ) 
+		     &&
+		     ( fraction_in_use < H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+		     &&
+		     ( (expected_table_len / 2) >= H5C2__MIN_MDJSC_CB_TBL_LEN )
+		   )
+		{
+		    expected_table_len /= 2;
+		}
+	    }
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                      expected_num_entries, expected_max_idx,
+                                      free_entries);
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* now re-register the callbacks just deregistered.  To keep the test
+     * at least somewhat sane, re-register the entries in the order they
+     * appear in the free list, so as to maintain the indicies[i] == i
+     * invarient.  At present, this means re-registering entries the 
+     * the reverse of the order they were deregistered in.
+     */
+     
+    for ( i = (max_callbacks / 8); i <= (3 * max_callbacks / 8); i++ )
+    {
+	if ( ( pass2 ) && ( free_entries[i] ) && ( (i % 2) == 1 ) )
+	{
+            register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		                    &(counters[i]), &(indicies[i]));
+
+	    HDassert( indicies[i] == i );
+
+            free_entries[i] = FALSE; 
+            expected_num_entries++;
+
+	    if ( i > expected_max_idx ) {
+
+	        expected_max_idx = i;
+	    }
+
+	    if ( expected_num_entries > expected_table_len ) {
+
+	        expected_table_len *= 2;
+	    }
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                      expected_num_entries, expected_max_idx,
+                                      free_entries);
+        }
+    }
+
+    HDassert( expected_num_entries == (max_callbacks / 2) );
+    HDassert( expected_max_idx == ((max_callbacks / 2) - 1) );
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* now register more entries up to max_callbacks */
+     
+    for ( i = (max_callbacks / 2); i < max_callbacks; i++ )
+    {
+	if ( ( pass2 ) && ( free_entries[i] ) )
+	{
+            register_mdjsc_callback(file_ptr, cache_ptr, test_mdjsc_callback,
+		                    &(counters[i]), &(indicies[i]));
+
+	    HDassert( indicies[i] == i );
+
+            free_entries[i] = FALSE; 
+            expected_num_entries++;
+
+	    if ( i > expected_max_idx ) {
+
+	        expected_max_idx = i;
+	    }
+
+	    if ( expected_num_entries > expected_table_len ) {
+
+	        expected_table_len *= 2;
+	    }
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                      expected_num_entries, expected_max_idx,
+                                      free_entries);
+        }
+    }
+
+    HDassert( expected_num_entries == max_callbacks );
+    HDassert( expected_max_idx == (max_callbacks - 1) );
+    HDassert( expected_table_len == max_callbacks );
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* deregister every other 200 callbacks on increasing index */
+    for ( i = 0; i < max_callbacks; i += 200 )
+    {
+        for ( j = i; ( ( i < j + 200 ) && ( j < max_callbacks ) ); j++ )
+	{
+	    if ( ( pass2 ) && ( ! free_entries[i] ) )
+	    {
+                deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
+
+	        indicies[i] = -1;
+                free_entries[i] = TRUE; 
+                expected_num_entries--;
+
+	        if ( i == expected_max_idx ) 
+	        {
+		    double fraction_in_use;
+
+		    while ( ( free_entries[expected_max_idx] ) &&
+			    ( expected_max_idx >= 0 ) )
+		    {
+		        expected_max_idx--;
+		    }
+
+                    fraction_in_use = ((double)expected_num_entries) /
+	                               ((double)expected_table_len);
+
+		    if ( ( expected_max_idx < (expected_table_len / 2) ) 
+		         &&
+		         ( fraction_in_use < 
+			   H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+		         &&
+		         ( (expected_table_len / 2) >= 
+			   H5C2__MIN_MDJSC_CB_TBL_LEN )
+		       )
+		    {
+		        expected_table_len /= 2;
+		    }
+	        }
+
+                verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+		                          expected_num_entries, 
+					  expected_max_idx,
+                                          free_entries);
+            }
+	}
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* working from the top downwards, de-register all entries with 
+     * indicies not divisible by 3.
+     */
+
+    for ( i = max_callbacks - 1;  i >= 0;  i-- )
+    {
+        if ( ( pass2 ) && ( ! free_entries[i] ) && ( (i % 3) != 0 ) )
+	{
+            deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
+
+	    indicies[i] = -1;
+            free_entries[i] = TRUE; 
+            expected_num_entries--;
+
+	    if ( i == expected_max_idx ) 
+	    {
+	        double fraction_in_use;
+
+	        while ( ( free_entries[expected_max_idx] ) &&
+		        ( expected_max_idx >= 0 ) )
+	        {
+	            expected_max_idx--;
+	        }
+
+                fraction_in_use = ((double)expected_num_entries) /
+	                           ((double)expected_table_len);
+
+	        while ( ( expected_max_idx < (expected_table_len / 2) ) 
+	                &&
+	                ( fraction_in_use < 
+			  H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+		        &&
+		        ( (expected_table_len / 2) >= 
+			  H5C2__MIN_MDJSC_CB_TBL_LEN )
+		      )
+                {
+	            expected_table_len /= 2;
+	        }
+	    }
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+	                              expected_num_entries, 
+                                      expected_max_idx,
+                                      free_entries);
+	}
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    
+    /* working from low index up, deregister all entries with index
+     * greater than (max_callbacks / 8).
+     */
+
+    for ( i = (max_callbacks / 8);  i < max_callbacks;  i++ )
+    {
+        if ( ( pass2 ) && ( ! free_entries[i] ) )
+	{
+            deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
+
+	    indicies[i] = -1;
+            free_entries[i] = TRUE; 
+            expected_num_entries--;
+
+	    if ( i == expected_max_idx ) 
+	    {
+	        double fraction_in_use;
+
+	        while ( ( free_entries[expected_max_idx] ) &&
+		        ( expected_max_idx >= 0 ) )
+	        {
+	            expected_max_idx--;
+	        }
+
+                fraction_in_use = ((double)expected_num_entries) /
+	                           ((double)expected_table_len);
+
+	        while ( ( expected_max_idx < (expected_table_len / 2) ) 
+	                &&
+	                ( fraction_in_use < 
+			  H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+		        &&
+		        ( (expected_table_len / 2) >= 
+			  H5C2__MIN_MDJSC_CB_TBL_LEN )
+		      )
+                {
+	            expected_table_len /= 2;
+	        }
+	    }
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+	                              expected_num_entries, 
+                                      expected_max_idx,
+                                      free_entries);
+	}
+    }
+
+    HDassert( expected_table_len == (max_callbacks / 8) );
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* working from the top down, deregister the remaining callbacks. */
+
+    for ( i = (max_callbacks / 8);  i >= 0;  i-- )
+    {
+        if ( ( pass2 ) && ( ! free_entries[i] ) )
+	{
+            deregister_mdjsc_callback(file_ptr, cache_ptr, indicies[i]);
+
+	    indicies[i] = -1;
+            free_entries[i] = TRUE; 
+            expected_num_entries--;
+
+	    if ( i == expected_max_idx ) 
+	    {
+	        double fraction_in_use;
+
+	        while ( ( free_entries[expected_max_idx] ) &&
+		        ( expected_max_idx >= 0 ) )
+	        {
+	            expected_max_idx--;
+	        }
+
+                fraction_in_use = ((double)expected_num_entries) /
+	                           ((double)expected_table_len);
+
+	        while ( ( expected_max_idx < (expected_table_len / 2) ) 
+	                &&
+	                ( fraction_in_use < 
+			  H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) 
+		        &&
+		        ( (expected_table_len / 2) >= 
+			  H5C2__MIN_MDJSC_CB_TBL_LEN )
+		      )
+                {
+	            expected_table_len /= 2;
+	        }
+	    }
+
+            verify_mdjsc_table_config(cache_ptr, expected_table_len, 
+	                              expected_num_entries, 
+                                      expected_max_idx,
+                                      free_entries);
+	}
+    }
+
+    HDassert( expected_table_len == H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( expected_num_entries == 0 );
+    HDassert( expected_max_idx  == -1 );
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+
+    /* Close the file, and tidy up.
+     */
+
+    if ( pass2 ) {
+
+        if ( H5Fclose(file_id) < 0 ) {
+
+	    pass2 = FALSE;
+            failure_mssg2 = "H5Fclose() failed.";
+        }
+    }
+
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d.\n", fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    /* delete the HDF5 file and journal file */
+#if 1
+        HDremove(filename);
+        HDremove(journal_filename);
+#endif
+    if ( show_progress ) {
+
+        HDfprintf(stdout, "%s%d cp = %d done.\n", 
+		  fcn_name, (int)pass2, cp++);
+        HDfflush(stdout);
+    }
+
+    return;
+
+} /* verify_mdjsc_callback_registration_deregistration() */
+
+
+/***************************************************************************
  * Function: 	check_buffer_writes
  *
  * Purpose:  	Verify the function H5C_jb__write_to_buffer properly writes
@@ -8875,6 +12351,7 @@ verify_mdj_file_unmarking_on_recovery(void)
  *              Thursday, February 21, 2008
  * 
  **************************************************************************/
+
 static void 
 check_buffer_writes(void)
 {
@@ -10935,6 +14412,9 @@ main(void)
 #endif 
 #if 1
     check_mdj_file_marking();
+#endif
+#if 1
+    check_mdjsc_callbacks();
 #endif
 
     return(failures2);

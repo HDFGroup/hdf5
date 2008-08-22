@@ -402,7 +402,6 @@ H5AC2_term_interface(void)
             H5AC2_dxpl_id=(-1);
             H5AC2_noblock_dxpl_id=(-1);
             H5AC2_ind_dxpl_id=(-1);
-
 #endif /* H5_HAVE_PARALLEL */
             /* Reset interface initialization flag */
             H5_interface_initialize_g = 0;
@@ -1070,7 +1069,82 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5AC2_end_transaction() */
+} /* H5AC2_check_for_journaling() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC2_deregister_mdjsc_callback()
+ *
+ * Purpose:	Deregister a metadata journaling status change callback.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              8/15/08
+ *
+ * Modifications:
+ *		
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC2_deregister_mdjsc_callback(H5F_t * file_ptr,
+                                int32_t idx)
+{
+    herr_t    result;
+    herr_t    ret_value = SUCCEED;      /* Return value */
+    H5C2_t *  cache_ptr = NULL;
+#if H5AC2__TRACE_FILE_ENABLED
+    char      trace[256] = "";
+    FILE *    trace_file_ptr = NULL;
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    FUNC_ENTER_NOAPI(H5AC2_deregister_mdjsc_callback, FAIL)
+
+    if ( ( file_ptr == NULL ) ||
+	 ( ( cache_ptr = file_ptr->shared->cache2 ) == NULL ) ) {
+
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+		     "Invalid parameter(s) on entry.");
+    }
+
+#if H5AC2__TRACE_FILE_ENABLED
+    /* For the deregister metadata journaling status change callback 
+     * call, only the idx is really needed.  Write the return value to 
+     * catch occult errors.
+     */
+    if ( ( cache_ptr != NULL ) 
+         &&
+         ( H5C2_get_trace_file_ptr((H5C2_t *)cache_ptr, &trace_file_ptr) >= 0 )
+         &&
+         ( trace_file_ptr != NULL ) ) {
+
+        sprintf(trace, "H5AC2_deregister_mdjsc_callback %d ", idx);
+    }
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    result = H5C2_deregister_mdjsc_callback(cache_ptr, idx);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_deregister_mdjsc_callback() failed.");
+    }
+
+done:
+
+#if H5AC2__TRACE_FILE_ENABLED
+    if ( trace_file_ptr != NULL ) {
+
+	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+    }
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC2_deregister_mdjsc_callback() */
 
 
 /*-------------------------------------------------------------------------
@@ -1123,7 +1197,8 @@ H5AC2_end_transaction(hbool_t do_transaction,
          ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
-        sprintf(trace, "H5AC2_end_transaction %s %llu", api_call_name, trans_num);
+        sprintf(trace, "H5AC2_end_transaction %s %llu", 
+                api_call_name, trans_num);
     }
 #endif /* H5AC2__TRACE_FILE_ENABLED */
 
@@ -2379,6 +2454,104 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5AC2_register_mdjsc_callback()
+ *
+ * Purpose:	Register a metadata journaling status change callback,
+ *              and return the index assigned to the callback in *idx_ptr.
+ *
+ *		If config_ptr is not NULL, return the current metadata 
+ *		journaling configuration in *config_ptr.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              8/15/08
+ *
+ * Modifications:
+ *		
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5AC2_register_mdjsc_callback(H5F_t * file_ptr,
+                              H5C2_mdj_status_change_func_t fcn_ptr,
+                              void * data_ptr,
+                              int32_t * idx_ptr,
+                              H5C2_mdj_config_t * config_ptr)
+{
+    herr_t    result;
+    herr_t    ret_value=SUCCEED;      /* Return value */
+    H5C2_t *  cache_ptr;
+#if H5AC2__TRACE_FILE_ENABLED
+    char      trace[256] = "";
+    FILE *    trace_file_ptr = NULL;
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    FUNC_ENTER_NOAPI(H5AC2_register_mdjsc_callback, FAIL)
+
+    if ( ( file_ptr == NULL ) ||
+	 ( ( cache_ptr = file_ptr->shared->cache2 ) == NULL ) ||
+	 ( fcn_ptr == NULL ) ||
+	 ( idx_ptr == NULL ) ) {
+
+         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
+		     "Invalid parameter(s) on entry.");
+    }
+
+#if H5AC2__TRACE_FILE_ENABLED
+    /* For the register metadata journaling status change callback 
+     * call, fnc_ptr, data_ptr, and the returned idx are all that 
+     * are needed.  Write the return value to catch occult errors.
+     */
+    if ( ( cache_ptr != NULL ) &&
+         ( H5C2_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
+         ( trace_file_ptr != NULL ) ) {
+
+       sprintf(trace, "H5AC2_register_mdjsc_callback 0x%lx 0x%lx ", 
+               (unsigned long)(fcn_ptr), (unsigned long)(data_ptr));
+    }
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    result = H5C2_register_mdjsc_callback(cache_ptr, 
+                                          fcn_ptr,
+                                          data_ptr, 
+                                          idx_ptr);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_register_mdjsc_callback() failed.");
+    }
+
+    if ( config_ptr != NULL ) {
+
+        result = H5C2_get_journal_config((H5C2_t *)cache_ptr, config_ptr);
+
+        if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_get_journal_config() failed.");
+        }
+    }
+
+done:
+
+#if H5AC2__TRACE_FILE_ENABLED
+    if ( trace_file_ptr != NULL ) {
+
+	HDfprintf(trace_file_ptr, "%s %d %d\n", 
+                  trace, *idx_ptr, (int)ret_value);
+    }
+#endif /* H5AC2__TRACE_FILE_ENABLED */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC2_register_mdjsc_callback() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC2_resize_pinned_entry
  *
  * Purpose:	Resize a pinned entry.  The target entry MUST be
@@ -2399,6 +2572,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+
 herr_t
 H5AC2_resize_pinned_entry(void *  thing,
                          size_t  new_size)
@@ -2662,6 +2836,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+
 herr_t
 H5AC2_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC2_class_t *type, 
 		haddr_t addr, size_t new_size, void *thing, unsigned flags)
@@ -3073,7 +3248,9 @@ done:
  *
  * Modifications:
  *
- *		None.
+ *		JRM -- 8/14/08
+ *		Reworked for change in argument list to 
+ *		H5C2_get_journal_config().
  *
  *-------------------------------------------------------------------------
  */
@@ -3084,6 +3261,7 @@ H5AC2_get_jnl_config(H5AC2_t * cache_ptr,
 {
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
+    H5C2_mdj_config_t internal_config;
 
     FUNC_ENTER_NOAPI(H5AC2_get_jnl_config, FAIL)
 
@@ -3110,7 +3288,7 @@ H5AC2_get_jnl_config(H5AC2_t * cache_ptr,
     }
 
     /* get the current journal configuration.  Start by setting defaults,
-     * which will typically be changed shortly.
+     * which will be changed shortly if journaling is enabled.
      */
 
     config_ptr->enable_journaling    = FALSE;
@@ -3121,18 +3299,25 @@ H5AC2_get_jnl_config(H5AC2_t * cache_ptr,
     config_ptr->jbrb_use_aio         = FALSE;
     config_ptr->jbrb_human_readable  = FALSE;
 
-    result = H5C2_get_journal_config(cache_ptr,
-		                     &(config_ptr->enable_journaling),
-                                     &(config_ptr->journal_file_path[0]),
-				     &(config_ptr->jbrb_buf_size),
-				     &(config_ptr->jbrb_num_bufs),
-				     &(config_ptr->jbrb_use_aio),
-				     &(config_ptr->jbrb_human_readable));
+    result = H5C2_get_journal_config(cache_ptr, &internal_config);
 
     if ( result < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                     "H5C2_get_journal_config() failed.")
+    }
+
+    if ( internal_config.enable_journaling ) {
+
+        config_ptr->enable_journaling   = internal_config.enable_journaling;
+	HDstrncpy(&(config_ptr->journal_file_path[0]),
+		  internal_config.journal_file_path,
+		  H5AC2__MAX_JOURNAL_FILE_NAME_LEN);
+        config_ptr->journal_file_path[H5AC2__MAX_JOURNAL_FILE_NAME_LEN] = '\0';
+	config_ptr->jbrb_buf_size       = internal_config.jbrb_buf_size;
+	config_ptr->jbrb_num_bufs       = internal_config.jbrb_num_bufs;
+	config_ptr->jbrb_use_aio        = internal_config.jbrb_use_aio;
+	config_ptr->jbrb_human_readable = internal_config.jbrb_human_readable;
     }
 
 done:
@@ -3461,7 +3646,19 @@ done:
  *
  * Modifications:
  *
- * 		None.
+ * 		JRM -- 8/14/08
+ * 		Revised code for the use of the H5C2_mdj_config_t 
+ * 		structure in H5C2_get_journal_config() and
+ *		H5C2_begin_journaling().  
+ *
+ *		Per Quincey's request, also added code to 
+ *		throw an error if journaling is requested when 
+ *		it is already enabled, or if the end of journaling
+ *		is requested when it is already disabled.
+ *
+ *		Note that this required the addition of the 
+ *		initializing parameter, which allows us to 
+ *		avoid generating an error on startup.
  *
  *-------------------------------------------------------------------------
  */
@@ -3469,13 +3666,14 @@ done:
 herr_t
 H5AC2_set_jnl_config(H5F_t * f,
                      hid_t dxpl_id,
-                     H5AC2_jnl_config_t *config_ptr)
+                     H5AC2_jnl_config_t *config_ptr,
+		     hbool_t initializing)
 {
     /* const char *        fcn_name = "H5AC2_set_jnl_config"; */
     H5AC2_t *           cache_ptr;
     herr_t              result;
     herr_t              ret_value = SUCCEED;      /* Return value */
-    hbool_t		mdj_enabled = FALSE;
+    H5C2_mdj_config_t	internal_config;
 #if H5AC2__TRACE_FILE_ENABLED
     H5AC2_jnl_config_t  trace_config = H5AC2__DEFAULT_JNL_CONFIG;
     FILE *              trace_file_ptr = NULL;
@@ -3520,8 +3718,7 @@ H5AC2_set_jnl_config(H5F_t * f,
                     "Bad journaling configuration");
     }
 
-    result = H5C2_get_journal_config((H5C2_t *)cache_ptr, &mdj_enabled,
-		                     NULL, NULL, NULL, NULL, NULL);
+    result = H5C2_get_journal_config((H5C2_t *)cache_ptr, &internal_config);
 
     if ( result < 0 ) {
 
@@ -3529,20 +3726,30 @@ H5AC2_set_jnl_config(H5F_t * f,
                     "H5C2_get_journal_config() failed.")
     }
 
-    if ( config_ptr->enable_journaling != mdj_enabled ) {
+    if ( config_ptr->enable_journaling != internal_config.enable_journaling ) {
 
         /* we have work to do -- start or stop journaling as requested */
 	
 	if ( config_ptr->enable_journaling ) {
 
+	    internal_config.enable_journaling = config_ptr->enable_journaling;
+
+	    HDstrncpy(internal_config.journal_file_path,
+                      &(config_ptr->journal_file_path[0]),
+		      H5C2__MAX_JOURNAL_FILE_NAME_LEN);
+            internal_config.journal_file_path[H5AC2__MAX_JOURNAL_FILE_NAME_LEN]
+		    = '\0';
+
+	    internal_config.jbrb_buf_size       = config_ptr->jbrb_buf_size;
+	    internal_config.jbrb_num_bufs       = config_ptr->jbrb_num_bufs;
+	    internal_config.jbrb_use_aio        = config_ptr->jbrb_use_aio;
+	    internal_config.jbrb_human_readable = 
+		    config_ptr->jbrb_human_readable;
+
 	    result = H5C2_begin_journaling(f,
 			                   dxpl_id,
 					   cache_ptr,
-					   &(config_ptr->journal_file_path[0]),
-                                           config_ptr->jbrb_buf_size,
-                                           config_ptr->jbrb_num_bufs,
-                                           config_ptr->jbrb_use_aio,
-                                           config_ptr->jbrb_human_readable);
+					   &internal_config);
 	    if ( result < 0 ) {
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
@@ -3558,6 +3765,19 @@ H5AC2_set_jnl_config(H5F_t * f,
 	                    "H5C2_end_journaling() failed.")
 	    }
 	}
+    } else if ( ! initializing ) {
+
+        if ( config_ptr->enable_journaling ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+		        "journaling already enabled.")
+
+        } else {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+		        "journaling already disabled.")
+
+        }
     }
 
 done:
@@ -4032,6 +4252,72 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC2_validate_jnl_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC2_validate_jnl_config_ver()
+ *
+ * Purpose:     Return true if the supplied H5AC2_jnl_config_t version
+ *		number is valid, and FALSE otherwise.
+ *
+ * Return:      TRUE if the version number is valid, and FALSE otherwise.
+ *
+ * Programmer:  John Mainzer
+ *              8/13/08
+ *
+ * Modifications:
+ *
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+hbool_t
+H5AC2_validate_jnl_config_ver(int version_num)
+{
+    hbool_t valid = FALSE;
+
+    if ( version_num == H5AC2__CURR_JNL_CONFIG_VER )
+    {
+        valid = TRUE;
+    }
+
+    return(valid);
+
+} /* H5AC2_validate_jnl_config_ver() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC2_validate_cache_config_ver()
+ *
+ * Purpose:     Return true if the supplied H5AC2_cache_config_t version
+ *		number is valid, and FALSE otherwise.
+ *
+ * Return:      TRUE if the version number is valid, and FALSE otherwise.
+ *
+ * Programmer:  John Mainzer
+ *              8/13/08
+ *
+ * Modifications:
+ *
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+hbool_t
+H5AC2_validate_cache_config_ver(int version_num)
+{
+    hbool_t valid = FALSE;
+
+    if ( version_num == H5AC2__CURR_CACHE_CONFIG_VERSION )
+    {
+        valid = TRUE;
+    }
+
+    return(valid);
+
+} /* H5AC2_validate_cache_config_ver() */
 
 
 /*-------------------------------------------------------------------------

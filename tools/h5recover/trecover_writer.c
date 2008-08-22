@@ -54,15 +54,43 @@ journal_files(const char *filename, const char *ctl_filename, const char *jnl_fi
      * access properties.
      */
     hid_t       faccpl;         /* file access property list handle */
+    H5AC2_jnl_config_t jnl_config;
 
     faccpl = H5Pcreate(H5P_FILE_ACCESS);
     /* Turn journaling on if not patch mode */
     if (!patch){
-	if (H5Pset_journal(faccpl, jnl_filename) < 0){
-	    fprintf(stderr, "H5Pset_journal on data file failed\n");
-	    H5Pclose(faccpl);
-	    return(-1);
-	}
+
+    /* set latest format */
+    if ( H5Pset_libver_bounds(faccpl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST ) 
+         < 0 ) {
+        fprintf(stderr, "H5Pset_libver_bounds on data file failed\n");
+        H5Pclose(faccpl);
+        return(-1);
+    }
+
+    /* get current journaling configuration */
+    jnl_config.version = H5AC2__CURR_JNL_CONFIG_VER;
+
+    if ( H5Pget_jnl_config(faccpl, &jnl_config) < 0 ) {
+        fprintf(stderr, "H5Pget_jnl_config on faccpl failed\n");
+        H5Pclose(faccpl);
+        return(-1);
+    }
+
+    jnl_config.enable_journaling = 1;     /* turn on journaling */
+    jnl_config.journal_recovered = 0;
+    jnl_config.jbrb_buf_size = 8*1024;    /* multiples of sys buffer size*/
+    jnl_config.jbrb_num_bufs = 2;
+    jnl_config.jbrb_use_aio = 0;          /* only sync IO is supported */
+    jnl_config.jbrb_human_readable = 1;   /* only readable form is supported */
+    strcpy(jnl_config.journal_file_path, jnl_filename);
+
+    if ( H5Pset_jnl_config(faccpl, &jnl_config) < 0 ) {
+        fprintf(stderr, "H5Pset_jnl_config on faccpl failed\n");
+        H5Pclose(faccpl);
+        return(-1);
+    }
+
 	/* remove any existing journal file. */
 	remove(jnl_filename);
     }

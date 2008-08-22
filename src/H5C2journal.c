@@ -75,6 +75,15 @@ hbool_t H5C2__check_for_journaling = TRUE;
  * Programmer:  John Mainzer
  *              March 26, 2008
  *
+ * Changes:	JRM -- 8/14/08
+ *              Reworked the function to use the H5C2_mdj_config_t
+ *              structure.
+ *
+ *		JRM -- 8/18/08
+ *		Added code to flush the cache before journaling 
+ *		starts, and to call the metadata journaling status
+ *		change callbacks after journaling has been started.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -82,14 +91,11 @@ herr_t
 H5C2_begin_journaling(H5F_t * f,
 		      hid_t dxpl_id,
 		      H5C2_t * cache_ptr,
-		      char * journal_file_name_ptr,
-                      size_t buf_size,
-                      int num_bufs,
-                      hbool_t use_aio,
-                      hbool_t human_readable)
+		      H5C2_mdj_config_t * config_ptr)
 {
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
+    H5C2_mdj_config_t config;
 
     FUNC_ENTER_NOAPI(H5C2_begin_journaling, FAIL)
 #if 0 /* JRM */
@@ -111,9 +117,10 @@ H5C2_begin_journaling(H5F_t * f,
     HDassert( cache_ptr->jwipl_size == 0 );
     HDassert( cache_ptr->jwipl_head_ptr == NULL );
     HDassert( cache_ptr->jwipl_tail_ptr == NULL );
-    HDassert( buf_size > 0 );
-    HDassert( num_bufs > 0 );
-    HDassert( journal_file_name_ptr != NULL );
+    HDassert( config_ptr != NULL );
+    HDassert( config_ptr->jbrb_buf_size > 0 );
+    HDassert( config_ptr->jbrb_num_bufs > 0 );
+    HDassert( HDstrlen(config_ptr->journal_file_path) > 0 );
 
     if ( cache_ptr->mdj_enabled ) {
 
@@ -127,17 +134,29 @@ H5C2_begin_journaling(H5F_t * f,
     HDfprintf(stdout, "%s Finished initial sanity checks.\n", FUNC);
 #endif /* JRM */ 
 
+    result = H5C2_flush_cache(f, dxpl_id, H5C2__NO_FLAGS_SET);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_flush_cache() failed.") 
+    }
+
+#if 0 /* JRM */
+    HDfprintf(stdout, "%s Finished flushing the cache.\n", FUNC);
+#endif /* JRM */ 
+
 #if 0 /* JRM */
     HDfprintf(stdout, "%s calling H5C2_jb__init().\n", FUNC);
 #endif /* JRM */ 
 
     result = H5C2_jb__init(&(cache_ptr->mdj_jbrb),
 		           f->name,
-		           journal_file_name_ptr,
-                           buf_size,
-                           num_bufs,
-                           use_aio,
-                           human_readable);
+			   config_ptr->journal_file_path,
+			   config_ptr->jbrb_buf_size,
+			   config_ptr->jbrb_num_bufs,
+			   config_ptr->jbrb_use_aio,
+			   config_ptr->jbrb_human_readable);
 
     if ( result != SUCCEED ) {
 #if 0 /* JRM */
@@ -152,7 +171,8 @@ H5C2_begin_journaling(H5F_t * f,
 		  FUNC);
 #endif /* JRM */ 
 
-    result = H5C2_mark_journaling_in_progress(f, dxpl_id, journal_file_name_ptr);
+    result = H5C2_mark_journaling_in_progress(f, dxpl_id, 
+		                              config_ptr->journal_file_path);
 
     if ( result != SUCCEED ) {
 #if 0 /* JRM */
@@ -164,6 +184,22 @@ H5C2_begin_journaling(H5F_t * f,
     }
 
     cache_ptr->mdj_enabled = TRUE;
+
+    result = H5C2_get_journal_config(cache_ptr, &config);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_get_journal_config() failed.")
+    }
+
+    result = H5C2_call_mdjsc_callbacks(cache_ptr, &config);
+
+    if ( result < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_call_mdjsc_callbacks() failed.")
+    }
 
 #if 0 /* JRM */
         HDfprintf(stdout, "%s exiting.\n", FUNC);
@@ -267,6 +303,10 @@ done:
  * Programmer:  John Mainzer
  *              April 12, 2008
  *
+ * Changes:	Added code to call the metadata journaling status change
+ *		callback function.
+ *						JR -- 8/18/08
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -277,6 +317,7 @@ H5C2_end_journaling(H5F_t * f,
 {
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
+    H5C2_mdj_config_t config;
 
     FUNC_ENTER_NOAPI(H5C2_end_journaling, FAIL)
 #if 0 /* JRM */
@@ -333,6 +374,22 @@ H5C2_end_journaling(H5F_t * f,
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
                         "H5C2_jb__takedown() failed.")
+        }
+
+        result = H5C2_get_journal_config(cache_ptr, &config);
+
+        if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_get_journal_config() failed.")
+        }
+
+        result = H5C2_call_mdjsc_callbacks(cache_ptr, &config);
+
+        if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_call_mdjsc_callbacks() failed.")
         }
     }
 
@@ -473,46 +530,16 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5C2_get_journal_config
  *
- * Purpose:     Return the current metadata journaling status.
+ * Purpose:     Return the current metadata journaling status in an
+ *              instance of H5C2_mdj_config_t.
  *
- *              If journaling is enabled, *journaling_enabled_ptr is 
- *              set to TRUE, and the targets of the remaining pointer
- *              parameters will be set to reflect current journaling 
- *              status if they are not NULL.
+ *              If journaling is enabled, config_ptr->enable_journaling 
+ *              is set to TRUE, and the remaining fields in *config_ptr
+ *              will be set to reflect current journaling status.
  *
- *              If journaling is disabled, *journaling_enabled_ptr is set
- *              to FALSE, and the the targets of the remaining pointer 
- *              parameters are not altered.
- *
- *              The remaining parameters are discussed in detail below:
- *
- *              journal_file_path_ptr is presumed to point to a buffer 
- *              of length H5AC2__MAX_JOURNAL_FILE_NAME_LEN.  If journaling
- *              is enabled, and the field is not null, the path to the 
- *              journal file will be copied into this buffer to the 
- *              extent that it fits.
- *
- * 		jbrb_buf_size_ptr is presumed to point to a size_t.  If 
- * 		journaling is enabled and the field is not NULL, the size
- * 		of the buffers used in the journal buffer ring buffer
- * 		will be reported in *jbrb_buf_size_ptr.
- *
- * 		jbrb_num_bufs_ptr is presumed to point to an int.  If
- * 		journaling is enabled and the field is not NULL, the 
- * 		number of buffers in the ournal buffer ring buffer
- *              will be reported in *jbrb_num_bufs_ptr.
- *
- *              jbrb_use_aio_ptr is presumed to point to a hbool_t.  If
- *              journaling is enabled and the field is not NULL, 
- *              *jbrb_use_aio_ptr will be set to true or false depending
- *              on whether the journal entry logging code has been 
- *              instructed to use AIO.
- *
- *		jbrb_human_readable_ptr is presumed to point to a hbool_t.  If
- *		journaling is enabled and the field is not NULL,
- *		*jbrb_human_readable_ptr will be set to true or false depending
- *		on whether the journal entry logging code has been 
- *		instructed to record the journal in human readable form.
+ *              If journaling is disabled, config_ptr->enable_journaling
+ *              is set to FALSE, and the remaining fields of *config_ptr
+ *              are undefined.
  * 		
  * Return:      Success:        SUCCEED
  *              Failure:        FAIL
@@ -522,19 +549,15 @@ done:
  *
  * Changes:
  *
- *              None.
+ *              JRM -- 8/14/08
+ *              Reworked function to use H5C2_mdj_config_t.
  *
  *-------------------------------------------------------------------------
  */
 
 herr_t
 H5C2_get_journal_config(H5C2_t * cache_ptr,
-		        hbool_t * journaling_enabled_ptr,
-			char * journal_file_path_ptr,
-			size_t * jbrb_buf_size_ptr,
-			int * jbrb_num_bufs_ptr,
-			hbool_t * jbrb_use_aio_ptr,
-			hbool_t * jbrb_human_readable_ptr)
+		        H5C2_mdj_config_t * config_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
@@ -543,46 +566,33 @@ H5C2_get_journal_config(H5C2_t * cache_ptr,
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
 
-    if ( journaling_enabled_ptr == NULL ) {
+    if ( config_ptr == NULL ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "journaling_enabled_ptr NULL on entry!?!.")
+                    "config_ptr NULL on entry!?!.")
     }
 
     if ( cache_ptr->mdj_enabled ) {
 
-        *journaling_enabled_ptr = TRUE;
+        config_ptr->enable_journaling = TRUE;
 
-	if ( journal_file_path_ptr != NULL ) {
+	HDstrncpy(&(config_ptr->journal_file_path[0]), 
+		  cache_ptr->mdj_file_name_ptr,
+		  H5C2__MAX_JOURNAL_FILE_NAME_LEN);
 
-	    HDsnprintf(journal_file_path_ptr, 
-                       H5AC2__MAX_JOURNAL_FILE_NAME_LEN,
-		       "%s",
-		       cache_ptr->mdj_file_name_ptr);
-	}
+	config_ptr->journal_file_path[H5C2__MAX_JOURNAL_FILE_NAME_LEN] = '\0';
 
-	if ( jbrb_buf_size_ptr != NULL ) {
+	config_ptr->jbrb_buf_size = (cache_ptr->mdj_jbrb).buf_size;
 
-	    *jbrb_buf_size_ptr = (cache_ptr->mdj_jbrb).buf_size;
-	}
+	config_ptr->jbrb_num_bufs = (cache_ptr->mdj_jbrb).num_bufs;
 
-	if ( jbrb_num_bufs_ptr != NULL ) {
+	config_ptr->jbrb_use_aio = (cache_ptr->mdj_jbrb).use_aio;
 
-	    *jbrb_num_bufs_ptr = (cache_ptr->mdj_jbrb).num_bufs;
-	}
-
-	if ( jbrb_use_aio_ptr != NULL ) {
-
-	    *jbrb_use_aio_ptr = (cache_ptr->mdj_jbrb).use_aio;
-	}
-
-	if ( jbrb_human_readable_ptr ) {
-
-	    *jbrb_human_readable_ptr = (cache_ptr->mdj_jbrb).human_readable;
-	}
+	config_ptr->jbrb_human_readable = (cache_ptr->mdj_jbrb).human_readable;
+	
     } else {
 
-        *journaling_enabled_ptr = FALSE;
+        config_ptr->enable_journaling = FALSE;
     }
 
 done:
@@ -1918,6 +1928,688 @@ done:
 
 } /* H5C2_unmark_journaling_in_progress() */
 
+
+/**************************************************************************/
+/****** metadata journaling status change callback management code ********/
+/**************************************************************************/
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_call_mdjsc_callbacks()
+ *
+ * Purpose:     Call the metadata journaling status change callbacks.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              August 15, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr, 
+		          H5C2_mdj_config_t * config_ptr)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+    int32_t i;
+    int32_t funcs_called = 0;
+    H5C2_mdj_status_change_func_t func_ptr;
+    void * data_ptr;
+
+    FUNC_ENTER_NOAPI(H5C2_call_mdjsc_callbacks, FAIL)
+
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->mdjsc_cb_tbl != NULL );
+    HDassert( cache_ptr->mdjsc_cb_tbl_len >= H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( ( cache_ptr->mdjsc_cb_tbl_fl_head == -1 ) ||
+	      ( cache_ptr->num_mdjsc_cbs < cache_ptr->mdjsc_cb_tbl_len ) );
+
+    if ( ( cache_ptr->num_mdjsc_cbs < 0 ) 
+         ||
+	 ( cache_ptr->num_mdjsc_cbs > cache_ptr->mdjsc_cb_tbl_len ) 
+	 ||
+	 ( cache_ptr->mdjsc_cb_tbl_fl_head < -1 ) 
+	 ||
+	 ( cache_ptr->mdjsc_cb_tbl_fl_head > cache_ptr->mdjsc_cb_tbl_len ) 
+	 ||
+	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use < -1 ) 
+	 ||
+	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use >= 
+	   cache_ptr->mdjsc_cb_tbl_len ) 
+	 ||
+	 ( cache_ptr->mdjsc_cb_tbl_len < H5C2__MIN_MDJSC_CB_TBL_LEN ) 
+	 ||
+         ( ( cache_ptr->num_mdjsc_cbs == cache_ptr->mdjsc_cb_tbl_len )
+	   &&
+	   ( ( cache_ptr->mdjsc_cb_tbl_fl_head != -1 ) 
+	     ||
+	     ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use !=
+	       cache_ptr->mdjsc_cb_tbl_len - 1 ) 
+	   )
+	 )
+	 ||
+         ( ( cache_ptr->num_mdjsc_cbs < cache_ptr->mdjsc_cb_tbl_len )
+	   &&
+	   ( cache_ptr->mdjsc_cb_tbl_fl_head < 0 )
+	 )
+       ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "mdjsc_cb_tbl corrupt(1)?!?!");
+    }
+
+    for ( i = 0; i <= cache_ptr->mdjsc_cb_tbl_max_idx_in_use; i++ )
+    {
+        if ( ((cache_ptr->mdjsc_cb_tbl)[i]).fcn_ptr != NULL ) {
+
+	    func_ptr = ((cache_ptr->mdjsc_cb_tbl)[i]).fcn_ptr;
+	    data_ptr = ((cache_ptr->mdjsc_cb_tbl)[i]).data_ptr;
+
+	    func_ptr(config_ptr, data_ptr);
+
+	    funcs_called++;
+	}
+    }
+
+    if ( funcs_called != cache_ptr->num_mdjsc_cbs ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+		    "funcs_called != cache_ptr->num_mdjsc_cbs.");
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_call_mdjsc_callbacks() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_deregister_mdjsc_callback()
+ *
+ * Purpose:     Deregister a metadata journaling status change callback,
+ * 		shrinking the metadata journaling status callback table 
+ * 		as necessary.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              August 15, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_deregister_mdjsc_callback(H5C2_t * cache_ptr,
+			       int32_t idx)
+{
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+    int32_t i;
+    double fraction_in_use;
+
+    FUNC_ENTER_NOAPI(H5C2_deregister_mdjsc_callback, FAIL)
+#if 0 /* JRM */
+    HDfprintf(stdout, "entering %s: idx = %d.\n", FUNC, idx);
+#endif /* JRM */
+
+    if ( ( cache_ptr == NULL ) ||
+         ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) {
+
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s: cache_ptr corrupt?!?\n", FUNC);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+		    "cache_ptr corrupt?!?");
+    }
+
+    if ( ( cache_ptr->mdjsc_cb_tbl == NULL ) ||
+         ( ( cache_ptr->num_mdjsc_cbs == cache_ptr->mdjsc_cb_tbl_len ) 
+	   &&
+	   ( cache_ptr->mdjsc_cb_tbl_fl_head != -1 ) ) ||
+	 ( ( cache_ptr->mdjsc_cb_tbl_fl_head < 0 ) 
+	   &&
+	   ( cache_ptr->num_mdjsc_cbs != cache_ptr->mdjsc_cb_tbl_len ) ) ||
+         ( cache_ptr->mdjsc_cb_tbl_len < H5C2__MIN_MDJSC_CB_TBL_LEN ) ||
+         ( cache_ptr->mdjsc_cb_tbl_fl_head >= cache_ptr->mdjsc_cb_tbl_len ) ||
+	 ( cache_ptr->num_mdjsc_cbs > cache_ptr->mdjsc_cb_tbl_len ) ||
+	 ( cache_ptr->num_mdjsc_cbs < 0 ) ||
+	 ( ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use < 0 ) &&
+	   ( cache_ptr->num_mdjsc_cbs > 0 ) ) ) {
+	    
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s: mdjsc_cb_tbl corrupt(1)?!?!\n", FUNC);
+	HDfprintf(stdout, "mdjsc_cb_tbl_len = %d\n", 
+		  cache_ptr->mdjsc_cb_tbl_len);
+	HDfprintf(stdout, "num_mdjsc_cbs = %d\n", 
+		  cache_ptr->num_mdjsc_cbs);
+	HDfprintf(stdout, "mdjsc_cb_tbl_fl_head = %d\n", 
+		  cache_ptr->mdjsc_cb_tbl_fl_head);
+	HDfprintf(stdout, "mdjsc_cb_tbl_max_idx_in_use = %d\n", 
+		  cache_ptr->mdjsc_cb_tbl_max_idx_in_use);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "mdjsc_cb_tbl corrupt(1)?!?!");
+    }
+
+    if ( cache_ptr->num_mdjsc_cbs <= 0 ) {
+
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s: mdjsc_cb_tbl empty(1)?!?!\n", FUNC);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "mdjsc_cb_tbl empty(1)!?!");
+    }
+
+    if ( ( idx < 0 ) ||
+	 ( idx >= cache_ptr->mdjsc_cb_tbl_len ) ||
+	 ( idx > cache_ptr->mdjsc_cb_tbl_max_idx_in_use ) ) {
+
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s: bad fcn_ptr/data_ptr/idx?!?\n", FUNC);
+	HDfprintf(stdout, "%s: idx = %d.\n", FUNC, idx);
+	HDfprintf(stdout, "%s: cache_ptr->mdjsc_cb_tbl_len = %d.\n", 
+		  FUNC, cache_ptr->mdjsc_cb_tbl_len);
+	HDfprintf(stdout, "%s: cache_ptr->mdjsc_cb_tbl_max_idx_in_use = %d.\n",
+		  FUNC, cache_ptr->mdjsc_cb_tbl_max_idx_in_use);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad idx?!?");
+
+    } else if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).fcn_ptr == NULL ) {
+	
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s: callback already deregistered\n", FUNC);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+		    "callback already deregistered");
+   
+    } else if ( ((cache_ptr->mdjsc_cb_tbl)[idx]).fl_next != -1 ) {
+	
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s: free list corrupted\n", FUNC);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "free list corrupted.");
+
+    }
+
+    ((cache_ptr->mdjsc_cb_tbl)[idx]).fcn_ptr = NULL;
+    ((cache_ptr->mdjsc_cb_tbl)[idx]).data_ptr = NULL;
+    ((cache_ptr->mdjsc_cb_tbl)[idx]).fl_next = 
+	    cache_ptr->mdjsc_cb_tbl_fl_head;
+    cache_ptr->mdjsc_cb_tbl_fl_head = idx;
+    (cache_ptr->num_mdjsc_cbs)--;
+
+    if ( cache_ptr->num_mdjsc_cbs == 0 ) {
+
+        cache_ptr->mdjsc_cb_tbl_max_idx_in_use = -1;
+
+    } else if ( idx == cache_ptr->mdjsc_cb_tbl_max_idx_in_use ) {
+
+        i = idx;
+
+        while ( ( i >= 0 ) &&
+		( ((cache_ptr->mdjsc_cb_tbl)[i]).fcn_ptr == NULL ) ) {
+
+	    i--;
+	}
+
+	if ( i < 0 ) {
+
+#if 0 /* JRM */
+            HDfprintf(stdout, "%s: mdjsc_cb_tbl empty(2)!?!\n", FUNC);
+#endif /* JRM */
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+			"mdjsc_cb_tbl empty(2)!?!");
+	}
+
+	cache_ptr->mdjsc_cb_tbl_max_idx_in_use = i;
+    }
+
+    if ( ( cache_ptr->num_mdjsc_cbs >= cache_ptr->mdjsc_cb_tbl_len )
+	 ||
+	 ( ( cache_ptr->num_mdjsc_cbs < cache_ptr->mdjsc_cb_tbl_len ) 
+	   &&
+	   ( cache_ptr->num_mdjsc_cbs > 0 ) 
+	   &&
+	   ( ( cache_ptr->mdjsc_cb_tbl_fl_head < 0 ) 
+	     ||
+	     ( cache_ptr->mdjsc_cb_tbl_fl_head >= cache_ptr->mdjsc_cb_tbl_len )
+	   ) 
+	 ) 
+	 ||
+	 ( ( cache_ptr->num_mdjsc_cbs == 0 ) 
+	   &&
+	   ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use != -1 ) 
+	 )
+       ) {
+
+#if 0 /* JRM */
+        HDfprintf(stdout, "%s: mdjsc_cb_tbl corrupt(2)?!?!\n", FUNC);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "mdjsc_cb_tbl corrupt(2)?!?!");
+    }
+
+    fraction_in_use = ((double)(cache_ptr->num_mdjsc_cbs)) /
+	              ((double)(cache_ptr->mdjsc_cb_tbl_len));
+
+    if ( ( fraction_in_use < H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) &&
+         ( cache_ptr->mdjsc_cb_tbl_len > H5C2__MIN_MDJSC_CB_TBL_LEN ) &&
+         ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use < 
+	   (cache_ptr->mdjsc_cb_tbl_len / 2) ) ) {
+
+        result = H5C2_shrink_mdjsc_callback_table(cache_ptr);
+
+	if ( result != SUCCEED ) {
+
+#if 0 /* JRM */
+            HDfprintf(stdout, 
+	              "%s: H5C2_shrink_mdjsc_callback_table() failed.\n", FUNC);
+#endif /* JRM */
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+			"H5C2_shrink_mdjsc_callback_table() failed.");
+        }
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_deregister_mdjsc_callback() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_grow_mdjsc_callback_table()
+ *
+ * Purpose:     Double the size of the the metadata journaling status
+ * 		change callback table.  Note that the table is assumed
+ * 		to be full on entry.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              August 15, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_grow_mdjsc_callback_table(H5C2_t * cache_ptr)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+    int32_t i;
+    int32_t old_mdjsc_cb_tbl_len;
+    int64_t new_mdjsc_cb_tbl_len;
+    H5C2_mdjsc_record_t * old_mdjsc_cb_tbl = NULL;
+    H5C2_mdjsc_record_t * new_mdjsc_cb_tbl = NULL;
+
+    FUNC_ENTER_NOAPI(H5C2_grow_mdjsc_callback_table, FAIL)
+
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->mdjsc_cb_tbl != NULL );
+    HDassert( cache_ptr->mdjsc_cb_tbl_len >= H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( cache_ptr->mdjsc_cb_tbl_fl_head == -1 );
+    HDassert( cache_ptr->num_mdjsc_cbs == cache_ptr->mdjsc_cb_tbl_len );
+
+    if ( ( cache_ptr->num_mdjsc_cbs != cache_ptr->mdjsc_cb_tbl_len ) ||
+	 ( cache_ptr->mdjsc_cb_tbl_fl_head != -1 ) ||
+	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use != 
+	   cache_ptr->mdjsc_cb_tbl_len - 1 ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+	            "unexpected mdjsc_cb_tbl status.");
+    }
+
+    old_mdjsc_cb_tbl = cache_ptr->mdjsc_cb_tbl;
+    old_mdjsc_cb_tbl_len = cache_ptr->mdjsc_cb_tbl_len;
+
+    new_mdjsc_cb_tbl_len = 2 * old_mdjsc_cb_tbl_len;
+    new_mdjsc_cb_tbl = H5MM_malloc((size_t)new_mdjsc_cb_tbl_len *
+		                   sizeof(H5C2_mdjsc_record_t));
+    if ( new_mdjsc_cb_tbl == NULL ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "can't alloc new mdjsc_cb_tbl.")
+    }
+
+    for ( i = 0; i < old_mdjsc_cb_tbl_len; i++ )
+    {
+        new_mdjsc_cb_tbl[i] = old_mdjsc_cb_tbl[i];
+    }
+
+    for ( i = old_mdjsc_cb_tbl_len; i < new_mdjsc_cb_tbl_len; i++ )
+    {
+	new_mdjsc_cb_tbl[i].fcn_ptr = NULL;
+	new_mdjsc_cb_tbl[i].data_ptr = NULL;
+	new_mdjsc_cb_tbl[i].fl_next = i + 1;
+    }
+    new_mdjsc_cb_tbl[new_mdjsc_cb_tbl_len - 1].fl_next = -1;
+
+    cache_ptr->mdjsc_cb_tbl = new_mdjsc_cb_tbl;
+    cache_ptr->mdjsc_cb_tbl_len = new_mdjsc_cb_tbl_len;
+    cache_ptr->mdjsc_cb_tbl_fl_head = old_mdjsc_cb_tbl_len;
+
+    old_mdjsc_cb_tbl = H5MM_xfree(old_mdjsc_cb_tbl);
+
+    if ( old_mdjsc_cb_tbl != NULL ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                    "free of old_mdjsc_cb_tbl failed.");
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_grow_mdjsc_callback_table() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5C2_register_mdjsc_callback()
+ *
+ * Purpose:     Register a metadata journaling status change callback,
+ * 		growing the metadata journaling status callback table 
+ * 		as necessary.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              August 15, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_register_mdjsc_callback(H5C2_t * cache_ptr,
+		             H5C2_mdj_status_change_func_t fcn_ptr,
+			     void * data_ptr,
+			     int32_t * idx_ptr)
+{
+    herr_t result;
+    herr_t ret_value = SUCCEED;      /* Return value */
+    int32_t i;
+
+    FUNC_ENTER_NOAPI(H5C2_register_mdjsc_callback, FAIL)
+
+    if ( ( cache_ptr == NULL ) ||
+         ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) )
+    {
+#if 0 /* JRM */
+	HDfprintf(stdout, "%s: bad cache_ptr on entry.\n", FUNC);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad cache_ptr on entry");
+    }
+
+    if ( cache_ptr->mdjsc_cb_tbl == NULL ) 
+    {
+#if 0 /* JRM */
+	HDfprintf(stdout, "%s: cache_ptr->mdjsc_cb_tbl == NULL.\n", FUNC);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+		    "cache_ptr->mdjsc_cb_tbl == NULL")
+    }
+
+    if ( cache_ptr->mdjsc_cb_tbl_len < H5C2__MIN_MDJSC_CB_TBL_LEN )
+    {
+#if 0 /* JRM */
+	HDfprintf(stdout, "%s: cache_ptr->mdjsc_cb_tbl_len too small.\n", FUNC);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+		    "cache_ptr->mdjsc_cb_tbl_len too small")
+    }
+
+    if ( ( cache_ptr->mdjsc_cb_tbl_fl_head == -1 ) &&
+	 ( cache_ptr->num_mdjsc_cbs < cache_ptr->mdjsc_cb_tbl_len ) )
+    {
+#if 0 /* JRM */
+	HDfprintf(stdout, "%s: mdjsc callback table corrupt?\n", FUNC);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+		    "mdjsc callback table corrupt?")
+    }
+
+    if ( fcn_ptr == NULL )
+    {
+#if 0 /* JRM */
+	HDfprintf(stdout, "%s: fcn_ptr NULL on entry\n", FUNC);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "fcn_ptr NULL on entry")
+    }
+
+    if ( idx_ptr == NULL )
+    {
+#if 0 /* JRM */
+	HDfprintf(stdout, "%s: idx_ptr NULL on entry\n", FUNC);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "idx_ptr NULL on entry")
+    }
+
+    if ( cache_ptr->mdjsc_cb_tbl_len <= cache_ptr->num_mdjsc_cbs ) {
+
+        result = H5C2_grow_mdjsc_callback_table(cache_ptr);
+
+	if ( result != SUCCEED ) {
+#if 0 /* JRM */
+	    HDfprintf(stdout, "%s: H5C2_grow_mdjsc_callback_table() failed.\n",
+		      FUNC);
+#endif /* JRM */
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+			"H5C2_grow_mdjsc_callback_table() failed.");
+        }
+    }
+
+    if ( ( cache_ptr->mdjsc_cb_tbl_fl_head < 0 ) ||
+         ( cache_ptr->mdjsc_cb_tbl_fl_head >= cache_ptr->mdjsc_cb_tbl_len ) ||
+	 ( cache_ptr->num_mdjsc_cbs >= cache_ptr->mdjsc_cb_tbl_len ) ) {
+
+#if 0 /* JRM */
+	    HDfprintf(stdout, "%s: mdjsc_cb_tbl corrupt(1)?!?!.\n",
+		      FUNC);
+	    HDfprintf(stdout, "%s: cache_ptr->mdjsc_cb_tbl_fl_head = %d.\n",
+		      FUNC, cache_ptr->mdjsc_cb_tbl_fl_head);
+	    HDfprintf(stdout, "%s: cache_ptr->num_mdjsc_cbs = %d.\n",
+		      FUNC, cache_ptr->num_mdjsc_cbs);
+	    HDfprintf(stdout, "%s: cache_ptr->mdjsc_cb_tbl_len = %d.\n",
+		      FUNC, cache_ptr->mdjsc_cb_tbl_len);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "mdjsc_cb_tbl corrupt(1)?!?!");
+    }
+
+    i = cache_ptr->mdjsc_cb_tbl_fl_head;
+
+    cache_ptr->mdjsc_cb_tbl_fl_head = ((cache_ptr->mdjsc_cb_tbl)[i]).fl_next;
+    (cache_ptr->num_mdjsc_cbs)++;
+
+    if ( ( ( cache_ptr->num_mdjsc_cbs == cache_ptr->mdjsc_cb_tbl_len ) &&
+	   ( cache_ptr->mdjsc_cb_tbl_fl_head != -1 ) 
+	 ) 
+         ||
+	 ( cache_ptr->num_mdjsc_cbs > cache_ptr->mdjsc_cb_tbl_len ) 
+	 ||
+	 ( ( cache_ptr->num_mdjsc_cbs < cache_ptr->mdjsc_cb_tbl_len ) 
+	   &&
+	   ( ( cache_ptr->mdjsc_cb_tbl_fl_head < 0 ) 
+	     ||
+	     ( cache_ptr->mdjsc_cb_tbl_fl_head >= cache_ptr->mdjsc_cb_tbl_len )
+	   ) 
+	 ) 
+       ) {
+
+#if 0 /* JRM */
+	    HDfprintf(stdout, "%s: mdjsc_cb_tbl corrupt(2)?!?!.",
+		      FUNC);
+#endif /* JRM */
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "mdjsc_cb_tbl corrupt(2)?!?!");
+    }
+
+    ((cache_ptr->mdjsc_cb_tbl)[i]).fcn_ptr  = fcn_ptr;
+    ((cache_ptr->mdjsc_cb_tbl)[i]).data_ptr = data_ptr;
+    ((cache_ptr->mdjsc_cb_tbl)[i]).fl_next  = -1;
+
+    if ( i > cache_ptr->mdjsc_cb_tbl_max_idx_in_use ) {
+
+        cache_ptr->mdjsc_cb_tbl_max_idx_in_use = i;
+    }
+
+    *idx_ptr = i;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_register_mdjsc_callback() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C2_shrink_mdjsc_callback_table()
+ *
+ * Purpose:     Half the size of the the metadata journaling status
+ * 		change callback table.  Note that the table is assumed
+ * 		to be:
+ *
+ * 		1) Not more than H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO * 100
+ *                 percent full.
+ *
+ *              2) Of size H5C2__MIN_MDJSC_CB_TBL_LEN * 2 ** n, where
+ *                 n is a positive integer.
+ *
+ *              3) Contain no entries at index greater than or equal to
+ *                 cache_ptr->mdjsc_cb_tbl_len / 2.
+ *
+ * Return:      Success:        SUCCEED
+ *              Failure:        FAIL
+ *
+ * Programmer:  John Mainzer
+ *              August 15, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t
+H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr)
+{
+    herr_t ret_value = SUCCEED;      /* Return value */
+    int32_t i;
+    int32_t old_mdjsc_cb_tbl_len;
+    int32_t new_mdjsc_cb_tbl_len;
+    int32_t new_fl_head = -1;
+    int32_t last_free_entry = -1;
+    double fraction_in_use;
+    H5C2_mdjsc_record_t * old_mdjsc_cb_tbl = NULL;
+    H5C2_mdjsc_record_t * new_mdjsc_cb_tbl = NULL;
+
+    FUNC_ENTER_NOAPI(H5C2_shrink_mdjsc_callback_table, FAIL)
+
+    HDassert( cache_ptr != NULL );
+    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
+    HDassert( cache_ptr->mdjsc_cb_tbl != NULL );
+    HDassert( cache_ptr->mdjsc_cb_tbl_len > H5C2__MIN_MDJSC_CB_TBL_LEN );
+    HDassert( cache_ptr->mdjsc_cb_tbl_fl_head >= 0);
+    HDassert( cache_ptr->num_mdjsc_cbs < cache_ptr->mdjsc_cb_tbl_len / 2 );
+
+    fraction_in_use = ((double)(cache_ptr->num_mdjsc_cbs)) /
+	              ((double)(cache_ptr->mdjsc_cb_tbl_len));
+
+    if ( ( cache_ptr->num_mdjsc_cbs >= cache_ptr->mdjsc_cb_tbl_len ) ||
+	 ( (cache_ptr->mdjsc_cb_tbl_len / 2) < H5C2__MIN_MDJSC_CB_TBL_LEN ) ||
+	 ( cache_ptr->mdjsc_cb_tbl_fl_head == -1 ) ||
+	 ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use >= 
+	   cache_ptr->mdjsc_cb_tbl_len / 2 ) ||
+	 ( fraction_in_use >= H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+	            "unexpected mdjsc_cb_tbl status.");
+    }
+
+    old_mdjsc_cb_tbl = cache_ptr->mdjsc_cb_tbl;
+    old_mdjsc_cb_tbl_len = cache_ptr->mdjsc_cb_tbl_len;
+
+    new_mdjsc_cb_tbl_len = old_mdjsc_cb_tbl_len / 2;
+#if 0 /* JRM */
+    HDfprintf(stdout, "new_mdjsc_cb_tbl_len = %d.\n", new_mdjsc_cb_tbl_len);
+#endif /* JRM */
+
+    while ( ( (new_mdjsc_cb_tbl_len / 2) >= H5C2__MIN_MDJSC_CB_TBL_LEN ) &&
+	    ( (((double)(cache_ptr->num_mdjsc_cbs)) / 
+	       ((double)new_mdjsc_cb_tbl_len)) <= 
+	      H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO ) &&
+	    ( (new_mdjsc_cb_tbl_len / 2) > 
+	      cache_ptr->mdjsc_cb_tbl_max_idx_in_use ) )
+    {
+	new_mdjsc_cb_tbl_len /= 2;
+#if 0 /* JRM */
+        HDfprintf(stdout, "new_mdjsc_cb_tbl_len = %d.\n", new_mdjsc_cb_tbl_len);
+#endif /* JRM */
+    }
+
+    if ( ( new_mdjsc_cb_tbl_len < H5C2__MIN_MDJSC_CB_TBL_LEN ) ||
+         ( new_mdjsc_cb_tbl_len < cache_ptr->mdjsc_cb_tbl_max_idx_in_use ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+	            "error in computation of new_mdjsc_cb_tbl_len?!?!");
+    }
+
+    new_mdjsc_cb_tbl = H5MM_malloc(new_mdjsc_cb_tbl_len *
+		                   sizeof(H5C2_mdjsc_record_t));
+    if ( new_mdjsc_cb_tbl == NULL ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "can't alloc new mdjsc_cb_tbl.")
+    }
+
+    /* now copy over the table, constructing the free list as we go */
+
+    for ( i = 0; i < new_mdjsc_cb_tbl_len; i++ )
+    {
+        if ( old_mdjsc_cb_tbl[i].fcn_ptr == NULL ) {
+
+	    new_mdjsc_cb_tbl[i].fcn_ptr = NULL;
+	    new_mdjsc_cb_tbl[i].data_ptr = NULL;
+	    new_mdjsc_cb_tbl[i].fl_next = -1;
+	
+	    if ( new_fl_head == -1 ) {
+
+	        new_fl_head = i;
+		last_free_entry = i;
+
+	    } else {
+
+		new_mdjsc_cb_tbl[last_free_entry].fl_next = i;
+	        last_free_entry = i;
+	    }
+	} else {
+
+            new_mdjsc_cb_tbl[i] = old_mdjsc_cb_tbl[i];
+
+	}
+    }
+
+    if ( new_fl_head == -1 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "table full after shrink!?!.");
+
+    }
+
+    cache_ptr->mdjsc_cb_tbl = new_mdjsc_cb_tbl;
+    cache_ptr->mdjsc_cb_tbl_fl_head = new_fl_head;
+    cache_ptr->mdjsc_cb_tbl_len = new_mdjsc_cb_tbl_len;
+
+    old_mdjsc_cb_tbl = H5MM_xfree(old_mdjsc_cb_tbl);
+
+    if ( old_mdjsc_cb_tbl != NULL ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                    "free of old_mdjsc_cb_tbl failed.");
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C2_shrink_mdjsc_callback_table() */
 
 
 /**************************************************************************/
@@ -3459,79 +4151,4 @@ H5C2_jb__bin2hex(const uint8_t * buf,
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5C2_jb__bin2hex*/
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5Pset_journal
- *
- * Purpose:	Modify the file access property list to enable journaling.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Albert Cheng & Mike McGreevy
- *		May 27, 2008
- *
- * Modifications:
- *
- * 		John Mainzer -- 8/4/08
- * 		Reworked the function to use the new H5AC2_jnl_config_t
- * 		structure and the associated utilities. 
- *
- * 		I can't but observe that this function really doesn't 
- * 		belong in this file.  Also, it used (and still uses)
- * 		API calls -- which really shouldn't happen in the 
- * 		library.
- *
- * 		We must address these issues eventually, but for now my 
- * 		objective is simply to avoid breaking Albert's test code.
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5Pset_journal(hid_t fapl_id, 
-	       const char *journal_file)
-{
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED; /* set to SUCCEED for now. */
-    H5AC2_jnl_config_t config;
-
-    FUNC_ENTER_API(H5Pset_journal, FAIL)
-    H5TRACE2("e", "i*s", fapl_id, journal_file);
-
-    /* Check/fix arguments */
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-    if (!journal_file || !*journal_file)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
-    if (strlen(journal_file) >= H5AC2__MAX_JOURNAL_FILE_NAME_LEN)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file name too long")
-
-    /* setup cache config struct to enable journaling */
-    config.version = H5AC2__CURR_JNL_CONFIG_VER;
-
-    /* get cache config struct information */
-    H5Pget_jnl_config(fapl_id, &config);
-
-    /* set enable journaling field to true */
-    config.enable_journaling = TRUE;    /* turn on journaling */
-    config.journal_recovered = FALSE;
-    config.jbrb_buf_size = 8*1024;	    /* multiples of system buffer size*/
-    config.jbrb_num_bufs = 2;	
-    config.jbrb_use_aio = FALSE;	    /* only sync IO is supported */
-    config.jbrb_human_readable = TRUE;  /* only readable form is supported */
-    /* specify name of journal file */
-    HDstrcpy(config.journal_file_path, journal_file);
-
-    /* set latest format */
-    if (H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format'")
-
-    /* set cache config struct information */
-    ret_value = H5Pset_jnl_config(fapl_id, &config);
-
-done:
-
-    FUNC_LEAVE_API(ret_value)
-
-} /* H5Pset_journal() */
 

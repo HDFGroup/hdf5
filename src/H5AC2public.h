@@ -513,7 +513,7 @@ typedef struct H5AC2_jnl_config_t
 
     /* metadata journaling configuration fields: */
     hbool_t     enable_journaling;
-    char        journal_file_path[ H5AC2__MAX_JOURNAL_FILE_NAME_LEN];
+    char        journal_file_path[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t     journal_recovered;
     size_t      jbrb_buf_size;
     int         jbrb_num_bufs;

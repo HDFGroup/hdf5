@@ -198,7 +198,39 @@ struct H5C2_jbrb_t
 #define H5C2__MAX_PASSES_ON_FLUSH	4
 
 
-#define H5C2__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
+/****************************************************************************
+ *
+ * structure H5C2_mdjsc_record_t
+ *
+ * A dynamically allocate array of instances of H5C2_mdjsc_record_t is 
+ * used to record metadata journaling status change callbacks -- of which 
+ * there can be an arbitrary number.
+ *
+ * The fields in the structure are discussed individually below:
+ *
+ * fcn_ptr:	Pointer to the instance of H5C2_mdj_status_change_func_t
+ * 		to be called on metadata journaling start or stop.  NULL
+ * 		if this record is not in use.
+ *
+ * 		Note that the cache must be clean when this callback 
+ * 		is called.
+ *
+ * data_ptr:	Pointer to void.  This value is supplied on registration,
+ * 		and is passed to *fcn_ptr.  NULL if this record is not 
+ * 		in use.
+ *
+ * fl_next:	Index of the next free entry in the metadata status change
+ * 		callback table, or -1 if there is no next free entry or 
+ * 		if the entry is in use.
+ *
+ ****************************************************************************/
+
+typedef struct H5C2_mdjsc_record_t 
+{
+    H5C2_mdj_status_change_func_t	fcn_ptr;
+    void *				data_ptr;
+    int32_t				fl_next;
+} H5C2_mdjsc_record_t;
 
 
 /****************************************************************************
@@ -865,7 +897,36 @@ struct H5C2_jbrb_t
  *
  *              This field is NULL if the list is empty.
  *
+ * It is necessary to turn off some optimization while journaling is 
+ * in progress, so as to avoid generating dirty metadata during a flush.
+ * The following fields are used to maintain a list of functions to be
+ * called when journaling is enabled or disabled.  Note that the metadata
+ * cache must be clean when these function are called.
  *
+ * The metadata journaling status change callback table is initaly allocated
+ * with H5C2__MIN_MDJSC_CB_TBL_LEN entries.  The table size is doubled
+ * whenever an entry is added to a full table, and halved whenever the 
+ * active entries to total entries ratio drops below 
+ * H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO and the upper half of the table is 
+ * empty (Since entries are removed from the table by specifying the 
+ * index of the entry, we can't compress the table).
+ *
+ * mdjsc_cb_tbl: Base address of a dynamically allocated array of instances
+ * 		of H5C2_mdjsc_record_t used to record an arbitrarily long 
+ * 		list of functions to call whenever journaling is enabled or 
+ * 		disabled.
+ *
+ * mdjsc_cb_tbl_len: Number of entries currently allocated in *mdjsc_cb_tbl.
+ *
+ * num_mdjsc_cbs: Number of callbacks currently registered in the metadata
+ * 		journaling status change callback table.
+ *
+ * mdjsc_cb_tbl_fl_head:  Index of the first free entry in the mdjsc_cb_tbl,
+ * 		or -1 if the table is full.
+ *
+ * mdjsc_cb_tbl_max_idx_in_use: Maximum of the indicies of metadata journaling
+ * 		status change callback table entries in use, or -1 if the 
+ * 		table is empty;
  *
  * Statistics collection fields:
  *
@@ -1092,6 +1153,8 @@ struct H5C2_jbrb_t
  *
  ****************************************************************************/
 
+#define H5C2__HASH_TABLE_LEN     (64 * 1024) /* must be a power of 2 */
+
 #define H5C2__H5C2_T_MAGIC		0x005CAC0F
 #define H5C2__MAX_NUM_TYPE_IDS		17
 #define H5C2__PREFIX_LEN		32
@@ -1106,6 +1169,9 @@ struct H5C2_jbrb_t
           H5F_SIZEOF_SIZE(f) +			\
 	  ((pathLen) + 1) +             	\
 	  4 /* checksum */ )
+
+#define H5C2__MIN_MDJSC_CB_TBL_LEN		16
+#define H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO	0.25
 
 struct H5C2_t
 {
@@ -1206,6 +1272,11 @@ struct H5C2_t
     size_t			jwipl_size;
     H5C2_cache_entry_t *	jwipl_head_ptr;
     H5C2_cache_entry_t *	jwipl_tail_ptr;
+    H5C2_mdjsc_record_t *	mdjsc_cb_tbl;
+    int32_t			mdjsc_cb_tbl_len;
+    int32_t			num_mdjsc_cbs;
+    int32_t			mdjsc_cb_tbl_fl_head;
+    int32_t			mdjsc_cb_tbl_max_idx_in_use;
     
 #if H5C2_COLLECT_CACHE_STATS
 

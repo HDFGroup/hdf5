@@ -649,6 +649,31 @@ H5C2_create(size_t		        max_cache_size,
     cache_ptr->jwipl_head_ptr                            = NULL;
     cache_ptr->jwipl_tail_ptr                            = NULL;
 
+    /* allocate and initialze the metadata journaling status change 
+     * callback table, along with the associated fields.  Note that
+     * the table will grow and shrink as needed.
+     */
+    cache_ptr->mdjsc_cb_tbl = 
+	    H5MM_malloc(H5C2__MIN_MDJSC_CB_TBL_LEN * 
+			sizeof(H5C2_mdjsc_record_t));
+    if ( cache_ptr->mdjsc_cb_tbl == NULL ) {
+
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, \
+		    "can't alloc mdjsc_cb_tbl.")
+    }
+    for ( i = 0; i < H5C2__MIN_MDJSC_CB_TBL_LEN; i++ )
+    {
+        ((cache_ptr->mdjsc_cb_tbl)[i]).fcn_ptr  = NULL;
+        ((cache_ptr->mdjsc_cb_tbl)[i]).data_ptr = NULL;
+        ((cache_ptr->mdjsc_cb_tbl)[i]).fl_next  = i + 1;
+    }
+    ((cache_ptr->mdjsc_cb_tbl)[H5C2__MIN_MDJSC_CB_TBL_LEN - 1]).fl_next  = -1;
+    cache_ptr->mdjsc_cb_tbl_len = H5C2__MIN_MDJSC_CB_TBL_LEN;
+    cache_ptr->num_mdjsc_cbs = 0;
+    cache_ptr->mdjsc_cb_tbl_fl_head = 0;
+    cache_ptr->mdjsc_cb_tbl_max_idx_in_use = -1;
+
+
     if ( H5C2_reset_cache_hit_rate_stats(cache_ptr) != SUCCEED ) {
 
         /* this should be impossible... */
@@ -936,6 +961,11 @@ H5C2_dest(H5F_t * f,
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
 
+    /* All metadata journaling status change callbacks should have
+     * de-registered at this point.
+     */
+    HDassert( cache_ptr->num_mdjsc_cbs == 0 );
+
     if ( cache_ptr->mdj_enabled ) {
 
 	if ( H5C2_end_journaling(f, dxpl_id, cache_ptr) != SUCCEED ) {
@@ -955,6 +985,17 @@ H5C2_dest(H5F_t * f,
 
         H5SL_close(cache_ptr->slist_ptr);
         cache_ptr->slist_ptr = NULL;
+    }
+
+    if ( cache_ptr->mdjsc_cb_tbl != NULL ) {
+
+	cache_ptr->mdjsc_cb_tbl = H5MM_xfree(cache_ptr->mdjsc_cb_tbl);
+
+	if ( cache_ptr->mdjsc_cb_tbl != NULL ) {
+
+	    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+			"free of mdjsc_cb_tbl failed.");
+	}
     }
 
     cache_ptr->magic = 0;

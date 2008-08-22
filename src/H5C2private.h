@@ -1257,6 +1257,81 @@ typedef struct H5C2_auto_size_ctl_t
 } H5C2_auto_size_ctl_t;
 
 
+/****************************************************************************
+ *
+ * structure H5C2_mdj_config_t
+ *
+ * H5C2_mdj_config_t is a structure intended for use in comminicating 
+ * metadata journaling configuration data to and from the metadata 
+ * cache. 
+ *
+ * In its initial incarnation, it is identical to the H5AC2_jnl_config_t
+ * structure less ther version, and journal_recovered fields.  However, 
+ * in the future we may support other types of journaling -- which will 
+ * likely require modification or replacement of the H5AC2_jnl_config_t 
+ * structure.
+ *
+ * The fields of the structure are discussed individually below.  Note
+ * that the fields with the "jbrb_" prefix are used to configure the
+ * journal buffer ring buffer -- a ring buffer of buffers used to buffer
+ * output of journal messages.
+ *
+ * enable_journaling:  Boolean flag that is set to TRUE if journaling is
+ *      to be enabled, and to FALSE otherwise.
+ *
+ *      When the cache configuration is reported, this field is TRUE iff
+ *      journaling is enabled.
+ *
+ * journal_file_path:  Full path of the file to be used to store the
+ *      metadata journal.  This field is only defined if enable_journaling
+ *      is TRUE.
+ *
+ *      At present, the length of the journal file path is restricted to
+ *      no more than H5C2__MAX_JOURNAL_FILE_NAME_LEN (which must equal
+ *      H5AC2__MAX_JOURNAL_FILE_NAME_LEN). 
+ *
+ * jbrb_buf_size: size_t containing the size of each individual buffer
+ *      in the journal buffer ring buffer.  This size should be chosen
+ *      to be some multiple of the block size used by the file system
+ *      on which the journal file will be written.
+ *
+ * jbrb_num_bufs: Integer containing the number of buffers in the journal
+ *      buffer ring buffer.  If synchronous I/O is used, one or two buffers
+ *      is sufficient.  If asynchronous I/O is used, the number of buffers
+ *      should be sufficiently large that a write on buffer is likely to
+ *      complete before that buffer is needed again.
+ *
+ * jbrb_use_aio:  Boolean flag indicating whether we should use
+ *      asynchronous I/O for journal entry writes.
+ *
+ * jbrb_human_readable: Boolean flag which determines whether the journal
+ *      file will be written in human readable form.  In general, this
+ *      field should be set to false, as the human readable journal
+ *      file is at least twice a large as the machine readable version.
+ *
+ ****************************************************************************/
+
+#define H5C2__MAX_JOURNAL_FILE_NAME_LEN        1024
+
+typedef struct H5C2_mdj_config_t
+{
+    hbool_t     enable_journaling;
+    char        journal_file_path[H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    size_t      jbrb_buf_size;
+    int         jbrb_num_bufs;
+    hbool_t     jbrb_use_aio;
+    hbool_t     jbrb_human_readable;
+
+} H5C2_mdj_config_t;
+
+/* The following typedef is used for callbacks on metadata journaling
+ * configuration changes.
+ */
+
+typedef void (*H5C2_mdj_status_change_func_t)(H5C2_mdj_config_t * config_ptr,
+		                              void * data_ptr);
+
+
 /*
  * Library prototypes.
  */
@@ -1463,11 +1538,7 @@ H5_DLL herr_t H5C2_validate_resize_config(H5C2_auto_size_ctl_t * config_ptr,
 H5_DLL herr_t H5C2_begin_journaling(H5F_t * f,
                                     hid_t dxpl_id,
 				    H5C2_t * cache_ptr,
-                                    char * journal_file_name_ptr,
-                                    size_t buf_size,
-                                    int num_bufs,
-                                    hbool_t use_aio,
-                                    hbool_t human_readable);
+				    H5C2_mdj_config_t * config_ptr);
 
 H5_DLL herr_t H5C2_begin_transaction(H5C2_t * cache_ptr,
 		                     uint64_t * trans_num_ptr,
@@ -1483,12 +1554,7 @@ H5_DLL herr_t H5C2_end_transaction(H5F_t * f,
                                    const char * api_call_name);
 
 H5_DLL herr_t H5C2_get_journal_config(H5C2_t * cache_ptr,
-                                      hbool_t * journaling_enabled_ptr,
-                                      char * journal_file_path_ptr,
-                                      size_t * jbrb_buf_size_ptr,
-                                      int * jbrb_num_bufs_ptr,
-                                      hbool_t * jbrb_use_aio_ptr,
-                                      hbool_t * jbrb_human_readable_ptr);
+		                      H5C2_mdj_config_t * config_ptr);
 
 H5_DLL herr_t H5C2_journal_post_flush(H5C2_t * cache_ptr,
                                       hbool_t cache_is_clean);
@@ -1591,6 +1657,24 @@ H5_DLL herr_t H5C2_unmark_journaling_in_progress(H5F_t * f,
 						 H5C2_t * cache_ptr);
 
 
+/**************************************************************************/
+/****** metadata journaling status change callback management code ********/
+/**************************************************************************/
+
+H5_DLL herr_t H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr,
+                                        H5C2_mdj_config_t * config_ptr);
+
+H5_DLL herr_t H5C2_deregister_mdjsc_callback(H5C2_t * cache_ptr,
+                                             int32_t idx);
+
+H5_DLL herr_t H5C2_grow_mdjsc_callback_table(H5C2_t * cache_ptr);
+
+H5_DLL herr_t H5C2_register_mdjsc_callback(H5C2_t * cache_ptr,
+                                         H5C2_mdj_status_change_func_t fcn_ptr,
+                                         void * data_ptr,
+                                         int32_t * idx_ptr);
+
+H5_DLL herr_t H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr);
 
 #endif /* !_H5C2private_H */
 

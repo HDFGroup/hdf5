@@ -1420,7 +1420,7 @@ H5Pget_mdc_config(hid_t                 plist_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
     }
 
-    if ( config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION ) {
+    if ( ! H5AC2_validate_cache_config_ver(config_ptr->version) ) {
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
     }
@@ -1547,7 +1547,7 @@ H5Pget_jnl_config(hid_t                plist_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
     }
 
-    if ( config_ptr->version != H5AC2__CURR_JNL_CONFIG_VER ) {
+    if ( ! H5AC2_validate_jnl_config_ver(config_ptr->version) ) {
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
     }

@@ -1412,7 +1412,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
                         "H5AC2_check_for_journaling() reports failure.")
         }
 
-	if ( H5AC2_set_jnl_config(file, dxpl_id, config_ptr) < 0 ) {
+	if ( H5AC2_set_jnl_config(file, dxpl_id, config_ptr, TRUE) < 0 ) {
 
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, \
                         "H5AC2_set_jnl_config() failed.")
@@ -3396,7 +3396,7 @@ H5Fget_jnl_config(hid_t file_id,
     }
 
     if ( ( NULL == config_ptr ) ||
-         ( config_ptr->version != H5AC2__CURR_JNL_CONFIG_VER ) ) {
+         ( ! H5AC2_validate_jnl_config_ver(config_ptr->version) ) ) {
 
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
     }
@@ -3455,7 +3455,10 @@ H5Fset_jnl_config(hid_t file_id,
     }
 
     /* set the resize configuration  */
-    result = H5AC2_set_jnl_config(file, H5P_DATASET_XFER_DEFAULT, config_ptr);
+    result = H5AC2_set_jnl_config(file, 
+		                  H5P_DATASET_XFER_DEFAULT, 
+		                  config_ptr, 
+				  FALSE);
 
     if ( result != SUCCEED ) {
 
@@ -3512,7 +3515,7 @@ H5Fget_mdc_config(hid_t file_id,
     }
 
     if ( ( NULL == config_ptr ) ||
-         ( config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION ) ) {
+         ( ! H5AC2_validate_cache_config_ver(config_ptr->version) ) ) {
 
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
     }
