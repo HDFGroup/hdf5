@@ -586,6 +586,10 @@ rem
         call :tooltest0 %arg%
     )
     
+    rem add a userblock to file
+    set arg=%file1% -u ublock.bin -b 2048
+    call :tooltest %arg%
+    
     
     if %nerrors% equ 0 (
         echo.All %h5repack% tests passed.
