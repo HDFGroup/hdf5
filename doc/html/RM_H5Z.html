@@ -378,7 +378,7 @@ END SUBROUTINE h5zfilter_avail_f
 <dl>
 <dt><strong>Name:</strong> <a name="Compression-Register">H5Zregister</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Zregister</code>(<em>const H5Z_class_t</em> <code>filter_class</code>)
+    <dd><em>herr_t</em> <code>H5Zregister</code>(<em>const H5Z_class_t *</em><code>filter_class</code>)
     )
 <dt><strong>Purpose:</strong>
     <dd>Registers new filter.
@@ -397,9 +397,9 @@ END SUBROUTINE h5zfilter_avail_f
       fields can be set to <code>NULL</code> 
       if they are not required for the filter being registered.
       <p>
-      <code>H5Zregister</code> accepts a single parameter, 
-      the <code>filter_class</code> data structure, 
-      which is defined as follows:
+      <code>H5Zregister</code> accepts a single parameter, a pointer to 
+      a buffer for the <code>filter_class</code> data structure. 
+      That data structure is defined as follows:
       <pre>
           typedef struct H5Z_class_t {
               H5Z_filter_t id;
@@ -563,8 +563,9 @@ END SUBROUTINE h5zfilter_avail_f
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>const&nbsp;H5Z_class_t</em>&nbsp;<code>filter_class&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">IN: Struct containing filter-definition information.</td></tr>
+            <td valign="top"><em>const&nbsp;H5Z_class_t&nbsp;*</em><code>filter_class&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: A pointer to a buffer for the struct 
+                containing filter-definition information.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
@@ -715,7 +716,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 20 August 2008");
+document.writeln("Last modified: 25 August 2008");
 -->
 </SCRIPT>
  
