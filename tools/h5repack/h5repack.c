@@ -410,9 +410,9 @@ static int check_options(pack_opt_t *options)
     }
 
 
-    /*-------------------------------------------------------------------------
-    * verify new user userblock options
-    *-------------------------------------------------------------------------
+    /*--------------------------------------------------------------------------------
+    * verify new user userblock options; both file name and block size must be present
+    *---------------------------------------------------------------------------------
     */
     if ( options->ublock_filename != NULL && options->ublock_size == 0 )
     {

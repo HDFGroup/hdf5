@@ -23,7 +23,7 @@
 
 extern char  *progname;
 
-#if 0
+#if 1
 #define H5REPACK_DEBUG
 #endif
 
@@ -203,7 +203,7 @@ int copy_objects(const char* fnamein,
     *-------------------------------------------------------------------------
     */
 
-    if ( options->ublock_size > 0 && options->ublock_filename != NULL )
+    if ( options->ublock_size > 0 )
     {
         /* either use the FCPL already created or create a new one */
         if(fcpl != H5P_DEFAULT)
@@ -261,7 +261,7 @@ int copy_objects(const char* fnamein,
     * write a new user block if requested
     *-------------------------------------------------------------------------
     */
-    if ( options->ublock_size > 0 && options->ublock_filename != NULL )
+    if ( options->ublock_size > 0  )
     {      
         copy_user_block( options->ublock_filename, fnameout, options->ublock_size);
     }
@@ -312,7 +312,8 @@ int copy_objects(const char* fnamein,
     H5Fclose(fidin);
     H5Fclose(fidout);
 
-    if(ub_size > 0)
+    /* write only the input file user block if there is no user block file input */
+    if(ub_size > 0 && options->ublock_size == 0)
         copy_user_block(fnamein, fnameout, ub_size);
 
     return 0;

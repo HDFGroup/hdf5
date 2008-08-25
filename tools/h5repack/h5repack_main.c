@@ -87,7 +87,7 @@ static struct long_options l_opts[] = {
  *   PVN, May 16, 2008
  *    added  backward compatibility for -i infile -o outfile 
  *   PVN, August 20, 2008
- *    add a user block to file if requested (new switches -u -b) 
+ *    add a user block to repacked file (switches -u -b) 
  *-------------------------------------------------------------------------
  */
 int main(int argc, char **argv)
