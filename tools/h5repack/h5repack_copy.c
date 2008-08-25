@@ -23,7 +23,7 @@
 
 extern char  *progname;
 
-#if 1
+#if 0
 #define H5REPACK_DEBUG
 #endif
 
