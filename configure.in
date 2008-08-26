@@ -381,11 +381,43 @@ dnl  ], AC_MSG_RESULT(yes),
 dnl     AC_MSG_RESULT(no)
 dnl     FCFLAGS="$FCFLAGS_saved")
 
+
+
+  FORTRAN_DEFAULT_REALisDBLE="no"
+  AC_MSG_CHECKING([if Fortran default REAL is DOUBLE PRECISION])
+  
+  AC_TRY_RUN([
+     MODULE type_mod
+       INTERFACE h5t	
+         MODULE PROCEDURE h5t_real
+         MODULE PROCEDURE h5t_dble
+       END INTERFACE
+     CONTAINS
+       SUBROUTINE h5t_real(r)
+         REAL :: r
+       END SUBROUTINE h5t_real
+       SUBROUTINE h5t_dble(d)
+         DOUBLE PRECISION :: d
+       END SUBROUTINE h5t_dble
+     END MODULE type_mod
+     PROGRAM main
+       USE type_mod
+       REAL :: r
+       DOUBLE PRECISION :: d
+       CALL h5t(r)
+       CALL h5t(d)
+     END PROGRAM main
+                  ],
+   AC_MSG_RESULT(no), 
+   [AC_MSG_RESULT(yes) 
+       FORTRAN_DEFAULT_REALisDBLE="yes"])
   dnl Change back to the C language
   AC_LANG_POP(Fortran)
 else
   echo "no"
 fi
+
+AM_CONDITIONAL([FORTRAN_DEFAULT_REALisDBLE_F], [test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"])
 
 dnl ----------------------------------------------------------------------
 dnl Check if they would like the C++ interface compiled
