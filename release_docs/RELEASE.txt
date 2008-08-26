@@ -71,7 +71,8 @@ New Features
 
         Tools
         -----
-        - None
+        - h5repack: add a userblock to an HDF5 file during the repack. (PVN - 2008/08/26)
+
 
         F90 API
         ------
