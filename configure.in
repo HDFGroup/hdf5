@@ -867,10 +867,14 @@ if test "X${HDF_FORTRAN}" = "Xyes"; then
     H5_FORTRAN_SHARED="no"
   fi
 
-  if (${FC} -V 2>&1 | grep '^Intel(R) Fortran Compiler') > /dev/null; then
-    H5_FORTRAN_SHARED="no"
+  if (${FC} -V 2>&1 | grep '^Intel(R) Fortran') > /dev/null; then
+    if (${FC} -v 2>&1 | grep '^Version 8.') > /dev/null; then
+      H5_FORTRAN_SHARED="no"
+    else
+dnl echo 'adding fortran compiler flag needed for building shared libraries'
+      FCFLAGS="${FCFLAGS} -fPIC"
+    fi
   fi
-
   if (${FC} +version 2>&1 | grep '^HP F90') > /dev/null; then
     H5_FORTRAN_SHARED="no"
   fi
