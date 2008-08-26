@@ -80,18 +80,19 @@ am__libhdf5_fortran_la_SOURCES_DIST = H5fortran_flags.f90 \
 	H5f90global.f90 H5fortran_types.f90 H5_ff.f90 H5Aff.f90 \
 	H5Dff.f90 H5Eff.f90 H5Fff.f90 H5Gff.f90 H5Iff.f90 H5Lff.f90 \
 	H5Off.f90 H5Pff.f90 H5Rff.f90 H5Sff.f90 H5Tff.f90 H5Zff.f90 \
-	H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c H5If.c \
-	H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c HDF5.f90 \
-	H5FDmpiof.c HDF5mpio.f90 H5FDmpioff.f90
+	H5_DBLE_Interface$(F_DBLE).f90 H5f90kit.c H5_f.c H5Af.c H5Df.c \
+	H5Ef.c H5Ff.c H5Gf.c H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c \
+	H5Tf.c H5Zf.c HDF5.f90 H5FDmpiof.c HDF5mpio.f90 H5FDmpioff.f90
 @BUILD_PARALLEL_CONDITIONAL_FALSE@am__objects_1 = HDF5.lo
 @BUILD_PARALLEL_CONDITIONAL_TRUE@am__objects_1 = H5FDmpiof.lo \
 @BUILD_PARALLEL_CONDITIONAL_TRUE@	HDF5mpio.lo H5FDmpioff.lo
 am_libhdf5_fortran_la_OBJECTS = H5fortran_flags.lo H5f90global.lo \
 	H5fortran_types.lo H5_ff.lo H5Aff.lo H5Dff.lo H5Eff.lo \
 	H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo H5Off.lo H5Pff.lo H5Rff.lo \
-	H5Sff.lo H5Tff.lo H5Zff.lo H5f90kit.lo H5_f.lo H5Af.lo H5Df.lo \
-	H5Ef.lo H5Ff.lo H5Gf.lo H5If.lo H5Lf.lo H5Of.lo H5Pf.lo \
-	H5Rf.lo H5Sf.lo H5Tf.lo H5Zf.lo $(am__objects_1)
+	H5Sff.lo H5Tff.lo H5Zff.lo H5_DBLE_Interface$(F_DBLE).lo \
+	H5f90kit.lo H5_f.lo H5Af.lo H5Df.lo H5Ef.lo H5Ff.lo H5Gf.lo \
+	H5If.lo H5Lf.lo H5Of.lo H5Pf.lo H5Rf.lo H5Sf.lo H5Tf.lo \
+	H5Zf.lo $(am__objects_1)
 libhdf5_fortran_la_OBJECTS = $(am_libhdf5_fortran_la_OBJECTS)
 PROGRAMS = $(noinst_PROGRAMS)
 am_H5fortran_detect_OBJECTS = H5fortran_detect.$(OBJEXT)
@@ -397,12 +398,21 @@ lib_LTLIBRARIES = libhdf5_fortran.la
 
 # Include HDF5.f90 if parallel is disabled, HDF5mpiof*  if parallel is enabled
 @BUILD_PARALLEL_CONDITIONAL_TRUE@PARALLEL_COND_SRC = H5FDmpiof.c HDF5mpio.f90 H5FDmpioff.f90
+@FORTRAN_DEFAULT_REALisDBLE_F_FALSE@F_DBLE = Include
+
+#   Condition for including/excluding the DBLE interfaces for when the 
+#   default REAL is of type DOUBLE PRECISION.
+#   We do not include the double precision interfaces if the defaut REAL is
+#   DOUBLE PRECISION since this would lead to a non-unique conflict with the
+#   generic interfaces declared as REAL.
+@FORTRAN_DEFAULT_REALisDBLE_F_TRUE@F_DBLE = Exclude
 
 # Source files for the library.
 libhdf5_fortran_la_SOURCES = H5fortran_flags.f90 H5f90global.f90          \
          H5fortran_types.f90 H5_ff.f90 H5Aff.f90 H5Dff.f90 H5Eff.f90    \
          H5Fff.f90 H5Gff.f90 H5Iff.f90 H5Lff.f90 H5Off.f90 H5Pff.f90 H5Rff.f90 H5Sff.f90    \
          H5Tff.f90 H5Zff.f90                                            \
+	 H5_DBLE_Interface$(F_DBLE).f90 \
          H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c           \
          H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c               \
          $(PARALLEL_COND_SRC)
@@ -897,13 +907,16 @@ H5Rff.lo:            $(srcdir)/H5Rff.f90 H5f90global.lo
 H5Sff.lo:            $(srcdir)/H5Sff.f90 H5f90global.lo
 H5Tff.lo:            $(srcdir)/H5Tff.f90 H5f90global.lo
 H5Zff.lo:            $(srcdir)/H5Zff.f90 H5f90global.lo
+H5_DBLE_Interface$(F_DBLE).lo:  $(srcdir)/H5_DBLE_Interface$(F_DBLE).f90 H5Aff.lo H5Dff.lo H5Pff.lo
+
 HDF5.lo:             $(srcdir)/HDF5.f90 H5f90global.lo H5Aff.lo      \
                      H5Dff.lo H5Eff.lo H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo \
-                     H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo
+                     H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo \
+                     H5_DBLE_Interface$(F_DBLE).lo
 H5FDmpioff.lo:       $(srcdir)/H5FDmpioff.f90 H5f90global.lo
 HDF5mpio.lo:         $(srcdir)/H5FDmpioff.f90 H5f90global.lo H5Aff.lo  \
                      H5Dff.lo H5Eff.lo H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo  \
-                     H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo H5FDmpioff.lo
+                     H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo H5_DBLE_Interface$(F_DBLE).lo H5FDmpioff.lo
 
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
