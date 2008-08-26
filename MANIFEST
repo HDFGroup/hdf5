@@ -176,6 +176,8 @@
 
 ./fortran/src/H5_f.c
 ./fortran/src/H5_ff.f90
+./fortran/src/H5_DBLE_InterfaceInclude.f90
+./fortran/src/H5_DBLE_InterfaceExclude.f90
 ./fortran/src/H5Af.c
 ./fortran/src/H5Aff.f90
 ./fortran/src/H5Df.c
