@@ -45,7 +45,7 @@ static int have_request(pack_opt_t *options);
  * Purpose: locate all high-level HDF5 objects in the file
  *  and compress/chunk them using options
  *
- * Algorythm: 2 traversals are made to the file; the 1st builds a list of
+ * Algorithm: 2 traversals are made to the file; the 1st builds a list of
  *  the objects, the 2nd makes a copy of them, using the options;
  *  the reason for the 1st traversal is to check for invalid
  *  object name requests
@@ -384,8 +384,12 @@ static int check_options(pack_opt_t *options)
         is present with other objects\n");
     return -1;
     }
-    
-    /* check options for the latest format */
+
+    /*-------------------------------------------------------------------------
+    * check options for the latest format
+    *-------------------------------------------------------------------------
+    */
+
     if (options->grp_compact < 0) {
         error_msg(progname, "invalid maximum number of links to store as header messages\n");
         return -1;
@@ -404,6 +408,26 @@ static int check_options(pack_opt_t *options)
             return -1;
         }
     }
+
+
+    /*--------------------------------------------------------------------------------
+    * verify new user userblock options; both file name and block size must be present
+    *---------------------------------------------------------------------------------
+    */
+    if ( options->ublock_filename != NULL && options->ublock_size == 0 )
+    {
+        error_msg(progname, "user block size missing for file %s\n",
+            options->ublock_filename);
+        return -1;
+    }
+    
+    if ( options->ublock_filename == NULL && options->ublock_size != 0 )
+    {
+        error_msg(progname, "file name missing for user block\n",
+            options->ublock_filename);
+        return -1;
+    }
+    
     
     return 0;
 }

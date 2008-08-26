@@ -37,7 +37,7 @@ static int has_i_o = 0;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:d:s:";
+static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -51,6 +51,8 @@ static struct long_options l_opts[] = {
     { "compact", require_arg, 'c' },
     { "indexed", require_arg, 'd' },
     { "ssize", require_arg, 's' },
+    { "ublock", require_arg, 'u' },
+    { "block", require_arg, 'b' },
     { NULL, 0, '\0' }
 };
 
@@ -84,14 +86,16 @@ static struct long_options l_opts[] = {
  *    added support for multiple global filters
  *   PVN, May 16, 2008
  *    added  backward compatibility for -i infile -o outfile 
-  *-------------------------------------------------------------------------
+ *   PVN, August 20, 2008
+ *    add a user block to repacked file (switches -u -b) 
+ *-------------------------------------------------------------------------
  */
 int main(int argc, char **argv)
 {
     char          *infile  = NULL;
     char          *outfile = NULL;
     pack_opt_t    options;            /*the global options */
-    int           ret;
+    int           ret=-1;
     int           i;
     
     /* initialize options  */
@@ -284,7 +288,8 @@ int main(int argc, char **argv)
         
     }
 
-  
+
+   
     /* pack it */
     ret=h5repack(infile,outfile,&options);
     
@@ -324,6 +329,8 @@ static void usage(const char *prog)
  printf("   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
  printf("   -m T, --threshold=T     Do not apply the filter to datasets smaller than T\n");
  printf("   -e M, --file=M          Name of file M with the -f and -l options\n");
+ printf("   -u U, --ublock=U        Name of file U with user block data to be added\n");
+ printf("   -b D, --block=D         Size of user block to be added\n");
  printf("   -f FILT, --filter=FILT  Filter type\n");
  printf("   -l LAYT, --layout=LAYT  Layout type\n");
  
@@ -331,7 +338,9 @@ static void usage(const char *prog)
 
  printf("  T - is an integer greater than 1, size of dataset in bytes \n");
  printf("  M - is a filename.\n");
+ printf("  U - is a filename.\n");
  printf("  S - is an integer\n");
+ printf("  D - is the user block size (any power of 2 equal to 512 or greater)\n");
  printf("  F - is the shared object header message type, any of <dspace|dtype|fill|\n");
  printf("        pline|attr>. If F is not specified, S applies to all messages\n");
 
@@ -510,24 +519,35 @@ static void parse_command_line(int argc, const char* argv[], pack_opt_t* options
                     strcpy(msgType, msgPtr+1);
                     msgPtr[0] = '\0';
                     ssize = atoi( opt_arg );
-                    if (strcmp(msgType, "dspace") == 0) {
+                    if (strncmp(msgType, "dspace",6) == 0) {
                         options->msg_size[0] = ssize;
                     }
-                    else if (strcmp(msgType, "dtype") == 0) {
+                    else if (strncmp(msgType, "dtype", 5) == 0) {
                         options->msg_size[1] = ssize;
                     }
-                    else if (strcmp(msgType, "fill") == 0) {
+                    else if (strncmp(msgType, "fill", 4) == 0) {
                         options->msg_size[2] = ssize;
                     }
-                    else if (strcmp(msgType, "pline") == 0) {
+                    else if (strncmp(msgType, "pline", 5) == 0) {
                         options->msg_size[3] = ssize;
                     }
-                    else if (strcmp(msgType, "attr") == 0) {
+                    else if (strncmp(msgType, "attr", 4) == 0) {
                         options->msg_size[4] = ssize;
                     }
                 }            
             }
             
+            break;
+
+            
+        case 'u':
+            
+            options->ublock_filename = opt_arg;
+            break;
+            
+        case 'b':
+            
+            options->ublock_size = atoi( opt_arg );
             break;
 
         } /* switch */
