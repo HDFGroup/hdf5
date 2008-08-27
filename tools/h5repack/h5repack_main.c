@@ -34,7 +34,7 @@ int d_status = EXIT_SUCCESS;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:i:s:";
+static const char *s_opts = "hVvf:l:m:e:nLc:i:s:u:b:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -44,7 +44,8 @@ static struct long_options l_opts[] = {
     { "threshold", require_arg, 'm' },
     { "file", require_arg, 'e' },
     { "native", no_arg, 'n' },
-  
+    { "ublock", require_arg, 'u' },
+    { "block", require_arg, 'b' },
     { NULL, 0, '\0' }
 };
 
@@ -68,12 +69,12 @@ static struct long_options l_opts[] = {
  *  July 2004: Introduced the extra EC or NN option for SZIP
  *  October 2006: Added a new switch -n, that allows to write the dataset 
  *                using a native type. The default to write is the file type.
- *
- * Modification:
- *   PVN, November 19, 2007
+ *  PVN, November 19, 2007
  *    adopted the syntax h5repack [OPTIONS]  file1 file2
- *   PVN, November 28, 2007
+ *  PVN, November 28, 2007
  *    added support for multiple global filters
+ *  PVN, August 20, 2008
+ *    add a user block to repacked file (switches -u -b) 
  *-------------------------------------------------------------------------
  */
 int main(int argc, char **argv)
@@ -146,6 +147,8 @@ static void usage(const char *prog)
  
  printf("   -m T, --threshold=T     Do not apply the filter to datasets smaller than T\n");
  printf("   -e M, --file=M          Name of file M with the -f and -l options\n");
+ printf("   -u U, --ublock=U        Name of file U with user block data to be added\n");
+ printf("   -b D, --block=D         Size of user block to be added\n");
  printf("   -f FILT, --filter=FILT  Filter type\n");
  printf("   -l LAYT, --layout=LAYT  Layout type\n");
  
@@ -153,6 +156,8 @@ static void usage(const char *prog)
 
  printf("  T - is an integer greater than 1, size of dataset in bytes \n");
  printf("  M - is a filename.\n");
+ printf("  U - is a filename.\n");
+ printf("  D - is the user block size (any power of 2 equal to 512 or greater)\n");
  
  printf("\n");
 
@@ -281,10 +286,18 @@ static void parse_command_line(int argc, const char* argv[], pack_opt_t* options
         case 'n':
             options->use_native = 1;
             break;
-        
-     
 
-       
+        case 'u':
+            
+            options->ublock_filename = opt_arg;
+            break;
+            
+        case 'b':
+            
+            options->ublock_size = atoi( opt_arg );
+            break;
+
+        
 
         } /* switch */
         

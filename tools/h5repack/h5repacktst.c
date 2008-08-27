@@ -15,8 +15,8 @@
 
 #include "h5repack.h"
 #include "h5test.h"
-#include "h5tools.h"
 #include "h5diff.h"
+#include "h5tools.h"
 
 #define GOERROR  {H5_FAILED(); goto error;}
 
@@ -64,6 +64,12 @@
 #define FNAME15    "h5repack_ext.h5"
 #define FNAME15OUT "h5repack_ext_out.h5"
 
+/* File w/userblock */
+#define FNAME16    "h5repack_ub.h5"
+#define FNAME16OUT "h5repack_ub_out.h5"
+
+#define FNAME_UB   "ublock.bin"
+
 
 const char *H5REPACK_FILENAMES[] = {
    "h5repack_big_out",
@@ -81,6 +87,10 @@ int d_status = EXIT_SUCCESS;
 #define CDIM1   DIM1/2
 #define CDIM2   DIM2/2
 #define RANK    2
+
+/* Size of userblock (for userblock test) */
+#define USERBLOCK_SIZE  2048
+
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -109,6 +119,10 @@ int make_dset(hid_t loc_id,const char *name,hid_t sid,hid_t dcpl,void *buf);
 int make_attr(hid_t loc_id,int rank,hsize_t *dims,const char *attr_name,hid_t type_id,void *buf);
 void make_dset_reg_ref(hid_t loc_id);
 int make_external(hid_t loc_id);
+static int make_userblock(void);
+static int verify_userblock( const char* filename);
+static int make_userblock_file(void);
+
 
 
 /*-------------------------------------------------------------------------
@@ -136,6 +150,10 @@ int main (void)
  /* initialize */
  memset(&diff_options, 0, sizeof (diff_opt_t));
  memset(&pack_options, 0, sizeof (pack_opt_t));
+
+ 
+ /* set h5diff "contents" mode */
+ diff_options.m_contents = 1;
 
  
  /* set h5diff "contents" mode */
@@ -1208,6 +1226,49 @@ if (szip_can_encode) {
  SKIPPED();
 #endif
 
+ /*-------------------------------------------------------------------------
+ * test file with userblock
+ *-------------------------------------------------------------------------
+ */
+ TESTING("    file with userblock");
+ if(h5repack_init(&pack_options, 0) < 0)
+  GOERROR;
+ if(h5repack(FNAME16, FNAME16OUT, &pack_options) < 0)
+  GOERROR;
+ if(h5diff(FNAME16, FNAME16OUT, NULL, NULL, &diff_options) > 0)
+  GOERROR;
+ if(h5repack_verify(FNAME16OUT, &pack_options) <= 0)
+  GOERROR;
+ if(verify_userblock(FNAME16OUT) < 0)
+  GOERROR;
+ if(h5repack_end(&pack_options) < 0)
+  GOERROR;
+ PASSED();
+
+ /*-------------------------------------------------------------------------
+ * test file with userblock
+ *-------------------------------------------------------------------------
+ */
+ TESTING("    file with added userblock");
+ if(h5repack_init(&pack_options, 0) < 0)
+  GOERROR;
+
+ /* add the options for a user block size and user block filename */
+ pack_options.ublock_size = USERBLOCK_SIZE;
+ pack_options.ublock_filename = FNAME_UB;
+ 
+ if(h5repack(FNAME8, FNAME8OUT, &pack_options) < 0)
+  GOERROR;
+ if(h5diff(FNAME8, FNAME8OUT, NULL, NULL, &diff_options) > 0)
+  GOERROR;
+ if(h5repack_verify(FNAME8OUT, &pack_options) <= 0)
+  GOERROR;
+ if(verify_userblock(FNAME8OUT) < 0)
+  GOERROR;
+ if(h5repack_end(&pack_options) < 0)
+  GOERROR;
+ PASSED();
+
 
 
 /*-------------------------------------------------------------------------
@@ -1387,6 +1448,20 @@ int make_testfiles(void)
   goto out;
  if(H5Fclose(loc_id)<0)
   return -1;
+
+ /*-------------------------------------------------------------------------
+ * create a file with userblock
+ *-------------------------------------------------------------------------
+ */
+ if(make_userblock() < 0)
+  goto out;
+
+ /*-------------------------------------------------------------------------
+ * create a userblock file 
+ *-------------------------------------------------------------------------
+ */
+ if(make_userblock_file() < 0)
+  goto out;
 
 
  return 0;
@@ -2388,6 +2463,180 @@ out:
  return -1;
 
 }
+
+/*-------------------------------------------------------------------------
+ * Function: make_userblock
+ *
+ * Purpose: create a file for the userblock copying test
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+make_userblock(void)
+{
+    hid_t   fid = -1;
+    hid_t   fcpl = -1;
+    int     fd = -1;            /* File descriptor for writing userblock */
+    char    ub[USERBLOCK_SIZE]; /* User block data */
+    ssize_t nwritten;           /* # of bytes written */
+    size_t  u;                  /* Local index variable */
+
+    /* Create file creation property list with userblock set */
+    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        goto out;
+    if(H5Pset_userblock(fcpl, (hsize_t)USERBLOCK_SIZE) < 0)
+        goto out;
+
+    /* Create file with userblock */
+    if((fid = H5Fcreate(FNAME16, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Fclose(fid) < 0)
+        goto out;
+
+    /* Close file creation property list */
+    if(H5Pclose(fcpl) < 0)
+        goto out;
+
+
+    /* Initialize userblock data */
+    for(u = 0; u < USERBLOCK_SIZE; u++)
+        ub[u] = 'a' + (u % 26);
+
+    /* Re-open HDF5 file, as "plain" file */
+    if((fd = HDopen(FNAME16, O_WRONLY, 0644)) < 0)
+        goto out;
+
+    /* Write userblock data */
+    nwritten = HDwrite(fd, ub, (size_t)USERBLOCK_SIZE);
+    assert(nwritten == USERBLOCK_SIZE);
+
+    /* Close file */
+    HDclose(fd);
+
+    return 0;
+
+out:
+    H5E_BEGIN_TRY {
+        H5Pclose(fcpl);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    if(fd > 0)
+        HDclose(fd);
+
+    return -1;
+} /* end make_userblock() */
+
+/*-------------------------------------------------------------------------
+ * Function: verify_userblock
+ *
+ * Purpose: Verify that the userblock was copied correctly
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+verify_userblock( const char* filename)
+{
+    hid_t   fid = -1;
+    hid_t   fcpl = -1;
+    int     fd = -1;            /* File descriptor for writing userblock */
+    char    ub[USERBLOCK_SIZE]; /* User block data */
+    hsize_t ub_size = 0;        /* User block size */
+    ssize_t nread;              /* # of bytes read */
+    size_t  u;                  /* Local index variable */
+
+    /* Open file with userblock */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        goto out;
+
+    /* Retrieve file creation property list & userblock size */
+    if((fcpl = H5Fget_create_plist(fid)) < 0)
+        goto out;
+    if(H5Pget_userblock(fcpl, &ub_size) < 0)
+        goto out;
+
+    /* Verify userblock size is correct */
+    if(ub_size != USERBLOCK_SIZE)
+        goto out;
+
+    /* Close file creation property list */
+    if(H5Pclose(fcpl) < 0)
+        goto out;
+
+    if(H5Fclose(fid) < 0)
+        goto out;
+
+
+    /* Re-open HDF5 file, as "plain" file */
+    if((fd = HDopen(filename, O_RDONLY, 0)) < 0)
+        goto out;
+
+    /* Read userblock data */
+    nread = HDread(fd, ub, (size_t)USERBLOCK_SIZE);
+    assert(nread == USERBLOCK_SIZE);
+
+    /* Verify userblock data */
+    for(u = 0; u < USERBLOCK_SIZE; u++)
+        if(ub[u] != (char)('a' + (u % 26)))
+            goto out;
+
+    /* Close file */
+    HDclose(fd);
+
+    return 0;
+
+out:
+    H5E_BEGIN_TRY {
+        H5Pclose(fcpl);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    if(fd > 0)
+        HDclose(fd);
+
+    return -1;
+} /* end verify_userblock() */
+
+
+/*-------------------------------------------------------------------------
+ * Function: make_userblock_file
+ *
+ * Purpose: create a file for the userblock add test
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+make_userblock_file(void)
+{
+    hid_t   fid = -1;
+    hid_t   fcpl = -1;
+    int     fd = -1;            /* File descriptor for writing userblock */
+    char    ub[USERBLOCK_SIZE]; /* User block data */
+    ssize_t nwritten;           /* # of bytes written */
+    size_t  u;                  /* Local index variable */
+
+    /* initialize userblock data */
+    for(u = 0; u < USERBLOCK_SIZE; u++)
+        ub[u] = 'a' + (u % 26);
+
+    /* open file */
+    if((fd = HDopen(FNAME_UB,O_WRONLY|O_CREAT|O_TRUNC, 0644 )) < 0)
+        goto out;
+
+    /* write userblock data */
+    nwritten = HDwrite(fd, ub, (size_t)USERBLOCK_SIZE);
+    assert(nwritten == USERBLOCK_SIZE);
+
+    /* close file */
+    HDclose(fd);
+
+    return 0;
+
+out:
+    
+    if(fd > 0)
+        HDclose(fd);
+
+    return -1;
+} 
 
 /*-------------------------------------------------------------------------
  * Function: write_dset_in

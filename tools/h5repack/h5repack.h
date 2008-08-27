@@ -104,7 +104,9 @@ typedef struct {
  H5D_layout_t    layout_g;    /*global layout information for the ALL case */
  int             verbose;     /*verbose mode */
  hsize_t         threshold;   /*minimum size to compress, in bytes */
- int             use_native;  /*use a native type in write */  
+ int             use_native;  /*use a native type in write */ 
+ const char      *ublock_filename; /* user block file name */
+ int             ublock_size;      /* user block size */
 
 } pack_opt_t;
 

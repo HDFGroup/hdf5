@@ -377,6 +377,24 @@ static int check_options(pack_opt_t *options)
         is present with other objects\n");
     return -1;
     }
+
+    /*--------------------------------------------------------------------------------
+    * verify new user userblock options; both file name and block size must be present
+    *---------------------------------------------------------------------------------
+    */
+    if ( options->ublock_filename != NULL && options->ublock_size == 0 )
+    {
+        error_msg(progname, "user block size missing for file %s\n",
+            options->ublock_filename);
+        return -1;
+    }
+    
+    if ( options->ublock_filename == NULL && options->ublock_size != 0 )
+    {
+        error_msg(progname, "file name missing for user block\n",
+            options->ublock_filename);
+        return -1;
+    }
     
   
     
