@@ -33,7 +33,7 @@ extern char  *progname;
  */
 #define FORMAT_OBJ      " %-27s %s\n"   /* obj type, name */
 #define FORMAT_OBJ_ATTR "  %-27s %s\n"  /* obj type, name */
-#define USERBLOCK_XFER_SIZE     512             /* Size of buffer/# of bytes to xfer at a time when copying userblock */
+#define USERBLOCK_XFER_SIZE     512     /* size of buffer/# of bytes to xfer at a time when copying userblock */
 
 /*-------------------------------------------------------------------------
  * local functions

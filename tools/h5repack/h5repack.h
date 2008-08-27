@@ -104,7 +104,7 @@ typedef struct {
  int             latest;      /*pack file with the latest file format */
  int             grp_compact; /* Set the maximum number of links to store as header messages in the group */
  int             grp_indexed; /* Set the minimum number of links to store in the indexed format */
- int             msg_size[8]; /* Minumum size of shared messages: dataspace, 
+ int             msg_size[8]; /* Minimum size of shared messages: dataspace, 
                                  datatype, fill value, filter pipleline, attribute */
  const char      *ublock_filename; /* user block file name */
  int             ublock_size;      /* user block size */
