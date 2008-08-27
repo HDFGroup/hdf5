@@ -97,7 +97,6 @@ which require many different parameters to be easily manipulated.
   <i>Generic Properties</i> 
   <ul>
     <li><a href="#Property-CreateClass">H5Pcreate_class</a> 
-    <li><a href="#Property-CreateList">H5Pcreate_list</a> 
     <li><a href="#Property-Register">H5Pregister</a> 
     <li><a href="#Property-Insert">H5Pinsert</a> 
     <li><a href="#Property-Set">H5Pset</a> 
@@ -297,7 +296,6 @@ which require many different parameters to be easily manipulated.
     <p><i>Generic Properties</i> 
     <ul>
     <li><a href="#Property-CreateClass">H5Pcreate_class</a> 
-    <li><a href="#Property-CreateList">H5Pcreate_list</a> 
     <li><a href="#Property-Register">H5Pregister</a> 
     <li><a href="#Property-Insert">H5Pinsert</a> 
     <li><a href="#Property-Set">H5Pset</a> 
@@ -498,7 +496,6 @@ See further notes in the description of each function.
       <li><a href="#Property-CopyProp">H5Pcopy_prop</a>
       <li><a href="#Property-Create">H5Pcreate</a>
       <li><a href="#Property-CreateClass">H5Pcreate_class</a>
-      <li><a href="#Property-CreateList">H5Pcreate_list</a>
       <li><a href="#Property-Equal">H5Pequal</a>
       <li><a href="#Property-Exist">H5Pexist</a>
       <li><a href="#Property-FillValueDefined">H5Pfill_value_defined</a>
@@ -652,7 +649,6 @@ as the corresponding C function.
     <p><i>Generic Properties</i> 
     <ul>
     <li><a href="#Property-CreateClass">h5pcreate_class_f</a>
-<!--<li><a href="#Property-CreateList">H5Pcreate_list</a>           -->
     <li><a href="#Property-Register">h5pregister_f</a>
     <li><a href="#Property-Insert">h5pinsert_f</a>
     <li><a href="#Property-Set">h5pset_f</a>
@@ -1326,54 +1322,6 @@ END SUBROUTINE h5pcreate_class_f
         -->
 </dl>
 
-<!-- NEW PAGE -->
-<!-- HEADER RIGHT "H5Pcreate_list" -->
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-CreateList">H5Pcreate_list</a>
-  
-  <dt><strong>Signature:</strong>
-    <dd><em>hid_t</em> <code>H5Pcreate_list</code>(
-                 <em>hid_t</em> <code>class</code>)
-
-  <dt><strong>Purpose:</strong>
-    <dd>Creates a new property list class of a given class.
-
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pcreate_list</code> creates a new property list of a  
-	given class.  If a <code>create</code> callback exists for the 
-    property list class, it is called before the property list 
-    is passed back to the user.  
-	If <code>create</code> callbacks exist for any individual properties 
-    in the property list, they are called before the class 
-    <code>create</code> callback.
-	
-  <dt><strong>Parameter:</strong>
-    <ul><table>
-    <tr>
-        <td><em>hid_t</em>&nbsp;<code>class;&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-        <td>IN: Class of property list to create.</td></tr>
-    </table></ul>
-
-  <dt><strong>Returns:</strong>
-    <dd>Success: a valid property list identifier
-    <dd>Failure: a negative value
-
-  <dt><strong>Fortran90 Interface:</strong>
-    <dd>None.
-<!--
-	<pre>
-SUBROUTINE
-	</pre>		
--->
-
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Premove_filter" -->
@@ -2062,7 +2010,7 @@ END SUBROUTINE h5pget_buffer_f
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pget_cache</code>(<em>hid_t</em> <code>plist_id</code>,
         <em>int</em> <code>*mdc_nelmts</code>,
-        <em>int</em> <code>*rdcc_nelmts</code>,
+        <em>size_t</em> <code>*rdcc_nelmts</code>,
         <em>size_t</em> <code>*rdcc_nbytes</code>,
         <em>double</em> <code>*rdcc_w0</code>
     )
@@ -2085,7 +2033,7 @@ END SUBROUTINE h5pget_buffer_f
 		    <td valign="top"><em>int</em> <code>*mdc_nelmts</code></td>
             <td valign="top">IN/OUT: Number of elements (objects) in the meta data cache.</td></tr>
         <tr>
-		    <td valign="top"><em>int</em> <code>*rdcc_nelmts</code></td>
+		    <td valign="top"><em>size_t</em> <code>*rdcc_nelmts</code></td>
             <td valign="top">IN/OUT: Number of elements (objects) in the raw data chunk cache.</td></tr>
         <tr>
 		    <td valign="top"><em>size_t</em>&nbsp;<code>*rdcc_nbytes&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
@@ -2132,7 +2080,8 @@ END SUBROUTINE h5pget_cache_f
         <tr>
           <td valign="top">1.6.0</td>
           <td valign="top">
-            The <code>rdcc_nbytes</code> parameter changed from 
+            The <code>rdcc_nbytes</code> and <code>rdcc_nelmts</code> 
+            parameters changed from 
             type <em>int</em> to <em>size_t</em>.</td></tr>
     </table></ul>
 </dl>
@@ -6471,7 +6420,7 @@ END SUBROUTINE h5pset_buffer_f
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pset_cache</code>(<em>hid_t</em> <code>plist_id</code>,
         <em>int</em> <code>mdc_nelmts</code>,
-        <em>int</em> <code>rdcc_nelmts</code>,
+        <em>size_t</em> <code>rdcc_nelmts</code>,
         <em>size_t</em> <code>rdcc_nbytes</code>,
         <em>double</em> <code>rdcc_w0</code>
     )
@@ -6508,7 +6457,7 @@ END SUBROUTINE h5pset_buffer_f
 		    <td valign="top"><em>int</em> <code>mdc_nelmts</code></td>
             <td valign="top">IN: Number of elements (objects) in the meta data cache.</td></tr>
         <tr>
-		    <td valign="top"><em>int</em> <code>rdcc_nelmts</code></td>
+		    <td valign="top"><em>size_t</em> <code>rdcc_nelmts</code></td>
             <td valign="top">IN: Number of elements (objects) in the raw data chunk cache.</td></tr>
         <tr>
 		    <td valign="top"><em>size_t</em>&nbsp;<code>rdcc_nbytes&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
@@ -6561,7 +6510,8 @@ END SUBROUTINE h5pset_cache_f
 		    to <code>INTEGER(SIZE_T)</code>.</td></tr>
         <tr>
 		  <td valign="top">1.6.0</td>
-		  <td valign="top">The&nbsp;<code>rdcc_nbytes</code>&nbsp;parameter&nbsp;has&nbsp;changed 
+		  <td valign="top">The <code>rdcc_nbytes</code>
+                    and <code>rdcc_nelmts</code> parameters changed 
 		    from type <em>int</em> to <em>size_t</em>.</td>
 		  <td valign="top">&nbsp;</td>
           <td valign="top">&nbsp;</td></tr>
@@ -10903,7 +10853,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 2 June 2008");
+document.writeln("Last modified: 27 August 2008");
 -->
 </SCRIPT>
  
