@@ -1,4 +1,4 @@
-HDF5 version 1.6.7-snap16 currently under development
+HDF5 version 1.6.7-snap14 currently under development
 ================================================================================
 
 INTRODUCTION
@@ -70,9 +70,8 @@ New Features
            sizes for cases where compression  filters are present. (PVN - 2008/05/01)
      - h5dump: added an option to allow a user defined formatting string for printf 
          regarding floating point numbers. (PVN - 2008/05/06)
-
-
-
+     - h5repack: add a userblock to an HDF5 file during the repack. (PVN - 2008/08/26)
+     - h5repack: copy userblock from HDF5 file during the repack. (PVN - 2008/08/26)
 
 
     F90 API:
@@ -93,8 +92,7 @@ Bug Fixes since HDF5-1.6.7 Release
 
     Library
     -------
-     - Fixed issue where datatypes were being saved with the wrong version
-        numbers.  (NAF - 2008/08/08)
+     None
 
     Configuration
     -------------
@@ -322,10 +320,6 @@ Footnotes:
 
 Known Problems
 ==============
-* The library may not shut down correctly if the reference count on an id has
-  been incremented with H5Iinc_ref() and never decremented with H5*close() or
-  H5Idec_ref().  (NAF - 2008/08/19)
-
 * We discovered two problems when running collective IO parallel HDF5 tests
   with chunking storage with the ChaMPIon MPI compiler on tungsten, a Linux
   cluster at NCSA.
