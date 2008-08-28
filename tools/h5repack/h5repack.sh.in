@@ -494,6 +494,10 @@ fi
 arg="$FILE1 -u ublock.bin -b 2048"
 TOOLTEST $arg
 
+# add alignment
+arg="$FILE1 -t 1 -a 1 "
+TOOLTEST $arg
+
 
 if test $nerrors -eq 0 ; then
    echo "All $H5REPACK tests passed."

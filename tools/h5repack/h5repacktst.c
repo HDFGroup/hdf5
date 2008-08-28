@@ -1403,6 +1403,9 @@ if (szip_can_encode) {
  *-------------------------------------------------------------------------
  */
  TESTING("    file with added userblock");
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+
  if(h5repack_init(&pack_options, 0) < 0)
   GOERROR;
 
@@ -1420,7 +1423,72 @@ if (szip_can_encode) {
   GOERROR;
  if(h5repack_end(&pack_options) < 0)
   GOERROR;
+
+
  PASSED();
+#else
+ SKIPPED();
+#endif
+
+
+/*-------------------------------------------------------------------------
+ * test file with aligment
+ *-------------------------------------------------------------------------
+ */
+ TESTING("    file with aligment");
+
+#ifdef H5_HAVE_FILTER_DEFLATE
+
+ if(h5repack_init(&pack_options, 0) < 0)
+  GOERROR;
+
+ /* add the options for aligment */
+ pack_options.alignment = 1;
+ pack_options.threshold = 1;
+ 
+ if(h5repack(FNAME8, FNAME8OUT, &pack_options) < 0)
+  GOERROR;
+ if(h5diff(FNAME8, FNAME8OUT, NULL, NULL, &diff_options) > 0)
+  GOERROR;
+ if(h5repack_verify(FNAME8OUT, &pack_options) <= 0)
+  GOERROR;
+ 
+
+ /* verify aligment */
+ {
+     hsize_t threshold;
+     hsize_t alignment;
+     hid_t fapl;
+     hid_t fid;
+     
+     if (( fid = H5Fopen(FNAME8OUT, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0 )
+         GOERROR;
+     if ((fapl = H5Fget_access_plist(fid)) < 0)
+         GOERROR;
+     if ( H5Pget_alignment(fapl, &threshold, &alignment  )  < 0)
+         GOERROR;
+     if ( threshold != 1 )
+         GOERROR;
+     if ( alignment != 1 )
+         GOERROR;
+     if ( H5Pclose(fapl) < 0)
+         GOERROR;
+     if (H5Fclose(fid) < 0)
+         GOERROR;
+     
+ }
+
+
+ if(h5repack_end(&pack_options) < 0)
+  GOERROR;
+ 
+
+ PASSED();
+#else
+ SKIPPED();
+#endif
+
+
 
 
 

@@ -192,9 +192,13 @@ int do_copy_refobjs(hid_t fidin,
                                     if(H5Rcreate(&refbuf[u], fidout, refname, H5R_OBJECT, -1) < 0)
                                         goto error;
                                     if(options->verbose)
+                                    {
+                                        
+                                        printf(FORMAT_OBJ,"dset",travt->objs[i].name );
                                         printf("object <%s> object reference created to <%s>\n",
                                             travt->objs[i].name,
                                             refname);
+                                    }
                                 } /*refname*/
                                 H5Oclose(refobj_id);
                             } /* u */
@@ -271,9 +275,13 @@ int do_copy_refobjs(hid_t fidin,
                                     if(H5Sclose(region_id) < 0)
                                         goto error;
                                     if(options->verbose)
+                                    {
+                                        
+                                        printf(FORMAT_OBJ,"dset",travt->objs[i].name );
                                         printf("object <%s> region reference created to <%s>\n",
                                             travt->objs[i].name,
                                             refname);
+                                    }
                                 } /*refname*/
                                 H5Oclose(refobj_id);
                             } /* u */
