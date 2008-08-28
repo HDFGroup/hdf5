@@ -615,9 +615,12 @@ H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *key)
     HDassert(err_msg);
 
     /* Close the message if it is in the class being closed */
-    if(err_msg->cls == cls)
+    if(err_msg->cls == cls) {
+        if(H5E_close_msg(err_msg) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTCLOSEOBJ, FAIL, "unable to close error message")
         if(NULL == H5I_remove(obj_id))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTREMOVE, FAIL, "unable to remove error message")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
