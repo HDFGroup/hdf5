@@ -74,6 +74,7 @@ MAJOR, H5E_ERROR, Error API
 MAJOR, H5E_SLIST, Skip Lists
 MAJOR, H5E_FSPACE, Free Space Manager
 MAJOR, H5E_SOHM, Shared Object Header Messages
+MAJOR, H5E_EARRAY, Extensible Array
 MAJOR, H5E_NONE_MAJOR, No error
 
 # Sections (for grouping minor errors)

@@ -62,6 +62,7 @@ typedef enum {
     H5AC_FSPACE_SINFO_ID,/*free space sections			     */
     H5AC_SOHM_TABLE_ID, /*shared object header message master table  */
     H5AC_SOHM_LIST_ID,  /*shared message index stored as a list      */
+    H5AC_EARRAY_HDR_ID,	/*extensible array header		     */
     H5AC_TEST_ID,	/*test entry -- not used for actual files    */
     H5AC_NTYPES		/* Number of types, must be last             */
 } H5AC_type_t;

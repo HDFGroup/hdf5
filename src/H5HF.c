@@ -847,6 +847,9 @@ HDfprintf(stderr, "%s; After iterator reset fh->hdr->rc = %Zu\n", FUNC, fh->hdr-
     } /* end if */
 
     /* Decrement the reference count on the heap header */
+    /* (don't put in H5HF_hdr_fuse_decr() as the heap header may be evicted
+     *  immediately -QAK)
+     */
     if(H5HF_hdr_decr(fh->hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
 
@@ -912,6 +915,9 @@ HDfprintf(stderr, "%s: fh_addr = %a\n", FUNC, fh_addr);
     if(hdr->file_rc)
         hdr->pending_delete = TRUE;
     else {
+        /* Set the shared heap header's file context for this operation */
+        hdr->f = f;
+
         /* Delete heap now, starting with header (unprotects header) */
         if(H5HF_hdr_delete(hdr, dxpl_id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTDELETE, FAIL, "unable to delete fractal heap")

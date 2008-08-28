@@ -47,6 +47,7 @@ hid_t H5E_SLIST_g          = FAIL;      /* Skip Lists */
 hid_t H5E_EFL_g            = FAIL;      /* External file list */
 hid_t H5E_TST_g            = FAIL;      /* Ternary Search Trees */
 hid_t H5E_ARGS_g           = FAIL;      /* Invalid arguments to routine */
+hid_t H5E_EARRAY_g         = FAIL;      /* Extensible Array */
 hid_t H5E_ERROR_g          = FAIL;      /* Error API */
 hid_t H5E_PLINE_g          = FAIL;      /* Data filters */
 hid_t H5E_FSPACE_g         = FAIL;      /* Free Space Manager */

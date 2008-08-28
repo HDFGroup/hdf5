@@ -1612,8 +1612,8 @@ extern hbool_t H5_libinit_g;    /* Has the library been initialized? */
 /* Include required function stack header */
 #include "H5CSprivate.h"
 
-#define H5_PUSH_FUNC(func_name) H5CS_push(#func_name)
-#define H5_POP_FUNC             H5CS_pop()
+#define H5_PUSH_FUNC(func_name) H5CS_push(func_name);
+#define H5_POP_FUNC             H5CS_pop();
 #else /* H5_HAVE_CODESTACK */
 #define H5_PUSH_FUNC(func_name) /* void */
 #define H5_POP_FUNC             /* void */
@@ -1723,7 +1723,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
     FUNC_ENTER_API_VARS(func_name)                                            \
     FUNC_ENTER_COMMON(func_name,H5_IS_API(#func_name));                       \
     FUNC_ENTER_API_THREADSAFE;                                                \
-    H5_PUSH_FUNC(func_name);                                                  \
+    H5_PUSH_FUNC(#func_name)                                                  \
     BEGIN_MPE_LOG(func_name);                                                 \
     {
 
@@ -1763,7 +1763,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  */
 #define FUNC_ENTER_NOAPI_NOINIT(func_name) {                                        \
     FUNC_ENTER_COMMON(func_name,!H5_IS_API(#func_name));                      \
-    H5_PUSH_FUNC(func_name);                                                  \
+    H5_PUSH_FUNC(#func_name)                                                  \
     {
 
 /*
@@ -1780,7 +1780,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
  */
 #define FUNC_ENTER_NOAPI_NOINIT_NOFUNC(func_name) {                           \
     FUNC_ENTER_COMMON_NOFUNC(func_name,!H5_IS_API(#func_name));               \
-    H5_PUSH_FUNC(func_name);                                                  \
+    H5_PUSH_FUNC(#func_name)                                                  \
     {
 
 /*
@@ -1809,7 +1809,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
    H5_INTERFACE_INIT(err)						      \
                                                                               \
    /* Push the name of this function on the function stack */                 \
-   H5_PUSH_FUNC(func_name);                                                   \
+   H5_PUSH_FUNC(#func_name)                                                   \
                                                                               \
    BEGIN_MPE_LOG(func_name)
 
@@ -1819,7 +1819,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
    H5_INTERFACE_INIT(err)						      \
                                                                               \
    /* Push the name of this function on the function stack */                 \
-   H5_PUSH_FUNC(func_name);
+   H5_PUSH_FUNC(#func_name)
 
 /*-------------------------------------------------------------------------
  * Purpose:	Register function exit for code profiling.  This should be
@@ -1840,7 +1840,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 #define FUNC_LEAVE_API(ret_value)                                             \
         FINISH_MPE_LOG;                                                       \
         H5TRACE_RETURN(ret_value);					      \
-        H5_POP_FUNC;                                                          \
+        H5_POP_FUNC                                                          \
         FUNC_LEAVE_API_THREADSAFE                                             \
         return (ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \
@@ -1855,13 +1855,13 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 }} /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI(ret_value)                                           \
-        H5_POP_FUNC;                                                          \
+        H5_POP_FUNC                                                          \
         return (ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \
 } /*end scope from beginning of FUNC_ENTER*/
 
 #define FUNC_LEAVE_NOAPI_VOID                                                 \
-        H5_POP_FUNC;                                                          \
+        H5_POP_FUNC                                                          \
         return;						                      \
     } /*end scope from end of FUNC_ENTER*/                                    \
 } /*end scope from beginning of FUNC_ENTER*/
@@ -1880,6 +1880,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 /* Macro for "glueing" together items, for re-scanning macros */
 #define H5_GLUE(x,y)       x##y
 #define H5_GLUE3(x,y,z)    x##y##z
+#define H5_GLUE4(w,x,y,z)  w##x##y##z
 
 /* Compile-time "assert" macro */
 #define HDcompile_assert(e)     do { enum { compile_assert__ = 1 / (e) }; } while(0)

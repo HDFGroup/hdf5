@@ -48,6 +48,7 @@ H5E_SLIST_g=
 H5E_EFL_g=    
 H5E_TST_g=    
 H5E_ARGS_g=    
+H5E_EARRAY_g=    
 H5E_ERROR_g=    
 H5E_PLINE_g=    
 H5E_FSPACE_g=    

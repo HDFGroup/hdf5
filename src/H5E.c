@@ -1301,6 +1301,11 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
     if(maj_ptr->cls != min_ptr->cls)
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "major and minor errors not from same error class")
 
+/* Note that the variable-argument parsing for the format is identical in
+ *      the H5E_printf_stack() routine - correct errors and make changes in both
+ *      places. -QAK
+ */
+
     /* Format the description */
     va_start(ap, fmt);
 

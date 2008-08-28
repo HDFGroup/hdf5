@@ -491,6 +491,7 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "free space sections",
     "shared OH message master table",
     "shared OH message index",
+    "extensible array headers",
     "test entry"	/* for testing only -- not used for actual files */
 };
 

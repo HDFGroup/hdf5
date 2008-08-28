@@ -660,6 +660,107 @@ H5E_set_auto(H5E_t *estack, const H5E_auto_op_t *op, void *client_data)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5E_printf_stack
+ *
+ * Purpose:	Printf-like wrapper around H5E_push_stack.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, August 12, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned line,
+    hid_t cls_id, hid_t maj_id, hid_t min_id, const char *fmt, ...)
+{
+    va_list     ap;                     /* Varargs info */
+#ifndef H5_HAVE_VASPRINTF
+    int         tmp_len;        /* Current size of description buffer */
+    int         desc_len;       /* Actual length of description when formatted */
+#endif /* H5_HAVE_VASPRINTF */
+    char        *tmp = NULL;      /* Buffer to place formatted description in */
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    /*
+     * WARNING: We cannot call HERROR() from within this function or else we
+     *		could enter infinite recursion.  Furthermore, we also cannot
+     *		call any other HDF5 macro or function which might call
+     *		HERROR().  HERROR() is called by HRETURN_ERROR() which could
+     *		be called by FUNC_ENTER().
+     */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_printf_stack)
+
+    /* Sanity check */
+    HDassert(cls_id > 0);
+    HDassert(maj_id > 0);
+    HDassert(min_id > 0);
+    HDassert(fmt);
+
+/* Note that the variable-argument parsing for the format is identical in
+ *      the H5Epush2() routine - correct errors and make changes in both
+ *      places. -QAK
+ */
+
+    /* Start the variable-argument parsing */
+    va_start(ap, fmt);
+
+#ifdef H5_HAVE_VASPRINTF
+    /* Use the vasprintf() routine, since it does what we're trying to do below */
+    if(HDvasprintf(&tmp, fmt, ap) < 0)
+        HGOTO_DONE(FAIL)
+#else /* H5_HAVE_VASPRINTF */
+    /* Allocate space for the formatted description buffer */
+    tmp_len = 128;
+    if(NULL == (tmp = H5MM_malloc((size_t)tmp_len)))
+        HGOTO_DONE(FAIL)
+
+    /* If the description doesn't fit into the initial buffer size, allocate more space and try again */
+    while((desc_len = HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap))
+#ifdef H5_VSNPRINTF_WORKS
+            >
+#else /* H5_VSNPRINTF_WORKS */
+            >=
+#endif /* H5_VSNPRINTF_WORKS */
+            (tmp_len - 1)
+#ifndef H5_VSNPRINTF_WORKS
+            || (desc_len < 0)
+#endif /* H5_VSNPRINTF_WORKS */
+            ) {
+        /* shutdown & restart the va_list */
+        va_end(ap);
+        va_start(ap, fmt);
+
+        /* Release the previous description, it's too small */
+        H5MM_xfree(tmp);
+
+        /* Allocate a description of the appropriate length */
+#ifdef H5_VSNPRINTF_WORKS
+        tmp_len = desc_len + 1;
+#else /* H5_VSNPRINTF_WORKS */
+        tmp_len = 2 * tmp_len;
+#endif /* H5_VSNPRINTF_WORKS */
+        if(NULL == (tmp = H5MM_malloc((size_t)tmp_len)))
+            HGOTO_DONE(FAIL)
+    } /* end while */
+#endif /* H5_HAVE_VASPRINTF */
+
+    va_end(ap);
+
+    /* Push the error on the stack */
+    if(H5E_push_stack(estack, file, func, line, cls_id, maj_id, min_id, tmp) < 0)
+        HGOTO_DONE(FAIL)
+
+done:
+    if(tmp)
+        H5MM_xfree(tmp);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E_printf_stack() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5E_push_stack
  *
  * Purpose:	Pushes a new error record onto error stack for the current
@@ -886,7 +987,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5E_dump_api_stack(int is_api)
+H5E_dump_api_stack(hbool_t is_api)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 

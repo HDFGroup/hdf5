@@ -495,6 +495,13 @@
 ./src/H5Epubgen.h
 ./src/H5Epublic.h
 ./src/H5Eterm.h
+./src/H5EA.c
+./src/H5EAcache.c
+./src/H5EAhdr.c
+./src/H5EAint.c
+./src/H5EApkg.h
+./src/H5EAprivate.h
+./src/H5EAtest.c
 ./src/H5F.c
 ./src/H5Fdbg.c
 ./src/H5Ffake.c
@@ -767,6 +774,7 @@
 ./test/dt_arith.c
 ./test/dtypes.c
 ./test/dtransform.c
+./test/earray.c
 ./test/enum.c
 ./test/extend.c
 ./test/external.c
