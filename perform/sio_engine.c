@@ -79,21 +79,6 @@ static int  clean_file_g = -1;  /*whether to cleanup temporary test     */
 /*files. -1 is not defined;             */
 /*0 is no cleanup; 1 is do cleanup      */
 
-/*
- * In a parallel machine, the filesystem suitable for compiling is
- * unlikely a parallel file system that is suitable for parallel I/O.
- * There is no standard pathname for the parallel file system.  /tmp
- * is about the best guess.
- */
-#ifndef HDF5_PARAPREFIX
-#  ifdef __PUMAGON__
-/* For the PFS of TFLOPS */
-#    define HDF5_PARAPREFIX     "pfs:/pfs_grande/multi/tmp_1"
-#  else
-#    define HDF5_PARAPREFIX     ""
-#  endif    /* __PUMAGON__ */
-#endif  /* !HDF5_PARAPREFIX */
-
 #ifndef MIN
 #   define MIN(a,b) ((a) < (b) ? (a) : (b))
 #endif  /* !MIN */
@@ -357,16 +342,16 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     }
 
     /* First use the environment variable and then try the constant */
-    prefix = getenv("HDF5_PARAPREFIX");
+    prefix = getenv("HDF5_PREFIX");
 
-#ifdef HDF5_PARAPREFIX
+#ifdef HDF5_PREFIX
     if (!prefix)
-    prefix = HDF5_PARAPREFIX;
-#endif  /* HDF5_PARAPREFIX */
+    prefix = HDF5_PREFIX;
+#endif  /* HDF5_PREFIX */
 
     /* Prepend the prefix value to the base name */
     if (prefix && *prefix) {
-    /* If the prefix specifies the HDF5_PARAPREFIX directory, then
+    /* If the prefix specifies the HDF5_PREFIX directory, then
      * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
      * directory instead. */
     register char *user, *login, *subdir;

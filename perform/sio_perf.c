@@ -919,6 +919,14 @@ report_parameters(struct options *opts)
             HDfprintf(output, "direct\n");
         }
     }
+
+    {
+        char *prefix = getenv("HDF5_PREFIX");
+
+        HDfprintf(output, "Env HDF5_PREFIX=%s\n",
+                  (prefix ? prefix : "not set"));
+    }
+
     HDfprintf(output, "==== End of Parameters ====\n");
     HDfprintf(output, "\n");
 }
@@ -1408,6 +1416,7 @@ usage(const char *prog)
         printf("\n");
         printf("  Environment variables:\n");
         printf("      HDF5_NOCLEANUP   Do not remove data files if set [default remove]\n");
+        printf("      HDF5_PREFIX      Data file prefix\n");
         printf("\n");
         fflush(stdout);
 }
