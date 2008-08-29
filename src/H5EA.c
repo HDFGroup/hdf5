@@ -164,6 +164,75 @@ END_FUNC(PRIV)  /* end H5EA_create() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5EA_open
+ *
+ * Purpose:	Opens an existing extensible array in the file.
+ *
+ * Return:	Pointer to array wrapper on success
+ *              NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Aug 28 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+H5EA_t *, NULL, NULL,
+H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr))
+
+    /* Local variables */
+    H5EA_t *ea = NULL;          /* Pointer to new extensible array wrapper */
+    H5EA_hdr_t *hdr = NULL;     /* The extensible array header information */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(H5F_addr_defined(ea_addr));
+
+    /* Load the array header into memory */
+#ifdef QAK
+HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
+#endif /* QAK */
+    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, NULL, NULL, H5AC_READ)))
+        H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header, address = %llu", (unsigned long_long)ea_addr)
+
+    /* Check for pending array deletion */
+    if(hdr->pending_delete)
+        H5E_THROW(H5E_CANTOPENOBJ, "can't open extensible array pending deletion")
+
+    /* Create fractal heap info */
+    if(NULL == (ea = H5FL_MALLOC(H5EA_t)))
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array info")
+
+    /* Point extensible array wrapper at header */
+    ea->hdr = hdr;
+    if(H5EA__hdr_incr(ea->hdr) < 0)
+        H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
+
+    /* Increment # of files using this array header */
+    if(H5EA__hdr_fuse_incr(ea->hdr) < 0)
+        H5E_THROW(H5E_CANTINC, "can't increment file reference count on shared array header")
+
+    /* Set file pointer for this array open context */
+    ea->f = f;
+
+    /* Set the return value */
+    ret_value = ea;
+
+CATCH
+
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+        H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
+    if(!ret_value)
+        if(ea && H5EA_close(ea, dxpl_id) < 0)
+            H5E_THROW(H5E_CLOSEERROR, "unable to close extensible array")
+
+END_FUNC(PRIV)  /* end H5EA_open() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5EA_get_nelmts
  *
  * Purpose:	Query the current number of elements in array

@@ -363,6 +363,7 @@ func_init_failed:							      \
                                                                               \
     /* General heap information */                                            \
     + 1 /* Element Size */                                                    \
+    + 1 /* Max. # of elements bits */                                         \
     + 1 /* # of elements to store in index block */                           \
     + 1 /* Min. # elements per data block */                                  \
     + 1 /* Min. # of data block pointers for a super block */                 \
@@ -382,7 +383,8 @@ typedef struct H5EA_hdr_t {
     H5AC_info_t cache_info;
 
     /* Extensible array configuration/creation parameters (stored) */
-    uint8_t elmt_size;                  /* Element size (in bytes) */
+    uint8_t raw_elmt_size;              /* Element size in file (in bytes) */
+    uint8_t max_nelmts_bits;            /* Log2(Max. # of elements in array) - i.e. # of bits needed to store max. # of elements */
     uint8_t idx_blk_elmts;              /* # of elements to store in index block */
     uint8_t data_blk_min_elmts;         /* Min. # of elements per data block */
     uint8_t sup_blk_min_data_ptrs;      /* Min. # of data block pointers for a super block */
@@ -412,6 +414,11 @@ H5_DLLVAR const H5AC_class_t H5AC_EARRAY_HDR[1];
 
 /* Declare a free list to manage the H5EA_hdr_t struct */
 H5FL_EXTERN(H5EA_hdr_t);
+
+/* Internal extensible array testing class */
+#ifdef H5EA_TESTING
+H5_DLLVAR const H5EA_class_t H5EA_CLS_TEST[1];
+#endif /* H5EA_TESTING */
 
 
 /******************************/

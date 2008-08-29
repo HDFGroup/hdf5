@@ -576,10 +576,13 @@ reopen_file(hid_t *file, H5F_t **f, const char *filename, hid_t fapl, hid_t dxpl
         /* Close heap */
         if(H5HF_close(*fh, dxpl) < 0)
             FAIL_STACK_ERROR
+        *fh = NULL;
 
         /* Close file */
         if(H5Fclose(*file) < 0)
             FAIL_STACK_ERROR
+        *file = (-1);
+        *f = NULL;
 
         /* Re-open the file */
         if((*file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
@@ -2066,6 +2069,8 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     H5HF_t      *fh2 = NULL;            /* 2nd fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
+    h5_stat_size_t       empty_size;             /* File size, w/o heap */
+    h5_stat_size_t       file_size;              /* File size, after deleting heap */
     size_t      id_len;                 /* Size of fractal heap IDs */
     fheap_heap_state_t state;           /* State of fractal heap */
 
@@ -2076,22 +2081,25 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
 
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the size of a file w/empty heap*/
+    if((empty_size = h5_get_file_size(filename)) < 0)
+        TEST_ERROR
+
+    /* Re-open the file */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
+
     /* Get a pointer to the internal file object */
     if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
-    /* Re-open the file */
-    if((file2 = H5Freopen(file)) < 0)
-        FAIL_STACK_ERROR
-
-    /* Get a pointer to the internal file object */
-    if(NULL == (f2 = (H5F_t *)H5I_object(file2)))
-        FAIL_STACK_ERROR
-
     /*
-     * Test fractal heap creation
+     * Display testing message
      */
-
     TESTING("open fractal heap twice");
 
     /* Create heap */
@@ -2109,11 +2117,11 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
     if(check_stats(fh, &state))
         TEST_ERROR
 
-    /* Open the heap again */
+    /* Open the heap again, through the first file handle */
     if(NULL == (fh2 = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr)))
         FAIL_STACK_ERROR
 
-    /* Query the type of address mapping */
+    /* Verify the creation parameters */
     HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
     if(H5HF_get_cparam_test(fh2, &test_cparam) < 0)
         FAIL_STACK_ERROR
@@ -2125,11 +2133,23 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
         FAIL_STACK_ERROR
     fh2 = NULL;
 
+    /* Check for closing & re-opening the heap & file */
+    if(reopen_file(&file, &f, filename, fapl, H5P_DATASET_XFER_DEFAULT, &fh, fh_addr, tparam) < 0)
+        TEST_ERROR
+
+    /* Re-open the file */
+    if((file2 = H5Freopen(file)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f2 = (H5F_t *)H5I_object(file2)))
+        FAIL_STACK_ERROR
+
     /* Open the fractal heap through the second file handle */
     if(NULL == (fh2 = H5HF_open(f2, H5P_DATASET_XFER_DEFAULT, fh_addr)))
         FAIL_STACK_ERROR
 
-    /* Query the type of address mapping */
+    /* Verify the creation parameters */
     HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
     if(H5HF_get_cparam_test(fh2, &test_cparam) < 0)
         FAIL_STACK_ERROR
@@ -2153,9 +2173,21 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
         FAIL_STACK_ERROR
     fh2 = NULL;
 
+    /* Delete heap */
+    if(H5HF_delete(f2, H5P_DATASET_XFER_DEFAULT, fh_addr) < 0)
+        FAIL_STACK_ERROR
+
     /* Close the second file */
     if(H5Fclose(file2) < 0)
         FAIL_STACK_ERROR
+
+    /* Get the size of the file */
+    if((file_size = h5_get_file_size(filename)) < 0)
+        TEST_ERROR
+
+    /* Verify the file is correct size */
+    if(file_size != empty_size)
+        TEST_ERROR
 
     /* All tests passed */
     PASSED()
@@ -2171,6 +2203,7 @@ error:
 	H5Fclose(file);
 	H5Fclose(file2);
     } H5E_END_TRY;
+
     return(1);
 } /* test_open_twice() */
 
@@ -2252,7 +2285,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *t
     if(H5HF_delete(f, H5P_DATASET_XFER_DEFAULT, fh_addr) < 0)
         FAIL_STACK_ERROR
 
-    /* Query the type of address mapping */
+    /* Verify the creation parameters */
     HDmemset(&test_cparam, 0, sizeof(H5HF_create_t));
     if(H5HF_get_cparam_test(fh2, &test_cparam) < 0)
         FAIL_STACK_ERROR
@@ -2281,7 +2314,21 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *t
         FAIL_STACK_ERROR
     fh = NULL;
 
-#ifdef QAK
+    /* Check for closing & re-opening the file */
+    if(tparam->reopen_heap) {
+        /* Close file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
+
+        /* Re-open the file */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
+            FAIL_STACK_ERROR
+    } /* end if */
+
     /* Try re-opening the heap again (should fail, as heap is now deleted) */
     H5E_BEGIN_TRY {
         fh = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr);
@@ -2293,7 +2340,6 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *t
         /* Indicate error */
         TEST_ERROR
     } /* end if */
-#endif /* QAK */
 
     /* Close the file */
     if(H5Fclose(file) < 0)

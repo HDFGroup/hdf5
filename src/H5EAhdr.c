@@ -49,6 +49,8 @@
 /* Local Macros */
 /****************/
 
+/* Max. # of bits for max. nelmts index */
+#define H5EA_MAX_NELMTS_IDX_MAX 64
 
 /******************/
 /* Local Typedefs */
@@ -157,8 +159,12 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
 #ifndef NDEBUG
     /* Check for valid parameters */
-    if(cparam->elmt_size == 0)
+    if(cparam->raw_elmt_size == 0)
 	H5E_THROW(H5E_BADVALUE, "element size must be greater than zero")
+    if(cparam->max_nelmts_bits == 0)
+	H5E_THROW(H5E_BADVALUE, "max. # of nelmts bitsmust be greater than zero")
+    if(cparam->max_nelmts_bits > H5EA_MAX_NELMTS_IDX_MAX)
+	H5E_THROW(H5E_BADVALUE, "element size must be <= %u", (unsigned)H5EA_MAX_NELMTS_IDX_MAX)
     if(!POWER_OF_TWO(cparam->sup_blk_min_data_ptrs))
 	H5E_THROW(H5E_BADVALUE, "min # of data block pointers in super block not power of two")
     if(!POWER_OF_TWO(cparam->data_blk_min_elmts))
@@ -172,7 +178,8 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     /* Set the internal parameters for the array */
 
     /* Set the creation parameters for the array */
-    hdr->elmt_size = cparam->elmt_size;
+    hdr->raw_elmt_size = cparam->raw_elmt_size;
+    hdr->max_nelmts_bits = cparam->max_nelmts_bits;
     hdr->idx_blk_elmts = cparam->idx_blk_elmts;
     hdr->sup_blk_min_data_ptrs = cparam->sup_blk_min_data_ptrs;
     hdr->data_blk_min_elmts = cparam->data_blk_min_elmts;

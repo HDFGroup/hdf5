@@ -169,8 +169,9 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *u
     if(*p++ != H5EA_HDR_VERSION)
 	H5E_THROW(H5E_VERSION, "wrong extensible array header version")
 
-    /* General array information */
-    hdr->elmt_size = *p++;              /* Element size (in bytes) */
+    /* General array creation/configuration information */
+    hdr->raw_elmt_size = *p++;          /* Element size in file (in bytes) */
+    hdr->max_nelmts_bits = *p++;        /* Log2(Max. # of elements in array) - i.e. # of bits needed to store max. # of elements */
     hdr->idx_blk_elmts = *p++;          /* # of elements to store in index block */
     hdr->data_blk_min_elmts = *p++;     /* Min. # of elements per data block */
     hdr->sup_blk_min_data_ptrs = *p++;  /* Min. # of data block pointers for a super block */
@@ -263,8 +264,9 @@ H5EA__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
         /* Version # */
         *p++ = H5EA_HDR_VERSION;
 
-        /* General array information */
-        *p++ = hdr->elmt_size;              /* Element size (in bytes) */
+        /* General array creation/configuration information */
+        *p++ = hdr->raw_elmt_size;          /* Element size in file (in bytes) */
+        *p++ = hdr->max_nelmts_bits;        /* Log2(Max. # of elements in array) - i.e. # of bits needed to store max. # of elements */
         *p++ = hdr->idx_blk_elmts;          /* # of elements to store in index block */
         *p++ = hdr->data_blk_min_elmts;     /* Min. # of elements per data block */
         *p++ = hdr->sup_blk_min_data_ptrs;  /* Min. # of data block pointers for a super block */

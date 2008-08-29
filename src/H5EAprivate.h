@@ -46,9 +46,33 @@
 /* Library Private Typedefs */
 /****************************/
 
+/* Extensible array class IDs */
+typedef enum H5EA_cls_id_t {
+    /* Start real class IDs at 0 -QAK */
+    H5EA_CLS_TEST_ID,	        /* Extensible array is for testing (do not use for actual data) */
+    H5EA_NUM_CLS_ID             /* Number of Extensible Array class IDs (must be last) */
+} H5EA_cls_id_t;
+
+/*
+ * Each type of element that can be stored in an extesible array has a
+ * variable of this type that contains class variables and methods.
+ */
+typedef struct H5EA_class_t {
+    H5EA_cls_id_t id;           /* ID of Extensible Array class, as found in file */
+    size_t nat_elmt_size;       /* Size of native (memory) element */
+
+    /* Extensible array client callback methods */
+    herr_t (*fill)(uint8_t *raw_blk, size_t nelmts);                    /* Fill array of elements with encoded form of "missing element" value */
+    herr_t (*encode)(uint8_t *raw, const void *elmt);   /*  Encode element from native form to disk storage form */
+    herr_t (*decode)(const uint8_t *raw, void *elmt);   /*  Decode element from disk storage form to native form */
+    herr_t (*debug)(FILE *stream, int indent, int fwidth, const void *elmt); /* Print an element for debugging */
+} H5EA_class_t;
+
 /* Extensible array creation parameters */
 typedef struct H5EA_create_t {
-    uint8_t elmt_size;                  /* Element size (in bytes) */
+    const H5EA_class_t *cls;            /* Class of extensible array to create */
+    uint8_t raw_elmt_size;              /* Element size in file (in bytes) */
+    uint8_t max_nelmts_bits;            /* Log2(Max. # of elements in array) - i.e. # of bits needed to store max. # of elements */
     uint8_t idx_blk_elmts;              /* # of elements to store in index block */
     uint8_t data_blk_min_elmts;         /* Min. # of elements per data block */
     uint8_t sup_blk_min_data_ptrs;      /* Min. # of data block pointers for a super block */
@@ -75,6 +99,7 @@ typedef struct H5EA_t H5EA_t;
 
 /* General routines */
 H5_DLL H5EA_t *H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam);
+H5_DLL H5EA_t *H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr);
 H5_DLL herr_t H5EA_get_nelmts(const H5EA_t *ea, hsize_t *nelmts);
 H5_DLL herr_t H5EA_get_addr(const H5EA_t *ea, haddr_t *addr);
 H5_DLL herr_t H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr);
