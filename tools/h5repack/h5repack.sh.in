@@ -457,7 +457,7 @@ TOOLTEST $FILE1 -n
 
 
 # latest file format with long switches. use FILE4=h5repack_layout.h5 (no filters)
-arg="$FILE4 --layout CHUNK=20x10 --filter GZIP=1 --threshold=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype]"
+arg="$FILE4 --layout CHUNK=20x10 --filter GZIP=1 --minimum=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype]"
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
 else
