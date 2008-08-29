@@ -37,14 +37,14 @@ static int has_i_o = 0;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:";
+static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:t:a:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
     { "verbose", no_arg, 'v' },
     { "filter", require_arg, 'f' },
     { "layout", require_arg, 'l' },
-    { "threshold", require_arg, 'm' },
+    { "minimum", require_arg, 'm' },
     { "file", require_arg, 'e' },
     { "native", no_arg, 'n' },
     { "latest", no_arg, 'L' },
@@ -53,6 +53,8 @@ static struct long_options l_opts[] = {
     { "ssize", require_arg, 's' },
     { "ublock", require_arg, 'u' },
     { "block", require_arg, 'b' },
+    { "threshold", require_arg, 't' },
+    { "alignment", require_arg, 'a' },
     { NULL, 0, '\0' }
 };
 
@@ -87,7 +89,9 @@ static struct long_options l_opts[] = {
  *   PVN, May 16, 2008
  *    added  backward compatibility for -i infile -o outfile 
  *   PVN, August 20, 2008
- *    add a user block to repacked file (switches -u -b) 
+ *    add a user block to repacked file (switches -u -b)
+ *   PVN, August 28, 2008
+ *    add options to set alignment (H5Pset_alignment) (switches -t -a) 
  *-------------------------------------------------------------------------
  */
 int main(int argc, char **argv)
@@ -166,10 +170,10 @@ int main(int argc, char **argv)
             
             else if (strcmp(argv[i], "-m") == 0) 
             {
-                options.threshold = parse_number(argv[i+1]);
-                if ((int)options.threshold==-1) 
+                options.min_comp = parse_number(argv[i+1]);
+                if ((int)options.min_comp<=0) 
                 {
-                    error_msg(progname, "invalid treshold size <%s>\n",argv[i+1]);
+                    error_msg(progname, "invalid minimum compress size <%s>\n",argv[i+1]);
                     exit(1);
                 }
                 ++i;
@@ -288,7 +292,6 @@ int main(int argc, char **argv)
         
     }
 
-
    
     /* pack it */
     ret=h5repack(infile,outfile,&options);
@@ -327,20 +330,24 @@ static void usage(const char *prog)
  printf("   -c L1, --compact=L1     Maximum number of links in header messages\n");
  printf("   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
  printf("   -s S[:F], --ssize=S[:F] Shared object header message minimum size\n");
- printf("   -m T, --threshold=T     Do not apply the filter to datasets smaller than T\n");
- printf("   -e M, --file=M          Name of file M with the -f and -l options\n");
+ printf("   -m M, --minimum=M       Do not apply the filter to datasets smaller than M\n");
+ printf("   -e E, --file=E          Name of file E with the -f and -l options\n");
  printf("   -u U, --ublock=U        Name of file U with user block data to be added\n");
- printf("   -b D, --block=D         Size of user block to be added\n");
+ printf("   -b B, --block=B         Size of user block to be added\n");
+ printf("   -t T, --threshold=T     Threshold value for H5Pset_alignment\n");
+ printf("   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
  printf("   -f FILT, --filter=FILT  Filter type\n");
  printf("   -l LAYT, --layout=LAYT  Layout type\n");
  
  printf("\n");
 
- printf("  T - is an integer greater than 1, size of dataset in bytes \n");
- printf("  M - is a filename.\n");
- printf("  U - is a filename.\n");
+ printf("  M - is an integer greater than 1, size of dataset in bytes \n");
+ printf("  E - is a filename.\n");
  printf("  S - is an integer\n");
- printf("  D - is the user block size (any power of 2 equal to 512 or greater)\n");
+ printf("  U - is a filename.\n");
+ printf("  T - is an integer\n");
+ printf("  A - is an integer greater than zero\n");
+ printf("  B - is the user block size (any power of 2 equal to 512 or greater)\n");
  printf("  F - is the shared object header message type, any of <dspace|dtype|fill|\n");
  printf("        pline|attr>. If F is not specified, S applies to all messages\n");
 
@@ -464,10 +471,10 @@ static void parse_command_line(int argc, const char* argv[], pack_opt_t* options
 
         case 'm':
 
-            options->threshold = parse_number( opt_arg );
-            if ((int)options->threshold==-1) 
+            options->min_comp = parse_number( opt_arg );
+            if ((int)options->min_comp<=0) 
             {
-                error_msg(progname, "invalid treshold size <%s>\n", opt_arg );
+                error_msg(progname, "invalid minimum compress size <%s>\n", opt_arg );
                 exit(EXIT_FAILURE);
             }
             break;
@@ -548,6 +555,26 @@ static void parse_command_line(int argc, const char* argv[], pack_opt_t* options
         case 'b':
             
             options->ublock_size = atoi( opt_arg );
+            break;
+
+        case 't':
+            
+            options->threshold = atoi( opt_arg );
+            if ( options->threshold < 0 ) 
+            {
+                error_msg(progname, "invalid threshold size\n", opt_arg );
+                exit(EXIT_FAILURE);
+            }
+            break;
+
+        case 'a':
+            
+            options->alignment = atoi( opt_arg );
+            if ( options->alignment < 1 ) 
+            {
+                error_msg(progname, "invalid alignment size\n", opt_arg );
+                exit(EXIT_FAILURE);
+            }
             break;
 
         } /* switch */

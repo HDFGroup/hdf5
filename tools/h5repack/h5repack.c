@@ -95,7 +95,7 @@ int h5repack_init (pack_opt_t *options,
 {
     int k, n;
     memset(options,0,sizeof(pack_opt_t));
-    options->threshold = 1024;
+    options->min_comp = 1024;
     options->verbose   = verbose;
         
     for ( n = 0; n < H5_REPACK_MAX_NFILTERS; n++)
@@ -427,7 +427,18 @@ static int check_options(pack_opt_t *options)
             options->ublock_filename);
         return -1;
     }
-    
+
+
+    /*--------------------------------------------------------------------------------
+    * verify alignment options; threshold is zero default but alignment not
+    *---------------------------------------------------------------------------------
+    */
+       
+    if ( options->alignment == 0 && options->threshold != 0 )
+    {
+        error_msg(progname, "alignment for H5Pset_alignment missing\n");
+        return -1;
+    }
     
     return 0;
 }

@@ -31,9 +31,7 @@ extern char  *progname;
  * macros
  *-------------------------------------------------------------------------
  */
-#define FORMAT_OBJ      " %-27s %s\n"   /* obj type, name */
-#define FORMAT_OBJ_ATTR "  %-27s %s\n"  /* obj type, name */
-#define USERBLOCK_XFER_SIZE     512             /* Size of buffer/# of bytes to xfer at a time when copying userblock */
+#define USERBLOCK_XFER_SIZE     512     /* size of buffer/# of bytes to xfer at a time when copying userblock */
 
 /*-------------------------------------------------------------------------
  * local functions
@@ -239,6 +237,48 @@ int copy_objects(const char* fnamein,
        
         
     }
+
+
+    /*-------------------------------------------------------------------------
+    * set alignment options
+    *-------------------------------------------------------------------------
+    */
+
+   
+    if (  options->alignment > 0 )
+    {
+        /* either use the FCPL already created or create a new one */
+        if (fapl != H5P_DEFAULT)
+        {
+            
+            if (H5Pset_alignment(fapl, options->threshold, options->alignment) < 0)
+            {
+                error_msg(progname, "failed to set alignment\n");
+                goto out;
+            }
+            
+        }
+        
+        else
+        {
+            
+            /* create a file access property list */
+            if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) 
+            {
+                error_msg(progname, "Could not create file access property list\n");
+                goto out;
+            } 
+            
+            if (H5Pset_alignment(fapl, options->threshold, options->alignment) < 0)
+            {
+                error_msg(progname, "failed to set alignment\n");
+                goto out;
+            }
+            
+        }      
+        
+    }
+
 
     /*-------------------------------------------------------------------------
     * create the output file
@@ -588,7 +628,7 @@ int do_copy_objects(hid_t fidin,
                             dsize_in=H5Dget_storage_size(dset_in);
 
                             /* check for datasets too small */
-                            if (nelmts*msize < options->threshold )
+                            if (nelmts*msize < options->min_comp )
                                 apply_s=0;
 
                             /* apply the filter */
@@ -768,7 +808,7 @@ int do_copy_objects(hid_t fidin,
                                 if ( has_filter && apply_s == 0 )
                                     printf(" <warning: filter not applied to %s. dataset smaller than %d bytes>\n",
                                             travt->objs[i].name,
-                                            (int)options->threshold);
+                                            (int)options->min_comp);
 
                                 if ( has_filter && apply_f == 0 )
                                     printf(" <warning: could not apply the filter to %s>\n",
