@@ -430,22 +430,15 @@ static int check_options(pack_opt_t *options)
 
 
     /*--------------------------------------------------------------------------------
-    * verify alignment options; both threshold and alignment sizes must be present
+    * verify alignment options; threshold is zero default but alignment not
     *---------------------------------------------------------------------------------
     */
-#if 0
-    if ( options->alignment != 0 && options->threshold == 0 )
-    {
-        error_msg(progname, "threshold for H5Pset_alignment missing\n");
-        return -1;
-    }
-    
+       
     if ( options->alignment == 0 && options->threshold != 0 )
     {
         error_msg(progname, "alignment for H5Pset_alignment missing\n");
         return -1;
     }
-#endif    
     
     return 0;
 }
