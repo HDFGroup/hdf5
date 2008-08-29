@@ -14,8 +14,17 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * This example shows how to use the Journaling feature. It also simulates a
- * crash without closing the file first.
+ * This example shows how to use the Journaling feature. It simulates a typical
+ * application that loops through the following steps:
+ *   Calculate data
+ *   Write Data to file
+ *   Flush file
+ *   Write a timecounter to file indicating success of last write/flush
+ *   Repeat
+ *
+ * When the data file is opened again for updates, it retrieves the value
+ * of the timecounter which indicates data are for sure good up to that time
+ * step. It does more updates from that time step on.
  */
 
 #include "hdf5.h"
@@ -60,7 +69,7 @@ helppage(void)
     printf("To try this program, run:\n");
     printf("\t%s -c\n", ProgName);
     printf("\t%s %s\n", H5dumptoolname, H5FILE_NAME);
-    printf("\t%s -w\n", ProgName);
+    printf("\t%s -w\t\t# Crash it by ^C\n", ProgName);
     printf("\t%s %s (This should fail)\n", H5dumptoolname, H5FILE_NAME);
     printf("\t%s -j %s %s\n", H5recovertoolname, H5JournalFILE_NAME, H5FILE_NAME);
     printf("\t%s %s (This should succeed)\n", H5dumptoolname, H5FILE_NAME);
@@ -110,6 +119,7 @@ main (int ac, char **av)
     hid_t       faccpl;			/* File access property list */
     int		cmode=0;		/* Create mode, overrides the others. */
     int		wmode=0;		/* write mod, default no. */
+    int		timecounter, maxtimecounter;
 
 
     /* Parse different options:
@@ -195,9 +205,9 @@ main (int ac, char **av)
 	H5Sclose(dataspace);
 	H5Pclose(dsetpl);
 
-	/* Also create a simple 1d file attribute to store the timestep counter. */
+	/* Also create a simple scalar file attribute to store the timestep counter. */
 	dimsf[0] = 1;
-	dataspace = H5Screate_simple(1, dimsf, NULL);
+	dataspace = H5Screate_simple(0, NULL, NULL);
 	timestep = H5Acreate2(file, TIMESTEPNAME, H5T_NATIVE_INT, dataspace,
 			    H5P_DEFAULT, H5P_DEFAULT);
 
@@ -240,12 +250,18 @@ main (int ac, char **av)
 	/* Open dataset and timestep for modifications. */
 	dataset=H5Dopen2(file, DATASETNAME, H5P_DEFAULT);
 	timestep=H5Aopen(file, TIMESTEPNAME, H5P_DEFAULT);
+	/* retrieve the previous good time step counter value. */
+	H5Aread(timestep, H5T_NATIVE_INT, &timecounter);
 
-	/* write data to new rows and crash */
-	/* Do 3 writes to generate at least 3 transactions. */
-	writedata(file, dataset, NX, 2*NX-1, timestep);
-	writedata(file, dataset, 2*NX, 3*NX-1, timestep);
-	writedata(file, dataset, 3*NX, 4*NX-1, timestep);
+	/* write another 10*NX new rows but allow crashing */
+	maxtimecounter = timecounter + 10*NX;
+	printf("Current timecounter=%d, adding more rows up to maximum=%d.\n",
+	    timecounter, maxtimecounter);
+	while (timecounter < maxtimecounter){
+	    printf("adding data from %d to %d\n", timecounter+1,timecounter+NX);
+	    writedata(file, dataset, timecounter+1, timecounter+NX, timestep);
+	    timecounter += NX;
+	}
 
 	/* close all remaining handles. */
 	H5Dclose(dataset);
@@ -317,7 +333,8 @@ writedata(hid_t file, hid_t dataset, int begin, int end, hid_t timestep)
     /* Pause 2 seconds to allow manual abort. */
     timecounter=end;
     fprintf(stderr,
-	"After data write for time step %d. Simulate calculation...", timecounter);
+	"After data write for time step %d. Pause to allow crashing..."
+	"Hit ^C to crash it", timecounter);
     sleep(2);
     fprintf(stderr, "\n");
 
