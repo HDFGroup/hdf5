@@ -88,6 +88,8 @@ New Features
      - h5dump: support for external links, display the object that the external link 
          points to. (PVN - 2008/05/12)
      - h5repack: add a userblock to an HDF5 file during the repack. (PVN - 2008/08/26)
+     - h5repack: add 2 options that call H5Pset_alignment in the repacked file. (PVN - 2008/08/29)
+
 
 
 
