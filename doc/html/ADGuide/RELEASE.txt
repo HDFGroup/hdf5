@@ -1,4 +1,4 @@
-HDF5 version 1.6.7-snap15 released on Sun Aug 17 14:55:23 CDT 2008
+HDF5 version 1.6.7-snap16 released on Sun Aug 31 15:52:47 CDT 2008
 ================================================================================
 
 INTRODUCTION
@@ -70,9 +70,8 @@ New Features
            sizes for cases where compression  filters are present. (PVN - 2008/05/01)
      - h5dump: added an option to allow a user defined formatting string for printf 
          regarding floating point numbers. (PVN - 2008/05/06)
-
-
-
+     - h5repack: add a userblock to an HDF5 file during the repack. (PVN - 2008/08/26)
+     - h5repack: copy userblock from HDF5 file during the repack. (PVN - 2008/08/26)
 
 
     F90 API:
@@ -93,8 +92,7 @@ Bug Fixes since HDF5-1.6.7 Release
 
     Library
     -------
-     - Fixed issue where datatypes were being saved with the wrong version
-        numbers.  (NAF - 2008/08/08)
+     None
 
     Configuration
     -------------

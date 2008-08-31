@@ -28,7 +28,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5 C++], [1.6.7-snap16], [help@hdfgroup.org])
+AC_INIT([HDF5 C++], [1.6.7-snap17], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5Library.cpp])
 AC_CONFIG_HEADER([src/H5cxx_config.h])
 
