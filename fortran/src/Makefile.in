@@ -101,7 +101,12 @@ H5fortran_detect_LDADD = $(LDADD)
 H5match_types_SOURCES = H5match_types.c
 H5match_types_OBJECTS = H5match_types.$(OBJEXT)
 H5match_types_LDADD = $(LDADD)
-am_H5test_kind_OBJECTS = H5test_kind.$(OBJEXT)
+am__H5test_kind_SOURCES_DIST = $(srcdir)/H5test_kind.f90 \
+	$(srcdir)/H5test_kind_SIZEOF.f90
+@FORTRAN_HAVE_SIZEOF_FALSE@am_H5test_kind_OBJECTS =  \
+@FORTRAN_HAVE_SIZEOF_FALSE@	H5test_kind.$(OBJEXT)
+@FORTRAN_HAVE_SIZEOF_TRUE@am_H5test_kind_OBJECTS =  \
+@FORTRAN_HAVE_SIZEOF_TRUE@	H5test_kind_SIZEOF.$(OBJEXT)
 H5test_kind_OBJECTS = $(am_H5test_kind_OBJECTS)
 H5test_kind_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
@@ -127,7 +132,7 @@ SOURCES = $(libhdf5_fortran_la_SOURCES) $(H5fortran_detect_SOURCES) \
 	H5match_types.c $(H5test_kind_SOURCES)
 DIST_SOURCES = $(am__libhdf5_fortran_la_SOURCES_DIST) \
 	$(H5fortran_detect_SOURCES) H5match_types.c \
-	$(H5test_kind_SOURCES)
+	$(am__H5test_kind_SOURCES_DIST)
 settingsDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(settings_DATA)
 ETAGS = etags
@@ -414,7 +419,7 @@ libhdf5_fortran_la_SOURCES = H5fortran_flags.f90 H5f90global.f90          \
          H5Tff.f90 H5Zff.f90                                            \
 	 H5_DBLE_Interface$(F_DBLE).f90 \
          H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c           \
-         H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c               \
+         H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c        \
          $(PARALLEL_COND_SRC)
 
 
@@ -446,10 +451,11 @@ BUILT_SOURCES = H5f90i_gen.h
 # Automake knows how to build fortran programs if we tell it the source
 # files.
 H5fortran_detect_SOURCES = H5fortran_detect.f90
+@FORTRAN_HAVE_SIZEOF_FALSE@H5test_kind_SOURCES = $(srcdir)/H5test_kind.f90
 
 # H5test_kind.f90 is included in the distribution, and Automake knows
 # how to compile a fortran program given its sources.
-H5test_kind_SOURCES = $(srcdir)/H5test_kind.f90
+@FORTRAN_HAVE_SIZEOF_TRUE@H5test_kind_SOURCES = $(srcdir)/H5test_kind_SIZEOF.f90
 
 # Mark this directory as part of the Fortran API
 FORTRAN_API = yes
@@ -612,6 +618,12 @@ H5test_kind.o: $(srcdir)/H5test_kind.f90
 
 H5test_kind.obj: $(srcdir)/H5test_kind.f90
 	$(FC) $(AM_FCFLAGS) $(FCFLAGS) -c -o H5test_kind.obj `if test -f '$(srcdir)/H5test_kind.f90'; then $(CYGPATH_W) '$(srcdir)/H5test_kind.f90'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/H5test_kind.f90'; fi`
+
+H5test_kind_SIZEOF.o: $(srcdir)/H5test_kind_SIZEOF.f90
+	$(FC) $(AM_FCFLAGS) $(FCFLAGS) -c -o H5test_kind_SIZEOF.o `test -f '$(srcdir)/H5test_kind_SIZEOF.f90' || echo '$(srcdir)/'`$(srcdir)/H5test_kind_SIZEOF.f90
+
+H5test_kind_SIZEOF.obj: $(srcdir)/H5test_kind_SIZEOF.f90
+	$(FC) $(AM_FCFLAGS) $(FCFLAGS) -c -o H5test_kind_SIZEOF.obj `if test -f '$(srcdir)/H5test_kind_SIZEOF.f90'; then $(CYGPATH_W) '$(srcdir)/H5test_kind_SIZEOF.f90'; else $(CYGPATH_W) '$(srcdir)/$(srcdir)/H5test_kind_SIZEOF.f90'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -880,7 +892,9 @@ H5fort_type_defines.h: H5fortran_detect$(EXEEXT)
 
 H5match_types.$(OBJEXT): H5fort_type_defines.h
 
-# H5test_kind.f90 generates H5fortran_detect.f90.
+# H5test_kind.f90 generates H5Fortran_detect.f90 depending on if 
+# intrinsic function SIZEOF is available.
+
 H5fortran_detect.f90: H5test_kind$(EXEEXT)
 	$(RUNSERIAL) ./H5test_kind$(EXEEXT) > H5fortran_detect.f90
 
@@ -893,6 +907,7 @@ H5f90global.lo:      $(srcdir)/H5f90global.f90 H5fortran_flags.lo H5fortran_type
 H5fortran_types.lo:  H5fortran_types.f90
 H5fortran_detect.lo: H5fortran_detect.f90
 H5test_kind.lo:      $(srcdir)/H5test_kind.f90
+H5test_kind_SIZEOF.lo:      $(srcdir)/H5test_kind_SIZEOF.f90
 H5_ff.lo:            $(srcdir)/H5_ff.f90 H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.f90 H5f90global.lo
 H5Dff.lo:            $(srcdir)/H5Dff.f90 H5f90global.lo

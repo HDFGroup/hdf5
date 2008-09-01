@@ -63,7 +63,7 @@ libhdf5_fortran_la_SOURCES=H5fortran_flags.f90 H5f90global.f90          \
          H5Tff.f90 H5Zff.f90                                            \
 	 H5_DBLE_Interface$(F_DBLE).f90 \
          H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c           \
-         H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c               \
+         H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c        \
          $(PARALLEL_COND_SRC)
 
 # h5fc and libhdf5_fortran.settings are generated during configure.
@@ -152,13 +152,20 @@ H5match_types.$(OBJEXT): H5fort_type_defines.h
 # files.
 H5fortran_detect_SOURCES = H5fortran_detect.f90
 
-# H5test_kind.f90 generates H5fortran_detect.f90.
+# H5test_kind.f90 generates H5Fortran_detect.f90 depending on if 
+# intrinsic function SIZEOF is available.
+
 H5fortran_detect.f90: H5test_kind$(EXEEXT)
 	$(RUNSERIAL) ./H5test_kind$(EXEEXT) > H5fortran_detect.f90
 
 # H5test_kind.f90 is included in the distribution, and Automake knows
 # how to compile a fortran program given its sources.
-H5test_kind_SOURCES = $(srcdir)/H5test_kind.f90
+
+if FORTRAN_HAVE_SIZEOF
+  H5test_kind_SOURCES = $(srcdir)/H5test_kind_SIZEOF.f90
+else
+  H5test_kind_SOURCES = $(srcdir)/H5test_kind.f90
+endif
 
 # Mark this directory as part of the Fortran API
 FORTRAN_API=yes
@@ -172,6 +179,7 @@ H5f90global.lo:      $(srcdir)/H5f90global.f90 H5fortran_flags.lo H5fortran_type
 H5fortran_types.lo:  H5fortran_types.f90
 H5fortran_detect.lo: H5fortran_detect.f90
 H5test_kind.lo:      $(srcdir)/H5test_kind.f90
+H5test_kind_SIZEOF.lo:      $(srcdir)/H5test_kind_SIZEOF.f90
 H5_ff.lo:            $(srcdir)/H5_ff.f90 H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.f90 H5f90global.lo
 H5Dff.lo:            $(srcdir)/H5Dff.f90 H5f90global.lo
