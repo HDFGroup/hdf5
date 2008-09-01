@@ -391,6 +391,7 @@ H5Itype_exists(H5I_type_t type)
     htri_t ret_value = TRUE;                      /* Return value */
 
     FUNC_ENTER_API(H5Itype_exists, FAIL)
+    H5TRACE1("t", "It", type);
 
     if(type <= H5I_BADID || type >= H5I_next_type)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid type number")
@@ -433,6 +434,7 @@ H5Inmembers(H5I_type_t type, hsize_t *num_members)
     int ret_value = SUCCEED;                      /* Return value */
 
     FUNC_ENTER_API(H5Inmembers, FAIL)
+    H5TRACE2("e", "It*h", type, num_members);
 
     if(H5I_IS_LIB_TYPE(type))
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "cannot call public function on library type")
@@ -522,6 +524,7 @@ H5Iclear_type(H5I_type_t type, hbool_t force)
     herr_t ret_value;                      /* Return value */
 
     FUNC_ENTER_API(H5Iclear_type, FAIL)
+    H5TRACE2("e", "Itb", type, force);
 
     if(H5I_IS_LIB_TYPE(type))
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "cannot call public function on library type")
@@ -703,6 +706,7 @@ H5Idestroy_type(H5I_type_t type)
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(H5Idestroy_type, FAIL)
+    H5TRACE1("e", "It", type);
 
     if(H5I_IS_LIB_TYPE(type))
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "cannot call public function on library type")
@@ -782,6 +786,7 @@ H5Iregister(H5I_type_t type, void *object)
     hid_t ret_value;                      /* Return value */
 
     FUNC_ENTER_API(H5Iregister, H5I_INVALID_HID)
+    H5TRACE2("i", "It*x", type, object);
 
     if(H5I_IS_LIB_TYPE(type))
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "cannot call public function on library type")
@@ -1685,6 +1690,7 @@ H5Idec_type_ref(H5I_type_t type)
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_API(H5Idec_type_ref, FAIL)
+    H5TRACE1("e", "It", type);
 
     if(H5I_IS_LIB_TYPE(type))
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "cannot call public function on library type")
