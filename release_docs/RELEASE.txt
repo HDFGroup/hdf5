@@ -1,4 +1,4 @@
-HDF5 version 1.9.8-MDJ_a1 released on Sun Aug 31 01:09:05 CDT 2008
+HDF5 version 1.9.8-MDJ_a2 currently under development
 ================================================================================
 
 
