@@ -381,6 +381,21 @@ dnl  ], AC_MSG_RESULT(yes),
 dnl     AC_MSG_RESULT(no)
 dnl     FCFLAGS="$FCFLAGS_saved")
 
+dnl --------------------------------------------------------------------
+dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
+
+  AC_MSG_CHECKING([if Fortran compiler supports intrinsic SIZEOF])
+
+  HAVE_SIZEOF="no"	
+  AC_TRY_COMPILE(,[
+	i = sizeof(x)	
+  ], [AC_MSG_RESULT(yes)
+     	HAVE_SIZEOF="yes"],
+       AC_MSG_RESULT(no))
+  AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF" = "Xyes"])
+
+dnl Check to see if -r8 was specified to determine if we need to
+dnl compile the DOUBLE PRECISION interfaces.
 
 
   FORTRAN_DEFAULT_REALisDBLE="no"

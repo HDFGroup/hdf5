@@ -892,6 +892,8 @@ FSEARCH_DIRS
 F9XMODFLAG
 F9XMODEXT
 FCLIBS
+FORTRAN_HAVE_SIZEOF_TRUE
+FORTRAN_HAVE_SIZEOF_FALSE
 FORTRAN_DEFAULT_REALisDBLE_F_TRUE
 FORTRAN_DEFAULT_REALisDBLE_F_FALSE
 CXXFLAGS
@@ -5526,6 +5528,56 @@ ac_compiler_gnu=$ac_cv_fc_compiler_gnu
 
 
 
+  { echo "$as_me:$LINENO: checking if Fortran compiler supports intrinsic SIZEOF" >&5
+echo $ECHO_N "checking if Fortran compiler supports intrinsic SIZEOF... $ECHO_C" >&6; }
+
+  HAVE_SIZEOF="no"
+  cat >conftest.$ac_ext <<_ACEOF
+      program main
+
+	i = sizeof(x)
+
+      end
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_fc_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  { echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; }
+     	HAVE_SIZEOF="yes"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	{ echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6; }
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+   if test "X$HAVE_SIZEOF" = "Xyes"; then
+  FORTRAN_HAVE_SIZEOF_TRUE=
+  FORTRAN_HAVE_SIZEOF_FALSE='#'
+else
+  FORTRAN_HAVE_SIZEOF_TRUE='#'
+  FORTRAN_HAVE_SIZEOF_FALSE=
+fi
+
+
+
 
   FORTRAN_DEFAULT_REALisDBLE="no"
   { echo "$as_me:$LINENO: checking if Fortran default REAL is DOUBLE PRECISION" >&5
@@ -8002,13 +8054,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:8005: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:8057: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:8008: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:8060: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:8011: output\"" >&5)
+  (eval echo "\"\$as_me:8063: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -9116,7 +9168,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 9119 "configure"' > conftest.$ac_ext
+  echo '#line 9171 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -11684,11 +11736,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11687: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11739: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11691: \$? = $ac_status" >&5
+   echo "$as_me:11743: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -12008,11 +12060,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12011: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12063: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:12015: \$? = $ac_status" >&5
+   echo "$as_me:12067: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -12113,11 +12165,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12116: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12168: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12120: \$? = $ac_status" >&5
+   echo "$as_me:12172: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12168,11 +12220,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:12171: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:12223: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:12175: \$? = $ac_status" >&5
+   echo "$as_me:12227: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14996,7 +15048,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 14999 "configure"
+#line 15051 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15096,7 +15148,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 15099 "configure"
+#line 15151 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -17115,11 +17167,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17118: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17170: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17122: \$? = $ac_status" >&5
+   echo "$as_me:17174: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17214,11 +17266,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17217: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17269: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17221: \$? = $ac_status" >&5
+   echo "$as_me:17273: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17266,11 +17318,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17269: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17321: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17273: \$? = $ac_status" >&5
+   echo "$as_me:17325: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18796,11 +18848,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18799: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18851: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18803: \$? = $ac_status" >&5
+   echo "$as_me:18855: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18895,11 +18947,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18898: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18950: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18902: \$? = $ac_status" >&5
+   echo "$as_me:18954: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18947,11 +18999,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18950: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19002: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18954: \$? = $ac_status" >&5
+   echo "$as_me:19006: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -50833,6 +50885,13 @@ echo "$as_me: error: conditional \"am__fastdepCC\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${FORTRAN_HAVE_SIZEOF_TRUE}" && test -z "${FORTRAN_HAVE_SIZEOF_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"FORTRAN_HAVE_SIZEOF\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"FORTRAN_HAVE_SIZEOF\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${FORTRAN_DEFAULT_REALisDBLE_F_TRUE}" && test -z "${FORTRAN_DEFAULT_REALisDBLE_F_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"FORTRAN_DEFAULT_REALisDBLE_F\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -52094,6 +52153,8 @@ FSEARCH_DIRS!$FSEARCH_DIRS$ac_delim
 F9XMODFLAG!$F9XMODFLAG$ac_delim
 F9XMODEXT!$F9XMODEXT$ac_delim
 FCLIBS!$FCLIBS$ac_delim
+FORTRAN_HAVE_SIZEOF_TRUE!$FORTRAN_HAVE_SIZEOF_TRUE$ac_delim
+FORTRAN_HAVE_SIZEOF_FALSE!$FORTRAN_HAVE_SIZEOF_FALSE$ac_delim
 FORTRAN_DEFAULT_REALisDBLE_F_TRUE!$FORTRAN_DEFAULT_REALisDBLE_F_TRUE$ac_delim
 FORTRAN_DEFAULT_REALisDBLE_F_FALSE!$FORTRAN_DEFAULT_REALisDBLE_F_FALSE$ac_delim
 CXXFLAGS!$CXXFLAGS$ac_delim
@@ -52160,8 +52221,6 @@ DYNAMIC_DIRS!$DYNAMIC_DIRS$ac_delim
 HL!$HL$ac_delim
 HL_FOR!$HL_FOR$ac_delim
 BUILD_ALL_CONDITIONAL_TRUE!$BUILD_ALL_CONDITIONAL_TRUE$ac_delim
-BUILD_ALL_CONDITIONAL_FALSE!$BUILD_ALL_CONDITIONAL_FALSE$ac_delim
-DEPRECATED_SYMBOLS!$DEPRECATED_SYMBOLS$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -52203,6 +52262,8 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+BUILD_ALL_CONDITIONAL_FALSE!$BUILD_ALL_CONDITIONAL_FALSE$ac_delim
+DEPRECATED_SYMBOLS!$DEPRECATED_SYMBOLS$ac_delim
 DEFAULT_API_VERSION!$DEFAULT_API_VERSION$ac_delim
 STRICT_FORMAT_CHECKS!$STRICT_FORMAT_CHECKS$ac_delim
 BUILD_CXX_CONDITIONAL_TRUE!$BUILD_CXX_CONDITIONAL_TRUE$ac_delim
@@ -52219,7 +52280,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 14; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 16; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5
