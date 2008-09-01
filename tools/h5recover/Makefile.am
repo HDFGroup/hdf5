@@ -27,7 +27,7 @@ INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 TEST_PROG=
 TEST_SCRIPT=testh5recover.sh
 
-check_PROGRAMS=$(TEST_PROG)
+check_PROGRAMS=$(TEST_PROG) trecover enable_journaling
 check_SCRIPTS=$(TEST_SCRIPT)
 SCRIPT_DEPEND=trecover$(EXEEXT)
 
@@ -38,7 +38,7 @@ trecover_SOURCES=trecover_main.c trecover_writer.c trecover_crasher.c
 # For now, it is a dummy program in order to provide a real executable
 # for the Red Storm platform.
 # Added trecover here since we don't want it in TEST_PROG as it gets SIGTERM by default.
-bin_PROGRAMS=h5recover trecover enable_journaling
+bin_PROGRAMS=h5recover
 
 # All the programs depend on the hdf5 and h5tools libraries
 LDADD=$(LIBH5TOOLS) $(LIBHDF5)

@@ -52,9 +52,9 @@ host_triplet = @host@
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/testh5recover.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
-check_PROGRAMS = $(am__EXEEXT_1)
-bin_PROGRAMS = h5recover$(EXEEXT) trecover$(EXEEXT) \
+check_PROGRAMS = $(am__EXEEXT_1) trecover$(EXEEXT) \
 	enable_journaling$(EXEEXT)
+bin_PROGRAMS = h5recover$(EXEEXT)
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 subdir = tools/h5recover
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
