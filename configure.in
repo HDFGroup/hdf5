@@ -318,6 +318,10 @@ AC_ARG_ENABLE([fortran],
                               [Compile the Fortran interface [default=no]])],
               [HDF_FORTRAN=$enableval])
 
+
+HAVE_SIZEOF="no"
+FORTRAN_DEFAULT_REALisDBLE="no"	
+
 if test "X$HDF_FORTRAN" = "Xyes"; then
   echo "yes"
 
@@ -385,20 +389,17 @@ dnl --------------------------------------------------------------------
 dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
 
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic SIZEOF])
-
-  HAVE_SIZEOF="no"	
   AC_TRY_COMPILE(,[
 	i = sizeof(x)	
   ], [AC_MSG_RESULT(yes)
      	HAVE_SIZEOF="yes"],
        AC_MSG_RESULT(no))
-  AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF" = "Xyes"])
+
 
 dnl Check to see if -r8 was specified to determine if we need to
 dnl compile the DOUBLE PRECISION interfaces.
 
 
-  FORTRAN_DEFAULT_REALisDBLE="no"
   AC_MSG_CHECKING([if Fortran default REAL is DOUBLE PRECISION])
   
   AC_TRY_RUN([
@@ -432,6 +433,7 @@ else
   echo "no"
 fi
 
+AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF" = "Xyes"])
 AM_CONDITIONAL([FORTRAN_DEFAULT_REALisDBLE_F], [test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"])
 
 dnl ----------------------------------------------------------------------
