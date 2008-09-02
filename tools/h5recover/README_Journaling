@@ -1,0 +1,47 @@
+	HDF5 Metadata Journaling Alpha1 Release
+
+Feature Description
+===================
+The metadata journaling feature will keep a journal file of metadata being
+written to an HDF5 file. Whenever the HDF5 file is flushed (H5Fflush)
+or closed (H5Fclose) successfully, that is all metadata are written to
+the file for sure, the journal file will be reset anew.
+
+If the application that opens the HDF5 file crashes before the file is
+closed, the file could be in an unstable state. If the file has been opened with
+journaling enabled, the user can recover the file by the h5recover tool
+with the journal file. All metadata are guaranteed to be stable but
+rawdata modifications are not.
+
+Release Description
+===================
+This is an alpha1 release. The Metadata Journaling feature is implemented
+and is available for friendly users test. Be advised that there may be
+further changes of the programming API and the file format. Therefore,
+users are advised to use this release for testing purpose only.
+
+How to use the Metadata Journaling feature
+==========================================
+An example application using the Metadata Journaling feature is
+included in the source code as tools/h5recover/enable_journaling.c. To
+enable Metadata Journaling, one should copy the function routine,
+set_journaling(), to its own application program code and call
+set_journaling() as demonstrated in the enable_journaling.c example.
+
+To test run the enable_journaling example, follow these steps
+(assuming the hdf5 library is installed in the following location,
+/projects/sio/acheng/HDF5/MDJ_a1/tbird):
+
+% /projects/sio/acheng/HDF5/MDJ_a1/tbird/bin/h5cc enable_journaling.c -o enable_journaling
+% ./enable_journaling -c	# create the data file, JournalEG.h5
+% ./enable_journaling -w	# write more rows to the data file.
+				# Interrupt the application at any point.
+% /projects/sio/acheng/HDF5/MDJ_a1/tbird/bin/h5dump JournalEG.h5	# h5dump would fail
+% /projects/sio/acheng/HDF5/MDJ_a1/tbird/bin/h5recover -j JournalEG.h5.jnl JournalEG.h5		# recover the data file with the Journaling file
+% /projects/sio/acheng/HDF5/MDJ_a1/tbird/bin/h5dump JournalEG.h5	# h5dump would succeed now.
+% ./enable_journaling -w	# can write more rows to the data file again.
+
+
+====================
+Contact acheng@hdfgroup.org for any question.
+Last updated: Sep 1st, 2008.
