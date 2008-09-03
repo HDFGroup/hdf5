@@ -1436,6 +1436,21 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5EA.c">
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAcache.c">
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAhdr.c">
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAint.c">
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAtest.c">
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Edeprec.c">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -7739,6 +7754,12 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Dpublic.h">
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EApkg.h">
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAprivate.h">
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Epkg.h">

@@ -1988,6 +1988,8 @@
 ./windows/test/dtransformdll/dtransformdll.vcproj
 ./windows/test/dtypes/dtypes.vcproj
 ./windows/test/dtypesdll/dtypesdll.vcproj
+./windows/test/earray/earray.vcproj
+./windows/test/earraydll/earraydll.vcproj
 ./windows/test/enum/enum.vcproj
 ./windows/test/enumdll/enumdll.vcproj
 ./windows/test/error_test/error_test.vcproj
@@ -2242,6 +2244,8 @@
 ./windows_vnet/test/dtransformdll/dtransformdll.vcproj
 ./windows_vnet/test/dtypes/dtypes.vcproj
 ./windows_vnet/test/dtypesdll/dtypesdll.vcproj
+./windows_vnet/test/earray/earray.vcproj
+./windows_vnet/test/earraydll/earraydll.vcproj
 ./windows_vnet/test/enum/enum.vcproj
 ./windows_vnet/test/enumdll/enumdll.vcproj
 ./windows_vnet/test/error_test/error_test.vcproj
