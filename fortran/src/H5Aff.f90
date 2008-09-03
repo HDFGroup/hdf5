@@ -138,9 +138,6 @@ CONTAINS
   SUBROUTINE h5acreate_f(loc_id, name, type_id, space_id, attr_id, &
                                  hdferr, acpl_id, aapl_id ) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5acreate_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier 
     CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
@@ -219,9 +216,6 @@ CONTAINS
 
   SUBROUTINE h5aopen_name_f(obj_id, name, attr_id, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aopen_name_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
     CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
@@ -279,9 +273,6 @@ CONTAINS
 
   SUBROUTINE h5aopen_idx_f(obj_id, index, attr_id, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aopen_idx_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
     INTEGER, INTENT(IN) :: index            ! Attribute index 
@@ -309,9 +300,6 @@ CONTAINS
 
   SUBROUTINE h5awrite_integer_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_integer_scalar
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -341,9 +329,6 @@ CONTAINS
 
   SUBROUTINE h5awrite_integer_1(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_integer_1
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -377,9 +362,6 @@ CONTAINS
 
   SUBROUTINE h5awrite_integer_2(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_integer_2
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -412,9 +394,6 @@ CONTAINS
 
   SUBROUTINE h5awrite_integer_3(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_integer_3
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -446,9 +425,6 @@ CONTAINS
 
   SUBROUTINE h5awrite_integer_4(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_integer_4
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -481,9 +457,6 @@ CONTAINS
 
   SUBROUTINE h5awrite_integer_5(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_integer_5
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -515,9 +488,6 @@ CONTAINS
 
   SUBROUTINE h5awrite_integer_6(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_integer_6
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -551,9 +521,6 @@ CONTAINS
 
   SUBROUTINE h5awrite_integer_7(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_integer_7
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -587,9 +554,6 @@ CONTAINS
 
   SUBROUTINE h5awrite_real_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_real_scalar
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -619,9 +583,6 @@ CONTAINS
 
   SUBROUTINE h5awrite_real_1(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_real_1
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -655,9 +616,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_real_2(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_real_2
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -691,9 +649,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_real_3(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_real_3
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -727,9 +682,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_real_4(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_real_4
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -763,9 +715,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_real_5(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_real_5
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -799,9 +748,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_real_6(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_real_6
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -835,9 +781,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_real_7(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_real_7
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -871,9 +814,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_double_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_double_scalar
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -903,9 +843,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_double_1(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_double_1
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -938,9 +875,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_double_2(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_double_2
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -974,9 +908,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_double_3(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_double_3
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1010,9 +941,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_double_4(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_double_4
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1046,9 +974,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_double_5(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_double_5
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1082,9 +1007,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_double_6(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_double_6
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1118,9 +1040,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_double_7(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_double_7
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1153,9 +1072,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_char_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_char_scalar
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1186,9 +1102,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_char_1(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_char_1
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1221,9 +1134,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_char_2(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_char_2
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1258,9 +1168,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_char_3(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_char_3
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1294,9 +1201,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_char_4(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_char_4
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1330,9 +1234,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_char_5(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_char_5
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1366,9 +1267,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_char_6(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_char_6
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1402,9 +1300,6 @@ CONTAINS
 
           SUBROUTINE h5awrite_char_7(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5awrite_char_7
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1475,9 +1370,6 @@ CONTAINS
 
           SUBROUTINE h5aread_integer_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_integer_scalar
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1506,9 +1398,6 @@ CONTAINS
 
           SUBROUTINE h5aread_integer_1(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_integer_1
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1539,9 +1428,6 @@ CONTAINS
 
           SUBROUTINE h5aread_integer_2(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_integer_2
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1572,9 +1458,6 @@ CONTAINS
 
           SUBROUTINE h5aread_integer_3(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_integer_3
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1607,9 +1490,6 @@ CONTAINS
 
           SUBROUTINE h5aread_integer_4(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_integer_4
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1643,9 +1523,6 @@ CONTAINS
 
           SUBROUTINE h5aread_integer_5(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_integer_5
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1679,9 +1556,6 @@ CONTAINS
 
           SUBROUTINE h5aread_integer_6(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_integer_6
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1715,9 +1589,6 @@ CONTAINS
 
           SUBROUTINE h5aread_integer_7(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_integer_7
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1751,9 +1622,6 @@ CONTAINS
 
           SUBROUTINE h5aread_real_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_real_scalar
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1783,9 +1651,6 @@ CONTAINS
 
           SUBROUTINE h5aread_real_1(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_real_1
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1819,9 +1684,6 @@ CONTAINS
 
           SUBROUTINE h5aread_real_2(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_real_2
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1855,9 +1717,6 @@ CONTAINS
 
           SUBROUTINE h5aread_real_3(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_real_3
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1891,9 +1750,6 @@ CONTAINS
 
           SUBROUTINE h5aread_real_4(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_real_4
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1927,9 +1783,6 @@ CONTAINS
 
           SUBROUTINE h5aread_real_5(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_real_5
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1963,9 +1816,6 @@ CONTAINS
 
           SUBROUTINE h5aread_real_6(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_real_6
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1999,9 +1849,6 @@ CONTAINS
 
           SUBROUTINE h5aread_real_7(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_real_7
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2035,9 +1882,6 @@ CONTAINS
 
           SUBROUTINE h5aread_double_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_double_scalar
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2067,9 +1911,6 @@ CONTAINS
 
           SUBROUTINE h5aread_double_1(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_double_1
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2103,9 +1944,6 @@ CONTAINS
 
           SUBROUTINE h5aread_double_2(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_double_2
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2139,9 +1977,6 @@ CONTAINS
 
           SUBROUTINE h5aread_double_3(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_double_3
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2175,9 +2010,6 @@ CONTAINS
 
           SUBROUTINE h5aread_double_4(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_double_4
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2211,9 +2043,6 @@ CONTAINS
 
           SUBROUTINE h5aread_double_5(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_double_5
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2247,9 +2076,6 @@ CONTAINS
 
           SUBROUTINE h5aread_double_6(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_double_6
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2283,9 +2109,6 @@ CONTAINS
 
           SUBROUTINE h5aread_double_7(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_double_7
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2319,9 +2142,6 @@ CONTAINS
 
           SUBROUTINE h5aread_char_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_char_scalar
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2353,9 +2173,6 @@ CONTAINS
 
           SUBROUTINE h5aread_char_1(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_char_1
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2390,9 +2207,6 @@ CONTAINS
 
           SUBROUTINE h5aread_char_2(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_char_2
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2427,9 +2241,6 @@ CONTAINS
 
           SUBROUTINE h5aread_char_3(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_char_3
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2464,9 +2275,6 @@ CONTAINS
 
           SUBROUTINE h5aread_char_4(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_char_4
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2501,9 +2309,6 @@ CONTAINS
 
           SUBROUTINE h5aread_char_5(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_char_5
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2538,9 +2343,6 @@ CONTAINS
 
           SUBROUTINE h5aread_char_6(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_char_6
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2575,9 +2377,6 @@ CONTAINS
 
           SUBROUTINE h5aread_char_7(attr_id, memtype_id,  buf, dims, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aread_char_7
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2636,9 +2435,6 @@ CONTAINS
 
           SUBROUTINE h5aget_space_f(attr_id, space_id, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aget_space_f
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
             INTEGER(HID_T), INTENT(OUT) :: space_id 
@@ -2688,9 +2484,6 @@ CONTAINS
 
           SUBROUTINE h5aget_type_f(attr_id, type_id, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aget_type_f
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
             INTEGER(HID_T), INTENT(OUT) :: type_id 
@@ -2742,9 +2535,6 @@ CONTAINS
 
   SUBROUTINE h5aget_name_f(attr_id, size, buf, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aget_name_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
     INTEGER(SIZE_T), INTENT(IN) :: size    ! Buffer size 
@@ -2816,9 +2606,6 @@ CONTAINS
   SUBROUTINE h5aget_name_by_idx_f(loc_id, obj_name, idx_type, order, &
        n, name, hdferr, size, lapl_id) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aget_name_by_idx_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
@@ -2915,9 +2702,6 @@ CONTAINS
 
   SUBROUTINE h5aget_num_attrs_f(obj_id, attr_num, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aget_num_attrs_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id  ! Object identifier 
     INTEGER, INTENT(OUT) :: attr_num      ! Number of attributes of the
@@ -2969,9 +2753,6 @@ CONTAINS
 
   SUBROUTINE h5adelete_f(obj_id, name, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5adelete_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
     CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
@@ -3024,9 +2805,6 @@ CONTAINS
 
   SUBROUTINE h5aclose_f(attr_id, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aclose_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
     INTEGER, INTENT(OUT) :: hdferr         ! Error code:
@@ -3071,9 +2849,6 @@ CONTAINS
 
   SUBROUTINE h5aget_storage_size_f(attr_id, size, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aget_storage_size_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier  
     INTEGER(HSIZE_T), INTENT(OUT) :: size   ! Attribute storage requirement
@@ -3119,9 +2894,6 @@ CONTAINS
 
   SUBROUTINE h5aget_create_plist_f(attr_id, creation_prop_id, hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aget_create_plist_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Identifier of the attribute 
     INTEGER(HID_T), INTENT(OUT) :: creation_prop_id   ! Identifier for the attribute’s creation property
@@ -3173,9 +2945,6 @@ CONTAINS
         hdferr, lapl_id) 
 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5arename_by_name_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier 
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location, 
@@ -3254,9 +3023,6 @@ CONTAINS
 
   SUBROUTINE h5aopen_f(obj_id, attr_name, attr_id, hdferr, aapl_id) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aopen_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id      ! Object identifier 
     CHARACTER(LEN=*), INTENT(IN) :: attr_name ! Attribute name
@@ -3334,9 +3100,6 @@ CONTAINS
 !----------------------------------------------------------------------
   SUBROUTINE h5adelete_by_idx_f(loc_id, obj_name, idx_type, order, n, hdferr, lapl_id) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5adelete_by_idx_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location, 
@@ -3414,9 +3177,6 @@ CONTAINS
 !----------------------------------------------------------------------
   SUBROUTINE h5adelete_by_name_f(loc_id, obj_name, attr_name, hdferr, lapl_id) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5adelete_by_name_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location, 
@@ -3486,9 +3246,6 @@ CONTAINS
 
   SUBROUTINE h5aopen_by_idx_f(loc_id, obj_name, idx_type, order, n, attr_id, hdferr, aapl_id, lapl_id) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aopen_by_idx_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id      ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object to which attribute is attached
@@ -3579,9 +3336,6 @@ CONTAINS
 
   SUBROUTINE h5aget_info_f(attr_id, f_corder_valid, corder, cset, data_size,  hdferr) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aget_info_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier
 
@@ -3652,9 +3406,6 @@ CONTAINS
   SUBROUTINE h5aget_info_by_idx_f(loc_id, obj_name, idx_type, order, n, &
        f_corder_valid, corder, cset, data_size, hdferr, lapl_id) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aget_info_by_idx_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: obj_name ! Name of object to which attribute is attached
@@ -3750,9 +3501,6 @@ CONTAINS
   SUBROUTINE h5aget_info_by_name_f(loc_id, obj_name, attr_name, &
        f_corder_valid, corder, cset, data_size, hdferr, lapl_id) 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aget_info_by_name_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: obj_name ! Name of object to which attribute is attached
@@ -3841,9 +3589,6 @@ CONTAINS
        acpl_id, aapl_id, lapl_id)
 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5acreate_by_name_f
-!DEC$endif
 
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
@@ -3933,9 +3678,6 @@ CONTAINS
   SUBROUTINE h5aexists_f(obj_id, attr_name, attr_exists, hdferr)
 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aexists_f
-!DEC$endif
 
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id     ! Object identifier
@@ -3997,9 +3739,6 @@ CONTAINS
   SUBROUTINE h5aexists_by_name_f(loc_id, obj_name, attr_name, attr_exists, hdferr, lapl_id)
 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5aexists_by_name_f
-!DEC$endif
 
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Location identifier
@@ -4074,9 +3813,6 @@ CONTAINS
   SUBROUTINE h5aopen_by_name_f(loc_id, obj_name, attr_name, attr_id, hdferr, aapl_id, lapl_id)
 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport ::  h5aopen_by_name_f
-!DEC$endif
 
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Location identifier
@@ -4154,9 +3890,6 @@ CONTAINS
   SUBROUTINE h5arename_f(loc_id, old_attr_name, new_attr_name, hdferr) 
 
 !This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5arename_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: old_attr_name ! Prior attribute name

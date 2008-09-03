@@ -214,6 +214,7 @@
 ./fortran/src/H5fortran_flags.f90
 ./fortran/src/H5match_types.c
 ./fortran/src/HDF5.f90
+./fortran/src/hdf5_fortrandll.def
 ./fortran/src/HDF5mpio.f90
 ./fortran/src/Makefile.am
 ./fortran/src/Makefile.in
