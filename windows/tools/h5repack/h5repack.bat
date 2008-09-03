@@ -554,7 +554,7 @@ rem
 
 
     rem latest file format with long switches. use FILE4=h5repack_layout.h5 (no filters)
-    set arg=%file4% --layout CHUNK=20x10 --filter GZIP=1 --threshold=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype]
+    set arg=%file4% --layout CHUNK=20x10 --filter GZIP=1 --minimum=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype]
     if not "%use_filter_deflate%"=="yes" (
        call :skip %arg%
     ) else (
@@ -591,6 +591,10 @@ rem
     
     rem add a userblock to file
     set arg=%file1% -u ublock.bin -b 2048
+    call :tooltest %arg%
+    
+    rem add alignment
+    set arg=%file1% -t 1 -a 1
     call :tooltest %arg%
     
     
