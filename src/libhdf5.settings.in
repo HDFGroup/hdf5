@@ -42,7 +42,7 @@ Clear file buffers before write: @CLEARFILEBUF@
 Languages:
 ----------
                         Fortran: @HDF_FORTRAN@
-@BUILD_FORTRAN_CONDITIONAL_TRUE@              Fortran Compiler:  @FC@ @FCFLAGS@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@               Fortran Compiler: @FC@ @FCFLAGS@
                             C++: @HDF_CXX@
 @BUILD_CXX_CONDITIONAL_TRUE@                  C++ Compiler:  @CXX@@CXXFLAGS@
 
