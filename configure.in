@@ -389,8 +389,10 @@ dnl --------------------------------------------------------------------
 dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
 
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic SIZEOF])
-  AC_TRY_COMPILE(,[
-	i = sizeof(x)	
+  AC_TRY_RUN([ 
+   PROGRAM main
+     i = sizeof(x)
+   END PROGRAM
   ], [AC_MSG_RESULT(yes)
      	HAVE_SIZEOF="yes"],
        AC_MSG_RESULT(no))
