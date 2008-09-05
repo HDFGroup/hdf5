@@ -80,7 +80,23 @@ New Features
 
     C++ API:
     --------
-    None
+        - These member functions were added as wrapper for H5Rdereference to
+          replace the incorrect IdComponent::dereference().
+                void H5Object::dereference(H5Object& obj, void* ref)
+                void H5Object::dereference(H5File& h5file, void* ref)
+                void H5Object::dereference(Attribute& obj, void* ref)
+          In addition, these constructors were added to create the associated
+          objects by way of dereference:
+                DataSet(H5Object& obj, void* ref);
+                DataSet(H5File& file, void* ref);
+                DataSet(Attribute& attr, void* ref);
+                DataType(H5Object& obj, void* ref);
+                DataType(H5File& file, void* ref);
+                DataType(Attribute& attr, void* ref);
+                Group(H5Object& obj, void* ref);
+                Group(H5File& obj, void* ref);
+                Group(Attribute& attr, void* ref);
+          (BMR - 2008/08/10)
 
 
 Support for New Platforms, Languages and Compilers
@@ -136,7 +152,17 @@ Bug Fixes since HDF5-1.6.7 Release
                                 
     C++ API
     -------
-     None
+        - Fixed a design bug which allowed an Attribute object to create/modify
+          attributes (bugzilla #1068).  The API class hierarchy was revised
+          to address the problem.  Classes AbstractDS and Attribute are moved
+          out of H5Object.  Class Attribute now multiply inherits from
+          IdComponent and AbstractDs and class DataSet from H5Object and
+          AbstractDs.  In addition, the data member IdComponent::id was
+          moved into subclasses: Attribute, DataSet, DataSpace, DataType,
+          H5File, Group, and PropList. (BMR - 2008/08/10)
+        - IdComponent::dereference was incorrect and replaced as described
+          in "New Features" section.
+          (BMR - 2008/08/10)
 
 
 Documentation
