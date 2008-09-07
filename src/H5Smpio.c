@@ -615,6 +615,11 @@ static herr_t H5S_obtain_datatype(const hsize_t size[],
     span_type = NULL;
     return 0;
   }
+{
+    int mpi_rank;
+    MPI_Comm_rank (MPI_COMM_WORLD, &mpi_rank);
+    fprintf(stderr, "%s: mpi_rank = %d\n", FUNC, mpi_rank);
+}
 
 /* MPI2 hasn't been widely acccepted, adding H5_HAVE_MPI2 for the future use */
 #ifdef H5_HAVE_MPI2
