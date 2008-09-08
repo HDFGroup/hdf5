@@ -140,11 +140,6 @@ CONTAINS
   
   SUBROUTINE h5dcreate_f(loc_id, name, type_id, space_id, dset_id, & 
        hdferr, dcpl_id, lcpl_id, dapl_id)
- 
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dcreate_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset 
@@ -231,10 +226,6 @@ CONTAINS
 !----------------------------------------------------------------------
 
           SUBROUTINE h5dopen_f(loc_id, name, dset_id, hdferr, dapl_id)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dopen_f
-!DEC$endif
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset 
@@ -296,11 +287,6 @@ CONTAINS
 !----------------------------------------------------------------------
 
           SUBROUTINE h5dclose_f(dset_id, hdferr)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dclose_f
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id ! Dataset identifier
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
@@ -324,11 +310,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_reference_obj
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -394,11 +375,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_reference_dsetreg(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_reference_dsetreg
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -468,11 +444,6 @@ CONTAINS
            
           SUBROUTINE h5dwrite_integer_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_integer_scalar
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -528,11 +499,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_integer_1
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -590,11 +556,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_integer_2
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -652,11 +613,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_integer_3
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -715,11 +671,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_integer_4
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -777,11 +728,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_integer_5
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -841,11 +787,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_integer_6
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -904,11 +845,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_integer_7
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -967,11 +903,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_char_scalar
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1028,11 +959,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_char_1
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1091,11 +1017,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_char_2
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1154,11 +1075,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_char_3
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1217,11 +1133,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_char_4
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1280,11 +1191,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_char_5
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1343,11 +1249,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_char_6
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1406,11 +1307,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_char_7
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1468,11 +1364,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_real_scalar
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1526,11 +1417,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_real_1
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1588,11 +1474,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_real_2
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1650,11 +1531,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_real_3
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1711,11 +1587,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_real_4
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1772,11 +1643,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_real_5
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1833,11 +1699,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_real_6
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1894,11 +1755,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_real_7
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1952,9 +1808,6 @@ CONTAINS
            
           END SUBROUTINE h5dwrite_real_7
 
-
-
-
 !----------------------------------------------------------------------
 ! Name:		h5dread_f 
 !
@@ -1997,11 +1850,6 @@ CONTAINS
 !----------------------------------------------------------------------
           SUBROUTINE h5dread_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_reference_obj
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2067,11 +1915,6 @@ CONTAINS
 
           SUBROUTINE h5dread_reference_dsetreg(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_reference_dsetreg
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2141,11 +1984,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_integer_scalar
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2201,11 +2039,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_integer_1
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2263,11 +2096,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_integer_2
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2326,11 +2154,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_integer_3
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2389,11 +2212,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_integer_4
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2452,11 +2270,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_integer_5
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2515,11 +2328,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_integer_6
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2578,11 +2386,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_integer_7
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2640,11 +2443,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_char_scalar
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2701,11 +2499,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_char_1
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2764,11 +2557,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_char_2
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2827,11 +2615,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_char_3
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2890,11 +2673,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_char_4
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2953,11 +2731,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_char_5
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3016,11 +2789,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_char_6
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3079,11 +2847,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_char_7
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3141,11 +2904,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_real_scalar
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3200,11 +2958,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_real_1
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3261,11 +3014,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_real_2
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3322,11 +3070,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_real_3
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3383,11 +3126,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_real_4
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3444,11 +3182,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_real_5
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3505,11 +3238,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_real_6
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3566,11 +3294,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_real_7
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3650,11 +3373,7 @@ CONTAINS
 !
 ! Comment:		
 !----------------------------------------------------------------------
-          SUBROUTINE h5dget_space_f(dataset_id, dataspace_id, hdferr) 
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dget_space_f
-!DEC$endif
+          SUBROUTINE h5dget_space_f(dataset_id, dataspace_id, hdferr)
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HID_T), INTENT(OUT) :: dataspace_id   ! Dataspace identifier
@@ -3703,11 +3422,7 @@ CONTAINS
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5dget_type_f(dataset_id, datatype_id, hdferr) 
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dget_type_f
-!DEC$endif
+          SUBROUTINE h5dget_type_f(dataset_id, datatype_id, hdferr)
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HID_T), INTENT(OUT) :: datatype_id    ! Datatype identifier
@@ -3760,11 +3475,7 @@ CONTAINS
 !----------------------------------------------------------------------
 
 
-  SUBROUTINE h5dset_extent_f(dataset_id, size, hdferr) 
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dset_extent_f
-!DEC$endif
+  SUBROUTINE h5dset_extent_f(dataset_id, size, hdferr)
     IMPLICIT NONE 
     INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
@@ -3817,11 +3528,7 @@ CONTAINS
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5dget_create_plist_f(dataset_id, plist_id, hdferr) 
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dget_create_plist_f
-!DEC$endif
+          SUBROUTINE h5dget_create_plist_f(dataset_id, plist_id, hdferr)
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HID_T), INTENT(OUT) :: plist_id    ! Dataset creation
@@ -3869,11 +3576,7 @@ CONTAINS
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5dget_storage_size_f(dataset_id, size, hdferr) 
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dget_storage_size_f
-!DEC$endif
+          SUBROUTINE h5dget_storage_size_f(dataset_id, size, hdferr)
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HSIZE_T),  INTENT(OUT)  :: size
@@ -3921,11 +3624,7 @@ CONTAINS
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5dvlen_get_max_len_f(dataset_id, type_id, space_id, len,  hdferr) 
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dvlen_get_max_len_f
-!DEC$endif
+          SUBROUTINE h5dvlen_get_max_len_f(dataset_id, type_id, space_id, len,  hdferr)
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: type_id         ! Datatype identifier
@@ -3952,11 +3651,6 @@ CONTAINS
           SUBROUTINE h5dwrite_vl_integer(dset_id, mem_type_id, buf, dims, len, &
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_vl_integer
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -4017,11 +3711,6 @@ CONTAINS
           SUBROUTINE h5dread_vl_integer(dset_id, mem_type_id, buf, dims, len, &
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_vl_integer
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -4085,11 +3774,6 @@ CONTAINS
           SUBROUTINE h5dwrite_vl_real(dset_id, mem_type_id, buf, dims, len, &
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_vl_real
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -4150,11 +3834,6 @@ CONTAINS
           SUBROUTINE h5dread_vl_real(dset_id, mem_type_id, buf, dims, len, &
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_vl_real
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -4218,11 +3897,6 @@ CONTAINS
           SUBROUTINE h5dwrite_vl_string(dset_id, mem_type_id, buf, dims, str_len, &
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dwrite_vl_string
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -4294,11 +3968,6 @@ CONTAINS
           SUBROUTINE h5dread_vl_string(dset_id, mem_type_id, buf, dims, str_len, &
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dread_vl_string
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -4393,11 +4062,6 @@ CONTAINS
 !----------------------------------------------------------------------
 
           SUBROUTINE h5dfill_integer(fill_value, space_id, buf,  hdferr)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dfill_integer
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER, INTENT(IN) :: fill_value  ! Fill value
             INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -4457,11 +4121,6 @@ CONTAINS
 !----------------------------------------------------------------------
 
           SUBROUTINE h5dfill_real(fill_valuer, space_id, buf,  hdferr)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dfill_real
-!DEC$endif
-
             IMPLICIT NONE
             REAL, INTENT(IN) :: fill_valuer  ! Fill value
             INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -4520,11 +4179,6 @@ CONTAINS
 !----------------------------------------------------------------------
 
           SUBROUTINE h5dfill_char(fill_value, space_id, buf,  hdferr)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dfill_char
-!DEC$endif
-
             IMPLICIT NONE
             CHARACTER, INTENT(IN) :: fill_value  ! Fill value
             INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -4582,11 +4236,6 @@ CONTAINS
 !----------------------------------------------------------------------
 
           SUBROUTINE h5dget_space_status_f(dset_id, flag, hdferr)
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dget_space_status_f
-!DEC$endif
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id  ! Dataspace identifier
             INTEGER, INTENT(IN)        :: flag     ! Memory buffer to fill in
@@ -4636,11 +4285,6 @@ CONTAINS
 !----------------------------------------------------------------------
   
   SUBROUTINE h5dcreate_anon_f(loc_id, type_id, space_id, dset_id, hdferr, dcpl_id, dapl_id)
-
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5dcreate_anon_f
-!DEC$endif
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier. 
     INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier. 
