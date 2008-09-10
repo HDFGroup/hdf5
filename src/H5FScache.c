@@ -439,7 +439,7 @@ H5FS_cache_hdr_dest(H5F_t UNUSED *f, H5FS_t *fspace)
         fspace->sect_cls = (H5FS_section_class_t *)H5FL_SEQ_FREE(H5FS_section_class_t, fspace->sect_cls);
 
     /* Free free space info */
-    H5FL_FREE(H5FS_t, fspace);
+    (void)H5FL_FREE(H5FS_t, fspace);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1014,7 +1014,7 @@ H5FS_sinfo_free_node_cb(void *item, void UNUSED *key, void *op_data)
     H5SL_destroy(fspace_node->sect_list, H5FS_sinfo_free_sect_cb, op_data);
 
     /* Release free space list node */
-    H5FL_FREE(H5FS_node_t, fspace_node);
+    (void)H5FL_FREE(H5FS_node_t, fspace_node);
 
     FUNC_LEAVE_NOAPI(0)
 }   /* H5FS_sinfo_free_node_cb() */
@@ -1072,7 +1072,7 @@ H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin free space header")
 
     /* Release free space section info */
-    H5FL_FREE(H5FS_sinfo_t, sinfo);
+    (void)H5FL_FREE(H5FS_sinfo_t, sinfo);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

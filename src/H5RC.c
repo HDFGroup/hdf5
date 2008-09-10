@@ -99,29 +99,29 @@ done:
 herr_t
 H5RC_decr(H5RC_t *rc)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5RC_decr,FAIL);
+    FUNC_ENTER_NOAPI(H5RC_decr, FAIL)
 
     /* Sanity check */
     HDassert(rc);
     HDassert(rc->o);
-    HDassert(rc->n>0);
+    HDassert(rc->n > 0);
     HDassert(rc->free_func);
 
     /* Decrement reference count */
     rc->n--;
 
     /* Check if we should delete this object now */
-    if(rc->n==0) {
-        if((rc->free_func)(rc->o)<0) {
-            H5FL_FREE(H5RC_t,rc);
-            HGOTO_ERROR(H5E_RS,H5E_CANTFREE,FAIL,"memory release failed");
+    if(rc->n == 0) {
+        if((rc->free_func)(rc->o) < 0) {
+            (void)H5FL_FREE(H5RC_t, rc);
+            HGOTO_ERROR(H5E_RS, H5E_CANTFREE, FAIL, "memory release failed")
         } /* end if */
-        H5FL_FREE(H5RC_t,rc);
+        (void)H5FL_FREE(H5RC_t, rc);
     } /* end if */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RC_decr() */
 

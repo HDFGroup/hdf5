@@ -875,7 +875,7 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
     } /* end if */
 
     /* destroy object header */
-    H5FL_FREE(H5O_t, oh);
+    (void)H5FL_FREE(H5O_t, oh);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_dest() */

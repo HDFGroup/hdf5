@@ -185,7 +185,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
         p += name_len;    /* advance the memory pointer */
 
     /* Decode the attribute's datatype */
-    if((attr->shared->dt = (H5T_t *)(H5O_MSG_DTYPE->decode)(f, dxpl_id, ((flags & H5O_ATTR_FLAG_TYPE_SHARED) ? H5O_MSG_FLAG_SHARED : 0), ioflags, p)) == NULL)
+    if(NULL == (attr->shared->dt = (H5T_t *)(H5O_MSG_DTYPE->decode)(f, dxpl_id, ((flags & H5O_ATTR_FLAG_TYPE_SHARED) ? H5O_MSG_FLAG_SHARED : 0), ioflags, p)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, NULL, "can't decode attribute datatype")
     if(attr->shared->version < H5O_ATTR_VERSION_2)
         p += H5O_ALIGN_OLD(attr->shared->dt_size);
@@ -206,7 +206,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
     HDmemcpy(&(attr->shared->ds->extent), extent, sizeof(H5S_extent_t));
 
     /* Release temporary extent information */
-    H5FL_FREE(H5S_extent_t, extent);
+    (void)H5FL_FREE(H5S_extent_t, extent);
 
     /* Default to entire dataspace being selected */
     if(H5S_select_all(attr->shared->ds, FALSE) < 0)
@@ -467,7 +467,7 @@ H5O_attr_size(const H5F_t UNUSED *f, const void *_mesg)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_attr_reset(void *_mesg)
+H5O_attr_reset(void UNUSED *_mesg)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_reset)
 
@@ -686,8 +686,8 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_ty
 
     /* Copy attribute's datatype */
     /* (Start destination datatype as transient, even if source is named) */
-    attr_dst->shared->dt = H5T_copy(attr_src->shared->dt, H5T_COPY_ALL);
-    HDassert(attr_dst->shared->dt);
+    if(NULL == (attr_dst->shared->dt = H5T_copy(attr_src->shared->dt, H5T_COPY_ALL)))
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "cannot copy datatype")
 
     /* Set the location of the destination datatype */
     if(H5T_set_loc(attr_dst->shared->dt, file_dst, H5T_LOC_DISK) < 0)
@@ -930,7 +930,6 @@ H5O_attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     HDassert(file_src);
     HDassert(attr_dst);
     HDassert(file_dst);
-
 
     /* Only need to fix reference attribute with real data being copied to
      *  another file.

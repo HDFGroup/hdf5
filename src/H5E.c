@@ -510,7 +510,7 @@ H5E_unregister_class(H5E_cls_t *cls)
         H5MM_xfree((void*)cls->lib_name);
     if(cls->lib_vers)
         H5MM_xfree((void*)cls->lib_vers);
-    H5FL_FREE(H5E_cls_t, cls);
+    (void)H5FL_FREE(H5E_cls_t, cls);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E_unregister_class() */
@@ -684,7 +684,7 @@ H5E_close_msg(H5E_msg_t *err)
         H5MM_xfree((void*)err->msg);
     /* Don't free err->cls here */
 
-    H5FL_FREE(H5E_msg_t, err);
+    (void)H5FL_FREE(H5E_msg_t, err);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E_close_msg() */
@@ -956,7 +956,7 @@ H5E_get_current_stack(void)
 done:
     if(ret_value == NULL)
         if(estack_copy)
-            H5FL_FREE(H5E_t, estack_copy);
+            (void)H5FL_FREE(H5E_t, estack_copy);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_get_current_stack() */
@@ -1123,7 +1123,7 @@ H5E_close_stack(H5E_t *estack)
     H5E_clear_stack(estack);
 
     /* Free the stack structure */
-    H5FL_FREE(H5E_t, estack);
+    (void)H5FL_FREE(H5E_t, estack);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E_close_stack() */

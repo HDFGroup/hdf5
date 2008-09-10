@@ -203,68 +203,63 @@ done:
  * Programmer:	Quincey Koziol
  *		Friday, June 4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 htri_t
 H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
 {
-    htri_t ret_value = 0;       /* Indicate that success, but no location change */
+    htri_t ret_value = FALSE;   /* Indicate success, but no location change */
 
     FUNC_ENTER_NOAPI_NOINIT(H5T_vlen_set_loc)
 
     /* check parameters */
-    assert(dt);
-    assert(loc>H5T_LOC_BADLOC && loc<H5T_LOC_MAXLOC);
+    HDassert(dt);
+    HDassert(loc > H5T_LOC_BADLOC && loc < H5T_LOC_MAXLOC);
 
     /* Only change the location if it's different */
     if(loc != dt->shared->u.vlen.loc || f != dt->shared->u.vlen.f) {
-        /* Indicate that the location changed */
-        ret_value=TRUE;
-
         switch(loc) {
             case H5T_LOC_MEMORY:   /* Memory based VL datatype */
-                assert(f==NULL);
+                HDassert(NULL == f);
 
                 /* Mark this type as being stored in memory */
-                dt->shared->u.vlen.loc=H5T_LOC_MEMORY;
+                dt->shared->u.vlen.loc = H5T_LOC_MEMORY;
 
-                if(dt->shared->u.vlen.type==H5T_VLEN_SEQUENCE) {
+                if(dt->shared->u.vlen.type == H5T_VLEN_SEQUENCE) {
                     /* size in memory, disk size is different */
                     dt->shared->size = sizeof(hvl_t);
 
                     /* Set up the function pointers to access the VL sequence in memory */
-                    dt->shared->u.vlen.getlen=H5T_vlen_seq_mem_getlen;
-                    dt->shared->u.vlen.getptr=H5T_vlen_seq_mem_getptr;
-                    dt->shared->u.vlen.isnull=H5T_vlen_seq_mem_isnull;
-                    dt->shared->u.vlen.read=H5T_vlen_seq_mem_read;
-                    dt->shared->u.vlen.write=H5T_vlen_seq_mem_write;
-                    dt->shared->u.vlen.setnull=H5T_vlen_seq_mem_setnull;
-                } else if(dt->shared->u.vlen.type==H5T_VLEN_STRING) {
+                    dt->shared->u.vlen.getlen = H5T_vlen_seq_mem_getlen;
+                    dt->shared->u.vlen.getptr = H5T_vlen_seq_mem_getptr;
+                    dt->shared->u.vlen.isnull = H5T_vlen_seq_mem_isnull;
+                    dt->shared->u.vlen.read = H5T_vlen_seq_mem_read;
+                    dt->shared->u.vlen.write = H5T_vlen_seq_mem_write;
+                    dt->shared->u.vlen.setnull = H5T_vlen_seq_mem_setnull;
+                } else if(dt->shared->u.vlen.type == H5T_VLEN_STRING) {
                     /* size in memory, disk size is different */
                     dt->shared->size = sizeof(char *);
 
                     /* Set up the function pointers to access the VL string in memory */
-                    dt->shared->u.vlen.getlen=H5T_vlen_str_mem_getlen;
-                    dt->shared->u.vlen.getptr=H5T_vlen_str_mem_getptr;
-                    dt->shared->u.vlen.isnull=H5T_vlen_str_mem_isnull;
-                    dt->shared->u.vlen.read=H5T_vlen_str_mem_read;
-                    dt->shared->u.vlen.write=H5T_vlen_str_mem_write;
-                    dt->shared->u.vlen.setnull=H5T_vlen_str_mem_setnull;
+                    dt->shared->u.vlen.getlen = H5T_vlen_str_mem_getlen;
+                    dt->shared->u.vlen.getptr = H5T_vlen_str_mem_getptr;
+                    dt->shared->u.vlen.isnull = H5T_vlen_str_mem_isnull;
+                    dt->shared->u.vlen.read = H5T_vlen_str_mem_read;
+                    dt->shared->u.vlen.write = H5T_vlen_str_mem_write;
+                    dt->shared->u.vlen.setnull = H5T_vlen_str_mem_setnull;
                 } else {
                     assert(0 && "Invalid VL type");
                 }
 
                 /* Reset file ID (since this VL is in memory) */
-                dt->shared->u.vlen.f=NULL;
+                dt->shared->u.vlen.f = NULL;
                 break;
 
             case H5T_LOC_DISK:   /* Disk based VL datatype */
-                assert(f);
+                HDassert(f);
 
                 /* Mark this type as being stored on disk */
-                dt->shared->u.vlen.loc=H5T_LOC_DISK;
+                dt->shared->u.vlen.loc = H5T_LOC_DISK;
 
                 /*
                  * Size of element on disk is 4 bytes for the length, plus the size
@@ -275,20 +270,23 @@ H5T_vlen_set_loc(const H5T_t *dt, H5F_t *f, H5T_loc_t loc)
 
                 /* Set up the function pointers to access the VL information on disk */
                 /* VL sequences and VL strings are stored identically on disk, so use the same functions */
-                dt->shared->u.vlen.getlen=H5T_vlen_disk_getlen;
-                dt->shared->u.vlen.getptr=H5T_vlen_disk_getptr;
-                dt->shared->u.vlen.isnull=H5T_vlen_disk_isnull;
-                dt->shared->u.vlen.read=H5T_vlen_disk_read;
-                dt->shared->u.vlen.write=H5T_vlen_disk_write;
-                dt->shared->u.vlen.setnull=H5T_vlen_disk_setnull;
+                dt->shared->u.vlen.getlen = H5T_vlen_disk_getlen;
+                dt->shared->u.vlen.getptr = H5T_vlen_disk_getptr;
+                dt->shared->u.vlen.isnull = H5T_vlen_disk_isnull;
+                dt->shared->u.vlen.read = H5T_vlen_disk_read;
+                dt->shared->u.vlen.write = H5T_vlen_disk_write;
+                dt->shared->u.vlen.setnull = H5T_vlen_disk_setnull;
 
                 /* Set file ID (since this VL is on disk) */
-                dt->shared->u.vlen.f=f;
+                dt->shared->u.vlen.f = f;
                 break;
 
             default:
                 HGOTO_ERROR(H5E_DATATYPE, H5E_BADRANGE, FAIL, "invalid VL datatype location")
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
+
+        /* Indicate that the location changed */
+        ret_value = TRUE;
     } /* end if */
 
 done:

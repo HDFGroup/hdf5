@@ -303,7 +303,7 @@ H5D_chunk_new(H5F_t *f, hid_t dxpl_id, H5D_t *dset,
      */
     if(H5P_get(dc_plist, H5D_CRT_CHUNK_SIZE_NAME, dset->shared->layout.u.chunk.dim) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve chunk size")
-    dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] = H5T_get_size(type);
+    dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] = H5T_GET_SIZE(type);
 
     /* Sanity check dimensions */
     if(H5S_get_simple_extent_dims(dset->shared->space, NULL, max_dim) < 0)
@@ -732,7 +732,7 @@ H5D_free_chunk_info(void *item, void UNUSED *key, void UNUSED *opdata)
         (void)H5S_close(chunk_info->mspace);
 
     /* Free the actual chunk info */
-    H5FL_FREE(H5D_chunk_info_t, chunk_info);
+    (void)H5FL_FREE(H5D_chunk_info_t, chunk_info);
 
     FUNC_LEAVE_NOAPI(0)
 }   /* H5D_free_chunk_info() */
@@ -877,13 +877,13 @@ H5D_create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
     while(sel_points) {
         /* Check for intersection of temporary chunk and file selection */
         /* (Casting away const OK - QAK) */
-        if(H5S_hyper_intersect_block((H5S_t *)fm->file_space,coords,end)==TRUE) {
+        if(TRUE == H5S_hyper_intersect_block((H5S_t *)fm->file_space, coords, end)) {
             H5S_t *tmp_fchunk;                  /* Temporary file dataspace */
             H5D_chunk_info_t *new_chunk_info;   /* chunk information to insert into skip list */
             hssize_t    schunk_points;          /* Number of elements in chunk selection */
 
             /* Create "temporary" chunk for selection operations (copy file space) */
-            if((tmp_fchunk = H5S_copy(fm->file_space, TRUE, FALSE)) == NULL)
+            if(NULL == (tmp_fchunk = H5S_copy(fm->file_space, TRUE, FALSE)))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy memory space")
 
             /* Make certain selections are stored in span tree form (not "optimized hyperslab" or "all") */
@@ -1045,7 +1045,7 @@ H5D_create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
 
         /* Just point at the memory dataspace & selection */
         /* (Casting away const OK -QAK) */
-        chunk_info->mspace=(H5S_t *)fm->mem_space;
+        chunk_info->mspace = (H5S_t *)fm->mem_space;
 
         /* Indicate that the chunk's memory space is shared */
         chunk_info->mspace_shared = TRUE;
@@ -1165,14 +1165,14 @@ H5D_chunk_file_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const
 
             /* Create a dataspace for the chunk */
             if((fspace = H5S_create_simple(fm->f_ndims,fm->chunk_dim,NULL))==NULL) {
-                H5FL_FREE(H5D_chunk_info_t,chunk_info);
+                (void)H5FL_FREE(H5D_chunk_info_t,chunk_info);
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "unable to create dataspace for chunk")
             } /* end if */
 
             /* De-select the chunk space */
             if(H5S_select_none(fspace) < 0) {
                 (void)H5S_close(fspace);
-                H5FL_FREE(H5D_chunk_info_t,chunk_info);
+                (void)H5FL_FREE(H5D_chunk_info_t,chunk_info);
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to de-select dataspace")
             } /* end if */
 
@@ -1252,11 +1252,11 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const 
         HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
     /* Find correct chunk in file & memory skip list */
-    if(chunk_index==fm->last_index) {
+    if(chunk_index == fm->last_index) {
         /* If the chunk index is the same as the last chunk index we used,
          * get the cached spaces to operate on.
          */
-        chunk_info=fm->last_chunk_info;
+        chunk_info = fm->last_chunk_info;
     } /* end if */
     else {
         /* If the chunk index is not the same as the last chunk index we used,
@@ -1267,23 +1267,23 @@ H5D_chunk_mem_cb(void UNUSED *elem, hid_t UNUSED type_id, unsigned ndims, const 
             HGOTO_ERROR(H5E_DATASPACE, H5E_NOTFOUND, FAIL, "can't locate chunk in skip list")
 
         /* Check if the chunk already has a memory space */
-        if(chunk_info->mspace==NULL) {
+        if(NULL == chunk_info->mspace) {
             /* Copy the template memory chunk dataspace */
-            if((chunk_info->mspace = H5S_copy(fm->mchunk_tmpl, FALSE, FALSE)) == NULL)
+            if(NULL == (chunk_info->mspace = H5S_copy(fm->mchunk_tmpl, FALSE, FALSE)))
                 HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOPY, FAIL, "unable to copy file space")
         } /* end else */
 
         /* Update the "last chunk seen" information */
-        fm->last_index=chunk_index;
-        fm->last_chunk_info=chunk_info;
+        fm->last_index = chunk_index;
+        fm->last_chunk_info = chunk_info;
     } /* end else */
 
     /* Get coordinates of selection iterator for memory */
-    if(H5S_SELECT_ITER_COORDS(&fm->mem_iter,coords_in_mem) < 0)
+    if(H5S_SELECT_ITER_COORDS(&fm->mem_iter, coords_in_mem) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "unable to get iterator coordinates")
 
     /* Add point to memory selection for chunk */
-    if(fm->msel_type==H5S_SEL_POINTS) {
+    if(fm->msel_type == H5S_SEL_POINTS) {
         if(H5S_select_elements(chunk_info->mspace, H5S_SELECT_APPEND, (size_t)1, coords_in_mem) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSELECT, FAIL, "unable to select element")
     } /* end if */
@@ -2216,7 +2216,7 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     --rdcc->nused;
 
     /* Free */
-    H5FL_FREE(H5D_rdcc_ent_t, ent);
+    (void)H5FL_FREE(H5D_rdcc_ent_t, ent);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3276,7 +3276,7 @@ H5D_chunk_prune_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
 done:
     if(ret_value != H5_ITER_CONT && sl_node)
-        H5FL_FREE(H5D_chunk_sl_ck_t, sl_node);
+        (void)H5FL_FREE(H5D_chunk_sl_ck_t, sl_node);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_chunk_prune_cb() */
@@ -3318,7 +3318,7 @@ H5D_chunk_prune_sl_rm_cb(void *item, void UNUSED *key, void *op_data)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, H5_ITER_ERROR, "unable to remove chunk entry from index")
 
 done:
-    H5FL_FREE(H5D_chunk_sl_ck_t, sl_node);
+    (void)H5FL_FREE(H5D_chunk_sl_ck_t, sl_node);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5D_chunk_prune_sl_rm_cb() */
@@ -4144,9 +4144,8 @@ H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     bkg = udata.bkg;
 
 done:
-    if(sid_buf > 0)
-        if(H5I_dec_ref(sid_buf, FALSE) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary dataspace ID")
+    if(sid_buf > 0 && H5I_dec_ref(sid_buf, FALSE) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't decrement temporary dataspace ID")
     if(tid_src > 0)
         if(H5I_dec_ref(tid_src, FALSE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")

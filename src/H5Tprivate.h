@@ -33,7 +33,20 @@
 /* Macro for size of temporary buffers to contain a single element */
 #define H5T_ELEM_BUF_SIZE       256
 
-/* Forward references of package typedefs */
+/* If the module using this macro is allowed access to the private variables, access them directly */
+#ifdef H5T_PACKAGE
+#define H5T_GET_SIZE(T)                 ((T)->shared->size)
+#define H5T_GET_SHARED(T)               ((T)->shared)
+#define H5T_GET_MEMBER_OFFSET(T, I)     ((T)->u.compnd.memb[I].offset)
+#define H5T_GET_MEMBER_SIZE(T, I)       ((T)->u.compnd.memb[I].shared->size)
+#else /* H5T_PACKAGE */
+#define H5T_GET_SIZE(T)                 (H5T_get_size(T))
+#define H5T_GET_SHARED(T)               (H5T_get_shared(T))
+#define H5T_GET_MEMBER_OFFSET(T, I)     (H5T_get_member_offset((T), (I)))
+#define H5T_GET_MEMBER_SIZE(T, I)       (H5T_get_member_size((T), (I)))
+#endif /* H5T_PACKAGE */
+
+/* Forward references of package typedefs (declared in H5Tpkg.h) */
 typedef struct H5T_t H5T_t;
 typedef struct H5T_stats_t H5T_stats_t;
 typedef struct H5T_path_t H5T_path_t;
@@ -103,13 +116,13 @@ H5_DLL htri_t H5T_is_immutable(const H5T_t *dt);
 H5_DLL htri_t H5T_is_named(const H5T_t *dt);
 H5_DLL htri_t H5T_is_relocatable(const H5T_t *dt);
 H5_DLL H5T_path_t *H5T_path_find(const H5T_t *src, const H5T_t *dst,
-				  const char *name, H5T_conv_t func, hid_t dxpl_id, hbool_t is_api);
+    const char *name, H5T_conv_t func, hid_t dxpl_id, hbool_t is_api);
 H5_DLL hbool_t H5T_path_noop(const H5T_path_t *p);
 H5_DLL H5T_bkg_t H5T_path_bkg(const H5T_path_t *p);
 H5_DLL H5T_subset_t H5T_path_compound_subset(const H5T_path_t *p);
 H5_DLL herr_t H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id,
-			   size_t nelmts, size_t buf_stride, size_t bkg_stride,
-                           void *buf, void *bkg, hid_t dset_xfer_plist);
+    size_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf, void *bkg,
+    hid_t dset_xfer_plist);
 H5_DLL herr_t H5T_vlen_reclaim(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point, void *_op_data);
 H5_DLL herr_t H5T_vlen_get_alloc_info(hid_t dxpl_id, H5T_vlen_alloc_info_t **vl_alloc_info);
 H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5F_t *f, H5T_loc_t loc);

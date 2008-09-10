@@ -1227,7 +1227,7 @@ H5FL_blk_gc_list(H5FL_blk_head_t *head)
         } /* end while */
 
         /* Free the free list node */
-        H5FL_FREE(H5FL_blk_node_t, head->head);
+        (void)H5FL_FREE(H5FL_blk_node_t, head->head);
 
         /* Advance to the next free list */
         head->head = (H5FL_blk_node_t *)temp;
@@ -2133,7 +2133,7 @@ H5FL_fac_term(H5FL_fac_head_t *factory)
     H5FL_blk_unlink(&(factory->queue));
 
     /* Free factory info */
-    H5FL_FREE(H5FL_fac_head_t,factory);
+    (void)H5FL_FREE(H5FL_fac_head_t, factory);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

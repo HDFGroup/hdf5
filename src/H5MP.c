@@ -461,7 +461,7 @@ H5MP_close (H5MP_pool_t *mp)
             HGOTO_ERROR (H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't destroy page factory")
 
     /* Free the memory pool itself */
-    H5FL_FREE(H5MP_pool_t, mp);
+    (void)H5FL_FREE(H5MP_pool_t, mp);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -110,7 +110,7 @@ static herr_t
 H5D_efl_new(H5F_t *f, hid_t UNUSED dxpl_id, H5D_t *dset,
     const H5P_genplist_t *dc_plist)
 {
-    const H5T_t *type = dset->shared->type;     /* Convenience pointer to dataset's datatype */
+    size_t dt_size;                     /* Size of datatype */
     hsize_t dim[H5O_LAYOUT_NDIMS];	/* Current size of data in elements */
     hsize_t max_dim[H5O_LAYOUT_NDIMS];  /* Maximum size of data in elements */
     hssize_t tmp_size;                  /* Temporary holder for raw data size */
@@ -141,6 +141,10 @@ H5D_efl_new(H5F_t *f, hid_t UNUSED dxpl_id, H5D_t *dset,
         if(max_dim[i] > dim[i])
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "only the first dimension can be extendible")
 
+    /* Retrieve the size of the dataset's datatype */
+    if(0 == (dt_size = H5T_get_size(dset->shared->type)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to determine datatype size")
+
     /* Check for storage overflows */
     max_points = H5S_get_npoints_max(dset->shared->space);
     max_storage = H5O_efl_total_size(&dset->shared->dcpl_cache.efl);
@@ -148,13 +152,13 @@ H5D_efl_new(H5F_t *f, hid_t UNUSED dxpl_id, H5D_t *dset,
         if(H5O_EFL_UNLIMITED != max_storage)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unlimited data space but finite storage")
     } /* end if */
-    else if(max_points * H5T_get_size(type) < max_points)
+    else if((max_points * dt_size) < max_points)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data space * type size overflowed")
-    else if(max_points * H5T_get_size(type) > max_storage)
+    else if((max_points * dt_size) > max_storage)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data space size exceeds external storage size")
 
     /* Compute the total size of dataset */
-    tmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space) * H5T_get_size(type);
+    tmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space) * dt_size;
     H5_ASSIGN_OVERFLOW(dset->shared->layout.u.contig.size, tmp_size, hssize_t, hsize_t);
 
     /* Get the sieve buffer size for this dataset */

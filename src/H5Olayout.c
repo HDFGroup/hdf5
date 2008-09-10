@@ -254,7 +254,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
 done:
     if(ret_value == NULL)
         if(mesg)
-            H5FL_FREE(H5O_layout_t, mesg);
+            (void)H5FL_FREE(H5O_layout_t, mesg);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_layout_decode() */
@@ -552,22 +552,22 @@ H5O_layout_reset (void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_free (void *_mesg)
+H5O_layout_free(void *_mesg)
 {
     H5O_layout_t     *mesg = (H5O_layout_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_layout_free);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_layout_free)
 
-    assert (mesg);
+    HDassert(mesg);
 
     /* Free the compact storage buffer */
-    if(mesg->type==H5D_COMPACT)
-        mesg->u.compact.buf=H5MM_xfree(mesg->u.compact.buf);
+    if(mesg->type == H5D_COMPACT)
+        mesg->u.compact.buf = H5MM_xfree(mesg->u.compact.buf);
 
-    H5FL_FREE(H5O_layout_t,mesg);
+    (void)H5FL_FREE(H5O_layout_t, mesg);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_layout_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -721,7 +721,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
 done:
     if(!ret_value)
 	if(layout_dst)
-	    H5FL_FREE(H5O_layout_t, layout_dst);
+	    (void)H5FL_FREE(H5O_layout_t, layout_dst);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_layout_copy_file() */
@@ -742,8 +742,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * stream,
-		 int indent, int fwidth)
+H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
+    FILE * stream, int indent, int fwidth)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     unsigned                    u;
@@ -791,5 +791,5 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE 
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED);
-}
+} /* end H5O_layout_debug() */
 

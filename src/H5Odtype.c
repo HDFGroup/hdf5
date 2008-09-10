@@ -1092,7 +1092,7 @@ H5O_dtype_copy(const void *_src, void *_dst)
     /* Was result already allocated? */
     if(_dst) {
         *((H5T_t *) _dst) = *dst;
-        H5FL_FREE(H5T_t, dst);
+        (void)H5FL_FREE(H5T_t, dst);
         dst = (H5T_t *) _dst;
     } /* end if */
 
@@ -1119,9 +1119,6 @@ done:
 	This function returns the size of the raw simple datatype message on
     success.  (Not counting the message type or size fields, only the data
     portion of the message).  It doesn't take into account alignment.
- NOTES
-        All datatype messages have a common 8 byte header, plus a variable-
-    sized "properties" field.
 --------------------------------------------------------------------------*/
 static size_t
 H5O_dtype_size(const H5F_t *f, const void *_mesg)
@@ -1289,8 +1286,8 @@ H5O_dtype_free(void *mesg)
 
     HDassert(mesg);
 
-    H5FL_FREE(H5T_shared_t, ((H5T_t *) mesg)->shared);
-    H5FL_FREE(H5T_t,mesg);
+    (void)H5FL_FREE(H5T_shared_t, ((H5T_t *) mesg)->shared);
+    (void)H5FL_FREE(H5T_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_dtype_free() */
@@ -1311,8 +1308,8 @@ H5O_dtype_free(void *mesg)
 static herr_t
 H5O_dtype_set_share(void *_mesg/*in,out*/, const H5O_shared_t *sh)
 {
-    H5T_t	*dt = (H5T_t *)_mesg;
-    herr_t       ret_value = SUCCEED;
+    H5T_t *dt = (H5T_t *)_mesg;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_set_share)
 
@@ -1411,9 +1408,9 @@ H5O_dtype_pre_copy_file(H5F_t *file_src, const void *mesg_src,
     hbool_t UNUSED *deleted, const H5O_copy_t UNUSED *cpy_info,
     void *_udata)
 {
-    const H5T_t	   *dt_src = (const H5T_t *)mesg_src;  /* Source datatype */
+    const H5T_t	*dt_src = (const H5T_t *)mesg_src;  /* Source datatype */
     H5D_copy_file_ud_t *udata = (H5D_copy_file_ud_t *)_udata;   /* Dataset copying user data */
-    herr_t         ret_value = SUCCEED;          /* Return value */
+    herr_t ret_value = SUCCEED;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_pre_copy_file)
 
@@ -1461,8 +1458,8 @@ H5O_dtype_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t *mesg_type,
     void *native_src, H5F_t *file_dst, hbool_t UNUSED *recompute_size,
     H5O_copy_t UNUSED *cpy_info, void UNUSED *udata, hid_t UNUSED dxpl_id)
 {
-    H5T_t               *dst_mesg = NULL;       /* Destination datatype */
-    void                *ret_value = NULL;      /* Return value */
+    H5T_t *dst_mesg;            /* Destination datatype */
+    void *ret_value;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_copy_file)
 

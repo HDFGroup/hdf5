@@ -384,15 +384,15 @@ typedef struct H5D_rdcdc_t {
  * there will be two IDs and two H5D_t structs, both sharing one H5D_shared_t.
  */
 typedef struct H5D_shared_t {
-    size_t              fo_count;       /* reference count */
+    size_t              fo_count;       /* Reference count */
     hid_t               type_id;        /* ID for dataset's datatype    */
-    H5T_t              *type;           /* datatype of this dataset     */
-    H5S_t              *space;          /* dataspace of this dataset    */
+    H5T_t              *type;           /* Datatype for this dataset     */
+    H5S_t              *space;          /* Dataspace of this dataset    */
     hbool_t             space_dirty;    /* Whether the dataspace info needs to be flushed to the file */
     hbool_t             layout_dirty;   /* Whether the layout info needs to be flushed to the file */
-    hid_t               dcpl_id;        /* dataset creation property id */
+    hid_t               dcpl_id;        /* Dataset creation property id */
     H5D_dcpl_cache_t    dcpl_cache;     /* Cached DCPL values */
-    H5O_layout_t        layout;         /* data layout                  */
+    H5O_layout_t        layout;         /* Data layout                  */
     hbool_t             checked_filters;/* TRUE if dataset passes can_apply check */
 
     /* Buffered/cached information for types of raw data storage*/
@@ -429,7 +429,7 @@ typedef struct {
 } H5D_obj_create_t;
 
 /* Typedef for filling a buffer with a fill value */
-typedef struct {
+typedef struct H5D_fill_buf_info_t {
     hbool_t     alloc_vl_during_refill; /* Whether to allocate VL-datatype fill buffer during refill */
     H5MM_allocate_t fill_alloc_func;    /* Routine to call for allocating fill buffer */
     void        *fill_alloc_info;       /* Extra info for allocation routine */
