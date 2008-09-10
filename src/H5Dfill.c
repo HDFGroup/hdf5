@@ -123,11 +123,11 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
     /* Check args */
     if(buf == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer")
-    if(NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataspace")
-    if(NULL == (fill_type = H5I_object_verify(fill_type_id, H5I_DATATYPE)))
+    if(NULL == (fill_type = (H5T_t *)H5I_object_verify(fill_type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
-    if(NULL == (buf_type = H5I_object_verify(buf_type_id, H5I_DATATYPE)))
+    if(NULL == (buf_type = (H5T_t *)H5I_object_verify(buf_type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
 
     /* Fill the selection in the memory buffer */
@@ -320,10 +320,10 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
 
                 /* Point at element buffer */
-                fill_buf = elem_ptr;
+                fill_buf = (const uint8_t *)elem_ptr;
             } /* end if */
             else
-                fill_buf = fill;
+                fill_buf = (const uint8_t *)fill;
 
             /* Fill the selection in the memory buffer */
             if(H5S_select_fill(fill_buf, dst_type_size, space, buf) < 0)
@@ -401,7 +401,7 @@ H5D_fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf,
         if(fb_info->has_vlen_fill_type) {
             /* Create temporary datatype for conversion operation */
             if(NULL == (fb_info->mem_type = H5T_copy(dset_type, H5T_COPY_REOPEN)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy file datatype")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy file datatype")
             if((fb_info->mem_tid = H5I_register(H5I_DATATYPE, fb_info->mem_type, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
 

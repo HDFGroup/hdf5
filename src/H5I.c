@@ -90,7 +90,7 @@
 typedef struct H5I_id_info_t {
     hid_t	id;		/* ID for this info			    */
     unsigned	count;		/* ref. count for this atom		    */
-    unsigned    app_count;
+    unsigned    app_count;      /* ref. count of application visible atoms  */
     void	*obj_ptr;	/* pointer associated with the atom	    */
     struct H5I_id_info_t *next;	/* link to next atom (in case of hash-clash)*/
 } H5I_id_info_t;
@@ -1385,7 +1385,7 @@ H5I_dec_ref(hid_t id, hbool_t app_ref)
         --(id_ptr->count);
         if (app_ref)
             --(id_ptr->app_count);
-        HDassert((id_ptr->count >= id_ptr->app_count) && (id_ptr->app_count >= 0));
+        HDassert(id_ptr->count >= id_ptr->app_count);
         ret_value = app_ref ? id_ptr->app_count : id_ptr->count;
     }
 

@@ -161,7 +161,7 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
                 H5F_t	*f;
 
                 /* Get the file struct */
-                if(NULL == (f = H5I_object(loc_id)))
+                if(NULL == (f = (H5F_t *)H5I_object(loc_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file ID")
 
                 /* Construct a group location for root group of the file */
@@ -183,7 +183,7 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
             {
                 H5G_t	*group;
 
-                if(NULL == (group = H5I_object(loc_id)))
+                if(NULL == (group = (H5G_t *)H5I_object(loc_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid group ID")
                 if(NULL == (loc->oloc = H5G_oloc(group)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of group")
@@ -196,7 +196,7 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
             {
                 H5T_t	*dt;
 
-                if(NULL == (dt = H5I_object(loc_id)))
+                if(NULL == (dt = (H5T_t *)H5I_object(loc_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid type ID")
                 if(NULL == (loc->oloc = H5T_oloc(dt)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of datatype")
@@ -212,7 +212,7 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
             {
                 H5D_t	*dset;
 
-                if(NULL == (dset = H5I_object(loc_id)))
+                if(NULL == (dset = (H5D_t *)H5I_object(loc_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid data ID")
                 if(NULL == (loc->oloc = H5D_oloc(dset)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of dataset")
@@ -225,7 +225,7 @@ H5G_loc(hid_t loc_id, H5G_loc_t *loc)
             {
                 H5A_t	*attr;
 
-                if(NULL == (attr = H5I_object(loc_id)))
+                if(NULL == (attr = (H5A_t *)H5I_object(loc_id)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid attribute ID")
                 if(NULL == (loc->oloc = H5A_oloc(attr)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location of attribute")

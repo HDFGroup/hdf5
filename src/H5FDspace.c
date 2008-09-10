@@ -167,7 +167,7 @@ H5FD_free_freelist(H5FD_t *file)
             nbytes += cur->size;
 #endif  /* H5FD_ALLOC_DEBUG */
             next = cur->next;
-            H5FL_FREE(H5FD_free_t, cur);
+            (void)H5FL_FREE(H5FD_free_t, cur);
         } /* end for */
 
         file->fl[i] = NULL;
@@ -353,7 +353,7 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
                                 else
                                     file->fl[mapped_type] = cur->next;
 
-                                H5FL_FREE(H5FD_free_t, cur);
+                                (void)H5FL_FREE(H5FD_free_t, cur);
 
                                 if(size == file->maxsize)
                                     file->maxsize = 0;  /*unknown*/
@@ -416,7 +416,7 @@ HDfprintf(stderr, "%s: Exact size match (aligned)\n", FUNC);
                             else
                                 file->fl[mapped_type] = cur->next;
 
-                            H5FL_FREE(H5FD_free_t, cur);
+                            (void)H5FL_FREE(H5FD_free_t, cur);
 
                             if(size == file->maxsize)
                                 file->maxsize = 0;  /*unknown*/
@@ -497,7 +497,7 @@ HDfprintf(stderr, "%s: Splitting %Hu byte sized block\n", FUNC, best->size);
                         best->next = tmp;
                     } else {
                         /* no tail piece */
-                        H5FL_FREE(H5FD_free_t,tmp);
+                        (void)H5FL_FREE(H5FD_free_t,tmp);
                     }
 
                     best->size = head;
@@ -1222,7 +1222,7 @@ HDfprintf(stderr, "%s: mapped_type = %u\n", FUNC, (unsigned)mapped_type);
                         prev = last_prev;
 
                     /* Free the memory for the merged block */
-                    H5FL_FREE(H5FD_free_t, last);
+                    (void)H5FL_FREE(H5FD_free_t, last);
                 } /* end if */
 
                 /* Adjust the address and size of the block found */
@@ -1256,7 +1256,7 @@ HDfprintf(stderr, "%s: mapped_type = %u\n", FUNC, (unsigned)mapped_type);
                             prev = last_prev;
 
                         /* Free the memory for the merged block */
-                        H5FL_FREE(H5FD_free_t, last);
+                        (void)H5FL_FREE(H5FD_free_t, last);
                     } /* end if */
 
                     /* Adjust the size of the block found */
@@ -1331,7 +1331,7 @@ HDfprintf(stderr, "%s: Reducing file size to = %a\n", FUNC, last->addr);
                 file->fl[mapped_type] = last->next;
                 if(file->maxsize == last->size)
                     file->maxsize = 0; /*unknown*/
-                H5FL_FREE(H5FD_free_t, last);
+                (void)H5FL_FREE(H5FD_free_t, last);
             } /* end if */
         } /* end if */
     } else if(file->cls->free) {
@@ -1614,7 +1614,7 @@ HDfprintf(stderr, "%s: type = %u, addr = %a, size = %Hu, extra_requested = %Hu\n
                             prev->next = curr->next;
 
                         /* Free the memory for the used block */
-                        H5FL_FREE(H5FD_free_t, curr);
+                        (void)H5FL_FREE(H5FD_free_t, curr);
                     } /* end if */
                     else {
                         curr->addr += extra_requested;

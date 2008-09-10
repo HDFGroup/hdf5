@@ -288,12 +288,12 @@ H5S_none_iter_next(H5S_sel_iter_t UNUSED *iter, size_t UNUSED nelem)
 static herr_t
 H5S_none_iter_next_block(H5S_sel_iter_t UNUSED *iter)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_iter_next);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_iter_next)
 
     /* Check args */
-    assert (iter);
+    HDassert(iter);
 
-    FUNC_LEAVE_NOAPI(FAIL);
+    FUNC_LEAVE_NOAPI(FAIL)
 }   /* H5S_none_iter_next_block() */
 
 

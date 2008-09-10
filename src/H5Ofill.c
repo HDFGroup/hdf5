@@ -275,7 +275,7 @@ done:
     if(!ret_value && fill) {
         if(fill->buf)
             H5MM_xfree(fill->buf);
-	H5FL_FREE(H5O_fill_t, fill);
+	(void)H5FL_FREE(H5O_fill_t, fill);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -335,7 +335,7 @@ done:
     if(!ret_value && fill) {
         if(fill->buf)
             H5MM_xfree(fill->buf);
-	H5FL_FREE(H5O_fill_t, fill);
+	(void)H5FL_FREE(H5O_fill_t, fill);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -507,7 +507,7 @@ H5O_fill_copy(const void *_src, void *_dst)
     /* Copy data type of fill value */
     if(src->type) {
         if(NULL == (dst->type = H5T_copy(src->type, H5T_COPY_TRANSIENT)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy fill value data type")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "can't copy datatype")
     } /* end if */
     else
         dst->type = NULL;
@@ -556,7 +556,7 @@ H5O_fill_copy(const void *_src, void *_dst)
                     H5I_dec_ref(src_id, FALSE);
                     H5I_dec_ref(dst_id, FALSE);
                     if(bkg_buf)
-                        H5FL_BLK_FREE(type_conv, bkg_buf);
+                        (void)H5FL_BLK_FREE(type_conv, bkg_buf);
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, NULL, "datatype conversion failed")
                 } /* end if */
 
@@ -564,7 +564,7 @@ H5O_fill_copy(const void *_src, void *_dst)
                 H5I_dec_ref(src_id, FALSE);
                 H5I_dec_ref(dst_id, FALSE);
                 if(bkg_buf)
-                    H5FL_BLK_FREE(type_conv, bkg_buf);
+                    (void)H5FL_BLK_FREE(type_conv, bkg_buf);
             } /* end if */
         } /* end if */
     } /* end if */
@@ -581,7 +581,7 @@ done:
 	if(dst->type)
             H5T_close(dst->type);
 	if(!_dst)
-            H5FL_FREE(H5O_fill_t, dst);
+            (void)H5FL_FREE(H5O_fill_t, dst);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -783,7 +783,7 @@ H5O_fill_free(void *fill)
 
     HDassert(fill);
 
-    H5FL_FREE(H5O_fill_t, fill);
+    (void)H5FL_FREE(H5O_fill_t, fill);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_fill_free() */

@@ -392,7 +392,7 @@ H5B2_cache_hdr_dest(H5F_t UNUSED *f, H5B2_t *bt2)
         H5RC_DEC(bt2->shared);
 
     /* Free B-tree header info */
-    H5FL_FREE(H5B2_t, bt2);
+    (void)H5FL_FREE(H5B2_t, bt2);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5B2_cache_hdr_dest() */
@@ -742,7 +742,7 @@ H5B2_cache_internal_dest(H5F_t UNUSED *f, H5B2_internal_t *internal)
         H5RC_DEC(internal->shared);
 
     /* Free B-tree internal node info */
-    H5FL_FREE(H5B2_internal_t, internal);
+    (void)H5FL_FREE(H5B2_internal_t, internal);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5B2_cache_internal_dest() */
@@ -1061,7 +1061,7 @@ H5B2_cache_leaf_dest(H5F_t UNUSED *f, H5B2_leaf_t *leaf)
         H5RC_DEC(leaf->shared);
 
     /* Free B-tree leaf node info */
-    H5FL_FREE(H5B2_leaf_t,leaf);
+    (void)H5FL_FREE(H5B2_leaf_t, leaf);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5B2_cache_leaf_dest() */

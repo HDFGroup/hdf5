@@ -58,8 +58,8 @@
 /* Local Macros */
 
 /* Define the code template for insertions for the "OP" in the H5SL_LOCATE macro */
-#define H5SL_LOCATE_INSERT_FOUND(SLIST,X,UPDATE,I)                      \
-        HGOTO_ERROR(H5E_SLIST,H5E_CANTINSERT,NULL,"can't insert duplicate key");
+#define H5SL_LOCATE_INSERT_FOUND(SLIST, X, UPDATE, I)                   \
+        HGOTO_ERROR(H5E_SLIST, H5E_CANTINSERT, NULL, "can't insert duplicate key")
 
 /* Define the code template for removals for the "OP" in the H5SL_LOCATE macro */
 /* (NOTE: the code in H5SL_remove_first() is largely the same, fix bugs in both places) */
@@ -83,11 +83,11 @@
         HGOTO_DONE(tmp);
 
 /* Define the code template for searches for the "OP" in the H5SL_LOCATE macro */
-#define H5SL_LOCATE_SEARCH_FOUND(SLIST,X,UPDATE,I)                      \
+#define H5SL_LOCATE_SEARCH_FOUND(SLIST, X, UPDATE, I)                   \
         HGOTO_DONE(X->item);
 
 /* Define the code template for finds for the "OP" in the H5SL_LOCATE macro */
-#define H5SL_LOCATE_FIND_FOUND(SLIST,X,UPDATE,I)                        \
+#define H5SL_LOCATE_FIND_FOUND(SLIST, X, UPDATE, I)                     \
         HGOTO_DONE(X);
 
 
@@ -327,7 +327,7 @@ H5SL_new_node(size_t lvl, void *item, const void *key, uint32_t hashval)
     FUNC_ENTER_NOAPI_NOINIT(H5SL_new_node)
 
     /* Allocate the node */
-    if(NULL == (ret_value = H5FL_ARR_MALLOC(H5SL_node_ptr_t, (lvl + 1))))
+    if(NULL == (ret_value = (H5SL_node_t *)H5FL_ARR_MALLOC(H5SL_node_ptr_t, (lvl + 1))))
         HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Initialize node */
@@ -416,6 +416,9 @@ H5SL_insert_common(H5SL_t *slist, void *item, const void *key)
         case H5SL_TYPE_OBJ:
             H5SL_INSERT(OBJ, slist, x, update, const H5_obj_t, key, -)
             break;
+
+        default:
+            HDassert(0 && "Unknown skiplist type!");
     } /* end switch */
 
     /* 'key' must not have been found in existing list, if we get here */
@@ -558,24 +561,24 @@ H5SL_release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 herr_t
 H5SL_close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_close_common);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_close_common)
 
     /* Check args */
-    assert(slist);
+    HDassert(slist);
 
     /* Check internal consistency */
     /* (Pre-condition) */
 
     /* Free skip list nodes */
-    (void)H5SL_release_common(slist,op,op_data);      /* always succeeds */
+    (void)H5SL_release_common(slist, op, op_data);      /* always succeeds */
 
     /* Release header node */
-    H5FL_ARR_FREE(H5SL_node_ptr_t,slist->header);
+    H5FL_ARR_FREE(H5SL_node_ptr_t, slist->header);
 
     /* Free skip list object */
-    H5FL_FREE(H5SL_t,slist);
+    (void)H5FL_FREE(H5SL_t, slist);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SL_close_common() */
 
 
@@ -599,7 +602,7 @@ H5SL_close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 H5SL_t *
 H5SL_create(H5SL_type_t type, double p, size_t max_level)
 {
-    H5SL_t *new_slist=NULL;     /* Pointer to new skip list object created */
+    H5SL_t *new_slist = NULL;   /* Pointer to new skip list object created */
     H5SL_node_t *header;        /* Pointer to skip list header node */
     size_t u;                   /* Local index variable */
     H5SL_t *ret_value;          /* Return value */
@@ -612,46 +615,45 @@ H5SL_create(H5SL_type_t type, double p, size_t max_level)
     HDassert(type>=H5SL_TYPE_INT && type<=H5SL_TYPE_OBJ);
 
     /* Allocate skip list structure */
-    if((new_slist=H5FL_MALLOC(H5SL_t))==NULL)
-        HGOTO_ERROR(H5E_SLIST,H5E_NOSPACE,NULL,"memory allocation failed");
+    if(NULL == (new_slist = H5FL_MALLOC(H5SL_t)))
+        HGOTO_ERROR(H5E_SLIST, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set the static internal fields */
-    new_slist->type=type;
-    new_slist->p=p;
-    new_slist->p1=(int)(p*RAND_MAX);
-    new_slist->max_level=max_level;
+    new_slist->type = type;
+    new_slist->p = p;
+    new_slist->p1 = (int)(p*RAND_MAX);
+    new_slist->max_level = max_level;
 
     /* Set the dynamic internal fields */
-    new_slist->curr_level=-1;
-    new_slist->nobjs=0;
+    new_slist->curr_level = -1;
+    new_slist->nobjs = 0;
 
     /* Allocate the header node */
     if(NULL == (header = H5SL_new_node((max_level - 1), NULL, NULL, ULONG_MAX)))
         HGOTO_ERROR(H5E_SLIST ,H5E_NOSPACE, NULL, "can't create new skip list node")
 
     /* Initialize header node's forward pointers */
-    for(u=0; u<max_level; u++)
-        header->forward[u]=NULL;
+    for(u = 0; u < max_level; u++)
+        header->forward[u] = NULL;
 
     /* Initialize header node's backward pointer */
-    header->backward=NULL;
+    header->backward = NULL;
 
     /* Attach the header */
-    new_slist->header=header;
-    new_slist->last=header;
+    new_slist->header = header;
+    new_slist->last = header;
 
     /* Set the return value */
-    ret_value=new_slist;
+    ret_value = new_slist;
 
 done:
     /* Error cleanup */
-    if(ret_value==NULL) {
-        if(new_slist!=NULL) {
-            H5FL_FREE(H5SL_t,new_slist);
-        } /* end if */
+    if(ret_value == NULL) {
+        if(new_slist != NULL)
+            (void)H5FL_FREE(H5SL_t, new_slist);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SL_create() */
 
 
@@ -804,13 +806,13 @@ H5SL_remove(H5SL_t *slist, const void *key)
     H5SL_node_t **update[H5SL_LEVEL_MAX];       /* 'update' vector */
     H5SL_node_t *x;                             /* Current node to examine */
     uint32_t hashval = 0;                       /* Hash value for key */
-    void *ret_value=NULL;                       /* Return value */
+    void *ret_value = NULL;                     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_remove);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_remove)
 
     /* Check args */
-    assert(slist);
-    assert(key);
+    HDassert(slist);
+    HDassert(key);
 
     /* Check internal consistency */
     /* (Pre-condition) */
@@ -820,7 +822,7 @@ H5SL_remove(H5SL_t *slist, const void *key)
     /* Work through the forward pointers for a node, finding the node at each
      * level that is before the location to remove
      */
-    x=slist->header;
+    x = slist->header;
     switch(slist->type) {
         case H5SL_TYPE_INT:
             H5SL_REMOVE(SCALAR, slist, x, update, const int, key, -)
@@ -849,10 +851,13 @@ H5SL_remove(H5SL_t *slist, const void *key)
         case H5SL_TYPE_OBJ:
             H5SL_REMOVE(OBJ, slist, x, update, const H5_obj_t, key, -)
             break;
+
+        default:
+            HDassert(0 && "Unknown skiplist type!");
     } /* end switch */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SL_remove() */
 
 
@@ -999,6 +1004,9 @@ H5SL_search(H5SL_t *slist, const void *key)
         case H5SL_TYPE_OBJ:
             H5SL_SEARCH(OBJ, slist, x, -, const H5_obj_t, key, -)
             break;
+
+        default:
+            HDassert(0 && "Unknown skiplist type!");
     } /* end switch */
 
     /* 'key' must not have been found in list, if we get here */
@@ -1081,6 +1089,9 @@ H5SL_less(H5SL_t *slist, const void *key)
         case H5SL_TYPE_OBJ:
             H5SL_SEARCH(OBJ, slist, x, -, const H5_obj_t, key, -)
             break;
+
+        default:
+            HDassert(0 && "Unknown skiplist type!");
     } /* end switch */
 
     /* An exact match for 'key' must not have been found in list, if we get here */
@@ -1176,6 +1187,9 @@ H5SL_greater(H5SL_t *slist, const void *key)
         case H5SL_TYPE_OBJ:
             H5SL_SEARCH(OBJ, slist, x, -, const H5_obj_t, key, -)
             break;
+
+        default:
+            HDassert(0 && "Unknown skiplist type!");
     } /* end switch */
 
     /* An exact match for 'key' must not have been found in list, if we get here */
@@ -1261,6 +1275,9 @@ H5SL_find(H5SL_t *slist, const void *key)
         case H5SL_TYPE_OBJ:
             H5SL_FIND(OBJ, slist, x, -, const H5_obj_t, key, -)
             break;
+
+        default:
+            HDassert(0 && "Unknown skiplist type!");
     } /* end switch */
 
     /* 'key' must not have been found in list, if we get here */
@@ -1479,28 +1496,28 @@ herr_t
 H5SL_iterate(H5SL_t *slist, H5SL_operator_t op, void *op_data)
 {
     H5SL_node_t *node;  /* Pointers to skip list nodes */
-    herr_t ret_value=0; /* Return value */
+    herr_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_iterate);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_iterate)
 
     /* Check args */
-    assert(slist);
+    HDassert(slist);
 
     /* Check internal consistency */
     /* (Pre-condition) */
 
     /* Free skip list nodes */
-    node=slist->header->forward[0];
-    while(node!=NULL) {
+    node = slist->header->forward[0];
+    while(node != NULL) {
         /* Call the iterator callback */
         /* Casting away const OK -QAK */
-        if((ret_value=(op)(node->item,(void *)node->key,op_data))!=0)
+        if((ret_value = (op)(node->item, (void *)node->key, op_data)) != 0)
             break;
 
-        node=node->forward[0];
+        node = node->forward[0];
     } /* end while */
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SL_iterate() */
 
 

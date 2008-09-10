@@ -464,7 +464,7 @@ HDfprintf(stderr, "%s: sinfo->bins[%u].sect_count = %Zu\n", FUNC, bin, sinfo->bi
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTCLOSEOBJ, FAIL, "can't destroy size tracking node's skip list")
 
         /* Release free space list node */
-        H5FL_FREE(H5FS_node_t, fspace_node);
+        (void)H5FL_FREE(H5FS_node_t, fspace_node);
 
         /* Decrement total number of section sizes managed */
         sinfo->tot_size_count--;

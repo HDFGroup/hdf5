@@ -18,12 +18,19 @@
  *      to a file for the H5T interface.
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
 #define H5T_PACKAGE		/*suppress error about including H5Tpkg	  */
 
 /* Interface initialization */
 #define H5_INTERFACE_INIT_FUNC	H5T_init_commit_interface
 
 
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling			*/
 #include "H5FOprivate.h"	/* File objects				*/
@@ -32,8 +39,47 @@
 #include "H5Pprivate.h"         /* Property lists                       */
 #include "H5Tpkg.h"		/* Datatypes				*/
 
-/* Static local functions */
+
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
 static H5T_t *H5T_open_oid(const H5G_loc_t *loc, hid_t dxpl_id);
+
+
+/*********************/
+/* Public Variables */
+/*********************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
+
 
 
 /*--------------------------------------------------------------------------
@@ -87,7 +133,7 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name")
-    if(NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Get correct property list */
@@ -224,17 +270,17 @@ done:
 herr_t
 H5Tcommit_anon(hid_t loc_id, hid_t type_id, hid_t tcpl_id, hid_t tapl_id)
 {
-    H5G_loc_t	loc;
-    H5T_t	*type = NULL;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5G_loc_t	loc;                    /* Group location for location */
+    H5T_t	*type = NULL;           /* Datatype created */
+    herr_t      ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Tcommit_anon, FAIL)
     H5TRACE4("e", "iiii", loc_id, type_id, tcpl_id, tapl_id);
 
     /* Check arguments */
-    if(H5G_loc (loc_id, &loc) < 0)
+    if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
-    if(NULL == (type = H5I_object_verify(type_id, H5I_DATATYPE)))
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Get correct property list */
@@ -302,8 +348,9 @@ H5T_commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id)
     if(H5T_is_sensible(type) <= 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "datatype is not sensible")
 
-    /* Mark datatype as being on disk now.  This step changes the size of datatype as
-     * stored on disk. */
+    /* Mark datatype as being on disk now.  This step changes the size of
+     *  datatype as stored on disk.
+     */
     if(H5T_set_loc(type, file, H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
 
@@ -350,8 +397,9 @@ H5T_commit(H5F_t *file, H5T_t *type, hid_t tcpl_id, hid_t dxpl_id)
     if(H5FO_insert(type->sh_loc.file, type->sh_loc.u.loc.oh_addr, type->shared, TRUE) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert datatype into list of open objects")
 
-    /* Mark datatype as being on memory now.  Since this datatype may still be used in memory
-     * after committed to disk, change its size back as in memory. */
+    /* Mark datatype as being on memory again.  Since this datatype may still be
+     *  used in memory after committed to disk, change its size back as in memory.
+     */
     if(H5T_set_loc(type, NULL, H5T_LOC_MEMORY) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype in memory")
 
@@ -391,14 +439,14 @@ done:
 htri_t
 H5Tcommitted(hid_t type_id)
 {
-    H5T_t	*type = NULL;
-    htri_t      ret_value;       /* Return value */
+    H5T_t	*type;          /* Datatype to query */
+    htri_t      ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Tcommitted, FAIL)
     H5TRACE1("t", "i", type_id);
 
     /* Check arguments */
-    if(NULL == (type = H5I_object_verify(type_id,H5I_DATATYPE)))
+    if(NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Set return value */
@@ -440,7 +488,6 @@ H5T_committed(const H5T_t *type)
  *		ADJUST to the link count.
  *
  * Return:	Success:	New link count
- *
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
@@ -484,15 +531,15 @@ done:
 hid_t
 H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 {
-    H5T_t       *type = NULL;
-    H5G_loc_t	 loc;
+    H5T_t      *type = NULL;           /* Datatype opened in file */
+    H5G_loc_t	 loc;                   /* Group location of object to open */
     H5G_name_t   path;            	/* Datatype group hier. path */
     H5O_loc_t    oloc;            	/* Datatype object location */
     H5O_type_t   obj_type;              /* Type of object at location */
     H5G_loc_t    type_loc;              /* Group object for datatype */
     hbool_t      obj_found = FALSE;     /* Object at 'name' found */
     hid_t        dxpl_id = H5AC_dxpl_id; /* dxpl to use to open datatype */
-    hid_t        ret_value = FAIL;
+    hid_t        ret_value = FAIL;      /* Return value */
 
     FUNC_ENTER_API(H5Topen2, FAIL)
     H5TRACE3("i", "i*si", loc_id, name, tapl_id);
@@ -530,7 +577,7 @@ H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
         HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a named datatype")
 
     /* Open it */
-    if((type = H5T_open(&type_loc, dxpl_id)) == NULL)
+    if(NULL == (type = H5T_open(&type_loc, dxpl_id)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to open named datatype")
 
     /* Register the type and return the ID */
@@ -580,11 +627,11 @@ H5Tget_create_plist(hid_t dtype_id)
     H5TRACE1("i", "i", dtype_id);
 
     /* Check arguments */
-    if(NULL == (type = H5I_object_verify(dtype_id, H5I_DATATYPE)))
+    if(NULL == (type = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
 
     /* Copy the default datatype creation property list */
-    if(NULL == (tcpl_plist = H5I_object(H5P_LST_DATATYPE_CREATE_g)))
+    if(NULL == (tcpl_plist = (H5P_genplist_t *)H5I_object(H5P_LST_DATATYPE_CREATE_g)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get default creation property list")
     if((new_tcpl_id = H5P_copy_plist(tcpl_plist, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to copy the creation property list")
@@ -598,7 +645,7 @@ H5Tget_create_plist(hid_t dtype_id)
         H5P_genplist_t  *new_plist;     /* New datatype creation property list */
 
         /* Get property list object for new TCPL */
-        if(NULL == (new_plist = H5I_object(new_tcpl_id)))
+        if(NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_tcpl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
         /* Retrieve any object creation properties */
@@ -644,12 +691,12 @@ H5T_open(const H5G_loc_t *loc, hid_t dxpl_id)
     HDassert(loc);
 
     /* Check if datatype was already open */
-    if((shared_fo = H5FO_opened(loc->oloc->file, loc->oloc->addr)) == NULL) {
+    if(NULL == (shared_fo = (H5T_shared_t *)H5FO_opened(loc->oloc->file, loc->oloc->addr))) {
         /* Clear any errors from H5FO_opened() */
         H5E_clear_stack(NULL);
 
         /* Open the datatype object */
-        if((dt = H5T_open_oid(loc, dxpl_id)) == NULL)
+        if(NULL == (dt = H5T_open_oid(loc, dxpl_id)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, NULL, "not found")
 
         /* Add the datatype to the list of opened objects in the file */
@@ -748,16 +795,19 @@ done:
 static H5T_t *
 H5T_open_oid(const H5G_loc_t *loc, hid_t dxpl_id)
 {
-    H5T_t	*dt = NULL;
-    H5T_t	*ret_value;
+    H5T_t *dt = NULL;          /* Datatype from the file */
+    H5T_t *ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5T_open_oid)
 
     HDassert(loc);
 
+    /* Open named datatype object in file */
     if(H5O_open(loc->oloc) < 0)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, NULL, "unable to open named datatype")
-    if(NULL == (dt = H5O_msg_read(loc->oloc, H5O_DTYPE_ID, NULL, dxpl_id)))
+
+    /* Deserialize the datatype message into a datatype in memory */
+    if(NULL == (dt = (H5T_t *)H5O_msg_read(loc->oloc, H5O_DTYPE_ID, NULL, dxpl_id)))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to load type message from object header")
 
     /* Mark the type as named and open */

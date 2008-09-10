@@ -87,18 +87,18 @@ done:
 static herr_t
 H5ST_close_internal(H5ST_ptr_t p)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5ST_close_internal);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5ST_close_internal)
 
     /* Recursively free TST */
     if(p) {
         H5ST_close_internal(p->lokid);
-        if (p->splitchar)
+        if(p->splitchar)
             H5ST_close_internal(p->eqkid);
         H5ST_close_internal(p->hikid);
-        H5FL_FREE(H5ST_node_t,p);
+        (void)H5FL_FREE(H5ST_node_t, p);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5ST_close_internal() */
 
 
@@ -123,23 +123,23 @@ H5ST_close_internal(H5ST_ptr_t p)
 herr_t
 H5ST_close(H5ST_tree_t *tree)
 {
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5ST_close,FAIL);
+    FUNC_ENTER_NOAPI(H5ST_close, FAIL)
 
     /* Check arguments */
-    if(tree==NULL)
-        HGOTO_ERROR(H5E_ARGS,H5E_BADVALUE,FAIL,"invalid TST");
+    if(NULL == tree)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid TST")
 
     /* Free the TST itself */
-    if(H5ST_close_internal(tree->root)<0)
-        HGOTO_ERROR(H5E_TST,H5E_CANTFREE,FAIL,"can't free TST");
+    if(H5ST_close_internal(tree->root) < 0)
+        HGOTO_ERROR(H5E_TST, H5E_CANTFREE, FAIL, "can't free TST")
 
     /* Free root node itself */
-    H5FL_FREE(H5ST_tree_t,tree);
+    (void)H5FL_FREE(H5ST_tree_t, tree);
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5ST_close() */
 
 
@@ -587,53 +587,54 @@ H5ST_delete_internal(H5ST_ptr_t *root, H5ST_ptr_t p)
     H5ST_ptr_t q,               /* Temporary pointer to TST node */
         newp;                   /* Pointer to node which will replace deleted node in tree */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5ST_delete_internal);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5ST_delete_internal)
 
     /* Find node to replace one being deleted */
     if(p->lokid) {
         /* If the deleted node has lo & hi kids, attach them together */
         if(p->hikid) {
-            q=p->lokid;
+            q = p->lokid;
             while(q->hikid)
-                q=q->hikid;
-            q->hikid=p->hikid;
-            p->hikid->parent=q;
+                q = q->hikid;
+            q->hikid = p->hikid;
+            p->hikid->parent = q;
         } /* end if */
-        newp=p->lokid;
+        newp = p->lokid;
     } /* end if */
     else if(p->hikid) {
-        newp=p->hikid;
+        newp = p->hikid;
     } /* end if */
     else {
-        newp=NULL;
+        newp = NULL;
     } /* end else */
 
     /* Deleted node is in middle of tree */
     if(p->parent) {
         /* Attach new node to correct side of parent */
-        if(p==p->parent->lokid)
-            p->parent->lokid=newp;
+        if(p == p->parent->lokid)
+            p->parent->lokid = newp;
         else
-            p->parent->hikid=newp;
+            p->parent->hikid = newp;
         if(newp)
-            newp->parent=p->parent;
+            newp->parent = p->parent;
     } /* end if */
     else {
         if(newp)
-            newp->parent=p->parent;
+            newp->parent = p->parent;
         if(p->up) {
-            p->up->eqkid=newp;
+            p->up->eqkid = newp;
+
             /* If we deleted the last node in the TST, delete the upper node also */
-            if(newp==NULL)
-                H5ST_delete_internal(root,p->up);
+            if(NULL == newp)
+                H5ST_delete_internal(root, p->up);
         } /* end if */
         else /* Deleted last node at top level of tree */
-            *root=newp;
+            *root = newp;
     } /* end else */
 
-    H5FL_FREE(H5ST_node_t,p);
+    (void)H5FL_FREE(H5ST_node_t, p);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5ST_delete_internal() */
 
 

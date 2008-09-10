@@ -385,8 +385,8 @@ H5A_attr_cmp_name_inc(const void *attr1, const void *attr2)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_name_inc)
 
-    FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t **)attr1)->shared->name, 
-            (*(const H5A_t **)attr2)->shared->name))
+    FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t * const *)attr1)->shared->name, 
+            (*(const H5A_t * const *)attr2)->shared->name))
 } /* end H5A_attr_cmp_name_inc() */
 
 
@@ -413,8 +413,8 @@ H5A_attr_cmp_name_dec(const void *attr1, const void *attr2)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_name_dec)
 
-    FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t **)attr2)->shared->name, 
-            (*(const H5A_t **)attr1)->shared->name))
+    FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t * const *)attr2)->shared->name, 
+            (*(const H5A_t * const *)attr1)->shared->name))
 } /* end H5A_attr_cmp_name_dec() */
 
 
@@ -442,9 +442,9 @@ H5A_attr_cmp_corder_inc(const void *attr1, const void *attr2)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_corder_inc)
 
-    if((*(const H5A_t **)attr1)->shared->crt_idx < (*(const H5A_t **)attr2)->shared->crt_idx)
+    if((*(const H5A_t * const *)attr1)->shared->crt_idx < (*(const H5A_t * const *)attr2)->shared->crt_idx)
         ret_value = -1;
-    else if((*(const H5A_t **)attr1)->shared->crt_idx > (*(const H5A_t **)attr2)->shared->crt_idx)
+    else if((*(const H5A_t * const *)attr1)->shared->crt_idx > (*(const H5A_t * const *)attr2)->shared->crt_idx)
         ret_value = 1;
     else
         ret_value = 0;
@@ -477,9 +477,9 @@ H5A_attr_cmp_corder_dec(const void *attr1, const void *attr2)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_corder_dec)
 
-    if((*(const H5A_t **)attr1)->shared->crt_idx < (*(const H5A_t **)attr2)->shared->crt_idx)
+    if((*(const H5A_t * const *)attr1)->shared->crt_idx < (*(const H5A_t * const *)attr2)->shared->crt_idx)
         ret_value = 1;
-    else if((*(const H5A_t **)attr1)->shared->crt_idx > (*(const H5A_t **)attr2)->shared->crt_idx)
+    else if((*(const H5A_t * const *)attr1)->shared->crt_idx > (*(const H5A_t * const *)attr2)->shared->crt_idx)
         ret_value = -1;
     else
         ret_value = 0;

@@ -291,20 +291,20 @@ H5S_select_serialize(const H5S_t *space, uint8_t *buf)
 hssize_t
 H5Sget_select_npoints(hid_t spaceid)
 {
-    H5S_t	*space = NULL;      /* Dataspace to modify selection of */
+    H5S_t *space;               /* Dataspace to modify selection of */
     hssize_t ret_value;         /* return value */
 
-    FUNC_ENTER_API(H5Sget_select_npoints, FAIL);
+    FUNC_ENTER_API(H5Sget_select_npoints, FAIL)
     H5TRACE1("Hs", "i", spaceid);
 
     /* Check args */
-    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
+    if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     ret_value = H5S_GET_SELECT_NPOINTS(space);
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Sget_select_npoints() */
 
 
@@ -365,20 +365,20 @@ H5S_get_select_npoints(const H5S_t *space)
 htri_t
 H5Sselect_valid(hid_t spaceid)
 {
-    H5S_t	*space = NULL;      /* Dataspace to modify selection of */
-    htri_t ret_value;     /* return value */
+    H5S_t *space;       /* Dataspace to modify selection of */
+    htri_t ret_value;   /* return value */
 
-    FUNC_ENTER_API(H5Sselect_valid, FAIL);
+    FUNC_ENTER_API(H5Sselect_valid, FAIL)
     H5TRACE1("t", "i", spaceid);
 
     /* Check args */
-    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
+    if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     ret_value = H5S_SELECT_VALID(space);
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Sselect_valid() */
 
 
@@ -516,22 +516,22 @@ done:
 herr_t
 H5Sget_select_bounds(hid_t spaceid, hsize_t start[], hsize_t end[])
 {
-    H5S_t	*space = NULL;      /* Dataspace to modify selection of */
-    herr_t ret_value;        /* return value */
+    H5S_t *space;       /* Dataspace to modify selection of */
+    herr_t ret_value;   /* return value */
 
-    FUNC_ENTER_API(H5Sget_select_bounds, FAIL);
+    FUNC_ENTER_API(H5Sget_select_bounds, FAIL)
     H5TRACE3("e", "i*h*h", spaceid, start, end);
 
     /* Check args */
-    if(start==NULL || end==NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer");
-    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace");
+    if(start == NULL || end == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer")
+    if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-    ret_value = H5S_SELECT_BOUNDS(space,start,end);
+    ret_value = H5S_SELECT_BOUNDS(space, start, end);
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Sget_select_bounds() */
 
 
@@ -1134,7 +1134,7 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
 {
     H5T_t *dt;                  /* Datatype structure */
     H5S_sel_iter_t iter;        /* Selection iteration info */
-    hbool_t iter_init=0;        /* Selection iteration info has been initialized */
+    hbool_t iter_init = FALSE;  /* Selection iteration info has been initialized */
     uint8_t *loc;               /* Current element location in buffer */
     hsize_t coords[H5O_LAYOUT_NDIMS];  /* Coordinates of element in dataspace */
     hssize_t nelmts;            /* Number of elements in selection */
@@ -1157,44 +1157,44 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     FUNC_ENTER_NOAPI(H5S_select_iterate, FAIL);
 
     /* Check args */
-    assert(buf);
-    assert(H5I_DATATYPE == H5I_get_type(type_id));
-    assert(space);
-    assert(op);
+    HDassert(buf);
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
+    HDassert(space);
+    HDassert(op);
 
     /* Get the datatype size */
-    if (NULL==(dt=H5I_object_verify(type_id,H5I_DATATYPE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype");
-    if((elmt_size=H5T_get_size(dt))==0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid");
+    if(NULL == (dt = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an valid base datatype")
+    if(0 == (elmt_size = H5T_get_size(dt)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADSIZE, FAIL, "datatype size invalid")
 
     /* Initialize iterator */
-    if (H5S_select_iter_init(&iter, space, elmt_size)<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator");
-    iter_init=1;	/* Selection iteration info has been initialized */
+    if(H5S_select_iter_init(&iter, space, elmt_size) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "unable to initialize selection iterator")
+    iter_init = TRUE;	/* Selection iteration info has been initialized */
 
     /* Get the number of elements in selection */
-    if((nelmts = H5S_GET_SELECT_NPOINTS(space))<0)
-        HGOTO_ERROR (H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected");
+    if((nelmts = H5S_GET_SELECT_NPOINTS(space)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
 
     /* Get the rank of the dataspace */
-    ndims=space->extent.rank;
+    ndims = space->extent.rank;
 
-    if (ndims > 0){
+    if(ndims > 0) {
 	/* Copy the size of the space */
-	assert(space->extent.size);
-	HDmemcpy(space_size, space->extent.size, ndims*sizeof(hsize_t));
-    }
-    space_size[ndims]=elmt_size;
+	HDassert(space->extent.size);
+	HDmemcpy(space_size, space->extent.size, ndims * sizeof(hsize_t));
+    } /* end if */
+    space_size[ndims] = elmt_size;
 
     /* Compute the maximum number of bytes required */
-    H5_ASSIGN_OVERFLOW(max_elem,nelmts,hssize_t,size_t);
+    H5_ASSIGN_OVERFLOW(max_elem, nelmts, hssize_t, size_t);
 
     /* Loop, while elements left in selection */
-    while(max_elem>0 && user_ret==0) {
+    while(max_elem > 0 && user_ret == 0) {
         /* Get the sequences of bytes */
         if(H5S_SELECT_GET_SEQ_LIST(space, 0, &iter, (size_t)H5D_IO_VECTOR_SIZE, max_elem, &nseq, &nelem, off, len) < 0)
-            HGOTO_ERROR (H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed");
+            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
 
         /* Loop, while sequences left to process */
         for(curr_seq=0; curr_seq<nseq && user_ret==0; curr_seq++) {
@@ -1235,12 +1235,10 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
 
 done:
     /* Release selection iterator */
-    if(iter_init) {
-        if (H5S_SELECT_ITER_RELEASE(&iter)<0)
-            HDONE_ERROR (H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator");
-    } /* end if */
+    if(iter_init && H5S_SELECT_ITER_RELEASE(&iter) < 0)
+        HDONE_ERROR(H5E_DATASPACE, H5E_CANTRELEASE, FAIL, "unable to release selection iterator")
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 }   /* end H5S_select_iterate() */
 
 
@@ -1262,21 +1260,21 @@ done:
 H5S_sel_type
 H5Sget_select_type(hid_t space_id)
 {
-    H5S_t		   *space = NULL;	/* dataspace to modify */
-    H5S_sel_type        ret_value;       /* Return value */
+    H5S_t *space;	        /* dataspace to modify */
+    H5S_sel_type ret_value;     /* Return value */
 
-    FUNC_ENTER_API(H5Sget_select_type, H5S_SEL_ERROR);
+    FUNC_ENTER_API(H5Sget_select_type, H5S_SEL_ERROR)
     H5TRACE1("St", "i", space_id);
 
     /* Check args */
-    if (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5S_SEL_ERROR, "not a dataspace");
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5S_SEL_ERROR, "not a dataspace")
 
     /* Set return value */
-    ret_value=H5S_GET_SELECT_TYPE(space);
+    ret_value = H5S_GET_SELECT_TYPE(space);
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* end H5Sget_select_type() */
 
 

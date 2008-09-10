@@ -290,7 +290,7 @@ H5B2_shared_free(void *_shared)
     } /* end if */
 
     /* Free the shared B-tree info itself */
-    H5FL_FREE(H5B2_shared_t, shared);
+    (void)H5FL_FREE(H5B2_shared_t, shared);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

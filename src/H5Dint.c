@@ -555,7 +555,7 @@ done:
         if(new_dset != NULL) {
             if(new_dset->dcpl_id != 0)
                 (void)H5I_dec_ref(new_dset->dcpl_id, FALSE);
-            H5FL_FREE(H5D_shared_t, new_dset);
+            (void)H5FL_FREE(H5D_shared_t, new_dset);
         } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1015,10 +1015,10 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
 
     /* check args */
     HDassert(file);
-    HDassert(H5I_DATATYPE==H5I_get_type(type_id));
+    HDassert(H5I_DATATYPE == H5I_get_type(type_id));
     HDassert(space);
-    HDassert(H5I_GENPROP_LST==H5I_get_type(dcpl_id));
-    HDassert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
+    HDassert(H5I_GENPROP_LST == H5I_get_type(dcpl_id));
+    HDassert(H5I_GENPROP_LST == H5I_get_type(dxpl_id));
 
     /* Get the dataset's datatype */
     if(NULL == (type = (const H5T_t *)H5I_object(type_id)))
@@ -1030,10 +1030,10 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
 
     /* Check if the datatype is/contains a VL-type */
     if(H5T_detect_class(type, H5T_VLEN))
-        has_vl_type=TRUE;
+        has_vl_type = TRUE;
 
     /* Check if the dataspace has an extent set (or is NULL) */
-    if(!(H5S_has_extent(space)) )
+    if(!H5S_has_extent(space))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "dataspace extent has not been set.")
 
     /* Initialize the dataset object */
@@ -1156,10 +1156,8 @@ done:
                 if(H5D_chunk_dest(file, dxpl_id, new_dset) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, NULL, "unable to destroy chunk cache")
             } /* end if */
-            if(new_dset->shared->space) {
-                if(H5S_close(new_dset->shared->space) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace")
-            } /* end if */
+            if(new_dset->shared->space && H5S_close(new_dset->shared->space) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release dataspace")
             if(new_dset->shared->type) {
                 if(H5I_dec_ref(new_dset->shared->type_id, FALSE) < 0)
                     HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, NULL, "unable to release datatype")
@@ -1172,14 +1170,12 @@ done:
                         HDONE_ERROR(H5E_DATASET, H5E_CANTDELETE, NULL, "unable to delete object header")
                 } /* end if */
             } /* end if */
-            if(new_dset->shared->dcpl_id != 0) {
-                if(H5I_dec_ref(new_dset->shared->dcpl_id, FALSE) < 0)
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
-            } /* end if */
-            H5FL_FREE(H5D_shared_t, new_dset->shared);
+            if(new_dset->shared->dcpl_id != 0 && H5I_dec_ref(new_dset->shared->dcpl_id, FALSE) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTDEC, NULL, "unable to decrement ref count on property list")
+            (void)H5FL_FREE(H5D_shared_t, new_dset->shared);
         } /* end if */
         new_dset->oloc.file = NULL;
-        H5FL_FREE(H5D_t, new_dset);
+        (void)H5FL_FREE(H5D_t, new_dset);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1271,13 +1267,13 @@ done:
         /* Free the location--casting away const*/
         if(dataset) {
             if(shared_fo == NULL)   /* Need to free shared fo */
-                H5FL_FREE(H5D_shared_t, dataset->shared);
+                (void)H5FL_FREE(H5D_shared_t, dataset->shared);
 
             H5O_loc_free(&(dataset->oloc));
             H5G_name_free(&(dataset->path));
 
-            H5FL_FREE(H5D_t, dataset);
-        }
+            (void)H5FL_FREE(H5D_t, dataset);
+        } /* end if */
         if(shared_fo)
             shared_fo->fo_count--;
     } /* end if */
@@ -1324,7 +1320,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
     if(NULL == (dataset->shared->type = (H5T_t *)H5O_msg_read(&(dataset->oloc), H5O_DTYPE_ID, NULL, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load type info from dataset header")
     if(NULL == (dataset->shared->space = H5S_read(&(dataset->oloc), dxpl_id)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load space info from dataset header")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to load dataspace info from dataset header")
 
     /* Get a datatype ID for the dataset's datatype */
     if((dataset->shared->type_id = H5I_register(H5I_DATATYPE, dataset->shared->type, FALSE)) < 0)
@@ -1498,14 +1494,10 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
 
 done:
     if(ret_value < 0) {
-        if(H5F_addr_defined(dataset->oloc.addr)) {
-            if(H5O_close(&(dataset->oloc)) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
-        } /* end if */
-        if(dataset->shared->space) {
-            if(H5S_close(dataset->shared->space) < 0)
-                HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
-        } /* end if */
+        if(H5F_addr_defined(dataset->oloc.addr) && H5O_close(&(dataset->oloc)) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release object header")
+        if(dataset->shared->space && H5S_close(dataset->shared->space) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to release dataspace")
         if(dataset->shared->type) {
             if(dataset->shared->type_id > 0) {
                 if(H5I_dec_ref(dataset->shared->type_id, FALSE) < 0)
@@ -1634,7 +1626,7 @@ H5D_close(H5D_t *dataset)
          */
         dataset->oloc.file = NULL;
 
-        H5FL_FREE(H5D_shared_t, dataset->shared);
+        (void)H5FL_FREE(H5D_shared_t, dataset->shared);
     } /* end if */
     else {
         /* Decrement the ref. count for this object in the top file */
@@ -1652,7 +1644,7 @@ H5D_close(H5D_t *dataset)
        free_failed = TRUE;
 
     /* Free the dataset's memory structure */
-    H5FL_FREE(H5D_t, dataset);
+    (void)H5FL_FREE(H5D_t, dataset);
 
     /* Check if anything failed in the middle... */
     if(free_failed)
@@ -1716,7 +1708,6 @@ H5D_nameof(H5D_t *dataset)
  *		is not copied.
  *
  * Return:	Success:	Ptr to the dataset's datatype, uncopied.
- *
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
@@ -1731,6 +1722,7 @@ H5D_typeof(const H5D_t *dset)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_typeof)
 
     HDassert(dset);
+    HDassert(dset->shared);
     HDassert(dset->shared->type);
 
     FUNC_LEAVE_NOAPI(dset->shared->type)

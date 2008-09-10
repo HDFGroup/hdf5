@@ -221,20 +221,20 @@ done:
 herr_t
 H5RS_decr(H5RS_str_t *rs)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5RS_decr);
+    FUNC_ENTER_NOAPI_NOFUNC(H5RS_decr)
 
     /* Sanity check */
-    assert(rs);
-    assert(rs->n > 0);
+    HDassert(rs);
+    HDassert(rs->n > 0);
 
     /* Decrement reference count for string */
-    if((--rs->n)==0) {
+    if((--rs->n) == 0) {
         if(!rs->wrapped)
-            (void)H5FL_BLK_FREE(str_buf,rs->s);
-        H5FL_FREE(H5RS_str_t,rs);
+            (void)H5FL_BLK_FREE(str_buf, rs->s);
+        (void)H5FL_FREE(H5RS_str_t, rs);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5RS_decr() */
 
 

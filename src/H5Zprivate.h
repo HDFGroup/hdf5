@@ -98,7 +98,8 @@ typedef struct H5Z_data_xform_t H5Z_data_xform_t; /* Defined in H5Ztrans.c */
 H5_DLL H5Z_data_xform_t *H5Z_xform_create(const char *expr);
 H5_DLL herr_t H5Z_xform_copy(H5Z_data_xform_t **data_xform_prop);
 H5_DLL herr_t H5Z_xform_destroy(H5Z_data_xform_t *data_xform_prop);
-H5_DLL herr_t H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size, const H5T_t *buf_type);
+H5_DLL herr_t H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void *array,
+    size_t array_size, const H5T_t *buf_type);
 H5_DLL hbool_t H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop);
 H5_DLL char* H5Z_xform_extract_xform_str(const H5Z_data_xform_t *data_xform_prop);
 

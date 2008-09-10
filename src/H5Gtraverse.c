@@ -89,7 +89,7 @@ H5G_traverse_term_interface(void)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_traverse_term_interface)
 
     /* Free the global component buffer */
-    H5G_comp_g = H5MM_xfree(H5G_comp_g);
+    H5G_comp_g = (char *)H5MM_xfree(H5G_comp_g);
     H5G_comp_alloc_g = 0;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -200,12 +200,12 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     /* Check for generic default property list and use link access default if so */
     if(_lapl_id == H5P_DEFAULT) {
         HDassert(H5P_LINK_ACCESS_DEFAULT != -1);
-        if(NULL == (lapl = H5I_object(H5P_LINK_ACCESS_DEFAULT)))
+        if(NULL == (lapl = (H5P_genplist_t *)H5I_object(H5P_LINK_ACCESS_DEFAULT)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to get default property list")
     } /* end if */
     else {
         /* Get the underlying property list passed in */
-        if(NULL == (lapl = H5I_object(_lapl_id)))
+        if(NULL == (lapl = (H5P_genplist_t *)H5I_object(_lapl_id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to get property list from ID")
     } /* end else */
 
@@ -214,7 +214,7 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unable to copy property list")
 
     /* Get the underlying property list copy */
-    if(NULL == (lapl = H5I_object(lapl_id)))
+    if(NULL == (lapl = (H5P_genplist_t *)H5I_object(lapl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "unable to get property list from ID")
 
     /* Record number of soft links left to traverse in the property list. */
@@ -228,22 +228,22 @@ H5G_traverse_ud(const H5G_loc_t *grp_loc/*in,out*/, const H5O_link_t *lnk,
     /* Get the oloc from the ID the user callback returned */
     switch(H5I_get_type(cb_return)) {
         case H5I_GROUP:
-            if((new_oloc = H5G_oloc(H5I_object(cb_return))) == NULL)
+            if((new_oloc = H5G_oloc((H5G_t *)H5I_object(cb_return))) == NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location from group ID")
                 break;
 
         case H5I_DATASET:
-            if((new_oloc = H5D_oloc(H5I_object(cb_return))) ==NULL)
+            if((new_oloc = H5D_oloc((H5D_t *)H5I_object(cb_return))) ==NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location from dataset ID")
                 break;
 
         case H5I_DATATYPE:
-            if((new_oloc = H5T_oloc(H5I_object(cb_return))) ==NULL)
+            if((new_oloc = H5T_oloc((H5T_t *)H5I_object(cb_return))) ==NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get object location from datatype ID")
                 break;
 
         case H5I_FILE:
-            if((temp_file = H5I_object(cb_return)) == NULL)
+            if((temp_file = (H5F_t *)H5I_object(cb_return)) == NULL)
                 HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "couldn't get file from ID")
             if((new_oloc = H5G_oloc(temp_file->shared->root_grp)) ==NULL)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get root group location from file ID")
@@ -624,7 +624,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         size_t new_alloc;               /* New component buffer size */
 
         new_alloc = MAX3(1024, (2 * H5G_comp_alloc_g), (HDstrlen(name) + 1));
-        if(NULL == (new_comp = H5MM_realloc(H5G_comp_g, new_alloc)))
+        if(NULL == (new_comp = (char *)H5MM_realloc(H5G_comp_g, new_alloc)))
             HGOTO_ERROR(H5E_SYM, H5E_NOSPACE, FAIL, "unable to allocate component buffer")
         H5G_comp_g = new_comp;
         H5G_comp_alloc_g = new_alloc;
@@ -862,7 +862,7 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
     if(lapl_id == H5P_DEFAULT)
         nlinks = H5L_NUM_LINKS;
     else {
-        if(NULL == (lapl = H5I_object(lapl_id)))
+        if(NULL == (lapl = (H5P_genplist_t *)H5I_object(lapl_id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
         if(H5P_get(lapl, H5L_ACS_NLINKS_NAME, &nlinks) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get number of links")

@@ -698,7 +698,7 @@ H5D_typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
 {
     const H5T_t	*src_type;              /* Source datatype */
     const H5T_t	*dst_type;              /* Destination datatype */
-    herr_t	ret_value = SUCCEED;	/* Return value	*/
+    herr_t ret_value = SUCCEED;	        /* Return value	*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_typeinfo_init)
 
@@ -707,7 +707,7 @@ H5D_typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     HDassert(dset);
 
     /* Initialize type info safely */
-    HDmemset(type_info, 0, sizeof(H5D_type_info_t));
+    HDmemset(type_info, 0, sizeof(*type_info));
 
     /* Get the memory & dataset datatypes */
     if(NULL == (type_info->mem_type = (const H5T_t *)H5I_object_verify(mem_type_id, H5I_DATATYPE)))
