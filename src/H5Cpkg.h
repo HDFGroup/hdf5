@@ -802,7 +802,7 @@
  ****************************************************************************/
 
 #define H5C__H5C_T_MAGIC	0x005CAC0E
-#define H5C__MAX_NUM_TYPE_IDS	17
+#define H5C__MAX_NUM_TYPE_IDS	18
 #define H5C__PREFIX_LEN		32
 
 struct H5C_t

@@ -39,6 +39,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
+#include "H5Vprivate.h"         /* Vector functions			*/
 
 
 /****************/
@@ -61,10 +62,10 @@
 /********************/
 
 /* Extensible array class callbacks */
-static herr_t H5EA_test_fill(uint8_t *raw_blk, size_t nelmts);
-static herr_t H5EA_test_encode(uint8_t *raw, const void *elmt);
-static herr_t H5EA_test_decode(const uint8_t *raw, void *elmt);
-static herr_t H5EA_test_debug(FILE *stream, int indent, int fwidth, const void *elmt);
+static herr_t H5EA__test_fill(void *nat_blk, size_t nelmts);
+static herr_t H5EA__test_encode(void *raw, const void *elmt, size_t nelmts);
+static herr_t H5EA__test_decode(const void *raw, void *elmt, size_t nelmts);
+static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth, const void *elmt);
 
 
 /*********************/
@@ -74,11 +75,11 @@ static herr_t H5EA_test_debug(FILE *stream, int indent, int fwidth, const void *
 /* Extensible array testing class information */
 const H5EA_class_t H5EA_CLS_TEST[1]={{
     H5EA_CLS_TEST_ID,           /* Type of Extensible array */
-    sizeof(haddr_t),            /* Size of native record */
-    H5EA_test_fill,             /* Fill block of missing elements callback */
-    H5EA_test_encode,           /* Element encoding callback */
-    H5EA_test_decode,           /* Element decoding callback */
-    H5EA_test_debug             /* Element debugging callback */
+    sizeof(uint64_t),           /* Size of native element */
+    H5EA__test_fill,            /* Fill block of missing elements callback */
+    H5EA__test_encode,          /* Element encoding callback */
+    H5EA__test_decode,          /* Element decoding callback */
+    H5EA__test_debug            /* Element debugging callback */
 }};
 
 
@@ -94,7 +95,7 @@ const H5EA_class_t H5EA_CLS_TEST[1]={{
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_test_fill
+ * Function:	H5EA__test_fill
  *
  * Purpose:	Fill "missing elements" in block of elements
  *
@@ -108,17 +109,22 @@ const H5EA_class_t H5EA_CLS_TEST[1]={{
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA_test_fill(uint8_t *raw_blk, size_t nelmts))
+H5EA__test_fill(void *nat_blk, size_t nelmts))
+
+    /* Local variables */
+    uint64_t fill_val = H5EA_TEST_FILL;          /* Value to fill elements with */
 
     /* Sanity checks */
-    HDassert(raw_blk);
+    HDassert(nat_blk);
     HDassert(nelmts);
 
-END_FUNC(STATIC)  /* end H5EA_test_fill() */
+    H5V_array_fill(nat_blk, &fill_val, sizeof(uint64_t), nelmts);
+
+END_FUNC(STATIC)  /* end H5EA__test_fill() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_test_encode
+ * Function:	H5EA__test_encode
  *
  * Purpose:	Encode an element from "native" to "raw" form
  *
@@ -132,17 +138,34 @@ END_FUNC(STATIC)  /* end H5EA_test_fill() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA_test_encode(uint8_t *raw, const void *elmt))
+H5EA__test_encode(void *raw, const void *_elmt, size_t nelmts))
+
+    /* Local variables */
+    const uint64_t *elmt = (const uint64_t *)_elmt;     /* Convenience pointer to native elements */
 
     /* Sanity checks */
     HDassert(raw);
     HDassert(elmt);
+    HDassert(nelmts);
 
-END_FUNC(STATIC)  /* end H5EA_test_encode() */
+    /* Encode native elements into raw elements */
+    while(nelmts) {
+        /* Encode element */
+        /* (advances 'raw' pointer */
+        UINT64ENCODE(raw, *elmt);
+
+        /* Advance native element pointer */
+        elmt++;
+
+        /* Decrement # of elements to encode */
+        nelmts--;
+    } /* end while */
+
+END_FUNC(STATIC)  /* end H5EA__test_encode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_test_decode
+ * Function:	H5EA__test_decode
  *
  * Purpose:	Decode an element from "raw" to "native" form
  *
@@ -156,17 +179,35 @@ END_FUNC(STATIC)  /* end H5EA_test_encode() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA_test_decode(const uint8_t *raw, void *elmt))
+H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts))
+
+    /* Local variables */
+    uint64_t *elmt = (uint64_t *)_elmt;     /* Convenience pointer to native elements */
+    const uint8_t *raw = (const uint8_t *)_raw; /* Convenience pointer to raw elements */
 
     /* Sanity checks */
     HDassert(raw);
     HDassert(elmt);
+    HDassert(nelmts);
 
-END_FUNC(STATIC)  /* end H5EA_test_decode() */
+    /* Decode raw elements into native elements */
+    while(nelmts) {
+        /* Decode element */
+        /* (advances 'raw' pointer */
+        UINT64DECODE(raw, *elmt);
+
+        /* Advance native element pointer */
+        elmt++;
+
+        /* Decrement # of elements to decode */
+        nelmts--;
+    } /* end while */
+
+END_FUNC(STATIC)  /* end H5EA__test_decode() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_test_debug
+ * Function:	H5EA__test_debug
  *
  * Purpose:	Display an element for debugging
  *
@@ -180,13 +221,13 @@ END_FUNC(STATIC)  /* end H5EA_test_decode() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA_test_debug(FILE *stream, int indent, int fwidth, const void *elmt))
+H5EA__test_debug(FILE *stream, int indent, int fwidth, const void *elmt))
 
     /* Sanity checks */
     HDassert(stream);
     HDassert(elmt);
 
-END_FUNC(STATIC)  /* end H5EA_test_debug() */
+END_FUNC(STATIC)  /* end H5EA__test_debug() */
 
 
 /*-------------------------------------------------------------------------

@@ -52,6 +52,7 @@
 /* Max. # of bits for max. nelmts index */
 #define H5EA_MAX_NELMTS_IDX_MAX 64
 
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -101,14 +102,14 @@ H5FL_DEFINE(H5EA_hdr_t);
  */
 BEGIN_FUNC(PKG, ERR,
 H5EA_hdr_t *, NULL, NULL,
-H5EA__hdr_alloc(H5F_t *f))
+H5EA__hdr_alloc(H5F_t *f, const H5EA_class_t *cls))
 
-    H5EA_hdr_t *hdr = NULL;          /* Shared fractal heap header */
+    /* Local variables */
+    H5EA_hdr_t *hdr = NULL;          /* Shared extensible array header */
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
+    HDassert(cls);
 
     /* Allocate space for the shared information */
     if(NULL == (hdr = H5FL_CALLOC(H5EA_hdr_t)))
@@ -116,6 +117,11 @@ H5EA__hdr_alloc(H5F_t *f))
 
     /* Set the internal parameters for the array */
     hdr->f = f;
+    hdr->sizeof_addr = H5F_SIZEOF_ADDR(f);
+    hdr->sizeof_size = H5F_SIZEOF_SIZE(f);
+
+    /* Set the class of the array */
+    hdr->cls = cls;
 
     /* Set the return value */
     ret_value = hdr;
@@ -129,7 +135,7 @@ END_FUNC(PKG)   /* end H5EA__hdr_alloc() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_hdr_create
+ * Function:	H5EA__hdr_create
  *
  * Purpose:	Creates a new extensible array header in the file
  *
@@ -145,15 +151,14 @@ BEGIN_FUNC(PKG, ERR,
 haddr_t, HADDR_UNDEF, HADDR_UNDEF,
 H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam))
 
+    /* Local variables */
     H5EA_hdr_t *hdr;            /* Extensible array header */
 
 #ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
+HDfprintf(stderr, "%s: Called\n", __func__);
 #endif /* QAK */
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(f);
     HDassert(cparam);
 
@@ -172,10 +177,11 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 #endif /* NDEBUG */
 
     /* Allocate space for the shared information */
-    if(NULL == (hdr = H5EA__hdr_alloc(f)))
+    if(NULL == (hdr = H5EA__hdr_alloc(f, cparam->cls)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array shared header")
 
     /* Set the internal parameters for the array */
+    hdr->idx_blk_addr = HADDR_UNDEF;
 
     /* Set the creation parameters for the array */
     hdr->raw_elmt_size = cparam->raw_elmt_size;
@@ -198,14 +204,13 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     /* Set address of array header to return */
     ret_value = hdr->addr;
 
-
 CATCH
 
 END_FUNC(PKG)   /* end H5EA__hdr_create() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_hdr_incr
+ * Function:	H5EA__hdr_incr
  *
  * Purpose:	Increment component reference count on shared array header
  *
@@ -238,7 +243,7 @@ END_FUNC(PKG)   /* end H5EA__hdr_incr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_hdr_decr
+ * Function:	H5EA__hdr_decr
  *
  * Purpose:	Decrement component reference count on shared array header
  *
@@ -274,7 +279,7 @@ END_FUNC(PKG)   /* end H5EA__hdr_decr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_hdr_fuse_incr
+ * Function:	H5EA__hdr_fuse_incr
  *
  * Purpose:	Increment file reference count on shared array header
  *
@@ -300,7 +305,7 @@ END_FUNC(PKG)   /* end H5EA__hdr_fuse_incr() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_hdr_fuse_decr
+ * Function:	H5EA__hdr_fuse_decr
  *
  * Purpose:	Decrement file reference count on shared array header
  *
@@ -330,6 +335,36 @@ END_FUNC(PKG)   /* end H5EA__hdr_fuse_decr() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5EA__hdr_modified
+ *
+ * Purpose:	Mark an extensible array as modified
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sep  9 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PKG, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA__hdr_modified(H5EA_hdr_t *hdr))
+
+    /* Sanity check */
+    HDassert(hdr);
+    HDassert(hdr->f);
+
+    /* Mark header as dirty in cache */
+    if(H5AC_mark_pinned_or_protected_entry_dirty(hdr->f, hdr) < 0)
+        H5E_THROW(H5E_CANTMARKDIRTY, "unable to mark extensible array header as dirty")
+
+CATCH
+
+END_FUNC(PKG)   /* end H5EA__hdr_modified() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5EA__hdr_delete
  *
  * Purpose:	Delete an extensible array, starting with the header
@@ -346,9 +381,7 @@ BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
 H5EA__hdr_delete(H5EA_hdr_t *hdr, hid_t dxpl_id))
 
-    /*
-     * Check arguments.
-     */
+    /* Sanity check */
     HDassert(hdr);
     HDassert(!hdr->file_rc);
 
@@ -366,40 +399,15 @@ H5EA__hdr_delete(H5EA_hdr_t *hdr, hid_t dxpl_id))
 } /* end block */
 #endif /* NDEBUG */
 
-#ifdef LATER
-    /* Check for root direct/indirect block */
-    if(H5F_addr_defined(hdr->man_dtable.table_addr)) {
+    /* Check for index block */
+    if(H5F_addr_defined(hdr->idx_blk_addr)) {
 #ifdef QAK
-HDfprintf(stderr, "%s: hdr->man_dtable.table_addr = %a\n", FUNC, hdr->man_dtable.table_addr);
+HDfprintf(stderr, "%s: hdr->idx_blk_addr = %a\n", __func__, hdr->idx_blk_addr);
 #endif /* QAK */
-        if(hdr->man_dtable.curr_root_rows == 0) {
-            hsize_t dblock_size;        /* Size of direct block */
-
-            /* Check for I/O filters on this heap */
-            if(hdr->filter_len > 0) {
-                dblock_size = (hsize_t)hdr->pline_root_direct_size;
-#ifdef QAK
-HDfprintf(stderr, "%s: hdr->pline_root_direct_size = %Zu\n", FUNC, hdr->pline_root_direct_size);
-#endif /* QAK */
-
-                /* Reset the header's pipeline information */
-                hdr->pline_root_direct_size = 0;
-                hdr->pline_root_direct_filter_mask = 0;
-            } /* end else */
-            else
-                dblock_size = (hsize_t)hdr->man_dtable.cparam.start_block_size;
-
-            /* Delete root direct block */
-            if(H5HF_man_dblock_delete(hdr->f, dxpl_id, hdr->man_dtable.table_addr, dblock_size) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap root direct block")
-        } /* end if */
-        else {
-            /* Delete root indirect block */
-            if(H5HF_man_iblock_delete(hdr, dxpl_id, hdr->man_dtable.table_addr, hdr->man_dtable.curr_root_rows, NULL, 0) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap root indirect block")
-        } /* end else */
+        /* Delete index block */
+        if(H5EA__iblock_delete(hdr, dxpl_id) < 0)
+            H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array index block")
     } /* end if */
-#endif /* LATER */
 
     /* Release header's disk space */
     if(H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_HDR, dxpl_id, hdr->addr, (hsize_t)hdr->size) < 0)

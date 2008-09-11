@@ -501,9 +501,11 @@
 ./src/H5EA.c
 ./src/H5EAcache.c
 ./src/H5EAhdr.c
+./src/H5EAiblock.c
 ./src/H5EAint.c
 ./src/H5EApkg.h
 ./src/H5EAprivate.h
+./src/H5EAstat.c
 ./src/H5EAtest.c
 ./src/H5F.c
 ./src/H5Fdbg.c

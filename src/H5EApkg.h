@@ -341,8 +341,14 @@ func_init_failed:							      \
 /* Size of signature information (on disk) */
 #define H5EA_SIZEOF_MAGIC               4
 
-/* Fractal heap signatures */
+/* Fill value for extensible array test class */
+#ifdef H5EA_TESTING
+#define H5EA_TEST_FILL          ((uint64_t)ULLONG_MAX)
+#endif /* H5EA_TESTING */
+
+/* Extensible array signatures */
 #define H5EA_HDR_MAGIC                  "EAHD"          /* Header */
+#define H5EA_IBLOCK_MAGIC               "EAIB"          /* Index block */
 
 /* Size of checksum information (on disk) */
 #define H5EA_SIZEOF_CHKSUM      4
@@ -359,14 +365,25 @@ func_init_failed:							      \
     /* General metadata fields */                                             \
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
-    /* Extensible Array Header specific fields */                             \
-                                                                              \
     /* General heap information */                                            \
     + 1 /* Element Size */                                                    \
     + 1 /* Max. # of elements bits */                                         \
     + 1 /* # of elements to store in index block */                           \
     + 1 /* Min. # elements per data block */                                  \
     + 1 /* Min. # of data block pointers for a super block */                 \
+                                                                              \
+    /* Extensible Array Header specific fields */                             \
+    + (h)->sizeof_addr /* File address of index block  */		      \
+    + (h)->sizeof_size /* Max. index set  */				      \
+    )
+
+/* Size of the extensible array index block on disk */
+#define H5EA_IBLOCK_SIZE(h)     (                                             \
+    /* General metadata fields */                                             \
+    H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
+                                                                              \
+    /* Extensible Array Index Block specific fields */			      \
+    + (size_t)((h)->idx_blk_elmts * (h)->raw_elmt_size) /* Elements in index block  */ \
     )
 
 
@@ -389,6 +406,12 @@ typedef struct H5EA_hdr_t {
     uint8_t data_blk_min_elmts;         /* Min. # of elements per data block */
     uint8_t sup_blk_min_data_ptrs;      /* Min. # of data block pointers for a super block */
 
+    /* Index block information (stored in header) */
+    haddr_t idx_blk_addr;               /* Address of index block in header */
+
+    /* Statistics for array (stored in header) */
+    hsize_t max_idx_set;                /* Highest element index stored (+1 - i.e. if element 0 has been set, this value with be '1', if no elements have been stored, this value will be '0') */
+
     /* Computed/cached values */
     size_t rc;                          /* Reference count of heap's components using heap header */
     haddr_t addr;                       /* Address of header in file */
@@ -396,7 +419,27 @@ typedef struct H5EA_hdr_t {
     H5F_t *f;                           /* Pointer to file for extensible array */
     size_t file_rc;                     /* Reference count of files using array header */
     hbool_t pending_delete;             /* Array is pending deletion */
+    size_t sizeof_addr;                 /* Size of file addresses */
+    size_t sizeof_size;                 /* Size of file sizes */
+
+    /* Memory data structures (not stored directly) */
+    const H5EA_class_t *cls;            /* Pointer to class for array */
 } H5EA_hdr_t;
+
+/* The extensible array index block information */
+typedef struct H5EA_iblock_t {
+    /* Information for H5AC cache functions, _must_ be first field in structure */
+    H5AC_info_t cache_info;
+
+    /* Extensible array information (stored) */
+    void        *elmts;         /* Buffer for elements stored in index block  */
+
+    /* Internal array information (not stored) */
+    size_t      rc;             /* Reference count of objects using this block */
+    H5EA_hdr_t	*hdr;	        /* Shared array header info	              */
+    haddr_t     addr;           /* Address of this index block on disk	      */
+    size_t      size;           /* Size of index block on disk		      */
+} H5EA_iblock_t;
 
 /* Extensible array */
 struct H5EA_t {
@@ -412,8 +455,17 @@ struct H5EA_t {
 /* H5EA header inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_EARRAY_HDR[1];
 
+/* H5EA index block inherits cache-like properties from H5AC */
+H5_DLLVAR const H5AC_class_t H5AC_EARRAY_IBLOCK[1];
+
 /* Declare a free list to manage the H5EA_hdr_t struct */
 H5FL_EXTERN(H5EA_hdr_t);
+
+/* Declare a free list to manage the H5EA_iblock_t struct */
+H5FL_EXTERN(H5EA_iblock_t);
+
+/* Declare a free list to manage the index block elements */
+H5FL_BLK_EXTERN(elmt_buf);
 
 /* Internal extensible array testing class */
 #ifdef H5EA_TESTING
@@ -426,16 +478,27 @@ H5_DLLVAR const H5EA_class_t H5EA_CLS_TEST[1];
 /******************************/
 
 /* Header routines */
-H5_DLL H5EA_hdr_t *H5EA__hdr_alloc(H5F_t *f);
+H5_DLL H5EA_hdr_t *H5EA__hdr_alloc(H5F_t *f, const H5EA_class_t *cls);
 H5_DLL haddr_t H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam);
 H5_DLL herr_t H5EA__hdr_incr(H5EA_hdr_t *hdr);
 H5_DLL herr_t H5EA__hdr_decr(H5EA_hdr_t *hdr);
 H5_DLL herr_t H5EA__hdr_fuse_incr(H5EA_hdr_t *hdr);
 H5_DLL size_t H5EA__hdr_fuse_decr(H5EA_hdr_t *hdr);
+H5_DLL herr_t H5EA__hdr_modified(H5EA_hdr_t *hdr);
 H5_DLL herr_t H5EA__hdr_delete(H5EA_hdr_t *hdr, hid_t dxpl_id);
+
+/* Index block routines */
+H5_DLL H5EA_iblock_t *H5EA__iblock_alloc(H5EA_hdr_t *hdr);
+H5_DLL haddr_t H5EA__iblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id);
+H5_DLL H5EA_iblock_t *H5EA__iblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
+    H5AC_protect_t rw);
+H5_DLL herr_t H5EA__iblock_unprotect(H5EA_iblock_t *iblock, hid_t dxpl_id,
+    unsigned cache_flags);
+H5_DLL herr_t H5EA__iblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id);
 
 /* Metadata cache callbacks */
 H5_DLL herr_t H5EA__cache_hdr_dest(H5F_t *f, H5EA_hdr_t *hdr);
+H5_DLL herr_t H5EA__cache_iblock_dest(H5F_t *f, H5EA_iblock_t *iblock);
 
 /* Testing routines */
 #ifdef H5EA_TESTING
