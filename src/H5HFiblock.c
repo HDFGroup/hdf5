@@ -1157,7 +1157,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
     HDassert(iblock_nrows > 0);
     HDassert(did_protect);
 
-    /* Check if we are allow to use existing pinned iblock pointer */
+    /* Check if we are allowed to use existing pinned iblock pointer */
     if(!must_protect) {
         /* Check for this block already being pinned */
         if(par_iblock) {
