@@ -65,8 +65,36 @@ an application synchronized with the HDF5 library or related software.
 This section lists the API-level changes that have been made in the 
 transition from the HDF5 Release 1.6.6 to Release 1.6.7.
 As this is primarily a bug-fix release, 
-the only interface changes are related to the removal of the 
+the only interface changes are one changed function signature and
+the changes related to the removal of the 
 stream I/O driver, as outlined below.
+
+
+    <h3>Function with Changed Syntax</h3>
+
+        The following function syntax has changed;
+        the affected parameter is noted in <font color=red>red</font>.
+        <p>
+        <dl>
+        <dt><u>C function:</u>
+        <dt><code>H5Sselect_elements</code>
+          <dd><code>
+              herr_t H5Sselect_elements(
+              <em>hid_t </em><code>space_id</code>,
+              <em>H5S_seloper_t</em> <code>op</code>,
+              <br>
+              &nbsp; &nbsp; &nbsp; &nbsp;
+              <em>size_t</em> <code>num_elements</code>,
+              <font color=red>
+              <em>const hsize_t *</em><code>coord</code>
+              </font>
+              )
+              </code>
+         </dl>
+         <p>
+         <cite>(This syntax change was listed on 10 September 2008, 
+          several months after Release 1.6.7.)</cite>
+
 
     <h3>Stream I/O Driver Removed</h3>
     
@@ -2782,7 +2810,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 6 May 2008
+Last modified: 10 September 2008 
 <!-- hhmts end -->
 
 </body>

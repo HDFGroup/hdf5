@@ -1305,7 +1305,7 @@ END SUBROUTINE h5sselect_all_f
     <dd><em>herr_t</em> <code>H5Sselect_elements</code>(<em>hid_t </em><code>space_id</code>,
         <em>H5S_seloper_t</em> <code>op</code>,
         <em>size_t</em> <code>num_elements</code>,
-        <em>const hsize_t *</em><code>coord</code>[ ]
+        <em>const hsize_t *</em><code>coord</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Selects array elements to be included in the selection for a dataspace.
@@ -1371,7 +1371,7 @@ END SUBROUTINE h5sselect_all_f
           <td valign="top"><em>size_t</em>&nbsp;<code>num_elements&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
           <td valign="top">Number of elements to be selected.</td></tr>
         <tr>
-          <td valign="top"><em>const hsize_t *</em><code>coord</code>[ ]</td>
+          <td valign="top"><em>const hsize_t *</em><code>coord</code></td>
           <td valign="top">A 2-dimensional array of 0-based values specifying 
               the coordinates of the elements being selected.</td></tr>
     </table></ul>
@@ -1955,7 +1955,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 23 July 2008");
+document.writeln("Last modified: 10 September 2008");
 -->
 </SCRIPT> 
 
