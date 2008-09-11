@@ -500,6 +500,7 @@
 ./src/H5Eterm.h
 ./src/H5EA.c
 ./src/H5EAcache.c
+./src/H5EAdbg.c
 ./src/H5EAhdr.c
 ./src/H5EAiblock.c
 ./src/H5EAint.c

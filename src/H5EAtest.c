@@ -65,7 +65,8 @@
 static herr_t H5EA__test_fill(void *nat_blk, size_t nelmts);
 static herr_t H5EA__test_encode(void *raw, const void *elmt, size_t nelmts);
 static herr_t H5EA__test_decode(const void *raw, void *elmt, size_t nelmts);
-static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth, const void *elmt);
+static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth,
+    hsize_t idx, const void *elmt);
 
 
 /*********************/
@@ -221,11 +222,20 @@ END_FUNC(STATIC)  /* end H5EA__test_decode() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__test_debug(FILE *stream, int indent, int fwidth, const void *elmt))
+H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
+    const void *elmt))
+
+    /* Local variables */
+    char temp_str[128];     /* Temporary string, for formatting */
 
     /* Sanity checks */
     HDassert(stream);
     HDassert(elmt);
+
+    /* Print element */
+    sprintf(temp_str, "Element #%llu:", (unsigned long_long)idx);
+    HDfprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
+        (unsigned long_long)*(const uint64_t *)elmt);
 
 END_FUNC(STATIC)  /* end H5EA__test_debug() */
 

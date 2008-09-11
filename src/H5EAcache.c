@@ -187,6 +187,10 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls, vo
     if(*p++ != H5EA_HDR_VERSION)
 	H5E_THROW(H5E_VERSION, "wrong extensible array header version")
 
+    /* Extensible array type */
+    if(*p++ != (uint8_t)cls->id)
+	H5E_THROW(H5E_BADTYPE, "incorrect extensible array class")
+
     /* General array creation/configuration information */
     hdr->raw_elmt_size = *p++;          /* Element size in file (in bytes) */
     hdr->max_nelmts_bits = *p++;        /* Log2(Max. # of elements in array) - i.e. # of bits needed to store max. # of elements */
@@ -285,6 +289,9 @@ H5EA__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
 
         /* Version # */
         *p++ = H5EA_HDR_VERSION;
+
+        /* Extensible array type */
+        *p++ = hdr->cls->id;
 
         /* General array creation/configuration information */
         *p++ = hdr->raw_elmt_size;          /* Element size in file (in bytes) */
@@ -492,6 +499,10 @@ H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED
     if(*p++ != H5EA_IBLOCK_VERSION)
 	H5E_THROW(H5E_VERSION, "wrong extensible array index block version")
 
+    /* Extensible array type */
+    if(*p++ != (uint8_t)hdr->cls->id)
+	H5E_THROW(H5E_BADTYPE, "incorrect extensible array class")
+
     /* Internal information */
 
     /* Decode elements in index block */
@@ -590,6 +601,9 @@ H5EA__cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 
         /* Version # */
         *p++ = H5EA_IBLOCK_VERSION;
+
+        /* Extensible array type */
+        *p++ = iblock->hdr->cls->id;
 
         /* Internal information */
 

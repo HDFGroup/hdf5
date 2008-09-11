@@ -28,6 +28,8 @@
 #define H5A_PACKAGE		/*suppress error about including H5Apkg  */
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 #define H5B2_TESTING		/*suppress warning about H5B2 testing funcs*/
+#define H5EA_PACKAGE		/*suppress error about including H5EApkg  */
+#define H5EA_TESTING		/*suppress warning about H5EA testing funcs*/
 #define H5F_PACKAGE		/*suppress error about including H5Fpkg	  */
 #define H5FS_PACKAGE		/*suppress error about including H5FSpkg  */
 #define H5G_PACKAGE		/*suppress error about including H5Gpkg	  */
@@ -41,6 +43,7 @@
 #include "H5B2pkg.h"		/* v2 B-trees				*/
 #include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5EApkg.h"		/* Extensible Arrays			*/
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5FSpkg.h"		/* File free space			*/
 #include "H5Gpkg.h"		/* Groups				*/
@@ -55,8 +58,113 @@
 /* File drivers */
 #include "H5FDfamily.h"
 
-#define INDENT  3
 #define VCOL    50
+
+
+/*-------------------------------------------------------------------------
+ * Function:    get_H5B2_class
+ *
+ * Purpose:	Determine the v2 B-tree class from the buffer read in.
+ *              B-trees are debugged through the B-tree subclass.  The subclass
+ *              identifier is two bytes after the B-tree signature.
+ *
+ * Return:	Non-NULL on success/NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sep 11 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static const H5B2_class_t *
+get_H5B2_class(const uint8_t *sig)
+{
+    H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC + 1];
+    const H5B2_class_t *cls;
+
+    switch(subtype) {
+        case H5B2_TEST_ID:
+            cls = H5B2_TEST;
+            break;
+
+        case H5B2_FHEAP_HUGE_INDIR_ID:
+            cls = H5HF_BT2_INDIR;
+            break;
+
+        case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
+            cls = H5HF_BT2_FILT_INDIR;
+            break;
+
+        case H5B2_FHEAP_HUGE_DIR_ID:
+            cls = H5HF_BT2_DIR;
+            break;
+
+        case H5B2_FHEAP_HUGE_FILT_DIR_ID:
+            cls = H5HF_BT2_FILT_DIR;
+            break;
+
+        case H5B2_GRP_DENSE_NAME_ID:
+            cls = H5G_BT2_NAME;
+            break;
+
+        case H5B2_GRP_DENSE_CORDER_ID:
+            cls = H5G_BT2_CORDER;
+            break;
+
+        case H5B2_SOHM_INDEX_ID:
+            cls = H5SM_INDEX;
+            break;
+
+        case H5B2_ATTR_DENSE_NAME_ID:
+            cls = H5A_BT2_NAME;
+            break;
+
+        case H5B2_ATTR_DENSE_CORDER_ID:
+            cls = H5A_BT2_CORDER;
+            break;
+
+        default:
+            fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
+            HDexit(4);
+    } /* end switch */
+
+    return(cls);
+} /* end get_H5B2_class() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    get_H5EA_class
+ *
+ * Purpose:	Determine the extensible array class from the buffer read in.
+ *              Extensible arrays are debugged through the array subclass.
+ *              The subclass identifier is two bytes after the signature.
+ *
+ * Return:	Non-NULL on success/NULL on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sep 11 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static const H5EA_class_t *
+get_H5EA_class(const uint8_t *sig)
+{
+    H5EA_cls_id_t clsid = (H5EA_cls_id_t)sig[H5EA_SIZEOF_MAGIC + 1];
+    const H5EA_class_t *cls;
+
+    switch(clsid) {
+        case H5EA_CLS_TEST_ID:
+            cls = H5EA_CLS_TEST;
+            break;
+
+        default:
+            fprintf(stderr, "Unknown array class %u\n", (unsigned)(clsid));
+            HDexit(4);
+    } /* end switch */
+
+    return(cls);
+} /* end get_H5EA_class() */
 
 
 /*-------------------------------------------------------------------------
@@ -112,7 +220,7 @@ main(int argc, char *argv[])
         fprintf(stderr, "cannot open file\n");
         HDexit(1);
     } /* end if */
-    if(NULL == (f = H5I_object(fid))) {
+    if(NULL == (f = (H5F_t *)H5I_object(fid))) {
         fprintf(stderr, "cannot obtain H5F_t pointer\n");
         HDexit(2);
     } /* end if */
@@ -121,13 +229,13 @@ main(int argc, char *argv[])
      * Parse command arguments.
      */
     if(argc > 2)
-        addr = HDstrtoll(argv[2], NULL, 0);
+        addr = (haddr_t)HDstrtoll(argv[2], NULL, 0);
     if(argc > 3)
-        extra = HDstrtoll(argv[3], NULL, 0);
+        extra = (haddr_t)HDstrtoll(argv[3], NULL, 0);
     if(argc > 4)
-        extra2 = HDstrtoll(argv[4], NULL, 0);
+        extra2 = (haddr_t)HDstrtoll(argv[4], NULL, 0);
     if(argc > 5)
-        extra3 = HDstrtoll(argv[5], NULL, 0);
+        extra3 = (haddr_t)HDstrtoll(argv[5], NULL, 0);
 
     /*
      * Read the signature at the specified file position.
@@ -210,65 +318,18 @@ main(int argc, char *argv[])
 
     } else if(!HDmemcmp(sig, H5B2_HDR_MAGIC, (size_t)H5B2_SIZEOF_MAGIC)) {
         /*
-         * Debug a v2 B-tree.  B-trees are debugged through the B-tree
-         * subclass.  The subclass identifier is two bytes after the
-         * B-tree signature.
+         * Debug a v2 B-tree header.
          */
-        H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC+1];
-
-        switch(subtype) {
-            case H5B2_TEST_ID:
-                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST);
-                break;
-
-            case H5B2_FHEAP_HUGE_INDIR_ID:
-                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_INDIR);
-                break;
-
-            case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
-                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_INDIR);
-                break;
-
-            case H5B2_FHEAP_HUGE_DIR_ID:
-                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_DIR);
-                break;
-
-            case H5B2_FHEAP_HUGE_FILT_DIR_ID:
-                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR);
-                break;
-
-            case H5B2_GRP_DENSE_NAME_ID:
-                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5G_BT2_NAME);
-                break;
-
-            case H5B2_GRP_DENSE_CORDER_ID:
-                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5G_BT2_CORDER);
-                break;
-
-            case H5B2_SOHM_INDEX_ID:
-                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5SM_INDEX);
-                break;
-
-            case H5B2_ATTR_DENSE_NAME_ID:
-                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5A_BT2_NAME);
-                break;
-
-            case H5B2_ATTR_DENSE_CORDER_ID:
-                status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5A_BT2_CORDER);
-                break;
-
-            default:
-                fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
-                HDexit(4);
-        } /* end switch */
+        const H5B2_class_t *cls = get_H5B2_class(sig);
+        HDassert(cls);
+        status = H5B2_hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls);
 
     } else if(!HDmemcmp(sig, H5B2_INT_MAGIC, (size_t)H5B2_SIZEOF_MAGIC)) {
         /*
-         * Debug a v2 B-tree.  B-trees are debugged through the B-tree
-         * subclass.  The subclass identifier is the byte after the
-         * B-tree signature.
+         * Debug a v2 B-tree internal node.
          */
-        H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC + 1];
+        const H5B2_class_t *cls = get_H5B2_class(sig);
+        HDassert(cls);
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0 || extra3 == 0) {
@@ -279,59 +340,14 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        switch(subtype) {
-            case H5B2_TEST_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2, (unsigned)extra3);
-                break;
-
-            case H5B2_FHEAP_HUGE_INDIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_INDIR, extra, (unsigned)extra2, (unsigned)extra3);
-                break;
-
-            case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_INDIR, extra, (unsigned)extra2, (unsigned)extra3);
-                break;
-
-            case H5B2_FHEAP_HUGE_DIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_DIR, extra, (unsigned)extra2, (unsigned)extra3);
-                break;
-
-            case H5B2_FHEAP_HUGE_FILT_DIR_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2, (unsigned)extra3);
-                break;
-
-            case H5B2_GRP_DENSE_NAME_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5G_BT2_NAME, extra, (unsigned)extra2, (unsigned)extra3);
-                break;
-
-            case H5B2_GRP_DENSE_CORDER_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5G_BT2_CORDER, extra, (unsigned)extra2, (unsigned)extra3);
-                break;
-
-            case H5B2_SOHM_INDEX_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5SM_INDEX, extra, (unsigned)extra2, (unsigned)extra3);
-                break;
-
-            case H5B2_ATTR_DENSE_NAME_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5A_BT2_NAME, extra, (unsigned)extra2, (unsigned)extra3);
-                break;
-
-            case H5B2_ATTR_DENSE_CORDER_ID:
-                status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5A_BT2_CORDER, extra, (unsigned)extra2, (unsigned)extra3);
-                break;
-
-            default:
-                fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
-                HDexit(4);
-        } /* end switch */
+        status = H5B2_int_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2, (unsigned)extra3);
 
     } else if(!HDmemcmp(sig, H5B2_LEAF_MAGIC, (size_t)H5B2_SIZEOF_MAGIC)) {
         /*
-         * Debug a v2 B-tree.  B-trees are debugged through the B-tree
-         * subclass.  The subclass identifier is the byte after the
-         * B-tree signature.
+         * Debug a v2 B-tree leaf node.
          */
-        H5B2_subid_t subtype = (H5B2_subid_t)sig[H5B2_SIZEOF_MAGIC + 1];
+        const H5B2_class_t *cls = get_H5B2_class(sig);
+        HDassert(cls);
 
         /* Check for enough valid parameters */
         if(extra == 0 || extra2 == 0) {
@@ -341,51 +357,7 @@ main(int argc, char *argv[])
             HDexit(4);
         } /* end if */
 
-        switch(subtype) {
-            case H5B2_TEST_ID:
-                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5B2_TEST, extra, (unsigned)extra2);
-                break;
-
-            case H5B2_FHEAP_HUGE_INDIR_ID:
-                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_INDIR, extra, (unsigned)extra2);
-                break;
-
-            case H5B2_FHEAP_HUGE_FILT_INDIR_ID:
-                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_INDIR, extra, (unsigned)extra2);
-                break;
-
-            case H5B2_FHEAP_HUGE_DIR_ID:
-                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_DIR, extra, (unsigned)extra2);
-                break;
-
-            case H5B2_FHEAP_HUGE_FILT_DIR_ID:
-                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5HF_BT2_FILT_DIR, extra, (unsigned)extra2);
-                break;
-
-            case H5B2_GRP_DENSE_NAME_ID:
-                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5G_BT2_NAME, extra, (unsigned)extra2);
-                break;
-
-            case H5B2_GRP_DENSE_CORDER_ID:
-                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5G_BT2_CORDER, extra, (unsigned)extra2);
-                break;
-
-            case H5B2_SOHM_INDEX_ID:
-                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5SM_INDEX, extra, (unsigned)extra2);
-                break;
-
-            case H5B2_ATTR_DENSE_NAME_ID:
-                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5A_BT2_NAME, extra, (unsigned)extra2);
-                break;
-
-            case H5B2_ATTR_DENSE_CORDER_ID:
-                status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, H5A_BT2_CORDER, extra, (unsigned)extra2);
-                break;
-
-            default:
-                fprintf(stderr, "Unknown B-tree subtype %u\n", (unsigned)(subtype));
-                HDexit(4);
-        } /* end switch */
+        status = H5B2_leaf_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2);
 
     } else if(!HDmemcmp(sig, H5HF_HDR_MAGIC, (size_t)H5HF_SIZEOF_MAGIC)) {
         /*
@@ -466,6 +438,31 @@ main(int argc, char *argv[])
         } /* end if */
 
         status = H5SM_list_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, (unsigned) extra, (size_t) extra2);
+
+    } else if(!HDmemcmp(sig, H5EA_HDR_MAGIC, (size_t)H5EA_SIZEOF_MAGIC)) {
+        /*
+         * Debug an extensible aray header.
+         */
+        const H5EA_class_t *cls = get_H5EA_class(sig);
+        HDassert(cls);
+        status = H5EA__hdr_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls);
+
+    } else if(!HDmemcmp(sig, H5EA_IBLOCK_MAGIC, (size_t)H5EA_SIZEOF_MAGIC)) {
+        /*
+         * Debug an extensible aray index block.
+         */
+        const H5EA_class_t *cls = get_H5EA_class(sig);
+        HDassert(cls);
+
+        /* Check for enough valid parameters */
+        if(extra == 0) {
+            fprintf(stderr, "ERROR: Need extensible array header address in order to dump index block\n");
+            fprintf(stderr, "Extensible array index block usage:\n");
+            fprintf(stderr, "\th5debug <filename> <index block address> <array header address>\n");
+            HDexit(4);
+        } /* end if */
+
+        status = H5EA__iblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra);
 
     } else if(!HDmemcmp(sig, H5O_HDR_MAGIC, (size_t)H5O_SIZEOF_MAGIC)) {
         /*

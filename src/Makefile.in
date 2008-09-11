@@ -86,7 +86,7 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5Dcontig.lo H5Ddbg.lo H5Ddeprec.lo H5Defl.lo H5Dfill.lo \
 	H5Dint.lo H5Dio.lo H5Distore.lo H5Dmpio.lo H5Doh.lo \
 	H5Dscatgath.lo H5Dselect.lo H5Dtest.lo H5E.lo H5Edeprec.lo \
-	H5Eint.lo H5EA.lo H5EAcache.lo H5EAhdr.lo H5EAiblock.lo H5EAint.lo \
+	H5Eint.lo H5EA.lo H5EAcache.lo H5EAdbg.lo H5EAhdr.lo H5EAiblock.lo H5EAint.lo \
 	H5EAstat.lo H5EAtest.lo H5F.lo H5Fdbg.lo H5Ffake.lo H5Fmount.lo \
 	H5Fsfile.lo H5Fsuper.lo H5Ftest.lo H5FD.lo H5FDcore.lo \
 	H5FDdirect.lo H5FDfamily.lo H5FDlog.lo H5FDmpi.lo H5FDmpio.lo \
@@ -430,7 +430,7 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5Dio.c \
         H5Distore.c H5Dmpio.c H5Doh.c H5Dscatgath.c H5Dselect.c H5Dtest.c \
         H5E.c H5Edeprec.c H5Eint.c \
-        H5EA.c H5EAcache.c H5EAhdr.c H5EAiblock.c H5EAint.c H5EAstat.c H5EAtest.c \
+        H5EA.c H5EAcache.c H5EAdbg.c H5EAhdr.c H5EAiblock.c H5EAint.c H5EAstat.c H5EAtest.c \
         H5F.c H5Fdbg.c H5Ffake.c H5Fmount.c H5Fsfile.c H5Fsuper.c H5Ftest.c \
         H5FD.c H5FDcore.c  \
         H5FDdirect.c H5FDfamily.c H5FDlog.c H5FDmpi.c H5FDmpio.c   \
@@ -642,6 +642,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5E.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5EA.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5EAcache.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5EAdbg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5EAhdr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5EAiblock.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5EAint.Plo@am__quote@

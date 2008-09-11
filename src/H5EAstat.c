@@ -16,7 +16,7 @@
 /*-------------------------------------------------------------------------
  *
  * Created:		H5EAstat.c
- *			Sep 11 2009
+ *			Sep 11 2008
  *			Quincey Koziol <koziol@hdfgroup.org>
  *
  * Purpose:	        Extensible array metadata statistics functions.

@@ -357,6 +357,7 @@ func_init_failed:							      \
 #define H5EA_METADATA_PREFIX_SIZE(c) (                                        \
     H5EA_SIZEOF_MAGIC   /* Signature */                                       \
     + 1 /* Version */                                                         \
+    + 1 /* Array type */                                                      \
     + ((c) ? H5EA_SIZEOF_CHKSUM : 0) /* Metadata checksum */                  \
     )
 
@@ -499,6 +500,13 @@ H5_DLL herr_t H5EA__iblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id);
 /* Metadata cache callbacks */
 H5_DLL herr_t H5EA__cache_hdr_dest(H5F_t *f, H5EA_hdr_t *hdr);
 H5_DLL herr_t H5EA__cache_iblock_dest(H5F_t *f, H5EA_iblock_t *iblock);
+
+/* Debugging routines for dumping file structures */
+H5_DLL herr_t H5EA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    FILE *stream, int indent, int fwidth, const H5EA_class_t *cls);
+H5_DLL herr_t H5EA__iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    FILE *stream, int indent, int fwidth, const H5EA_class_t *cls,
+    haddr_t hdr_addr);
 
 /* Testing routines */
 #ifdef H5EA_TESTING
