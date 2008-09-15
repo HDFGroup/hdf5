@@ -1699,11 +1699,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5EAdbg.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5EAhdr.c"
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5EAiblock.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5EAint.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAstat.c"
 				>
 			</File>
 			<File
