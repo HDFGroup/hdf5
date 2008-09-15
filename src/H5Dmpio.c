@@ -637,10 +637,36 @@ H5D_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info
    } /* end else */
 
 #ifndef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
-    if(io_option == H5D_ONE_LINK_CHUNK_IO)
+    if(io_option == H5D_ONE_LINK_CHUNK_IO) {
         io_option = H5D_MULTI_CHUNK_IO; /* We can not do this with one chunk IO. */
-    if(io_option == H5D_ONE_LINK_CHUNK_IO_MORE_OPT)
+#ifdef  H5_HAVE_INSTRUMENTED_LIBRARY
+    {  int new_value; 
+       htri_t check_prop;
+       check_prop = H5Pexist(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_LINK_TO_MULTI);
+       if(check_prop > 0) {
+           new_value = 1;
+           if(H5Pset(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_LINK_TO_MULTI, &new_value) < 0)
+                HGOTO_ERROR(H5E_IO, H5E_CANTSET, FAIL, "unable to set property value")
+
+       }
+     }/* add this property because the library changes the option from one link to multiple chunks.*/
+#endif
+    }
+    if(io_option == H5D_ONE_LINK_CHUNK_IO_MORE_OPT){
         io_option = H5D_MULTI_CHUNK_IO_MORE_OPT;
+#ifdef  H5_HAVE_INSTRUMENTED_LIBRARY
+      { int        new_value;
+       htri_t check_prop;
+       check_prop = H5Pexist(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_LINK_TO_MULTI_OPT);
+       if(check_prop > 0) {
+           new_value = 1;
+           if(H5Pset(io_info->dxpl_id, H5D_XFER_COLL_CHUNK_LINK_TO_MULTI_OPT, &new_value) < 0)
+                HGOTO_ERROR(H5E_IO, H5E_CANTSET, FAIL, "unable to set property value")
+
+       }
+      }/* add this property because the library changes the option from one link to multiple chunks.*/ 
+#endif
+    }
 #endif
 
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY
