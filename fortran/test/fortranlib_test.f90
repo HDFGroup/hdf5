@@ -143,6 +143,10 @@ PROGRAM fortranlibtest
   CALL enumtest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Enum datatype test', total_error)
 
+  ret_total_error = 0
+  CALL test_derived_flt(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Derived float datatype test', total_error)
+
 !     write(*,*)
 !     write(*,*) '========================================='
 !     write(*,*) 'Testing PROPERTY interface               ' 
