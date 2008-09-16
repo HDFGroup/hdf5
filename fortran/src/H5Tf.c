@@ -413,17 +413,16 @@ nh5tset_precision_c ( hid_t_f *type_id , size_t_f *precision)
  *              Tuesday, January 25, 2000
  * Modifications:
  *---------------------------------------------------------------------------*/
-
 int_f
 nh5tget_offset_c ( hid_t_f *type_id , size_t_f *offset)
 {
   int ret_value = -1;
   hid_t c_type_id;
-  size_t c_offset;
+  int c_offset;
 
   c_type_id = *type_id;
   c_offset = H5Tget_offset(c_type_id);
-  if ( c_offset == 0  ) return ret_value;
+  if ( c_offset < 0  ) return ret_value;
 
   *offset = (size_t_f)c_offset ;
   ret_value = 0;
@@ -725,7 +724,7 @@ nh5tget_norm_c ( hid_t_f *type_id , int_f *norm)
 
   c_type_id = *type_id;
   c_norm = H5Tget_norm(c_type_id);
-  if ( c_norm == 0  ) return ret_value;
+  if ( c_norm == H5T_NORM_ERROR  ) return ret_value;
 
   *norm = (int_f)c_norm;
   ret_value = 0;
