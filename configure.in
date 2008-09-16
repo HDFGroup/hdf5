@@ -2187,7 +2187,9 @@ if test "X-$DEBUG_PKG" = X- ; then
 fi
 
 AC_SUBST([DEBUG_PKG])
-all_packages="ac,b,b2,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
+dnl Removed b2 temporary since b2 code has errors.
+dnl all_packages="ac,b,b2,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
+all_packages="ac,b,d,e,f,g,hg,hl,i,mf,mm,o,p,s,t,v,z"
 case "X-$DEBUG_PKG" in
   X-yes)
     DEBUG_PKG="d,e,f,g,hg,i,mm,o,p,s,t,v,z"
