@@ -370,9 +370,9 @@ done:
  * Modifications:
  *		Robb Matzke, 1999-10-19
  *		The backing store file is created and opened if specified.
- *              
+ *
  *              Raymond Lu, 2006-11-30
- *              Enabled the driver to read an existing file depending on 
+ *              Enabled the driver to read an existing file depending on
  *              the setting of the backing_store and file open flags.
  *-------------------------------------------------------------------------
  */
@@ -860,7 +860,7 @@ done:
  * Modifications:
  *              Raymond Lu, 2006-11-30
  *              Added a condition check for backing store flag, for an
- *              existing file can be opened for read and write now. 
+ *              existing file can be opened for read and write now.
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */

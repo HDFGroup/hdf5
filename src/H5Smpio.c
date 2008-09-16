@@ -293,7 +293,7 @@ H5S_mpio_hyper_type( const H5S_t *space, size_t elmt_size,
             goto empty;
 #ifdef H5S_DEBUG
   if(H5DEBUG(S))
-            HDfprintf(H5DEBUG(S),"%s: Non-flattened selection\n",FUNC); 
+            HDfprintf(H5DEBUG(S),"%s: Non-flattened selection\n",FUNC);
 #endif
         for ( i=0; i<rank; ++i) {
             d[i].start = diminfo[i].start+space->select.offset[i];

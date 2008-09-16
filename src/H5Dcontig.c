@@ -242,7 +242,7 @@ H5D_contig_fill(H5D_t *dset, hid_t dxpl_id)
     while(npoints > 0) {
         size_t curr_points;     /* Number of elements to write on this iteration of the loop */
         size_t size;            /* Size of buffer to write */
-        
+
         /* Compute # of elements and buffer size to write for this iteration */
         curr_points = MIN(fb_info.elmts_per_buf, npoints);
         size = curr_points * fb_info.file_elmt_size;
@@ -542,7 +542,7 @@ H5D_contig_write_one(H5D_io_info_t *io_info, hsize_t offset, size_t size)
 
     HDassert(io_info);
 
-    if(H5D_contig_writevv(io_info, (size_t)1, &dset_curr_seq, &dset_len, &dset_off, 
+    if(H5D_contig_writevv(io_info, (size_t)1, &dset_curr_seq, &dset_len, &dset_off,
             (size_t)1, &mem_curr_seq, &mem_len, &mem_off) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vector write failed")
 
@@ -1155,7 +1155,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst, 
+H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
     H5O_layout_t *layout_dst, H5T_t *dt_src, H5O_copy_t *cpy_info, hid_t dxpl_id)
 {
     haddr_t     addr_src;               /* File offset in source dataset */
@@ -1276,7 +1276,7 @@ H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_t *f_dst,
         if(H5T_get_class(dt_src, FALSE) == H5T_REFERENCE) {
             /* Need to fix values of references when copying across files */
             if(f_src != f_dst)
-                fix_ref = TRUE; 
+                fix_ref = TRUE;
         } /* end if */
 
         /* Set the number of bytes to read & write to the buffer size */

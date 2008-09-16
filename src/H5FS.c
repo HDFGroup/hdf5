@@ -473,7 +473,7 @@ done:
  *
  * Purpose:     Collect meta storage info used by the free space manager
  *
- * Return:      Success:        non-negative 
+ * Return:      Success:        non-negative
  *              Failure:        negative
  *
  * Programmer:  Vailin Choi
@@ -495,8 +495,8 @@ H5FS_size(const H5F_t *f, const H5FS_t *fspace, hsize_t *meta_size)
 
     /* Get the free space size info */
     *meta_size += H5FS_HEADER_SIZE(f) + fspace->alloc_sect_size;
- 
-    FUNC_LEAVE_NOAPI(SUCCEED) 
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FS_size() */
 
 #ifdef H5FS_DEBUG

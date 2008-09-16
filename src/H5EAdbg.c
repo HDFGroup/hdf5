@@ -215,7 +215,7 @@ H5EA__iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
         HDfprintf(stream, "%*sElements in Index Block:\n", indent, "");
         for(u = 0; u < MIN(hdr->idx_blk_elmts, hdr->max_idx_set); u++) {
             /* Call the class's 'debug' callback */
-            if((hdr->cls->debug)(stream, (indent + 6), MAX(0, (fwidth - 6)), 
+            if((hdr->cls->debug)(stream, (indent + 6), MAX(0, (fwidth - 6)),
                     (hsize_t)u,
                     ((uint8_t *)iblock->elmts) + (hdr->cls->nat_elmt_size * u)) < 0)
                 H5E_THROW(H5E_CANTGET, "can't get element for debugging")

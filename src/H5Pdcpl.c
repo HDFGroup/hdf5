@@ -253,7 +253,7 @@ H5P_dcrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
         {
             dst_efl.slot[i].name_offset = 0;
         }
-        
+
     }
 
 

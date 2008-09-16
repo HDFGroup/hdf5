@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     {
         print_version("h5import");
         exit(EXIT_SUCCESS);
-        
+
     }
 
  /*
@@ -292,19 +292,19 @@ processDataFile(char *infile, struct Input *in, FILE **strm, hid_t file_id)
  /*-------------------------------------------------------------------------
   * special case for opening binary classes in WIN32
   * "FP" denotes a floating point binary file,
-  * "IN" denotes a signed integer binary file, 
+  * "IN" denotes a signed integer binary file,
   * "UIN" denotes an unsigned integer binary file,
   *-------------------------------------------------------------------------
   */
   if ( in->inputClass == 4 /* "IN" */ ||
        in->inputClass == 3 /* "FP" */ ||
-       in->inputClass == 7 /* "UIN" */ 
-      
+       in->inputClass == 7 /* "UIN" */
+
       )
   {
 
 #ifdef WIN32
-      
+
       if ((*strm = fopen(infile, "rb")) == NULL)
       {
           (void) fprintf(stderr, err1, infile);
@@ -852,20 +852,20 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
     char    str[1024];
     char    c;
     int     i = 0, j, nlines = 0, line;
-    
+
 /*-------------------------------------------------------------------------
  * get number of lines in the input file
  *-------------------------------------------------------------------------
  */
 
-    while ( !feof( *strm ) ) 
+    while ( !feof( *strm ) )
     {
         c = fgetc( *strm );
-                   
+
         if ( c == 10 ) /* eol */
         {
             nlines++;
-            
+
         }
     }
 
@@ -890,9 +890,9 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
         goto out;
 
     /* disable error reporting */
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
-        
+
         /* create parent groups */
         if(in->path.count > 1) {
             j = 0;
@@ -913,7 +913,7 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
             handle = file_id;
             j = 0;
         }
-        
+
         /*enable error reporting */
     } H5E_END_TRY;
 
@@ -930,11 +930,11 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
 
     while(!feof(*strm)) {
         c = fgetc(*strm);
-        
+
         str[i] = c;
-        
+
         i++;
-        
+
         if(c == 10) /* eol */
         {
             char    *str2 = str;
@@ -960,11 +960,11 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
 
             i = 0;
             str[ 0 ] = '\0';
-            
+
         }
     }
 
-    
+
     /* close */
     H5Dclose(dset_id);
     H5Sclose(space_id);

@@ -154,8 +154,8 @@ H5P_reset_external_file_test(hid_t dcpl_id)
     /* Check arguments */
     if(NULL == (plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset creation property list")
-     
-    /* get external file list */ 
+
+    /* get external file list */
     if(H5P_get(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list")
 
@@ -163,7 +163,7 @@ H5P_reset_external_file_test(hid_t dcpl_id)
     if(H5O_msg_reset(H5O_EFL_ID, &efl) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't release external file list info")
 
-    /* set external file list */ 
+    /* set external file list */
     if(H5P_set(plist, H5D_CRT_EXT_FILE_LIST_NAME, &efl) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get external file list")
 

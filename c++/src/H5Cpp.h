@@ -44,9 +44,9 @@
 #include "H5Group.h"
 #include "H5File.h"
 #include "H5Library.h"
- 
+
 /* Some C++ compilers do not have offsetof macro; define to bypass the problem
-   - BMR- -EIP- 2007/08/01 
+   - BMR- -EIP- 2007/08/01
 */
 #ifndef H5_CXX_HAVE_OFFSETOF
 #ifdef HOFFSET

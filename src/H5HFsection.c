@@ -1185,7 +1185,7 @@ HDfprintf(stderr, "%s: (*sect).sect_info = {%a, %Hu, %u}\n", FUNC, (*sect)->sect
 #ifdef QAK
 HDfprintf(stderr, "%s: dblock_addr = %a\n", FUNC, dblock_addr);
 #endif /* QAK */
-    if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, 
+    if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr,
             dblock_size, (*sect)->u.single.parent, (*sect)->u.single.par_entry, H5AC_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load fractal heap direct block")
     HDassert(H5F_addr_eq(dblock->block_off + dblock_size, (*sect)->sect_info.addr + (*sect)->sect_info.size));
@@ -2430,7 +2430,7 @@ H5HF_sect_indirect_new(H5HF_hdr_t *hdr, haddr_t sect_off, hsize_t sect_size,
     /* Set the 'indirect' specific fields */
     if(iblock) {
         sect->u.indirect.u.iblock = iblock;
-        sect->u.indirect.iblock_entries = hdr->man_dtable.cparam.width * 
+        sect->u.indirect.iblock_entries = hdr->man_dtable.cparam.width *
                 sect->u.indirect.u.iblock->max_rows;
         if(H5HF_iblock_incr(sect->u.indirect.u.iblock) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared indirect block")
@@ -2485,7 +2485,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5HF_free_section_t *
-H5HF_sect_indirect_for_row(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock, 
+H5HF_sect_indirect_for_row(H5HF_hdr_t *hdr, H5HF_indirect_t *iblock,
     H5HF_free_section_t *row_sect)
 {
     H5HF_free_section_t *sect = NULL;   /* 'Indirect' free space section to add */
@@ -2505,7 +2505,7 @@ HDfprintf(stderr, "%s: Entering\n", FUNC);
 #endif /* QAK */
 
     /* Create free space section node */
-    if(NULL == (sect = H5HF_sect_indirect_new(hdr, row_sect->sect_info.addr, 
+    if(NULL == (sect = H5HF_sect_indirect_new(hdr, row_sect->sect_info.addr,
             row_sect->sect_info.size, iblock, iblock->block_off,
             row_sect->u.row.row, row_sect->u.row.col, row_sect->u.row.num_entries)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create indirect section")
@@ -2794,7 +2794,7 @@ HDfprintf(stderr, "%s: child_iblock_addr = %a\n", FUNC, child_iblock_addr);
     sect->u.indirect.dir_nrows = dir_nrows;
 
     /* Make certain we've tracked the section's dependents correctly */
-    HDassert(sect->u.indirect.rc == 
+    HDassert(sect->u.indirect.rc ==
             (sect->u.indirect.indir_nents + sect->u.indirect.dir_nrows));
 
 done:
@@ -2987,7 +2987,7 @@ HDfprintf(stderr, "%s: sect->u.indirect.u.iblock_off = %Hu\n", FUNC, sect->u.ind
     sect->u.indirect.u.iblock = sec_iblock;
 
     /* Set the number of entries in the indirect block */
-    sect->u.indirect.iblock_entries = hdr->man_dtable.cparam.width * 
+    sect->u.indirect.iblock_entries = hdr->man_dtable.cparam.width *
             sect->u.indirect.u.iblock->max_rows;
 
     /* Unlock indirect block */
@@ -3054,7 +3054,7 @@ HDfprintf(stderr, "%s: sect->u.indirect.u.iblock_off = %Hu\n", FUNC, sect->u.ind
     sect->u.indirect.u.iblock = sect_iblock;
 
     /* Set the number of entries in the indirect block */
-    sect->u.indirect.iblock_entries = hdr->man_dtable.cparam.width * 
+    sect->u.indirect.iblock_entries = hdr->man_dtable.cparam.width *
             sect->u.indirect.u.iblock->max_rows;
 
     /* Section is "live" now */
@@ -3317,10 +3317,10 @@ HDfprintf(stderr, "%s: iblock = %p, iblock_off = %Hu\n", FUNC, iblock, iblock_of
 
             /* Transfer row sections between current & peer sections */
             HDmemcpy(&peer_sect->u.indirect.dir_rows[0],
-                &sect->u.indirect.dir_rows[0], 
+                &sect->u.indirect.dir_rows[0],
                 (sizeof(H5HF_free_section_t *) * peer_dir_nrows));
-            HDmemmove(&sect->u.indirect.dir_rows[0], 
-                &sect->u.indirect.dir_rows[peer_dir_nrows], 
+            HDmemmove(&sect->u.indirect.dir_rows[0],
+                &sect->u.indirect.dir_rows[peer_dir_nrows],
                 (sizeof(H5HF_free_section_t *) * (sect->u.indirect.dir_nrows - peer_dir_nrows)));
             sect->u.indirect.dir_nrows -= peer_dir_nrows;
             HDassert(row_sect == sect->u.indirect.dir_rows[0]);
@@ -3352,9 +3352,9 @@ HDfprintf(stderr, "%s: iblock = %p, iblock_off = %Hu\n", FUNC, iblock, iblock_of
             sect->u.indirect.num_entries -= (peer_nentries + 1); /* Transferred entries, plus the entry allocated out of the row */
 
             /* Make certain we've tracked the sections' dependents correctly */
-            HDassert(sect->u.indirect.rc == 
+            HDassert(sect->u.indirect.rc ==
                     (sect->u.indirect.indir_nents + sect->u.indirect.dir_nrows));
-            HDassert(peer_sect->u.indirect.rc == 
+            HDassert(peer_sect->u.indirect.rc ==
                     (peer_sect->u.indirect.indir_nents + peer_sect->u.indirect.dir_nrows));
         } /* end else */
     } /* end if */
@@ -3576,7 +3576,7 @@ HDfprintf(stderr, "%s: peer_sect_addr = %a\n", FUNC, peer_sect_addr);
 
             /* Transfer child indirect sections between current & peer sections */
             HDmemcpy(&peer_sect->u.indirect.indir_ents[0],
-                &sect->u.indirect.indir_ents[sect->u.indirect.indir_nents - peer_nentries], 
+                &sect->u.indirect.indir_ents[sect->u.indirect.indir_nents - peer_nentries],
                 (sizeof(H5HF_free_section_t *) * peer_nentries));
             sect->u.indirect.indir_nents -= (peer_nentries + 1); /* Transferred blocks, plus child entry */
 
@@ -3610,9 +3610,9 @@ HDfprintf(stderr, "%s: peer_sect->u.indirect.rc = %u\n", FUNC, peer_sect->u.indi
             /* (Note modified on current section's ref. count, since we haven't
              *  detached the child section yet)
              */
-            HDassert((sect->u.indirect.rc - 1) == 
+            HDassert((sect->u.indirect.rc - 1) ==
                     (sect->u.indirect.indir_nents + sect->u.indirect.dir_nrows));
-            HDassert(peer_sect->u.indirect.rc == 
+            HDassert(peer_sect->u.indirect.rc ==
                     (peer_sect->u.indirect.indir_nents + peer_sect->u.indirect.dir_nrows));
         } /* end else */
     } /* end if */
@@ -3917,8 +3917,8 @@ HDfprintf(stderr, "%s: nrows_moved2 = %u\n", FUNC, nrows_moved2);
             sect1->u.indirect.dir_rows = new_dir_rows;
 
             /* Transfer the second section's rows to first section */
-            HDmemcpy(&sect1->u.indirect.dir_rows[sect1->u.indirect.dir_nrows], 
-                &sect2->u.indirect.dir_rows[src_row2], 
+            HDmemcpy(&sect1->u.indirect.dir_rows[sect1->u.indirect.dir_nrows],
+                &sect2->u.indirect.dir_rows[src_row2],
                 (sizeof(H5HF_free_section_t *) * nrows_moved2));
 
             /* Re-target the row sections moved from second section */
@@ -3963,8 +3963,8 @@ HDfprintf(stderr, "%s: nrows_moved2 = %u\n", FUNC, nrows_moved2);
             sect1->u.indirect.indir_ents = new_indir_ents;
 
             /* Transfer the second section's entries to first section */
-            HDmemcpy(&sect1->u.indirect.indir_ents[sect1->u.indirect.indir_nents], 
-                &sect2->u.indirect.indir_ents[0], 
+            HDmemcpy(&sect1->u.indirect.indir_ents[sect1->u.indirect.indir_nents],
+                &sect2->u.indirect.indir_ents[0],
                 (sizeof(H5HF_free_section_t *) * sect2->u.indirect.indir_nents));
         } /* end else */
 
@@ -3985,7 +3985,7 @@ HDfprintf(stderr, "%s: nrows_moved2 = %u\n", FUNC, nrows_moved2);
     sect1->u.indirect.span_size += sect2->u.indirect.span_size;
 
     /* Make certain we've tracked the first section's dependents correctly */
-    HDassert(sect1->u.indirect.rc == 
+    HDassert(sect1->u.indirect.rc ==
             (sect1->u.indirect.indir_nents + sect1->u.indirect.dir_nrows));
 
     /* Wrap up, freeing or re-inserting second row section */
@@ -4103,7 +4103,7 @@ HDfprintf(stderr, "%s: par_entry = %u, par_row = %u, par_col = %u\n", FUNC, par_
     HDassert(par_iblock);
 
     /* Create parent indirect section */
-    if(NULL == (par_sect = H5HF_sect_indirect_new(hdr, sect->sect_info.addr, 
+    if(NULL == (par_sect = H5HF_sect_indirect_new(hdr, sect->sect_info.addr,
             sect->sect_info.size, par_iblock, par_iblock->block_off,
             par_row, par_col, 1)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't create indirect section")
@@ -4287,7 +4287,7 @@ H5HF_sect_indirect_deserialize(H5HF_hdr_t *hdr, hid_t dxpl_id,
     unsigned *des_flags)
 {
     H5HF_free_section_t *new_sect;      /* New indirect section */
-    hsize_t iblock_off;                 /* Indirect block's offset */ 
+    hsize_t iblock_off;                 /* Indirect block's offset */
     unsigned start_row;                 /* Indirect section's start row */
     unsigned start_col;                 /* Indirect section's start column */
     unsigned nentries;                  /* Indirect section's number of entries */

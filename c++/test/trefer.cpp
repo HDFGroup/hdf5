@@ -190,7 +190,7 @@ static void test_reference_obj()
 	sid1.close();
 	dataset.close();
 	delete file1;
-	
+
 	// Re-open the file
 	file1 = new H5File(FILE1, H5F_ACC_RDWR);
 
@@ -198,9 +198,9 @@ static void test_reference_obj()
 	dataset = file1->openDataSet("/Dataset3");
 
 	// Read selection from disk
-	dataset.read(rbuf, PredType::STD_REF_OBJ); 
+	dataset.read(rbuf, PredType::STD_REF_OBJ);
 
-	// Dereference dataset object by ctor, from the location where 
+	// Dereference dataset object by ctor, from the location where
 	// 'dataset' is located
 	DataSet dset2(dataset, &rbuf[0]);
 
@@ -234,14 +234,14 @@ static void test_reference_obj()
 	verify_val(read_comment2, write_comment, "Group::getComment", __LINE__, __FILE__);
 	group.close();
 
-	// Dereference group object by ctor and using dataset to specify 
+	// Dereference group object by ctor and using dataset to specify
 	// location
 	Group new_group(dataset, &rbuf[2]);
 	H5std_string read_comment3 = new_group.getComment(".", 10);
 	verify_val(read_comment3, write_comment, "Group::getComment", __LINE__, __FILE__);
 	group.close();
 
-	// Dereference datatype object from the location where 'dataset' 
+	// Dereference datatype object from the location where 'dataset'
 	// is located
 	dtype1.dereference(dataset, &rbuf[3]);
 

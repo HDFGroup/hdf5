@@ -827,7 +827,7 @@ dataset_writeAll(void)
       VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
-  
+
 
     /* write data collectively */
     MESG("writeAll with scalar dataspace");

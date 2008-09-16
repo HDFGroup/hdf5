@@ -315,7 +315,7 @@ done:
  * Purpose:     Set a prefix to be applied to the path of any external links
  *              traversed.  The prefix is appended to the filename stored
  *              in the external link.
- * 
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	James Laird

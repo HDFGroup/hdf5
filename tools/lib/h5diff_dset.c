@@ -43,35 +43,35 @@ hsize_t diff_dataset( hid_t file1_id,
     hid_t   dcpl1 = -1;
     hid_t   dcpl2 = -1;
     hsize_t nfound = 0;
-    
+
    /*-------------------------------------------------------------------------
     * open the handles
     *-------------------------------------------------------------------------
     */
     /* disable error reporting */
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         /* open the datasets */
-        if((did1 = H5Dopen2(file1_id, obj1_name, H5P_DEFAULT)) < 0) 
+        if((did1 = H5Dopen2(file1_id, obj1_name, H5P_DEFAULT)) < 0)
         {
             printf("Cannot open dataset <%s>\n", obj1_name);
             goto error;
         }
-        
-        if((did2 = H5Dopen2(file2_id, obj2_name, H5P_DEFAULT)) < 0) 
+
+        if((did2 = H5Dopen2(file2_id, obj2_name, H5P_DEFAULT)) < 0)
         {
             printf("Cannot open dataset <%s>\n", obj2_name);
             goto error;
         }
         /* enable error reporting */
     } H5E_END_TRY;
-    
-    
+
+
     if ((dcpl1 = H5Dget_create_plist(did1)) < 0)
         goto error;
     if ((dcpl2 = H5Dget_create_plist(did2)) < 0)
         goto error;
-    
+
    /*-------------------------------------------------------------------------
     * check if the dataset creation property list has filters that
     * are not registered in the current configuration
@@ -93,7 +93,7 @@ hsize_t diff_dataset( hid_t file1_id,
     *-------------------------------------------------------------------------
     */
     /* disable error reporting */
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Pclose(dcpl1);
         H5Pclose(dcpl2);
@@ -101,13 +101,13 @@ hsize_t diff_dataset( hid_t file1_id,
         H5Dclose(did2);
         /* enable error reporting */
     } H5E_END_TRY;
-    
+
     return nfound;
-    
+
 error:
     options->err_stat=1;
     /* disable error reporting */
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
         H5Pclose(dcpl1);
         H5Pclose(dcpl2);
@@ -115,7 +115,7 @@ error:
         H5Dclose(did2);
         /* enable error reporting */
     } H5E_END_TRY;
-    
+
     return nfound;
 }
 
@@ -131,47 +131,47 @@ error:
  *
  * Date: May 9, 2003
  *
- * Modifications: 
+ * Modifications:
  *
  * October 2006:  Read by hyperslabs for big datasets.
  *
  *  A threshold of H5TOOLS_MALLOCSIZE (128 MB) is the limit upon which I/O hyperslab is done
- *  i.e., if the memory needed to read a dataset is greater than this limit, 
- *  then hyperslab I/O is done instead of one operation I/O 
+ *  i.e., if the memory needed to read a dataset is greater than this limit,
+ *  then hyperslab I/O is done instead of one operation I/O
  *  For each dataset, the memory needed is calculated according to
  *
  *  memory needed = number of elements * size of each element
  *
- *  if the memory needed is lower than H5TOOLS_MALLOCSIZE, then the following operations 
+ *  if the memory needed is lower than H5TOOLS_MALLOCSIZE, then the following operations
  *  are done
  *
  *  H5Dread( input_dataset1 )
  *  H5Dread( input_dataset2 )
  *
- *  with all elements in the datasets selected. If the memory needed is greater than 
+ *  with all elements in the datasets selected. If the memory needed is greater than
  *  H5TOOLS_MALLOCSIZE, then the following operations are done instead:
  *
- *  a strip mine is defined for each dimension k (a strip mine is defined as a 
+ *  a strip mine is defined for each dimension k (a strip mine is defined as a
  *  hyperslab whose size is memory manageable) according to the formula
  *
  *  (1) strip_mine_size[k ] = MIN(dimension[k ], H5TOOLS_BUFSIZE / size of memory type)
  *
- *  where H5TOOLS_BUFSIZE is a constant currently defined as 1MB. This formula assures 
- *  that for small datasets (small relative to the H5TOOLS_BUFSIZE constant), the strip 
- *  mine size k is simply defined as its dimension k, but for larger datasets the 
+ *  where H5TOOLS_BUFSIZE is a constant currently defined as 1MB. This formula assures
+ *  that for small datasets (small relative to the H5TOOLS_BUFSIZE constant), the strip
+ *  mine size k is simply defined as its dimension k, but for larger datasets the
  *  hyperslab size is still memory manageable.
- *  a cycle is done until the number of elements in the dataset is reached. In each 
- *  iteration, two parameters are defined for the function H5Sselect_hyperslab, 
+ *  a cycle is done until the number of elements in the dataset is reached. In each
+ *  iteration, two parameters are defined for the function H5Sselect_hyperslab,
  *  the start and size of each hyperslab, according to
  *
  *  (2) hyperslab_size [k] = MIN(dimension[k] - hyperslab_offset[k], strip_mine_size [k])
  *
- *  where hyperslab_offset [k] is initially set to zero, and later incremented in 
- *  hyperslab_size[k] offsets. The reason for the operation 
+ *  where hyperslab_offset [k] is initially set to zero, and later incremented in
+ *  hyperslab_size[k] offsets. The reason for the operation
  *
  *  dimension[k] - hyperslab_offset[k]
  *
- *  in (2) is that, when using the strip mine size, it assures that the "remaining" part 
+ *  in (2) is that, when using the strip mine size, it assures that the "remaining" part
  *  of the dataset that does not fill an entire strip mine is processed.
  *
  *-------------------------------------------------------------------------
@@ -185,13 +185,13 @@ hsize_t diff_datasetid( hid_t did1,
     hid_t      sid1=-1;
     hid_t      sid2=-1;
     hid_t      f_tid1=-1;
-    hid_t      f_tid2=-1;                
+    hid_t      f_tid2=-1;
     hid_t      m_tid1=-1;
-    hid_t      m_tid2=-1;                
+    hid_t      m_tid2=-1;
     size_t     m_size1;
-    size_t     m_size2;               
+    size_t     m_size2;
     H5T_sign_t sign1;
-    H5T_sign_t sign2;                 
+    H5T_sign_t sign2;
     int        rank1;
     int        rank2;
     hsize_t    nelmts1;
@@ -206,60 +206,60 @@ hsize_t diff_datasetid( hid_t did1,
     hsize_t    storage_size2;
     hsize_t    nfound=0;               /* number of differences found */
     int        cmp=1;                  /* do diff or not */
-    void       *buf1=NULL;                  
-    void       *buf2=NULL; 
-    void       *sm_buf1=NULL;                
+    void       *buf1=NULL;
+    void       *buf2=NULL;
+    void       *sm_buf1=NULL;
     void       *sm_buf2=NULL;
     size_t     need;                   /* bytes needed for malloc */
     int        i;
-    
+
     /* get the dataspace handle */
     if ( (sid1 = H5Dget_space(did1)) < 0 )
         goto error;
-    
+
     /* get rank */
     if ( (rank1 = H5Sget_simple_extent_ndims(sid1)) < 0 )
         goto error;
-    
+
     /* get the dataspace handle */
     if ( (sid2 = H5Dget_space(did2)) < 0 )
         goto error;
-    
+
     /* get rank */
     if ( (rank2 = H5Sget_simple_extent_ndims(sid2)) < 0 )
         goto error;
-    
+
     /* get dimensions */
     if ( H5Sget_simple_extent_dims(sid1,dims1,maxdim1) < 0 )
         goto error;
-    
+
     /* get dimensions */
     if ( H5Sget_simple_extent_dims(sid2,dims2,maxdim2) < 0 )
         goto error;
-    
+
     /*-------------------------------------------------------------------------
      * get the file data type
      *-------------------------------------------------------------------------
      */
-    
+
     /* get the data type */
     if ( (f_tid1 = H5Dget_type(did1)) < 0 )
         goto error;
-    
+
     /* get the data type */
     if ( (f_tid2 = H5Dget_type(did2)) < 0 )
         goto error;
-    
+
     /*-------------------------------------------------------------------------
      * check for empty datasets
      *-------------------------------------------------------------------------
      */
-    
+
     storage_size1=H5Dget_storage_size(did1);
     storage_size2=H5Dget_storage_size(did2);
     if (storage_size1<0 || storage_size2<0)
         goto error;
-    
+
     if (storage_size1==0 || storage_size2==0)
     {
         if (options->m_verbose && obj1_name && obj2_name)
@@ -267,12 +267,12 @@ hsize_t diff_datasetid( hid_t did1,
         cmp=0;
         options->not_cmp=1;
     }
-    
+
    /*-------------------------------------------------------------------------
     * check for comparable TYPE and SPACE
     *-------------------------------------------------------------------------
     */
-    
+
     if (diff_can_type(f_tid1,
         f_tid2,
         rank1,
@@ -288,46 +288,46 @@ hsize_t diff_datasetid( hid_t did1,
         cmp=0;
         options->not_cmp=1;
     }
-    
+
    /*-------------------------------------------------------------------------
     * memory type and sizes
     *-------------------------------------------------------------------------
     */
     if ((m_tid1=h5tools_get_native_type(f_tid1)) < 0)
         goto error;
-    
+
     if ((m_tid2=h5tools_get_native_type(f_tid2)) < 0)
         goto error;
-    
+
     m_size1 = H5Tget_size( m_tid1 );
     m_size2 = H5Tget_size( m_tid2 );
-    
+
    /*-------------------------------------------------------------------------
     * check for different signed/unsigned types
     *-------------------------------------------------------------------------
     */
-    
+
     sign1=H5Tget_sign(m_tid1);
     sign2=H5Tget_sign(m_tid2);
     if ( sign1 != sign2 )
     {
-        if (options->m_verbose && obj1_name) 
+        if (options->m_verbose && obj1_name)
         {
             parallel_print("Comparison not supported: <%s> has sign %s ", obj1_name, get_sign(sign1));
             parallel_print("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
         }
-        
+
         cmp=0;
         options->not_cmp=1;
     }
-    
+
    /*-------------------------------------------------------------------------
     * only attempt to compare if possible
     *-------------------------------------------------------------------------
     */
     if (cmp)
     {
-        
+
        /*-------------------------------------------------------------------------
         * get number of elements
         *-------------------------------------------------------------------------
@@ -337,43 +337,43 @@ hsize_t diff_datasetid( hid_t did1,
         {
             nelmts1 *= dims1[i];
         }
-        
+
         nelmts2 = 1;
         for (i = 0; i < rank2; i++)
         {
             nelmts2 *= dims2[i];
         }
-        
+
         assert(nelmts1==nelmts2);
-        
+
        /*-------------------------------------------------------------------------
         * "upgrade" the smaller memory size
         *-------------------------------------------------------------------------
         */
-        
+
         if ( m_size1 != m_size2 )
         {
             if ( m_size1 < m_size2 )
             {
                 H5Tclose(m_tid1);
-                
+
                 if ((m_tid1=h5tools_get_native_type(f_tid2)) < 0)
                     goto error;
-                
+
                 m_size1 = H5Tget_size( m_tid1 );
             }
             else
             {
                 H5Tclose(m_tid2);
-                
+
                 if ((m_tid2=h5tools_get_native_type(f_tid1)) < 0)
                     goto error;
-                
+
                 m_size2 = H5Tget_size( m_tid2 );
             }
         }
         assert(m_size1==m_size2);
-        
+
         /* print names */
         if (obj1_name) {
             name1=diff_basename(obj1_name);
@@ -381,27 +381,27 @@ hsize_t diff_datasetid( hid_t did1,
         if (obj2_name) {
             name2=diff_basename(obj2_name);
         }
-        
-        
+
+
        /*-------------------------------------------------------------------------
         * read/compare
         *-------------------------------------------------------------------------
         */
-        
+
         need = (size_t)(nelmts1*m_size1);  /* bytes needed */
         if ( need < H5TOOLS_MALLOCSIZE)
         {
             buf1 = HDmalloc(need);
             buf2 = HDmalloc(need);
         }
-        
+
         if ( buf1!=NULL && buf2!=NULL)
         {
             if ( H5Dread(did1,m_tid1,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf1) < 0 )
                 goto error;
             if ( H5Dread(did2,m_tid2,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf2) < 0 )
                 goto error;
-            
+
             /* array diff */
             nfound = diff_array(buf1,
                 buf2,
@@ -416,61 +416,61 @@ hsize_t diff_datasetid( hid_t did1,
                 did1,
                 did2);
         }
-        
+
         else /* possibly not enough memory, read/compare by hyperslabs */
-            
+
         {
             size_t        p_type_nbytes = m_size1; /*size of memory type */
             hsize_t       p_nelmts = nelmts1;      /*total selected elmts */
             hsize_t       elmtno;                  /*counter  */
             int           carry;                   /*counter carry value */
             unsigned int  vl_data = 0;             /*contains VL datatypes */
-            
+
             /* stripmine info */
             hsize_t       sm_size[H5S_MAX_RANK];   /*stripmine size */
             hsize_t       sm_nbytes;               /*bytes per stripmine */
             hsize_t       sm_nelmts;               /*elements per stripmine*/
             hid_t         sm_space;                /*stripmine data space */
-            
+
             /* hyperslab info */
             hsize_t       hs_offset[H5S_MAX_RANK]; /*starting offset */
             hsize_t       hs_size[H5S_MAX_RANK];   /*size this pass */
             hsize_t       hs_nelmts;               /*elements in request */
             hsize_t       zero[8];                 /*vector of zeros */
-            
+
             /* check if we have VL data in the dataset's datatype */
             if (H5Tdetect_class(m_tid1, H5T_VLEN) == TRUE)
                 vl_data = TRUE;
-            
+
             /*
              * determine the strip mine size and allocate a buffer. The strip mine is
              * a hyperslab whose size is manageable.
              */
             sm_nbytes = p_type_nbytes;
-            
-            for (i = rank1; i > 0; --i) 
+
+            for (i = rank1; i > 0; --i)
             {
                 sm_size[i - 1] = MIN(dims1[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
                 sm_nbytes *= sm_size[i - 1];
                 assert(sm_nbytes > 0);
             }
-            
+
             sm_buf1 = malloc((size_t)sm_nbytes);
             sm_buf2 = malloc((size_t)sm_nbytes);
-            
+
             sm_nelmts = sm_nbytes / p_type_nbytes;
             sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
-            
+
             /* the stripmine loop */
             memset(hs_offset, 0, sizeof hs_offset);
             memset(zero, 0, sizeof zero);
-            
-            for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_nelmts) 
+
+            for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_nelmts)
             {
                 /* calculate the hyperslab size */
-                if (rank1 > 0) 
+                if (rank1 > 0)
                 {
-                    for (i = 0, hs_nelmts = 1; i < rank1; i++) 
+                    for (i = 0, hs_nelmts = 1; i < rank1; i++)
                     {
                         hs_size[i] = MIN(dims1[i] - hs_offset[i], sm_size[i]);
                         hs_nelmts *= hs_size[i];
@@ -481,22 +481,22 @@ hsize_t diff_datasetid( hid_t did1,
                         goto error;
                     if (H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL) < 0)
                         goto error;
-                } 
-                else 
+                }
+                else
                 {
                     H5Sselect_all(sid1);
                     H5Sselect_all(sid2);
                     H5Sselect_all(sm_space);
                     hs_nelmts = 1;
                 } /* rank */
-                
+
                 if ( H5Dread(did1,m_tid1,sm_space,sid1,H5P_DEFAULT,sm_buf1) < 0 )
                     goto error;
                 if ( H5Dread(did2,m_tid2,sm_space,sid2,H5P_DEFAULT,sm_buf2) < 0 )
                     goto error;
-                
-                /* get array differences. in the case of hyperslab read, increment the 
-                   number of differences found in each hyperslab and pass the 
+
+                /* get array differences. in the case of hyperslab read, increment the
+                   number of differences found in each hyperslab and pass the
                    position at the beggining for printing
                  */
                 nfound += diff_array(sm_buf1,
@@ -511,16 +511,16 @@ hsize_t diff_datasetid( hid_t did1,
                     m_tid1,
                     did1,
                     did2);
-                
+
                 /* reclaim any VL memory, if necessary */
                 if(vl_data)
                 {
                     H5Dvlen_reclaim(m_tid1, sm_space, H5P_DEFAULT, sm_buf1);
                     H5Dvlen_reclaim(m_tid1, sm_space, H5P_DEFAULT, sm_buf2);
                 }
-                
+
                 /* calculate the next hyperslab offset */
-                for (i = rank1, carry = 1; i > 0 && carry; --i) 
+                for (i = rank1, carry = 1; i > 0 && carry; --i)
                 {
                     hs_offset[i - 1] += hs_size[i - 1];
                     if (hs_offset[i - 1] == dims1[i - 1])
@@ -529,7 +529,7 @@ hsize_t diff_datasetid( hid_t did1,
                         carry = 0;
                 } /* i */
             } /* elmtno */
-            
+
             H5Sclose(sm_space);
             /* free */
             if (sm_buf1!=NULL)
@@ -542,24 +542,24 @@ hsize_t diff_datasetid( hid_t did1,
                 free(sm_buf2);
                 sm_buf2=NULL;
             }
-            
+
   } /* hyperslab read */
  }/*cmp*/
- 
+
  /*-------------------------------------------------------------------------
   * compare attributes
   * the if condition refers to cases when the dataset is a referenced object
   *-------------------------------------------------------------------------
   */
-  
+
   if (obj1_name)
       nfound += diff_attr(did1,did2,obj1_name,obj2_name,options);
-  
+
  /*-------------------------------------------------------------------------
   * close
   *-------------------------------------------------------------------------
   */
-  
+
   /* free */
   if (buf1!=NULL)
   {
@@ -581,8 +581,8 @@ hsize_t diff_datasetid( hid_t did1,
       free(sm_buf2);
       sm_buf2=NULL;
   }
-  
-  H5E_BEGIN_TRY 
+
+  H5E_BEGIN_TRY
   {
       H5Sclose(sid1);
       H5Sclose(sid2);
@@ -591,12 +591,12 @@ hsize_t diff_datasetid( hid_t did1,
       H5Tclose(m_tid1);
       H5Tclose(m_tid2);
   } H5E_END_TRY;
-  
+
   return nfound;
-  
+
 error:
   options->err_stat=1;
-  
+
   /* free */
   if (buf1!=NULL)
   {
@@ -618,9 +618,9 @@ error:
       free(sm_buf2);
       sm_buf2=NULL;
   }
-  
+
   /* disable error reporting */
-  H5E_BEGIN_TRY 
+  H5E_BEGIN_TRY
   {
       H5Sclose(sid1);
       H5Sclose(sid2);
@@ -630,7 +630,7 @@ error:
       H5Tclose(m_tid2);
       /* enable error reporting */
   } H5E_END_TRY;
-  
+
   return nfound;
 }
 
@@ -668,21 +668,21 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
     int          maxdim_diff=0;          /* maximum dimensions are different */
     int          dim_diff=0;             /* current dimensions are different */
     int          i;
-    
+
    /*-------------------------------------------------------------------------
     * check for the same class
     *-------------------------------------------------------------------------
     */
-    
+
     if ((tclass1=H5Tget_class(f_tid1)) < 0)
         return -1;
-    
+
     if ((tclass2=H5Tget_class(f_tid2)) < 0)
         return -1;
-    
+
     if ( tclass1 != tclass2 )
     {
-        if (options->m_verbose && obj1_name) 
+        if (options->m_verbose && obj1_name)
         {
             printf("Comparison not possible: <%s> is of class %s and <%s> is of class %s\n",
                 obj1_name, get_class(tclass1),
@@ -690,12 +690,12 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
         }
         return 0;
     }
-    
+
    /*-------------------------------------------------------------------------
     * check for non supported classes
     *-------------------------------------------------------------------------
     */
-    
+
     assert(tclass1==tclass2);
     switch (tclass1)
     {
@@ -709,21 +709,21 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
     case H5T_ENUM:
     case H5T_VLEN:
     case H5T_REFERENCE:
-        
+
         break;
-        
+
     default: /*H5T_TIME */
         if (options->m_verbose && obj1_name )
             printf("Comparison not supported: <%s> and <%s> are of class %s\n",
             obj1_name,obj2_name,get_class(tclass2) );
         return 0;
     }
-    
+
    /*-------------------------------------------------------------------------
     * check for equal file datatype; warning only
     *-------------------------------------------------------------------------
     */
-    
+
     if ( (H5Tequal(f_tid1, f_tid2)==0) && options->m_verbose && obj1_name)
     {
         printf("Warning: different storage datatype\n");
@@ -734,15 +734,15 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
         print_type(f_tid2);
         printf("\n");
     }
-    
+
    /*-------------------------------------------------------------------------
     * check for the same rank
     *-------------------------------------------------------------------------
     */
-    
+
     if ( rank1 != rank2 )
     {
-        if (options->m_verbose && obj1_name) 
+        if (options->m_verbose && obj1_name)
         {
             printf("Comparison not supported: <%s> has rank %d, dimensions ", obj1_name, rank1);
             print_dimensions(rank1,dims1);
@@ -756,12 +756,12 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
         }
         return 0;
     }
-    
+
    /*-------------------------------------------------------------------------
     * check for different dimensions
     *-------------------------------------------------------------------------
     */
-    
+
     assert(rank1==rank2);
     for ( i=0; i<rank1; i++)
     {
@@ -773,19 +773,19 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
         if ( dims1[i] != dims2[i] )
             dim_diff=1;
     }
-    
+
    /*-------------------------------------------------------------------------
     * current dimensions
     *-------------------------------------------------------------------------
     */
-    
+
     if (dim_diff==1)
     {
-        if (options->m_verbose && obj1_name) 
+        if (options->m_verbose && obj1_name)
         {
             printf("Comparison not supported: <%s> has rank %d, dimensions ", obj1_name, rank1);
             print_dimensions(rank1,dims1);
-            if (maxdim1 && maxdim2) 
+            if (maxdim1 && maxdim2)
             {
                 printf(", max dimensions ");
                 print_dimensions(rank1,maxdim1);
@@ -798,14 +798,14 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
         }
         return 0;
     }
-    
+
    /*-------------------------------------------------------------------------
     * maximum dimensions; just give a warning
     *-------------------------------------------------------------------------
     */
     if (maxdim1 && maxdim2 && maxdim_diff==1 && obj1_name )
     {
-        if (options->m_verbose) 
+        if (options->m_verbose)
         {
             printf( "Warning: different maximum dimensions\n");
             printf("<%s> has max dimensions ", obj1_name);
@@ -816,7 +816,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
             printf("\n");
         }
     }
-    
+
     return 1;
 }
 
@@ -878,7 +878,7 @@ void print_sizes( const char *obj1,
 /*-------------------------------------------------------------------------
  * Function: print_size
  *
- * Purpose: print dimensions 
+ * Purpose: print dimensions
  *
  *-------------------------------------------------------------------------
  */
@@ -896,7 +896,7 @@ print_size (int rank, hsize_t *dims)
     }
     parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[rank-1]);
     parallel_print("]\n" );
-    
+
 }
 #endif /* H5DIFF_DEBUG */
 

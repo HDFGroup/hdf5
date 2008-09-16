@@ -5539,7 +5539,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    gent_binary
  *
- * Purpose:     Generate a file to be used in the binary output test 
+ * Purpose:     Generate a file to be used in the binary output test
  *              Contains:
  *              1) an integer dataset
  *              2) a float dataset
@@ -5564,7 +5564,7 @@ gent_binary(void)
  * integer
  *-------------------------------------------------------------------------
  */
- 
+
  did = H5Dcreate2(fid, "integer", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
  H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ibuf);
  H5Dclose(did);
@@ -5587,7 +5587,7 @@ gent_binary(void)
  aid = H5Acreate2(did, "attr", H5T_NATIVE_DOUBLE, sid, H5P_DEFAULT, H5P_DEFAULT);
  H5Aclose(aid);
  H5Dclose(did);
- 
+
 
  /* close */
  H5Sclose(sid);
@@ -5629,8 +5629,8 @@ gent_bigdims(void)
     /* create a file */
     fid  = H5Fcreate(FILE56, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     assert(fid >= 0);
-    
-    /* create dataset */ 
+
+    /* create dataset */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto out;
     if(H5Pset_fill_value(dcpl, H5T_NATIVE_SCHAR, &fillvalue) < 0)
@@ -5641,35 +5641,35 @@ gent_bigdims(void)
         goto out;
     if((did = H5Dcreate2(fid, "dset4gb", H5T_NATIVE_SCHAR, f_sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         goto out;
-    if((tid = H5Dget_type(did)) < 0) 
+    if((tid = H5Dget_type(did)) < 0)
         goto out;
     if((size = H5Tget_size(tid)) <= 0)
         goto out;
-    
+
     /* select an hyperslab */
     nelmts = 20;
     hs_start[0] = GB4LL - 10;
     hs_size[0]  = nelmts;
-    
-    if((m_sid = H5Screate_simple(1, hs_size, hs_size)) < 0) 
+
+    if((m_sid = H5Screate_simple(1, hs_size, hs_size)) < 0)
         goto out;
-    
+
     buf=(char *) malloc((unsigned)(nelmts*size));
-    
-    for(i=0, c=0; i<nelmts; i++, c++) 
+
+    for(i=0, c=0; i<nelmts; i++, c++)
     {
         buf[i] = c;
     }
-    
-    if(H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size,NULL) < 0) 
+
+    if(H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size,NULL) < 0)
         goto out;
-    if(H5Dwrite (did,H5T_NATIVE_SCHAR,m_sid,f_sid,H5P_DEFAULT,buf) < 0) 
+    if(H5Dwrite (did,H5T_NATIVE_SCHAR,m_sid,f_sid,H5P_DEFAULT,buf) < 0)
         goto out;
-    
-    
+
+
     free(buf);
     buf=NULL;
-    
+
     /* close */
     if(H5Sclose(f_sid) < 0)
         goto out;
@@ -5682,9 +5682,9 @@ gent_bigdims(void)
 
     ret = H5Fclose(fid);
     assert(ret >= 0);
-    
+
     return;
-    
+
 out:
     printf("Error.....\n");
     H5E_BEGIN_TRY {
@@ -5695,7 +5695,7 @@ out:
         H5Fclose(fid);
     } H5E_END_TRY;
     return;
-    
+
 }
 
 
@@ -5735,7 +5735,7 @@ gent_hyperslab(void)
  * Function: gent_group_creation_order
  *
  * Purpose: generate a file with several groups with creation order set and not
- *  set tru its hierarchy 
+ *  set tru its hierarchy
  *
  *-------------------------------------------------------------------------
  */
@@ -5746,118 +5746,118 @@ gent_group_creation_order(void)
     hid_t    gid;      /* group ID */
     hid_t    gcpl_id;  /* group creation property list ID */
     hid_t    fcpl_id;  /* file creation property list ID (to set root group order) */
-    
-    if((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) < 0) 
+
+    if((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) < 0)
         goto out;
-    
-    if(H5Pset_link_creation_order(fcpl_id, H5P_CRT_ORDER_TRACKED ) < 0) 
+
+    if(H5Pset_link_creation_order(fcpl_id, H5P_CRT_ORDER_TRACKED ) < 0)
         goto out;
-    
-    if((fid = H5Fcreate(FILE58, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT)) < 0) 
+
+    if((fid = H5Fcreate(FILE58, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT)) < 0)
         goto out;
-    
-    
+
+
     /* create group creation property list */
-    if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) 
+    if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
         goto out;
 
 /*-------------------------------------------------------------------------
- * create a group "2" 
+ * create a group "2"
  *-------------------------------------------------------------------------
- */  
-    
+ */
 
-    if((gid = H5Gcreate2(fid, "2", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+
+    if((gid = H5Gcreate2(fid, "2", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
         goto out;
-    if(H5Gclose(gid) < 0) 
-        goto out;
-    
-    if((gid = H5Gcreate2(fid, "2/c", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-        goto out;
-    if(H5Gclose(gid) < 0) 
-        goto out;
-    if((gid = H5Gcreate2(fid, "2/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-        goto out;
-    if(H5Gclose(gid) < 0) 
-        goto out;
-    if((gid = H5Gcreate2(fid, "2/a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-        goto out;
-    if(H5Gclose(gid) < 0) 
+    if(H5Gclose(gid) < 0)
         goto out;
 
-    if((gid = H5Gcreate2(fid, "2/a/a2", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gcreate2(fid, "2/c", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
-    if(H5Gclose(gid) < 0) 
+    if(H5Gclose(gid) < 0)
         goto out;
-    if((gid = H5Gcreate2(fid, "2/a/a1", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gcreate2(fid, "2/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
-    if(H5Gclose(gid) < 0) 
+    if(H5Gclose(gid) < 0)
         goto out;
-
-     if((gid = H5Gcreate2(fid, "2/a/a2/a22", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gcreate2(fid, "2/a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
-    if(H5Gclose(gid) < 0) 
-        goto out;
-    if((gid = H5Gcreate2(fid, "2/a/a2/a21", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-        goto out;
-    if(H5Gclose(gid) < 0) 
+    if(H5Gclose(gid) < 0)
         goto out;
 
-  
+    if((gid = H5Gcreate2(fid, "2/a/a2", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Gclose(gid) < 0)
+        goto out;
+    if((gid = H5Gcreate2(fid, "2/a/a1", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Gclose(gid) < 0)
+        goto out;
+
+     if((gid = H5Gcreate2(fid, "2/a/a2/a22", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Gclose(gid) < 0)
+        goto out;
+    if((gid = H5Gcreate2(fid, "2/a/a2/a21", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Gclose(gid) < 0)
+        goto out;
+
+
 /*-------------------------------------------------------------------------
  * create a group "1" with H5P_CRT_ORDER_TRACKED set
  *-------------------------------------------------------------------------
- */  
-    if(H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) 
+ */
+    if(H5Pset_link_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0)
         goto out;
 
 
-    if((gid = H5Gcreate2(fid, "1", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gcreate2(fid, "1", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
         goto out;
-    if(H5Gclose(gid) < 0) 
-        goto out;
-    
-    if((gid = H5Gcreate2(fid, "1/c", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-        goto out;
-    if(H5Gclose(gid) < 0) 
-        goto out;
-    if((gid = H5Gcreate2(fid, "1/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-        goto out;
-    if(H5Gclose(gid) < 0) 
-        goto out;
-    if((gid = H5Gcreate2(fid, "1/a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
-        goto out;
-    if(H5Gclose(gid) < 0) 
+    if(H5Gclose(gid) < 0)
         goto out;
 
-    if((gid = H5Gcreate2(fid, "1/a/a2", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gcreate2(fid, "1/c", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
-    if(H5Gclose(gid) < 0) 
+    if(H5Gclose(gid) < 0)
         goto out;
-    if((gid = H5Gcreate2(fid, "1/a/a1", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gcreate2(fid, "1/b", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
-    if(H5Gclose(gid) < 0) 
+    if(H5Gclose(gid) < 0)
+        goto out;
+    if((gid = H5Gcreate2(fid, "1/a", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Gclose(gid) < 0)
         goto out;
 
-     if((gid = H5Gcreate2(fid, "1/a/a2/a22", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gcreate2(fid, "1/a/a2", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
         goto out;
-    if(H5Gclose(gid) < 0) 
+    if(H5Gclose(gid) < 0)
         goto out;
-    if((gid = H5Gcreate2(fid, "1/a/a2/a21", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gcreate2(fid, "1/a/a1", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
         goto out;
-    if(H5Gclose(gid) < 0) 
+    if(H5Gclose(gid) < 0)
         goto out;
-    
-  
-    if(H5Pclose(gcpl_id) < 0) 
+
+     if((gid = H5Gcreate2(fid, "1/a/a2/a22", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
-    if(H5Pclose(fcpl_id) < 0) 
+    if(H5Gclose(gid) < 0)
         goto out;
-    if(H5Fclose(fid) < 0) 
+    if((gid = H5Gcreate2(fid, "1/a/a2/a21", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
-    
+    if(H5Gclose(gid) < 0)
+        goto out;
+
+
+    if(H5Pclose(gcpl_id) < 0)
+        goto out;
+    if(H5Pclose(fcpl_id) < 0)
+        goto out;
+    if(H5Fclose(fid) < 0)
+        goto out;
+
     return;
-    
+
 out:
     printf("Error.....\n");
     H5E_BEGIN_TRY {
@@ -5865,17 +5865,17 @@ out:
         H5Pclose(gcpl_id);
         H5Pclose(fcpl_id);
         H5Fclose(fid);
-        
+
     } H5E_END_TRY;
     return;
-    
+
 }
 
 /*-------------------------------------------------------------------------
  * Function: gent_attr_creation_order
  *
- * Purpose: generate a file with several objects with attributes with creation 
- *  order set and not set 
+ * Purpose: generate a file with several objects with attributes with creation
+ *  order set and not set
  *
  *-------------------------------------------------------------------------
  */
@@ -5893,85 +5893,85 @@ gent_attr_creation_order(void)
     hid_t    tcpl_id;  /* datatype creation property list ID */
     int      i;
     const char *attr_name[3] = {"c", "b", "a" };
-    
-    if((fid = H5Fcreate(FILE59, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+
+    if((fid = H5Fcreate(FILE59, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
-    
+
     /* create group creation property list */
-    if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0) 
+    if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
         goto out;
 
     /* create dataset creation property list */
-    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0) 
+    if((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         goto out;
 
     /* create dataset creation property list */
-    if((tcpl_id = H5Pcreate(H5P_DATATYPE_CREATE)) < 0) 
+    if((tcpl_id = H5Pcreate(H5P_DATATYPE_CREATE)) < 0)
         goto out;
 
     /* enable attribute creation order tracking on dataset property list */
-    if(H5Pset_attr_creation_order(dcpl_id, H5P_CRT_ORDER_TRACKED) < 0) 
+    if(H5Pset_attr_creation_order(dcpl_id, H5P_CRT_ORDER_TRACKED) < 0)
         goto out;
 
     /* enable attribute creation order tracking on group property list */
-    if(H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0) 
+    if(H5Pset_attr_creation_order(gcpl_id, H5P_CRT_ORDER_TRACKED) < 0)
         goto out;
 
     /* enable attribute creation order tracking on datatype property list */
-    if(H5Pset_attr_creation_order(tcpl_id, H5P_CRT_ORDER_TRACKED) < 0) 
+    if(H5Pset_attr_creation_order(tcpl_id, H5P_CRT_ORDER_TRACKED) < 0)
         goto out;
 
     /* create a dataspace */
-    if((sid = H5Screate(H5S_SCALAR)) < 0) 
+    if((sid = H5Screate(H5S_SCALAR)) < 0)
         goto out;
 
 /*-------------------------------------------------------------------------
  * create a dataset with creation order tracked for attributes and atributes in it
  *-------------------------------------------------------------------------
  */
-  
+
     /* create a dataset */
-    if((did = H5Dcreate2(fid, "dt", H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0) 
+    if((did = H5Dcreate2(fid, "dt", H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl_id, H5P_DEFAULT)) < 0)
         goto out;
 
     /* add attributes */
-    for(i = 0; i < 3; i++) 
+    for(i = 0; i < 3; i++)
     {
-        if((aid = H5Acreate2(did, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        if((aid = H5Acreate2(did, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
-        
+
         /* close attribute */
-        if(H5Aclose(aid) < 0) 
+        if(H5Aclose(aid) < 0)
             goto out;
     } /* end for */
-    
-    if(H5Dclose(did) < 0) 
+
+    if(H5Dclose(did) < 0)
         goto out;
-    
+
 
 /*-------------------------------------------------------------------------
  * create a dataset without creation order tracked for attributes and atributes in it
  *-------------------------------------------------------------------------
  */
-  
+
     /* create a dataset */
-    if((did = H5Dcreate2(fid, "d", H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((did = H5Dcreate2(fid, "d", H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
 
     /* add attributes */
-    for(i = 0; i < 3; i++) 
+    for(i = 0; i < 3; i++)
     {
-        if((aid = H5Acreate2(did, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        if((aid = H5Acreate2(did, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
-        
+
         /* close attribute */
-        if(H5Aclose(aid) < 0) 
+        if(H5Aclose(aid) < 0)
             goto out;
     } /* end for */
-    
-    if(H5Dclose(did) < 0) 
+
+    if(H5Dclose(did) < 0)
         goto out;
-    
+
 
 
 /*-------------------------------------------------------------------------
@@ -5979,22 +5979,22 @@ gent_attr_creation_order(void)
  *-------------------------------------------------------------------------
  */
 
-    if((gid = H5Gcreate2(fid, "gt", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gcreate2(fid, "gt", H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
         goto out;
-    
+
     /* add attributes */
-    for(i = 0; i < 3; i++) 
+    for(i = 0; i < 3; i++)
     {
-        if((aid = H5Acreate2(gid, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        if((aid = H5Acreate2(gid, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
-        
+
         /* close attribute */
-        if(H5Aclose(aid) < 0) 
+        if(H5Aclose(aid) < 0)
             goto out;
-        
+
     } /* end for */
-    
-    if(H5Gclose(gid) < 0) 
+
+    if(H5Gclose(gid) < 0)
         goto out;
 
 /*-------------------------------------------------------------------------
@@ -6002,22 +6002,22 @@ gent_attr_creation_order(void)
  *-------------------------------------------------------------------------
  */
 
-    if((gid = H5Gcreate2(fid, "g", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if((gid = H5Gcreate2(fid, "g", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
-    
+
     /* add attributes */
-    for(i = 0; i < 3; i++) 
+    for(i = 0; i < 3; i++)
     {
-        if((aid = H5Acreate2(gid, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        if((aid = H5Acreate2(gid, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
-        
+
         /* close attribute */
-        if(H5Aclose(aid) < 0) 
+        if(H5Aclose(aid) < 0)
             goto out;
-        
+
     } /* end for */
-    
-    if(H5Gclose(gid) < 0) 
+
+    if(H5Gclose(gid) < 0)
         goto out;
 
 
@@ -6026,25 +6026,25 @@ gent_attr_creation_order(void)
  *-------------------------------------------------------------------------
  */
 
-    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) 
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
         goto out;
-    
+
     if((H5Tcommit2(fid, "tt", tid, H5P_DEFAULT, tcpl_id, H5P_DEFAULT)) < 0)
         goto out;
-    
+
     /* add attributes */
-    for(i = 0; i < 3; i++) 
+    for(i = 0; i < 3; i++)
     {
-        if((aid = H5Acreate2(tid, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        if((aid = H5Acreate2(tid, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
-        
+
         /* close attribute */
-        if(H5Aclose(aid) < 0) 
+        if(H5Aclose(aid) < 0)
             goto out;
-        
+
     } /* end for */
-    
-    if(H5Tclose(tid) < 0) 
+
+    if(H5Tclose(tid) < 0)
         goto out;
 
 /*-------------------------------------------------------------------------
@@ -6052,47 +6052,47 @@ gent_attr_creation_order(void)
  *-------------------------------------------------------------------------
  */
 
-    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0) 
+    if((tid = H5Tcopy(H5T_NATIVE_INT)) < 0)
         goto out;
-    
+
     if((H5Tcommit2(fid, "t", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
-    
+
     /* add attributes */
-    for(i = 0; i < 3; i++) 
+    for(i = 0; i < 3; i++)
     {
-        if((aid = H5Acreate2(tid, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        if((aid = H5Acreate2(tid, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
-        
+
         /* close attribute */
-        if(H5Aclose(aid) < 0) 
+        if(H5Aclose(aid) < 0)
             goto out;
-        
+
     } /* end for */
-    
-    if(H5Tclose(tid) < 0) 
+
+    if(H5Tclose(tid) < 0)
         goto out;
 
 /*-------------------------------------------------------------------------
  * add some attributes to the root group
  *-------------------------------------------------------------------------
  */
-    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) 
+    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
         goto out;
-    
+
     /* add attributes */
-    for(i = 0; i < 3; i++) 
+    for(i = 0; i < 3; i++)
     {
-        if((aid = H5Acreate2(gid, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+        if((aid = H5Acreate2(gid, attr_name[i], H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
-        
+
         /* close attribute */
-        if(H5Aclose(aid) < 0) 
+        if(H5Aclose(aid) < 0)
             goto out;
-        
+
     } /* end for */
-    
-    if(H5Gclose(gid) < 0) 
+
+    if(H5Gclose(gid) < 0)
         goto out;
 
 
@@ -6100,22 +6100,22 @@ gent_attr_creation_order(void)
  * close
  *-------------------------------------------------------------------------
  */
-    if(H5Sclose(sid) < 0) 
+    if(H5Sclose(sid) < 0)
         goto out;
 
-    if(H5Pclose(dcpl_id) < 0) 
+    if(H5Pclose(dcpl_id) < 0)
         goto out;
-    if(H5Pclose(gcpl_id) < 0) 
+    if(H5Pclose(gcpl_id) < 0)
         goto out;
-    if(H5Pclose(tcpl_id) < 0) 
+    if(H5Pclose(tcpl_id) < 0)
         goto out;
-    if(H5Fclose(fid) < 0) 
+    if(H5Fclose(fid) < 0)
         goto out;
 
 
-    
+
     return;
-    
+
 out:
     printf("Error.....\n");
     H5E_BEGIN_TRY {
@@ -6126,16 +6126,16 @@ out:
         H5Pclose(dcpl_id);
         H5Pclose(tcpl_id);
         H5Fclose(fid);
-        
+
     } H5E_END_TRY;
     return;
-    
+
 }
 
 /*-------------------------------------------------------------------------
  * Function:    gent_fpformat
  *
- * Purpose:     Generate a file to be used in the floating point format test 
+ * Purpose:     Generate a file to be used in the floating point format test
  *              Contains:
  *              1) a float dataset
  *              2) a double dataset
@@ -6179,7 +6179,7 @@ gent_fpformat(void)
 /*-------------------------------------------------------------------------
  * Function:    gent_extlinks
  *
- * Purpose:     Generate 2 files to be used in the external links test 
+ * Purpose:     Generate 2 files to be used in the external links test
  *   External links point from one HDF5 file to an object (Group, Dataset, or
  *    committed Datatype) in another file.
  *
@@ -6195,7 +6195,7 @@ gent_extlinks(void)
  /* create two files, a source and a target */
  source_fid = H5Fcreate(FILE61, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
  target_fid = H5Fcreate(FILE62, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
- 
+
 
 /*-------------------------------------------------------------------------
  * create a Group, a Dataset, and a committed Datatype in the target

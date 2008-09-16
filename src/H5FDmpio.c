@@ -544,14 +544,14 @@ Description:
         The library won't behave as it asks for only when we find
         that the low-level MPI-IO package doesn't support this.
 
-Parameters: 
+Parameters:
         hid_t dxpl_id	      		in: Data transfer property list identifier
 	H5FD_mpio_chunk_opt_t   	in: The optimization flag for linked chunk IO
                                             or multi-chunk IO.
-                                                
 
-Returns: 
-Returns a non-negative value if successful. Otherwise returns a negative value. 
+
+Returns:
+Returns a non-negative value if successful. Otherwise returns a negative value.
 *
  *-------------------------------------------------------------------------
  */
@@ -596,14 +596,14 @@ Description:
         The library won't behave as it asks for only when we find
         that the low-level MPI-IO package doesn't support this.
 
-Parameters: 
+Parameters:
         hid_t dxpl_id	      		in: Data transfer property list identifier
 	H5FD_mpio_chunk_opt_t   	in: The optimization flag for linked chunk IO
                                             or multi-chunk IO.
-                                                
 
-Returns: 
-Returns a non-negative value if successful. Otherwise returns a negative value. 
+
+Returns:
+Returns a non-negative value if successful. Otherwise returns a negative value.
 *
  *-------------------------------------------------------------------------
  */
@@ -643,15 +643,15 @@ Purpose:
 	To set a threshold for doing linked chunk IO
 
 Description:
-        If the number is greater than the threshold set by the user, 
+        If the number is greater than the threshold set by the user,
         the library will do linked chunk IO; otherwise, IO will be done for every chunk.
 
-Parameters: 
+Parameters:
         hid_t dxpl_id	      		in: Data transfer property list identifier
-	unsigned num_proc_per_chunk	in: the threshold of the average number of chunks selected by each process 
+	unsigned num_proc_per_chunk	in: the threshold of the average number of chunks selected by each process
 
-Returns: 
-Returns a non-negative value if successful. Otherwise returns a negative value. 
+Returns:
+Returns a non-negative value if successful. Otherwise returns a negative value.
 *
  *-------------------------------------------------------------------------
  */
@@ -690,13 +690,13 @@ Purpose:
 	To set a threshold for doing collective IO for each chunk
 Description:
 	The library will calculate the percentage of the number of process holding selections at each chunk. If that percentage of number of process in the individual chunk is greater than the threshold set by the user, the library will do collective chunk IO for this chunk; otherwise, independent IO will be done for this chunk.
-Parameters: 
-	hid_t dxpl_id	         				
+Parameters:
+	hid_t dxpl_id
 		in: Data transfer property list identifier
-	unsigned percent_num_proc_per_chunk	
+	unsigned percent_num_proc_per_chunk
 		in: the threshold of the percentage of the number of process holding selections per chunk
-Returns: 
-Returns a non-negative value if successful. Otherwise returns a negative value. 
+Returns:
+Returns a non-negative value if successful. Otherwise returns a negative value.
 
 
 *
@@ -941,7 +941,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
 #ifndef H5_HAVE_MPI_GET_SIZE
     struct stat                 stat_buf;
 #endif
- 
+
     FUNC_ENTER_NOAPI(H5FD_mpio_open, NULL)
 
 #ifdef H5FDmpio_DEBUG
@@ -1016,7 +1016,7 @@ H5FD_mpio_open(const char *name, unsigned flags, hid_t fapl_id,
     /* Only processor p0 will get the filesize and broadcast it. */
     if (mpi_rank == 0) {
         /* Get current file size.  If MPI_File_get_size is disabled in configuration
-         * because it doesn't return correct value (SGI Altix Propack 4), 
+         * because it doesn't return correct value (SGI Altix Propack 4),
          * use stat to get the file size. */
 #ifdef H5_HAVE_MPI_GET_SIZE
         if (MPI_SUCCESS != (mpi_code=MPI_File_get_size(fh, &size)))
@@ -1514,7 +1514,7 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t dxpl_id, haddr_t add
             if(MPI_SUCCESS != (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
         } /* end else */
- 
+
         /*
          * Reset the file view when we used MPI derived types
          */

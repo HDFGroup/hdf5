@@ -1004,7 +1004,7 @@ H5G_create(H5F_t *file, hid_t gcpl_id, hid_t dxpl_id)
 
     /* Set the count of times the object is opened */
     grp->shared->fo_count = 1;
-    
+
     /* Set return value */
     ret_value = grp;
 
@@ -1768,7 +1768,7 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
 
     /* Build the link's relative path name */
     HDassert(udata->path[old_path_len] == '\0');
-    HDstrcpy(&(udata->path[old_path_len]), lnk->name); 
+    HDstrcpy(&(udata->path[old_path_len]), lnk->name);
     udata->curr_path_len += link_name_len;
 
     /* Construct the link info from the link message */
@@ -1831,9 +1831,9 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
 
                 /* Add the path separator to the current path */
                 HDassert(udata->path[udata->curr_path_len] == '\0');
-                HDstrcpy(&(udata->path[udata->curr_path_len]), "/"); 
+                HDstrcpy(&(udata->path[udata->curr_path_len]), "/");
                 udata->curr_path_len++;
-                    
+
                 /* Attempt to get the link info for this group */
                 if(H5G_obj_get_linfo(&obj_oloc, &linfo, udata->dxpl_id)) {
                     /* Check for creation order tracking, if creation order index lookup requested */

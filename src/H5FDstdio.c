@@ -539,8 +539,8 @@ H5FD_stdio_query(const H5FD_t *_f, unsigned long *flags /* out */)
 /*-------------------------------------------------------------------------
  * Function:	H5FD_stdio_alloc
  *
- * Purpose:	Allocates file memory. If fseeko isn't available, makes 
- *              sure the file size isn't bigger than 2GB because the 
+ * Purpose:	Allocates file memory. If fseeko isn't available, makes
+ *              sure the file size isn't bigger than 2GB because the
  *              parameter OFFSET of fseek is of the type LONG INT, limiting
  *              the file size to 2GB.
  *
@@ -584,7 +584,7 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
     /* If fseeko isn't available, big files (>2GB) won't be supported. */
     if((addr + size) > BIG_FILE)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_SEEKERROR, "can't write file bigger than 2GB because fseeko isn't available", HADDR_UNDEF)
-#endif 
+#endif
 
     file->eoa = addr + size;
 

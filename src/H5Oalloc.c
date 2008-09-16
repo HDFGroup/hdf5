@@ -148,7 +148,7 @@ H5O_add_gap(H5O_t *oh, unsigned chunkno, unsigned idx,
                 oh->mesg[u].raw -= new_gap_size;
 
         /* Slide raw message info forward in chunk image */
-        HDmemmove(new_gap_loc, new_gap_loc + new_gap_size, 
+        HDmemmove(new_gap_loc, new_gap_loc + new_gap_size,
                 (size_t)((oh->chunk[chunkno].image + (oh->chunk[chunkno].size - H5O_SIZEOF_CHKSUM_OH(oh))) - (new_gap_loc + new_gap_size)));
 
         /* Add existing gap size to new gap size */
@@ -849,7 +849,7 @@ H5O_alloc_new_chunk(H5F_t *f,
         if(H5O_alloc_msgs(oh, (size_t)3) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, UFAIL, "can't allocate more space for messages")
 
-    /* Move message (that will be replaced with continuation message) 
+    /* Move message (that will be replaced with continuation message)
      *  to new chunk, if necessary.
      */
     if(found_null < 0) {
@@ -1078,7 +1078,7 @@ H5O_release_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_mesg_t *mesg,
     /* Check if chunk has a gap currently */
     if(oh->chunk[mesg->chunkno].gap) {
         /* Eliminate the gap in the chunk */
-        if(H5O_eliminate_gap(oh, mesg, 
+        if(H5O_eliminate_gap(oh, mesg,
                 ((oh->chunk[mesg->chunkno].image + oh->chunk[mesg->chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[mesg->chunkno].gap)),
                 oh->chunk[mesg->chunkno].gap) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTREMOVE, FAIL, "can't eliminate gap in chunk")
@@ -1136,7 +1136,7 @@ H5O_move_msgs_forward(H5O_t *oh)
 
                 /* Check if null message is not last in chunk */
                 chunk = &(oh->chunk[curr_msg->chunkno]);
-                if((curr_msg->raw + curr_msg->raw_size) 
+                if((curr_msg->raw + curr_msg->raw_size)
                         != ((chunk->image + chunk->size) - (H5O_SIZEOF_CHKSUM_OH(oh) + chunk->gap))) {
                     H5O_mesg_t *nonnull_msg;       /* Pointer to current message to operate on */
                     unsigned	v;              /* Local index variable */
@@ -1220,7 +1220,7 @@ H5O_move_msgs_forward(H5O_t *oh)
                             /* Check for gap in null message's chunk */
                             if(oh->chunk[old_chunkno].gap > 0) {
                                 /* Eliminate the gap in the chunk */
-                                if(H5O_eliminate_gap(oh, null_msg, 
+                                if(H5O_eliminate_gap(oh, null_msg,
                                         ((oh->chunk[old_chunkno].image + oh->chunk[old_chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[old_chunkno].gap)),
                                         oh->chunk[old_chunkno].gap) < 0)
                                     HGOTO_ERROR(H5E_OHDR, H5E_CANTREMOVE, FAIL, "can't eliminate gap in chunk")
@@ -1278,7 +1278,7 @@ H5O_move_msgs_forward(H5O_t *oh)
                             /* Check for gap in new null message's chunk */
                             if(oh->chunk[old_chunkno].gap > 0) {
                                 /* Eliminate the gap in the chunk */
-                                if(H5O_eliminate_gap(oh, &oh->mesg[new_null_msg], 
+                                if(H5O_eliminate_gap(oh, &oh->mesg[new_null_msg],
                                         ((oh->chunk[old_chunkno].image + oh->chunk[old_chunkno].size) - (H5O_SIZEOF_CHKSUM_OH(oh) + oh->chunk[old_chunkno].gap)),
                                         oh->chunk[old_chunkno].gap) < 0)
                                     HGOTO_ERROR(H5E_OHDR, H5E_CANTREMOVE, FAIL, "can't eliminate gap in chunk")

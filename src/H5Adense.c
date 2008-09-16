@@ -1475,7 +1475,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, 
+H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n)
 {
     H5HF_t *fheap = NULL;               /* Fractal heap handle */

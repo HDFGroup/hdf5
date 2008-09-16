@@ -820,7 +820,7 @@ test_compress(void)
     err = H5PTclose(table);
     if( err < 0) TEST_ERROR;
 
-    /* Open the packet table as a regular dataset and make sure that the 
+    /* Open the packet table as a regular dataset and make sure that the
      * compression filter is set.
      */
     dset_id = H5Dopen2(fid1, "Compressed Test Dataset", H5P_DEFAULT);
@@ -850,7 +850,7 @@ test_compress(void)
     err = H5PTclose(table);
     if( err < 0) TEST_ERROR;
 
-    /* Open the packet table as a regular dataset and make sure that the 
+    /* Open the packet table as a regular dataset and make sure that the
      * compression filter is not set.
      */
     dset_id = H5Dopen2(fid1, "Uncompressed Dataset", H5P_DEFAULT);
@@ -887,7 +887,7 @@ error:
        H5Tclose(part_t);
        H5PTclose(table);
        H5Fclose(fid1);
-    } H5E_END_TRY    
+    } H5E_END_TRY
     H5_FAILED();
     return -1;
 }

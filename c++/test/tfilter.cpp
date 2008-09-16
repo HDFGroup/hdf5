@@ -48,7 +48,7 @@
 #define FILTER_CHUNK_DIM2 25
 
 // will do this function later or use it as guideline - BMR - 2007/01/26
-static herr_t test_filter_internal(hid_t fid, const char *name, hid_t dcpl, 
+static herr_t test_filter_internal(hid_t fid, const char *name, hid_t dcpl,
 		int if_fletcher32, int corrupted, hsize_t *dset_size)
 {
     cerr << "do nothing right now" << endl;
@@ -58,7 +58,7 @@ static herr_t test_filter_internal(hid_t fid, const char *name, hid_t dcpl,
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS        305
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
-    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf); 
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_BOGUS[1] = {{
     H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
@@ -227,7 +227,7 @@ void test_szip_filter(H5File& file1)
     {
         issue_fail_msg("test_szip_filter()", __LINE__, __FILE__, E.getCDetailMsg());
     }
-    } // if szip presents 
+    } // if szip presents
     else {
 	SKIPPED();
     }

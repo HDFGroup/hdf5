@@ -76,7 +76,7 @@ void *test_vlstr_alloc_custom(size_t size, void *info)
      *  This weird contortion is required on the DEC Alpha to keep the
      *  alignment correct - QAK
      */
-    
+
     extra = MAX(sizeof(void *),sizeof(size_t));
 
     if((ret_value = HDmalloc(extra + size)) != NULL) {
@@ -108,7 +108,7 @@ void test_vlstr_free_custom(void *_mem, void *info)
      *  This weird contortion is required on the DEC Alpha to keep the
      *  alignment correct - QAK
      */
-    
+
     extra=MAX(sizeof(void *),sizeof(size_t));
 
     if(_mem!=NULL) {
@@ -172,7 +172,7 @@ static void test_vlstrings_basic()
 	dataset2.close();
 	HDfree(wdata2);
 
-	// Change to the custom memory allocation routines for reading 
+	// Change to the custom memory allocation routines for reading
 	// VL string.
 	DSetMemXferPropList xfer;
 	size_t mem_used = 0;	// Memory used during allocation
@@ -239,7 +239,7 @@ static void test_vlstrings_basic()
 /*-------------------------------------------------------------------------
  * Function:	test_vlstrings_special
  *
- * Purpose:	Test VL string code for special string cases, nil and 
+ * Purpose:	Test VL string code for special string cases, nil and
  *		zero-sized.
  *
  * Return:	None
@@ -305,11 +305,11 @@ static void test_vlstrings_special()
 	// Close Dataset.
 	dataset.close();
 
-	/* 
+	/*
 	 * Create another dataset to test nil strings.
 	 */
 
-	// Create the property list and set the fill value for the second 
+	// Create the property list and set the fill value for the second
 	// dataset.
 	DSetCreatPropList dcpl;
 	char *fill = NULL;	// Fill value
@@ -594,7 +594,7 @@ static void test_write_vl_string_attribute()
 	// Open attribute ATTRSTR_NAME again.
 	gr_attr = root.openAttribute(ATTRSTR_NAME);
 
-	// The attribute string written is freed below, in the 
+	// The attribute string written is freed below, in the
 	// test_read_vl_string_attribute() test
 
 	// Close attribute and file
@@ -671,7 +671,7 @@ static void test_read_vl_string_attribute()
 } // test_read_vl_string_attribute
 
 /* Helper routine for test_vl_rewrite() */
-static void write_scalar_dset(H5File& file, DataType& type, DataSpace& space, 
+static void write_scalar_dset(H5File& file, DataType& type, DataSpace& space,
 				char *name, char *data)
 {
     DataSet dset;
@@ -689,7 +689,7 @@ static void write_scalar_dset(H5File& file, DataType& type, DataSpace& space,
 }
 
 /* Helper routine for test_vl_rewrite() */
-static void read_scalar_dset(H5File& file, DataType& type, DataSpace& space, 
+static void read_scalar_dset(H5File& file, DataType& type, DataSpace& space,
 				char *name, char *data)
 {
     char *data_read;

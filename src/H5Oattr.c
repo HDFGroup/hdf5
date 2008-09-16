@@ -230,7 +230,7 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
     /* Indicate that the fill values aren't to be written out */
     attr->shared->initialized = 1;
 
-    /* Increment the reference count for this object header message in cache(compact 
+    /* Increment the reference count for this object header message in cache(compact
        storage) or for the object from dense storage. */
     attr->shared->nrefs++;
 
@@ -460,9 +460,9 @@ H5O_attr_size(const H5F_t UNUSED *f, const void *_mesg)
  * Modification:Raymond Lu
  *              25 June 2008
  *              Made this function empty.  The freeing action is actually
- *              done in H5O_attr_free (see H5O_msg_free_real).  But this 
- *              empty reset function needs to be here.  Otherwise, the 
- *              caller function H5O_msg_reset_real will zero-set the whole 
+ *              done in H5O_attr_free (see H5O_msg_free_real).  But this
+ *              empty reset function needs to be here.  Otherwise, the
+ *              caller function H5O_msg_reset_real will zero-set the whole
  *              message.
  *-------------------------------------------------------------------------
  */
@@ -676,10 +676,10 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_ty
     H5O_loc_reset(&(attr_dst->shared->oloc));
     H5G_name_reset(&(attr_dst->path));
     attr_dst->obj_opened = FALSE;
-    
+
     /* Reference count for the header message in the cache */
     attr_dst->shared->nrefs = 1;
- 
+
     /* Copy attribute's name */
     attr_dst->shared->name = H5MM_strdup(attr_src->shared->name);
     HDassert(attr_dst->shared->name);

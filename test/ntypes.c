@@ -89,7 +89,7 @@ test_atomic_dtype(hid_t file)
 
     TESTING("atomic datatype");
     envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL) 
+    if(envval == NULL)
         envval = "nomatch";
     if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi")) {
 	/* Initialize the dataset */
@@ -1885,7 +1885,7 @@ test_refer_dtype(hid_t file)
     /* Output message about test being performed */
     TESTING("reference datatype");
     envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL) 
+    if(envval == NULL)
         envval = "nomatch";
     if(HDstrcmp(envval, "multi")) {
         H5O_type_t          obj_type;       /* Object type */

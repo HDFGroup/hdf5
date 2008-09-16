@@ -614,7 +614,7 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
 
     *extpath = NULL;
 
-    /* 
+    /*
      * Unix: name[0] is a "/"
      * Windows: name[0-2] is "<drive letter>:\" or "<drive-letter>:/"
      */
@@ -627,17 +627,17 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
         if (NULL == (new_name = (char *)H5MM_strdup(name)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
-	/* 
+	/*
 	 * Windows: name[0-1] is "<drive-letter>:"
-	 * 	Get current working directory on the drive specified in NAME 
+	 * 	Get current working directory on the drive specified in NAME
 	 * Unix: does not apply
 	 */
         if (CHECK_ABS_DRIVE(name)) {
             drive = name[0] - 'A' + 1;
             retcwd = HDgetdcwd(drive, cwdpath, MAX_PATH_LEN);
             HDstrcpy(new_name, &name[2]);
-	/* 
-	 * Windows: name[0] is a '/' or '\' 
+	/*
+	 * Windows: name[0] is a '/' or '\'
 	 *	Get current drive
 	 * Unix: does not apply
 	 */

@@ -2401,7 +2401,7 @@ test_obj_ref(hid_t fapl)
         FAIL_STACK_ERROR
     if(H5Dclose(dataset) < 0)
         FAIL_STACK_ERROR
-    
+
     /* Create a dataset(inside Group1) */
     if((dataset = H5Dcreate2(group, "Dataset1", H5T_STD_U32LE, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
@@ -2421,11 +2421,11 @@ test_obj_ref(hid_t fapl)
     /* Create another dataset(inside Group1) */
     if((dataset = H5Dcreate2(group, "Dataset2", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
- 
+
     /* Close Dataset */
     if(H5Dclose(dataset) < 0)
         FAIL_STACK_ERROR
- 
+
     /* Create a datatype to refer to */
     if((tid1 = H5Tcreate(H5T_COMPOUND, sizeof(s1_t))) < 0)
         FAIL_STACK_ERROR
@@ -2448,19 +2448,19 @@ test_obj_ref(hid_t fapl)
 
     /* Create a new group in group1 */
     if((group2 = H5Gcreate2(group, "Group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
- 
+
     /* Create a hard link to group1 in group2 */
     if(H5Lcreate_hard(fid1, "/Group1", H5L_SAME_LOC, "/Group1/Group2/Link", H5P_DEFAULT, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
- 
+
     /* Create dataset in that group */
     if((dataset = H5Dcreate2(group2, "Dataset4", H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-  
+
     /* Close Dataset */
     if(H5Dclose(dataset) < 0)
         FAIL_STACK_ERROR
-  
+
     /* Close group */
     if(H5Gclose(group) < 0)
         FAIL_STACK_ERROR
@@ -2498,7 +2498,7 @@ test_obj_ref(hid_t fapl)
     /* Create reference to named datatype */
     if(H5Rcreate(&wbuf[3], fid1, "/Group1/Datatype1", H5R_OBJECT, -1) < 0)
         FAIL_STACK_ERROR
-    
+
     if(H5Rcreate(&wbuf[4], fid1, "/Group1/Group2/Dataset4", H5R_OBJECT, -1) < 0)
         FAIL_STACK_ERROR
     if(H5Rcreate(&wbuf[5], fid1, "/Group1/Group2", H5R_OBJECT, -1) < 0)
@@ -2514,7 +2514,7 @@ test_obj_ref(hid_t fapl)
     if(H5Dwrite(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
         FAIL_STACK_ERROR
 
-    TESTING("getting path to normal dataset in root group"); 
+    TESTING("getting path to normal dataset in root group");
     if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[0])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
@@ -2526,7 +2526,7 @@ test_obj_ref(hid_t fapl)
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
-    TESTING("getting path to dataset in /Group1"); 
+    TESTING("getting path to dataset in /Group1");
     if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[1])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
@@ -2538,7 +2538,7 @@ test_obj_ref(hid_t fapl)
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
-    TESTING("getting path to /Group1"); 
+    TESTING("getting path to /Group1");
     if((group = H5Rdereference(dataset, H5R_OBJECT, &wbuf[2])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(group, (char*)buf, sizeof(buf));
@@ -2550,7 +2550,7 @@ test_obj_ref(hid_t fapl)
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
-    TESTING("getting path to datatype in /Group1"); 
+    TESTING("getting path to datatype in /Group1");
     if((tid1 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[3])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(tid1, (char*)buf, sizeof(buf));
@@ -2562,7 +2562,7 @@ test_obj_ref(hid_t fapl)
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
-    TESTING("getting path to dataset in nested group"); 
+    TESTING("getting path to dataset in nested group");
     if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[4])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
@@ -2574,7 +2574,7 @@ test_obj_ref(hid_t fapl)
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
-    TESTING("getting path to nested group"); 
+    TESTING("getting path to nested group");
     if((group = H5Rdereference(dataset, H5R_OBJECT, &wbuf[5])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(group, (char*)buf, sizeof(buf));
@@ -2586,7 +2586,7 @@ test_obj_ref(hid_t fapl)
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
-    TESTING("getting path to dataset created via hard link"); 
+    TESTING("getting path to dataset created via hard link");
     if((dataset2 = H5Rdereference(dataset, H5R_OBJECT, &wbuf[6])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
@@ -2598,7 +2598,7 @@ test_obj_ref(hid_t fapl)
     PASSED()
 
     HDmemset(buf, 0, sizeof(buf));
-    TESTING("getting path to root group"); 
+    TESTING("getting path to root group");
     if((group = H5Rdereference(dataset, H5R_OBJECT, &wbuf[7])) < 0) FAIL_STACK_ERROR
     *buf = '\0';
     i = H5Iget_name(group, (char*)buf, sizeof(buf));
@@ -2629,8 +2629,8 @@ test_obj_ref(hid_t fapl)
         FAIL_STACK_ERROR
     if(H5Ldelete(fid1, "/Group1/Dataset2", H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
- 
-    TESTING("getting path to dataset that has been unlinked"); 
+
+    TESTING("getting path to dataset that has been unlinked");
     *buf = '\0';
     i = H5Iget_name(dataset2, (char*)buf, sizeof(buf));
     if(H5Dclose(dataset2) < 0) FAIL_STACK_ERROR
@@ -2639,15 +2639,15 @@ test_obj_ref(hid_t fapl)
     i = H5Rget_name(dataset, H5R_OBJECT, &wbuf[1], (char*)buf, sizeof(buf));
     if(i != 0) TEST_ERROR
     PASSED()
-    
+
     /* Close disk dataspace */
     if(H5Sclose(sid1) < 0)
         FAIL_STACK_ERROR
-    
+
     /* Close Dataset */
     if(H5Dclose(dataset) < 0)
         FAIL_STACK_ERROR
- 
+
     /* Close file */
     if(H5Fclose(fid1) < 0)
         FAIL_STACK_ERROR
@@ -2666,8 +2666,8 @@ test_reg_ref(hid_t fapl)
     char filename1[1024];
     hid_t	file_id;        /* file identifier */
     hid_t	dsetv_id;       /*dataset identifiers*/
-    hid_t	dsetr_id;      
-    hid_t	space_id, spacer_id;      
+    hid_t	dsetr_id;
+    hid_t	space_id, spacer_id;
     hsize_t	dims[2] = {2,9};
     hsize_t	dimsr[1] = {2};
     int		rank = 2;
@@ -2713,8 +2713,8 @@ test_reg_ref(hid_t fapl)
     /*
      * Create a reference to the hyperslab.
      */
-    start[0] = 0; 
-    start[1] = 3; 
+    start[0] = 0;
+    start[1] = 3;
     count[0] = 2;
     count[1] = 3;
     if((status = H5Sselect_hyperslab(space_id,H5S_SELECT_SET,start,NULL,count,NULL)) < 0)
@@ -2760,7 +2760,7 @@ test_reg_ref(hid_t fapl)
     TESTING("H5Rget_name to get name from region reference(hyperslab)");
     *buf1 = '\0';
     name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[0], (char*)buf1, NAME_BUF_SIZE);
-    if(!((HDstrcmp(buf1, "/MATRIX") == 0) &&(name_size1 == 7))) TEST_ERROR 
+    if(!((HDstrcmp(buf1, "/MATRIX") == 0) &&(name_size1 == 7))) TEST_ERROR
     PASSED()
 
     TESTING("H5Iget_name to get name from region reference(hyperslab)");
@@ -2770,7 +2770,7 @@ test_reg_ref(hid_t fapl)
 
     /* Get name of the dataset the first region reference points using H5Iget_name */
     *buf2 = '\0';
-    name_size2 = H5Iget_name(dsetv_id, (char*)buf2, NAME_BUF_SIZE); 
+    name_size2 = H5Iget_name(dsetv_id, (char*)buf2, NAME_BUF_SIZE);
     if(!((HDstrcmp(buf2, "/MATRIX") == 0) &&(name_size2 == 7))) TEST_ERROR
 
     if((status = H5Dclose(dsetv_id)) < 0) TEST_ERROR
@@ -2780,7 +2780,7 @@ test_reg_ref(hid_t fapl)
     /* Get name of the dataset the second region reference points to using H5Rget_name */
     TESTING("H5Rget_name to get name from region reference(pnt selec)");
     *buf1 = '\0';
-    name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[1], (char*)buf1, NAME_BUF_SIZE);      
+    name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[1], (char*)buf1, NAME_BUF_SIZE);
     if(!((HDstrcmp(buf1, "/MATRIX") == 0) &&(name_size1 == 7))) TEST_ERROR
     PASSED()
 
@@ -2791,7 +2791,7 @@ test_reg_ref(hid_t fapl)
 
     /* Get name of the dataset the first region reference points using H5Iget_name */
     *buf2 = '\0';
-    name_size2 = H5Iget_name(dsetv_id, (char*)buf2, NAME_BUF_SIZE); 
+    name_size2 = H5Iget_name(dsetv_id, (char*)buf2, NAME_BUF_SIZE);
     if(!((HDstrcmp(buf2, "/MATRIX") == 0) &&(name_size2 == 7))) TEST_ERROR
 
     if((status = H5Dclose(dsetv_id)) < 0) TEST_ERROR
@@ -2802,7 +2802,7 @@ test_reg_ref(hid_t fapl)
 	TEST_ERROR
     if((status = H5Fclose(file_id)) < 0)
 	TEST_ERROR
-     
+
     return 0;
 
 error:

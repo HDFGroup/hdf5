@@ -125,7 +125,7 @@ H5HF_iblock_pin(H5HF_indirect_t *iblock)
 
         /* Sanity check */
         HDassert(par_iblock->child_iblocks);
-        HDassert(iblock->par_entry >= (iblock->hdr->man_dtable.max_direct_rows 
+        HDassert(iblock->par_entry >= (iblock->hdr->man_dtable.max_direct_rows
                 * iblock->hdr->man_dtable.cparam.width));
 
         /* Compute index in parent's child iblock pointer array */
@@ -179,7 +179,7 @@ H5HF_iblock_unpin(H5HF_indirect_t *iblock)
 
         /* Sanity check */
         HDassert(par_iblock->child_iblocks);
-        HDassert(iblock->par_entry >= (iblock->hdr->man_dtable.max_direct_rows 
+        HDassert(iblock->par_entry >= (iblock->hdr->man_dtable.max_direct_rows
                 * iblock->hdr->man_dtable.cparam.width));
 
         /* Compute index in parent's child iblock pointer array */
@@ -1165,7 +1165,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
 
             /* Sanity check */
             HDassert(par_iblock->child_iblocks);
-            HDassert(par_entry >= (hdr->man_dtable.max_direct_rows 
+            HDassert(par_entry >= (hdr->man_dtable.max_direct_rows
                     * hdr->man_dtable.cparam.width));
 
             /* Compute index in parent's child iblock pointer array */
@@ -1525,7 +1525,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
                 /* Are we in a direct or indirect block row */
                 if(row < hdr->man_dtable.max_direct_rows) {
                     hsize_t dblock_size;        /* Size of direct block on disk */
-                    
+
                     /* Check for I/O filters on this heap */
                     if(hdr->filter_len > 0)
                         dblock_size = iblock->filt_ents[entry].size;
@@ -1624,7 +1624,7 @@ H5HF_man_iblock_size(H5F_t *f, hid_t dxpl_id, H5HF_hdr_t *hdr, haddr_t iblock_ad
         entry = hdr->man_dtable.max_direct_rows * hdr->man_dtable.cparam.width;
 	first_row_bits = H5V_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size) +
 			    H5V_log2_of2(hdr->man_dtable.cparam.width);
-        num_indirect_rows = 
+        num_indirect_rows =
 	    (H5V_log2_gen(hdr->man_dtable.row_block_size[hdr->man_dtable.max_direct_rows]) - first_row_bits) + 1;
         for(u = hdr->man_dtable.max_direct_rows; u < iblock->nrows; u++, num_indirect_rows++) {
             size_t      v;                      /* Local index variable */

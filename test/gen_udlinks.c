@@ -22,9 +22,9 @@
  *  They will be named according to the platform and should
  *  be placed in the hdf5/test directory so that the links test can use them.
  *
- * Note: The be_extlink2.h5 is also used by external.c to test opening 
+ * Note: The be_extlink2.h5 is also used by external.c to test opening
  *  external link twice. -SLU 2007/11/7
- *  
+ *
  */
 
 #include "hdf5.h"

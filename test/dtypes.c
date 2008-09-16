@@ -2308,7 +2308,7 @@ test_compound_13(void)
 
     TESTING("compound datatypes of boundary size with latest format");
 
-    /* Create some phony data. */   
+    /* Create some phony data. */
     for(u = 0; u < COMPOUND13_ARRAY_SIZE + 1; u++)
         data_out.x[u] = u;
     data_out.y = 99.99;
@@ -2338,7 +2338,7 @@ test_compound_13(void)
 
     /* Write some data. */
     if(H5Awrite(attid, typeid, &data_out) < 0) FAIL_STACK_ERROR
-    
+
     /* Release all resources. */
     if(H5Aclose(attid) < 0) FAIL_STACK_ERROR
     if(H5Tclose(array1_tid) < 0) FAIL_STACK_ERROR
@@ -4637,7 +4637,7 @@ test_latest(void)
     if(H5Oget_info_by_name(file, compnd_type, &oi, H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
     new_dtype_oh_size = oi.hdr.space.total;
-    
+
     /* Check that the new format is smaller than the old format */
     if(old_dtype_oh_size <= new_dtype_oh_size)
         TEST_ERROR

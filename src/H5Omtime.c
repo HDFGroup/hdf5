@@ -244,7 +244,7 @@ H5O_mtime_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 
 	the_time -= tz.tz_minuteswest * 60 - (tm.tm_isdst ? 3600 : 0);
     }
-#else 
+#else
     /*
      * The catch-all.  If we can't convert a character string universal
      * coordinated time to a time_t value reliably then we can't decode the

@@ -94,7 +94,7 @@ int main(void)
 	 * Create the first dataset.
 	 */
 	DataSet* dataset = new DataSet(file->createDataSet(
-		"/Data/Compressed_Data", PredType::NATIVE_INT, 
+		"/Data/Compressed_Data", PredType::NATIVE_INT,
 		*dataspace, ds_creatplist ));
 
 	/*
@@ -109,7 +109,7 @@ int main(void)
 	dims[0] = 500;
 	dims[1] = 20;
 	dataspace = new DataSpace(RANK, dims); // create second dspace
-	dataset = new DataSet(file->createDataSet("/Data/Float_Data", 
+	dataset = new DataSet(file->createDataSet("/Data/Float_Data",
 			PredType::NATIVE_FLOAT, *dataspace));
 
 	delete dataset;

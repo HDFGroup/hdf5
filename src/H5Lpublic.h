@@ -60,7 +60,7 @@ extern "C" {
  * defined by HDF5 but their behavior can be overridden by users.
  * Users who want to create new classes of links should contact the HDF5
  * development team at hdfhelp@ncsa.uiuc.edu .
- * These values can never change because they appear in HDF5 files. 
+ * These values can never change because they appear in HDF5 files.
  */
 typedef enum {
     H5L_TYPE_ERROR = (-1),      /* Invalid link type id         */

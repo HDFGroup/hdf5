@@ -395,7 +395,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         /* Release the space allocated for the I/O pipeline filters */
         H5O_msg_free(H5O_PLINE_ID, pline);
     } /* end if */
-    else 
+    else
         /* Set the heap header's size */
         hdr->heap_size = size;
 

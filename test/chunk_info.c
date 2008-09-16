@@ -34,17 +34,17 @@
 
 int main( void )
 {
-    
+
     hid_t   fid;      /* file ID */
     hid_t   did;      /* dataset ID */
     hid_t   f_sid;    /* file space ID */
     hid_t   m_sid;    /* memory space ID */
     hid_t   pid;      /* property list ID */
     hsize_t start[2]; /* chunk location to start writing */
-    hsize_t dims[2]  = { 4, 4};       
+    hsize_t dims[2]  = { 4, 4};
     hsize_t chunk_dims[2] = { 2, 2 };
-    int     chunk_data[2][2] = { {1, 1}, {1, 1} }; 
-    int     buf[4][4];  
+    int     chunk_data[2][2] = { {1, 1}, {1, 1} };
+    int     buf[4][4];
     int     fillvalue = 0;
     int     i, j, ii, jj;
 
@@ -82,22 +82,22 @@ int main( void )
     /* iterate in dim 0 */
     for (j = 0; j < chunk_dims[0]; j++)
     {
-        
+
         /* reset start in dim 1 */
         start[1] = 0;
-        
+
         /* iterate in dim 1 */
         for (i = 0; i < chunk_dims[1]; i++)
         {
-            
+
             /* select file hyperslab to save a 2x2 chunk */
             if (H5Sselect_hyperslab(f_sid, H5S_SELECT_SET, start, NULL, chunk_dims, NULL) < 0) TEST_ERROR;
-            
+
             /* write the data to the hyperslab. */
-            if (H5Dwrite(did, H5T_NATIVE_INT, m_sid, f_sid, H5P_DEFAULT, chunk_data) < 0) TEST_ERROR; 
-         
-            /* read back and display complete dataset 4x4 */   
-            if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR; 
+            if (H5Dwrite(did, H5T_NATIVE_INT, m_sid, f_sid, H5P_DEFAULT, chunk_data) < 0) TEST_ERROR;
+
+            /* read back and display complete dataset 4x4 */
+            if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) TEST_ERROR;
 
 
 #if defined (PRINT_DATA)
@@ -108,14 +108,14 @@ int main( void )
                 printf("\n");
             }
 #endif
-            
-            
+
+
             /* increment start in dim 1 */
             start[1] += 2;
-            
-            
+
+
         }
-        
+
         /* increment start in dim 0 */
         start[0] += 2;
     }
@@ -134,7 +134,7 @@ int main( void )
     if (H5Fclose(fid) < 0) TEST_ERROR
 
     PASSED();
-  
+
     puts("All chunk info tests passed.");
     return 0;
 

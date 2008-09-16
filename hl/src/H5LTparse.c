@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static char const 
+static char const
 yyrcsid[] = "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28 2000/01/17 02:04:06 bde Exp $";
 #endif
 #include <stdlib.h>
@@ -92,7 +92,7 @@ struct arr_info {
 };
 /*stack for nested array type*/
 struct arr_info arr_stack[STACK_SIZE];
-int asindex = -1;               /*pointer to the top of array stack*/ 
+int asindex = -1;               /*pointer to the top of array stack*/
 
 hbool_t     is_str_size = 0;        /*flag to lexer for string size*/
 hbool_t     is_str_pad = 0;         /*flag to lexer for string padding*/
@@ -100,7 +100,7 @@ H5T_pad_t   str_pad;                /*variable for string padding*/
 H5T_cset_t  str_cset;               /*variable for string character set*/
 hbool_t     is_variable = 0;        /*variable for variable-length string*/
 size_t      str_size;               /*variable for string size*/
-   
+
 hid_t       enum_id;                /*type ID*/
 hbool_t     is_enum = 0;            /*flag to lexer for enum type*/
 hbool_t     is_enum_memb = 0;       /*flag to lexer for enum member*/
@@ -823,9 +823,9 @@ case 46:
 break;
 case 47:
 #line 156 "H5LTparse.y"
-{ yyval.ival = cmpd_stack[csindex].id; 
+{ yyval.ival = cmpd_stack[csindex].id;
                               cmpd_stack[csindex].id = 0;
-                              cmpd_stack[csindex].first_memb = 1; 
+                              cmpd_stack[csindex].first_memb = 1;
                               csindex--;
                             }
 break;
@@ -835,7 +835,7 @@ case 50:
 break;
 case 51:
 #line 167 "H5LTparse.y"
-{   
+{
                             size_t origin_size, new_size;
                             hid_t dtype_id = cmpd_stack[csindex].id;
 
@@ -849,7 +849,7 @@ case 51:
                                 cmpd_stack[csindex].first_memb = 0;
                             } else {
                                 origin_size = H5Tget_size(dtype_id);
-                                
+
                                 if(yyvsp[-1].ival == 0) {
                                     new_size = origin_size + H5Tget_size(yyvsp[-6].ival);
                                     H5Tset_size(dtype_id, new_size);
@@ -860,10 +860,10 @@ case 51:
                                     H5Tinsert(dtype_id, yyvsp[-3].sval, yyvsp[-1].ival, yyvsp[-6].ival);
                                 }
                             }
-                          
+
                             cmpd_stack[csindex].is_field = 0;
                             H5Tclose(yyvsp[-6].ival);
-                             
+
                             new_size = H5Tget_size(dtype_id);
                         }
 break;
@@ -887,7 +887,7 @@ case 56:
 break;
 case 57:
 #line 213 "H5LTparse.y"
-{ 
+{
                           yyval.ival = H5Tarray_create2(yyvsp[-1].ival, arr_stack[asindex].ndims, arr_stack[asindex].dims);
                           arr_stack[asindex].ndims = 0;
                           asindex--;
@@ -901,9 +901,9 @@ break;
 case 61:
 #line 224 "H5LTparse.y"
 { unsigned ndims = arr_stack[asindex].ndims;
-                                  arr_stack[asindex].dims[ndims] = (hsize_t)yylval.ival; 
+                                  arr_stack[asindex].dims[ndims] = (hsize_t)yylval.ival;
                                   arr_stack[asindex].ndims++;
-                                  arr_stack[asindex].is_dim = 0; 
+                                  arr_stack[asindex].is_dim = 0;
                                 }
 break;
 case 64:
@@ -916,10 +916,10 @@ case 65:
 break;
 case 66:
 #line 241 "H5LTparse.y"
-{   
+{
                                 size_t size = (size_t)yylval.ival;
                                 yyval.ival = H5Tcreate(H5T_OPAQUE, size);
-                                is_opq_size = 0;    
+                                is_opq_size = 0;
                             }
 break;
 case 67:
@@ -928,7 +928,7 @@ case 67:
 break;
 case 68:
 #line 247 "H5LTparse.y"
-{  
+{
                                 H5Tset_tag(yyvsp[-6].ival, yylval.sval);
                                 is_opq_tag = 0;
                             }
@@ -943,12 +943,12 @@ case 72:
 break;
 case 73:
 #line 260 "H5LTparse.y"
-{  
+{
                                 if(yyvsp[-1].ival == H5T_VARIABLE_TOKEN)
                                     is_variable = 1;
-                                else 
+                                else
                                     str_size = yylval.ival;
-                                is_str_size = 0; 
+                                is_str_size = 0;
                             }
 break;
 case 74:
@@ -964,7 +964,7 @@ case 74:
 break;
 case 75:
 #line 277 "H5LTparse.y"
-{  
+{
                                 if(yyvsp[-1].ival == H5T_CSET_ASCII_TOKEN)
                                     str_cset = H5T_CSET_ASCII;
                                 else if(yyvsp[-1].ival == H5T_CSET_UTF8_TOKEN)
@@ -982,7 +982,7 @@ case 76:
 break;
 case 77:
 #line 291 "H5LTparse.y"
-{   
+{
                                 hid_t str_id = yyvsp[-1].ival;
 
                                 /*set string size*/
@@ -991,12 +991,12 @@ case 77:
                                     is_variable = 0;
                                 } else
                                     H5Tset_size(str_id, str_size);
-                                
+
                                 /*set string padding and character set*/
                                 H5Tset_strpad(str_id, str_pad);
                                 H5Tset_cset(str_id, str_cset);
 
-                                yyval.ival = str_id; 
+                                yyval.ival = str_id;
                             }
 break;
 case 78:
@@ -1043,7 +1043,7 @@ case 91:
 #line 330 "H5LTparse.y"
 {
                                                 is_enum_memb = 1; /*indicate member of enum*/
-                                                enum_memb_symbol = strdup(yylval.sval); 
+                                                enum_memb_symbol = strdup(yylval.sval);
                                             }
 break;
 case 92:
@@ -1056,7 +1056,7 @@ case 92:
                                 long_long llong_val=(long_long)yylval.ival;
                                 hid_t super = H5Tget_super(enum_id);
                                 hid_t native = H5Tget_native_type(super, H5T_DIR_ASCEND);
-                                
+
                                 if(is_enum && is_enum_memb) { /*if it's an enum member*/
                                     /*To handle machines of different endianness*/
                                     if(H5Tequal(native, H5T_NATIVE_SCHAR) || H5Tequal(native, H5T_NATIVE_UCHAR))
@@ -1070,7 +1070,7 @@ case 92:
                                     else if(H5Tequal(native, H5T_NATIVE_LLONG) || H5Tequal(native, H5T_NATIVE_ULLONG))
                                         H5Tenum_insert(enum_id, enum_memb_symbol, &llong_val);
 
-                                    is_enum_memb = 0; 
+                                    is_enum_memb = 0;
                                     if(enum_memb_symbol) free(enum_memb_symbol);
                                 }
 

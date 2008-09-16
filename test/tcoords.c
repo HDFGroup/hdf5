@@ -18,7 +18,7 @@
 * Test program:	 tcoords
 *
 * Test the element coordinates for dataspace selection.  For
-* chunked dataset, when the hyperslab selection of some 
+* chunked dataset, when the hyperslab selection of some
 * dimensions is full, the library optimize it by "flattenning"
 * the fully selected dimensions.  This program tests if the
 * coordinates of selected elements are correctly calculated.
@@ -40,9 +40,9 @@ int da_buffer[2][3][6][2];
 
 /***********************************************************
 **
-** test_singleEnd_selElements(): Test element selection of only 
+** test_singleEnd_selElements(): Test element selection of only
 ** one block.
-** 
+**
 *************************************************************/
 static void test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
 {
@@ -53,7 +53,7 @@ static void test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
     int i, j, k;
     hsize_t da_dims[4] = { 2, 3, 6, 2 };
     hsize_t da_chunksize[4] = { 1, 3, 3, 2 };
-    
+
     /* For testing the full selection in the fastest-growing end */
     int mem1_buffer[1][1][6][2];
     hsize_t mem1_dims[4] = { 1, 1, 6, 2 };
@@ -139,7 +139,7 @@ static void test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
     ret = H5Dclose(did);
     CHECK(ret, FAIL, "H5Dclose");
 
-  
+
     /* ****** Case 1: ******
      * Testing the full selection in the fastest-growing end */
     did = H5Dopen2(file, dset_name, H5P_DEFAULT);
@@ -251,7 +251,7 @@ static void test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
 **
 ** test_singleEnd_selHyperslab(): Test full hyperslab selection
 ** of only one block.
-** 
+**
 *************************************************************/
 static void test_singleEnd_selHyperslab(hid_t file, hbool_t is_chunked)
 {
@@ -397,9 +397,9 @@ static void test_singleEnd_selHyperslab(hid_t file, hbool_t is_chunked)
 
 /***********************************************************
 **
-** test_multiple_end(): Test full hyperslab selection of 
+** test_multiple_end(): Test full hyperslab selection of
 ** multiple blocks.
-** 
+**
 *************************************************************/
 static void test_multiple_ends(hid_t file, hbool_t is_chunked)
 {
@@ -479,7 +479,7 @@ static void test_multiple_ends(hid_t file, hbool_t is_chunked)
                 for(l=0; l<4; l++)
                     for(m=0; m<2; m++)
                         for(n=0; n<3; n++)
-                            for(p=0; p<6; p++) {                
+                            for(p=0; p<6; p++) {
                                 data_buf[i][j][k][l][m][n][p][0] = i*1000000 + j*100000 + k*10000 + l*1000 + m*100 + n*10 + p;
                                 data_buf[i][j][k][l][m][n][p][1] = i*1000000 + j*100000 + k*10000 + l*1000 + m*100 + n*10 + p + 1;
                             }
@@ -620,7 +620,7 @@ static void test_multiple_ends(hid_t file, hbool_t is_chunked)
 
 
     /* ****** Case 5: ******
-     * Testing the full selections in the fastest-growing end and the slowest-growing end, 
+     * Testing the full selections in the fastest-growing end and the slowest-growing end,
      * and also in the middle dimensions */
     did = H5Dopen2(file, dset_name, H5P_DEFAULT);
     CHECK(did, FAIL, "H5Dopen2");

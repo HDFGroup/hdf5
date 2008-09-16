@@ -100,7 +100,7 @@ h5_stat_size_t empty_size_g;
 /*-------------------------------------------------------------------------
  * Function:	init_cparam
  *
- * Purpose:	Initialize array creation parameter structure 
+ * Purpose:	Initialize array creation parameter structure
  *
  * Return:	Success:	0
  *		Failure:	-1
@@ -271,7 +271,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-create_array(H5F_t *f, hid_t dxpl, const H5EA_create_t *cparam, 
+create_array(H5F_t *f, hid_t dxpl, const H5EA_create_t *cparam,
     H5EA_t **ea, haddr_t *ea_addr)
 {
     hsize_t     nelmts;                 /* Number of elements in array */
@@ -1115,7 +1115,7 @@ main(void)
     if(NULL == (envval = HDgetenv("HDF5_DRIVER")))
         envval = "nomatch";
 
-    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && 
+    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") &&
             HDstrcmp(envval, "family")) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));

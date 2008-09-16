@@ -236,7 +236,7 @@ int main(void)
     const char* polynomial = "(2+x)* ((x-8)/2)";
     /* inverses the utrans transform in init_test to get back original array */
     const char* utrans_inv = "(x/3)*4 - 100";
-    
+
     if((file_id = H5Fcreate("dtransform.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
     if((dxpl_id_c_to_f = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
@@ -311,7 +311,7 @@ int main(void)
     TEST_TYPE_CHUNK(dxpl_id_c_to_f, long double, H5T_NATIVE_LDOUBLE, "ldouble", windchillFfloat, 1);
 #endif
 
-    if(test_copy(dxpl_id_c_to_f_copy, dxpl_id_polynomial_copy) < 0) TEST_ERROR; 
+    if(test_copy(dxpl_id_c_to_f_copy, dxpl_id_polynomial_copy) < 0) TEST_ERROR;
     if(test_trivial(dxpl_id_simple) < 0) TEST_ERROR;
     if(test_poly(dxpl_id_polynomial) < 0) TEST_ERROR;
     if(test_getset(dxpl_id_c_to_f) < 0) TEST_ERROR;

@@ -882,11 +882,11 @@ if (szip_can_encode) {
 
 /*-------------------------------------------------------------------------
  * the following tests assume the input files have filters
- * FNAME7     
- * FNAME8     
- * FNAME9     
- * FNAME10    
- * FNAME11    
+ * FNAME7
+ * FNAME8
+ * FNAME9
+ * FNAME10
+ * FNAME11
  *-------------------------------------------------------------------------
  */
 
@@ -1343,7 +1343,7 @@ if (szip_can_encode) {
  PASSED();
 
 /*-------------------------------------------------------------------------
- * test --latest options 
+ * test --latest options
  *-------------------------------------------------------------------------
  */
  TESTING("    latest file format options");
@@ -1375,7 +1375,7 @@ if (szip_can_encode) {
 
   TESTING("    several global filters");
 
-#if defined (H5_HAVE_FILTER_DEFLATE) && defined (H5_HAVE_FILTER_SHUFFLE) 
+#if defined (H5_HAVE_FILTER_DEFLATE) && defined (H5_HAVE_FILTER_SHUFFLE)
 
  if (h5repack_init (&pack_options, 0) < 0)
   GOERROR;
@@ -1412,7 +1412,7 @@ if (szip_can_encode) {
  /* add the options for a user block size and user block filename */
  pack_options.ublock_size = USERBLOCK_SIZE;
  pack_options.ublock_filename = FNAME_UB;
- 
+
  if(h5repack(FNAME8, FNAME8OUT, &pack_options) < 0)
   GOERROR;
  if(h5diff(FNAME8, FNAME8OUT, NULL, NULL, &diff_options) > 0)
@@ -1445,14 +1445,14 @@ if (szip_can_encode) {
  /* add the options for aligment */
  pack_options.alignment = 1;
  pack_options.threshold = 1;
- 
+
  if(h5repack(FNAME8, FNAME8OUT, &pack_options) < 0)
   GOERROR;
  if(h5diff(FNAME8, FNAME8OUT, NULL, NULL, &diff_options) > 0)
   GOERROR;
  if(h5repack_verify(FNAME8OUT, &pack_options) <= 0)
   GOERROR;
- 
+
 
  /* verify aligment */
  {
@@ -1460,7 +1460,7 @@ if (szip_can_encode) {
      hsize_t alignment;
      hid_t fapl;
      hid_t fid;
-     
+
      if (( fid = H5Fopen(FNAME8OUT, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0 )
          GOERROR;
      if ((fapl = H5Fget_access_plist(fid)) < 0)
@@ -1475,13 +1475,13 @@ if (szip_can_encode) {
          GOERROR;
      if (H5Fclose(fid) < 0)
          GOERROR;
-     
+
  }
 
 
  if(h5repack_end(&pack_options) < 0)
   GOERROR;
- 
+
 
  PASSED();
 #else
@@ -1498,12 +1498,12 @@ if (szip_can_encode) {
  */
  {
      hid_t       fapl;
-     
+
      /* setup */
      h5_reset();
      fapl = h5_fileaccess();
-     h5_cleanup(H5REPACK_FILENAMES, fapl); 
-     
+     h5_cleanup(H5REPACK_FILENAMES, fapl);
+
  }
 
  puts("All h5repack tests passed.");
@@ -1699,7 +1699,7 @@ int make_testfiles(void)
   goto out;
 
  /*-------------------------------------------------------------------------
- * create a userblock file 
+ * create a userblock file
  *-------------------------------------------------------------------------
  */
  if(make_userblock_file() < 0)
@@ -2247,7 +2247,7 @@ int make_nbit(hid_t loc_id)
 #endif
 
 /*-------------------------------------------------------------------------
- * close 
+ * close
  *-------------------------------------------------------------------------
  */
  if(H5Sclose(sid) < 0)
@@ -2780,7 +2780,7 @@ out:
 }
 
 /*-------------------------------------------------------------------------
- * Function: make_big 
+ * Function: make_big
  *
  * Purpose: used in test read by hyperslabs. Creates a 128MB dataset.
  *  Only 1 1024Kb hyperslab is written.
@@ -2808,7 +2808,7 @@ int make_big(hid_t loc_id)
  hs_start[0] = 0;
  hs_size[0]  = 1024;
 
- /* create */ 
+ /* create */
  if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
  if(H5Pset_fill_value(dcpl, H5T_NATIVE_SCHAR, &fillvalue) < 0)
@@ -2819,19 +2819,19 @@ int make_big(hid_t loc_id)
   goto out;
  if((did = H5Dcreate2(loc_id, "dset", H5T_NATIVE_SCHAR, f_sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
   goto out;
- if((m_sid = H5Screate_simple(1, hs_size, hs_size)) < 0) 
+ if((m_sid = H5Screate_simple(1, hs_size, hs_size)) < 0)
   goto out;
- if((tid = H5Dget_type(did)) < 0) 
+ if((tid = H5Dget_type(did)) < 0)
   goto out;
  if((size = H5Tget_size(tid))<=0)
   goto out;
- 
+
  /* initialize buffer to 0  */
  buf=(signed  char *) calloc( nelmts, size);
- 
- if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size, NULL) < 0) 
+
+ if (H5Sselect_hyperslab (f_sid,H5S_SELECT_SET,hs_start,NULL,hs_size, NULL) < 0)
   goto out;
- if (H5Dwrite (did,H5T_NATIVE_SCHAR,m_sid,f_sid,H5P_DEFAULT,buf) < 0) 
+ if (H5Dwrite (did,H5T_NATIVE_SCHAR,m_sid,f_sid,H5P_DEFAULT,buf) < 0)
   goto out;
 
  free(buf);
@@ -2862,7 +2862,7 @@ out:
 
 
 /*-------------------------------------------------------------------------
- * Function: make_external 
+ * Function: make_external
  *
  * Purpose: create a external dataset
  *
@@ -2881,11 +2881,11 @@ int make_external(hid_t loc_id)
 
  cur_size[0] = max_size[0] = 2;
  size = max_size[0] * sizeof(int);
- 
- /* create */ 
+
+ /* create */
  if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
   goto out;
- if(H5Pset_external(dcpl, H5REPACK_EXTFILE, (off_t)0, size) < 0) 
+ if(H5Pset_external(dcpl, H5REPACK_EXTFILE, (off_t)0, size) < 0)
   goto out;
  if((sid = H5Screate_simple(1,cur_size, max_size)) < 0)
   goto out;
@@ -3081,12 +3081,12 @@ make_userblock_file(void)
     return 0;
 
 out:
-    
+
     if(fd > 0)
         HDclose(fd);
 
     return -1;
-} 
+}
 
 /*-------------------------------------------------------------------------
  * Function: write_dset_in
@@ -4901,5 +4901,5 @@ out:
  return -1;
 }
 
- 
+
 
