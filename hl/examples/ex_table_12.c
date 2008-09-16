@@ -102,7 +102,7 @@ int main( void )
 
   /* close type */
  H5Tclose( string_type );
- 
+
  /* close the file */
  H5Fclose( file_id );
 

@@ -1235,7 +1235,7 @@ dump_dataspace(hid_t space)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t    
+static herr_t
 dump_attr_cb(hid_t oid, const char *attr_name, const H5A_info_t UNUSED *info, void UNUSED *_op_data)
 {
     hid_t       attr_id;
@@ -1392,7 +1392,7 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
     hid_t       obj;
     char       *obj_path = NULL;    /* Full path of object */
     herr_t      ret = SUCCEED;
-   
+
     /* Build the object's path name */
     obj_path = HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
     HDassert(obj_path);
@@ -1411,33 +1411,33 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
             goto done;
         } /* end if */
 
-        switch(oinfo.type) 
+        switch(oinfo.type)
         {
         case H5O_TYPE_GROUP:
-            if((obj = H5Gopen2(group, name, H5P_DEFAULT)) < 0) 
+            if((obj = H5Gopen2(group, name, H5P_DEFAULT)) < 0)
             {
                 error_msg(progname, "unable to dump group \"%s\"\n", name);
                 d_status = EXIT_FAILURE;
                 ret = FAIL;
-            } 
-            else 
+            }
+            else
             {
                 char *old_prefix; /* Pointer to previous prefix */
-                
+
                 /* Keep copy of prefix before iterating into group */
                 old_prefix = HDstrdup(prefix);
                 HDassert(old_prefix);
-                
+
                 /* Append group name to prefix */
                 add_prefix(&prefix, &prefix_len, name);
-                
+
                 /* Iterate into group */
                  dump_function_table->dump_group_function(obj, name);
-              
+
                 /* Restore old prefix name */
                 HDstrcpy(prefix, old_prefix);
                 HDfree(old_prefix);
-                
+
                 /* Close group */
                 H5Gclose(obj);
             }
@@ -1776,11 +1776,11 @@ done:
  *
  * Programmer:  Ruey-Hsia Li
  *
- * Modifications: 
+ * Modifications:
  *  Pedro Vicente, March 27, 2006
  *   added display of attributes
  *  Pedro Vicente, October 4, 2007, added parameters to H5Aiterate2() to allow for
- *   other iteration orders 
+ *   other iteration orders
  *
  *-------------------------------------------------------------------------
  */
@@ -1790,21 +1790,21 @@ dump_named_datatype(hid_t tid, const char *name)
 
     unsigned  attr_crt_order_flags;
     hid_t     tcpl_id;  /* datatype creation property list ID */
-    
-    
+
+
     if ((tcpl_id = H5Tget_create_plist(tid)) < 0)
     {
         error_msg(progname, "error in getting creation property list ID\n");
         d_status = EXIT_FAILURE;
     }
-    
+
     /* query the creation properties for attributes */
-    if (H5Pget_attr_creation_order(tcpl_id, &attr_crt_order_flags) < 0) 
+    if (H5Pget_attr_creation_order(tcpl_id, &attr_crt_order_flags) < 0)
     {
         error_msg(progname, "error in getting creation properties\n");
         d_status = EXIT_FAILURE;
     }
-    
+
     if(H5Pclose(tcpl_id) < 0) {
         error_msg(progname, "error in closing creation property list ID\n");
         d_status = EXIT_FAILURE;
@@ -1828,7 +1828,7 @@ dump_named_datatype(hid_t tid, const char *name)
 
     /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
       in the datatype's create property list for attributes, then, sort by creation order, otherwise by name */
-    
+
     if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
         H5Aiterate2(tid, sort_by, sort_order, NULL, dump_attr_cb, NULL);
     else
@@ -1873,21 +1873,21 @@ dump_group(hid_t gid, const char *name)
         error_msg(progname, "error in getting group creation property list ID\n");
         d_status = EXIT_FAILURE;
     }
-    
+
     /* query the group creation properties for attributes */
-    if (H5Pget_attr_creation_order(gcpl_id, &attr_crt_order_flags) < 0) 
+    if (H5Pget_attr_creation_order(gcpl_id, &attr_crt_order_flags) < 0)
     {
         error_msg(progname, "error in getting group creation properties\n");
         d_status = EXIT_FAILURE;
     }
 
     /* query the group creation properties */
-    if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) 
+    if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0)
     {
         error_msg(progname, "error in getting group creation properties\n");
         d_status = EXIT_FAILURE;
     }
-    
+
     if(H5Pclose(gcpl_id) < 0) {
         error_msg(progname, "error in closing group creation property list ID\n");
         d_status = EXIT_FAILURE;
@@ -1907,7 +1907,7 @@ dump_group(hid_t gid, const char *name)
 
     if(!HDstrcmp(name, "/") && unamedtype) {
         unsigned u;             /* Local index variable */
-        
+
         /* dump unamed type in root group */
         for(u = 0; u < type_table->nobjs; u++)
             if(!type_table->objs[u].recorded) {
@@ -1924,51 +1924,51 @@ dump_group(hid_t gid, const char *name)
 
     if(oinfo.rc > 1) {
         obj_t  *found_obj;    /* Found object */
-        
+
         found_obj = search_obj(group_table, oinfo.addr);
-        
+
         if (found_obj == NULL) {
             indentation(indent);
             error_msg(progname, "internal error (file %s:line %d)\n",
                 __FILE__, __LINE__);
             d_status = EXIT_FAILURE;
-        } 
+        }
         else if (found_obj->displayed) {
             indentation(indent);
             printf("%s \"%s\"\n", HARDLINK, found_obj->objname);
-        } 
+        }
         else {
             found_obj->displayed = TRUE;
             /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
                in the group for attributes, then, sort by creation order, otherwise by name */
-            
+
             if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
                 H5Aiterate2(gid, sort_by, sort_order, NULL, dump_attr_cb, NULL);
             else
                 H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL);
-            
+
             /* if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
                in the group, then, sort by creation order, otherwise by name */
-            
+
             if((sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
                 H5Literate(gid, sort_by, sort_order, NULL, dump_all_cb, NULL);
             else
                 H5Literate(gid, H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL);
 
         }
-    } 
+    }
 
 
-    else 
+    else
     {
 
         /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
            in the group for attributes, then, sort by creation order, otherwise by name */
-            
+
         if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
             H5Aiterate2(gid, sort_by, sort_order, NULL, dump_attr_cb, NULL);
         else
-            H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL); 
+            H5Aiterate2(gid, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL);
 
          /* if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
             in the group, then, sort by creation order, otherwise by name */
@@ -1976,11 +1976,11 @@ dump_group(hid_t gid, const char *name)
         if((sort_by == H5_INDEX_CRT_ORDER) && (crt_order_flags & H5P_CRT_ORDER_TRACKED))
             H5Literate(gid, sort_by, sort_order, NULL, dump_all_cb, NULL);
         else
-            H5Literate(gid, H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL); 
+            H5Literate(gid, H5_INDEX_NAME, sort_order, NULL, dump_all_cb, NULL);
 
-        
+
     }
-    
+
     indent -= COL;
     indentation(indent);
     end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
@@ -1996,10 +1996,10 @@ dump_group(hid_t gid, const char *name)
  *
  * Programmer:  Ruey-Hsia Li
  *
- * Modifications: 
+ * Modifications:
  *  Pedro Vicente, 2004, added dataset creation property list display
  *  Pedro Vicente, October 4, 2007, added parameters to H5Aiterate2() to allow for
- *   other  iteration orders 
+ *   other  iteration orders
  *
  *-------------------------------------------------------------------------
  */
@@ -2016,9 +2016,9 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
         error_msg(progname, "error in getting creation property list ID\n");
         d_status = EXIT_FAILURE;
     }
-    
+
     /* query the creation properties for attributes */
-    if (H5Pget_attr_creation_order(dcpl_id, &attr_crt_order_flags) < 0) 
+    if (H5Pget_attr_creation_order(dcpl_id, &attr_crt_order_flags) < 0)
     {
         error_msg(progname, "error in getting creation properties\n");
         d_status = EXIT_FAILURE;
@@ -2038,7 +2038,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     if(display_oid)
         dump_oid(did);
 
-    if(display_dcpl) 
+    if(display_dcpl)
         dump_dcpl(dcpl_id, type, did);
 
     if(display_data)
@@ -2069,15 +2069,15 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
 
     if ( !bin_output )
     {
-        
+
        /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
         in the group for attributes, then, sort by creation order, otherwise by name */
-        
+
         if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
             H5Aiterate2(did, sort_by, sort_order, NULL, dump_attr_cb, NULL);
         else
             H5Aiterate2(did, H5_INDEX_NAME, sort_order, NULL, dump_attr_cb, NULL);
-        
+
     }
 
     indent -= COL;
@@ -2219,11 +2219,11 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     outputformat->pindex=display_index;
 
     /* do not print indices for regions */
-    if(obj_data == DATASET_DATA) 
+    if(obj_data == DATASET_DATA)
     {
         hid_t f_type = H5Dget_type(obj_id);
-        
-        if (H5Tequal(f_type, H5T_STD_REF_DSETREG)) 
+
+        if (H5Tequal(f_type, H5T_STD_REF_DSETREG))
         {
             outputformat->pindex = 0;
         }
@@ -2541,7 +2541,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
             hid_t tid = H5Dget_type( obj_id );
             size_t datum_size = H5Tget_size( tid );
             hsize_t dims[H5S_MAX_RANK];
-            int ndims = H5Sget_simple_extent_dims( sid, dims, NULL);  
+            int ndims = H5Sget_simple_extent_dims( sid, dims, NULL);
             hsize_t nelmts = 1;
             hsize_t size;
             double ratio = 0;
@@ -2549,13 +2549,13 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
             int ok = 0;
 
             /* only print the compression ratio for these filters */
-            for ( i = 0; i < nfilters; i++) 
+            for ( i = 0; i < nfilters; i++)
             {
                 cd_nelmts = NELMTS(cd_values);
                 filtn = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts,
                     cd_values, sizeof(f_name), f_name, NULL);
-                
-                switch (filtn) 
+
+                switch (filtn)
                 {
                 case H5Z_FILTER_DEFLATE:
                 case H5Z_FILTER_SZIP:
@@ -2565,10 +2565,10 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
                     break;
                 }
             }
-            
+
             if (ndims && ok )
             {
-                
+
                 for (i = 0; i < ndims; i++)
                 {
                     nelmts *= dims[i];
@@ -2581,9 +2581,9 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
 
                 if (b!=0)
                     ratio = (double) a / (double) b;
-              
+
                 HDfprintf(stdout, "SIZE %Hu (%.3f:1 COMPRESSION)\n ", storage_size, ratio);
-                
+
             }
             else
                 HDfprintf(stdout, "SIZE %Hu\n ", storage_size);
@@ -2591,7 +2591,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
 
             H5Sclose(sid);
             H5Tclose(tid);
-            
+
         }
         else
         {
@@ -2669,7 +2669,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
     * FILTERS
     *-------------------------------------------------------------------------
     */
-    
+
 
     indentation(indent + COL);
     printf("%s %s\n", FILTERS, BEGIN);
@@ -2934,8 +2934,8 @@ dump_fcpl(hid_t fid)
     else
         HDstrcpy(dname,"Unknown driver");
 
-    /* Take out this because the driver used can be different from the 
-     * standard output. */  
+    /* Take out this because the driver used can be different from the
+     * standard output. */
     /*indentation(indent + COL);
     printf("%s %s\n","FILE_DRIVER", dname);*/
     indentation(indent + COL);
@@ -3071,11 +3071,11 @@ set_binary_form(const char *form)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    set_sort_by 
+ * Function:    set_sort_by
  *
  * Purpose: set the "by" form of sorting by translating from a string input
  *          parameter to a H5_index_t return value
- *          current sort values are [creation_order | name] 
+ *          current sort values are [creation_order | name]
  *
  * Return: H5_index_t form of sort or H5_INDEX_UNKNOWN if none found
  *
@@ -3102,11 +3102,11 @@ set_sort_by(const char *form)
 
 
 /*-------------------------------------------------------------------------
- * Function:    set_sort_order  
+ * Function:    set_sort_order
  *
  * Purpose: set the order of sorting by translating from a string input
  *          parameter to a H5_iter_order_t return value
- *          current order values are [ascending | descending ] 
+ *          current order values are [ascending | descending ]
  *
  * Return: H5_iter_order_t form of order or H5_ITER_UNKNOWN if none found
  *
@@ -3295,7 +3295,7 @@ parse_subset_params(char *dset)
  *
  *  Pedro Vicente, May 8, 2008
  *   added a flag PE that prints/not prints error messages
- *   added for cases of external links not found, to avoid printing of 
+ *   added for cases of external links not found, to avoid printing of
  *    objects not found, since external links are dumped on a trial error basis
  *
  *-------------------------------------------------------------------------
@@ -3307,7 +3307,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe)
     hid_t            dsetid;
     struct subset_t *sset = (struct subset_t *)data;
 
-    if((dsetid = H5Dopen2(fid, dset, H5P_DEFAULT)) < 0) 
+    if((dsetid = H5Dopen2(fid, dset, H5P_DEFAULT)) < 0)
     {
         if (pe)
         {
@@ -3373,36 +3373,36 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe)
         }
     }
 
-    
+
    /*-------------------------------------------------------------------------
     * check for block overlap
     *-------------------------------------------------------------------------
     */
 
-    if(sset) 
+    if(sset)
     {
         hid_t sid = H5Dget_space(dsetid);
         unsigned int ndims = H5Sget_simple_extent_ndims(sid);
         unsigned int i;
-        
+
         for ( i = 0; i < ndims; i++)
         {
             if ( sset->count[i] > 1 )
             {
-                
+
                 if ( sset->stride[i] < sset->block[i] )
                 {
                     error_msg(progname, "wrong subset selection; blocks overlap\n");
                     d_status = EXIT_FAILURE;
                     return;
-                    
-                }                                
-                
+
+                }
+
             }
-            
-        } 
+
+        }
         H5Sclose(sid);
-        
+
     }
 
     H5Oget_info(dsetid, &oinfo);
@@ -3450,7 +3450,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe)
  *
  * Pedro Vicente, May 8, 2008
  *   added a flag PE that prints/not prints error messages
- *   added for cases of external links not found, to avoid printing of 
+ *   added for cases of external links not found, to avoid printing of
  *    objects not found, since external links are dumped on a trial error basis
  *
  *-------------------------------------------------------------------------
@@ -3459,9 +3459,9 @@ static void
 handle_groups(hid_t fid, const char *group, void UNUSED * data, int pe)
 {
     hid_t      gid;
-   
-    
-    if((gid = H5Gopen2(fid, group, H5P_DEFAULT)) < 0) 
+
+
+    if((gid = H5Gopen2(fid, group, H5P_DEFAULT)) < 0)
     {
         if ( pe )
         {
@@ -3471,21 +3471,21 @@ handle_groups(hid_t fid, const char *group, void UNUSED * data, int pe)
             end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
             d_status = EXIT_FAILURE;
         }
-    } 
-    else 
+    }
+    else
     {
         size_t new_len = HDstrlen(group) + 1;
-        
-        if(prefix_len <= new_len) 
+
+        if(prefix_len <= new_len)
         {
             prefix_len = new_len;
             prefix = HDrealloc(prefix, prefix_len);
         } /* end if */
-        
+
         HDstrcpy(prefix, group);
-          
+
         dump_group(gid, group);
-       
+
         if(H5Gclose(gid) < 0)
             d_status = EXIT_FAILURE;
     } /* end else */
@@ -3594,7 +3594,7 @@ handle_links(hid_t fid, const char *links, void UNUSED * data, int pe)
  *
  *  Pedro Vicente, May 8, 2008
  *   added a flag PE that prints/not prints error messages
- *   added for cases of external links not found, to avoid printing of 
+ *   added for cases of external links not found, to avoid printing of
  *    objects not found, since external links are dumped on a trial error basis
  *
  *-------------------------------------------------------------------------
@@ -3604,16 +3604,16 @@ handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe)
 {
     hid_t       type_id;
 
-    if((type_id = H5Topen2(fid, type, H5P_DEFAULT)) < 0) 
+    if((type_id = H5Topen2(fid, type, H5P_DEFAULT)) < 0)
     {
         /* check if type is unamed datatype */
         unsigned idx = 0;
 
-        while(idx < type_table->nobjs ) 
+        while(idx < type_table->nobjs )
         {
             char name[128];
 
-            if(!type_table->objs[idx].recorded) 
+            if(!type_table->objs[idx].recorded)
             {
                 /* unamed datatype */
                 sprintf(name, "/#"H5_PRINTF_HADDR_FMT, type_table->objs[idx].objno);
@@ -3625,7 +3625,7 @@ handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe)
             idx++;
         } /* end while */
 
-        if(idx == type_table->nobjs) 
+        if(idx == type_table->nobjs)
         {
             if ( pe )
             {
@@ -3639,7 +3639,7 @@ handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe)
                 d_status = EXIT_FAILURE;
             }
         }
-        else 
+        else
         {
             hid_t dsetid = H5Dopen2(fid, type_table->objs[idx].objname, H5P_DEFAULT);
             type_id = H5Dget_type(dsetid);
@@ -3647,8 +3647,8 @@ handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe)
             H5Tclose(type_id);
             H5Dclose(dsetid);
         }
-    } 
-    else 
+    }
+    else
     {
         dump_named_datatype(type_id, type);
 
@@ -3809,7 +3809,7 @@ parse_start:
             break;
 
         case 'o':
-         
+
          if (bin_form > 0 )
          {
           if (set_output_file(opt_arg, 1) < 0){
@@ -3824,14 +3824,14 @@ parse_start:
            leave(EXIT_FAILURE);
           }
          }
-      
+
          usingdasho = TRUE;
          last_was_dset = FALSE;
          outfname = opt_arg;
          break;
 
        case 'b':
-            
+
         if ( ( bin_form = set_binary_form(opt_arg)) < 0){
          /* failed to set binary form */
          usage(progname);
@@ -3844,10 +3844,10 @@ parse_start:
           usage(progname);
           leave(EXIT_FAILURE);
          }
-         
+
          last_was_dset = FALSE;
         }
-        
+
         break;
 
        case 'q':
@@ -3862,14 +3862,14 @@ parse_start:
            break;
 
        case 'z':
-          
+
            if ( ( sort_order = set_sort_order(opt_arg)) < 0)
            {
                /* failed to set "sort order" form */
                usage(progname);
                leave(EXIT_FAILURE);
            }
-           
+
            break;
 
         /** begin XML parameters **/
@@ -4225,29 +4225,29 @@ main(int argc, const char *argv[])
             dump_fcpl(fid);
     }
 
-    if(display_all) 
+    if(display_all)
     {
-        if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) 
+        if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
         {
             error_msg(progname, "unable to open root group\n");
             d_status = EXIT_FAILURE;
-        } 
-        else 
+        }
+        else
         {
-     
+
             dump_function_table->dump_group_function(gid, "/" );
-     
+
         }
 
-        if(H5Gclose(gid) < 0) 
+        if(H5Gclose(gid) < 0)
         {
             error_msg(progname, "unable to close root group\n");
             d_status = EXIT_FAILURE;
         }
 
-        
-    } 
-    else 
+
+    }
+    else
     {
         /* Note: this option is not supported for XML */
         if(doxml) {
@@ -5478,7 +5478,7 @@ xml_dump_named_datatype(hid_t type, const char *name)
  *
  * Modifications:
  *  Pedro Vicente, October 9, 2007
- *   added parameters to H5A(L)iterate to allow for other iteration orders 
+ *   added parameters to H5A(L)iterate to allow for other iteration orders
  *
  *-------------------------------------------------------------------------
  */
@@ -5504,21 +5504,21 @@ xml_dump_group(hid_t gid, const char *name)
         error_msg(progname, "error in getting group creation property list ID\n");
         d_status = EXIT_FAILURE;
     }
-    
+
     /* query the group creation properties for attributes */
-    if (H5Pget_attr_creation_order(gcpl_id, &attr_crt_order_flags) < 0) 
+    if (H5Pget_attr_creation_order(gcpl_id, &attr_crt_order_flags) < 0)
     {
         error_msg(progname, "error in getting group creation properties\n");
         d_status = EXIT_FAILURE;
     }
 
     /* query the group creation properties */
-    if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0) 
+    if(H5Pget_link_creation_order(gcpl_id, &crt_order_flags) < 0)
     {
         error_msg(progname, "error in getting group creation properties\n");
         d_status = EXIT_FAILURE;
     }
-    
+
     if(H5Pclose(gcpl_id) < 0) {
         error_msg(progname, "error in closing group creation property list ID\n");
         d_status = EXIT_FAILURE;
@@ -5614,7 +5614,7 @@ xml_dump_group(hid_t gid, const char *name)
                 found_obj->displayed = TRUE;
 
                 /* 1.  do all the attributes of the group */
-               
+
                 if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
                     H5Aiterate2(gid, sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL);
                 else
@@ -5678,7 +5678,7 @@ xml_dump_group(hid_t gid, const char *name)
         free(parentxid);
 
         /* 1.  do all the attributes of the group */
-        
+
         if((sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
             H5Aiterate2(gid, sort_by, sort_order, NULL, dump_function_table->dump_attribute_function, NULL);
         else
@@ -6141,7 +6141,7 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    xml_dump_dataset 
+ * Function:    xml_dump_dataset
  *
  * Purpose:     Dump a description of an HDF5 dataset in XML.
  *
@@ -6151,7 +6151,7 @@ xml_dump_fill_value(hid_t dcpl, hid_t type)
  *
  * Modifications:
  *  Pedro Vicente, October 9, 2007
- *   added parameters to H5Aiterate2 to allow for other iteration orders 
+ *   added parameters to H5Aiterate2 to allow for other iteration orders
  *
  *-------------------------------------------------------------------------
  */
@@ -6640,7 +6640,7 @@ h5_fileaccess(void)
             return -1;
     } else if (!HDstrcmp(name, "direct")) {
         /* Substitute Direct I/O driver with sec2 driver temporarily because
-         * some output has sec2 driver as the standard. */  
+         * some output has sec2 driver as the standard. */
         if (H5Pset_fapl_sec2(fapl)<0) return -1;
     } else {
         /* Unknown driver */
@@ -6701,7 +6701,7 @@ add_prefix(char **prfx, size_t *prfx_len, const char *name)
  * made by: PVN
  *
  * Purpose:     Dump an external link
- *  Since external links are soft links, they are dumped on a trial error 
+ *  Since external links are soft links, they are dumped on a trial error
  *   basis, attempting to dump as a dataset, as a group and as a named datatype
  *   Error messages are supressed
  *
@@ -6711,34 +6711,34 @@ add_prefix(char **prfx, size_t *prfx_len, const char *name)
 static int dump_extlink(const char *filename, const char *targname)
 {
     hid_t fid;
-    
-    
+
+
     fid = h5tools_fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT, driver, NULL, 0);
-   
-    if (fid < 0) 
+
+    if (fid < 0)
     {
         goto fail;
     }
-    
+
     /* add some indentation to distinguish that these objects are external */
     indent += 2*COL;
-    
+
     handle_datasets(fid, targname, NULL, 0);
     handle_groups(fid, targname, NULL, 0);
     handle_datatypes(fid, targname, NULL, 0);
-    
+
     indent -= 2*COL;
-    
-    
+
+
     if (H5Fclose(fid) < 0)
         d_status = EXIT_FAILURE;
-    
-    
+
+
     return SUCCEED;
-    
+
 fail:
 
     return FAIL;
-    
+
 }
 

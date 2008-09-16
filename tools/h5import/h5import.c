@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     {
         print_version("h5import");
         exit(EXIT_SUCCESS);
-        
+
     }
 
  /*
@@ -807,20 +807,20 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
     char    str[1024];
     char    c;
     int     i = 0, j, nlines = 0, line;
-    
+
 /*-------------------------------------------------------------------------
  * get number of lines in the input file
  *-------------------------------------------------------------------------
  */
 
-    while ( !feof( *strm ) ) 
+    while ( !feof( *strm ) )
     {
         c = fgetc( *strm );
-                   
+
         if ( c == 10 ) /* eol */
         {
             nlines++;
-            
+
         }
     }
 
@@ -845,9 +845,9 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
         goto out;
 
     /* disable error reporting */
-    H5E_BEGIN_TRY 
+    H5E_BEGIN_TRY
     {
-        
+
         /* create parent groups */
         if(in->path.count > 1) {
             j = 0;
@@ -868,7 +868,7 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
             handle = file_id;
             j = 0;
         }
-        
+
         /*enable error reporting */
     } H5E_END_TRY;
 
@@ -885,11 +885,11 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
 
     while(!feof(*strm)) {
         c = fgetc(*strm);
-        
+
         str[i] = c;
-        
+
         i++;
-        
+
         if(c == 10) /* eol */
         {
             char    *str2 = str;
@@ -915,11 +915,11 @@ processStrData(FILE **strm, struct Input *in, hid_t file_id)
 
             i = 0;
             str[ 0 ] = '\0';
-            
+
         }
     }
 
-    
+
     /* close */
     H5Dclose(dset_id);
     H5Sclose(space_id);

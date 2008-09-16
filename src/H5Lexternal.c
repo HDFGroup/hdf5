@@ -169,7 +169,7 @@ done:
  *              Monday, July 10, 2006
  * Modifications:
  *		Vailin Choi, April 2, 2008
- *		Add handling to search for the target file 
+ *		Add handling to search for the target file
  *		See description in RM: H5Lcreate_external
  *
  *-------------------------------------------------------------------------
@@ -269,7 +269,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
 	    HDstrcpy(tempname, &file_name[2]);
 	}
     }
-    
+
     /* try searching from paths set in the environment variable */
     if ((ext_file == NULL) && (env_prefix=HDgetenv("HDF5_EXT_PREFIX"))) {
 
@@ -295,7 +295,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
         if (pp)
             H5MM_xfree(pp);
     }
-    
+
     /* try searching from property list */
     if (ext_file == NULL) {
         if(H5P_get(plist, H5L_ACS_ELINK_PREFIX_NAME, &my_prefix) < 0)

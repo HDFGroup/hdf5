@@ -91,7 +91,7 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 ///\param       obj - IN: Location reference object is in
 ///\param	ref - IN: Reference pointer
 ///\parDescription
-///		\c obj can be DataSet, Group, H5File, or named DataType, that 
+///		\c obj can be DataSet, Group, H5File, or named DataType, that
 ///		is a datatype that has been named by DataType::commit.
 // Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
@@ -99,7 +99,7 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 {
    H5Object::dereference(obj, ref);
 }
- */ 
+ */
 DataType::DataType(H5Object& obj, void* ref) : H5Object()
 {
    id = obj.p_dereference(ref);
@@ -122,7 +122,7 @@ DataType::DataType() : H5Object(), id(0) {}
 ///\brief	Copy constructor: makes a copy of the original DataType object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataType::DataType(const DataType& original) : H5Object(original) 
+DataType::DataType(const DataType& original) : H5Object(original)
 {
     id = original.getId();
     incRefCount(); // increment number of references to this id
@@ -159,7 +159,7 @@ void DataType::copy( const DataType& like_type )
 //--------------------------------------------------------------------------
 // Function:	DataType::copy
 ///\brief	Copies the datatype of the given dataset to this datatype object
-///\param	dset - IN: Dataset 
+///\param	dset - IN: Dataset
 ///\exception	H5::DataTypeIException
 // Programmer	Binh-Minh Ribler - Jan, 2007
 ///\parDescription
@@ -227,7 +227,7 @@ bool DataType::operator==(const DataType& compared_type ) const
 // Function:	DataType::p_commit (private)
 //\brief	Commits a transient datatype to a file, creating a new
 //		named datatype
-//\param	loc_id - IN: The id of either a file, group, dataset, named 
+//\param	loc_id - IN: The id of either a file, group, dataset, named
 //			 datatype, or attribute.
 //\param	name - IN: Name of the datatype
 //\exception	H5::DataTypeIException

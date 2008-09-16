@@ -460,7 +460,7 @@ H5G_get_name(hid_t id, char *name/*out*/, size_t size, hid_t lapl_id,
                 H5I_dec_ref(file, FALSE);
 		HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't determine name")
             } /* end if */
-	
+
             /* Close file ID used for search */
 	    if(H5I_dec_ref(file, FALSE) < 0)
 		HGOTO_ERROR(H5E_SYM, H5E_CANTCLOSEFILE, FAIL, "can't determine name")
@@ -470,7 +470,7 @@ H5G_get_name(hid_t id, char *name/*out*/, size_t size, hid_t lapl_id,
         ret_value = len;
     } /* end if */
 
-done: 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_get_name() */
 
@@ -914,7 +914,7 @@ done:
  */
 herr_t
 H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
-    H5RS_str_t *src_full_path_r, H5F_t *dst_file, H5RS_str_t *dst_full_path_r, 
+    H5RS_str_t *src_full_path_r, H5F_t *dst_file, H5RS_str_t *dst_full_path_r,
     hid_t dxpl_id)
 {
     herr_t ret_value = SUCCEED;
@@ -1086,8 +1086,8 @@ H5G_get_name_by_addr_cb(hid_t gid, const char *path, const H5L_info_t *linfo,
             HGOTO_DONE(H5_ITER_STOP)
         } /* end if */
     } /* end if */
-   
-done:    
+
+done:
     if(obj_found && H5G_loc_free(&obj_loc) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, H5_ITER_ERROR, "can't free location")
 
@@ -1137,7 +1137,7 @@ H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *
         udata.lapl_id = lapl_id;
         udata.dxpl_id = dxpl_id;
         udata.path = NULL;
-        
+
         /* Visit all the links in the file */
         if((status = H5G_visit(file, "/", H5_INDEX_NAME, H5_ITER_NATIVE, H5G_get_name_by_addr_cb, &udata, lapl_id, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group traversal failed while looking for object name")
@@ -1166,8 +1166,8 @@ H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *
     } /* end if */
     else
         ret_value = 0;
-   
-done:    
+
+done:
     /* Release resources */
     H5MM_xfree(udata.path);
 

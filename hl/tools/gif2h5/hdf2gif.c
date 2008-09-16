@@ -38,7 +38,7 @@ usage(void)
     fprintf(stdout, "       h52gif -V \n");
     fprintf(stdout, "        Print HDF5 library version and exit\n");
     printf("h52gif expects *at least* one h5_image.\n");
-   
+
 }
 
 FILE *fpGif = NULL;
@@ -69,16 +69,16 @@ int main(int argc , char **argv)
     int bool_is_image = 0; /* 0 = false , 1 = true */
     char *image_name = NULL;
     int idx;
-    
+
     if ( argv[1] && (strcmp("-V",argv[1])==0) )
     {
         print_version("gif2h5");
         exit(EXIT_SUCCESS);
-        
+
     }
 
 
-    if (argc < 4) 
+    if (argc < 4)
     {
         /* they didn't supply at least one image -- bail */
         usage();
@@ -89,14 +89,14 @@ int main(int argc , char **argv)
     GIFName = argv[2];
 
     /* get the options */
-    while (arg_index++ < argc - 1) 
+    while (arg_index++ < argc - 1)
     {
         if (!strcmp(argv[arg_index] , "-i")) {
             bool_is_image = 1;
             continue;
         }
 
-        if (bool_is_image) 
+        if (bool_is_image)
         {
             /* allocate space to store the image name */
             size_t len = strlen(argv[arg_index]);
@@ -118,7 +118,7 @@ int main(int argc , char **argv)
     b = (BYTE *) &idx;
     EndianOrder = (b[0] ? 1:0);
 
-    if (!(fpGif = fopen(GIFName , "wb"))) 
+    if (!(fpGif = fopen(GIFName , "wb")))
     {
         printf("Error opening gif file for output. Aborting.\n");
         goto out;
@@ -132,19 +132,19 @@ int main(int argc , char **argv)
         hssize_t      npals;
         hsize_t       pal_dims[2];
         unsigned char *pal;
-       
-        if ((fid = H5Fopen(HDFName , H5F_ACC_RDONLY , H5P_DEFAULT)) < 0) 
+
+        if ((fid = H5Fopen(HDFName , H5F_ACC_RDONLY , H5P_DEFAULT)) < 0)
         {
             fprintf(stderr , "Unable to open HDF file for input. Aborting.\n");
             goto out;
         }
-        
+
         /* read image */
         if ( H5IMget_image_info( fid, image_name, &width, &height, &planes, interlace, &npals ) < 0 )
             goto out;
 
         Image = (BYTE*) malloc( (size_t) width * (size_t) height );
-        
+
         if ( H5IMread_image( fid, image_name, Image ) < 0 )
             goto out;
 
@@ -154,7 +154,7 @@ int main(int argc , char **argv)
                 goto out;
 
             pal = (BYTE*) malloc( (size_t) pal_dims[0] * (size_t) pal_dims[1] );
-            
+
             if ( H5IMget_palette( fid, image_name, 0, pal ) < 0 )
                 goto out;
 
@@ -169,9 +169,9 @@ int main(int argc , char **argv)
 
             free(pal);
         }
-        
+
         H5Fclose(fid);
-        
+
         RWidth  = (int)width;
         RHeight = (int)height;
 
@@ -185,17 +185,17 @@ int main(int argc , char **argv)
          *      palette
          *   2. Check for palettes in any of the other images.
          */
-        if (!npals) 
+        if (!npals)
         {
             numcols = 256;
-            for (i = 0 ; i < numcols ; i++) 
+            for (i = 0 ; i < numcols ; i++)
             {
                 Red[i] = 255 - i;
                 Green[i] = 255 - i;
                 Blue[i] = 255 - i;
             }
-        } 
-        else 
+        }
+        else
         {
             for (i = 0 ; i < numcols ; i++)
             {
@@ -205,7 +205,7 @@ int main(int argc , char **argv)
             }
         }
 
-        for (i = 0; i < numcols; i++) 
+        for (i = 0; i < numcols; i++)
         {
             pc2nc[i] = r1[i] = g1[i] = b1[i] = 0;
         }
@@ -213,16 +213,16 @@ int main(int argc , char **argv)
         /* compute number of unique colors */
         nc = 0;
 
-        for (i = 0; i < numcols; i++) 
+        for (i = 0; i < numcols; i++)
         {
             /* see if color #i is already used */
-            for (j = 0; j < i; j++) 
+            for (j = 0; j < i; j++)
             {
                 if (Red[i] == Red[j] && Green[i] == Green[j] && Blue[i] == Blue[j])
                     break;
             }
-            
-            if (j==i) 
+
+            if (j==i)
             {
                 /* wasn't found */
                 pc2nc[i] = nc;
@@ -230,15 +230,15 @@ int main(int argc , char **argv)
                 g1[nc] = Green[i];
                 b1[nc] = Blue[i];
                 nc++;
-            } 
-            else 
+            }
+            else
             {
                 pc2nc[i] = pc2nc[j];
             }
         }
 
         /* figure out 'BitsPerPixel' */
-        for (i = 1; i < 8; i++) 
+        for (i = 1; i < 8; i++)
         {
             if ((1<<i) >= nc)
                 break;
@@ -252,23 +252,23 @@ int main(int argc , char **argv)
         else
             InitCodeSize = BitsPerPixel;
 
-        if (!fpGif) 
+        if (!fpGif)
         {
             fprintf(stderr,  "WriteGIF: file not open for writing\n" );
             goto out;
         }
 
-      
+
         fwrite("GIF87a", sizeof( char ), 6, fpGif);  /* the GIF magic number */
-        
+
         putword(RWidth, fpGif);             /* screen descriptor */
         putword(RHeight, fpGif);
-        
+
         i = 0x00;                   /* No, there is no color map */
         i |= (8-1)<<4;              /* OR in the color resolution (hardwired 8) */
         i |= (BitsPerPixel - 1);    /* OR in the # of bits per pixel */
         fputc(i,fpGif);
-        
+
         fputc(Background,fpGif);    /* background color */
         fputc(0, fpGif);            /* future expansion byte */
 
@@ -286,7 +286,7 @@ int main(int argc , char **argv)
         /* since we always have a local color palette ... */
         fputc((0x80 | (BitsPerPixel - 1)) , fpGif);
 
-        for (i = 0; i < ColorMapSize; i++) 
+        for (i = 0; i < ColorMapSize; i++)
         {
             /* write out Global colormap */
             fputc(r1[i], fpGif);
@@ -301,7 +301,7 @@ int main(int argc , char **argv)
         free(Image);
     }
 
-    if (fputc(';',fpGif) == EOF) 
+    if (fputc(';',fpGif) == EOF)
     {
         /* Write GIF file terminator */
         fprintf(stderr , "Error!");

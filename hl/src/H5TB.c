@@ -61,7 +61,7 @@ static hid_t H5TB_create_type(hid_t loc_id,
  *
  * Date: January 17, 2001
  *
- * Comments: 
+ * Comments:
  *
  * Modifications:
  *
@@ -113,7 +113,7 @@ herr_t H5TBmake_table( const char *table_title,
  }
 
  /* Create a simple data space with unlimited size */
- if((sid = H5Screate_simple( 1, dims, maxdims )) < 0) 
+ if((sid = H5Screate_simple( 1, dims, maxdims )) < 0)
   return -1;
 
  /* Modify dataset creation properties, i.e. enable chunking  */
@@ -2310,7 +2310,7 @@ herr_t H5TBinsert_field( hid_t loc_id,
   if(inserted )
    idx = i - 1;
 
-  if(i == position ) { 
+  if(i == position ) {
    /* Get the new member size */
    new_member_size = H5Tget_size( field_type );
 
@@ -2858,7 +2858,7 @@ herr_t H5TBdelete_field( hid_t loc_id,
  * We have to read field by field of the old dataset and save it into the new one
  *-------------------------------------------------------------------------
  */
- for ( i = 0; i < nfields; i++) { 
+ for ( i = 0; i < nfields; i++) {
   /* Get the member name */
   member_name = H5Tget_member_name(type_id1, (unsigned)i);
 
@@ -3441,20 +3441,20 @@ int H5TB_find_field( const char *field, const char *field_list )
 {
     const char *start = field_list;
     const char *end;
-    
-    while ( (end = strstr( start, "," )) != 0 ) 
+
+    while ( (end = strstr( start, "," )) != 0 )
     {
         size_t count = end - start;
         if(strncmp(start, field, count) == 0 && count == strlen(field) )
             return 1;
         start = end + 1;
     }
-    
+
     if(strcmp( start, field ) == 0 )
         return 1;
-    
+
     return -1;
-    
+
 }
 
 

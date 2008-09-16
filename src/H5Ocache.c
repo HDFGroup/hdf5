@@ -606,7 +606,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "corrupt object header - too few messages")
 #else /* H5_STRICT_FORMAT_CHECKS */
     /* Check for incorrect # of messages in object header and if we have write
-     * access on the file, flag the object header as dirty, so it gets fixed. 
+     * access on the file, flag the object header as dirty, so it gets fixed.
      */
     if(oh->version == H5O_VERSION_1)
         if((oh->nmesgs + merged_null_msgs) != nmesgs &&
@@ -760,7 +760,7 @@ H5O_assert(oh);
 
         /* Mark chunk 0 as dirty, since the object header prefix has been updated */
         /* (this could be more sophisticated and track whether any prefix fields
-         *      have been changed, which could save I/O accesses if the 
+         *      have been changed, which could save I/O accesses if the
          *      messages in chunk 0 haven't changed - QAK)
          */
         HDassert(H5F_addr_eq(addr, oh->chunk[0].addr));

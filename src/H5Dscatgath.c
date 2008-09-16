@@ -507,7 +507,7 @@ H5D_scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
          * if necessary.
          */
 
-	/* 
+	/*
          * Gather data
          */
         n = H5D_gather_file(io_info, file_space, &file_iter, smine_nelmts,
@@ -516,7 +516,7 @@ H5D_scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
 
         /* If the source and destination are compound types and subset of each other
-         * and no conversion is needed, copy the data directly into user's buffer and 
+         * and no conversion is needed, copy the data directly into user's buffer and
          * bypass the rest of steps.
          */
         if(H5T_SUBSET_FALSE != type_info->cmpd_subset) {
@@ -644,7 +644,7 @@ H5D_scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
             HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "mem gather failed")
 
         /* If the source and destination are compound types and the destination is
-         * is a subset of the source and no conversion is needed, copy the data 
+         * is a subset of the source and no conversion is needed, copy the data
          * directly into user's buffer and bypass the rest of steps.  If the source
          * is a subset of the destination, the optimization is done in conversion
          * function H5T_conv_struct_opt to protect the background data.
@@ -705,9 +705,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5D_compound_opt_read
  *
- * Purpose:	A special optimization case when the source and 
- *              destination members are a subset of each other, and 
- *              the order is the same, and no conversion is needed.  
+ * Purpose:	A special optimization case when the source and
+ *              destination members are a subset of each other, and
+ *              the order is the same, and no conversion is needed.
  *              For example:
  *                  struct source {            struct destination {
  *                      TYPE1 A;      -->          TYPE1 A;
@@ -724,7 +724,7 @@ done:
  *                  };                             TYPE4 D;
  *                                                 TYPE5 E;
  *                                             };
- *              The optimization is simply moving data to the appropriate 
+ *              The optimization is simply moving data to the appropriate
  *              places in the buffer.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -811,7 +811,7 @@ H5D_compound_opt_read(size_t nelmts, const H5S_t *space,
 
             /* Copy the data into the right place. */
             for(i = 0; i < curr_nelmts; i++) {
-                HDmemmove(xubuf, xdbuf, type_size); 
+                HDmemmove(xubuf, xdbuf, type_size);
 
                 /* Update pointers */
                 xdbuf += src_stride;
@@ -837,9 +837,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5D_compound_opt_write
  *
- * Purpose:	A special optimization case when the source and 
- *              destination members are a subset of each other, and 
- *              the order is the same, and no conversion is needed.  
+ * Purpose:	A special optimization case when the source and
+ *              destination members are a subset of each other, and
+ *              the order is the same, and no conversion is needed.
  *              For example:
  *                  struct source {            struct destination {
  *                      TYPE1 A;      -->          TYPE1 A;
@@ -856,7 +856,7 @@ done:
  *                  };                             TYPE4 D;
  *                                                 TYPE5 E;
  *                                             };
- *              The optimization is simply moving data to the appropriate 
+ *              The optimization is simply moving data to the appropriate
  *              places in the buffer.
  *
  *
@@ -888,7 +888,7 @@ H5D_compound_opt_write(size_t nelmts, const H5D_type_info_t *type_info)
     xsbuf = (uint8_t *)type_info->tconv_buf;
     xdbuf = (uint8_t *)type_info->tconv_buf;
     for(i = 0; i < nelmts; i++) {
-        HDmemmove(xdbuf, xsbuf, dst_stride); 
+        HDmemmove(xdbuf, xsbuf, dst_stride);
 
         /* Update pointers */
         xsbuf += src_stride;

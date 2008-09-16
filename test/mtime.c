@@ -85,7 +85,7 @@ main(void)
     if(H5Fclose(file) < 0) TEST_ERROR;
 
     /*
-     * Open the file and get the modification time. We'll test the 
+     * Open the file and get the modification time. We'll test the
      * H5Oget_info() arguments too: being able to stat something without
      * knowing its name.
      */

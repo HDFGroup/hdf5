@@ -202,7 +202,7 @@ main (void)
            ret   = H5Aread(attr, atype_mem, string_out);
            printf("Found string attribute; its index is %d , value =   %s \n", i, string_out);
            ret   = H5Tclose(atype_mem);
-      } 
+      }
        ret   = H5Aclose(attr);
        ret   = H5Tclose(atype);
     }

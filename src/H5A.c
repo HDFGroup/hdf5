@@ -711,7 +711,7 @@ done:
  *
  * Purpose:
  *      Finishes initializing an attributes the open
- *      
+ *
  * Usage:
  *  herr_t H5A_open_common(loc, name, dxpl_id)
  *      const H5G_loc_t *loc;   IN: Pointer to group location for object
@@ -832,7 +832,7 @@ done:
  * Function:	H5A_open_by_name
  *
  * Purpose:	Open an attribute in an object header, according to it's name
- *      
+ *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
@@ -1411,7 +1411,7 @@ done:
  NAME
     H5A_get_name
  PURPOSE
-    Private function for H5Aget_name.  Gets a copy of the name for an 
+    Private function for H5Aget_name.  Gets a copy of the name for an
     attribute
  RETURNS
     This function returns the length of the attribute's name (which may be
@@ -2397,7 +2397,7 @@ H5A_free(H5A_t *attr)
 	    HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release dataspace info")
         attr->shared->ds = NULL;
     }
-    if(attr->shared->data) 
+    if(attr->shared->data)
         attr->shared->data = H5FL_BLK_FREE(attr_buf, attr->shared->data);
 
 done:
@@ -2435,7 +2435,7 @@ H5A_close(H5A_t *attr)
     if(attr->obj_opened && (H5O_close(&(attr->shared->oloc)) < 0))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release object header info")
 
-    /* Reference count can be 0.  It only happens when H5A_create fails. */ 
+    /* Reference count can be 0.  It only happens when H5A_create fails. */
     if(1 >= attr->shared->nrefs) {
         /* Free dynamicly allocated items */
         if(H5A_free(attr) < 0)

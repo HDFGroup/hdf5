@@ -1471,7 +1471,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
      * However, the library sometimes queries it through H5F_get_eoa.
      * Here the code finds the biggest EOA for individual file if
      * the query is from H5F_get_eoa (TYPE is H5FD_MEM_DEFAULT).
-     */ 
+     */
     if(H5FD_MEM_DEFAULT == type) {
         UNIQUE_MEMBERS(file->fa.memb_map, mt) {
 	    if (file->memb[mt]) {
@@ -1498,7 +1498,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
         } END_MEMBERS;
     } else {
         H5FD_mem_t mmt = file->fa.memb_map[type];
-        if (H5FD_MEM_DEFAULT==mmt) mmt = type;        
+        if (H5FD_MEM_DEFAULT==mmt) mmt = type;
 
 	if (file->memb[mmt]) {
             H5E_BEGIN_TRY {

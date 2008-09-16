@@ -21,7 +21,7 @@
 /*-------------------------------------------------------------------------
  * Function: print_size
  *
- * Purpose: print dimensions 
+ * Purpose: print dimensions
  *
  *-------------------------------------------------------------------------
  */
@@ -39,7 +39,7 @@ print_size (int rank, hsize_t *dims)
     }
     parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[rank-1]);
     parallel_print("]\n" );
-    
+
 }
 #endif /* H5DIFF_DEBUG */
 
@@ -152,48 +152,48 @@ error:
  *
  * Date: May 9, 2003
  *
- * Modifications: 
+ * Modifications:
  *
  *
  * October 2006:  Read by hyperslabs for big datasets.
  *
  *  A threshold of H5TOOLS_MALLOCSIZE (128 MB) is the limit upon which I/O hyperslab is done
- *  i.e., if the memory needed to read a dataset is greater than this limit, 
- *  then hyperslab I/O is done instead of one operation I/O 
+ *  i.e., if the memory needed to read a dataset is greater than this limit,
+ *  then hyperslab I/O is done instead of one operation I/O
  *  For each dataset, the memory needed is calculated according to
  *
  *  memory needed = number of elements * size of each element
  *
- *  if the memory needed is lower than H5TOOLS_MALLOCSIZE, then the following operations 
+ *  if the memory needed is lower than H5TOOLS_MALLOCSIZE, then the following operations
  *  are done
  *
  *  H5Dread( input_dataset1 )
  *  H5Dread( input_dataset2 )
  *
- *  with all elements in the datasets selected. If the memory needed is greater than 
+ *  with all elements in the datasets selected. If the memory needed is greater than
  *  H5TOOLS_MALLOCSIZE, then the following operations are done instead:
  *
- *  a strip mine is defined for each dimension k (a strip mine is defined as a 
+ *  a strip mine is defined for each dimension k (a strip mine is defined as a
  *  hyperslab whose size is memory manageable) according to the formula
  *
  *  (1) strip_mine_size[k ] = MIN(dimension[k ], H5TOOLS_BUFSIZE / size of memory type)
  *
- *  where H5TOOLS_BUFSIZE is a constant currently defined as 1MB. This formula assures 
- *  that for small datasets (small relative to the H5TOOLS_BUFSIZE constant), the strip 
- *  mine size k is simply defined as its dimension k, but for larger datasets the 
+ *  where H5TOOLS_BUFSIZE is a constant currently defined as 1MB. This formula assures
+ *  that for small datasets (small relative to the H5TOOLS_BUFSIZE constant), the strip
+ *  mine size k is simply defined as its dimension k, but for larger datasets the
  *  hyperslab size is still memory manageable.
- *  a cycle is done until the number of elements in the dataset is reached. In each 
- *  iteration, two parameters are defined for the function H5Sselect_hyperslab, 
+ *  a cycle is done until the number of elements in the dataset is reached. In each
+ *  iteration, two parameters are defined for the function H5Sselect_hyperslab,
  *  the start and size of each hyperslab, according to
  *
  *  (2) hyperslab_size [k] = MIN(dimension[k] - hyperslab_offset[k], strip_mine_size [k])
  *
- *  where hyperslab_offset [k] is initially set to zero, and later incremented in 
- *  hyperslab_size[k] offsets. The reason for the operation 
+ *  where hyperslab_offset [k] is initially set to zero, and later incremented in
+ *  hyperslab_size[k] offsets. The reason for the operation
  *
  *  dimension[k] - hyperslab_offset[k]
  *
- *  in (2) is that, when using the strip mine size, it assures that the "remaining" part 
+ *  in (2) is that, when using the strip mine size, it assures that the "remaining" part
  *  of the dataset that does not fill an entire strip mine is processed.
  *
  *-------------------------------------------------------------------------
@@ -207,13 +207,13 @@ hsize_t diff_datasetid( hid_t did1,
  hid_t      sid1=-1;
  hid_t      sid2=-1;
  hid_t      f_tid1=-1;
- hid_t      f_tid2=-1;                
+ hid_t      f_tid2=-1;
  hid_t      m_tid1=-1;
- hid_t      m_tid2=-1;                
+ hid_t      m_tid2=-1;
  size_t     m_size1;
- size_t     m_size2;               
+ size_t     m_size2;
  H5T_sign_t sign1;
- H5T_sign_t sign2;                 
+ H5T_sign_t sign2;
  int        rank1;
  int        rank2;
  hsize_t    nelmts1;
@@ -228,9 +228,9 @@ hsize_t diff_datasetid( hid_t did1,
  hsize_t    storage_size2;
  hsize_t    nfound=0;               /* number of differences found */
  int        cmp=1;                  /* do diff or not */
- void       *buf1=NULL;                  
- void       *buf2=NULL; 
- void       *sm_buf1=NULL;                
+ void       *buf1=NULL;
+ void       *buf2=NULL;
+ void       *sm_buf1=NULL;
  void       *sm_buf2=NULL;
  size_t     need;                   /* bytes needed for malloc */
  int        i;
@@ -401,7 +401,7 @@ hsize_t diff_datasetid( hid_t did1,
   name2=diff_basename(obj2_name);
  }
 
- 
+
 /*-------------------------------------------------------------------------
  * read/compare
  *-------------------------------------------------------------------------
@@ -435,60 +435,60 @@ hsize_t diff_datasetid( hid_t did1,
                       did1,
                       did2);
  }
- 
+
  else /* possibly not enough memory, read/compare by hyperslabs */
-  
+
  {
   size_t        p_type_nbytes = m_size1; /*size of memory type */
   hsize_t       p_nelmts = nelmts1;      /*total selected elmts */
   hsize_t       elmtno;                  /*counter  */
   int           carry;                   /*counter carry value */
   unsigned int  vl_data = 0;             /*contains VL datatypes */
-  
+
   /* stripmine info */
   hsize_t       sm_size[H5S_MAX_RANK];   /*stripmine size */
   hsize_t       sm_nbytes;               /*bytes per stripmine */
   hsize_t       sm_nelmts;               /*elements per stripmine*/
   hid_t         sm_space;                /*stripmine data space */
-  
+
   /* hyperslab info */
   hsize_t       hs_offset[H5S_MAX_RANK]; /*starting offset */
   hsize_t       hs_size[H5S_MAX_RANK];   /*size this pass */
   hsize_t       hs_nelmts;               /*elements in request */
   hsize_t       zero[8];                 /*vector of zeros */
-  
+
   /* check if we have VL data in the dataset's datatype */
   if (H5Tdetect_class(m_tid1, H5T_VLEN) == TRUE)
    vl_data = TRUE;
-  
+
   /*
    * determine the strip mine size and allocate a buffer. The strip mine is
    * a hyperslab whose size is manageable.
    */
   sm_nbytes = p_type_nbytes;
-  
+
   for (i = rank1; i > 0; --i) {
    sm_size[i - 1] = MIN(dims1[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
    sm_nbytes *= sm_size[i - 1];
    assert(sm_nbytes > 0);
   }
-  
+
   sm_buf1 = malloc((size_t)sm_nbytes);
   sm_buf2 = malloc((size_t)sm_nbytes);
-  
+
   sm_nelmts = sm_nbytes / p_type_nbytes;
   sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
-  
+
   /* the stripmine loop */
   memset(hs_offset, 0, sizeof hs_offset);
   memset(zero, 0, sizeof zero);
 
-  for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_nelmts) 
+  for (elmtno = 0; elmtno < p_nelmts; elmtno += hs_nelmts)
   {
    /* calculate the hyperslab size */
-   if (rank1 > 0) 
+   if (rank1 > 0)
    {
-    for (i = 0, hs_nelmts = 1; i < rank1; i++) 
+    for (i = 0, hs_nelmts = 1; i < rank1; i++)
     {
      hs_size[i] = MIN(dims1[i] - hs_offset[i], sm_size[i]);
      hs_nelmts *= hs_size[i];
@@ -499,21 +499,21 @@ hsize_t diff_datasetid( hid_t did1,
      goto error;
     if (H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL, &hs_nelmts, NULL) < 0)
      goto error;
-   } 
-   else 
+   }
+   else
    {
     H5Sselect_all(sid1);
     H5Sselect_all(sid2);
     H5Sselect_all(sm_space);
     hs_nelmts = 1;
    } /* rank */
- 
+
    if ( H5Dread(did1,m_tid1,sm_space,sid1,H5P_DEFAULT,sm_buf1) < 0 )
     goto error;
    if ( H5Dread(did2,m_tid2,sm_space,sid2,H5P_DEFAULT,sm_buf2) < 0 )
     goto error;
-   
-   /* get array differences. in the case of hyperslab read, increment the number of differences 
+
+   /* get array differences. in the case of hyperslab read, increment the number of differences
       found in each hyperslab and pass the position at the beggining for printing */
    nfound += diff_array(sm_buf1,
                         sm_buf2,
@@ -534,9 +534,9 @@ hsize_t diff_datasetid( hid_t did1,
     H5Dvlen_reclaim(m_tid1, sm_space, H5P_DEFAULT, sm_buf1);
     H5Dvlen_reclaim(m_tid1, sm_space, H5P_DEFAULT, sm_buf2);
    }
-   
+
    /* calculate the next hyperslab offset */
-   for (i = rank1, carry = 1; i > 0 && carry; --i) 
+   for (i = rank1, carry = 1; i > 0 && carry; --i)
    {
     hs_offset[i - 1] += hs_size[i - 1];
     if (hs_offset[i - 1] == dims1[i - 1])
@@ -545,7 +545,7 @@ hsize_t diff_datasetid( hid_t did1,
      carry = 0;
    } /* i */
   } /* elmtno */
-  
+
   H5Sclose(sm_space);
   /* free */
   if (sm_buf1!=NULL)
@@ -558,10 +558,10 @@ hsize_t diff_datasetid( hid_t did1,
    free(sm_buf2);
    sm_buf2=NULL;
   }
-  
+
  } /* hyperslab read */
  }/*cmp*/
- 
+
 /*-------------------------------------------------------------------------
  * compare attributes
  * the if condition refers to cases when the dataset is a referenced object
@@ -575,7 +575,7 @@ hsize_t diff_datasetid( hid_t did1,
  * close
  *-------------------------------------------------------------------------
  */
- 
+
  /* free */
  if (buf1!=NULL)
  {
@@ -611,7 +611,7 @@ hsize_t diff_datasetid( hid_t did1,
 
 error:
  options->err_stat=1;
- 
+
  /* free */
  if (buf1!=NULL)
  {

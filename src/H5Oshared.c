@@ -490,7 +490,7 @@ H5O_shared_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     HDassert(f);
     HDassert(sh_mesg);
 
-    /* 
+    /*
      * Committed datatypes increment the OH of the original message when they
      * are written (in H5O_shared_link) and decrement it here.
      * SOHMs in the heap behave differently; their refcount is incremented
@@ -556,7 +556,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_shared_copy_file(H5F_t UNUSED *file_src, H5F_t *file_dst, 
+H5O_shared_copy_file(H5F_t UNUSED *file_src, H5F_t *file_dst,
     const H5O_msg_class_t *mesg_type, const void *_native_src, void *_native_dst,
     hbool_t UNUSED *recompute_size, H5O_copy_t *cpy_info, void UNUSED *udata,
     hid_t dxpl_id)
@@ -615,7 +615,7 @@ done:
  * Purpose:     Delate a shared message and replace with a new one.
  *              The function is needed at cases such as coping a shared reg_ref attribute.
  *              When a shared reg_ref attribute is copied from one file to
- *              another, the values in file need to be replaced. The only way 
+ *              another, the values in file need to be replaced. The only way
  *              to complish that is to delete the old message and write the
  *              new message with the correct values.
  *

@@ -24,10 +24,10 @@
  * Inputs:
  *     src_loc_id - Location identifier of the source link
  *       src_name - Name of the link to be copied
- *    src_namelen - length of the name 
+ *    src_namelen - length of the name
  *    dest_loc_id - Location identifier specifying the destination of the copy
  *      dest_name - Name to be assigned to the NEW copy
- *   dest_namelen - Length of the name 
+ *   dest_namelen - Length of the name
  *         loc_id - Identifier of the file or group containing the object
  *           name - Name of the link to delete
  *        lcpl_id - Link creation property list identifier
@@ -40,7 +40,7 @@
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5lcopy_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *dest_loc_id, 
+nh5lcopy_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *dest_loc_id,
 	     _fcd dest_name, size_t_f *dest_namelen,
 	     hid_t_f *lcpl_id, hid_t_f *lapl_id)
 {
@@ -59,7 +59,7 @@ nh5lcopy_c(hid_t_f *src_loc_id, _fcd src_name, size_t_f *src_namelen, hid_t_f *d
   /*
    * Call H5Lcopy function.
    */
-  if( H5Lcopy( (hid_t)*src_loc_id, c_src_name, (hid_t) *dest_loc_id, 
+  if( H5Lcopy( (hid_t)*src_loc_id, c_src_name, (hid_t) *dest_loc_id,
 	       c_dest_name, (hid_t)*lcpl_id, (hid_t)*lapl_id ) < 0)
     HGOTO_DONE(FAIL);
 
@@ -68,15 +68,15 @@ done:
     HDfree(c_src_name);
   if(c_dest_name)
     HDfree(c_dest_name);
-  
+
   return ret_value;
 }
 
 /*----------------------------------------------------------------------------
  * Name:        h5lcreate_external_c
- * Purpose:     Call H5Lcreate_external_c 
+ * Purpose:     Call H5Lcreate_external_c
  * Inputs:
- *    file_name - Name of the file containing the target object. Neither the file nor the target object is 
+ *    file_name - Name of the file containing the target object. Neither the file nor the target object is
  *                required to exist. May be the file the link is being created in.
  *     obj_name - Path within the target file to the target object.
  *  link_loc_id - The file or group identifier for the new link.
@@ -92,7 +92,7 @@ done:
 
 int_f
 nh5lcreate_external_c(_fcd file_name, size_t_f *file_namelen, _fcd obj_name, size_t_f *obj_namelen,
-		      hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, 
+		      hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
 		      hid_t_f *lcpl_id, hid_t_f *lapl_id)
 
 {
@@ -125,7 +125,7 @@ done:
     HDfree(c_obj_name);
   if(c_link_name)
     HDfree(c_link_name);
-  
+
   return ret_value;
 }
 
@@ -188,9 +188,9 @@ done:
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5lcreate_soft_c(_fcd target_path, size_t_f *target_path_len, 
-		  hid_t_f *link_loc_id, 
-		  _fcd link_name, size_t_f *link_name_len, 
+nh5lcreate_soft_c(_fcd target_path, size_t_f *target_path_len,
+		  hid_t_f *link_loc_id,
+		  _fcd link_name, size_t_f *link_name_len,
 		  hid_t_f *lcpl_id, hid_t_f *lapl_id )
 {
   char *c_target_path = NULL;
@@ -240,9 +240,9 @@ nh5lcreate_soft_c(_fcd target_path, size_t_f *target_path_len,
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5lcreate_hard_c(hid_t_f *obj_loc_id, _fcd obj_name, size_t_f *obj_namelen, 
-		  hid_t_f *link_loc_id, 
-		  _fcd link_name, size_t_f *link_namelen, 
+nh5lcreate_hard_c(hid_t_f *obj_loc_id, _fcd obj_name, size_t_f *obj_namelen,
+		  hid_t_f *link_loc_id,
+		  _fcd link_name, size_t_f *link_namelen,
 		  hid_t_f *lcpl_id, hid_t_f *lapl_id )
 {
   char *c_obj_name = NULL;
@@ -273,8 +273,8 @@ nh5lcreate_hard_c(hid_t_f *obj_loc_id, _fcd obj_name, size_t_f *obj_namelen,
 }
 
 /*----------------------------------------------------------------------------
- * Name:        h5ldelete_by_idx_c 
- * Purpose:     Calls h5ldelete_by_idx 
+ * Name:        h5ldelete_by_idx_c
+ * Purpose:     Calls h5ldelete_by_idx
  * Inputs:
  *          loc_id - File or group identifier specifying location of subject group
  *      group_name - Name of subject group
@@ -283,16 +283,16 @@ nh5lcreate_hard_c(hid_t_f *obj_loc_id, _fcd obj_name, size_t_f *obj_namelen,
  *                    H5_INDEX_UNKNOWN_F = -1  - Unknown index type
  *                    H5_INDEX_NAME_F          - Index on names
  *                    H5_INDEX_CRT_ORDER_F     - Index on creation order
- *                    H5_INDEX_N_F	       - Number of indices defined                   
+ *                    H5_INDEX_N_F	       - Number of indices defined
  *           order - Order within field or index; Possible values are:
  *                    H5_ITER_UNKNOWN_F   - Unknown order
  *                    H5_ITER_INC_F       - Increasing order
  *                    H5_ITER_DEC_F       - Decreasing order
  *                    H5_ITER_NATIVE_F    - No particular order, whatever is fastest
  *                    H5_ITER_N_F	  - Number of iteration orders
- *               n - Link for which to retrieve information  
- *         lapl_id - Link access property list     
- *              
+ *               n - Link for which to retrieve information
+ *         lapl_id - Link access property list
+ *
  * Outputs:     N/A
  * Returns:     0 on success, -1 on failure
  * Programmer:  M.S. Breitenfeld
@@ -300,7 +300,7 @@ nh5lcreate_hard_c(hid_t_f *obj_loc_id, _fcd obj_name, size_t_f *obj_namelen,
  * Modifications: N/A
  *---------------------------------------------------------------------------*/
 int_f
-nh5ldelete_by_idx_c (hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
+nh5ldelete_by_idx_c (hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 		     int_f *index_field, int_f *order, hsize_t_f *n, hid_t_f *lapl_id)
 {
     char *c_group_name = NULL;          /* Buffer to hold C string */
@@ -318,7 +318,7 @@ nh5ldelete_by_idx_c (hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
     c_order = (H5_iter_order_t)*order;
 
      /*
-      * Call H5Ldelete_by_name function. 
+      * Call H5Ldelete_by_name function.
       */
     if(H5Ldelete_by_idx((hid_t)*loc_id, c_group_name, c_index_field, c_order, (hsize_t)*n, (hid_t)*lapl_id) < 0)
       HGOTO_DONE(FAIL);
@@ -331,7 +331,7 @@ done:
 
 /*----------------------------------------------------------------------------
  * Name:        h5lexists_c
- * Purpose:     Calls H5Lexists 
+ * Purpose:     Calls H5Lexists
  * Inputs:
  *      loc_id - Identifier of the file or group to query.
  *        name - Link name to check
@@ -370,14 +370,14 @@ done:
 /*----------------------------------------------------------------------------
  * Name:        h5lget_info_c
  * Purpose:     Call  H5Lget_info
- * Inputs:  
+ * Inputs:
  *		link_loc_id - File or group identifier.
  *                link_name - Name of the link for which information is being sought
  *             link_namelen - Name length
  *                  lapl_id - Link access property list
  * Outputs:
  *
- *              cset - indicates the character set used for link’s name. 
+ *              cset - indicates the character set used for link’s name.
  *            corder - specifies the link’s creation order position.
  *      corder_valid - indicates whether the value in corder is valid.
  *         link_type -  specifies the link class:
@@ -395,7 +395,7 @@ done:
  *---------------------------------------------------------------------------*/
 int_f
 nh5lget_info_c (hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen,
-		int_f *cset, int_f *corder, int_f *corder_valid, int_f *link_type, 
+		int_f *cset, int_f *corder, int_f *corder_valid, int_f *link_type,
 		int_f *address, hsize_t_f *val_size,
 		hid_t_f *lapl_id)
 {
@@ -431,7 +431,7 @@ done:
 /*----------------------------------------------------------------------------
  * Name:        h5lget_info_by_idx_c
  * Purpose:     Call  H5Lget_info_by_idx
- * Inputs: 
+ * Inputs:
  *	loc_id  - File or group identifier specifying location of subject group
  *   group_name - Name of subject group
  *group_namelen - Name length
@@ -439,8 +439,8 @@ done:
  *        order - Order within field or index
  *            n - Link for which to retrieve information
  *      lapl_id - Link access property list
- * Outputs:   
- *        corder_valid - Indicates whether the the creation order data is valid for this attribute 
+ * Outputs:
+ *        corder_valid - Indicates whether the the creation order data is valid for this attribute
  *              corder - Is a positive integer containing the creation order of the attribute
  *                cset - Indicates the character set used for the attribute’s name
  *           data_size - indicates the size, in the number of characters, of the attribute
@@ -451,7 +451,7 @@ done:
  * Modifications: N/A
  *---------------------------------------------------------------------------*/
 int_f
-nh5lget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen, 
+nh5lget_info_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
 		      int_f *index_field, int_f *order, hsize_t_f *n,
 		      int_f *corder_valid, int_f *corder, int_f *cset, hsize_t_f *data_size, hid_t_f *lapl_id)
 {
@@ -508,16 +508,16 @@ nh5lis_registered_c(int_f *link_cls_id)
   int_f ret_value = 0;      /* Return value */
   H5L_type_t c_link_cls_id; /* User-defined link class identifier */
   htri_t registered; /* registration status */
-			
-		     
+
+
   c_link_cls_id = (H5L_type_t)*link_cls_id;
   /*
    * Call H5Lis_registered
    */
   registered = H5Lis_registered(c_link_cls_id);
-  
+
   ret_value = (int_f)registered;
-  
+
   return ret_value;
 }
 
@@ -608,7 +608,7 @@ nh5lget_name_by_idx_c(hid_t_f *loc_id, _fcd group_name, size_t_f *group_namelen,
     if ((c_name = HDmalloc(c_size)) == NULL)
       HGOTO_DONE(FAIL);
 
-    if((*size = (size_t)H5Lget_name_by_idx((hid_t)*loc_id, c_group_name, (H5_index_t)*index_field, 
+    if((*size = (size_t)H5Lget_name_by_idx((hid_t)*loc_id, c_group_name, (H5_index_t)*index_field,
 						     (H5_iter_order_t)*order, (hsize_t)*n,c_name, c_size, (hid_t)*lapl_id)) < 0)
       HGOTO_DONE(FAIL);
 
@@ -626,7 +626,7 @@ done:
 /*----------------------------------------------------------------------------
  * Name:        h5lget_val_c
  * Purpose:     Call  H5Lget_val
- * Inputs:  
+ * Inputs:
  *		link_loc_id - File or group identifier.
  *                link_name - Name of the link for which valrmation is being sought
  *             link_namelen - Name length
@@ -674,23 +674,23 @@ done:
  * Name:        H5Lregistered_c
  * Purpose:     Call H5Lregistered
  * Inputs:
- *		
+ *
  * Inputs:
- *     version         - Version number of this struct 
- *     class_id        - Link class identifier          
- *     comment         - Comment for debugging            
- *     comment_len     - Comment for debugging          
- *     create_func     - Callback during link creation            
+ *     version         - Version number of this struct
+ *     class_id        - Link class identifier
+ *     comment         - Comment for debugging
+ *     comment_len     - Comment for debugging
+ *     create_func     - Callback during link creation
  *     create_func_len - length
- *    move_func        - Callback after moving link       
- *    move_func_len    - length    
- *     copy_func       - Callback after copying link      
+ *    move_func        - Callback after moving link
+ *    move_func_len    - length
+ *     copy_func       - Callback after copying link
  *     copy_func_len   - length
- *     trav_func       - The main traversal function      
+ *     trav_func       - The main traversal function
  *     trav_func_len   - length
- *     del_func        - Callback for link deletion       
+ *     del_func        - Callback for link deletion
  *     del_func_len    - length
- *     query_func      - Callback for queries    
+ *     query_func      - Callback for queries
  *     query_func_len  - length
  *
  * Returns:     0 on success, -1 on failure
@@ -717,7 +717,7 @@ done:
 /*   char *c_trav_func = NULL;  */
 /*   char *c_del_func = NULL;  */
 /*   char *c_query_func = NULL; */
-  
+
 /*   H5L_class_t class_t; */
 
 /*   int ret_value = 0; */
@@ -769,20 +769,20 @@ done:
 /*     HDfree(c_src_name); */
 /*   if(c_dest_name) */
 /*     HDfree(c_dest_name); */
-  
+
 /*   return ret_value; */
 /* } */
 
 /*----------------------------------------------------------------------------
  * Name:        h5lget_val_c
  * Purpose:     Call H5Lget_val_c
- * Inputs: 
+ * Inputs:
  *               link_loc_id - File or group identifier.
  *                 link_name - Link whose value is to be returned.
  *             link_name_len - length of link_name
  *                      size - Maximum number of characters of link value to be returned.
  *                  lapl_id  - List access property list identifier
- * Outputs:   
+ * Outputs:
  *             linkval_buff  - The buffer to hold the returned link value.
  *
  * Returns:      0 on success, -1 on failure
@@ -791,7 +791,7 @@ done:
  * Modifications: N/A
  *---------------------------------------------------------------------------*/
 int_f
-nh5lget_val_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, size_t_f *size, 
+nh5lget_val_c(hid_t_f *link_loc_id, _fcd link_name, size_t_f *link_namelen, size_t_f *size,
 	      void *linkval_buff, hid_t_f *lapl_id)
 {
   int_f ret_value = 0;       /* Return value */

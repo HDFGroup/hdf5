@@ -117,7 +117,7 @@ H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[]);
 H5_DLL herr_t H5Ddebug(hid_t dset_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
- * 
+ *
  * Use of these symbols is deprecated.
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS

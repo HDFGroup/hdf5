@@ -239,7 +239,7 @@ DataSet CommonFG::openDataSet( const H5std_string& name ) const
 ///\par Description
 ///		Note that both names are interpreted relative to the
 ///		specified location.
-///		For information on creating hard link and soft link, please 
+///		For information on creating hard link and soft link, please
 ///		refer to the C layer Reference Manual at:
 /// http://hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateHard and
 /// http://hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateSoft

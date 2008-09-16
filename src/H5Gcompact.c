@@ -406,7 +406,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_compact_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo, 
+H5G_compact_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
     H5G_lib_iterate_t op, void *op_data)
 {

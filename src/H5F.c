@@ -42,7 +42,7 @@
 #include "H5FDmulti.h"		/*multiple files partitioned by mem usage */
 #include "H5FDsec2.h"		/*Posix unbuffered I/O			*/
 #include "H5FDstdio.h"		/* Standard C buffered I/O		*/
-#ifdef H5_HAVE_WINDOWS 
+#ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h"        /* Windows buffered I/O     */
 #endif
 #include "H5FDdirect.h"         /*Linux direct I/O			*/
@@ -1373,7 +1373,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
     /* formulate the absolute path for later search of target file for external link */
     if (H5_build_extpath(name, &file->extpath) < 0)
 	HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "unable to build extpath")
-    
+
     /* Success */
     ret_value = file;
 
@@ -2127,7 +2127,7 @@ H5Fget_intent(hid_t file_id, unsigned *intent_flags)
     /* If no intent flags were passed in, exit quietly */
     if(!intent_flags)
 	HGOTO_DONE(SUCCEED)
-    
+
     *intent_flags = H5F_get_intent(file);
 
     /* HDF5 uses some flags internally that users don't know about.
@@ -2180,7 +2180,7 @@ H5F_get_intent(const H5F_t *f)
  *		when searching the target file.
  *
  * Return:	'extpath' on success/abort on failure (shouldn't fail)
- * 
+ *
  * Programmer:	Vailin Choi, April 2, 2008
  *
  * Modifications:

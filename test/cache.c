@@ -965,7 +965,7 @@ smoke_check_5(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
-        /* enum H5C_cache_flash_incr_mode       */   
+        /* enum H5C_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C_flash_incr__off,
         /* double      flash_multiple         = */ 2.0,
         /* double      flash_threshold        = */ 0.5,
@@ -1205,7 +1205,7 @@ smoke_check_6(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
-        /* enum H5C_cache_flash_incr_mode       */   
+        /* enum H5C_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C_flash_incr__off,
         /* double      flash_multiple         = */ 2.0,
         /* double      flash_threshold        = */ 0.5,
@@ -1445,7 +1445,7 @@ smoke_check_7(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (8 * 1024 * 1024),
 
-        /* enum H5C_cache_flash_incr_mode       */   
+        /* enum H5C_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C_flash_incr__off,
         /* double      flash_multiple         = */ 2.0,
         /* double      flash_threshold        = */ 0.5,
@@ -1686,7 +1686,7 @@ smoke_check_8(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
-        /* enum H5C_cache_flash_incr_mode       */   
+        /* enum H5C_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C_flash_incr__off,
         /* double      flash_multiple         = */ 2.0,
         /* double      flash_threshold        = */ 0.5,
@@ -1871,9 +1871,9 @@ smoke_check_8(void)
  * Purpose:	A repeat of smoke check 1, only with the cache corked
  * 		part of the time.
  *
- * 		Recall that smoke check 1 is a basic functional test, 
- * 		with inserts, destroys, and renames in the mix, along 
- * 		with repeated protects and unprotects.  All entries are 
+ * 		Recall that smoke check 1 is a basic functional test,
+ * 		with inserts, destroys, and renames in the mix, along
+ * 		with repeated protects and unprotects.  All entries are
  * 		marked as clean.
  *
  * Return:	void
@@ -2178,9 +2178,9 @@ smoke_check_9(void)
  * Purpose:	A repeat of smoke check 2, only with the cache corked
  * 		part of the time.
  *
- * 		Recall that smoke check 2 is a basic functional test, 
- * 		with inserts, destroys, and renames in the mix, along 
- * 		with some repeated protects and unprotects.  About half 
+ * 		Recall that smoke check 2 is a basic functional test,
+ * 		with inserts, destroys, and renames in the mix, along
+ * 		with some repeated protects and unprotects.  About half
  * 		the entries are marked as dirty.
  *
  * Return:	void
@@ -2708,12 +2708,12 @@ check_insert_entry(void)
 
     pass = TRUE;
 
-    /* Allocate a cache, and insert entries into it using all 
+    /* Allocate a cache, and insert entries into it using all
      * combinations of flags.  Verify that the entries are inserted,
      * and that the flags have the desired effects.
      *
      * Note that the dirty parameter in insert_entry is no longer
-     * used, as we have decided that all inserted entries are 
+     * used, as we have decided that all inserted entries are
      * dirty by definition. (Which sounds very reasonable, but didn't
      * used to be the case.)
      */
@@ -2729,10 +2729,10 @@ check_insert_entry(void)
     if ( pass ) {
 
         insert_entry(cache_ptr, entry_type, 0, TRUE, H5C__NO_FLAGS_SET);
-        insert_entry(cache_ptr, entry_type, 1, TRUE, 
+        insert_entry(cache_ptr, entry_type, 1, TRUE,
                      H5C__SET_FLUSH_MARKER_FLAG);
         insert_entry(cache_ptr, entry_type, 2, TRUE, H5C__PIN_ENTRY_FLAG);
-        insert_entry(cache_ptr, entry_type, 3, TRUE, 
+        insert_entry(cache_ptr, entry_type, 3, TRUE,
 		     (H5C__SET_FLUSH_MARKER_FLAG | H5C__PIN_ENTRY_FLAG));
     }
 
@@ -2748,7 +2748,7 @@ check_insert_entry(void)
 	/* Start by checking everything we can via H5C_get_entry_status() */
 
 	result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-			              &in_cache, &is_dirty, &is_protected, 
+			              &in_cache, &is_dirty, &is_protected,
 				      &is_pinned);
 
         if ( result < 0 ) {
@@ -2757,10 +2757,10 @@ check_insert_entry(void)
             failure_mssg = "H5AC_get_entry_status() reports failure.";
         }
 
-	if ( pass ) { 
+	if ( pass ) {
 
 	    /* check the universals */
-	    if ( ( ! in_cache ) || ( ! is_dirty ) || ( is_protected ) || 
+	    if ( ( ! in_cache ) || ( ! is_dirty ) || ( is_protected ) ||
                  ( entry_size != entry_sizes[entry_type] ) ) {
 
                 pass = FALSE;
@@ -2819,7 +2819,7 @@ check_insert_entry(void)
 		search_ptr = cache_ptr->pel_head_ptr;
 
 		while ( ( search_ptr != NULL ) &&
-			( search_ptr != 
+			( search_ptr !=
 			  (struct H5C_cache_entry_t *)entry_ptr ) )
 		{
 		    search_ptr = search_ptr->next;
@@ -2841,7 +2841,7 @@ check_insert_entry(void)
 		search_ptr = cache_ptr->LRU_head_ptr;
 
 		while ( ( search_ptr != NULL ) &&
-			( search_ptr != 
+			( search_ptr !=
 			  (struct H5C_cache_entry_t *)entry_ptr ) )
 		{
 		    search_ptr = search_ptr->next;
@@ -2864,7 +2864,7 @@ check_insert_entry(void)
 		search_ptr = cache_ptr->dLRU_head_ptr;
 
 		while ( ( search_ptr != NULL ) &&
-			( search_ptr != 
+			( search_ptr !=
 			  (struct H5C_cache_entry_t *)entry_ptr ) )
 		{
 		    search_ptr = search_ptr->aux_next;
@@ -2884,8 +2884,8 @@ check_insert_entry(void)
     } /* while */
 
 
-    /* So much for looking at the individual entries.  Now verify 
-     * that the various counts and sized in the cache header are 
+    /* So much for looking at the individual entries.  Now verify
+     * that the various counts and sized in the cache header are
      * as expected.
      */
 
@@ -5383,9 +5383,9 @@ check_flush_cache__pe_multi_entry_test(H5C_t * cache_ptr,
 /*-------------------------------------------------------------------------
  * Function:	check_flush_cache__flush_ops()
  *
- * Purpose:	Run the flush ops cache tests. 
+ * Purpose:	Run the flush ops cache tests.
  *
- * 		These are tests that test the cache's ability to handle 
+ * 		These are tests that test the cache's ability to handle
  * 		the case in which the flush callback dirties, resizes,
  * 		and/or renames entries.
  *
@@ -5421,7 +5421,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
     if ( pass ) /* test #1 */
     {
 	/* start with a very simple test, in which there are two entries
-	 * resident in cache, and the second entry dirties the first in 
+	 * resident in cache, and the second entry dirties the first in
 	 * the flush callback.  No size changes, and no flush flags.
 	 */
         int test_num			= 1;
@@ -5431,9 +5431,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= 2 * PICO_ENTRY_SIZE;
 	int expected_index_len		= 2;
 	size_t expected_index_size	= 2 * PICO_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[2] = 
+	struct fo_flush_cache_test_spec spec[2] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ 0,
 	    /* entry_index        = */ 0,
@@ -5461,7 +5461,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ TRUE,
 	    /* expected_destroyed = */ FALSE
 	  },
-          { 
+          {
             /* entry_num          = */ 1,
             /* entry_type         = */ 0,
 	    /* entry_index        = */ 1,
@@ -5529,8 +5529,8 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	 * Note that we must repeat all tests with the flush invalidate flag
 	 * as this triggers a different set of code to execute the flush.
 	 *
-	 * Create two entries resident in cache, and have the second entry 
-	 * dirty the first in the flush callback.  
+	 * Create two entries resident in cache, and have the second entry
+	 * dirty the first in the flush callback.
 	 */
         int test_num			= 2;
 	unsigned int flush_flags	= H5C__FLUSH_INVALIDATE_FLAG;
@@ -5539,9 +5539,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= 2 * PICO_ENTRY_SIZE;
 	int expected_index_len		= 0;
 	size_t expected_index_size	= 0;
-	struct fo_flush_cache_test_spec spec[2] = 
+	struct fo_flush_cache_test_spec spec[2] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
@@ -5569,7 +5569,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ TRUE,
 	    /* expected_destroyed = */ TRUE
 	  },
-          { 
+          {
             /* entry_num          = */ 1,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 1,
@@ -5644,9 +5644,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
 	int expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
-	struct fo_flush_cache_test_spec spec[1] = 
+	struct fo_flush_cache_test_spec spec[1] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
@@ -5723,9 +5723,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
 	int expected_index_len		= 0;
 	size_t expected_index_size	= 0;
-	struct fo_flush_cache_test_spec spec[1] = 
+	struct fo_flush_cache_test_spec spec[1] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
@@ -5793,8 +5793,8 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	 * which the call back function renames the entry for which it has
 	 * been called.
 	 *
-	 * Run this entry twice, as the first run moves the entry to its 
-	 * alternate address, and the second moves it back.  
+	 * Run this entry twice, as the first run moves the entry to its
+	 * alternate address, and the second moves it back.
 	 */
         int test_num			= 5; /* and 6 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
@@ -5803,9 +5803,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE;
 	int expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[1] = 
+	struct fo_flush_cache_test_spec spec[1] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
@@ -5866,15 +5866,15 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 					 check_size,
 					 checks);
 
-	/* this change forces the rename to move the target entry back to its 
+	/* this change forces the rename to move the target entry back to its
 	 * main address.  The first test moved it to its alternate address.
 	 *
 	 * Note that these two tests are not the same, as in the first test,
-	 * the renamed entry is moved forward in the slist.  In the second 
+	 * the renamed entry is moved forward in the slist.  In the second
 	 * it is moved backwards.
 	 *
 	 * Since there is only one entry in the cache, this doesn't really
-	 * matter in this case.  But we will do similar tests later with 
+	 * matter in this case.  But we will do similar tests later with
 	 * other entries in the cache.
 	 */
 	if ( pass ) {
@@ -5898,15 +5898,15 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 
     if ( pass ) /* test #7 & #8 */
     {
-	/* Run tests 5 & 6 again, using the flush invalidate flag on the 
+	/* Run tests 5 & 6 again, using the flush invalidate flag on the
 	 * second test.
 	 *
 	 * Single entry test verifying that the cache can handle the case in
 	 * which the call back function renames the entry for which it has
 	 * been called.
 	 *
-	 * Run this entry twice, as the first run moves the entry to its 
-	 * alternate address, and the second moves it back.  
+	 * Run this entry twice, as the first run moves the entry to its
+	 * alternate address, and the second moves it back.
 	 */
         int test_num			= 7; /* and 8 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
@@ -5915,9 +5915,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE;
 	int expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[1] = 
+	struct fo_flush_cache_test_spec spec[1] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
@@ -5978,15 +5978,15 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 					 check_size,
 					 checks);
 
-	/* this change forces the rename to move the target entry back to its 
+	/* this change forces the rename to move the target entry back to its
 	 * main address.  The first test moved it to its alternate address.
 	 *
 	 * Note that these two tests are not the same, as in the first test,
-	 * the renamed entry is moved forward in the slist.  In the second 
+	 * the renamed entry is moved forward in the slist.  In the second
 	 * it is moved backwards.
 	 *
 	 * Since there is only one entry in the cache, this doesn't really
-	 * matter in this case.  But we will do similar tests later with 
+	 * matter in this case.  But we will do similar tests later with
 	 * other entries in the cache.
 	 */
 
@@ -6016,11 +6016,11 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
     if ( pass ) /* test #9 & #10 */
     {
 	/* Single entry test verifying that the cache can handle the case in
-	 * which the call back function both resizes and renames the entry 
+	 * which the call back function both resizes and renames the entry
 	 * for which it has been called.
 	 *
-	 * Again, we run this entry twice, as the first run moves the entry to its 
-	 * alternate address, and the second moves it back.  
+	 * Again, we run this entry twice, as the first run moves the entry to its
+	 * alternate address, and the second moves it back.
 	 */
         int test_num			= 9; /* and 10 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
@@ -6029,9 +6029,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
 	int expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
-	struct fo_flush_cache_test_spec spec[1] = 
+	struct fo_flush_cache_test_spec spec[1] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
@@ -6092,15 +6092,15 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 					 check_size,
 					 checks);
 
-	/* this change forces the rename to move the target entry back to its 
+	/* this change forces the rename to move the target entry back to its
 	 * main address.  The first test moved it to its alternate address.
 	 *
 	 * Note that these two tests are not the same, as in the first test,
-	 * the renamed entry is moved forward in the slist.  In the second 
+	 * the renamed entry is moved forward in the slist.  In the second
 	 * it is moved backwards.
 	 *
 	 * Since there is only one entry in the cache, this doesn't really
-	 * matter in this case.  But we will do similar tests later with 
+	 * matter in this case.  But we will do similar tests later with
 	 * other entries in the cache.
 	 */
 	if ( pass ) {
@@ -6128,11 +6128,11 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	 * second test.
 	 *
 	 * Single entry test verifying that the cache can handle the case in
-	 * which the call back function both resizes and renames the entry 
+	 * which the call back function both resizes and renames the entry
 	 * for which it has been called.
 	 *
-	 * Again, we run this entry twice, as the first run moves the entry to its 
-	 * alternate address, and the second moves it back.  
+	 * Again, we run this entry twice, as the first run moves the entry to its
+	 * alternate address, and the second moves it back.
 	 */
         int test_num			= 11; /* and 12 */
 	unsigned int flush_flags	= H5C__NO_FLAGS_SET;
@@ -6141,9 +6141,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= VARIABLE_ENTRY_SIZE / 2;
 	int expected_index_len		= 1;
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE / 4;
-	struct fo_flush_cache_test_spec spec[1] = 
+	struct fo_flush_cache_test_spec spec[1] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
@@ -6204,15 +6204,15 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 					 check_size,
 					 checks);
 
-	/* this change forces the rename to move the target entry back to its 
+	/* this change forces the rename to move the target entry back to its
 	 * main address.  The first test moved it to its alternate address.
 	 *
 	 * Note that these two tests are not the same, as in the first test,
-	 * the renamed entry is moved forward in the slist.  In the second 
+	 * the renamed entry is moved forward in the slist.  In the second
 	 * it is moved backwards.
 	 *
 	 * Since there is only one entry in the cache, this doesn't really
-	 * matter in this case.  But we will do similar tests later with 
+	 * matter in this case.  But we will do similar tests later with
 	 * other entries in the cache.
 	 */
 	if ( pass ) {
@@ -6241,9 +6241,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 
     if ( pass ) /* test #13 */
     {
-	/* Test the ability of the cache to handle the case in which 
-	 * the flush function of an entry that is resident in cache 
-	 * dirties two entries that are not in cache.  No size 
+	/* Test the ability of the cache to handle the case in which
+	 * the flush function of an entry that is resident in cache
+	 * dirties two entries that are not in cache.  No size
 	 * changes.
 	 *
 	 * At present, I am assured that this case will never occur, but
@@ -6256,9 +6256,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= 1 * PICO_ENTRY_SIZE;
 	int expected_index_len		= 3;
 	size_t expected_index_size	= 3 * PICO_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[1] = 
+	struct fo_flush_cache_test_spec spec[1] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ 0,
 	    /* entry_index        = */ 1,
@@ -6339,9 +6339,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
     {
 	/* Repeat previous test with the flush invalidate flag.
 	 *
-	 * Test the ability of the cache to handle the case in which 
-	 * the flush function of an entry that is resident in cache 
-	 * dirties two entries that are not in cache.  No size 
+	 * Test the ability of the cache to handle the case in which
+	 * the flush function of an entry that is resident in cache
+	 * dirties two entries that are not in cache.  No size
 	 * changes.
 	 *
 	 * At present, I am assured that this case will never occur, but
@@ -6354,9 +6354,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= 1 * PICO_ENTRY_SIZE;
 	int expected_index_len		= 0;
 	size_t expected_index_size	= (size_t)0;
-	struct fo_flush_cache_test_spec spec[1] = 
+	struct fo_flush_cache_test_spec spec[1] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ 0,
 	    /* entry_index        = */ 1,
@@ -6435,8 +6435,8 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 
     if ( pass ) /* test #15 */
     {
-	/* Test the ability of the cache to handle the case in which 
-	 * the flush function of an entry that is resident in cache 
+	/* Test the ability of the cache to handle the case in which
+	 * the flush function of an entry that is resident in cache
 	 * resizes and dirties two entries that are not in cache.
 	 *
 	 * At present, I am assured that this case will never occur, but
@@ -6451,9 +6451,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE +
 		                          (VARIABLE_ENTRY_SIZE / 4) +
 					  (VARIABLE_ENTRY_SIZE / 2);
-	struct fo_flush_cache_test_spec spec[1] = 
+	struct fo_flush_cache_test_spec spec[1] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 1,
@@ -6534,8 +6534,8 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
     {
 	/* Repeat previous test with the flush invalidate flag.
 	 *
-	 * Test the ability of the cache to handle the case in which 
-	 * the flush function of an entry that is resident in cache 
+	 * Test the ability of the cache to handle the case in which
+	 * the flush function of an entry that is resident in cache
 	 * resizes and dirties two entries that are not in cache.
 	 *
 	 * At present, I am assured that this case will never occur, but
@@ -6548,9 +6548,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= 1 * VARIABLE_ENTRY_SIZE;
 	int expected_index_len		= 0;
 	size_t expected_index_size	= (size_t)0;
-	struct fo_flush_cache_test_spec spec[1] = 
+	struct fo_flush_cache_test_spec spec[1] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 1,
@@ -6629,8 +6629,8 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 
     if ( pass ) /* test #17 & #18 */
     {
-	/* Test the ability of the cache to handle the case in which 
-	 * the flush function of an entry that is resident in cache 
+	/* Test the ability of the cache to handle the case in which
+	 * the flush function of an entry that is resident in cache
 	 * resizes, dirties, and renames two entries that are not in cache.
 	 *
 	 * At present, I am assured that this case will never occur, but
@@ -6645,9 +6645,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE +
 		                          (VARIABLE_ENTRY_SIZE / 4) +
 					  (VARIABLE_ENTRY_SIZE / 2);
-	struct fo_flush_cache_test_spec spec[1] = 
+	struct fo_flush_cache_test_spec spec[1] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 1,
@@ -6710,7 +6710,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_destroyed = */ FALSE
 	  }
 	};
-	
+
         check_flush_cache__flush_op_test(cache_ptr,
                                          test_num,
                                          flush_flags,
@@ -6723,12 +6723,12 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 					 check_size,
 					 checks);
 
-	/* this change forces the renames to move the target entries back to 
-	 * their main address.  The first test moved them to their alternate 
+	/* this change forces the renames to move the target entries back to
+	 * their main address.  The first test moved them to their alternate
 	 * address.
 	 *
 	 * Note that these two tests are not the same, as in the first test,
-	 * the renamed entries are moved forward in the slist.  In the second 
+	 * the renamed entries are moved forward in the slist.  In the second
 	 * they are moved backwards.
 	 */
 	if ( pass ) {
@@ -6758,8 +6758,8 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	/* Repeat the above test with the flush invalidate flag on the
 	 * second test.
 	 *
-	 * Test the ability of the cache to handle the case in which 
-	 * the flush function of an entry that is resident in cache 
+	 * Test the ability of the cache to handle the case in which
+	 * the flush function of an entry that is resident in cache
 	 * resizes, dirties, and renames two entries that are not in cache.
 	 *
 	 * At present, I am assured that this case will never occur, but
@@ -6774,9 +6774,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t expected_index_size	= VARIABLE_ENTRY_SIZE +
 		                          (VARIABLE_ENTRY_SIZE / 4) +
 					  (VARIABLE_ENTRY_SIZE / 2);
-	struct fo_flush_cache_test_spec spec[1] = 
+	struct fo_flush_cache_test_spec spec[1] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 1,
@@ -6852,12 +6852,12 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 					 check_size,
 					 checks);
 
-	/* this change forces the renames to move the target entries back to 
-	 * their main address.  The first test moved them to their alternate 
+	/* this change forces the renames to move the target entries back to
+	 * their main address.  The first test moved them to their alternate
 	 * address.
 	 *
 	 * Note that these two tests are not the same, as in the first test,
-	 * the renamed entries are moved forward in the slist.  In the second 
+	 * the renamed entries are moved forward in the slist.  In the second
 	 * they are moved backwards.
 	 */
 	if ( pass ) {
@@ -6894,14 +6894,14 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
     {
 	/* Now mix things up a bit.
 	 *
-	 * Load several entries, two of which have flush functions that 
-	 * resize, dirty, and rename two entries that are not in the 
-	 * cache.  Mark only one of these entries, and then flush the 
+	 * Load several entries, two of which have flush functions that
+	 * resize, dirty, and rename two entries that are not in the
+	 * cache.  Mark only one of these entries, and then flush the
 	 * cache with the flush marked entries flag.
 	 *
-	 * This is the only test in which we test the 
+	 * This is the only test in which we test the
 	 * H5C__FLUSH_MARKED_ENTRIES_FLAG.  The hope is that since
-	 * we test the two features extensively by themselves, so 
+	 * we test the two features extensively by themselves, so
 	 * it should be sufficient to verify that they play together
 	 * as expected.
 	 */
@@ -6915,9 +6915,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 		                          (VARIABLE_ENTRY_SIZE / 4) +
 					  (VARIABLE_ENTRY_SIZE / 2) +
 					  (2 * PICO_ENTRY_SIZE);
-	struct fo_flush_cache_test_spec spec[4] = 
+	struct fo_flush_cache_test_spec spec[4] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 1,
@@ -6945,7 +6945,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
-          { 
+          {
             /* entry_num          = */ 1,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 11,
@@ -6973,7 +6973,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ FALSE,
 	    /* expected_destroyed = */ FALSE
           },
-          { 
+          {
             /* entry_num          = */ 2,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
@@ -7001,7 +7001,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
-          { 
+          {
             /* entry_num          = */ 3,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 1,
@@ -7113,9 +7113,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
     {
 	/* Mix things up some more.
 	 *
-	 * Load lots of entries, some of which have flush functions that 
-	 * resize, dirty, and rename two entries that are not in the 
-	 * cache.  
+	 * Load lots of entries, some of which have flush functions that
+	 * resize, dirty, and rename two entries that are not in the
+	 * cache.
 	 *
 	 * Also load entries that have flush ops on entries that are in
 	 * cache.
@@ -7130,9 +7130,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 		                          (2 * (VARIABLE_ENTRY_SIZE / 4)) +
 					  (2 * (VARIABLE_ENTRY_SIZE / 2)) +
 					  (4 * PICO_ENTRY_SIZE);
-	struct fo_flush_cache_test_spec spec[6] = 
+	struct fo_flush_cache_test_spec spec[6] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 1,
@@ -7160,7 +7160,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
-          { 
+          {
             /* entry_num          = */ 1,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 11,
@@ -7188,7 +7188,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
-          { 
+          {
             /* entry_num          = */ 2,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
@@ -7216,7 +7216,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
-          { 
+          {
             /* entry_num          = */ 3,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 1,
@@ -7244,7 +7244,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ FALSE,
 	    /* expected_destroyed = */ FALSE
           },
-          { 
+          {
             /* entry_num          = */ 4,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 10,
@@ -7272,7 +7272,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ TRUE,
 	    /* expected_destroyed = */ FALSE
           },
-          { 
+          {
             /* entry_num          = */ 5,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 20,
@@ -7386,9 +7386,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	 *
 	 * Mix things up some more.
 	 *
-	 * Load lots of entries, some of which have flush functions that 
-	 * resize, dirty, and rename two entries that are not in the 
-	 * cache.  
+	 * Load lots of entries, some of which have flush functions that
+	 * resize, dirty, and rename two entries that are not in the
+	 * cache.
 	 *
 	 * Also load entries that have flush ops on entries that are in
 	 * cache.
@@ -7400,9 +7400,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= (2 * VARIABLE_ENTRY_SIZE) + (4 * PICO_ENTRY_SIZE);
 	int expected_index_len		= 0;
 	size_t expected_index_size	= 0;
-	struct fo_flush_cache_test_spec spec[6] = 
+	struct fo_flush_cache_test_spec spec[6] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 1,
@@ -7430,7 +7430,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
-          { 
+          {
             /* entry_num          = */ 1,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 11,
@@ -7458,7 +7458,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
-          { 
+          {
             /* entry_num          = */ 2,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 0,
@@ -7486,7 +7486,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
-          { 
+          {
             /* entry_num          = */ 3,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 1,
@@ -7514,7 +7514,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
-          { 
+          {
             /* entry_num          = */ 4,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 10,
@@ -7542,7 +7542,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* expected_flushed   = */ TRUE,
 	    /* expected_destroyed = */ TRUE
           },
-          { 
+          {
             /* entry_num          = */ 5,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 20,
@@ -7666,9 +7666,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= 3 * PICO_ENTRY_SIZE;
 	int expected_index_len		= 3;
 	size_t expected_index_size	= 3 * PICO_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[3] = 
+	struct fo_flush_cache_test_spec spec[3] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 100,
@@ -7800,9 +7800,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= 3 * PICO_ENTRY_SIZE;
 	int expected_index_len		= 0;
 	size_t expected_index_size	= (size_t)0;
-	struct fo_flush_cache_test_spec spec[3] = 
+	struct fo_flush_cache_test_spec spec[3] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ PICO_ENTRY_TYPE,
 	    /* entry_index        = */ 100,
@@ -7922,22 +7922,22 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 
     if ( pass ) /* test #26 */
     {
-	/* This one is complex.  
+	/* This one is complex.
 	 *
-	 * In the following overvies table, VET stands for 
+	 * In the following overvies table, VET stands for
 	 * VARIABLE_ENTRY_TYPE.
 	 *
 	 * In trying to follow what happens when we flush the
 	 * set of entries constructed below, recall that each
-	 * flush operation is executed the first time the 
+	 * flush operation is executed the first time the
 	 * entry is flushed, and then not executed again.
-	 * This may be a weakness in the tests, but that 
+	 * This may be a weakness in the tests, but that
 	 * is the way it is for now.
 	 *
-	 * After thinking about it for a while, I'm not sure that 
-	 * the interaction between pins and flush operations needs 
-	 * all that much testing, as the two are essentially 
-	 * orthoginal.  Thus this is a bit of a smoke check to 
+	 * After thinking about it for a while, I'm not sure that
+	 * the interaction between pins and flush operations needs
+	 * all that much testing, as the two are essentially
+	 * orthoginal.  Thus this is a bit of a smoke check to
 	 * verify that we get the expected results.
 	 *
 	 * (VET, 100)	initially not resident in cache
@@ -8004,9 +8004,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= 10 * VARIABLE_ENTRY_SIZE;
 	int expected_index_len		= 13;
 	size_t expected_index_size	= 9 * VARIABLE_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[10] = 
+	struct fo_flush_cache_test_spec spec[10] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 200,
@@ -8357,24 +8357,24 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
     {
 	/* Repeat test #26 with the flush invalidate flag.
 	 *
-	 * In the following overview table, VET stands for 
+	 * In the following overview table, VET stands for
 	 * VARIABLE_ENTRY_TYPE.
 	 *
 	 * In trying to follow what happens when we flush the
 	 * set of entries constructed below, recall that each
-	 * flush operation is executed the first time the 
+	 * flush operation is executed the first time the
 	 * entry is flushed, and then not executed again.
-	 * This may be a weakness in the tests, but that 
+	 * This may be a weakness in the tests, but that
 	 * is the way it is for now.
 	 *
-	 * After thinking about it for a while, I'm not sure that 
-	 * the interaction between pins and flush operations needs 
-	 * all that much testing, as the two are essentially 
+	 * After thinking about it for a while, I'm not sure that
+	 * the interaction between pins and flush operations needs
+	 * all that much testing, as the two are essentially
 	 * orthoginal.  The big thing is to verify that flushes of
-	 * pinned entries with flush ops result in the expected 
+	 * pinned entries with flush ops result in the expected
 	 * updates of the cache.
 	 *
-	 * Thus this is a bit of a smoke check to * verify that we 
+	 * Thus this is a bit of a smoke check to * verify that we
 	 * get the expected results.
 	 *
 	 * (VET, 100)	initially not resident in cache
@@ -8441,9 +8441,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= 10 * VARIABLE_ENTRY_SIZE;
 	int expected_index_len		= 0;
 	size_t expected_index_size	= (size_t)0;
-	struct fo_flush_cache_test_spec spec[10] = 
+	struct fo_flush_cache_test_spec spec[10] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 200,
@@ -8793,7 +8793,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
     if ( pass ) /* test #28 */
     {
 	/* Test the expected fheap case, in which an entry dirties
-	 * and resizes itself, and dirties an entry which it has 
+	 * and resizes itself, and dirties an entry which it has
 	 * pinned.
 	 */
         int test_num			= 28;
@@ -8803,9 +8803,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= 3 * VARIABLE_ENTRY_SIZE;
 	int expected_index_len		= 5;
 	size_t expected_index_size	= 4 * VARIABLE_ENTRY_SIZE;
-	struct fo_flush_cache_test_spec spec[5] = 
+	struct fo_flush_cache_test_spec spec[5] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 100,
@@ -8986,7 +8986,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	/* Repeat test #28 with the flush invalidate flag.
 	 *
 	 * Test the expected fheap case, in which an entry dirties
-	 * and resizes itself, and dirties an entry which it has 
+	 * and resizes itself, and dirties an entry which it has
 	 * pinned.
 	 */
         int test_num			= 29;
@@ -8996,9 +8996,9 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	size_t init_expected_index_size	= 3 * VARIABLE_ENTRY_SIZE;
 	int expected_index_len		= 0;
 	size_t expected_index_size	= 0;
-	struct fo_flush_cache_test_spec spec[5] = 
+	struct fo_flush_cache_test_spec spec[5] =
 	{
-          { 
+          {
             /* entry_num          = */ 0,
             /* entry_type         = */ VARIABLE_ENTRY_TYPE,
 	    /* entry_index        = */ 100,
@@ -9185,7 +9185,7 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 /*-------------------------------------------------------------------------
  * Function:	check_flush_cache__flush_op_test()
  *
- * Purpose:	Run a flush op flush cache test.  Of the nature of 
+ * Purpose:	Run a flush op flush cache test.  Of the nature of
  * 		flush operations, this is a multi-entry test.
  *
  * Return:	void
@@ -9222,7 +9222,7 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
 #if 0 /* This is useful debugging code -- lets keep it around. */
     HDfprintf(stdout, "check_flush_cache__flush_op_test: test %d\n",
 	      test_num);
-#endif 
+#endif
 
     if ( cache_ptr == NULL ) {
 
@@ -9282,23 +9282,23 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
              ( check[i].entry_index < 0 ) ||
              ( check[i].entry_index > max_indices[check[i].entry_type] ) ||
              ( check[i].expected_size <= (size_t)0 ) ||
-	     ( ( check[i].in_cache != TRUE ) && 
+	     ( ( check[i].in_cache != TRUE ) &&
 	       ( check[i].in_cache != FALSE ) ) ||
-	     ( ( check[i].at_main_addr != TRUE ) && 
+	     ( ( check[i].at_main_addr != TRUE ) &&
 	       ( check[i].at_main_addr != FALSE ) ) ||
-	     ( ( check[i].is_dirty != TRUE ) && 
+	     ( ( check[i].is_dirty != TRUE ) &&
 	       ( check[i].is_dirty != FALSE ) ) ||
-	     ( ( check[i].is_protected != TRUE ) && 
+	     ( ( check[i].is_protected != TRUE ) &&
 	       ( check[i].is_protected != FALSE ) ) ||
-	     ( ( check[i].is_pinned != TRUE ) && 
+	     ( ( check[i].is_pinned != TRUE ) &&
 	       ( check[i].is_pinned != FALSE ) ) ||
-	     ( ( check[i].expected_loaded != TRUE ) && 
+	     ( ( check[i].expected_loaded != TRUE ) &&
 	       ( check[i].expected_loaded != FALSE ) ) ||
-	     ( ( check[i].expected_cleared != TRUE ) && 
+	     ( ( check[i].expected_cleared != TRUE ) &&
 	       ( check[i].expected_cleared != FALSE ) ) ||
-	     ( ( check[i].expected_flushed != TRUE ) && 
+	     ( ( check[i].expected_flushed != TRUE ) &&
 	       ( check[i].expected_flushed != FALSE ) ) ||
-	     ( ( check[i].expected_destroyed != TRUE ) && 
+	     ( ( check[i].expected_destroyed != TRUE ) &&
 	       ( check[i].expected_destroyed != FALSE ) ) ) {
 
             pass = FALSE;
@@ -9338,7 +9338,7 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
 
 	for ( j = 0; j < spec[i].num_flush_ops; j++ )
 	{
-	    add_flush_op(spec[i].entry_type, 
+	    add_flush_op(spec[i].entry_type,
 			 spec[i].entry_index,
 			 spec[i].flush_ops[j].op_code,
 			 spec[i].flush_ops[j].type,
@@ -9420,7 +9420,7 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
         i = 0;
         while ( ( pass ) && ( i < check_size ) )
         {
-	    if ( check[i].in_cache != entry_in_cache(cache_ptr, 
+	    if ( check[i].in_cache != entry_in_cache(cache_ptr,
 				                     check[i].entry_type,
 						     check[i].entry_index) ) {
 
@@ -9460,7 +9460,7 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
 		if ( ( ! entry_ptr->header.destroy_in_progress ) &&
 		     ( check[i].in_cache ) &&
                      ( entry_ptr->header.size != check[i].expected_size ) ) {
-                    HDfprintf(stdout, 
+                    HDfprintf(stdout,
                               "(!destroy in progress and in cache and size (expected) = %d (%d).\n",
                               (int)(entry_ptr->header.size),
 			      (int)(check[i].expected_size));
@@ -9654,9 +9654,9 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
     test_entry_t * base_addr;
     struct expected_entry_status expected[8 + 31 + 14] =
     {
-      /* the expected array is used to maintain a table of the expected status of every 
+      /* the expected array is used to maintain a table of the expected status of every
        * entry used in this test.  Note that since the function that processes this
-       * array only processes as much of it as it is told to, we don't have to 
+       * array only processes as much of it as it is told to, we don't have to
        * worry about maintaining the status of entries that we haven't used yet.
        */
       /* entry			entry				in	at main                                                       */
@@ -9745,9 +9745,9 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
     if ( pass ) {
 
         /* the basic idea in this test is to insert a bunch of entries
-         * with flush operations associated with them, and then load 
-         * other entries into the cache until the cache is full.  At 
-         * that point, load yet more entries into the cache, and see 
+         * with flush operations associated with them, and then load
+         * other entries into the cache until the cache is full.  At
+         * that point, load yet more entries into the cache, and see
          * if the flush operations are performed as expected.
 	 *
 	 * To make things a bit more interesting, we also include a
@@ -9765,43 +9765,43 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 */
 
 	protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 0);
-	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 0, 
+	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 0,
 			           H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
 				   (VARIABLE_ENTRY_SIZE / 2));
 
 	protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 1);
-	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 1, 
+	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 1,
 			                 H5C__NO_FLAGS_SET, (size_t)0);
 
 	protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 2);
-	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 2, 
+	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 2,
 			                 H5C__NO_FLAGS_SET, (size_t)0);
 
 	protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 3);
-	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 3, 
+	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 3,
 			           H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
 				   (VARIABLE_ENTRY_SIZE / 2));
 
 	protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 4);
-	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 4, 
+	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 4,
 			           H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
 				   (VARIABLE_ENTRY_SIZE / 2));
 
 	protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 5);
-	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 5, 
+	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 5,
 			           H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG,
 				   (VARIABLE_ENTRY_SIZE / 2));
 
 	protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 6);
-	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 6, 
+	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 6,
 			                 H5C__NO_FLAGS_SET, (size_t)0);
 
 	protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 7);
-	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 7, 
+	unprotect_entry_with_size_change(cache_ptr, VARIABLE_ENTRY_TYPE, 7,
 			                 H5C__NO_FLAGS_SET, (size_t)0);
 
 	if ( ( cache_ptr->index_len != 8 ) ||
-             ( cache_ptr->index_size != (4 * (VARIABLE_ENTRY_SIZE / 2)) + 
+             ( cache_ptr->index_size != (4 * (VARIABLE_ENTRY_SIZE / 2)) +
 	                                (4 * VARIABLE_ENTRY_SIZE) ) ) {
 
             pass = FALSE;
@@ -9811,7 +9811,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 
     if ( pass ) {
 
-	/* Now set up the pinning relationships: 
+	/* Now set up the pinning relationships:
 	 *
 	 * Briefly, (VET, 0) is pinned by (VET, 1), (VET, 2), and (VET, 3)
 	 *          (VET, 7) is pinned by (VET, 3), and (VET, 5)
@@ -9841,39 +9841,39 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 *
 	 *          (VET, 7) dirties (VET, 6)
 	 */
-        add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__DIRTY, 
+        add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__DIRTY,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
-        add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__RESIZE, 
-                     VARIABLE_ENTRY_TYPE, 0, FALSE, 
+        add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__RESIZE,
+                     VARIABLE_ENTRY_TYPE, 0, FALSE,
 		     3 * VARIABLE_ENTRY_SIZE / 4);
 
-        add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__DIRTY, 
+        add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__DIRTY,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
-        add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__RESIZE, 
+        add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__RESIZE,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, VARIABLE_ENTRY_SIZE);
-        add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__RENAME, 
+        add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__RENAME,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
 
-        add_flush_op(VARIABLE_ENTRY_TYPE, 3, FLUSH_OP__DIRTY, 
+        add_flush_op(VARIABLE_ENTRY_TYPE, 3, FLUSH_OP__DIRTY,
                      VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
-        add_flush_op(VARIABLE_ENTRY_TYPE, 3, FLUSH_OP__RESIZE, 
+        add_flush_op(VARIABLE_ENTRY_TYPE, 3, FLUSH_OP__RESIZE,
                      VARIABLE_ENTRY_TYPE, 3, FALSE, VARIABLE_ENTRY_SIZE);
 
-        add_flush_op(VARIABLE_ENTRY_TYPE, 7, FLUSH_OP__DIRTY, 
+        add_flush_op(VARIABLE_ENTRY_TYPE, 7, FLUSH_OP__DIRTY,
                      VARIABLE_ENTRY_TYPE, 6, FALSE, (size_t)0);
     }
 
     if ( pass ) {
 
-	/* to summarize, at present the following variable size entries 
+	/* to summarize, at present the following variable size entries
 	 * are in cache with the following characteristics:
 	 *
 	 * 		in
 	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 * 
+	 *
 	 * (VET, 0) 	Y	 5 KB	Y	Y	-	-
 	 *
-	 * (VET, 1)	Y	10 KB	N	N	0	dirty (VET, 0), 
+	 * (VET, 1)	Y	10 KB	N	N	0	dirty (VET, 0),
 	 * 							resize (VET, 0) to 7.5 KB
 	 *
 	 * (VET, 2)	Y	10 KB	N	N	0	dirty (VET, 0)
@@ -9888,11 +9888,11 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 * (VET, 5)	Y	 5 KB	Y	N	7	-
 	 *
 	 * (VET, 6)	Y	10 KB	N	N	-	-
-	 * 
+	 *
 	 * (VET, 7)	Y	10 KB	N	Y	-	dirty (VET, 6)
 	 *
-	 * Recall that in this test bed, flush operations are excuted the 
-	 * first time the associated entry is flushed, and are then 
+	 * Recall that in this test bed, flush operations are excuted the
+	 * first time the associated entry is flushed, and are then
 	 * deleted.
 	 */
 
@@ -9900,14 +9900,14 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	for ( i = 0; i < 31; i++ )
 	{
 	    protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(cache_ptr, MONSTER_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(cache_ptr, MONSTER_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	for ( i = 0; i < 1; i++ )
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -9926,9 +9926,9 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 
 	    /* verify the expected status of all entries we have loaded to date: */
             num_large_entries = 1;
-	    verify_entry_status(cache_ptr, 
+	    verify_entry_status(cache_ptr,
 			        0,
-			        (num_variable_entries + num_monster_entries + num_large_entries), 
+			        (num_variable_entries + num_monster_entries + num_large_entries),
 				expected);
 	}
     }
@@ -9936,8 +9936,8 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 
     if ( pass ) {
 
-	/* Now load a large entry.  This should result in the eviction 
-	 * of (VET,1), and the increase in the size of (VET, 0) from .5 
+	/* Now load a large entry.  This should result in the eviction
+	 * of (VET,1), and the increase in the size of (VET, 0) from .5
 	 * VARIABLE_ENTRY_SIZE to .75 VARIABLE_ENTRY_SIZE.
 	 *
 	 * The following table illustrates the intended state of affairs
@@ -9945,7 +9945,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 *
 	 * 		in
 	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 * 
+	 *
 	 * (VET, 0) 	Y	7.5 KB	Y	Y	-	-
 	 *
 	 * (VET, 1)	N	10 KB	N	N	-	-
@@ -9962,7 +9962,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 * (VET, 5)	Y	 5 KB	Y	N	7	-
 	 *
 	 * (VET, 6)	Y	10 KB	N	N	-	-
-	 * 
+	 *
 	 * (VET, 7)	Y	10 KB	Y	Y	-	dirty (VET, 6)
 	 *
 	 * Start by updating the expected table for the expected changes in entry status:
@@ -9975,7 +9975,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
         num_large_entries = 2;
 
 	protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 1);
-	unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, 1, 
+	unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, 1,
                                          H5C__DIRTIED_FLAG, (size_t)0);
 
 	if ( ( cache_ptr->index_len != 40 ) ||
@@ -9994,25 +9994,25 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	}
 
 	/* verify entry status */
-	verify_entry_status(cache_ptr, 
+	verify_entry_status(cache_ptr,
 			    1,
-                            (num_variable_entries + num_monster_entries + num_large_entries), 
+                            (num_variable_entries + num_monster_entries + num_large_entries),
 			    expected);
     }
 
     if ( pass ) {
 
-	/* Now load another large entry.  This should result in the eviction 
+	/* Now load another large entry.  This should result in the eviction
 	 * of (VET, 2), the increase in the size of (VET, 0) from .75
 	 * VARIABLE_ENTRY_SIZE to 1.0 VARIABLE_ENTRY_SIZE, and the renaming
 	 * of (VET, 0) to its alternate address.
 	 *
-	 * The following table shows the expected states of the variable 
+	 * The following table shows the expected states of the variable
 	 * size entries after the test.
 	 *
 	 * 		in
 	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 * 
+	 *
 	 * (VET, 0) 	Y	10 KB	Y	Y	-	-
 	 *
 	 * (VET, 1)	N	10 KB	N	N	-	-
@@ -10027,7 +10027,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 * (VET, 5)	Y	 5 KB	Y	N	7	-
 	 *
 	 * (VET, 6)	Y	10 KB	N	N	-	-
-	 * 
+	 *
 	 * (VET, 7)	Y	10 KB	Y	Y	-	dirty (VET, 6)
 	 *
 	 * Start by updating the expected table for the expected changes in entry status:
@@ -10041,7 +10041,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
         num_large_entries = 3;
 
 	protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 2);
-	unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, 2, 
+	unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, 2,
                                          H5C__DIRTIED_FLAG, (size_t)0);
 
 	if ( ( cache_ptr->index_len != 40 ) ||
@@ -10051,7 +10051,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	                                (2 * LARGE_ENTRY_SIZE) ) ||
 	     ( cache_ptr->index_size != ((3 * VARIABLE_ENTRY_SIZE / 2) +
 				         (3 * VARIABLE_ENTRY_SIZE) +
-				         (31 * MONSTER_ENTRY_SIZE) + 
+				         (31 * MONSTER_ENTRY_SIZE) +
 				         (3 * LARGE_ENTRY_SIZE)) ) ) {
 
             pass = FALSE;
@@ -10059,9 +10059,9 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	}
 
 	/* verify entry status */
-	verify_entry_status(cache_ptr, 
+	verify_entry_status(cache_ptr,
 			    2,
-                            (num_variable_entries + num_monster_entries + num_large_entries), 
+                            (num_variable_entries + num_monster_entries + num_large_entries),
 			    expected);
     }
 
@@ -10071,16 +10071,16 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 * flushed, and increasing its size from 1/2 VARIABLE_ENTRY_SIZE to
 	 * VARIABLE_ENTRY_SIZE.
 	 *
-	 * As a result of this size increase, the cache will have to look 
+	 * As a result of this size increase, the cache will have to look
 	 * for another entry to evict.  After flushing (VET, 4) and (VET, 5),
 	 * it should evict (VET, 6), yielding the needed memory.
 	 *
-	 * The following table shows the expected states of the variable 
+	 * The following table shows the expected states of the variable
 	 * size entries after the test.
 	 *
 	 * 		in
 	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 * 
+	 *
 	 * (VET, 0) 	Y	10 KB	Y	Y	-	-
 	 *
 	 * (VET, 1)	N	10 KB	N	N	-	-
@@ -10094,7 +10094,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 * (VET, 5)	Y	 5 KB	N	N	7	-
 	 *
 	 * (VET, 6)	N	10 KB	N	N	-	-
-	 * 
+	 *
 	 * (VET, 7)	Y	10 KB	Y	Y	-	dirty (VET, 6)
 	 *
 	 * Start by updating the expected table for the expected changes in entry status:
@@ -10114,11 +10114,11 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
         num_large_entries = 5;
 
 	protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 3);
-	unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, 3, 
+	unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, 3,
                                          H5C__DIRTIED_FLAG, (size_t)0);
 
 	protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 4);
-	unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, 4, 
+	unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, 4,
                                          H5C__DIRTIED_FLAG, (size_t)0);
 
         /* verify cache size */
@@ -10137,16 +10137,16 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	}
 
 	/* verify entry status */
-	verify_entry_status(cache_ptr, 
+	verify_entry_status(cache_ptr,
 			    3,
-                            (num_variable_entries + num_monster_entries + num_large_entries), 
+                            (num_variable_entries + num_monster_entries + num_large_entries),
 			    expected);
     }
 
     if ( pass ) {
 
         /* now touch all the non VARIABLE_ENTRY_TYPE entries in the
-	 * cache to bring all the VARIABLE_ENTRY_TYPE entries to the 
+	 * cache to bring all the VARIABLE_ENTRY_TYPE entries to the
 	 * end of the LRU list.
 	 *
 	 * Note that we don't have to worry about (VET, 0) and (VET, 7)
@@ -10155,14 +10155,14 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	for ( i = 0; i < 31; i++ )
 	{
 	    protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(cache_ptr, MONSTER_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(cache_ptr, MONSTER_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	for ( i = 0; i < 5; i++ )
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10177,9 +10177,9 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	}
 
 	/* verify entry status */
-	verify_entry_status(cache_ptr, 
+	verify_entry_status(cache_ptr,
 			    4,
-                            (num_variable_entries + num_monster_entries + num_large_entries), 
+                            (num_variable_entries + num_monster_entries + num_large_entries),
 			    expected);
     }
 
@@ -10188,12 +10188,12 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	/* Now load three more large entries.  This should result
 	 * in the eviction of (VET, 3), and the unpinning of (VET, 0)
 	 *
-	 * The following table shows the expected states of the variable 
+	 * The following table shows the expected states of the variable
 	 * size entries after the test.
 	 *
 	 * 		in
 	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 * 
+	 *
 	 * (VET, 0) 	Y	10 KB	Y	N	-	-
 	 *
 	 * (VET, 1)	N	10 KB	N	N	-	-
@@ -10207,7 +10207,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 * (VET, 5)	Y	 5 KB	N	N	7	-
 	 *
 	 * (VET, 6)	N	10 KB	N	N	-	-
-	 * 
+	 *
 	 * (VET, 7)	Y	10 KB	Y	Y	-	dirty (VET, 6)
 	 *
 	 * Start by updating the expected table for the expected changes in entry status:
@@ -10222,7 +10222,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	for ( i = 5; i < 8; i++ )
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10241,9 +10241,9 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	}
 
 	/* verify entry status */
-	verify_entry_status(cache_ptr, 
+	verify_entry_status(cache_ptr,
 			    5,
-                            (num_variable_entries + num_monster_entries + num_large_entries), 
+                            (num_variable_entries + num_monster_entries + num_large_entries),
 			    expected);
     }
 
@@ -10251,12 +10251,12 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 
 	/* load another large entry.  (VET, 4) should be evicted.
 	 *
-	 * The following table shows the expected states of the variable 
+	 * The following table shows the expected states of the variable
 	 * size entries after the test.
 	 *
 	 * 		in
 	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 * 
+	 *
 	 * (VET, 0) 	Y	10 KB	Y	N	-	-
 	 *
 	 * (VET, 1)	N	10 KB	N	N	-	-
@@ -10270,7 +10270,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 * (VET, 5)	Y	 5 KB	N	N	7	-
 	 *
 	 * (VET, 6)	N	10 KB	N	N	-	-
-	 * 
+	 *
 	 * (VET, 7)	Y	10 KB	Y	Y	-	dirty (VET, 6)
 	 *
 	 * Start by updating the expected table for the expected changes in entry status:
@@ -10284,7 +10284,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	for ( i = 8; i < 9; i++ )
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10304,24 +10304,24 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	}
 
 	/* verify entry status */
-	verify_entry_status(cache_ptr, 
+	verify_entry_status(cache_ptr,
 			    6,
-                            (num_variable_entries + num_monster_entries + num_large_entries), 
+                            (num_variable_entries + num_monster_entries + num_large_entries),
 			    expected);
     }
 
     if ( pass ) {
 
-	/* Load another large entry.  
+	/* Load another large entry.
 	 *
-	 * (VET, 5) should be evicted, and (VET, 7) should be unpinned. 
+	 * (VET, 5) should be evicted, and (VET, 7) should be unpinned.
 	 *
-	 * The following table shows the expected states of the variable 
+	 * The following table shows the expected states of the variable
 	 * size entries after the test.
 	 *
 	 * 		in
 	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 * 
+	 *
 	 * (VET, 0) 	Y	10 KB	Y	N	-	-
 	 *
 	 * (VET, 1)	N	10 KB	N	N	-	-
@@ -10335,7 +10335,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 * (VET, 5)	N	 5 KB	N	N	-	-
 	 *
 	 * (VET, 6)	N	10 KB	N	N	-	-
-	 * 
+	 *
 	 * (VET, 7)	Y	10 KB	Y	N	-	dirty (VET, 6)
 	 *
 	 * Start by updating the expected table for the expected changes in entry status:
@@ -10350,7 +10350,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	for ( i = 9; i < 10; i++ )
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10368,16 +10368,16 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	}
 
 	/* verify entry status */
-	verify_entry_status(cache_ptr, 
+	verify_entry_status(cache_ptr,
 			    7,
-                            (num_variable_entries + num_monster_entries + num_large_entries), 
+                            (num_variable_entries + num_monster_entries + num_large_entries),
 			    expected);
     }
 
     if ( pass ) {
 
         /* Again, touch all the non VARIABLE_ENTRY_TYPE entries in the
-	 * cache to bring all the VARIABLE_ENTRY_TYPE entries to the 
+	 * cache to bring all the VARIABLE_ENTRY_TYPE entries to the
 	 * end of the LRU list.
 	 *
 	 * Both (VET, 0) and (VET, 7) have been unpinned, so they are
@@ -10386,14 +10386,14 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	for ( i = 0; i < 31; i++ )
 	{
 	    protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(cache_ptr, MONSTER_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(cache_ptr, MONSTER_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	for ( i = 0; i < 10; i++ )
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10411,35 +10411,35 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	}
 
 	/* verify entry status */
-	verify_entry_status(cache_ptr, 
+	verify_entry_status(cache_ptr,
 			    8,
-                            (num_variable_entries + num_monster_entries + num_large_entries), 
+                            (num_variable_entries + num_monster_entries + num_large_entries),
 			    expected);
     }
 
     if ( pass ) {
 
-	/* load two more large entries.  
+	/* load two more large entries.
 	 *
 	 * (VET, 0) should be flushed, but not evicted initially since it is dirty.
 	 *
-	 * (VET, 7) should be evicted, but (VET, 7) has an eviction operation that 
-	 * dirties (VET, 6).  Since (VET, 6) is not in the cache, it will be loaded.  
+	 * (VET, 7) should be evicted, but (VET, 7) has an eviction operation that
+	 * dirties (VET, 6).  Since (VET, 6) is not in the cache, it will be loaded.
 	 * Since this results in no net increase in free space, the cache will
 	 * continue to attempt to create free space.
 	 *
 	 * The cache will then flush all the monster and large entries, but since they
-	 * are all dirty, they will not be evicted.  
+	 * are all dirty, they will not be evicted.
 	 *
 	 * Finally, it will reach (VET, 0) again, and evict it on the second pass.
 	 * This finally makes the necessary space.
 	 *
-	 * The following table shows the expected states of the variable 
+	 * The following table shows the expected states of the variable
 	 * size entries after the test.
 	 *
 	 * 		in
 	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 * 
+	 *
 	 * (VET, 0) 	N	10 KB	N	N	-	-
 	 *
 	 * (VET, 1)	N	10 KB	N	N	-	-
@@ -10453,12 +10453,12 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 * (VET, 5)	N	 5 KB	N	N	-	-
 	 *
 	 * (VET, 6)	Y	10 KB	Y	N	-	-
-	 * 
+	 *
 	 * (VET, 7)	N	10 KB	N	N	-	-
 	 *
 	 * Start by updating the expected table for the expected changes in entry status:
 	 *
-	 * Note that we reset the loaded, cleared, flushed, and destroyed fields of 
+	 * Note that we reset the loaded, cleared, flushed, and destroyed fields of
 	 * (VET,6) so we can track what is happening.
 	 */
 	base_addr = entries[VARIABLE_ENTRY_TYPE];
@@ -10486,7 +10486,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	/* a newly loaded entry is not inserted in the cache until after space has been
 	 * made for it.  Thus (LET, 11) will not be flushed.
 	 */
-	for ( i = num_variable_entries; 
+	for ( i = num_variable_entries;
 	      i < num_variable_entries + num_monster_entries + num_large_entries - 1;
 	      i++ )
 	{
@@ -10497,7 +10497,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	for ( i = 10; i < 12; i++ )
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10515,34 +10515,34 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	}
 
 	/* verify entry status */
-	verify_entry_status(cache_ptr, 
+	verify_entry_status(cache_ptr,
 			    9,
-                            (num_variable_entries + num_monster_entries + num_large_entries), 
+                            (num_variable_entries + num_monster_entries + num_large_entries),
 			    expected);
     }
 
     if ( pass ) {
 
         /* Again, touch all the non VARIABLE_ENTRY_TYPE entries in the
-	 * cache to bring the last remaining VARIABLE_ENTRY_TYPE entry to the 
-	 * end of the LRU list. 
+	 * cache to bring the last remaining VARIABLE_ENTRY_TYPE entry to the
+	 * end of the LRU list.
 	 */
 	for ( i = 0; i < num_monster_entries; i++ )
 	{
 	    protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(cache_ptr, MONSTER_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(cache_ptr, MONSTER_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	for ( i = 0; i < num_large_entries; i++ )
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
 	/* update the expected array to mark all these entries dirty again. */
-	for ( i = num_variable_entries; 
+	for ( i = num_variable_entries;
 	      i < num_variable_entries + num_monster_entries + num_large_entries - 1;
 	      i++ )
 	{
@@ -10563,27 +10563,27 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	}
 
 	/* verify entry status */
-	verify_entry_status(cache_ptr, 
+	verify_entry_status(cache_ptr,
 			    10,
-                            (num_variable_entries + num_monster_entries + num_large_entries), 
+                            (num_variable_entries + num_monster_entries + num_large_entries),
 			    expected);
     }
 
     if ( pass ) {
-	    
-        /* Load two more large entries.  
+
+        /* Load two more large entries.
 	 *
 	 * Since (VET, 6) is dirty, at first this will just cause (VET, 6) to be flushed.
 	 *
 	 * But all other entries in the cache are dirty, so the cache will flush them all,
 	 * and then evict (VET, 6) on the second pass.
 	 *
-	 * The following table shows the expected states of the variable 
+	 * The following table shows the expected states of the variable
 	 * size entries after the test.
 	 *
 	 * 		in
 	 * entry:	cache?	size:	dirty?	pinned?	pins:	flush operations:
-	 * 
+	 *
 	 * (VET, 0) 	N	10 KB	N	N	-	-
 	 *
 	 * (VET, 1)	N	10 KB	N	N	-	-
@@ -10597,7 +10597,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 * (VET, 5)	N	 5 KB	N	N	-	-
 	 *
 	 * (VET, 6)	N	10 KB	N	N	-	-
-	 * 
+	 *
 	 * (VET, 7)	N	10 KB	N	N	-	-
 	 *
 	 * Start by updating the expected table for the expected changes in entry status:
@@ -10613,7 +10613,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	/* a newly loaded entry is not inserted in the cache until after space has been
 	 * made for it.  Thus (LET, 13) will not be flushed.
 	 */
-	for ( i = num_variable_entries; 
+	for ( i = num_variable_entries;
 	      i < num_variable_entries + num_monster_entries + num_large_entries - 1;
 	      i++ )
 	{
@@ -10624,7 +10624,7 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	for ( i = 12; i < 14; i++ )
 	{
 	    protect_entry(cache_ptr, LARGE_ENTRY_TYPE, i);
-	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i, 
+	    unprotect_entry_with_size_change(cache_ptr, LARGE_ENTRY_TYPE, i,
 			                     H5C__DIRTIED_FLAG, (size_t)0);
 	}
 
@@ -10641,9 +10641,9 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	}
 
 	/* verify entry status */
-	verify_entry_status(cache_ptr, 
+	verify_entry_status(cache_ptr,
 			    11,
-                            (num_variable_entries + num_monster_entries + num_large_entries), 
+                            (num_variable_entries + num_monster_entries + num_large_entries),
 			    expected);
     }
 
@@ -10671,12 +10671,12 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
         }
     }
 
-#if H5C_COLLECT_CACHE_STATS 
+#if H5C_COLLECT_CACHE_STATS
     /* If we are collecting stats, check to see if we get the expected
      * values.
      *
      * Testing the stats code is fairly new, but given the extent
-     * to which I find myself depending on the stats, I've decided 
+     * to which I find myself depending on the stats, I've decided
      * to start testing the stats whenever it is convenient to do
      * so.
      */
@@ -12544,7 +12544,7 @@ check_flush_cache__single_entry_test(H5C_t * cache_ptr,
               (int)expected_flushed,
               (int)(entry_ptr->destroyed),
               (int)expected_destroyed);
-#endif 
+#endif
             pass = FALSE;
             HDsnprintf(msg, (size_t)128,
                 "Unexpected entry status after flush in single entry test #%d.",
@@ -13084,7 +13084,7 @@ check_expunge_entry(void)
          */
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                                      &in_cache, &is_dirty, &is_protected, 
+                                      &in_cache, &is_dirty, &is_protected,
 				      &is_pinned);
 
 	if ( result < 0 ) {
@@ -13151,14 +13151,14 @@ check_expunge_entry(void)
     }
 
     /* Expunge the entry and then verify that it is no longer in the cache.
-     * Also verify that the entry was loaded, cleared, and destroyed, but 
+     * Also verify that the entry was loaded, cleared, and destroyed, but
      * not flushed.
      */
     expunge_entry(cache_ptr, 0, 0);
 
     if ( pass ) {
 
-        /* entry shouldn't be in cache -- only in_cache should be touched 
+        /* entry shouldn't be in cache -- only in_cache should be touched
 	 * by the status call.  Thus, only check that boolean.
          */
 
@@ -13193,7 +13193,7 @@ check_expunge_entry(void)
     /* now repeat the process with a different entry.  On unprotect
      * mark the entry as dirty.  Verify that it is not flushed.
      */
-    
+
     base_addr = entries[0];
     entry_ptr = &(base_addr[1]);
 
@@ -13204,7 +13204,7 @@ check_expunge_entry(void)
          */
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                                      &in_cache, &is_dirty, &is_protected, 
+                                      &in_cache, &is_dirty, &is_protected,
 				      &is_pinned);
 
 	if ( result < 0 ) {
@@ -13243,7 +13243,7 @@ check_expunge_entry(void)
     if ( pass ) {
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                                      &in_cache, &is_dirty, &is_protected, 
+                                      &in_cache, &is_dirty, &is_protected,
 				      &is_pinned);
 
 	if ( result < 0 ) {
@@ -13279,12 +13279,12 @@ check_expunge_entry(void)
 
     if ( pass ) {
 
-        /* entry shouldn't be in cache -- only in_cache should be touched 
+        /* entry shouldn't be in cache -- only in_cache should be touched
 	 * by the status call.  Thus, only check that boolean.
          */
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                                      &in_cache, &is_dirty, &is_protected, 
+                                      &in_cache, &is_dirty, &is_protected,
 				      &is_pinned);
 
 	if ( result < 0 ) {
@@ -13333,7 +13333,7 @@ check_expunge_entry(void)
 /*-------------------------------------------------------------------------
  * Function:	check_multiple_read_protect()
  *
- * Purpose:	Verify that multiple, simultaneous read protects of a 
+ * Purpose:	Verify that multiple, simultaneous read protects of a
  * 		single entry perform as expectd.
  *
  * Return:	void
@@ -13390,7 +13390,7 @@ check_multiple_read_protect(void)
 
         entry_ptr = &((entries[0])[0]);
 
-        if ( ( entry_ptr->header.is_protected ) || 
+        if ( ( entry_ptr->header.is_protected ) ||
  	     ( entry_ptr->header.is_read_only ) ||
 	     ( entry_ptr->header.ro_ref_count != 0 ) ) {
 
@@ -13413,7 +13413,7 @@ check_multiple_read_protect(void)
     {
         protect_entry_ro(cache_ptr, 0, 0);
 
-        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+        if ( ( ! ( entry_ptr->header.is_protected ) ) ||
  	     ( ! ( entry_ptr->header.is_read_only ) ) ||
 	     ( entry_ptr->header.ro_ref_count != 1 ) ) {
 
@@ -13436,7 +13436,7 @@ check_multiple_read_protect(void)
     {
         protect_entry_ro(cache_ptr, 0, 0);
 
-        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+        if ( ( ! ( entry_ptr->header.is_protected ) ) ||
  	     ( ! ( entry_ptr->header.is_read_only ) ) ||
 	     ( entry_ptr->header.ro_ref_count != 2 ) ) {
 
@@ -13459,7 +13459,7 @@ check_multiple_read_protect(void)
     {
         unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
 
-        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+        if ( ( ! ( entry_ptr->header.is_protected ) ) ||
  	     ( ! ( entry_ptr->header.is_read_only ) ) ||
 	     ( entry_ptr->header.ro_ref_count != 1 ) ) {
 
@@ -13482,7 +13482,7 @@ check_multiple_read_protect(void)
     {
         protect_entry_ro(cache_ptr, 0, 0);
 
-        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+        if ( ( ! ( entry_ptr->header.is_protected ) ) ||
  	     ( ! ( entry_ptr->header.is_read_only ) ) ||
 	     ( entry_ptr->header.ro_ref_count != 2 ) ) {
 
@@ -13505,7 +13505,7 @@ check_multiple_read_protect(void)
     {
         protect_entry_ro(cache_ptr, 0, 0);
 
-        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+        if ( ( ! ( entry_ptr->header.is_protected ) ) ||
  	     ( ! ( entry_ptr->header.is_read_only ) ) ||
 	     ( entry_ptr->header.ro_ref_count != 3 ) ) {
 
@@ -13528,7 +13528,7 @@ check_multiple_read_protect(void)
     {
         unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
 
-        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+        if ( ( ! ( entry_ptr->header.is_protected ) ) ||
  	     ( ! ( entry_ptr->header.is_read_only ) ) ||
 	     ( entry_ptr->header.ro_ref_count != 2 ) ) {
 
@@ -13551,7 +13551,7 @@ check_multiple_read_protect(void)
     {
         unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
 
-        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+        if ( ( ! ( entry_ptr->header.is_protected ) ) ||
  	     ( ! ( entry_ptr->header.is_read_only ) ) ||
 	     ( entry_ptr->header.ro_ref_count != 1 ) ) {
 
@@ -13574,7 +13574,7 @@ check_multiple_read_protect(void)
     {
         unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
 
-        if ( ( entry_ptr->header.is_protected ) || 
+        if ( ( entry_ptr->header.is_protected ) ||
  	     ( entry_ptr->header.is_read_only ) ||
 	     ( entry_ptr->header.ro_ref_count != 0 ) ) {
 
@@ -13594,7 +13594,7 @@ check_multiple_read_protect(void)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
 
-    /* If we get this far, do a write protect and unprotect to verify 
+    /* If we get this far, do a write protect and unprotect to verify
      * that the stats are getting collected properly here as well.
      */
 
@@ -13602,7 +13602,7 @@ check_multiple_read_protect(void)
     {
         protect_entry(cache_ptr, 0, 0);
 
-        if ( ( ! ( entry_ptr->header.is_protected ) ) || 
+        if ( ( ! ( entry_ptr->header.is_protected ) ) ||
  	     ( entry_ptr->header.is_read_only ) ||
 	     ( entry_ptr->header.ro_ref_count != 0 ) ) {
 
@@ -13625,7 +13625,7 @@ check_multiple_read_protect(void)
     {
         unprotect_entry(cache_ptr, 0, 0, FALSE, H5C__NO_FLAGS_SET);
 
-        if ( ( entry_ptr->header.is_protected ) || 
+        if ( ( entry_ptr->header.is_protected ) ||
  	     ( entry_ptr->header.is_read_only ) ||
 	     ( entry_ptr->header.ro_ref_count != 0 ) ) {
 
@@ -13645,7 +13645,7 @@ check_multiple_read_protect(void)
 #endif /* H5C_COLLECT_CACHE_STATS */
 
 
-    /* Finally, mix things up a little, using a mix of reads and 
+    /* Finally, mix things up a little, using a mix of reads and
      * and writes on different entries.  Also include a pin to verify
      * that it works as well.
      *
@@ -14142,7 +14142,7 @@ check_resize_entry(void)
 
     /* Setup a cache and verify that it is empty.
      *
-     * Then force the load of an entry by protecting it, and verify that 
+     * Then force the load of an entry by protecting it, and verify that
      * the entry and cache have the expected sizes.
      *
      * Then unprotect the entry with the size changed flag and a reduced
@@ -14150,10 +14150,10 @@ check_resize_entry(void)
      * sizes.
      *
      * Use a second protect/unprotect cycle to restore the entry to
-     * its original size.  Verify that the entry and cache have the 
+     * its original size.  Verify that the entry and cache have the
      * expected sizes.
      *
-     * Protect and unprotect the entry again to pin it.  Use 
+     * Protect and unprotect the entry again to pin it.  Use
      * H5C_resize_entry to reduce its size.  Verify that the entry
      * and cache have the expected sizes.
      *
@@ -14165,7 +14165,7 @@ check_resize_entry(void)
      *
      *
      * Obesrve that all the above tests have been done with only one
-     * entry in the cache.  Repeat the tests with several entries in 
+     * entry in the cache.  Repeat the tests with several entries in
      * the cache.
      */
 
@@ -14218,8 +14218,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned);
 
 	if ( result < 0 ) {
@@ -14249,9 +14249,9 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_unprotect(NULL, -1, -1, cache_ptr, 
+        result = H5C_unprotect(NULL, -1, -1, cache_ptr,
 			       &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr,
-			       (void *)entry_ptr, 
+			       (void *)entry_ptr,
 			       H5C__SIZE_CHANGED_FLAG | H5C__DIRTIED_FLAG,
 			       (LARGE_ENTRY_SIZE / 2));
 
@@ -14288,8 +14288,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned);
 
 	if ( result < 0 ) {
@@ -14322,9 +14322,9 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_unprotect(NULL, -1, -1, cache_ptr, 
+        result = H5C_unprotect(NULL, -1, -1, cache_ptr,
 			       &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr,
-			       (void *)entry_ptr, 
+			       (void *)entry_ptr,
 			       (H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG),
 			       LARGE_ENTRY_SIZE);
 
@@ -14361,8 +14361,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned);
 
 	if ( result < 0 ) {
@@ -14397,17 +14397,17 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_resize_pinned_entry(cache_ptr, (void *)entry_ptr, 
+        result = H5C_resize_pinned_entry(cache_ptr, (void *)entry_ptr,
 			                 (LARGE_ENTRY_SIZE / 4));
 
 	if ( result < 0 ) {
 
             pass = FALSE;
-            HDsnprintf(msg, (size_t)128, 
+            HDsnprintf(msg, (size_t)128,
 		       "H5C_resize_pinned_entry() reports failure 1.");
             failure_mssg = msg;
 
-	} 
+	}
     }
 
     if ( pass ) {
@@ -14426,8 +14426,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned);
 
 	if ( result < 0 ) {
@@ -14458,17 +14458,17 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_resize_pinned_entry(cache_ptr, (void *)entry_ptr, 
+        result = H5C_resize_pinned_entry(cache_ptr, (void *)entry_ptr,
 			                 LARGE_ENTRY_SIZE);
 
 	if ( result < 0 ) {
 
             pass = FALSE;
-            HDsnprintf(msg, (size_t)128, 
+            HDsnprintf(msg, (size_t)128,
 		       "H5C_resize_pinned_entry() reports failure 2.");
             failure_mssg = msg;
 
-	} 
+	}
     }
 
     if ( pass ) {
@@ -14487,8 +14487,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned);
 
 	if ( result < 0 ) {
@@ -14519,13 +14519,13 @@ check_resize_entry(void)
 
     protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 0);
 
-    unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 0, FALSE, 
+    unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 0, FALSE,
 		    H5C__UNPIN_ENTRY_FLAG | H5C__DELETED_FLAG);
 
     if ( pass ) {
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                                      &in_cache, &is_dirty, &is_protected, 
+                                      &in_cache, &is_dirty, &is_protected,
 				      &is_pinned);
 
 	if ( result < 0 ) {
@@ -14630,8 +14630,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned);
 
 	if ( result < 0 ) {
@@ -14661,9 +14661,9 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_unprotect(NULL, -1, -1, cache_ptr, 
+        result = H5C_unprotect(NULL, -1, -1, cache_ptr,
 			       &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr,
-			       (void *)entry_ptr, 
+			       (void *)entry_ptr,
 			       H5C__SIZE_CHANGED_FLAG | H5C__DIRTIED_FLAG,
 			       (LARGE_ENTRY_SIZE / 2));
 
@@ -14687,10 +14687,10 @@ check_resize_entry(void)
     if ( pass ) {
 
 	if ( ( cache_ptr->index_len != 4 ) ||
-	     ( cache_ptr->index_size != 
+	     ( cache_ptr->index_size !=
 	       ((3 * LARGE_ENTRY_SIZE) + (LARGE_ENTRY_SIZE / 2)) ) ||
 	     ( cache_ptr->slist_len != 2 ) ||
-	     ( cache_ptr->slist_size != 
+	     ( cache_ptr->slist_size !=
 	       (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 2)) ) ) {
 
             pass = FALSE;
@@ -14702,8 +14702,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned);
 
 	if ( result < 0 ) {
@@ -14736,9 +14736,9 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_unprotect(NULL, -1, -1, cache_ptr, 
+        result = H5C_unprotect(NULL, -1, -1, cache_ptr,
 			       &(types[LARGE_ENTRY_TYPE]), entry_ptr->addr,
-			       (void *)entry_ptr, 
+			       (void *)entry_ptr,
 			       (H5C__DIRTIED_FLAG | H5C__SIZE_CHANGED_FLAG),
 			       LARGE_ENTRY_SIZE);
 
@@ -14775,8 +14775,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned);
 
 	if ( result < 0 ) {
@@ -14811,26 +14811,26 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_resize_pinned_entry(cache_ptr, (void *)entry_ptr, 
+        result = H5C_resize_pinned_entry(cache_ptr, (void *)entry_ptr,
 			                 (LARGE_ENTRY_SIZE / 4));
 
 	if ( result < 0 ) {
 
             pass = FALSE;
-            HDsnprintf(msg, (size_t)128, 
+            HDsnprintf(msg, (size_t)128,
 		       "H5C_resize_pinned_entry() reports failure 3.");
             failure_mssg = msg;
 
-	} 
+	}
     }
 
     if ( pass ) {
 
 	if ( ( cache_ptr->index_len != 4 ) ||
-	     ( cache_ptr->index_size != 
+	     ( cache_ptr->index_size !=
 	       ((3 * LARGE_ENTRY_SIZE) + (LARGE_ENTRY_SIZE / 4)) ) ||
 	     ( cache_ptr->slist_len != 2 ) ||
-	     ( cache_ptr->slist_size != 
+	     ( cache_ptr->slist_size !=
 	       (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 4)) ) ) {
 
             pass = FALSE;
@@ -14842,8 +14842,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned);
 
 	if ( result < 0 ) {
@@ -14874,17 +14874,17 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_resize_pinned_entry(cache_ptr, (void *)entry_ptr, 
+        result = H5C_resize_pinned_entry(cache_ptr, (void *)entry_ptr,
 			                 LARGE_ENTRY_SIZE);
 
 	if ( result < 0 ) {
 
             pass = FALSE;
-            HDsnprintf(msg, (size_t)128, 
+            HDsnprintf(msg, (size_t)128,
 		       "H5C_resize_pinned_entry() reports failure 4.");
             failure_mssg = msg;
 
-	} 
+	}
     }
 
     if ( pass ) {
@@ -14903,8 +14903,8 @@ check_resize_entry(void)
 
     if ( pass ) {
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
-			              &reported_entry_size, &in_cache, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
+			              &reported_entry_size, &in_cache,
 				      &is_dirty, &is_protected, &is_pinned);
 
 	if ( result < 0 ) {
@@ -14935,13 +14935,13 @@ check_resize_entry(void)
 
     protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 3);
 
-    unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 3, FALSE, 
+    unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 3, FALSE,
 		    H5C__UNPIN_ENTRY_FLAG | H5C__DELETED_FLAG);
 
     if ( pass ) {
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                                      &in_cache, &is_dirty, &is_protected, 
+                                      &in_cache, &is_dirty, &is_protected,
 				      &is_pinned);
 
 	if ( result < 0 ) {
@@ -15028,7 +15028,7 @@ check_resize_entry(void)
 /*-------------------------------------------------------------------------
  * Function:	check_evictions_enabled()
  *
- * Purpose:	Verify that H5C_get_evictions_enabled() and 
+ * Purpose:	Verify that H5C_get_evictions_enabled() and
  * 		H5C_set_evictions_enabled() functions perform as expected.
  *
  * Return:	void
@@ -15077,7 +15077,7 @@ check_evictions_enabled(void)
      * Load another entry -- verify that this does not cause an entry
      * to be evicted.
      *
-     * Insert an entry -- verify that this does not cause an entry to 
+     * Insert an entry -- verify that this does not cause an entry to
      * be evicted.
      *
      * Use H5C_set_evictions_enabled() to re-enable evictions.  Verify
@@ -15090,7 +15090,7 @@ check_evictions_enabled(void)
      * Protect an entry not in the cache.  Verify that this causes
      * two evictions.
      *
-     * Used H5C_set_evictions_enabled() to disable evictions again.  
+     * Used H5C_set_evictions_enabled() to disable evictions again.
      * Verify with a call to H5C_get_evictions_enabled().
      *
      * Now flush and discard the cache -- should succeed.
@@ -15159,7 +15159,7 @@ check_evictions_enabled(void)
     for ( i = 0; i < 16 ; i++ )
     {
         protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, i);
-        unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, i, 
+        unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, i,
 			FALSE, H5C__NO_FLAGS_SET);
     }
 
@@ -15190,7 +15190,7 @@ check_evictions_enabled(void)
 
     /* protect and unprotect another entry */
     protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 16);
-    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 16, 
+    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 16,
 		    FALSE, H5C__NO_FLAGS_SET);
 
     if ( show_progress ) /* 7 */
@@ -15221,7 +15221,7 @@ check_evictions_enabled(void)
 
         entry_ptr = &(base_addr[0]);
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              NULL, &in_cache, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
@@ -15284,7 +15284,7 @@ check_evictions_enabled(void)
 
         entry_ptr = &(base_addr[1]);
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              NULL, &in_cache, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
@@ -15355,7 +15355,7 @@ check_evictions_enabled(void)
 
     /* protect and unprotect another entry */
     protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 18);
-    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 18, 
+    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 18,
 		    FALSE, H5C__NO_FLAGS_SET);
 
     if ( show_progress ) /* 15 */
@@ -15428,7 +15428,7 @@ check_evictions_enabled(void)
 
     /* protect and unprotect an entry that is in the cache */
     protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 19);
-    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 19, 
+    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 19,
 		    FALSE, H5C__NO_FLAGS_SET);
 
     if ( show_progress ) /* 20 */
@@ -15457,14 +15457,14 @@ check_evictions_enabled(void)
 
     /* protect and unprotect an entry that isn't in the cache */
     protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 20);
-    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 20, 
+    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 20,
 		    FALSE, H5C__NO_FLAGS_SET);
 
     if ( show_progress ) /* 22 */
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    /* verify that the entries have been evicted to bring the 
+    /* verify that the entries have been evicted to bring the
      * cache back down to its normal size.
      */
 
@@ -15491,7 +15491,7 @@ check_evictions_enabled(void)
 
         entry_ptr = &(base_addr[2]);
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              NULL, &in_cache, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
@@ -15527,7 +15527,7 @@ check_evictions_enabled(void)
 
         entry_ptr = &(base_addr[3]);
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              NULL, &in_cache, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
@@ -15576,11 +15576,11 @@ check_evictions_enabled(void)
         HDfprintf(stdout, "%s() - %0d -- pass = %d\n",
                   fcn_name, mile_stone++, (int)pass);
 
-    /* protect and unprotect an entry that isn't in the cache, forcing 
+    /* protect and unprotect an entry that isn't in the cache, forcing
      * the cache to grow.
      */
     protect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 21);
-    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 21, 
+    unprotect_entry(cache_ptr, MONSTER_ENTRY_TYPE, 21,
 		    FALSE, H5C__NO_FLAGS_SET);
 
 
@@ -15656,7 +15656,7 @@ check_evictions_enabled(void)
 
         entry_ptr = &(base_addr[4]);
 
-        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, 
+        result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              NULL, &in_cache, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
@@ -16777,7 +16777,7 @@ check_expunge_entry_errs(void)
 
     if ( pass ) {
 
-	result = H5C_expunge_entry(NULL, -1, -1, cache_ptr, 
+	result = H5C_expunge_entry(NULL, -1, -1, cache_ptr,
                                    &(types[0]), entry_ptr->addr);
 
         if ( result > 0 ) {
@@ -16795,7 +16795,7 @@ check_expunge_entry_errs(void)
 
     if ( pass ) {
 
-	result = H5C_expunge_entry(NULL, -1, -1, cache_ptr, 
+	result = H5C_expunge_entry(NULL, -1, -1, cache_ptr,
                                    &(types[0]), entry_ptr->addr);
 
         if ( result > 0 ) {
@@ -16813,7 +16813,7 @@ check_expunge_entry_errs(void)
 
     if ( pass ) {
 
-	result = H5C_expunge_entry(NULL, -1, -1, cache_ptr, 
+	result = H5C_expunge_entry(NULL, -1, -1, cache_ptr,
                                    &(types[0]), entry_ptr->addr);
 
         if ( result < 0 ) {
@@ -16874,11 +16874,11 @@ check_resize_entry_errs(void)
 
     pass = TRUE;
 
-    /* Allocate a cache, protect an entry, and then call 
+    /* Allocate a cache, protect an entry, and then call
      * H5C_resize_pinned_entry() to resize it -- this should fail.
      *
      * Unprotect the the entry with the pinned flag, and then call
-     * H5C_resize_pinned_entry() again with new size of zero.  
+     * H5C_resize_pinned_entry() again with new size of zero.
      * This should fail too.
      *
      * Finally, unpin the entry and destroy the cache.
@@ -16980,7 +16980,7 @@ check_unprotect_ro_dirty_err(void)
 
     pass = TRUE;
 
-    /* allocate a cache, protect an entry read only, and then unprotect it 
+    /* allocate a cache, protect an entry read only, and then unprotect it
      * with the dirtied flag set.  This should fail.  Destroy the cache
      * -- should succeed.
      */
@@ -17022,8 +17022,8 @@ check_unprotect_ro_dirty_err(void)
         takedown_cache(cache_ptr, FALSE, FALSE);
     }
 
-    /* allocate a another cache, protect an entry read only twice, and 
-     * then unprotect it with the dirtied flag set.  This should fail.  
+    /* allocate a another cache, protect an entry read only twice, and
+     * then unprotect it with the dirtied flag set.  This should fail.
      * Unprotect it with no flags set twice and then destroy the cache.
      * This should succeed.
      */
@@ -17110,9 +17110,9 @@ check_protect_ro_rw_err(void)
 
     pass = TRUE;
 
-    /* allocate a cache, protect an entry read only, and then try to protect 
+    /* allocate a cache, protect an entry read only, and then try to protect
      * it again rw.  This should fail.
-     * 
+     *
      * Unprotect the entry and destroy the cache -- should succeed.
      */
 
@@ -17166,7 +17166,7 @@ check_protect_ro_rw_err(void)
 /*-------------------------------------------------------------------------
  * Function:	check_evictions_enabled_err()
  *
- * Purpose:	Verify that H5C_get_evictions_enabled() and 
+ * Purpose:	Verify that H5C_get_evictions_enabled() and
  *              H5C_set_evictions_enabled() generate errors as expected.
  *
  * Return:	void
@@ -17200,7 +17200,7 @@ check_check_evictions_enabled_err(void)
      *
      * Repeat with a NULL evictions_enabled_ptr, should fail as well.
      *
-     * Configure the cache to use auto cache resize.  Call 
+     * Configure the cache to use auto cache resize.  Call
      * H5C_set_evictions_enabled() to disable evictions.  Should fail.
      *
      * Unprotect the entry and destroy the cache -- should succeed.
@@ -17317,7 +17317,7 @@ check_check_evictions_enabled_err(void)
  *
  * 		John Mainzer 1/8/08
  * 		Added a basic set of tests for the flash cache size
- * 		increment code.  
+ * 		increment code.
  *
  *-------------------------------------------------------------------------
  */
@@ -17372,7 +17372,7 @@ check_auto_cache_resize(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
-        /* enum H5C_cache_flash_incr_mode       */   
+        /* enum H5C_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C_flash_incr__off,
         /* double      flash_multiple         = */ 2.0,
         /* double      flash_threshold        = */ 0.5,
@@ -20523,10 +20523,10 @@ check_auto_cache_resize(void)
     }
 
     /* now test the flash cache size increment code.  At least at present,
-     * there should be no interaction between the regular auto-resize 
-     * code and the flash cache size increment code other than a reset 
+     * there should be no interaction between the regular auto-resize
+     * code and the flash cache size increment code other than a reset
      * of the counter and stats collection used by the regular auto-resize
-     * code.  Thus we do only limited tests of the two pieces of code 
+     * code.  Thus we do only limited tests of the two pieces of code
      * operating together.
      *
      * Start with simple test to verify that the flash cache increment
@@ -20535,7 +20535,7 @@ check_auto_cache_resize(void)
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* allocate a cache, enable the flash cache size increase code, and 
+    /* allocate a cache, enable the flash cache size increase code, and
      * then force the flash size increase code through all its operational
      * modes.  Verify that all performs as expected.
      */
@@ -20648,7 +20648,7 @@ check_auto_cache_resize(void)
 
     /* Now load a monster entry.  Since a monster entry is larger than
      * half the size of the cache, and there is not sufficient space
-     * for a monster entry in the cache, we will add space to the 
+     * for a monster entry in the cache, we will add space to the
      * cache to make room for the entry.
      */
     if ( pass ) {
@@ -20664,7 +20664,7 @@ check_auto_cache_resize(void)
 	     ( ( ( cache_ptr->max_cache_size != (80 * 1024) ) ||
 		 ( cache_ptr->min_clean_size != (40 * 1024) ) ||
 		 ( cache_ptr->index_len != 2 ) ||
-                 ( cache_ptr->index_size != (HUGE_ENTRY_SIZE + 
+                 ( cache_ptr->index_size != (HUGE_ENTRY_SIZE +
 		                             MONSTER_ENTRY_SIZE) ) ||
 		 ( cache_ptr->cache_accesses != 1 ) ) ) ) {
 
@@ -20726,9 +20726,9 @@ check_auto_cache_resize(void)
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* delete existing entries to prepare for next test, and reset 
+    /* delete existing entries to prepare for next test, and reset
      * the size of the cache.
-     */ 
+     */
     if ( pass ) {
 
 	expunge_entry(cache_ptr, MONSTER_ENTRY_TYPE, 1);
@@ -20736,12 +20736,12 @@ check_auto_cache_resize(void)
 
         if ( pass ) {
 
-            result = H5C_set_cache_auto_resize_config(cache_ptr, 
+            result = H5C_set_cache_auto_resize_config(cache_ptr,
 			                              &auto_size_ctl);
 
             if ( result != SUCCEED ) {
 
-                pass = FALSE; 
+                pass = FALSE;
                 failure_mssg = "H5C_set_cache_auto_resize_config failed 13.\n";
 	    }
         }
@@ -20758,7 +20758,7 @@ check_auto_cache_resize(void)
 	}
     }
 
-    /* repeat the above basic test, only this time, use inserts to add 
+    /* repeat the above basic test, only this time, use inserts to add
      * entries to the cache, not protects.
      */
 
@@ -20793,7 +20793,7 @@ check_auto_cache_resize(void)
 
     /* Now insert a monster entry.  Since a monster entry is larger than
      * half the size of the cache, and there is not sufficient space
-     * for a monster entry in the cache, we will add space to the 
+     * for a monster entry in the cache, we will add space to the
      * cache to make room for the entry.
      */
     if ( pass ) {
@@ -20805,7 +20805,7 @@ check_auto_cache_resize(void)
 	     ( ( ( cache_ptr->max_cache_size != (80 * 1024) ) ||
 		 ( cache_ptr->min_clean_size != (40 * 1024) ) ||
 		 ( cache_ptr->index_len != 2 ) ||
-                 ( cache_ptr->index_size != 
+                 ( cache_ptr->index_size !=
 		   HUGE_ENTRY_SIZE + MONSTER_ENTRY_SIZE ) ||
 		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
@@ -20820,14 +20820,14 @@ check_auto_cache_resize(void)
      */
     if ( pass ) {
 
-        insert_entry(cache_ptr, MONSTER_ENTRY_TYPE, 5, TRUE, 
+        insert_entry(cache_ptr, MONSTER_ENTRY_TYPE, 5, TRUE,
 		     H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (144 * 1024) ) ||
 		 ( cache_ptr->min_clean_size != ( 72 * 1024) ) ||
 		 ( cache_ptr->index_len != 3 ) ||
-                 ( cache_ptr->index_size != 
+                 ( cache_ptr->index_size !=
 		   2 * MONSTER_ENTRY_SIZE + HUGE_ENTRY_SIZE ) ||
 		 ( cache_ptr->cache_accesses != 0 ) ) ) ) {
 
@@ -20862,11 +20862,11 @@ check_auto_cache_resize(void)
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* delete existing entries to prepare for next test, and reset 
+    /* delete existing entries to prepare for next test, and reset
      * the size of the cache.  We must also change the size of the needed
-     * variable entries before we run the test, so will protect and 
+     * variable entries before we run the test, so will protect and
      * unprotect them now so as to get the correct initial size.
-     */ 
+     */
     if ( pass ) {
 
 	expunge_entry(cache_ptr, MONSTER_ENTRY_TYPE, 5);
@@ -20894,12 +20894,12 @@ check_auto_cache_resize(void)
         if ( pass ) {
 
             auto_size_ctl.initial_size           = 6 * 1024;
-            result = H5C_set_cache_auto_resize_config(cache_ptr, 
+            result = H5C_set_cache_auto_resize_config(cache_ptr,
 			                              &auto_size_ctl);
 
             if ( result != SUCCEED ) {
 
-                pass = FALSE; 
+                pass = FALSE;
                 failure_mssg = "H5C_set_cache_auto_resize_config failed 13.\n";
 	    }
         }
@@ -20922,11 +20922,11 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12);
@@ -21049,7 +21049,7 @@ check_auto_cache_resize(void)
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
     /* re-size the variable entries back down to their initial size, and
-     * restore the cache to its initial size as well, in preparation 
+     * restore the cache to its initial size as well, in preparation
      * for the next test.
      */
     if ( pass ) {
@@ -21067,12 +21067,12 @@ check_auto_cache_resize(void)
         if ( pass ) {
 
             auto_size_ctl.initial_size           = 6 * 1024;
-            result = H5C_set_cache_auto_resize_config(cache_ptr, 
+            result = H5C_set_cache_auto_resize_config(cache_ptr,
 			                              &auto_size_ctl);
 
             if ( result != SUCCEED ) {
 
-                pass = FALSE; 
+                pass = FALSE;
                 failure_mssg = "H5C_set_cache_auto_resize_config failed 14.\n";
 	    }
         }
@@ -21096,7 +21096,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
         resize_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, 2 * 1024, TRUE);
 
@@ -21135,7 +21135,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
         resize_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, 10 * 1024, TRUE);
 
@@ -21156,7 +21156,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
         resize_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12, 10 * 1024, TRUE);
 
@@ -21180,15 +21180,15 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
 			H5C__UNPIN_ENTRY_FLAG);
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
 			H5C__UNPIN_ENTRY_FLAG);
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
 			H5C__UNPIN_ENTRY_FLAG);
 
 	if ( ( pass ) &&
@@ -21206,7 +21206,7 @@ check_auto_cache_resize(void)
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
     /* re-size the variable entries back down to their initial size, and
-     * restore the cache to its initial size as well, in preparation 
+     * restore the cache to its initial size as well, in preparation
      * for the next test.
      */
     if ( pass ) {
@@ -21224,12 +21224,12 @@ check_auto_cache_resize(void)
         if ( pass ) {
 
             auto_size_ctl.initial_size           = 6 * 1024;
-            result = H5C_set_cache_auto_resize_config(cache_ptr, 
+            result = H5C_set_cache_auto_resize_config(cache_ptr,
 			                              &auto_size_ctl);
 
             if ( result != SUCCEED ) {
 
-                pass = FALSE; 
+                pass = FALSE;
                 failure_mssg = "H5C_set_cache_auto_resize_config failed 15.\n";
 	    }
         }
@@ -21249,7 +21249,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
         resize_pinned_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, 2 * 1024);
 
@@ -21288,7 +21288,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
         resize_pinned_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, 10 * 1024);
 
@@ -21309,7 +21309,7 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
 			H5C__PIN_ENTRY_FLAG);
         resize_pinned_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12, 10 * 1024);
 
@@ -21333,15 +21333,15 @@ check_auto_cache_resize(void)
     if ( pass ) {
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 10, NO_CHANGE,
 			H5C__UNPIN_ENTRY_FLAG);
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 11, NO_CHANGE,
 			H5C__UNPIN_ENTRY_FLAG);
 
         protect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12);
-        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE, 
+        unprotect_entry(cache_ptr, VARIABLE_ENTRY_TYPE, 12, NO_CHANGE,
 			H5C__UNPIN_ENTRY_FLAG);
 
 	if ( ( pass ) &&
@@ -21455,14 +21455,14 @@ check_auto_cache_resize(void)
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
     /* protect and unprotect a large entry -- no change in cache size since
-     * a large entry will just fill the available space in the cache.  
+     * a large entry will just fill the available space in the cache.
      */
     if ( pass ) {
 
         rpt_fcn_called = FALSE;
 
         protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 0);
-        unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 0, NO_CHANGE, 
+        unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 0, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
@@ -21480,7 +21480,7 @@ check_auto_cache_resize(void)
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* protect and unprotect another a large entry -- should trigger a 
+    /* protect and unprotect another a large entry -- should trigger a
      * flash cache size increase to 12 KB (remember that flash_multiple is
      * set to 2.0).
      */
@@ -21489,7 +21489,7 @@ check_auto_cache_resize(void)
         rpt_fcn_called = FALSE;
 
         protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 1);
-        unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 1, NO_CHANGE, 
+        unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 1, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
@@ -21507,7 +21507,7 @@ check_auto_cache_resize(void)
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* protect and unprotect two more large entries -- shouldnt trigger a 
+    /* protect and unprotect two more large entries -- shouldnt trigger a
      * flash cache size increase.
      */
     if ( pass ) {
@@ -21515,10 +21515,10 @@ check_auto_cache_resize(void)
         rpt_fcn_called = FALSE;
 
         protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 2);
-        unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 2, NO_CHANGE, 
+        unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 2, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
         protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 3);
-        unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 3, NO_CHANGE, 
+        unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 3, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
@@ -21536,7 +21536,7 @@ check_auto_cache_resize(void)
 
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
-    /* do many accesses of a single entry to talk the cache into reducing 
+    /* do many accesses of a single entry to talk the cache into reducing
      * its size to the minimum.
      */
     if ( pass ) {
@@ -21572,17 +21572,17 @@ check_auto_cache_resize(void)
         rpt_fcn_called = FALSE;
 
         protect_entry(cache_ptr, LARGE_ENTRY_TYPE, 0);
-        unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 0, NO_CHANGE, 
+        unprotect_entry(cache_ptr, LARGE_ENTRY_TYPE, 0, NO_CHANGE,
 			H5C__NO_FLAGS_SET);
 
 	if ( ( pass ) &&
 	     ( ( ( cache_ptr->max_cache_size != (4 * 1024 + 128) ) ||
 		 ( cache_ptr->min_clean_size != (2 * 1024 + 64) ) ||
 		 ( cache_ptr->index_len != 2 ) ||
-                 ( cache_ptr->index_size != 
+                 ( cache_ptr->index_size !=
 		   LARGE_ENTRY_SIZE + TINY_ENTRY_SIZE ) ||
 		 ( cache_ptr->cache_accesses != 1 )  ||
-		 ( rpt_fcn_called == FALSE ) || 
+		 ( rpt_fcn_called == FALSE ) ||
                  ( rpt_status != flash_increase ) ) ) ) {
 
             pass = FALSE;
@@ -21610,7 +21610,7 @@ check_auto_cache_resize(void)
 
         if ( ( cache_ptr->max_cache_size != (20 * 1024) ) ||
              ( cache_ptr->min_clean_size != (10 * 1024) ) ||
-	     ( rpt_fcn_called == FALSE ) || 
+	     ( rpt_fcn_called == FALSE ) ||
              ( rpt_status != at_max_size ) ) {
 
             pass = FALSE;
@@ -21654,7 +21654,7 @@ check_auto_cache_resize(void)
  *
  * Modifications:
  *
- * 		Added code to include the flash cache size increment 
+ * 		Added code to include the flash cache size increment
  * 		code in this test.
  * 							JRM -- 1/10/08
  *
@@ -21695,7 +21695,7 @@ check_auto_cache_resize_disable(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
-        /* enum H5C_cache_flash_incr_mode       */   
+        /* enum H5C_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C_flash_incr__off,
         /* double      flash_multiple         = */ 1.0,
         /* double      flash_threshold        = */ 0.25,
@@ -24207,27 +24207,27 @@ check_auto_cache_resize_disable(void)
     if ( show_progress ) HDfprintf(stderr, "check point %d\n", checkpoint++);
 
     /* Now test the flash cache size increment code to verify that it
-     * is disabled when it should be.  
+     * is disabled when it should be.
      *
-     * Since the flash size increase code doesn't look at hit rate, or 
+     * Since the flash size increase code doesn't look at hit rate, or
      * use epochs (other than to start a new epoch if a flash cache size
      * increase is triggered), we go about these tests somewhat differently
      * than the rest of the tests in this function.
      *
-     * As of this writing, there is only one flash cache size increment 
+     * As of this writing, there is only one flash cache size increment
      * mode (add space), which is triggered whenever the size of a newly
      * loaded or inserted entry, or the delta between old and new entry
      * sizes exceeds some fraction of the current maximum cache size, and
      * the cache doesn't have enough free space to accomodate the new/
      * resize entry without performing evictions.  The range of permissible
      * values for the flash_threshold (0.1 to 1.0 as of this writing), and
-     * for the flash_multiple (0.1 to 10.0) do not permit the facility to 
+     * for the flash_multiple (0.1 to 10.0) do not permit the facility to
      * be turned off by configuration.  Thus, flash cache size increases
-     * can be disabled only via the flash_incr_mode, and by setting the 
+     * can be disabled only via the flash_incr_mode, and by setting the
      * current max_cache_size equal to max_size.
      *
      * We have already tested the latter in check_auto_cache_resize(), so
-     * we need only thest the former here.  Do this by disabling flash 
+     * we need only thest the former here.  Do this by disabling flash
      * cache size increments via the flash_incr_mode, and then creating
      * situations that would trigger flash cache size increases were that
      * code enabled.
@@ -24339,7 +24339,7 @@ check_auto_cache_resize_disable(void)
      * size increment code was active, this would trigger an increase.
      * Verify that it doesn't.
      *
-     * This finishes the additional tests needed for the flash cache 
+     * This finishes the additional tests needed for the flash cache
      * size increase code.
      */
     if ( pass ) {
@@ -24446,7 +24446,7 @@ check_auto_cache_resize_epoch_markers(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
-        /* enum H5C_cache_flash_incr_mode       */   
+        /* enum H5C_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C_flash_incr__off,
         /* double      flash_multiple         = */ 2.0,
         /* double      flash_threshold        = */ 0.5,
@@ -25116,7 +25116,7 @@ check_auto_cache_resize_epoch_markers(void)
  *
  * Modifications:
  *
- * 		Added code to verify that errors in the flash cache size 
+ * 		Added code to verify that errors in the flash cache size
  * 		increment related fields are caught as well.
  *
  * 						JRM -- 1/17/08
@@ -25186,7 +25186,7 @@ check_auto_cache_resize_input_errs(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
-        /* enum H5C_cache_flash_incr_mode       */   
+        /* enum H5C_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C_flash_incr__off,
         /* double      flash_multiple         = */ 2.0,
         /* double      flash_threshold        = */ 0.5,
@@ -26567,7 +26567,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = 
+	invalid_auto_size_ctl.flash_incr_mode        =
        			(enum H5C_cache_flash_incr_mode) -1; /* INVALID */
 	invalid_auto_size_ctl.flash_multiple         = 2.0;
 	invalid_auto_size_ctl.flash_threshold        = 0.5;
@@ -26643,7 +26643,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = 
+	invalid_auto_size_ctl.flash_incr_mode        =
 						H5C_flash_incr__add_space;
 	invalid_auto_size_ctl.flash_multiple         = 0.09; /* INVALID */
 	invalid_auto_size_ctl.flash_threshold        = 0.5;
@@ -26717,7 +26717,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = 
+	invalid_auto_size_ctl.flash_incr_mode        =
 						H5C_flash_incr__add_space;
 	invalid_auto_size_ctl.flash_multiple         = 10.01; /* INVALID */
 	invalid_auto_size_ctl.flash_threshold        = 0.5;
@@ -26793,7 +26793,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = 
+	invalid_auto_size_ctl.flash_incr_mode        =
 						H5C_flash_incr__add_space;
 	invalid_auto_size_ctl.flash_multiple         = 1.0;
 	invalid_auto_size_ctl.flash_threshold        = 0.09; /* INVALID */
@@ -26867,7 +26867,7 @@ check_auto_cache_resize_input_errs(void)
         invalid_auto_size_ctl.apply_max_increment    = TRUE;
         invalid_auto_size_ctl.max_increment          = (2 * 1024 * 1024);
 
-	invalid_auto_size_ctl.flash_incr_mode        = 
+	invalid_auto_size_ctl.flash_incr_mode        =
 						H5C_flash_incr__add_space;
 	invalid_auto_size_ctl.flash_multiple         = 1.0;
 	invalid_auto_size_ctl.flash_threshold        = 1.001; /* INVALID */
@@ -27632,7 +27632,7 @@ check_auto_cache_resize_aux_fcns(void)
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
-        /* enum H5C_cache_flash_incr_mode       */   
+        /* enum H5C_cache_flash_incr_mode       */
 	/*                    flash_incr_mode = */ H5C_flash_incr__off,
         /* double      flash_multiple         = */ 2.0,
         /* double      flash_threshold        = */ 0.5,

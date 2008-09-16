@@ -359,7 +359,7 @@ done:
     if(!ret_value)
         if(dst_mesg)
             H5O_msg_free(H5O_SHARED_TYPE->id, dst_mesg);
-    
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_SHARED_COPY_FILE() */
 
@@ -404,7 +404,7 @@ H5O_SHARED_POST_COPY_FILE(const H5O_loc_t *oloc_src, const void *mesg_src,
 
 #ifdef H5O_SHARED_POST_COPY_FILE_REAL
     /* Call native message's copy file callback to copy the message */
-    if(H5O_SHARED_POST_COPY_FILE_REAL(oloc_src, mesg_src, oloc_dst, mesg_dst, dxpl_id, cpy_info) <0 ) 
+    if(H5O_SHARED_POST_COPY_FILE_REAL(oloc_src, mesg_src, oloc_dst, mesg_dst, dxpl_id, cpy_info) <0 )
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy native message to another file")
 #endif /* H5O_SHARED_POST_COPY_FILE_REAL */
 

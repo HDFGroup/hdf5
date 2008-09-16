@@ -54,9 +54,9 @@ nh5iget_type_c (hid_t_f *obj_id, int_f *type)
  * Returns:     length of the name on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Wednesday, March 12, 2003
- * Modifications: 
+ * Modifications:
  *               Changed the size of c_buf_size to c_buf_size + 1, which
- *               fixes the problem of truncating the string by 1 if the 
+ *               fixes the problem of truncating the string by 1 if the
  *               exact size of the string (buf_size) is passed in.
  *               M.S. Breitenfeld, April 21, 2008
  *---------------------------------------------------------------------------*/
@@ -70,7 +70,7 @@ nh5iget_name_c(hid_t_f *obj_id, _fcd buf, size_t_f *buf_size, size_t_f *name_siz
      char *c_buf =NULL;
 
      /*
-      * Allocate buffer to hold name of an object 
+      * Allocate buffer to hold name of an object
       */
      c_buf_size = (size_t)*buf_size +1;
      c_buf = (char *)HDmalloc(c_buf_size);

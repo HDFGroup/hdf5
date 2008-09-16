@@ -112,7 +112,7 @@ void issue_fail_msg(const char* where, int line, const char* file_name,
  *		different, the function will print out a message and the
  *		different values.  This function is made to reuse the code
  *		segment that is used in various places throughout
- *		the test code.  Where the C version of this code segment 
+ *		the test code.  Where the C version of this code segment
  *		"goto error," this function will return -1.
  *
  * Return:	Success:	0

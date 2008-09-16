@@ -74,7 +74,7 @@ typedef struct {
 /********************/
 
 static herr_t H5O_msg_reset_real(const H5O_msg_class_t *type, void *native);
-static herr_t H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/, 
+static herr_t H5O_msg_remove_cb(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned sequence, hbool_t *oh_modified, void *_udata/*in,out*/);
 static herr_t H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
     const H5O_msg_class_t *type, const void *mesg, unsigned mesg_flags,
@@ -1655,7 +1655,7 @@ H5O_msg_set_share(unsigned type_id, const H5O_shared_t *share, void *mesg)
     HDassert(share);
     HDassert(share->type != H5O_SHARE_TYPE_UNSHARED);
 
-    /* If there's a special action for this class that needs to be performed 
+    /* If there's a special action for this class that needs to be performed
      *  when setting the shared component, do that
      */
     if(type->set_share) {

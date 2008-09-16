@@ -125,7 +125,7 @@ H5HF_iblock_pin(H5HF_indirect_t *iblock)
 
         /* Sanity check */
         HDassert(par_iblock->child_iblocks);
-        HDassert(iblock->par_entry >= (iblock->hdr->man_dtable.max_direct_rows 
+        HDassert(iblock->par_entry >= (iblock->hdr->man_dtable.max_direct_rows
                 * iblock->hdr->man_dtable.cparam.width));
 
         /* Compute index in parent's child iblock pointer array */
@@ -179,7 +179,7 @@ H5HF_iblock_unpin(H5HF_indirect_t *iblock)
 
         /* Sanity check */
         HDassert(par_iblock->child_iblocks);
-        HDassert(iblock->par_entry >= (iblock->hdr->man_dtable.max_direct_rows 
+        HDassert(iblock->par_entry >= (iblock->hdr->man_dtable.max_direct_rows
                 * iblock->hdr->man_dtable.cparam.width));
 
         /* Compute index in parent's child iblock pointer array */
@@ -1165,7 +1165,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
 
             /* Sanity check */
             HDassert(par_iblock->child_iblocks);
-            HDassert(par_entry >= (hdr->man_dtable.max_direct_rows 
+            HDassert(par_entry >= (hdr->man_dtable.max_direct_rows
                     * hdr->man_dtable.cparam.width));
 
             /* Compute index in parent's child iblock pointer array */
@@ -1525,7 +1525,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
                 /* Are we in a direct or indirect block row */
                 if(row < hdr->man_dtable.max_direct_rows) {
                     hsize_t dblock_size;        /* Size of direct block on disk */
-                    
+
                     /* Check for I/O filters on this heap */
                     if(hdr->filter_len > 0)
                         dblock_size = iblock->filt_ents[entry].size;

@@ -22,8 +22,8 @@
 #ifndef H5FDmpi_H
 #define H5FDmpi_H
 
-/***** Macros for One linked collective IO case. *****/ 
-/* The default value to do one linked collective IO for all chunks. 
+/***** Macros for One linked collective IO case. *****/
+/* The default value to do one linked collective IO for all chunks.
    If the average number of chunks per process is greater than this value,
       the library will create an MPI derived datatype to link all chunks to do collective IO.
       The user can set this value through an API. */

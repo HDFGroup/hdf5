@@ -121,7 +121,7 @@ static void test_classes()
 	}
 	PASSED();
     }   // end of try block
-    catch (Exception E) { 
+    catch (Exception E) {
 	issue_fail_msg("test_classes", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }
@@ -178,8 +178,8 @@ static void test_copy()
         another_int_type = new_int_type;
 
 	PASSED();
-    } 
-    catch (Exception E) { 
+    }
+    catch (Exception E) {
 	issue_fail_msg("test_copy", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }
@@ -191,12 +191,12 @@ static void test_copy()
  * Purpose:	Tests query functions of compound and enumeration types.
  *
  * Return:	Success: 	0
- * 	
+ *
  *		Failure:	number of errors
  *
  * Programmer:	Binh-Minh Ribler (use C version)
  *		January, 2007
- *  
+ *
  * Modifications:
  *
  *-------------------------------------------------------------------------
@@ -289,7 +289,7 @@ static void test_query()
         issue_fail_msg("test_query", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }   // test_query
- 
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_transient
@@ -311,7 +311,7 @@ const char* filename1 = "dtypes1.h5";
 static void test_transient ()
 {
     static hsize_t	ds_size[2] = {10, 20};
-    
+
     SUBTEST("Transient datatypes");
     try {
 
@@ -345,7 +345,7 @@ static void test_transient ()
 	} catch (DataTypeIException err) {}
 	itype.close();
 
-	// Get a copy of the dataset's datatype by applying DataType::copy() 
+	// Get a copy of the dataset's datatype by applying DataType::copy()
 	// to the dataset. The resulted datatype should be modifiable.
 	itype.copy(dset);
 	itype.setPrecision(256);
@@ -393,7 +393,7 @@ static void test_named ()
     hsize_t		i;
     unsigned 		attr_data[10][20];
     char		filename[1024];
-    
+
     SUBTEST("Named datatypes");
     try {
 	// Create the file.
@@ -437,7 +437,7 @@ static void test_named ()
 
 	// It should be possible to define an attribute for the named type
 	Attribute attr1 = itype.createAttribute("attr1", PredType::NATIVE_UCHAR, space);
-	for (i=0; i<ds_size[0]*ds_size[1]; i++) 
+	for (i=0; i<ds_size[0]*ds_size[1]; i++)
 	    attr_data[0][i] = (int)i;/*tricky*/
 	attr1.write(PredType::NATIVE_UINT, attr_data);
 	attr1.close();
@@ -454,7 +454,7 @@ static void test_named ()
     /*
      * Close the committed type and reopen it.  It should return a named type.
 * This had something to do with the way IntType was returned and assigned
-and caused itype.committed not working correctly.  So, use another_type for 
+and caused itype.committed not working correctly.  So, use another_type for
 now.
 	itype.close();
 	itype = file.openIntType("native-int");
@@ -475,7 +475,7 @@ now.
 	dset.close();
 	ds_type->close();
 
-	// Reopen the dataset and its type, then make sure the type is 
+	// Reopen the dataset and its type, then make sure the type is
 	// a named type.
 	dset = file.openDataSet("dset1");
 	ds_type = new DataType(dset.getDataType());
@@ -497,7 +497,7 @@ now.
 	if (!iscommitted)
 	    throw InvalidActionException("DataType::iscommitted()", "Dataset type should be named type!");
 	ds_type->close();
-    
+
 	// Get the dataset datatype by applying DataType::copy() to the
 	// dataset. The resulted datatype should be modifiable.
 	IntType copied_type;

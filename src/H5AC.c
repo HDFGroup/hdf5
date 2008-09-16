@@ -746,9 +746,9 @@ done:
  *		Added code to free the auxiliary structure and its
  *		associated slist if present.
  *						   JRM - 6/28/05
- *		
+ *
  *		Added code to close the trace file if it is present.
- *		
+ *
  *						    JRM - 6/8/06
  *
  *-------------------------------------------------------------------------
@@ -830,15 +830,15 @@ done:
  *              6/30/06
  *
  * Modifications:
- *		
+ *
  *		None.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_expunge_entry(H5F_t *f, 
-		   hid_t dxpl_id, 
-		   const H5AC_class_t *type, 
+H5AC_expunge_entry(H5F_t *f,
+		   hid_t dxpl_id,
+		   const H5AC_class_t *type,
 		   haddr_t addr)
 {
     herr_t   result;
@@ -862,8 +862,8 @@ H5AC_expunge_entry(H5F_t *f,
     cache_ptr = f->shared->cache;
 
 #if H5AC__TRACE_FILE_ENABLED
-    /* For the expunge entry call, only the addr, and type id are really 
-     * necessary in the trace file.  Write the return value to catch occult 
+    /* For the expunge entry call, only the addr, and type id are really
+     * necessary in the trace file.  Write the return value to catch occult
      * errors.
      */
     if ( ( cache_ptr != NULL ) &&
@@ -1002,8 +1002,8 @@ H5AC_flush(H5F_t *f, hid_t dxpl_id, unsigned flags)
     /* For the flush, only the flags are really necessary in the trace file.
      * Write the result to catch occult errors.
      */
-    if ( ( f != NULL ) && 
-         ( f->shared != NULL ) && 
+    if ( ( f != NULL ) &&
+         ( f->shared != NULL ) &&
 	 ( f->shared->cache != NULL ) &&
 	 ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
 	 ( trace_file_ptr != NULL ) ) {
@@ -1281,8 +1281,8 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
     HDassert(thing);
 
 #if H5AC__TRACE_FILE_ENABLED
-    /* For the insert, only the addr, size, type id and flags are really 
-     * necessary in the trace file.  Write the result to catch occult 
+    /* For the insert, only the addr, size, type id and flags are really
+     * necessary in the trace file.  Write the result to catch occult
      * errors.
      *
      * Note that some data is not available right now -- put what we can
@@ -1369,8 +1369,8 @@ done:
 #if H5AC__TRACE_FILE_ENABLED
     if ( trace_file_ptr != NULL ) {
 
-	HDfprintf(trace_file_ptr, "%s %d %d\n", trace, 
-                  (int)trace_entry_size, 
+	HDfprintf(trace_file_ptr, "%s %d %d\n", trace,
+                  (int)trace_entry_size,
 		  (int)ret_value);
     }
 #endif /* H5AC__TRACE_FILE_ENABLED */
@@ -1417,8 +1417,8 @@ H5AC_mark_pinned_entry_dirty(H5F_t * f,
     FUNC_ENTER_NOAPI(H5AC_mark_pinned_entry_dirty, FAIL)
 
 #if H5AC__TRACE_FILE_ENABLED
-    /* For the mark pinned entry dirty call, only the addr, size_changed, 
-     * and new_size are really necessary in the trace file. Write the result 
+    /* For the mark pinned entry dirty call, only the addr, size_changed,
+     * and new_size are really necessary in the trace file. Write the result
      * to catch occult errors.
      */
     if ( ( f != NULL ) &&
@@ -1539,7 +1539,7 @@ H5AC_mark_pinned_or_protected_entry_dirty(H5F_t * f,
 
 #if H5AC__TRACE_FILE_ENABLED
     /* For the mark pinned or protected entry dirty call, only the addr
-     * is really necessary in the trace file.  Write the result to catch 
+     * is really necessary in the trace file.  Write the result to catch
      * occult errors.
      */
     if ( ( f != NULL ) &&
@@ -1671,7 +1671,7 @@ H5AC_rename(H5F_t *f, const H5AC_class_t *type, haddr_t old_addr, haddr_t new_ad
     HDassert(H5F_addr_ne(old_addr, new_addr));
 
 #if H5AC__TRACE_FILE_ENABLED
-    /* For the rename call, only the old addr and new addr are really 
+    /* For the rename call, only the old addr and new addr are really
      * necessary in the trace file.  Include the type id so we don't have to
      * look it up.  Also write the result to catch occult errors.
      */
@@ -1776,7 +1776,7 @@ H5AC_pin_protected_entry(H5F_t * f,
     FUNC_ENTER_NOAPI(H5AC_pin_protected_entry, FAIL)
 
 #if H5AC__TRACE_FILE_ENABLED
-    /* For the pin protected entry call, only the addr is really necessary 
+    /* For the pin protected entry call, only the addr is really necessary
      * in the trace file.  Also write the result to catch occult errors.
      */
     if ( ( f != NULL ) &&
@@ -1873,11 +1873,11 @@ done:
  *		Added trace file support.
  *
  *		JRM - 3/18/07
- *		Modified code to support the new flags parameter for 
- *		H5C_protect().  For now, that means passing in the 
+ *		Modified code to support the new flags parameter for
+ *		H5C_protect().  For now, that means passing in the
  *		H5C_READ_ONLY_FLAG if rw == H5AC_READ.
  *
- *		Also updated the trace file output to save the 
+ *		Also updated the trace file output to save the
  *		rw parameter, since we are now doing something with it.
  *
  *-------------------------------------------------------------------------
@@ -1917,9 +1917,9 @@ H5AC_protect(H5F_t *f,
 	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "no write intent on file")
 
 #if H5AC__TRACE_FILE_ENABLED
-    /* For the protect call, only the addr and type id is really necessary 
-     * in the trace file.  Include the size of the entry protected as a 
-     * sanity check.  Also indicate whether the call was successful to 
+    /* For the protect call, only the addr and type id is really necessary
+     * in the trace file.  Include the size of the entry protected as a
+     * sanity check.  Also indicate whether the call was successful to
      * catch occult errors.
      */
     if ( ( f != NULL ) &&
@@ -1986,7 +1986,7 @@ done:
 #if H5AC__TRACE_FILE_ENABLED
     if ( trace_file_ptr != NULL ) {
 
-	HDfprintf(trace_file_ptr, "%s %d %d\n", trace, 
+	HDfprintf(trace_file_ptr, "%s %d %d\n", trace,
                   (int)trace_entry_size,
                   (int)(ret_value != NULL));
     }
@@ -2030,8 +2030,8 @@ H5AC_resize_pinned_entry(H5F_t * f,
     FUNC_ENTER_NOAPI(H5AC_resize_pinned_entry, FAIL)
 
 #if H5AC__TRACE_FILE_ENABLED
-    /* For the resize pinned entry call, only the addr, and new_size are 
-     * really necessary in the trace file. Write the result to catch 
+    /* For the resize pinned entry call, only the addr, and new_size are
+     * really necessary in the trace file. Write the result to catch
      * occult errors.
      */
     if ( ( f != NULL ) &&
@@ -2141,7 +2141,7 @@ H5AC_unpin_entry(H5F_t * f,
     FUNC_ENTER_NOAPI(H5AC_unpin_entry, FAIL)
 
 #if H5AC__TRACE_FILE_ENABLED
-    /* For the unpin entry call, only the addr is really necessary 
+    /* For the unpin entry call, only the addr is really necessary
      * in the trace file.  Also write the result to catch occult errors.
      */
     if ( ( f != NULL ) &&
@@ -2302,7 +2302,7 @@ H5AC_unprotect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
 
 #if H5AC__TRACE_FILE_ENABLED
     /* For the unprotect call, only the addr, type id, flags, and possible
-     * new size are really necessary in the trace file.  Write the return 
+     * new size are really necessary in the trace file.  Write the return
      * value to catch occult errors.
      */
     if ( ( f != NULL ) &&
@@ -2413,8 +2413,8 @@ done:
 #if H5AC__TRACE_FILE_ENABLED
     if ( trace_file_ptr != NULL ) {
 
-	HDfprintf(trace_file_ptr, "%s %d %x %d\n", 
-		  trace, 
+	HDfprintf(trace_file_ptr, "%s %d %x %d\n",
+		  trace,
 		  (int)trace_new_size,
 		  (unsigned)trace_flags,
 		  (int)ret_value);
@@ -2539,11 +2539,11 @@ done:
  *
  *		JRM - 7/28/07
  *		Added support for the new evictions enabled related fields.
- *		
- *		Observe that H5AC_get_cache_auto_resize_config() and 
+ *
+ *		Observe that H5AC_get_cache_auto_resize_config() and
  *		H5AC_set_cache_auto_resize_config() are becoming generic
- *		metadata cache configuration routines as they gain 
- *		switches for functions that are only tenuously related 
+ *		metadata cache configuration routines as they gain
+ *		switches for functions that are only tenuously related
  *		to auto resize configuration.
  *
  *		JRM - 1/2/08
@@ -2808,7 +2808,7 @@ done:
  *              Updated for the addition of H5AC_cache_config_t.
  *
  *		John Mainzer -- 10/25/05
- *		Added support for the new dirty_bytes_threshold field of 
+ *		Added support for the new dirty_bytes_threshold field of
  *		both H5AC_cache_config_t and H5AC_aux_t.
  *
  *		John Mainzer -- 6/7/06
@@ -2816,15 +2816,15 @@ done:
  *
  *		John Mainzer -- 7/28/07
  *		Added support for the new evictions enabled related fields.
- *		
- *		Observe that H5AC_get_cache_auto_resize_config() and 
+ *
+ *		Observe that H5AC_get_cache_auto_resize_config() and
  *		H5AC_set_cache_auto_resize_config() are becoming generic
- *		metadata cache configuration routines as they gain 
- *		switches for functions that are only tenuously related 
+ *		metadata cache configuration routines as they gain
+ *		switches for functions that are only tenuously related
  *		to auto resize configuration.
  *
  *		John Mainzer -- 1/3/07
- *		Updated trace file code to record the new flash cache 
+ *		Updated trace file code to record the new flash cache
  *		size increase related fields.
  *
  *-------------------------------------------------------------------------
@@ -2971,16 +2971,16 @@ H5AC_set_cache_auto_resize_config(H5AC_t * cache_ptr,
 done:
 
 #if H5AC__TRACE_FILE_ENABLED
-    /* For the set cache auto resize config call, only the contents 
-     * of the config is necessary in the trace file. Write the return 
+    /* For the set cache auto resize config call, only the contents
+     * of the config is necessary in the trace file. Write the return
      * value to catch occult errors.
      */
     if ( ( cache_ptr != NULL ) &&
          ( H5C_get_trace_file_ptr(cache_ptr, &trace_file_ptr) >= 0 ) &&
          ( trace_file_ptr != NULL ) ) {
 
-	HDfprintf(trace_file_ptr, 
-                  "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %f %f %d %d %d %f %f %d %d %d %d %f %d %d\n", 
+	HDfprintf(trace_file_ptr,
+                  "%s %d %d %d %d \"%s\" %d %d %d %f %d %d %ld %d %f %f %d %f %f %d %d %d %f %f %d %d %d %d %f %d %d\n",
 		  "H5AC_set_cache_auto_resize_config",
 		  trace_config.version,
 		  (int)(trace_config.rpt_fcn_enabled),
@@ -3048,9 +3048,9 @@ done:
  *              are applied.
  *              					JRM - 5/15/06
  *
- *	      - Added code testing the evictions enabled field.  At 
- *	        present this consists of verifying that if 
- *	        evictions_enabled is FALSE, then automatic cache 
+ *	      - Added code testing the evictions enabled field.  At
+ *	        present this consists of verifying that if
+ *	        evictions_enabled is FALSE, then automatic cache
  *		resizing in disabled.
  *
  *	        					JRM - 7/28/07
@@ -3103,7 +3103,7 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
     /* don't bother to test trace_file_name unless open_trace_file is TRUE */
     if ( config_ptr->open_trace_file ) {
 
-	/* Can't really test the trace_file_name field without trying to 
+	/* Can't really test the trace_file_name field without trying to
 	 * open the file, so we will content ourselves with a couple of
 	 * sanity checks on the length of the file name.
 	 */
@@ -3129,7 +3129,7 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
     }
 
     if ( ( config_ptr->evictions_enabled == FALSE ) &&
-	 ( ( config_ptr->incr_mode != H5C_incr__off ) || 
+	 ( ( config_ptr->incr_mode != H5C_incr__off ) ||
 	   ( config_ptr->incr_mode != H5C_decr__off ) ) ) {
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \

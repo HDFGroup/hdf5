@@ -1766,7 +1766,7 @@ HDfprintf(stderr, "%s: removing object from merge list, sect->type = %u\n", FUNC
     /* Update current space used for free space sections */
     if(H5FS_sect_serialize_size(f, dxpl_id, fspace) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTCOMPUTE, FAIL, "can't adjust free space section size on disk")
-    
+
     /* Mark free space sections as dirty */
     if(H5AC_mark_pinned_or_protected_entry_dirty(f, fspace->sinfo) < 0)
         HGOTO_ERROR(H5E_FSPACE, H5E_CANTMARKDIRTY, FAIL, "unable to mark free space sections as dirty")

@@ -342,7 +342,7 @@ done:
  *              H5Odecr_refcount() should be used when the object is
  *              no longer being referenced by address (e.g. when the UD link
  *              is deleted).
- *         
+ *
  *              The address of the HDF5 file on disk has no effect on
  *              H5Oopen_by_addr(), nor does the use of any unusual file
  *              drivers. The "address" is really the offset within the
@@ -1214,7 +1214,7 @@ done:
  * Modification:
  *              Raymond Lu
  *              5 November 2007
- *              Turn off the holding file variable if it's on.  When it's 
+ *              Turn off the holding file variable if it's on.  When it's
  *              needed, the caller will turn it on again.
  *-------------------------------------------------------------------------
  */
@@ -2827,7 +2827,7 @@ H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         udata.dxpl_id = dxpl_id;
         udata.op = op;
         udata.op_data = op_data;
-        
+
         /* Create skip list to store visited object information */
         if((udata.visited = H5SL_create(H5SL_TYPE_OBJ, 0.5, (size_t)16)) == NULL)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create skip list for visited objects")

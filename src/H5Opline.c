@@ -39,7 +39,7 @@ static void *H5O_pline_copy(const void *_mesg, void *_dest);
 static size_t H5O_pline_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_pline_reset(void *_mesg);
 static herr_t H5O_pline_free(void *_mesg);
-static herr_t H5O_pline_pre_copy_file(H5F_t *file_src, 
+static herr_t H5O_pline_pre_copy_file(H5F_t *file_src,
     const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static herr_t H5O_pline_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);

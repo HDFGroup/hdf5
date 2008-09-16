@@ -77,7 +77,7 @@ typedef int H5Z_filter_t;
 /* Macros for the shuffle filter */
 #define H5Z_SHUFFLE_USER_NPARMS    0    /* Number of parameters that users can set */
 #define H5Z_SHUFFLE_TOTAL_NPARMS   1    /* Total number of parameters for filter */
- 
+
 /* Macros for the szip filter */
 #define H5Z_SZIP_USER_NPARMS    2       /* Number of parameters that users can set */
 #define H5Z_SZIP_TOTAL_NPARMS   4       /* Total number of parameters for filter */
@@ -85,7 +85,7 @@ typedef int H5Z_filter_t;
 #define H5Z_SZIP_PARM_PPB       1       /* "User" parameter for pixels-per-block */
 #define H5Z_SZIP_PARM_BPP       2       /* "Local" parameter for bits-per-pixel */
 #define H5Z_SZIP_PARM_PPS       3       /* "Local" parameter for pixels-per-scanline */
-   
+
 /* Macros for the nbit filter */
 #define H5Z_NBIT_USER_NPARMS     0     /* Number of parameters that users can set */
 

@@ -1874,7 +1874,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filters(hid_t file, hid_t 
+test_filters(hid_t file, hid_t
 #ifndef H5_HAVE_FILTER_SZIP
 UNUSED
 #endif /* H5_HAVE_FILTER_SZIP */
@@ -5368,7 +5368,7 @@ test_set_local(hid_t fapl)
     /* Check that the values read are the modified version of what was written */
     for(i=0; i<dims[0]; i++) {
 	for(j=0; j<dims[1]; j++) {
-	    /* If the difference between two values is greater than 0.001%, they're 
+	    /* If the difference between two values is greater than 0.001%, they're
              * considered not equal. */
             if(!DBL_REL_EQUAL(points_dbl[i][j],check_dbl[i][j],0.00001)) {
 		H5_FAILED();
@@ -6606,7 +6606,7 @@ main(void)
             nerrors += (test_deprec(file) < 0			? 1 : 0);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
             nerrors += (test_huge_chunks(my_fapl) < 0		? 1 : 0);
-            
+
             if(H5Fclose(file) < 0)
                 goto error;
         } /* end for */

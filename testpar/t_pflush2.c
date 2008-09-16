@@ -144,7 +144,7 @@ main(int argc, char* argv[])
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(comm, &mpi_size);
-    MPI_Comm_rank(comm, &mpi_rank);  
+    MPI_Comm_rank(comm, &mpi_rank);
 
     fapl1 = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(fapl1, comm, info);
@@ -152,10 +152,10 @@ main(int argc, char* argv[])
     fapl2 = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(fapl2, comm, info);
 
-    
+
     if(mpi_rank == 0)
 	TESTING("H5Fflush (part2 with flush)");
-    
+
     /* Don't run this test using the core or split file drivers */
     envval = HDgetenv("HDF5_DRIVER");
     if (envval == NULL)
@@ -168,14 +168,14 @@ main(int argc, char* argv[])
 	    H5_FAILED()
 	    goto error;
 	}
-	else if(mpi_rank == 0) 
+	else if(mpi_rank == 0)
 	{
 	    PASSED()
 	}
-	
+
 	/* Check the case where the file was not flushed.  This should give an error
 	 * so we turn off the error stack temporarily */
-	if(mpi_rank == 0) 
+	if(mpi_rank == 0)
 	    TESTING("H5Fflush (part2 without flush)");
 	H5Eget_auto2(H5E_DEFAULT,&func,NULL);
 	H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
@@ -183,7 +183,7 @@ main(int argc, char* argv[])
 	h5_fixname(FILENAME[1], fapl2, name, sizeof name);
 	if(check_file(name, fapl2))
 	{
-	    if(mpi_rank == 0) 
+	    if(mpi_rank == 0)
 	    {
 		PASSED()
 	    }

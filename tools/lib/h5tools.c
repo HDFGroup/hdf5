@@ -709,7 +709,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
  *
  *  Select a hyperslab from the dataset DSET using the parameters
  *   specified in SSET. Dump this out to STREAM.
- *      
+ *
  *  Hyperslabs select "count" blocks of size "block", spaced "stride" elements
  *   from each other, starting at coordinate "start".
  *
@@ -724,22 +724,22 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
  *
  * Algorithm
  *
- * In a inner loop, the parameters from SSET are translated into temporary 
- * variables so that 1 row is printed at a time (getting the coordinate indices 
+ * In a inner loop, the parameters from SSET are translated into temporary
+ * variables so that 1 row is printed at a time (getting the coordinate indices
  * at each row).
- * We define the stride, count and block to be 1 in the row dimension to achieve 
- * this and advance until all points are printed. 
- * An outer loop for cases where dimensionality is greater than 2D is made. 
- * In each iteration, the 2D block is displayed in the inner loop. The remaining 
+ * We define the stride, count and block to be 1 in the row dimension to achieve
+ * this and advance until all points are printed.
+ * An outer loop for cases where dimensionality is greater than 2D is made.
+ * In each iteration, the 2D block is displayed in the inner loop. The remaining
  * slower dimensions above the first 2 are incremented one at a time in the outer loop
  *
  * The element position is obtained from the matrix according to:
- *       Given an index I(z,y,x) its position from the beginning of an array 
+ *       Given an index I(z,y,x) its position from the beginning of an array
  *       of sizes A(size_z, size_y,size_x) is given by
- *       Position of I(z,y,x) = index_z * size_y * size_x 
+ *       Position of I(z,y,x) = index_z * size_y * size_x
  *                             + index_y * size_x
  *                             + index_x
- * 
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -781,14 +781,14 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
     hsize_t total_points = 1; /* to print */
     hsize_t printed_points = 0; /* printed */
 #endif
-    
+
 
     ret = FAIL;     /* be pessimistic */
     f_space = H5Dget_space(dset);
-    
+
     if (f_space == FAIL)
         goto done;
-    
+
     /*
      * check that everything looks okay. the dimensionality must not be too
      * great and the dimensionality of the items selected for printing must
@@ -835,7 +835,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         total_points *= sset->count[ i ] * sset->block[ i ];;
     }
 #endif
-    
+
 
 
     /* initialize temporary start, count and maximum start */
@@ -854,55 +854,55 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         {
             max_start[ i ] = temp_start[ i ] + sset->count[ i ];
             temp_count[ i ] = 1;
-            
+
         }
     }
 
-      
+
     /* offset loop */
     for (n = 0; n < outer_count; n++)
     {
 
-        hsize_t row_counter = 0; 
+        hsize_t row_counter = 0;
 
         /* number of read iterations in inner loop, read by rows, to match 2D display */
         if (ctx.ndims > 1)
         {
-            
+
         /* count is the number of iterations to display all the rows,
             the block size count times */
             count = sset->count[ row_dim ] * sset->block[ row_dim ];
-            
+
             /* always 1 row_counter at a time, that is a block of size 1, 1 time */
-            temp_count[ row_dim ] = 1; 
-            temp_block[ row_dim ] = 1;  
-            
+            temp_count[ row_dim ] = 1;
+            temp_block[ row_dim ] = 1;
+
             /* advance 1 row_counter at a time  */
             if (sset->block[ row_dim ] > 1 )
                 temp_stride[ row_dim ] = 1;
-            
-            
+
+
         }
         /* for the 1D case */
         else
         {
             count = 1;
         }
-        
-        
+
+
         size_row_block = sset->block[ row_dim ];
 
-   
+
         /* display loop */
-        for (; count > 0; 
+        for (; count > 0;
                temp_start[ row_dim ] += temp_stride[ row_dim ],
                count--)
                {
 
-     
+
                    /* jump rows if size of block exceeded
                       cases where block > 1 only and stride > block */
-                   if ( size_row_block > 1 && 
+                   if ( size_row_block > 1 &&
                         row_counter == size_row_block  &&
                         sset->stride[ row_dim ] > sset->block[ row_dim ]
                         )
@@ -914,7 +914,7 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
                        temp_start[ row_dim ] += increase_rows;
 
                        row_counter = 0;
-                           
+
                    }
 
                    row_counter++;
@@ -927,32 +927,32 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
                 temp_count,
                 temp_block);
             sm_nelmts = H5Sget_select_npoints(f_space);
-             
+
             if (sm_nelmts == 0) {
                 /* nothing to print */
                 ret = SUCCEED;
                 goto done_close;
             }
-            
+
             /*
             * determine the strip mine size and allocate a buffer. the strip mine is
             * a hyperslab whose size is manageable.
             */
             sm_nbytes = p_type_nbytes = H5Tget_size(p_type);
-            
+
             if (ctx.ndims > 0)
                 for (i = ctx.ndims; i > 0; --i) {
                     sm_size[i - 1] = MIN(total_size[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
                     sm_nbytes *= sm_size[i - 1];
                     assert(sm_nbytes > 0);
                 }
-                
+
                 assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
                 sm_buf = malloc((size_t)sm_nelmts * p_type_nbytes);
                 sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
-                
+
                 H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, &zero, NULL, &sm_nelmts, NULL);
-                
+
                 /* read the data */
                 if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0) {
                     H5Sclose(f_space);
@@ -960,43 +960,43 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
                     free(sm_buf);
                     return FAIL;
                 }
-                
+
                 /* print the data */
                 flags = START_OF_DATA;
-                
+
                 if (count == 1)
                     flags |= END_OF_DATA;
-                
+
                 for (i = 0; i < ctx.ndims; i++)
                     ctx.p_max_idx[i] = ctx.p_min_idx[i] + MIN(total_size[i], sm_size[i]);
-                
+
                 /* print array indices. get the lower bound of the hyperslab and calulate
                 the element position at the start of hyperslab */
                 H5Sget_select_bounds(f_space,low,high);
                 elmtno=0;
-                for (i = 0; i < (size_t)ctx.ndims-1; i++) 
+                for (i = 0; i < (size_t)ctx.ndims-1; i++)
                 {
                     hsize_t offset = 1; /* accumulation of the previous dimensions */
-                    for (j = i+1; j < (size_t)ctx.ndims; j++) 
+                    for (j = i+1; j < (size_t)ctx.ndims; j++)
                         offset *= total_size[j];
                     elmtno+= low[i] * offset;
                 }
                 elmtno+= low[ctx.ndims - 1];
-                
+
                 /* initialize the current stripmine position; this is necessary to print the array
                 indices */
                 ctx.sm_pos = elmtno;
-                
+
                 h5tools_dump_simple_data(stream, info, dset, &ctx, flags, sm_nelmts,
                     p_type, sm_buf);
                 free(sm_buf);
-                
+
                 /* we need to jump to next line and update the index */
                 ctx.need_prefix = 1;
-                
+
                 ctx.continuation++;
-                
-                
+
+
 #if defined (SANITY_CHECK)
                 printed_points += sm_nelmts;
 #endif
@@ -1008,14 +1008,14 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         {
             /* dimension for start */
             current_outer_dim = (ctx.ndims - 2) -1;
-            
+
             /* set start to original from current_outer_dim up */
             for (i = current_outer_dim + 1; i < ctx.ndims; i++)
             {
                 temp_start[ i ] = sset->start[ i ];
             }
 
-            
+
             /* increment start dimension */
             do
             {
@@ -1034,9 +1034,9 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
                 }
             }
             while (current_outer_dim >= 0 && reset_dim);
-            
+
         } /* ctx.ndims > 1 */
-        
+
     } /* outer_count */
 
 #if defined (SANITY_CHECK)
@@ -1050,9 +1050,9 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
         putc('\n', stream);
         fputs(OPT(info->line_sep, ""), stream);
     }
-    
+
     ret = SUCCEED;
-    
+
 done_close:
     H5Sclose(f_space);
 done:
@@ -1125,7 +1125,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
     ctx.indent_level = indentlevel;
     ctx.need_prefix = 1;
     ctx.ndims = H5Sget_simple_extent_ndims(f_space);
-    
+
     if ((size_t)ctx.ndims > NELMTS(sm_size)) {
         H5Sclose(f_space);
         return FAIL;

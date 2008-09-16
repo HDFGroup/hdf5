@@ -366,7 +366,7 @@ Attribute::Attribute(H5File& h5file, void* ref) : AbstractDs(), IdComponent()
 // Purpose:     Get the id of this attribute
 // Description:
 //		Class hierarchy is revised to address bugzilla 1068.  Class
-//		AbstractDS and Attribute are moved out of H5Object.  In 
+//		AbstractDS and Attribute are moved out of H5Object.  In
 //		addition, member IdComponent::id is moved into subclasses, and
 //		IdComponent::getId now becomes pure virtual function.
 // Programmer   Binh-Minh Ribler - May, 2008

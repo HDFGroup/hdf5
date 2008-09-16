@@ -722,14 +722,14 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
         HDassert(super_vers >= HDF5_SUPERBLOCK_VERSION_2);
         need_ext = TRUE;
     } /* end if */
-    /* If we're going to use a version of the superblock format which allows 
+    /* If we're going to use a version of the superblock format which allows
      *  for the superblock extension, check for non-default values to store
      *  in it.
      */
     else if(super_vers >= HDF5_SUPERBLOCK_VERSION_2) {
         /* Check for non-default v1 B-tree 'K' values to store */
         if(f->shared->btree_k[H5B_SNODE_ID] != HDF5_BTREE_SNODE_IK_DEF ||
-                f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF || 
+                f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF ||
                 f->shared->sym_leaf_k != H5F_CRT_SYM_LEAF_DEF)
             need_ext = TRUE;
         /* Check for driver info to store */
@@ -771,7 +771,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
 
         /* Check for non-default v1 B-tree 'K' values to store */
         if(f->shared->btree_k[H5B_SNODE_ID] != HDF5_BTREE_SNODE_IK_DEF ||
-                f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF || 
+                f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF ||
                 f->shared->sym_leaf_k != H5F_CRT_SYM_LEAF_DEF) {
             H5O_btreek_t btreek;        /* v1 B-tree 'K' value message for superblock extension */
 

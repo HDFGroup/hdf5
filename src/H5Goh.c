@@ -272,7 +272,7 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
     HDassert(bh_info);
 
     /* Check for "new style" group info */
-    if(NULL == H5O_msg_read_real(f, dxpl_id, oh, H5O_LINFO_ID, &linfo)) { 
+    if(NULL == H5O_msg_read_real(f, dxpl_id, oh, H5O_LINFO_ID, &linfo)) {
         H5O_stab_t          stab;       	/* Info about symbol table */
 
         /* Must be "old style" group, clear error stack */
@@ -281,7 +281,7 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
         /* Get symbol table message */
         if(NULL == H5O_msg_read_real(f, dxpl_id, oh, H5O_STAB_ID, &stab))
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't find LINFO nor STAB messages")
-	
+
         /* Get symbol table size info */
         if(H5G_stab_bh_size(f, dxpl_id, &stab, bh_info) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve symbol table size info")

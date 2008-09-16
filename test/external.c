@@ -612,7 +612,7 @@ test_2 (hid_t fapl)
 	int temparray[10] = {0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f,0x0f0f0f0f};
 
     TESTING("read external dataset");
-    
+
     /* Write the data to external files directly */
     for (i=0; i<4; i++) {
 	for (j=0; j<25; j++) {
@@ -899,7 +899,7 @@ test_4 (hid_t fapl)
 	    goto error;
 
         PASSED();
-    } else 
+    } else
         SKIPPED();
 
     return 0;

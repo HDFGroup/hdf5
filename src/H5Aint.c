@@ -385,7 +385,7 @@ H5A_attr_cmp_name_inc(const void *attr1, const void *attr2)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_name_inc)
 
-    FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t * const *)attr1)->shared->name, 
+    FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t * const *)attr1)->shared->name,
             (*(const H5A_t * const *)attr2)->shared->name))
 } /* end H5A_attr_cmp_name_inc() */
 
@@ -413,7 +413,7 @@ H5A_attr_cmp_name_dec(const void *attr1, const void *attr2)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_name_dec)
 
-    FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t * const *)attr2)->shared->name, 
+    FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t * const *)attr2)->shared->name,
             (*(const H5A_t * const *)attr1)->shared->name))
 } /* end H5A_attr_cmp_name_dec() */
 
@@ -680,7 +680,7 @@ H5O_ainfo_t *
 H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo)
 {
     H5O_ainfo_t *ret_value;     /* Return value */
-    
+
     FUNC_ENTER_NOAPI(H5A_get_ainfo, NULL)
 
     /* check arguments */
@@ -732,7 +732,7 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
 {
     hbool_t type_shared, space_shared;  /* Flags to indicate that shared messages are used for this attribute */
     hbool_t use_latest_format;          /* Flag indicating the newest file format should be used */
-    
+
     FUNC_ENTER_NOAPI_NOFUNC(H5A_set_version)
 
     /* check arguments */

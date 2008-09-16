@@ -53,7 +53,7 @@ main(int argv , char *argc[])
     {
         print_version("gif2h5");
         exit(EXIT_SUCCESS);
-        
+
     }
 
     if (argv < 3) {
@@ -120,7 +120,7 @@ main(int argv , char *argc[])
 
         if (gifImageDesc.Image != NULL)
             free(gifImageDesc.Image);
-        
+
         if (GifMemoryStruct.GifImageDesc[i] != NULL)
         {
             free(GifMemoryStruct.GifImageDesc[i]);

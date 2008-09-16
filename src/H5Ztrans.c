@@ -974,7 +974,7 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size
 	if(H5Z_xform_eval_full(tree, array_size, array_type, &res) < 0)
 	    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "error while performing data transform")
 
-	if(data_xform_prop->dat_val_pointers->num_ptrs > 1)	
+	if(data_xform_prop->dat_val_pointers->num_ptrs > 1)
 	    HDmemcpy(array, res.value.dat_val, array_size * H5Tget_size(array_type));
 
         /* Free the temporary arrays we used */

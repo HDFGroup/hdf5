@@ -555,7 +555,7 @@ HDfprintf(stderr, "%s: Load free space sections, addr = %a\n", FUNC, addr);
     /* Allocate a new free space section info */
     if(NULL == (sinfo = H5FS_sinfo_new(f, fspace)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    
+
     /* Link free space manager to section info */
     /* (for deserializing sections) */
     HDassert(fspace->sinfo == NULL);

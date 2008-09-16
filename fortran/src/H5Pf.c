@@ -3448,7 +3448,7 @@ nh5pget_attr_phase_change_c(hid_t_f *ocpl_id, int_f *max_compact, int_f *min_den
 }
 
 /*----------------------------------------------------------------------------
- * Name:        h5pset_attr_creation_order_c 
+ * Name:        h5pset_attr_creation_order_c
  * Purpose:     Calls H5Ppset_attr_creation_order
  *
  * Inputs:      ocpl_id		- Object (dataset or group) creation property list identifier
@@ -3482,10 +3482,10 @@ nh5pset_attr_creation_order_c(hid_t_f *ocpl_id, int_f *crt_order_flags )
  *
  * Inputs:
  *       plist_id - file creation property list
- *       nindexes - Number of shared object header message indexes 
- *                   available in files created WITH this property list 
- * 
- * Outputs:     
+ *       nindexes - Number of shared object header message indexes
+ *                   available in files created WITH this property list
+ *
+ * Outputs:
  * Returns:     0 on success, -1 on failure
  * Programmer:  M.S. Breitenfeld
  *              January, 2008
@@ -3519,8 +3519,8 @@ nh5pset_shared_mesg_nindexes_c(hid_t_f *plist_id, int_f *nindexes )
  *          index_num - Index being configured.
  *    mesg_type_flags - Types of messages that should be stored in this index.
  *      min_mesg_size - Minimum message size.
- * 
- * Outputs:     
+ *
+ * Outputs:
  * Returns:     0 on success, -1 on failure
  * Programmer:  M.S. Breitenfeld
  *              January, 2008
@@ -3733,10 +3733,10 @@ nh5pset_obj_track_times_c(hid_t_f *plist_id, int_f *flag)
  * Name:        h5pset_create_inter_group_c
  * Purpose:     Calls H5Pset_create_intermediate_group
  *
- * Inputs:   
+ * Inputs:
  *		lcpl_id - Link creation property list identifier
- *   crt_intermed_group - crt_intermed_group specifying whether 
- *                        to create intermediate groups upon the 
+ *   crt_intermed_group - crt_intermed_group specifying whether
+ *                        to create intermediate groups upon the
  *                        creation of an object
  * Returns:     0 on success, -1 on failure
  * Programmer:  M.S. Breitenfeld
@@ -3854,9 +3854,9 @@ nh5pget_char_encoding_c(hid_t_f *plist_id, int_f *encoding)
    */
   ret = H5Pget_char_encoding((hid_t)*plist_id, &c_encoding);
   if (ret < 0) return ret_value;
-  
+
   *encoding = (int_f)c_encoding;
-  
+
   ret_value = 0;
   return ret_value;
 }
@@ -3887,7 +3887,7 @@ nh5pset_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options)
    */
   ret = H5Pset_copy_object((hid_t)*ocp_plist_id, (unsigned)*copy_options);
   if (ret < 0) return ret_value;
-  
+
   ret_value = 0;
   return ret_value;
 }
@@ -3920,7 +3920,7 @@ nh5pget_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options)
   if (ret < 0) return ret_value;
 
   *copy_options = (int_f)c_copy_options;
-  
+
   ret_value = 0;
   return ret_value;
 }
@@ -3928,14 +3928,14 @@ nh5pget_copy_object_c(hid_t_f *ocp_plist_id, int_f *copy_options)
 /*----------------------------------------------------------------------------
  * Name:        h5pget_data_transform_c
  * Purpose:     Calls H5Pget_data_transform
- * Inputs:      
+ * Inputs:
  *              prp_id - property list identifier to query
  *      expression_len - buffer size transorm expression
  *
- * Output:      
+ * Output:
  *          expression - buffer to hold transform expression
  *
- * Returns:     
+ * Returns:
  *          Success:  0
  *	    Failure: -1
  *
@@ -3968,7 +3968,7 @@ nh5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_l
      if(ret < 0) return ret_value;
      /* or strlen ? */
      HD5packFstring(c_expression, _fcdtocp(expression), c_expression_len-1);
-     
+
      *size = (size_t_f)ret;
 
      ret_value = 0;
@@ -3978,14 +3978,14 @@ nh5pget_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_l
 /*----------------------------------------------------------------------------
  * Name:        h5pset_data_transform_c
  * Purpose:     Calls H5Pset_data_transform
- * Inputs:      
- *              prp_id - property list identifier to query      
+ * Inputs:
+ *              prp_id - property list identifier to query
  *          expression - buffer to hold transform expression
  *      expression_len - buffer size transorm expression
  *
  * Output:
  *
- * Returns:     
+ * Returns:
  *          Success:  0
  *	    Failure: -1
  *
@@ -4020,12 +4020,12 @@ nh5pset_data_transform_c(hid_t_f *plist_id, _fcd expression, int_f *expression_l
 /*----------------------------------------------------------------------------
  * Name:        h5pget_local_heap_size_hint_c
  * Purpose:     Calls H5Pget_local_heap_size_hint
- * Inputs: 
+ * Inputs:
  *         gcpl_id - Group creation property list identifier
  *
  * Output:
  *       size_hint - Hint for size of local heap
- * Returns:     
+ * Returns:
  *          Success:  0
  *	    Failure: -1
  *
@@ -4053,13 +4053,13 @@ nh5pget_local_heap_size_hint_c(hid_t_f *gcpl_id, size_t_f *size_hint)
 /*----------------------------------------------------------------------------
  * Name:        h5pget_est_link_info_c
  * Purpose:     Calls H5Pget_est_link_info
- * Inputs: 
+ * Inputs:
  *              gcpl_id - Group creation property list identifier
  *
- * Output: 
+ * Output:
  *      est_num_entries - Estimated number of links to be inserted into group
  *         est_name_len - Estimated average length of link names
- * Returns:     
+ * Returns:
  *          Success:  0
  *	    Failure: -1
  *
@@ -4090,13 +4090,13 @@ nh5pget_est_link_info_c(hid_t_f *gcpl_id, int_f *est_num_entries, int_f *est_nam
 /*----------------------------------------------------------------------------
  * Name:        h5pset_local_heap_size_hint_c
  * Purpose:     Calls H5Pset_local_heap_size_hint
- * Inputs: 
+ * Inputs:
  *         gcpl_id - Group creation property list identifier
  *       size_hint - Hint for size of local heap
  *
  * Output:
  *
- * Returns:     
+ * Returns:
  *          Success:  0
  *	    Failure: -1
  *
@@ -4122,13 +4122,13 @@ nh5pset_local_heap_size_hint_c(hid_t_f *gcpl_id, size_t_f *size_hint)
 /*----------------------------------------------------------------------------
  * Name:        h5pset_est_link_info_c
  * Purpose:     Calls H5Pset_est_link_info
- * Inputs: 
- *              gcpl_id - Group creation property list identifier 
+ * Inputs:
+ *              gcpl_id - Group creation property list identifier
  *      est_num_entries - Estimated number of links to be inserted into group
  *         est_name_len - Estimated average length of link names
  *
  * Output:
- * Returns:     
+ * Returns:
  *          Success:  0
  *	    Failure: -1
  *
@@ -4155,7 +4155,7 @@ nh5pset_est_link_info_c(hid_t_f *gcpl_id, int_f *est_num_entries, int_f *est_nam
  * Name:        h5pset_link_phase_change_c
  * Purpose:     Calls H5Pset_link_phase_change
  *
- * Inputs:      gcpl_id     - Group creation property list identifier   
+ * Inputs:      gcpl_id     - Group creation property list identifier
  *              max_compact - Maximum number of attributes to be stored in compact storage
  *              min_dense   - Minimum number of attributes to be stored in dense storage
  * Outputs
@@ -4184,7 +4184,7 @@ nh5pset_link_phase_change_c(hid_t_f *gcpl_id, int_f *max_compact, int_f *min_den
  * Name:        h5pset_fapl_direct_c
  * Purpose:     Calls H5Pset_fapl_direct
  *
- * Inputs:   
+ * Inputs:
  *    fapl_id 	 - File access property list identifier
  *    alignment  - Required memory alignment boundary
  *    block_size - File system block size
@@ -4218,7 +4218,7 @@ nh5pset_fapl_direct_c(hid_t_f *fapl_id, size_t_f *alignment, size_t_f *block_siz
  * Name:        h5pget_fapl_direct_c
  * Purpose:     Calls H5Pget_fapl_direct
  *
- * Inputs:   
+ * Inputs:
  *    fapl_id 	 - File access property list identifier
  * Outputs:
  *    alignment  - Required memory alignment boundary
@@ -4244,7 +4244,7 @@ nh5pget_fapl_direct_c(hid_t_f *fapl_id, size_t_f *alignment, size_t_f *block_siz
    */
   ret = H5Pget_fapl_direct((hid_t)*fapl_id, &c_alignment, &c_block_size, &c_cbuf_size );
   if (ret < 0) return ret_value;
-  
+
   *alignment  = (size_t_f)c_alignment;
   *block_size = (size_t_f)c_block_size;
   *cbuf_size  = (size_t_f)c_cbuf_size;
@@ -4258,7 +4258,7 @@ nh5pget_fapl_direct_c(hid_t_f *fapl_id, size_t_f *alignment, size_t_f *block_siz
  * Name:        h5pset_attr_phase_change_c
  * Purpose:     Calls H5Pset_attr_phase_change
  *
- * Inputs:      ocpl_id		- Object (dataset or group) creation property list identifier  
+ * Inputs:      ocpl_id		- Object (dataset or group) creation property list identifier
  *              max_compact     - Maximum number of attributes to be stored in compact storage
  *              min_dense       - Minimum number of attributes to be stored in dense storage
  * Outputs:
@@ -4283,7 +4283,7 @@ nh5pset_attr_phase_change_c(hid_t_f *ocpl_id, int_f *max_compact, int_f *min_den
 }
 
 /*----------------------------------------------------------------------------
- * Name:        h5pset_nbit_c 
+ * Name:        h5pset_nbit_c
  * Purpose:     Calls H5Pset_nbit
  *
  * Inputs:      plist_id - Dataset creation property list identifier
@@ -4308,10 +4308,10 @@ nh5pset_nbit_c(hid_t_f *plist_id )
   return ret_value;
 }
 /*----------------------------------------------------------------------------
- * Name:        h5pset_scaleoffset_c 
+ * Name:        h5pset_scaleoffset_c
  * Purpose:     Calls H5Pset_scaleoffset
  *
- * Inputs:    
+ * Inputs:
  *      plist_id - Dataset creation property list identifier
  *    scale_type - Flag indicating compression method.
  *  scale_factor - Parameter related to scale.
@@ -4341,9 +4341,9 @@ nh5pset_scaleoffset_c(hid_t_f *plist_id, int_f *scale_type, int_f *scale_factor 
 
 /*----------------------------------------------------------------------------
  * Name:        h5pset_nlinks
- * Purpose:     Calls H5Pset_nlinks 
+ * Purpose:     Calls H5Pset_nlinks
  *
- * Inputs:   
+ * Inputs:
  *            lapl_id - File access property list identifier
  *             nlinks - Maximum number of links to traverse
  * Outputs:
@@ -4369,9 +4369,9 @@ nh5pset_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks)
 
 /*----------------------------------------------------------------------------
  * Name:        h5pget_nlinks
- * Purpose:     Calls H5Pget_nlinks 
+ * Purpose:     Calls H5Pget_nlinks
  *
- * Inputs:   
+ * Inputs:
  *            lapl_id - File access property list identifier
  *
  * Outputs:
@@ -4403,9 +4403,9 @@ nh5pget_nlinks_c(hid_t_f *lapl_id, size_t_f *nlinks)
  * Name:        h5pget_create_inter_group_c
  * Purpose:     Calls H5Pget_create_intermediate_group
  *
- * Inputs:   
+ * Inputs:
  *		lcpl_id - Link creation property list identifier
- *   crt_intermed_group - Specifying whether to create intermediate groups upon 
+ *   crt_intermed_group - Specifying whether to create intermediate groups upon
  *                        the creation of an object
  * Returns:     0 on success, -1 on failure
  * Programmer:  M.S. Breitenfeld

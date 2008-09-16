@@ -600,7 +600,7 @@ main (int ac, char **av)
     puts("Test passed with the Family Driver.");
 
     /*
-     * We shouldn't run this test if the file system doesn't support big files 
+     * We shouldn't run this test if the file system doesn't support big files
      * because we would generate multi-gigabyte files.
      */
     puts("\nChecking if file system supports big files...");

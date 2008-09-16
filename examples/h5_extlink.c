@@ -160,7 +160,7 @@ static void extlink_prefix_example(void)
     /* Close both groups. */
     H5Gclose(group2_id);
     H5Gclose(group_id);
-    
+
     /* If we change the prefix, the same external link can find a file in the blue
      * directory.
      */

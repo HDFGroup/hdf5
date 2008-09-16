@@ -126,7 +126,7 @@ static struct {
 
 /* Local function prototypes */
 static int
-compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
+compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
             const void *buf1, const void *buf2, hid_t obj_owner);
 static int
 compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf);
@@ -220,14 +220,14 @@ addr_reset(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    attach_ref_attr 
+ * Function:    attach_ref_attr
  *
  * Purpose:     Create an attribute with object references
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Peter Cao
- *              Friday, August 4, 2006 
+ *              Friday, August 4, 2006
  *
  * Modifications:
  *
@@ -281,7 +281,7 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    attach_reg_ref_attr 
+ * Function:    attach_reg_ref_attr
  *
  * Purpose:     Create an attribute with object references
  *
@@ -358,14 +358,14 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    create_reg_ref_dataset 
+ * Function:    create_reg_ref_dataset
  *
  * Purpose:     Create a dataset with region references
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Peter Cao
- *              Friday, August 4, 2006 
+ *              Friday, August 4, 2006
  *
  * Modifications:
  *
@@ -828,7 +828,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
+compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
         const void *buf1, const void *buf2, hid_t obj_owner)
 {
     size_t elmt_size;           /* Size of an element */
@@ -1340,7 +1340,7 @@ HDassert(0 && "Unknown type of object");
                 if(linfo.u.val_size != linfo2.u.val_size) TEST_ERROR
 
                 /* Compare link values */
-                if(linfo.type == H5L_TYPE_SOFT || 
+                if(linfo.type == H5L_TYPE_SOFT ||
                         (linfo.type >= H5L_TYPE_UD_MIN && linfo.type <= H5L_TYPE_MAX)) {
                     char linkval[NAME_BUF_SIZE];            /* Link value */
                     char linkval2[NAME_BUF_SIZE];           /* Link value */
@@ -1361,7 +1361,7 @@ HDassert(0 && "Unknown type of link");
     } /* end if */
 
     /* Check if the attributes are equal */
-    if(compare_std_attributes(gid, gid2, pid) != TRUE) TEST_ERROR 
+    if(compare_std_attributes(gid, gid2, pid) != TRUE) TEST_ERROR
 
     /* Groups should be the same. :-) */
     return TRUE;
@@ -4369,7 +4369,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Peter Cao
- *              August 8, 2006 
+ *              August 8, 2006
  *
  * Modifications:
  *
@@ -4520,7 +4520,7 @@ test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     char objname[NAME_BUF_SIZE];                /* Sub-group & dataset name buffer */
     char src_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
-    
+
     TESTING("H5Ocopy(): deep nested groups");
 
     /* set initial data values */
@@ -7151,7 +7151,7 @@ int
 main(void)
 {
     const char *envval;
-    
+
     /* Don't run this test using the core, split, or multi file drivers */
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL)
@@ -7181,7 +7181,7 @@ main(void)
         /* Create an FCPL with sharing enabled */
         if((fcpl_shared = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR
         if(H5Pset_shared_mesg_nindexes(fcpl_shared, 1) < 0) TEST_ERROR
-        if(H5Pset_shared_mesg_index(fcpl_shared, 0, H5O_SHMESG_ALL_FLAG, (size_t) 10) < 0) TEST_ERROR 
+        if(H5Pset_shared_mesg_index(fcpl_shared, 0, H5O_SHMESG_ALL_FLAG, (size_t) 10) < 0) TEST_ERROR
 
         /* Test in all configurations */
         for(configuration = 0; configuration <= MAX_CONFIGURATION; configuration++) {
@@ -7254,10 +7254,10 @@ main(void)
             nerrors += test_copy_group_empty(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_root_group(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_group(fcpl_src, fcpl_dst, my_fapl);
-            if (ExpressMode > 1 && !HDstrcmp(envval, "direct")) { 
-                /* This test case with Direct driver has a poor performance on 
-                 * NCSA copper, though it works.  Skip it for now and worry 
-                 * about the performance later. 
+            if (ExpressMode > 1 && !HDstrcmp(envval, "direct")) {
+                /* This test case with Direct driver has a poor performance on
+                 * NCSA copper, though it works.  Skip it for now and worry
+                 * about the performance later.
                  */
                 printf("***Express test mode on.  test_copy_group_deep is skipped");
                 SKIPPED();
@@ -7274,19 +7274,19 @@ main(void)
             nerrors += test_copy_path(fcpl_src, fcpl_dst, my_fapl);
             nerrors += test_copy_same_file_named_datatype(fcpl_src, my_fapl);
             nerrors += test_copy_old_layout(fcpl_dst, my_fapl);
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG, 
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG,
                        FALSE, "H5Ocopy(): without attributes");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, 0, TRUE, 
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, 0, TRUE,
                        "H5Ocopy(): with missing groups");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_SOFT_LINK_FLAG, 
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_SOFT_LINK_FLAG,
                        FALSE, "H5Ocopy(): expand soft link");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_SHALLOW_HIERARCHY_FLAG, 
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_SHALLOW_HIERARCHY_FLAG,
                        FALSE, "H5Ocopy(): shallow group copy");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_REFERENCE_FLAG, 
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_REFERENCE_FLAG,
                        FALSE, "H5Ocopy(): expand object reference");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_PRESERVE_NULL_FLAG, 
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_PRESERVE_NULL_FLAG,
                        FALSE, "H5Ocopy(): preserve NULL messages");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG | 
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG |
                        H5O_COPY_PRESERVE_NULL_FLAG, TRUE, "H5Ocopy(): preserve NULL messages");
 
 /* TODO: not implemented

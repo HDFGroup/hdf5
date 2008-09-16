@@ -7450,9 +7450,9 @@ main(void)
     unsigned	nerrors = 0;            /* Cumulative error count */
     int		ExpressMode;
     const char  *envval = NULL;
- 
+
     envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL) 
+    if(envval == NULL)
         envval = "nomatch";
     if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
 	/* Reset library */

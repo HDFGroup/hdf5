@@ -30,12 +30,12 @@
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Wednesday, August 4, 1999
- * Modifications: 
+ * Modifications:
  *               - Added optional parameters introduced in version 1.8
  *                 February, 2008
  *---------------------------------------------------------------------------*/
 int_f
-nh5dcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f *space_id, 
+nh5dcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f *space_id,
 	      hid_t_f *lcpl_id, hid_t_f *dcpl_id, hid_t_f *dapl_id, hid_t_f *dset_id)
 {
      char *c_name = NULL;
@@ -51,7 +51,7 @@ nh5dcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_
      /*
       * Call H5Dcreate2 function.
       */
-     if((c_dset_id = H5Dcreate2((hid_t)*loc_id, c_name, (hid_t)*type_id, (hid_t)*space_id, 
+     if((c_dset_id = H5Dcreate2((hid_t)*loc_id, c_name, (hid_t)*type_id, (hid_t)*space_id,
 				(hid_t)*lcpl_id, (hid_t)*dcpl_id, (hid_t)*dapl_id)) < 0)
          goto DONE;
      *dset_id = (hid_t_f)c_dset_id;
@@ -119,7 +119,7 @@ DONE:
  *              Tuesday, May 14, 2002
  * Modifications: This function is added to accomodate oveloaded h5dwrite_f
  *                with the dims argument being of INTEGER(HSIZE_T) type
- 
+
  *---------------------------------------------------------------------------*/
 int_f
 nh5dwritec_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
@@ -257,7 +257,7 @@ nh5dwritec_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, h
  *                complains about wrong parameter types in h5dwrite_c function
  *                called by Fortran rouitnes
  *                                           October 10, 2006 EIP
- * 
+ *
  *---------------------------------------------------------------------------*/
 int_f
 nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f UNUSED *dims)
@@ -788,7 +788,7 @@ nh5dreadc_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hi
  *                complains about wrong parameter types in h5dwrite_c function
  *                called by Fortran rouitnes
  *                                           October 10, 2006 EIP
- * 
+ *
  *---------------------------------------------------------------------------*/
 int_f
 nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f UNUSED *dims)
@@ -1964,8 +1964,8 @@ nh5dget_space_status_c ( hid_t_f *dset_id, int_f *flag)
  *		type_id	   - Identifier of the datatype to use when creating the dataset.
  *		space_id   - Identifier of the dataspace to use when creating the dataset.
  *              dcpl_id    - Dataset creation property list identifier.
- *              dapl_id    - Dataset access property list identifier.    
- * Outputs:     
+ *              dapl_id    - Dataset access property list identifier.
+ * Outputs:
  *              dset_id - dataset identifier
  *
  * Returns:     0 on success, -1 on failure
@@ -1973,18 +1973,18 @@ nh5dget_space_status_c ( hid_t_f *dset_id, int_f *flag)
  *              February, 2008
  *---------------------------------------------------------------------------*/
 int_f
-nh5dcreate_anon_c (hid_t_f *loc_id, hid_t_f *type_id, hid_t_f *space_id, 
+nh5dcreate_anon_c (hid_t_f *loc_id, hid_t_f *type_id, hid_t_f *space_id,
 		   hid_t_f *dcpl_id, hid_t_f *dapl_id, hid_t_f *dset_id)
 {
   int ret_value = -1;
-  
+
   /*
    * Call H5Dcreate2 function.
    */
-  if((*dset_id = (hid_t_f)H5Dcreate_anon((hid_t)*loc_id, (hid_t)*type_id, (hid_t)*space_id, 
+  if((*dset_id = (hid_t_f)H5Dcreate_anon((hid_t)*loc_id, (hid_t)*type_id, (hid_t)*space_id,
 					 (hid_t)*dcpl_id, (hid_t)*dapl_id)) < 0)
     goto DONE;
-  
+
   ret_value = 0;
 
  DONE:

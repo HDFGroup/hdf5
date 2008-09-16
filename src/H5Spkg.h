@@ -44,7 +44,7 @@
  */
 #define H5O_SDSPACE_VERSION_2	2
 
-/* The latest version of the format.  Look through the 'encode' 
+/* The latest version of the format.  Look through the 'encode'
  *      and 'size' callbacks for places to change when updating this. */
 #define H5O_SDSPACE_VERSION_LATEST H5O_SDSPACE_VERSION_2
 

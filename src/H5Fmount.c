@@ -159,7 +159,7 @@ H5F_mount(H5G_loc_t *loc, const char *name, H5F_t *child,
      * user from doing this.
      */
     if(mp_loc.oloc->holding_file != FALSE)
-        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount path cannot contain links to external files")    
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount path cannot contain links to external files")
 
     /* Open the mount point group */
     if(NULL == (mount_point = H5G_open(&mp_loc, dxpl_id)))

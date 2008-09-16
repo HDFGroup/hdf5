@@ -93,7 +93,7 @@ void parallel_print(const char* format, ...)
 /*-------------------------------------------------------------------------
  * Function: print_dimensions
  *
- * Purpose: print dimensions 
+ * Purpose: print dimensions
  *
  *-------------------------------------------------------------------------
  */
@@ -110,7 +110,7 @@ print_dimensions (int rank, hsize_t *dims)
     }
     parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[rank-1]);
     parallel_print("]" );
-    
+
 }
 
 

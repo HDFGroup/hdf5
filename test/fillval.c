@@ -1529,7 +1529,7 @@ test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name,
     /* Create dataspace describing memory buffer */
     if((mspace = H5Screate_simple(5, hs_size, hs_size)) < 0) TEST_ERROR
 
-    /* Select elements within file dataspace */ 
+    /* Select elements within file dataspace */
     if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, hs_stride, hs_size, NULL) < 0) TEST_ERROR
 
     /* Write to all even data locations */
@@ -2112,7 +2112,7 @@ main(int argc, char *argv[])
     const char  *envval = NULL;
 
     envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL) 
+    if(envval == NULL)
         envval = "nomatch";
     if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
         int	nerrors=0, argno, test_contig=1, test_chunk=1, test_compact=1;

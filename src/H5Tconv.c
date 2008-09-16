@@ -883,7 +883,7 @@ typedef struct H5T_conv_struct_t {
     hid_t	*src_memb_id;		/*source member type ID's	     */
     hid_t	*dst_memb_id;		/*destination member type ID's	     */
     H5T_path_t	**memb_path;		/*conversion path for each member    */
-    H5T_subset_t     smembs_subset;     /*are source and dest members a subset of each other? */ 
+    H5T_subset_t     smembs_subset;     /*are source and dest members a subset of each other? */
 } H5T_conv_struct_t;
 
 /* Conversion data for H5T_conv_enum() */
@@ -1775,8 +1775,8 @@ done:
  *
  * Modifications:
  *              Raymond Lu, 3 May 2007
- *              Added the detection for a special optimization case when the 
- *              source and destination members are a subset of each other, and 
+ *              Added the detection for a special optimization case when the
+ *              source and destination members are a subset of each other, and
  *              the order is the same, and no conversion is needed.  For example:
  *                  struct source {            struct destination {
  *                      TYPE1 A;      -->          TYPE1 A;
@@ -1793,9 +1793,9 @@ done:
  *                  };                             TYPE4 D;
  *                                                 TYPE5 E;
  *                                             };
- *              The optimization is simply moving data to the appropriate 
+ *              The optimization is simply moving data to the appropriate
  *              places in the buffer.
- * 
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1904,7 +1904,7 @@ H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
                 /* If any of source members doesn't have counterpart in the same
                  * order or there's conversion between members, don't do the
                  * optimization.
-                 */ 
+                 */
                 if(src2dst[i] != i || (src->shared->u.compnd.memb[i].offset != dst->shared->u.compnd.memb[i].offset) || (priv->memb_path[i])->is_noop == FALSE)
                     priv->smembs_subset = H5T_SUBSET_FALSE;
             } /* end for */
@@ -1912,14 +1912,14 @@ H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
             priv->smembs_subset = H5T_SUBSET_DST;
             for(i = 0; i < dst_nmembs; i++) {
                 /* If any of source members doesn't have counterpart in the same order or
-                 * there's conversion between members, don't do the optimization. */ 
+                 * there's conversion between members, don't do the optimization. */
                 if(src2dst[i] != i || (src->shared->u.compnd.memb[i].offset != dst->shared->u.compnd.memb[i].offset) || (priv->memb_path[i])->is_noop == FALSE)
                     priv->smembs_subset = H5T_SUBSET_FALSE;
             } /* end for */
         } else /* If the numbers of source and dest members are equal and no conversion is needed,
                 * the case should have been handled as noop earlier in H5Dio.c. */
           ;
-     
+
     } /* end if */
 
     cdata->recalc = FALSE;
@@ -1934,7 +1934,7 @@ done:
  *
  * Purpose:     A quick way to return a field in a struct private in this
  *              file.  The flag SMEMBS_SUBSET indicates whether the source
- *              members are a subset of destination or the destination 
+ *              members are a subset of destination or the destination
  *              members are a subset of the source, and the order is the
  *              same, and no conversion is needed.  For example:
  *                  struct source {            struct destination {
@@ -1945,7 +1945,7 @@ done:
  *                                                 TYPE5 E;
  *                                             };
  *
- * Return:      One of the value from H5T_subset_t.	
+ * Return:      One of the value from H5T_subset_t.
  *
  * Programmer:	Raymond Lu
  *		8 June 2007
@@ -2239,8 +2239,8 @@ done:
  *              datatype.
  *
  *              Raymond Lu, 3 May 2007
- *              Optimize a special case when the source and destination members 
- *              are a subset of each other, and the order is the same, and no 
+ *              Optimize a special case when the source and destination members
+ *              are a subset of each other, and the order is the same, and no
  *              conversion is needed.  For example:
  *                  struct source {            struct destination {
  *                      TYPE1 A;      -->          TYPE1 A;
@@ -2249,9 +2249,9 @@ done:
  *                  };                             TYPE4 D;
  *                                                 TYPE5 E;
  *                                             };
- *              The optimization is simply moving data to the appropriate 
+ *              The optimization is simply moving data to the appropriate
  *              places in the buffer.
- * 
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2389,16 +2389,16 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
             }
 
             if(priv->smembs_subset == H5T_SUBSET_SRC || priv->smembs_subset == H5T_SUBSET_DST) {
-                /* If the optimization flag is set to indicate source members are a subset and 
+                /* If the optimization flag is set to indicate source members are a subset and
                  * in the top of the destination, simply copy the source members to background buffer. */
                 xbuf = buf;
                 xbkg = bkg;
                 if(dst->shared->size <= src->shared->size)
                     /* This is to deal with a very special situation when the fields and their
-                     * offset for both source and destination are identical but the datatype 
-                     * sizes of source and destination are different.  The library still 
-                     * considers these two types different and does conversion.  It happens 
-                     * in table API test (hdf5/hl/test/test_table.c) when a table field is 
+                     * offset for both source and destination are identical but the datatype
+                     * sizes of source and destination are different.  The library still
+                     * considers these two types different and does conversion.  It happens
+                     * in table API test (hdf5/hl/test/test_table.c) when a table field is
                      * deleted.
                      */
                     copy_size = dst->shared->size;
@@ -2406,7 +2406,7 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     copy_size = src->shared->size;
 
                 for (elmtno=0; elmtno<nelmts; elmtno++) {
-                    HDmemmove(xbkg, xbuf, copy_size); 
+                    HDmemmove(xbkg, xbuf, copy_size);
 
                     /* Update pointers */
                     xbuf += buf_stride;
@@ -3113,7 +3113,7 @@ H5T_conv_vlen(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
                                 uint8_t *tmp_p;
                                 /* TMP_P is reset each time in the loop because DST_BASE_SIZE may include some data in addition to VL info. - SLU */
                                 for(u=seq_len; u<bg_seq_len; u++) {
-                                    tmp_p = (uint8_t*)tmp_buf + u*dst_base_size;  
+                                    tmp_p = (uint8_t*)tmp_buf + u*dst_base_size;
                                     UINT32DECODE(tmp_p, parent_seq_len);
                                     if(parent_seq_len>0) {
                                         H5F_addr_decode(dst->shared->u.vlen.f, (const uint8_t **)&tmp_p, &(parent_hobjid.addr));

@@ -4463,7 +4463,7 @@ H5T_path_find(const H5T_t *src, const H5T_t *dst, const char *name,
     }
 
     /* Set the flag to indicate both source and destination types are compound types
-     * for the optimization of data reading (in H5Dio.c). */ 
+     * for the optimization of data reading (in H5Dio.c). */
     if(H5T_COMPOUND==H5T_get_class(src, TRUE) && H5T_COMPOUND==H5T_get_class(dst, TRUE))
         path->are_compounds = TRUE;
 
@@ -4515,8 +4515,8 @@ H5T_path_noop(const H5T_path_t *p)
  * Function:	H5T_path_compound_subset
  *
  * Purpose:	Checks if the source and destination types are both compound.
- *              Tells whether whether the source members are a subset of 
- *              destination, and the order is the same, and no conversion 
+ *              Tells whether whether the source members are a subset of
+ *              destination, and the order is the same, and no conversion
  *              is needed.  For example:
  *                  struct source {            struct destination {
  *                      TYPE1 A;      -->          TYPE1 A;

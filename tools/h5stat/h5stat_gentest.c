@@ -32,7 +32,7 @@
 #define NUM_GRPS       	35000
 #define NUM_ATTRS	100
 
-/* 
+/*
  * Generate 1.8 HDF5 file
  * with NUM_GRPS groups
  * with NUM_ATTRS attributes on the dataset

@@ -15700,12 +15700,12 @@ main(void)
     if(envval == NULL)
         envval = "nomatch";
 
-    /* This test case with Direct driver has a poor performance on 
-     * NCSA copper, though it works.  Skip it if the express mode is set on 
-     * and worry about the performance later. 
+    /* This test case with Direct driver has a poor performance on
+     * NCSA copper, though it works.  Skip it if the express mode is set on
+     * and worry about the performance later.
      */
-    if((HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && 
-        HDstrcmp(envval, "family") && HDstrcmp(envval, "stdio")) && 
+    if((HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") &&
+        HDstrcmp(envval, "family") && HDstrcmp(envval, "stdio")) &&
         !(!HDstrcmp(envval, "direct") && (ExpressMode > 1)))
     {
 

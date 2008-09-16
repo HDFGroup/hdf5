@@ -389,7 +389,7 @@ finish:
  * Return:      Nothing
  * Programmer:  Bill Wendling, 30. October 2001
  * Modifications:
- *    Added multidimensional testing (Christian Chilan, April, 2008) 
+ *    Added multidimensional testing (Christian Chilan, April, 2008)
  */
 static void
 run_test_loop(struct options *opts)
@@ -397,7 +397,7 @@ run_test_loop(struct options *opts)
     parameters parms;
     int i;
     int doing_sio;      /* if this process is doing SIO */
-    size_t      buf_bytes;     
+    size_t      buf_bytes;
     /* load options into parameter structure */
     parms.num_files = opts->num_files;
     parms.num_dsets = opts->num_dsets;
@@ -901,7 +901,7 @@ report_parameters(struct options *opts)
         else {
             HDfprintf(output, "Contiguous\n");
         }
-        
+
         HDfprintf(output, "HDF5 file driver=");
         if (opts->vfd==sec2) {
             HDfprintf(output, "sec2\n");
@@ -951,7 +951,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->output_file = NULL;
     cl_opts->io_types =  0;    /* will set default after parsing options */
     cl_opts->num_iters = 1;
- 
+
     default_rank = 2;
 
     cl_opts->dset_rank = 0;
@@ -967,7 +967,7 @@ parse_command_line(int argc, char *argv[])
     }
 
     cl_opts->vfd = sec2;
-   
+
     cl_opts->print_times = FALSE;   /* Printing times is off by default */
     cl_opts->print_raw = FALSE;     /* Printing raw data throughput is off by default */
     cl_opts->h5_alignment = 1;      /* No alignment for HDF5 objects by default */

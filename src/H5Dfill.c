@@ -165,7 +165,7 @@ done:
     If there's VL type of data, the address of the data is copied multiple
     times into the buffer, causing some trouble when the data is released.
     Instead, make multiple copies of fill value first, then do conversion
-    on each element so that each of them has a copy of the VL data. 
+    on each element so that each of them has a copy of the VL data.
 --------------------------------------------------------------------------*/
 herr_t
 H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
@@ -236,9 +236,9 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
         } /* end if */
 
-        /* If there's VL type of data, make multiple copies of fill value first, 
-         * then do conversion on each element so that each of them has a copy 
-         * of the VL data. 
+        /* If there's VL type of data, make multiple copies of fill value first,
+         * then do conversion on each element so that each of them has a copy
+         * of the VL data.
          */
         if(TRUE == H5T_detect_class(fill_type, H5T_VLEN)) {
             H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
