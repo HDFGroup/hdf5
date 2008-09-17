@@ -294,7 +294,7 @@ int copy_objects(const char* fnamein,
     {
         error_msg(progname, "<%s>: Could not create file\n", fnameout );
         goto out;
-    } /* end if */
+    } 
 
 
     /*-------------------------------------------------------------------------
@@ -303,7 +303,12 @@ int copy_objects(const char* fnamein,
     */
     if ( options->ublock_size > 0  )
     {
-        copy_user_block( options->ublock_filename, fnameout, options->ublock_size);
+        if ( copy_user_block( options->ublock_filename, fnameout, options->ublock_size) < 0 )
+        {
+            error_msg(progname, "Could not copy user block. Exiting...\n");
+            goto out;
+            
+        }
     }
 
 
@@ -329,14 +334,11 @@ int copy_objects(const char* fnamein,
     * and create hard links
     *-------------------------------------------------------------------------
     */
-    if(do_copy_refobjs(fidin, fidout, travt, options) < 0) {
+    if ( do_copy_refobjs(fidin, fidout, travt, options) < 0 ) 
+    {
         printf("h5repack: <%s>: Could not copy data to: %s\n", fnamein, fnameout);
         goto out;
-    } /* end if */
-
-    /* free table */
-    trav_table_free(travt);
-
+    } 
 
     /*-------------------------------------------------------------------------
     * close
@@ -351,10 +353,25 @@ int copy_objects(const char* fnamein,
 
     H5Fclose(fidin);
     H5Fclose(fidout);
+    
+    /* free table */
+    trav_table_free(travt);
+    travt = NULL;
 
-    /* write only the input file user block if there is no user block file input */
-    if(ub_size > 0 && options->ublock_size == 0)
-        copy_user_block(fnamein, fnameout, ub_size);
+    /*-------------------------------------------------------------------------
+    * write only the input file user block if there is no user block file input
+    *-------------------------------------------------------------------------
+    */
+
+    if( ub_size > 0 && options->ublock_size == 0 )
+    {
+        if ( copy_user_block(fnamein, fnameout, ub_size) < 0 )
+        {
+            error_msg(progname, "Could not copy user block. Exiting...\n");
+            goto out;
+            
+        }
+    }
 
     return 0;
 

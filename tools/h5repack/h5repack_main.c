@@ -347,7 +347,8 @@ static void usage(const char *prog)
  printf("  U - is a filename.\n");
  printf("  T - is an integer\n");
  printf("  A - is an integer greater than zero\n");
- printf("  B - is the user block size (any power of 2 equal to 512 or greater)\n");
+ printf("  B - is the user block size, any value that is 512 or greater and is\n");
+ printf("        a power of 2 (1024 default)\n");
  printf("  F - is the shared object header message type, any of <dspace|dtype|fill|\n");
  printf("        pline|attr>. If F is not specified, S applies to all messages\n");
 

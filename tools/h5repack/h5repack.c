@@ -416,9 +416,12 @@ static int check_options(pack_opt_t *options)
     */
     if ( options->ublock_filename != NULL && options->ublock_size == 0 )
     {
-        error_msg(progname, "user block size missing for file %s\n",
-            options->ublock_filename);
-        return -1;
+        if ( options->verbose )
+        {
+            printf("Warning: user block size missing for file %s. Assigning a default size of 1024...\n",
+                options->ublock_filename);
+            options->ublock_size = 1024;
+        }
     }
 
     if ( options->ublock_filename == NULL && options->ublock_size != 0 )
