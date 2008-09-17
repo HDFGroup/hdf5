@@ -2062,8 +2062,14 @@ AC_TRY_COMPILE(,[int __attribute__((unused)) x],
                AC_MSG_RESULT([yes]),
                AC_MSG_RESULT([no]))
 
+AC_MSG_CHECKING([for __func__ extension])
+AC_TRY_COMPILE(,[ const char *fname = __func__; ],
+               AC_DEFINE([HAVE_C99_FUNC], [1],
+                         [Define if the compiler understand the __func__ keyword])
+               AC_MSG_RESULT([yes]),
+               AC_MSG_RESULT([no]))
 AC_MSG_CHECKING([for __FUNCTION__ extension])
-AC_TRY_COMPILE(,[(void)__FUNCTION__],
+AC_TRY_COMPILE(,[ const char *fname = __FUNCTION__; ],
                AC_DEFINE([HAVE_FUNCTION], [1],
                          [Define if the compiler understand the __FUNCTION__ keyword])
                AC_MSG_RESULT([yes]),

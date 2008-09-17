@@ -111,9 +111,18 @@ H5_DECLARE_PKG_VAR(H5_MY_PKG_INIT, H5_MY_PKG)
 /* API re-entrance variable */
 extern hbool_t H5_api_entered_g;    /* Has library already been entered through API? */
 
+/* Use FUNC to safely handle variations of C99 __func__ keyword handling */
+#ifdef H5_HAVE_C99_FUNC
+#define FUNC __func__
+#elif defined(H5_HAVE_FUNCTION)
+#define FUNC __FUNCTION__
+#else
+#error "We need __func__ or __FUNCTION__ to test function names!"
+#endif
+
 /* Macros for entering different scopes of routines */
 #define H5_PACKAGE_ENTER(pkg, pkg_init, init)				      \
-    FUNC_ENTER_NAME_CHECK(H5_IS_PKG(__func__))				      \
+    FUNC_ENTER_NAME_CHECK(H5_IS_PKG(FUNC))				      \
                                                                               \
     /* The library should be initialized already */			      \
     HDassert(H5_INIT_GLOBAL);						      \
@@ -123,13 +132,13 @@ extern hbool_t H5_api_entered_g;    /* Has library already been entered through 
     H5_GLUE4(H5_CHECK_PACKAGE_INIT_, init, _, pkg_init)(pkg)		      \
                                                                               \
     /* Push the name of this function on the function stack */		      \
-    H5_PUSH_FUNC(__func__)						      \
+    H5_PUSH_FUNC(FUNC)							      \
                                                                               \
     /* Enter scope for this type of function */				      \
     {
 
 #define H5_PRIVATE_ENTER(pkg, pkg_init)					      \
-    FUNC_ENTER_NAME_CHECK(H5_IS_PRIV(__func__))				      \
+    FUNC_ENTER_NAME_CHECK(H5_IS_PRIV(FUNC))				      \
                                                                               \
     /* The library should be initialized already */			      \
     HDassert(H5_INIT_GLOBAL);						      \
@@ -138,20 +147,15 @@ extern hbool_t H5_api_entered_g;    /* Has library already been entered through 
     H5_GLUE3(H5_PKG_, pkg_init, _INIT)(pkg)				      \
                                                                               \
     /* Push the name of this function on the function stack */		      \
-    H5_PUSH_FUNC(__func__)						      \
+    H5_PUSH_FUNC(FUNC)							      \
                                                                               \
     /* Enter scope for this type of function */				      \
     {{
 
-/* Remove this shim and change H5TRACE* macros when this change is permanent -QAK */
-#ifdef H5_DEBUG_API
-#define FUNC __func__
-#endif
-
 #define H5_PUBLIC_ENTER(pkg, pkg_init)					      \
-    FUNC_ENTER_API_VARS(__func__)                                             \
+    FUNC_ENTER_API_VARS(FUNC)                                      	      \
     FUNC_ENTER_API_THREADSAFE;                                                \
-    FUNC_ENTER_NAME_CHECK(H5_IS_PUB(__func__))				      \
+    FUNC_ENTER_NAME_CHECK(H5_IS_PUB(FUNC))				      \
                                                                               \
     /* Clear thread error stack when entering public functions */	      \
     H5E_clear_stack(NULL);				                      \
@@ -175,10 +179,10 @@ extern hbool_t H5_api_entered_g;    /* Has library already been entered through 
     H5_api_entered_g = TRUE;						      \
                                                                               \
     /* Start logging MPI's MPE information */				      \
-    BEGIN_MPE_LOG(__func__)						      \
+    BEGIN_MPE_LOG(FUNC)							      \
                                                                               \
     /* Push the name of this function on the function stack */		      \
-    H5_PUSH_FUNC(__func__)						      \
+    H5_PUSH_FUNC(FUNC)							      \
                                                                               \
     /* Enter scope for this type of function */				      \
     {{{
@@ -291,7 +295,7 @@ func_init_failed:							      \
  * error number, a description of the error (as a printf-like format string),
  * and an optional set of arguments for the printf format arguments.
  */
-#define H5E_PRINTF(...) H5E_printf_stack(NULL, __FILE__, __func__, __LINE__, H5E_ERR_CLS_g, H5_MY_PKG_ERR,  __VA_ARGS__)
+#define H5E_PRINTF(...) H5E_printf_stack(NULL, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, H5_MY_PKG_ERR,  __VA_ARGS__)
 
 /*
  * H5_LEAVE macro, used to facilitate control flow between a

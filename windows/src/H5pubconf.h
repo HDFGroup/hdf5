@@ -78,6 +78,9 @@
 /* Define to 1 if you have the `BSDgettimeofday' function. */
 /* #undef H5_HAVE_BSDGETTIMEOFDAY */
 
+/* Define if the compiler understand the __func__ keyword */
+/* #undef H5_HAVE_C99_FUNC */
+
 /* Define if the function stack tracing code is to be compiled in */
 /* #undef H5_HAVE_CODESTACK */
 
