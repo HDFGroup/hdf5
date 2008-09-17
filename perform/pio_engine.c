@@ -44,6 +44,14 @@
 
 /* Macro definitions */
 
+#if H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 6
+#    define H5DCREATE(fd, name, type, space, dcpl)    H5Dcreate(fd, name, type, space, dcpl)
+#    define H5DOPEN(fd, name)                         H5Dopen(fd, name)
+#else
+#    define H5DCREATE(fd, name, type, space, dcpl)    H5Dcreate2(fd, name, type, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)
+#    define H5DOPEN(fd, name)                         H5Dopen2(fd, name, H5P_DEFAULT)
+#endif
+
 /* sizes of various items. these sizes won't change during program execution */
 /* The following three must have the same type */
 #define ELMT_SIZE           (sizeof(unsigned char))     /* we're doing bytes */
@@ -639,11 +647,18 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
 
     /* debug */
     if (pio_debug_level >= 4) {
-    HDprint_rank(output);
-    HDfprintf(output, "Debug(do_write): "
-        "buf_size=%Hd, bytes_begin=%Hd, bytes_count=%Hd\n",
-        (long_long)buf_size, (long_long)bytes_begin,
-        (long_long)bytes_count);
+        HDprint_rank(output);
+        if (!parms->dim2d) {
+        HDfprintf(output, "Debug(do_write): "
+            "buf_size=%Hd, bytes_begin=%Hd, bytes_count=%Hd\n",
+            (long_long)buf_size, (long_long)bytes_begin[0],
+            (long_long)bytes_count);
+        } else {
+        HDfprintf(output, "Debug(do_write): "
+            "linear buf_size=%Hd, bytes_begin=(%Hd,%Hd), bytes_count=%Hd\n",
+            (long_long)buf_size*blk_size, (long_long)bytes_begin[0],
+            (long_long)bytes_begin[1], (long_long)bytes_count);
+        }
     }
 
     /* I/O Access specific setup */
@@ -907,8 +922,8 @@ do_write(results *res, file_descr *fd, parameters *parms, long ndsets,
         }/* end else */
 
         sprintf(dname, "Dataset_%ld", ndset);
-        h5ds_id = H5Dcreate2(fd->h5fd, dname, ELMT_H5_TYPE,
-            h5dset_space_id, H5P_DEFAULT, h5dcpl, H5P_DEFAULT);
+        h5ds_id = H5DCREATE(fd->h5fd, dname, ELMT_H5_TYPE,
+            h5dset_space_id, h5dcpl);
 
         if (h5ds_id < 0) {
             fprintf(stderr, "HDF5 Dataset Create failed\n");
@@ -1606,11 +1621,18 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 
     /* debug */
     if (pio_debug_level >= 4) {
-    HDprint_rank(output);
-    HDfprintf(output, "Debug(do_read): "
-        "buf_size=%Hd, bytes_begin=%Hd, bytes_count=%Hd\n",
-        (long_long)buf_size, (long_long)bytes_begin,
-        (long_long)bytes_count);
+        HDprint_rank(output);
+        if (!parms->dim2d) {
+        HDfprintf(output, "Debug(do_write): "
+            "buf_size=%Hd, bytes_begin=%Hd, bytes_count=%Hd\n",
+            (long_long)buf_size, (long_long)bytes_begin[0],
+            (long_long)bytes_count);
+        } else {
+        HDfprintf(output, "Debug(do_write): "
+            "linear buf_size=%Hd, bytes_begin=(%Hd,%Hd), bytes_count=%Hd\n",
+            (long_long)buf_size*blk_size, (long_long)bytes_begin[0],
+            (long_long)bytes_begin[1], (long_long)bytes_count);
+        }
     }
 
     /* I/O Access specific setup */
@@ -1840,7 +1862,7 @@ do_read(results *res, file_descr *fd, parameters *parms, long ndsets,
 
         case PHDF5:
         sprintf(dname, "Dataset_%ld", ndset);
-        h5ds_id = H5Dopen2(fd->h5fd, dname, H5P_DEFAULT);
+        h5ds_id = H5DOPEN(fd->h5fd, dname);
         if (h5ds_id < 0) {
             fprintf(stderr, "HDF5 Dataset open failed\n");
             GOTOERROR(FAIL);
