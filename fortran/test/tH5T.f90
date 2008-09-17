@@ -824,3 +824,207 @@
     RETURN
     END SUBROUTINE enumtest 
 
+
+!/*-------------------------------------------------------------------------
+! * Function:    test_derived_flt
+! *
+! * Purpose:     Tests user-define and query functions of floating-point types.
+! *              test h5tget/set_fields_f.
+! *
+! * Return:      Success:        0
+! *
+! *              Failure:        number of errors
+! *
+! * Fortran Programmer:  M.S. Breitenfeld
+! *                      September 9, 2008
+! *
+! * Modifications:
+! *
+! *-------------------------------------------------------------------------
+! */
+
+SUBROUTINE test_derived_flt(cleanup, total_error) 
+
+  USE HDF5 ! This module contains all necessary modules 
+  
+  IMPLICIT NONE
+  LOGICAL, INTENT(IN)  :: cleanup
+  INTEGER, INTENT(OUT) :: total_error
+  INTEGER(hid_t) :: file=-1, tid1=-1, tid2=-1
+  INTEGER(hid_t) :: dxpl_id=-1
+  INTEGER(size_t) :: spos, epos, esize, mpos, msize, size
+  
+  CHARACTER(LEN=15), PARAMETER :: filename="h5t_derived_flt"
+  CHARACTER(LEN=80) :: fix_filename
+
+  INTEGER(SIZE_T) :: precision1, offset1, ebias1, size1
+  INTEGER(SIZE_T) :: precision2, offset2, ebias2, size2
+
+  INTEGER :: error
+
+  !/* Create File */
+  CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+  IF (error .NE. 0) THEN
+     WRITE(*,*) "Cannot modify filename"
+     STOP
+  ENDIF
+
+  CALL h5fcreate_f(fix_filename,H5F_ACC_TRUNC_F,file,error)
+  CALL check("h5fcreate_f", error, total_error)
+  
+  CALL h5pcreate_f(H5P_DATASET_XFER_F, dxpl_id, error)
+  CALL check("h5pcreate_f", error, total_error)
+
+  CALL h5tcopy_f(H5T_IEEE_F64LE, tid1, error)
+  CALL check("h5tcopy_f",error,total_error)
+
+  CALL h5tcopy_f(H5T_IEEE_F32LE, tid2, error)
+  CALL check("h5tcopy_f",error,total_error)
+
+  !/*------------------------------------------------------------------------
+  ! *                   1st floating-point type
+  ! * size=7 byte, precision=42 bits, offset=3 bits, mantissa size=31 bits,
+  ! * mantissa position=3, exponent size=10 bits, exponent position=34,
+  ! * exponent bias=511.  It can be illustrated in little-endian order as
+  ! *
+  ! *          6       5       4       3       2       1       0
+  ! *    ???????? ???SEEEE EEEEEEMM MMMMMMMM MMMMMMMM MMMMMMMM MMMMM???
+  ! *
+  ! * To create a new floating-point type, the following properties must be
+  ! * set in the order of
+  ! *   set fields -> set offset -> set precision -> set size.
+  ! * All these properties must be set before the type can function. Other
+  ! * properties can be set anytime.  Derived type size cannot be expanded
+  ! * bigger than original size but can be decreased.  There should be no
+  ! * holes among the significant bits.  Exponent bias usually is set
+  ! * 2^(n-1)-1, where n is the exponent size.
+  ! *-----------------------------------------------------------------------*/
+
+  CALL H5Tset_fields_f(tid1, INT(44,size_t), INT(34,size_t), INT(10,size_t), &
+       INT(3,size_t), INT(31,size_t), error)
+  CALL check("H5Tset_fields_f",error,total_error)
+
+  CALL H5Tset_offset_f(tid1, INT(3,size_t), error)
+  CALL check("H5Tset_offset_f",error,total_error)
+
+  CALL H5Tset_precision_f(tid1, INT(42,size_t), error)
+  CALL check("H5Tset_precision_f",error,total_error)
+
+  CALL H5Tset_size_f(tid1, INT(7,size_t), error)
+  CALL check("H5Tset_size_f",error,total_error)
+
+  CALL H5Tset_ebias_f(tid1, INT(511,size_t), error)
+  CALL check("H5Tset_ebias_f",error,total_error)
+
+  CALL H5Tset_pad_f(tid1, H5T_PAD_ZERO_F, H5T_PAD_ZERO_F, error)
+  CALL check("H5Tset_pad_f",error,total_error)
+
+  CALL h5tcommit_f(file, "new float type 1", tid1, error)
+  CALL check("h5tcommit_f", error, total_error)
+
+  CALL h5tclose_f(tid1, error)
+  CALL check("h5tclose_f", error, total_error)
+
+  CALL H5Topen_f(file, "new float type 1", tid1, error)
+  CALL check("H5Topen_f", error, total_error)
+
+  CALL H5Tget_fields_f(tid1, spos, epos, esize, mpos, msize, error)
+  CALL check("H5Tget_fields_f", error, total_error)
+
+  IF(spos.NE.44 .OR. epos.NE.34 .OR. esize.NE.10 .OR. mpos.NE.3 .OR. msize.NE.31)THEN
+     CALL VERIFY("H5Tget_fields_f", -1, 0, total_error)
+  ENDIF
+
+  CALL H5Tget_precision_f(tid1, precision1, error)
+  CALL check("H5Tget_precision_f", error, total_error)
+  CALL VERIFY("H5Tget_precision_f", INT(precision1), 42, total_error) 
+
+  CALL H5Tget_offset_f(tid1, offset1, error)
+  CALL check("H5Tget_offset_f", error, total_error)
+  CALL VERIFY("H5Tget_offset_f", INT(offset1), 3, total_error)
+
+  CALL H5Tget_size_f(tid1, size1, error)
+  CALL check("H5Tget_size_f", error, total_error)
+  CALL VERIFY("H5Tget_size_f", INT(size1), 7, total_error)
+
+  CALL H5Tget_ebias_f(tid1, ebias1, error)
+  CALL check("H5Tget_ebias_f", error, total_error)
+  CALL VERIFY("H5Tget_ebias_f", INT(ebias1), 511, total_error)
+
+  !/*--------------------------------------------------------------------------
+  ! *                   2nd floating-point type
+  ! * size=3 byte, precision=24 bits, offset=0 bits, mantissa size=16 bits,
+  ! * mantissa position=0, exponent size=7 bits, exponent position=16, exponent
+  ! * bias=63. It can be illustrated in little-endian order as
+  ! *
+  ! *          2       1       0
+  ! *    SEEEEEEE MMMMMMMM MMMMMMMM
+  ! *--------------------------------------------------------------------------*/
+
+  CALL H5Tset_fields_f(tid2, INT(23,size_t), INT(16,size_t), INT(7,size_t), &
+       INT(0,size_t), INT(16,size_t), error)
+  CALL check("H5Tset_fields_f",error,total_error)
+
+  CALL H5Tset_offset_f(tid2, INT(0,size_t), error)
+  CALL check("H5Tset_offset_f",error,total_error)
+
+  CALL H5Tset_precision_f(tid2, INT(24,size_t), error)
+  CALL check("H5Tset_precision_f",error,total_error)
+
+  CALL H5Tset_size_f(tid2, INT(3,size_t), error)
+  CALL check("H5Tset_size_f",error,total_error)
+
+  CALL H5Tset_ebias_f(tid2, INT(63,size_t), error)
+  CALL check("H5Tset_ebias_f",error,total_error)
+
+  CALL H5Tset_pad_f(tid2, H5T_PAD_ZERO_F, H5T_PAD_ZERO_F, error)
+  CALL check("H5Tset_pad_f",error,total_error)
+
+  CALL h5tcommit_f(file, "new float type 2", tid2, error)
+  CALL check("h5tcommit_f", error, total_error)
+
+  CALL h5tclose_f(tid2, error)
+  CALL check("h5tclose_f", error, total_error)
+
+  CALL H5Topen_f(file, "new float type 2", tid2, error)
+  CALL check("H5Topen_f", error, total_error)
+
+  CALL H5Tget_fields_f(tid2, spos, epos, esize, mpos, msize, error)
+  CALL check("H5Tget_fields_f", error, total_error)
+
+  IF(spos.NE.23 .OR. epos.NE.16 .OR. esize.NE.7 .OR. mpos.NE.0 .OR. msize.NE.16)THEN
+     CALL VERIFY("H5Tget_fields_f", -1, 0, total_error)
+  ENDIF
+
+  CALL H5Tget_precision_f(tid2, precision2, error)
+  CALL check("H5Tget_precision_f", error, total_error)
+  CALL VERIFY("H5Tget_precision_f", INT(precision2), 24, total_error) 
+
+  CALL H5Tget_offset_f(tid2, offset2, error)
+  CALL check("H5Tget_offset_f", error, total_error)
+  CALL VERIFY("H5Tget_offset_f", INT(offset2), 0, total_error)
+
+  CALL H5Tget_size_f(tid2, size2, error)
+  CALL check("H5Tget_size_f", error, total_error)
+  CALL VERIFY("H5Tget_size_f", INT(size2), 3, total_error)
+
+  CALL H5Tget_ebias_f(tid2, ebias2, error)
+  CALL check("H5Tget_ebias_f", error, total_error)
+  CALL VERIFY("H5Tget_ebias_f", INT(ebias2), 63, total_error)
+
+  CALL h5tclose_f(tid1, error)
+  CALL check("h5tclose_f", error, total_error)
+
+  CALL h5tclose_f(tid2, error)
+  CALL check("h5tclose_f", error, total_error)
+
+  CALL H5Pclose_f(dxpl_id, error)
+  CALL check("H5Pclose_f", error, total_error)
+
+  CALL h5fclose_f(file,error)
+  CALL check("h5fclose_f", error, total_error)
+
+END SUBROUTINE test_derived_flt
+
+
+

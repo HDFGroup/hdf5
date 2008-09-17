@@ -48,6 +48,7 @@
      INTEGER :: vl_total_error = 0
      INTEGER :: z_total_error = 0
      INTEGER :: sz_total_error = 0
+     INTEGER :: derived_flt_error = 0
      INTEGER :: majnum, minnum, relnum
      CHARACTER(LEN=8) error_string
      CHARACTER(LEN=8) :: success = ' PASSED '
@@ -230,6 +231,13 @@
      write(*, fmt = e_format) error_string
      total_error = total_error + enum_total_error 
 
+     error_string = failure
+     CALL test_derived_flt(cleanup, derived_flt_error)
+     IF (derived_flt_error == 0) error_string = success
+     write(*, fmt = '(28a)', advance = 'no') ' Derived float datatype test'     
+     write(*, fmt = '(47x,a)', advance = 'no')  ' '
+     write(*, fmt = e_format) error_string
+     total_error = total_error + derived_flt_error
 
 !     write(*,*)
 !     write(*,*) '========================================='
