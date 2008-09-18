@@ -378,6 +378,9 @@
    2GB. */
 /* #undef H5_MPI_FILE_SET_SIZE_BIG */
 
+/* Define if we can violate pointer alignment restrictions */
+/* #undef H5_NO_ALIGNMENT_RESTRICTIONS */
+
 /* Define if shared writing must be disabled (CodeWarrior only) */
 #define H5_NO_SHARED_WRITING 
 
@@ -385,19 +388,19 @@
 #define H5_PACKAGE "hdf5"
 
 /* Define to the address where bug reports for this package should be sent. */
-#define H5_PACKAGE_BUGREPORT "hdfhelp@ncsa.uiuc.edu"
+#define H5_PACKAGE_BUGREPORT "help@hdfgroup.org"
 
 /* Define to the full name of this package. */
 #define H5_PACKAGE_NAME "HDF5"
 
 /* Define to the full name and version of this package. */
-#define H5_PACKAGE_STRING "HDF5 1.7.58"
+#define H5_PACKAGE_STRING "HDF5 1.9.17"
 
 /* Define to the one symbol short name of this package. */
 #define H5_PACKAGE_TARNAME "hdf5"
 
 /* Define to the version of this package. */
-#define H5_PACKAGE_VERSION "1.7.58"
+#define H5_PACKAGE_VERSION "1.9.17"
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #define H5_PRINTF_LL_WIDTH "ll"

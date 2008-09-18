@@ -456,6 +456,9 @@
 /* Define if your system can handle special collective IO properly. */
 #define H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS 1
 
+/* Define if we can violate pointer alignment restrictions */
+#define H5_NO_ALIGNMENT_RESTRICTIONS 1
+
 /* Define if deprecated public API symbols are disabled */
 /* #undef H5_NO_DEPRECATED_SYMBOLS */
 

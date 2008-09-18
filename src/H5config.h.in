@@ -436,6 +436,9 @@
 /* Define if your system can handle special collective IO properly. */
 #undef MPI_SPECIAL_COLLECTIVE_IO_WORKS
 
+/* Define if we can violate pointer alignment restrictions */
+#undef NO_ALIGNMENT_RESTRICTIONS
+
 /* Define if deprecated public API symbols are disabled */
 #undef NO_DEPRECATED_SYMBOLS
 
