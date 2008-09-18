@@ -39,7 +39,7 @@ void init_packobject(pack_info_t *obj)
     {
         obj->filter[j].filtn        = -1;
         for ( k=0; k<CD_VALUES; k++)
-            obj->filter[j].cd_values[k] = -1;
+            obj->filter[j].cd_values[k] = 0;
     }
     obj->chunk.rank = -1;
     obj->refobj_id = -1;

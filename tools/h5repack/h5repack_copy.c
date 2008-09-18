@@ -41,7 +41,9 @@ static void  print_dataset_info(hid_t dcpl_id,char *objname,double per, int pr);
 static int   do_copy_objects(hid_t fidin,hid_t fidout,trav_table_t *travt,pack_opt_t *options);
 static int   copy_attr(hid_t loc_in,hid_t loc_out,pack_opt_t *options);
 static int   copy_user_block(const char *infile, const char *outfile, hsize_t size);
+#if defined (H5REPACK_DEBUG)  
 static void  print_user_block(const char *filename, hid_t fid);
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: copy_objects
@@ -491,7 +493,9 @@ int do_copy_objects(hid_t fidin,
     void     *buf=NULL;         /* buffer for raw data */
     void     *sm_buf=NULL;      /* buffer for raw data */
     int      has_filter;        /* current object has a filter */
+    int      req_filter;        /* there was a request for a filter */
     unsigned i;
+    unsigned u;
     int      is_ref=0;
 
     /*-------------------------------------------------------------------------
@@ -499,16 +503,19 @@ int do_copy_objects(hid_t fidin,
     *-------------------------------------------------------------------------
     */
 
-    if (options->verbose) {
+    if (options->verbose) 
+    {
         printf("-----------------------------------------\n");
         printf(" Type     Filter (Compression)     Name\n");
         printf("-----------------------------------------\n");
     }
 
-    for ( i = 0; i < travt->nobjs; i++) {
+    for ( i = 0; i < travt->nobjs; i++) 
+    {
 
         buf = NULL;
-        switch ( travt->objs[i].type ) {
+        switch ( travt->objs[i].type ) 
+        {
             /*-------------------------------------------------------------------------
              * H5TRAV_TYPE_GROUP
              *-------------------------------------------------------------------------
@@ -522,11 +529,13 @@ int do_copy_objects(hid_t fidin,
                  * and copy its attributes using that ID
                  *-------------------------------------------------------------------------
                  */
-                if(HDstrcmp(travt->objs[i].name, "/") == 0) {
+                if(HDstrcmp(travt->objs[i].name, "/") == 0) 
+                {
                     if ((grp_out = H5Gopen2(fidout, "/", H5P_DEFAULT)) < 0)
                         goto error;
                 }
-                else if (options->grp_compact>0 || options->grp_indexed>0) {
+                else if (options->grp_compact>0 || options->grp_indexed>0) 
+                {
                     /* Set up group creation property list */
                     if((gcpl_id = H5Pcreate(H5P_GROUP_CREATE)) < 0)
                         goto error;
@@ -537,7 +546,8 @@ int do_copy_objects(hid_t fidin,
                     if((grp_out = H5Gcreate2(fidout, travt->objs[i].name, H5P_DEFAULT, gcpl_id, H5P_DEFAULT)) < 0)
                         goto error; 
                 }
-                else {
+                else 
+                {
                     if((grp_out = H5Gcreate2(fidout, travt->objs[i].name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                         goto error;
                 }
@@ -570,6 +580,24 @@ int do_copy_objects(hid_t fidin,
             case H5TRAV_TYPE_DATASET:
 
                 has_filter = 0;
+                req_filter = 0;
+
+                /* check if filters were requested */
+                for( u = 0; u < options->op_tbl->nelems; u++)
+                {
+                    int k; 
+                    
+                    for( k = 0; k < options->op_tbl->objs[u].nfilters; k++)
+                    {
+                        if ( options->op_tbl->objs[u].filter->filtn > 0 )
+                        {
+                            
+                            req_filter = 1;
+                            
+                        }
+                        
+                    }
+                }
 
                 /* early detection of references */
                 if((dset_in = H5Dopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
@@ -590,10 +618,14 @@ int do_copy_objects(hid_t fidin,
                  * otherwise we do a copy using H5Ocopy
                  *-------------------------------------------------------------------------
                  */
-                if(options->op_tbl->nelems || options->all_filter == 1
-                        || options->all_layout == 1 || is_ref) {
-                    int j;
-
+                if ( options->op_tbl->nelems  || 
+                     options->all_filter == 1 || 
+                     options->all_layout == 1 || 
+                     is_ref) 
+                {
+                    
+                    int      j;
+                    
                     if((dset_in = H5Dopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
                         goto error;
                     if((f_space_id = H5Dget_space(dset_in)) < 0)
@@ -610,8 +642,10 @@ int do_copy_objects(hid_t fidin,
                     if(H5Sget_simple_extent_dims(f_space_id, dims, NULL) < 0)
                         goto error;
                     nelmts = 1;
-                    for(j = 0; j < rank; j++)
+                    for ( j = 0; j < rank; j++)
+                    {
                         nelmts *= dims[j];
+                    }
 
                     if(options->use_native == 1)
                         wtype_id = h5tools_get_native_type(ftype_id);
@@ -649,7 +683,8 @@ int do_copy_objects(hid_t fidin,
                                 apply_s=0;
 
                             /* apply the filter */
-                            if (apply_s) {
+                            if (apply_s) 
+                            {
                                 if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,options,&has_filter) < 0)
                                     goto error;
                             }
@@ -800,8 +835,8 @@ int do_copy_objects(hid_t fidin,
                             {
                                 double ratio=0;
 
-                                /* only print the compression ration if there was a filter */
-                                if (apply_s && apply_f && has_filter)
+                                /* only print the compression ration if there was a filter request */
+                                if (apply_s && apply_f && req_filter)
                                 {
                                     hssize_t a, b;
 
@@ -1390,6 +1425,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#if defined (H5REPACK_DEBUG)  
 static 
 void print_user_block(const char *filename, hid_t fid)
 {
@@ -1463,3 +1499,5 @@ done:
 
     return;    
 }
+#endif
+
