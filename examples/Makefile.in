@@ -27,7 +27,7 @@ CFLAGS=
 
 ## These are the programs that `make all' or `make tests' will build and which
 ## `make check' will run. List them in the order they should be run.
-TEST_PROGS_PARA=ph5example
+@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROGS_PARA=ph5example
 TEST_PROGS=h5_write h5_read h5_extend_write h5_chunk_read h5_compound   \
            h5_group h5_select h5_attribute h5_mount h5_reference h5_drivers
 TEST_SCRIPTS=testh5cc.sh
@@ -45,7 +45,7 @@ DISTCLEAN=testh5cc.sh
 ## List all source files here.  The list of object files will be
 ## created by replacing the `.c' with a `.o'.  This list is necessary
 ## for building automatic dependencies.
-TEST_SRC_PARA=ph5example.c
+@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_SRC_PARA=ph5example.c
 TEST_SRC=h5_chunk_read.c h5_compound.c h5_extend_write.c h5_group.c     \
          h5_read.c h5_write.c h5_select.c h5_attribute.c h5_mount.c     \
          h5_reference.c h5_drivers.c $(TEST_SRC_PARA)
