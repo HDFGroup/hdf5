@@ -321,14 +321,18 @@ uncompress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
 static void
 get_unique_name(void)
 {
-    const char *prefix = "/tmp", *tmpl = "/zip_perf.data";
+    const char *prefix = "", *tmpl = "zip_perf.data";
     const char *env = getenv("HDF5_PREFIX");
 
-    if (env)
+    if (env) {
         prefix = env;
+        strcat(prefix, "/");
+    }
 
-    if (option_prefix)
+    if (option_prefix) {
         prefix = option_prefix;
+        strcat(prefix, "/");
+    }
 
     filename = calloc(1, strlen(prefix) + strlen(tmpl) + 1);
 
