@@ -3764,6 +3764,53 @@ esac
 
 
 dnl ----------------------------------------------------------------------
+dnl Check if pointer alignments are enforced
+dnl
+AC_MSG_CHECKING([if alignment restrictions are strictly enforced])
+AC_RUN_IFELSE([
+    AC_LANG_PROGRAM([
+        #include <stdlib.h>
+        #include <string.h>
+
+        typedef struct {
+            size_t len;
+            void *p;
+        } hvl_t;
+        ], [
+        char *chp = "beefs";
+        char **chpp = malloc (2 * sizeof (char *));
+        char **chpp2;
+        hvl_t vl = { 12345, (void *) chp };
+        hvl_t *vlp;
+        hvl_t *vlp2;
+
+        memcpy ((void *) ((char *) chpp + 1), &chp, sizeof (char *));
+        chpp2 = (char **) ((char *) chpp + 1);
+        if (strcmp (*chpp2, chp)) {
+            free (chpp);
+            return 1;
+        }
+        free (chpp);
+
+        vlp = malloc (2 * sizeof (hvl_t));
+        memcpy ((void *) ((char *) vlp + 1), &vl, sizeof (hvl_t));
+        vlp2 = (hvl_t *) ((char *) vlp + 1);
+        if (vlp2->len != vl.len || vlp2->p != vl.p) {
+            free (vlp);
+            return 1;
+        }
+        free (vlp);
+    ])
+    ], [
+    AC_DEFINE([NO_ALIGNMENT_RESTRICTIONS], [1], [Define if we can violate pointer alignment restrictions])
+    AC_MSG_RESULT([no])
+    ], [
+    AC_MSG_RESULT([yes])
+    ], [
+    AC_MSG_RESULT([unknown, assuming yes])
+    ])
+
+dnl ----------------------------------------------------------------------
 dnl Create automake conditionals to tell automake makefiles which directories
 dnl need to be compiled
 
