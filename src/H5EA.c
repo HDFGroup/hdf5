@@ -116,7 +116,7 @@ H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam))
     haddr_t ea_addr;            /* Array header address */
 
 #ifdef QAK
-HDfprintf(stderr, "%s: Called\n", __func__);
+HDfprintf(stderr, "%s: Called\n", FUNC);
 #endif /* QAK */
 
     /*
@@ -194,7 +194,7 @@ H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, const H5EA_class_t *cls))
 
     /* Load the array header into memory */
 #ifdef QAK
-HDfprintf(stderr, "%s: ea_addr = %a\n", __func__, ea_addr);
+HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
 #endif /* QAK */
     if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, cls, NULL, H5AC_READ)))
         H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header, address = %llu", (unsigned long_long)ea_addr)
@@ -253,7 +253,7 @@ H5EA_get_nelmts(const H5EA_t *ea, hsize_t *nelmts))
     /* Local variables */
 
 #ifdef QAK
-HDfprintf(stderr, "%s: Called\n", __func__);
+HDfprintf(stderr, "%s: Called\n", FUNC);
 #endif /* QAK */
 
     /*
@@ -288,7 +288,7 @@ H5EA_get_addr(const H5EA_t *ea, haddr_t *addr))
     /* Local variables */
 
 #ifdef QAK
-HDfprintf(stderr, "%s: Called\n", __func__);
+HDfprintf(stderr, "%s: Called\n", FUNC);
 #endif /* QAK */
 
     /*
@@ -327,8 +327,8 @@ H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt))
     hbool_t hdr_dirty = FALSE;          /* Whether header information changed */
 
 #ifdef QAK
-HDfprintf(stderr, "%s: Called\n", __func__);
-HDfprintf(stderr, "%s: Index %Hu\n", __func__, idx);
+HDfprintf(stderr, "%s: Called\n", FUNC);
+HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
 #endif /* QAK */
 
     /*
@@ -343,7 +343,7 @@ HDfprintf(stderr, "%s: Index %Hu\n", __func__, idx);
     /* Check if we should create the index block */
     if(!H5F_addr_defined(hdr->idx_blk_addr)) {
 #ifdef QAK
-HDfprintf(stderr, "%s: Index block address not defined!\n", __func__, idx);
+HDfprintf(stderr, "%s: Index block address not defined!\n", FUNC, idx);
 #endif /* QAK */
         /* Create the index block */
         hdr->idx_blk_addr = H5EA__iblock_create(hdr, dxpl_id);
@@ -354,7 +354,7 @@ HDfprintf(stderr, "%s: Index block address not defined!\n", __func__, idx);
         hdr_dirty = TRUE;
     } /* end if */
 #ifdef QAK
-HDfprintf(stderr, "%s: Index block address is: %a\n", __func__, hdr->idx_blk_addr);
+HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
 #endif /* QAK */
 
     /* Protect index block */
@@ -367,7 +367,7 @@ HDfprintf(stderr, "%s: Index block address is: %a\n", __func__, hdr->idx_blk_add
         HDmemcpy(((uint8_t *)iblock->elmts) + (hdr->cls->nat_elmt_size * idx), elmt, hdr->cls->nat_elmt_size);
     } /* end if */
     else {
-HDfprintf(stderr, "%s: Index %Hu not supported yet!\n", __func__, idx);
+HDfprintf(stderr, "%s: Index %Hu not supported yet!\n", FUNC, idx);
 HDassert(0 && "Index location not supported!");
     } /* end else */
 
@@ -411,8 +411,8 @@ H5EA_get(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, void *elmt))
     H5EA_iblock_t *iblock = NULL;       /* Pointer to index block for EA */
 
 #ifdef QAK
-HDfprintf(stderr, "%s: Called\n", __func__);
-HDfprintf(stderr, "%s: Index %Hu\n", __func__, idx);
+HDfprintf(stderr, "%s: Called\n", FUNC);
+HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
 #endif /* QAK */
 
     /*
@@ -427,7 +427,7 @@ HDfprintf(stderr, "%s: Index %Hu\n", __func__, idx);
     /* Check for element beyond max. element in array */
     if(idx >= hdr->max_idx_set) {
 #ifdef QAK
-HDfprintf(stderr, "%s: Element beyond max. index set\n", __func__, idx);
+HDfprintf(stderr, "%s: Element beyond max. index set\n", FUNC, idx);
 #endif /* QAK */
         /* Call the class's 'fill' callback */
         if((hdr->cls->fill)(elmt, (size_t)1) < 0)
@@ -435,7 +435,7 @@ HDfprintf(stderr, "%s: Element beyond max. index set\n", __func__, idx);
     } /* end if */
     else {
 #ifdef QAK
-HDfprintf(stderr, "%s: Index block address is: %a\n", __func__, hdr->idx_blk_addr);
+HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
 #endif /* QAK */
 
         /* Protect index block */
@@ -448,7 +448,7 @@ HDfprintf(stderr, "%s: Index block address is: %a\n", __func__, hdr->idx_blk_add
             HDmemcpy(elmt, ((uint8_t *)iblock->elmts) + (hdr->cls->nat_elmt_size * idx), hdr->cls->nat_elmt_size);
         } /* end if */
         else {
-HDfprintf(stderr, "%s: Index %Hu not supported yet!\n", __func__, idx);
+HDfprintf(stderr, "%s: Index %Hu not supported yet!\n", FUNC, idx);
 HDassert(0 && "Index location not supported!");
         } /* end else */
     } /* end else */
@@ -482,7 +482,7 @@ H5EA_close(H5EA_t *ea, hid_t dxpl_id))
     haddr_t ea_addr = HADDR_UNDEF;      /* Address of array (for deletion) */
 
 #ifdef QAK
-HDfprintf(stderr, "%s: Called\n", __func__);
+HDfprintf(stderr, "%s: Called\n", FUNC);
 #endif /* QAK */
 
     /*
@@ -566,7 +566,7 @@ H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr))
 
     /* Lock the array header into memory */
 #ifdef QAK
-HDfprintf(stderr, "%s: ea_addr = %a\n", __func__, ea_addr);
+HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
 #endif /* QAK */
     if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, NULL, NULL, H5AC_WRITE)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array header, address = %llu", (unsigned long_long)ea_addr)
