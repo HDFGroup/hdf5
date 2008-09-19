@@ -22,8 +22,7 @@
 
 
 static void usage(const char *prog);
-static int  parse_number(char *str);
-static void parse_command_line(int argc, const char* argv[], pack_opt_t* options);
+static void parse_command_line(int argc, const char **argv, pack_opt_t* options);
 static void read_info(const char *filename,pack_opt_t *options);
 
 
@@ -94,10 +93,10 @@ static struct long_options l_opts[] = {
  *    add options to set alignment (H5Pset_alignment) (switches -t -a)
  *-------------------------------------------------------------------------
  */
-int main(int argc, char **argv)
+int main(int argc, const char **argv)
 {
-    char          *infile  = NULL;
-    char          *outfile = NULL;
+    const char          *infile  = NULL;
+    const char          *outfile = NULL;
     pack_opt_t    options;            /*the global options */
     int           ret=-1;
     int           i;
@@ -170,7 +169,7 @@ int main(int argc, char **argv)
 
             else if (strcmp(argv[i], "-m") == 0)
             {
-                options.min_comp = parse_number(argv[i+1]);
+                options.min_comp = atoi(argv[i+1]);
                 if ((int)options.min_comp<=0)
                 {
                     error_msg(progname, "invalid minimum compress size <%s>\n",argv[i+1]);
@@ -207,7 +206,7 @@ int main(int argc, char **argv)
             else if (strcmp(argv[i], "-s") == 0)
             {
 
-                char *s = argv[++i];
+                const char *s = argv[++i];
                 int idx = 0;
                 int ssize = 0;
                 char *msgPtr = strchr( s, ':');
@@ -431,7 +430,8 @@ static void usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 
-static void parse_command_line(int argc, const char* argv[], pack_opt_t* options)
+static 
+void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 {
 
     int opt;
@@ -472,7 +472,7 @@ static void parse_command_line(int argc, const char* argv[], pack_opt_t* options
 
         case 'm':
 
-            options->min_comp = parse_number( opt_arg );
+            options->min_comp = atoi( opt_arg );
             if ((int)options->min_comp<=0)
             {
                 error_msg(progname, "invalid minimum compress size <%s>\n", opt_arg );
@@ -555,22 +555,18 @@ static void parse_command_line(int argc, const char* argv[], pack_opt_t* options
 
         case 'b':
 
-            options->ublock_size = atoi( opt_arg );
+            options->ublock_size = atol( opt_arg );
             break;
 
         case 't':
 
-            options->threshold = atoi( opt_arg );
-            if ( options->threshold < 0 )
-            {
-                error_msg(progname, "invalid threshold size\n", opt_arg );
-                exit(EXIT_FAILURE);
-            }
+            options->threshold = atol( opt_arg );
+          
             break;
 
         case 'a':
 
-            options->alignment = atoi( opt_arg );
+            options->alignment = atol( opt_arg );
             if ( options->alignment < 1 )
             {
                 error_msg(progname, "invalid alignment size\n", opt_arg );
@@ -591,45 +587,7 @@ static void parse_command_line(int argc, const char* argv[], pack_opt_t* options
         exit(EXIT_FAILURE);
     }
 
-
-
-
 }
-
-/*-------------------------------------------------------------------------
- * Function: parse_number
- *
- * Purpose: read a number from command line argument
- *
- * Return: number, -1 for FAIL
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: September, 23, 2003
- *
- *-------------------------------------------------------------------------
- */
-
-
-int parse_number(char *str)
-{
-    unsigned    i;
-    int         n;
-    char        c;
-    size_t      len=strlen(str);
-
-    for ( i=0; i<len; i++)
-    {
-        c = str[i];
-        if (!isdigit(c)){
-            return -1;
-        }
-    }
-    str[i]='\0';
-    n=atoi(str);
-    return n;
-}
-
 
 /*-------------------------------------------------------------------------
  * Function: read_info

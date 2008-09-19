@@ -193,7 +193,7 @@ int do_copy_refobjs(hid_t fidin,
                                         goto error;
                                     if(options->verbose)
                                     {
-
+                                        
                                         
                                         printf(FORMAT_OBJ,"dset",travt->objs[i].name );
                                         printf("object <%s> object reference created to <%s>\n",
@@ -277,7 +277,7 @@ int do_copy_refobjs(hid_t fidin,
                                         goto error;
                                     if(options->verbose)
                                     {
-
+                                        
                                         
                                         
                                         printf(FORMAT_OBJ,"dset",travt->objs[i].name );

@@ -19,7 +19,7 @@
 
 extern char  *progname;
 static int has_layout(hid_t pid, pack_info_t *obj);
-static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *filter);
+static int has_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter);
 
 
 /*-------------------------------------------------------------------------
@@ -442,16 +442,18 @@ error:
  *-------------------------------------------------------------------------
  */
 
-static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *filter)
+static 
+int has_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
 {
-    unsigned      nfilters_dcpl;  /* number of filters in DCPL*/
+    int           nfilters_dcpl;  /* number of filters in DCPL*/
     unsigned      filt_flags;     /* filter flags */
     H5Z_filter_t  filtn;          /* filter identification number */
     unsigned      cd_values[20];  /* filter client data values */
     size_t        cd_nelmts;      /* filter client number of values */
     char          f_name[256];    /* filter name */
     size_t        size;           /* type size */
-    unsigned      i, j;           /* index */
+    int           i;              /* index */
+    unsigned      j;              /* index */
 
     /* get information about filters */
     if((nfilters_dcpl = H5Pget_nfilters(pid)) < 0)
@@ -475,7 +477,7 @@ static int has_filters(hid_t pid, hid_t tid, unsigned nfilters, filter_info_t *f
     for( i = 0; i < nfilters_dcpl; i++)
     {
         cd_nelmts = NELMTS(cd_values);
-        filtn = H5Pget_filter2(pid, i, &filt_flags, &cd_nelmts,
+        filtn = H5Pget_filter2(pid, (unsigned)i, &filt_flags, &cd_nelmts,
             cd_values, sizeof(f_name), f_name, NULL);
 
         /* filter ID */
