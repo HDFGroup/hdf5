@@ -339,7 +339,7 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:	shutdown
+ * Function:	shutdown_ea
  *
  * Purpose:	Close array, delete array, close file and verify that file
  *              is empty size
@@ -353,7 +353,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-shutdown(hid_t file, H5F_t *f, H5EA_t *ea, haddr_t ea_addr)
+shutdown_ea(hid_t file, H5F_t *f, H5EA_t *ea, haddr_t ea_addr)
 {
     h5_stat_size_t file_size;           /* File size, after deleting array */
 
@@ -389,7 +389,7 @@ HDsystem("cp earray.h5 earray.h5.save");
 
 error:
     return(-1);
-} /* shutdown() */
+} /* shutdown_ea() */
 
 
 /*-------------------------------------------------------------------------
@@ -521,7 +521,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
         TEST_ERROR
 
     /* Close array, delete array, close file & verify file is empty */
-    if(shutdown(file, f, ea, ea_addr) < 0)
+    if(shutdown_ea(file, f, ea, ea_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -591,7 +591,7 @@ test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         TEST_ERROR
 
     /* Close array, delete array, close file & verify file is empty */
-    if(shutdown(file, f, ea, ea_addr) < 0)
+    if(shutdown_ea(file, f, ea, ea_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -695,7 +695,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Close array, delete array, close file & verify file is empty */
-    if(shutdown(file2, f2, ea2, ea_addr) < 0)
+    if(shutdown_ea(file2, f2, ea2, ea_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -931,7 +931,7 @@ test_set_first(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
             TEST_ERROR
 
         /* Close array, delete array, close file & verify file is empty */
-        if(shutdown(file, f, ea, ea_addr) < 0)
+        if(shutdown_ea(file, f, ea, ea_addr) < 0)
             TEST_ERROR
 
         /* All tests passed */
@@ -1057,7 +1057,7 @@ test_set_iblock(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         } /* end for */
 
         /* Close array, delete array, close file & verify file is empty */
-        if(shutdown(file, f, ea, ea_addr) < 0)
+        if(shutdown_ea(file, f, ea, ea_addr) < 0)
             TEST_ERROR
 
         /* All tests passed */

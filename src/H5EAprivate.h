@@ -104,7 +104,7 @@ H5_DLL H5EA_t *H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr,
 H5_DLL herr_t H5EA_get_nelmts(const H5EA_t *ea, hsize_t *nelmts);
 H5_DLL herr_t H5EA_get_addr(const H5EA_t *ea, haddr_t *addr);
 H5_DLL herr_t H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt);
-herr_t H5EA_get(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, void *elmt);
+H5_DLL herr_t H5EA_get(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, void *elmt);
 H5_DLL herr_t H5EA_close(H5EA_t *ea, hid_t dxpl_id);
 H5_DLL herr_t H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr);
 
