@@ -320,7 +320,8 @@ static int check_options(pack_opt_t *options)
         }
     }
 
-    if (options->all_layout==1 && has_ck){
+    if (options->all_layout==1 && has_ck)
+    {
     error_msg(progname, "invalid chunking input: 'all' option\
         is present with other objects\n");
     return -1;
@@ -379,7 +380,8 @@ static int check_options(pack_opt_t *options)
         } /* j */
     } /* i */
 
-    if (options->all_filter==1 && has_cp){
+    if (options->all_filter==1 && has_cp)
+    {
     error_msg(progname, "invalid compression input: 'all' option\
         is present with other objects\n");
     return -1;
@@ -390,20 +392,25 @@ static int check_options(pack_opt_t *options)
     *-------------------------------------------------------------------------
     */
 
-    if (options->grp_compact < 0) {
+    if (options->grp_compact < 0) 
+    {
         error_msg(progname, "invalid maximum number of links to store as header messages\n");
         return -1;
     }
-    if (options->grp_indexed < 0) {
+    if (options->grp_indexed < 0) 
+    {
         error_msg(progname, "invalid minimum number of links to store in the indexed format\n");
         return -1;
     }
-    if (options->grp_indexed > options->grp_compact) {
+    if (options->grp_indexed > options->grp_compact) 
+    {
         error_msg(progname, "minimum indexed size is greater than the maximum compact size\n");
         return -1;
     }
-    for (i=0; i<8; i++) {
-        if (options->msg_size[i]<0) {
+    for (i=0; i<8; i++) 
+    {
+        if (options->msg_size[i]<0) 
+        {
             error_msg(progname, "invalid shared message size\n");
             return -1;
         }
@@ -411,7 +418,7 @@ static int check_options(pack_opt_t *options)
 
 
     /*--------------------------------------------------------------------------------
-    * verify new user userblock options; both file name and block size must be present
+    * verify new user userblock options; file name must be present
     *---------------------------------------------------------------------------------
     */
     if ( options->ublock_filename != NULL && options->ublock_size == 0 )
