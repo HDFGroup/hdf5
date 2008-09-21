@@ -16,9 +16,9 @@
     Data:
         (0) 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19
 /g1/g1.2                 Group
-/g1/g1.2/extlink         -> file: somefile    path: somepath
+/g1/g1.2/extlink         External Link {somefile//somepath} {**NOT FOUND**}
 /g1/g1.2/g1.2.1          Group
-/g1/g1.2/g1.2.1/slink    -> somevalue
+/g1/g1.2/g1.2.1/slink    Soft Link {somevalue}
 /g2                      Group
 /g2/dset2.1              Dataset {10}
     Data:
@@ -27,4 +27,4 @@
     Data:
         (0,0) 0, 0.1, 0.2, 0.3, 0.4, 0, 0.2, 0.4, 0.6, 0.8, 0, 0.3, 0.6, 0.9,
         (2,4) 1.2
-/g2/udlink               -> cannot follow UD links
+/g2/udlink               UD Link {cannot follow UD links}

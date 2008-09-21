@@ -129,6 +129,9 @@ TOOLTEST tslink-1.ls 0 -w80 -r tslink.h5
 
 # test for displaying external and user-defined links
 TOOLTEST textlink-1.ls 0 -w80 -r textlink.h5
+TOOLTEST textlinksrc-1.ls 0 -w80 -r textlinksrc.h5
+TOOLTEST textlinksrc-2.ls 0 -w80 -rv textlinksrc.h5/ext_link5
+TOOLTEST textlinksrc-3.ls 0 -w80 -r textlinksrc.h5/ext_link1
 TOOLTEST tudlink-1.ls 0 -w80 -r tudlink.h5
 
 # tests for hard links

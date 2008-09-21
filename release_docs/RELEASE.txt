@@ -73,6 +73,8 @@ New Features
         -----
         - h5repack: add a userblock to an HDF5 file during the repack. (PVN - 2008/08/26)
         - h5repack: add 2 options that call H5Pset_alignment in the repacked file. (PVN - 2008/08/29)
+        - h5ls: added capability to traverse through external links when the -r
+            (recursive) flag is given. (NAF - 2008/09/16)
 
 
 
