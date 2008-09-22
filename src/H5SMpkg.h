@@ -40,13 +40,6 @@
 /* Package Macros           */
 /****************************/
 
-/* Size of signature information (on disk) */
-#define H5SM_SIZEOF_MAGIC 4
-
-/* Shared Message signatures */
-#define H5SM_TABLE_MAGIC        "SMTB"          /* Shared Message Table */
-#define H5SM_LIST_MAGIC         "SMLI"          /* Shared Message List */
-
 /* Size of checksum information (on disk) */
 #define H5SM_SIZEOF_CHECKSUM 4
 
@@ -69,7 +62,7 @@
     )
 
 #define H5SM_TABLE_SIZE(f) (                                                  \
-        H5SM_SIZEOF_MAGIC               /* Signature */                       \
+        H5_SIZEOF_MAGIC                 /* Signature */                       \
          + H5SM_SIZEOF_CHECKSUM         /* Checksum */                        \
     )
 
@@ -84,7 +77,7 @@
     )
 
 #define H5SM_LIST_SIZE(f, num_mesg) (                                         \
-         H5SM_SIZEOF_MAGIC              /* Signature */                       \
+         H5_SIZEOF_MAGIC                /* Signature */                       \
          + (H5SM_SOHM_ENTRY_SIZE(f) * num_mesg) /* Message entries */         \
          + H5SM_SIZEOF_CHECKSUM         /* Checksum */                        \
     )

@@ -127,7 +127,7 @@ H5O_assert(const H5O_t *oh)
         /* Version specific checks */
         if(oh->version > H5O_VERSION_1) {
             /* Make certain that the magic number is correct for each chunk */
-            HDassert(!HDmemcmp(oh->chunk[u].image, (u == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC), H5O_SIZEOF_MAGIC));
+            HDassert(!HDmemcmp(oh->chunk[u].image, (u == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC), H5_SIZEOF_MAGIC));
 
             /* Check for valid gap size */
             HDassert(oh->chunk[u].gap < (size_t)H5O_SIZEOF_MSGHDR_OH(oh));

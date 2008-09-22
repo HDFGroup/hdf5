@@ -119,7 +119,7 @@
 /* Local Macros */
 /****************/
 #define H5B_SIZEOF_HDR(F)						      \
-   (H5B_SIZEOF_MAGIC +		/*magic number				  */  \
+   (H5_SIZEOF_MAGIC +		/*magic number				  */  \
     4 +				/*type, level, num entries		  */  \
     2*H5F_SIZEOF_ADDR(F))	/*left and right sibling addresses	  */
 #define H5B_NKEY(b,shared,idx)  ((b)->native+(shared)->nkey[(idx)])

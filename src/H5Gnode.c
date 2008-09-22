@@ -66,7 +66,7 @@ typedef struct H5G_node_t {
 
 /* Private macros */
 #define H5G_NODE_VERS   1               /*symbol table node version number   */
-#define H5G_NODE_SIZEOF_HDR(F) (H5G_NODE_SIZEOF_MAGIC + 4)
+#define H5G_NODE_SIZEOF_HDR(F) (H5_SIZEOF_MAGIC + 4)
 
 /* Size of stack buffer for serialized nodes */
 #define H5G_NODE_BUF_SIZE       512
@@ -380,9 +380,9 @@ H5G_node_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED  *_udata1
     p = node;
 
     /* magic */
-    if(HDmemcmp(p, H5G_NODE_MAGIC, (size_t)H5G_NODE_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, NULL, "bad symbol table node signature")
-    p += 4;
+    p += H5_SIZEOF_MAGIC;
 
     /* version */
     if(H5G_NODE_VERS != *p++)
@@ -559,8 +559,8 @@ H5G_node_serialize(H5F_t *f, H5G_node_t *sym, size_t size, uint8_t *buf)
     p = buf;
 
     /* magic number */
-    HDmemcpy(p, H5G_NODE_MAGIC, (size_t)H5G_NODE_SIZEOF_MAGIC);
-    p += 4;
+    HDmemcpy(p, H5G_NODE_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    p += H5_SIZEOF_MAGIC;
 
     /* version number */
     *p++ = H5G_NODE_VERS;

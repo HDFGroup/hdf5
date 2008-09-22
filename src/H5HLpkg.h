@@ -45,7 +45,7 @@ H5_DLLVAR const H5AC_class_t H5AC_LHEAP[1];
 /**************************/
 
 #define H5HL_SIZEOF_HDR(F)						      \
-    H5HL_ALIGN(H5HL_SIZEOF_MAGIC +	/*heap signature		*/    \
+    H5HL_ALIGN(H5_SIZEOF_MAGIC +	/*heap signature		*/    \
 	       4 +			/*reserved			*/    \
 	       H5F_SIZEOF_SIZE (F) +	/*data size			*/    \
 	       H5F_SIZEOF_SIZE (F) +	/*free list head		*/    \

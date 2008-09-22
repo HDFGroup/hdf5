@@ -67,13 +67,6 @@
 #define H5O_ALIGN_F(F, X)						      \
      H5O_ALIGN_VERS((H5F_USE_LATEST_FORMAT(F) ? H5O_VERSION_LATEST : H5O_VERSION_1), X)
 
-/* Size of signature information (on disk) */
-#define H5O_SIZEOF_MAGIC                4
-
-/* Object header signatures */
-#define H5O_HDR_MAGIC                   "OHDR"          /* Header */
-#define H5O_CHK_MAGIC                   "OCHK"          /* Continuation chunk */
-
 /* Size of checksum (on disk) */
 #define H5O_SIZEOF_CHKSUM               4
 
@@ -106,7 +99,7 @@
                 4 +		/*reference count	*/		      \
                 4)		/*chunk data size	*/		      \
         :								      \
-            (H5O_SIZEOF_MAGIC +	/*magic number  	*/		      \
+            (H5_SIZEOF_MAGIC +	/*magic number  	*/		      \
                 1 +		/*version number 	*/		      \
                 1 +		/*flags		 	*/		      \
                 (((O)->flags & H5O_HDR_STORE_TIMES) ? (			      \
@@ -155,7 +148,7 @@
             0 +		/*no magic #  */				      \
                 0 	/*no checksum */				      \
         :								      \
-            H5O_SIZEOF_MAGIC + 		/*magic #  */			      \
+            H5_SIZEOF_MAGIC + 		/*magic #  */			      \
                 H5O_SIZEOF_CHKSUM 	/*checksum */			      \
     )
 #define H5O_SIZEOF_CHKHDR_OH(O)						      \

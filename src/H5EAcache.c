@@ -200,9 +200,9 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
     p = buf;
 
     /* Magic number */
-    if(HDmemcmp(p, H5EA_HDR_MAGIC, (size_t)H5EA_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
 	H5E_THROW(H5E_BADVALUE, "wrong extensible array header signature")
-    p += H5EA_SIZEOF_MAGIC;
+    p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5EA_HDR_VERSION)
@@ -311,8 +311,8 @@ H5EA__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         p = buf;
 
         /* Magic number */
-        HDmemcpy(p, H5EA_HDR_MAGIC, (size_t)H5EA_SIZEOF_MAGIC);
-        p += H5EA_SIZEOF_MAGIC;
+        HDmemcpy(p, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
 
         /* Version # */
         *p++ = H5EA_HDR_VERSION;
@@ -516,9 +516,9 @@ H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     p = buf;
 
     /* Magic number */
-    if(HDmemcmp(p, H5EA_IBLOCK_MAGIC, (size_t)H5EA_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
 	H5E_THROW(H5E_BADVALUE, "wrong extensible array index block signature")
-    p += H5EA_SIZEOF_MAGIC;
+    p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5EA_IBLOCK_VERSION)
@@ -640,8 +640,8 @@ H5EA__cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         p = buf;
 
         /* Magic number */
-        HDmemcpy(p, H5EA_IBLOCK_MAGIC, (size_t)H5EA_SIZEOF_MAGIC);
-        p += H5EA_SIZEOF_MAGIC;
+        HDmemcpy(p, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
 
         /* Version # */
         *p++ = H5EA_IBLOCK_VERSION;
@@ -860,9 +860,9 @@ H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     p = buf;
 
     /* Magic number */
-    if(HDmemcmp(p, H5EA_DBLOCK_MAGIC, (size_t)H5EA_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
 	H5E_THROW(H5E_BADVALUE, "wrong extensible array data block signature")
-    p += H5EA_SIZEOF_MAGIC;
+    p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5EA_DBLOCK_VERSION)
@@ -964,8 +964,8 @@ H5EA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         p = buf;
 
         /* Magic number */
-        HDmemcpy(p, H5EA_DBLOCK_MAGIC, (size_t)H5EA_SIZEOF_MAGIC);
-        p += H5EA_SIZEOF_MAGIC;
+        HDmemcpy(p, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
 
         /* Version # */
         *p++ = H5EA_DBLOCK_VERSION;

@@ -40,14 +40,6 @@
 /* Package Private Macros */
 /**************************/
 
-/* Size of signature information (on disk) */
-#define H5B2_SIZEOF_MAGIC               4
-
-/* B-tree signatures */
-#define H5B2_HDR_MAGIC                  "BTHD"          /* Header */
-#define H5B2_INT_MAGIC                  "BTIN"          /* Internal node */
-#define H5B2_LEAF_MAGIC                 "BTLF"          /* Leaf node */
-
 /* Size of storage for number of records per node (on disk) */
 #define H5B2_SIZEOF_RECORDS_PER_NODE    2
 
@@ -67,7 +59,7 @@
 
 /* Format overhead for all v2 B-tree metadata in the file */
 #define H5B2_METADATA_PREFIX_SIZE (                                           \
-    H5B2_SIZEOF_MAGIC   /* Signature */                                       \
+    H5_SIZEOF_MAGIC   /* Signature */                                         \
     + 1 /* Version */                                                         \
     + 1 /* Tree type */                                                       \
     + H5B2_SIZEOF_CHKSUM /* Metadata checksum */                              \

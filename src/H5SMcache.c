@@ -165,9 +165,9 @@ H5SM_table_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1
     p = buf;
 
     /* Check magic number */
-    if(HDmemcmp(p, H5SM_TABLE_MAGIC, (size_t)H5SM_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM table signature")
-    p += H5SM_SIZEOF_MAGIC;
+    p += H5_SIZEOF_MAGIC;
 
     /* Don't count the checksum in the table size yet, since it comes after
      * all of the index headers
@@ -290,8 +290,8 @@ H5SM_table_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_ma
         p = buf;
 
         /* Encode magic number */
-        HDmemcpy(p, H5SM_TABLE_MAGIC, (size_t)H5SM_SIZEOF_MAGIC);
-        p += H5SM_SIZEOF_MAGIC;
+        HDmemcpy(p, H5SM_TABLE_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
 
         /* Encode each index header */
         for(x = 0; x < table->num_indexes; ++x) {
@@ -504,9 +504,9 @@ H5SM_list_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED *udata1,
     p = buf;
 
     /* Check magic number */
-    if(HDmemcmp(p, H5SM_LIST_MAGIC, (size_t)H5SM_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC))
         HGOTO_ERROR(H5E_SOHM, H5E_CANTLOAD, NULL, "bad SOHM list signature")
-    p += H5SM_SIZEOF_MAGIC;
+    p += H5_SIZEOF_MAGIC;
 
     /* Read messages into the list array */
     for(x = 0; x < header->num_messages; x++) {
@@ -598,8 +598,8 @@ H5SM_list_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5SM_lis
         p = buf;
 
         /* Encode magic number */
-        HDmemcpy(p, H5SM_LIST_MAGIC, (size_t)H5SM_SIZEOF_MAGIC);
-        p += H5SM_SIZEOF_MAGIC;
+        HDmemcpy(p, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
 
         /* Write messages from the messages array to disk */
         mesgs_written = 0;

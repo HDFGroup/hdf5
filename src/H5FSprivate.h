@@ -175,6 +175,10 @@ H5_DLL herr_t H5FS_sect_change_class(H5F_t *f, hid_t dxpl_id, H5FS_t *fspace,
     H5FS_section_info_t *sect, unsigned new_class);
 
 /* Debugging routines for dumping file structures */
+H5_DLL herr_t H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    FILE *stream, int indent, int fwidth);
+H5_DLL herr_t H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    FILE *stream, int indent, int fwidth, haddr_t fs_addr, haddr_t client_addr);
 H5_DLL herr_t H5FS_sect_debug(const H5FS_t *fspace, const H5FS_section_info_t *sect,
     FILE *stream, int indent, int fwidth);
 

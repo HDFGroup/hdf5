@@ -342,25 +342,17 @@ func_init_failed:							      \
 #define H5_MY_PKG_INIT  NO
 #endif /* H5EA_MODULE */
 
-/* Size of signature information (on disk) */
-#define H5EA_SIZEOF_MAGIC               4
-
 /* Fill value for extensible array test class */
 #ifdef H5EA_TESTING
 #define H5EA_TEST_FILL          ((uint64_t)ULLONG_MAX)
 #endif /* H5EA_TESTING */
-
-/* Extensible array signatures */
-#define H5EA_HDR_MAGIC                  "EAHD"          /* Header */
-#define H5EA_IBLOCK_MAGIC               "EAIB"          /* Index block */
-#define H5EA_DBLOCK_MAGIC               "EADB"          /* Data block */
 
 /* Size of checksum information (on disk) */
 #define H5EA_SIZEOF_CHKSUM      4
 
 /* "Standard" size of prefix information for extensible array metadata */
 #define H5EA_METADATA_PREFIX_SIZE(c) (                                        \
-    H5EA_SIZEOF_MAGIC   /* Signature */                                       \
+    H5_SIZEOF_MAGIC   /* Signature */                                         \
     + 1 /* Version */                                                         \
     + 1 /* Array type */                                                      \
     + ((c) ? H5EA_SIZEOF_CHKSUM : 0) /* Metadata checksum */                  \

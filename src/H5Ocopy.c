@@ -592,7 +592,7 @@ H5O_copy_header_real(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst /*out */,
      * header.  This will be written when the header is flushed to disk.
      */
     if(oh_dst->version > H5O_VERSION_1)
-        HDmemcpy(current_pos, H5O_HDR_MAGIC, (size_t)H5O_SIZEOF_MAGIC);
+        HDmemcpy(current_pos, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     current_pos += H5O_SIZEOF_HDR(oh_dst) - H5O_SIZEOF_CHKSUM_OH(oh_dst);
 
     /* Loop through destination messages, updating their "raw" info */

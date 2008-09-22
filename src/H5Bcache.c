@@ -113,7 +113,7 @@ H5B_serialize(const H5F_t *f, const H5B_t *bt)
     p = shared->page;
 
     /* magic number */
-    HDmemcpy(p, H5B_MAGIC, (size_t)H5B_SIZEOF_MAGIC);
+    HDmemcpy(p, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC);
     p += 4;
 
     /* node type and level */
@@ -202,7 +202,7 @@ H5B_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, void *udata)
     p = shared->page;
 
     /* magic number */
-    if (HDmemcmp(p, H5B_MAGIC, (size_t)H5B_SIZEOF_MAGIC))
+    if (HDmemcmp(p, H5B_MAGIC, (size_t)H5_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree signature")
     p += 4;
 

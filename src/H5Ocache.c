@@ -167,9 +167,9 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
     /* Check for magic number */
     /* (indicates version 2 or later) */
-    if(!HDmemcmp(p, H5O_HDR_MAGIC, (size_t)H5O_SIZEOF_MAGIC)) {
+    if(!HDmemcmp(p, H5O_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /* Magic number */
-        p += H5O_SIZEOF_MAGIC;
+        p += H5_SIZEOF_MAGIC;
 
         /* Version */
         oh->version = *p++;
@@ -349,9 +349,9 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
         /* Check for magic # on chunks > 0 in later versions of the format */
         if(chunkno > 0 && oh->version > H5O_VERSION_1) {
             /* Magic number */
-            if(HDmemcmp(p, H5O_CHK_MAGIC, (size_t)H5O_SIZEOF_MAGIC))
+            if(HDmemcmp(p, H5O_CHK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "wrong object header chunk signature")
-            p += H5O_SIZEOF_MAGIC;
+            p += H5_SIZEOF_MAGIC;
         } /* end if */
 
 	/* Decode messages from this chunk */
@@ -682,8 +682,8 @@ H5O_assert(oh);
             uint64_t chunk0_size = oh->chunk[0].size - H5O_SIZEOF_HDR(oh);  /* Size of chunk 0's data */
 
             /* Verify magic number */
-            HDassert(!HDmemcmp(p, H5O_HDR_MAGIC, H5O_SIZEOF_MAGIC));
-            p += H5O_SIZEOF_MAGIC;
+            HDassert(!HDmemcmp(p, H5O_HDR_MAGIC, H5_SIZEOF_MAGIC));
+            p += H5_SIZEOF_MAGIC;
 
             /* Version */
             *p++ = oh->version;
@@ -775,7 +775,7 @@ H5O_assert(oh);
             /* Sanity checks */
             if(oh->version > H5O_VERSION_1)
                 /* Make certain the magic # is present */
-                HDassert(!HDmemcmp(oh->chunk[u].image, (u == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC), H5O_SIZEOF_MAGIC));
+                HDassert(!HDmemcmp(oh->chunk[u].image, (u == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC), H5_SIZEOF_MAGIC));
             else
                 /* Gaps should never occur in version 1 of the format */
                 HDassert(oh->chunk[u].gap == 0);
