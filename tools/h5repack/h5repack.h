@@ -28,6 +28,9 @@
 
 #define MAX_NC_NAME 256 /* max length of a name */
 #define MAX_VAR_DIMS 32 /* max per variable dimensions */
+#define FORMAT_OBJ      " %-27s %s\n"   /* obj type, name */
+#define FORMAT_OBJ_ATTR "  %-27s %s\n"  /* obj type, name */
+
 
 /*-------------------------------------------------------------------------
  * data structures for command line options
@@ -103,12 +106,14 @@ typedef struct {
  chunk_info_t    chunk_g;     /*global chunk INFO for the ALL case */
  H5D_layout_t    layout_g;    /*global layout information for the ALL case */
  int             verbose;     /*verbose mode */
- hsize_t         threshold;   /*minimum size to compress, in bytes */
+ hsize_t         min_comp;    /*minimum size to compress, in bytes */
  int             use_native;  /*use a native type in write */ 
  const char      *ublock_filename; /* user block file name */
- int             ublock_size;      /* user block size */
-
+ hsize_t         ublock_size;      /* user block size */
+ hsize_t         threshold;        /* alignment threshold for H5Pset_alignment */
+ hsize_t         alignment ;       /* alignment for H5Pset_alignment */
 } pack_opt_t;
+
 
 
 

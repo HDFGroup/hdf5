@@ -21,8 +21,7 @@
 
 
 static void usage(const char *prog);
-static int  parse_number(char *str);
-static void parse_command_line(int argc, const char* argv[], pack_opt_t* options);
+static void parse_command_line(int argc, const char **argv, pack_opt_t* options);
 static void read_info(const char *filename,pack_opt_t *options);
 
 
@@ -34,18 +33,20 @@ int d_status = EXIT_SUCCESS;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:i:s:u:b:";
+static const char *s_opts = "hVvf:l:m:e:nu:b:t:a:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
     { "verbose", no_arg, 'v' },
     { "filter", require_arg, 'f' },
     { "layout", require_arg, 'l' },
-    { "threshold", require_arg, 'm' },
+    { "minimum", require_arg, 'm' },
     { "file", require_arg, 'e' },
     { "native", no_arg, 'n' },
     { "ublock", require_arg, 'u' },
     { "block", require_arg, 'b' },
+    { "threshold", require_arg, 't' },
+    { "alignment", require_arg, 'a' },
     { NULL, 0, '\0' }
 };
 
@@ -75,14 +76,16 @@ static struct long_options l_opts[] = {
  *    added support for multiple global filters
  *  PVN, August 20, 2008
  *    add a user block to repacked file (switches -u -b) 
+ *   PVN, August 28, 2008
+ *    add options to set alignment (H5Pset_alignment) (switches -t -a)
  *-------------------------------------------------------------------------
  */
 int main(int argc, char **argv)
 {
-    char          *infile  = NULL;
-    char          *outfile = NULL;
+    const char    *infile  = NULL;
+    const char    *outfile = NULL;
     pack_opt_t    options;            /*the global options */
-    int           ret;
+    int           ret=-1;
     
     /* initialize options  */
     h5repack_init (&options,0);
@@ -145,19 +148,26 @@ static void usage(const char *prog)
  printf("   -V, --version           Print version number and exit\n");
  printf("   -n, --native            Use a native HDF5 type when repacking\n");
  
- printf("   -m T, --threshold=T     Do not apply the filter to datasets smaller than T\n");
- printf("   -e M, --file=M          Name of file M with the -f and -l options\n");
+ printf("   -m M, --minimum=M       Do not apply the filter to datasets smaller than M\n");
+ printf("   -e E, --file=E          Name of file E with the -f and -l options\n");
+
  printf("   -u U, --ublock=U        Name of file U with user block data to be added\n");
- printf("   -b D, --block=D         Size of user block to be added\n");
+ printf("   -b B, --block=B         Size of user block to be added\n");
+ printf("   -t T, --threshold=T     Threshold value for H5Pset_alignment\n");
+ printf("   -a A, --alignment=A     Alignment value for H5Pset_alignment\n");
+
  printf("   -f FILT, --filter=FILT  Filter type\n");
  printf("   -l LAYT, --layout=LAYT  Layout type\n");
  
  printf("\n");
 
- printf("  T - is an integer greater than 1, size of dataset in bytes \n");
- printf("  M - is a filename.\n");
+ printf("  M - is an integer greater than 1, size of dataset in bytes \n");
+ printf("  E - is a filename.\n");
  printf("  U - is a filename.\n");
- printf("  D - is the user block size (any power of 2 equal to 512 or greater)\n");
+ printf("  T - is an integer\n");
+ printf("  A - is an integer greater than zero\n");
+ printf("  B - is the user block size, any value that is 512 or greater and is\n");
+ printf("        a power of 2 (1024 default)\n");
  
  printf("\n");
 
@@ -230,7 +240,8 @@ static void usage(const char *prog)
  *-------------------------------------------------------------------------
  */
 
-static void parse_command_line(int argc, const char* argv[], pack_opt_t* options)
+static 
+void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 {
     
     int opt;
@@ -271,10 +282,10 @@ static void parse_command_line(int argc, const char* argv[], pack_opt_t* options
 
         case 'm':
 
-            options->threshold = parse_number( opt_arg );
-            if ((int)options->threshold==-1) 
+            options->min_comp = atoi( opt_arg );
+            if ((int)options->min_comp<=0)
             {
-                error_msg(progname, "invalid treshold size <%s>\n", opt_arg );
+                error_msg(progname, "invalid minimum compress size <%s>\n", opt_arg );
                 exit(EXIT_FAILURE);
             }
             break;
@@ -287,16 +298,31 @@ static void parse_command_line(int argc, const char* argv[], pack_opt_t* options
             options->use_native = 1;
             break;
 
-        case 'u':
-            
+       case 'u':
+
             options->ublock_filename = opt_arg;
             break;
-            
+
         case 'b':
-            
-            options->ublock_size = atoi( opt_arg );
+
+            options->ublock_size = atol( opt_arg );
             break;
 
+        case 't':
+
+            options->threshold = atol( opt_arg );
+          
+            break;
+
+        case 'a':
+
+            options->alignment = atol( opt_arg );
+            if ( options->alignment < 1 )
+            {
+                error_msg(progname, "invalid alignment size\n", opt_arg );
+                exit(EXIT_FAILURE);
+            }
+            break;
         
 
         } /* switch */
@@ -317,39 +343,6 @@ static void parse_command_line(int argc, const char* argv[], pack_opt_t* options
  
 }
 
-/*-------------------------------------------------------------------------
- * Function: parse_number
- *
- * Purpose: read a number from command line argument
- *
- * Return: number, -1 for FAIL
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: September, 23, 2003
- *
- *-------------------------------------------------------------------------
- */
-
-
-int parse_number(char *str)
-{
-    unsigned    i;
-    int         n;
-    char        c;
-    size_t      len=strlen(str);
-    
-    for ( i=0; i<len; i++)
-    {
-        c = str[i];
-        if (!isdigit(c)){
-            return -1;
-        }
-    }
-    str[i]='\0';
-    n=atoi(str);
-    return n;
-}
 
 
 /*-------------------------------------------------------------------------

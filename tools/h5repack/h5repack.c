@@ -15,11 +15,12 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+
+#include "H5private.h"
 #include "h5repack.h"
-#include "h5diff.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
-#include "H5private.h"
 
 extern char  *progname;
 
@@ -92,19 +93,20 @@ int h5repack_init (pack_opt_t *options,
 {
     int k, n;
     memset(options,0,sizeof(pack_opt_t));
-    options->threshold = 1024;
+    options->min_comp = 1024;
     options->verbose   = verbose;
-        
+
     for ( n = 0; n < H5_REPACK_MAX_NFILTERS; n++)
     {
         options->filter_g[n].filtn  = -1;
-        options->filter_g[n].cd_nelmts  = -1;
+        options->filter_g[n].cd_nelmts  = 0;
         for ( k = 0; k < CD_VALUES; k++)
-            options->filter_g[n].cd_values[k] = -1;
+            options->filter_g[n].cd_values[k] = 0;
     }
-     
+
     return (options_table_init(&(options->op_tbl)));
 }
+
 
 /*-------------------------------------------------------------------------
  * Function: h5repack_end
@@ -379,25 +381,38 @@ static int check_options(pack_opt_t *options)
     }
 
     /*--------------------------------------------------------------------------------
-    * verify new user userblock options; both file name and block size must be present
+    * verify new user userblock options; file name must be present
     *---------------------------------------------------------------------------------
     */
     if ( options->ublock_filename != NULL && options->ublock_size == 0 )
     {
-        error_msg(progname, "user block size missing for file %s\n",
-            options->ublock_filename);
-        return -1;
+        if ( options->verbose )
+        {
+            printf("Warning: user block size missing for file %s. Assigning a default size of 1024...\n",
+                options->ublock_filename);
+            options->ublock_size = 1024;
+        }
     }
-    
+
     if ( options->ublock_filename == NULL && options->ublock_size != 0 )
     {
         error_msg(progname, "file name missing for user block\n",
             options->ublock_filename);
         return -1;
     }
-    
-  
-    
+
+
+    /*--------------------------------------------------------------------------------
+    * verify alignment options; threshold is zero default but alignment not
+    *---------------------------------------------------------------------------------
+    */
+
+    if ( options->alignment == 0 && options->threshold != 0 )
+    {
+        error_msg(progname, "alignment for H5Pset_alignment missing\n");
+        return -1;
+    }
+
     return 0;
 }
 
@@ -431,7 +446,8 @@ static int check_objects(const char* fname,
      * open the file
      *-------------------------------------------------------------------------
      */
-    if((fid = h5tools_fopen(fname, NULL, NULL, 0)) < 0){
+    if((fid = h5tools_fopen(fname, NULL, NULL, 0)) < 0)
+    {
         printf("<%s>: %s\n", fname, H5FOPENERROR );
         return -1;
     }
@@ -456,13 +472,15 @@ static int check_objects(const char* fname,
     if(options->verbose)
         printf("Opening file <%s>. Searching for objects to modify...\n", fname);
     
-    for(i = 0; i < options->op_tbl->nelems; i++) {
+    for(i = 0; i < options->op_tbl->nelems; i++) 
+    {
         char* name=options->op_tbl->objs[i].path;
         if(options->verbose)
             printf(" <%s>",name);
         
         /* the input object names are present in the file and are valid */
-        if(h5trav_getindext(name, travt) < 0) {
+        if(h5trav_getindext(name, travt) < 0) 
+        {
             error_msg(progname, "%s Could not find <%s> in file <%s>. Exiting...\n",
                 (options->verbose?"\n":""),name,fname);
             goto out;
@@ -471,24 +489,27 @@ static int check_objects(const char* fname,
             printf("...Found\n");
 
         /* check for extra filter conditions */
-        switch(options->op_tbl->objs[i].filter->filtn) {
+        switch(options->op_tbl->objs[i].filter->filtn) 
+        {
             /* chunk size must be smaller than pixels per block */
             case H5Z_FILTER_SZIP:
             {
-                int     j;
-                int     csize = 1;
-                int     ppb = options->op_tbl->objs[i].filter->cd_values[0];
-                hsize_t dims[H5S_MAX_RANK];
-                int     rank;
-                hid_t   did;
-                hid_t   sid;
+                int      j;
+                hsize_t  csize = 1;
+                unsigned ppb = options->op_tbl->objs[i].filter->cd_values[0];
+                hsize_t  dims[H5S_MAX_RANK];
+                int      rank;
+                hid_t    did;
+                hid_t    sid;
                 
-                if(options->op_tbl->objs[i].chunk.rank > 0) {
+                if (options->op_tbl->objs[i].chunk.rank > 0) 
+                {
                     rank = options->op_tbl->objs[i].chunk.rank;
                     for(j = 0; j < rank; j++)
-                        csize *= (int)options->op_tbl->objs[i].chunk.chunk_lengths[j];
+                        csize *= options->op_tbl->objs[i].chunk.chunk_lengths[j];
                 }
-                else {
+                else 
+                {
                     if((did = H5Dopen(fid, name)) < 0)
                         goto out;
                     if((sid = H5Dget_space(did)) < 0)
@@ -499,14 +520,15 @@ static int check_objects(const char* fname,
                     if(H5Sget_simple_extent_dims(sid, dims, NULL) < 0)
                         goto out;
                     for(j = 0; j < rank; j++)
-                        csize *= (int)dims[j];
+                        csize *= dims[j];
                     if(H5Sclose(sid) < 0)
                         goto out;
                     if(H5Dclose(did) < 0)
                         goto out;
                 }
                 
-                if (csize < ppb ) {
+                if (csize < ppb ) 
+                {
                     printf(" <warning: SZIP settins, chunk size is smaller than pixels per block>\n");
                     goto out;
                 }

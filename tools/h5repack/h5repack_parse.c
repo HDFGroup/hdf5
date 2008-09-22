@@ -324,7 +324,7 @@ obj_list_t* parse_filter(const char *str,
    */
        
    case H5Z_FILTER_DEFLATE:
-       if (filt->cd_values[0]<0 || filt->cd_values[0]>9 )
+       if (filt->cd_values[0]>9 )
        {
            if (obj_list) free(obj_list);
            error_msg(progname, "invalid compression parameter in <%s>\n",str);

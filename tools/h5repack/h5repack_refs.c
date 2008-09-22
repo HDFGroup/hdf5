@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "h5repack.h"
 #include "H5private.h"
+#include "h5diff.h"
 #include "h5tools.h"
 
 /*-------------------------------------------------------------------------
@@ -26,8 +27,10 @@
  */
 
 static const char* MapIdToName(hid_t refobj_id,trav_table_t *travt);
+static int copy_refs_attr(hid_t loc_in, hid_t loc_out, pack_opt_t *options,
+                          trav_table_t *travt, hid_t fidout);
 static void close_obj(H5G_obj_t1 obj_type, hid_t obj_id);
-static int copy_refs_attr(hid_t loc_in,hid_t loc_out,pack_opt_t *options,trav_table_t *travt,hid_t fidout);
+
 
 /*-------------------------------------------------------------------------
  * Function: do_copy_refobjs
@@ -77,13 +80,13 @@ int do_copy_refobjs(hid_t fidin,
         /*-------------------------------------------------------------------------
         * H5G_GROUP
         *-------------------------------------------------------------------------
-            */
+        */
         case H5G_GROUP:
             
         /*-------------------------------------------------------------------------
         * copy referenced objects in attributes
         *-------------------------------------------------------------------------
-            */
+        */
             
             if ((grp_out=H5Gopen(fidout,travt->objs[i].name))<0)
                 goto error;
@@ -96,9 +99,9 @@ int do_copy_refobjs(hid_t fidin,
             if (H5Gclose(grp_in)<0)
                 goto error;
             
-                /*-------------------------------------------------------------------------
-                * check for hard links
-                *-------------------------------------------------------------------------
+           /*-------------------------------------------------------------------------
+            * check for hard links
+            *-------------------------------------------------------------------------
             */
             
             if (travt->objs[i].nlinks)
@@ -114,10 +117,10 @@ int do_copy_refobjs(hid_t fidin,
             
             break;
             
-            /*-------------------------------------------------------------------------
-            * H5G_DATASET
-            *-------------------------------------------------------------------------
-            */
+       /*-------------------------------------------------------------------------
+       * H5G_DATASET
+       *-------------------------------------------------------------------------
+       */
         case H5G_DATASET:
             
             if ((dset_in=H5Dopen(fidin,travt->objs[i].name))<0)
@@ -143,18 +146,18 @@ int do_copy_refobjs(hid_t fidin,
                 goto error;
             
             
-                /*-------------------------------------------------------------------------
-                * check if the dataset creation property list has filters that
-                * are not registered in the current configuration
-                * 1) the external filters GZIP and SZIP might not be available
-                * 2) the internal filters might be turned off
-                *-------------------------------------------------------------------------
-            */
+           /*-------------------------------------------------------------------------
+           * check if the dataset creation property list has filters that
+           * are not registered in the current configuration
+           * 1) the external filters GZIP and SZIP might not be available
+           * 2) the internal filters might be turned off
+           *-------------------------------------------------------------------------
+           */
             if (h5tools_canreadf((NULL),dcpl_id)==1)
             {
-            /*-------------------------------------------------------------------------
-            * test for a valid output dataset
-            *-------------------------------------------------------------------------
+               /*-------------------------------------------------------------------------
+                * test for a valid output dataset
+                *-------------------------------------------------------------------------
                 */
                 dset_out = FAIL;
                 
@@ -207,10 +210,15 @@ int do_copy_refobjs(hid_t fidin,
                                 /* create the reference, -1 parameter for objects */
                                 if (H5Rcreate(&refbuf[u],fidout,refname,H5R_OBJECT,-1)<0)
                                     goto error;
-                                if (options->verbose)
+                                if(options->verbose)
+                                {
+                                    
+                                    
+                                    printf(FORMAT_OBJ,"dset",travt->objs[i].name );
                                     printf("object <%s> object reference created to <%s>\n",
-                                    travt->objs[i].name,
-                                    refname);
+                                        travt->objs[i].name,
+                                        refname);
+                                }
                             }/*refname*/
                             close_obj(obj_type,refobj_id);
                         }/*  u */
@@ -263,9 +271,9 @@ int do_copy_refobjs(hid_t fidin,
                         if ((obj_type = H5Rget_obj_type(dset_in,H5R_DATASET_REGION,buf))<0)
                             goto error;
                         
-                            /*-------------------------------------------------------------------------
-                            * create output
-                            *-------------------------------------------------------------------------
+                        /*-------------------------------------------------------------------------
+                        * create output
+                        *-------------------------------------------------------------------------
                         */
                         
                         refbuf=HDcalloc(sizeof(hdset_reg_ref_t),(size_t)nelmts); /*init to zero */
@@ -292,10 +300,16 @@ int do_copy_refobjs(hid_t fidin,
                                     goto error;
                                 if (H5Sclose(region_id)<0)
                                     goto error;
-                                if (options->verbose)
+                                if(options->verbose)
+                                {
+                                    
+                                    
+                                    
+                                    printf(FORMAT_OBJ,"dset",travt->objs[i].name );
                                     printf("object <%s> region reference created to <%s>\n",
-                                    travt->objs[i].name,
-                                    refname);
+                                        travt->objs[i].name,
+                                        refname);
+                                }
                             }/*refname*/
                             close_obj(obj_type,refobj_id);
                         }/*  u */
@@ -319,9 +333,9 @@ int do_copy_refobjs(hid_t fidin,
                 } /* H5T_STD_REF_DSETREG */
                 
                 
-                  /*-------------------------------------------------------------------------
-                  * not references, open previously created object in 1st traversal
-                  *-------------------------------------------------------------------------
+               /*-------------------------------------------------------------------------
+                * not references, open previously created object in 1st traversal
+                *-------------------------------------------------------------------------
                 */
                 else
                 {
@@ -339,9 +353,9 @@ int do_copy_refobjs(hid_t fidin,
                     goto error;
                 
                 
-                    /*-------------------------------------------------------------------------
-                    * check for hard links
-                    *-------------------------------------------------------------------------
+                /*-------------------------------------------------------------------------
+                * check for hard links
+                *-------------------------------------------------------------------------
                 */
                 if (travt->objs[i].nlinks)
                 {
