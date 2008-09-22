@@ -100,7 +100,7 @@ H5EA_get_stats(const H5EA_t *ea, H5EA_stat_t *stats))
     /* Local variables */
 
 #ifdef QAK
-HDfprintf(stderr, "%s: Called\n", __func__);
+HDfprintf(stderr, "%s: Called\n", FUNC);
 #endif /* QAK */
 
     /*
@@ -109,8 +109,8 @@ HDfprintf(stderr, "%s: Called\n", __func__);
     HDassert(ea);
     HDassert(stats);
 
-    /* Placeholder value */
-    HDmemset(stats, 0, sizeof(*stats));
+    /* Copy extensible array statistics */
+    HDmemcpy(stats, &ea->hdr->stats, sizeof(ea->hdr->stats));
 
 END_FUNC(PRIV)  /* end H5EA_get_stats() */
 

@@ -96,10 +96,14 @@ typedef enum H5FD_mem_t {
  * Map "extensible array" index blocks to 'ohdr' type file memory, since they
  * are similar to extensible array header blocks.
  *
+ * Map "extensible array" data blocks to 'lheap' type file memory, since they
+ * are similar enough to B-tree nodes.
+ *
  *      -QAK
  */
 #define H5FD_MEM_EARRAY_HDR     H5FD_MEM_OHDR
 #define H5FD_MEM_EARRAY_IBLOCK  H5FD_MEM_OHDR
+#define H5FD_MEM_EARRAY_DBLOCK  H5FD_MEM_BTREE
 
 /*
  * A free-list map which maps all types of allocation requests to a single

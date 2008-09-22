@@ -64,6 +64,7 @@ typedef enum {
     H5AC_SOHM_LIST_ID,  /*shared message index stored as a list      */
     H5AC_EARRAY_HDR_ID,	/*extensible array header		     */
     H5AC_EARRAY_IBLOCK_ID, /*extensible array index block	     */
+    H5AC_EARRAY_DBLOCK_ID, /*extensible array index block	     */
     H5AC_TEST_ID,	/*test entry -- not used for actual files    */
     H5AC_NTYPES		/* Number of types, must be last             */
 } H5AC_type_t;

@@ -206,15 +206,15 @@ main(int argc, char *argv[])
     /*
      * Open the file and get the file descriptor.
      */
-    if((dxpl = H5Pcreate (H5P_DATASET_XFER))<0) {
+    if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0) {
         fprintf(stderr, "cannot create dataset transfer property list\n");
         HDexit(1);
     } /* end if */
-    if((fapl = H5Pcreate (H5P_FILE_ACCESS))<0) {
+    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         fprintf(stderr, "cannot create file access property list\n");
         HDexit(1);
     } /* end if */
-    if(strchr (argv[1], '%'))
+    if(strchr(argv[1], '%'))
 	H5Pset_fapl_family (fapl, (hsize_t)0, H5P_DEFAULT);
     if((fid = H5Fopen(argv[1], H5F_ACC_RDONLY, fapl)) < 0) {
         fprintf(stderr, "cannot open file\n");
@@ -463,6 +463,23 @@ main(int argc, char *argv[])
         } /* end if */
 
         status = H5EA__iblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra);
+
+    } else if(!HDmemcmp(sig, H5EA_DBLOCK_MAGIC, (size_t)H5EA_SIZEOF_MAGIC)) {
+        /*
+         * Debug an extensible aray data block.
+         */
+        const H5EA_class_t *cls = get_H5EA_class(sig);
+        HDassert(cls);
+
+        /* Check for enough valid parameters */
+        if(extra == 0 || extra2 == 0) {
+            fprintf(stderr, "ERROR: Need extensible array header address and # of elements in data block in order to dump data block\n");
+            fprintf(stderr, "Extensible array data block usage:\n");
+            fprintf(stderr, "\th5debug <filename> <data block address> <array header address> <# of elements in data block>\n");
+            HDexit(4);
+        } /* end if */
+
+        status = H5EA__dblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (size_t)extra2);
 
     } else if(!HDmemcmp(sig, H5O_HDR_MAGIC, (size_t)H5O_SIZEOF_MAGIC)) {
         /*

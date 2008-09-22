@@ -77,8 +77,10 @@ typedef struct earray_test_param_t {
 
 /* Extensible array state information */
 typedef struct earray_state_t {
-    hsize_t     nsuper_blks;            /* # of super blocks */
-    hsize_t     ndata_blks;             /* # of data blocks */
+    hsize_t max_idx_set;        /* Highest element index stored (+1 - i.e. if element 0 has been set, this value with be '1', if no elements have been stored, this value will be '0') */
+    hsize_t nsuper_blks;        /* # of super blocks */
+    hsize_t ndata_blks;         /* # of data blocks */
+    hsize_t nelmts;             /* # of elements "realized" */
 } earray_state_t;
 
 /* Local variables */
@@ -183,12 +185,20 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
         FAIL_STACK_ERROR
 
     /* Compare information */
+    if(earray_stats.max_idx_set != state->max_idx_set) {
+        HDfprintf(stdout, "earray_stats.max_idx_set = %Hu, state->max_idx_set = %Hu\n", earray_stats.max_idx_set, state->max_idx_set);
+        TEST_ERROR
+    } /* end if */
     if(earray_stats.nsuper_blks != state->nsuper_blks) {
         HDfprintf(stdout, "earray_stats.nsuper_blks = %Hu, state->nsuper_blks = %Hu\n", earray_stats.nsuper_blks, state->nsuper_blks);
         TEST_ERROR
     } /* end if */
     if(earray_stats.ndata_blks != state->ndata_blks) {
         HDfprintf(stdout, "earray_stats.ndata_blks = %Hu, state->ndata_blks = %Hu\n", earray_stats.ndata_blks, state->ndata_blks);
+        TEST_ERROR
+    } /* end if */
+    if(earray_stats.nelmts != state->nelmts) {
+        HDfprintf(stdout, "earray_stats.nelmts = %Hu, state->nelmts = %Hu\n", earray_stats.nelmts, state->nelmts);
         TEST_ERROR
     } /* end if */
 
@@ -339,7 +349,7 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:	shutdown_ea
+ * Function:	finish
  *
  * Purpose:	Close array, delete array, close file and verify that file
  *              is empty size
@@ -353,7 +363,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-shutdown_ea(hid_t file, H5F_t *f, H5EA_t *ea, haddr_t ea_addr)
+finish(hid_t file, H5F_t *f, H5EA_t *ea, haddr_t ea_addr)
 {
     h5_stat_size_t file_size;           /* File size, after deleting array */
 
@@ -389,7 +399,7 @@ HDsystem("cp earray.h5 earray.h5.save");
 
 error:
     return(-1);
-} /* shutdown_ea() */
+} /* finish() */
 
 
 /*-------------------------------------------------------------------------
@@ -480,6 +490,30 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
         /* Indicate error */
         TEST_ERROR
     } /* end if */
+    HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+    test_cparam.sup_blk_min_data_ptrs = 1;
+    H5E_BEGIN_TRY {
+        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+    } H5E_END_TRY;
+    if(ea) {
+        /* Close opened extensible array */
+        H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+
+        /* Indicate error */
+        TEST_ERROR
+    } /* end if */
+    HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+    test_cparam.sup_blk_min_data_ptrs = 6;
+    H5E_BEGIN_TRY {
+        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+    } H5E_END_TRY;
+    if(ea) {
+        /* Close opened extensible array */
+        H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+
+        /* Indicate error */
+        TEST_ERROR
+    } /* end if */
 
     /* Set invalid min. # of elements per data block */
     HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
@@ -521,7 +555,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
         TEST_ERROR
 
     /* Close array, delete array, close file & verify file is empty */
-    if(shutdown_ea(file, f, ea, ea_addr) < 0)
+    if(finish(file, f, ea, ea_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -591,7 +625,7 @@ test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         TEST_ERROR
 
     /* Close array, delete array, close file & verify file is empty */
-    if(shutdown_ea(file, f, ea, ea_addr) < 0)
+    if(finish(file, f, ea, ea_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -695,7 +729,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Close array, delete array, close file & verify file is empty */
-    if(shutdown_ea(file2, f2, ea2, ea_addr) < 0)
+    if(finish(file2, f2, ea2, ea_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -918,6 +952,8 @@ test_set_first(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 
         /* Verify array state */
         HDmemset(&state, 0, sizeof(state));
+        state.max_idx_set = 1;
+        state.nelmts = (hsize_t)cparam->idx_blk_elmts;
         if(check_stats(ea, &state))
             TEST_ERROR
 
@@ -931,7 +967,7 @@ test_set_first(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
             TEST_ERROR
 
         /* Close array, delete array, close file & verify file is empty */
-        if(shutdown_ea(file, f, ea, ea_addr) < 0)
+        if(finish(file, f, ea, ea_addr) < 0)
             TEST_ERROR
 
         /* All tests passed */
@@ -1043,6 +1079,8 @@ test_set_iblock(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 
             /* Verify array state */
             HDmemset(&state, 0, sizeof(state));
+            state.max_idx_set = u + 1;
+            state.nelmts = (hsize_t)cparam->idx_blk_elmts;
             if(check_stats(ea, &state))
                 TEST_ERROR
 
@@ -1057,7 +1095,7 @@ test_set_iblock(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         } /* end for */
 
         /* Close array, delete array, close file & verify file is empty */
-        if(shutdown_ea(file, f, ea, ea_addr) < 0)
+        if(finish(file, f, ea, ea_addr) < 0)
             TEST_ERROR
 
         /* All tests passed */
@@ -1079,6 +1117,126 @@ error:
 
     return 1;
 } /* test_set_iblock() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_set_first_dblock
+ *
+ * Purpose:	Set first element in extensible array's first data block
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, September 11, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_set_first_dblock(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5EA_t      *ea = NULL;             /* Extensible array wrapper */
+    earray_state_t state;               /* State of extensible array */
+    uint64_t    welmt;                  /* Element to write */
+    uint64_t    relmt;                  /* Element to read */
+    hsize_t     nelmts;                 /* Highest element written in array */
+    hsize_t     idx;                    /* Index value of first element of first data block */
+    haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
+
+    /*
+     * Display testing message
+     */
+    TESTING("setting first element of array's first data block");
+
+    /* Create file & retrieve pointer to internal file object */
+    if(create_file(fapl, &file, &f) < 0)
+        TEST_ERROR
+
+    /* Create array */
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr) < 0)
+        TEST_ERROR
+
+    /* Verify the creation parameters */
+    if(verify_cparam(ea, cparam) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the file */
+    if(reopen_file(&file, &f, fapl, H5P_DATASET_XFER_DEFAULT, &ea, ea_addr, cparam->cls, tparam) < 0)
+        TEST_ERROR
+
+    /* Verify high-water # of elements written */
+    nelmts = (hsize_t)ULLONG_MAX;
+    if(H5EA_get_nelmts(ea, &nelmts) < 0)
+        FAIL_STACK_ERROR
+    if(nelmts != 0)
+        TEST_ERROR
+
+    /* Verify array state */
+    HDmemset(&state, 0, sizeof(state));
+    if(check_stats(ea, &state))
+        TEST_ERROR
+
+    /* Compute index of first element of first data block */
+    idx = cparam->idx_blk_elmts;
+
+    /* Retrieve first element of first data block of array (not set yet) */
+    relmt = (uint64_t)0;
+    if(H5EA_get(ea, H5P_DATASET_XFER_DEFAULT, idx, &relmt) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify first element is fill value for array */
+    if(relmt != H5EA_TEST_FILL)
+        TEST_ERROR
+
+    /* Set first element of first data block */
+    welmt = (uint64_t)7;
+    if(H5EA_set(ea, H5P_DATASET_XFER_DEFAULT, idx, &welmt) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify high-water # of elements written */
+    nelmts = (hsize_t)ULLONG_MAX;
+    if(H5EA_get_nelmts(ea, &nelmts) < 0)
+        FAIL_STACK_ERROR
+    if(nelmts != (idx + 1))
+        TEST_ERROR
+
+    /* Verify array state */
+    HDmemset(&state, 0, sizeof(state));
+    state.max_idx_set = idx + 1;
+    state.ndata_blks = 1;
+    state.nelmts = (hsize_t)(cparam->idx_blk_elmts + cparam->data_blk_min_elmts);
+    if(check_stats(ea, &state))
+        TEST_ERROR
+
+    /* Retrieve first element of array (set now) */
+    relmt = (uint64_t)0;
+    if(H5EA_get(ea, H5P_DATASET_XFER_DEFAULT, idx, &relmt) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify first element is value written */
+    if(relmt != welmt)
+        TEST_ERROR
+
+    /* Close array, delete array, close file & verify file is empty */
+    if(finish(file, f, ea, ea_addr) < 0)
+        TEST_ERROR
+
+    /* All tests passed */
+    PASSED()
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        if(ea)
+            H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+	H5Fclose(file);
+    } H5E_END_TRY;
+
+    return 1;
+} /* test_set_first_dblock() */
 
 
 /*-------------------------------------------------------------------------
@@ -1174,6 +1332,7 @@ main(void)
             /* Basic capacity tests */
             nerrors += test_set_first(fapl, &cparam, &tparam);
             nerrors += test_set_iblock(fapl, &cparam, &tparam);
+            nerrors += test_set_first_dblock(fapl, &cparam, &tparam);
         } /* end for */
 
         if(nerrors)

@@ -80,8 +80,10 @@ typedef struct H5EA_create_t {
 
 /* Extensible array metadata statistics info */
 typedef struct H5EA_stat_t {
+    hsize_t max_idx_set;        /* Highest element index stored (+1 - i.e. if element 0 has been set, this value with be '1', if no elements have been stored, this value will be '0') */
     hsize_t nsuper_blks;        /* # of super blocks */
     hsize_t ndata_blks;         /* # of data blocks */
+    hsize_t nelmts;             /* # of elements "realized" */
 } H5EA_stat_t;
 
 /* Extensible array info (forward decl - defined in H5EApkg.h) */
