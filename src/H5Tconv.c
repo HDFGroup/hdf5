@@ -883,7 +883,7 @@ typedef struct H5T_conv_struct_t {
     hid_t	*src_memb_id;		/*source member type ID's	     */
     hid_t	*dst_memb_id;		/*destination member type ID's	     */
     H5T_path_t	**memb_path;		/*conversion path for each member    */
-    H5T_subset_t     smembs_subset;     /*are source and dest members a subset of each other? */
+    H5T_subset_info_t   subset_info;    /*info related to compound subsets   */
 } H5T_conv_struct_t;
 
 /* Conversion data for H5T_conv_enum() */
@@ -1827,7 +1827,8 @@ H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
 
         /* The flag of special optimization to indicate if source members and destination
          * members are a subset of each other.  Initialize it to FALSE */
-        priv->smembs_subset = H5T_SUBSET_FALSE;
+        priv->subset_info.subset = H5T_SUBSET_FALSE;
+        priv->subset_info.copy_size = 0;
 
         /*
          * Insure that members are sorted.
@@ -1899,23 +1900,41 @@ H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
         cdata->need_bkg = H5T_BKG_YES;
 
         if(src_nmembs < dst_nmembs) {
-            priv->smembs_subset = H5T_SUBSET_SRC;
+            priv->subset_info.subset = H5T_SUBSET_SRC;
             for(i = 0; i < src_nmembs; i++) {
                 /* If any of source members doesn't have counterpart in the same
                  * order or there's conversion between members, don't do the
                  * optimization.
                  */
-                if(src2dst[i] != i || (src->shared->u.compnd.memb[i].offset != dst->shared->u.compnd.memb[i].offset) || (priv->memb_path[i])->is_noop == FALSE)
-                    priv->smembs_subset = H5T_SUBSET_FALSE;
+                if(src2dst[i] != i || (src->shared->u.compnd.memb[i].offset != dst->shared->u.compnd.memb[i].offset) || (priv->memb_path[i])->is_noop == FALSE) {
+                    priv->subset_info.subset = H5T_SUBSET_FALSE;
+                    break;
+                } /* end if */
             } /* end for */
+            /* Compute the size of the data to be copied for each element.  It
+             * may be smaller than either src or dst if there is extra space at
+             * the end of src.
+             */
+            if(priv->subset_info.subset == H5T_SUBSET_SRC)
+                priv->subset_info.copy_size = src->shared->u.compnd.memb[src_nmembs-1].offset
+                    + src->shared->u.compnd.memb[src_nmembs-1].size;
         } else if(dst_nmembs < src_nmembs) {
-            priv->smembs_subset = H5T_SUBSET_DST;
+            priv->subset_info.subset = H5T_SUBSET_DST;
             for(i = 0; i < dst_nmembs; i++) {
                 /* If any of source members doesn't have counterpart in the same order or
                  * there's conversion between members, don't do the optimization. */
-                if(src2dst[i] != i || (src->shared->u.compnd.memb[i].offset != dst->shared->u.compnd.memb[i].offset) || (priv->memb_path[i])->is_noop == FALSE)
-                    priv->smembs_subset = H5T_SUBSET_FALSE;
+                if(src2dst[i] != i || (src->shared->u.compnd.memb[i].offset != dst->shared->u.compnd.memb[i].offset) || (priv->memb_path[i])->is_noop == FALSE) {
+                    priv->subset_info.subset = H5T_SUBSET_FALSE;
+                    break;
+                }
             } /* end for */
+            /* Compute the size of the data to be copied for each element.  It
+             * may be smaller than either src or dst if there is extra space at
+             * the end of dst.
+             */
+            if(priv->subset_info.subset == H5T_SUBSET_DST)
+                priv->subset_info.copy_size = dst->shared->u.compnd.memb[dst_nmembs-1].offset
+                    + dst->shared->u.compnd.memb[dst_nmembs-1].size;
         } else /* If the numbers of source and dest members are equal and no conversion is needed,
                 * the case should have been handled as noop earlier in H5Dio.c. */
           ;
@@ -1945,14 +1964,15 @@ done:
  *                                                 TYPE5 E;
  *                                             };
  *
- * Return:      One of the value from H5T_subset_t.
+ * Return:      A pointer to the subset info struct in p.  Points directly
+ *              into the structure.
  *
  * Programmer:	Raymond Lu
  *		8 June 2007
  *
  *-------------------------------------------------------------------------
  */
-H5T_subset_t
+H5T_subset_info_t *
 H5T_conv_struct_subset(const H5T_cdata_t *cdata)
 {
     H5T_conv_struct_t	*priv;
@@ -1964,7 +1984,7 @@ H5T_conv_struct_subset(const H5T_cdata_t *cdata)
 
     priv = (H5T_conv_struct_t *)(cdata->priv);
 
-    FUNC_LEAVE_NOAPI(priv->smembs_subset)
+    FUNC_LEAVE_NOAPI((H5T_subset_info_t *) &priv->subset_info)
 } /* end H5T_conv_struct_subset() */
 
 
@@ -2388,22 +2408,12 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                 buf_stride = src->shared->size;
             }
 
-            if(priv->smembs_subset == H5T_SUBSET_SRC || priv->smembs_subset == H5T_SUBSET_DST) {
+            if(priv->subset_info.subset == H5T_SUBSET_SRC || priv->subset_info.subset == H5T_SUBSET_DST) {
                 /* If the optimization flag is set to indicate source members are a subset and
                  * in the top of the destination, simply copy the source members to background buffer. */
                 xbuf = buf;
                 xbkg = bkg;
-                if(dst->shared->size <= src->shared->size)
-                    /* This is to deal with a very special situation when the fields and their
-                     * offset for both source and destination are identical but the datatype
-                     * sizes of source and destination are different.  The library still
-                     * considers these two types different and does conversion.  It happens
-                     * in table API test (hdf5/hl/test/test_table.c) when a table field is
-                     * deleted.
-                     */
-                    copy_size = dst->shared->size;
-                else
-                    copy_size = src->shared->size;
+                copy_size = priv->subset_info.copy_size;
 
                 for (elmtno=0; elmtno<nelmts; elmtno++) {
                     HDmemmove(xbkg, xbuf, copy_size);

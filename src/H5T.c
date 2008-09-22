@@ -4526,19 +4526,23 @@ H5T_path_noop(const H5T_path_t *p)
  *                                                 TYPE5 E;
  *                                             };
  *
- * Return:	One of the values of H5T_subset_t (can't fail).
+ * Return:	A pointer to the subset info struct in p, or NULL if there are
+ *          no compounds.  Points directly into the H5T_path_t structure.
  *
  * Programmer:	Raymond Lu
  *		8 June 2007
  *
- * Modifications:
+ * Modifications:  Neil Fortner
+ *      19 September 2008
+ *      Changed return value to H5T_subset_info_t
+ *      (to allow it to return copy_size)
  *
  *-------------------------------------------------------------------------
  */
-H5T_subset_t
+H5T_subset_info_t *
 H5T_path_compound_subset(const H5T_path_t *p)
 {
-    H5T_subset_t ret_value = FALSE;
+    H5T_subset_info_t *ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_path_compound_subset);
 

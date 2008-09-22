@@ -519,7 +519,7 @@ H5D_scatgath_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
          * and no conversion is needed, copy the data directly into user's buffer and
          * bypass the rest of steps.
          */
-        if(H5T_SUBSET_FALSE != type_info->cmpd_subset) {
+        if(type_info->cmpd_subset && H5T_SUBSET_FALSE != type_info->cmpd_subset->subset) {
             if(H5D_compound_opt_read(smine_nelmts, mem_space, &mem_iter, dxpl_cache,
                     type_info, buf /*out*/) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
@@ -649,7 +649,8 @@ H5D_scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
          * is a subset of the destination, the optimization is done in conversion
          * function H5T_conv_struct_opt to protect the background data.
          */
-        if(H5T_SUBSET_DST == type_info->cmpd_subset) {
+        if(type_info->cmpd_subset && H5T_SUBSET_DST == type_info->cmpd_subset->subset
+            && type_info->dst_type_size == type_info->cmpd_subset->copy_size) {
             if(H5D_compound_opt_write(smine_nelmts, type_info) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "datatype conversion failed")
         } /* end if */
@@ -745,7 +746,7 @@ H5D_compound_opt_read(size_t nelmts, const H5S_t *space,
     hsize_t    *off = NULL;                     /* Pointer to sequence offsets */
     size_t     _len[H5D_IO_VECTOR_SIZE];        /* Array to store sequence lengths */
     size_t     *len = NULL;                     /* Pointer to sequence lengths */
-    size_t     src_stride, dst_stride, type_size;
+    size_t     src_stride, dst_stride, copy_size;
     herr_t     ret_value = SUCCEED;	       /*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_compound_opt_read)
@@ -756,6 +757,9 @@ H5D_compound_opt_read(size_t nelmts, const H5S_t *space,
     HDassert(iter);
     HDassert(dxpl_cache);
     HDassert(type_info);
+    HDassert(type_info->cmpd_subset);
+    HDassert(H5T_SUBSET_SRC == type_info->cmpd_subset->subset ||
+        H5T_SUBSET_DST == type_info->cmpd_subset->subset);
     HDassert(user_buf);
 
     /* Allocate the vector I/O arrays */
@@ -774,12 +778,8 @@ H5D_compound_opt_read(size_t nelmts, const H5S_t *space,
     src_stride = type_info->src_type_size;
     dst_stride = type_info->dst_type_size;
 
-    if(H5T_SUBSET_SRC == type_info->cmpd_subset)
-        type_size = src_stride;
-    else {
-        HDassert(H5T_SUBSET_DST == type_info->cmpd_subset);
-        type_size = dst_stride;
-    } /* end else */
+    /* Get the size, in bytes, to copy for each element */
+    copy_size = type_info->cmpd_subset->copy_size;
 
     /* Loop until all elements are written */
     xdbuf = type_info->tconv_buf;
@@ -811,7 +811,7 @@ H5D_compound_opt_read(size_t nelmts, const H5S_t *space,
 
             /* Copy the data into the right place. */
             for(i = 0; i < curr_nelmts; i++) {
-                HDmemmove(xubuf, xdbuf, type_size);
+                HDmemmove(xubuf, xdbuf, copy_size);
 
                 /* Update pointers */
                 xdbuf += src_stride;
