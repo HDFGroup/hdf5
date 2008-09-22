@@ -265,7 +265,7 @@ HDfprintf(stderr, "%s: nelmts = %Zu, hdr->data_blk_min_elmts = %u, idx = %u\n", 
     /* Check for needing to increase size of array of factories */
     if(idx >= hdr->elmt_fac.nalloc) {
         H5FL_fac_head_t **new_fac;      /* New array of element factories */
-        size_t new_nalloc = MAX(1, (2 * hdr->elmt_fac.nalloc));   /* New number of factories allocated */
+        size_t new_nalloc = MAX3(1, (idx + 1), (2 * hdr->elmt_fac.nalloc));   /* New number of factories allocated */
 
         /* Re-allocate array of element factories */
         if(NULL == (new_fac = H5FL_SEQ_REALLOC(H5FL_fac_head_ptr_t, hdr->elmt_fac.fac, new_nalloc)))
