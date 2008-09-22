@@ -4570,7 +4570,7 @@ test_select_combine(void)
     none_id=H5Scopy(base_id);
     CHECK(none_id, FAIL, "H5Scopy");
     error=H5Sselect_none(none_id);
-    CHECK(error, FAIL, "H5Sselect_all");
+    CHECK(error, FAIL, "H5Sselect_none");
     sel_type=H5Sget_select_type(none_id);
     VERIFY(sel_type, H5S_SEL_NONE, "H5Sget_select_type");
 
