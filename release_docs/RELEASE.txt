@@ -109,6 +109,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+        - Fixed an issue that could cause data to be improperly overwritten
+            during compound type conversion.  (NAF - 2008/09/19)
         - Fixed pointer alignment violations that could occur during vlen
             conversion.  (NAF - 2008/09/16)
         - Fixed problem where library could cause a segmentation fault when

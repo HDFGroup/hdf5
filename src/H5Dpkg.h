@@ -86,7 +86,7 @@ typedef struct H5D_type_info_t {
     size_t max_type_size;	        /* Size of largest source/destination type */
     hbool_t is_conv_noop;               /* Whether the type conversion is a NOOP */
     hbool_t is_xform_noop;              /* Whether the data transform is a NOOP */
-    H5T_subset_t cmpd_subset;           /* Whether (and which) the source/destination datatypes are compound subsets of one another */
+    const H5T_subset_info_t *cmpd_subset;   /* Info related to the compound subset conversion functions */
     H5T_bkg_t need_bkg;		        /* Type of background buf needed */
     size_t request_nelmts;		/* Requested strip mine	*/
     uint8_t *tconv_buf;	                /* Datatype conv buffer	*/

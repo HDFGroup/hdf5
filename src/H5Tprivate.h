@@ -92,6 +92,11 @@ typedef enum {
     H5T_SUBSET_CAP              /* Must be the last value */
 } H5T_subset_t;
 
+typedef struct H5T_subset_info_t {
+    H5T_subset_t    subset;     /* See above */
+    size_t          copy_size;  /* Size in bytes, to copy for each element */
+} H5T_subset_info_t;
+
 /* Forward declarations for prototype arguments */
 struct H5O_t;
 
@@ -119,7 +124,7 @@ H5_DLL H5T_path_t *H5T_path_find(const H5T_t *src, const H5T_t *dst,
     const char *name, H5T_conv_t func, hid_t dxpl_id, hbool_t is_api);
 H5_DLL hbool_t H5T_path_noop(const H5T_path_t *p);
 H5_DLL H5T_bkg_t H5T_path_bkg(const H5T_path_t *p);
-H5_DLL H5T_subset_t H5T_path_compound_subset(const H5T_path_t *p);
+H5_DLL H5T_subset_info_t *H5T_path_compound_subset(const H5T_path_t *p);
 H5_DLL herr_t H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id,
     size_t nelmts, size_t buf_stride, size_t bkg_stride, void *buf, void *bkg,
     hid_t dset_xfer_plist);

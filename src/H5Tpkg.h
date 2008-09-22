@@ -288,7 +288,7 @@ typedef enum H5T_sort_t {
 typedef struct H5T_cmemb_t {
     char		*name;		/*name of this member		     */
     size_t		offset;		/*offset from beginning of struct    */
-    size_t		size;		/*total size: dims * type_size	     */
+    size_t		size;		/*size of this member		     */
     struct H5T_t	*type;		/*type of this member		     */
 } H5T_cmemb_t;
 
@@ -1380,7 +1380,7 @@ H5_DLL herr_t H5T_insert(H5T_t *parent, const char *name, size_t offset,
         const H5T_t *member);
 H5_DLL size_t H5T_get_member_size(const H5T_t *dt, unsigned membno);
 H5_DLL htri_t H5T_is_packed(const H5T_t *dt);
-H5_DLL H5T_subset_t H5T_conv_struct_subset(const H5T_cdata_t *cdata);
+H5_DLL H5T_subset_info_t *H5T_conv_struct_subset(const H5T_cdata_t *cdata);
 
 /* Enumerated type functions */
 H5_DLL H5T_t *H5T_enum_create(const H5T_t *parent);

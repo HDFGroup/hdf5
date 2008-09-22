@@ -745,7 +745,7 @@ H5D_typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
     type_info->is_conv_noop = H5T_path_noop(type_info->tpath);
     type_info->is_xform_noop = H5Z_xform_noop(dxpl_cache->data_xform_prop);
     if(type_info->is_xform_noop && type_info->is_conv_noop) {
-        type_info->cmpd_subset = H5T_SUBSET_FALSE;
+        type_info->cmpd_subset = NULL;
         type_info->need_bkg = H5T_BKG_NO;
     } /* end if */
     else {

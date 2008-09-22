@@ -2683,10 +2683,10 @@ test_compound_14(void)
     } /* end if */
 
     rdata1.c1 = rdata1.c2 = 0;
-    if(rdata1.str) free(rdata1.str);
+    if(rdata1.str) HDfree(rdata1.str);
 
     rdata2.c1 = rdata2.c2 = rdata2.l1 = rdata2.l2 = rdata2.l3 = rdata2.l4 = 0;
-    if(rdata2.str) free(rdata2.str);
+    if(rdata2.str) HDfree(rdata2.str);
 
     if(H5Dread(dset1_id, cmpd_m1_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata1) < 0) {
         H5_FAILED(); AT();
@@ -2713,8 +2713,8 @@ test_compound_14(void)
         goto error;
     } /* end if */
 
-    if(rdata1.str) free(rdata1.str);
-    if(rdata2.str) free(rdata2.str);
+    if(rdata1.str) HDfree(rdata1.str);
+    if(rdata2.str) HDfree(rdata2.str);
 
     if(H5Dclose(dset1_id) < 0)
         goto error;
@@ -2732,7 +2732,166 @@ test_compound_14(void)
 
  error:
     return 1;
-}
+} /* end test_compound_14() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_compound_15
+ *
+ * Purpose:     Tests that conversion occurs correctly when the source is
+ *              subset of the destination, but there is extra space at the
+ *              end of the source type.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, September 19, 2008
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_15(void)
+{
+    typedef struct cmpd_struct {
+       int  i1;
+       int  i2;
+    } cmpd_struct;
+
+    cmpd_struct wdata1 = {1254, 5471};
+    cmpd_struct rdata;
+    int         wdata2[2] = {1, 2};
+    hid_t       file;
+    hid_t       cmpd_m_tid, cmpd_f_tid;
+    hid_t       space_id;
+    hid_t       dset_id;
+    hsize_t     dim1[1];
+    char        filename[1024];
+
+    TESTING("compound subset conversion with extra space in source");
+
+    /* Create File */
+    h5_fixname(FILENAME[3], H5P_DEFAULT, filename, sizeof filename);
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't create file!\n");
+        goto error;
+    } /* end if */
+
+    /* Create file compound datatype */
+    if((cmpd_f_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(cmpd_f_tid,"i1",HOFFSET(struct cmpd_struct,i1),H5T_NATIVE_INT) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't insert field 'i1'\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(cmpd_f_tid,"i2",HOFFSET(struct cmpd_struct,i2),H5T_NATIVE_INT) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't insert field 'i2'\n");
+        goto error;
+    } /* end if */
+
+    /* Create memory compound datatype */
+    if((cmpd_m_tid = H5Tcreate( H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't create datatype!\n");
+        goto error;
+    } /* end if */
+
+    if(H5Tinsert(cmpd_m_tid,"i1",0,H5T_NATIVE_INT) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't insert field 'i1'\n");
+        goto error;
+    } /* end if */
+
+    /* Create space, dataset, write wdata1 */
+    dim1[0] = 1;
+    if((space_id = H5Screate_simple(1, dim1, NULL)) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't create space\n");
+        goto error;
+    } /* end if */
+
+    if((dset_id = H5Dcreate2(file, "Dataset", cmpd_f_tid, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't create dataset\n");
+        goto error;
+    } /* end if */
+
+    if(H5Dwrite(dset_id, cmpd_f_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata1) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't write data\n");
+        goto error;
+    } /* end if */
+
+    /* Write wdata2.  The use of cmpd_m_tid here should cause only the first
+     * element of wdata2 to be written. */
+    if(H5Dwrite(dset_id, cmpd_m_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata2) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't write data\n");
+        goto error;
+    } /* end if */
+
+    /* Read data */
+    if(H5Dread(dset_id, cmpd_f_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't read data\n");
+        goto error;
+    } /* end if */
+
+    /* Check for correctness of read data */
+    if(rdata.i1 != wdata2[0] || rdata.i2 != wdata1.i2) {
+        H5_FAILED(); AT();
+        printf("incorrect read data\n");
+        goto error;
+    } /* end if */
+
+    /* Now try reading only the i1 field, verify it does not overwrite i2 in the
+     * read buffer */
+    rdata.i1 = wdata1.i1;
+    rdata.i2 = wdata2[1];
+
+    /* Read data */
+    if(H5Dread(dset_id, cmpd_m_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata) < 0) {
+        H5_FAILED(); AT();
+        printf("Can't read data\n");
+        goto error;
+    } /* end if */
+
+    /* Check for correctness of read data */
+    if(rdata.i1 != wdata2[0] || rdata.i2 != wdata2[1]) {
+        H5_FAILED(); AT();
+        printf("incorrect read data\n");
+        goto error;
+    } /* end if */
+
+    /* Close */
+    if(H5Dclose(dset_id) < 0)
+        goto error;
+    if(H5Tclose(cmpd_f_tid) < 0)
+        goto error;
+    if(H5Tclose(cmpd_m_tid) < 0)
+        goto error;
+    if(H5Sclose(space_id) < 0)
+        goto error;
+    if(H5Fclose(file) < 0)
+        goto error;
+
+    PASSED();
+    return 0;
+
+ error:
+    return 1;
+} /* end test_compound_14() */
 
 
 /*-------------------------------------------------------------------------
@@ -5427,6 +5586,7 @@ main(void)
     nerrors += test_compound_12();
     nerrors += test_compound_13();
     nerrors += test_compound_14();
+    nerrors += test_compound_15();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_enum_2();
     nerrors += test_conv_bitfield();
