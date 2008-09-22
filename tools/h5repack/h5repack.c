@@ -483,7 +483,8 @@ static int check_objects(const char* fname,
      * open the file
      *-------------------------------------------------------------------------
      */
-    if((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0)) < 0){
+    if((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0)) < 0)
+    {
         printf("<%s>: %s\n", fname, H5FOPENERROR );
         return -1;
     }
@@ -508,13 +509,15 @@ static int check_objects(const char* fname,
     if(options->verbose)
         printf("Opening file <%s>. Searching for objects to modify...\n", fname);
 
-    for(i = 0; i < options->op_tbl->nelems; i++) {
+    for(i = 0; i < options->op_tbl->nelems; i++) 
+    {
         char* name=options->op_tbl->objs[i].path;
         if(options->verbose)
             printf(" <%s>",name);
 
         /* the input object names are present in the file and are valid */
-        if(h5trav_getindext(name, travt) < 0) {
+        if(h5trav_getindext(name, travt) < 0) 
+        {
             error_msg(progname, "%s Could not find <%s> in file <%s>. Exiting...\n",
                 (options->verbose?"\n":""),name,fname);
             goto out;
@@ -523,7 +526,8 @@ static int check_objects(const char* fname,
             printf("...Found\n");
 
         /* check for extra filter conditions */
-        switch(options->op_tbl->objs[i].filter->filtn) {
+        switch(options->op_tbl->objs[i].filter->filtn) 
+        {
             /* chunk size must be smaller than pixels per block */
             case H5Z_FILTER_SZIP:
             {
