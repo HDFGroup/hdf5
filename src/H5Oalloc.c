@@ -837,8 +837,8 @@ H5O_alloc_new_chunk(H5F_t *f,
      *  # at the beginning of the chunk image.
      */
     if(oh->version > H5O_VERSION_1) {
-        HDmemcpy(p, H5O_CHK_MAGIC, (size_t)H5O_SIZEOF_MAGIC);
-        p += H5O_SIZEOF_MAGIC;
+        HDmemcpy(p, H5O_CHK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
     } /* end if */
 
     /*

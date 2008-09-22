@@ -35,27 +35,19 @@
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5B2private.h"	/* v2 B-trees				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5FSprivate.h"	/* File free space                      */
+#include "H5FSprivate.h"	/* Free space manager			*/
 #include "H5SLprivate.h"	/* Skip lists				*/
 
 /**************************/
 /* Package Private Macros */
 /**************************/
 
-/* Size of signature information (on disk) */
-#define H5HF_SIZEOF_MAGIC               4
-
-/* Fractal heap signatures */
-#define H5HF_HDR_MAGIC                  "FRHP"          /* Header */
-#define H5HF_IBLOCK_MAGIC               "FHIB"          /* Indirect block */
-#define H5HF_DBLOCK_MAGIC               "FHDB"          /* Direct block */
-
 /* Size of checksum information (on disk) */
 #define H5HF_SIZEOF_CHKSUM      4
 
 /* "Standard" size of prefix information for fractal heap metadata */
 #define H5HF_METADATA_PREFIX_SIZE(c) (                                        \
-    H5HF_SIZEOF_MAGIC   /* Signature */                                       \
+    H5_SIZEOF_MAGIC   /* Signature */                                         \
     + 1 /* Version */                                                         \
     + ((c) ? H5HF_SIZEOF_CHKSUM : 0) /* Metadata checksum */                  \
     )

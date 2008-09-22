@@ -43,9 +43,6 @@
 #  undef H5G_DEBUG
 #endif
 
-#define H5G_NODE_MAGIC  "SNOD"          /*symbol table node magic number     */
-#define H5G_NODE_SIZEOF_MAGIC 4         /*sizeof symbol node magic number    */
-
 /*
  * The disk size for a symbol table entry...
  */

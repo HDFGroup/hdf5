@@ -42,19 +42,12 @@
 /* Package Private Macros */
 /**************************/
 
-/* Size of signature information (on disk) */
-#define H5FS_SIZEOF_MAGIC               4
-
-/* Free space signatures */
-#define H5FS_HDR_MAGIC                  "FSHD"          /* Header */
-#define H5FS_SINFO_MAGIC                "FSSE"          /* Serialized sections */
-
 /* Size of checksum information (on disk) */
 #define H5FS_SIZEOF_CHKSUM      4
 
 /* "Standard" size of prefix information for free space metadata */
 #define H5FS_METADATA_PREFIX_SIZE (                                           \
-    H5FS_SIZEOF_MAGIC   /* Signature */                                       \
+    H5_SIZEOF_MAGIC   /* Signature */                                         \
     + 1 /* Version */                                                         \
     + H5FS_SIZEOF_CHKSUM /* Metadata checksum */                              \
     )
@@ -207,12 +200,6 @@ H5_DLL H5FS_t *H5FS_new(size_t nclasses, const H5FS_section_class_t *classes[],
 
 /* Free space section routines */
 H5_DLL H5FS_sinfo_t *H5FS_sinfo_new(H5F_t *f, H5FS_t *fspace);
-
-/* Debugging routines for dumping file structures */
-H5_DLL herr_t H5FS_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    FILE *stream, int indent, int fwidth);
-H5_DLL herr_t H5FS_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    FILE *stream, int indent, int fwidth, haddr_t fs_addr, haddr_t client_addr);
 
 /* Metadata cache callbacks */
 H5_DLL herr_t H5FS_cache_hdr_dest(H5F_t *f, H5FS_t *hdr);

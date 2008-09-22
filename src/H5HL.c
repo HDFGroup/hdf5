@@ -231,9 +231,9 @@ H5HL_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * udata1,
     p = hdr;
 
     /* Check magic number */
-    if(HDmemcmp(hdr, H5HL_MAGIC, (size_t)H5HL_SIZEOF_MAGIC))
+    if(HDmemcmp(hdr, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "bad heap signature")
-    p += H5HL_SIZEOF_MAGIC;
+    p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(H5HL_VERSION != *p++)
@@ -488,8 +488,8 @@ H5HL_serialize(H5F_t *f, H5HL_t *heap, uint8_t *buf)
     /* serialize the header */
     p = buf;
     fl = heap->freelist;
-    HDmemcpy(p, H5HL_MAGIC, (size_t)H5HL_SIZEOF_MAGIC);
-    p += H5HL_SIZEOF_MAGIC;
+    HDmemcpy(p, H5HL_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+    p += H5_SIZEOF_MAGIC;
     *p++ = H5HL_VERSION;
     *p++ = 0;	/*reserved*/
     *p++ = 0;	/*reserved*/

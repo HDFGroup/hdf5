@@ -51,8 +51,7 @@
 #ifdef NDEBUG
 #  undef H5B_DEBUG
 #endif
-#define H5B_MAGIC	"TREE"		/*tree node magic number	     */
-#define H5B_SIZEOF_MAGIC 4		/*size of magic number		     */
+
 
 /****************************/
 /* Library Private Typedefs */

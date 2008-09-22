@@ -408,6 +408,52 @@ typedef struct H5F_t H5F_t;
                                                     must compensate. -QAK
                                                  */
 
+/* Macros to define signatures of all objects in the file */
+
+/* Size of signature information (on disk) */
+/* (all on-disk signatures should be this length) */
+#define H5_SIZEOF_MAGIC               4
+
+/* v1 B-tree node signature */
+#define H5B_MAGIC	                "TREE"
+
+/* v2 B-tree signatures */
+#define H5B2_HDR_MAGIC                  "BTHD"          /* Header */
+#define H5B2_INT_MAGIC                  "BTIN"          /* Internal node */
+#define H5B2_LEAF_MAGIC                 "BTLF"          /* Leaf node */
+
+/* Extensible array signatures */
+#define H5EA_HDR_MAGIC                  "EAHD"          /* Header */
+#define H5EA_IBLOCK_MAGIC               "EAIB"          /* Index block */
+#define H5EA_DBLOCK_MAGIC               "EADB"          /* Data block */
+
+/* Free space signatures */
+#define H5FS_HDR_MAGIC                  "FSHD"          /* Header */
+#define H5FS_SINFO_MAGIC                "FSSE"          /* Serialized sections */
+
+/* Symbol table node signature */
+#define H5G_NODE_MAGIC                  "SNOD"
+
+/* Fractal heap signatures */
+#define H5HF_HDR_MAGIC                  "FRHP"          /* Header */
+#define H5HF_IBLOCK_MAGIC               "FHIB"          /* Indirect block */
+#define H5HF_DBLOCK_MAGIC               "FHDB"          /* Direct block */
+
+/* Global heap signature */
+#define H5HG_MAGIC	                "GCOL"
+
+/* Local heap signature */
+#define H5HL_MAGIC                      "HEAP"
+
+/* Object header signatures */
+#define H5O_HDR_MAGIC                   "OHDR"          /* Header */
+#define H5O_CHK_MAGIC                   "OCHK"          /* Continuation chunk */
+
+/* Shared Message signatures */
+#define H5SM_TABLE_MAGIC                "SMTB"          /* Shared Message Table */
+#define H5SM_LIST_MAGIC                 "SMLI"          /* Shared Message List */
+
+
 /* Forward declarations for prototype arguments */
 struct H5B_class_t;
 struct H5RC_t;
