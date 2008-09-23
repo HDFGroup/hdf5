@@ -72,6 +72,8 @@ New Features
          regarding floating point numbers. (PVN - 2008/05/06)
      - h5repack: add a userblock to an HDF5 file during the repack. (PVN - 2008/08/26)
      - h5repack: copy userblock from HDF5 file during the repack. (PVN - 2008/08/26)
+     - h5diff: new mode (-c contents), that checks if the objects in both files are 
+         the same. (PVN - 2008/08/26)
 
 
     F90 API:
