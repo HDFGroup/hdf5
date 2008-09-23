@@ -507,9 +507,6 @@
                                              !List of element points selected
             INTEGER, INTENT(OUT) :: hdferr   ! Error code
 
-!            INTEGER, EXTERNAL :: h5sget_select_elem_pointlist_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
             INTERFACE
               INTEGER FUNCTION h5sget_select_elem_pointlist_c(space_id, startpoint, &
                                                               num_points, buf )
@@ -526,6 +523,7 @@
 
             hdferr =  h5sget_select_elem_pointlist_c(space_id, startpoint, &
                                                        num_points, buf )
+
           END SUBROUTINE h5sget_select_elem_pointlist_f
 
 !----------------------------------------------------------------------
@@ -568,7 +566,7 @@
                                                ! H5S_SELECT_OR_F (1)
             INTEGER, INTENT(IN) :: rank     ! Number of dataspace dimensions 
             INTEGER(SIZE_T), INTENT(IN) :: num_elements  ! Number of elements to be
-                                                 ! selected
+                                                         ! selected
             INTEGER(HSIZE_T), & 
             DIMENSION(rank,num_elements), INTENT(IN) :: coord 
                                           ! Array with the coordinates
@@ -578,9 +576,6 @@
             INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:,:) :: c_coord
             INTEGER :: error, i,j
 
-!            INTEGER, EXTERNAL :: h5sselect_elements_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
             INTERFACE
               INTEGER FUNCTION h5sselect_elements_c(space_id, operator,&
                                num_elements,c_c_coord)
@@ -595,17 +590,27 @@
               END FUNCTION h5sselect_elements_c
             END INTERFACE
 
-            allocate(c_coord(rank, num_elements), stat = error)
-            if (error.NE. 0) then
-                hdferr = -1
-                return
-            endif
-            do i = 1, rank
+            ALLOCATE(c_coord(rank,num_elements), stat = error)
+            IF (error.NE. 0) THEN
+               hdferr = -1
+               RETURN
+            ENDIF
+            DO i = 1, rank
                c_coord(i,:) = coord(rank-i+1, :) - 1
-            enddo 
-            hdferr = h5sselect_elements_c(space_id, operator, num_elements, &
-                                          c_coord)
-            deallocate(c_coord)
+            ENDDO
+            hdferr = h5sselect_elements_c(space_id, OPERATOR, num_elements, c_coord)
+
+!            ALLOCATE(c_coord(num_elements,rank), stat = error)
+!            IF (error.NE. 0) THEN
+!               hdferr = -1
+!               RETURN
+!            ENDIF
+!
+!            c_coord = TRANSPOSE(coord)
+!            hdferr = h5sselect_elements_c(space_id, OPERATOR, INT(rank,size_t), c_coord)
+
+
+            DEALLOCATE(c_coord)
  
           END SUBROUTINE h5sselect_elements_f
 
