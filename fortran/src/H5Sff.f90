@@ -564,8 +564,7 @@
     INTEGER, INTENT(IN) :: rank     ! Number of dataspace dimensions 
     INTEGER(SIZE_T), INTENT(IN) :: num_elements  ! Number of elements to be
                                                  ! selected
-    INTEGER(HSIZE_T), & 
-         DIMENSION(rank,num_elements), INTENT(IN) :: coord 
+    INTEGER(HSIZE_T), DIMENSION(rank,num_elements), INTENT(IN) :: coord 
                                           ! Array with the coordinates
                                           ! of the selected elements
                                           ! coord(rank, num_elements)
@@ -587,7 +586,7 @@
        END FUNCTION h5sselect_elements_c
     END INTERFACE
     
-    ALLOCATE(c_coord(rank,num_elements), stat = error)
+    ALLOCATE(c_coord(rank,num_elements), STAT = error)
     IF (error.NE. 0) THEN
        hdferr = -1
        RETURN
