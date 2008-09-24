@@ -1236,12 +1236,6 @@ SUBROUTINE test_select_point(cleanup, total_error)
   CALL h5dwrite_f(dataset, H5T_NATIVE_CHARACTER, wbuf, dims2, error, sid2, sid1, xfer_plist)
   CALL check("h5dwrite_f", error, total_error)
 
-!!$    ret=H5Dwrite(dataset,H5T_NATIVE_UCHAR,sid2,sid1,xfer_plist,wbuf);
-!!$    CHECK(ret, FAIL, "H5Dwrite");
-!!$
-
-  
-
   ! /* Close memory dataspace */
   CALL h5sclose_f(sid2, error)
   CALL check("h5sclose_f", error, total_error)
@@ -1758,3 +1752,223 @@ SUBROUTINE test_select_combine(cleanup, total_error)
   CALL check("h5sclose_f", error, total_error)
 
 END SUBROUTINE test_select_combine
+
+!/****************************************************************
+!**
+!**  test_select_bounds(): Tests selection bounds on dataspaces,
+!**      both with and without offsets.
+!**
+!****************************************************************/
+
+SUBROUTINE test_select_bounds(cleanup, total_error)
+  USE HDF5 ! This module contains all necessary modules 
+  
+  IMPLICIT NONE
+  LOGICAL, INTENT(IN)  :: cleanup
+  INTEGER, INTENT(OUT) :: total_error
+
+  INTEGER, PARAMETER :: SPACE11_RANK=2
+  INTEGER, PARAMETER :: SPACE11_DIM1=100
+  INTEGER, PARAMETER :: SPACE11_DIM2=50
+  INTEGER, PARAMETER :: SPACE11_NPOINTS=4
+  
+  INTEGER(hid_t) :: sid ! /* Dataspace ID */
+  INTEGER(hsize_t), DIMENSION(1:SPACE11_RANK) :: dims = (/SPACE11_DIM1, SPACE11_DIM2/) !Dataspace dimensions
+  INTEGER(hsize_t), DIMENSION(SPACE11_RANK, SPACE11_NPOINTS) :: coord !/* Coordinates for point selection
+  INTEGER(hsize_t), DIMENSION(SPACE11_RANK) :: start ! /* The start of the hyperslab */
+  INTEGER(hsize_t), DIMENSION(SPACE11_RANK) :: stride !/* The stride between block starts for the hyperslab */
+  INTEGER(hsize_t), DIMENSION(SPACE11_RANK) :: count !/* The number of blocks for the hyperslab */
+  INTEGER(hsize_t), DIMENSION(SPACE11_RANK) :: BLOCK !/* The size of each block for the hyperslab */
+  INTEGER(hssize_t), DIMENSION(SPACE11_RANK) :: offset !/* Offset amount for selection */
+  INTEGER(hsize_t), DIMENSION(SPACE11_RANK) :: low_bounds !/* The low bounds for the selection */
+  INTEGER(hsize_t), DIMENSION(SPACE11_RANK) :: high_bounds !/* The high bounds for the selection */
+    
+  INTEGER :: error
+
+  !/* Create dataspace */
+  CALL h5screate_simple_f(SPACE11_RANK, dims, sid, error)
+  CALL check("h5screate_simple_f", error, total_error)
+
+  ! /* Get bounds for 'all' selection */
+  CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
+  CALL check("h5sget_select_bounds_f", error, total_error)
+
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 1, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), SPACE11_DIM1, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), SPACE11_DIM2, total_error)
+
+  !/* Set offset for selection */
+  offset(1:2) = 1
+  CALL H5Soffset_simple_f(sid, offset, error)
+  CALL check("H5Soffset_simple_f", error, total_error)
+
+  !/* Get bounds for 'all' selection with offset (which should be ignored) */
+  CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
+  CALL check("h5sget_select_bounds_f", error, total_error)
+
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(1)), 1, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(1)), SPACE11_DIM1, total_error)
+  CALL verify("h5sget_select_bounds_f", INT(high_bounds(2)), SPACE11_DIM2, total_error)
+
+  !/* Reset offset for selection */
+  offset(1:2) = 0
+  CALL H5Soffset_simple_f(sid, offset, error)
+  CALL check("H5Soffset_simple_f", error, total_error)
+
+  !/* Set 'none' selection */
+  CALL H5Sselect_none_f(sid, error)
+  CALL check("H5Sselect_none_f", error, total_error)
+
+  !/* Get bounds for 'none' selection, should fail */
+  CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
+  CALL VERIFY("h5sget_select_bounds_f", error, -1, total_error)
+
+  !/* Set point selection */
+  
+  coord(1,1)=  3; coord(2,1)=  3;
+  coord(1,2)=  3; coord(2,2)= 46;
+  coord(1,3)= 96; coord(2,3)=  3;
+  coord(1,4)= 96; coord(2,4)= 46;
+
+  CALL h5sselect_elements_f(sid, H5S_SELECT_SET_F, SPACE11_RANK, INT(SPACE11_NPOINTS,size_t), coord, error)
+  CALL check("h5sselect_elements_f", error, total_error)
+
+  !/* Get bounds for point selection */
+  CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
+  CALL check("h5sget_select_bounds_f", error, total_error)
+
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 3, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 3, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), SPACE11_DIM1-4, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), SPACE11_DIM2-4, total_error)
+
+  ! /* Set bad offset for selection */
+
+  offset(1:2) = (/5,-5/)
+  CALL H5Soffset_simple_f(sid, offset, error)
+  CALL check("H5Soffset_simple_f", error, total_error)
+
+  ! /* Get bounds for hyperslab selection with negative offset */
+  CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
+  CALL VERIFY("h5sget_select_bounds_f", error, -1, total_error)
+ 
+  ! /* Set valid offset for selection */
+  offset(1:2) = (/2,-2/)
+  CALL H5Soffset_simple_f(sid, offset, error)
+  CALL check("H5Soffset_simple_f", error, total_error)
+
+  ! /* Get bounds for point selection with offset */
+  CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
+  CALL check("h5sget_select_bounds_f", error, total_error)
+
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 5, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), SPACE11_DIM1-2, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), SPACE11_DIM2-6, total_error)
+
+  ! /* Reset offset for selection */
+  offset(1:2) = 0
+  CALL H5Soffset_simple_f(sid, offset, error)
+  CALL check("H5Soffset_simple_f", error, total_error)
+
+  ! /* Set "regular" hyperslab selection */
+  start(1:2) = 2
+  stride(1:2) = 10
+  count(1:2) = 4
+  block(1:2) = 5
+  
+  CALL h5sselect_hyperslab_f(sid, H5S_SELECT_SET_F, start, &
+       count, error, stride, block) 
+  CALL check("h5sselect_hyperslab_f", error, total_error)
+
+  !/* Get bounds for hyperslab selection */
+  CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
+  CALL check("h5sget_select_bounds_f", error, total_error)
+
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 3, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 3, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), 37, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), 37, total_error)
+
+  !/* Set bad offset for selection */
+  offset(1:2) = (/5,-5/)
+  CALL H5Soffset_simple_f(sid, offset, error)
+  CALL check("H5Soffset_simple_f", error, total_error)
+
+  ! /* Get bounds for hyperslab selection with negative offset */
+  CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
+  CALL VERIFY("h5sget_select_bounds_f", error, -1, total_error)
+
+  ! /* Set valid offset for selection */
+  offset(1:2) = (/5,-2/)
+  CALL H5Soffset_simple_f(sid, offset, error)
+  CALL check("H5Soffset_simple_f", error, total_error)
+
+  !/* Get bounds for hyperslab selection with offset */
+  CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
+  CALL check("h5sget_select_bounds_f", error, total_error)
+
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 8, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), 42, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), 35, total_error)
+
+  !/* Reset offset for selection */
+  offset(1:2) = 0
+  CALL H5Soffset_simple_f(sid, offset, error)
+  CALL check("H5Soffset_simple_f", error, total_error)
+  
+  ! /* Make "irregular" hyperslab selection */
+  start(1:2) = 20
+  stride(1:2) = 20
+  count(1:2) = 2
+  block(1:2) = 10
+
+  CALL h5sselect_hyperslab_f(sid, H5S_SELECT_OR_F, start, &
+       count, error, stride, block) 
+  CALL check("h5sselect_hyperslab_f", error, total_error)
+
+  !/* Get bounds for hyperslab selection */
+  CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
+  CALL check("h5sget_select_bounds_f", error, total_error)
+
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 3, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 3, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), 50, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), 50, total_error)
+
+  ! /* Set bad offset for selection */
+  offset(1:2) = (/5,-5/)
+  CALL H5Soffset_simple_f(sid, offset, error)
+  CALL check("H5Soffset_simple_f", error, total_error)
+
+  ! /* Get bounds for hyperslab selection with negative offset */
+  CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
+  CALL VERIFY("h5sget_select_bounds_f", error, -1, total_error)
+
+  !/* Set valid offset for selection */
+  offset(1:2) = (/5,-2/)
+  CALL H5Soffset_simple_f(sid, offset, error)
+  CALL check("H5Soffset_simple_f", error, total_error)
+
+  !/* Get bounds for hyperslab selection with offset */
+  CALL h5sget_select_bounds_f(sid, low_bounds, high_bounds, error)
+  CALL check("h5sget_select_bounds_f", error, total_error)
+
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(1)), 8, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(low_bounds(2)), 1, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(1)), 55, total_error)
+  CALL VERIFY("h5sget_select_bounds_f", INT(high_bounds(2)), 48, total_error)
+
+  !/* Reset offset for selection */
+  offset(1:2) = 0
+  CALL H5Soffset_simple_f(sid, offset, error)
+  CALL check("H5Soffset_simple_f", error, total_error)
+
+  !/* Close the dataspace */
+  CALL h5sclose_f(sid, error)
+  CALL check("h5sclose_f", error, total_error)
+
+END SUBROUTINE test_select_bounds

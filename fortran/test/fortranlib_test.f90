@@ -135,6 +135,10 @@ PROGRAM fortranlibtest
   CALL test_select_combine(cleanup, total_error)
   CALL write_test_status(ret_total_error, ' Selection combinations test ', total_error)
 
+  ret_total_error = 0
+  CALL test_select_bounds(cleanup, total_error)
+  CALL write_test_status(ret_total_error, ' Selection bounds test ', total_error)
+  
 !     write(*,*)
 !     write(*,*) '========================================='
 !     write(*,*) 'Testing DATATYPE interface               '
