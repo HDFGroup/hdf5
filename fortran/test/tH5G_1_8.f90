@@ -157,7 +157,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
   CHARACTER(LEN=17), PARAMETER :: CORDER_SOFT_GROUP_NAME =  "corder_soft_group"
   INTEGER(HID_T) :: file_id ! /* File ID */
   INTEGER :: error ! /* Generic return value */
-
+  LOGICAL :: mounted
   LOGICAL :: cleanup
 
   ! /* Create group creation property list */
@@ -248,7 +248,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
            ! /* Check for out of bound query by index on empty group, should fail */
            CALL H5Gget_info_by_idx_f(group_id, ".", H5_INDEX_NAME_F, order, INT(0,HSIZE_T), &
                 storage_type, nlinks, max_corder, error)
-           CALL VERIFY("H5Gget_info_by_idx", error, -1, total_error)
+           CALL VERIFY("H5Gget_info_by_idx_f", error, -1, total_error)
 
            ! /* Create several links, up to limit of compact form */
            DO u = 0, max_compact-1
@@ -262,31 +262,33 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
               CALL check("H5Gcreate_f", error, total_error)
 
               ! /* Retrieve group's information */
-              CALL H5Gget_info_f(group_id2, storage_type, nlinks, max_corder, error)
+              CALL H5Gget_info_f(group_id2, storage_type, nlinks, max_corder, error, mounted)
               CALL check("H5Gget_info_f", error, total_error)
 
               ! /* Check (new/empty) group's information */
               CALL VERIFY("H5Gget_info_f", storage_type, H5G_STORAGE_TYPE_COMPACT_F, total_error)
               CALL VERIFY("H5Gget_info_f", max_corder, 0, total_error)
               CALL VERIFY("H5Gget_info_f", nlinks, 0, total_error)
+              CALL verifyLogical("H5Gget_info_f.mounted", mounted,.FALSE.,total_error)
 
               ! /* Retrieve group's information */
-              CALL H5Gget_info_by_name_f(group_id, objname, storage_type, nlinks, max_corder, error)
-              CALL check("H5Gget_info_by_name", error, total_error)
+              CALL H5Gget_info_by_name_f(group_id, objname, storage_type, nlinks, max_corder, error, mounted=mounted)
+              CALL check("H5Gget_info_by_name_f", error, total_error)
 
               ! /* Check (new/empty) group's information */
-              CALL VERIFY("H5Gget_info_f", storage_type, H5G_STORAGE_TYPE_COMPACT_F, total_error)
-              CALL VERIFY("H5Gget_info_f", max_corder, 0, total_error)
-              CALL VERIFY("H5Gget_info_f", nlinks, 0, total_error)
+              CALL VERIFY("H5Gget_info_by_name_f", storage_type, H5G_STORAGE_TYPE_COMPACT_F, total_error)
+              CALL VERIFY("H5Gget_info_by_name_f", max_corder, 0, total_error)
+              CALL VERIFY("H5Gget_info_by_name_f", nlinks, 0, total_error)
+              CALL verifyLogical("H5Gget_info_by_name_f.mounted", mounted,.FALSE.,total_error)
 
               ! /* Retrieve group's information */
               CALL H5Gget_info_by_name_f(group_id2, ".", storage_type, nlinks, max_corder, error)
               CALL check("H5Gget_info_by_name", error, total_error)
 
               ! /* Check (new/empty) group's information */
-              CALL VERIFY("H5Gget_info_f", storage_type, H5G_STORAGE_TYPE_COMPACT_F, total_error)
-              CALL VERIFY("H5Gget_info_f", max_corder, 0, total_error)
-              CALL VERIFY("H5Gget_info_f", nlinks, 0, total_error)
+              CALL VERIFY("H5Gget_info_by_name_f", storage_type, H5G_STORAGE_TYPE_COMPACT_F, total_error)
+              CALL VERIFY("H5Gget_info_by_name_f", max_corder, 0, total_error)
+              CALL VERIFY("H5Gget_info_by_name_f", nlinks, 0, total_error)
 
               ! /* Create objects in new group created */
               DO v = 0, u
@@ -327,23 +329,25 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
 
               ! /* Check (new) group's information */
               CALL VERIFY("H5Gget_info_by_name_f", storage_type, H5G_STORAGE_TYPE_COMPACT_F, total_error)
-              CALL VERIFY("H5Gget_info_by_name_f2", max_corder, u+1, total_error)
+              CALL VERIFY("H5Gget_info_by_name_f", max_corder, u+1, total_error)
               CALL VERIFY("H5Gget_info_by_name_f", nlinks, u+1, total_error)
 
               ! /* Retrieve group's information */
               IF(order.NE.H5_ITER_NATIVE_F)THEN
                  IF(order.EQ.H5_ITER_INC_F) THEN
                     CALL H5Gget_info_by_idx_f(group_id, ".", idx_type, order, INT(u,HSIZE_T), &
-                         storage_type, nlinks, max_corder, error,lapl_id=H5P_DEFAULT_F)
+                         storage_type, nlinks, max_corder, error,lapl_id=H5P_DEFAULT_F, mounted=mounted)
                     CALL check("H5Gget_info_by_idx_f", error, total_error)
+                    CALL verifyLogical("H5Gget_info_by_idx_f", mounted,.FALSE.,total_error)
                  ELSE
                     CALL H5Gget_info_by_idx_f(group_id, ".", idx_type, order, INT(0,HSIZE_T), &
-                         storage_type, nlinks, max_corder, error)
+                         storage_type, nlinks, max_corder, error, mounted=mounted)
+                    CALL verifyLogical("H5Gget_info_by_idx_f", mounted,.FALSE.,total_error)
                     CALL check("H5Gget_info_by_idx_f", error, total_error)
                  ENDIF
               ! /* Check (new) group's information */
                  CALL VERIFY("H5Gget_info_by_idx_f", storage_type, H5G_STORAGE_TYPE_COMPACT_F, total_error)
-                 CALL VERIFY("H5Gget_info_by_idx_f33", max_corder, u+1, total_error)
+                 CALL VERIFY("H5Gget_info_by_idx_f", max_corder, u+1, total_error)
                  CALL VERIFY("H5Gget_info_by_idx_f", nlinks, u+1, total_error)
               ENDIF
               ! /* Close group created */
@@ -356,7 +360,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
 
               ! /* Check main group's information */
               CALL VERIFY("H5Gget_info_f", storage_type, H5G_STORAGE_TYPE_COMPACT_F, total_error)
-              CALL VERIFY("H5Gget_info_f2", max_corder, u+1, total_error)
+              CALL VERIFY("H5Gget_info_f", max_corder, u+1, total_error)
               CALL VERIFY("H5Gget_info_f", nlinks, u+1, total_error)
               
               ! /* Retrieve main group's information, by name */
