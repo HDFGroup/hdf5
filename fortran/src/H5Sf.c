@@ -274,7 +274,9 @@ nh5sget_select_hyper_blocklist_c( hid_t_f *space_id ,hsize_t_f * startblock,
  * Returns:     0 on success, -1 on failure
  * Programmer:  Xiangyang Su
  *              Wednesday, November 17, 1999
- * Modifications:
+ * Modifications: swapped array bounds to account for C and Fortran reversed
+ *                matrix notation.
+ *                M.S. Breitenfeld
  *---------------------------------------------------------------------------*/
 
 int_f
@@ -298,8 +300,8 @@ nh5sget_select_bounds_c( hid_t_f *space_id , hsize_t_f * start, hsize_t_f * end)
   ret_value = H5Sget_select_bounds(c_space_id, c_start, c_end);
   for(i = 0; i < rank; i++)
   {
-    start[i] = (hsize_t_f)(c_start[i]+1);
-    end[i] = (hsize_t_f)(c_end[i]+1);
+    start[i] = (hsize_t_f)(c_start[rank-i-1]+1);
+    end[i] = (hsize_t_f)(c_end[rank-i-1]+1);
   }
   if (ret_value  >= 0  ) ret_value = 0;
 

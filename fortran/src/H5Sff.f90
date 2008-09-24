@@ -386,35 +386,32 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE  h5sget_select_bounds_f(space_id, start, end, hdferr)
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
-            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
-                                             !Starting coordinates of the bounding box. 
-            INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: end
-                                             !Ending coordinates of the bounding box,
-                                             !i.e., the coordinates of the diagonally 
-                                             !opposite corner 
-            INTEGER, INTENT(OUT) :: hdferr   ! Error code
+  SUBROUTINE  h5sget_select_bounds_f(space_id, start, END, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
+    INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
+                                           ! Starting coordinates of the bounding box. 
+    INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: END
+                                           !Ending coordinates of the bounding box,
+                                           !i.e., the coordinates of the diagonally 
+                                           !opposite corner 
+    INTEGER, INTENT(OUT) :: hdferr         ! Error code
 
-!            INTEGER, EXTERNAL :: h5sget_select_bounds_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5sget_select_bounds_c(space_id, start, end)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-!DEC$ ATTRIBUTES C,reference,decorate,alias:'H5SGET_SELECT_BOUNDS_C'::h5sget_select_bounds_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: space_id
-              INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
-              INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: end
-              END FUNCTION h5sget_select_bounds_c
-            END INTERFACE
-
-            hdferr =   h5sget_select_bounds_c(space_id, start, end)
+    INTERFACE
+       INTEGER FUNCTION h5sget_select_bounds_c(space_id, start, END)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5SGET_SELECT_BOUNDS_C'::h5sget_select_bounds_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: space_id
+         INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
+         INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: END
+       END FUNCTION h5sget_select_bounds_c
+    END INTERFACE
+    
+    hdferr =   h5sget_select_bounds_c(space_id, start, END)
  
-          END SUBROUTINE h5sget_select_bounds_f
+  END SUBROUTINE h5sget_select_bounds_f
 
 !----------------------------------------------------------------------
 ! Name:		h5sget_select_elem_npoints_f 
@@ -557,49 +554,49 @@
 !
 ! Comment:		
 !----------------------------------------------------------------------
-          SUBROUTINE h5sselect_elements_f(space_id, operator, rank, & 
-                                          num_elements, coord, hdferr)
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
-            INTEGER, INTENT(IN) :: operator    ! Flag, valid values are:
-                                               ! H5S_SELECT_SET_F (0)
-                                               ! H5S_SELECT_OR_F (1)
-            INTEGER, INTENT(IN) :: rank     ! Number of dataspace dimensions 
-            INTEGER(SIZE_T), INTENT(IN) :: num_elements  ! Number of elements to be
-                                                         ! selected
-            INTEGER(HSIZE_T), & 
-            DIMENSION(rank,num_elements), INTENT(IN) :: coord 
+  SUBROUTINE h5sselect_elements_f(space_id, OPERATOR, rank, & 
+       num_elements, coord, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
+    INTEGER, INTENT(IN) :: OPERATOR    ! Flag, valid values are:
+                                       ! H5S_SELECT_SET_F (0)
+                                       ! H5S_SELECT_OR_F (1)
+    INTEGER, INTENT(IN) :: rank     ! Number of dataspace dimensions 
+    INTEGER(SIZE_T), INTENT(IN) :: num_elements  ! Number of elements to be
+                                                 ! selected
+    INTEGER(HSIZE_T), & 
+         DIMENSION(rank,num_elements), INTENT(IN) :: coord 
                                           ! Array with the coordinates
                                           ! of the selected elements
                                           ! coord(rank, num_elements)
-            INTEGER, INTENT(OUT) :: hdferr     ! Error code
-            INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:,:) :: c_coord
-            INTEGER :: error, i,j
+    INTEGER, INTENT(OUT) :: hdferr     ! Error code
+    INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:,:) :: c_coord
+    INTEGER :: error, i,j
 
-            INTERFACE
-              INTEGER FUNCTION h5sselect_elements_c(space_id, operator,&
-                               num_elements,c_c_coord)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5SSELECT_ELEMENTS_C'::h5sselect_elements_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: space_id
-              INTEGER, INTENT(IN) :: operator
-              INTEGER(SIZE_T), INTENT(IN) :: num_elements
-              INTEGER(HSIZE_T),DIMENSION(*) :: c_c_coord
-              END FUNCTION h5sselect_elements_c
-            END INTERFACE
-
-            ALLOCATE(c_coord(rank,num_elements), stat = error)
-            IF (error.NE. 0) THEN
-               hdferr = -1
-               RETURN
-            ENDIF
-            DO i = 1, rank
-               c_coord(i,:) = coord(rank-i+1, :) - 1
-            ENDDO
-            hdferr = h5sselect_elements_c(space_id, OPERATOR, num_elements, c_coord)
-
+    INTERFACE
+       INTEGER FUNCTION h5sselect_elements_c(space_id, OPERATOR,&
+            num_elements,c_c_coord)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5SSELECT_ELEMENTS_C'::h5sselect_elements_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: space_id
+         INTEGER, INTENT(IN) :: OPERATOR
+         INTEGER(SIZE_T), INTENT(IN) :: num_elements
+         INTEGER(HSIZE_T),DIMENSION(*) :: c_c_coord
+       END FUNCTION h5sselect_elements_c
+    END INTERFACE
+    
+    ALLOCATE(c_coord(rank,num_elements), stat = error)
+    IF (error.NE. 0) THEN
+       hdferr = -1
+       RETURN
+    ENDIF
+    DO i = 1, rank
+       c_coord(i,:) = coord(rank-i+1, :) - 1
+    ENDDO
+    hdferr = h5sselect_elements_c(space_id, OPERATOR, num_elements, c_coord)
+    
 !            ALLOCATE(c_coord(num_elements,rank), stat = error)
 !            IF (error.NE. 0) THEN
 !               hdferr = -1
@@ -610,9 +607,9 @@
 !            hdferr = h5sselect_elements_c(space_id, OPERATOR, INT(rank,size_t), c_coord)
 
 
-            DEALLOCATE(c_coord)
+    DEALLOCATE(c_coord)
  
-          END SUBROUTINE h5sselect_elements_f
+  END SUBROUTINE h5sselect_elements_f
 
 !----------------------------------------------------------------------
 ! Name:		h5sselect_all_f 
