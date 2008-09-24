@@ -951,6 +951,7 @@
 ./tools/h5import/testfiles/test15.h5
 ./tools/h5import/testfiles/teststr.h5
 ./tools/h5import/testfiles/textstr
+./tools/h5import/testfiles/txtstr
 ./tools/h5import/testfiles/textpfe.conf
 ./tools/h5import/testfiles/in64.txt
 
