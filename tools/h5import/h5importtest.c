@@ -29,6 +29,7 @@
  * Define names for test files
  */
 
+
 int
 main(void)
 {
@@ -172,7 +173,7 @@ main(void)
 #ifndef UNICOS
 
 
-    	sp = fopen("txtin16", "w");
+    	sp = fopen("in16.txt", "w");
 	for (k = 0; k < npln; k++)
     	for (i = 0; i < nrow; i++)
         {
@@ -182,7 +183,7 @@ main(void)
         }
     (void) fclose(sp);
 
-      sp = fopen("txtin32", "w");
+      sp = fopen("in32.txt", "w");
       for (k = 0; k < npln; k++)
     	for (i = 0; i < nrow; i++)
         {
