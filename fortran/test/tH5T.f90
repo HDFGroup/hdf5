@@ -814,13 +814,16 @@
     INTEGER(HID_T) :: file_id
     INTEGER(HID_T) :: dset_id
     INTEGER(HID_T) :: dspace_id
-    INTEGER(HID_T) :: dtype_id
+    INTEGER(HID_T) :: dtype_id, dtype, native_type 
     INTEGER        :: error
     INTEGER        :: value
     INTEGER(HSIZE_T), DIMENSION(1) :: dsize
     INTEGER(SIZE_T) :: buf_size 
     INTEGER, DIMENSION(2) :: data
     INTEGER(HSIZE_T), DIMENSION(7) :: dims
+    INTEGER :: order1, order2
+    INTEGER(SIZE_T) :: type_size1, type_size2
+    INTEGER :: class
 
     dims(1) = 2
     dsize(1) = 2
@@ -829,55 +832,80 @@
      !
      ! Create a new file using default properties.
      ! 
-          CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
-          if (error .ne. 0) then
-              write(*,*) "Cannot modify filename"
-              stop
-          endif
+    CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+    IF (error .NE. 0) THEN
+       WRITE(*,*) "Cannot modify filename"
+       STOP
+    ENDIF
     CALL h5fcreate_f(fix_filename,H5F_ACC_TRUNC_F,file_id,error)
-        CALL check("h5fcreate_f", error, total_error)
+    CALL check("h5fcreate_f", error, total_error)
     !
     ! Create enumeration datatype with tow values
     !
     CALL h5tenum_create_f(H5T_NATIVE_INTEGER,dtype_id,error)
-        CALL check("h5tenum_create_f", error, total_error)
-    CALL h5tenum_insert_f(dtype_id,true,data(1),error)
-        CALL check("h5tenum_insert_f", error, total_error)
-    CALL h5tenum_insert_f(dtype_id,false,data(2),error)
-        CALL check("h5tenum_insert_f", error, total_error)
+    CALL check("h5tenum_create_f", error, total_error)
+    CALL h5tenum_insert_f(dtype_id,true,DATA(1),error)
+    CALL check("h5tenum_insert_f", error, total_error)
+    CALL h5tenum_insert_f(dtype_id,false,DATA(2),error)
+    CALL check("h5tenum_insert_f", error, total_error)
     !
     ! Create write  and close a dataset with enum datatype
     !
     CALL h5screate_simple_f(1,dsize,dspace_id,error)
-        CALL check("h5screate_simple_f", error, total_error)
+    CALL check("h5screate_simple_f", error, total_error)
     CALL h5dcreate_f(file_id,dsetname,dtype_id,dspace_id,dset_id,error)
-        CALL check("h5dcreate_f", error, total_error)
-    CALL h5dwrite_f(dset_id,dtype_id,data,dims,error)
-        CALL check("h5dwrite_f", error, total_error)
+    CALL check("h5dcreate_f", error, total_error)
+    CALL h5dwrite_f(dset_id,dtype_id,DATA,dims,error)
+    CALL check("h5dwrite_f", error, total_error)
+
+    CALL H5Dget_type_f(dset_id, dtype, error)
+    CALL check("H5Dget_type_f", error, total_error)
+
+    CALL H5Tget_native_type_f(dtype, H5T_DIR_ASCEND_F, native_type, error)
+    CALL check("H5Tget_native_type_f",error, total_error)
+
+    !/* Verify the datatype retrieved and converted */
+    CALL H5Tget_order_f(native_type, order1, error)
+    CALL check("H5Tget_order_f",error, total_error)
+    CALL H5Tget_order_f(H5T_NATIVE_INTEGER, order2, error)
+    CALL check("H5Tget_order_f",error, total_error)
+    CALL VERIFY("H5Tget_native_type_f",order1, order2, total_error) 
+
+    CALL H5Tget_size_f(native_type, type_size1, error)
+    CALL check("H5Tget_size_f",error, total_error)
+    CALL H5Tget_size_f(H5T_STD_I32BE, type_size2, error)
+    CALL check("H5Tget_size_f",error, total_error)
+    CALL VERIFY("H5Tget_native_type_f", INT(type_size1), INT(type_size2), total_error) 
+
+    CALL H5Tget_class_f(native_type, class, error)
+    CALL check("H5Tget_class_f",error, total_error)
+    CALL VERIFY("H5Tget_native_type_f", INT(class), INT(H5T_ENUM_F), total_error) 
+    
     CALL h5dclose_f(dset_id,error)
-        CALL check("h5dclose_f", error, total_error)
+    CALL check("h5dclose_f", error, total_error)
     CALL h5sclose_f(dspace_id,error)
-        CALL check("h5sclose_f", error, total_error)
+    CALL check("h5sclose_f", error, total_error)
     !
     ! Get value of "TRUE"
     !
     CALL h5tenum_valueof_f(dtype_id, "TRUE", value, error)
-        CALL check("h5tenum_valueof_f", error, total_error)
-        if (value .ne. 1) then
-            write(*,*) " Value of TRUE is not 1, error"
-            total_error = total_error + 1
-        endif 
+    CALL check("h5tenum_valueof_f", error, total_error)
+    IF (value .NE. 1) THEN
+       WRITE(*,*) " Value of TRUE is not 1, error"
+       total_error = total_error + 1
+    ENDIF
     !
     !  Get name of 0
     !
     value = 0
     buf_size = 5
     CALL h5tenum_nameof_f(dtype_id,  value, buf_size, mem_name, error)
-         CALL check("h5tenum_nameof_f", error, total_error)
-         if (mem_name .ne. "FALSE") then
-             write(*,*) " Wrong name for 0 value"
-             total_error = total_error + 1
-         endif
+    CALL check("h5tenum_nameof_f", error, total_error)
+    IF (mem_name .NE. "FALSE") THEN
+       WRITE(*,*) " Wrong name for 0 value"
+       total_error = total_error + 1
+    ENDIF
+
     CALL h5tclose_f(dtype_id,error)
         CALL check("h5tclose_f", error, total_error)
     CALL h5fclose_f(file_id,error)
