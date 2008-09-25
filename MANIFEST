@@ -924,9 +924,9 @@
 ./tools/h5import/testfiles/binin8.conf
 ./tools/h5import/testfiles/binuin16.conf
 ./tools/h5import/testfiles/binuin32.conf
-./tools/h5import/testfiles/fp1
-./tools/h5import/testfiles/fp2
-./tools/h5import/testfiles/in1
+./tools/h5import/testfiles/fp1.txt
+./tools/h5import/testfiles/fp2.txt
+./tools/h5import/testfiles/in1.txt
 ./tools/h5import/testfiles/textfp32.conf
 ./tools/h5import/testfiles/textfp64.conf
 ./tools/h5import/testfiles/textin16.conf
@@ -947,13 +947,14 @@
 ./tools/h5import/testfiles/test11.h5
 ./tools/h5import/testfiles/test12.h5
 ./tools/h5import/testfiles/test13.h5
-./tools/h5import/testfiles/teststr.h5
+./tools/h5import/testfiles/test14.h5
 ./tools/h5import/testfiles/test15.h5
-./tools/h5import/testfiles/teststr.h5
-./tools/h5import/testfiles/textstr
-./tools/h5import/testfiles/txtstr
+./tools/h5import/testfiles/textstr.conf
+./tools/h5import/testfiles/str.txt
 ./tools/h5import/testfiles/textpfe.conf
 ./tools/h5import/testfiles/in64.txt
+./tools/h5import/testfiles/in32.txt
+./tools/h5import/testfiles/in16.txt
 
 
 
