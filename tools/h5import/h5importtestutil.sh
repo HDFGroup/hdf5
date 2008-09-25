@@ -81,22 +81,22 @@ TESTING "ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed "
 TOOLTEST $srcdir/testfiles/fp2 -c $srcdir/testfiles/textfp64.conf -o test7.h5
 
 TESTING "BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed " 
-TOOLTEST bfp64 -c $srcdir/testfiles/conbfp64 -o test8.h5
+TOOLTEST bfp64 -c $srcdir/testfiles/binfp64.conf -o test8.h5
 
 TESTING "BINARY I16 - rank 3 - Output order LE + CHUNKED + extended " 
-TOOLTEST bin16 -c $srcdir/testfiles/conbin16 -o test9.h5
+TOOLTEST bin16 -c $srcdir/testfiles/binin16.conf -o test9.h5
 
 TESTING "BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed " 
-TOOLTEST bin8 -c $srcdir/testfiles/conbin8  -o test10.h5
+TOOLTEST bin8 -c $srcdir/testfiles/binin8.conf  -o test10.h5
 
 TESTING "BINARY I32 - rank 3 - Output BE + CHUNKED " 
-TOOLTEST bin32 -c $srcdir/testfiles/conbin32 -o test11.h5
+TOOLTEST bin32 -c $srcdir/testfiles/binin32.conf -o test11.h5
 
 TESTING "BINARY UI16 - rank 3 - Output byte BE + CHUNKED " 
-TOOLTEST buin16 -c $srcdir/testfiles/conbuin16 -o test12.h5
+TOOLTEST buin16 -c $srcdir/testfiles/binuin16.conf -o test12.h5
 
 TESTING "BINARY UI32 - rank 3 - Output LE + CHUNKED " 
-TOOLTEST buin32 -c $srcdir/testfiles/conbuin32 -o test13.h5
+TOOLTEST buin32 -c $srcdir/testfiles/binuin32.conf -o test13.h5
 
 TESTING "STR" 
 TOOLTEST $srcdir/testfiles/txtstr -c $srcdir/testfiles/textstr -o teststr.h5
