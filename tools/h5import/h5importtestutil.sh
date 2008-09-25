@@ -124,6 +124,10 @@ TOOLTEST $srcdir/testfiles/txtstr.txt -c $srcdir/testfiles/txtstr.conf -o txtstr
 TESTING "BINARY I8 CR LF EOF" 
 TOOLTEST binin8w.bin -c $srcdir/testfiles/binin8w.conf -o binin8w.h5
 
+TESTING "ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE " 
+TOOLTEST $srcdir/testfiles/in64.txt -c $srcdir/testfiles/textpfe.conf -o test15.h5
+
+
 
 rm -f  *.txt *.bin *.h5
 rm -rf tmp_testfiles
