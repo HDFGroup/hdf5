@@ -262,11 +262,11 @@ H5EA_get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam))
     HDassert(cparam);
 
     /* Get extensible array creation parameters */
-    cparam->raw_elmt_size = ea->hdr->raw_elmt_size;
-    cparam->max_nelmts_bits = ea->hdr->max_nelmts_bits;
-    cparam->idx_blk_elmts = ea->hdr->idx_blk_elmts;
-    cparam->sup_blk_min_data_ptrs = ea->hdr->sup_blk_min_data_ptrs;
-    cparam->data_blk_min_elmts = ea->hdr->data_blk_min_elmts;
+    cparam->raw_elmt_size = ea->hdr->cparam.raw_elmt_size;
+    cparam->max_nelmts_bits = ea->hdr->cparam.max_nelmts_bits;
+    cparam->idx_blk_elmts = ea->hdr->cparam.idx_blk_elmts;
+    cparam->sup_blk_min_data_ptrs = ea->hdr->cparam.sup_blk_min_data_ptrs;
+    cparam->data_blk_min_elmts = ea->hdr->cparam.data_blk_min_elmts;
 
 END_FUNC(PRIV)  /* end H5EA_get_cparam_test() */
 

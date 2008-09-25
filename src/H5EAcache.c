@@ -213,11 +213,11 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
 	H5E_THROW(H5E_BADTYPE, "incorrect extensible array class")
 
     /* General array creation/configuration information */
-    hdr->raw_elmt_size = *p++;          /* Element size in file (in bytes) */
-    hdr->max_nelmts_bits = *p++;        /* Log2(Max. # of elements in array) - i.e. # of bits needed to store max. # of elements */
-    hdr->idx_blk_elmts = *p++;          /* # of elements to store in index block */
-    hdr->data_blk_min_elmts = *p++;     /* Min. # of elements per data block */
-    hdr->sup_blk_min_data_ptrs = *p++;  /* Min. # of data block pointers for a super block */
+    hdr->cparam.raw_elmt_size = *p++;          /* Element size in file (in bytes) */
+    hdr->cparam.max_nelmts_bits = *p++;        /* Log2(Max. # of elements in array) - i.e. # of bits needed to store max. # of elements */
+    hdr->cparam.idx_blk_elmts = *p++;          /* # of elements to store in index block */
+    hdr->cparam.data_blk_min_elmts = *p++;     /* Min. # of elements per data block */
+    hdr->cparam.sup_blk_min_data_ptrs = *p++;  /* Min. # of data block pointers for a super block */
 
     /* Internal information */
     H5F_addr_decode(f, &p, &hdr->idx_blk_addr); /* Address of index block */
@@ -318,14 +318,14 @@ H5EA__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         *p++ = H5EA_HDR_VERSION;
 
         /* Extensible array type */
-        *p++ = hdr->cls->id;
+        *p++ = hdr->cparam.cls->id;
 
         /* General array creation/configuration information */
-        *p++ = hdr->raw_elmt_size;          /* Element size in file (in bytes) */
-        *p++ = hdr->max_nelmts_bits;        /* Log2(Max. # of elements in array) - i.e. # of bits needed to store max. # of elements */
-        *p++ = hdr->idx_blk_elmts;          /* # of elements to store in index block */
-        *p++ = hdr->data_blk_min_elmts;     /* Min. # of elements per data block */
-        *p++ = hdr->sup_blk_min_data_ptrs;  /* Min. # of data block pointers for a super block */
+        *p++ = hdr->cparam.raw_elmt_size;          /* Element size in file (in bytes) */
+        *p++ = hdr->cparam.max_nelmts_bits;        /* Log2(Max. # of elements in array) - i.e. # of bits needed to store max. # of elements */
+        *p++ = hdr->cparam.idx_blk_elmts;          /* # of elements to store in index block */
+        *p++ = hdr->cparam.data_blk_min_elmts;     /* Min. # of elements per data block */
+        *p++ = hdr->cparam.sup_blk_min_data_ptrs;  /* Min. # of data block pointers for a super block */
 
         /* Internal information */
         H5F_addr_encode(f, &p, hdr->idx_blk_addr);  /* Address of index block */
@@ -525,17 +525,17 @@ H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 	H5E_THROW(H5E_VERSION, "wrong extensible array index block version")
 
     /* Extensible array type */
-    if(*p++ != (uint8_t)hdr->cls->id)
+    if(*p++ != (uint8_t)hdr->cparam.cls->id)
 	H5E_THROW(H5E_BADTYPE, "incorrect extensible array class")
 
     /* Internal information */
 
     /* Decode elements in index block */
-    if(hdr->idx_blk_elmts > 0) {
+    if(hdr->cparam.idx_blk_elmts > 0) {
         /* Convert from raw elements on disk into native elements in memory */
-        if((hdr->cls->decode)(p, iblock->elmts, (size_t)hdr->idx_blk_elmts) < 0)
+        if((hdr->cparam.cls->decode)(p, iblock->elmts, (size_t)hdr->cparam.idx_blk_elmts) < 0)
             H5E_THROW(H5E_CANTDECODE, "can't decode extensible array index elements")
-        p += (hdr->idx_blk_elmts * hdr->raw_elmt_size);
+        p += (hdr->cparam.idx_blk_elmts * hdr->cparam.raw_elmt_size);
     } /* end if */
 
     /* Decode data block addresses in index block */
@@ -647,16 +647,16 @@ H5EA__cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         *p++ = H5EA_IBLOCK_VERSION;
 
         /* Extensible array type */
-        *p++ = iblock->hdr->cls->id;
+        *p++ = iblock->hdr->cparam.cls->id;
 
         /* Internal information */
 
         /* Encode elements in index block */
-        if(iblock->hdr->idx_blk_elmts > 0) {
+        if(iblock->hdr->cparam.idx_blk_elmts > 0) {
             /* Convert from native elements in memory into raw elements on disk */
-            if((iblock->hdr->cls->encode)(p, iblock->elmts, (size_t)iblock->hdr->idx_blk_elmts) < 0)
+            if((iblock->hdr->cparam.cls->encode)(p, iblock->elmts, (size_t)iblock->hdr->cparam.idx_blk_elmts) < 0)
                 H5E_THROW(H5E_CANTENCODE, "can't encode extensible array index elements")
-            p += (iblock->hdr->idx_blk_elmts * iblock->hdr->raw_elmt_size);
+            p += (iblock->hdr->cparam.idx_blk_elmts * iblock->hdr->cparam.raw_elmt_size);
         } /* end if */
 
         /* Encode data block addresses in index block */
@@ -869,16 +869,16 @@ H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 	H5E_THROW(H5E_VERSION, "wrong extensible array data block version")
 
     /* Extensible array type */
-    if(*p++ != (uint8_t)hdr->cls->id)
+    if(*p++ != (uint8_t)hdr->cparam.cls->id)
 	H5E_THROW(H5E_BADTYPE, "incorrect extensible array class")
 
     /* Internal information */
 
     /* Decode elements in data block */
     /* Convert from raw elements on disk into native elements in memory */
-    if((hdr->cls->decode)(p, dblock->elmts, *nelmts) < 0)
+    if((hdr->cparam.cls->decode)(p, dblock->elmts, *nelmts) < 0)
         H5E_THROW(H5E_CANTDECODE, "can't decode extensible array data elements")
-    p += (*nelmts * hdr->raw_elmt_size);
+    p += (*nelmts * hdr->cparam.raw_elmt_size);
 
     /* Sanity check */
     /* (allow for checksum not decoded yet) */
@@ -971,16 +971,16 @@ H5EA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         *p++ = H5EA_DBLOCK_VERSION;
 
         /* Extensible array type */
-        *p++ = dblock->hdr->cls->id;
+        *p++ = dblock->hdr->cparam.cls->id;
 
         /* Internal information */
 
         /* Encode elements in data block */
 
         /* Convert from native elements in memory into raw elements on disk */
-        if((dblock->hdr->cls->encode)(p, dblock->elmts, dblock->nelmts) < 0)
+        if((dblock->hdr->cparam.cls->encode)(p, dblock->elmts, dblock->nelmts) < 0)
             H5E_THROW(H5E_CANTENCODE, "can't encode extensible array data elements")
-        p += (dblock->nelmts * dblock->hdr->raw_elmt_size);
+        p += (dblock->nelmts * dblock->hdr->cparam.raw_elmt_size);
 
         /* Compute metadata checksum */
         metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);

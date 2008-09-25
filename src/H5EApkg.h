@@ -386,7 +386,7 @@ func_init_failed:							      \
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* Extensible Array Index Block specific fields */			      \
-    + ((size_t)(i)->hdr->idx_blk_elmts * (size_t)(i)->hdr->raw_elmt_size) /* Elements in index block  */ \
+    + ((size_t)(i)->hdr->cparam.idx_blk_elmts * (size_t)(i)->hdr->cparam.raw_elmt_size) /* Elements in index block  */ \
     + ((i)->ndblk_addrs * (i)->hdr->sizeof_addr) /* Data block addresses in index block  */ \
     + ((i)->nsblk_addrs * (i)->hdr->sizeof_addr) /* Super block addresses in index block  */ \
     )
@@ -397,7 +397,7 @@ func_init_failed:							      \
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* Extensible Array Data Block specific fields */			      \
-    + ((d)->nelmts * (size_t)(d)->hdr->raw_elmt_size) /* Elements in index block  */  \
+    + ((d)->nelmts * (size_t)(d)->hdr->cparam.raw_elmt_size) /* Elements in index block  */  \
     )
 
 
@@ -422,11 +422,7 @@ typedef struct H5EA_hdr_t {
     H5AC_info_t cache_info;
 
     /* Extensible array configuration/creation parameters (stored) */
-    uint8_t raw_elmt_size;              /* Element size in file (in bytes) */
-    uint8_t max_nelmts_bits;            /* Log2(Max. # of elements in array) - i.e. # of bits needed to store max. # of elements */
-    uint8_t idx_blk_elmts;              /* # of elements to store in index block */
-    uint8_t data_blk_min_elmts;         /* Min. # of elements per data block */
-    uint8_t sup_blk_min_data_ptrs;      /* Min. # of data block pointers for a super block */
+    H5EA_create_t cparam;               /* Creation parameters for extensible array */
 
     /* Index block information (stored in header) */
     haddr_t idx_blk_addr;               /* Address of index block in header */
@@ -453,9 +449,6 @@ typedef struct H5EA_hdr_t {
     /* Super block information (not stored) */
     size_t nsblks;                      /* Number of superblocks needed for array */
     H5EA_sblk_info_t *sblk_info;        /* Array of information for each super block */
-
-    /* Memory data structures (not stored directly) */
-    const H5EA_class_t *cls;            /* Pointer to class for array */
 } H5EA_hdr_t;
 
 /* The extensible array index block information */

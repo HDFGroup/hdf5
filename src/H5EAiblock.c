@@ -123,8 +123,8 @@ H5EA__iblock_alloc(H5EA_hdr_t *hdr))
     iblock->addr = HADDR_UNDEF;
 
     /* Compute information */
-    iblock->nsblks = 2 * H5V_log2_of2((uint32_t)hdr->sup_blk_min_data_ptrs);
-    iblock->ndblk_addrs = 2 * ((size_t)hdr->sup_blk_min_data_ptrs - 1);
+    iblock->nsblks = 2 * H5V_log2_of2((uint32_t)hdr->cparam.sup_blk_min_data_ptrs);
+    iblock->ndblk_addrs = 2 * ((size_t)hdr->cparam.sup_blk_min_data_ptrs - 1);
     iblock->nsblk_addrs = hdr->nsblks - iblock->nsblks;
 #ifdef QAK
 HDfprintf(stderr, "%s: iblock->nsblks = %u\n", FUNC, iblock->nsblks);
@@ -133,8 +133,8 @@ HDfprintf(stderr, "%s: iblock->nsblk_addrs = %Zu\n", FUNC, iblock->nsblk_addrs);
 #endif /* QAK */
 
     /* Allocate buffer for elements in index block */
-    if(hdr->idx_blk_elmts > 0)
-        if(NULL == (iblock->elmts = H5FL_BLK_MALLOC(idx_blk_elmt_buf, (size_t)(hdr->idx_blk_elmts * hdr->cls->nat_elmt_size))))
+    if(hdr->cparam.idx_blk_elmts > 0)
+        if(NULL == (iblock->elmts = H5FL_BLK_MALLOC(idx_blk_elmt_buf, (size_t)(hdr->cparam.idx_blk_elmts * hdr->cparam.cls->nat_elmt_size))))
             H5E_THROW(H5E_CANTALLOC, "memory allocation failed for index block data element buffer")
 
     /* Allocate buffer for data block addresses in index block */
@@ -201,13 +201,13 @@ HDfprintf(stderr, "%s: iblock->size = %Zu\n", FUNC, iblock->size);
 #endif /* QAK */
 
     /* Allocate space for the index block on disk */
-    if(HADDR_UNDEF == (iblock->addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_IBLOCK, dxpl_id, iblock->size)))
+    if(HADDR_UNDEF == (iblock->addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_IBLOCK, dxpl_id, (hsize_t)iblock->size)))
 	H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array index block")
 
     /* Clear any elements in index block to fill value */
-    if(hdr->idx_blk_elmts > 0) {
+    if(hdr->cparam.idx_blk_elmts > 0) {
         /* Call the class's 'fill' callback */
-        if((hdr->cls->fill)(iblock->elmts, (size_t)hdr->idx_blk_elmts) < 0)
+        if((hdr->cparam.cls->fill)(iblock->elmts, (size_t)hdr->cparam.idx_blk_elmts) < 0)
             H5E_THROW(H5E_CANTSET, "can't set extensible array index block elements to class's fill value")
     } /* end if */
 
@@ -431,7 +431,7 @@ H5EA__iblock_dest(H5F_t *f, H5EA_iblock_t *iblock))
     iblock->hdr->f = f;
 
     /* Check if we've got elements in the index block */
-    if(iblock->hdr->idx_blk_elmts > 0) {
+    if(iblock->hdr->cparam.idx_blk_elmts > 0) {
         /* Free buffer for index block elements */
         HDassert(iblock->elmts);
         (void)H5FL_BLK_FREE(idx_blk_elmt_buf, iblock->elmts);

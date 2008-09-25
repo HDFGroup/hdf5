@@ -119,26 +119,26 @@ H5EA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     /* Print the values */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Array class ID:",
-	      (hdr->cls->id == H5EA_CLS_TEST_ID ? "H5EA_CLS_TEST_ID" :
+	      (hdr->cparam.cls->id == H5EA_CLS_TEST_ID ? "H5EA_CLS_TEST_ID" :
               "Unknown!"));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Header size:",
 	      hdr->size);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Raw Element Size:",
-	      (unsigned)hdr->raw_elmt_size);
+	      (unsigned)hdr->cparam.raw_elmt_size);
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Native Element Size (on this platform):",
-	      hdr->cls->nat_elmt_size);
+	      hdr->cparam.cls->nat_elmt_size);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "# of elements in index block:",
-	      (unsigned)hdr->idx_blk_elmts);
+	      (unsigned)hdr->cparam.idx_blk_elmts);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Min. # of elements per data block:",
-	      (unsigned)hdr->data_blk_min_elmts);
+	      (unsigned)hdr->cparam.data_blk_min_elmts);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Min. # of data block pointers for a super block:",
-	      (unsigned)hdr->sup_blk_min_data_ptrs);
+	      (unsigned)hdr->cparam.sup_blk_min_data_ptrs);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Highest element index stored (+1):",
 	      hdr->stats.max_idx_set);
@@ -210,7 +210,7 @@ H5EA__iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
     /* Print the values */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Array class ID:",
-	      (hdr->cls->id == H5EA_CLS_TEST_ID ? "H5EA_CLS_TEST_ID" :
+	      (hdr->cparam.cls->id == H5EA_CLS_TEST_ID ? "H5EA_CLS_TEST_ID" :
               "Unknown!"));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Index Block size:",
@@ -223,16 +223,16 @@ H5EA__iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
 	      iblock->nsblk_addrs);
 
     /* Check if there are any elements in index block */
-    if(hdr->idx_blk_elmts > 0) {
+    if(hdr->cparam.idx_blk_elmts > 0) {
         unsigned u;             /* Local index variable */
 
         /* Print the elements in the index block */
         HDfprintf(stream, "%*sElements in Index Block:\n", indent, "");
-        for(u = 0; u < hdr->idx_blk_elmts; u++) {
+        for(u = 0; u < hdr->cparam.idx_blk_elmts; u++) {
             /* Call the class's 'debug' callback */
-            if((hdr->cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)),
+            if((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)),
                     (hsize_t)u,
-                    ((uint8_t *)iblock->elmts) + (hdr->cls->nat_elmt_size * u)) < 0)
+                    ((uint8_t *)iblock->elmts) + (hdr->cparam.cls->nat_elmt_size * u)) < 0)
                 H5E_THROW(H5E_CANTGET, "can't get element for debugging")
         } /* end for */
     } /* end if */
@@ -325,7 +325,7 @@ H5EA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
     /* Print the values */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Array class ID:",
-	      (hdr->cls->id == H5EA_CLS_TEST_ID ? "H5EA_CLS_TEST_ID" :
+	      (hdr->cparam.cls->id == H5EA_CLS_TEST_ID ? "H5EA_CLS_TEST_ID" :
               "Unknown!"));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Data Block size:",
@@ -336,9 +336,9 @@ H5EA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
     HDfprintf(stream, "%*sElements:\n", indent, "");
     for(u = 0; u < dblk_nelmts; u++) {
         /* Call the class's 'debug' callback */
-        if((hdr->cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)),
+        if((hdr->cparam.cls->debug)(stream, (indent + 3), MAX(0, (fwidth - 3)),
                 (hsize_t)u,
-                ((uint8_t *)dblock->elmts) + (hdr->cls->nat_elmt_size * u)) < 0)
+                ((uint8_t *)dblock->elmts) + (hdr->cparam.cls->nat_elmt_size * u)) < 0)
             H5E_THROW(H5E_CANTGET, "can't get element for debugging")
     } /* end for */
 

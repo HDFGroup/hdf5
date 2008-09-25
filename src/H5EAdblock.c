@@ -176,11 +176,11 @@ HDfprintf(stderr, "%s: dblock->size = %Zu\n", FUNC, dblock->size);
 #endif /* QAK */
 
     /* Allocate space for the data block on disk */
-    if(HADDR_UNDEF == (dblock->addr = H5MF_alloc(iblock->hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, dblock->size)))
+    if(HADDR_UNDEF == (dblock->addr = H5MF_alloc(iblock->hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
 	H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array data block")
 
     /* Clear any elements in index block to fill value */
-    if((iblock->hdr->cls->fill)(dblock->elmts, (size_t)dblock->nelmts) < 0)
+    if((iblock->hdr->cparam.cls->fill)(dblock->elmts, (size_t)dblock->nelmts) < 0)
         H5E_THROW(H5E_CANTSET, "can't set extensible array data block elements to class's fill value")
 
     /* Cache the new extensible array data block */
@@ -228,13 +228,13 @@ H5EA__dblock_sblk_idx(const H5EA_hdr_t *hdr, hsize_t idx))
 
     /* Sanity check */
     HDassert(hdr);
-    HDassert(idx >= hdr->idx_blk_elmts);
+    HDassert(idx >= hdr->cparam.idx_blk_elmts);
 
 #ifdef QAK
 HDfprintf(stderr, "%s: Entering - idx = %Hu\n", FUNC, idx);
 #endif /* QAK */
     /* Adjust index for elements in index block */
-    idx -= hdr->idx_blk_elmts;
+    idx -= hdr->cparam.idx_blk_elmts;
 #ifdef QAK
 HDfprintf(stderr, "%s: after adjusting for index block elements, idx = %Hu\n", FUNC, idx);
 #endif /* QAK */
@@ -242,9 +242,9 @@ HDfprintf(stderr, "%s: after adjusting for index block elements, idx = %Hu\n", F
     /* Determine the superblock information for the index */
     H5_CHECK_OVERFLOW(idx, /*From:*/hsize_t, /*To:*/uint64_t);
 #ifdef QAK
-HDfprintf(stderr, "%s: hdr->data_blk_min_elmts = %u\n", FUNC, (unsigned)hdr->data_blk_min_elmts);
+HDfprintf(stderr, "%s: hdr->cparam.data_blk_min_elmts = %u\n", FUNC, (unsigned)hdr->cparam.data_blk_min_elmts);
 #endif /* QAK */
-    sblk_idx = H5V_log2_gen((uint64_t)((idx / hdr->data_blk_min_elmts) + 1));
+    sblk_idx = H5V_log2_gen((uint64_t)((idx / hdr->cparam.data_blk_min_elmts) + 1));
 #ifdef QAK
 HDfprintf(stderr, "%s: sblk_idx = %u\n", FUNC, sblk_idx);
 HDfprintf(stderr, "%s: hdr->sblk_info[%u] = {%Hu, %Zu, %Hu, %Hu}\n", FUNC, sblk_idx, hdr->sblk_info[sblk_idx].ndblks, hdr->sblk_info[sblk_idx].dblk_nelmts, hdr->sblk_info[sblk_idx].start_idx, hdr->sblk_info[sblk_idx].start_dblk);
