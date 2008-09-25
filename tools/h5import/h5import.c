@@ -45,10 +45,6 @@ int main(int argc, char *argv[])
    (void)HDsetvbuf(stderr, (char *) NULL, _IOLBF, 0);
    (void)HDsetvbuf(stdout, (char *) NULL, _IOLBF, 0);
 
-#if defined __MWERKS__
-    argc = ccommand(&argv);
-#endif
-
     if ( argv[1] && (strcmp("-V",argv[1])==0) )
     {
         print_version("h5import");
@@ -275,7 +271,7 @@ gtoken(char *s)
  * Programmer:  pkmat
  *
  * Modifications: pvn
- *  7/23/2007. Added support for STR type
+ *  7/23/2007. Added support for STR type, extra parameter FILE_ID
  *
  *-------------------------------------------------------------------------
  */
@@ -293,11 +289,52 @@ processDataFile(char *infile, struct Input *in, FILE **strm, hid_t file_id)
   const char *err10 = "Unrecognized input class type.\n";
   const char *err11 = "Error in reading string data.\n";
 
-  if ((*strm = fopen(infile, "r")) == NULL)
+ /*-------------------------------------------------------------------------
+  * special case for opening binary classes in WIN32
+  * "FP" denotes a floating point binary file,
+  * "IN" denotes a signed integer binary file,
+  * "UIN" denotes an unsigned integer binary file,
+  *-------------------------------------------------------------------------
+  */
+  if ( in->inputClass == 4 /* "IN" */ ||
+       in->inputClass == 3 /* "FP" */ ||
+       in->inputClass == 7 /* "UIN" */
+
+      )
   {
-      (void) fprintf(stderr, err1, infile);
-      return(-1);
+
+#ifdef WIN32
+
+      if ((*strm = fopen(infile, "rb")) == NULL)
+      {
+          (void) fprintf(stderr, err1, infile);
+          return(-1);
+      }
+#else
+
+      if ((*strm = fopen(infile, "r")) == NULL)
+      {
+          (void) fprintf(stderr, err1, infile);
+          return(-1);
+      }
+
+#endif
+
   }
+ /*-------------------------------------------------------------------------
+  * if the input class is not binary, just use "r"
+  *-------------------------------------------------------------------------
+  */
+  else
+  {
+      if ((*strm = fopen(infile, "r")) == NULL)
+      {
+          (void) fprintf(stderr, err1, infile);
+          return(-1);
+      }
+  }
+
+
 
   switch(in->inputClass)
   {
@@ -372,8 +409,10 @@ readIntegerData(FILE **strm, struct Input *in)
   H5DT_INT8 *in08;
   H5DT_INT16 *in16, temp;
   H5DT_INT32 *in32;
+#ifndef WIN32
   H5DT_INT64 *in64;
   char buffer[256];
+#endif
   hsize_t len=1;
   hsize_t i;
   int j;
@@ -486,6 +525,7 @@ readIntegerData(FILE **strm, struct Input *in)
       }
     break;
 
+#ifndef _WIN32
     case 64:
       in64 = (H5DT_INT64 *) in->data;
       switch(in->inputClass)
@@ -518,6 +558,7 @@ readIntegerData(FILE **strm, struct Input *in)
           return (-1);
       }
   	  break;
+#endif /* ifndef _WIN32 */
 
     default:
       (void) fprintf(stderr, err3);
@@ -532,8 +573,10 @@ readUIntegerData(FILE **strm, struct Input *in)
   H5DT_UINT8 *in08;
   H5DT_UINT16 *in16, temp;
   H5DT_UINT32 *in32;
+#ifndef _WIN32
   H5DT_UINT64 *in64;
   char buffer[256];
+#endif
   hsize_t len=1;
   hsize_t i;
   int j;
@@ -644,6 +687,7 @@ readUIntegerData(FILE **strm, struct Input *in)
       }
     break;
 
+#ifndef _WIN32
     case 64:
       in64 = (H5DT_UINT64 *) in->data;
       switch(in->inputClass)
@@ -676,6 +720,7 @@ readUIntegerData(FILE **strm, struct Input *in)
           return (-1);
       }
     break;
+#endif /* ifndef _WIN32 */
 
     default:
       (void) fprintf(stderr, err3);
@@ -730,9 +775,9 @@ readFloatData(FILE **strm, struct Input *in)
                     return (-1);
                 }
             }
-
-          fp32 = (H5DT_FLOAT32 *) in->data;
-        break;
+            
+            fp32 = (H5DT_FLOAT32 *) in->data;
+            break;
 
         case 3: /* FP */
           for (i = 0; i < len; i++, fp32++)
@@ -770,7 +815,7 @@ readFloatData(FILE **strm, struct Input *in)
 
         /* same as TEXTFP */
         case 2: /*TEXTFPE */
-
+            
             for (i = 0; i < len; i++, fp64++)
             {
                 if (fscanf(*strm, "%lf", fp64) != 1)
@@ -781,7 +826,7 @@ readFloatData(FILE **strm, struct Input *in)
             }
             
             fp64 = (H5DT_FLOAT64 *) in->data;
-        break;
+            break;
 
         case 3: /* FP */
           for (i = 0; i < len; i++, fp64++)
@@ -1457,6 +1502,9 @@ validateConfigurationParameters(struct Input * in)
   const char *err4a = "OUTPUT-ARCHITECTURE cannot be STD if OUTPUT-CLASS is floating point (FP).\n";
   const char *err4b = "OUTPUT-ARCHITECTURE cannot be IEEE if OUTPUT-CLASS is integer (IN).\n";
   const char *err5 = "For OUTPUT-CLASS FP, valid values for OUTPUT-SIZE are (32, 64) .\n";
+#ifdef _WIN32
+  const char *err6 = "No support for reading 64-bit integer (INPUT-CLASS: IN, TEXTIN, UIN, TEXTUIN files\n";
+#endif
 
    /* for class STR other parameters are ignored */
   if (in->inputClass == 5) /* STR */
@@ -1515,6 +1563,13 @@ validateConfigurationParameters(struct Input * in)
       return (-1);
     }
 
+#ifdef _WIN32
+  if (in->inputSize == 64 && (in->inputClass == 0 || in->inputClass == 4 || in->inputClass == 6 || in->inputClass == 7) )
+	{
+	  (void) fprintf(stderr, err6);
+	  return -1;
+	}
+#endif
   return (0);
 }
 
