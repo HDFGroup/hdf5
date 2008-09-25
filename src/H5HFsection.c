@@ -2635,8 +2635,7 @@ HDfprintf(stderr, "%s: end_row = %u, end_col = %u\n", FUNC, end_row, end_col);
             + indirect_start_col;
 
         /* Compute ending indirect entry */
-        indirect_end_entry = (end_row * hdr->man_dtable.cparam.width) +
-            end_col;
+        indirect_end_entry = (end_row * hdr->man_dtable.cparam.width) + end_col;
 
         /* Compute # of indirect entries covered */
         sect->u.indirect.indir_nents = (indirect_end_entry - indirect_start_entry) + 1;
@@ -3776,10 +3775,9 @@ H5HF_sect_indirect_merge_row(H5HF_hdr_t *hdr, hid_t dxpl_id,
     unsigned start_entry1;              /* Start entry for section #1 */
     unsigned start_row1, start_col1;    /* Starting row & column for section #1 */
     unsigned end_entry1;                /* End entry for section #1 */
-    unsigned end_row1, end_col1;        /* Ending row & column for section #1 */
+    unsigned end_row1;                  /* Ending row for section #1 */
     unsigned start_entry2;              /* Start entry for section #2 */
     unsigned start_row2, start_col2;    /* Starting row & column for section #2 */
-    unsigned end_row2, end_col2;        /* Ending row & column for section #2 */
     unsigned end_entry2;                /* End entry for section #2 */
     hbool_t merged_rows;                /* Flag to indicate that rows was merged together */
     unsigned u;                         /* Local index variable */
@@ -3822,24 +3820,20 @@ HDfprintf(stderr, "%s: sect2->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect2->sec
     start_entry1 = (start_row1 * hdr->man_dtable.cparam.width) + start_col1;
     end_entry1 = (start_entry1 + sect1->u.indirect.num_entries) - 1;
     end_row1 = end_entry1 / hdr->man_dtable.cparam.width;
-    end_col1 = end_entry1 % hdr->man_dtable.cparam.width;
 #ifdef QAK
 HDfprintf(stderr, "%s: sect1->u.indirect.dir_nrows = %u\n", FUNC, sect1->u.indirect.dir_nrows);
 HDfprintf(stderr, "%s: start_row1 = %u, start_col1 = %u, start_entry1 = %u\n", FUNC, start_row1, start_col1, start_entry1);
 HDfprintf(stderr, "%s: sect1->u.indirect.num_entries = %u\n", FUNC, sect1->u.indirect.num_entries);
-HDfprintf(stderr, "%s: end_row1 = %u, end_col1 = %u, end_entry1 = %u\n", FUNC, end_row1, end_col1, end_entry1);
+HDfprintf(stderr, "%s: end_row1 = %u, end_entry1 = %u\n", FUNC, end_row1, end_entry1);
 #endif /* QAK */
     start_row2 = sect2->u.indirect.row;
     start_col2 = sect2->u.indirect.col;
     start_entry2 = (start_row2 * hdr->man_dtable.cparam.width) + start_col2;
     end_entry2 = (start_entry2 + sect2->u.indirect.num_entries) - 1;
-    end_row2 = end_entry2 / hdr->man_dtable.cparam.width;
-    end_col2 = end_entry2 % hdr->man_dtable.cparam.width;
 #ifdef QAK
 HDfprintf(stderr, "%s: sect2->u.indirect.dir_nrows = %u\n", FUNC, sect2->u.indirect.dir_nrows);
 HDfprintf(stderr, "%s: start_row2 = %u, start_col2 = %u, start_entry2 = %u\n", FUNC, start_row2, start_col2, start_entry2);
 HDfprintf(stderr, "%s: sect2->u.indirect.num_entries = %u\n", FUNC, sect2->u.indirect.num_entries);
-HDfprintf(stderr, "%s: end_row2 = %u, end_col2 = %u, end_entry2 = %u\n", FUNC, end_row2, end_col2, end_entry2);
 #endif /* QAK */
 
     /* Check for direct sections in second section */
@@ -4428,7 +4422,6 @@ H5HF_sect_indirect_valid(const H5HF_hdr_t *hdr, const H5HF_free_section_t *sect)
     unsigned start_col;         /* Column for first block covered */
     unsigned start_entry;       /* Entry for first block covered */
     unsigned end_row;           /* Row for last block covered */
-    unsigned end_col;           /* Column for last block covered */
     unsigned end_entry;         /* Entry for last block covered */
     unsigned u;                 /* Local index variable */
 
@@ -4455,10 +4448,9 @@ HDfprintf(stderr, "%u, %u, %u}\n", sect->u.indirect.row, sect->u.indirect.col, s
     /* Compute ending entry, column & row */
     end_entry = (start_entry + sect->u.indirect.num_entries) - 1;
     end_row = end_entry / hdr->man_dtable.cparam.width;
-    end_col = end_entry % hdr->man_dtable.cparam.width;
 #ifdef QAK
 HDfprintf(stderr, "%s: start_row = %u, start_col = %u, start_entry = %u\n", "H5HF_sect_indirect_valid", start_row, start_col, start_entry);
-HDfprintf(stderr, "%s: end_row = %u, end_col = %u, end_entry = %u\n", "H5HF_sect_indirect_valid", end_row, end_col, end_entry);
+HDfprintf(stderr, "%s: end_row = %u, end_entry = %u\n", "H5HF_sect_indirect_valid", end_row, end_entry);
 #endif /* QAK */
 
     /* Sanity check any direct rows */
