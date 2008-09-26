@@ -110,7 +110,9 @@ Bug Fixes since HDF5-1.6.7 Release
 
     Library
     -------
-     None
+     - Changed the return value of H5Fget_obj_count from INT to SSIZE_T. Also
+           changed the return value of H5Fget_obj_ids from HERR_T to SSIZE_T and
+           the type of the parameter MAX_OBJS from INT to SIZE_T. (SLU - 2008/09/26)
 
     Configuration
     -------------

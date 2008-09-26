@@ -747,7 +747,7 @@ static void
 create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
 		hid_t *ret_gid2, hid_t *ret_gid3)
 {
-    int	oid_count;
+    ssize_t	oid_count;
     herr_t	ret;
 
     /* Check reference counts of file IDs and opened object IDs.
@@ -1011,7 +1011,7 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
 			hid_t gid2, hid_t gid3)
 {
     hid_t    fid3, fid4;
-    int oid_count;
+    ssize_t  oid_count, ret_count;
     herr_t   ret;
 
     /* Create two new files */
@@ -1057,8 +1057,8 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1,
 
         oid_list = (hid_t*)calloc((size_t)oid_count, sizeof(hid_t));
         if(oid_list != NULL) {
-	    ret = H5Fget_obj_ids(H5F_OBJ_ALL, H5F_OBJ_ALL, oid_count, oid_list);
-	    CHECK(ret, FAIL, "H5Fget_obj_ids");
+	    ret_count = H5Fget_obj_ids(H5F_OBJ_ALL, H5F_OBJ_ALL, (size_t)oid_count, oid_list);
+	    CHECK(ret_count, FAIL, "H5Fget_obj_ids");
         }
 
         for(i=0; i<oid_count; i++) {

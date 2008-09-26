@@ -37,7 +37,7 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, h
 {
      int ret_value = -1;
      char *c_name;
-     int c_namelen;
+     int_f c_namelen;
      hid_t c_file_id;
      unsigned c_access_flags;
      hid_t c_crt_prp;
@@ -66,7 +66,7 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, h
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
+     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen);
      if (c_name == NULL) return ret_value;
 
      /*
@@ -184,7 +184,7 @@ nh5funmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
 {
      int ret_value = -1;
      char *c_name;
-     int c_namelen;
+     int_f c_namelen;
      hid_t c_loc_id;
      htri_t status;
 
@@ -194,7 +194,7 @@ nh5funmount_c (hid_t_f *loc_id, _fcd dsetname, int_f *namelen)
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(dsetname, c_namelen);
+     c_name = (char *)HD5f2cstring(dsetname, (size_t)c_namelen);
      if (c_name == NULL) return ret_value;
 
      /*
@@ -228,7 +228,7 @@ nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hi
 {
      int ret_value = -1;
      char *c_name;
-     int c_namelen;
+     int_f c_namelen;
      hid_t c_file_id;
      unsigned c_access_flags;
      hid_t c_acc_prp;
@@ -250,7 +250,7 @@ nh5fopen_c (_fcd name, int_f *namelen, int_f *access_flags, hid_t_f *acc_prp, hi
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
+     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen);
      if (c_name == NULL) return ret_value;
 
      /*
@@ -361,14 +361,14 @@ nh5fis_hdf5_c (_fcd name, int_f *namelen, int_f *flag)
 {
      int ret_value = -1;
      char *c_name;
-     int c_namelen;
+     int_f c_namelen;
      htri_t status;
 
      /*
       * Convert FORTRAN name to C name
       */
      c_namelen = *namelen;
-     c_name = (char *)HD5f2cstring(name, c_namelen);
+     c_name = (char *)HD5f2cstring(name, (size_t)c_namelen);
      if (c_name == NULL) return ret_value;
 
      /*
@@ -397,7 +397,7 @@ nh5fclose_c ( hid_t_f *file_id )
   int ret_value = 0;
   hid_t c_file_id;
 
-  c_file_id = *file_id;
+  c_file_id = (hid_t*)*file_id;
   if ( H5Fclose(c_file_id) < 0  ) ret_value = -1;
   return ret_value;
 }
@@ -411,21 +411,23 @@ nh5fclose_c ( hid_t_f *file_id )
  * Programmer:  Elena Pourmal
  *              Monday, September 30, 2002
  * Modifications:
+ *              Changed type of obj_count to size_t_f
+ *              Thursday, September 25, 2008
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, int_f * obj_count)
+nh5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, size_t_f * obj_count)
 {
   int ret_value = 0;
   hid_t c_file_id;
   unsigned c_obj_type;
-  int c_obj_count;
+  ssize_t c_obj_count;
 
 
   c_file_id = (hid_t)*file_id;
   c_obj_type = (unsigned) *obj_type;
   if ( (c_obj_count=H5Fget_obj_count(c_file_id, c_obj_type)) < 0  ) ret_value = -1;
-  *obj_count = (int_f)c_obj_count;
+  *obj_count = (size_t_f)c_obj_count;
   return ret_value;
 }
 /*----------------------------------------------------------------------------
@@ -438,20 +440,34 @@ nh5fget_obj_count_c ( hid_t_f *file_id , int_f *obj_type, int_f * obj_count)
  * Programmer:  Elena Pourmal
  *              Monday, September 30, 2002
  * Modifications:
+ *              Changed type of max_obj to size_t_f; added parameter for the 
+ *              number of open objects
+ *              Thursday, September 25, 2008 EIP
  *---------------------------------------------------------------------------*/
-
 int_f
-nh5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, int_f *max_objs, hid_t_f *obj_ids)
+nh5fget_obj_ids_c ( hid_t_f *file_id , int_f *obj_type, size_t_f *max_objs, hid_t_f *obj_ids,
+size_t_f *num_objs)
 {
   int ret_value = 0;
   hid_t c_file_id;
   unsigned c_obj_type;
-  int c_max_objs;
+  int i;
+  size_t c_max_objs;
+  ssize_t c_num_objs;
+  hid_t *c_obj_ids;
 
   c_file_id = (hid_t)*file_id;
   c_obj_type = (unsigned) *obj_type;
-  c_max_objs = (int)*max_objs;
-  if ( H5Fget_obj_ids(c_file_id, c_obj_type, c_max_objs, (hid_t *)obj_ids) < 0  ) ret_value = -1;
+  c_max_objs = (size_t)*max_objs;
+  c_obj_ids = (hid_t *)HDmalloc(sizeof(hid_t)*c_max_objs);
+
+  c_num_objs = H5Fget_obj_ids(c_file_id, c_obj_type, c_max_objs, c_obj_ids);
+  if ( c_num_objs < 0  ) ret_value = -1;
+  for (i=0; i< c_max_objs; i++) obj_ids[i] = (hid_t_f)c_obj_ids[i];
+
+  HDfree(c_obj_ids);
+  *num_objs = (size_t_f)c_num_objs;
+
   return ret_value;
 }
 /*----------------------------------------------------------------------------
@@ -494,7 +510,7 @@ int_f
 nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
 {
     char *c_buf=NULL;           /* Buffer to hold C string */
-    ssize_t size_c;
+    ssize_t size_c = -1;
     int_f ret_value=0;          /* Return value */
 
      /*
@@ -504,7 +520,7 @@ nh5fget_name_c(hid_t_f *obj_id, size_t_f *size, _fcd buf, size_t_f *buflen)
          HGOTO_DONE(FAIL);
 
      /*
-      * Call H5Aget_name function
+      * Call H5Fget_name function
       */
      if ((size_c = (size_t_f)H5Fget_name((hid_t)*obj_id, c_buf, (size_t)*buflen)) < 0)
          HGOTO_DONE(FAIL);
