@@ -638,7 +638,8 @@
 !		September 30, 2002
 !
 ! Modifications: 	
-!
+!               Changed the type of obj_count to INTEGER(SIZE_T)
+!                               September 25, 2008 EIP
 ! Comment:		
 !----------------------------------------------------------------------
           
@@ -646,7 +647,8 @@
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier
             INTEGER, INTENT(IN)  :: obj_type      ! Object type
-            INTEGER, INTENT(OUT) :: obj_count     ! Number of open objects
+            INTEGER(SIZE_T), INTENT(OUT) :: obj_count
+                                                  ! Number of open objects
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
 
             INTERFACE
@@ -657,7 +659,8 @@
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: file_id
               INTEGER, INTENT(IN)  :: obj_type      ! Object type
-              INTEGER, INTENT(OUT) :: obj_count    ! Number of open objects
+              INTEGER(SIZE_T), INTENT(OUT) :: obj_count
+                                                    ! Number of open objects
               END FUNCTION h5fget_obj_count_c
             END INTERFACE
 
@@ -690,33 +693,42 @@
 !		September 30, 2002
 !
 ! Modifications: 	
+!               Added optional parameter num_objs for number of open objects
+!               of the specified type and changed type of max_obj to 
+!               INTEGER(SIZE_T)
+!                               September 25, 2008 EIP
 !
 ! Comment:		
 !----------------------------------------------------------------------
           
-          SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, max_objs, obj_ids, hdferr)
+          SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, max_objs, obj_ids, hdferr, num_objs)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier
             INTEGER, INTENT(IN)  :: obj_type   ! Object type
-            INTEGER, INTENT(IN)  :: max_objs   ! Maximum # of objects to retrieve
+            INTEGER(SIZE_T), INTENT(IN)  :: max_objs   ! Maximum # of objects to retrieve
             INTEGER(HID_T), DIMENSION(*), INTENT(INOUT) :: obj_ids
                                                ! Array of open objects iidentifiers
-            INTEGER, INTENT(OUT) :: hdferr        ! Error code
+            INTEGER, INTENT(OUT) :: hdferr     ! Error code
+            INTEGER(SIZE_T), INTENT(OUT), OPTIONAL :: num_objs 
+            INTEGER(SIZE_T) :: c_num_objs 
+                              ! Number of open objects of the specified type
 
             INTERFACE
-              INTEGER FUNCTION h5fget_obj_ids_c(file_id, obj_type, max_objs, obj_ids)
+              INTEGER FUNCTION h5fget_obj_ids_c(file_id, obj_type, max_objs, obj_ids, c_num_objs)
               USE H5GLOBAL
               !DEC$ IF DEFINED(HDF5F90_WINDOWS)
        !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5FGET_OBJ_IDS_C':: h5fget_obj_ids_c
               !DEC$ ENDIF
               INTEGER(HID_T), INTENT(IN) :: file_id
               INTEGER, INTENT(IN)  :: obj_type      
-              INTEGER, INTENT(IN)  :: max_objs
+              INTEGER(SIZE_T), INTENT(IN)  :: max_objs
               INTEGER(HID_T), DIMENSION(*), INTENT(INOUT) :: obj_ids  
+              INTEGER(SIZE_T), INTENT(OUT) :: c_num_objs 
               END FUNCTION h5fget_obj_ids_c
             END INTERFACE
 
-            hdferr = h5fget_obj_ids_c(file_id, obj_type, max_objs, obj_ids)
+            hdferr = h5fget_obj_ids_c(file_id, obj_type, max_objs, obj_ids, c_num_objs)
+            if (present(num_objs)) num_objs= c_num_objs
 
           END SUBROUTINE h5fget_obj_ids_f
 
