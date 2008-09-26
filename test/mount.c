@@ -3392,7 +3392,7 @@ test_cut_graph(hid_t fapl)
     hid_t gidQ = -1;                    /* Group IDs in file #7 */
     char    name[NAME_BUF_SIZE];        /* Buffer for filename retrieved */
     ssize_t name_len;                   /* Filename length */
-    int obj_count;                      /* Number of objects open */
+    ssize_t obj_count;                  /* Number of objects open */
     char	filename1[NAME_BUF_SIZE],
 		filename2[NAME_BUF_SIZE],
 		filename3[NAME_BUF_SIZE],

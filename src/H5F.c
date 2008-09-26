@@ -51,7 +51,7 @@
 typedef struct H5F_olist_t {
     H5I_type_t obj_type;        /* Type of object to look for */
     hid_t      *obj_id_list;    /* Pointer to the list of open IDs to return */
-    unsigned   *obj_id_count;   /* Number of open IDs */
+    size_t     *obj_id_count;   /* Number of open IDs */
     struct {
         hbool_t local;          /* Set flag for "local" file searches */
         union {
@@ -59,12 +59,12 @@ typedef struct H5F_olist_t {
             const H5F_t *file;  /* Pointer to file to look inside */
         } ptr;
     } file_info;
-    unsigned   list_index;      /* Current index in open ID array */
-    int   max_index;            /* Maximum # of IDs to put into array */
+    size_t     list_index;      /* Current index in open ID array */
+    size_t     max_index;            /* Maximum # of IDs to put into array */
 } H5F_olist_t;
 
 /* PRIVATE PROTOTYPES */
-static unsigned H5F_get_objects(const H5F_t *f, unsigned types, int max_objs, hid_t *obj_id_list);
+static size_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_objs, hid_t *obj_id_list);
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void** file_handle);
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
@@ -370,14 +370,19 @@ done:
  *
  * Programmer:	Raymond Lu
  *		Wednesday, Dec 5, 2001
+ * Modification:
+ *              Raymond Lu
+ *              24 September 2008
+ *              Changed the return value to ssize_t to  accommadate 
+ *              potential large number of objects. 
  *
  *-------------------------------------------------------------------------
  */
-int
+ssize_t
 H5Fget_obj_count(hid_t file_id, unsigned types)
 {
     H5F_t    *f = NULL;         /* File to query */
-    int   ret_value;            /* Return value */
+    ssize_t  ret_value;            /* Return value */
 
     FUNC_ENTER_API(H5Fget_obj_count, FAIL)
     H5TRACE2("Is", "iIu", file_id, types);
@@ -387,8 +392,8 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
     if(0 == (types & H5F_OBJ_ALL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type")
 
-    if((ret_value = H5F_get_obj_count(f, types)) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCOUNT, FAIL, "can't get object count")
+    /* H5F_get_obj_count doesn't fail */
+    ret_value = H5F_get_obj_count(f, types);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -401,23 +406,28 @@ done:
  * Purpose:	Private function return the number of opened object IDs
  *		(files, datasets, groups, datatypes) in the same file.
  *
- * Return:      Non-negative on success; negative on failure.
+ * Return:      Non-negative on success; can't fail.
  *
  * Programmer:  Raymond Lu
  *              Wednesday, Dec 5, 2001
  *
  * Modification:
+ *              Raymond Lu
+ *              24 September 2008
+ *              Changed the return value to size_t to accommadate 
+ *              potential large number of objects. 
  *
  *-------------------------------------------------------------------------
  */
-unsigned
+size_t
 H5F_get_obj_count(const H5F_t *f, unsigned types)
 {
-    unsigned   ret_value;            /* Return value */
+    size_t   ret_value;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_obj_count)
 
-    ret_value=H5F_get_objects(f, types, -1, NULL);
+    /* H5F_get_objects doesn't fail */
+    ret_value=H5F_get_objects(f, types, 0, NULL);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -434,14 +444,18 @@ H5F_get_obj_count(const H5F_t *f, unsigned types)
  *              Wednesday, Dec 5, 2001
  *
  * Modification:
+ *              Raymond Lu
+ *              24 September 2008
+ *              Changed the return value to ssize_t and MAX_OBJTS to size_t to 
+ *              accommadate potential large number of objects. 
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5Fget_obj_ids(hid_t file_id, unsigned types, int max_objs, hid_t *oid_list)
+ssize_t
+H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
 {
     H5F_t    *f = NULL;         /* File to query */
-    herr_t   ret_value;         /* Return value */
+    ssize_t   ret_value;         /* Return value */
 
     FUNC_ENTER_API(H5Fget_obj_ids, FAIL)
     H5TRACE4("e", "iIuIs*i", file_id, types, max_objs, oid_list);
@@ -451,7 +465,8 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, int max_objs, hid_t *oid_list)
     if(0 == (types & H5F_OBJ_ALL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type")
     HDassert(oid_list);
-
+ 
+    /* H5F_get_objects doesn't fail */
     ret_value = H5F_get_obj_ids(f, types, max_objs, oid_list);
 
 done:
@@ -464,22 +479,27 @@ done:
  *
  * Purpose:     Private function to return a list of opened object IDs.
  *
- * Return:      Non-negative on success; negative on failure.
+ * Return:      Non-negative on success; can't fail.
  *
  * Programmer:  Raymond Lu
  *              Wednesday, Dec 5, 2001
  *
  * Modification:
+ *              Raymond Lu
+ *              24 September 2008
+ *              Changed the return value and MAX_OBJTS to size_t to accommadate
+ *              potential large number of objects. 
  *
  *-------------------------------------------------------------------------
  */
-unsigned
-H5F_get_obj_ids(const H5F_t *f, unsigned types, int max_objs, hid_t *oid_list)
+size_t
+H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list)
 {
-    unsigned ret_value;              /* Return value */
+    size_t ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_obj_ids)
 
+    /* H5F_get_objects doesn't fail */
     ret_value = H5F_get_objects(f, types, max_objs, oid_list);
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -492,7 +512,7 @@ H5F_get_obj_ids(const H5F_t *f, unsigned types, int max_objs, hid_t *oid_list)
  * Purpose:	This function is called by H5F_get_obj_count or
  *		H5F_get_obj_ids to get number of object IDs and/or a
  *		list of opened object IDs (in return value).
- * Return:	Non-negative on success; negative on failure.
+ * Return:	Non-negative on success; Can't fail.
  *
  * Programmer:  Raymond Lu
  *              Wednesday, Dec 5, 2001
@@ -501,12 +521,12 @@ H5F_get_obj_ids(const H5F_t *f, unsigned types, int max_objs, hid_t *oid_list)
  *
  *---------------------------------------------------------------------------
  */
-static unsigned
-H5F_get_objects(const H5F_t *f, unsigned types, int max_index, hid_t *obj_id_list)
+static size_t
+H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list)
 {
-    unsigned obj_id_count=0;    /* Number of open IDs */
+    size_t obj_id_count=0;      /* Number of open IDs */
     H5F_olist_t olist;          /* Structure to hold search results */
-    unsigned ret_value;         /* Return value */
+    size_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_objects)
 
@@ -517,7 +537,7 @@ H5F_get_objects(const H5F_t *f, unsigned types, int max_index, hid_t *obj_id_lis
     olist.max_index   = max_index;
 
     /* Determine if we are searching for local or global objects */
-    if(types&H5F_OBJ_LOCAL) {
+    if(types & H5F_OBJ_LOCAL) {
         olist.file_info.local = TRUE;
         olist.file_info.ptr.file = f;
     } /* end if */
@@ -527,7 +547,8 @@ H5F_get_objects(const H5F_t *f, unsigned types, int max_index, hid_t *obj_id_lis
     } /* end else */
 
     /* Search through file IDs to count the number, and put their
-     * IDs on the object list */
+     * IDs on the object list.  H5I_search returns NULL if no object 
+     * is found, so don't return failure in this function. */
     if(types & H5F_OBJ_FILE) {
         olist.obj_type = H5I_FILE;
         (void)H5I_search(H5I_FILE, H5F_get_objects_cb, &olist);
@@ -535,28 +556,28 @@ H5F_get_objects(const H5F_t *f, unsigned types, int max_index, hid_t *obj_id_lis
 
     /* Search through dataset IDs to count number of datasets, and put their
      * IDs on the object list */
-    if( (max_index < 0 || (int)olist.list_index < max_index) && (types & H5F_OBJ_DATASET) ) {
+    if(types & H5F_OBJ_DATASET) {
         olist.obj_type = H5I_DATASET;
         (void)H5I_search(H5I_DATASET, H5F_get_objects_cb, &olist);
     }
 
     /* Search through group IDs to count number of groups, and put their
      * IDs on the object list */
-    if( (max_index < 0 || (int)olist.list_index < max_index) && (types & H5F_OBJ_GROUP) ) {
+    if(types & H5F_OBJ_GROUP) {
         olist.obj_type = H5I_GROUP;
         (void)H5I_search(H5I_GROUP, H5F_get_objects_cb, &olist);
     }
 
     /* Search through datatype IDs to count number of named datatypes, and put their
      * IDs on the object list */
-    if( (max_index < 0 || (int)olist.list_index < max_index) && (types & H5F_OBJ_DATATYPE) ) {
+    if(types & H5F_OBJ_DATATYPE) {
         olist.obj_type = H5I_DATATYPE;
         (void)H5I_search(H5I_DATATYPE, H5F_get_objects_cb, &olist);
     }
 
     /* Search through attribute IDs to count number of attributes, and put their
      * IDs on the object list */
-    if( (max_index < 0 || (int)olist.list_index < max_index) && (types & H5F_OBJ_ATTR) ) {
+    if(types & H5F_OBJ_ATTR) {
         olist.obj_type = H5I_ATTR;
         (void)H5I_search(H5I_ATTR, H5F_get_objects_cb, &olist);
     }
@@ -574,6 +595,9 @@ H5F_get_objects(const H5F_t *f, unsigned types, int max_index, hid_t *obj_id_lis
  * Purpose:	H5F_get_objects' callback function.  It verifies if an
  * 		object is in the file, and either count it or put its ID
  *		on the list.
+ *
+ * Return:      TRUE if the array of object IDs is filled up.
+ *              FALSE otherwise.
  *
  * Programmer:  Raymond Lu
  *              Wednesday, Dec 5, 2001
@@ -609,8 +633,11 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 	    if(olist->obj_id_count)
 	    	(*olist->obj_id_count)++;
 
-            /* Check if we've filled up the array */
-            if(olist->max_index>=0 && (int)olist->list_index>=olist->max_index)
+            /* Check if we've filled up the array.  Return TRUE only if
+             * we have filled up the array. Otherwise return FALSE(RET_VALUE is 
+             * preset to FALSE) because H5I_search needs the return value of FALSE
+             * to continue searching. */
+            if(olist->max_index>0 && olist->list_index>=olist->max_index)
                 HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
 	}
     } /* end if */
@@ -659,8 +686,11 @@ H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
 	    if(olist->obj_id_count)
             	(*olist->obj_id_count)++;
 
-            /* Check if we've filled up the array */
-            if(olist->max_index>=0 && (int)olist->list_index>=olist->max_index)
+            /* Check if we've filled up the array.  Return TRUE only if
+             * we have filled up the array. Otherwise return FALSE(RET_VALUE is 
+             * preset to FALSE) because H5I_search needs the return value of FALSE
+             * to continue searching. */
+            if(olist->max_index>0 && olist->list_index>=olist->max_index)
                 HGOTO_DONE(TRUE)  /* Indicate that the iterator should stop */
     	} /* end if */
     } /* end else */

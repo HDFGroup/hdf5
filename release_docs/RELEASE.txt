@@ -106,6 +106,9 @@ Bug Fixes since HDF5-1.8.1
 
         Library
         -------
+        - Changed the return value of H5Fget_obj_count from INT to SSIZE_T. Also
+            changed the return value of H5Fget_obj_ids from HERR_T to SSIZE_T and
+            the type of the parameter MAX_OBJS from INT to SIZE_T. (SLU - 2008/09/26)
         - Fixed an issue that could cause data to be improperly overwritten
             during compound type conversion.  (NAF - 2008/09/19)
         - Fixed pointer alignment violations that could occur during vlen

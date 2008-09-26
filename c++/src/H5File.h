@@ -60,12 +60,12 @@ class H5_DLLCPP H5File : public IdComponent, public CommonFG {
 
 	// Returns the number of opened object IDs (files, datasets, groups
 	// and datatypes) in the same file.
-	int getObjCount(unsigned types) const;
-	int getObjCount() const;
+	ssize_t getObjCount(unsigned types) const;
+	ssize_t getObjCount() const;
 
 	// Retrieves a list of opened object IDs (files, datasets, groups
 	// and datatypes) in the same file.
-	void getObjIDs(unsigned types, int max_objs, hid_t *oid_list) const;
+	void getObjIDs(unsigned types, size_t max_objs, hid_t *oid_list) const;
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Retrieves the type of object that an object reference points to.

@@ -578,7 +578,7 @@
           INTEGER(HID_T) :: fapl, fapl1, fapl2, fapl3 ! File access identifiers
           INTEGER(HID_T) :: fid_d_fapl, fid1_fapl     ! File access identifiers
           LOGICAL        :: flag
-          INTEGER        :: obj_count, obj_countf
+          INTEGER(SIZE_T) :: obj_count, obj_countf
           INTEGER(HID_T), ALLOCATABLE, DIMENSION(:) :: obj_ids
           INTEGER        :: i
           
