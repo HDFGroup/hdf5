@@ -14,9 +14,11 @@
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
 # Tests for the h5cc compiler tool
-# Created: Albert Cheng, 2007/3/13
+# Created: Albert Cheng, 2007/4/11
 #
 # Modification:
+#	Albert Cheng, 2008/9/27
+#	Added -shlib tests and verbose control.
 #
 
 # Initializations
@@ -36,7 +38,8 @@ CMP='cmp -s'
 DIFF='diff -c'
 
 nerrors=0
-verbose=yes
+verbose=${HDF5_VERBOSE:-1}      # 0: none; 1: default; 2: chatty; 3: everything
+test $verbose -gt 2 && set -x
 
 # setup my machine information.
 myos=`uname -s`
@@ -170,10 +173,13 @@ TOOLTEST() {
     result=$?
     if [ $result = 0 ]; then
 	echo " PASSED"
+	test $verbose -gt 1 && \
+	    ( echo "========== results ==========="; cat $out;
+	      echo "===============================================") |sed 's/^/    /'
     else
 	echo "*FAILED*"
 	nerrors="`expr $nerrors + 1`"
-	test yes = "$verbose" && \
+	test $verbose -gt 0 && \
 	    ( echo "========== results ==========="; cat $out;
 	      echo "===============================================") |sed 's/^/    /'
     fi
@@ -195,28 +201,46 @@ SKIP() {
 ###			  T H E   T E S T S                                ###
 ##############################################################################
 #
-# HDF5 program that calls HDF5 APIs.
+# Group 1: HDF5 program that calls HDF5 APIs.
 echo "***"Simple Compile and Link in one step.
 TOOLTEST $hdf5main
 # Application program that calls HDF5 and its own functions.
 TOOLTEST $appmain $prog1 $prog2
+# Repeat with -shlib option
+echo "***"Simple Compile and Link with -shlib in one step.
+TOOLTEST -shlib $hdf5main
+# Application program that calls HDF5 and its own functions.
+TOOLTEST -shlib $appmain $prog1 $prog2
 
-# Compile, then link.
+# Group 2: Compile, then link.
 echo "***"Compile and Link in two steps.
 TOOLTEST -c $hdf5main
 TOOLTEST $hdf5main_o
 TOOLTEST -c $appmain $prog1 $prog2
 TOOLTEST $appmain_o $prog1_o $prog2_o
+# Repeat with -shlib option
+echo "***"Compile and Link with -shlib in two steps.
+TOOLTEST -c $hdf5main
+TOOLTEST -shlib $hdf5main_o
+TOOLTEST -c $appmain $prog1 $prog2
+TOOLTEST -shlib $appmain_o $prog1_o $prog2_o
 
-# Build external library, then link with it.
+# Group3: Build external library, then link with it.
 echo "***"Build external library and link with it.
 TOOLTEST -c $prog1 $prog2
 $AR cru $applib $prog1_o $prog2_o
 $RANLIB $applib
 TOOLTEST $appmain $applib
 TOOLTEST $appmain_o $applib
+# Repeat with -shlib option
+echo "***"Build external library and link with it using -shlib.
+TOOLTEST -c $prog1 $prog2
+$AR cru $applib $prog1_o $prog2_o
+$RANLIB $applib
+TOOLTEST -shlib $appmain $applib
+TOOLTEST -shlib $appmain_o $applib
 
-# Just preprocess, no compile, no link.
+# Group 4: Just preprocess, no compile, no link.
 echo "***"Just preprocess, no compile, no link.
 TOOLTEST -E $hdf5main
 TOOLTEST -E $appmain $prog1 $prog2
