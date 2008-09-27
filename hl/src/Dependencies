@@ -42,14 +42,12 @@ H5LT.lo: \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
    $(top_srcdir)/src/H5FDfamily.h \
-   $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDlog.h \
    $(top_srcdir)/src/H5FDmpi.h \
    $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDmpiposix.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5FDsec2.h \
-   $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h
 H5TA.lo: \
    $(srcdir)/H5TA.c \
@@ -79,14 +77,12 @@ H5TA.lo: \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
    $(top_srcdir)/src/H5FDfamily.h \
-   $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDlog.h \
    $(top_srcdir)/src/H5FDmpi.h \
    $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDmpiposix.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5FDsec2.h \
-   $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h
 H5IM.lo: \
    $(srcdir)/H5IM.c \
@@ -116,12 +112,10 @@ H5IM.lo: \
    $(top_srcdir)/src/H5Tpublic.h \
    $(top_srcdir)/src/H5FDcore.h \
    $(top_srcdir)/src/H5FDfamily.h \
-   $(top_srcdir)/src/H5FDgass.h \
    $(top_srcdir)/src/H5FDlog.h \
    $(top_srcdir)/src/H5FDmpi.h \
    $(top_srcdir)/src/H5FDmpio.h \
    $(top_srcdir)/src/H5FDmpiposix.h \
    $(top_srcdir)/src/H5FDmulti.h \
    $(top_srcdir)/src/H5FDsec2.h \
-   $(top_srcdir)/src/H5FDsrb.h \
    $(top_srcdir)/src/H5FDstdio.h

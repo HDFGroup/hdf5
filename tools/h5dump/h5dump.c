@@ -2691,8 +2691,6 @@ dump_fcpl(hid_t fid)
         HDstrcpy(dname,"H5FD_CORE");
     else if (H5FD_FAMILY==fdriver)
         HDstrcpy(dname,"H5FD_FAMILY");
-     else if (H5FD_GASS==fdriver)
-        HDstrcpy(dname,"H5FD_GASS");
      else if (H5FD_LOG==fdriver)
         HDstrcpy(dname,"H5FD_LOG");
     else if (H5FD_MPIO==fdriver)

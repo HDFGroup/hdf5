@@ -1181,8 +1181,6 @@
 ./src/H5FDcore.h
 ./src/H5FDfamily.c
 ./src/H5FDfamily.h
-./src/H5FDgass.c
-./src/H5FDgass.h
 ./src/H5FDlog.c
 ./src/H5FDlog.h
 ./src/H5FDmpi.c
@@ -1197,8 +1195,6 @@
 ./src/H5FDpublic.h
 ./src/H5FDsec2.c
 ./src/H5FDsec2.h
-./src/H5FDsrb.c
-./src/H5FDsrb.h
 ./src/H5FDstdio.c
 ./src/H5FDstdio.h
 ./src/H5FL.c
@@ -1354,9 +1350,6 @@
 ./test/fillval.c
 ./test/flush1.c
 ./test/flush2.c
-./test/gass_append.c
-./test/gass_read.c
-./test/gass_write.c
 ./test/gen_deflate.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_mergemsg.c			_DO_NOT_DISTRIBUTE_
 ./test/gen_old_array.c			_DO_NOT_DISTRIBUTE_
@@ -1387,9 +1380,6 @@
 ./test/reserved.c
 ./test/set_extent.c
 ./test/space_overflow.c			_DO_NOT_DISTRIBUTE_
-./test/srb_append.c
-./test/srb_read.c
-./test/srb_write.c
 ./test/stab.c
 ./test/tarray.c
 ./test/tarrold.h5

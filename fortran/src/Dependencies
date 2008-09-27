@@ -41,14 +41,12 @@ H5f90kit.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \
@@ -81,14 +79,12 @@ H5_f.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \
@@ -121,14 +117,12 @@ H5Rf.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \
@@ -161,14 +155,12 @@ H5Ff.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \
@@ -203,14 +195,12 @@ H5Sf.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \
@@ -243,14 +233,12 @@ H5Df.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \
@@ -283,14 +271,12 @@ H5Gf.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \
@@ -323,14 +309,12 @@ H5Af.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \
@@ -365,14 +349,12 @@ H5Tf.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \
@@ -405,14 +387,12 @@ H5Pf.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \
@@ -445,14 +425,12 @@ H5If.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \
@@ -487,14 +465,12 @@ H5Ef.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \
@@ -527,14 +503,12 @@ H5Zf.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \
@@ -567,14 +541,12 @@ H5FDmpiof.lo: \
    $(top_srcdir)/fortran/../src/H5Tpublic.h \
    $(top_srcdir)/fortran/../src/H5FDcore.h \
    $(top_srcdir)/fortran/../src/H5FDfamily.h \
-   $(top_srcdir)/fortran/../src/H5FDgass.h \
    $(top_srcdir)/fortran/../src/H5FDlog.h \
    $(top_srcdir)/fortran/../src/H5FDmpi.h \
    $(top_srcdir)/fortran/../src/H5FDmpio.h \
    $(top_srcdir)/fortran/../src/H5FDmpiposix.h \
    $(top_srcdir)/fortran/../src/H5FDmulti.h \
    $(top_srcdir)/fortran/../src/H5FDsec2.h \
-   $(top_srcdir)/fortran/../src/H5FDsrb.h \
    $(top_srcdir)/fortran/../src/H5FDstdio.h \
    $(srcdir)/H5f90i.h \
    $(top_srcdir)/fortran/../src/H5private.h \

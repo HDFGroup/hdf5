@@ -116,7 +116,8 @@ Bug Fixes since HDF5-1.6.7 Release
 
     Configuration
     -------------
-     None
+     - The GASS and SRB virtual file drivers have been retired and removed
+       from the HDF5 library. AKC - 2008/9/26
 
 
     Performance

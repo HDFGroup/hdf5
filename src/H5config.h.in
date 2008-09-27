@@ -75,9 +75,6 @@
 /* Define if the compiler understand the __FUNCTION__ keyword */
 #undef HAVE_FUNCTION
 
-/* Define if the Globus GASS is defined */
-#undef HAVE_GASS
-
 /* Define to 1 if you have the `GetConsoleScreenBufferInfo' function. */
 #undef HAVE_GETCONSOLESCREENBUFFERINFO
 
@@ -99,9 +96,6 @@
 /* Define to 1 if you have the `get_fpc_csr' function. */
 #undef HAVE_GET_FPC_CSR
 
-/* Define to 1 if you have the <globus_common.h> header file. */
-#undef HAVE_GLOBUS_COMMON_H
-
 /* Define if we have GPFS support */
 #undef HAVE_GPFS
 
@@ -121,46 +115,8 @@
 /* Define to 1 if you have the <io.h> header file. */
 #undef HAVE_IO_H
 
-/* Define to 1 if you have the `crypto' library (-lcrypto). */
-#undef HAVE_LIBCRYPTO
-
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #undef HAVE_LIBDMALLOC
-
-/* Define to 1 if you have the `elf' library (-lelf). */
-#undef HAVE_LIBELF
-
-/* Define to 1 if you have the `globus_common' library (-lglobus_common). */
-#undef HAVE_LIBGLOBUS_COMMON
-
-/* Define to 1 if you have the `globus_gaa' library (-lglobus_gaa). */
-#undef HAVE_LIBGLOBUS_GAA
-
-/* Define to 1 if you have the `globus_gass_cache' library
-   (-lglobus_gass_cache). */
-#undef HAVE_LIBGLOBUS_GASS_CACHE
-
-/* Define to 1 if you have the `globus_gass_file' library
-   (-lglobus_gass_file). */
-#undef HAVE_LIBGLOBUS_GASS_FILE
-
-/* Define to 1 if you have the `globus_gass_transfer' library
-   (-lglobus_gass_transfer). */
-#undef HAVE_LIBGLOBUS_GASS_TRANSFER
-
-/* Define to 1 if you have the `globus_gass_transfer_assist' library
-   (-lglobus_gass_transfer_assist). */
-#undef HAVE_LIBGLOBUS_GASS_TRANSFER_ASSIST
-
-/* Define to 1 if you have the `globus_gss' library (-lglobus_gss). */
-#undef HAVE_LIBGLOBUS_GSS
-
-/* Define to 1 if you have the `globus_gss_assist' library
-   (-lglobus_gss_assist). */
-#undef HAVE_LIBGLOBUS_GSS_ASSIST
-
-/* Define to 1 if you have the `globus_io' library (-lglobus_io). */
-#undef HAVE_LIBGLOBUS_IO
 
 /* Define to 1 if you have the `lmpe' library (-llmpe). */
 #undef HAVE_LIBLMPE
@@ -185,15 +141,6 @@
 
 /* Define to 1 if you have the `pthread' library (-lpthread). */
 #undef HAVE_LIBPTHREAD
-
-/* Define to 1 if you have the `socket' library (-lsocket). */
-#undef HAVE_LIBSOCKET
-
-/* Define to 1 if you have the `SrbClient' library (-lSrbClient). */
-#undef HAVE_LIBSRBCLIENT
-
-/* Define to 1 if you have the `ssl' library (-lssl). */
-#undef HAVE_LIBSSL
 
 /* Define to 1 if you have the `sz' library (-lsz). */
 #undef HAVE_LIBSZ
@@ -239,12 +186,6 @@
 
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
-
-/* Define if the SRB is defined */
-#undef HAVE_SRB
-
-/* Define to 1 if you have the <srbClient.h> header file. */
-#undef HAVE_SRBCLIENT_H
 
 /* Define if `struct stat' has the `st_blocks' field */
 #undef HAVE_STAT_ST_BLOCKS
