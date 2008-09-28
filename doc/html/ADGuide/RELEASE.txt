@@ -1,4 +1,4 @@
-HDF5 version 1.6.7-snap19 released on Sun Sep 21 17:11:16 CDT 2008
+HDF5 version 1.6.7-snap20 released on Sun Sep 28 14:52:11 CDT 2008
 ================================================================================
 
 INTRODUCTION
@@ -72,6 +72,8 @@ New Features
          regarding floating point numbers. (PVN - 2008/05/06)
      - h5repack: add a userblock to an HDF5 file during the repack. (PVN - 2008/08/26)
      - h5repack: copy userblock from HDF5 file during the repack. (PVN - 2008/08/26)
+     - h5diff: new mode (-c contents), that checks if the objects in both files are 
+         the same. (PVN - 2008/08/26)
 
 
     F90 API:
@@ -108,11 +110,14 @@ Bug Fixes since HDF5-1.6.7 Release
 
     Library
     -------
-     None
+     - Changed the return value of H5Fget_obj_count from INT to SSIZE_T. Also
+           changed the return value of H5Fget_obj_ids from HERR_T to SSIZE_T and
+           the type of the parameter MAX_OBJS from INT to SIZE_T. (SLU - 2008/09/26)
 
     Configuration
     -------------
-     None
+     - The GASS and SRB virtual file drivers have been retired and removed
+       from the HDF5 library. AKC - 2008/9/26
 
 
     Performance
