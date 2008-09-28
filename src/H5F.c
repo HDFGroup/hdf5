@@ -385,7 +385,7 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
     ssize_t  ret_value;            /* Return value */
 
     FUNC_ENTER_API(H5Fget_obj_count, FAIL)
-    H5TRACE2("Is", "iIu", file_id, types);
+    H5TRACE2("Zs", "iIu", file_id, types);
 
     if(file_id != (hid_t)H5F_OBJ_ALL && (NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE))))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id")
@@ -458,7 +458,7 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
     ssize_t   ret_value;         /* Return value */
 
     FUNC_ENTER_API(H5Fget_obj_ids, FAIL)
-    H5TRACE4("e", "iIuIs*i", file_id, types, max_objs, oid_list);
+    H5TRACE4("Zs", "iIuz*i", file_id, types, max_objs, oid_list);
 
     if(file_id != (hid_t)H5F_OBJ_ALL && (NULL == (f = (H5F_t *)H5I_object_verify(file_id, H5I_FILE))))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file id")
