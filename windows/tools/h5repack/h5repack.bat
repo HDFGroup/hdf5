@@ -590,8 +590,13 @@ rem
     )
     
     rem add a userblock to file
+    rem Temporarily comment test on Windows.  The ublock.bin test file is inaccessible
+    rem because h5repacktst is run from a different folder than on other platforms.
+    rem Until ublock.bin is added to SVN and distributed with the source package,
+    rem we cannot test this on Windows.  --SJW 9/29/08
     set arg=%file1% -u ublock.bin -b 2048
-    call :tooltest %arg%
+    call :skip %arg%
+    rem call :tooltest %arg%
     
     rem add alignment
     set arg=%file1% -t 1 -a 1

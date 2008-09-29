@@ -22,6 +22,9 @@ rem
 setlocal enabledelayedexpansion
 pushd %~dp0
 
+rem srcdir is used on Unix-- define as the current directory for Windows.
+set srcdir=%CD%
+
 rem The tool name
 set h5import=h5import%2
 rem The path of the tool binary
@@ -101,49 +104,52 @@ goto main
     rem On Windows, echo gives a carriage return, so we store the TESTING params
     rem and call TESTING from TOOLTEST.  --SJW 8/27/07
     set testing=ASCII I32 rank 3 - Output BE 
-    call :tooltest txtin32 -c %CD%\testfiles\textin32 -o test1.h5
+    call :tooltest %srcdir%\testfiles\in32.txt -c %srcdir%\testfiles\textin32.conf -o test1.h5
 
     set testing=ASCII I16 rank 3 - Output LE - CHUNKED - extended
-    call :tooltest txtin16 -c %CD%\testfiles\textin16 -o test2.h5
+    call :tooltest %srcdir%\testfiles\in16.txt -c %srcdir%\testfiles\textin16.conf -o test2.h5
 
     set testing=ASCII I8 - rank 3 - Output I16 LE-Chunked+Extended+Compressed
-    call :tooltest txtin16 -c %CD%\testfiles\textin8  -o test3.h5
+    call :tooltest %srcdir%\testfiles\in16.txt -c %srcdir%\testfiles\textin8.conf  -o test3.h5
 
     set testing=ASCII UI32 - rank 3 - Output BE
-    call :tooltest %CD%\testfiles\in1 -c %CD%\testfiles\textuin32 -o test4.h5
+    call :tooltest %srcdir%\testfiles\in1.txt -c %srcdir%\testfiles\textuin32.conf -o test4.h5
 
     set testing=ASCII UI16 - rank 2 - Output LE+Chunked+Compressed
-    call :tooltest %CD%\testfiles\in1 -c %CD%\testfiles\textuin16 -o test5.h5
+    call :tooltest %srcdir%\testfiles\in1.txt -c %srcdir%\testfiles\textuin16.conf -o test5.h5
 
     set testing=ASCII F32 - rank 3 - Output LE
-    call :tooltest %CD%\testfiles\fp1 -c %CD%\testfiles\textfp32 -o test6.h5
+    call :tooltest %srcdir%\testfiles\fp1.txt -c %srcdir%\testfiles\textfp32.conf -o test6.h5
 
     set testing=ASCII F64 - rank 3 - Output BE + CHUNKED+Extended+Compressed
-    call :tooltest %CD%\testfiles\fp2 -c %CD%\testfiles\textfp64 -o test7.h5
+    call :tooltest %srcdir%\testfiles\fp2.txt -c %srcdir%\testfiles\textfp64.conf -o test7.h5
 
     set testing=BINARY F64 - rank 3 - Output LE+CHUNKED+Extended+Compressed
-    call :tooltest bfp64 -c %CD%\testfiles\conbfp64 -o test8.h5
+    call :tooltest binfp64.bin -c %srcdir%\testfiles\binfp64.conf -o test8.h5
 
     set testing=BINARY I16 - rank 3 - Output order LE + CHUNKED + extended
-    call :tooltest bin16 -c %CD%\testfiles\conbin16 -o test9.h5
+    call :tooltest binin16.bin -c %srcdir%\testfiles\binin16.conf -o test9.h5
 
     set testing=BINARY I8 - rank 3 - Output I16LE + Chunked+Extended+Compressed
-    call :tooltest bin8 -c %CD%\testfiles\conbin8  -o test10.h5
+    call :tooltest binin8.bin -c %srcdir%\testfiles\binin8.conf  -o test10.h5
 
     set testing=BINARY I32 - rank 3 - Output BE + CHUNKED
-    call :tooltest bin32 -c %CD%\testfiles\conbin32 -o test11.h5
+    call :tooltest binin32.bin -c %srcdir%\testfiles\binin32.conf -o test11.h5
 
     set testing=BINARY UI16 - rank 3 - Output byte BE + CHUNKED
-    call :tooltest buin16 -c %CD%\testfiles\conbuin16 -o test12.h5
+    call :tooltest binuin16.bin -c %srcdir%\testfiles\binuin16.conf -o test12.h5
 
     set testing=BINARY UI32 - rank 3 - Output LE + CHUNKED
-    call :tooltest buin32 -c %CD%\testfiles\conbuin32 -o test13.h5
+    call :tooltest binuin32.bin -c %srcdir%\testfiles\binuin32.conf -o test13.h5
 
     set testing=STR 
-    call :tooltest %CD%\testfiles\txtstr -c %CD%\testfiles\textstr -o teststr.h5
+    call :tooltest %srcdir%\testfiles\str.txt -c %srcdir%\testfiles\textstr.conf -o test14.h5
+    
+    set testing=ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE 
+    call :tooltest %srcdir%\testfiles\in64.txt -c %srcdir%\testfiles\textpfe.conf -o test15.h5
 
-    del /f tx* b* *.dat
-    del /f test*.h5
+
+    del /f *.txt *.bin *.h5
     rmdir /s /q tmp_testfiles
     
     ) else (
