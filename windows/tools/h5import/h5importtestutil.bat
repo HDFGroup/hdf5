@@ -161,6 +161,11 @@ goto main
 
     set testing=BINARY I8 CR LF EOF
     call :tooltest binin8w.bin -c %srcdir%\testfiles\binin8w.conf -o binin8w.h5
+    
+    set testing=ASCII F64 - rank 1 - INPUT-CLASS TEXTFPE
+    call :tooltest %srcdir%\testfiles\in64.txt -c %srcdir%\testfiles\textpfe.conf -o test15.h5
+
+
 
     del /f *.txt *.bin *.h5
     rmdir /s /q tmp_testfiles

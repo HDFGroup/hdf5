@@ -587,7 +587,7 @@ rem
     )
     
     rem add a userblock to file
-    set arg=%file1% -u ublock.bin -b 2048
+    set arg=%file1% -u testfiles\ublock.bin -b 2048
     call :tooltest %arg%
     
     rem add alignment
