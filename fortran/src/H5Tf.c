@@ -413,6 +413,7 @@ nh5tset_precision_c ( hid_t_f *type_id , size_t_f *precision)
  *              Tuesday, January 25, 2000
  * Modifications:
  *---------------------------------------------------------------------------*/
+
 int_f
 nh5tget_offset_c ( hid_t_f *type_id , size_t_f *offset)
 {
@@ -1839,7 +1840,6 @@ nh5tcompiler_conv_c ( hid_t_f *src_id, hid_t_f *dst_id, int_f *c_flag)
   ret_value = 0;
   return ret_value;
 }
-
 /*----------------------------------------------------------------------------
  * Name:        h5tget_native_type_c
  * Purpose:     Call H5Tget_native_type
@@ -1865,3 +1865,4 @@ nh5tget_native_type_c(hid_t_f *dtype_id, int_f *direction, hid_t_f *native_dtype
   ret_value = 0;
   return ret_value;
 }
+

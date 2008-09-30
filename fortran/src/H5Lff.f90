@@ -51,9 +51,7 @@ CONTAINS
 ! Comment:		
 !----------------------------------------------------------------------
   SUBROUTINE h5lcopy_f(src_loc_id, src_name, dest_loc_id, dest_name, hdferr, &
-       lcpl_id, lapl_id) 
-!
-!This definition is needed for Windows DLLs
+       lcpl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: src_loc_id  ! Location identifier of the source link
     CHARACTER(LEN=*), INTENT(IN) :: src_name   ! Name of the link to be copied
@@ -130,9 +128,7 @@ CONTAINS
 !
 ! Comment:		
 !----------------------------------------------------------------------
-  SUBROUTINE h5ldelete_f(loc_id, name, hdferr, lapl_id) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5ldelete_f(loc_id, name, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id  ! Identifier of the file or group containing the object
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of the link to delete
@@ -192,9 +188,7 @@ CONTAINS
 !
 ! Comment:		
 !----------------------------------------------------------------------
-  SUBROUTINE h5lcreate_soft_f(target_path, link_loc_id, link_name, hdferr, lcpl_id, lapl_id) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5lcreate_soft_f(target_path, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: target_path     ! Path to the target object, which is not required to exist.
     INTEGER(HID_T), INTENT(IN) :: link_loc_id     ! The file or group identifier for the new link.
@@ -272,9 +266,7 @@ CONTAINS
 !
 ! Comment:		
 !----------------------------------------------------------------------
-  SUBROUTINE h5lcreate_hard_f(obj_loc_id, obj_name, link_loc_id, link_name, hdferr, lcpl_id, lapl_id) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5lcreate_hard_f(obj_loc_id, obj_name, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_loc_id  ! The file or group identifier for the target object.
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of the target object, which must already exist.
@@ -354,9 +346,7 @@ CONTAINS
 !
 ! Comment:		
 !----------------------------------------------------------------------
-  SUBROUTINE h5lcreate_external_f(file_name, obj_name, link_loc_id, link_name, hdferr, lcpl_id, lapl_id) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5lcreate_external_f(file_name, obj_name, link_loc_id, link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: file_name  ! Name of the file containing the target object. Neither 
                                               ! the file nor the target object is required to exist. 
@@ -449,8 +439,7 @@ CONTAINS
 ! Modifications: N/A 
 !
 !----------------------------------------------------------------------
-  SUBROUTINE h5ldelete_by_idx_f(loc_id, group_name, index_field, order, n, hdferr, lapl_id) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5ldelete_by_idx_f(loc_id, group_name, index_field, order, n, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id       ! Identifer for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: group_name ! Name of object, relative to location, 
@@ -525,9 +514,6 @@ CONTAINS
 !
 !----------------------------------------------------------------------
   SUBROUTINE h5lexists_f(loc_id, name, link_exists, hdferr, lapl_id)
-
-!This definition is needed for Windows DLLs
-
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id  ! Identifier of the file or group to query.
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Link name to check.
@@ -605,8 +591,7 @@ CONTAINS
 
   SUBROUTINE h5lget_info_f(link_loc_id, link_name, &
        cset, corder, f_corder_valid, link_type, address, val_size, &
-       hdferr, lapl_id) 
-!This definition is needed for Windows DLLs
+       hdferr, lapl_id)
     IMPLICIT NONE
 
     INTEGER(HID_T), INTENT(IN) :: link_loc_id ! File or group identifier.
@@ -699,8 +684,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
   SUBROUTINE h5lget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
-       f_corder_valid, corder, cset, data_size, hdferr, lapl_id) 
-!This definition is needed for Windows DLLs
+       f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier specifying location of subject group  
     CHARACTER(LEN=*), INTENT(IN) :: group_name ! Name of subject group
@@ -785,8 +769,7 @@ CONTAINS
 ! Modifications:  N/A
 !
 !----------------------------------------------------------------------
-  SUBROUTINE h5lis_registered_f(link_cls_id, registered, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5lis_registered_f(link_cls_id, registered, hdferr)
     IMPLICIT NONE
     INTEGER, INTENT(IN) :: link_cls_id  ! User-defined link class identifier
     LOGICAL, INTENT(OUT) :: registered  ! .TRUE. - if the link class has been registered and
@@ -841,8 +824,7 @@ CONTAINS
 ! Modifications:  N/A
 !
 !----------------------------------------------------------------------
-  SUBROUTINE h5lmove_f(src_loc_id, src_name, dest_loc_id, dest_name, hdferr, lcpl_id, lapl_id) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5lmove_f(src_loc_id, src_name, dest_loc_id, dest_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: src_loc_id  ! Original file or group identifier.
     CHARACTER(LEN=*), INTENT(IN) :: src_name  ! Original link name.
@@ -927,8 +909,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
   SUBROUTINE h5lget_name_by_idx_f(loc_id, group_name, index_field, order, n, &
-        name, hdferr, size, lapl_id) 
-!This definition is needed for Windows DLLs
+        name, hdferr, size, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id       ! File or group identifier specifying location of subject group  
     CHARACTER(LEN=*), INTENT(IN) :: group_name ! Name of subject group
@@ -1026,11 +1007,7 @@ CONTAINS
 !!$!
 !!$!----------------------------------------------------------------------
 !!$  SUBROUTINE h5lget_val_by_idx_f(loc_id, group_name, index_field, order, n, &
-!!$       f_corder_valid, corder, cset, data_size, hdferr, lapl_id) 
-!!$!This definition is needed for Windows DLLs
-!!$!DEC$if defined(BUILD_HDF5_DLL)
-!!$!DEC$attributes dllexport :: h5lget_val_by_idx_f
-!!$!DEC$endif
+!!$       f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
 !!$    IMPLICIT NONE
 !!$    INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier specifying location of subject group  
 !!$    CHARACTER(LEN=*), INTENT(IN) :: group_name ! Name of subject group
@@ -1120,11 +1097,7 @@ CONTAINS
 !----------------------------------------------------------------------
 
 !!$  SUBROUTINE h5lget_val_f(link_loc_id, link_name, size, linkval_buff,   &
-!!$       hdferr, lapl_id) 
-!!$!This definition is needed for Windows DLLs
-!!$!DEC$if defined(BUILD_HDF5_DLL)
-!!$!DEC$attributes dllexport :: h5lget_val_f
-!!$!DEC$endif
+!!$       hdferr, lapl_id)
 !!$    IMPLICIT NONE
 !!$    INTEGER(HID_T), INTENT(IN) :: link_loc_id  ! File or group identifier.
 !!$    CHARACTER(LEN=*), INTENT(IN) :: link_name  ! Link whose value is to be returned.
@@ -1206,11 +1179,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 !!$  SUBROUTINE H5Lregistered_f(version, class_id, comment, create_func, &
-!!$       move_func, copy_func, trav_func, del_func, query_func, hdferr) 
-!!$!This definition is needed for Windows DLLs
-!!$!DEC$if defined(BUILD_HDF5_DLL)
-!!$!DEC$attributes dllexport :: H5Lregistered_f
-!!$!DEC$endif
+!!$       move_func, copy_func, trav_func, del_func, query_func, hdferr)
 !!$    IMPLICIT NONE
 !!$    INTEGER, INTENT(IN) :: version      ! Version number of this struct 
 !!$    INTEGER, INTENT(IN) :: class_id     ! Link class identifier          

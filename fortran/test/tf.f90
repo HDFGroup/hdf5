@@ -18,11 +18,51 @@
 !    This file contains subroutines which are used in
 !    all the hdf5 fortran tests
 !
+
+
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: write_test_status 
+!DEC$endif
+  SUBROUTINE write_test_status( test_result, test_title, total_error)
+
+! Writes the results of the tests
+
+    IMPLICIT NONE
+
+    INTEGER, INTENT(IN) :: test_result  ! negative,  --skip --
+                                        ! 0       ,   passed 
+                                        ! positive,   failed
+
+    CHARACTER(LEN=*), INTENT(IN) :: test_title ! Short description of test
+    INTEGER, INTENT(INOUT) :: total_error ! Accumulated error
+
+! Controls the output style for reporting test results
+
+  CHARACTER(LEN=8) :: error_string
+  CHARACTER(LEN=8), PARAMETER :: success = ' PASSED '
+  CHARACTER(LEN=8), PARAMETER :: failure = '*FAILED*'
+  CHARACTER(LEN=8), PARAMETER :: skip    = '--SKIP--'
+
+
+    error_string = failure
+    IF (test_result ==  0) THEN
+       error_string = success
+    ELSE IF (test_result == -1) THEN
+       error_string = skip
+    ENDIF
+       
+    WRITE(*, fmt = '(A, T72, A)') test_title, error_string
+    
+    IF(test_result.GT.0) total_error = total_error + test_result
+
+  END SUBROUTINE write_test_status
+
+
 !This definition is needed for Windows DLLs
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$attributes dllexport :: check
 !DEC$endif
-
 SUBROUTINE check(string,error,total_error)
   CHARACTER(LEN=*) :: string
   INTEGER :: error, total_error

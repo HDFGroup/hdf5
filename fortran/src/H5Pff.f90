@@ -23,54 +23,36 @@
        INTERFACE h5pset_fill_value_f
          MODULE PROCEDURE h5pset_fill_value_integer
          MODULE PROCEDURE h5pset_fill_value_real
-! Comment if on Crays
-         MODULE PROCEDURE h5pset_fill_value_double
-! End comment if on Crays
          MODULE PROCEDURE h5pset_fill_value_char
        END INTERFACE
      
        INTERFACE h5pget_fill_value_f
          MODULE PROCEDURE h5pget_fill_value_integer
          MODULE PROCEDURE h5pget_fill_value_real
-! Comment if on Crays
-         MODULE PROCEDURE h5pget_fill_value_double
-! End comment if on Crays
          MODULE PROCEDURE h5pget_fill_value_char
        END INTERFACE
 
        INTERFACE h5pset_f
          MODULE PROCEDURE h5pset_integer
          MODULE PROCEDURE h5pset_real
-! Comment if on Crays
-         MODULE PROCEDURE h5pset_double
-! End comment if on Crays
          MODULE PROCEDURE h5pset_char
        END INTERFACE
      
        INTERFACE h5pget_f
          MODULE PROCEDURE h5pget_integer
          MODULE PROCEDURE h5pget_real
-! Comment if on Crays
-         MODULE PROCEDURE h5pget_double
-! End comment if on Crays
          MODULE PROCEDURE h5pget_char
        END INTERFACE
 
        INTERFACE h5pregister_f
          MODULE PROCEDURE h5pregister_integer
          MODULE PROCEDURE h5pregister_real
-! Comment if on Crays
-         MODULE PROCEDURE h5pregister_double
-! End comment if on Crays
          MODULE PROCEDURE h5pregister_char
        END INTERFACE
      
        INTERFACE h5pinsert_f
          MODULE PROCEDURE h5pinsert_integer
          MODULE PROCEDURE h5pinsert_real
-! Comment if on Crays
-         MODULE PROCEDURE h5pinsert_double
-! End comment if on Crays
          MODULE PROCEDURE h5pinsert_char
        END INTERFACE
        
@@ -113,9 +95,7 @@
 !
 ! Comment:		
 !----------------------------------------------------------------------
-          SUBROUTINE h5pcreate_f(class, prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pcreate_f(class, prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: class      ! The type of the property list 
                                               ! to be created. Possible values
@@ -176,9 +156,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_preserve_f(prp_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_preserve_f(prp_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             LOGICAL, INTENT(IN) ::  flag ! TRUE/FALSE flag to set the dataset
@@ -233,9 +211,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_preserve_f(prp_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_preserve_f(prp_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             LOGICAL, INTENT(OUT) ::  flag ! TRUE/FALSE flag. Shows status of the dataset's
@@ -295,9 +271,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_class_f(prp_id, classtype, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_class_f(prp_id, classtype, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: classtype  ! The type of the property list 
@@ -355,9 +329,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pcopy_f(prp_id, new_prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pcopy_f(prp_id, new_prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(OUT) :: new_prp_id 
@@ -408,9 +380,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pclose_f(prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pclose_f(prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
@@ -459,9 +429,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_chunk_f(prp_id, ndims, dims, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_chunk_f(prp_id, ndims, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: ndims    ! Number of chunk dimensions
@@ -516,9 +484,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_chunk_f(prp_id, ndims, dims, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_chunk_f(prp_id, ndims, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: ndims    ! Number of chunk dimensions to
@@ -574,9 +540,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_deflate_f(prp_id, level, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_deflate_f(prp_id, level, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: level        ! Compression level 
@@ -630,9 +594,7 @@
 
 
           SUBROUTINE h5pset_fill_value_integer(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
+                                               hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
@@ -661,9 +623,7 @@
 
 
           SUBROUTINE h5pget_fill_value_integer(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
+                                               hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
@@ -692,9 +652,7 @@
 
 
           SUBROUTINE h5pset_fill_value_real(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
+                                               hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
@@ -723,9 +681,7 @@
 
 
           SUBROUTINE h5pget_fill_value_real(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
+                                               hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
@@ -753,71 +709,9 @@
           END SUBROUTINE h5pget_fill_value_real
 
 
-          SUBROUTINE h5pset_fill_value_double(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
-            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
-                                                  ! of fillvalue datatype 
-                                                  ! (in memory)
-            DOUBLE PRECISION, INTENT(IN) :: fillvalue   ! Fillvalue
-            INTEGER, INTENT(OUT) :: hdferr  ! Error code
-
-!            INTEGER, EXTERNAL :: h5pset_fill_value_double_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5pset_fill_value_double_c(prp_id, type_id, fillvalue)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_FILL_VALUE_DOUBLE_C'::h5pset_fill_value_double_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: prp_id
-              INTEGER(HID_T), INTENT(IN) :: type_id
-              DOUBLE PRECISION, INTENT(IN) :: fillvalue
-              END FUNCTION h5pset_fill_value_double_c
-            END INTERFACE
-
-            hdferr = h5pset_fill_value_double_c(prp_id, type_id, fillvalue)
-          END SUBROUTINE h5pset_fill_value_double
-
-
-          SUBROUTINE h5pget_fill_value_double(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
-            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
-                                                  ! of fillvalue datatype
-                                                  ! (in memory) 
-            DOUBLE PRECISION, INTENT(IN) :: fillvalue   ! Fillvalue
-            INTEGER, INTENT(OUT) :: hdferr  ! Error code
-
-!            INTEGER, EXTERNAL :: h5pget_fill_value_double_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5pget_fill_value_double_c(prp_id, type_id, fillvalue)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_FILL_VALUE_DOUBLE_C'::h5pget_fill_value_double_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: prp_id
-              INTEGER(HID_T), INTENT(IN) :: type_id
-              DOUBLE PRECISION :: fillvalue
-              END FUNCTION h5pget_fill_value_double_c
-            END INTERFACE
-
-            hdferr = h5pget_fill_value_double_c(prp_id, type_id, fillvalue)
-          END SUBROUTINE h5pget_fill_value_double
 
           SUBROUTINE h5pset_fill_value_char(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
+                                               hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
@@ -846,9 +740,7 @@
           END SUBROUTINE h5pset_fill_value_char
 
           SUBROUTINE h5pget_fill_value_char(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
+                                               hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
@@ -907,9 +799,6 @@
 
           SUBROUTINE h5pget_version_f(prp_id, boot, freelist, &
                                     stab, shhdr, hdferr)
-!
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, DIMENSION(:), INTENT(OUT) :: boot  !array to put boot
@@ -968,9 +857,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
  
-          SUBROUTINE h5pset_userblock_f (prp_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_userblock_f (prp_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: size !Size of the user-block in bytes 
@@ -1019,9 +906,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_userblock_f(prp_id, block_size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_userblock_f(prp_id, block_size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(OUT) ::  block_size !Size of the 
@@ -1071,9 +956,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_sizes_f (prp_id, sizeof_addr, sizeof_size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_sizes_f (prp_id, sizeof_addr, sizeof_size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(SIZE_T), INTENT(IN) :: sizeof_addr !Size of an object 
@@ -1128,9 +1011,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_sizes_f(prp_id, sizeof_addr, sizeof_size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_sizes_f(prp_id, sizeof_addr, sizeof_size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: sizeof_addr !Size of an object
@@ -1185,9 +1066,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_sym_k_f (prp_id, ik, lk, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_sym_k_f (prp_id, ik, lk, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: ik ! Symbol table tree rank 
@@ -1241,9 +1120,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_sym_k_f(prp_id, ik, lk, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_sym_k_f(prp_id, ik, lk, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: ik !Symbol table tree rank
@@ -1294,9 +1171,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_istore_k_f (prp_id, ik, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_istore_k_f (prp_id, ik, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: ik ! 1/2 rank of chunked storage B-tree
@@ -1346,9 +1221,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_istore_k_f(prp_id, ik, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_istore_k_f(prp_id, ik, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: ik !1/2 rank of chunked storage B-tree
@@ -1397,9 +1270,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_driver_f(prp_id, driver, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_driver_f(prp_id, driver, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(OUT) :: driver !low-level file driver identifier
@@ -1446,9 +1317,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fapl_stdio_f (prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_fapl_stdio_f (prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
@@ -1492,9 +1361,8 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-!          SUBROUTINE h5pget_stdio_f (prp_id, io, hdferr) 
+!          SUBROUTINE h5pget_stdio_f (prp_id, io, hdferr)
 !
-!This definition is needed for Windows DLLs
 !            IMPLICIT NONE
 !            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
 !            INTEGER, INTENT(OUT) :: io   ! value indicates that the file 
@@ -1529,9 +1397,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fapl_sec2_f (prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_fapl_sec2_f (prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
@@ -1612,9 +1478,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_alignment_f(prp_id, threshold,  alignment, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_alignment_f(prp_id, threshold,  alignment, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: threshold ! Threshold value
@@ -1666,9 +1530,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_alignment_f(prp_id, threshold,  alignment, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_alignment_f(prp_id, threshold,  alignment, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(OUT) :: threshold ! Threshold value
@@ -1720,9 +1582,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fapl_core_f(prp_id, increment, backing_store, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_fapl_core_f(prp_id, increment, backing_store, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(SIZE_T), INTENT(IN) :: increment ! File block size in bytes.
@@ -1778,9 +1638,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_fapl_core_f(prp_id, increment, backing_store, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_fapl_core_f(prp_id, increment, backing_store, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: increment ! File block size in bytes.
@@ -1837,9 +1695,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fapl_family_f(prp_id, memb_size, memb_plist , hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: memb_size ! Logical size, in bytes,
@@ -1895,9 +1751,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_fapl_family_f(prp_id, memb_size, memb_plist , hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(OUT) :: memb_size ! Logical size, in bytes,
@@ -1956,9 +1810,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_cache_f(prp_id, mdc_nelmts,rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_cache_f(prp_id, mdc_nelmts,rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: mdc_nelmts  !Number of elements (objects)
@@ -2024,9 +1876,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: mdc_nelmts  !Number of elements (objects)
@@ -2089,9 +1939,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fapl_split_f(prp_id, meta_ext, meta_plist, raw_ext, raw_plist, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_fapl_split_f(prp_id, meta_ext, meta_plist, raw_ext, raw_plist, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: meta_ext  !Name of the extension for
@@ -2204,9 +2052,7 @@
 !----------------------------------------------------------------------
 
  
-          SUBROUTINE h5pset_gc_references_f (prp_id, gc_reference, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_gc_references_f (prp_id, gc_reference, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: gc_reference !the flag for garbage collecting
@@ -2256,9 +2102,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_gc_references_f (prp_id, gc_reference, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_gc_references_f (prp_id, gc_reference, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: gc_reference !the flag for garbage collecting
@@ -2312,9 +2156,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_layout_f (prp_id, layout, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_layout_f (prp_id, layout, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: layout !Type of storage layout for raw data
@@ -2370,9 +2212,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_layout_f (prp_id, layout, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_layout_f (prp_id, layout, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: layout !Type of storage layout for raw data
@@ -2427,9 +2267,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: filter  !Filter to be added to the pipeline.
@@ -2486,9 +2324,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_nfilters_f (prp_id, nfilters, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_nfilters_f (prp_id, nfilters, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: nfilters !the number of filters in the pipeline
@@ -2544,9 +2380,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, cd_values, namelen, name, filter_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, cd_values, namelen, name, filter_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: filter_number  !Sequence number within the filter
@@ -2618,9 +2452,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_external_f(prp_id, name, offset,bytes, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_external_f(prp_id, name, offset,bytes, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             CHARACTER(LEN=*), INTENT(IN) :: name !Name of an external file
@@ -2681,9 +2513,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_external_count_f (prp_id, count, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_external_count_f (prp_id, count, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: count !number of external files for the 
@@ -2739,9 +2569,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             INTEGER, INTENT(IN) :: idx !External file index.
@@ -2805,9 +2633,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_btree_ratios_f(prp_id, left, middle, right, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_btree_ratios_f(prp_id, left, middle, right, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             REAL, INTENT(IN) :: left !The B-tree split ratio for left-most nodes.
@@ -2864,9 +2690,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_btree_ratios_f(prp_id, left, middle, right, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_btree_ratios_f(prp_id, left, middle, right, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             REAL, INTENT(OUT) :: left !The B-tree split ratio for left-most nodes.
@@ -2924,9 +2748,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_fclose_degree_f(fapl_id, degree, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_fclose_degree_f(fapl_id, degree, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: fapl_id ! File Access Property list identifier 
             INTEGER, INTENT(OUT) :: degree     ! Possible values
@@ -2983,9 +2805,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fclose_degree_f(fapl_id, degree, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_fclose_degree_f(fapl_id, degree, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: fapl_id ! File Access Property list identifier 
             INTEGER, INTENT(IN) :: degree     ! Possible values
@@ -3036,9 +2856,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pequal_f(plist1_id, plist2_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pequal_f(plist1_id, plist2_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist1_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: plist2_id ! Property list identifier 
@@ -3086,9 +2904,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_buffer_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_buffer_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! Data transfer property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: size  ! Buffer size in bytes; 
@@ -3133,9 +2949,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! Data transfer property list identifier 
             INTEGER(HSIZE_T), INTENT(OUT) :: size ! Buffer size in bytes; 
@@ -3185,9 +2999,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pfill_value_defined_f(plist_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pfill_value_defined_f(plist_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id 
             INTEGER, INTENT(OUT) :: flag
@@ -3236,9 +3048,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_alloc_time_f(plist_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_alloc_time_f(plist_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id 
             INTEGER, INTENT(IN) :: flag
@@ -3287,9 +3097,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_alloc_time_f(plist_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_alloc_time_f(plist_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id 
             INTEGER, INTENT(OUT) :: flag
@@ -3336,9 +3144,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fill_time_f(plist_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_fill_time_f(plist_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id 
             INTEGER, INTENT(IN) :: flag
@@ -3385,9 +3191,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_fill_time_f(plist_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_fill_time_f(plist_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id 
             INTEGER, INTENT(OUT) :: flag
@@ -3430,9 +3234,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_meta_block_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_meta_block_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: size  ! Block size in bytes; 
@@ -3475,9 +3277,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_meta_block_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_meta_block_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
             INTEGER(HSIZE_T), INTENT(OUT) :: size  ! Block size in bytes; 
@@ -3520,9 +3320,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_sieve_buf_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_sieve_buf_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
             INTEGER(SIZE_T), INTENT(IN) :: size  ! Buffer size in bytes; 
@@ -3565,9 +3363,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_sieve_buf_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_sieve_buf_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: size   ! Buffer size in bytes 
@@ -3610,9 +3406,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_small_data_block_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_small_data_block_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: size    ! Small raw data block size
@@ -3655,9 +3449,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_small_data_block_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_small_data_block_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
             INTEGER(HSIZE_T), INTENT(OUT) :: size    ! Small raw data block size
@@ -3700,9 +3492,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_hyper_vector_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_hyper_vector_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset transfer property list identifier 
             INTEGER(SIZE_T), INTENT(IN) :: size     ! Vector size
@@ -3745,9 +3535,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_hyper_vector_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_hyper_vector_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset transfer property list identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: size     ! Vector size
@@ -3791,9 +3579,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_integer(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_integer(prp_id, name, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -3843,9 +3629,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_real(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_real(prp_id, name, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -3871,57 +3655,6 @@
         hdferr = h5pset_real_c(prp_id, name , name_len, value)
           END SUBROUTINE h5pset_real
 
-!----------------------------------------------------------------------
-! Name:		h5pset_double
-!
-! Purpose: 	Sets a property list value
-!
-! Inputs:  
-!		prp_id		- iproperty list identifier to modify
-!		name 		- name of property to modify
-!		value		- value to set property to
-! Outputs:  
-!		hdferr:		- error code		
-!				 	Success:  0
-!				 	Failure: -1   
-! Optional parameters:
-!				NONE
-!
-! Programmer:	Elena Pourmal
-!	        October 9, 2002	
-!
-! Modifications: 	
-!
-! Comment:		
-!----------------------------------------------------------------------
-
-          SUBROUTINE h5pset_double(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
-            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
-            DOUBLE PRECISION,   INTENT(IN) :: value ! Property value
-            INTEGER, INTENT(OUT) :: hdferr  ! Error code
-            INTEGER :: name_len
-
-            INTERFACE
-              INTEGER FUNCTION h5pset_double_c(prp_id, name, name_len, value)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_DOUBLE_C'::h5pset_double_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
-              INTEGER(HID_T), INTENT(IN) :: prp_id
-              CHARACTER(LEN=*), INTENT(IN) :: name
-              INTEGER, INTENT(IN)         :: name_len
-              DOUBLE PRECISION, INTENT(IN) :: value
-              END FUNCTION h5pset_double_c
-            END INTERFACE
-
-            name_len = LEN(name)
-        hdferr = h5pset_double_c(prp_id, name , name_len, value)
-          END SUBROUTINE h5pset_double
 
 !----------------------------------------------------------------------
 ! Name:		h5pset_char
@@ -3947,9 +3680,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_char(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_char(prp_id, name, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -4003,9 +3734,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_integer(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_integer(prp_id, name, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -4055,9 +3784,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_real(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_real(prp_id, name, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -4083,57 +3810,6 @@
             hdferr = h5pget_real_c(prp_id, name , name_len, value)
           END SUBROUTINE h5pget_real
 
-!----------------------------------------------------------------------
-! Name:		h5pget_double
-!
-! Purpose: 	Gets a property list value
-!
-! Inputs:  
-!		prp_id		- iproperty list identifier to modify
-!		name 		- name of property to modify
-! Outputs:  
-!		value		- value of property
-!		hdferr:		- error code		
-!				 	Success:  0
-!				 	Failure: -1   
-! Optional parameters:
-!				NONE
-!
-! Programmer:	Elena Pourmal
-!	        October 9, 2002	
-!
-! Modifications: 	
-!
-! Comment:		
-!----------------------------------------------------------------------
-
-          SUBROUTINE h5pget_double(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
-            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
-            DOUBLE PRECISION,   INTENT(OUT) :: value ! Property value
-            INTEGER, INTENT(OUT) :: hdferr  ! Error code
-            INTEGER :: name_len
-
-            INTERFACE
-              INTEGER FUNCTION h5pget_double_c(prp_id, name, name_len, value)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_DOUBLE_C'::h5pget_double_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
-              INTEGER(HID_T), INTENT(IN) :: prp_id
-              CHARACTER(LEN=*), INTENT(IN) :: name
-              INTEGER, INTENT(IN)         :: name_len
-              DOUBLE PRECISION, INTENT(OUT) :: value
-              END FUNCTION h5pget_double_c
-            END INTERFACE
-
-            name_len = LEN(name)
-            hdferr = h5pget_double_c(prp_id, name , name_len, value)
-          END SUBROUTINE h5pget_double
 
 !----------------------------------------------------------------------
 ! Name:		h5pget_char
@@ -4159,9 +3835,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_char(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_char(prp_id, name, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -4215,9 +3889,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pexist_f(prp_id, name, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pexist_f(prp_id, name, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -4271,9 +3943,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_size_f(prp_id, name, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_size_f(prp_id, name, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to query
@@ -4321,9 +3991,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_nprops_f(prp_id, nprops, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_nprops_f(prp_id, nprops, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: nprops  ! iNumber of properties
@@ -4369,9 +4037,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_class_name_f(prp_id, name, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_class_name_f(prp_id, name, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(OUT) :: name  ! Buffer to retireve class name
@@ -4425,9 +4091,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_class_parent_f(prp_id, parent_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_class_parent_f(prp_id, parent_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier 
             INTEGER(HID_T), INTENT(OUT) :: parent_id ! Parent class property list 
@@ -4472,9 +4136,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pisa_class_f(plist, pclass, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pisa_class_f(plist, pclass, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist     ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: pclass    ! Class identifier
@@ -4524,9 +4186,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pcopy_prop_f(dst_id, src_id, name, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pcopy_prop_f(dst_id, src_id, name, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dst_id  ! Destination property list 
                                                   ! identifier 
@@ -4577,9 +4237,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5premove_f(plid, name, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5premove_f(plid, name, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plid   ! property list identifier
             CHARACTER(LEN=*), INTENT(IN) :: name ! name of property to remove
@@ -4627,9 +4285,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5punregister_f(class, name, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5punregister_f(class, name, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: class  ! property list class identifier
             CHARACTER(LEN=*), INTENT(IN) :: name ! name of property to remove
@@ -4676,9 +4332,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pclose_class_f(class, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pclose_class_f(class, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: class  ! property list class identifier
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
@@ -4728,9 +4382,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pcreate_class_f(parent, name, class, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pcreate_class_f(parent, name, class, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: parent  ! parent property list class 
                                                   ! identifier
@@ -4785,9 +4437,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pregister_integer(class, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pregister_integer(class, name, size, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
@@ -4842,9 +4492,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pregister_real(class, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pregister_real(class, name, size, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
@@ -4873,63 +4521,6 @@
           END SUBROUTINE h5pregister_real
 
 !----------------------------------------------------------------------
-! Name:		h5pregister_double
-!
-! Purpose: 	Registers a permanent property with a property list class.
-!
-! Inputs:  
-!		class		- property list class to register 
-!                                 permanent property within
-!		name 		- name of property to register
-!               size            - size of property in bytes
-!		value		- default value for property in newly 
-!                                 created property lists
-! Outputs:  
-!		hdferr:		- error code		
-!				 	Success:  0
-!				 	Failure: -1   
-! Optional parameters:
-!				NONE
-!
-! Programmer:	Elena Pourmal
-!	        October 10, 2002	
-!
-! Modifications: 	
-!
-! Comment:		
-!----------------------------------------------------------------------
-
-          SUBROUTINE h5pregister_double(class, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
-            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
-            INTEGER(SIZE_T), INTENT(IN) :: size  ! size of the property value	
-            DOUBLE PRECISION,   INTENT(IN) :: value        ! Property value
-            INTEGER, INTENT(OUT) :: hdferr  ! Error code
-            INTEGER :: name_len
-
-            INTERFACE
-              INTEGER FUNCTION h5pregister_double_c(class, name, name_len, size, value)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PREGISTER_DOUBLE_C'::h5pregister_double_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
-              INTEGER(HID_T), INTENT(IN) :: class
-              CHARACTER(LEN=*), INTENT(IN) :: name
-              INTEGER, INTENT(IN)         :: name_len
-              INTEGER(SIZE_T), INTENT(IN) :: size 
-              DOUBLE PRECISION, INTENT(IN) :: value
-              END FUNCTION h5pregister_double_c
-            END INTERFACE
-
-            name_len = LEN(name)
-            hdferr = h5pregister_double_c(class, name , name_len, size, value)
-          END SUBROUTINE h5pregister_double
-
-!----------------------------------------------------------------------
 ! Name:		h5pregister_char
 !
 ! Purpose: 	Registers a permanent property with a property list class.
@@ -4956,9 +4547,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pregister_char(class, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pregister_char(class, name, size, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
@@ -5016,9 +4605,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pinsert_integer(plist, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pinsert_integer(plist, name, size, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert 
@@ -5072,9 +4659,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pinsert_real(plist, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pinsert_real(plist, name, size, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert 
@@ -5102,61 +4687,6 @@
             hdferr = h5pinsert_real_c(plist, name , name_len, size, value)
           END SUBROUTINE h5pinsert_real
 
-!----------------------------------------------------------------------
-! Name:		h5pinsert_double
-!
-! Purpose: 	Registers a temporary property with a property list class.
-!
-! Inputs:  
-!		plist		- property list identifier
-!                                 permanent property within
-!		name 		- name of property to insert
-!               size            - size of property in bytes
-!		value		- initial value for the property 
-! Outputs:  
-!		hdferr:		- error code		
-!				 	Success:  0
-!				 	Failure: -1   
-! Optional parameters:
-!				NONE
-!
-! Programmer:	Elena Pourmal
-!	        October 10, 2002	
-!
-! Modifications: 	
-!
-! Comment:		
-!----------------------------------------------------------------------
-
-          SUBROUTINE h5pinsert_double(plist, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier 
-            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert 
-            INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value	
-            DOUBLE PRECISION, INTENT(IN) :: value ! Property value
-            INTEGER, INTENT(OUT) :: hdferr        ! Error code
-            INTEGER :: name_len
-
-            INTERFACE
-              INTEGER FUNCTION h5pinsert_double_c(plist, name, name_len, size, value)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PINSERT_DOUBLE_C'::h5pinsert_double_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
-              INTEGER(HID_T), INTENT(IN) :: plist
-              CHARACTER(LEN=*), INTENT(IN) :: name
-              INTEGER, INTENT(IN)         :: name_len
-              INTEGER(SIZE_T), INTENT(IN) :: size 
-              DOUBLE PRECISION, INTENT(IN) :: value
-              END FUNCTION h5pinsert_double_c
-            END INTERFACE
-
-            name_len = LEN(name)
-            hdferr = h5pinsert_double_c(plist, name , name_len, size, value)
-          END SUBROUTINE h5pinsert_double
 
 !----------------------------------------------------------------------
 ! Name:		h5pinsert_char
@@ -5184,9 +4714,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pinsert_char(plist, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pinsert_char(plist, name, size, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist      ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name     ! Name of property to insert 
@@ -5241,9 +4769,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_shuffle_f(prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_shuffle_f(prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: hdferr       ! Error code
@@ -5290,9 +4816,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_edc_check_f(prp_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_edc_check_f(prp_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: flag          ! Checksum filter flag
@@ -5338,9 +4862,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_edc_check_f(prp_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_edc_check_f(prp_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset transfer property list identifier 
             INTEGER, INTENT(OUT) :: flag        ! Checksum filter flag
@@ -5391,9 +4913,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_fletcher32_f(prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_fletcher32_f(prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: hdferr       ! Error code
@@ -5438,9 +4958,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_family_offset_f(prp_id, offset, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_family_offset_f(prp_id, offset, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: offset ! Offset in bytes
@@ -5490,9 +5008,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_fapl_multi_l(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_fapl_multi_l(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
             INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_map
@@ -5562,9 +5078,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_fapl_multi_s(prp_id, relax, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pset_fapl_multi_s(prp_id, relax, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
             LOGICAL, INTENT(IN) :: relax
@@ -5616,9 +5130,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr, maxlen_out) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr, maxlen_out)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
             INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT) :: memb_map
@@ -5692,8 +5204,6 @@
 
 
           SUBROUTINE h5pset_szip_f(prp_id, options_mask, pixels_per_block, hdferr) 
-!
-!This definition is needed for Windows DLLs
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property 
                                                  ! list identifier 
@@ -5745,9 +5255,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pall_filters_avail_f(prp_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pall_filters_avail_f(prp_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property 
                                                  ! list identifier 
@@ -5804,9 +5312,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, cd_values, namelen, name, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, cd_values, namelen, name, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
 
@@ -5874,9 +5380,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: filter  !Filter to be modified
@@ -5932,8 +5436,6 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr)
-!
-!This definition is needed for Windows DLLs
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property list
                                                  ! identifier
@@ -5984,8 +5486,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pget_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: ocpl_id ! Object (dataset or group) creation property list identifier
     INTEGER, INTENT(OUT) :: max_compact  ! Maximum number of attributes to be stored in compact storage
@@ -6036,8 +5536,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pset_attr_creation_order_f(ocpl_id, crt_order_flags , hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: ocpl_id ! Object (dataset or group) creation property list identifier
     INTEGER, INTENT(IN) :: crt_order_flags  ! Flags specifying whether to track and index attribute creation order
@@ -6086,8 +5584,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pset_shared_mesg_nindexes_f( plist_id, nindexes, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! file creation property list
     INTEGER, INTENT(IN) :: nindexes ! Number of shared object header message indexes 
@@ -6140,8 +5636,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pset_shared_mesg_index_f(fcpl_id, index_num, mesg_type_flags, min_mesg_size, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: fcpl_id ! file creation property list
     INTEGER, INTENT(IN) :: index_num ! Index being configured.
@@ -6196,8 +5690,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pget_attr_creation_order_f(ocpl_id, crt_order_flags, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: ocpl_id ! Object (group or dataset) creation property list identifier 
     INTEGER, INTENT(OUT) :: crt_order_flags ! Flags specifying whether to track and index attribute creation order 
@@ -6248,8 +5740,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pset_libver_bounds_f(fapl_id, low, high, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: fapl_id ! File access property list identifier
     INTEGER, INTENT(IN) :: low ! The earliest version of the library that will be used for writing objects.
@@ -6306,8 +5796,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pset_link_creation_order_f(gcpl_id, crt_order_flags, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id ! File access property list identifier
     INTEGER, INTENT(IN) :: crt_order_flags ! Creation order flag(s)
@@ -6357,8 +5845,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pget_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier
     INTEGER, INTENT(OUT) :: max_compact  ! Maximum number of attributes to be stored in compact storage
@@ -6407,9 +5893,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pget_obj_track_times_f(plist_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pget_obj_track_times_f(plist_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property 
                                          ! list identifier 
@@ -6473,9 +5957,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pset_obj_track_times_f(plist_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pset_obj_track_times_f(plist_id, flag, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property 
                                            ! list identifier 
@@ -6529,9 +6011,7 @@
 !          so had to shorten the name		
 !--------------------------------------------------------------------------------------
 
-  SUBROUTINE h5pset_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pset_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: lcpl_id ! Link creation property list identifier
     INTEGER, INTENT(IN) :: crt_intermed_group  ! specifying whether to create intermediate groups 
@@ -6580,8 +6060,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pget_link_creation_order_f(gcpl_id, crt_order_flags, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id   ! Group creation property list identifier
     INTEGER, INTENT(OUT) :: crt_order_flags ! Creation order flag(s)
@@ -6633,8 +6111,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pset_char_encoding_f(plist_id, encoding, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Property list identifier
     
@@ -6689,8 +6165,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE  h5pget_char_encoding_f(plist_id, encoding, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Property list identifier
     
@@ -6741,9 +6215,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pset_copy_object_f(ocp_plist_id, copy_options, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pset_copy_object_f(ocp_plist_id, copy_options, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: ocp_plist_id ! Object copy property list identifier
     INTEGER, INTENT(IN) :: copy_options ! Copy option(s) to be set, valid options are:
@@ -6793,9 +6265,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pget_copy_object_f(ocp_plist_id, copy_options, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pget_copy_object_f(ocp_plist_id, copy_options, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: ocp_plist_id ! Object copy property list identifier
     INTEGER, INTENT(OUT) :: copy_options ! valid copy options returned are:
@@ -6848,9 +6318,7 @@
 ! Comment: Should hdferr return just 0 or 1 and add another arguement for the size?
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Identifier of the property list or class
     CHARACTER(LEN=*), INTENT(OUT) :: expression  ! Buffer to hold transform expression
@@ -6909,9 +6377,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pset_data_transform_f(plist_id, expression, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pset_data_transform_f(plist_id, expression, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Identifier of the property list or class
     CHARACTER(LEN=*), INTENT(IN) :: expression  ! Buffer to hold transform expression
@@ -6960,9 +6426,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pget_local_heap_size_hint_f(gcpl_id, size_hint, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pget_local_heap_size_hint_f(gcpl_id, size_hint, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier
     INTEGER(SIZE_T), INTENT(OUT) :: size_hint ! Hint for size of local heap
@@ -7009,9 +6473,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pget_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pget_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier  
     INTEGER, INTENT(OUT) :: est_num_entries ! Estimated number of links to be inserted into group
@@ -7059,9 +6521,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pset_local_heap_size_hint_f(gcpl_id, size_hint, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pset_local_heap_size_hint_f(gcpl_id, size_hint, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier
     INTEGER(SIZE_T), INTENT(IN) :: size_hint ! Hint for size of local heap
@@ -7108,9 +6568,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pset_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pset_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier  
     INTEGER, INTENT(IN) :: est_num_entries ! Estimated number of links to be inserted into group
@@ -7160,8 +6618,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pset_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier
     INTEGER, INTENT(IN) :: max_compact  ! Maximum number of attributes to be stored in compact storage
@@ -7212,8 +6668,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE  
     INTEGER(HID_T), INTENT(IN) :: fapl_id ! File access property list identifier
     INTEGER(SIZE_T), INTENT(IN) :: alignment 	  ! Required memory alignment boundary!
@@ -7265,8 +6719,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pget_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE  
     INTEGER(HID_T), INTENT(IN) :: fapl_id ! File access property list identifier
     INTEGER(SIZE_T), INTENT(OUT) :: alignment 	  ! Required memory alignment boundary!
@@ -7319,8 +6771,6 @@
 !----------------------------------------------------------------------
 
   SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
-!
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: ocpl_id ! Object (dataset or group) creation property list identifier
     INTEGER, INTENT(IN) :: max_compact  ! Maximum number of attributes to be stored in compact storage
@@ -7371,9 +6821,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pset_nbit_f(plist_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pset_nbit_f(plist_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property list identifier
     INTEGER, INTENT(OUT) :: hdferr       ! Error code
@@ -7418,9 +6866,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pset_scaleoffset_f(plist_id, scale_type, scale_factor, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pset_scaleoffset_f(plist_id, scale_type, scale_factor, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property list identifier
     INTEGER, INTENT(IN) :: scale_type                  ! Flag indicating compression method.
@@ -7469,9 +6915,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pset_nlinks_f(lapl_id, nlinks, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pset_nlinks_f(lapl_id, nlinks, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: lapl_id ! File access property list identifier
     INTEGER(SIZE_T), INTENT(IN) :: nlinks ! Maximum number of links to traverse
@@ -7518,9 +6962,7 @@
 ! Comment: 
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5pget_nlinks_f(lapl_id, nlinks, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pget_nlinks_f(lapl_id, nlinks, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: lapl_id ! File access property list identifier
     INTEGER(SIZE_T), INTENT(OUT) :: nlinks ! Maximum number of links to traverse
@@ -7568,9 +7010,7 @@
 !          so had to shorten the name		
 !--------------------------------------------------------------------------------------
 
-  SUBROUTINE h5pget_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr) 
-!
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5pget_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: lcpl_id      ! Link creation property list identifier
     INTEGER, INTENT(IN) :: crt_intermed_group  ! Flag specifying whether to create intermediate groups 

@@ -13,22 +13,15 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 !
-MODULE HDF5
-  USE H5GLOBAL
-  USE H5F
-  USE H5G
-  USE H5E
-  USE H5I
-  USE H5L
-  USE H5S
-  USE H5D
-  USE H5A
-  USE H5T
-  USE H5O
-  USE H5P
-  USE H5R
-  USE H5Z
-  USE H5_DBLE_INTERFACE
-  USE H5LIB
+!
+! FUNCTION
+!   This module is included for when the default REAL is of type DOUBLE PRECISION.
+!   We do not include the double precision interfaces if the defaut REAL is
+!   DOUBLE PRECISION since this would lead to a non-unique conflict with the
+!   generic interfaces declared as REAL.
+!   
+!
+MODULE H5_DBLE_INTERFACE
 
-END MODULE HDF5
+
+END MODULE H5_DBLE_INTERFACE

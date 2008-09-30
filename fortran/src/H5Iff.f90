@@ -52,9 +52,7 @@
 !
 ! Comment:		
 !----------------------------------------------------------------------
-          SUBROUTINE h5iget_type_f(obj_id, type, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5iget_type_f(obj_id, type, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
             INTEGER, INTENT(OUT) :: type !type of an object. 
@@ -110,8 +108,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, name_size, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, name_size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: obj_id     ! Object identifier 
             INTEGER(SIZE_T), INTENT(IN) :: buf_size  ! Buffer size 
@@ -161,9 +158,7 @@
 !
 ! Comment:		
 !----------------------------------------------------------------------
-          SUBROUTINE h5iinc_ref_f(obj_id, ref_count, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5iinc_ref_f(obj_id, ref_count, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
             INTEGER, INTENT(OUT) :: ref_count !Current reference count of ID
@@ -206,9 +201,7 @@
 !
 ! Comment:		
 !----------------------------------------------------------------------
-          SUBROUTINE h5idec_ref_f(obj_id, ref_count, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5idec_ref_f(obj_id, ref_count, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
             INTEGER, INTENT(OUT) :: ref_count !Current reference count of ID
@@ -251,9 +244,7 @@
 !
 ! Comment:		
 !----------------------------------------------------------------------
-          SUBROUTINE h5iget_ref_f(obj_id, ref_count, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5iget_ref_f(obj_id, ref_count, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
             INTEGER, INTENT(OUT) :: ref_count !Current reference count of ID
@@ -296,9 +287,7 @@
 !
 ! Comment:		
 !----------------------------------------------------------------------
-          SUBROUTINE h5iget_file_id_f(obj_id, file_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5iget_file_id_f(obj_id, file_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN)  :: obj_id   ! Object identifier 
             INTEGER(HID_T), INTENT(OUT) :: file_id  ! File identifier

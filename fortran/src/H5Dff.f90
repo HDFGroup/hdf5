@@ -47,16 +47,6 @@ MODULE H5D
      MODULE PROCEDURE h5dwrite_real_5
      MODULE PROCEDURE h5dwrite_real_6
      MODULE PROCEDURE h5dwrite_real_7
-     ! Comment if on Crays
-     MODULE PROCEDURE h5dwrite_double_scalar
-     MODULE PROCEDURE h5dwrite_double_1
-     MODULE PROCEDURE h5dwrite_double_2
-     MODULE PROCEDURE h5dwrite_double_3
-     MODULE PROCEDURE h5dwrite_double_4
-     MODULE PROCEDURE h5dwrite_double_5
-     MODULE PROCEDURE h5dwrite_double_6
-     MODULE PROCEDURE h5dwrite_double_7
-     ! End comment if on Crays
   END INTERFACE
 
   INTERFACE h5dread_f
@@ -87,17 +77,6 @@ MODULE H5D
      MODULE PROCEDURE h5dread_real_5
      MODULE PROCEDURE h5dread_real_6
      MODULE PROCEDURE h5dread_real_7
-     ! Comment if on Crays
-     MODULE PROCEDURE h5dread_double_scalar
-     MODULE PROCEDURE h5dread_double_1
-     MODULE PROCEDURE h5dread_double_2
-     MODULE PROCEDURE h5dread_double_3
-     MODULE PROCEDURE h5dread_double_4
-     MODULE PROCEDURE h5dread_double_5
-     MODULE PROCEDURE h5dread_double_6
-     MODULE PROCEDURE h5dread_double_7
-     ! End comment if on Crays
-
   END INTERFACE
 
   INTERFACE h5dwrite_vl_f
@@ -115,7 +94,6 @@ MODULE H5D
   INTERFACE h5dfill_f
      MODULE PROCEDURE h5dfill_integer
      MODULE PROCEDURE h5dfill_real
-     MODULE PROCEDURE h5dfill_double
      MODULE PROCEDURE h5dfill_char
   END INTERFACE
 
@@ -162,8 +140,6 @@ CONTAINS
   
   SUBROUTINE h5dcreate_f(loc_id, name, type_id, space_id, dset_id, & 
        hdferr, dcpl_id, lcpl_id, dapl_id)
- 
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset 
@@ -250,7 +226,6 @@ CONTAINS
 !----------------------------------------------------------------------
 
           SUBROUTINE h5dopen_f(loc_id, name, dset_id, hdferr, dapl_id)
-!This definition is needed for Windows DLLs
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset 
@@ -312,8 +287,6 @@ CONTAINS
 !----------------------------------------------------------------------
 
           SUBROUTINE h5dclose_f(dset_id, hdferr)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id ! Dataset identifier
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
@@ -337,8 +310,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -404,8 +375,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_reference_dsetreg(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -475,8 +444,6 @@ CONTAINS
            
           SUBROUTINE h5dwrite_integer_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -532,8 +499,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -591,8 +556,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -650,8 +613,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -710,8 +671,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -769,8 +728,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -830,8 +787,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -890,8 +845,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_integer_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -950,8 +903,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1008,8 +959,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1068,8 +1017,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1128,8 +1075,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1188,8 +1133,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1248,8 +1191,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1308,8 +1249,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1368,8 +1307,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_char_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1427,8 +1364,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1482,8 +1417,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1541,8 +1474,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1600,8 +1531,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1658,8 +1587,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1716,8 +1643,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1774,8 +1699,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1832,8 +1755,6 @@ CONTAINS
 
           SUBROUTINE h5dwrite_real_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1887,478 +1808,6 @@ CONTAINS
            
           END SUBROUTINE h5dwrite_real_7
 
-
-          SUBROUTINE h5dwrite_double_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(IN) :: buf ! Data buffer
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default 
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default
-
-!            INTEGER, EXTERNAL :: h5dwrite_double_s_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dwrite_double_s_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_S_C'::h5dwrite_double_s_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(IN) :: buf
-              END FUNCTION h5dwrite_double_s_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dwrite_double_s_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dwrite_double_scalar
-
-          SUBROUTINE h5dwrite_double_1(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(IN), &
-            DIMENSION(dims(1)) :: buf
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default 
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default
-
-!            INTEGER, EXTERNAL :: h5dwrite_double_1_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dwrite_double_1_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_1_C'::h5dwrite_double_1_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1)) :: buf
-              END FUNCTION h5dwrite_double_1_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dwrite_double_1_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dwrite_double_1
-
-          SUBROUTINE h5dwrite_double_2(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(IN), &
-            DIMENSION(dims(1),dims(2)) :: buf
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default 
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default 
-
-!            INTEGER, EXTERNAL :: h5dwrite_double_2_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dwrite_double_2_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_2_C'::h5dwrite_double_2_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1),dims(2)) :: buf
-              END FUNCTION h5dwrite_double_2_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dwrite_double_2_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dwrite_double_2
-
-          SUBROUTINE h5dwrite_double_3(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(IN), &
-            DIMENSION(dims(1),dims(2),dims(3)) :: buf
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default 
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default 
-
-!            INTEGER, EXTERNAL :: h5dwrite_double_3_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dwrite_double_3_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_3_C'::h5dwrite_double_3_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1),dims(2),dims(3)) :: buf
-              END FUNCTION h5dwrite_double_3_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dwrite_double_3_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dwrite_double_3
-
-          SUBROUTINE h5dwrite_double_4(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(IN), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default 
-            INTEGER(HID_T) :: mem_space_id_default
-            INTEGER(HID_T) :: file_space_id_default
-
-!            INTEGER, EXTERNAL :: h5dwrite_double_4_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dwrite_double_4_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_4_C'::h5dwrite_double_4_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-              END FUNCTION h5dwrite_double_4_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dwrite_double_4_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dwrite_double_4
-
-          SUBROUTINE h5dwrite_double_5(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(IN), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default 
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default 
-
-!            INTEGER, EXTERNAL :: h5dwrite_double_5_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dwrite_double_5_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_5_C'::h5dwrite_double_5_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-              END FUNCTION h5dwrite_double_5_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dwrite_double_5_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dwrite_double_5
-
-          SUBROUTINE h5dwrite_double_6(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(IN), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-                                                ! Data buffer
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default 
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default 
-
-!            INTEGER, EXTERNAL :: h5dwrite_double_6_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dwrite_double_6_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_6_C'::h5dwrite_double_6_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-              END FUNCTION h5dwrite_double_6_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dwrite_double_6_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dwrite_double_6
-
-          SUBROUTINE h5dwrite_double_7(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(IN), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-                                                ! Data buffer
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default 
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default 
-
-!            INTEGER, EXTERNAL :: h5dwrite_double_7_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dwrite_double_7_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DWRITE_DOUBLE_7_C'::h5dwrite_double_7_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-              END FUNCTION h5dwrite_double_7_c
-            END INTERFACE
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dwrite_double_7_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dwrite_double_7
-
 !----------------------------------------------------------------------
 ! Name:		h5dread_f 
 !
@@ -2401,8 +1850,6 @@ CONTAINS
 !----------------------------------------------------------------------
           SUBROUTINE h5dread_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2468,8 +1915,6 @@ CONTAINS
 
           SUBROUTINE h5dread_reference_dsetreg(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2539,8 +1984,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2596,8 +2039,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2655,8 +2096,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2715,8 +2154,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2775,8 +2212,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2835,8 +2270,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2895,8 +2328,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -2955,8 +2386,6 @@ CONTAINS
 
           SUBROUTINE h5dread_integer_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3014,8 +2443,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3072,8 +2499,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3132,8 +2557,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3192,8 +2615,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3252,8 +2673,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3312,8 +2731,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3372,8 +2789,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3432,8 +2847,6 @@ CONTAINS
 
           SUBROUTINE h5dread_char_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3491,8 +2904,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3547,8 +2958,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_1(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3605,8 +3014,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_2(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3663,8 +3070,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_3(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3721,8 +3126,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_4(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3779,8 +3182,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_5(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3837,8 +3238,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_6(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3895,8 +3294,6 @@ CONTAINS
 
           SUBROUTINE h5dread_real_7(dset_id, mem_type_id, buf, dims, hdferr, &
                                         mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -3951,478 +3348,6 @@ CONTAINS
            
           END SUBROUTINE h5dread_real_7
 
-          SUBROUTINE h5dread_double_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(INOUT) :: buf ! Data buffer
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default 
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default
-
-!            INTEGER, EXTERNAL :: h5dread_double_s_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dread_double_s_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_S_C'::h5dread_double_s_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(OUT) :: buf
-              END FUNCTION h5dread_double_s_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dread_double_s_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dread_double_scalar
-
-          SUBROUTINE h5dread_double_1(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1)) :: buf
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default 
-
-!            INTEGER, EXTERNAL :: h5dread_double_1_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dread_double_1_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_1_C'::h5dread_double_1_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(INOUT), &
-              DIMENSION(dims(1)) :: buf
-              END FUNCTION h5dread_double_1_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dread_double_1_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dread_double_1
-
-          SUBROUTINE h5dread_double_2(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1),dims(2)) :: buf
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default 
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default 
-
-!            INTEGER, EXTERNAL :: h5dread_double_2_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dread_double_2_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_2_C'::h5dread_double_2_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(INOUT), & 
-              DIMENSION(dims(1),dims(2)) :: buf
-              END FUNCTION h5dread_double_2_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dread_double_2_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dread_double_2
-
-          SUBROUTINE h5dread_double_3(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1),dims(2),dims(3)) :: buf
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default
-
-!            INTEGER, EXTERNAL :: h5dread_double_3_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dread_double_3_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_3_C'::h5dread_double_3_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(INOUT), &
-              DIMENSION(dims(1),dims(2),dims(3)) :: buf
-              END FUNCTION h5dread_double_3_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dread_double_3_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dread_double_3
-
-          SUBROUTINE h5dread_double_4(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-                                                ! Data buffer
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default 
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default 
-
-!            INTEGER, EXTERNAL :: h5dread_double_4_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dread_double_4_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_4_C'::h5dread_double_4_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(INOUT), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-              END FUNCTION h5dread_double_4_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dread_double_4_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dread_double_4
-
-          SUBROUTINE h5dread_double_5(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default 
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default 
-
-!            INTEGER, EXTERNAL :: h5dread_double_5_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dread_double_5_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_5_C'::h5dread_double_5_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(INOUT), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-              END FUNCTION h5dread_double_5_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dread_double_5_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dread_double_5
-
-          SUBROUTINE h5dread_double_6(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-                                                ! Data buffer
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default 
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default 
-
-!            INTEGER, EXTERNAL :: h5dread_double_6_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dread_double_6_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_6_C'::h5dread_double_6_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(INOUT), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-              END FUNCTION h5dread_double_6_c
-            END INTERFACE
-
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dread_double_6_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dread_double_6
-
-          SUBROUTINE h5dread_double_7(dset_id, mem_type_id, buf, dims, hdferr, &
-                                        mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
-            INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-                                                ! Data buffer
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
-                                                ! Memory dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
-                                                ! File dataspace identfier 
-            INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
-                                                ! Transfer property list identifier 
-            
-            INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HID_T) :: mem_space_id_default 
-            INTEGER(HID_T) :: file_space_id_default 
-
-!            INTEGER, EXTERNAL :: h5dread_double_7_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dread_double_7_c(dset_id, mem_type_id, &
-                                          mem_space_id_default, & 
-                                          file_space_id_default, &
-                                          xfer_prp_default, buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DREAD_DOUBLE_7_C'::h5dread_double_7_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: dset_id
-              INTEGER(HID_T), INTENT(IN) :: mem_type_id
-              INTEGER(HID_T)  :: mem_space_id_default
-              INTEGER(HID_T) :: file_space_id_default
-              INTEGER(HID_T) :: xfer_prp_default
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims
-              DOUBLE PRECISION, INTENT(INOUT), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-              END FUNCTION h5dread_double_7_c
-            END INTERFACE
-
-            xfer_prp_default = H5P_DEFAULT_F
-            mem_space_id_default = H5S_ALL_F
-            file_space_id_default = H5S_ALL_F
-
-            if (present(xfer_prp)) xfer_prp_default = xfer_prp 
-            if (present(mem_space_id))  mem_space_id_default = mem_space_id 
-            if (present(file_space_id)) file_space_id_default = file_space_id 
-
-            hdferr = h5dread_double_7_c(dset_id, mem_type_id, mem_space_id_default, &
-                                file_space_id_default, xfer_prp_default, buf, dims)
-           
-          END SUBROUTINE h5dread_double_7
-
 !----------------------------------------------------------------------
 ! Name:		h5dget_space_f 
 !
@@ -4448,8 +3373,7 @@ CONTAINS
 !
 ! Comment:		
 !----------------------------------------------------------------------
-          SUBROUTINE h5dget_space_f(dataset_id, dataspace_id, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5dget_space_f(dataset_id, dataspace_id, hdferr)
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HID_T), INTENT(OUT) :: dataspace_id   ! Dataspace identifier
@@ -4498,8 +3422,7 @@ CONTAINS
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5dget_type_f(dataset_id, datatype_id, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5dget_type_f(dataset_id, datatype_id, hdferr)
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HID_T), INTENT(OUT) :: datatype_id    ! Datatype identifier
@@ -4552,8 +3475,7 @@ CONTAINS
 !----------------------------------------------------------------------
 
 
-  SUBROUTINE h5dset_extent_f(dataset_id, size, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5dset_extent_f(dataset_id, size, hdferr)
     IMPLICIT NONE 
     INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
@@ -4606,8 +3528,7 @@ CONTAINS
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5dget_create_plist_f(dataset_id, plist_id, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5dget_create_plist_f(dataset_id, plist_id, hdferr)
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HID_T), INTENT(OUT) :: plist_id    ! Dataset creation
@@ -4655,8 +3576,7 @@ CONTAINS
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5dget_storage_size_f(dataset_id, size, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5dget_storage_size_f(dataset_id, size, hdferr)
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HSIZE_T),  INTENT(OUT)  :: size
@@ -4704,8 +3624,7 @@ CONTAINS
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5dvlen_get_max_len_f(dataset_id, type_id, space_id, len,  hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5dvlen_get_max_len_f(dataset_id, type_id, space_id, len,  hdferr)
             IMPLICIT NONE 
             INTEGER(HID_T), INTENT(IN) :: dataset_id      ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: type_id         ! Datatype identifier
@@ -4732,8 +3651,6 @@ CONTAINS
           SUBROUTINE h5dwrite_vl_integer(dset_id, mem_type_id, buf, dims, len, &
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -4794,8 +3711,6 @@ CONTAINS
           SUBROUTINE h5dread_vl_integer(dset_id, mem_type_id, buf, dims, len, &
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -4859,8 +3774,6 @@ CONTAINS
           SUBROUTINE h5dwrite_vl_real(dset_id, mem_type_id, buf, dims, len, &
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -4921,8 +3834,6 @@ CONTAINS
           SUBROUTINE h5dread_vl_real(dset_id, mem_type_id, buf, dims, len, &
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -4986,8 +3897,6 @@ CONTAINS
           SUBROUTINE h5dwrite_vl_string(dset_id, mem_type_id, buf, dims, str_len, &
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -5059,8 +3968,6 @@ CONTAINS
           SUBROUTINE h5dread_vl_string(dset_id, mem_type_id, buf, dims, str_len, &
                                          hdferr, &
                                          mem_space_id, file_space_id, xfer_prp)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier
             INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -5155,8 +4062,6 @@ CONTAINS
 !----------------------------------------------------------------------
 
           SUBROUTINE h5dfill_integer(fill_value, space_id, buf,  hdferr)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER, INTENT(IN) :: fill_value  ! Fill value
             INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -5216,8 +4121,6 @@ CONTAINS
 !----------------------------------------------------------------------
 
           SUBROUTINE h5dfill_real(fill_valuer, space_id, buf,  hdferr)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             REAL, INTENT(IN) :: fill_valuer  ! Fill value
             INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -5252,68 +4155,6 @@ CONTAINS
           END SUBROUTINE h5dfill_real
 
 !----------------------------------------------------------------------
-! Name:		h5dfill_double
-!
-! Purpose:      Fills dataspace elements with a fill value in a memory buffer.	
-!               Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes 
-!               of the fillvalues and buffers are supported. Buffer and fillvalue
-!               are assumed to have the same datatype.
-!               Only one-dimesional buffers are supported.
-!
-! Inputs:  
-!		fill_value	- fill value
-!		space_id	- memory space selection identifier
-!		buf		- data buffer iin memory ro apply selection to
-!				- of k-th dimension of the buf array
-! Outputs:  
-!		hdferr:		- error code		
-!				 	Success:  0
-!				 	Failure: -1   
-!
-! Programmer:	Elena Pourmal
-!		March 12, 2003
-!
-!----------------------------------------------------------------------
-
-          SUBROUTINE h5dfill_double(fill_value, space_id, buf,  hdferr)
-!This definition is needed for Windows DLLs
-
-            IMPLICIT NONE
-            DOUBLE PRECISION, INTENT(IN) :: fill_value  ! Fill value
-            INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
-            DOUBLE PRECISION, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
-            INTEGER, INTENT(OUT) :: hdferr      ! Error code 
-            
-            INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
-            INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
-            
-!            INTEGER, EXTERNAL :: h5dfill_double_c
-! MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5dfill_double_c(fill_value, fill_type_id, space_id, &
-                                         buf, mem_type_id)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5DFILL_DOUBLE_C'::h5dfill_double_c  
-              !DEC$ ENDIF
-              DOUBLE PRECISION, INTENT(IN) :: fill_value  ! Fill value
-              INTEGER(HID_T) :: fill_type_id ! Fill value datatype identifier
-              INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
-              DOUBLE PRECISION, INTENT(IN), DIMENSION(*) :: buf ! Memory buffer to fill in
-              INTEGER(HID_T) :: mem_type_id !  Buffer dadtype identifier 
-              END FUNCTION h5dfill_double_c
-            END INTERFACE 
-            fill_type_id = H5T_NATIVE_DOUBLE
-            mem_type_id  = H5T_NATIVE_DOUBLE
-
-            hdferr = h5dfill_double_c(fill_value, fill_type_id, space_id, & 
-                               buf, mem_type_id)
-
-
-          END SUBROUTINE h5dfill_double
-
-!----------------------------------------------------------------------
 ! Name:		h5dfill_char
 !
 ! Purpose:      Fills dataspace elements with a fill value in a memory buffer.	
@@ -5338,8 +4179,6 @@ CONTAINS
 !----------------------------------------------------------------------
 
           SUBROUTINE h5dfill_char(fill_value, space_id, buf,  hdferr)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             CHARACTER, INTENT(IN) :: fill_value  ! Fill value
             INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -5397,8 +4236,6 @@ CONTAINS
 !----------------------------------------------------------------------
 
           SUBROUTINE h5dget_space_status_f(dset_id, flag, hdferr)
-!This definition is needed for Windows DLLs
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dset_id  ! Dataspace identifier
             INTEGER, INTENT(IN)        :: flag     ! Memory buffer to fill in
@@ -5448,8 +4285,6 @@ CONTAINS
 !----------------------------------------------------------------------
   
   SUBROUTINE h5dcreate_anon_f(loc_id, type_id, space_id, dset_id, hdferr, dcpl_id, dapl_id)
-
-!This definition is needed for Windows DLLs
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier. 
     INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier. 

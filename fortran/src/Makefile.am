@@ -45,13 +45,25 @@ else
    PARALLEL_COND_SRC = HDF5.f90
 endif
 
+#   Condition for including/excluding the DBLE interfaces for when the 
+#   default REAL is of type DOUBLE PRECISION.
+#   We do not include the double precision interfaces if the defaut REAL is
+#   DOUBLE PRECISION since this would lead to a non-unique conflict with the
+#   generic interfaces declared as REAL.
+if FORTRAN_DEFAULT_REALisDBLE_F
+   F_DBLE = Exclude
+else
+   F_DBLE = Include
+endif
+
 # Source files for the library.
 libhdf5_fortran_la_SOURCES=H5fortran_flags.f90 H5f90global.f90          \
          H5fortran_types.f90 H5_ff.f90 H5Aff.f90 H5Dff.f90 H5Eff.f90    \
          H5Fff.f90 H5Gff.f90 H5Iff.f90 H5Lff.f90 H5Off.f90 H5Pff.f90 H5Rff.f90 H5Sff.f90    \
          H5Tff.f90 H5Zff.f90                                            \
+	 H5_DBLE_Interface$(F_DBLE).f90 \
          H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c           \
-         H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c               \
+         H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c        \
          $(PARALLEL_COND_SRC)
 
 # h5fc and libhdf5_fortran.settings are generated during configure.
@@ -140,13 +152,20 @@ H5match_types.$(OBJEXT): H5fort_type_defines.h
 # files.
 H5fortran_detect_SOURCES = H5fortran_detect.f90
 
-# H5test_kind.f90 generates H5fortran_detect.f90.
+# H5test_kind.f90 generates H5Fortran_detect.f90 depending on if 
+# intrinsic function SIZEOF is available.
+
 H5fortran_detect.f90: H5test_kind$(EXEEXT)
 	$(RUNSERIAL) ./H5test_kind$(EXEEXT) > H5fortran_detect.f90
 
 # H5test_kind.f90 is included in the distribution, and Automake knows
 # how to compile a fortran program given its sources.
-H5test_kind_SOURCES = $(srcdir)/H5test_kind.f90
+
+if FORTRAN_HAVE_SIZEOF
+  H5test_kind_SOURCES = $(srcdir)/H5test_kind_SIZEOF.f90
+else
+  H5test_kind_SOURCES = $(srcdir)/H5test_kind.f90
+endif
 
 # Mark this directory as part of the Fortran API
 FORTRAN_API=yes
@@ -160,6 +179,7 @@ H5f90global.lo:      $(srcdir)/H5f90global.f90 H5fortran_flags.lo H5fortran_type
 H5fortran_types.lo:  H5fortran_types.f90
 H5fortran_detect.lo: H5fortran_detect.f90
 H5test_kind.lo:      $(srcdir)/H5test_kind.f90
+H5test_kind_SIZEOF.lo:      $(srcdir)/H5test_kind_SIZEOF.f90
 H5_ff.lo:            $(srcdir)/H5_ff.f90 H5f90global.lo
 H5Aff.lo:            $(srcdir)/H5Aff.f90 H5f90global.lo
 H5Dff.lo:            $(srcdir)/H5Dff.f90 H5f90global.lo
@@ -174,12 +194,15 @@ H5Rff.lo:            $(srcdir)/H5Rff.f90 H5f90global.lo
 H5Sff.lo:            $(srcdir)/H5Sff.f90 H5f90global.lo
 H5Tff.lo:            $(srcdir)/H5Tff.f90 H5f90global.lo
 H5Zff.lo:            $(srcdir)/H5Zff.f90 H5f90global.lo
+H5_DBLE_Interface$(F_DBLE).lo:  $(srcdir)/H5_DBLE_Interface$(F_DBLE).f90 H5Aff.lo H5Dff.lo H5Pff.lo
+
 HDF5.lo:             $(srcdir)/HDF5.f90 H5f90global.lo H5Aff.lo      \
                      H5Dff.lo H5Eff.lo H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo \
-                     H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo
+                     H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo \
+                     H5_DBLE_Interface$(F_DBLE).lo
 H5FDmpioff.lo:       $(srcdir)/H5FDmpioff.f90 H5f90global.lo
 HDF5mpio.lo:         $(srcdir)/H5FDmpioff.f90 H5f90global.lo H5Aff.lo  \
                      H5Dff.lo H5Eff.lo H5Fff.lo H5Gff.lo H5Iff.lo H5Lff.lo  \
-                     H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo H5FDmpioff.lo
+                     H5Pff.lo H5Rff.lo H5Sff.lo H5Tff.lo H5Zff.lo H5_DBLE_Interface$(F_DBLE).lo H5FDmpioff.lo
 
 include $(top_srcdir)/config/conclude.am

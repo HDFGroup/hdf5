@@ -46,8 +46,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5olink_f(object_id, new_loc_id, new_link_name, hdferr, lcpl_id, lapl_id) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5olink_f(object_id, new_loc_id, new_link_name, hdferr, lcpl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: object_id  ! Object to be linked
     INTEGER(HID_T), INTENT(IN) :: new_loc_id ! File or group identifier specifying 
@@ -114,8 +113,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5oopen_f(loc_id, name, obj_id, hdferr, lapl_id) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5oopen_f(loc_id, name, obj_id, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier
     CHARACTER(LEN=*), INTENT(IN) :: name  ! Path to the object, relative to loc_id

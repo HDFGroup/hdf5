@@ -47,9 +47,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5eclear_f(hdferr) 
-!
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5eclear_f(hdferr)
             IMPLICIT NONE
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
 
@@ -92,8 +90,6 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5eprint_f(hdferr, name)
-!
-!This definition is needed for Windows DLLs
             CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: name ! File name
             INTEGER, INTENT(OUT) :: hdferr          ! Error code
 !            INTEGER, EXTERNAL :: h5eprint_c1, h5eprint_c2 
@@ -157,8 +153,6 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5eget_major_f(error_no, name, namelen, hdferr)
-!
-!This definition is needed for Windows DLLs
             INTEGER, INTENT(IN) :: error_no !Major error number
             CHARACTER(LEN=*), INTENT(OUT) :: name ! Character string describing
                                                   ! the error.
@@ -213,8 +207,6 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
-!
-!This definition is needed for Windows DLLs
             INTEGER, INTENT(IN) :: error_no !Major error number
             CHARACTER(LEN=*), INTENT(OUT) :: name ! Character string describing
                                                   ! the error
@@ -267,8 +259,6 @@
 
 
           SUBROUTINE h5eset_auto_f(printflag, hdferr)
-!
-!This definition is needed for Windows DLLs
             INTEGER, INTENT(IN) :: printflag  !flag to turn automatic error
                                               !printing on or off
                                               !possible values are:

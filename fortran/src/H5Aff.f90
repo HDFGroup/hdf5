@@ -51,16 +51,6 @@ MODULE H5A
      MODULE PROCEDURE h5awrite_real_5
      MODULE PROCEDURE h5awrite_real_6
      MODULE PROCEDURE h5awrite_real_7
-! Comment if on Crays
-     MODULE PROCEDURE h5awrite_double_scalar
-     MODULE PROCEDURE h5awrite_double_1
-     MODULE PROCEDURE h5awrite_double_2
-     MODULE PROCEDURE h5awrite_double_3
-     MODULE PROCEDURE h5awrite_double_4
-     MODULE PROCEDURE h5awrite_double_5
-     MODULE PROCEDURE h5awrite_double_6
-     MODULE PROCEDURE h5awrite_double_7
-! End commnet if on Crays
 
   END INTERFACE
 
@@ -90,17 +80,7 @@ MODULE H5A
      MODULE PROCEDURE h5aread_real_5
      MODULE PROCEDURE h5aread_real_6
      MODULE PROCEDURE h5aread_real_7
-! Comment if on Crays
-     MODULE PROCEDURE h5aread_double_scalar
-     MODULE PROCEDURE h5aread_double_1
-     MODULE PROCEDURE h5aread_double_2
-     MODULE PROCEDURE h5aread_double_3
-     MODULE PROCEDURE h5aread_double_4
-     MODULE PROCEDURE h5aread_double_5
-     MODULE PROCEDURE h5aread_double_6
-     MODULE PROCEDURE h5aread_double_7
-! End commnet if on Crays
-!
+
   END INTERFACE
   
 CONTAINS
@@ -136,8 +116,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
   SUBROUTINE h5acreate_f(loc_id, name, type_id, space_id, attr_id, &
-                                 hdferr, acpl_id, aapl_id ) 
-!This definition is needed for Windows DLLs
+                                 hdferr, acpl_id, aapl_id )
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier 
     CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
@@ -214,8 +193,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5aopen_name_f(obj_id, name, attr_id, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5aopen_name_f(obj_id, name, attr_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
     CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
@@ -271,8 +249,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5aopen_idx_f(obj_id, index, attr_id, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5aopen_idx_f(obj_id, index, attr_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
     INTEGER, INTENT(IN) :: index            ! Attribute index 
@@ -298,8 +275,7 @@ CONTAINS
   END SUBROUTINE h5aopen_idx_f
 
 
-  SUBROUTINE h5awrite_integer_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5awrite_integer_scalar(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -327,8 +303,7 @@ CONTAINS
     hdferr = h5awrite_integer_s_c(attr_id, memtype_id,  buf, dims)
   END SUBROUTINE h5awrite_integer_scalar
 
-  SUBROUTINE h5awrite_integer_1(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5awrite_integer_1(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -360,8 +335,7 @@ CONTAINS
   END SUBROUTINE h5awrite_integer_1
 
 
-  SUBROUTINE h5awrite_integer_2(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5awrite_integer_2(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -392,8 +366,7 @@ CONTAINS
   END SUBROUTINE h5awrite_integer_2
 
 
-  SUBROUTINE h5awrite_integer_3(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5awrite_integer_3(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -423,8 +396,7 @@ CONTAINS
   END SUBROUTINE h5awrite_integer_3
 
 
-  SUBROUTINE h5awrite_integer_4(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5awrite_integer_4(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -455,8 +427,7 @@ CONTAINS
   END SUBROUTINE h5awrite_integer_4
 
 
-  SUBROUTINE h5awrite_integer_5(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5awrite_integer_5(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -486,8 +457,7 @@ CONTAINS
   END SUBROUTINE h5awrite_integer_5
 
 
-  SUBROUTINE h5awrite_integer_6(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5awrite_integer_6(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -519,8 +489,7 @@ CONTAINS
   END SUBROUTINE h5awrite_integer_6
 
 
-  SUBROUTINE h5awrite_integer_7(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5awrite_integer_7(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -552,8 +521,7 @@ CONTAINS
   END SUBROUTINE h5awrite_integer_7
 
 
-  SUBROUTINE h5awrite_real_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5awrite_real_scalar(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -581,8 +549,7 @@ CONTAINS
     hdferr = h5awrite_real_s_c(attr_id, memtype_id,  buf, dims)
   END SUBROUTINE h5awrite_real_scalar
 
-  SUBROUTINE h5awrite_real_1(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5awrite_real_1(attr_id, memtype_id,  buf, dims, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
     INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -614,8 +581,7 @@ CONTAINS
   END SUBROUTINE h5awrite_real_1
 
 
-          SUBROUTINE h5awrite_real_2(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_real_2(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -647,8 +613,7 @@ CONTAINS
           END SUBROUTINE h5awrite_real_2
 
 
-          SUBROUTINE h5awrite_real_3(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_real_3(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -680,8 +645,7 @@ CONTAINS
           END SUBROUTINE h5awrite_real_3
 
 
-          SUBROUTINE h5awrite_real_4(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_real_4(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -713,8 +677,7 @@ CONTAINS
           END SUBROUTINE h5awrite_real_4
 
 
-          SUBROUTINE h5awrite_real_5(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_real_5(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -746,8 +709,7 @@ CONTAINS
           END SUBROUTINE h5awrite_real_5
 
 
-          SUBROUTINE h5awrite_real_6(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_real_6(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -779,8 +741,7 @@ CONTAINS
           END SUBROUTINE h5awrite_real_6
 
 
-          SUBROUTINE h5awrite_real_7(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_real_7(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -812,266 +773,7 @@ CONTAINS
           END SUBROUTINE h5awrite_real_7
 
 
-          SUBROUTINE h5awrite_double_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(IN) :: buf     ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5awrite_double_s_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5awrite_double_s_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_S_C'::h5awrite_double_s_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(IN)::buf
-              END FUNCTION h5awrite_double_s_c
-            END INTERFACE
-
-            hdferr = h5awrite_double_s_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5awrite_double_scalar
-
-          SUBROUTINE h5awrite_double_1(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(IN), &
-            DIMENSION(dims(1)) :: buf ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5awrite_double_1_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5awrite_double_1_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_1_C'::h5awrite_double_1_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1)) :: buf
-              END FUNCTION h5awrite_double_1_c
-            END INTERFACE
-
-            hdferr = h5awrite_double_1_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5awrite_double_1
-
-
-          SUBROUTINE h5awrite_double_2(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(IN), & 
-            DIMENSION(dims(1),dims(2)) :: buf
-                                                    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5awrite_double_2_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5awrite_double_2_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_2_C'::h5awrite_double_2_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1),dims(2)) :: buf
-              END FUNCTION h5awrite_double_2_c
-            END INTERFACE
-
-            hdferr = h5awrite_double_2_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5awrite_double_2
-
-
-          SUBROUTINE h5awrite_double_3(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(IN), &
-            DIMENSION(dims(1),dims(2),dims(3)) :: buf
-                                                    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5awrite_double_3_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5awrite_double_3_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_3_C'::h5awrite_double_3_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1),dims(2),dims(3)) :: buf
-              END FUNCTION h5awrite_double_3_c
-            END INTERFACE
-
-            hdferr = h5awrite_double_3_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5awrite_double_3
-
-
-          SUBROUTINE h5awrite_double_4(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(IN), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-                                                    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5awrite_double_4_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5awrite_double_4_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_4_C'::h5awrite_double_4_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-              END FUNCTION h5awrite_double_4_c
-            END INTERFACE
-
-            hdferr = h5awrite_double_4_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5awrite_double_4
-
-
-          SUBROUTINE h5awrite_double_5(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(IN), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-                                                    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5awrite_double_5_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5awrite_double_5_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_5_C'::h5awrite_double_5_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-              END FUNCTION h5awrite_double_5_c
-            END INTERFACE
-
-            hdferr = h5awrite_double_5_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5awrite_double_5
-
-
-          SUBROUTINE h5awrite_double_6(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(IN), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-                                                    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5awrite_double_6_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5awrite_double_6_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_6_C'::h5awrite_double_6_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-              END FUNCTION h5awrite_double_6_c
-            END INTERFACE
-
-            hdferr = h5awrite_double_6_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5awrite_double_6
-
-
-          SUBROUTINE h5awrite_double_7(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(IN), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-                                                    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5awrite_double_7_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5awrite_double_7_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AWRITE_DOUBLE_7_C'::h5awrite_double_7_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(IN), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-              END FUNCTION h5awrite_double_7_c
-            END INTERFACE
-
-            hdferr = h5awrite_double_7_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5awrite_double_7
-
-          SUBROUTINE h5awrite_char_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_char_scalar(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1100,8 +802,7 @@ CONTAINS
             hdferr = h5awritec_s_c(attr_id, memtype_id,  buf, dims)
           END SUBROUTINE h5awrite_char_scalar
 
-          SUBROUTINE h5awrite_char_1(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_char_1(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1132,8 +833,7 @@ CONTAINS
           END SUBROUTINE h5awrite_char_1
 
 
-          SUBROUTINE h5awrite_char_2(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_char_2(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1166,8 +866,7 @@ CONTAINS
           END SUBROUTINE h5awrite_char_2
 
 
-          SUBROUTINE h5awrite_char_3(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_char_3(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1199,8 +898,7 @@ CONTAINS
           END SUBROUTINE h5awrite_char_3
 
 
-          SUBROUTINE h5awrite_char_4(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_char_4(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1232,8 +930,7 @@ CONTAINS
           END SUBROUTINE h5awrite_char_4
 
 
-          SUBROUTINE h5awrite_char_5(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_char_5(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1265,8 +962,7 @@ CONTAINS
           END SUBROUTINE h5awrite_char_5
 
 
-          SUBROUTINE h5awrite_char_6(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_char_6(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1298,8 +994,7 @@ CONTAINS
           END SUBROUTINE h5awrite_char_6
 
 
-          SUBROUTINE h5awrite_char_7(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5awrite_char_7(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1368,8 +1063,7 @@ CONTAINS
 !			up to 7 dimensions.	
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5aread_integer_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_integer_scalar(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1396,8 +1090,7 @@ CONTAINS
             hdferr = h5aread_integer_s_c(attr_id, memtype_id,  buf, dims)
           END SUBROUTINE h5aread_integer_scalar
 
-          SUBROUTINE h5aread_integer_1(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_integer_1(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1426,8 +1119,7 @@ CONTAINS
           END SUBROUTINE h5aread_integer_1
 
 
-          SUBROUTINE h5aread_integer_2(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_integer_2(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1456,8 +1148,7 @@ CONTAINS
           END SUBROUTINE h5aread_integer_2
 
 
-          SUBROUTINE h5aread_integer_3(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_integer_3(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1488,8 +1179,7 @@ CONTAINS
           END SUBROUTINE h5aread_integer_3
 
 
-          SUBROUTINE h5aread_integer_4(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_integer_4(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1521,8 +1211,7 @@ CONTAINS
           END SUBROUTINE h5aread_integer_4
 
 
-          SUBROUTINE h5aread_integer_5(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_integer_5(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1554,8 +1243,7 @@ CONTAINS
           END SUBROUTINE h5aread_integer_5
 
 
-          SUBROUTINE h5aread_integer_6(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_integer_6(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1587,8 +1275,7 @@ CONTAINS
           END SUBROUTINE h5aread_integer_6
 
 
-          SUBROUTINE h5aread_integer_7(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_integer_7(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1620,8 +1307,7 @@ CONTAINS
           END SUBROUTINE h5aread_integer_7
 
 
-          SUBROUTINE h5aread_real_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_real_scalar(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1649,8 +1335,7 @@ CONTAINS
             hdferr = h5aread_real_s_c(attr_id, memtype_id,  buf, dims)
           END SUBROUTINE h5aread_real_scalar
 
-          SUBROUTINE h5aread_real_1(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_real_1(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1682,8 +1367,7 @@ CONTAINS
           END SUBROUTINE h5aread_real_1
 
 
-          SUBROUTINE h5aread_real_2(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_real_2(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1715,8 +1399,7 @@ CONTAINS
           END SUBROUTINE h5aread_real_2
 
 
-          SUBROUTINE h5aread_real_3(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_real_3(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1748,8 +1431,7 @@ CONTAINS
           END SUBROUTINE h5aread_real_3
 
 
-          SUBROUTINE h5aread_real_4(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_real_4(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1781,8 +1463,7 @@ CONTAINS
           END SUBROUTINE h5aread_real_4
 
 
-          SUBROUTINE h5aread_real_5(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_real_5(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1814,8 +1495,7 @@ CONTAINS
           END SUBROUTINE h5aread_real_5
 
 
-          SUBROUTINE h5aread_real_6(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_real_6(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1847,8 +1527,7 @@ CONTAINS
           END SUBROUTINE h5aread_real_6
 
 
-          SUBROUTINE h5aread_real_7(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_real_7(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -1879,269 +1558,7 @@ CONTAINS
             hdferr = h5aread_real_7_c(attr_id, memtype_id,  buf, dims)
           END SUBROUTINE h5aread_real_7
 
-
-          SUBROUTINE h5aread_double_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(INOUT) :: buf    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5aread_double_s_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5aread_double_s_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_S_C'::h5aread_double_s_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(INOUT)::buf
-              END FUNCTION h5aread_double_s_c
-            END INTERFACE
-
-            hdferr = h5aread_double_s_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5aread_double_scalar
-
-          SUBROUTINE h5aread_double_1(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1)) :: buf
-                                                    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5aread_double_1_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5aread_double_1_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_1_C'::h5aread_double_1_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(INOUT), &
-              DIMENSION(dims(1)) :: buf
-              END FUNCTION h5aread_double_1_c
-            END INTERFACE
-
-            hdferr = h5aread_double_1_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5aread_double_1
-
-
-          SUBROUTINE h5aread_double_2(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1),dims(2)) :: buf
-                                                    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5aread_double_2_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5aread_double_2_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_2_C'::h5aread_double_2_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(INOUT), &
-              DIMENSION(dims(1),dims(2)) :: buf
-              END FUNCTION h5aread_double_2_c
-            END INTERFACE
-
-            hdferr = h5aread_double_2_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5aread_double_2
-
-
-          SUBROUTINE h5aread_double_3(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1),dims(2),dims(3)) :: buf
-                                                    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5aread_double_3_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5aread_double_3_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_3_C'::h5aread_double_3_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(INOUT), &
-              DIMENSION(dims(1),dims(2),dims(3)) :: buf
-              END FUNCTION h5aread_double_3_c
-            END INTERFACE
-
-            hdferr = h5aread_double_3_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5aread_double_3
-
-
-          SUBROUTINE h5aread_double_4(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-                                                    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5aread_double_4_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5aread_double_4_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_4_C'::h5aread_double_4_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(INOUT), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4)) :: buf
-              END FUNCTION h5aread_double_4_c
-            END INTERFACE
-
-            hdferr = h5aread_double_4_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5aread_double_4
-
-
-          SUBROUTINE h5aread_double_5(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-                                                    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5aread_double_5_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5aread_double_5_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_5_C'::h5aread_double_5_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(INOUT), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)) :: buf
-              END FUNCTION h5aread_double_5_c
-            END INTERFACE
-
-            hdferr = h5aread_double_5_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5aread_double_5
-
-
-          SUBROUTINE h5aread_double_6(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-                                                    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5aread_double_6_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5aread_double_6_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_6_C'::h5aread_double_6_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(INOUT), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)) :: buf
-              END FUNCTION h5aread_double_6_c
-            END INTERFACE
-
-            hdferr = h5aread_double_6_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5aread_double_6
-
-
-          SUBROUTINE h5aread_double_7(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
-            INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
-                                                     ! identifier  (in memory)
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-            DOUBLE PRECISION, INTENT(INOUT), &
-            DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-                                                    ! Attribute data 
-            INTEGER, INTENT(OUT) :: hdferr          ! Error code
-
-!            INTEGER, EXTERNAL :: h5aread_double_7_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5aread_double_7_c(attr_id, memtype_id,  buf, dims)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AREAD_DOUBLE_7_C'::h5aread_double_7_c
-              !DEC$ ENDIF
-            INTEGER(HSIZE_T), INTENT(IN), DIMENSION(*) :: dims       ! Array to story buf dimension sizes 
-              INTEGER(HID_T), INTENT(IN) :: attr_id
-              INTEGER(HID_T), INTENT(IN) :: memtype_id
-              DOUBLE PRECISION, INTENT(INOUT), &
-              DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)) :: buf
-              END FUNCTION h5aread_double_7_c
-            END INTERFACE
-
-            hdferr = h5aread_double_7_c(attr_id, memtype_id,  buf, dims)
-          END SUBROUTINE h5aread_double_7
-
-
-          SUBROUTINE h5aread_char_scalar(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_char_scalar(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2171,8 +1588,7 @@ CONTAINS
             hdferr = h5areadc_s_c(attr_id, memtype_id,  buf, dims)
           END SUBROUTINE h5aread_char_scalar
 
-          SUBROUTINE h5aread_char_1(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_char_1(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2205,8 +1621,7 @@ CONTAINS
           END SUBROUTINE h5aread_char_1
 
 
-          SUBROUTINE h5aread_char_2(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_char_2(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2239,8 +1654,7 @@ CONTAINS
           END SUBROUTINE h5aread_char_2
 
 
-          SUBROUTINE h5aread_char_3(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_char_3(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2273,8 +1687,7 @@ CONTAINS
           END SUBROUTINE h5aread_char_3
 
 
-          SUBROUTINE h5aread_char_4(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_char_4(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2307,8 +1720,7 @@ CONTAINS
           END SUBROUTINE h5aread_char_4
 
 
-          SUBROUTINE h5aread_char_5(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_char_5(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2341,8 +1753,7 @@ CONTAINS
           END SUBROUTINE h5aread_char_5
 
 
-          SUBROUTINE h5aread_char_6(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_char_6(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2375,8 +1786,7 @@ CONTAINS
           END SUBROUTINE h5aread_char_6
 
 
-          SUBROUTINE h5aread_char_7(attr_id, memtype_id,  buf, dims, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aread_char_7(attr_id, memtype_id,  buf, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id   ! Attribute identifier 
             INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
@@ -2433,8 +1843,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5aget_space_f(attr_id, space_id, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aget_space_f(attr_id, space_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
             INTEGER(HID_T), INTENT(OUT) :: space_id 
@@ -2482,8 +1891,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5aget_type_f(attr_id, type_id, hdferr) 
-!This definition is needed for Windows DLLs
+          SUBROUTINE h5aget_type_f(attr_id, type_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
             INTEGER(HID_T), INTENT(OUT) :: type_id 
@@ -2533,8 +1941,7 @@ CONTAINS
 !----------------------------------------------------------------------
 
 
-  SUBROUTINE h5aget_name_f(attr_id, size, buf, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5aget_name_f(attr_id, size, buf, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
     INTEGER(SIZE_T), INTENT(IN) :: size    ! Buffer size 
@@ -2604,8 +2011,7 @@ CONTAINS
 !----------------------------------------------------------------------
 
   SUBROUTINE h5aget_name_by_idx_f(loc_id, obj_name, idx_type, order, &
-       n, name, hdferr, size, lapl_id) 
-!This definition is needed for Windows DLLs
+       n, name, hdferr, size, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location,
@@ -2700,8 +2106,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5aget_num_attrs_f(obj_id, attr_num, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5aget_num_attrs_f(obj_id, attr_num, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id  ! Object identifier 
     INTEGER, INTENT(OUT) :: attr_num      ! Number of attributes of the
@@ -2751,8 +2156,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5adelete_f(obj_id, name, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5adelete_f(obj_id, name, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
     CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
@@ -2803,8 +2207,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5aclose_f(attr_id, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5aclose_f(attr_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
     INTEGER, INTENT(OUT) :: hdferr         ! Error code:
@@ -2847,8 +2250,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5aget_storage_size_f(attr_id, size, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5aget_storage_size_f(attr_id, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier  
     INTEGER(HSIZE_T), INTENT(OUT) :: size   ! Attribute storage requirement
@@ -2892,8 +2294,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5aget_create_plist_f(attr_id, creation_prop_id, hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5aget_create_plist_f(attr_id, creation_prop_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Identifier of the attribute 
     INTEGER(HID_T), INTENT(OUT) :: creation_prop_id   ! Identifier for the attribute’s creation property
@@ -2942,9 +2343,7 @@ CONTAINS
 !----------------------------------------------------------------------
 
   SUBROUTINE h5arename_by_name_f(loc_id, obj_name, old_attr_name, new_attr_name, &
-        hdferr, lapl_id) 
-
-!This definition is needed for Windows DLLs
+        hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier 
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location, 
@@ -3021,8 +2420,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5aopen_f(obj_id, attr_name, attr_id, hdferr, aapl_id) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5aopen_f(obj_id, attr_name, attr_id, hdferr, aapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id      ! Object identifier 
     CHARACTER(LEN=*), INTENT(IN) :: attr_name ! Attribute name
@@ -3098,8 +2496,7 @@ CONTAINS
 ! Modifications: N/A 
 !
 !----------------------------------------------------------------------
-  SUBROUTINE h5adelete_by_idx_f(loc_id, obj_name, idx_type, order, n, hdferr, lapl_id) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5adelete_by_idx_f(loc_id, obj_name, idx_type, order, n, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location, 
@@ -3175,8 +2572,7 @@ CONTAINS
 ! Modifications: N/A 
 !
 !----------------------------------------------------------------------
-  SUBROUTINE h5adelete_by_name_f(loc_id, obj_name, attr_name, hdferr, lapl_id) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5adelete_by_name_f(loc_id, obj_name, attr_name, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id      ! Identifer for object to which attribute is attached
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object, relative to location, 
@@ -3244,8 +2640,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5aopen_by_idx_f(loc_id, obj_name, idx_type, order, n, attr_id, hdferr, aapl_id, lapl_id) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5aopen_by_idx_f(loc_id, obj_name, idx_type, order, n, attr_id, hdferr, aapl_id, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id      ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: obj_name  ! Name of object to which attribute is attached
@@ -3334,8 +2729,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5aget_info_f(attr_id, f_corder_valid, corder, cset, data_size,  hdferr) 
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5aget_info_f(attr_id, f_corder_valid, corder, cset, data_size,  hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier
 
@@ -3404,8 +2798,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
   SUBROUTINE h5aget_info_by_idx_f(loc_id, obj_name, idx_type, order, n, &
-       f_corder_valid, corder, cset, data_size, hdferr, lapl_id) 
-!This definition is needed for Windows DLLs
+       f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: obj_name ! Name of object to which attribute is attached
@@ -3499,8 +2892,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
   SUBROUTINE h5aget_info_by_name_f(loc_id, obj_name, attr_name, &
-       f_corder_valid, corder, cset, data_size, hdferr, lapl_id) 
-!This definition is needed for Windows DLLs
+       f_corder_valid, corder, cset, data_size, hdferr, lapl_id)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: obj_name ! Name of object to which attribute is attached
@@ -3587,9 +2979,6 @@ CONTAINS
 !----------------------------------------------------------------------
   SUBROUTINE h5acreate_by_name_f(loc_id, obj_name, attr_name, type_id, space_id, attr, hdferr, &
        acpl_id, aapl_id, lapl_id)
-
-!This definition is needed for Windows DLLs
-
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: obj_name ! Name of object to which attribute is attached
@@ -3676,9 +3065,6 @@ CONTAINS
 !
 !----------------------------------------------------------------------
   SUBROUTINE h5aexists_f(obj_id, attr_name, attr_exists, hdferr)
-
-!This definition is needed for Windows DLLs
-
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id     ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: attr_name ! Attribute name
@@ -3737,9 +3123,6 @@ CONTAINS
 !
 !----------------------------------------------------------------------
   SUBROUTINE h5aexists_by_name_f(loc_id, obj_name, attr_name, attr_exists, hdferr, lapl_id)
-
-!This definition is needed for Windows DLLs
-
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Location identifier
     CHARACTER(LEN=*), INTENT(IN) :: obj_name ! Object name either relative to loc_id, 
@@ -3811,9 +3194,6 @@ CONTAINS
 !
 !----------------------------------------------------------------------
   SUBROUTINE h5aopen_by_name_f(loc_id, obj_name, attr_name, attr_id, hdferr, aapl_id, lapl_id)
-
-!This definition is needed for Windows DLLs
-
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Location identifier
     CHARACTER(LEN=*), INTENT(IN) :: obj_name ! Object name either relative to loc_id, 
@@ -3887,9 +3267,7 @@ CONTAINS
 !
 !----------------------------------------------------------------------
 
-  SUBROUTINE h5arename_f(loc_id, old_attr_name, new_attr_name, hdferr) 
-
-!This definition is needed for Windows DLLs
+  SUBROUTINE h5arename_f(loc_id, old_attr_name, new_attr_name, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id    ! Object identifier
     CHARACTER(LEN=*), INTENT(IN) :: old_attr_name ! Prior attribute name
