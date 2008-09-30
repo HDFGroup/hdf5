@@ -1195,6 +1195,11 @@ main(void)
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (3 * cparam.data_blk_min_elmts) + 1), "setting first element of array's third data block");
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (5 * cparam.data_blk_min_elmts)), "setting all elements of array's third data block");
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (5 * cparam.data_blk_min_elmts) + 1), "setting first element of array's fourth data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (7 * cparam.data_blk_min_elmts)), "setting all elements of array's fourth data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (7 * cparam.data_blk_min_elmts) + 1), "setting first element of array's fifth data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (11 * cparam.data_blk_min_elmts)), "setting all elements of array's fifth data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (11 * cparam.data_blk_min_elmts) + 1), "setting first element of array's sixth data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (15 * cparam.data_blk_min_elmts)), "setting all elements of array's sixth data block");
 
             /* Close down testing parameters */
             finish_tparam(&tparam);
