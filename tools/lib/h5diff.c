@@ -85,6 +85,7 @@ hsize_t h5diff(const char *fname1,
     * open the files first; if they are not valid, no point in continuing
     *-------------------------------------------------------------------------
     */
+
     
      /* disable error reporting */
     H5E_BEGIN_TRY 
@@ -121,23 +122,44 @@ hsize_t h5diff(const char *fname1,
     }
     
    /*-------------------------------------------------------------------------
-    * get the list of objects in the files
+    * get the list of objects in file1
+    *-------------------------------------------------------------------------
+    */
+
+    if ( nobjects1 )
+    {
+        
+        info1 = (trav_info_t*) malloc( nobjects1 * sizeof(trav_info_t));
+        if ( info1 == NULL )
+        {
+            printf("Error: Not enough memory for object list in file <%s>\n",fname1);
+            options->err_stat=1;
+            goto out;
+        }
+        
+        h5trav_getinfo( file1_id, info1, 0 );
+    }
+
+    /*-------------------------------------------------------------------------
+    * get the list of objects in file2
     *-------------------------------------------------------------------------
     */
     
-    info1 = (trav_info_t*) malloc( nobjects1 * sizeof(trav_info_t));
-    info2 = (trav_info_t*) malloc( nobjects2 * sizeof(trav_info_t));
-    if (info1==NULL || info2==NULL)
+    if ( nobjects2 )
     {
-        printf("Error: Not enough memory for object list\n");
-        options->err_stat=1;
-        if (info1) h5trav_freeinfo(info1,nobjects1);
-        if (info2) h5trav_freeinfo(info2,nobjects1);
-        goto out;
+        
+        info2 = (trav_info_t*) malloc( nobjects2 * sizeof(trav_info_t));
+        if ( info2 == NULL )
+        {
+            printf("Error: Not enough memory for object list in file <%s>\n",fname2);
+            options->err_stat=1;
+            goto out;
+        }
+        
+        h5trav_getinfo( file2_id, info2, 0 );
     }
-    
-    h5trav_getinfo( file1_id, info1, 0 );
-    h5trav_getinfo( file2_id, info2, 0 );
+
+
     
    /*-------------------------------------------------------------------------
     * object name was supplied
@@ -176,9 +198,7 @@ hsize_t h5diff(const char *fname1,
                             options);
     } /* end else */
     
-    
-    h5trav_freeinfo(info1,nobjects1);
-    h5trav_freeinfo(info2,nobjects2);
+   
     
 out:
     /* close */
@@ -187,6 +207,11 @@ out:
         H5Fclose(file1_id);
         H5Fclose(file2_id);
     } H5E_END_TRY;
+    
+    if (info1!=NULL) 
+        h5trav_freeinfo(info1,nobjects1);
+    if (info2!=NULL)
+        h5trav_freeinfo(info2,nobjects2);
     
     
     return nfound;
