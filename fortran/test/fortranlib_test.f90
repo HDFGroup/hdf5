@@ -25,12 +25,16 @@ PROGRAM fortranlibtest
   INTEGER :: total_error = 0
   INTEGER :: error
   INTEGER :: majnum, minnum, relnum
-  LOGICAL :: cleanup = .TRUE.
-! LOGICAL :: cleanup = .FALSE.
   LOGICAL :: szip_flag
   INTEGER :: ret_total_error
+  LOGICAL :: cleanup, status
 
-  CALL h5open_f(error) 
+  CALL h5open_f(error)
+
+  cleanup = .TRUE.
+  CALL h5_env_nocleanup_f(status)
+  IF(status) cleanup=.FALSE.
+
   WRITE(*,*) '                       ==========================                            '
   WRITE(*,*) '                              FORTRAN tests '
   WRITE(*,*) '                       ==========================                            '
@@ -169,7 +173,6 @@ PROGRAM fortranlibtest
   CALL write_test_status(ret_total_error, ' External dataset test', total_error)
 
   ret_total_error = 0
-  cleanup = .FALSE.
   CALL multi_file_test(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Multi file driver test', total_error)
 

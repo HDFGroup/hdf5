@@ -1063,9 +1063,15 @@ SUBROUTINE test_select_point(cleanup, total_error)
   INTEGER :: i,j;        !/* Counters */
 !    struct pnt_iter pi;     /* Custom Pointer iterator struct */
   INTEGER :: error		!/* Generic return value		*/
-  CHARACTER(LEN=12) :: filename = 'h5s_hyper.h5'
+  CHARACTER(LEN=9) :: filename = 'h5s_hyper'
+  CHARACTER(LEN=80) :: fix_filename 
   CHARACTER(LEN=1), DIMENSION(1:SPACE2_DIM1,1:SPACE2_DIM2) :: wbuf, rbuf
-    
+
+  CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+  IF (error .NE. 0) THEN
+     WRITE(*,*) "Cannot modify filename"
+     STOP
+  ENDIF
   xfer_plist = H5P_DEFAULT_F
 !    MESSAGE(5, ("Testing Element Selection Functions\n"));
 
@@ -1086,7 +1092,7 @@ SUBROUTINE test_select_point(cleanup, total_error)
 !!$  *tbuf++=(uint8_t)((i*SPACE2_DIM2)+j);
   
   !/* Create file */
-  CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, fid1, error)
+  CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, fid1, error)
   CALL check("h5fcreate_f", error, total_error)
   
   !/* Create dataspace for dataset */
@@ -1326,6 +1332,10 @@ SUBROUTINE test_select_point(cleanup, total_error)
   !/* Close file */
   CALL h5fclose_f(fid1, error)
   CALL check("h5fclose_f", error, total_error)
+
+
+  IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+  CALL check("h5_cleanup_f", error, total_error)
 
 END SUBROUTINE test_select_point
 

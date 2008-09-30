@@ -800,7 +800,7 @@
     SUBROUTINE enumtest(cleanup, total_error)
 
     USE HDF5
-    IMPLICIT none
+    IMPLICIT NONE
 
     LOGICAL, INTENT(IN)  :: cleanup
     INTEGER, INTENT(OUT) :: total_error 
@@ -871,7 +871,7 @@
     CALL check("H5Tget_order_f",error, total_error)
     CALL VERIFY("H5Tget_native_type_f",order1, order2, total_error) 
 
-    ! this test depends on whether -i8 was specified needs to account for that FIX -scot-
+    ! this test depends on whether -i8 was specified
 
 !!$    CALL H5Tget_size_f(native_type, type_size1, error)
 !!$    CALL check("H5Tget_size_f",error, total_error)
@@ -909,11 +909,15 @@
     ENDIF
 
     CALL h5tclose_f(dtype_id,error)
-        CALL check("h5tclose_f", error, total_error)
+    CALL check("h5tclose_f", error, total_error)
     CALL h5fclose_f(file_id,error)
-        CALL check("h5fclose_f", error, total_error)
+    CALL check("h5fclose_f", error, total_error)
+
+    IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+    CALL check("h5_cleanup_f", error, total_error)
+
     RETURN
-    END SUBROUTINE enumtest
+  END SUBROUTINE enumtest
 
 !/*-------------------------------------------------------------------------
 ! * Function:    test_derived_flt
@@ -1113,5 +1117,9 @@ SUBROUTINE test_derived_flt(cleanup, total_error)
 
   CALL h5fclose_f(file,error)
   CALL check("h5fclose_f", error, total_error)
+
+
+  IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+  CALL check("h5_cleanup_f", error, total_error)
 
 END SUBROUTINE test_derived_flt
