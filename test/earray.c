@@ -1057,7 +1057,7 @@ HDfprintf(stderr, "idx = %Hu, tparam->sblk_info[%u] = {%Hu, %Zu, %Hu, %Hu}\n", i
 HDfprintf(stderr, "state.nelmts = %Hu\n", state.nelmts);
 #endif /* QAK */
             state.ndata_blks = 1 + tparam->sblk_info[sblk_idx].start_dblk + 
-                    ((idx - cparam->idx_blk_elmts) / tparam->sblk_info[sblk_idx].dblk_nelmts);
+                    ((idx - (cparam->idx_blk_elmts + tparam->sblk_info[sblk_idx].start_idx)) / tparam->sblk_info[sblk_idx].dblk_nelmts);
 #ifdef QAK
 HDfprintf(stderr, "state.ndata_blks = %Hu\n", state.ndata_blks);
 #endif /* QAK */
@@ -1191,6 +1191,10 @@ main(void)
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + 1), "setting first element of array's first data block");
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + cparam.data_blk_min_elmts), "setting all elements of array's first data block");
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + cparam.data_blk_min_elmts + 1), "setting first element of array's second data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (3 * cparam.data_blk_min_elmts)), "setting all elements of array's second data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (3 * cparam.data_blk_min_elmts) + 1), "setting first element of array's third data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (5 * cparam.data_blk_min_elmts)), "setting all elements of array's third data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (5 * cparam.data_blk_min_elmts) + 1), "setting first element of array's fourth data block");
 
             /* Close down testing parameters */
             finish_tparam(&tparam);

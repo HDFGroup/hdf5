@@ -380,9 +380,12 @@ HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
 
         /* Get super block index where element is located */
         sblk_idx = H5EA__dblock_sblk_idx(hdr, idx);
+#ifdef QAK
+HDfprintf(stderr, "%s: sblk_idx = %u, iblock->nsblks = %Zu\n", FUNC, sblk_idx, iblock->nsblks);
+#endif /* QAK */
 
         /* Adjust index to offset in super block */
-        elmt_idx = idx - hdr->cparam.idx_blk_elmts + hdr->sblk_info[sblk_idx].start_idx;
+        elmt_idx = idx - (hdr->cparam.idx_blk_elmts + hdr->sblk_info[sblk_idx].start_idx);
 #ifdef QAK
 HDfprintf(stderr, "%s: after adjusting for super block elements, elmt_idx = %Hu\n", FUNC, elmt_idx);
 #endif /* QAK */
@@ -397,7 +400,7 @@ HDfprintf(stderr, "%s: Element in data block pointed to by address in index bloc
             /* Compute the data block index in index block */
             dblk_idx = (size_t)(hdr->sblk_info[sblk_idx].start_dblk + (elmt_idx / hdr->sblk_info[sblk_idx].dblk_nelmts));
 #ifdef QAK
-HDfprintf(stderr, "%s: dblk_idx = %u\n", FUNC, dblk_idx);
+HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_idx, iblock->ndblk_addrs);
 #endif /* QAK */
             HDassert(dblk_idx < iblock->ndblk_addrs);
 
@@ -528,7 +531,7 @@ HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
             sblk_idx = H5EA__dblock_sblk_idx(hdr, idx);
 
             /* Adjust index to offset in super block */
-            elmt_idx = idx - hdr->cparam.idx_blk_elmts + hdr->sblk_info[sblk_idx].start_idx;
+            elmt_idx = idx - (hdr->cparam.idx_blk_elmts + hdr->sblk_info[sblk_idx].start_idx);
 #ifdef QAK
 HDfprintf(stderr, "%s: after adjusting for super block elements, elmt_idx = %Hu\n", FUNC, elmt_idx);
 #endif /* QAK */
