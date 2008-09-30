@@ -56,11 +56,15 @@
      CHARACTER(LEN=8) :: failure = '*FAILED*'
      CHARACTER(LEN=8) :: skip = '--SKIP--'
      CHARACTER(LEN=4) :: e_format ='(8a)'
-     LOGICAL :: cleanup = .TRUE.
-!     LOGICAL :: cleanup = .FALSE.
      LOGICAL :: szip_flag
+     LOGICAL :: cleanup, status
 
      CALL h5open_f(error) 
+
+     cleanup = .TRUE.
+     CALL h5_env_nocleanup_f(status)
+     IF(status) cleanup=.FALSE.
+
      write(*,*) '                       ==========================                            '
      write(*,*) '                              FORTRAN tests '
      write(*,*) '                       ==========================                            '
@@ -280,7 +284,6 @@
      total_error = total_error + external_total_error 
     
      error_string = failure
-     cleanup = .FALSE.
      CALL multi_file_test(cleanup, multi_file_total_error)
      IF (multi_file_total_error == 0) error_string = success
      write(*, fmt = '(23a)', advance = 'no') ' Multi file driver test'     

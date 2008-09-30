@@ -129,3 +129,22 @@ nh5_exit_c(int_f *status)
     HDexit((int)*status);
 }   /* h5_exit_c */
 
+/*----------------------------------------------------------------------------
+ * Name:        h5_env_nocleanup_c
+ * Purpose:     Determines the state of the environment variable HDF5_NOCLEANUP
+ * Input:       none
+ * Output:      status:  1 - HDF5_NOCLEANUP is set
+ *                       0 - HDF5_NOCLEANUP is not set
+ * Returns:     none
+ * Programmer:  M.S. Breitenfeld
+ *              September 30, 3008
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+void
+nh5_env_nocleanup_c(int_f *status)
+{
+  *status = (int_f)0;
+  if (HDgetenv("HDF5_NOCLEANUP"))
+    *status = (int_f)1;
+}   /* h5_env_nocleanup_c */
+

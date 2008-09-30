@@ -201,3 +201,47 @@
             CALL h5_exit_c(status)
 
           END SUBROUTINE h5_exit_f
+
+!----------------------------------------------------------------------
+! Name:         h5_env_nocleanup_f
+!
+! Purpose:      Uses the HDF5_NOCLEANUP environment variable in Fortran
+!               tests to determine if the output files should be removed
+!
+! Inputs:
+!
+! Outputs:      HDF5_NOCLEANUP:  .true. - don't remove test files
+!                               .false. - remove test files
+!
+! Programmer:   M.S. Breitenfeld
+!               September 30, 2008
+!
+!----------------------------------------------------------------------
+SUBROUTINE h5_env_nocleanup_f(HDF5_NOCLEANUP)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_DLL)
+!DEC$attributes dllexport :: h5_env_nocleanup_f
+!DEC$endif
+  IMPLICIT NONE
+  LOGICAL, INTENT(OUT) :: HDF5_NOCLEANUP ! Return code
+  INTEGER :: status
+
+  INTERFACE
+     SUBROUTINE h5_env_nocleanup_c(status)
+       !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+       !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_ENV_NOCLEANUP_C':: h5_env_nocleanup_c
+       !DEC$ ENDIF
+       INTEGER :: status
+     END SUBROUTINE h5_env_nocleanup_c
+  END INTERFACE
+
+  CALL h5_env_nocleanup_c(status)
+
+  HDF5_NOCLEANUP = .FALSE.
+  IF(status.EQ.1)THEN
+     HDF5_NOCLEANUP = .TRUE.
+  ENDIF
+
+END SUBROUTINE h5_env_nocleanup_f
+

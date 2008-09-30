@@ -771,13 +771,13 @@
      !
      ! Create a new file using default properties.
      ! 
-          CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
-          if (error .ne. 0) then
-              write(*,*) "Cannot modify filename"
-              stop
-          endif
+    CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+    IF (error .NE. 0) THEN
+       WRITE(*,*) "Cannot modify filename"
+       STOP
+    ENDIF
     CALL h5fcreate_f(fix_filename,H5F_ACC_TRUNC_F,file_id,error)
-        CALL check("h5fcreate_f", error, total_error)
+    CALL check("h5fcreate_f", error, total_error)
     !
     ! Create enumeration datatype with tow values
     !
@@ -850,6 +850,11 @@
         CALL check("h5tclose_f", error, total_error)
     CALL h5fclose_f(file_id,error)
         CALL check("h5fclose_f", error, total_error)
+
+    IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+    CALL check("h5_cleanup_f", error, total_error)
+
+
     RETURN
     END SUBROUTINE enumtest 
 
@@ -1052,6 +1057,9 @@ SUBROUTINE test_derived_flt(cleanup, total_error)
 
   CALL h5fclose_f(file,error)
   CALL check("h5fclose_f", error, total_error)
+
+  IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+  CALL check("h5_cleanup_f", error, total_error)
 
 END SUBROUTINE test_derived_flt
 
