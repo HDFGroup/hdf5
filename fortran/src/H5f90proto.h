@@ -826,6 +826,7 @@ H5_FCDLL int_f nh5aget_name_c(hid_t_f *attr_id, size_t_f *size, _fcd buf);
 #   define nh5tvlen_create_c               FNAME(H5TVLEN_CREATE_C)
 #   define nh5tis_variable_str_c         FNAME(H5TIS_VARIABLE_STR_C)
 #   define nh5tget_member_class_c         FNAME(H5TGET_MEMBER_CLASS_C)
+#   define nh5tget_native_type_c         FNAME(H5TGET_NATIVE_TYPE_C)
 #else
 #   define nh5topen_c         FNAME(h5topen_c)
 #   define nh5tcommit_c       FNAME(h5tcommit_c)
@@ -883,6 +884,7 @@ H5_FCDLL int_f nh5aget_name_c(hid_t_f *attr_id, size_t_f *size, _fcd buf);
 #   define nh5tvlen_create_c               FNAME(h5tvlen_create_c)
 #   define nh5tis_variable_str_c         FNAME(h5tis_variable_str_c)
 #   define nh5tget_member_class_c         FNAME(h5tget_member_class_c)
+#   define nh5tget_native_type_c         FNAME(h5tget_native_type_c)
 #endif
 #endif
 
@@ -942,6 +944,7 @@ H5_FCDLL int_f nh5tget_super_c ( hid_t_f *type_id , hid_t_f *base_type_id);
 H5_FCDLL int_f nh5tvlen_create_c ( hid_t_f *type_id , hid_t_f *vltype_id);
 H5_FCDLL int_f nh5tis_variable_str_c ( hid_t_f *type_id , int_f *flag );
 H5_FCDLL int_f nh5tget_member_class_c ( hid_t_f *type_id ,  int_f *member_no, int_f *class );
+H5_FCDLL int_f nh5tget_native_type_c( hid_t_f *dtype_id, int_f *direction, hid_t_f *native_dtype_id);
 
 /*
  * Functions from H5Pf.c

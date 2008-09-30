@@ -753,13 +753,16 @@
     INTEGER(HID_T) :: file_id
     INTEGER(HID_T) :: dset_id
     INTEGER(HID_T) :: dspace_id
-    INTEGER(HID_T) :: dtype_id
+    INTEGER(HID_T) :: dtype_id, dtype, native_type 
     INTEGER        :: error
     INTEGER        :: value
     INTEGER(HSIZE_T), DIMENSION(1) :: dsize
     INTEGER(SIZE_T) :: buf_size 
     INTEGER, DIMENSION(2) :: data
     INTEGER(HSIZE_T), DIMENSION(7) :: dims
+    INTEGER :: order1, order2
+    INTEGER(SIZE_T) :: type_size1, type_size2
+    INTEGER :: class
 
     dims(1) = 2
     dsize(1) = 2
@@ -793,6 +796,32 @@
         CALL check("h5dcreate_f", error, total_error)
     CALL h5dwrite_f(dset_id,dtype_id,data,dims,error)
         CALL check("h5dwrite_f", error, total_error)
+
+    CALL H5Dget_type_f(dset_id, dtype, error)
+    CALL check("H5Dget_type_f", error, total_error)
+
+    CALL H5Tget_native_type_f(dtype, H5T_DIR_ASCEND_F, native_type, error)
+    CALL check("H5Tget_native_type_f",error, total_error)
+
+    !/* Verify the datatype retrieved and converted */
+    CALL H5Tget_order_f(native_type, order1, error)
+    CALL check("H5Tget_order_f",error, total_error)
+    CALL H5Tget_order_f(H5T_NATIVE_INTEGER, order2, error)
+    CALL check("H5Tget_order_f",error, total_error)
+    CALL VERIFY("H5Tget_native_type_f",order1, order2, total_error) 
+
+    ! this test depends on whether -i8 was specified
+
+!!$    CALL H5Tget_size_f(native_type, type_size1, error)
+!!$    CALL check("H5Tget_size_f",error, total_error)
+!!$    CALL H5Tget_size_f(H5T_STD_I32BE, type_size2, error)
+!!$    CALL check("H5Tget_size_f",error, total_error)
+!!$    CALL VERIFY("H5Tget_native_type_f", INT(type_size1), INT(type_size2), total_error) 
+
+    CALL H5Tget_class_f(native_type, class, error)
+    CALL check("H5Tget_class_f",error, total_error)
+    CALL VERIFY("H5Tget_native_type_f", INT(class), INT(H5T_ENUM_F), total_error) 
+    
     CALL h5dclose_f(dset_id,error)
         CALL check("h5dclose_f", error, total_error)
     CALL h5sclose_f(dspace_id,error)
