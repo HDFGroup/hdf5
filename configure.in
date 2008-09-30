@@ -318,6 +318,10 @@ AC_ARG_ENABLE([fortran],
                               [Compile the Fortran interface [default=no]])],
               [HDF_FORTRAN=$enableval])
 
+
+HAVE_SIZEOF="no"
+FORTRAN_DEFAULT_REALisDBLE="no"	
+
 if test "X$HDF_FORTRAN" = "Xyes"; then
   echo "yes"
 
@@ -381,11 +385,58 @@ dnl  ], AC_MSG_RESULT(yes),
 dnl     AC_MSG_RESULT(no)
 dnl     FCFLAGS="$FCFLAGS_saved")
 
+dnl --------------------------------------------------------------------
+dnl See if the fortran compiler supports the intrinsic function "SIZEOF"
+
+  AC_MSG_CHECKING([if Fortran compiler supports intrinsic SIZEOF])
+  AC_TRY_RUN([ 
+   PROGRAM main
+     i = sizeof(x)
+   END PROGRAM
+  ], [AC_MSG_RESULT(yes)
+     	HAVE_SIZEOF="yes"],
+       AC_MSG_RESULT(no))
+
+
+dnl Check to see if -r8 was specified to determine if we need to
+dnl compile the DOUBLE PRECISION interfaces.
+
+
+  AC_MSG_CHECKING([if Fortran default REAL is DOUBLE PRECISION])
+  
+  AC_TRY_RUN([
+     MODULE type_mod
+       INTERFACE h5t	
+         MODULE PROCEDURE h5t_real
+         MODULE PROCEDURE h5t_dble
+       END INTERFACE
+     CONTAINS
+       SUBROUTINE h5t_real(r)
+         REAL :: r
+       END SUBROUTINE h5t_real
+       SUBROUTINE h5t_dble(d)
+         DOUBLE PRECISION :: d
+       END SUBROUTINE h5t_dble
+     END MODULE type_mod
+     PROGRAM main
+       USE type_mod
+       REAL :: r
+       DOUBLE PRECISION :: d
+       CALL h5t(r)
+       CALL h5t(d)
+     END PROGRAM main
+                  ],
+   AC_MSG_RESULT(no), 
+   [AC_MSG_RESULT(yes) 
+       FORTRAN_DEFAULT_REALisDBLE="yes"])
   dnl Change back to the C language
   AC_LANG_POP(Fortran)
 else
   echo "no"
 fi
+
+AM_CONDITIONAL([FORTRAN_HAVE_SIZEOF], [test "X$HAVE_SIZEOF" = "Xyes"])
+AM_CONDITIONAL([FORTRAN_DEFAULT_REALisDBLE_F], [test "X$FORTRAN_DEFAULT_REALisDBLE" = "Xyes"])
 
 dnl ----------------------------------------------------------------------
 dnl Check if they would like the C++ interface compiled
@@ -835,10 +886,14 @@ if test "X${HDF_FORTRAN}" = "Xyes"; then
     H5_FORTRAN_SHARED="no"
   fi
 
-  if (${FC} -V 2>&1 | grep '^Intel(R) Fortran Compiler') > /dev/null; then
-    H5_FORTRAN_SHARED="no"
+  if (${FC} -V 2>&1 | grep '^Intel(R) Fortran') > /dev/null; then
+    if (${FC} -v 2>&1 | grep '^Version 8.') > /dev/null; then
+      H5_FORTRAN_SHARED="no"
+    else
+dnl echo 'adding fortran compiler flag needed for building shared libraries'
+      FCFLAGS="${FCFLAGS} -fPIC"
+    fi
   fi
-
   if (${FC} +version 2>&1 | grep '^HP F90') > /dev/null; then
     H5_FORTRAN_SHARED="no"
   fi
