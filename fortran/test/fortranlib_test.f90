@@ -49,6 +49,7 @@
      INTEGER :: z_total_error = 0
      INTEGER :: sz_total_error = 0
      INTEGER :: derived_flt_error = 0
+     INTEGER :: ret_total_error = 0
      INTEGER :: majnum, minnum, relnum
      CHARACTER(LEN=8) error_string
      CHARACTER(LEN=8) :: success = ' PASSED '
@@ -201,6 +202,32 @@
      write(*, fmt = e_format) error_string
      total_error = total_error + element_total_error 
 
+     error_string = failure
+     ret_total_error = 0
+     CALL test_select_point(cleanup, ret_total_error)
+     IF (ret_total_error == 0) error_string = success
+     write(*, fmt = '(33a)', advance = 'no') ' Element selection functions test'     
+     write(*, fmt = '(37x,a)', advance = 'no')  ' '
+     write(*, fmt = e_format) error_string
+     total_error = total_error + ret_total_error
+
+     error_string = failure
+     ret_total_error = 0
+     CALL test_select_combine(cleanup, ret_total_error)
+     IF (ret_total_error == 0) error_string = success
+     write(*, fmt = '(28a)', advance = 'no') ' Selection combinations test'     
+     write(*, fmt = '(42x,a)', advance = 'no')  ' '
+     write(*, fmt = e_format) error_string
+     total_error = total_error + ret_total_error
+
+     error_string = failure
+     ret_total_error = 0
+     CALL test_select_bounds(cleanup, ret_total_error)
+     IF (ret_total_error == 0) error_string = success
+     write(*, fmt = '(22a)', advance = 'no') ' Selection bounds test'     
+     write(*, fmt = '(48x,a)', advance = 'no')  ' '
+     write(*, fmt = e_format) error_string
+     total_error = total_error + ret_total_error
 
 !     write(*,*)
 !     write(*,*) '========================================='
