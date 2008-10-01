@@ -1,0 +1,2 @@
+datatype: </t1> and </t2>
+1 differences found
