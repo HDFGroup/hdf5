@@ -167,7 +167,7 @@ SUBROUTINE attribute_test_1_8(cleanup, total_error)
            CALL write_test_status(ret_total_error, &
                 '   - Testing deleting attribute by index', &
                 total_error)
-           
+          
 !!$              CALL test_attr_iterate2(new_format, my_fcpl, my_fapl)
 !!$              CALL test_attr_open_by_idx(new_format, my_fcpl, my_fapl)
 !!$              CALL test_attr_open_by_name(new_format, my_fcpl, my_fapl)

@@ -26,10 +26,14 @@ PROGRAM fortranlibtest
   INTEGER :: error
   INTEGER :: ret_total_error
   INTEGER :: majnum, minnum, relnum
-  LOGICAL :: cleanup = .TRUE.
-!       LOGICAL :: cleanup = .FALSE.
+  LOGICAL :: cleanup, status
 
   CALL h5open_f(error) 
+
+  cleanup = .TRUE.
+  CALL h5_env_nocleanup_f(status)
+  IF(status) cleanup=.FALSE.
+
   WRITE(*,*) '                       ==========================                            '
   WRITE(*,*) '                              FORTRAN 1.8 tests '
   WRITE(*,*) '                       ==========================                            '

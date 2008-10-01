@@ -372,13 +372,26 @@
           ! Close the file.
           !
           CALL h5fclose_f(file_id, error)
-              CALL check("h5fclose_f", error, total_error)
+          CALL check("h5fclose_f", error, total_error)
           CALL h5pclose_f(fapl, error)
-              CALL check("h5pclose_f", error, total_error)
+          CALL check("h5pclose_f", error, total_error)
           CALL h5pclose_f(fapl_1, error)
-              CALL check("h5pclose_f", error, total_error)
-          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
-              CALL check("h5_cleanup_f", error, total_error)
+          CALL check("h5pclose_f", error, total_error)
+          IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
+          
+          IF(cleanup) CALL h5_cleanup_f(filename//'.h5-b', H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
+          IF(cleanup) CALL h5_cleanup_f(filename//'.h5-g', H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
+          IF(cleanup) CALL h5_cleanup_f(filename//'.h5-l', H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
+          IF(cleanup) CALL h5_cleanup_f(filename//'.h5-o', H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
+          IF(cleanup) CALL h5_cleanup_f(filename//'.h5-r', H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
+          IF(cleanup) CALL h5_cleanup_f(filename//'.h5-s', H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
      
           RETURN
         END SUBROUTINE multi_file_test
