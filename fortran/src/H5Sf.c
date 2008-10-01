@@ -1035,11 +1035,6 @@ nh5sselect_elements_c ( hid_t_f *space_id , int_f *op, size_t_f *nelements,  hsi
   int i, j;
   hsize_t *c_coord;
   size_t c_nelements;
-/*
-  if (*op != H5S_SELECT_SET_F) return ret_value;
-*/
-/*   if (*op != H5S_SELECT_SET) return ret_value; */
-/*   c_op =  H5S_SELECT_SET; */
 
   c_op = (H5S_seloper_t)*op;
 
