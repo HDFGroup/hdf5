@@ -51,11 +51,11 @@ PROGRAM fortranlibtest
      total_error = total_error + 1
   ENDIF
   WRITE(*,*)
+
 !     CALL h5check_version_f(1,4,4,total_error)
 !     write(*,*) '========================================='
 !     write(*,*) 'Testing FILE Interface                   '
 !     write(*,*) '========================================='
-     
 
   ret_total_error = 0
   CALL mountingtest(cleanup, ret_total_error)
@@ -154,7 +154,7 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL compoundtest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Compound datatype test', total_error)
- 
+
   ret_total_error = 0
   CALL enumtest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Enum datatype test', total_error)
@@ -225,7 +225,7 @@ PROGRAM fortranlibtest
   CALL vl_test_real(cleanup, ret_total_error)
   CALL vl_test_string(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' VL test', total_error)
-  
+
   WRITE(*,*)
 
   WRITE(*,*) '                  ============================================  '
