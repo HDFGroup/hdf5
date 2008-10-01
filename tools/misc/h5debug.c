@@ -460,6 +460,23 @@ main(int argc, char *argv[])
 
         status = H5EA__iblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra);
 
+    } else if(!HDmemcmp(sig, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
+        /*
+         * Debug an extensible aray super block.
+         */
+        const H5EA_class_t *cls = get_H5EA_class(sig);
+        HDassert(cls);
+
+        /* Check for enough valid parameters */
+        if(extra == 0 || extra2 == 0) {
+            fprintf(stderr, "ERROR: Need extensible array header address and super block index in order to dump super block\n");
+            fprintf(stderr, "Extensible array super block usage:\n");
+            fprintf(stderr, "\th5debug <filename> <super block address> <array header address> <super block index>\n");
+            HDexit(4);
+        } /* end if */
+
+        status = H5EA__sblock_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, cls, extra, (unsigned)extra2);
+
     } else if(!HDmemcmp(sig, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*
          * Debug an extensible aray data block.

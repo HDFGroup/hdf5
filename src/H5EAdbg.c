@@ -279,6 +279,88 @@ END_FUNC(PKG)   /* end H5EA__iblock_debug() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5EA__sblock_debug
+ *
+ * Purpose:	Prints debugging info about a extensible array super block.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sep 30 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PKG, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA__sblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
+    int fwidth, const H5EA_class_t *cls, haddr_t hdr_addr, unsigned sblk_idx))
+
+    /* Local variables */
+    H5EA_hdr_t *hdr = NULL;          /* Shared extensible array header */
+    H5EA_sblock_t *sblock = NULL;    /* Extensible array super block */
+
+    /* Check arguments */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(stream);
+    HDassert(indent >= 0);
+    HDassert(fwidth >= 0);
+    HDassert(cls);
+    HDassert(H5F_addr_defined(hdr_addr));
+
+    /* Load the extensible array header */
+    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, hdr_addr, cls, NULL, H5AC_READ)))
+	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
+
+    /* Sanity check */
+    HDassert(H5F_addr_eq(hdr->idx_blk_addr, addr));
+
+    /* Protect super block */
+    if(NULL == (sblock = H5EA__sblock_protect(hdr, dxpl_id, addr, sblk_idx, H5AC_READ)))
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long_long)addr)
+
+    /* Print opening message */
+    HDfprintf(stream, "%*sExtensible Array Super Block...\n", indent, "");
+
+    /* Print the values */
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+	      "Array class ID:",
+	      (hdr->cparam.cls->id == H5EA_CLS_TEST_ID ? "H5EA_CLS_TEST_ID" :
+              "Unknown!"));
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+	      "Super Block size:",
+	      sblock->size);
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+	      "# of data block addresses in super block:",
+	      sblock->ndblks);
+
+    /* Check if there are any data block addresses in super block */
+    if(sblock->ndblks > 0) {
+        char temp_str[128];     /* Temporary string, for formatting */
+        unsigned u;             /* Local index variable */
+
+        /* Print the data block addresses in the super block */
+        HDfprintf(stream, "%*sData Block Addresses in Super Block:\n", indent, "");
+        for(u = 0; u < sblock->ndblks; u++) {
+            /* Print address */
+            sprintf(temp_str, "Address #%u:", u);
+            HDfprintf(stream, "%*s%-*s %a\n", (indent + 3), "", MAX(0, (fwidth - 3)),
+                temp_str,
+                sblock->dblk_addrs[u]);
+        } /* end for */
+    } /* end if */
+
+CATCH
+    if(sblock && H5EA__sblock_unprotect(sblock, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
+        H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array super block")
+    if(hdr && H5AC_unprotect(f, dxpl_id, H5AC_EARRAY_HDR, hdr_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+	H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array header")
+
+END_FUNC(PKG)   /* end H5EA__sblock_debug() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5EA__dblock_debug
  *
  * Purpose:	Prints debugging info about a extensible array data block.
@@ -316,7 +398,7 @@ H5EA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
 	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Protect data block */
-    if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, addr, (size_t)dblk_nelmts, H5AC_READ)))
+    if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, addr, dblk_nelmts, H5AC_READ)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long_long)addr)
 
     /* Print opening message */

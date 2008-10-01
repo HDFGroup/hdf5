@@ -409,7 +409,7 @@ HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_i
                 haddr_t dblk_addr;        /* Address of data block created */
 
                 /* Create data block */
-                dblk_addr = H5EA__dblock_create(iblock, dxpl_id, hdr->sblk_info[sblk_idx].dblk_nelmts);
+                dblk_addr = H5EA__dblock_create(hdr, dxpl_id, hdr->sblk_info[sblk_idx].dblk_nelmts);
                 if(!H5F_addr_defined(dblk_addr))
                     H5E_THROW(H5E_CANTCREATE, "unable to create extensible array data block")
 
@@ -435,7 +435,25 @@ HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_i
             dblock_cache_flags |= H5AC__DIRTIED_FLAG;
         } /* end if */
         else {
-HDfprintf(stderr, "%s: Super block index %Hu not supported yet!\n", FUNC, sblk_idx);
+            /* Check if the super block has been allocated on disk yet */
+            if(!H5F_addr_defined(iblock->sblk_addrs[sblk_idx - iblock->nsblks])) {
+                haddr_t sblk_addr;        /* Address of data block created */
+
+                /* Create super block */
+                sblk_addr = H5EA__sblock_create(hdr, dxpl_id, sblk_idx);
+                if(!H5F_addr_defined(sblk_addr))
+                    H5E_THROW(H5E_CANTCREATE, "unable to create extensible array super block")
+
+                /* Set super block address in index block */
+                iblock->sblk_addrs[sblk_idx - iblock->nsblks] = sblk_addr;
+                iblock_cache_flags |= H5AC__DIRTIED_FLAG;
+
+                /* Increment count of actual super blocks created */
+                hdr->stats.nsuper_blks++;
+                hdr_dirty = TRUE;
+            } /* end if */
+
+HDfprintf(stderr, "%s: Super block index %u not supported yet!\n", FUNC, sblk_idx);
 HDassert(0 && "Super block index location not supported!");
         } /* end else */
     } /* end else */

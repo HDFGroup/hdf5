@@ -152,7 +152,7 @@ END_FUNC(PKG)   /* end H5EA__dblock_alloc() */
  */
 BEGIN_FUNC(PKG, ERR,
 haddr_t, HADDR_UNDEF, HADDR_UNDEF,
-H5EA__dblock_create(H5EA_iblock_t *iblock, hid_t dxpl_id, size_t nelmts))
+H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, size_t nelmts))
 
     /* Local variables */
     H5EA_dblock_t *dblock = NULL;      /* Extensible array data block */
@@ -162,11 +162,11 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 #endif /* QAK */
 
     /* Sanity check */
-    HDassert(iblock);
+    HDassert(hdr);
     HDassert(nelmts > 0);
 
     /* Allocate the data block */
-    if(NULL == (dblock = H5EA__dblock_alloc(iblock->hdr, nelmts)))
+    if(NULL == (dblock = H5EA__dblock_alloc(hdr, nelmts)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array data block")
 
     /* Set size of data block on disk */
@@ -176,15 +176,15 @@ HDfprintf(stderr, "%s: dblock->size = %Zu\n", FUNC, dblock->size);
 #endif /* QAK */
 
     /* Allocate space for the data block on disk */
-    if(HADDR_UNDEF == (dblock->addr = H5MF_alloc(iblock->hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
+    if(HADDR_UNDEF == (dblock->addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
 	H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array data block")
 
     /* Clear any elements in index block to fill value */
-    if((iblock->hdr->cparam.cls->fill)(dblock->elmts, (size_t)dblock->nelmts) < 0)
+    if((hdr->cparam.cls->fill)(dblock->elmts, (size_t)dblock->nelmts) < 0)
         H5E_THROW(H5E_CANTSET, "can't set extensible array data block elements to class's fill value")
 
     /* Cache the new extensible array data block */
-    if(H5AC_set(iblock->hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblock->addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblock->addr, dblock, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array index block to cache")
 
     /* Set address of index block to return */
@@ -194,11 +194,11 @@ CATCH
     if(!H5F_addr_defined(ret_value))
         if(dblock) {
             /* Release data block's disk space */
-            if(H5F_addr_defined(dblock->addr) && H5MF_xfree(iblock->hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, dblock->addr, (hsize_t)dblock->size) < 0)
+            if(H5F_addr_defined(dblock->addr) && H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, dblock->addr, (hsize_t)dblock->size) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to release extensible array data block")
 
             /* Destroy data block */
-            if(H5EA__dblock_dest(iblock->hdr->f, dblock) < 0)
+            if(H5EA__dblock_dest(hdr->f, dblock) < 0)
                 H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array data block")
         } /* end if */
 

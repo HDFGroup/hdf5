@@ -54,11 +54,13 @@
 /* Fractal heap format version #'s */
 #define H5EA_HDR_VERSION        0               /* Header */
 #define H5EA_IBLOCK_VERSION     0               /* Index block */
+#define H5EA_SBLOCK_VERSION     0               /* Super block */
 #define H5EA_DBLOCK_VERSION     0               /* Data block */
 
 /* Size of stack buffer for serialization buffers */
 #define H5EA_HDR_BUF_SIZE       512
 #define H5EA_IBLOCK_BUF_SIZE    512
+#define H5EA_SBLOCK_BUF_SIZE    512
 #define H5EA_DBLOCK_BUF_SIZE    512
 
 
@@ -87,6 +89,11 @@ static herr_t H5EA__cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy,
 static herr_t H5EA__cache_iblock_clear(H5F_t *f, H5EA_iblock_t *iblock, hbool_t destroy);
 static herr_t H5EA__cache_iblock_size(const H5F_t *f, const H5EA_iblock_t *iblock, size_t *size_ptr);
 static herr_t H5EA__cache_iblock_dest(H5F_t *f, H5EA_iblock_t *iblock);
+static H5EA_sblock_t *H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
+static herr_t H5EA__cache_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5EA_sblock_t *sblock, unsigned * flags_ptr);
+static herr_t H5EA__cache_sblock_clear(H5F_t *f, H5EA_sblock_t *sblock, hbool_t destroy);
+static herr_t H5EA__cache_sblock_size(const H5F_t *f, const H5EA_sblock_t *sblock, size_t *size_ptr);
+static herr_t H5EA__cache_sblock_dest(H5F_t *f, H5EA_sblock_t *sblock);
 static H5EA_dblock_t *H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
 static herr_t H5EA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5EA_dblock_t *dblock, unsigned * flags_ptr);
 static herr_t H5EA__cache_dblock_clear(H5F_t *f, H5EA_dblock_t *dblock, hbool_t destroy);
@@ -116,6 +123,16 @@ const H5AC_class_t H5AC_EARRAY_IBLOCK[1] = {{
     (H5AC_dest_func_t)H5EA__cache_iblock_dest,
     (H5AC_clear_func_t)H5EA__cache_iblock_clear,
     (H5AC_size_func_t)H5EA__cache_iblock_size,
+}};
+
+/* H5EA super block inherits cache-like properties from H5AC */
+const H5AC_class_t H5AC_EARRAY_SBLOCK[1] = {{
+    H5AC_EARRAY_SBLOCK_ID,
+    (H5AC_load_func_t)H5EA__cache_sblock_load,
+    (H5AC_flush_func_t)H5EA__cache_sblock_flush,
+    (H5AC_dest_func_t)H5EA__cache_sblock_dest,
+    (H5AC_clear_func_t)H5EA__cache_sblock_clear,
+    (H5AC_size_func_t)H5EA__cache_sblock_size,
 }};
 
 /* H5EA data block inherits cache-like properties from H5AC */
@@ -795,6 +812,315 @@ H5EA__cache_iblock_dest(H5F_t *f, H5EA_iblock_t *iblock))
 CATCH
 
 END_FUNC(STATIC)   /* end H5EA__cache_iblock_dest() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_sblock_load
+ *
+ * Purpose:	Loads an extensible array super block from the disk.
+ *
+ * Return:	Success:	Pointer to a new extensible array super block
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sep 30 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+H5EA_sblock_t *, NULL, NULL,
+H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    const void *_sblk_idx, void *_hdr))
+
+    /* Local variables */
+    H5EA_hdr_t    *hdr = (H5EA_hdr_t *)_hdr;      /* Shared extensible array information */
+    const unsigned      *sblk_idx = (const unsigned *)_sblk_idx;  /* Index of this super block */
+    H5EA_sblock_t	*sblock = NULL; /* Super block info */
+    size_t		size;           /* Super block size */
+    H5WB_t              *wb = NULL;     /* Wrapped buffer for super block data */
+    uint8_t             sblock_buf[H5EA_IBLOCK_BUF_SIZE]; /* Buffer for super block */
+    uint8_t		*buf;           /* Pointer to super block buffer */
+    const uint8_t	*p;             /* Pointer into raw data buffer */
+    uint32_t            stored_chksum;  /* Stored metadata checksum value */
+    uint32_t            computed_chksum; /* Computed metadata checksum value */
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(sblk_idx && *sblk_idx > 0);
+    HDassert(hdr);
+
+    /* Allocate the extensible array super block */
+    if(NULL == (sblock = H5EA__sblock_alloc(hdr, *sblk_idx)))
+	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array super block")
+
+    /* Set the extensible array super block's address */
+    sblock->addr = addr;
+
+    /* Wrap the local buffer for serialized info */
+    if(NULL == (wb = H5WB_wrap(sblock_buf, sizeof(sblock_buf))))
+	H5E_THROW(H5E_CANTINIT, "can't wrap buffer")
+
+    /* Compute the size of the extensible array super block on disk */
+    size = H5EA_SBLOCK_SIZE(sblock);
+
+    /* Get a pointer to a buffer that's large enough for serialized info */
+    if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
+	H5E_THROW(H5E_CANTGET, "can't get actual buffer")
+
+    /* Read super block from disk */
+    if(H5F_block_read(f, H5FD_MEM_EARRAY_SBLOCK, addr, size, dxpl_id, buf) < 0)
+	H5E_THROW(H5E_READERROR, "can't read extensible array super block")
+
+    /* Get temporary pointer to serialized header */
+    p = buf;
+
+    /* Magic number */
+    if(HDmemcmp(p, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+	H5E_THROW(H5E_BADVALUE, "wrong extensible array super block signature")
+    p += H5_SIZEOF_MAGIC;
+
+    /* Version */
+    if(*p++ != H5EA_SBLOCK_VERSION)
+	H5E_THROW(H5E_VERSION, "wrong extensible array super block version")
+
+    /* Extensible array type */
+    if(*p++ != (uint8_t)hdr->cparam.cls->id)
+	H5E_THROW(H5E_BADTYPE, "incorrect extensible array class")
+
+    /* Internal information */
+
+    /* Decode data block addresses */
+    if(sblock->ndblks > 0) {
+        size_t u;               /* Local index variable */
+
+        /* Decode addresses of data blocks in super block */
+        for(u = 0; u < sblock->ndblks; u++)
+            H5F_addr_decode(f, &p, &sblock->dblk_addrs[u]);
+    } /* end if */
+
+    /* Sanity check */
+    /* (allow for checksum not decoded yet) */
+    HDassert((size_t)(p - buf) == (size - H5EA_SIZEOF_CHKSUM));
+
+    /* Save the super block's size */
+    sblock->size = size;
+
+    /* Compute checksum on super block */
+    computed_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
+
+    /* Metadata checksum */
+    UINT32DECODE(p, stored_chksum);
+
+    /* Sanity check */
+    HDassert((size_t)(p - buf) == sblock->size);
+
+    /* Verify checksum */
+    if(stored_chksum != computed_chksum)
+	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for extensible array super block")
+
+    /* Set return value */
+    ret_value = sblock;
+
+CATCH
+
+    /* Release resources */
+    if(wb && H5WB_unwrap(wb) < 0)
+	H5E_THROW(H5E_CLOSEERROR, "can't close wrapped buffer")
+    if(!ret_value)
+        if(sblock && H5EA__cache_sblock_dest(f, sblock) < 0)
+            H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array super block")
+
+END_FUNC(STATIC)   /* end H5EA__cache_sblock_load() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_sblock_flush
+ *
+ * Purpose:	Flushes a dirty extensible array super block to disk.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sep 30 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA__cache_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
+    H5EA_sblock_t *sblock, unsigned UNUSED * flags_ptr))
+
+    /* Local variables */
+    H5WB_t *wb = NULL;                  /* Wrapped buffer for serializing data */
+    uint8_t ser_buf[H5EA_SBLOCK_BUF_SIZE]; /* Serialization buffer */
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(sblock);
+    HDassert(sblock->hdr);
+
+    if(sblock->cache_info.is_dirty) {
+        uint8_t	*buf;           /* Temporary raw data buffer */
+        uint8_t *p;             /* Pointer into raw data buffer */
+        size_t	size;           /* Index block size on disk */
+        uint32_t metadata_chksum; /* Computed metadata checksum value */
+
+        /* Wrap the local buffer for serialized info */
+        if(NULL == (wb = H5WB_wrap(ser_buf, sizeof(ser_buf))))
+            H5E_THROW(H5E_CANTINIT, "can't wrap buffer")
+
+        /* Compute the size of the super block on disk */
+        size = sblock->size;
+
+        /* Get a pointer to a buffer that's large enough for serialized info */
+        if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
+            H5E_THROW(H5E_CANTGET, "can't get actual buffer")
+
+        /* Get temporary pointer to serialized info */
+        p = buf;
+
+        /* Magic number */
+        HDmemcpy(p, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
+
+        /* Version # */
+        *p++ = H5EA_SBLOCK_VERSION;
+
+        /* Extensible array type */
+        *p++ = sblock->hdr->cparam.cls->id;
+
+        /* Internal information */
+
+        /* Encode data block addresses */
+        if(sblock->ndblks > 0) {
+            size_t u;               /* Local index variable */
+
+            /* Encode addresses of data blocks in super block */
+            for(u = 0; u < sblock->ndblks; u++)
+                H5F_addr_encode(f, &p, sblock->dblk_addrs[u]);
+        } /* end if */
+
+        /* Compute metadata checksum */
+        metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
+
+        /* Metadata checksum */
+        UINT32ENCODE(p, metadata_chksum);
+
+	/* Write the super block */
+        HDassert((size_t)(p - buf) == size);
+	if(H5F_block_write(f, H5FD_MEM_EARRAY_SBLOCK, addr, size, dxpl_id, buf) < 0)
+            H5E_THROW(H5E_WRITEERROR, "unable to save extensible array super block to disk")
+
+	sblock->cache_info.is_dirty = FALSE;
+    } /* end if */
+
+    if(destroy)
+        if(H5EA__cache_sblock_dest(f, sblock) < 0)
+            H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array super block")
+
+CATCH
+
+    /* Release resources */
+    if(wb && H5WB_unwrap(wb) < 0)
+	H5E_THROW(H5E_CLOSEERROR, "can't close wrapped buffer")
+
+END_FUNC(STATIC)   /* end H5EA__cache_sblock_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_sblock_clear
+ *
+ * Purpose:	Mark a extensible array super block in memory as non-dirty.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sept 30 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA__cache_sblock_clear(H5F_t *f, H5EA_sblock_t *sblock, hbool_t destroy))
+
+    /* Sanity check */
+    HDassert(sblock);
+
+    /* Reset the dirty flag */
+    sblock->cache_info.is_dirty = FALSE;
+
+    if(destroy)
+        if(H5EA__cache_sblock_dest(f, sblock) < 0)
+            H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array super block")
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5EA__cache_sblock_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_sblock_size
+ *
+ * Purpose:	Compute the size in bytes of a extensible array super block
+ *		on disk, and return it in *size_ptr.  On failure,
+ *		the value of *size_ptr is undefined.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sept 30 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+BEGIN_FUNC(STATIC, NOERR,
+herr_t, SUCCEED, -,
+H5EA__cache_sblock_size(const H5F_t UNUSED *f, const H5EA_sblock_t *sblock,
+    size_t *size_ptr))
+
+    /* Sanity check */
+    HDassert(sblock);
+    HDassert(size_ptr);
+
+    /* Set size value */
+    *size_ptr = sblock->size;
+
+END_FUNC(STATIC)   /* end H5EA__cache_sblock_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_sblock_dest
+ *
+ * Purpose:	Destroys an extensible array super block in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Sep 30 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA__cache_sblock_dest(H5F_t *f, H5EA_sblock_t *sblock))
+
+    /* Sanity check */
+    HDassert(sblock);
+
+    /* Release the super block */
+    if(H5EA__sblock_dest(f, sblock) < 0)
+        H5E_THROW(H5E_CANTFREE, "can't free extensible array super block")
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5EA__cache_sblock_dest() */
 
 
 /*-------------------------------------------------------------------------

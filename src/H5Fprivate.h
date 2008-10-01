@@ -425,6 +425,7 @@ typedef struct H5F_t H5F_t;
 /* Extensible array signatures */
 #define H5EA_HDR_MAGIC                  "EAHD"          /* Header */
 #define H5EA_IBLOCK_MAGIC               "EAIB"          /* Index block */
+#define H5EA_SBLOCK_MAGIC               "EASB"          /* Super block */
 #define H5EA_DBLOCK_MAGIC               "EADB"          /* Data block */
 
 /* Free space signatures */

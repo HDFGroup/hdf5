@@ -507,6 +507,7 @@
 ./src/H5EAint.c
 ./src/H5EApkg.h
 ./src/H5EAprivate.h
+./src/H5EAsblock.c
 ./src/H5EAstat.c
 ./src/H5EAtest.c
 ./src/H5F.c

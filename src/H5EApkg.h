@@ -302,12 +302,12 @@ func_init_failed:							      \
  * BEGIN_FUNC() and an END_FUNC() within a function body.  The argument is
  * the return value.
  * The return value is assigned to a variable `ret_value' and control branches
- * to the `catch' label, if we're not already past it.
+ * to the `catch_except' label, if we're not already past it.
  */
 #define H5_LEAVE(v) {							      \
     ret_value = v;							      \
     if(!past_catch)							      \
-        goto catch;							      \
+        goto catch_except;						      \
 }
 
 /*
@@ -315,7 +315,7 @@ func_init_failed:							      \
  * FUNC_ENTER() and a FUNC_LEAVE() within a function body.  The arguments are
  * the minor error number, and an error string.
  * The return value is assigned to a variable `ret_value' and control branches
- * to the `catch' label, if we're not already past it.
+ * to the `catch_except' label, if we're not already past it.
  */
 #define H5E_THROW(...) {						      \
     H5E_PRINTF(__VA_ARGS__);						      \
@@ -325,7 +325,7 @@ func_init_failed:							      \
 /* Macro for "catching" flow of control when an error occurs.  Note that the
  *      H5_LEAVE macro won't jump back here once it's past this point.
  */
-#define CATCH past_catch = TRUE; catch:;
+#define CATCH past_catch = TRUE; catch_except:;
 
 
 /**************************/
@@ -391,6 +391,15 @@ func_init_failed:							      \
     + ((i)->nsblk_addrs * (i)->hdr->sizeof_addr) /* Super block addresses in index block  */ \
     )
 
+/* Size of the extensible array super block on disk */
+#define H5EA_SBLOCK_SIZE(s)     (                                             \
+    /* General metadata fields */                                             \
+    H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
+                                                                              \
+    /* Extensible Array Super Block specific fields */			      \
+    + ((s)->ndblks * (s)->hdr->sizeof_addr) /* Data block addresses in super block  */ \
+    )
+
 /* Size of the extensible array data block on disk */
 #define H5EA_DBLOCK_SIZE(d)     (					      \
     /* General metadata fields */                                             \
@@ -407,7 +416,7 @@ func_init_failed:							      \
 
 /* Information for each super block in extensible array */
 typedef struct H5EA_sblk_info_t {
-    hsize_t ndblks;             /* Number of data blocks for a super block */
+    size_t ndblks;              /* Number of data blocks for a super block */
     size_t dblk_nelmts;         /* Number of elements in each data block for super block */
     hsize_t start_idx;          /* Index of first element in super block */
     hsize_t start_dblk;         /* Index of first data block in super block */
@@ -473,6 +482,26 @@ typedef struct H5EA_iblock_t {
     size_t      nsblk_addrs;    /* Number of pointers to super blocks in index block */
 } H5EA_iblock_t;
 
+/* The extensible array super block information */
+typedef struct H5EA_sblock_t {
+    /* Information for H5AC cache functions, _must_ be first field in structure */
+    H5AC_info_t cache_info;
+
+    /* Extensible array information (stored) */
+    haddr_t     *dblk_addrs;    /* Buffer for addresses of data blocks in super block */
+
+    /* Internal array information (not stored) */
+    size_t      rc;             /* Reference count of objects using this block */
+    H5EA_hdr_t	*hdr;	        /* Shared array header info	              */
+    haddr_t     addr;           /* Address of this index block on disk	      */
+    size_t      size;           /* Size of index block on disk		      */
+
+    /* Computed/cached values (not stored) */
+    unsigned    idx;            /* Super block index within the extensible array */
+    size_t      ndblks;         /* # of data block addresses that are in super block */
+    size_t      dblk_nelmts;    /* # of elements for data blocks reachable through this super block */
+} H5EA_sblock_t;
+
 /* The extensible array data block information */
 typedef struct H5EA_dblock_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
@@ -506,6 +535,9 @@ H5_DLLVAR const H5AC_class_t H5AC_EARRAY_HDR[1];
 
 /* H5EA index block inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_EARRAY_IBLOCK[1];
+
+/* H5EA index block inherits cache-like properties from H5AC */
+H5_DLLVAR const H5AC_class_t H5AC_EARRAY_SBLOCK[1];
 
 /* H5EA data block inherits cache-like properties from H5AC */
 H5_DLLVAR const H5AC_class_t H5AC_EARRAY_DBLOCK[1];
@@ -544,9 +576,20 @@ H5_DLL herr_t H5EA__iblock_unprotect(H5EA_iblock_t *iblock, hid_t dxpl_id,
 H5_DLL herr_t H5EA__iblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5EA__iblock_dest(H5F_t *f, H5EA_iblock_t *iblock);
 
+/* Super block routines */
+H5_DLL H5EA_sblock_t *H5EA__sblock_alloc(H5EA_hdr_t *hdr, unsigned sblk_idx);
+H5_DLL haddr_t H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, unsigned sblk_idx);
+H5_DLL H5EA_sblock_t *H5EA__sblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
+    haddr_t sblk_addr, unsigned sblk_idx, H5AC_protect_t rw);
+H5_DLL herr_t H5EA__sblock_unprotect(H5EA_sblock_t *sblock, hid_t dxpl_id,
+    unsigned cache_flags);
+H5_DLL herr_t H5EA__sblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id,
+    haddr_t sblk_addr, unsigned sblk_idx);
+H5_DLL herr_t H5EA__sblock_dest(H5F_t *f, H5EA_sblock_t *sblock);
+
 /* Data block routines */
 H5_DLL H5EA_dblock_t *H5EA__dblock_alloc(H5EA_hdr_t *hdr, size_t nelmts);
-H5_DLL haddr_t H5EA__dblock_create(H5EA_iblock_t *iblock, hid_t dxpl_id,
+H5_DLL haddr_t H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id,
     size_t nelmts);
 H5_DLL unsigned H5EA__dblock_sblk_idx(const H5EA_hdr_t *hdr, hsize_t idx);
 H5_DLL H5EA_dblock_t *H5EA__dblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
@@ -563,6 +606,9 @@ H5_DLL herr_t H5EA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 H5_DLL herr_t H5EA__iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, const H5EA_class_t *cls,
     haddr_t hdr_addr);
+H5_DLL herr_t H5EA__sblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+    FILE *stream, int indent, int fwidth, const H5EA_class_t *cls,
+    haddr_t hdr_addr, unsigned sblk_idx);
 H5_DLL herr_t H5EA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     FILE *stream, int indent, int fwidth, const H5EA_class_t *cls,
     haddr_t hdr_addr, size_t dblk_nelmts);
