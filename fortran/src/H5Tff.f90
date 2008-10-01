@@ -1770,7 +1770,7 @@ CONTAINS
 !		index		- filed index (0-based)
 ! Outputs:  
 !		member_name	- buffer to hold member's name
-!		namelen		- name lenght
+!		namelen		- name length
 !		hdferr:		- error code		
 !				 	Success:  0
 !				 	Failure: -1   
@@ -2811,7 +2811,7 @@ CONTAINS
 !----------------------------------------------------------------------
 ! Name:		h5tvlen_create_f 
 !
-! Purpose: 	Creates a new variable-lenght datatype. 
+! Purpose: 	Creates a new variable-length datatype. 
 !
 ! Inputs:  
 !		type_id		- identifier iof base datatype
@@ -3338,6 +3338,5 @@ CONTAINS
     
     hdferr = h5tget_native_type_c(dtype_id, direction, native_dtype_id)
   END SUBROUTINE h5tget_native_type_f
-
 
 END MODULE H5T
