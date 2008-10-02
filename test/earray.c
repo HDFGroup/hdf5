@@ -969,6 +969,7 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5EA_t      *ea = NULL;             /* Extensible array wrapper */
     earray_state_t state;               /* State of extensible array */
+    unsigned    base_sblk_idx = UINT_MAX;       /* Starting index for actual superblocks */
     uint64_t    welmt;                  /* Element to write */
     uint64_t    relmt;                  /* Element to read */
     hsize_t     nelmts_written;         /* Highest element written in array */
@@ -1056,11 +1057,24 @@ HDfprintf(stderr, "idx = %Hu, tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", i
 #ifdef QAK
 HDfprintf(stderr, "state.nelmts = %Hu\n", state.nelmts);
 #endif /* QAK */
+
             state.ndata_blks = 1 + tparam->sblk_info[sblk_idx].start_dblk + 
                     ((idx - (cparam->idx_blk_elmts + tparam->sblk_info[sblk_idx].start_idx)) / tparam->sblk_info[sblk_idx].dblk_nelmts);
 #ifdef QAK
 HDfprintf(stderr, "state.ndata_blks = %Hu\n", state.ndata_blks);
 #endif /* QAK */
+
+            /* Check if we have any super blocks yet */
+            if(tparam->sblk_info[sblk_idx].ndblks >= cparam->sup_blk_min_data_ptrs) {
+                /* Check if this is the first superblock */
+                if(sblk_idx < base_sblk_idx)
+                    base_sblk_idx = sblk_idx;
+
+                state.nsuper_blks = (sblk_idx - base_sblk_idx) + 1;
+#ifdef QAK
+HDfprintf(stderr, "state.nsuper_blks = %Hu\n", state.nsuper_blks);
+#endif /* QAK */
+            } /* end if */
         } /* end else */
         if(check_stats(ea, &state))
             TEST_ERROR
@@ -1200,9 +1214,7 @@ main(void)
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (11 * cparam.data_blk_min_elmts)), "setting all elements of array's fifth data block");
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (11 * cparam.data_blk_min_elmts) + 1), "setting first element of array's sixth data block");
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (15 * cparam.data_blk_min_elmts)), "setting all elements of array's sixth data block");
-#ifdef NOT_YET
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (15 * cparam.data_blk_min_elmts) + 1), "setting first element of array's seventh data block");
-#endif /* NOT_YET */
 
             /* Close down testing parameters */
             finish_tparam(&tparam);

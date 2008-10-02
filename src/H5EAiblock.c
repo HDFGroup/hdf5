@@ -391,8 +391,6 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
                 if(H5EA__sblock_delete(hdr, dxpl_id, iblock->sblk_addrs[u], (unsigned)(u + iblock->nsblks)) < 0)
                     H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array super block")
                 iblock->sblk_addrs[u] = HADDR_UNDEF;
-HDfprintf(stderr, "%s: Deleting super blocks not tested yet!\n", FUNC);
-HDassert(0 && "Deleting super blocks not tested!");
             } /* end if */
         } /* end for */
     } /* end if */

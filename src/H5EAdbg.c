@@ -313,9 +313,6 @@ H5EA__sblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
     if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, hdr_addr, cls, NULL, H5AC_READ)))
 	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
-    /* Sanity check */
-    HDassert(H5F_addr_eq(hdr->idx_blk_addr, addr));
-
     /* Protect super block */
     if(NULL == (sblock = H5EA__sblock_protect(hdr, dxpl_id, addr, sblk_idx, H5AC_READ)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long_long)addr)
@@ -334,6 +331,9 @@ H5EA__sblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "# of data block addresses in super block:",
 	      sblock->ndblks);
+    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+	      "# of elements in data blocks from this super block:",
+	      sblock->dblk_nelmts);
 
     /* Check if there are any data block addresses in super block */
     if(sblock->ndblks > 0) {
