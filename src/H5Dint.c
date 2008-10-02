@@ -2313,9 +2313,9 @@ herr_t
 H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 {
     H5S_t   *space;                     /* Dataset's dataspace */
-    int     rank;	                /* Dataspace # of dimensions */
-    hsize_t curr_dims[H5O_LAYOUT_NDIMS];	/* Current dimension sizes */
-    htri_t changed;                     /* Whether the dataspace changed size */
+    int     rank;                       /* Dataspace # of dimensions */
+    hsize_t curr_dims[H5O_LAYOUT_NDIMS];/* Current dimension sizes */
+    htri_t  changed;                    /* Whether the dataspace changed size */
     herr_t  ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_set_extent)
@@ -2326,7 +2326,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 
     /* Check if we are allowed to modify this file */
     if(0 == (H5F_get_intent(dset->oloc.file) & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
+    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Check if the filters in the DCPL will need to encode, and if so, can they? */
     if(H5D_check_filters(dset) < 0)
@@ -2337,20 +2337,22 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 
     /* Check if we are shrinking or expanding any of the dimensions */
     if((rank = H5S_get_simple_extent_dims(space, curr_dims, NULL)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
+    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
 
     /* Modify the size of the data space */
     if((changed = H5S_set_extent(space, size)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
 
     /* Don't bother updating things, unless they've changed */
-    if(changed) {
+    if(changed) 
+    {
         hbool_t shrink = FALSE;             /* Flag to indicate a dimension has shrank */
         hbool_t expand = FALSE;             /* Flag to indicate a dimension has grown */
         unsigned u;                         /* Local index variable */
 
         /* Determine if we are shrinking and/or expanding any dimensions */
-        for(u = 0; u < (unsigned)rank; u++) {
+        for(u = 0; u < (unsigned)rank; u++) 
+        {
             if(size[u] < curr_dims[u])
                 shrink = TRUE;
             if(size[u] > curr_dims[u])
@@ -2366,7 +2368,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
             if(H5D_chunk_update_cache(dset, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
 
-	/* Allocate space for the new parts of the dataset, if appropriate */
+        /* Allocate space for the new parts of the dataset, if appropriate */
         if(expand && dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY)
             if(H5D_alloc_storage(dset, dxpl_id, H5D_ALLOC_EXTEND, FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset storage")
@@ -2375,13 +2377,17 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
         /*-------------------------------------------------------------------------
          * Remove chunk information in the case of chunked datasets
          * This removal takes place only in case we are shrinking the dateset
+         * and if the chunks are written 
          *-------------------------------------------------------------------------
          */
-        if(shrink && H5D_CHUNKED == dset->shared->layout.type) {
-            /* Remove excess chunks */
-            if(H5D_chunk_prune_by_extent(dset, dxpl_id, curr_dims) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks ")
-        } /* end if */
+         if( shrink && 
+             H5D_CHUNKED == dset->shared->layout.type &&
+             H5F_addr_defined(dset->shared->layout.u.chunk.addr)) 
+         {
+             /* Remove excess chunks */
+             if(H5D_chunk_prune_by_extent(dset, dxpl_id, curr_dims) < 0)
+                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks ")
+         } /* end if */
 
         /* Mark the dataspace as dirty, for later writing to the file */
         dset->shared->space_dirty = TRUE;
