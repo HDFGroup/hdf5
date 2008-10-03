@@ -40,17 +40,11 @@ enum H5Z_scaleoffset_type {t_bad=0, t_uchar=1, t_ushort, t_uint, t_ulong, t_ulon
 
 /* Local function prototypes */
 static double H5Z_scaleoffset_rnd(double val);
-static herr_t H5Z_can_apply_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
-    hid_t UNUSED file_id);
 static enum H5Z_scaleoffset_type H5Z_scaleoffset_get_type(unsigned dtype_class,
     unsigned dtype_size, unsigned dtype_sign);
 static herr_t H5Z_scaleoffset_set_parms_fillval(H5P_genplist_t *dcpl_plist,
     const H5T_t *type, enum H5Z_scaleoffset_type scale_type, unsigned cd_values[],
     int need_convert, hid_t dxpl_id);
-static herr_t H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id,
-    hid_t UNUSED file_id);
-static size_t H5Z_filter_scaleoffset(unsigned flags, size_t cd_nelmts,
-    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
 static void H5Z_scaleoffset_convert(void *buf, unsigned d_nelmts, size_t dtype_size);
 static unsigned H5Z_scaleoffset_log2(unsigned long_long num);
 static void H5Z_scaleoffset_precompress_i(void *data, unsigned d_nelmts,
@@ -81,16 +75,27 @@ static void H5Z_scaleoffset_decompress(unsigned char *data, unsigned d_nelmts,
 static void H5Z_scaleoffset_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
                                      size_t buffer_size, parms_atomic p);
 
+static herr_t H5Z_can_apply_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
+    hid_t UNUSED file_id);
+static herr_t H5Z_set_local_scaleoffset(hid_t dcpl_id, hid_t type_id, hid_t space_id,
+    hid_t UNUSED file_id);
+static size_t H5Z_filter_scaleoffset(unsigned flags, hsize_t UNUSED chunk_offset, 
+    size_t cd_nelmts, const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
+
 /* This message derives from H5Z */
 H5Z_class_t H5Z_SCALEOFFSET[1] = {{
-    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
-    H5Z_FILTER_SCALEOFFSET, /* Filter id number		*/
-    1,              /* Assume encoder present: check before registering */
-    1,              /* decoder_present flag (set to true) */
+    H5Z_CLASS_T_VERS,           /* H5Z_class_t version */
+    H5Z_FILTER_SCALEOFFSET,     /* Filter id number		*/
+    1,                          /* Assume encoder present: check before registering */
+    1,                          /* decoder_present flag (set to true) */
     "scaleoffset",		/* Filter name for debugging	*/
     H5Z_can_apply_scaleoffset,	/* The "can apply" callback     */
     H5Z_set_local_scaleoffset,  /* The "set local" callback     */
     NULL,                       /* The "reset local" callback   */
+    NULL,                       /* The "change local" callback  */
+    NULL,                       /* The "evict local" callback   */
+    NULL,                       /* The "delete local" callback  */
+    NULL,                       /* The "close local" callback   */
     H5Z_filter_scaleoffset,	/* The actual filter function	*/
 }};
 
@@ -911,8 +916,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
-                        size_t nbytes, size_t *buf_size, void **buf)
+H5Z_filter_scaleoffset (unsigned flags, hsize_t UNUSED chunk_offset, size_t cd_nelmts, 
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf)
 {
     size_t ret_value = 0;           /* return value */
     size_t size_out  = 0;           /* size of output buffer */
@@ -1008,7 +1013,7 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
     p.mem_order = H5T_native_order_g;
 
     /* input; decompress */
-    if (flags & H5Z_FLAG_REVERSE) {
+    if (flags & H5Z_FLAG_REVERSE) { /*Read*/
         /* retrieve values of minbits and minval from input compressed buffer
          * retrieve them corresponding to how they are stored during compression
          */
@@ -1090,7 +1095,7 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
             H5Z_scaleoffset_convert(outbuf, d_nelmts, p.size);
     }
     /* output; compress */
-    else {
+    else if (!(flags & H5Z_FLAG_INVMASK)) { /*Write*/
         assert(nbytes == d_nelmts * p.size);
 
         /* before preprocess, convert to memory endianness order if needed */

@@ -30,21 +30,40 @@
 #ifdef H5_HAVE_FILTER_FLETCHER32
 
 /* Local function prototypes */
-static size_t H5Z_filter_fletcher32 (unsigned flags, size_t cd_nelmts,
+#ifndef H5_USE_16_API
+static size_t H5Z_filter_fletcher32 (unsigned flags, hsize_t UNUSED chunk_offset, 
+    size_t cd_nelmts, const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
+
+/* This message derives from H5Z */
+const H5Z_class_t H5Z_FLETCHER32[1] = {{
+    H5Z_CLASS_T_VERS,           /* H5Z_class_t version */
+    H5Z_FILTER_FLETCHER32,	/* Filter id number		*/
+    1,                          /* encoder_present flag (set to true) */
+    1,                          /* decoder_present flag (set to true) */
+    "fletcher32",		/* Filter name for debugging	*/
+    NULL,                       /* The "can apply" callback     */
+    NULL,                       /* The "set local" callback     */
+    NULL,                       /* The "reset local" callback   */
+    NULL,                       /* The "change local" callback  */
+    NULL,                       /* The "evict local" callback   */
+    NULL,                       /* The "delete local" callback  */
+    NULL,                       /* The "close local" callback   */
+    H5Z_filter_fletcher32,	/* The actual filter function	*/
+}};
+#else
+static size_t H5Z_filter_fletcher32 (unsigned flags, size_t cd_nelmts, 
     const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_FLETCHER32[1] = {{
     H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
     H5Z_FILTER_FLETCHER32,	/* Filter id number		*/
-    1,              /* encoder_present flag (set to true) */
-    1,              /* decoder_present flag (set to true) */
     "fletcher32",		/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
-    NULL,                       /* The "reset local" callback   */
     H5Z_filter_fletcher32,	/* The actual filter function	*/
 }};
+#endif
 
 #define FLETCHER_LEN       4
 
@@ -74,9 +93,15 @@ const H5Z_class_t H5Z_FLETCHER32[1] = {{
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
+#ifndef H5_USE_16_API
 static size_t
-H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned UNUSED cd_values[],
-                     size_t nbytes, size_t *buf_size, void **buf)
+H5Z_filter_fletcher32 (unsigned flags, hsize_t UNUSED chunk_offset, size_t UNUSED cd_nelmts, 
+             const unsigned UNUSED cd_values[], size_t nbytes, size_t *buf_size, void **buf)
+#else
+static size_t
+H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, 
+             const unsigned UNUSED cd_values[], size_t nbytes, size_t *buf_size, void **buf)
+#endif
 {
     void    *outbuf = NULL;     /* Pointer to new buffer */
     unsigned char *src = (unsigned char*)(*buf);
@@ -84,7 +109,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
     uint32_t reversed_fletcher; /* Possible wrong checksum value */
     uint8_t  c[4];
     uint8_t  tmp;
-    size_t   ret_value;         /* Return value */
+    size_t   ret_value = nbytes;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_filter_fletcher32, 0)
 
@@ -134,7 +159,7 @@ H5Z_filter_fletcher32 (unsigned flags, size_t UNUSED cd_nelmts, const unsigned U
         /* Set return values */
         /* (Re-use the input buffer, just note that the size is smaller by the size of the checksum) */
         ret_value = nbytes-FLETCHER_LEN;
-    } else { /* Write */
+    } else if (!(flags & H5Z_FLAG_INVMASK)){ /* Write */
         unsigned char *dst;     /* Temporary pointer to destination buffer */
 
         /* Compute checksum (can't fail) */

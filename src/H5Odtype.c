@@ -743,7 +743,7 @@ H5O_dtype_encode_helper(const H5F_t *f, uint8_t **pp, const H5T_t *dt)
                 for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
                     /* Sanity check */
                     /* (compound datatypes w/array members must be encoded w/version >= 2) */
-                    HDassert(dt->shared->u.compnd.memb[i].type->shared->type != H5T_ARRAY || dt->shared->version >= H5O_DTYPE_VERSION_2);
+                    HDassert((dt->shared->u.compnd.memb[i].type)->shared->type != H5T_ARRAY || dt->shared->version >= H5O_DTYPE_VERSION_2);
 
                     /* Name */
                     HDstrcpy((char*)(*pp), dt->shared->u.compnd.memb[i].name);

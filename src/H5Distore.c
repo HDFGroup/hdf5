@@ -123,6 +123,7 @@ typedef struct H5D_rdcc_ent_t {
     size_t	alloc_size;	/*amount allocated for the chunk	*/
     uint8_t	*chunk;		/*the unfiltered chunk data		*/
     unsigned	idx;		/*index in hash table			*/
+    hssize_t    linear_offset;  /* Chunk's coordinates translated into one-dimensional offset */
     struct H5D_rdcc_ent_t *next;/*next item in doubly-linked list	*/
     struct H5D_rdcc_ent_t *prev;/*previous item in doubly-linked list	*/
 } H5D_rdcc_ent_t;
@@ -752,6 +753,8 @@ H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
     int		cmp;
     unsigned		u;
     H5B_ins_t		ret_value;
+    
+    htri_t              dis = FALSE;
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_insert)
 
@@ -811,12 +814,15 @@ H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
             ret_value = H5B_INS_NOOP;
         }
 
-    } else if (H5V_hyper_disjointp(udata->common.mesg->u.chunk.ndims,
+    } else if ((dis = H5V_hyper_disjointp(udata->common.mesg->u.chunk.ndims,
 				   lt_key->offset, udata->common.mesg->u.chunk.dim,
-				   udata->common.offset, udata->common.mesg->u.chunk.dim)) {
-        HDassert(H5V_hyper_disjointp(udata->common.mesg->u.chunk.ndims,
+				   udata->common.offset, udata->common.mesg->u.chunk.dim)) == TRUE) {
+
+        dis = H5V_hyper_disjointp(udata->common.mesg->u.chunk.ndims,
 				   rt_key->offset, udata->common.mesg->u.chunk.dim,
-				   udata->common.offset, udata->common.mesg->u.chunk.dim));
+				   udata->common.offset, udata->common.mesg->u.chunk.dim);
+        HDassert(dis);
+
         /*
          * Split this node, inserting the new new node to the right of the
          * current node.  The MD_KEY is where the split occurs.
@@ -993,6 +999,7 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     H5Z_EDC_t               edc_read = H5Z_NO_EDC;
     size_t                  nbytes = lt_key->nbytes;
     H5Z_cb_t                cb_struct;
+    hsize_t                 linear_offset = 0;  /* No real use */
 
     int                     ret_value = H5_ITER_CONT; /* Return value */
 
@@ -1042,7 +1049,8 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     if(is_compressed && (is_vlen || fix_ref)) {
         unsigned filter_mask = lt_key->filter_mask;
 
-        if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, edc_read, cb_struct, &nbytes, &buf_size, &buf) < 0)
+        if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, edc_read, linear_offset, 
+            cb_struct, &nbytes, &buf_size, &buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "data pipeline read failed")
     } /* end if */
 
@@ -1103,7 +1111,7 @@ H5D_istore_iter_copy(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
 
     /* Need to compress variable-length & reference data elements before writing to file */
     if(is_compressed && (is_vlen || fix_ref) ) {
-        if(H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), edc_read,
+        if(H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), edc_read, linear_offset, 
                 cb_struct, &nbytes, &buf_size, &buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
         udata_dst.nbytes = nbytes;
@@ -1147,6 +1155,7 @@ H5D_istore_iter_copy_conv(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     H5D_istore_it_ud4_t     *udata = (H5D_istore_it_ud4_t *)_udata;
     const H5D_istore_key_t  *lt_key = (const H5D_istore_key_t *)_lt_key;
     H5D_istore_ud1_t        udata_dst;                  /* User data about new destination chunk */
+    hsize_t linear_offset = 0;   /* No real use */
 
     /* General information about chunk copy */
     void                    *bkg = udata->bkg;
@@ -1206,7 +1215,7 @@ H5D_istore_iter_copy_conv(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
     if(is_compressed) {
         unsigned filter_mask = lt_key->filter_mask;
 
-        if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, edc_read, cb_struct, &src_nbytes, &buf_size, &buf) < 0)
+        if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &filter_mask, edc_read, linear_offset, cb_struct, &src_nbytes, &buf_size, &buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "data pipeline read failed")
     } /* end if */
 
@@ -1230,7 +1239,7 @@ H5D_istore_iter_copy_conv(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
  
     /* Need to compress variable-length & reference data elements before writing to file */
     if(is_compressed) {
-        if(H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), edc_read,
+        if(H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), edc_read, linear_offset, 
                 cb_struct, &dst_nbytes, &buf_size, &buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
 	udata->buf = buf;
@@ -1251,7 +1260,7 @@ H5D_istore_iter_copy_conv(H5F_t *f_src, hid_t dxpl_id, const void *_lt_key,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_istore_iter_copy() */
+} /* end H5D_istore_iter_copy_conv() */
 
 
 /*-------------------------------------------------------------------------
@@ -1452,7 +1461,6 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
         udata.nbytes = ent->chunk_size;
         udata.addr = HADDR_UNDEF;
 
-        /* Should the chunk be filtered before writing it to disk? */
         if(io_info->dset->shared->dcpl_cache.pline.nused) {
             if(!reset) {
                 /*
@@ -1476,8 +1484,11 @@ H5D_istore_flush_entry(const H5D_io_info_t *io_info, H5D_rdcc_ent_t *ent, hbool_
                 point_of_no_return = TRUE;
                 ent->chunk = NULL;
             } /* end else */
-            if(H5Z_pipeline(&(io_info->dset->shared->dcpl_cache.pline), 0, &(udata.filter_mask), io_info->dxpl_cache->err_detect,
-                     io_info->dxpl_cache->filter_cb, &(udata.nbytes), &alloc, &buf) < 0)
+
+            if(H5Z_pipeline(&(io_info->dset->shared->dcpl_cache.pline), 0, 
+                     &(udata.filter_mask), io_info->dxpl_cache->err_detect, 
+                     (hsize_t)ent->linear_offset, io_info->dxpl_cache->filter_cb, 
+                     &(udata.nbytes), &alloc, &buf) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed")
         } /* end if */
 
@@ -1546,6 +1557,7 @@ static herr_t
 H5D_istore_preempt(const H5D_io_info_t *io_info, H5D_rdcc_ent_t * ent, hbool_t flush)
 {
     H5D_rdcc_t *rdcc = &(io_info->dset->shared->cache.chunk);
+    hid_t       dcpl_id = io_info->dset->shared->dcpl_id;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_istore_preempt)
@@ -1565,6 +1577,9 @@ H5D_istore_preempt(const H5D_io_info_t *io_info, H5D_rdcc_ent_t * ent, hbool_t f
 	if(ent->chunk != NULL)
 	    ent->chunk = (uint8_t *)H5D_istore_chunk_xfree(ent->chunk, &(io_info->dset->shared->dcpl_cache.pline));
     } /* end else */
+
+    if(H5Z_evict_local(dcpl_id, /*unused*/0, /*unused*/0, (hsize_t)ent->linear_offset) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "failed to evict local filter info")
 
     /* Unlink from list */
     if(ent->prev)
@@ -1641,6 +1656,174 @@ H5D_istore_flush(H5D_t *dset, hid_t dxpl_id, unsigned flags)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_istore_conv_dtype
+ *
+ * Purpose:	Convert all the chunks in the cache if the datatype for 
+ *              dataset has been changed (called by H5Dmodify_dtype).
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Raymond Lu
+ *              16 April 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_istore_conv_dtype(H5D_t *dset, hid_t new_type_id)
+{
+    H5D_rdcc_t          *rdcc = &(dset->shared->cache.chunk);
+    const H5O_pline_t   *pline = &(dset->shared->dcpl_cache.pline); /* I/O pipeline info */
+    H5D_rdcc_ent_t	*ent, *next;
+    hid_t               orig_type_id = dset->shared->type_id;
+    H5T_t               *new_type, *orig_type;
+    H5T_t               *new_type_copy;
+    hid_t               new_type_copy_id;
+    size_t              orig_type_size, new_type_size;
+    size_t              nelmts;
+    unsigned char       *new_chunk = NULL;
+    unsigned char       *bkg=NULL;      /* Pointer to background buffer */
+    H5T_path_t		*tpath=NULL;	/*type conversion info	*/
+    herr_t              ret_value = SUCCEED;    /* Return value */
+    htri_t              is_vlen = FALSE;
+    hbool_t             vlen_conv = FALSE;
+    hid_t               dxpl_id;
+    H5P_genplist_t      *def_dx_plist = NULL, *dx_plist = NULL;
+ 
+    FUNC_ENTER_NOAPI(H5D_istore_conv_dtype, FAIL)
+
+    /* If there's no chunks in the cache, skip this function */
+    if(!rdcc->head)
+        HGOTO_DONE(SUCCEED);
+
+    /* The current datatype of the dataset */
+    if(NULL==(orig_type=(H5T_t *)H5I_object_verify(orig_type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+
+    /* The new datatype of the dataset */
+    if(NULL==(new_type=(H5T_t *)H5I_object_verify(new_type_id, H5I_DATATYPE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype")
+    
+    /* Make a copy of the new datatype to avoid changing the original new type */  
+    if(NULL==(new_type_copy=H5T_copy(new_type, H5T_COPY_ALL)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy data type");
+
+    if((new_type_copy_id = H5I_register(H5I_DATATYPE, new_type_copy)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom")
+
+    /* Mark the new datatype as being on disk now because the data in the cache 
+     * hasn't been converted to memory type yet. */
+    if(H5T_set_loc(new_type_copy, dset->oloc.file, H5T_LOC_DISK) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't set datatype location")
+
+    /* Get the object of default dataset creation property list */
+    if(NULL == (def_dx_plist = (H5P_genplist_t *)H5I_object(H5P_DATASET_XFER_DEFAULT)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dataset creation property list")
+
+    /* Create a new default property list */
+    if((dxpl_id = H5P_copy_plist(def_dx_plist)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy dataset creation property list")
+
+    if(NULL == (dx_plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dataset creation property list")
+
+    /* If the datatype is or contains vlen, set the property to indicate no conversion 
+     * is needed. */
+    if((is_vlen = H5T_detect_class(orig_type, H5T_VLEN)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to detect dtatypes")
+
+    if(is_vlen ) {
+        vlen_conv = FALSE;
+
+        if(H5P_set(dx_plist, H5D_XFER_VLEN_CONV_NAME, &vlen_conv) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Error setting vlen conv flag")
+    }
+
+    if((orig_type_size = H5T_get_size(orig_type)) == 0) 
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get size of original type")
+
+    if((new_type_size = H5T_get_size(new_type_copy)) == 0) 
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "can't get size of new type")
+
+    /* If the new type is the same as the current, simply finish the function */
+    if(0 == H5T_cmp(orig_type, new_type_copy, FALSE))
+        HGOTO_DONE(SUCCEED)
+
+    /* Figure out the number of elements in a chunk */
+    nelmts = dset->shared->layout.u.chunk.size/orig_type_size;
+
+    /* Find the conversion function */
+    if (NULL==(tpath=H5T_path_find(orig_type, new_type_copy, NULL, NULL, dxpl_id, FALSE)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and dst data types");
+
+    if (H5T_path_bkg(tpath) && (NULL==(bkg=(unsigned char*)H5MM_malloc(nelmts*(new_type_size > orig_type_size ? new_type_size : orig_type_size)))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate buffer")
+
+    /* Loop over all entries in the chunk cache */
+    for(ent = rdcc->head; ent; ent = next) {
+	next = ent->next;
+        ent->locked = TRUE;
+
+        if(new_type_size > orig_type_size) {
+            if(NULL == (new_chunk = H5D_istore_chunk_alloc(nelmts*new_type_size, pline)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
+
+            HDmemcpy(new_chunk, ent->chunk, ent->chunk_size); 
+
+            /* Convert the data */
+            if (H5T_convert(tpath, orig_type_id, new_type_copy_id, nelmts, (size_t)0, 
+                (size_t)0, new_chunk, bkg, dxpl_id)<0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
+
+            H5MM_free(ent->chunk);
+            ent->chunk = (uint8_t*)new_chunk;
+        } else if (new_type_size < orig_type_size) {
+            if(NULL == (new_chunk = H5D_istore_chunk_alloc(nelmts*new_type_size, pline)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for raw data chunk")
+
+            /* Convert the data */
+            if (H5T_convert(tpath, orig_type_id, new_type_copy_id, nelmts, (size_t)0,
+                (size_t)0, ent->chunk, bkg, dxpl_id)<0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
+
+            HDmemcpy(new_chunk, ent->chunk, nelmts*new_type_size); 
+
+            H5MM_free(ent->chunk);
+            ent->chunk = (uint8_t*)new_chunk;
+        } else {
+            /* Convert the data */
+            if (H5T_convert(tpath, orig_type_id, new_type_copy_id, nelmts, (size_t)0, 
+                (size_t)0, ent->chunk, bkg, dxpl_id)<0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "data type conversion failed");
+        }
+
+        ent->chunk_size = nelmts*new_type_size;
+        ent->alloc_size = ent->chunk_size;
+        ent->rd_count = ent->chunk_size;
+        ent->wr_count = ent->chunk_size;
+        ent->offset[dset->shared->layout.u.chunk.ndims-1] = new_type_size;
+        ent->dirty = TRUE;
+        ent->locked = FALSE;
+
+        /* Update some local variables for the filter pipeline */
+        if(H5Z_change_local(dset->shared->dcpl_id, new_type_copy_id, /*unused*/0, 
+            (hsize_t)ent->linear_offset) < 0)
+            HGOTO_ERROR(H5E_PLINE, H5E_SETLOCAL, FAIL, "failed to change local filter info")
+    } /* end for */
+
+    rdcc->nbytes = new_type_size*rdcc->nbytes/orig_type_size;
+
+    H5MM_free(bkg);
+
+    if (H5I_dec_ref(new_type_copy_id) < 0)
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "problem freeing id");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_istore_conv_dtype() */
+
 
 
 /*-------------------------------------------------------------------------
@@ -1908,6 +2091,52 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_istore_calc_offset
+ *
+ * Purpose:	Private function to translate from the multi-dimensional 
+ *              offset of a chunk in a dataspace to linear offset.  At this
+ *              moment, it's used for the filter for modifying dataset's
+ *              datatype.
+ *
+ * Return:	Success:	Linear offset of the chunk.
+ *
+ *		Failure:	Negative
+ *
+ * Programmer:	Raymond Lu
+ *              12 March 2008
+ *
+ * Modification:
+ *-------------------------------------------------------------------------
+ */
+hssize_t H5D_istore_calc_offset(H5S_t *space, hsize_t offset[])
+{
+    hsize_t     linear_offset = 0, tmp_offset = 0;
+    int         space_ndims;    /* Dataset's space rank */
+    hsize_t     space_dim[H5O_LAYOUT_NDIMS];    /* Dataset's dataspace dimensions */
+    int         u,v;			/*counters		*/
+    hssize_t    ret_value;
+  
+    FUNC_ENTER_NOAPI(H5D_istore_calc_offset, FAIL)
+
+    /* Retrieve the dataset dimensions */
+    if((space_ndims = H5S_get_simple_extent_dims(space, space_dim, NULL)) < 0)
+         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get simple dataspace info")
+
+    for(u=0; u<space_ndims; u++) {
+        tmp_offset = offset[u];
+        for(v=u+1; v<space_ndims; v++)
+            tmp_offset *= space_dim[v];
+        linear_offset += tmp_offset;
+    }
+
+    ret_value = linear_offset;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_istore_lock
  *
  * Purpose:	Return a pointer to a dataset chunk.  The pointer points
@@ -2038,8 +2267,10 @@ H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, NULL, "unable to read raw data chunk")
 
             if(pline->nused)
-                if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->filter_mask), io_info->dxpl_cache->err_detect,
-                        io_info->dxpl_cache->filter_cb, &(udata->nbytes), &chunk_alloc, &chunk) < 0)
+                if(H5Z_pipeline(pline, H5Z_FLAG_REVERSE, &(udata->filter_mask), 
+                    io_info->dxpl_cache->err_detect, (hsize_t)io_info->store->chunk.linear_offset,
+                    io_info->dxpl_cache->filter_cb, &(udata->nbytes), &chunk_alloc, 
+                    &chunk) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, NULL, "data pipeline read failed")
 #ifdef H5D_ISTORE_DEBUG
             rdcc->nmisses++;
@@ -2126,6 +2357,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
         assert(NULL==rdcc->slot[idx]);
         rdcc->slot[idx] = ent;
         ent->idx = idx;
+        ent->linear_offset = io_info->store->chunk.linear_offset;
         rdcc->nbytes += chunk_size;
         rdcc->nused++;
 
@@ -2856,7 +3088,7 @@ H5D_istore_chunk_alloc(size_t size, const H5O_pline_t *pline)
 {
     void *ret_value = NULL;		/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_chunk_alloc)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_chunk_alloc)
 
     HDassert(size);
     HDassert(pline);
@@ -2928,6 +3160,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
     H5D_io_info_t io_info;      /* Dataset I/O info */
     H5D_storage_t store;        /* Dataset storage information */
     hsize_t	chunk_offset[H5O_LAYOUT_NDIMS]; /* Offset of current chunk */
+    hssize_t     linear_offset = 0;
     size_t	orig_chunk_size; /* Original size of chunk in bytes */
     unsigned    filter_mask = 0; /* Filter mask for chunks that have them */
     const H5O_layout_t *layout = &(dset->shared->layout);       /* Dataset layout */
@@ -3012,6 +3245,7 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
             || pline->nused > 0)
         should_fill = TRUE;
 
+
     /* Check if fill values should be written to chunks */
     if(should_fill) {
         /* Initialize the fill value buffer */
@@ -3033,7 +3267,9 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
            size_t buf_size = orig_chunk_size;
 
            /* Push the chunk through the filters */
-           if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &orig_chunk_size, &buf_size, &fb_info.fill_buf) < 0)
+           if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, 
+               (hsize_t)linear_offset, dxpl_cache->filter_cb, &orig_chunk_size, 
+               &buf_size, &fb_info.fill_buf) < 0)
                HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
        } /* end if */
     } /* end if */
@@ -3091,7 +3327,9 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
                         size_t nbytes = fb_info.fill_buf_size;
 
                         /* Push the chunk through the filters */
-                        if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &nbytes, &buf_size, &fb_info.fill_buf) < 0)
+                        if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, 
+                            (hsize_t)linear_offset, dxpl_cache->filter_cb, &nbytes, 
+                            &buf_size, &fb_info.fill_buf) < 0)
                             HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
 
                         /* Keep the number of bytes the chunk turned in to */
@@ -3157,6 +3395,12 @@ H5D_istore_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
                 break;
             } /* end else */
         } /* end for */
+
+	/* Translate the offset of the chunck into single-dimensional offset for 
+	 * the filter of modifying dataset's datatype */
+	if((linear_offset = H5D_istore_calc_offset(dset->shared->space, chunk_offset)) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to calculate chunk offset")
+
     } /* end while */
 
 #ifdef H5_HAVE_PARALLEL
@@ -3785,7 +4029,7 @@ H5D_istore_delete(H5F_t *f, hid_t dxpl_id, const H5O_layout_t *layout)
 
         /* Delete entire B-tree */
         if(H5B_delete(f, dxpl_id, H5B_ISTORE, tmp_layout.u.chunk.addr, &udata)<0)
-            HGOTO_ERROR(H5E_IO, H5E_CANTDELETE, 0, "unable to delete chunk B-tree")
+            HGOTO_ERROR(H5E_IO, H5E_CANTDELETE, FAIL, "unable to delete chunk B-tree")
 
         /* Free the raw B-tree node buffer */
         if(tmp_layout.u.chunk.btree_shared==NULL)
@@ -4217,8 +4461,6 @@ H5D_istore_copy_conv(H5F_t *file, const H5D_t *dset_src, const H5D_t *dset_dst,
 
         if(H5P_set(plist, H5D_XFER_VLEN_CONV_NAME, &vlen_conv) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "Error setting vlen conv flag")
-        /*if(H5P_get(plist, H5D_XFER_VLEN_CONV_NAME, &vlen_conv) < 0)
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "Error getting vlen conv flag")*/
     }
 
     /* Set up the conversion functions */
@@ -4492,4 +4734,3 @@ H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream, int inden
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_istore_debug() */
-

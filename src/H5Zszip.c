@@ -33,12 +33,13 @@
 #   include "szlib.h"
 #endif
 
+#ifndef H5_USE_16_API
 /* Local function prototypes */
 static herr_t H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
     hid_t UNUSED file_id); 
 static herr_t H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id,
     hid_t UNUSED file_id);
-static size_t H5Z_filter_szip (unsigned flags, size_t cd_nelmts,
+static size_t H5Z_filter_szip (unsigned flags, hsize_t UNUSED chunk_offset, size_t cd_nelmts,
     const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
@@ -51,8 +52,29 @@ H5Z_class_t H5Z_SZIP[1] = {{
     H5Z_can_apply_szip,		/* The "can apply" callback     */
     H5Z_set_local_szip,         /* The "set local" callback     */
     NULL,                       /* The "reset local" callback   */
+    NULL,                       /* The "change local" callback  */
+    NULL,                       /* The "evict local" callback   */
+    NULL,                       /* The "delete local" callback  */
+    NULL,                       /* The "close local" callback   */
     H5Z_filter_szip,		/* The actual filter function	*/
 }};
+#else
+/* Local function prototypes */
+static herr_t H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static herr_t H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static size_t H5Z_filter_szip (unsigned flags, size_t cd_nelmts,
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
+
+/* This message derives from H5Z */
+H5Z_class_t H5Z_SZIP[1] = {{
+    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
+    H5Z_FILTER_SZIP,		/* Filter id number		*/
+    "szip",			    /* Filter name for debugging	*/
+    H5Z_can_apply_szip,		/* The "can apply" callback     */
+    H5Z_set_local_szip,         /* The "set local" callback     */
+    H5Z_filter_szip,		/* The actual filter function	*/
+}};
+#endif
 
 /* Local macros */
 #define H5Z_SZIP_USER_NPARMS    2       /* Number of parameters that users can set */
@@ -86,9 +108,14 @@ H5Z_class_t H5Z_SZIP[1] = {{
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_USE_16_API
 static herr_t
 H5Z_can_apply_szip(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id, 
     hid_t UNUSED file_id)
+#else
+static herr_t
+H5Z_can_apply_szip(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+#endif
 {
     const H5T_t	*type;                  /* Datatype */
     unsigned dtype_size;                /* Datatype's size (in bits) */
@@ -144,8 +171,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_USE_16_API
 static herr_t
 H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id, hid_t UNUSED file_id)
+#else
+static herr_t
+H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+#endif
 {
     H5P_genplist_t *dcpl_plist; /* Property list pointer */
     const H5T_t	*type;          /* Datatype */
@@ -285,9 +317,15 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_USE_16_API
 static size_t
-H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
+H5Z_filter_szip (unsigned flags, hsize_t UNUSED chunk_offset, size_t cd_nelmts, 
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf)
+#else
+static size_t
+H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[], 
     size_t nbytes, size_t *buf_size, void **buf)
+#endif
 {
     size_t ret_value = 0;       /* Return value */
     size_t size_out  = 0;       /* Size of output buffer */
@@ -318,7 +356,7 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     H5_ASSIGN_OVERFLOW(sz_param.pixels_per_scanline,cd_values[H5Z_SZIP_PARM_PPS],unsigned,int);
 
     /* Input; uncompress */
-    if (flags & H5Z_FLAG_REVERSE) {
+    if (flags & H5Z_FLAG_REVERSE) { /*Read*/
         uint32_t stored_nalloc;  /* Number of bytes the compressed block will expand into */
         size_t nalloc;  /* Number of bytes the compressed block will expand into */
 
@@ -347,7 +385,7 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
         ret_value = nalloc;
     }
     /* Output; compress */
-    else {
+    else if (!(flags & H5Z_FLAG_INVMASK)) { /*Write*/
         unsigned char *dst = NULL;    /* Temporary pointer to new output buffer */
 
         /* Allocate space for the compressed buffer & header (assume data won't get bigger) */
@@ -381,4 +419,3 @@ done:
 }
 
 #endif /* H5_HAVE_FILTER_SZIP */
-

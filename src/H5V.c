@@ -416,10 +416,10 @@ H5V_hyper_disjointp(unsigned n,
 
         if (0==size1[u] || 0==size2[u])
             HGOTO_DONE(TRUE)
-        if (((offset1?offset1[u]:0) < (offset2?offset2[u]:0) &&
-             ((offset1?offset1[u]:0) + size1[u] <= (offset2?offset2[u]:0))) ||
-            ((offset2?offset2[u]:0) < (offset1?offset1[u]:0) &&
-             ((offset2?offset2[u]:0) + size2[u] <= (offset1?offset1[u]:0))))
+        if ((((offset1?offset1[u]:0) < (offset2?offset2[u]:0)) &&
+             ((offset1?offset1[u]:0) + (size1?size1[u]:0) <= (offset2?offset2[u]:0))) ||
+            (((offset2?offset2[u]:0) < (offset1?offset1[u]:0)) &&
+             ((offset2?offset2[u]:0) + (size2?size2[u]:0) <= (offset1?offset1[u]:0))))
             HGOTO_DONE(TRUE)
     }
 

@@ -59,8 +59,13 @@ const H5std_string	DSET_BOGUS_NAME	("bogus");
 const int H5Z_FILTER_BOGUS = 305;
 
 // Local prototypes
+#ifndef H5_USE_16_API
+static size_t filter_bogus(unsigned int flags, hsize_t chunk_offset, size_t cd_nelmts,
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+#else
 static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -352,6 +357,7 @@ test_tconv( H5File& file)
 }   // test_tconv
 
 /* This message derives from H5Z */
+#ifndef H5_USE_16_API
 const H5Z_class_t H5Z_BOGUS[1] = {{
     H5Z_CLASS_T_VERS,		/* H5Z_class_t version number   */
     H5Z_FILTER_BOGUS,		/* Filter id number		*/
@@ -359,9 +365,23 @@ const H5Z_class_t H5Z_BOGUS[1] = {{
     "bogus",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
-    NULL,                       /* The "reset local" callback     */
+    NULL,                       /* The "reset local" callback   */
+    NULL,                       /* The "change local" callback  */
+    NULL,                       /* The "evict local" callback   */
+    NULL,                       /* The "delete local" callback  */
+    NULL,                       /* The "close local" callback   */
     (H5Z_func_t)filter_bogus,   /* The actual filter function	*/
 }};
+#else
+const H5Z_class_t H5Z_BOGUS[1] = {{
+    H5Z_CLASS_T_VERS,		/* H5Z_class_t version number   */
+    H5Z_FILTER_BOGUS,		/* Filter id number		*/
+    "bogus",			/* Filter name for debugging	*/
+    NULL,                       /* The "can apply" callback     */
+    NULL,                       /* The "set local" callback     */
+    (H5Z_func_t)filter_bogus,   /* The actual filter function	*/
+}};
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:	bogus
@@ -379,14 +399,19 @@ const H5Z_class_t H5Z_BOGUS[1] = {{
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_USE_16_API
 static size_t
 /*bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
       const unsigned int UNUSED cd_values[], size_t nbytes,
       size_t UNUSED *buf_size, void UNUSED **buf)
 BMR: removed UNUSED for now until asking Q. or R. to pass compilation*/
-filter_bogus(unsigned int flags, size_t cd_nelmts,
-      const unsigned int cd_values[], size_t nbytes,
-      size_t *buf_size, void **buf)
+filter_bogus(unsigned int flags, hsize_t chunk_offset, size_t cd_nelmts,
+      const unsigned int cd_values[], size_t nbytes, size_t *buf_size, void **buf)
+#else
+static size_t
+filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned int cd_values[], 
+      size_t nbytes, size_t *buf_size, void **buf)
+#endif
 {
     return nbytes;
 }

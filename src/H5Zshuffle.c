@@ -27,22 +27,44 @@
 #ifdef H5_HAVE_FILTER_SHUFFLE
 
 /* Local function prototypes */
+#ifndef H5_USE_16_API
+static herr_t H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
+    hid_t UNUSED file_id);
+static size_t H5Z_filter_shuffle(unsigned flags, hsize_t UNUSED chunk_offset, 
+    size_t cd_nelmts, const unsigned cd_values[], size_t nbytes, size_t *buf_size, 
+    void **buf);
+
+/* This message derives from H5Z */
+const H5Z_class_t H5Z_SHUFFLE[1] = {{
+    H5Z_CLASS_T_VERS,           /* H5Z_class_t version */
+    H5Z_FILTER_SHUFFLE,		/* Filter id number		*/
+    1,                          /* encoder_present flag (set to true) */
+    1,                          /* decoder_present flag (set to true) */
+    "shuffle",			/* Filter name for debugging	*/
+    NULL,                       /* The "can apply" callback     */
+    H5Z_set_local_shuffle,      /* The "set local" callback     */
+    NULL,                       /* The "reset local" callback   */
+    NULL,                       /* The "change local" callback  */
+    NULL,                       /* The "evict local" callback   */
+    NULL,                       /* The "delete local" callback  */
+    NULL,                       /* The "close local" callback   */
+    H5Z_filter_shuffle,		/* The actual filter function	*/
+}};
+#else
 static herr_t H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-static size_t H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts,
+static size_t H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, 
     const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_SHUFFLE[1] = {{
     H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
     H5Z_FILTER_SHUFFLE,		/* Filter id number		*/
-    1,              /* encoder_present flag (set to true) */
-    1,              /* decoder_present flag (set to true) */
     "shuffle",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     H5Z_set_local_shuffle,      /* The "set local" callback     */
-    NULL,                       /* The "reset local" callback   */
     H5Z_filter_shuffle,		/* The actual filter function	*/
 }};
+#endif
 
 /* Local macros */
 #define H5Z_SHUFFLE_USER_NPARMS    0       /* Number of parameters that users can set */
@@ -67,8 +89,13 @@ const H5Z_class_t H5Z_SHUFFLE[1] = {{
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
+#ifndef H5_USE_16_API
+static herr_t H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
+    hid_t UNUSED file_id)
+#else
 static herr_t
 H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+#endif
 {
     H5P_genplist_t *dcpl_plist;     /* Property list pointer */
     const H5T_t	*type;                  /* Datatype */
@@ -126,9 +153,15 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_USE_16_API
+static size_t H5Z_filter_shuffle(unsigned flags, hsize_t UNUSED chunk_offset, 
+    size_t cd_nelmts, const unsigned cd_values[], size_t nbytes, size_t *buf_size, 
+    void **buf)
+#else
 static size_t
 H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                    size_t nbytes, size_t *buf_size, void **buf)
+#endif
 {
     void *dest = NULL;          /* Buffer to deposit [un]shuffled bytes into */
     unsigned char *_src=NULL;   /* Alias for source buffer */
@@ -140,7 +173,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     size_t j;                   /* Local index variable */
 #endif /* NO_DUFFS_DEVICE */
     size_t leftover;            /* Extra bytes at end of buffer */
-    size_t ret_value;           /* Return value */
+    size_t ret_value=nbytes;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_filter_shuffle, 0)
 
@@ -163,7 +196,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
         if (NULL==(dest = H5MM_malloc(nbytes)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed for shuffle buffer")
 
-        if(flags & H5Z_FLAG_REVERSE) {
+        if(flags & H5Z_FLAG_REVERSE) { /*Read*/
             /* Get the pointer to the source buffer */
             _src =(unsigned char *)(*buf);
 
@@ -218,7 +251,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                 HDmemcpy((void*)_dest, (void*)_src, leftover);
             }
         } /* end if */
-        else {
+        else if (!(flags & H5Z_FLAG_INVMASK)) { /*Write*/
             /* Get the pointer to the destination buffer */
             _dest =(unsigned char *)dest;
 

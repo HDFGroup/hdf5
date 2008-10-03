@@ -1449,8 +1449,15 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
                 store.chunk.offset = chunk_info->coords;
                 store.chunk.index = chunk_info->index;
 
-                /* Load the chunk into cache and lock it. */
 		chunk_addr = H5D_istore_get_addr(io_info, &udata);
+
+	        /* Translate the offset of the chunck into single-dimensional offset for 
+                 * the filter of modifying dataset's datatype */
+	        if((io_info->store->chunk.linear_offset = H5D_istore_calc_offset(
+                    dataset->shared->space, io_info->store->chunk.offset)) < 0)
+		    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to calculate chunk offset")
+
+                /* Load the chunk into cache and lock it. */
                 if(H5D_istore_if_load(io_info, chunk_addr)) {
 		    if(NULL == (chunk = H5D_istore_lock(io_info, &udata, FALSE, &idx_hint)))
 			HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to read raw data chunk")
@@ -1572,6 +1579,12 @@ H5D_chunk_read(H5D_io_info_t *io_info, hsize_t nelmts,
 
         /* Load the chunk into cache and lock it. */
         chunk_addr = H5D_istore_get_addr(io_info, &udata);
+
+	/* Translate the offset of the chunck into single-dimensional offset for 
+	 * the filter of modifying dataset's datatype */
+	if((io_info->store->chunk.linear_offset = H5D_istore_calc_offset(
+	    dataset->shared->space, io_info->store->chunk.offset)) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to calculate chunk offset")
 
         if(H5D_istore_if_load(io_info, chunk_addr)) {
             if(NULL == (chunk = H5D_istore_lock(io_info, &udata, FALSE, &idx_hint)))
@@ -1782,6 +1795,8 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     H5D_istore_ud1_t udata;		/*B-tree pass-through	*/
     unsigned    idx_hint = 0;   	/* Cache index hint      */
     hbool_t     relax=TRUE;             /* Whether whole chunk is selected */
+    hbool_t     has_mdtype_filter=FALSE;/* Whether filter for modifying dset's dtype
+                                         * is enabled */
     herr_t	ret_value = SUCCEED;	/*return value		*/
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_write)
@@ -1809,6 +1824,23 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
     src_type_size = H5T_get_size(mem_type);
     dst_type_size = H5T_get_size(dataset->shared->type);
     max_type_size = MAX(src_type_size, dst_type_size);
+
+    /* If the filter for modifying dataset's datatype is enabled, don't relax 
+     * because we need the offset of the chunk to pass through H5Z_pipeline. */
+    if(dataset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
+	H5P_genplist_t      *plist;                 /* Property list pointer */
+	herr_t		    ret = SUCCEED;          /* Return value */
+	/* Get the plist structure */
+	if(NULL == (plist = H5P_object_verify(dataset->shared->dcpl_id, H5P_DATASET_CREATE)))
+	    HGOTO_ERROR(H5E_DATASET, H5E_BADATOM, FAIL, "can't find object for ID")
+
+	H5E_BEGIN_TRY {
+	    ret = H5P_get_filter_by_id(plist, H5Z_FILTER_DTYPE_MODIFY, NULL, NULL, NULL, (size_t)0, NULL, NULL);
+	} H5E_END_TRY;
+	
+	if(ret >= 0)
+	    has_mdtype_filter = TRUE;
+    } /* end if */
 
     /*
      * If there is no type conversion then write directly from the
@@ -1851,9 +1883,15 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
                  * simply allocate space instead of load the chunk. */
                 chunk_addr = H5D_istore_get_addr(io_info, &udata);
 
+	        /* Translate the offset of the chunck into single-dimensional offset for 
+                 * the filter of modifying dataset's datatype */
+	        if((io_info->store->chunk.linear_offset = H5D_istore_calc_offset(
+                    dataset->shared->space, io_info->store->chunk.offset)) < 0)
+		    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to calculate chunk offset")
+
                 if(H5D_istore_if_load(io_info, chunk_addr)) {
                     accessed_bytes = chunk_info->chunk_points * dst_type_size;
-                    if(accessed_bytes != dataset->shared->layout.u.chunk.size)
+                    if(has_mdtype_filter || accessed_bytes != dataset->shared->layout.u.chunk.size)
                         relax = FALSE;
 
 		    if(NULL == (chunk = H5D_istore_lock(io_info, &udata, relax, &idx_hint)))
@@ -1977,6 +2015,12 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
         store.chunk.offset = chunk_info->coords;
         store.chunk.index = chunk_info->index;
 
+	/* Translate the offset of the chunck into single-dimensional offset for 
+	 * the filter of modifying dataset's datatype */
+	if((io_info->store->chunk.linear_offset = H5D_istore_calc_offset(
+	    dataset->shared->space, io_info->store->chunk.offset)) < 0)
+	    HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to calculate chunk offset")
+
         /* Load the chunk into cache.  But if the whole chunk is written,
          * simply allocate space instead of load the chunk. */
         chunk_addr = H5D_istore_get_addr(io_info, &udata);
@@ -1987,7 +2031,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, hsize_t nelmts,
                 relax=FALSE;
             if(relax) {
                 accessed_bytes = H5S_GET_SELECT_NPOINTS(chunk_info->mspace) * src_type_size;
-                if(accessed_bytes != dataset->shared->layout.u.chunk.size)
+                if(has_mdtype_filter || accessed_bytes != dataset->shared->layout.u.chunk.size)
                     relax = FALSE;
             }
 
@@ -2381,7 +2425,7 @@ H5Dmodify_dtype(hid_t dset_id, hid_t new_type_id)
 
     H5D_t	*dset = NULL;
     H5T_t	*new_type = NULL;
-    herr_t	ret_value;
+    herr_t	ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Dmodify_dtype, FAIL)
     H5TRACE2("e", "ii", dset_id, new_type_id);
@@ -2465,12 +2509,30 @@ H5D_modify_dtype(H5F_t *file, H5D_t *dataset, hid_t type_id, H5T_t *type, hid_t 
             HGOTO_ERROR(H5E_DATASET, H5E_BADATOM, FAIL, "can't find object for ID")
 
         H5E_BEGIN_TRY {
-            ret = H5P_get_filter_by_id(plist, H5Z_FILTER_DTYPE_MODIFY, NULL, NULL, NULL, (size_t)0, NULL, NULL);
+            ret = H5P_get_filter_by_id(plist, H5Z_FILTER_DTYPE_MODIFY, NULL, NULL, 
+                    NULL, (size_t)0, NULL, NULL);
         } H5E_END_TRY;
         
         if(ret >= 0)
 	    filter_enabled = TRUE;
     } /* end if */
+
+    /* If the filter is present, generally only support committed or shared datatype.  
+     * We also allow  integer or floating number because of their limited encoding size.
+     */ 
+    if(filter_enabled && !H5T_committed(type) && 
+        !H5SM_can_share(file, dxpl_id, NULL, NULL, H5O_DTYPE_ID, type)) {
+        H5T_class_t tclass;
+        if((tclass = H5T_get_class(type, TRUE)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't find datatype class")
+
+        if(tclass != H5T_INTEGER && tclass != H5T_FLOAT)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "violate datatype restriction")
+    }
+
+    /* Check if the datatype should be (or are already) shared in the SOHM table */
+    if(H5SM_try_share(file, dxpl_id, NULL, H5O_DTYPE_ID, dataset->shared->type, NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADMESG, FAIL, "trying to share datatype failed")
 
     /* If space hasn't been allocated and not using external storage,
      * set the flag HAS_DATA to FALSE.  If the dataset is compact, 
@@ -2526,29 +2588,28 @@ H5D_modify_dtype(H5F_t *file, H5D_t *dataset, hid_t type_id, H5T_t *type, hid_t 
             default:
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "dataset should be contiguous or chunked")
         }
+    } else if(filter_enabled && has_data && H5D_CHUNKED == dataset->shared->layout.type) {
+        /* Convert the chunks already in the cache */
+        if(H5D_istore_conv_dtype(dataset, type_id) < 0)
+	    HGOTO_ERROR(H5E_CACHE, H5E_CANTCONVERT, FAIL, "can't convert data cache")
     }
 
     /* Get a file ID for the file */
     if((fid = H5F_get_id(file)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get file ID")
 
+    /* 
+     * Check whether the old datatype is committed & decrement ref count.
+     */
+    if(H5T_committed(dataset->shared->type)) {
+        /* Decrement the reference count on the committed datatype */
+        if(H5T_link(dataset->shared->type, -1, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_LINKCOUNT, FAIL, "unable to adjust committed datatype link count")
+    } /* end if */
+
     /* Copy & initialize datatype for the dataset struct */
     if(H5D_init_type(file, dataset, type_id, type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't copy datatype")
-
-    /* Check if the datatype should be (or are already) shared in the SOHM table */
-    if(H5SM_try_share(file, dxpl_id, NULL, H5O_DTYPE_ID, dataset->shared->type, NULL) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADMESG, FAIL, "trying to share datatype failed")
-
-    /* 
-     * Check whether datatype is committed & increment ref count. (to maintain 
-     * ref. count incr/decr similarity with "shared message" type of datatype sharing)
-     */
-    if(H5T_committed(dataset->shared->type)) {
-        /* Increment the reference count on the shared datatype */
-        if(H5T_link(dataset->shared->type, 1, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_LINKCOUNT, FAIL, "unable to adjust shared datatype link count")
-    } /* end if */
 
     /* Open the object header of the original dataset for updating datatype and layout */
     if(H5O_open(&(dataset->oloc)) < 0)
@@ -2561,8 +2622,8 @@ H5D_modify_dtype(H5F_t *file, H5D_t *dataset, hid_t type_id, H5T_t *type, hid_t 
     /* Delete the old datatype message */
     if(H5O_msg_remove(&(dataset->oloc), H5O_DTYPE_ID, 0, FALSE, dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete old dtype message")
-  
-    /* Add the new datatype message */
+
+    /* Add the new datatype message.  Ref count for committed dtype is incremented here. */
     if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_DTYPE_ID, H5O_MSG_FLAG_CONSTANT, 0, dataset->shared->type) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update datatype header message")
 
@@ -2606,7 +2667,9 @@ H5D_modify_dtype(H5F_t *file, H5D_t *dataset, hid_t type_id, H5T_t *type, hid_t 
      * allocation time is early, since space may not be allocated)
      */
     fill_prop = &(dataset->shared->dcpl_cache.fill);
-    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, ((fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != dataset->shared->layout.type) ? H5O_MSG_FLAG_CONSTANT : 0), 0, &(dataset->shared->layout)) < 0)
+    if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_LAYOUT_ID, 
+         ((fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != dataset->shared->layout.type) ? H5O_MSG_FLAG_CONSTANT : 0), 
+         0, &(dataset->shared->layout)) < 0)
          HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update layout")
 
     /*
@@ -2666,7 +2729,7 @@ H5D_modify_dtype(H5F_t *file, H5D_t *dataset, hid_t type_id, H5T_t *type, hid_t 
             HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset")
     } else if(filter_enabled) {
         /* Make the "reset local" filter callbacks for this dataset */
-        if(H5Z_reset_local(dataset->shared->dcpl_id, dataset->shared->type_id, fid) < 0)
+        if(H5Z_reset_local(dataset->shared->dcpl_id, dataset->shared->type_id, fid, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set local filter parameters")
 
         /* Release the file ID */
@@ -2675,7 +2738,7 @@ H5D_modify_dtype(H5F_t *file, H5D_t *dataset, hid_t type_id, H5T_t *type, hid_t 
   
         fid = -1;
     }
- 
+
 done:
      /* Release the file ID */
     if(fid>=0 && H5I_dec_ref(fid) < 0)

@@ -32,22 +32,42 @@
 #   include "zlib.h"
 #endif
 
+#ifndef H5_USE_16_API
 /* Local function prototypes */
-static size_t H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
-    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
+static size_t H5Z_filter_deflate (unsigned flags, hsize_t UNUSED chunk_offset, 
+    size_t cd_nelmts, const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
+
+/* This message derives from H5Z */
+const H5Z_class_t H5Z_DEFLATE[1] = {{
+    H5Z_CLASS_T_VERS,           /* H5Z_class_t version */
+    H5Z_FILTER_DEFLATE,		/* Filter id number		*/
+    1,                          /* encoder_present flag (set to true) */
+    1,                          /* decoder_present flag (set to true) */
+    "deflate",			/* Filter name for debugging	*/
+    NULL,                       /* The "can apply" callback     */
+    NULL,                       /* The "set local" callback     */
+    NULL,                       /* The "reset local" callback   */
+    NULL,                       /* The "change local" callback  */
+    NULL,                       /* The "evict local" callback   */
+    NULL,                       /* The "delete local" callback   */
+    NULL,                       /* The "close local" callback   */
+    H5Z_filter_deflate,         /* The actual filter function	*/
+}};
+#else
+/* Local function prototypes */
+static size_t H5Z_filter_deflate (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
+    size_t nbytes, size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_DEFLATE[1] = {{
     H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
     H5Z_FILTER_DEFLATE,		/* Filter id number		*/
-    1,              /* encoder_present flag (set to true) */
-    1,              /* decoder_present flag (set to true) */
     "deflate",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
-    NULL,                       /* The "reset local" callback   */
     H5Z_filter_deflate,         /* The actual filter function	*/
 }};
+#endif
 
 #define H5Z_DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s))*1.001)+12)
 
@@ -68,14 +88,19 @@ const H5Z_class_t H5Z_DEFLATE[1] = {{
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_USE_16_API
 static size_t
-H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
-		    const unsigned cd_values[], size_t nbytes,
-		    size_t *buf_size, void **buf)
+H5Z_filter_deflate (unsigned flags, hsize_t UNUSED chunk_offset, size_t cd_nelmts,
+		    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf)
+#else
+static size_t
+H5Z_filter_deflate (unsigned flags, size_t cd_nelmts, const unsigned cd_values[], 
+    size_t nbytes, size_t *buf_size, void **buf)
+#endif
 {
     void	*outbuf = NULL;         /* Pointer to new buffer */
     int		status;                 /* Status from zlib operation */
-    size_t	ret_value;              /* Return value */
+    size_t	ret_value = nbytes;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_filter_deflate, 0)
 
@@ -83,7 +108,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
     if (cd_nelmts!=1 || cd_values[0]>9)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid deflate aggression level")
 
-    if (flags & H5Z_FLAG_REVERSE) {
+    if (flags & H5Z_FLAG_REVERSE) { /*read*/
 	/* Input; uncompress */
 	z_stream	z_strm;                 /* zlib parameters */
 	size_t		nalloc = *buf_size;     /* Number of bytes for output (compressed) buffer */
@@ -148,8 +173,7 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
 
         /* Finish uncompressing the stream */
 	(void)inflateEnd(&z_strm);
-    }
-    else {
+    } else if (!(flags & H5Z_FLAG_INVMASK) || (flags & H5Z_FLAG_SKIP_CRECORD)) { /*Write*/
 	/*
 	 * Output; compress but fail if the result would be larger than the
 	 * input.  The library doesn't provide in-place compression, so we
@@ -197,4 +221,3 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 #endif /* H5_HAVE_FILTER_DEFLATE */
-

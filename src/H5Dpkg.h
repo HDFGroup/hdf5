@@ -112,7 +112,7 @@ typedef struct H5D_io_info_t {
     hbool_t xfer_opt_mode_changed;
     hbool_t using_mpi_vfd;      /* Whether the file is using an MPI-based VFD */
 #endif /* H5_HAVE_PARALLEL */
-    const H5D_storage_t *store; /* Dataset storage info */
+    H5D_storage_t *store;       /* Dataset storage info */
     H5D_io_ops_t ops;           /* I/O operation function pointers */
 #ifdef H5S_DEBUG
     H5S_iostats_t *stats;       /* I/O statistics */
@@ -454,8 +454,8 @@ H5_DLL haddr_t H5D_istore_get_addr(const H5D_io_info_t *io_info,
 H5_DLL herr_t H5D_istore_copy(H5F_t *f_src, H5O_layout_t *layout_src,
     H5F_t *f_dst, H5O_layout_t *layout_dst, H5T_t *src_dtype,
     H5O_copy_t *cpy_info, H5O_pline_t *pline, hid_t dxpl_id);
-H5_DLL herr_t H5D_istore_copy_conv(H5F_t *file, const H5D_t *dset_src, const H5D_t *dset_dst,
-    H5O_copy_t UNUSED *cpy_info, hid_t dxpl_id);
+H5_DLL herr_t H5D_istore_copy_conv(H5F_t *file, const H5D_t *dset_src, const H5D_t *dset_dst, H5O_copy_t UNUSED *cpy_info, hid_t dxpl_id);
+H5_DLL herr_t H5D_istore_conv_dtype(H5D_t *dset, hid_t new_type_id);
 H5_DLL void * H5D_istore_lock(const H5D_io_info_t *io_info, H5D_istore_ud1_t *udata,
     hbool_t relax, unsigned *idx_hint/*in,out*/);
 H5_DLL herr_t H5D_istore_unlock(const H5D_io_info_t *io_info,

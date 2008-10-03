@@ -160,17 +160,28 @@ const char *FILENAME[] = {
 int	points[DSET_DIM1][DSET_DIM2], check[DSET_DIM1][DSET_DIM2];
 double	points_dbl[DSET_DIM1][DSET_DIM2], check_dbl[DSET_DIM1][DSET_DIM2];
 
+#ifndef H5_USE_16_API
 /* Local prototypes for filter functions */
-static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
+static size_t filter_bogus(unsigned int flags, hsize_t chunk_offset, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 static herr_t can_apply_bogus(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
     hid_t file_id);
 static herr_t set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
     hid_t file_id);
+static size_t filter_bogus2(unsigned int flags, hsize_t chunk_offset, size_t cd_nelmts,
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+static size_t filter_corrupt(unsigned int flags, hsize_t chunk_offset, size_t cd_nelmts,
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+#else
+static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+static herr_t can_apply_bogus(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static herr_t set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t space_id);
 static size_t filter_bogus2(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
 static size_t filter_corrupt(unsigned int flags, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf);
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -991,16 +1002,31 @@ test_tconv(hid_t file)
 }
 
 /* This message derives from H5Z */
+#ifndef H5_USE_16_API
 const H5Z_class_t H5Z_BOGUS[1] = {{
-    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
+    H5Z_CLASS_T_VERS,           /* H5Z_class_t version          */
     H5Z_FILTER_BOGUS,		/* Filter id number		*/
-    1, 1,               /* Encoding and decoding enabled */
+    1, 1,                       /* Encoding and decoding enabled*/
     "bogus",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
     NULL,                       /* The "reset local" callback   */
+    NULL,                       /* The "change local" callback  */
+    NULL,                       /* The "evict local" callback   */
+    NULL,                       /* The "delete local" callback  */
+    NULL,                       /* The "close local" callback   */
     filter_bogus,		/* The actual filter function	*/
 }};
+#else
+const H5Z_class_t H5Z_BOGUS[1] = {{
+    H5Z_CLASS_T_VERS,           /* H5Z_class_t version          */
+    H5Z_FILTER_BOGUS,		/* Filter id number		*/
+    "bogus",			/* Filter name for debugging	*/
+    NULL,                       /* The "can apply" callback     */
+    NULL,                       /* The "set local" callback     */
+    filter_bogus,		/* The actual filter function	*/
+}};
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -1019,9 +1045,13 @@ const H5Z_class_t H5Z_BOGUS[1] = {{
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_USE_16_API
 static herr_t
 can_apply_bogus(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id, 
         hid_t UNUSED file_id)
+#else
+can_apply_bogus(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+#endif
 {
     if(H5Tequal(type_id,H5T_NATIVE_DOUBLE))
         return 0;
@@ -1046,10 +1076,17 @@ can_apply_bogus(hid_t UNUSED dcpl_id, hid_t type_id, hid_t UNUSED space_id,
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_USE_16_API
 static size_t
-filter_bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-      const unsigned int UNUSED *cd_values, size_t nbytes,
+filter_bogus(unsigned int UNUSED flags, hsize_t UNUSED chunk_offset, 
+      size_t UNUSED cd_nelmts, const unsigned int UNUSED *cd_values, 
+      size_t nbytes, size_t UNUSED *buf_size, void UNUSED **buf)
+#else
+static size_t
+filter_bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts, 
+      const unsigned int UNUSED *cd_values, size_t nbytes, 
       size_t UNUSED *buf_size, void UNUSED **buf)
+#endif
 {
     return nbytes;
 }
@@ -1072,9 +1109,14 @@ filter_bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_USE_16_API
 static herr_t
 set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id, 
         hid_t UNUSED file_id)
+#else
+static herr_t
+set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
+#endif
 {
     unsigned add_on=0;      /* Value to add to data going through */
     unsigned flags;         /* Filter flags */
@@ -1126,10 +1168,15 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id,
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_USE_16_API
+static size_t
+filter_bogus2(unsigned int flags, hsize_t UNUSED chunk_offset, size_t cd_nelmts,
+      const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf)
+#else
 static size_t
 filter_bogus2(unsigned int flags, size_t cd_nelmts,
-      const unsigned int *cd_values, size_t nbytes,
-      size_t *buf_size, void **buf)
+      const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf)
+#endif
 {
     /* Check for the correct number of parameters */
     if(cd_nelmts!=BOGUS2_ALL_NPARMS)
@@ -1168,16 +1215,31 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
 }
 
 /* This message derives from H5Z */
+#ifndef H5_USE_16_API
 const H5Z_class_t H5Z_CORRUPT[1] = {{
-    H5Z_CLASS_T_VERS,            /* H5Z_class_t version */
+    H5Z_CLASS_T_VERS,           /* H5Z_class_t version          */
     H5Z_FILTER_CORRUPT,		/* Filter id number		*/
-    1, 1,               /* Encoding and decoding enabled */
+    1, 1,                       /* Encoding and decoding enabled*/
     "corrupt",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
     NULL,                       /* The "reset local" callback   */
+    NULL,                       /* The "change local" callback  */
+    NULL,                       /* The "evict local" callback   */
+    NULL,                       /* The "delete local" callback  */
+    NULL,                       /* The "close local" callback   */
     filter_corrupt,		/* The actual filter function	*/
 }};
+#else
+const H5Z_class_t H5Z_CORRUPT[1] = {{
+    H5Z_CLASS_T_VERS,           /* H5Z_class_t version          */
+    H5Z_FILTER_CORRUPT,		/* Filter id number		*/
+    "corrupt",			/* Filter name for debugging	*/
+    NULL,                       /* The "can apply" callback     */
+    NULL,                       /* The "set local" callback     */
+    filter_corrupt,		/* The actual filter function	*/
+}};
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -1198,10 +1260,15 @@ const H5Z_class_t H5Z_CORRUPT[1] = {{
  *
  *-------------------------------------------------------------------------
  */
+#ifndef H5_USE_16_API
+static size_t
+filter_corrupt(unsigned int flags, hsize_t UNUSED chunk_offset, size_t cd_nelmts,
+      const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf)
+#else
 static size_t
 filter_corrupt(unsigned int flags, size_t cd_nelmts,
-      const unsigned int *cd_values, size_t nbytes,
-      size_t *buf_size, void **buf)
+      const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf)
+#endif
 {
     size_t         ret_value = 0;
     unsigned char  *dst = (unsigned char*)(*buf);
@@ -1355,7 +1422,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
 
     /* Create the dataset */
     if((dataset = H5Dcreate2(fid, name, H5T_NATIVE_INT, sid, H5P_DEFAULT,
-			     dcpl, H5P_DEFAULT)) < 0) goto error;
+			     dcpl, H5P_DEFAULT)) < 0) 
+        goto error;
 
     PASSED();
 
@@ -2018,8 +2086,16 @@ UNUSED
     data_corrupt[1] = 33;
     data_corrupt[2] = 27;
 
-    /* Temporarily disable this test because the changes in chunk caching conflicts with
-     * the way this test is conducted. -slu 2007/7/20 */
+    /* This is a shaky test because any changes in chunk caching may conflict with
+     * the way this test is conducted.  In Step 4 of test_filter_internal, the 
+     * program tries to modify some data.  When it does H5Dwrite, the library will
+     * overwrite the entire chunks if all data in the chunks are being modified.
+     * However, if the data being modified doesn't cover the whole chunks or the
+     * filter for modifying dataset's datatype is enabled, the chunks will be read
+     * first which will cause the Fletcher32 checksum to fail. (See how the RELAX
+     * variable is defined in H5D_chunk_write of H5Dio.c and H5D_istore_lock of
+     * H5Distore.c.)  - SLU 2008/3/5
+     */
     if(H5Zregister (H5Z_CORRUPT) < 0) goto error;
     if(H5Pset_filter(dc, H5Z_FILTER_CORRUPT, 0, (size_t)3, data_corrupt) < 0) goto error;
 
@@ -2124,6 +2200,7 @@ UNUSED
      * STEP 5: Test datatype modification by itself.
      *----------------------------------------------------------
      */
+#ifndef H5_USE_16_API 
 #ifdef H5_HAVE_FILTER_DTYPE_MODIFY
     puts("Testing datatype modification filter");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
@@ -2139,6 +2216,7 @@ UNUSED
     SKIPPED();
     puts("    Datatype modification filter not enabled");
 #endif /* H5_HAVE_FILTER_DTYPE_MODIFY */
+#endif /* H5_USE_16_API */
 
     /*----------------------------------------------------------
      * STEP 6: Test shuffle + deflate + dtype modification.
@@ -2148,11 +2226,17 @@ UNUSED
     puts("Testing dtype modify+shuffle+deflate filters(dtype modify first)");
     if((dc = H5Pcreate(H5P_DATASET_CREATE))<0) goto error;
     if (H5Pset_chunk (dc, 2, chunk_size)<0) goto error;
+#ifndef H5_USE_16_API 
     if (H5Pset_dtype_modifiable (dc)<0) goto error;
+#endif /* H5_USE_16_API */
     if (H5Pset_shuffle (dc)<0) goto error;
     if (H5Pset_deflate (dc, 6)<0) goto error;
 
+#ifndef H5_USE_16_API 
     if(test_filter_internal(file,DSET_SHUF_DEF_DTMOD_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,CHANGE_DTYPE,&combo_size)<0) goto error;
+#else
+    if(test_filter_internal(file,DSET_SHUF_DEF_DTMOD_NAME,dc,ENABLE_FLETCHER32,DATA_NOT_CORRUPTED,DONT_CHANGE_DTYPE,&combo_size)<0) goto error;
+#endif /* H5_USE_16_API */
 
     /* Clean up objects used for this test */
     if (H5Pclose (dc)<0) goto error;
@@ -4879,16 +4963,31 @@ test_types(hid_t file)
 }
 
 /* This message derives from H5Z */
+#ifndef H5_USE_16_API
 const H5Z_class_t H5Z_CAN_APPLY_TEST[1] = {{
-	H5Z_CLASS_T_VERS,
+    H5Z_CLASS_T_VERS,
     H5Z_FILTER_BOGUS3,		/* Filter id number		*/
-	1, 1,
+    1, 1,
     "bogus",			/* Filter name for debugging	*/
     can_apply_bogus,            /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
     NULL,                       /* The "reset local" callback   */
+    NULL,                       /* The "change local" callback  */
+    NULL,                       /* The "evict local" callback   */
+    NULL,                       /* The "delete local" callback  */
+    NULL,                       /* The "close local" callback   */
     filter_bogus,		/* The actual filter function	*/
 }};
+#else
+const H5Z_class_t H5Z_CAN_APPLY_TEST[1] = {{
+    H5Z_CLASS_T_VERS,
+    H5Z_FILTER_BOGUS3,		/* Filter id number		*/
+    "bogus",			/* Filter name for debugging	*/
+    can_apply_bogus,            /* The "can apply" callback     */
+    NULL,                       /* The "set local" callback     */
+    filter_bogus,		/* The actual filter function	*/
+}};
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -5240,16 +5339,31 @@ error:
 
 
 /* This message derives from H5Z */
+#ifndef H5_USE_16_API
 const H5Z_class_t H5Z_SET_LOCAL_TEST[1] = {{
-	H5Z_CLASS_T_VERS,
+    H5Z_CLASS_T_VERS,
     H5Z_FILTER_BOGUS2,		/* Filter id number		*/
-	1, 1,
+    1, 1,
     "bogus2",			/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     set_local_bogus2,           /* The "set local" callback     */
     NULL,                       /* The "reset local" callback   */
+    NULL,                       /* The "change local" callback  */
+    NULL,                       /* The "evict local" callback   */
+    NULL,                       /* The "delete local" callback  */
+    NULL,                       /* The "close local" callback   */
     filter_bogus2,		/* The actual filter function	*/
 }};
+#else
+const H5Z_class_t H5Z_SET_LOCAL_TEST[1] = {{
+    H5Z_CLASS_T_VERS,
+    H5Z_FILTER_BOGUS2,		/* Filter id number		*/
+    "bogus2",			/* Filter name for debugging	*/
+    NULL,                       /* The "can apply" callback     */
+    set_local_bogus2,           /* The "set local" callback     */
+    filter_bogus2,		/* The actual filter function	*/
+}};
+#endif
 
 
 /*-------------------------------------------------------------------------
@@ -6580,6 +6694,7 @@ main(void)
             nerrors += (test_tconv(file) < 0			? 1 : 0);
             nerrors += (test_filters(file, my_fapl) < 0		? 1 : 0);
             nerrors += (test_onebyte_shuffle(file) < 0 		? 1 : 0);
+#ifndef H5_USE_16_API
             nerrors += (test_nbit_int(file) < 0 		? 1 : 0);
             nerrors += (test_nbit_float(file) < 0         	? 1 : 0);
             nerrors += (test_nbit_double(file) < 0         	? 1 : 0);
@@ -6593,6 +6708,7 @@ main(void)
             nerrors += (test_scaleoffset_float_2(file) < 0 	? 1 : 0);
             nerrors += (test_scaleoffset_double(file) < 0 	? 1 : 0);
             nerrors += (test_scaleoffset_double_2(file) < 0 	? 1 : 0);
+#endif
             nerrors += (test_multiopen (file) < 0		? 1 : 0);
             nerrors += (test_types(file) < 0       		? 1 : 0);
             nerrors += (test_userblock_offset(my_fapl) < 0     	? 1 : 0);
@@ -6635,4 +6751,3 @@ error:
             nerrors, 1 == nerrors ? "" : "S");
     return 1;
 }
-

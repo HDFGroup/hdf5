@@ -64,6 +64,8 @@ typedef int H5Z_filter_t;
 #define H5Z_FLAG_INVMASK	0xff00	/*invocation flag mask		*/
 #define H5Z_FLAG_REVERSE	0x0100	/*reverse direction; read	*/
 #define H5Z_FLAG_SKIP_EDC	0x0200	/*skip EDC filters for read	*/
+#define H5Z_FLAG_SKIP_CRECORD   0x0400  /*skip record keeping for chunks.  Only for the 
+                                         *filter of modifying dset's dtype*/
 
 /* Special parameters for szip compression */
 /* [These are aliases for the similar definitions in szlib.h, which we can't
@@ -84,7 +86,7 @@ typedef enum H5Z_SO_scale_type_t {
 } H5Z_SO_scale_type_t;
 
 /* Current version of the H5Z_class_t struct */
-#define H5Z_CLASS_T_VERS (1)
+#define H5Z_CLASS_T_VERS (2)
 
 /* Values to decide if EDC is enabled for reading data */
 typedef enum H5Z_EDC_t {
@@ -140,7 +142,7 @@ extern "C" {
  * The "can_apply" callback returns positive a valid combination, zero for an
  * invalid combination and negative for an error.
  */
-typedef herr_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
+typedef herr_t (*H5Z_can_apply_func2_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
     hid_t file_id);
 
 /*
@@ -170,8 +172,14 @@ typedef herr_t (*H5Z_can_apply_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  * again.  The function prototype of "reset_local" callback is identical to 
  * the "set_local".
  */
-typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id,
+typedef herr_t (*H5Z_set_local_func2_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id,
     hid_t file_id);
+
+typedef herr_t (*H5Z_reset_local_func2_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id,
+    hid_t file_id, hbool_t from_reopen);
+
+typedef herr_t (*H5Z_change_local_func_t)(hid_t dcpl_id, hsize_t chunk_offset);
+typedef herr_t (*H5Z_close_local_func_t)(hid_t dcpl_id);
 
 /*
  * A filter gets definition flags and invocation flags (defined above), the
@@ -188,7 +196,7 @@ typedef herr_t (*H5Z_set_local_func_t)(hid_t dcpl_id, hid_t type_id, hid_t space
  * buffer. If an error occurs then the function should return zero and leave
  * all pointer arguments unchanged.
  */
-typedef size_t (*H5Z_func_t)(unsigned int flags, size_t cd_nelmts,
+typedef size_t (*H5Z_func2_t)(unsigned int flags, hsize_t chunk_offset, size_t cd_nelmts,
 			     const unsigned int cd_values[], size_t nbytes,
 			     size_t *buf_size, void **buf);
 
@@ -196,17 +204,45 @@ typedef size_t (*H5Z_func_t)(unsigned int flags, size_t cd_nelmts,
  * The filter table maps filter identification numbers to structs that
  * contain a pointers to the filter function and timing statistics.
  */
-typedef struct H5Z_class_t {
+typedef struct H5Z_class2_t {
     int version;                /* Version number of the H5Z_class_t struct */
     H5Z_filter_t id;		/* Filter ID number			     */
     unsigned encoder_present;   /* Does this filter have an encoder? */
     unsigned decoder_present;   /* Does this filter have a decoder? */
     const char	*name;		/* Comment for debugging		     */
-    H5Z_can_apply_func_t can_apply; /* The "can apply" callback for a filter */
-    H5Z_set_local_func_t set_local; /* The "set local" callback for a filter */
-    H5Z_set_local_func_t reset_local; /* The "reset local" callback for a filter */
+    H5Z_can_apply_func2_t can_apply; /* The "can apply" callback for a filter */
+    H5Z_set_local_func2_t set_local; /* The "set local" callback for a filter */
+    H5Z_reset_local_func2_t reset_local; /* The "reset local" callback for a filter */
+    H5Z_change_local_func_t change_local; /* The "change local" callback for a filter */
+    H5Z_change_local_func_t evict_local; /* The "evict local" callback for a filter */
+    H5Z_close_local_func_t delete_local; /* The "delete local" callback for a filter */
+    H5Z_close_local_func_t close_local; /* The "close local" callback for a filter */
+    H5Z_func2_t filter;		/* The actual filter function		     */
+} H5Z_class2_t;
+
+/* Symbols defined for compatibility with previous versions of the HDF5 API.
+ * 
+ * Use of these symbols is deprecated.
+ */
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+
+/* Typedefs */
+typedef herr_t (*H5Z_can_apply_func1_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+typedef herr_t (*H5Z_set_local_func1_t)(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+typedef size_t (*H5Z_func1_t)(unsigned int flags, size_t cd_nelmts,
+			     const unsigned int cd_values[], size_t nbytes,
+			     size_t *buf_size, void **buf);
+
+typedef struct H5Z_class1_t {
+    int version;                /* Version number of the H5Z_class_t struct */
+    H5Z_filter_t id;		/* Filter ID number			     */
+    const char	*name;		/* Comment for debugging		     */
+    H5Z_can_apply_func1_t can_apply; /* The "can apply" callback for a filter */
+    H5Z_set_local_func1_t set_local; /* The "set local" callback for a filter */
     H5Z_func_t filter;		/* The actual filter function		     */
-} H5Z_class_t;
+} H5Z_class1_t;
+
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 H5_DLL herr_t H5Zregister(const H5Z_class_t *cls);
 H5_DLL herr_t H5Zunregister(H5Z_filter_t id);
@@ -217,4 +253,3 @@ H5_DLL herr_t H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_confi
 }
 #endif
 #endif
-

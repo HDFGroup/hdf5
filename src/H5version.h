@@ -130,6 +130,22 @@
 #define H5E_auto_t_vers 1
 #endif /* !defined(H5E_auto_t_vers) */
 
+#if !defined(H5Z_can_apply_func_t_vers)
+#define H5Z_can_apply_func_t_vers 1
+#endif /* !defined(H5Z_can_apply_func_t_vers) */
+
+#if !defined(H5Z_class_t_vers)
+#define H5Z_class_t_vers 1
+#endif /* !defined(H5Z_class_t_vers) */
+
+#if !defined(H5Z_func_t_vers)
+#define H5Z_func_t_vers 1
+#endif /* !defined(H5Z_func_t_vers) */
+
+#if !defined(H5Z_set_local_func_t_vers)
+#define H5Z_set_local_func_t_vers 1
+#endif /* !defined(H5Z_set_local_func_t_vers) */
+
 #endif /* H5_USE_16_API */
 
 
@@ -394,6 +410,54 @@
 #else /* H5E_auto_t_vers */
 #error "H5E_auto_t_vers set to invalid value"
 #endif /* H5E_auto_t_vers */
+
+
+#if !defined(H5Z_can_apply_func_t_vers) || H5Z_can_apply_func_t_vers == 2
+#ifndef H5Z_can_apply_func_t_vers
+#define H5Z_can_apply_func_t_vers 2
+#endif /* H5Z_can_apply_func_t_vers */
+#define H5Z_can_apply_func_t H5Z_can_apply_func2_t
+#elif H5Z_can_apply_func_t_vers == 1
+#define H5Z_can_apply_func_t H5Z_can_apply_func1_t
+#else /* H5Z_can_apply_func_t_vers */
+#error "H5Z_can_apply_func_t_vers set to invalid value"
+#endif /* H5Z_can_apply_func_t_vers */
+
+
+#if !defined(H5Z_class_t_vers) || H5Z_class_t_vers == 2
+#ifndef H5Z_class_t_vers
+#define H5Z_class_t_vers 2
+#endif /* H5Z_class_t_vers */
+#define H5Z_class_t H5Z_class2_t
+#elif H5Z_class_t_vers == 1
+#define H5Z_class_t H5Z_class1_t
+#else /* H5Z_class_t_vers */
+#error "H5Z_class_t_vers set to invalid value"
+#endif /* H5Z_class_t_vers */
+
+
+#if !defined(H5Z_func_t_vers) || H5Z_func_t_vers == 2
+#ifndef H5Z_func_t_vers
+#define H5Z_func_t_vers 2
+#endif /* H5Z_func_t_vers */
+#define H5Z_func_t H5Z_func2_t
+#elif H5Z_func_t_vers == 1
+#define H5Z_func_t H5Z_func1_t
+#else /* H5Z_func_t_vers */
+#error "H5Z_func_t_vers set to invalid value"
+#endif /* H5Z_func_t_vers */
+
+
+#if !defined(H5Z_set_local_func_t_vers) || H5Z_set_local_func_t_vers == 2
+#ifndef H5Z_set_local_func_t_vers
+#define H5Z_set_local_func_t_vers 2
+#endif /* H5Z_set_local_func_t_vers */
+#define H5Z_set_local_func_t H5Z_set_local_func2_t
+#elif H5Z_set_local_func_t_vers == 1
+#define H5Z_set_local_func_t H5Z_set_local_func1_t
+#else /* H5Z_set_local_func_t_vers */
+#error "H5Z_set_local_func_t_vers set to invalid value"
+#endif /* H5Z_set_local_func_t_vers */
 
 #endif /* H5version_H */
 

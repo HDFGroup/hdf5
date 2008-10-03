@@ -102,17 +102,17 @@ static int
 write_dset( hid_t loc_id, int rank, hsize_t *dims, const char *dset_name,
                    hid_t tid, void *buf );
 
+#define MYFILTER_ID 405
+#ifndef H5_USE_16_API
 /* a filter operation callback function */
 static size_t
-myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-      const unsigned int UNUSED *cd_values, size_t nbytes,
-      size_t UNUSED *buf_size, void UNUSED **buf);
+myfilter(unsigned int UNUSED flags, hsize_t UNUSED chunk_offset, size_t UNUSED cd_nelmts,
+      const unsigned int UNUSED *cd_values, size_t nbytes, size_t UNUSED *buf_size, 
+      void UNUSED **buf);
 
 /* a "set local" callback     */
 static herr_t
 set_local_myfilter(hid_t dcpl_id, hid_t tid, hid_t UNUSED sid, hid_t UNUSED file_id);
-
-#define MYFILTER_ID 405
 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_MYFILTER[1] = {{
@@ -123,9 +123,33 @@ const H5Z_class_t H5Z_MYFILTER[1] = {{
     NULL,                /* The "can apply" callback     */
     set_local_myfilter,  /* The "set local" callback     */
     NULL,                /* The "reset local" callback   */
+    NULL,                /* The "change local" callback  */
+    NULL,                /* The "evict local" callback   */
+    NULL,                /* The "delete local" callback  */
+    NULL,                /* The "close local" callback   */
     myfilter,            /* The actual filter function */
 }};
+#else
+/* a filter operation callback function */
+static size_t
+myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
+      const unsigned int UNUSED *cd_values, size_t nbytes, size_t UNUSED *buf_size, 
+      void UNUSED **buf);
 
+/* a "set local" callback     */
+static herr_t
+set_local_myfilter(hid_t dcpl_id, hid_t tid, hid_t UNUSED sid);
+
+/* This message derives from H5Z */
+const H5Z_class_t H5Z_MYFILTER[1] = {{
+    H5Z_CLASS_T_VERS,
+    MYFILTER_ID,               /* Filter id number      */
+    "myfilter",                /* Filter name for debugging */
+    NULL,                /* The "can apply" callback     */
+    set_local_myfilter,  /* The "set local" callback     */
+    myfilter,            /* The actual filter function */
+}};
+#endif
 
 /* A UD link traversal function.  Shouldn't actually be called. */
 static hid_t UD_traverse(UNUSED const char * link_name, UNUSED hid_t cur_group,
@@ -4925,6 +4949,7 @@ static void gent_filters(void)
 }
 
 
+#ifndef H5_USE_16_API
 /*-------------------------------------------------------------------------
  * Function: myfilter
  *
@@ -4933,9 +4958,9 @@ static void gent_filters(void)
  *-------------------------------------------------------------------------
  */
 static size_t
-myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
-      const unsigned int UNUSED *cd_values, size_t nbytes,
-      size_t UNUSED *buf_size, void UNUSED **buf)
+myfilter(unsigned int UNUSED flags, hsize_t chunk_offset, size_t UNUSED cd_nelmts,
+      const unsigned int UNUSED *cd_values, size_t nbytes, size_t UNUSED *buf_size, 
+      void UNUSED **buf)
 {
  return nbytes;
 }
@@ -4968,6 +4993,52 @@ set_local_myfilter(hid_t dcpl_id, hid_t UNUSED tid, hid_t UNUSED sid, hid_t UNUS
 
  return(SUCCEED);
 }
+#else
+/*-------------------------------------------------------------------------
+ * Function: myfilter
+ *
+ * Purpose: filter operation callback function; the filter does nothing
+ *
+ *-------------------------------------------------------------------------
+ */
+static size_t
+myfilter(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
+      const unsigned int UNUSED *cd_values, size_t nbytes,
+      size_t UNUSED *buf_size, void UNUSED **buf)
+{
+ return nbytes;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function: set_local_myfilter
+ *
+ * Purpose: filter operation "set local" callback
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+set_local_myfilter(hid_t dcpl_id, hid_t UNUSED tid, hid_t UNUSED sid)
+{
+ unsigned flags;                        /* Filter flags */
+ size_t   cd_nelmts = 0;                /* Number of filter parameters */
+ unsigned cd_values[2] = {5, 6};        /* Filter parameters */
+
+ /* Get the filter's current parameters */
+ if(H5Pget_filter_by_id2(dcpl_id, MYFILTER_ID, &flags, &cd_nelmts, cd_values, 0, NULL, NULL) < 0)
+  return(FAIL);
+
+ cd_nelmts = 2;
+
+ /* Modify the filter's parameters for this dataset */
+ if(H5Pmodify_filter(dcpl_id, MYFILTER_ID, flags, cd_nelmts, cd_values) < 0)
+  return(FAIL);
+
+ return(SUCCEED);
+}
+
+#endif
 
 /*-------------------------------------------------------------------------
  * Function: gent_fcontents

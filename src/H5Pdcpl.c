@@ -2064,7 +2064,7 @@ H5Pset_dtype_modifiable(hid_t plist_id)
     H5O_pline_t         pline;
     H5P_genplist_t      *plist;              /* Property list pointer */
     size_t              cd_nelmts=3;         /* Number of filter parameters */
-    unsigned            cd_values[3]={0,0};  /* Filter parameters */
+    unsigned            cd_values[3]={0,0,0};/* Filter parameters */
     herr_t              ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_dtype_modifiable, FAIL)

@@ -57,7 +57,8 @@ static herr_t test_filter_internal(hid_t fid, const char *name, hid_t dcpl,
 
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS        305
-static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
+#ifndef H5_USE_16_API
+static size_t filter_bogus(unsigned int flags, hsize_t UNUSED chunk_offset, size_t cd_nelmts,
     const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf); 
 /* This message derives from H5Z */
 const H5Z_class_t H5Z_BOGUS[1] = {{
@@ -68,6 +69,46 @@ const H5Z_class_t H5Z_BOGUS[1] = {{
     NULL,                       /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
     NULL,                       /* The "reset local" callback   */
+    NULL,                       /* The "change local" callback  */
+    NULL,                       /* The "evict local" callback   */
+    NULL,                       /* The "delete local" callback  */
+    NULL,                       /* The "close local" callback   */
+    (H5Z_func_t)filter_bogus,   /* The actual filter function   */
+}};
+
+/*-------------------------------------------------------------------------
+ * Function:    filter_bogus
+ *
+ * Purpose:     A bogus compression method that doesn't do anything.
+ *
+ * Return:      Success:        Data chunk size
+ *
+ *              Failure:        0
+ *
+ * Programmer:  Robb Matzke
+ *              Tuesday, April 21, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static size_t
+filter_bogus(unsigned int UNUSED flags, hsize_t UNUSED chunk_offset, size_t UNUSED cd_nelmts,
+      const unsigned int UNUSED *cd_values, size_t nbytes, size_t UNUSED *buf_size, 
+      void UNUSED **buf)
+{
+    return nbytes;
+}
+#else
+static size_t filter_bogus(unsigned int flags, size_t cd_nelmts,
+    const unsigned int *cd_values, size_t nbytes, size_t *buf_size, void **buf); 
+/* This message derives from H5Z */
+const H5Z_class_t H5Z_BOGUS[1] = {{
+    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
+    H5Z_FILTER_BOGUS,           /* Filter id number             */
+    "bogus",                    /* Filter name for debugging    */
+    NULL,                       /* The "can apply" callback     */
+    NULL,                       /* The "set local" callback     */
     (H5Z_func_t)filter_bogus,   /* The actual filter function   */
 }};
 
@@ -94,6 +135,8 @@ filter_bogus(unsigned int UNUSED flags, size_t UNUSED cd_nelmts,
 {
     return nbytes;
 }
+
+#endif
 
 /*-------------------------------------------------------------------------
  * Function:	test_null_filter

@@ -37,14 +37,6 @@ typedef struct {
    int offset;    /* datatype offset */
 } parms_atomic;
 
-/* Local function prototypes */
-static herr_t H5Z_can_apply_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
-    hid_t UNUSED file_id);
-static herr_t H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id,
-    hid_t UNUSED file_id);
-static size_t H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
-                              size_t nbytes, size_t *buf_size, void **buf);
-
 static void H5Z_calc_parms_nooptype(void);
 static void H5Z_calc_parms_atomic(void);
 static herr_t H5Z_calc_parms_array(const H5T_t *type);
@@ -81,16 +73,28 @@ static void H5Z_nbit_compress_one_compound(unsigned char *data, size_t data_offs
 static void H5Z_nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned char *buffer,
                               size_t *buffer_size, const unsigned parms[]);
 
+/* Local function prototypes */
+static herr_t H5Z_can_apply_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id, 
+    hid_t UNUSED file_id);
+static herr_t H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id,
+    hid_t UNUSED file_id);
+static size_t H5Z_filter_nbit(unsigned flags, hsize_t UNUSED chunk_offset, size_t cd_nelmts, 
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf);
+
 /* This message derives from H5Z */
 H5Z_class_t H5Z_NBIT[1] = {{
-    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
+    H5Z_CLASS_T_VERS,           /* H5Z_class_t version */
     H5Z_FILTER_NBIT,		/* Filter id number		*/
-    1,              /* Assume encoder present: check before registering */
-    1,                  /* decoder_present flag (set to true) */
-    "nbit",			    /* Filter name for debugging	*/
+    1,                          /* Assume encoder present: check before registering */
+    1,                          /* decoder_present flag (set to true) */
+    "nbit",			/* Filter name for debugging	*/
     H5Z_can_apply_nbit,		/* The "can apply" callback     */
     H5Z_set_local_nbit,         /* The "set local" callback     */
     NULL,                       /* The "reset local" callback   */
+    NULL,                       /* The "change local" callback  */
+    NULL,                       /* The "evict local" callback   */
+    NULL,                       /* The "delete local" callback  */
+    NULL,                       /* The "close local" callback   */
     H5Z_filter_nbit,		/* The actual filter function	*/
 }};
 
@@ -871,10 +875,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
-                size_t nbytes, size_t *buf_size, void **buf)
+H5Z_filter_nbit(unsigned flags, hsize_t UNUSED chunk_offset, size_t cd_nelmts, 
+    const unsigned cd_values[], size_t nbytes, size_t *buf_size, void **buf)
 {
-    size_t ret_value = 0;          /* return value */
+    size_t ret_value = nbytes;     /* return value */
     size_t size_out  = 0;          /* size of output buffer */
     unsigned d_nelmts = 0;         /* number of elements in the chunk */
     unsigned char *outbuf = NULL;  /* pointer to new output buffer */
@@ -899,7 +903,7 @@ H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     d_nelmts = cd_values[2];
 
     /* input; decompress */
-    if (flags & H5Z_FLAG_REVERSE) {
+    if (flags & H5Z_FLAG_REVERSE) { /*Read*/
         size_out = d_nelmts * cd_values[4]; /* cd_values[4] stores datatype size */
 
         /* allocate memory space for decompressed buffer */
@@ -908,9 +912,9 @@ H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 
         /* decompress the buffer */
         H5Z_nbit_decompress(outbuf, d_nelmts, *buf, cd_values);
-    }
+    
     /* output; compress */
-    else {
+    } else if (!(flags & H5Z_FLAG_INVMASK)) { /*Write*/
         assert(nbytes == d_nelmts * cd_values[4]);
 
         size_out = nbytes;

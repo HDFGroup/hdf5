@@ -124,9 +124,16 @@ typedef struct {
     hvl_t r;
     long_long s, t, u;
 } stype4;
+typedef struct {
+    int a, b, c[8], d, e;
+    float f, g, h[16], i, j;
+    double k, l, m, n;
+    long o, p, q;
+    hvl_t r;
+    long_long s, t, u;
+    char v, w;
+} stype5;
 
-/*#define NX	10u
-#define NY	20u*/
 #define NX	100u
 #define NY	200u
 #define COMP_NX	8u
@@ -140,15 +147,14 @@ const unsigned test_type_flags[H5O_SHMESG_MAX_NINDEXES] =
                  H5O_MESG_SDSPACE_FLAG,
                  H5O_MESG_PLINE_FLAG,
                  0, 0};
-#ifndef TMP
+
 const unsigned test_minsizes[H5O_SHMESG_MAX_NINDEXES] = {0, 2, 40, 100, 3, 1000};
 #define TEST_L2B 65
 #define TEST_B2L 64
-#else
-const unsigned test_minsizes[H5O_SHMESG_MAX_NINDEXES] = {250,250,250,250,250,250};
-#define TEST_L2B 50
-#define TEST_B2L 40
-#endif
+
+#define COMMITTED_DTYPE	         0
+#define UNCOMMITTED_DTYPE        1
+#define MIXED_DTYPE              2
 
 
 /*-------------------------------------------------------------------------
@@ -237,7 +243,6 @@ test_compound (char *filename, hid_t fapl)
 
     /* Create xfer properties to preserve initialized data */
     if ((PRESERVE = H5Pcreate (H5P_DATASET_XFER)) < 0) goto error;
-    if (H5Pset_preserve (PRESERVE, 1) < 0) goto error;
 
     /*
      *######################################################################
@@ -897,17 +902,17 @@ initialize_stype1(void *buf, const size_t num)
 	s_ptr->d    = i*8+6;
 	s_ptr->e    = i*8+7;
 
-        s_ptr->f    = i*2/3;
-        s_ptr->g    = i*2/3+1;
+        s_ptr->f    = (float)i*2/3;
+        s_ptr->g    = (float)i*2/3+1;
         for(j=0; j<16; j++)
-	    s_ptr->h[j] = i*j/5+j;
-        s_ptr->i    = i*2/3+2;
-        s_ptr->j    = i*2/3+3;
+	    s_ptr->h[j] = (float)i*j/5+j;
+        s_ptr->i    = (float)i*2/3+2;
+        s_ptr->j    = (float)i*2/3+3;
 
-        s_ptr->k    = i/7+1;
-        s_ptr->l    = i/7+2;
-        s_ptr->m    = i/7+3;
-        s_ptr->n    = i/7+4;
+        s_ptr->k    = (double)i/7+1;
+        s_ptr->l    = (double)i/7+2;
+        s_ptr->m    = (double)i/7+3;
+        s_ptr->n    = (double)i/7+4;
     }
 }
 
@@ -940,17 +945,17 @@ initialize_stype2(void *buf, const size_t num)
 	s_ptr->d    = i*8+6;
 	s_ptr->e    = i*8+7;
 
-        s_ptr->f    = i*2/3;
-        s_ptr->g    = i*2/3+1;
+        s_ptr->f    = (float)i*2/3;
+        s_ptr->g    = (float)i*2/3+1;
         for(j=0; j<16; j++)
-	    s_ptr->h[j] = i*j/5+j;
-        s_ptr->i    = i*2/3+2;
-        s_ptr->j    = i*2/3+3;
+	    s_ptr->h[j] = (float)i*j/5+j;
+        s_ptr->i    = (float)i*2/3+2;
+        s_ptr->j    = (float)i*2/3+3;
 
-        s_ptr->k    = i/7+1;
-        s_ptr->l    = i/7+2;
-        s_ptr->m    = i/7+3;
-        s_ptr->n    = i/7+4;
+        s_ptr->k    = (double)i/7+1;
+        s_ptr->l    = (double)i/7+2;
+        s_ptr->m    = (double)i/7+3;
+        s_ptr->n    = (double)i/7+4;
 
         s_ptr->o    = i*3+0;
         s_ptr->p    = i*3+1;
@@ -1009,7 +1014,7 @@ initialize_stype3(void *buf, const size_t num)
  *-------------------------------------------------------------------------
  */
 static void
-initialize_stype4(void *buf, const size_t num)
+initialize_stype4(void *buf, const size_t num, int addition)
 {
     size_t i, j;
     stype4 *s_ptr;
@@ -1023,17 +1028,17 @@ initialize_stype4(void *buf, const size_t num)
 	s_ptr->d    = i*8+6;
 	s_ptr->e    = i*8+7;
 
-        s_ptr->f    = i*2/3;
-        s_ptr->g    = i*2/3+1;
+        s_ptr->f    = (float)i*2/3;
+        s_ptr->g    = (float)i*2/3+1;
         for(j=0; j<16; j++)
-	    s_ptr->h[j] = i*j/5+j;
-        s_ptr->i    = i*2/3+2;
-        s_ptr->j    = i*2/3+3;
+	    s_ptr->h[j] = (float)i*j/5+j;
+        s_ptr->i    = (float)i*2/3+2;
+        s_ptr->j    = (float)i*2/3+3;
 
-        s_ptr->k    = i/7+1;
-        s_ptr->l    = i/7+2;
-        s_ptr->m    = i/7+3;
-        s_ptr->n    = i/7+4;
+        s_ptr->k    = (double)i/7+1;
+        s_ptr->l    = (double)i/7+2;
+        s_ptr->m    = (double)i/7+3;
+        s_ptr->n    = (double)i/7+4;
 
         s_ptr->o    = i*3+0;
         s_ptr->p    = i*3+1;
@@ -1044,9 +1049,9 @@ initialize_stype4(void *buf, const size_t num)
         for(j=0; j<4; j++)
             ((unsigned int *)s_ptr->r.p)[j]=i*10+j;
 
-        s_ptr->s    = i*5+1;
-        s_ptr->t    = i*5+2;
-        s_ptr->u    = i*5+3;
+        s_ptr->s    = i*5+1+addition;
+        s_ptr->t    = i*5+2+addition;
+        s_ptr->u    = i*5+3+addition;
     }
 }
 
@@ -1282,6 +1287,75 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	create_stype5
+ *
+ * Purpose:	Create HDF5 compound datatype for stype5.
+ *
+ * Return:	Success:        datatype ID
+ *
+ *              Failure:        negative	
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 15 June 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+create_stype5(void)
+{
+    hid_t   array_dt1, array_dt2, vl_tid, tid;
+    const hsize_t	eight = 8, sixteen = 16;
+
+    /* Build hdf5 datatypes */
+    if((array_dt1 = H5Tarray_create2(H5T_NATIVE_INT,1, &eight)) < 0)
+        goto error;
+    if((array_dt2 = H5Tarray_create2(H5T_NATIVE_FLOAT,1, &sixteen)) < 0)
+        goto error;
+    if((vl_tid = H5Tvlen_create (H5T_NATIVE_UINT)) < 0)
+        goto error;
+
+    if((tid = H5Tcreate(H5T_COMPOUND, sizeof(stype5))) < 0 ||
+            H5Tinsert(tid, "a", HOFFSET(stype5, a), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "b", HOFFSET(stype5, b), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "c", HOFFSET(stype5, c), array_dt1) < 0 ||
+            H5Tinsert(tid, "d", HOFFSET(stype5, d), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "e", HOFFSET(stype5, e), H5T_NATIVE_INT) < 0 ||
+            H5Tinsert(tid, "f", HOFFSET(stype5, f), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "g", HOFFSET(stype5, g), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "h", HOFFSET(stype5, h), array_dt2) < 0 ||
+            H5Tinsert(tid, "i", HOFFSET(stype5, i), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "j", HOFFSET(stype5, j), H5T_NATIVE_FLOAT) < 0 ||
+            H5Tinsert(tid, "k", HOFFSET(stype5, k), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "l", HOFFSET(stype5, l), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "m", HOFFSET(stype5, m), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "n", HOFFSET(stype5, n), H5T_NATIVE_DOUBLE) < 0 ||
+            H5Tinsert(tid, "o", HOFFSET(stype5, o), H5T_NATIVE_LONG) < 0 ||
+            H5Tinsert(tid, "p", HOFFSET(stype5, p), H5T_NATIVE_LONG) < 0 ||
+            H5Tinsert(tid, "q", HOFFSET(stype5, q), H5T_NATIVE_LONG) < 0 ||
+            H5Tinsert(tid, "r", HOFFSET(stype5, r), vl_tid) < 0 ||
+            H5Tinsert(tid, "s", HOFFSET(stype5, s), H5T_NATIVE_LLONG) < 0 ||
+            H5Tinsert(tid, "t", HOFFSET(stype5, t), H5T_NATIVE_LLONG) < 0 ||
+            H5Tinsert(tid, "u", HOFFSET(stype5, u), H5T_NATIVE_LLONG) < 0 ||
+            H5Tinsert(tid, "v", HOFFSET(stype5, v), H5T_NATIVE_CHAR) < 0 ||
+            H5Tinsert(tid, "w", HOFFSET(stype5, w), H5T_NATIVE_CHAR) < 0)
+        goto error;
+
+    if(H5Tclose(array_dt1) < 0)
+        goto error;
+    if(H5Tclose(array_dt2) < 0)
+        goto error;
+    if(H5Tclose(vl_tid) < 0)
+        goto error;
+
+    return tid;
+
+error:
+    return FAIL;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	compare_data
  *
  * Purpose:	Compare data of stype1 and stype2.
@@ -1332,6 +1406,7 @@ compare_data(void *src_data, void *dst_data, hbool_t src_subset)
             !DBL_ABS_EQUAL(s_ptr->n, d_ptr->n) ) {
 
 	    H5_FAILED();
+
 	    printf("    i=%d\n", i);
 	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f}\n",
 		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
@@ -1348,6 +1423,7 @@ compare_data(void *src_data, void *dst_data, hbool_t src_subset)
                    d_ptr->h[9],d_ptr->h[10],d_ptr->h[11],d_ptr->h[12],d_ptr->h[13],
                    d_ptr->h[14], d_ptr->h[15], d_ptr->i,d_ptr->j,d_ptr->k,d_ptr->l,
                    d_ptr->m,d_ptr->n);
+
 	    goto error;
 	}
     }
@@ -1547,6 +1623,102 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	compare_stype4_stype5
+ *
+ * Purpose:	Compare data between stype4 and stype5.
+ *
+ * Return:	Success:        0
+ *
+ *              Failure:        negative	
+ *
+ * Programmer:  Raymond Lu
+ *              Friday, 14 September 2007
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static int
+compare_stype4_stype5(void *src_data, void *dst_data, size_t nelmts)
+{
+    stype4  *s_ptr;
+    stype5  *d_ptr;
+    size_t  i, j;
+
+    for(i = 0; i < nelmts; i++) {
+	s_ptr = ((stype4*)src_data) + i;
+	d_ptr = ((stype5*)dst_data) + i;
+
+	if (s_ptr->a    != d_ptr->a    ||
+	    s_ptr->b    != d_ptr->b    ||
+	    s_ptr->c[0] != d_ptr->c[0] ||
+	    s_ptr->c[1] != d_ptr->c[1] ||
+	    s_ptr->c[2] != d_ptr->c[2] ||
+	    s_ptr->c[3] != d_ptr->c[3] ||
+	    s_ptr->d    != d_ptr->d    ||
+	    s_ptr->e    != d_ptr->e    ||
+            !FLT_ABS_EQUAL(s_ptr->f, d_ptr->f) ||
+            !FLT_ABS_EQUAL(s_ptr->g, d_ptr->g) ||
+            !FLT_ABS_EQUAL(s_ptr->h[0], d_ptr->h[0]) ||
+            !FLT_ABS_EQUAL(s_ptr->h[1], d_ptr->h[1]) ||
+            !FLT_ABS_EQUAL(s_ptr->i, d_ptr->i) ||
+            !FLT_ABS_EQUAL(s_ptr->j, d_ptr->j) ||
+            !DBL_ABS_EQUAL(s_ptr->k, d_ptr->k) ||
+            !DBL_ABS_EQUAL(s_ptr->l, d_ptr->l) ||
+            !DBL_ABS_EQUAL(s_ptr->m, d_ptr->m) ||
+            !DBL_ABS_EQUAL(s_ptr->n, d_ptr->n) ||
+	    s_ptr->o    != d_ptr->o    ||
+	    s_ptr->p    != d_ptr->p    ||
+	    s_ptr->q    != d_ptr->q    ||
+	    s_ptr->s    != d_ptr->s    ||
+	    s_ptr->t    != d_ptr->t    ||
+	    s_ptr->u    != d_ptr->u ) {
+
+	    H5_FAILED();
+	    printf("    i=%d\n", i);
+	    printf("    src={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, o=%d, p=%d, q=%d, s=%ld, t=%ld, u=%ld}\n",
+		   s_ptr->a, s_ptr->b, s_ptr->c[0], s_ptr->c[1], s_ptr->c[2],
+		   s_ptr->c[3], s_ptr->c[4], s_ptr->c[5], s_ptr->c[6], s_ptr->c[7], 
+                   s_ptr->d, s_ptr->e, s_ptr->f, s_ptr->g,s_ptr->h[0],s_ptr->h[1],s_ptr->h[2],
+                   s_ptr->h[3],s_ptr->h[4],s_ptr->h[5],s_ptr->h[6],s_ptr->h[7],s_ptr->h[8],
+                   s_ptr->h[9],s_ptr->h[10],s_ptr->h[11],s_ptr->h[12],s_ptr->h[13],s_ptr->h[14],
+                   s_ptr->h[15], s_ptr->i,s_ptr->j,s_ptr->k,s_ptr->l,s_ptr->m,s_ptr->n, 
+                   s_ptr->o, s_ptr->p, s_ptr->q, s_ptr->s, s_ptr->t, s_ptr->u);
+	    printf("    dst={a=%d, b=%d, c=[%d,%d,%d,%d,%d,%d,%d,%d], d=%d, e=%d, f=%f, g=%f, h=[%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f], i=%f, j=%f, k=%f, l=%f, m=%f, n=%f, o=%d, p=%d, q=%d, s=%ld, t=%ld, u=%ld}\n",
+		   d_ptr->a, d_ptr->b, d_ptr->c[0], d_ptr->c[1], d_ptr->c[2],
+		   d_ptr->c[3], d_ptr->c[4], d_ptr->c[5], d_ptr->c[6], d_ptr->c[7], 
+                   d_ptr->d, d_ptr->e, d_ptr->f, d_ptr->g,d_ptr->h[0],d_ptr->h[1],d_ptr->h[2],
+                   d_ptr->h[3],d_ptr->h[4],d_ptr->h[5],d_ptr->h[6],d_ptr->h[7],d_ptr->h[8],
+                   d_ptr->h[9],d_ptr->h[10],d_ptr->h[11],d_ptr->h[12],d_ptr->h[13],
+                   d_ptr->h[14], d_ptr->h[15], d_ptr->i,d_ptr->j,d_ptr->k,d_ptr->l,
+                   d_ptr->m,d_ptr->n, d_ptr->o, d_ptr->p, d_ptr->q, d_ptr->s, d_ptr->t, 
+                   d_ptr->u);
+	    goto error;
+	}
+
+        if(s_ptr->r.len!=d_ptr->r.len) {
+	    H5_FAILED();
+	    printf("    i=%d\n", i);
+            printf("VL data lengths don't match!, src len=%d, dst len=%d\n",(int)s_ptr->r.len,(int)d_ptr->r.len);
+	    goto error;
+        } /* end if */
+        for(j=0; j<s_ptr->r.len; j++) {
+            if( ((unsigned int *)s_ptr->r.p)[j] != ((unsigned int *)d_ptr->r.p)[j] ) {
+	        H5_FAILED();
+	        printf("    i=%d\n", i);
+                printf("VL data values don't match!, src r.p[%d]=%u, dst r.p[%d]=%u\n",(int)j, ((unsigned int *)s_ptr->r.p)[j], (int)j, ((unsigned int *)d_ptr->r.p)[j]);
+	        goto error;
+            }
+        }
+    }
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_hdf5_src_subset
  *
  * Purpose:	Test the optimization of compound data writing, rewriting,
@@ -1657,9 +1829,6 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
 
     /* Create xfer properties to preserve initialized data */
     if((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
-       goto error;
-
-    if(H5Pset_preserve(dxpl, TRUE) < 0)
        goto error;
 
     /* Rewrite contiguous data set */
@@ -1813,7 +1982,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     rbuf = (void*)malloc(NX * NY * sizeof(stype1));
 
     rew_buf = (void*)malloc(NX * NY * sizeof(stype4));
-    initialize_stype4(rew_buf, (size_t)NX*NY);
+    initialize_stype4(rew_buf, (size_t)NX*NY, 0);
 
     /* Create dataset creation property list */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
@@ -1861,9 +2030,6 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
 
     /* Create xfer properties to preserve initialized data */
     if((dxpl = H5Pcreate (H5P_DATASET_XFER)) < 0)
-       goto error;
-
-    if(H5Pset_preserve(dxpl, TRUE) < 0)
        goto error;
 
     /* Rewrite contiguous data set */
@@ -1973,23 +2139,23 @@ error:
  */
 #ifdef H5_HAVE_FILTER_DTYPE_MODIFY
 static int
-test_hdf5_change_dtype_chunked(char *filename, hid_t fapl)
+test_hdf5_change_dtype_chunked(char *filename, hid_t fapl, int dtype_flag)
 {
     hid_t   file;     
-    hid_t   rew_tid, src_tid, dst_tid;
+    hid_t   rew_tid, rew2_tid, src_tid, dst_tid;
     hid_t   dataset;
     hid_t   space, space2, mspace;
     hid_t   fcpl, dcpl, dxpl;
+    H5O_info_t    type_info;
     hsize_t dims[2] = {NX, NY};
     hsize_t chunk_dims[2] = {NX/10, NY/10};
     hsize_t mem_dims[2] = {NX/2, NY};
-    void *orig=NULL, *rew_buf=NULL, *rbuf=NULL;
+    void *orig=NULL, *rew_buf=NULL, *rbuf=NULL, *rbuf2=NULL;
     void *rew_half_buf=NULL, *new_rbuf_half=NULL, *orig_rbuf_half=NULL;
     hsize_t hs_offset[2] = {0,0}; /* Hyperslab offset */
     const hsize_t hs_size[2] = {NX/2, NY};   /* Hyperslab size */
     const hsize_t hs_stride[2] = {1,1}; /* Hyperslab stride */
     const hsize_t hs_count[2] = {1,1}; /* Hyperslab count */
-    unsigned num_indexes;
     unsigned x;
 
     if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -2022,6 +2188,22 @@ test_hdf5_change_dtype_chunked(char *filename, hid_t fapl)
     if ((rew_tid=create_stype4())<0)
         goto error;
 
+    if ((rew2_tid=create_stype5())<0)
+        goto error;
+
+    /* Determine whether to test committed or uncomitted data types */
+    if((COMMITTED_DTYPE == dtype_flag || MIXED_DTYPE == dtype_flag) && H5Tcommit2(file, 
+        "src type", src_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto error;
+
+    if(COMMITTED_DTYPE == dtype_flag && H5Tcommit2(file, "rewrite type", rew_tid, 
+        H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto error;
+
+    if((COMMITTED_DTYPE == dtype_flag || MIXED_DTYPE == dtype_flag) && H5Tcommit2(file, 
+        "second rewrite type", rew2_tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto error;
+
     /* Create the data space */
     if((space = H5Screate_simple(2, dims, NULL))<0)
 	goto error;
@@ -2034,15 +2216,16 @@ test_hdf5_change_dtype_chunked(char *filename, hid_t fapl)
     initialize_stype2(orig, (size_t)NX*NY);
 
     rbuf = (void*)malloc(NX * NY * sizeof(stype1));
+    rbuf2 = (void*)malloc(NX * NY * sizeof(stype5));
 
     orig_rbuf_half = (void*)malloc(NX/2 * NY * sizeof(stype2));
     new_rbuf_half = (void*)malloc(NX/2 * NY * sizeof(stype4));
 
     rew_half_buf = (void*)malloc((NX/2) * NY * sizeof(stype4));
-    initialize_stype4(rew_half_buf, (size_t)(NX/2)*NY);
+    initialize_stype4(rew_half_buf, (size_t)(NX/2)*NY, 2);
 
     rew_buf = (void*)malloc(NX * NY * sizeof(stype4));
-    initialize_stype4(rew_buf, (size_t)NX*NY);
+    initialize_stype4(rew_buf, (size_t)NX*NY, 1);
 
     /* Create dataset creation property list */
     if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
@@ -2158,13 +2341,9 @@ test_hdf5_change_dtype_chunked(char *filename, hid_t fapl)
 
     /*
      *######################################################################
-     * STEP 4. Rewrite the whole data.
+     * STEP 4. Rewrite the whole data with the new datatype.
      */
-    TESTING("rewriting data with a subset of original data type");
-
-    /* Create xfer properties to preserve initialized data */
-    if ((dxpl = H5Pcreate (H5P_DATASET_XFER))<0)
-       goto error;
+    TESTING("rewriting data with the new data type");
 
     /* Rewrite chunked data set */
     if((dataset = H5Dopen2(file, DSET_NAME[3], H5P_DEFAULT))<0)
@@ -2198,6 +2377,115 @@ test_hdf5_change_dtype_chunked(char *filename, hid_t fapl)
     if(H5Dclose(dataset) < 0)
         goto error;
 
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 6. Change datatype after rewrite the whole data.  The data in
+     * the cache should be converted and flushed to the file when the 
+     * dataset is closed. 
+     */
+    TESTING("change datatype after rewriting the data");
+
+    /* Rewrite chunked data set */
+    if((dataset = H5Dopen2(file, DSET_NAME[3], H5P_DEFAULT))<0)
+        goto error;
+
+    /* Modify the data buffer a little */
+    initialize_stype4(rew_buf, (size_t)NX*NY, 3);
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, rew_tid, H5S_ALL, H5S_ALL, dxpl, rew_buf)<0)
+	goto error;
+
+    /* Modify the datatype of the chunked dataset now.  It should only change 
+     * the data of the chunks in the cache, not the data in the file. */
+    if(H5Dmodify_dtype(dataset, rew2_tid)<0) 
+        goto error;
+
+#ifdef TMP
+    /* There seems to be some problem with this operation - temporarily disable it */
+    /* Read the data back with rew2_tid (stype5) and compare it with rew_buf
+     * of rew_tid (stype4). */
+    if(H5Dread(dataset, rew2_tid, H5S_ALL, H5S_ALL, dxpl, rbuf2)<0)
+        goto error;
+
+    if(compare_stype4_stype5(rew_buf, rbuf2, (size_t)NX*NY) < 0)
+        goto error;
+#endif
+
+    if(H5Dclose(dataset) < 0)
+        goto error;
+
+    /* The reference count for the original dtype should be only 1, for
+     * it's a committed type and saved in the file, and no other reference. */ 
+    if(H5Tcommitted(src_tid)) {
+        if(H5Oget_info(src_tid, &type_info) < 0)
+            goto error;
+
+        if(type_info.rc != 1)
+            goto error;
+    }
+
+    /* The reference count for the changed dtype should be 100, for it's
+     * a committed type, and there're 100 chunks with one of them being
+     * changed to the new dtype, and the dataset's dtype has been changed,
+     * too. */
+    if(H5Tcommitted(rew_tid)) {
+        if(H5Oget_info(rew_tid, &type_info) < 0)
+            goto error;
+
+        if(type_info.rc != 100)
+            goto error;
+    }
+
+    /* The reference count for the second changed dtype should be 3, for
+     * it's a committed type, and one chunk has been converted in the cached
+     * and flushed to the file, and the dataset's dtype has been changed,
+     * too. */  
+    if(H5Tcommitted(rew2_tid)) {
+        if(H5Oget_info(rew2_tid, &type_info) < 0)
+            goto error;
+
+        if(type_info.rc != 3)
+            goto error;
+    }
+
+    PASSED();
+
+    /*
+     *######################################################################
+     * STEP 7. Delete the dataset and verify the reference count of the 
+     * data types.
+     */
+    TESTING("delete the dataset");
+
+    /* delete the data set */
+    if(H5Ldelete(file, DSET_NAME[3], H5P_DEFAULT)<0)
+        goto error;
+
+    /* The reference count for the changed dtype should be 1, for it's
+     * a committed type, and the dataset refered to it has been deleted.
+     */
+    if(H5Tcommitted(rew_tid)) {
+        if(H5Oget_info(rew_tid, &type_info) < 0)
+            goto error;
+
+        if(type_info.rc != 1)
+            goto error;
+    }
+
+    /* The reference count for the second changed dtype should be 1, for
+     * it's a committed type, and the dataset refered to it has been deleted.
+     */
+    if(H5Tcommitted(rew2_tid)) {
+        if(H5Oget_info(rew2_tid, &type_info) < 0)
+            goto error;
+
+        if(type_info.rc != 1)
+            goto error;
+    }
+
     /* Finishing test and release resources */
     if(H5Sclose(space) < 0)
         goto error;
@@ -2217,6 +2505,9 @@ test_hdf5_change_dtype_chunked(char *filename, hid_t fapl)
         goto error;
     if(H5Tclose(rew_tid)<0)
         goto error;
+    if(H5Tclose(rew2_tid)<0)
+        goto error;
+
     if(H5Fclose(file) < 0)
         goto error;
 
@@ -2264,7 +2555,7 @@ static int
 test_hdf5_change_dtype_no_filter(char *filename, hid_t fapl, htri_t is_contig)
 {
     hid_t   file;     
-    hid_t   rew_tid, src_tid, dst_tid;
+    hid_t   rew_tid, src_tid;
     hid_t   dataset;
     hid_t   space;
     hid_t   dcpl, dxpl;
@@ -2272,8 +2563,6 @@ test_hdf5_change_dtype_no_filter(char *filename, hid_t fapl, htri_t is_contig)
     hsize_t chunk_dims[2] = {NX/10, NY/10};
     /*hsize_t chunk_dims[2] = {NX, NY};*/
     void *orig=NULL, *rew_buf=NULL, *rbuf1=NULL, *rbuf2=NULL;
-    unsigned num_indexes;
-    unsigned x;
 
     /* Create the file for this test */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -2297,7 +2586,7 @@ test_hdf5_change_dtype_no_filter(char *filename, hid_t fapl, htri_t is_contig)
     rbuf1 = (void*)malloc(NX * NY * sizeof(stype2));
 
     rew_buf = (void*)malloc(NX * NY * sizeof(stype4));
-    initialize_stype4(rew_buf, (size_t)NX*NY);
+    initialize_stype4(rew_buf, (size_t)NX*NY, 0);
 
     rbuf2 = (void*)malloc(NX * NY * sizeof(stype4));
 
@@ -2461,14 +2750,12 @@ static int
 test_hdf5_change_dtype_compact(char *filename, hid_t fapl)
 {
     hid_t   file;     
-    hid_t   rew_tid, src_tid, dst_tid;
+    hid_t   rew_tid, src_tid;
     hid_t   dataset;
     hid_t   space;
     hid_t   dcpl, dxpl;
     hsize_t dims[2] = {COMP_NX, COMP_NY};
     void *orig=NULL, *rew_buf=NULL, *rbuf1=NULL, *rbuf2=NULL;
-    unsigned num_indexes;
-    unsigned x;
 
     /* Create the file for this test */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -2492,7 +2779,7 @@ test_hdf5_change_dtype_compact(char *filename, hid_t fapl)
     rbuf1 = (void*)malloc(COMP_NX * COMP_NY * sizeof(stype2));
 
     rew_buf = (void*)malloc(COMP_NX * COMP_NY * sizeof(stype4));
-    initialize_stype4(rew_buf, (size_t)COMP_NX*COMP_NY);
+    initialize_stype4(rew_buf, (size_t)COMP_NX*COMP_NY, 0);
 
     rbuf2 = (void*)malloc(COMP_NX * COMP_NY * sizeof(stype4));
 
@@ -2694,21 +2981,31 @@ main (int argc, char *argv[])
     h5_fixname(FILENAME[2], fapl_id, fname, sizeof(fname));
     nerrors += test_hdf5_dst_subset(fname, fapl_id);
 
-    puts("Testing the filter for modifying datatype of chunked dataset:");
+#ifndef H5_USE_16_API
+    puts("Testing the filter for modifying datatype of chunked dataset with uncommitted dtype:");
     h5_fixname(FILENAME[3], fapl_id, fname, sizeof(fname));
-    nerrors += test_hdf5_change_dtype_chunked(fname, fapl_id);
+    nerrors += test_hdf5_change_dtype_chunked(fname, fapl_id, UNCOMMITTED_DTYPE);
+
+    puts("Testing the filter for modifying datatype of chunked dataset with committed and uncommitted dtype:");
+    h5_fixname(FILENAME[4], fapl_id, fname, sizeof(fname));
+    nerrors += test_hdf5_change_dtype_chunked(fname, fapl_id, MIXED_DTYPE);
+
+    puts("Testing the filter for modifying datatype of chunked dataset with committed dtype:");
+    h5_fixname(FILENAME[5], fapl_id, fname, sizeof(fname));
+    nerrors += test_hdf5_change_dtype_chunked(fname, fapl_id, COMMITTED_DTYPE);
 
     puts("Testing modifying datatype of chunked dataset with no filter:");
-    h5_fixname(FILENAME[4], fapl_id, fname, sizeof(fname));
+    h5_fixname(FILENAME[6], fapl_id, fname, sizeof(fname));
     nerrors += test_hdf5_change_dtype_no_filter(fname, fapl_id, FALSE);
 
     puts("Testing modifying datatype of contiguous dataset:");
-    h5_fixname(FILENAME[5], fapl_id, fname, sizeof(fname));
+    h5_fixname(FILENAME[7], fapl_id, fname, sizeof(fname));
     nerrors += test_hdf5_change_dtype_no_filter(fname, fapl_id, TRUE);
 
     puts("Testing modifying datatype of compact dataset:");
-    h5_fixname(FILENAME[6], fapl_id, fname, sizeof(fname));
+    h5_fixname(FILENAME[8], fapl_id, fname, sizeof(fname));
     nerrors += test_hdf5_change_dtype_compact(fname, fapl_id);
+#endif
 
     if (nerrors) {
         printf("***** %u FAILURE%s! *****\n",

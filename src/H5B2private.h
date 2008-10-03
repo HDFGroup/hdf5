@@ -54,6 +54,7 @@ typedef enum H5B2_subid_t {
     H5B2_SOHM_INDEX_ID,         /* B-tree is an index for shared object header messages */
     H5B2_ATTR_DENSE_NAME_ID,    /* B-tree is for indexing 'name' field for "dense" attribute storage on objects */
     H5B2_ATTR_DENSE_CORDER_ID,  /* B-tree is for indexing 'creation order' field for "dense" attribute storage on objects */
+    H5B2_MODIFY_TYPE_ID,        /* B-tree is for indexing 'datatype' field for filter of modifying datatype */
     H5B2_NUM_BTREE_ID           /* Number of B-tree IDs (must be last)  */
 } H5B2_subid_t;
 

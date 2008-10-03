@@ -1228,6 +1228,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dxpl_id)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't increment object count")
     } /* end else */
 
+#ifndef H5_USE_16_API
     /* Get a file ID for the file */
     if((fid = H5F_get_id(dataset->oloc.file)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to get file ID")
@@ -1236,11 +1237,11 @@ H5D_open(const H5G_loc_t *loc, hid_t dxpl_id)
      * Make the "reset local" filter callbacks for this dataset.  It's mainly for some filters
      * like datatype modification which need some info after the dataset is reopened.
      * If the library has been closed and reopened, the user-defined filters aren't 
-     * registered in the library anymore.  This function for those filters can't be 
+     * registered in the library anymore.  This function is for those filters can't be 
      * found and may fail.  Therefore ignore the error if it's this case.
      */
     H5E_BEGIN_TRY {
-        H5Z_reset_local(dataset->shared->dcpl_id, dataset->shared->type_id, fid);
+        H5Z_reset_local(dataset->shared->dcpl_id, dataset->shared->type_id, fid, TRUE);
     } H5E_END_TRY;
 
     /* Release the file ID */
@@ -1248,6 +1249,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dxpl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, NULL, "can't close file")
 
     fid = -1;
+#endif
 
     ret_value = dataset;
 
@@ -1519,6 +1521,7 @@ done:
 herr_t
 H5D_close(H5D_t *dataset)
 {
+    hid_t fid;
     unsigned free_failed = FALSE;
     herr_t ret_value = SUCCEED;      /* Return value */
 
@@ -1532,6 +1535,10 @@ H5D_close(H5D_t *dataset)
 #ifdef H5D_ISTORE_DEBUG
     H5D_istore_stats(dataset, FALSE);
 #endif /* H5F_ISTORE_DEBUG */
+
+    /* Get a file ID for the file */
+    if((fid = H5F_get_id(dataset->oloc.file)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "unable to get file ID")
 
     dataset->shared->fo_count--;
     if(dataset->shared->fo_count == 0) {
@@ -1588,6 +1595,12 @@ H5D_close(H5D_t *dataset)
 #endif /* NDEBUG */
         } /* end switch */ /*lint !e788 All appropriate cases are covered */
 
+#ifndef H5_USE_16_API
+        H5E_BEGIN_TRY {
+            H5Z_close_local(dataset->shared->dcpl_id, dataset->shared->type_id, fid);
+        } H5E_END_TRY;
+#endif
+
         /*
         * Release datatype, dataspace and creation property list -- there isn't
         * much we can do if one of these fails, so we just continue.
@@ -1625,7 +1638,17 @@ H5D_close(H5D_t *dataset)
         if(H5FO_top_count(dataset->oloc.file, dataset->oloc.addr) == 0)
             if(H5O_close(&(dataset->oloc)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to close")
+
+        H5E_BEGIN_TRY {
+            H5Z_close_local(dataset->shared->dcpl_id, dataset->shared->type_id, fid);
+        } H5E_END_TRY;
     } /* end else */
+
+    /* Release the file ID */
+    if(H5I_dec_ref(fid) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, NULL, "can't close file")
+
+    fid = -1;
 
    /* Release the dataset's path info */
    if(H5G_name_free(&(dataset->path)) < 0)
@@ -2277,13 +2300,13 @@ H5D_check_filters(H5D_t *dataset)
                 if(H5Z_can_apply(dataset->shared->dcpl_id, dataset->shared->type_id, fid) < 0)
                     HGOTO_ERROR(H5E_PLINE, H5E_CANAPPLY, FAIL, "can't apply filters")
 
-                dataset->shared->checked_filters = TRUE;
-
                 /* Release the file ID */
                 if(H5I_dec_ref(fid) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEFILE, NULL, "can't close file")
 
                 fid = -1;
+
+                dataset->shared->checked_filters = TRUE;
             } /* end if */
         } /* end if */
     } /* end if */

@@ -20,6 +20,14 @@
 
 #include "h5test.h"
 
+#ifdef H5_USE_16_API
+int main(void)
+{
+    printf("Test skipped because backward compatbility with v1.6 is configured in\n");
+    return 0;
+}
+#else /* H5_USE_16_API */
+
 #define STR_LEN 16
 #define NX	10u
 #define NY	20u
@@ -43,6 +51,7 @@ const char *DSET_NAME[] = {
     "enum",
     "array",
     "reference",
+    "btree_node",
     NULL
 };
 
@@ -114,6 +123,84 @@ test_integer(hid_t file)
     if(H5Dclose(dset) < 0)
         TEST_ERROR;
   
+    PASSED();
+    return 0;
+
+error:
+    H5_FAILED();
+    H5E_BEGIN_TRY {
+        H5Sclose(space);
+        H5Dclose(dset);
+    } H5E_END_TRY;
+    return 1;
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_btree_node
+ *
+ * Purpose:	Creates a simple dataset of an integer type and tries to 
+ *              change the datatype to a bigger size.  Test whether the 
+ *              B-tree node works properly in the filter for modifying
+ *              dataset's datatype.  The B-tree is for storing the number
+ *              of datatype reference by the data chunks.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Raymond Lu
+ *              19 November 2007 
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_btree_node(hid_t file)
+{
+    hid_t               dset;
+    hid_t               space;
+    hid_t               dcpl;
+    hsize_t             dims[2] = {NX, NY};
+    hsize_t             chunk_dims[2] = {NX/2, NY/2};
+    int                 *wbuf = NULL, *ptr = NULL;
+    unsigned            i;
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE))<0)
+        TEST_ERROR;
+
+    if((space=H5Screate_simple(2, dims, NULL)) < 0)
+        TEST_ERROR;
+
+    if(H5Pset_dtype_modifiable(dcpl)<0) 
+        TEST_ERROR;
+
+    /* Set chunking */
+    if(H5Pset_chunk(dcpl, 2, chunk_dims)<0)
+        TEST_ERROR;
+
+    if((dset=H5Dcreate2(file, DSET_NAME[10], H5T_STD_U32BE, space, H5P_DEFAULT, dcpl, 
+        H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    wbuf = (int *)malloc(sizeof(int)*NX*NY);
+    ptr = wbuf;
+    for(i = 0; i<NX*NY; i++) {
+        *ptr = i;
+        ptr++;
+    }
+
+    if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
+
+    if(H5Dmodify_dtype(dset, H5T_STD_U64LE) < 0)
+        TEST_ERROR;
+ 
+    if(H5Dclose(dset) < 0)
+        TEST_ERROR;
+  
+    free(wbuf);
+
     PASSED();
     return 0;
 
@@ -805,6 +892,9 @@ int main(void)
     TESTING("dataset of reference type:");
     nerrors += test_reference(fid);
 
+    TESTING("size of B-tree node");
+    nerrors += test_btree_node(fid);
+
     if(H5Fclose(fid) < 0)
 	nerrors++;
 
@@ -819,3 +909,4 @@ int main(void)
 
     return 0;
 }
+#endif /* H5_USE_16_API */

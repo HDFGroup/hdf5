@@ -24,12 +24,12 @@
 #define H5Z_PACKAGE		/*suppress error about including H5Zpkg	  */
 
 #include "H5private.h"		/* Generic Functions			*/
+#include "H5Dprivate.h"		/* Error handling		  	*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free Lists				*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Zpkg.h"		/* Data filters				*/
-
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_pline_encode(H5F_t *f, uint8_t *p, const void *mesg);
@@ -38,6 +38,8 @@ static void *H5O_pline_copy(const void *_mesg, void *_dest);
 static size_t H5O_pline_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_pline_reset(void *_mesg);
 static herr_t H5O_pline_free(void *_mesg);
+static herr_t H5O_pline_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, 
+    void *_mesg);
 static herr_t H5O_pline_pre_copy_file(H5F_t *file_src, 
     const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static herr_t H5O_pline_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
@@ -52,7 +54,7 @@ static herr_t H5O_pline_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 #define H5O_SHARED_SIZE			H5O_pline_shared_size
 #define H5O_SHARED_SIZE_REAL		H5O_pline_size
 #define H5O_SHARED_DELETE		H5O_pline_shared_delete
-#undef H5O_SHARED_DELETE_REAL
+#define H5O_SHARED_DELETE_REAL          H5O_pline_delete
 #define H5O_SHARED_LINK			H5O_pline_shared_link
 #undef H5O_SHARED_LINK_REAL
 #define H5O_SHARED_COPY_FILE		H5O_pline_shared_copy_file
@@ -548,6 +550,78 @@ H5O_pline_free(void *mesg)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_pline_free() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_pline_delete
+ *
+ * Purpose:     Free file space referenced by message
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Raymond Lu
+ *              13 August 2008
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_pline_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
+{
+    H5O_pline_t *mesg = (H5O_pline_t *)_mesg;
+    H5O_pline_t *pline = NULL;
+    H5D_layout_t    layout;        /* Dataset's layout information */
+    hid_t       dcpl_id, file_id;
+    H5P_genplist_t  *dc_plist = NULL, *def_dc_plist=NULL;       /* New Property list */
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_pline_delete)
+
+    /* check args */
+    HDassert(f);
+    HDassert(mesg);
+
+    /* Get the object of default dataset creation property list */
+    if(NULL == (def_dc_plist = (H5P_genplist_t *)H5I_object(H5P_DATASET_CREATE_DEFAULT)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dataset creation property list")
+
+    /* Create a new default property list */
+    if((dcpl_id = H5P_copy_plist(def_dc_plist)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy dataset creation property list")
+
+    if(NULL == (dc_plist = (H5P_genplist_t *)H5I_object(dcpl_id)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get dataset creation property list")
+
+    /* Make a copy of filter pipeline and insert into the property list.  Only the filter
+     * for modifying dataset's datatype has the callback function to delete the local 
+     * values.  This filter only needs the property of pipeline and chunking. */
+    if((pline = H5O_pline_copy(mesg, NULL)) == NULL)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTCOPY, FAIL, "unable to copy pipeline")
+ 
+    if(H5P_set(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, pline) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTINIT, FAIL, "unable to set pipeline")
+
+    layout = H5D_CHUNKED; 
+    if(H5P_set(dc_plist, H5D_CRT_LAYOUT_NAME, &layout) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve layout")
+
+    if((file_id = H5F_get_id(f)) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "can't get file ID")
+
+    /* Call the function of the filter pipeline */
+    if(H5Z_delete_local(dcpl_id, 0, file_id) < 0)
+        HGOTO_ERROR(H5E_PLINE, H5E_CANTDELETE, FAIL, "can't get dataset creation property list")
+
+    if(H5I_dec_ref(dcpl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close property list ID");
+
+    if(H5I_dec_ref(file_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "can't close file ID");
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_pline_delete() */
 
 
 /*-------------------------------------------------------------------------

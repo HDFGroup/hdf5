@@ -112,6 +112,7 @@ typedef struct H5D_t H5D_t;
 typedef struct {
     hsize_t index;          /* "Index" of chunk in dataset (must be first for TBBT routines) */
     hsize_t *offset;        /* Chunk's coordinates in elements */
+    hssize_t linear_offset; /* Chunk's coordinates translated into one-dimensional offset */
 } H5D_chunk_storage_t;
 
 typedef struct {
@@ -185,6 +186,7 @@ H5_DLL herr_t H5D_istore_delete(H5F_t *f, hid_t dxpl_id,
     const H5O_layout_t *layout);
 H5_DLL herr_t H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
 				int indent, int fwidth, unsigned ndims);
+H5_DLL hssize_t H5D_istore_calc_offset(H5S_t *space, hsize_t offset[]);
 
 #endif /* _H5Dprivate_H */
 

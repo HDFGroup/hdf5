@@ -71,4 +71,7 @@ FUNCTION: H5Topen; ; v10, v18
 # (although not required, it's easier to compare this file with the headers
 #       generated if the list below is in alphanumeric sort order - QAK)
 TYPEDEF: H5E_auto; v10, v18
-
+TYPEDEF: H5Z_func; v10, v18
+TYPEDEF: H5Z_can_apply_func; v10, v18
+TYPEDEF: H5Z_set_local_func; v10, v18
+TYPEDEF: H5Z_class; v10, v18

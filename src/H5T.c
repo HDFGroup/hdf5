@@ -5404,6 +5404,11 @@ H5T_dtype_is_valid(H5T_t *dtype, H5T_t *new_type)
             }
         }  
             break;
+        case H5T_TIME:
+            if(new_class != H5T_TIME)
+	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be time type")
+
+            break;
         case H5T_STRING:
             if(new_class != H5T_STRING)
 	        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FALSE, "new type must be a string type")

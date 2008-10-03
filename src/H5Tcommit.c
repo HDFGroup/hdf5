@@ -434,6 +434,35 @@ H5T_committed(const H5T_t *type)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5T_immutable
+ *
+ * Purpose:	Determines if a datatype is predefined or not.
+ *
+ * Return:	Success:	TRUE if predefined, FALSE otherwise.
+ *
+ * Programmer:	Raymond Lu
+ *              4 August 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5T_immutable(const H5T_t *type)
+{
+    /* Use no-init for efficiency */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_immutable)
+
+    HDassert(type);
+
+if(H5T_STATE_IMMUTABLE == type->shared->state)
+    fprintf(stderr, "H5T_immutable: state=%d\n", type->shared->state);
+else
+    fprintf(stderr, "H5T_immutable: state isn't immutable\n");
+
+    FUNC_LEAVE_NOAPI(H5T_STATE_IMMUTABLE == type->shared->state)
+} /* end H5T_immutable() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5T_link
  *
  * Purpose:	Adjust the link count for an object header by adding
@@ -456,7 +485,8 @@ H5T_link(const H5T_t *type, int adjust, hid_t dxpl_id)
     FUNC_ENTER_NOAPI(H5T_link, FAIL)
 
     HDassert(type);
-    HDassert(type->sh_loc.type == H5O_SHARE_TYPE_COMMITTED);
+    HDassert(type->sh_loc.type == H5O_SHARE_TYPE_COMMITTED || 
+        type->sh_loc.type == H5O_SHARE_TYPE_SOHM);
 
     /* Adjust the link count on the named datatype */
     if((ret_value = H5O_link(&type->oloc, adjust, dxpl_id)) < 0)
