@@ -317,6 +317,8 @@ static int create_comm_world(int num_procs, int *doing_pio);
 static int destroy_comm_world(void);
 static void output_results(const struct options *options, const char *name,
                            minmax *table, int table_size, off_t data_size);
+static void output_times(const struct options *options, const char *name,
+                           minmax *table, int table_size);
 static void output_report(const char *fmt, ...);
 static void print_indent(register int indent);
 static void usage(const char *prog);
@@ -550,7 +552,7 @@ run_test(iotype iot, parameters parms, struct options *opts)
     minmax          write_open_mm = {0.0, 0.0, 0.0, 0};
     minmax          write_close_mm = {0.0, 0.0, 0.0, 0};
 
-    raw_size = (off_t)parms.num_dsets * (off_t)parms.num_bytes;
+    raw_size = parms.num_files * (off_t)parms.num_dsets * (off_t)parms.num_bytes;
     parms.io_type = iot;
     print_indent(2);
     output_report("IO API = ");
@@ -580,7 +582,6 @@ run_test(iotype iot, parameters parms, struct options *opts)
     write_raw_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
     write_open_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
     write_close_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-
     if (!parms.h5_write_only) {
         read_mpi_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
         read_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
@@ -721,6 +722,12 @@ run_test(iotype iot, parameters parms, struct options *opts)
     }
 
     output_results(opts,"Write Open-Close",write_gross_mm_table,parms.num_iters,raw_size);
+
+    if (opts->print_times) {
+        output_times(opts,"Write File Open",write_open_mm_table,parms.num_iters);
+        output_times(opts,"Write File Close",write_close_mm_table,parms.num_iters);
+    }
+
     /* Print out time from open to first write */
     if (pio_debug_level >= 3) {
        /* output all of the times for all iterations */
@@ -781,8 +788,12 @@ run_test(iotype iot, parameters parms, struct options *opts)
             output_all_info(read_gross_mm_table, parms.num_iters, 4);
         }
 
-        output_results(opts, "Read Open-Close", read_gross_mm_table,
-                       parms.num_iters, raw_size);
+        output_results(opts, "Read Open-Close", read_gross_mm_table,parms.num_iters, raw_size);
+
+        if (opts->print_times) {
+            output_times(opts,"Read File Open",read_open_mm_table,parms.num_iters);
+            output_times(opts,"Read File Close",read_close_mm_table,parms.num_iters);
+        }
 
         /* Print out time from open to first read */
         if (pio_debug_level >= 3) {
@@ -1023,6 +1034,30 @@ output_results(const struct options *opts, const char *name, minmax *table,
         output_report(" (%7.3f s)\n", total_mm.max);
     else
         output_report("\n");
+
+}
+
+static void
+output_times(const struct options *opts, const char *name, minmax *table,
+    int table_size)
+{
+    minmax          total_mm;
+
+    total_mm = accumulate_minmax_stuff(table, table_size);
+
+    print_indent(3);
+    output_report("%s (%d iteration(s)):\n", name,table_size);
+
+    /* Note: The maximum throughput uses the minimum amount of time & vice versa */
+
+    print_indent(4);
+        output_report("Minimum Accumulated Time using %d file(s): %7.5f s\n", opts->num_files,(total_mm.min));
+
+    print_indent(4);
+        output_report("Average Time per file: %7.5f s\n", ((total_mm.sum / opts->num_files) / total_mm.num));
+
+    print_indent(4);
+        output_report("Maximum Accumulated Time using %d file(s): %7.5f s\n", opts->num_files,(total_mm.max));
 }
 
 /*
