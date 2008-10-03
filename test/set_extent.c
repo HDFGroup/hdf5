@@ -49,6 +49,7 @@ int main( void )
     hsize_t dims_new[RANK] = { 70, 70 };
     hsize_t dims_chunk[RANK] = { 20, 20 };
     hsize_t dims_out[RANK];
+    hsize_t dims3[RANK];
     hsize_t maxdims[RANK] = { H5S_UNLIMITED, H5S_UNLIMITED };
     int     data[ 90 ][ 90 ];
     int     buf1[ 70 ][ 70 ];
@@ -483,6 +484,54 @@ int main( void )
     H5Fclose( file_id );
 
     PASSED();
+
+
+    
+    /*-------------------------------------------------------------------------
+    * test a dataset with initialized chunks
+    *-------------------------------------------------------------------------
+    */
+    
+    TESTING("initialized chunks");
+    
+    dims3[ 0 ] = 90;
+    dims3[ 1 ] = 90;
+    
+    if ((file_id = H5Fopen("set_extent_create.h5", H5F_ACC_RDWR, H5P_DEFAULT)) < 0) 
+        TEST_ERROR;
+    if ((space_id = H5Screate_simple(RANK, dims3, maxdims)) < 0) 
+        TEST_ERROR;
+    if ((plist_id = H5Pcreate (H5P_DATASET_CREATE)) < 0) 
+        TEST_ERROR;
+    if (H5Pset_chunk(plist_id, RANK, dims_chunk) < 0) 
+        TEST_ERROR;
+    
+    /* create a new dataset */
+    if ((dataset_id = H5Dcreate( file_id , "Dataset3", H5T_NATIVE_INT, space_id, plist_id ))<0) 
+       TEST_ERROR;
+
+    
+    /* set new dimensions for the array */
+    dims3[ 0 ] = 0;
+    dims3[ 1 ] = 0;
+    if (H5Dset_extent( dataset_id , dims3 ) < 0) 
+        TEST_ERROR;
+    
+    
+    if (H5Dclose(dataset_id) < 0) 
+        TEST_ERROR
+    if (H5Sclose(space_id) < 0) 
+        TEST_ERROR
+    if (H5Pclose(plist_id) < 0)  
+        TEST_ERROR
+    if (H5Fclose( file_id ) < 0) 
+        TEST_ERROR
+                    
+        
+    PASSED();
+
+
+
 
     puts("All set_extent tests passed.");
     return 0;

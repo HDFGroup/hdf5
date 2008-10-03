@@ -3857,96 +3857,124 @@ done:
 static herr_t
 H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 {
-    hsize_t                 curr_dims[H5O_LAYOUT_NDIMS];	/* Current dimension sizes */
-    int                     rank;	/* Dataspace # of dimensions */
-    herr_t                  ret_value = SUCCEED;        /* Return value */
-    H5S_t                  *space = NULL;
-    int                     u;
-    unsigned                shrink = 0;         /* Flag to indicate a dimension has shrank */
-    unsigned                expand = 0;         /* Flag to indicate a dimension has grown */
-    int                     changed = 0;
-
+    hsize_t   curr_dims[H5O_LAYOUT_NDIMS];    /* Current dimension sizes */
+    int       rank;                           /* Dataspace # of dimensions */
+    herr_t    ret_value = SUCCEED;            /* Return value */
+    H5S_t     *space = NULL;
+    int       u;
+    unsigned  shrink = 0;                     /* Flag to indicate a dimension has shrank */
+    unsigned  expand = 0;                     /* Flag to indicate a dimension has grown */
+    int       changed = 0;
+    
     FUNC_ENTER_NOAPI(H5D_set_extent, FAIL)
-
-    /* Check args */
+        
+   /* Check args */
     assert(dset);
     assert(size);
-
- /*-------------------------------------------------------------------------
-  * Get the data space
-  *-------------------------------------------------------------------------
-  */
+    
+    /*-------------------------------------------------------------------------
+    * Get the data space
+    *-------------------------------------------------------------------------
+    */
     space = dset->shared->space;
-
- /*-------------------------------------------------------------------------
-  * Check if we are shrinking or expanding any of the dimensions
-  *-------------------------------------------------------------------------
-  */
+    
+    /*-------------------------------------------------------------------------
+    * Check if we are shrinking or expanding any of the dimensions
+    *-------------------------------------------------------------------------
+    */
     if((rank = H5S_get_simple_extent_dims(space, curr_dims, NULL)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
-
-    for(u = 0; u < rank; u++) {
-	if(size[u] < curr_dims[u])
-	    shrink = 1;
-	if(size[u] > curr_dims[u])
-	    expand = 1;
+    {
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
     }
-
- /*-------------------------------------------------------------------------
-  * Modify the size of the data space
-  *-------------------------------------------------------------------------
-  */
+    
+    for(u = 0; u < rank; u++) 
+    {
+        if(size[u] < curr_dims[u])
+            shrink = 1;
+        if(size[u] > curr_dims[u])
+            expand = 1;
+    }
+        
+    /*-------------------------------------------------------------------------
+    * Modify the size of the data space
+    *-------------------------------------------------------------------------
+    */
     if((changed=H5S_set_extent(space, size)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
-
+    {
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+    }
+    
     /* Don't bother updating things, unless they've changed */
-    if(changed) {
-     /*-------------------------------------------------------------------------
-      * Modify the dataset storage
-      *-------------------------------------------------------------------------
-      */
+    if(changed) 
+    {
+        
+       /*-------------------------------------------------------------------------
+        * Modify the dataset storage
+        *-------------------------------------------------------------------------
+        */
+        
         /* Save the new dataspace in the file if necessary */
         if(H5S_modify(&(dset->ent), space, TRUE, dxpl_id) < 0)
+        {
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update file with new dataspace")
-
+        }
+        
         /* Update the index values for the cached chunks for this dataset */
         if(H5D_CHUNKED == dset->shared->layout.type)
+        {
             if(H5D_istore_update_cache(dset, dxpl_id) < 0)
+            {
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
-
-	/* Allocate space for the new parts of the dataset, if appropriate */
+            }
+        }
+        
+        /* Allocate space for the new parts of the dataset, if appropriate */
         if(expand && dset->shared->alloc_time==H5D_ALLOC_TIME_EARLY)
+        {
             if(H5D_alloc_storage(dset->ent.file, dxpl_id, dset, H5D_ALLOC_EXTEND, TRUE, FALSE) < 0)
+            {
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize dataset storage")
-
-
-     /*-------------------------------------------------------------------------
-      * Remove chunk information in the case of chunked datasets
-      * This removal takes place only in case we are shrinking the dateset
-      *-------------------------------------------------------------------------
-      */
-        if(shrink && H5D_CHUNKED == dset->shared->layout.type) {
+            }
+        }
+        
+        
+        /*-------------------------------------------------------------------------
+         * Remove chunk information in the case of chunked datasets
+         * This removal takes place only in case we are shrinking the dateset
+         * and if the chunks are written 
+         *-------------------------------------------------------------------------
+         */
+        if (shrink && 
+            H5D_CHUNKED == dset->shared->layout.type &&
+            H5F_addr_defined(dset->shared->layout.u.chunk.addr)) 
+        {
             H5D_io_info_t io_info;              /* Dataset I/O info */
             H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
             H5D_dxpl_cache_t *dxpl_cache=&_dxpl_cache;   /* Data transfer property cache */
-
+            
             /* Fill the DXPL cache values for later use */
             if (H5D_get_dxpl_cache(dxpl_id,&dxpl_cache)<0)
+            {
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
-
+            }
+            
             /* Construct dataset I/O info */
             H5D_BUILD_IO_INFO(&io_info,dset,dxpl_cache,dxpl_id,NULL);
-
+            
             /* Remove excess chunks */
             if(H5D_istore_prune_by_extent(&io_info) < 0)
+            {
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to remove chunks ")
-
+            }
+            
             /* Reset the elements outsize the new dimensions, but in existing chunks */
             if(H5D_istore_initialize_by_extent(&io_info) < 0)
+            {
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to initialize chunks ")
-        } /* end if */
-    } /* end if */
-
+            }
+        } /* end if shrink */
+    } /* end if changed */
+    
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
