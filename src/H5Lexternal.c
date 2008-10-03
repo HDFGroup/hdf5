@@ -171,6 +171,14 @@ done:
  *		Vailin Choi, April 2, 2008
  *		Add handling to search for the target file
  *		See description in RM: H5Lcreate_external
+ *		
+ *		Vailin Choi; Sept. 12th, 2008; bug #1247
+ *		Retrieve the file access property list identifer that is set
+ *		for link access property via H5Pget_elink_fapl().
+ *		If the return value is H5P_DEFAULT, the parent's file access 
+ *		property is used to H5F_open() the target file;
+ *		Otherwise, the file access property retrieved from H5Pget_elink_fapl()
+ *		is used to H5F_open() the target file.
  *
  *-------------------------------------------------------------------------
  */
@@ -197,6 +205,8 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     char        *env_prefix=NULL, *tmp_env_prefix=NULL;
     char        *out_prefix_name=NULL, *pp=NULL;
 
+    H5P_genplist_t 	*fa_plist;      /* File access property list pointer */
+    H5F_close_degree_t 	fc_degree = H5F_CLOSE_WEAK;  /* File close degree for target file */
 
     FUNC_ENTER_NOAPI(H5L_extern_traverse, FAIL)
 
@@ -219,31 +229,25 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
+    /* get the fapl_id set for lapl_id if any */
+    if(H5P_get(plist, H5L_ACS_ELINK_FAPL_NAME, &fapl_id) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get fapl for links")
+
     /* Get the location for the group holding the external link */
     if(H5G_loc(cur_group, &loc) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get object location")
 
-    /* Whatever access properties and intent the user used on the old file,
-     * use the same ones to open the new file.  If this is a bad default,
-     * users can override this callback using H5Lregister.
-     */
+    /* get the file access mode flags for the parent file */
     intent = H5F_INTENT(loc.oloc->file);
-    if((fapl_id = H5F_get_access_plist(loc.oloc->file, FALSE)) < 0)
-        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get file access property list")
 
-    /* Check for non-"weak" file close degree for parent file */
-    if(H5F_GET_FC_DEGREE(loc.oloc->file) != H5F_CLOSE_WEAK) {
-        H5P_genplist_t *fa_plist;      /* Property list pointer */
-        H5F_close_degree_t fc_degree = H5F_CLOSE_WEAK;  /* File close degree */
+    if ((fapl_id == H5P_DEFAULT) && ((fapl_id = H5F_get_access_plist(loc.oloc->file, FALSE)) < 0))
+	HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get parent's file access property list")
 
-        /* Get the plist structure */
-        if(NULL == (fa_plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
-
-        /* Set file close degree for new file to "weak" */
-        if(H5P_set(fa_plist, H5F_ACS_CLOSE_DEGREE_NAME, &fc_degree) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
-    } /* end if */
+    /* Set file close degree for new file to "weak" */
+    if(NULL == (fa_plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+    if(H5P_set(fa_plist, H5F_ACS_CLOSE_DEGREE_NAME, &fc_degree) < 0)
+	HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
 
     /*
      * Start searching for the target file

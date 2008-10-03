@@ -72,10 +72,17 @@ const char *FILENAME[] = {
     "tmp/extlinks13",	/* 34: */
     "tmp/extlinks14",	/* 35: */
     "tmp/extlinks15",	/* 36: */
+    "extlinks16A",	/* 37: */ /* TESTS for H5P_set_elink_fapl */
+    "extlinks16B",	/* 38: */ 
+    "extlinks17",	/* 39: */ 
     NULL
 };
 
 #define TMPDIR		"tmp"
+#define FAMILY_SIZE	1024
+#define CORE_INCREMENT  1024
+#define NUM1000		1000
+
 /* do not do check_all_closed() for "ext*" files and "tmp/ext*" */
 #define EXTSTOP		12
 
@@ -3055,6 +3062,7 @@ external_link_cwd(hid_t fapl, hbool_t new_format)
 } /* end external_link_cwd() */
 
 
+
 /*-------------------------------------------------------------------------
  * Function:    external_link_abstar: test 6
  *
@@ -3334,6 +3342,7 @@ external_link_reltar(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY;
     return -1;
 } /* end external_link_reltar() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    external_link_chdir: test 9
@@ -3432,7 +3441,479 @@ external_link_chdir(hid_t fapl, hbool_t new_format)
 } /* end external_link_chdir() */
 
 
+/*-------------------------------------------------------------------------
+ * Function:    external_set_elink_fapl1: test 10
+ *
+ * Purpose:     To verify that the external linked target file with physical layout
+ *		different from the parent can be successfully opened.
+ *	
+ *		1. target link: "extlinks16"
+ * 		2. target file: "extlinks16"
+ *		3. main file: Linux:"/CWD/tmp/extlinks0"; Window: "<cur drive>:/CWD/tmp/extlinks0"
+ *		4. Create target file A to be a "family" file: extlinks16A
+ *		4. Create target file B to be a "multi" file: extlinks16B
+ *		5. Create external link from main file to target file A: ext_linkA->extlinks16A:/A
+ *		5. Create external link from main file to target file B: ext_linkB->extlinks16B:/B
+ *		6. Should succeed in opening the target object: ext_extA
+ *		6. Should succeed in opening the target object: ext_extB
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Vailin Choi
+ *              Sept. 12, 2008
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_set_elink_fapl1(hid_t fapl, hbool_t new_format)
+{
+    hid_t	fid=(-1);
+    hid_t	fidA=(-1), fidB=(-1); 
+    hid_t	gidA=(-1), gidB=(-1);	
+    hid_t	oidA=(-1), oidB=(-1);	                
+    char	filename1[NAME_BUF_SIZE],
+    		filename2A[NAME_BUF_SIZE],
+    		filename2B[NAME_BUF_SIZE],
+		tmpname[NAME_BUF_SIZE],
+                cwdpath[NAME_BUF_SIZE];
+    hid_t 	fam_fapl, multi_fapl;
+    hid_t	lapl_idA, lapl_idB;
+    H5FD_mem_t	mt, memb_map[H5FD_MEM_NTYPES];
+    hid_t	memb_fapl[H5FD_MEM_NTYPES];
+    char        sv[H5FD_MEM_NTYPES][500];
+    const	char *memb_name[H5FD_MEM_NTYPES];
+    haddr_t	memb_addr[H5FD_MEM_NTYPES];
 
+    if(new_format)
+        TESTING("H5Pset/get_elink_fapl() with different physical layouts (w/new group format)")
+    else
+        TESTING("H5Pset/get_elink_fapl() with different physical layouts")
+
+    if ((HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST) || 
+	(HDgetcwd(cwdpath, NAME_BUF_SIZE)==NULL))
+	TEST_ERROR
+
+    /* 
+     * set up name for main file: 
+     *	 Linux: "/CWD/tmp/extlinks0" 
+     *   Windows: "<cur drive>:/CWD/tmp/extlinks0"
+     */ 
+    HDstrcpy(tmpname, cwdpath);
+    HDstrcat(tmpname, "/");
+    HDstrcat(tmpname, FILENAME[13]);
+    h5_fixname(tmpname, fapl, filename1, sizeof filename1);
+
+    /* create "family" fapl */
+    fam_fapl = h5_fileaccess();
+    if(H5Pset_fapl_family(fam_fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0)
+        TEST_ERROR;
+
+    /* set up name for external linked target file A: "extlinks16A"  */
+    /* set up name for target file A: "extlinks16A" */
+    h5_fixname(FILENAME[37], fam_fapl, filename2A, sizeof filename2A);
+
+    /* settings for multi file */
+    HDmemset(memb_map, 0,  sizeof memb_map);
+    HDmemset(memb_fapl, 0, sizeof memb_fapl);
+    HDmemset(memb_name, 0, sizeof memb_name);
+    HDmemset(memb_addr, 0, sizeof memb_addr);
+    HDmemset(sv, 0, sizeof sv);
+
+    for (mt = 0; mt < H5FD_MEM_NTYPES; mt++) {
+	memb_map[mt] = H5FD_MEM_SUPER;
+	memb_fapl[mt] = H5P_DEFAULT;
+    }
+
+    memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
+    memb_map[H5FD_MEM_BTREE] = H5FD_MEM_BTREE;
+    memb_map[H5FD_MEM_GHEAP] = H5FD_MEM_GHEAP;
+    memb_map[H5FD_MEM_LHEAP] = H5FD_MEM_LHEAP;
+
+    sprintf(sv[H5FD_MEM_SUPER], "%%s-%c.h5", 's');
+    memb_name[H5FD_MEM_SUPER] = sv[H5FD_MEM_SUPER];
+    memb_addr[H5FD_MEM_SUPER] = 0;
+    
+    sprintf(sv[H5FD_MEM_BTREE],  "%%s-%c.h5", 'b');
+    memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];
+    memb_addr[H5FD_MEM_BTREE] = HADDR_MAX/6;
+
+    sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
+    memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
+    memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/3;
+
+    sprintf(sv[H5FD_MEM_GHEAP], "%%s-%c.h5", 'g');
+    memb_name[H5FD_MEM_GHEAP] = sv[H5FD_MEM_GHEAP];
+    memb_addr[H5FD_MEM_GHEAP] = HADDR_MAX/2;
+
+    sprintf(sv[H5FD_MEM_LHEAP], "%%s-%c.h5", 'l');
+    memb_name[H5FD_MEM_LHEAP] = sv[H5FD_MEM_LHEAP];
+    memb_addr[H5FD_MEM_LHEAP] = HADDR_MAX*2/3;
+
+    sprintf(sv[H5FD_MEM_OHDR], "%%s-%c.h5", 'o');
+    memb_name[H5FD_MEM_OHDR] = sv[H5FD_MEM_OHDR];
+    memb_addr[H5FD_MEM_OHDR] = HADDR_MAX*5/6;
+
+    /* create "multi" fapl */
+    multi_fapl = h5_fileaccess();
+    if(H5Pset_fapl_multi(multi_fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE) < 0)
+        TEST_ERROR;
+
+    /* set up name for external linked target file B: "extlinks16B"  */
+    /* set up name for target file B: "extlinks16B" */
+    h5_fixname(FILENAME[38], multi_fapl, filename2B, sizeof filename2B);
+
+    /* Create target file A to be a "family" file */
+    if((fidA=H5Fcreate(filename2A, H5F_ACC_TRUNC, H5P_DEFAULT, fam_fapl)) < 0) TEST_ERROR
+    if((gidA=H5Gcreate2(fidA, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create target file B to be a "multi" file */
+    if((fidB=H5Fcreate(filename2B, H5F_ACC_TRUNC, H5P_DEFAULT, multi_fapl)) < 0) TEST_ERROR
+    if((gidB=H5Gcreate2(fidB, "B", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* closing for target files */
+    if(H5Gclose(gidA) < 0) TEST_ERROR
+    if(H5Gclose(gidB) < 0) TEST_ERROR
+    if(H5Fclose(fidA) < 0) TEST_ERROR
+    if(H5Fclose(fidB) < 0) TEST_ERROR
+
+    /* Create the main file */
+    if((fid=H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create external link to target file A:/A */
+    if(H5Lcreate_external(filename2A, "/A", fid, "ext_linkA", H5P_DEFAULT, H5P_DEFAULT) < 0) 
+	TEST_ERROR
+    /* Create external link to target file B:/B */
+    if(H5Lcreate_external(filename2B, "/B", fid, "ext_linkB", H5P_DEFAULT, H5P_DEFAULT) < 0) 
+	TEST_ERROR
+
+    /* Set file access property list for link access to use the family driver */
+    if((lapl_idA = H5Pcreate(H5P_LINK_ACCESS)) < 0) TEST_ERROR
+    if(H5Pset_elink_fapl(lapl_idA, fam_fapl) < 0) TEST_ERROR
+
+    /* open target object A */
+    oidA = H5Oopen(fid, "ext_linkA", lapl_idA);
+
+    /* should succeed in opening the target object A in the current working directory */
+    if (oidA < 0) {
+	H5_FAILED();
+	puts("    Should succeed in opening family target file A in current working directory");
+	goto error;
+    }
+
+    /* Set file access property list for link access to use the multi driver */
+    if((lapl_idB = H5Pcreate(H5P_LINK_ACCESS)) < 0) TEST_ERROR
+    if(H5Pset_elink_fapl(lapl_idB, multi_fapl) < 0) TEST_ERROR
+
+    /* open target object B */
+    oidB = H5Oopen(fid, "ext_linkB", lapl_idB);
+
+    /* should succeed in opening the target object B in the current working directory */
+    if (oidB < 0) {
+	H5_FAILED();
+	puts("    Should succeed in opening multi target file B in current working directory");
+	goto error;
+    }
+
+    /* closing */
+    if(H5Pclose(lapl_idA) < 0) TEST_ERROR
+    if(H5Pclose(lapl_idB) < 0) TEST_ERROR
+    if(H5Pclose(fam_fapl) < 0) TEST_ERROR
+    if(H5Pclose(multi_fapl) < 0) TEST_ERROR
+    if(H5Oclose(oidA) < 0) TEST_ERROR
+    if(H5Oclose(oidB) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+	H5Pclose (lapl_idA);
+	H5Pclose (lapl_idB);
+	H5Pclose (fam_fapl);
+	H5Pclose (multi_fapl);
+	H5Gclose (gidA);
+	H5Gclose (gidB);
+	H5Oclose (oidA);
+	H5Oclose (oidB);
+	H5Fclose (fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end external_set_elink_fapl1() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    external_set_elink_fapl2: test 11
+ *
+ * Purpose:     To verify that processing done to the external linked target object is
+ *		correctly handled when the parent and target files have the same 
+ *		physical layout but different access methods.
+ *
+ * 		1. target link: "extlinks17"
+ * 		2. target file: "extlinks17"
+ *		3. main file: Linux:"/CWD/tmp/extlinks0"; Window: "<cur drive>:/CWD/tmp/extlinks0"
+ *		4. Create target file to be a "core" file:/A/Dataset
+ *		5. Create external link from main file to target file:ext_link->target file:/A/Dataset
+ *		6. Set the file access property list of the link access to use "core" file without
+ *		   backing store
+ *		6. Should succeed in opening the target dataset: ext_link
+ *		7. Write data to the target dataset
+ *		8. On closing, the file size of target should be the same as before since
+ *		   it is opened without backing store.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Vailin Choi
+ *              Sept. 12, 2008
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
+{
+    hid_t	fid = (-1);     		/* File ID */
+    hid_t	gid = (-1);	                /* Group IDs */
+    char	filename1[NAME_BUF_SIZE],
+    		filename2[NAME_BUF_SIZE],
+		tmpname[NAME_BUF_SIZE],
+                cwdpath[NAME_BUF_SIZE];
+    hid_t       core_fapl, space, dset, did, dapl_id, dcpl;
+    hsize_t     dims[2];
+    int		points[NUM1000][NUM1000];
+    int		filesize, new_filesize, i, j, n;
+
+    if(new_format)
+        TESTING("H5Pset/get_elink_fapl() with same physical layout (w/new group format)")
+    else
+        TESTING("H5Pset/get_elink_fapl() with same physical layout")
+
+    if ((HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST) || 
+	(HDgetcwd(cwdpath, NAME_BUF_SIZE)==NULL))
+	TEST_ERROR
+
+    /* 
+     * set up name for main file: 
+     *	 Linux: "/CWD/tmp/extlinks0" 
+     *   Windows: "<cur drive>:/CWD/tmp/extlinks0"
+     */ 
+    HDstrcpy(tmpname, cwdpath);
+    HDstrcat(tmpname, "/");
+    HDstrcat(tmpname, FILENAME[13]);
+    h5_fixname(tmpname, fapl, filename1, sizeof filename1);
+
+    /* create fapl for the target file to be a "core" file */
+    core_fapl = h5_fileaccess();
+    if(H5Pset_fapl_core(core_fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
+        TEST_ERROR
+
+    /* set up name for external linked target file: "extlinks17"  */
+    /* set up name for target file: "extlinks17" */
+    h5_fixname(FILENAME[39], core_fapl, filename2, sizeof filename2);
+
+    /* Create the target file to be a "core" file */
+    if((fid=H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, core_fapl)) < 0) TEST_ERROR
+    if((gid=H5Gcreate2(fid, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    dims[0] = NUM1000;
+    dims[1] = NUM1000;
+    if((space = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE) < 0) TEST_ERROR;
+
+    /* create "Dataset" in group "A" of target file */
+    if((dset = H5Dcreate2(gid, "Dataset", H5T_NATIVE_INT, space, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
+	TEST_ERROR
+
+    /* closing for target file */
+    if(H5Pclose(dcpl) < 0) TEST_ERROR
+    if(H5Sclose(space) < 0) TEST_ERROR
+    if(H5Dclose(dset) < 0) TEST_ERROR
+    if(H5Gclose(gid) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    /* get size of target file */
+    filesize = h5_get_file_size(filename2);
+
+    /* Create the main file */
+    if((fid=H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+
+    /* Create external link to target file: ext_link->extlinks17:/A/Dataset */
+    if(H5Lcreate_external(filename2, "/A/Dataset", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0) 
+	TEST_ERROR
+
+    /* create fapl to be a "core" file without backing store */
+    if(H5Pset_fapl_core(core_fapl, (size_t)CORE_INCREMENT, FALSE) < 0)
+        TEST_ERROR
+
+    /* Set file access property list for link access to use the "core" driver */
+    if((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0) TEST_ERROR
+    if(H5Pset_elink_fapl(dapl_id, core_fapl) < 0) TEST_ERROR
+
+    /* try to open the external linked target dataset */
+    did = H5Dopen2(fid, "ext_link", dapl_id);
+
+    if (did < 0) {
+	H5_FAILED();
+	puts("    Should succeed in opening the target dataset");
+	goto error;
+    }
+
+    /* Initialize the dataset */
+    for(i = n = 0; i < NUM1000; i++)
+        for(j = 0; j < NUM1000; j++)
+            points[i][j] = n++;
+
+    /* Write the data to the dataset */
+    if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
+	TEST_ERROR
+
+    if(H5Pclose(core_fapl) < 0) TEST_ERROR
+    if(H5Pclose(dapl_id) < 0) TEST_ERROR
+    if(H5Dclose(did) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    new_filesize = h5_get_file_size(filename2);
+
+    /* the file size should remain the same since there is no backing store */
+    if (new_filesize != filesize) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+	H5Pclose(dcpl);
+	H5Sclose(space);
+	H5Dclose(dset);
+	H5Pclose(core_fapl);
+	H5Pclose(dapl_id);
+	H5Dclose (did);
+	H5Fclose (fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end external_set_elink_fapl2() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    external_set_elink_fapl3: test 12
+ *
+ * Purpose:     To verify that the file access property list for link access is
+ *		set and closed correctly.
+ *
+ *		1. Create fapl for core driver
+ *		2. Create fapl for stdio driver
+ *		3. Set link access's fapl to use stdio driver
+ *		4. Verify that link access's fapl is the stdio driver
+ *		5. Reset the link access' fapl to use core driver
+ *		6. H5Pcopy() the link access
+ *		7. Get the fapl property value of the original link access
+ *		8. Close the original link access
+ *		9. H5Pclose() fapl should fail since closing in step #8 should also close its fapl
+ *	       10. Verify that the copied link access's fapl is the core driver
+ *	       11. Get the fapl property value of the copied link access
+ *	       12. H5Premove() the fapl property from the copied link access
+ *	       13. H5Pclose() fapl set in the copied link access should fail since the
+ *		   removal in #12 should also close its fapl
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Vailin Choi
+ *              Sept. 12, 2008
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_set_elink_fapl3(hbool_t new_format)
+{
+    hid_t       core_fapl, stdio_fapl;
+    hid_t	lapl_id, new_lapl_id, l_fapl, out_fapl;
+    int   	ret;
+
+    if(new_format)
+        TESTING("H5Pset/get_fapl() (w/new group format)")
+    else
+        TESTING("H5Pset/get_fapl()")
+
+    /* create fapl for the target file to be a "core" file */
+    core_fapl = h5_fileaccess();
+    if(H5Pset_fapl_core(core_fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
+        TEST_ERROR
+
+    stdio_fapl = h5_fileaccess();
+    if(H5Pset_fapl_stdio(stdio_fapl) < 0)
+        TEST_ERROR
+
+    /* Set file access property list for link access to use the "stdio" driver */
+    if((lapl_id = H5Pcreate(H5P_LINK_ACCESS)) < 0) TEST_ERROR
+    if(H5Pset_elink_fapl(lapl_id, stdio_fapl) < 0) TEST_ERROR
+
+    /* Verify that the driver for the link's fapl is the "stdio" driver */
+    if((l_fapl = H5Pget_elink_fapl(lapl_id)) < 0) TEST_ERROR
+    if (H5Pget_driver(l_fapl) != H5FD_STDIO) TEST_ERROR
+    if (H5Pclose(l_fapl) < 0) TEST_ERROR
+
+    /* Set file access property list for link access to use the "core" driver */
+    if(H5Pset_elink_fapl(lapl_id, core_fapl) < 0) TEST_ERROR
+
+    /* Make a copy of the link access property */
+    if ((new_lapl_id = H5Pcopy(lapl_id)) < 0) TEST_ERROR
+
+    /* get the fapl set in lapl_id */
+    if (H5Pget(lapl_id, "external link fapl", &out_fapl) < 0) TEST_ERROR
+    if (H5Pclose(lapl_id) < 0) TEST_ERROR
+
+    /* Try closing out_fapl should fail since H5Pclose(lapl_id) should also close its fapl */
+    H5E_BEGIN_TRY {
+        ret = H5Pclose(out_fapl);
+    } H5E_END_TRY;
+    if (ret != FAIL) TEST_ERROR
+
+    /* Verify that the driver for the copied link's fapl is the "core" driver */
+    if((l_fapl = H5Pget_elink_fapl(new_lapl_id)) < 0) TEST_ERROR
+    if (H5Pget_driver(l_fapl) != H5FD_CORE) TEST_ERROR
+
+    /* get the fapl set in new_lapl_id */
+    if (H5Pget(new_lapl_id, "external link fapl", &out_fapl) < 0) TEST_ERROR
+    if (H5Premove(new_lapl_id, "external link fapl") < 0) TEST_ERROR
+
+    /* Try closing out_fapl should fail since the property is removed from new_lapl_id */
+    H5E_BEGIN_TRY {
+        ret = H5Pclose(out_fapl);
+    } H5E_END_TRY;
+    if (ret != FAIL) TEST_ERROR
+
+    if (H5Pclose(l_fapl) < 0) TEST_ERROR
+    if (H5Pclose(new_lapl_id) < 0) TEST_ERROR
+    if (H5Pclose(core_fapl) < 0) TEST_ERROR
+    if (H5Pclose(stdio_fapl) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+	H5Pclose(l_fapl);
+	H5Pclose(lapl_id);
+	H5Pclose(new_lapl_id);
+	H5Pclose(core_fapl);
+	H5Pclose(stdio_fapl);
+    } H5E_END_TRY;
+    return -1;
+    return -1;
+} /* end external_set_elink_fapl3() */
+
+
 #ifdef H5_HAVE_WINDOW_PATH
 
 /*-------------------------------------------------------------------------
@@ -11682,7 +12163,6 @@ main(void)
 
             /* General tests... (on both old & new format groups */
 
-
             nerrors += mklinks(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += cklinks(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += new_links(my_fapl, new_format) < 0 ? 1 : 0;
@@ -11731,6 +12211,9 @@ main(void)
             nerrors += external_link_abstar_cur(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_reltar(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_chdir(my_fapl, new_format) < 0 ? 1 : 0;
+	    nerrors += external_set_elink_fapl1(my_fapl, new_format) < 0 ? 1 : 0;
+	    nerrors += external_set_elink_fapl2(my_fapl, new_format) < 0 ? 1 : 0;
+	    nerrors += external_set_elink_fapl3(new_format) < 0 ? 1 : 0;
 
 #ifdef H5_HAVE_WINDOW_PATH
             nerrors += external_link_win1(my_fapl, new_format) < 0 ? 1 : 0;
@@ -11740,7 +12223,6 @@ main(void)
             nerrors += external_link_win5(my_fapl, new_format) < 0 ? 1 : 0;
             nerrors += external_link_win6(my_fapl, new_format) < 0 ? 1 : 0;
 #endif
-
             /* These tests assume that external links are a form of UD links,
              * so assume that everything that passed for external links
              * above has already been tested for UD links.
@@ -11802,7 +12284,9 @@ main(void)
 	    exit(1);
 	}
 	printf("All link tests passed.\n");
+#ifdef OUT
 	h5_cleanup(FILENAME, fapl);
+#endif
 	/* clean up tmp directory created by external link tests */
 	HDrmdir(TMPDIR);
     }
