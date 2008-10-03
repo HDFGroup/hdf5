@@ -597,6 +597,9 @@ HDremove_all(const char *fname)
  *
  * Programmer:	Vailin Choi
  *		April 2, 2008
+ *	Modifications: 2nd Oct, 2008; Vailin Choi
+ *		Remove compiler warning for "if condition"
+ *
  *-------------------------------------------------------------------------
  */
 #define MAX_PATH_LEN     1024
@@ -641,7 +644,7 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
 	 *	Get current drive
 	 * Unix: does not apply
 	 */
-        } else if (CHECK_ABS_PATH(name) && (drive=HDgetdrive())) {
+        } else if (CHECK_ABS_PATH(name) && ((drive=HDgetdrive()) != 0)) {
             sprintf(cwdpath, "%c:%c", (drive+'A'-1), name[0]);
             retcwd = cwdpath;
             HDstrcpy(new_name, &name[1]);

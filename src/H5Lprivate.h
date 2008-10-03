@@ -39,8 +39,9 @@
 #define H5L_CRT_INTERMEDIATE_GROUP_NAME         "intermediate_group" /* Create intermediate groups flag */
 
 /* ========  Link access property names ======== */
-#define H5L_ACS_NLINKS_NAME        "max soft links"         /* Number of soft links to traverse */
-#define H5L_ACS_ELINK_PREFIX_NAME  "external link prefix"   /* External link prefix */
+#define H5L_ACS_NLINKS_NAME        "max soft links"        /* Number of soft links to traverse */
+#define H5L_ACS_ELINK_PREFIX_NAME  "external link prefix"  /* External link prefix */
+#define H5L_ACS_ELINK_FAPL_NAME    "external link fapl"      /* file access property list for external link access */
 
 
 /****************************/
