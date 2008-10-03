@@ -431,7 +431,7 @@ HDfprintf(stderr, "%s: have_direct_block = %u\n", FUNC, (unsigned)have_direct_bl
         H5HF_direct_t *dblock;          /* Pointer to direct block to query */
 
         /* Lock first (root) direct block */
-        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, hdr->man_dtable.table_addr, hdr->man_dtable.cparam.start_block_size, NULL, 0, H5AC_WRITE)))
+        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, hdr->man_dtable.table_addr, hdr->man_dtable.cparam.start_block_size, NULL, 0, H5AC2_WRITE)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap direct block")
 
         /* Attach direct block to new root indirect block */
@@ -452,7 +452,7 @@ HDfprintf(stderr, "%s: have_direct_block = %u\n", FUNC, (unsigned)have_direct_bl
         } /* end if */
 
         /* Unlock first (previously the root) direct block */
-        if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+        if(H5AC2_unprotect(hdr->f, dxpl_id, H5AC2_FHEAP_DBLOCK, hdr->man_dtable.table_addr, (size_t)0, dblock, H5AC2__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
         dblock = NULL;
     } /* end if */
@@ -886,7 +886,7 @@ HDfprintf(stderr, "%s: Reverting root indirect block\n", FUNC);
     dblock_size = hdr->man_dtable.cparam.start_block_size;
 
     /* Get pointer to last direct block */
-    if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, root_iblock, 0, H5AC_WRITE)))
+    if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, root_iblock, 0, H5AC2_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to protect fractal heap direct block")
     HDassert(dblock->parent == root_iblock);
     HDassert(dblock->par_entry == 0);
@@ -917,7 +917,7 @@ HDfprintf(stderr, "%s: Reverting root indirect block\n", FUNC);
         HGOTO_ERROR(H5E_HEAP, H5E_CANTEXTEND, FAIL, "can't increase space to cover root direct block")
 
 done:
-    if(dblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+    if(dblock && H5AC2_unprotect(hdr->f, dxpl_id, H5AC2_FHEAP_DBLOCK, dblock_addr, (size_t)0, dblock, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
 
     FUNC_LEAVE_NOAPI(ret_value)

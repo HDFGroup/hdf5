@@ -307,6 +307,7 @@ H5_DLL herr_t H5AC2_end_transaction(hbool_t do_transaction,
                                     struct H5O_loc_t * id_oloc_ptr,
                                     hbool_t id_oloc_open,
                                     hbool_t transaction_begun,
+				    hid_t dxpl_id,
                                     uint64_t trans_num,
                                     const char * api_call_name);
 

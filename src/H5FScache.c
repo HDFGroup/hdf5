@@ -77,16 +77,16 @@ static herr_t H5FS_sinfo_serialize_node_cb(void *_item, void UNUSED *key, void *
 /* Metadata cache callbacks */
 static void *H5FS_cache_hdr_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
-static herr_t H5FS_cache_hdr_serialize(const H5F_t *f, haddr_t addr, size_t len, 
-    void *image, void *thing, unsigned *flags, haddr_t *new_addr,
-    size_t *new_len, void **new_image);
+static herr_t H5FS_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id, 
+    haddr_t addr, size_t len, void *image, void *thing, unsigned *flags, 
+    haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5FS_cache_hdr_free_icr(haddr_t addr, size_t len, void *thing);
 
 static void *H5FS_cache_sinfo_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
-static herr_t H5FS_cache_sinfo_serialize(const H5F_t *f, haddr_t addr, size_t len, 
-    void *image, void *thing, unsigned *flags, haddr_t *new_addr,
-    size_t *new_len, void **new_image);
+static herr_t H5FS_cache_sinfo_serialize(const H5F_t *f, hid_t dxpl_id,
+    haddr_t addr, size_t len, void *image, void *thing, unsigned *flags, 
+    haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5FS_cache_sinfo_free_icr(haddr_t addr, size_t len, void *thing);
 
 /*********************/
@@ -286,9 +286,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_hdr_serialize(const H5F_t *f, haddr_t UNUSED addr, size_t UNUSED len, 
-    void *image, void *_thing, unsigned *flags, haddr_t UNUSED *new_addr, 
-    size_t UNUSED *new_len, void UNUSED **new_image)
+H5FS_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, 
+    haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing, 
+    unsigned *flags, haddr_t UNUSED *new_addr, size_t UNUSED *new_len, 
+    void UNUSED **new_image)
 {
     H5FS_t *fspace = (H5FS_t *)_thing;    /* Pointer to free space header */
     uint8_t *p;                           /* Pointer into raw data buffer */
@@ -747,9 +748,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FS_cache_sinfo_serialize(const H5F_t * f, haddr_t UNUSED addr, size_t UNUSED len, 
-    void *image, void *_thing, unsigned *flags, haddr_t UNUSED *new_addr, 
-    size_t UNUSED *new_len, void UNUSED **new_image)
+H5FS_cache_sinfo_serialize(const H5F_t * f, hid_t dxpl_id, haddr_t UNUSED addr, 
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
+    haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
     H5FS_sinfo_t * sinfo = (H5FS_sinfo_t *)_thing;

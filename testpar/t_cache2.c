@@ -332,6 +332,7 @@ static herr_t datum_image_len(void *thing,
                               size_t *image_len_ptr);
 
 static herr_t datum_serialize(const H5F_t *f,
+                              hid_t dxpl_id,
                               haddr_t addr,
                               size_t len,
                               void * image_ptr,
@@ -1996,8 +1997,9 @@ datum_image_len(void *thing,
 
 herr_t 
 datum_serialize(const H5F_t UNUSED *f,
-                UNUSED haddr_t addr,
-                UNUSED size_t len,
+                hid_t UNUSED dxpl_id,
+                haddr_t UNUSED addr,
+                size_t UNUSED len,
                 void * image_ptr,
                 void * thing,
                 unsigned * flags_ptr,

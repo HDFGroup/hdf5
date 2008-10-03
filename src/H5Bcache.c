@@ -56,8 +56,9 @@
 /* Metadata cache callbacks */
 static void *H5B_deserialize(haddr_t addr, size_t len, const void *image,
     void *udata, hbool_t *dirty);
-static herr_t H5B_serialize(const H5F_t *f, haddr_t addr, size_t len, void *image,
-    void *thing, unsigned *flags, haddr_t *new_addr, size_t *new_len, void **new_image);
+static herr_t H5B_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+    size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr, 
+    size_t *new_len, void **new_image);
 static herr_t H5B_free_icr(haddr_t addr, size_t len, void *thing);
 
 
@@ -203,9 +204,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B_serialize(const H5F_t *f, haddr_t UNUSED addr, size_t UNUSED len, void *image,
-    void *_thing, unsigned *flags, haddr_t UNUSED *new_addr, size_t UNUSED *new_len,
-    void UNUSED **new_image)
+H5B_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, 
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
+    haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5B_t *bt = (H5B_t *)_thing;        /* Pointer to the B-tree node */
     H5B_shared_t *shared;       /* Pointer to shared B-tree info */

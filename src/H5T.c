@@ -1701,7 +1701,7 @@ H5Tclose(hid_t type_id)
     H5T_t	*dt = NULL;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_META(H5Tclose, type_id, FAIL)
+    FUNC_ENTER_API_META(H5Tclose, type_id, H5AC_dxpl_id, FAIL)
     H5TRACE1("e", "i", type_id);
 
     /* Check args */

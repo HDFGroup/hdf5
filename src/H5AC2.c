@@ -1171,6 +1171,7 @@ H5AC2_end_transaction(hbool_t do_transaction,
                       H5O_loc_t * id_oloc_ptr,
                       hbool_t id_oloc_open,
                       hbool_t transaction_begun,
+		      hid_t dxpl_id,
                       uint64_t trans_num,
                       const char * api_call_name)
 {
@@ -1218,7 +1219,8 @@ H5AC2_end_transaction(hbool_t do_transaction,
 
             cache_ptr = f->shared->cache2;
 
-            result = H5C2_end_transaction(f, cache_ptr, trans_num, api_call_name);
+            result = H5C2_end_transaction(f, dxpl_id, cache_ptr, 
+			                  trans_num, api_call_name);
 
             if ( result < 0 ) {
 

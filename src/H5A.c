@@ -223,7 +223,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id,
     H5S_t		*space;                 /* Dataspace to use for attribute */
     hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_API_META(H5Acreate2, loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Acreate2, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE6("i", "i*siiii", loc_id, attr_name, type_id, space_id, acpl_id, aapl_id);
 
     /* check arguments */
@@ -294,7 +294,7 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     H5S_t		*space;                 /* Dataspace to use for attribute */
     hid_t		ret_value;              /* Return value */
 
-    FUNC_ENTER_API_META(H5Acreate_by_name, loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Acreate_by_name, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE8("i", "i*s*siiiii", loc_id, obj_name, attr_name, type_id, space_id,
              acpl_id, aapl_id, lapl_id);
 
@@ -912,7 +912,7 @@ H5Awrite(hid_t attr_id, hid_t dtype_id, const void *buf)
     const H5T_t    *mem_type = NULL;
     herr_t	    ret_value;
 
-    FUNC_ENTER_API_META(H5Awrite, attr_id, FAIL)
+    FUNC_ENTER_API_META(H5Awrite, attr_id, H5AC_dxpl_id, FAIL)
     H5TRACE3("e", "ii*x", attr_id, dtype_id, buf);
 
     /* check arguments */
@@ -1734,7 +1734,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     H5G_loc_t	loc;	                /* Object location */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Arename, loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Arename, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE3("e", "i*s*s", loc_id, old_name, new_name);
 
     /* check arguments */
@@ -1780,7 +1780,7 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Arename_by_name, loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Arename_by_name, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE5("e", "i*s*s*si", loc_id, obj_name, old_attr_name, new_attr_name,
              lapl_id);
 
@@ -2046,7 +2046,7 @@ H5Adelete(hid_t loc_id, const char *name)
     H5G_loc_t	loc;		        /* Object location */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Adelete, loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Adelete, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE2("e", "i*s", loc_id, name);
 
     /* check arguments */
@@ -2093,7 +2093,7 @@ H5Adelete_by_name(hid_t loc_id, const char *obj_name, const char *attr_name,
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Adelete_by_name, loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Adelete_by_name, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE4("e", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
 
     /* check arguments */
@@ -2169,7 +2169,7 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     hbool_t     loc_found = FALSE;      /* Entry at 'obj_name' found */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Adelete_by_idx, loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Adelete_by_idx, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE6("e", "i*sIiIohi", loc_id, obj_name, idx_type, order, n, lapl_id);
 
     /* check arguments */
@@ -2232,7 +2232,7 @@ H5Aclose(hid_t attr_id)
 {
     herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_API_META(H5Aclose, attr_id, FAIL)
+    FUNC_ENTER_API_META(H5Aclose, attr_id, H5AC_dxpl_id, FAIL)
     H5TRACE1("e", "i", attr_id);
 
     /* check arguments */

@@ -55,14 +55,14 @@
 /* Metadata cache (H5AC) callbacks */
 
 static void *H5SM_table_deserialize(haddr_t addr, size_t len, const void *image,    const void *udata, hbool_t *dirty);
-static herr_t H5SM_table_serialize(const H5F_t * f, haddr_t addr, size_t len, void *image,
-    void *thing, unsigned *flags, haddr_t *new_addr,
+static herr_t H5SM_table_serialize(const H5F_t * f, hid_t dxpl_id, haddr_t addr,
+    size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
 static herr_t H5SM_table_free_icr(haddr_t addr, size_t len, void *thing);
 
 static void *H5SM_list_deserialize(haddr_t addr, size_t len, const void *image,    const void *udata, hbool_t *dirty);
-static herr_t H5SM_list_serialize(const H5F_t * f, haddr_t addr, size_t len, void *image,
-    void *thing, unsigned *flags, haddr_t *new_addr,
+static herr_t H5SM_list_serialize(const H5F_t * f, hid_t dxpl_id, haddr_t addr, 
+    size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
 static herr_t H5SM_list_free_icr(haddr_t addr, size_t len, void *thing);
 
@@ -249,9 +249,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_table_serialize(const H5F_t * f, haddr_t UNUSED addr, size_t UNUSED len, void *image,
-    void *_thing, unsigned *flags, haddr_t UNUSED *new_addr,
-    size_t UNUSED *new_len, void UNUSED **new_image)
+H5SM_table_serialize(const H5F_t * f, hid_t UNUSED dxlp_id, haddr_t UNUSED addr,
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
+    haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5SM_master_table_t *table = (H5SM_master_table_t *)_thing;
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -474,9 +474,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_list_serialize(const H5F_t * f, haddr_t UNUSED addr, size_t UNUSED len, void *image, 
-    void *_thing, unsigned *flags, haddr_t UNUSED *new_addr, 
-    size_t UNUSED *new_len, void UNUSED **new_image)
+H5SM_list_serialize(const H5F_t * f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, 
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
+    haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5SM_list_t *list = (H5SM_list_t *)_thing;
     herr_t ret_value = SUCCEED;         /* Return value */

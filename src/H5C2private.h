@@ -230,7 +230,9 @@ typedef struct H5C2_t H5C2_t;
  *
  *	The typedef for the serialize callback is as follows:
  *
- *	typedef herr_t (*H5C_serialize_func_t)(haddr_t addr,
+ *	typedef herr_t (*H5C_serialize_func_t)(const H5F_t *f,
+ *                                             hid_t dxpl_id,
+ *                                             haddr_t addr,
  *                                             size_t len,
  *                                             void * image_ptr,
  *                                             void * thing,
@@ -240,6 +242,15 @@ typedef struct H5C2_t H5C2_t;
  *                                             void ** new_image_ptr_ptr);
  *
  *	The parameters of the serialize callback are as follows:
+ *
+ *	f:	File pointer -- needed if other metadata cache entries
+ *		must be modified in the process of serializing the 
+ *		target entry.
+ *
+ *	dxpl_id: dxpl_id passed with the file pointer to the cache, and 
+ *	        passed on to the callback.  Necessary as some callbacks 
+ *	        revise the size and location of the target entry, or 
+ *	        possibly other entries on serialize.
  *
  *	addr:   Base address in file of the entry to be serialized.
  *
@@ -451,6 +462,7 @@ typedef herr_t (*H5C2_image_len_func_t)(const void *thing,
 #define H5C2__SERIALIZE_RENAMED_FLAG	0x2
 
 typedef herr_t (*H5C2_serialize_func_t)(const H5F_t *f,
+		                        hid_t dxpl_id,
                                         haddr_t addr,
                                         size_t len,
                                         void * image_ptr,
@@ -1549,6 +1561,7 @@ H5_DLL herr_t H5C2_end_journaling(H5F_t * f,
 				  H5C2_t * cache_ptr);
 
 H5_DLL herr_t H5C2_end_transaction(H5F_t * f,
+		                   hid_t dxpl_id,
                                    H5C2_t * cache_ptr,
                                    uint64_t trans_num,
                                    const char * api_call_name);
@@ -1562,6 +1575,7 @@ H5_DLL herr_t H5C2_journal_post_flush(H5C2_t * cache_ptr,
 H5_DLL herr_t H5C2_journal_pre_flush(H5C2_t * cache_ptr);
 
 H5_DLL herr_t H5C2_journal_transaction(H5F_t * f,
+		                       hid_t dxpl_id,
                                        H5C2_t * cache_ptr);
 
 H5_DLL herr_t H5C2_update_for_new_last_trans_on_disk(H5C2_t * cache_ptr,

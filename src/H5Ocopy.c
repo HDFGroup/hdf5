@@ -187,7 +187,7 @@ H5Ocopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
 
     herr_t      ret_value = SUCCEED;        /* Return value */
 
-    FUNC_ENTER_API_META(H5Ocopy, dst_loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Ocopy, dst_loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name,
              ocpypl_id, lcpl_id);
 

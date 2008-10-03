@@ -221,7 +221,7 @@ H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
     char                    fake_char;
     herr_t                  ret_value = SUCCEED;  /* Return value */
 
-    FUNC_ENTER_API_META(H5Dwrite, dset_id, FAIL)
+    FUNC_ENTER_API_META(H5Dwrite, dset_id, dxpl_id, FAIL)
     H5TRACE6("e", "iiiii*x", dset_id, mem_type_id, mem_space_id, file_space_id,
              dxpl_id, buf);
 

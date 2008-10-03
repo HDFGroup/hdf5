@@ -561,7 +561,7 @@ H5HF_sect_single_locate_parent(H5HF_hdr_t *hdr, hid_t dxpl_id, hbool_t refresh,
     HDassert(sect);
 
     /* Look up indirect block containing direct blocks for range */
-    if(H5HF_man_dblock_locate(hdr, dxpl_id, sect->sect_info.addr, &sec_iblock, &sec_entry, &did_protect, H5AC_READ) < 0)
+    if(H5HF_man_dblock_locate(hdr, dxpl_id, sect->sect_info.addr, &sec_iblock, &sec_entry, &did_protect, H5AC2_READ) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of section")
 
     /* Increment reference count on indirect block that free section is in */
@@ -833,7 +833,7 @@ HDfprintf(stderr, "%s: hdr->man_dtable.curr_root_rows = %u\n", FUNC, hdr->man_dt
 #ifdef QAK
 HDfprintf(stderr, "%s: dblock_addr = %a\n", FUNC, dblock_addr);
 #endif /* QAK */
-        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, sect->u.single.parent, sect->u.single.par_entry, H5AC_WRITE)))
+        if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, dblock_size, sect->u.single.parent, sect->u.single.par_entry, H5AC2_WRITE)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load fractal heap direct block")
         HDassert(H5F_addr_eq(dblock->block_off + dblock_overhead, sect->sect_info.addr));
 
@@ -1186,7 +1186,7 @@ HDfprintf(stderr, "%s: (*sect).sect_info = {%a, %Hu, %u}\n", FUNC, (*sect)->sect
 HDfprintf(stderr, "%s: dblock_addr = %a\n", FUNC, dblock_addr);
 #endif /* QAK */
     if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, dblock_addr, 
-            dblock_size, (*sect)->u.single.parent, (*sect)->u.single.par_entry, H5AC_WRITE)))
+            dblock_size, (*sect)->u.single.parent, (*sect)->u.single.par_entry, H5AC2_WRITE)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, FAIL, "unable to load fractal heap direct block")
     HDassert(H5F_addr_eq(dblock->block_off + dblock_size, (*sect)->sect_info.addr + (*sect)->sect_info.size));
 
@@ -1295,7 +1295,7 @@ HDfprintf(stderr, "%s: sect->u.single = {%p, %u, %a, %Zu}\n", "H5HF_sect_single_
 
             /* Retrieve direct block address from section */
             /* (Casting away const OK - QAK) */
-            status = H5HF_sect_single_dblock_info(iblock->hdr, H5AC_dxpl_id, (H5HF_free_section_t *)sect, &dblock_addr, &dblock_size);
+            status = H5HF_sect_single_dblock_info(iblock->hdr, H5AC2_dxpl_id, (H5HF_free_section_t *)sect, &dblock_addr, &dblock_size);
             HDassert(status >= 0);
             HDassert(H5F_addr_eq(iblock->ents[sect->u.single.par_entry].addr, dblock_addr));
             HDassert(dblock_size > 0);
@@ -1308,18 +1308,18 @@ HDfprintf(stderr, "%s: sect->u.single = {%p, %u, %a, %Zu}\n", "H5HF_sect_single_
             HDassert((sect->sect_info.size + dblock_overhead) < dblock_size);
 
             /* Check the direct block's status in the metadata cache */
-            status = H5AC_get_entry_status(iblock->hdr->f, dblock_addr, &dblock_status);
+            status = H5AC2_get_entry_status(iblock->hdr->f, dblock_addr, &dblock_status);
             HDassert(status >= 0);
 
             /* If the direct block for the section isn't already protected,
              *  protect it here in order to check single section's sanity
              *  against it.
              */
-            if(!(dblock_status & H5AC_ES__IS_PROTECTED)) {
+            if(!(dblock_status & H5AC2_ES__IS_PROTECTED)) {
                 H5HF_direct_t *dblock;      /* Direct block for section */
 
                 /* Protect the direct block for the section */
-                dblock = H5HF_man_dblock_protect(iblock->hdr, H5AC_dxpl_id, dblock_addr, dblock_size, iblock, sect->u.single.par_entry, H5AC_READ);
+                dblock = H5HF_man_dblock_protect(iblock->hdr, H5AC2_dxpl_id, dblock_addr, dblock_size, iblock, sect->u.single.par_entry, H5AC2_READ);
                 HDassert(dblock);
 
                 /* Sanity check settings for section */
@@ -1330,7 +1330,7 @@ HDfprintf(stderr, "%s: sect->u.single = {%p, %u, %a, %Zu}\n", "H5HF_sect_single_
                         (sect->sect_info.addr + sect->sect_info.size)));
 
                 /* Release direct block */
-                status = H5AC_unprotect(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET);
+                status = H5AC2_unprotect(iblock->hdr->f, H5AC2_dxpl_id, H5AC2_FHEAP_DBLOCK, dblock_addr, (size_t)0, dblock, H5AC2__NO_FLAGS_SET);
                 HDassert(status >= 0);
             } /* end if */
         } /* end if */
@@ -2976,7 +2976,7 @@ H5HF_sect_indirect_revive_row(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_
 HDfprintf(stderr, "%s: sect->sect_info.addr = %a\n", FUNC, sect->sect_info.addr);
 HDfprintf(stderr, "%s: sect->u.indirect.u.iblock_off = %Hu\n", FUNC, sect->u.indirect.u.iblock_off);
 #endif /* QAK */
-    if(H5HF_man_dblock_locate(hdr, dxpl_id, sect->sect_info.addr, &sec_iblock, NULL, &did_protect, H5AC_READ) < 0)
+    if(H5HF_man_dblock_locate(hdr, dxpl_id, sect->sect_info.addr, &sec_iblock, NULL, &did_protect, H5AC2_READ) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPUTE, FAIL, "can't compute row & column of section")
 
     /* Increment reference count on indirect block that free section is in */

@@ -582,8 +582,10 @@ H5HF_hdr_decr(H5HF_hdr_t *hdr)
     /* Mark header as evictable again when no child blocks depend on it */
     if(hdr->rc == 0) {
         HDassert(hdr->file_rc == 0);
-        if(H5AC2_unpin_entry(hdr) < 0)
+        if(H5AC2_unpin_entry(hdr) < 0) {
+
             HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPIN, FAIL, "unable to unpin fractal heap header")
+        }
     } /* end if */
 
 done:
@@ -1508,6 +1510,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+
 herr_t
 H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
 {

@@ -129,7 +129,7 @@ H5Tcommit1(hid_t loc_id, const char *name, hid_t type_id)
     H5T_t	*type;                  /* Datatype for ID */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Tcommit1, loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Tcommit1, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE3("e", "i*si", loc_id, name, type_id);
 
     /* Check arguments */

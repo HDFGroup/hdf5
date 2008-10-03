@@ -315,7 +315,7 @@ H5Lmove(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5G_loc_t	dst_loc, *dst_loc_p;
     herr_t      ret_value=SUCCEED;              /* Return value */
 
-    FUNC_ENTER_API_META(H5Lmove, src_loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Lmove, src_loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name, lcpl_id,
              lapl_id);
 
@@ -373,7 +373,7 @@ H5Lcopy(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id,
     H5G_loc_t	dst_loc, *dst_loc_p;
     herr_t      ret_value=SUCCEED;              /* Return value */
 
-    FUNC_ENTER_API_META(H5Lcopy, src_loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Lcopy, src_loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE6("e", "i*si*sii", src_loc_id, src_name, dst_loc_id, dst_name, lcpl_id,
              lapl_id);
 
@@ -434,7 +434,7 @@ H5Lcreate_soft(const char *link_target,
     H5G_loc_t	link_loc;               /* Group location for new link */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Lcreate_soft, link_loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Lcreate_soft, link_loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE5("e", "*si*sii", link_target, link_loc_id, link_name, lcpl_id, lapl_id);
 
     /* Check arguments */
@@ -480,7 +480,7 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name,
     H5G_loc_t	new_loc, *new_loc_p;
     herr_t      ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_API_META(H5Lcreate_hard, cur_loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Lcreate_hard, cur_loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE6("e", "i*si*sii", cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id,
              lapl_id);
 
@@ -549,7 +549,7 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
     H5G_loc_t	link_loc;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_META(H5Lcreate_ud, link_loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Lcreate_ud, link_loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE7("e", "i*sLl*xzii", link_loc_id, link_name, link_type, udata,
              udata_size, lcpl_id, lapl_id);
 
@@ -591,7 +591,7 @@ H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id)
     H5G_loc_t	loc;                    /* Group's location */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API_META(H5Ldelete, loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Ldelete, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE3("e", "i*si", loc_id, name, lapl_id);
 
     /* Check arguments */
@@ -636,7 +636,7 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name,
     H5L_trav_rmbi_t udata;              /* User data for callback */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_API_META(H5Ldelete_by_idx, loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Ldelete_by_idx, loc_id, H5AC_dxpl_id, FAIL)
     H5TRACE6("e", "i*sIiIohi", loc_id, group_name, idx_type, order, n, lapl_id);
 
     /* Check arguments */

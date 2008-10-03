@@ -1262,7 +1262,7 @@ H5Idec_ref(hid_t id)
 {
     int ret_value;                      /* Return value */
 
-    FUNC_ENTER_API_META(H5Idec_ref, id, FAIL);
+    FUNC_ENTER_API_META(H5Idec_ref, id, H5AC_dxpl_id, FAIL);
     H5TRACE1("Is", "i", id);
 
     /* Check arguments */
@@ -1387,7 +1387,7 @@ H5Iinc_ref(hid_t id)
 {
     int ret_value;                      /* Return value */
 
-    FUNC_ENTER_API_META(H5Iinc_ref, id, FAIL);
+    FUNC_ENTER_API_META(H5Iinc_ref, id, H5AC_dxpl_id, FAIL);
     H5TRACE1("Is", "i", id);
 
     /* Check arguments */

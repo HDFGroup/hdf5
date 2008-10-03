@@ -439,7 +439,7 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
     H5G_loc_t	obj_loc;
     herr_t      ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_API_META(H5Olink, obj_id, FAIL)
+    FUNC_ENTER_API_META(H5Olink, obj_id, H5AC_dxpl_id, FAIL)
     H5TRACE5("e", "ii*sii", obj_id, new_loc_id, new_name, lcpl_id, lapl_id);
 
     /* Check arguments */
@@ -491,7 +491,7 @@ H5Oincr_refcount(hid_t object_id)
     H5O_loc_t  *oloc;
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_API_META(H5Oincr_refcount, object_id, FAIL)
+    FUNC_ENTER_API_META(H5Oincr_refcount, object_id, H5AC_dxpl_id, FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Get the object's oloc so we can adjust its link count */
@@ -532,7 +532,7 @@ H5Odecr_refcount(hid_t object_id)
     H5O_loc_t  *oloc;
     herr_t      ret_value = SUCCEED;
 
-    FUNC_ENTER_API_META(H5Odecr_refcount, object_id, FAIL)
+    FUNC_ENTER_API_META(H5Odecr_refcount, object_id, H5AC_dxpl_id, FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Get the object's oloc so we can adjust its link count */
@@ -720,7 +720,7 @@ H5Oset_comment(hid_t obj_id, const char *comment)
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Oset_comment, obj_id, FAIL)
+    FUNC_ENTER_API_META(H5Oset_comment, obj_id, H5AC_ind_dxpl_id, FAIL)
     H5TRACE2("e", "i*s", obj_id, comment);
 
     /* Check args */
@@ -760,7 +760,7 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment,
     H5G_loc_t	loc;                    /* Location of group */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_API_META(H5Oset_comment_by_name, loc_id, FAIL)
+    FUNC_ENTER_API_META(H5Oset_comment_by_name, loc_id, H5AC_ind_dxpl_id, FAIL)
     H5TRACE4("e", "i*s*si", loc_id, name, comment, lapl_id);
 
     /* Check args */
@@ -1017,7 +1017,7 @@ H5Oclose(hid_t object_id)
     /* Will this ever change metadata?  No need for a transaction unless
      * it does.
      */
-    FUNC_ENTER_API_META(H5Oclose, object_id, FAIL)
+    FUNC_ENTER_API_META(H5Oclose, object_id, H5AC_dxpl_id, FAIL)
     H5TRACE1("e", "i", object_id);
 
     /* Get the type of the object and close it in the correct way */

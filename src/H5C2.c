@@ -113,6 +113,26 @@
 
 
 /*
+ * #defines controlling debugging code.  All should be turned off
+ * before checkin.
+ */
+
+#define H5C2_PRINT_ENTRY_POINTS	FALSE
+
+#if H5C2_PRINT_ENTRY_POINTS
+#define H5C2_PRINT_EXIT_POINTS	TRUE
+#define H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(i) \
+	( ( (i) == H5AC2_FHEAP_HDR_ID ) ||    \
+          ( (i) == H5AC2_FHEAP_DBLOCK_ID ) || \
+          ( (i) == H5AC2_FHEAP_IBLOCK_ID ) )
+#else /* H5C2_PRINT_ENTRY_POINTS */
+#define H5C2_PRINT_EXIT_POINTS	FALSE
+#endif /* H5C2_PRINT_ENTRY_POINTS */
+
+
+
+
+/*
  * Private file-scope variables.
  */
 
@@ -212,6 +232,7 @@ static void * H5C2_epoch_marker_deserialize(haddr_t addr,
 static herr_t H5C2_epoch_marker_image_len(const void * thing,
 		                          size_t *image_len_ptr);
 static herr_t H5C2_epoch_marker_serialize(const H5F_t *f,
+		                          hid_t dxpl_id,
                                           haddr_t addr,
 		                          size_t len,
 		                          void * image_ptr,
@@ -284,6 +305,7 @@ done:
 
 static herr_t 
 H5C2_epoch_marker_serialize(const H5F_t UNUSED *f,
+		            hid_t UNUSED dxpl_id,
                             haddr_t UNUSED addr,
 		            size_t UNUSED len,
 		            void UNUSED * image_ptr,
@@ -1108,6 +1130,14 @@ H5C2_expunge_entry(H5F_t *              f,
 
     FUNC_ENTER_NOAPI(H5C2_expunge_entry, FAIL)
 
+#if H5C2_PRINT_ENTRY_POINTS
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) )
+    {
+        HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n", 
+	          FUNC, (unsigned long)addr, type->name);
+    }
+#endif /* H5C2_PRINT_ENTRY_POINTS */
+
     HDassert( f );
     HDassert( f->shared );
 
@@ -1206,6 +1236,13 @@ done:
                             "LRU sanity check failed.\n");
         }
 #endif /* H5C2_DO_EXTREME_SANITY_CHECKS */
+
+#if H5C2_PRINT_EXIT_POINTS
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) ) {
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+                  FUNC, (int)ret_value);
+    }
+#endif /* H5C2_PRINT_EXIT_POINTS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -1357,6 +1394,10 @@ H5C2_flush_cache(const H5F_t *f,
 #endif /* H5C2_DO_SANITY_CHECKS */
 
     FUNC_ENTER_NOAPI(H5C2_flush_cache, FAIL)
+
+#if H5C2_PRINT_ENTRY_POINTS
+    HDfprintf(stdout, "%s: flags = 0x%x.\n", FUNC, flags);
+#endif /* H5C2_PRINT_ENTRY_POINTS */
 
     HDassert( f );
     HDassert( f->shared );
@@ -1695,6 +1736,11 @@ H5C2_flush_cache(const H5F_t *f,
 done:
 
     cache_ptr->flush_in_progress = FALSE;
+
+#if H5C2_PRINT_EXIT_POINTS
+    HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+              FUNC, (int)ret_value);
+#endif /* H5C2_PRINT_EXIT_POINTS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -2456,6 +2502,14 @@ H5C2_insert_entry(H5F_t *              f,
 
     FUNC_ENTER_NOAPI(H5C2_insert_entry, FAIL)
 
+#if H5C2_PRINT_ENTRY_POINTS 
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) )
+    {
+        HDfprintf(stdout, "%s: addr = 0x%lX, len = %d, type = %s.\n", FUNC, 
+	          (unsigned long)addr, (int)len, type->name);
+    }
+#endif /* JRM */
+
     HDassert( f );
     HDassert( f->shared );
 
@@ -2702,6 +2756,14 @@ done:
                         "LRU sanity check failed.\n");
     }
 #endif /* H5C2_DO_EXTREME_SANITY_CHECKS */
+
+#if H5C2_PRINT_EXIT_POINTS
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) ) {
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+                  FUNC, (int)ret_value);
+    }
+#endif /* H5C2_PRINT_EXIT_POINTS */
+
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -3097,6 +3159,17 @@ H5C2_mark_pinned_entry_dirty(void *  thing,
 
     entry_ptr = (H5C2_cache_entry_t *)thing;
 
+
+#if H5C2_PRINT_ENTRY_POINTS 
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) )
+    {
+        HDfprintf(stdout, 
+                  "%s: addr = 0x%lX, size_changed = %d, new_size = %d.\n", 
+	          FUNC, (unsigned long)(entry_ptr->addr), (int)size_changed, 
+	          (int)new_size);
+    }
+#endif /* JRM */
+
     if ( ! ( entry_ptr->is_pinned ) ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, \
@@ -3188,6 +3261,13 @@ H5C2_mark_pinned_entry_dirty(void *  thing,
 
 done:
 
+#if H5C2_PRINT_EXIT_POINTS
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) ) {
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+                  FUNC, (int)ret_value);
+    }
+#endif /* H5C2_PRINT_EXIT_POINTS */
+
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C2_mark_pinned_entry_dirty() */
@@ -3254,8 +3334,16 @@ H5C2_mark_pinned_or_protected_entry_dirty(void *   thing)
 
     entry_ptr = (H5C2_cache_entry_t *)thing;
 
+#if H5C2_PRINT_ENTRY_POINTS 
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) )
+    {
+        HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n", FUNC, 
+	          (unsigned long)(entry_ptr->addr), entry_ptr->type->name);
+    }
+#endif /* JRM */
+
     if ( entry_ptr->is_protected ) {
-#if 1 /* JRM - uncomment this when possible */
+#if 0 /* JRM - uncomment this when possible */
 	HDassert( ! ((entry_ptr)->is_read_only) );
 #endif
         /* set the dirtied flag */
@@ -3291,6 +3379,13 @@ H5C2_mark_pinned_or_protected_entry_dirty(void *   thing)
     }
 
 done:
+
+#if H5C2_PRINT_EXIT_POINTS
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) ) {
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+                  FUNC, (int)ret_value);
+    }
+#endif /* H5C2_PRINT_EXIT_POINTS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -3370,6 +3465,15 @@ H5C2_rename_entry(H5C2_t *	     cache_ptr,
 #endif /* H5C2_DO_SANITY_CHECKS */
 
     FUNC_ENTER_NOAPI(H5C2_rename_entry, FAIL)
+
+#if H5C2_PRINT_ENTRY_POINTS 
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) )
+    {
+        HDfprintf(stdout, "%s: type = %s,  old_addr = 0x%lX, new_addr = 0x%lx.\n", 
+	          FUNC, type->name, (unsigned long)old_addr, 
+		  (unsigned long)new_addr);
+    }
+#endif /* JRM */
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
@@ -3533,6 +3637,13 @@ done:
         }
 #endif /* H5C2_DO_EXTREME_SANITY_CHECKS */
 
+#if H5C2_PRINT_EXIT_POINTS
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) ) {
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+                  FUNC, (int)ret_value);
+    }
+#endif /* H5C2_PRINT_EXIT_POINTS */
+
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C2_rename_entry() */
@@ -3579,6 +3690,15 @@ H5C2_resize_pinned_entry(void *  thing,
 
     HDassert( entry_ptr );
     HDassert( H5F_addr_defined(entry_ptr->addr) );
+
+#if H5C2_PRINT_ENTRY_POINTS 
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) )
+    {
+        HDfprintf(stdout, "%s: type = %s, addr = 0x%lX, new_size = %d.\n", 
+	          FUNC, entry_ptr->type->name, (unsigned long)(entry_ptr->addr), 
+		  (int)new_size);
+    }
+#endif /* JRM */
 
     cache_ptr = entry_ptr->cache_ptr;
 
@@ -3688,6 +3808,13 @@ H5C2_resize_pinned_entry(void *  thing,
 
 done:
 
+#if H5C2_PRINT_EXIT_POINTS
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) ) {
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+                  FUNC, (int)ret_value);
+    }
+#endif /* H5C2_PRINT_EXIT_POINTS */
+
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C2_resize_pinned_entry() */
@@ -3739,6 +3866,14 @@ H5C2_pin_protected_entry(void *	  thing)
 
     FUNC_ENTER_NOAPI(H5C2_pin_protected_entry, FAIL)
 
+#if H5C2_PRINT_ENTRY_POINTS 
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) )
+    {
+        HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n", FUNC, 
+	          (unsigned long)(entry_ptr->addr), entry_ptr->type->name);
+    }
+#endif /* JRM */
+
     HDassert( entry_ptr );
     HDassert( H5F_addr_defined(entry_ptr->addr) );
 
@@ -3762,6 +3897,13 @@ H5C2_pin_protected_entry(void *	  thing)
     H5C2__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
 
 done:
+
+#if H5C2_PRINT_EXIT_POINTS
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) ) {
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+                  FUNC, (int)ret_value);
+    }
+#endif /* H5C2_PRINT_EXIT_POINTS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -3889,6 +4031,15 @@ H5C2_protect(H5F_t *		  f,
     void *		ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_protect, NULL)
+
+#if H5C2_PRINT_ENTRY_POINTS 
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) )
+    {
+        HDfprintf(stdout, 
+		  "%s: addr = 0x%lX, len = %d, type = %s, flags = 0x%x.\n", 
+	          FUNC, (unsigned long)addr, (int)len, type->name, flags);
+    }
+#endif /* JRM */
 
     /* check args */
     HDassert( f );
@@ -4228,6 +4379,13 @@ done:
                             "LRU sanity check failed.\n");
         }
 #endif /* H5C2_DO_EXTREME_SANITY_CHECKS */
+
+#if H5C2_PRINT_EXIT_POINTS
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) ) {
+        HDfprintf(stdout, "%s: Exiting with result = 0x%lX.\n", 
+                  FUNC, (unsigned long)ret_value);
+    }
+#endif /* H5C2_PRINT_EXIT_POINTS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -5363,6 +5521,14 @@ H5C2_unpin_entry(void *_entry_ptr)
 
     FUNC_ENTER_NOAPI(H5C2_unpin_entry, FAIL)
 
+#if H5C2_PRINT_ENTRY_POINTS 
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) )
+    {
+        HDfprintf(stdout, "%s: addr = 0x%lX, type = %s.\n", FUNC, 
+	          (unsigned long)(entry_ptr->addr), entry_ptr->type->name);
+    }
+#endif /* JRM */
+
     HDassert( entry_ptr );
 
     cache_ptr = entry_ptr->cache_ptr;
@@ -5385,6 +5551,13 @@ H5C2_unpin_entry(void *_entry_ptr)
     H5C2__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
 
 done:
+
+#if H5C2_PRINT_EXIT_POINTS
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(entry_ptr->type->id) ) {
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+                  FUNC, (int)ret_value);
+    }
+#endif /* H5C2_PRINT_EXIT_POINTS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -5521,6 +5694,15 @@ H5C2_unprotect(H5F_t *		    f,
     H5C2_cache_entry_t *	test_entry_ptr;
 
     FUNC_ENTER_NOAPI(H5C2_unprotect, FAIL)
+
+#if H5C2_PRINT_ENTRY_POINTS 
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) )
+    {
+    HDfprintf(stdout, 
+	      "%s: addr = 0x%lX, type = %s, flags = 0x%x, new_size = %d.\n", 
+	      FUNC, (unsigned long)addr, type->name, flags, (int)new_size);
+    }
+#endif /* JRM */
 
     deleted          = ( (flags & H5C2__DELETED_FLAG) != 0 );
     dirtied          = ( (flags & H5C2__DIRTIED_FLAG) != 0 );
@@ -5892,6 +6074,13 @@ done:
                             "LRU sanity check failed.\n");
         }
 #endif /* H5C2_DO_EXTREME_SANITY_CHECKS */
+
+#if H5C2_PRINT_EXIT_POINTS
+    if ( H5C2_PRINT_ENTRY_POINT_TARGET_TYPE(type->id) ) {
+        HDfprintf(stdout, "%s: Exiting with result = %d.\n", 
+                  FUNC, (int)ret_value);
+    }
+#endif /* H5C2_PRINT_EXIT_POINTS */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -8567,6 +8756,7 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 	    if ( ! ( entry_ptr->image_up_to_date ) ) {
 
 	        if ( entry_ptr->type->serialize(f,
+					        dxpl_id,
                                                 entry_ptr->addr, 
 				                entry_ptr->size,
 					        entry_ptr->image_ptr,
@@ -8824,6 +9014,10 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 	    entry_ptr->magic = H5C2__H5C2_CACHE_ENTRY_T_BAD_MAGIC;
 #endif /* NDEBUG */
             entry_ptr->cache_ptr = NULL;
+#if 0 /* JRM */
+	    HDfprintf(stdout, "%s: calling free_icr(%d -- %s).\n", FUNC, 
+		      type_ptr->id, type_ptr->name);
+#endif /* JRM */
             if ( type_ptr->free_icr(entry_ptr->addr, entry_ptr->size,
 		                    (void *)entry_ptr) != SUCCEED )
             {

@@ -421,6 +421,7 @@ done:
 
 herr_t
 H5C2_end_transaction(H5F_t * f,
+		     hid_t dxpl_id,
                      H5C2_t * cache_ptr,
                      uint64_t trans_num,
                      const char * api_call_name)
@@ -466,7 +467,7 @@ H5C2_end_transaction(H5F_t * f,
          */
         if ( cache_ptr->tl_len > 0 ) {
 
-            result = H5C2_journal_transaction(f, cache_ptr);
+            result = H5C2_journal_transaction(f, dxpl_id, cache_ptr);
 
             if ( result != SUCCEED ) {
 
@@ -785,6 +786,7 @@ done:
 
 herr_t
 H5C2_journal_transaction(H5F_t * f,
+		         hid_t dxpl_id,
 		         H5C2_t * cache_ptr)
 
 {
@@ -878,6 +880,7 @@ H5C2_journal_transaction(H5F_t * f,
 	if ( ! ( entry_ptr->image_up_to_date ) ) {
 
             result = entry_ptr->type->serialize(f,
+			                        dxpl_id,
                                                 entry_ptr->addr,
                                                 entry_ptr->size,
                                                 entry_ptr->image_ptr,
@@ -920,11 +923,11 @@ H5C2_journal_transaction(H5F_t * f,
 
 	        if ( resized ) 
                 {
-                    /* in the following protect/unprotect, use default 
-	             * dxpl_id as we know that the entry is in cache,
+                    /* in the following protect/unprotect, the dxpl_id
+		     * is irrelement, as we know that the entry is in cache,
 	             * and thus no I/O will take place.
 	             */
-	            thing = H5C2_protect(f, H5P_DATASET_XFER_DEFAULT,
+	            thing = H5C2_protect(f, dxpl_id,
 	                                 entry_ptr->type, entry_ptr->addr,
 				         entry_ptr->size, NULL, 
 				         H5C2__NO_FLAGS_SET);
@@ -939,7 +942,7 @@ H5C2_journal_transaction(H5F_t * f,
                                     "H5C2_protect() failed.")
                     }
 
-                    result = H5C2_unprotect(f, H5P_DATASET_XFER_DEFAULT,
+                    result = H5C2_unprotect(f, dxpl_id,
                                             entry_ptr->type, entry_ptr->addr,
                                             thing, H5C2__SIZE_CHANGED_FLAG, 
 					    new_len);
@@ -3806,7 +3809,7 @@ H5C2_jb__eoa(H5C2_jbrb_t * struct_ptr,
     } /* end if */
 
     /* Write EOA message */
-    HDsnprintf(temp, temp_len, "E eoa_value 0x%lx", eoa);
+    HDsnprintf(temp, temp_len, "E eoa_value 0x%llx", eoa);
 
     if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, struct_ptr->cur_trans ) < 0 ) {
 

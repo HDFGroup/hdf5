@@ -66,23 +66,23 @@
 /* Metadata cache callbacks */
 static void *H5B2_cache_hdr_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
-static herr_t H5B2_cache_hdr_serialize(const H5F_t *f, haddr_t addr, size_t len,
-    void *image, void *thing, unsigned *flags, haddr_t *new_addr,
-    size_t *new_len, void **new_image);
+static herr_t H5B2_cache_hdr_serialize(const H5F_t *f, hid_t dxpl_id, 
+    haddr_t addr, size_t len, void *image, void *thing, unsigned *flags, 
+    haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5B2_cache_hdr_free_icr(haddr_t addr, size_t len, void *thing);
 
 static void *H5B2_cache_internal_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
-static herr_t H5B2_cache_internal_serialize(const H5F_t *f, haddr_t addr, size_t len,
-    void *image, void *thing, unsigned *flags, haddr_t *new_addr,
-    size_t *new_len, void **new_image);
+static herr_t H5B2_cache_internal_serialize(const H5F_t *f, hid_t dxpl_id,
+    haddr_t addr, size_t len, void *image, void *thing, unsigned *flags, 
+    haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5B2_cache_internal_free_icr(haddr_t addr, size_t len, void *thing);
 
 static void *H5B2_cache_leaf_deserialize(haddr_t addr, size_t len,
     const void *image, void *udata, hbool_t *dirty);
-static herr_t H5B2_cache_leaf_serialize(const H5F_t *f, haddr_t addr, size_t len,
-    void *image, void *thing, unsigned *flags, haddr_t *new_addr,
-    size_t *new_len, void **new_image);
+static herr_t H5B2_cache_leaf_serialize(const H5F_t *f, hid_t dxpl_id, 
+    haddr_t addr, size_t len, void *image, void *thing, unsigned *flags, 
+    haddr_t *new_addr, size_t *new_len, void **new_image);
 static herr_t H5B2_cache_leaf_free_icr(haddr_t addr, size_t len, void *thing);
 
 /*********************/
@@ -271,8 +271,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_hdr_serialize(const H5F_t *f, haddr_t UNUSED addr, size_t UNUSED len,
-    void *image, void *_thing, unsigned *flags, haddr_t UNUSED *new_addr,
+H5B2_cache_hdr_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, 
+    haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing, 
+    unsigned *flags, haddr_t UNUSED *new_addr,
     size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5B2_t *bt2 = (H5B2_t *)_thing;      /* Pointer to the b-tree header */
@@ -531,9 +532,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_internal_serialize(const H5F_t *f, haddr_t UNUSED addr, 
-    size_t UNUSED len, void *image, void *_thing, unsigned *flags,
-    haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
+H5B2_cache_internal_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, 
+    haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing, 
+    unsigned *flags, haddr_t UNUSED *new_addr, size_t UNUSED *new_len, 
+    void UNUSED **new_image)
 {
     H5B2_shared_t *shared;  /* Shared B-tree information */
     uint8_t *p;             /* Pointer into raw data buffer */
@@ -779,9 +781,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_leaf_serialize(const H5F_t *f, haddr_t UNUSED addr, size_t UNUSED len,
-    void *image, void *_thing, unsigned *flags, haddr_t UNUSED *new_addr,
-    size_t UNUSED *new_len, void UNUSED **new_image)
+H5B2_cache_leaf_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, 
+    haddr_t UNUSED addr, size_t UNUSED len, void *image, void *_thing, 
+    unsigned *flags, haddr_t UNUSED *new_addr, size_t UNUSED *new_len, 
+    void UNUSED **new_image)
 {
     H5B2_shared_t *shared;  /* Shared B-tree information */
     uint8_t *p;             /* Pointer into raw data buffer */

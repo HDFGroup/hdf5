@@ -566,43 +566,53 @@ herr_t huge_image_len(void *thing, size_t *image_len_ptr);
 herr_t monster_image_len(void *thing, size_t *image_len_ptr);
 herr_t variable_image_len(void *thing, size_t *image_len_ptr);
 
-herr_t pico_serialize(const H5F_t *f, haddr_t addr, size_t len, void * image_ptr, 
+herr_t pico_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+		      size_t len, void * image_ptr, 
 		      void * thing, unsigned * flags_ptr, 
 		      haddr_t * new_addr_ptr, size_t * new_len_ptr, 
 		      void ** new_image_ptr_ptr);
-herr_t nano_serialize(const H5F_t *f, haddr_t addr, size_t len, void * image_ptr, 
+herr_t nano_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+		      size_t len, void * image_ptr, 
 		      void * thing, unsigned * flags_ptr, 
 		      haddr_t * new_addr_ptr, size_t * new_len_ptr, 
 		      void ** new_image_ptr_ptr);
-herr_t micro_serialize(const H5F_t *f, haddr_t addr, size_t len, void * image_ptr, 
+herr_t micro_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+		       size_t len, void * image_ptr, 
 		       void * thing, unsigned * flags_ptr, 
 		       haddr_t * new_addr_ptr, size_t * new_len_ptr, 
 		       void ** new_image_ptr_ptr);
-herr_t tiny_serialize(const H5F_t *f, haddr_t addr, size_t len, void * image_ptr, 
+herr_t tiny_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+		      size_t len, void * image_ptr, 
 		      void * thing, unsigned * flags_ptr, 
 		      haddr_t * new_addr_ptr, size_t * new_len_ptr, 
 		      void ** new_image_ptr_ptr);
-herr_t small_serialize(const H5F_t *f, haddr_t addr, size_t len, void * image_ptr, 
+herr_t small_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+		       size_t len, void * image_ptr, 
 		       void * thing, unsigned * flags_ptr, 
 		       haddr_t * new_addr_ptr, size_t * new_len_ptr, 
 		       void ** new_image_ptr_ptr);
-herr_t medium_serialize(const H5F_t *f, haddr_t addr, size_t len, void * image_ptr, 
+herr_t medium_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+		        size_t len, void * image_ptr, 
 	  	        void * thing, unsigned * flags_ptr, 
 		        haddr_t * new_addr_ptr, size_t * new_len_ptr, 
 		        void ** new_image_ptr_ptr);
-herr_t large_serialize(const H5F_t *f, haddr_t addr, size_t len, void * image_ptr, 
+herr_t large_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+		       size_t len, void * image_ptr, 
 		       void * thing, unsigned * flags_ptr, 
 		       haddr_t * new_addr_ptr, size_t * new_len_ptr, 
 		       void ** new_image_ptr_ptr);
-herr_t huge_serialize(const H5F_t *f, haddr_t addr, size_t len, void * image_ptr, 
+herr_t huge_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+		      size_t len, void * image_ptr, 
 	              void * thing, unsigned * flags_ptr, 
 	              haddr_t * new_addr_ptr, size_t * new_len_ptr, 
 	              void ** new_image_ptr_ptr);
-herr_t monster_serialize(const H5F_t *f, haddr_t addr, size_t len, void * image_ptr, 
+herr_t monster_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+		         size_t len, void * image_ptr, 
 	                 void * thing, unsigned * flags_ptr, 
 	                 haddr_t * new_addr_ptr, size_t * new_len_ptr, 
 	                 void ** new_image_ptr_ptr);
-herr_t variable_serialize(const H5F_t *f, haddr_t addr, size_t len, void * image_ptr, 
+herr_t variable_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+		          size_t len, void * image_ptr, 
 	                  void * thing, unsigned * flags_ptr, 
 	                  haddr_t * new_addr_ptr, size_t * new_len_ptr, 
 	                  void ** new_image_ptr_ptr);

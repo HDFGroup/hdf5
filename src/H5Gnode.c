@@ -77,8 +77,8 @@ static size_t H5G_node_size_real(const H5F_t *f);
 /* Metadata cache callbacks */
 static void *H5G_node_deserialize(haddr_t addr, size_t len, const void *image,
     void *udata, hbool_t *dirty);
-static herr_t H5G_node_serialize(const H5F_t *f, haddr_t addr, size_t len,
-    void *image, void *thing, unsigned *flags, haddr_t *new_addr,
+static herr_t H5G_node_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, 
+    size_t len, void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
 static herr_t H5G_node_free_icr(haddr_t addr, size_t len, void *thing);
 static herr_t H5G_node_clear(haddr_t addr, size_t len, void *sym);
@@ -421,9 +421,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_node_serialize(const H5F_t *f, haddr_t UNUSED addr, size_t UNUSED len,
-    void *image, void *_thing, unsigned *flags, haddr_t UNUSED *new_addr,
-    size_t UNUSED *new_len, void UNUSED **new_image)
+H5G_node_serialize(const H5F_t *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, 
+    size_t UNUSED len, void *image, void *_thing, unsigned *flags, 
+    haddr_t UNUSED *new_addr, size_t UNUSED *new_len, void UNUSED **new_image)
 {
     H5G_node_t *sym = (H5G_node_t *)_thing;        /* Pointer to the Symbol Table node */
     size_t	size;           /* Size of symbol table node in file */

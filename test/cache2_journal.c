@@ -548,7 +548,8 @@ end_trans(H5F_t * file_ptr,
 
     if ( pass2 ) {
 
-        result = H5C2_end_transaction(file_ptr, cache_ptr, trans_num, trans_name);
+        result = H5C2_end_transaction(file_ptr, H5AC2_dxpl_id, cache_ptr, 
+			              trans_num, trans_name);
 
         if ( result < 0 ) {
 
@@ -720,7 +721,7 @@ jrnl_col_major_scan_backward2(H5F_t * file_ptr,
 			      uint64_t trans_num)
 {
     const char * fcn_name = "jrnl_col_major_scan_backward2()";
-    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+    H5C2_t * cache_ptr;
     int i;
     int mile_stone = 1;
     int32_t type;
@@ -730,19 +731,26 @@ jrnl_col_major_scan_backward2(H5F_t * file_ptr,
     if ( verbose )
         HDfprintf(stdout, "%s: entering.\n", fcn_name);
 
-    for ( i = 0; i < NUMBER_OF_ENTRY_TYPES; i++ )
-    {
-        local_max_index[i] = MIN(max_index, max_indices2[i]);
+    if ( pass2 ) {
+
+	cache_ptr = file_ptr->shared->cache2;
+
+	HDassert( cache_ptr != NULL );
+
+        for ( i = 0; i < NUMBER_OF_ENTRY_TYPES; i++ )
+        {
+            local_max_index[i] = MIN(max_index, max_indices2[i]);
+        }
+
+        HDassert( lag > 5 );
+
+        if ( reset_stats ) {
+
+            H5C2_stats__reset(cache_ptr);
+        }
+
+        idx = local_max_index[NUMBER_OF_ENTRY_TYPES - 1] + lag;
     }
-
-    HDassert( lag > 5 );
-
-    if ( ( pass2 ) && ( reset_stats ) ) {
-
-        H5C2_stats__reset(cache_ptr);
-    }
-
-    idx = local_max_index[NUMBER_OF_ENTRY_TYPES - 1] + lag;
 
     if ( verbose ) /* 1 */
         HDfprintf(stdout, "%s: point %d.\n", fcn_name, mile_stone++);
@@ -878,7 +886,7 @@ jrnl_col_major_scan_forward2(H5F_t * file_ptr,
 			     uint64_t trans_num)
 {
     const char * fcn_name = "jrnl_col_major_scan_forward2()";
-    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+    H5C2_t * cache_ptr;
     int i;
     int32_t type;
     int32_t idx;
@@ -887,21 +895,28 @@ jrnl_col_major_scan_forward2(H5F_t * file_ptr,
     if ( verbose )
         HDfprintf(stdout, "%s: entering.\n", fcn_name);
 
-    for ( i = 0; i < NUMBER_OF_ENTRY_TYPES; i++ )
-    {
-        local_max_index[i] = MIN(max_index, max_indices2[i]);
+    if ( pass2 ) {
+
+        cache_ptr = file_ptr->shared->cache2;
+
+	HDassert( cache_ptr != NULL );
+
+        for ( i = 0; i < NUMBER_OF_ENTRY_TYPES; i++ )
+        {
+            local_max_index[i] = MIN(max_index, max_indices2[i]);
+        }
+
+        HDassert( lag > 5 );
+
+        type = 0;
+
+        if ( reset_stats ) {
+
+            H5C2_stats__reset(cache_ptr);
+	}
+
+        idx = -lag;
     }
-
-    HDassert( lag > 5 );
-
-    type = 0;
-
-    if ( ( pass2 ) && ( reset_stats ) ) {
-
-        H5C2_stats__reset(cache_ptr);
-    }
-
-    idx = -lag;
 
     while ( ( pass2 ) && ( (idx - lag) <= MAX_ENTRIES ) )
     {
@@ -1032,7 +1047,7 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
 			      uint64_t trans_num)
 {
     const char * fcn_name = "jrnl_row_major_scan_backward2";
-    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+    H5C2_t * cache_ptr;
     int32_t type;
     int32_t idx;
     int32_t local_max_index;
@@ -1042,14 +1057,20 @@ jrnl_row_major_scan_backward2(H5F_t * file_ptr,
     if ( verbose )
         HDfprintf(stdout, "%s(): Entering.\n", fcn_name);
 
-    HDassert( lag >= 10 );
+    if ( pass2 ) {
+
+        cache_ptr = file_ptr->shared->cache2;
+
+	HDassert( cache_ptr != NULL );
+        HDassert( lag >= 10 );
+
+        if ( reset_stats ) {
+
+            H5C2_stats__reset(cache_ptr);
+	}
+    }
 
     type = NUMBER_OF_ENTRY_TYPES - 1;
-
-    if ( ( pass2 ) && ( reset_stats ) ) {
-
-        H5C2_stats__reset(cache_ptr);
-    }
 
     while ( ( pass2 ) && ( type >= 0 ) )
     {
@@ -1459,7 +1480,7 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
 			     uint64_t trans_num)
 {
     const char * fcn_name = "jrnl_row_major_scan_forward2";
-    H5C2_t * cache_ptr = file_ptr->shared->cache2;
+    H5C2_t * cache_ptr;
     int32_t type;
     int32_t idx;
     int32_t local_max_index;
@@ -1469,13 +1490,19 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
     if ( verbose )
         HDfprintf(stdout, "%s(): entering.\n", fcn_name);
 
-    HDassert( lag >= 10 );
+    if ( pass2 ) {
 
-    type = 0;
+        cache_ptr = file_ptr->shared->cache2;
 
-    if ( ( pass2 ) && ( reset_stats ) ) {
+	HDassert( cache_ptr != NULL );
+	HDassert( lag >= 10 );
 
-        H5C2_stats__reset(cache_ptr);
+	type = 0;
+
+        if ( reset_stats ) {
+
+            H5C2_stats__reset(cache_ptr);
+	}
     }
 
     while ( ( pass2 ) && ( type < NUMBER_OF_ENTRY_TYPES ) )
@@ -6668,7 +6695,8 @@ verify_mdj_file_marking_on_create(void)
 	     * initialization.
 	     */
 	    H5C2_begin_transaction(cache_ptr, &trans_num, "dummy");
-	    H5C2_end_transaction(file_ptr, cache_ptr, trans_num, "dummy");
+	    H5C2_end_transaction(file_ptr, H5AC2_dxpl_id, cache_ptr, 
+			         trans_num, "dummy");
 
             if ( show_progress ) {
 
@@ -8602,7 +8630,8 @@ verify_mdj_file_unmarking_on_recovery(void)
 	     * initialization.
 	     */
 	    H5C2_begin_transaction(cache_ptr, &trans_num, "dummy");
-	    H5C2_end_transaction(file_ptr, cache_ptr, trans_num, "dummy");
+	    H5C2_end_transaction(file_ptr, H5AC2_dxpl_id, cache_ptr, 
+			         trans_num, "dummy");
 
             if ( show_progress ) {
 

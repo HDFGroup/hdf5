@@ -429,7 +429,7 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     /*
      * Load the heap direct block
      */
-    if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, addr, block_size, NULL, 0, H5AC_READ)))
+    if(NULL == (dblock = H5HF_man_dblock_protect(hdr, dxpl_id, addr, block_size, NULL, 0, H5AC2_READ)))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap direct block")
 
     /* Print opening message */
@@ -505,7 +505,7 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     H5_buffer_dump(stream, indent, dblock->blk, marker, (size_t)0, dblock->size);
 
 done:
-    if(dblock && H5AC_unprotect(f, dxpl_id, H5AC_FHEAP_DBLOCK, addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+    if(dblock && H5AC2_unprotect(f, dxpl_id, H5AC2_FHEAP_DBLOCK, addr, (size_t)0, dblock, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap direct block")
     if(hdr && H5AC2_unprotect(f, dxpl_id, H5AC2_FHEAP_HDR, hdr_addr, (size_t)0, hdr, H5AC2__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_PROTECT, FAIL, "unable to release fractal heap header")

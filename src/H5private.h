@@ -1731,7 +1731,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 
 /* Use this macro for API functions that [could] modify metadata */
 
-#define FUNC_ENTER_API_META(func_name, id, err) {{                            \
+#define FUNC_ENTER_API_META(func_name, id, dxpl_id, err) {{                   \
     {                                                                         \
         /* Metadata journaling variables */                     	      \
         uint64_t trans_num = 0;                                               \
@@ -1739,6 +1739,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 	hbool_t do_transaction = FALSE;				              \
 	hbool_t id_oloc_open = FALSE;                                         \
 	hbool_t transaction_begun = FALSE;                                    \
+	hid_t trans_dxpl_id = dxpl_id;                                        \
         /* end - Metadata journaling variables */                     	      \
                                                                               \
         FUNC_ENTER_API_VARS(func_name)                                        \
@@ -1905,7 +1906,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 #define FUNC_LEAVE_API_META(ret_value)                                        \
        if ( H5AC2_end_transaction(do_transaction, &id_oloc,                   \
 			          id_oloc_open, transaction_begun,            \
-			          trans_num, FUNC) < 0 ) {                    \
+			          trans_dxpl_id, trans_num, FUNC) < 0 ) {     \
 	    HDONE_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL,                     \
 			"H5AC2_end_transaction() failed.");                   \
         }                                                                     \
