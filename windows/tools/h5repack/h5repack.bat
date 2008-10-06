@@ -46,7 +46,7 @@ set h5detectszip=testh5repack_detect_szip%2
 set h5detectszip_bin=%CD%\..\testfiles\%h5detectszip%\%1\%h5detectszip%
 
 
-set info_file=testfiles\info.h5repack
+set info_file=testfiles\h5repack.info
 
 set file0=h5repack_fill.h5
 set file1=h5repack_objs.h5
