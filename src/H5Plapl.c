@@ -563,7 +563,7 @@ H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id)
     herr_t 		ret_value = SUCCEED;         		/* Return value */
 
     FUNC_ENTER_API(H5Pset_elink_fapl, FAIL)
-    H5TRACE2("e", "i*s", lapl_id, fapl_id);
+    H5TRACE2("e", "ii", lapl_id, fapl_id);
 
     /* Check arguments */
     if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
