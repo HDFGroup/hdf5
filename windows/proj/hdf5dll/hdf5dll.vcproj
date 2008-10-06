@@ -1808,6 +1808,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5EAsblock.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5EAstat.c"
 				>
 			</File>
