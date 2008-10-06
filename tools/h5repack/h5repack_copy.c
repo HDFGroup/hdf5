@@ -606,7 +606,11 @@ int do_copy_objects(hid_t fidin,
                 has_filter = 0;
                 req_filter = 0;
 
-                /* check if filters were requested */
+                /* check if global filters were requested */
+                if ( options->n_filter_g )
+                    req_filter = 1;
+
+                /* check if filters were requested for individual objects */
                 for( u = 0; u < options->op_tbl->nelems; u++)
                 {
                     int k; 
