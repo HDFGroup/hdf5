@@ -95,8 +95,8 @@ static struct long_options l_opts[] = {
  */
 int main(int argc, const char **argv)
 {
-    const char          *infile  = NULL;
-    const char          *outfile = NULL;
+    const char    *infile  = NULL;
+    const char    *outfile = NULL;
     pack_opt_t    options;            /*the global options */
     int           ret=-1;
     int           i;

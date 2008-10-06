@@ -76,15 +76,16 @@ int copy_objects(const char* fnamein,
     hid_t         fidin;
     hid_t         fidout = -1;
     trav_table_t  *travt = NULL;
-    hsize_t       ub_size = 0;                  /* Size of user block */
-    hid_t         fapl = H5P_DEFAULT;           /* File access property list ID */
-    hid_t         fcpl = H5P_DEFAULT;           /* File creation property list ID */
+    hsize_t       ub_size = 0;        /* size of user block */
+    hid_t         fcpl = H5P_DEFAULT; /* file creation property list ID */
+    hid_t         fapl = H5P_DEFAULT; /* file access property list ID */
 
     /*-------------------------------------------------------------------------
-    * open the files
+    * open input file
     *-------------------------------------------------------------------------
     */
-    if((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) {
+    if((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) 
+    {
         error_msg(progname, "<%s>: %s\n", fnamein, H5FOPENERROR );
         goto out;
     }
@@ -92,50 +93,63 @@ int copy_objects(const char* fnamein,
     /* get user block size */
     {
         hid_t fcpl_in; /* file creation property list ID for input file */
-
-        if((fcpl_in = H5Fget_create_plist(fidin)) < 0) {
+        
+        if((fcpl_in = H5Fget_create_plist(fidin)) < 0) 
+        {
             error_msg(progname, "failed to retrieve file creation property list\n");
             goto out;
-        } /* end if */
-
-        if(H5Pget_userblock(fcpl_in, &ub_size) < 0) {
+        } 
+        
+        if(H5Pget_userblock(fcpl_in, &ub_size) < 0) 
+        {
             error_msg(progname, "failed to retrieve userblock size\n");
             goto out;
-        } /* end if */
-
-        if(H5Pclose(fcpl_in) < 0) {
+        } 
+        
+        if(H5Pclose(fcpl_in) < 0) 
+        {
             error_msg(progname, "failed to close property list\n");
             goto out;
-        } /* end if */
-    } /* end block */
+        } 
+    } 
 
     /* Check if we need to create a non-default file creation property list */
-    if(options->latest || ub_size > 0) {
+    if(options->latest || ub_size > 0) 
+    {
         /* Create file creation property list */
-        if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) {
+        if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) 
+        {
             error_msg(progname, "fail to create a file creation property list\n");
             goto out;
-        }  /* end if */
+        }  
 
         if(ub_size > 0)
-            if(H5Pset_userblock(fcpl, ub_size) < 0) {
+        {
+            if(H5Pset_userblock(fcpl, ub_size) < 0) 
+            {
                 error_msg(progname, "failed to set non-default userblock size\n");
                 goto out;
-            } /* end if */
+            } 
+        }
 
-        if(options->latest) {
+        if(options->latest) 
+        {
             unsigned i = 0, nindex = 0, mesg_type_flags[5], min_mesg_sizes[5];
 
             /* Adjust group creation parameters for root group */
             /* (So that it is created in "dense storage" form) */
-            if(H5Pset_link_phase_change(fcpl, (unsigned)options->grp_compact, (unsigned)options->grp_indexed) < 0) {
+            if(H5Pset_link_phase_change(fcpl, (unsigned)options->grp_compact, (unsigned)options->grp_indexed) < 0) 
+            {
                 error_msg(progname, "fail to adjust group creation parameters for root group\n");
                 goto out;
-            } /* end if */
+            } 
 
-            for(i = 0; i < 5; i++) {
-                if(options->msg_size[i] > 0) {
-                    switch(i) {
+            for(i = 0; i < 5; i++) 
+            {
+                if(options->msg_size[i] > 0) 
+                {
+                    switch(i) 
+                    {
                         case 0:
                             mesg_type_flags[nindex] = H5O_SHMESG_SDSPACE_FLAG;
                             break;
@@ -162,14 +176,17 @@ int copy_objects(const char* fnamein,
                 } /* end if */
             } /* end for */
 
-            if(nindex > 0) {
-                if(H5Pset_shared_mesg_nindexes(fcpl, nindex) < 0) {
+            if(nindex > 0) 
+            {
+                if(H5Pset_shared_mesg_nindexes(fcpl, nindex) < 0) 
+                {
                     error_msg(progname, "fail to set the number of shared object header message indexes\n");
                     goto out;
-                } /* end if */
+                } 
 
                 /* msg_size[0]=dataspace, 1=datatype, 2=file value, 3=filter pipleline, 4=attribute */
-                for(i = 0; i < (nindex - 1); i++) {
+                for(i = 0; i < (nindex - 1); i++) 
+                {
                     if(H5Pset_shared_mesg_index(fcpl, i, mesg_type_flags[i], min_mesg_sizes[i]) < 0) {
                         error_msg(progname, "fail to configure the specified shared object header message index\n");
                         goto out;
@@ -178,12 +195,14 @@ int copy_objects(const char* fnamein,
             } /* if (nindex>0) */
 
             /* Create file access property list */
-            if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
+            if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) 
+            {
                 error_msg(progname, "Could not create file access property list\n");
                 goto out;
             } /* end if */
 
-            if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
+            if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) 
+            {
                 error_msg(progname, "Could not set property for using latest version of the format\n");
                 goto out;
             } /* end if */
@@ -249,7 +268,7 @@ int copy_objects(const char* fnamein,
    
     if (  options->alignment > 0 )
     {
-        /* either use the FCPL already created or create a new one */
+        /* either use the FAPL already created or create a new one */
         if (fapl != H5P_DEFAULT)
         {
             
@@ -313,7 +332,10 @@ int copy_objects(const char* fnamein,
         }
     }
 
-   
+     /*-------------------------------------------------------------------------
+    * get list of objects
+    *-------------------------------------------------------------------------
+    */
 
     /* init table */
     trav_table_init(&travt);
@@ -326,7 +348,8 @@ int copy_objects(const char* fnamein,
     * do the copy
     *-------------------------------------------------------------------------
     */
-    if(do_copy_objects(fidin, fidout, travt, options) < 0) {
+    if(do_copy_objects(fidin, fidout, travt, options) < 0) 
+    {
         error_msg(progname, "<%s>: Could not copy data to: %s\n", fnamein, fnameout);
         goto out;
     } /* end if */
@@ -383,7 +406,8 @@ int copy_objects(const char* fnamein,
     */
 
 out:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY 
+    {
         H5Pclose(fapl);
         H5Pclose(fcpl);
         H5Fclose(fidin);
@@ -582,7 +606,11 @@ int do_copy_objects(hid_t fidin,
                 has_filter = 0;
                 req_filter = 0;
 
-                /* check if filters were requested */
+                /* check if global filters were requested */
+                if ( options->n_filter_g )
+                    req_filter = 1;
+
+                /* check if filters were requested for individual objects */
                 for( u = 0; u < options->op_tbl->nelems; u++)
                 {
                     int k; 
