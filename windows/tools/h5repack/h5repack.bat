@@ -42,13 +42,11 @@ set h5diff=..\h5diff%2\%1\h5diff%2
 rem The path of the h5diff tool binary
 set h5diff_bin=%CD%\%h5diff%
 
-rem The tool name
 set h5detectszip=testh5repack_detect_szip%2
-rem The path of the tool binary
 set h5detectszip_bin=%CD%\..\testfiles\%h5detectszip%\%1\%h5detectszip%
 
 
-set info_file=..\testfiles\info.h5repack
+set info_file=testfiles\info.h5repack
 
 set file0=h5repack_fill.h5
 set file1=h5repack_objs.h5
@@ -68,7 +66,7 @@ set file13=h5repack_soffset.h5
 set nerrors=0
 set verbose=yes
 
-if not exist ..\testfiles mkdir ..\testfiles
+
 
 goto main
 
@@ -133,7 +131,7 @@ rem
 :tooltest
 
     rem Run test.
-    set infile=%CD%\..\testfiles\%1
+    set infile=%CD%\testfiles\%1
     rem Linux uses a $path variable here, but it is unneccessary, and will
     rem corrupt our Windows PATH if we use it.  --SJW 8/28/07
     rem set path=%CD%
@@ -167,7 +165,7 @@ rem
 :tooltest0
 
     rem Run test.
-    set infile=%CD%\..\testfiles\%1
+    set infile=%CD%\testfiles\%1
     rem Linux uses a $path variable here, but it is unneccessary, and will
     rem corrupt our Windows PATH if we use it.  --SJW 8/28/07
     rem set path=%CD%
@@ -590,13 +588,8 @@ rem
     )
     
     rem add a userblock to file
-    rem Temporarily comment test on Windows.  The ublock.bin test file is inaccessible
-    rem because h5repacktst is run from a different folder than on other platforms.
-    rem Until ublock.bin is added to SVN and distributed with the source package,
-    rem we cannot test this on Windows.  --SJW 9/29/08
-    set arg=%file1% -u ublock.bin -b 2048
-    call :skip %arg%
-    rem call :tooltest %arg%
+    set arg=%file1% -u testfiles\ublock.bin -b 2048
+    call :tooltest %arg%
     
     rem add alignment
     set arg=%file1% -t 1 -a 1
