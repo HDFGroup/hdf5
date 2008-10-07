@@ -23,6 +23,7 @@
 #include <math.h>
 #include <time.h>
 #include "h5test.h"
+#include "H5Iprivate.h"     /* For checking that datatype id's don't leak */
 
 /* Number of times to run each test */
 #define NTESTS	1
@@ -56,6 +57,27 @@
 #endif
 #define SET_ALIGNMENT(TYPE,VAL) \
     H5T_NATIVE_##TYPE##_ALIGN_g=MAX(H5T_NATIVE_##TYPE##_ALIGN_g, VAL)
+
+/*
+ * Macro for checking that the correct number of datatype ids are present.  Be
+ * careful as the call to H5Tunregister removes *ALL* compound conversions from
+ * the soft conversion list.  One must call reset_hdf5() after this.
+ */
+#define CHECK_NMEMBS(NMEMBS,SRC_ID,DST_ID)                                     \
+    if (H5Tunregister(H5T_PERS_SOFT, NULL, SRC_ID, DST_ID, NULL) < 0) {        \
+        FAIL_STACK_ERROR                                                       \
+        goto error;                                                            \
+    }                                                                          \
+    if (H5Tclose(SRC_ID) < 0 || ((SRC_ID) != (DST_ID) && H5Tclose(DST_ID) < 0)) { \
+        FAIL_STACK_ERROR                                                       \
+        goto error;                                                            \
+    }                                                                          \
+    if ((NMEMBS) != H5I_nmembers(H5I_DATATYPE)) {                              \
+        H5_FAILED();                                                           \
+        printf("    #dtype ids expected: %d; found: %d\n", NMEMBS,             \
+            H5I_nmembers(H5I_DATATYPE));                                       \
+        goto error;                                                            \
+    }
 
 const char *FILENAME[] = {
     "dtypes1",
@@ -628,6 +650,7 @@ test_compound_1(void)
     } /* end if */
 
     if (H5Tclose (complex_id) < 0) goto error;
+
     PASSED();
     return 0;
 
@@ -669,9 +692,12 @@ test_compound_2(void)
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
     hid_t       array_dt;
-    int			i;
+    int			i, nmembs;
 
     TESTING("compound element reordering");
+
+    if ((nmembs = H5I_nmembers(H5I_DATATYPE)) < 0)
+        FAIL_STACK_ERROR
 
     /* Sizes should be the same, but be careful just in case */
     buf = (unsigned char*)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
@@ -742,13 +768,14 @@ test_compound_2(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(st) < 0 || H5Tclose(dt) < 0) goto error;
+    CHECK_NMEMBS(nmembs , st, dt)
 
     PASSED();
     reset_hdf5();
     return 0;
 
  error:
+    reset_hdf5();
     return 1;
 }
 
@@ -786,9 +813,12 @@ test_compound_3(void)
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
     hid_t       array_dt;
-    int			i;
+    int			i, nmembs;
 
     TESTING("compound subset conversions");
+
+    if ((nmembs = H5I_nmembers(H5I_DATATYPE)) < 0)
+        FAIL_STACK_ERROR
 
     /* Initialize */
     buf = (unsigned char*)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
@@ -856,13 +886,14 @@ test_compound_3(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(st) < 0 || H5Tclose(dt) < 0) goto error;
+    CHECK_NMEMBS(nmembs, st, dt)
 
     PASSED();
     reset_hdf5();
     return 0;
 
  error:
+    reset_hdf5();
     return 1;
 }
 
@@ -904,9 +935,12 @@ test_compound_4(void)
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
     hid_t       array_dt;
-    int			i;
+    int			i, nmembs;
 
     TESTING("compound element shrinking & reordering");
+
+    if ((nmembs = H5I_nmembers(H5I_DATATYPE)) < 0)
+        FAIL_STACK_ERROR
 
     /* Sizes should be the same, but be careful just in case */
     buf = (unsigned char*)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
@@ -978,13 +1012,14 @@ test_compound_4(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(st) < 0 || H5Tclose(dt) < 0) goto error;
+    CHECK_NMEMBS(nmembs, st, dt)
 
     PASSED();
     reset_hdf5();
     return 0;
 
  error:
+    reset_hdf5();
     return 1;
 }
 
@@ -1133,9 +1168,12 @@ test_compound_6(void)
     const size_t	nelmts = NTESTELEM;
     unsigned char	*buf=NULL, *orig=NULL, *bkg=NULL;
     hid_t		st=-1, dt=-1;
-    int			i;
+    int			i, nmembs;
 
     TESTING("compound element growing");
+
+    if ((nmembs = H5I_nmembers(H5I_DATATYPE)) < 0)
+        FAIL_STACK_ERROR
 
     /* Sizes should be the same, but be careful just in case */
     buf = (unsigned char*)malloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
@@ -1189,16 +1227,14 @@ test_compound_6(void)
     free(buf);
     free(bkg);
     free(orig);
-    if (H5Tclose(st) < 0 || H5Tclose(dt) < 0) {
-        H5_FAILED();
-        goto error;
-    }
+    CHECK_NMEMBS(nmembs, st, dt)
 
     PASSED();
     reset_hdf5();
     return 0;
 
  error:
+    reset_hdf5();
     return 1;
 }
 
@@ -1337,6 +1373,7 @@ test_compound_7(void)
     return 0;
 
  error:
+    reset_hdf5();
     return 1;
 }
 
@@ -1956,9 +1993,9 @@ test_compound_10(void)
 
     if(H5Dclose(dset_id) < 0)
         goto error;
-    if(H5Tclose(cmpd_tid) < 0)
-        goto error;
     if(H5Tclose(arr_tid) < 0)
+        goto error;
+    if(H5Tclose(cmpd_tid) < 0)
         goto error;
     if(H5Tclose(cstr_id) < 0)
         goto error;
@@ -2401,19 +2438,19 @@ static int
 test_compound_14(void)
 {
     typedef struct cmpd_struct_1 {
-       char   c1;
-       char   c2;
-       char*  str;
+       char         c1;
+       char         c2;
+       char*        str;
     } cmpd_struct_1;
     
     typedef struct cmpd_struct_2 {
-       char   c1;
-       char   c2;
-       char*  str;
-       long   l1;
-       long   l2;
-       long   l3;
-       long   l4;
+       char         c1;
+       char         c2;
+       char*        str;
+       long         l1;
+       long         l2;
+       long         l3;
+       long         l4;
     } cmpd_struct_2;
 
     cmpd_struct_1 wdata1 = {'A', 'B', "variable-length string"};
@@ -2892,7 +2929,101 @@ test_compound_15(void)
 
  error:
     return 1;
-} /* end test_compound_14() */
+} /* end test_compound_15() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    test_compound_16
+ *
+ * Purpose:     Tests that committed types that can be registered during
+ *              compound conversion are not visible to the application
+ *              with H5Fget_obj_count or H5Fget_obj_ids.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, October 3, 2008
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_compound_16(void)
+{
+    typedef struct cmpd_struct {
+       int  i1;
+       int  i2;
+    } cmpd_struct;
+
+    cmpd_struct wdata1 = {1254, 5471};
+    cmpd_struct rdata;
+    int         wdata2[2] = {1, 2};
+    int         obj_count;
+    hid_t       file;
+    hid_t       cmpd_m_tid, cmpd_f_tid, int_id;
+    hid_t       space_id;
+    hid_t       dset_id;
+    hid_t       open_dtypes[2] = {0, 0};
+    hsize_t     dim1[1] = {1};
+    char        filename[1024];
+
+    TESTING("visibility of internally registered type ids");
+
+    /* Create File */
+    h5_fixname(FILENAME[3], H5P_DEFAULT, filename, sizeof filename);
+    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Copy and commit integer datatype */
+    if((int_id = H5Tcopy(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    if(H5Tcommit (file, "int", int_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Create file compound datatype */
+    if((cmpd_f_tid = H5Tcreate(H5T_COMPOUND, 2 * sizeof(int) + 2)) < 0) TEST_ERROR
+    if(H5Tinsert(cmpd_f_tid, "i1", 0, int_id) < 0) TEST_ERROR
+    if(H5Tinsert(cmpd_f_tid, "i2", sizeof(int) + 1, int_id) < 0) TEST_ERROR
+
+    /* Create memory compound datatype */
+    if((cmpd_m_tid = H5Tcreate(H5T_COMPOUND, sizeof(struct cmpd_struct))) < 0) TEST_ERROR
+    if(H5Tinsert(cmpd_m_tid, "i1", HOFFSET(struct cmpd_struct, i1), int_id) < 0) TEST_ERROR
+    if(H5Tinsert(cmpd_m_tid, "i2", HOFFSET(struct cmpd_struct, i2), int_id) < 0) TEST_ERROR
+
+    /* Create space, dataset, write wdata1 */
+    if((space_id = H5Screate_simple(1, dim1, NULL)) < 0) TEST_ERROR
+    if((dset_id = H5Dcreate2(file, "Dataset", cmpd_f_tid, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if(H5Dwrite(dset_id, cmpd_m_tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, &wdata1) < 0) TEST_ERROR
+
+    /* Check behavior of H5Fget_obj_count */
+    if((obj_count = H5Fget_obj_count(file, H5F_OBJ_DATATYPE)) != 1) {
+        H5_FAILED(); AT();
+        printf("    H5Fget_obj_count returned: %d; expected: 1\n", obj_count);
+        goto error;
+    }
+
+    /* Check behavior of H5Fget_obj_ids */
+    if(H5Fget_obj_ids(file, H5F_OBJ_DATATYPE, 2, open_dtypes) < 0) TEST_ERROR
+    if(open_dtypes[1]) {
+        H5_FAILED(); AT();
+        printf("    H5Fget_obj_ids returned as second id: %d; expected: 0\n", open_dtypes[1]);
+        goto error;
+    }
+
+    /* Close */
+    if(H5Dclose(dset_id) < 0) TEST_ERROR
+    if(H5Sclose(space_id) < 0) TEST_ERROR
+    if(H5Tclose(cmpd_f_tid) < 0) TEST_ERROR
+    if(H5Tclose(cmpd_m_tid) < 0) TEST_ERROR
+    if(H5Tclose(int_id) < 0) TEST_ERROR
+    if(H5Fclose(file) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    return 1;
+} /* end test_compound_16() */
 
 
 /*-------------------------------------------------------------------------
@@ -5588,6 +5719,7 @@ main(void)
     nerrors += test_compound_13();
     nerrors += test_compound_14();
     nerrors += test_compound_15();
+    nerrors += test_compound_16();
     nerrors += test_conv_enum_1();
     nerrors += test_conv_enum_2();
     nerrors += test_conv_bitfield();

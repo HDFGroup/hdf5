@@ -501,7 +501,7 @@ H5E_unregister_class(H5E_cls_t *cls)
 
     /* Iterate over all the messages and delete those in this error class */
     /* (Ignore return value, since callback isn't designed to return a particular object) */
-    (void)H5I_search(H5I_ERROR_MSG, H5E_close_msg_cb, cls);
+    (void)H5I_search(H5I_ERROR_MSG, H5E_close_msg_cb, cls, FALSE);
 
     /* Free error class structure */
     if(cls->cls_name)

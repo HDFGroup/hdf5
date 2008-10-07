@@ -64,7 +64,7 @@ typedef struct H5F_olist_t {
 } H5F_olist_t;
 
 /* PRIVATE PROTOTYPES */
-static size_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_objs, hid_t *obj_id_list);
+static size_t H5F_get_objects(const H5F_t *f, unsigned types, size_t max_objs, hid_t *obj_id_list, hbool_t app_ref);
 static int H5F_get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void** file_handle);
 static H5F_t *H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id,
@@ -393,7 +393,7 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type")
 
     /* H5F_get_obj_count doesn't fail */
-    ret_value = H5F_get_obj_count(f, types);
+    ret_value = H5F_get_obj_count(f, types, TRUE);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -420,14 +420,14 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5F_get_obj_count(const H5F_t *f, unsigned types)
+H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref)
 {
     size_t   ret_value;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_obj_count)
 
     /* H5F_get_objects doesn't fail */
-    ret_value=H5F_get_objects(f, types, 0, NULL);
+    ret_value=H5F_get_objects(f, types, 0, NULL, app_ref);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -467,7 +467,7 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
     HDassert(oid_list);
  
     /* H5F_get_objects doesn't fail */
-    ret_value = H5F_get_obj_ids(f, types, max_objs, oid_list);
+    ret_value = H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -493,14 +493,14 @@ done:
  *-------------------------------------------------------------------------
  */
 size_t
-H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list)
+H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list, hbool_t app_ref)
 {
     size_t ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_obj_ids)
 
     /* H5F_get_objects doesn't fail */
-    ret_value = H5F_get_objects(f, types, max_objs, oid_list);
+    ret_value = H5F_get_objects(f, types, max_objs, oid_list, app_ref);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -522,7 +522,7 @@ H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list
  *---------------------------------------------------------------------------
  */
 static size_t
-H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list)
+H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_list, hbool_t app_ref)
 {
     size_t obj_id_count=0;      /* Number of open IDs */
     H5F_olist_t olist;          /* Structure to hold search results */
@@ -551,35 +551,35 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_
      * is found, so don't return failure in this function. */
     if(types & H5F_OBJ_FILE) {
         olist.obj_type = H5I_FILE;
-        (void)H5I_search(H5I_FILE, H5F_get_objects_cb, &olist);
+        (void)H5I_search(H5I_FILE, H5F_get_objects_cb, &olist, app_ref);
     } /* end if */
 
     /* Search through dataset IDs to count number of datasets, and put their
      * IDs on the object list */
     if(types & H5F_OBJ_DATASET) {
         olist.obj_type = H5I_DATASET;
-        (void)H5I_search(H5I_DATASET, H5F_get_objects_cb, &olist);
+        (void)H5I_search(H5I_DATASET, H5F_get_objects_cb, &olist, app_ref);
     }
 
     /* Search through group IDs to count number of groups, and put their
      * IDs on the object list */
     if(types & H5F_OBJ_GROUP) {
         olist.obj_type = H5I_GROUP;
-        (void)H5I_search(H5I_GROUP, H5F_get_objects_cb, &olist);
+        (void)H5I_search(H5I_GROUP, H5F_get_objects_cb, &olist, app_ref);
     }
 
     /* Search through datatype IDs to count number of named datatypes, and put their
      * IDs on the object list */
     if(types & H5F_OBJ_DATATYPE) {
         olist.obj_type = H5I_DATATYPE;
-        (void)H5I_search(H5I_DATATYPE, H5F_get_objects_cb, &olist);
+        (void)H5I_search(H5I_DATATYPE, H5F_get_objects_cb, &olist, app_ref);
     }
 
     /* Search through attribute IDs to count number of attributes, and put their
      * IDs on the object list */
     if(types & H5F_OBJ_ATTR) {
         olist.obj_type = H5I_ATTR;
-        (void)H5I_search(H5I_ATTR, H5F_get_objects_cb, &olist);
+        (void)H5I_search(H5I_ATTR, H5F_get_objects_cb, &olist, app_ref);
     }
 
     /* Set the number of objects currently open */
@@ -1964,7 +1964,7 @@ H5F_try_close(H5F_t *f)
             unsigned u;             /* Local index variable */
 
             /* Get the list of IDs of open dataset, group, & attribute objects */
-            while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_ATTR, (int)(sizeof(objs)/sizeof(objs[0])), objs)) != 0) {
+            while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATASET|H5F_OBJ_GROUP|H5F_OBJ_ATTR, (int)(sizeof(objs)/sizeof(objs[0])), objs, FALSE)) != 0) {
                 /* Try to close all the open objects in this file */
                 for(u = 0; u < obj_count; u++)
                     if(H5I_dec_ref(objs[u], FALSE) < 0)
@@ -1976,7 +1976,7 @@ H5F_try_close(H5F_t *f)
              * they could be using one of the named datatypes and then the
              * open named datatype ID will get closed twice)
              */
-            while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATATYPE, (int)(sizeof(objs)/sizeof(objs[0])), objs)) != 0) {
+            while((obj_count = H5F_get_obj_ids(f, H5F_OBJ_LOCAL|H5F_OBJ_DATATYPE, (int)(sizeof(objs)/sizeof(objs[0])), objs, FALSE)) != 0) {
                 /* Try to close all the open objects in this file */
                 for(u = 0; u < obj_count; u++)
                     if(H5I_dec_ref(objs[u], FALSE) < 0)

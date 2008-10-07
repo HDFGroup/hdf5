@@ -684,7 +684,7 @@ htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char*
         HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "can't get file serial number")
 
     /* Count all opened attributes */
-    if((num_open_attr = H5F_get_obj_count(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL)) < 0)
+    if((num_open_attr = H5F_get_obj_count(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, FALSE)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "can't get number of opened attributes")
 
     /* Find out whether the attribute has been opened */
@@ -692,7 +692,7 @@ htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char*
         attr_id_list = (hid_t*)H5MM_malloc(num_open_attr*sizeof(hid_t));
 
         /* Retrieve the IDs of all opened attributes */
-        if(H5F_get_obj_ids(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, num_open_attr, attr_id_list) < 0)
+        if(H5F_get_obj_ids(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, num_open_attr, attr_id_list, FALSE) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't IDs of opened attributes")
 
         for(i=0; i<num_open_attr; i++) {

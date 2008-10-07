@@ -884,6 +884,7 @@ typedef struct H5T_conv_struct_t {
     hid_t	*dst_memb_id;		/*destination member type ID's	     */
     H5T_path_t	**memb_path;		/*conversion path for each member    */
     H5T_subset_info_t   subset_info;    /*info related to compound subsets   */
+    unsigned            src_nmembs;     /*needed by free function            */
 } H5T_conv_struct_t;
 
 /* Conversion data for H5T_conv_enum() */
@@ -1751,6 +1752,48 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5T_conv_struct_free
+ *
+ * Purpose:	Free the private data structure used by the compound
+ *      conversion functions.
+ *
+ * Return:	The result of H5MM_xfree(priv) (NULL)
+ *
+ * Programmer:	Neil Fortner
+ *		Wednesday, October 1, 2008
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5T_conv_struct_t *
+H5T_conv_struct_free(H5T_conv_struct_t *priv)
+{
+    int         *src2dst = priv->src2dst;
+    hid_t       *src_memb_id = priv->src_memb_id,
+                *dst_memb_id = priv->dst_memb_id;
+    unsigned    i;
+    int         status;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_conv_struct_free)
+
+    for (i=0; i<priv->src_nmembs; i++)
+        if (src2dst[i] >= 0) {
+            status = H5I_dec_ref(src_memb_id[i], FALSE);
+            HDassert(status >= 0);
+            status = H5I_dec_ref(dst_memb_id[src2dst[i]], FALSE);
+            HDassert(status >= 0);
+        }
+
+    H5MM_xfree(src2dst);
+    H5MM_xfree(src_memb_id);
+    H5MM_xfree(dst_memb_id);
+    H5MM_xfree(priv->memb_path);
+    FUNC_LEAVE_NOAPI(H5MM_xfree(priv));
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5T_conv_struct_init
  *
  * Purpose:	Initialize the `priv' field of `cdata' with conversion
@@ -1824,6 +1867,7 @@ H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
                 NULL == (priv->dst_memb_id = H5MM_malloc(dst_nmembs * sizeof(hid_t))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
         src2dst = priv->src2dst;
+        priv->src_nmembs = src_nmembs;
 
         /* The flag of special optimization to indicate if source members and destination
          * members are a subset of each other.  Initialize it to FALSE */
@@ -1885,11 +1929,7 @@ H5T_conv_struct_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata, hid_t dxpl_id)
             H5T_path_t *tpath = H5T_path_find(src->shared->u.compnd.memb[i].type, dst->shared->u.compnd.memb[src2dst[i]].type, NULL, NULL, dxpl_id, FALSE);
 
             if(NULL == (priv->memb_path[i] = tpath)) {
-                H5MM_xfree(priv->src2dst);
-                H5MM_xfree(priv->src_memb_id);
-                H5MM_xfree(priv->dst_memb_id);
-                H5MM_xfree(priv->memb_path);
-                cdata->priv = priv = H5MM_xfree (priv);
+                cdata->priv = priv = H5T_conv_struct_free(priv);
                 HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "unable to convert member datatype")
             } /* end if */
         } /* end if */
@@ -2073,11 +2113,7 @@ H5T_conv_struct(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
             /*
              * Free the private conversion data.
              */
-            H5MM_xfree(priv->src2dst);
-            H5MM_xfree(priv->src_memb_id);
-            H5MM_xfree(priv->dst_memb_id);
-            H5MM_xfree(priv->memb_path);
-            cdata->priv = priv = H5MM_xfree (priv);
+            cdata->priv = priv = H5T_conv_struct_free(priv);
             break;
 
         case H5T_CONV_CONV:
@@ -2346,11 +2382,7 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
                     if (dst_memb->size > src_memb->size) {
                         offset -= src_memb->size;
                         if (dst_memb->size > src->shared->size-offset) {
-                            H5MM_xfree(priv->src2dst);
-                            H5MM_xfree(priv->src_memb_id);
-                            H5MM_xfree(priv->dst_memb_id);
-                            H5MM_xfree(priv->memb_path);
-                            cdata->priv = priv = H5MM_xfree (priv);
+                            cdata->priv = priv = H5T_conv_struct_free(priv);
                             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "convertion is unsupported by this function");
                         }
                     }
@@ -2363,11 +2395,7 @@ H5T_conv_struct_opt(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
              * Free the private conversion data.
              */
             priv = (H5T_conv_struct_t *)(cdata->priv);
-            H5MM_xfree(priv->src2dst);
-            H5MM_xfree(priv->src_memb_id);
-            H5MM_xfree(priv->dst_memb_id);
-            H5MM_xfree(priv->memb_path);
-            cdata->priv = priv = H5MM_xfree (priv);
+            cdata->priv = priv = H5T_conv_struct_free(priv);
             break;
 
         case H5T_CONV_CONV:

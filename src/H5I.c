@@ -1877,7 +1877,7 @@ H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
     if(H5I_IS_LIB_TYPE(type))
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, NULL, "cannot call public function on library type")
 
-    ret_value = H5I_search(type, func, key);
+    ret_value = H5I_search(type, func, key, TRUE);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1905,12 +1905,15 @@ done:
  * Programmer:	Robb Matzke
  *		Friday, February 19, 1999
  *
- * Modifications:
+ * Modifications:  Neil Fortner
+ *      Wednesday, October 1, 2008
+ *      Added app_ref parameter.  When set to TRUE, the function will only
+ *      operate on ids that have a nonzero application reference count.
  *
  *-------------------------------------------------------------------------
  */
 void *
-H5I_search(H5I_type_t type, H5I_search_func_t func, void *key)
+H5I_search(H5I_type_t type, H5I_search_func_t func, void *key, hbool_t app_ref)
 {
     H5I_id_type_t	*type_ptr;	/*ptr to the type	*/
     void		*ret_value = NULL;	/*return value		*/
@@ -1935,7 +1938,7 @@ H5I_search(H5I_type_t type, H5I_search_func_t func, void *key)
             id_ptr = type_ptr->id_list[i];
             while(id_ptr) {
                 next_id = id_ptr->next;      /* Protect against ID being deleted in callback */
-                if((*func)(id_ptr->obj_ptr, id_ptr->id, key))
+                if((!app_ref || id_ptr->app_count) && (*func)(id_ptr->obj_ptr, id_ptr->id, key))
                     HGOTO_DONE(id_ptr->obj_ptr);	/*found the item*/
                 id_ptr = next_id;
             } /* end while */
