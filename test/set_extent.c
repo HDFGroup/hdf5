@@ -653,11 +653,11 @@ int main( void )
 
 
         /*-------------------------------------------------------------------------
-        * test a dataset with initialized chunks
+        * test a dataset with non initialized chunks
         *-------------------------------------------------------------------------
         */
 
-        TESTING("initialized chunks");
+        TESTING("non initialized chunks");
 
         dims3[ 0 ] = 90;
         dims3[ 1 ] = 90;
