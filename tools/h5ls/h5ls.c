@@ -61,6 +61,7 @@ static hbool_t  label_g = FALSE;          /* label compound values? */
 static hbool_t  string_g = FALSE;         /* print 1-byte numbers as ASCII? */
 static hbool_t  fullname_g = FALSE;       /* print full path names */
 static hbool_t  recursive_g = FALSE;      /* recursive descent listing */
+static hbool_t  follow_elink_g = FALSE;   /* follow external links */
 static hbool_t  grp_literal_g = FALSE;    /* list group, not contents */
 static hbool_t  hexdump_g = FALSE;        /* show data as raw hexadecimal */
 static hbool_t  show_errors_g = FALSE;    /* print HDF5 error messages */
@@ -115,6 +116,7 @@ usage: %s [OPTIONS] [OBJECTS...]\n\
       -a, --address    Print addresses for raw data\n\
       -d, --data       Print the values of datasets\n\
       -e, --errors     Show all HDF5 error reporting\n\
+      -E, --external   Allow traversal into external files\n\
       -f, --full       Print full path names instead of base names\n\
       -g, --group      Show information about a group, not its contents\n\
       -l, --label      Label members of compound datasets\n\
@@ -1906,10 +1908,14 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
             if(*path != '/')
                 HDfputc('/', stdout);
             HDfputs(path, stdout);
-            HDfputs("} ", stdout);
+            HDfputc('}', stdout);
 
             /* Recurse through the external link */
-            if(recursive_g) {
+            if(follow_elink_g) {
+                hbool_t orig_grp_literal = grp_literal_g;
+
+                HDfputc(' ', stdout);
+            
                 /* Check if we have already seen this elink */
                 if(elink_trav_visited(iter->elink_list, filename, path)) {
                     HDfputs("{Already Visited}\n", stdout);
@@ -1927,11 +1933,19 @@ list_lnk(const char *name, const H5L_info_t *linfo, void *_iter)
                  * target of an external link */
                 iter->ext_target = TRUE;
 
+                /* Prevent recursive listing of external link target if
+                 * recursive_g is off */
+                if(!recursive_g)
+                    grp_literal_g = TRUE;
+
                 /* Recurse through the external link */
                 if(visit_obj(iter->fid, name, iter) < 0) {
                     HDfree(buf);
+                    grp_literal_g = orig_grp_literal;
                     goto done;
                 }
+
+                grp_literal_g = orig_grp_literal;
             }
             else
                 HDfputc('\n', stdout);
@@ -2174,6 +2188,8 @@ main(int argc, const char *argv[])
             data_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--errors")) {
             show_errors_g = TRUE;
+        } else if(!HDstrcmp(argv[argno], "--external")) {
+            follow_elink_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--full")) {
             fullname_g = TRUE;
         } else if(!HDstrcmp(argv[argno], "--group")) {
@@ -2253,6 +2269,10 @@ main(int argc, const char *argv[])
 
                     case 'e': /* --errors */
                         show_errors_g = TRUE;
+                        break;
+
+                    case 'E': /* --external */
+                        follow_elink_g = TRUE;
                         break;
 
                     case 'f': /* --full */

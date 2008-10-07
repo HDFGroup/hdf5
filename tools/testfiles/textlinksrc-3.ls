@@ -1,5 +1,5 @@
 #############################
- output for 'h5ls -w80 -r textlinksrc.h5/ext_link1'
+ output for 'h5ls -w80 -Er textlinksrc.h5/ext_link1'
 #############################
 ext_link1                External Link {textlinktar.h5//group} {Group}
 /dset                    Dataset {6}

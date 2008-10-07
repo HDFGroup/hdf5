@@ -1159,6 +1159,10 @@
 ./tools/testfiles/textlinksrc-1.ls
 ./tools/testfiles/textlinksrc-2.ls
 ./tools/testfiles/textlinksrc-3.ls
+./tools/testfiles/textlinksrc-4.ls
+./tools/testfiles/textlinksrc-5.ls
+./tools/testfiles/textlinksrc-6.ls
+./tools/testfiles/textlinksrc-7.ls
 ./tools/testfiles/textlinktar.h5
 ./tools/testfiles/tfamily.ddl
 ./tools/testfiles/tfamily00000.h5

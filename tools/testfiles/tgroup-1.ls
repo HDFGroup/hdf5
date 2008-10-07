@@ -9,6 +9,7 @@ usage: h5ls [OPTIONS] [OBJECTS...]
       -a, --address    Print addresses for raw data
       -d, --data       Print the values of datasets
       -e, --errors     Show all HDF5 error reporting
+      -E, --external   Allow traversal into external files
       -f, --full       Print full path names instead of base names
       -g, --group      Show information about a group, not its contents
       -l, --label      Label members of compound datasets

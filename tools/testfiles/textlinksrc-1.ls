@@ -1,5 +1,5 @@
 #############################
- output for 'h5ls -w80 -r textlinksrc.h5'
+ output for 'h5ls -w80 -Er textlinksrc.h5'
 #############################
 /                        Group
 /ext_link1               External Link {textlinktar.h5//group} {Group}

@@ -1,5 +1,5 @@
 #############################
- output for 'h5ls -w80 -rv textlinksrc.h5/ext_link5'
+ output for 'h5ls -w80 -Erv textlinksrc.h5/ext_link5'
 #############################
 Opened "textlinksrc.h5" with sec2 driver.
 ext_link5                External Link {textlinktar.h5//empty_group} {Group
