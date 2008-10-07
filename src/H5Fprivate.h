@@ -35,6 +35,9 @@
 /* Main file structure */
 typedef struct H5F_t H5F_t;
 
+/* Block aggregation structure */
+typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
+
 /*===----------------------------------------------------------------------===
  *                              Flush Flags
  *===----------------------------------------------------------------------===
@@ -214,7 +217,7 @@ typedef struct H5F_t H5F_t;
 				 HADDR_UNDEF==(X)+(haddr_t)(Z) ||	      \
 				 (X)+(haddr_t)(Z)<(X))
 #define H5F_addr_hash(X,M)	((unsigned)((X)%(M)))
-#define H5F_addr_defined(X)	(X!=HADDR_UNDEF)
+#define H5F_addr_defined(X)	((X)!=HADDR_UNDEF)
 /* The H5F_addr_eq() macro guarantees that Y is not HADDR_UNDEF by making
  * certain that X is not HADDR_UNDEF and then checking that X equals Y
  */
@@ -233,43 +236,36 @@ typedef struct H5F_t H5F_t;
 #define H5F_addr_ge(X,Y)	((X)!=HADDR_UNDEF &&			      \
 				 (Y)!=HADDR_UNDEF &&			      \
 				 (X)>=(Y))
-#define H5F_addr_cmp(X,Y)	(H5F_addr_eq(X,Y)?0:			      \
-				 (H5F_addr_lt(X, Y)?-1:1))
+#define H5F_addr_cmp(X,Y)	(H5F_addr_eq((X), (Y)) ? 0 :		      \
+				 (H5F_addr_lt((X), (Y)) ? -1 : 1))
 #define H5F_addr_pow2(N)	((haddr_t)1<<(N))
-#define H5F_addr_overlap(O1,L1,O2,L2) ((O1<O2 && (O1+L1)>O2) ||               \
-                                 (O1>=O2 && O1<(O2+L2)))
+#define H5F_addr_overlap(O1,L1,O2,L2) (((O1) < (O2) && ((O1) + (L1)) > (O2)) || \
+                                 ((O1) >= (O2) && (O1) < ((O2) + (L2))))
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5F_PACKAGE
-/* The FCPL itself */
+#define H5F_INTENT(F)           ((F)->intent)
 #define H5F_FCPL(F)             ((F)->shared->fcpl_id)
-/* size of size_t and off_t as they exist on disk */
 #define H5F_SIZEOF_ADDR(F)      ((F)->shared->sizeof_addr)
 #define H5F_SIZEOF_SIZE(F)      ((F)->shared->sizeof_size)
-/* Size of symbol table leafs */
 #define H5F_SYM_LEAF_K(F)       ((F)->shared->sym_leaf_k)
-/* B-tree key value size */
 #define H5F_KVALUE(F,T)         ((F)->shared->btree_k[(T)->id])
-/* Raw data cache values */
 #define H5F_RDCC_NELMTS(F)      ((F)->shared->rdcc_nelmts)
 #define H5F_RDCC_NBYTES(F)      ((F)->shared->rdcc_nbytes)
 #define H5F_RDCC_W0(F)          ((F)->shared->rdcc_w0)
-/* Check for file driver feature enabled */
-#define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags & (FL))
-/* B-tree node raw page */
-#define H5F_GRP_BTREE_SHARED(F) ((F)->shared->grp_btree_shared)
-/* Base address of file */
 #define H5F_BASE_ADDR(F)        ((F)->shared->base_addr)
-/* Sieve buffer size for datasets */
+#define H5F_GRP_BTREE_SHARED(F) ((F)->shared->grp_btree_shared)
 #define H5F_SIEVE_BUF_SIZE(F)   ((F)->shared->sieve_buf_size)
 #define H5F_GC_REF(F)           ((F)->shared->gc_ref)
 #define H5F_USE_LATEST_FORMAT(F) ((F)->shared->latest_format)
-#define H5F_INTENT(F)           ((F)->intent)
 #define H5F_EXTPATH(F)          ((F)->extpath)
 #define H5F_GET_FC_DEGREE(F)    ((F)->shared->fc_degree)
 #define H5F_STORE_MSG_CRT_IDX(F)    ((F)->shared->store_msg_crt_idx)
+#define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags & (FL))
+#define H5F_DRIVER_ID(F)        ((F)->shared->lf->driver_id)
 #define H5F_GET_FILENO(F,FILENUM) ((FILENUM) = (F)->shared->lf->fileno)
 #else /* H5F_PACKAGE */
+#define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_FCPL(F)             (H5F_get_fcpl(F))
 #define H5F_SIZEOF_ADDR(F)      (H5F_sizeof_addr(F))
 #define H5F_SIZEOF_SIZE(F)      (H5F_sizeof_size(F))
@@ -278,17 +274,17 @@ typedef struct H5F_t H5F_t;
 #define H5F_RDCC_NELMTS(F)      (H5F_rdcc_nelmts(F))
 #define H5F_RDCC_NBYTES(F)      (H5F_rdcc_nbytes(F))
 #define H5F_RDCC_W0(F)          (H5F_rdcc_w0(F))
-#define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
-#define H5F_GRP_BTREE_SHARED(F) (H5F_grp_btree_shared(F))
 #define H5F_BASE_ADDR(F)        (H5F_get_base_addr(F))
+#define H5F_GRP_BTREE_SHARED(F) (H5F_grp_btree_shared(F))
 #define H5F_SIEVE_BUF_SIZE(F)   (H5F_sieve_buf_size(F))
 #define H5F_GC_REF(F)           (H5F_gc_ref(F))
 #define H5F_USE_LATEST_FORMAT(F) (H5F_use_latest_format(F))
-#define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_EXTPATH(F)          (H5F_get_extpath(F))
 #define H5F_GET_FC_DEGREE(F)    (H5F_get_fc_degree(F))
-#define H5F_STORE_MSG_CRT_IDX(F)    (H5F_store_msg_crt_idx(F))
-#define H5F_GET_FILENO(F,FILENUM) (H5F_get_filenum((F), &(FILENUM)))
+#define H5F_STORE_MSG_CRT_IDX(F) (H5F_store_msg_crt_idx(F))
+#define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
+#define H5F_DRIVER_ID(F)        (H5F_get_driver_id(F))
+#define H5F_GET_FILENO(F,FILENUM) (H5F_get_fileno((F), &(FILENUM)))
 #endif /* H5F_PACKAGE */
 
 
@@ -463,45 +459,43 @@ struct H5RC_t;
 H5_DLL H5F_t *H5F_open(const char *name, unsigned flags, hid_t fcpl_id,
     hid_t fapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5F_try_close(H5F_t *f);
-
-/* Functions than retrieve values from the file struct */
-H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
-H5_DLL hid_t H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
-H5_DLL unsigned H5F_get_intent(const H5F_t *f);
-H5_DLL char *H5F_get_extpath(const H5F_t *f);
-H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
-H5_DLL hid_t H5F_get_id(H5F_t *file, hbool_t app_ref);
-H5_DLL size_t H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref);
-H5_DLL size_t H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *obj_id_list, hbool_t app_ref);
-H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
-H5_DLL haddr_t H5F_get_eoa(const H5F_t *f);
-#ifdef H5_HAVE_PARALLEL
-H5_DLL int H5F_mpi_get_rank(const H5F_t *f);
-H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
-H5_DLL int H5F_mpi_get_size(const H5F_t *f);
-#endif /* H5_HAVE_PARALLEL */
 H5_DLL unsigned H5F_incr_nopen_objs(H5F_t *f);
 H5_DLL unsigned H5F_decr_nopen_objs(H5F_t *f);
 
-/* Functions than check file mounting information */
-H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
+/* Functions than retrieve values from the file struct */
+H5_DLL unsigned H5F_get_intent(const H5F_t *f);
+H5_DLL hid_t H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
+H5_DLL char *H5F_get_extpath(const H5F_t *f);
+H5_DLL hid_t H5F_get_id(H5F_t *file, hbool_t app_ref);
+H5_DLL size_t H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref);
+H5_DLL size_t H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *obj_id_list, hbool_t app_ref);
 
-/* Functions than retrieve values set from the FCPL */
+/* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL hid_t H5F_get_fcpl(const H5F_t *f);
 H5_DLL size_t H5F_sizeof_addr(const H5F_t *f);
 H5_DLL size_t H5F_sizeof_size(const H5F_t *f);
 H5_DLL unsigned H5F_sym_leaf_k(const H5F_t *f);
 H5_DLL unsigned H5F_Kvalue(const H5F_t *f, const struct H5B_class_t *type);
-H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);
 H5_DLL size_t H5F_rdcc_nbytes(const H5F_t *f);
 H5_DLL size_t H5F_rdcc_nelmts(const H5F_t *f);
 H5_DLL double H5F_rdcc_w0(const H5F_t *f);
+H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
 H5_DLL struct H5RC_t *H5F_grp_btree_shared(const H5F_t *f);
 H5_DLL size_t H5F_sieve_buf_size(const H5F_t *f);
 H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
 H5_DLL hbool_t H5F_use_latest_format(const H5F_t *f);
 H5_DLL H5F_close_degree_t H5F_get_fc_degree(const H5F_t *f);
 H5_DLL hbool_t H5F_store_msg_crt_idx(const H5F_t *f);
+
+/* Functions that retrieve values from VFD layer */
+H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);
+H5_DLL hid_t H5F_get_driver_id(const H5F_t *f);
+H5_DLL herr_t H5F_get_fileno(const H5F_t *f, unsigned long *filenum);
+H5_DLL haddr_t H5F_get_eoa(const H5F_t *f, H5FD_mem_t type);
+
+/* Functions than check file mounting information */
+H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
+H5_DLL hbool_t H5F_has_mount(const H5F_t *file);
 
 /* Functions that operate on blocks of bytes wrt super block */
 H5_DLL herr_t H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
@@ -523,6 +517,13 @@ H5_DLL herr_t H5F_sfile_assert_num(unsigned n);
 /* Routines for creating & destroying "fake" file structures */
 H5_DLL H5F_t *H5F_fake_alloc(size_t sizeof_size);
 H5_DLL herr_t H5F_fake_free(H5F_t *f);
+
+/* Parallel I/O (i.e. MPI) related routines */
+#ifdef H5_HAVE_PARALLEL
+H5_DLL int H5F_mpi_get_rank(const H5F_t *f);
+H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
+H5_DLL int H5F_mpi_get_size(const H5F_t *f);
+#endif /* H5_HAVE_PARALLEL */
 
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE * stream, int indent, int fwidth);

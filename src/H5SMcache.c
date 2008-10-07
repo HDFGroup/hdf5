@@ -27,6 +27,7 @@
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5Fpkg.h"		/* File access                          */
 #include "H5FLprivate.h"	/* Free Lists                           */
+#include "H5MFprivate.h"        /* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5SMpkg.h"            /* Shared object header messages        */
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
@@ -652,18 +653,34 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_list_dest(H5F_t UNUSED *f, H5SM_list_t* list)
+H5SM_list_dest(H5F_t *f, H5SM_list_t* list)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SM_list_dest)
+    herr_t ret_value = SUCCEED;         /* Return value */
 
+    FUNC_ENTER_NOAPI_NOINIT(H5SM_list_dest)
+
+    /* Sanity check */
     HDassert(list);
+    HDassert(list->header);
     HDassert(list->messages);
 
-    H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!list->cache_info.free_file_space_on_destroy || H5F_addr_defined(list->cache_info.addr));
 
+    /* Check for freeing file space for shared message index list */
+    if(list->cache_info.free_file_space_on_destroy) {
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_SOHM_INDEX, H5AC_dxpl_id, list->cache_info.addr, (hsize_t)H5SM_LIST_SIZE(f, list->header->list_max)) < 0)
+            HGOTO_ERROR(H5E_SOHM, H5E_NOSPACE, FAIL, "unable to free shared message list")
+    } /* end if */
+
+    /* Release resources */
+    H5FL_ARR_FREE(H5SM_sohm_t, list->messages);
     (void)H5FL_FREE(H5SM_list_t, list);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM_list_dest() */
 
 

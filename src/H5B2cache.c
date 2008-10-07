@@ -30,12 +30,14 @@
 
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 
+
 /***********/
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5B2pkg.h"		/* v2 B-trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MFprivate.h"	/* File memory management		*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 
@@ -80,6 +82,7 @@ static herr_t H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, ha
 static herr_t H5B2_cache_leaf_clear(H5F_t *f, H5B2_leaf_t *l, hbool_t destroy);
 static herr_t H5B2_cache_leaf_size(const H5F_t *f, const H5B2_leaf_t *l, size_t *size_ptr);
 
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -113,6 +116,7 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
     (H5AC_clear_func_t)H5B2_cache_leaf_clear,
     (H5AC_size_func_t)H5B2_cache_leaf_size,
 }};
+
 
 /*****************************/
 /* Library Private Variables */
@@ -376,16 +380,28 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
-H5B2_cache_hdr_dest(H5F_t UNUSED *f, H5B2_t *bt2)
+H5B2_cache_hdr_dest(H5F_t *f, H5B2_t *bt2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_hdr_dest)
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_hdr_dest)
 
     /*
      * Check arguments.
      */
     HDassert(bt2);
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!bt2->cache_info.free_file_space_on_destroy || H5F_addr_defined(bt2->cache_info.addr));
+
+    /* Check for freeing file space for B-tree header */
+    if(bt2->cache_info.free_file_space_on_destroy) {
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_BTREE, H5AC_dxpl_id, bt2->cache_info.addr, (hsize_t)H5B2_HEADER_SIZE(f)) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free v2 B-tree header")
+    } /* end if */
 
     /* Decrement reference count on shared B-tree info */
     if(bt2->shared)
@@ -394,7 +410,8 @@ H5B2_cache_hdr_dest(H5F_t UNUSED *f, H5B2_t *bt2)
     /* Free B-tree header info */
     (void)H5FL_FREE(H5B2_t, bt2);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_cache_hdr_dest() */
 
 
@@ -712,22 +729,33 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
-H5B2_cache_internal_dest(H5F_t UNUSED *f, H5B2_internal_t *internal)
+H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *internal)
 {
     H5B2_shared_t *shared;      /* Shared B-tree information */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_internal_dest)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_internal_dest)
 
     /*
      * Check arguments.
      */
     HDassert(internal);
 
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!internal->cache_info.free_file_space_on_destroy || H5F_addr_defined(internal->cache_info.addr));
+
     /* Get the pointer to the shared B-tree info */
     shared = (H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
+
+    /* Check for freeing file space for B-tree internal node */
+    if(internal->cache_info.free_file_space_on_destroy) {
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_BTREE, H5AC_dxpl_id, internal->cache_info.addr, (hsize_t)shared->node_size) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free v2 B-tree internal node")
+    } /* end if */
 
     /* Release internal node's native key buffer */
     if(internal->int_native)
@@ -744,7 +772,8 @@ H5B2_cache_internal_dest(H5F_t UNUSED *f, H5B2_internal_t *internal)
     /* Free B-tree internal node info */
     (void)H5FL_FREE(H5B2_internal_t, internal);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_cache_internal_dest() */
 
 
@@ -1035,22 +1064,33 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
-H5B2_cache_leaf_dest(H5F_t UNUSED *f, H5B2_leaf_t *leaf)
+H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf)
 {
     H5B2_shared_t *shared;      /* Shared B-tree information */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_leaf_dest)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_leaf_dest)
 
     /*
      * Check arguments.
      */
     HDassert(leaf);
 
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!leaf->cache_info.free_file_space_on_destroy || H5F_addr_defined(leaf->cache_info.addr));
+
     /* Get the pointer to the shared B-tree info */
     shared = (H5B2_shared_t *)H5RC_GET_OBJ(leaf->shared);
     HDassert(shared);
+
+    /* Check for freeing file space for B-tree leaf node */
+    if(leaf->cache_info.free_file_space_on_destroy) {
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_BTREE, H5AC_dxpl_id, leaf->cache_info.addr, (hsize_t)shared->node_size) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free v2 B-tree leaf node")
+    } /* end if */
 
     /* Release leaf's native key buffer */
     if(leaf->leaf_native)
@@ -1063,7 +1103,8 @@ H5B2_cache_leaf_dest(H5F_t UNUSED *f, H5B2_leaf_t *leaf)
     /* Free B-tree leaf node info */
     (void)H5FL_FREE(H5B2_leaf_t, leaf);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_cache_leaf_dest() */
 
 

@@ -489,7 +489,7 @@ done:
  *
  * Purpose:	Look up an object relative to a group, using link messages.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -497,13 +497,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+htri_t
 H5G_compact_lookup(H5O_loc_t *oloc, const char *name, H5O_link_t *lnk,
     hid_t dxpl_id)
 {
     H5G_iter_lkp_t udata;               /* User data for iteration callback */
     H5O_mesg_operator_t op;             /* Message operator */
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    htri_t     ret_value;               /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_compact_lookup, FAIL)
 
@@ -522,9 +522,8 @@ H5G_compact_lookup(H5O_loc_t *oloc, const char *name, H5O_link_t *lnk,
     if(H5O_msg_iterate(oloc, H5O_LINK_ID, &op, &udata, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over link messages")
 
-    /* Check if we found the link we were looking for */
-    if(!udata.found)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+    /* Determine if we found the link we were looking for */
+    ret_value = udata.found;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

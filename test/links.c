@@ -26,10 +26,11 @@
  */
 #define H5G_PACKAGE
 #define H5G_TESTING
-#include "H5Gpkg.h"		/* Groups 				*/
 
 #include "h5test.h"
-#include "H5Lprivate.h"
+#include "H5Gpkg.h"		/* Groups 				*/
+#include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5Lprivate.h"         /* Links                                */
 
 /* File for external link test.  Created with gen_udlinks.c */
 #define LINKED_FILE  "be_extlink2.h5"
@@ -1762,6 +1763,10 @@ external_link_root(hid_t fapl, hbool_t new_format)
     if(H5Gclose(gid) < 0) TEST_ERROR
     if(H5Fclose(fid) < 0) TEST_ERROR
 
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0) TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0) TEST_ERROR
+
     /* Open first file again with read-only access and check on objects created */
     if((fid = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
 
@@ -1782,6 +1787,10 @@ external_link_root(hid_t fapl, hbool_t new_format)
     /* Close first file */
     if(H5Fclose(fid) < 0) TEST_ERROR
 
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0) TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0) TEST_ERROR
+
     /* Verify that new objects can't be created through a read-only external
      * link.
      */
@@ -1794,6 +1803,10 @@ external_link_root(hid_t fapl, hbool_t new_format)
 
     /* Close second file again */
     if(H5Fclose(fid) < 0) TEST_ERROR
+
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0) TEST_ERROR
+    if(H5F_sfile_assert_num(0) != 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -10377,7 +10390,7 @@ open_by_idx_check(hid_t main_group_id, hid_t soft_group_id, hid_t mount_file_id,
     haddr_t *objno)
 {
     char        mntname[NAME_BUF_SIZE]; /* Link value */
-    hid_t       group_id;       /* ID of group to test */
+    hid_t       group_id = (-1); /* ID of group to test */
     H5O_info_t  oi;             /* Buffer for querying object's info */
     haddr_t     mnt_root_addr;  /* Address of root group in file to mount */
     hid_t       obj_id;         /* ID of object opened */
@@ -10845,7 +10858,7 @@ object_info_check(hid_t main_group_id, hid_t soft_group_id, H5_index_t idx_type,
     H5_iter_order_t order, unsigned max_links, haddr_t *objno)
 {
     char        objname[NAME_BUF_SIZE]; /* Object name */
-    hid_t       group_id;       /* ID of group to test */
+    hid_t       group_id = (-1); /* ID of group to test */
     H5O_info_t  oinfo;          /* Buffer for querying object's info */
     unsigned    u, v;           /* Local index variables */
 

@@ -3412,14 +3412,18 @@ H5C_expunge_entry(H5F_t *             f,
                   hid_t               secondary_dxpl_id,
 	          H5C_t *	      cache_ptr,
                   const H5C_class_t * type,
-                  haddr_t 	      addr)
+                  haddr_t 	      addr,
+                  unsigned 	      flags)
 {
     herr_t		result;
-    herr_t		ret_value = SUCCEED;      /* Return value */
     hbool_t		first_flush = TRUE;
+    hbool_t		free_file_space;
     H5C_cache_entry_t *	entry_ptr = NULL;
+    herr_t		ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_expunge_entry, FAIL)
+
+    free_file_space  = ( (flags & H5C__FREE_FILE_SPACE_FLAG) != 0 );
 
     HDassert( H5F_addr_defined(addr) );
     HDassert( cache_ptr );
@@ -3458,6 +3462,11 @@ H5C_expunge_entry(H5F_t *             f,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, \
 		    "Target entry is pinned.")
     }
+
+    /* Pass along 'free file space' flag to cache client */
+
+    entry_ptr->free_file_space_on_destroy = free_file_space;
+
 
     /* If we get this far, call H5C_flush_single_entry() with the
      * H5C__FLUSH_INVALIDATE_FLAG and the H5C__FLUSH_CLEAR_ONLY_FLAG.
@@ -4611,6 +4620,10 @@ done:
  *		JRM -- 12/31/07
  *		Added code supporting flash cache size increases.
  *
+ *		QAK -- 1/31/08
+ *		Added initialization for the new free_file_space_on_destroy
+ *		field.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -4692,6 +4705,7 @@ H5C_insert_entry(H5F_t * 	     f,
 
     entry_ptr->flush_in_progress = FALSE;
     entry_ptr->destroy_in_progress = FALSE;
+    entry_ptr->free_file_space_on_destroy = FALSE;
 
     entry_ptr->ht_next = NULL;
     entry_ptr->ht_prev = NULL;
@@ -7413,7 +7427,15 @@ done:
  *		ro_ref_count parameters.
  *
  *		JRM -- 12/31/07
- *		Modified funtion to support flash cache resizes.
+ *		Modified function to support flash cache resizes.
+ *
+ *		QAK -- 1/31/08
+ *		Modified function to support freeing file space in client's
+ *              'dest' callback routine.
+ *
+ *		QAK -- 2/07/08
+ *		Separated "destroy entry" concept from "remove entry from
+ *              cache" concept, by adding the 'take_ownership' flag.
  *
  *-------------------------------------------------------------------------
  */
@@ -7435,6 +7457,8 @@ H5C_unprotect(H5F_t *		  f,
     hbool_t		size_changed;
     hbool_t		pin_entry;
     hbool_t		unpin_entry;
+    hbool_t		free_file_space;
+    hbool_t		take_ownership;
 #ifdef H5_HAVE_PARALLEL
     hbool_t		clear_entry = FALSE;
 #endif /* H5_HAVE_PARALLEL */
@@ -7452,6 +7476,8 @@ H5C_unprotect(H5F_t *		  f,
     size_changed     = ( (flags & H5C__SIZE_CHANGED_FLAG) != 0 );
     pin_entry        = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
     unpin_entry      = ( (flags & H5C__UNPIN_ENTRY_FLAG) != 0 );
+    free_file_space  = ( (flags & H5C__FREE_FILE_SPACE_FLAG) != 0 );
+    take_ownership   = ( (flags & H5C__TAKE_OWNERSHIP_FLAG) != 0 );
 
     /* Changing the size of an entry dirties it.  Thus, set the
      * dirtied flag if the size_changed flag is set.
@@ -7471,6 +7497,9 @@ H5C_unprotect(H5F_t *		  f,
     HDassert( ( ! size_changed ) || ( dirtied ) );
     HDassert( ( ! size_changed ) || ( new_size > 0 ) );
     HDassert( ! ( pin_entry && unpin_entry ) );
+    HDassert( ( ! free_file_space ) || ( deleted ) );   /* deleted flag must accompany free_file_space */
+    HDassert( ( ! take_ownership ) || ( deleted ) );    /* deleted flag must accompany take_ownership */
+    HDassert( ! ( free_file_space && take_ownership ) );    /* can't have both free_file_space & take_ownership */
 
     entry_ptr = (H5C_cache_entry_t *)thing;
 
@@ -7696,7 +7725,9 @@ H5C_unprotect(H5F_t *		  f,
              * H5C__FLUSH_CLEAR_ONLY_FLAG and H5C__FLUSH_INVALIDATE_FLAG flags.
 	     * However, it is needed for the function call.
              */
-            hbool_t		dummy_first_flush = TRUE;
+            hbool_t	dummy_first_flush = TRUE;
+            unsigned    flush_flags = (H5C__FLUSH_CLEAR_ONLY_FLAG |
+                                         H5C__FLUSH_INVALIDATE_FLAG);
 
 	    /* we can't delete a pinned entry */
 	    HDassert ( ! (entry_ptr->is_pinned ) );
@@ -7716,14 +7747,23 @@ H5C_unprotect(H5F_t *		  f,
                             "hash table contains multiple entries for addr?!?.")
             }
 
+            /* Pass along 'free file space' flag to cache client */
+
+            entry_ptr->free_file_space_on_destroy = free_file_space;
+
+            /* Set the "take ownership" flag for the flush, if needed */
+            if ( take_ownership) {
+
+                flush_flags |= H5C__TAKE_OWNERSHIP_FLAG;
+            }
+
             if ( H5C_flush_single_entry(f,
                                         primary_dxpl_id,
                                         secondary_dxpl_id,
                                         cache_ptr,
                                         type,
                                         addr,
-                                        (H5C__FLUSH_CLEAR_ONLY_FLAG |
-                                         H5C__FLUSH_INVALIDATE_FLAG),
+                                        flush_flags,
                                         &dummy_first_flush,
                                         TRUE) < 0 ) {
 
@@ -10004,10 +10044,14 @@ done:
  *		in which the target entry is resized during flush, and
  *		update the caches data structures accordingly.
  *
- *
  *		JRM -- 3/29/07
  *		Added sanity checks on the new is_read_only and
  *		ro_ref_count fields.
+ *
+ *		QAK -- 2/07/08
+ *		Separated "destroy entry" concept from "remove entry from
+ *              cache" concept, by adding the 'take_ownership' flag and
+ *              the "destroy_entry" variable.
  *
  *-------------------------------------------------------------------------
  */
@@ -10024,12 +10068,14 @@ H5C_flush_single_entry(H5F_t *		   f,
 {
     hbool_t		destroy;
     hbool_t		clear_only;
+    hbool_t		take_ownership;
     hbool_t		was_dirty;
-    herr_t		ret_value = SUCCEED;      /* Return value */
+    hbool_t		destroy_entry;
     herr_t		status;
     int			type_id;
     unsigned		flush_flags = H5C_CALLBACK__NO_FLAGS_SET;
     H5C_cache_entry_t *	entry_ptr = NULL;
+    herr_t		ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5C_flush_single_entry)
 
@@ -10042,6 +10088,15 @@ H5C_flush_single_entry(H5F_t *		   f,
 
     destroy = ( (flags & H5C__FLUSH_INVALIDATE_FLAG) != 0 );
     clear_only = ( (flags & H5C__FLUSH_CLEAR_ONLY_FLAG) != 0);
+    take_ownership = ( (flags & H5C__TAKE_OWNERSHIP_FLAG) != 0);
+
+    /* Set the flag for destroying the entry, based on the 'take ownership'
+     *  and 'destroy' flags
+     */
+    if(take_ownership)
+        destroy_entry = FALSE;
+    else
+        destroy_entry = destroy;
 
     /* attempt to find the target entry in the hash table */
     H5C__SEARCH_INDEX(cache_ptr, addr, entry_ptr, FAIL)
@@ -10308,7 +10363,7 @@ H5C_flush_single_entry(H5F_t *		   f,
 	    }
 #endif /* NDEBUG */
             /* Call the callback routine to clear all dirty flags for object */
-            if ( (entry_ptr->type->clear)(f, entry_ptr, destroy) < 0 ) {
+            if ( (entry_ptr->type->clear)(f, entry_ptr, destroy_entry) < 0 ) {
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "can't clear entry")
             }
@@ -10341,7 +10396,7 @@ H5C_flush_single_entry(H5F_t *		   f,
 
             if ( *first_flush_ptr && entry_ptr->is_dirty ) {
 
-                status = (entry_ptr->type->flush)(f, primary_dxpl_id, destroy,
+                status = (entry_ptr->type->flush)(f, primary_dxpl_id, destroy_entry,
                                                  entry_ptr->addr, entry_ptr,
 						 &flush_flags);
                 *first_flush_ptr = FALSE;
@@ -10349,7 +10404,7 @@ H5C_flush_single_entry(H5F_t *		   f,
             } else {
 
                 status = (entry_ptr->type->flush)(f, secondary_dxpl_id,
-                                                 destroy, entry_ptr->addr,
+                                                 destroy_entry, entry_ptr->addr,
                                                  entry_ptr, &flush_flags);
             }
 
@@ -10534,6 +10589,10 @@ done:
  *		Added initialization for the new is_read_only and
  *		ro_ref_count fields.
  *
+ *		QAK -- 1/31/08
+ *		Added initialization for the new free_file_space_on_destroy
+ *		field.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -10609,6 +10668,7 @@ H5C_load_entry(H5F_t *             f,
 #endif /* H5_HAVE_PARALLEL */
     entry_ptr->flush_in_progress = FALSE;
     entry_ptr->destroy_in_progress = FALSE;
+    entry_ptr->free_file_space_on_destroy = FALSE;
 
     if ( (type->size)(f, thing, &(entry_ptr->size)) < 0 ) {
 

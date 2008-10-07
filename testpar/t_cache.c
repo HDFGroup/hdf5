@@ -2180,7 +2180,7 @@ expunge_entry(H5C_t * cache_ptr,
     if ( nerrors == 0 ) {
 
         result = H5AC_expunge_entry(file_ptr, -1, &(types[0]),
-			            entry_ptr->header.addr);
+			            entry_ptr->header.addr, H5AC__NO_FLAGS_SET);
 
         if ( result < 0 ) {
 

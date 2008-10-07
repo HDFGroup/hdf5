@@ -64,8 +64,8 @@ static herr_t H5O_eliminate_gap(H5O_t *oh, H5O_mesg_t *mesg,
     uint8_t *new_gap_loc, size_t new_gap_size);
 static herr_t H5O_alloc_null(H5O_t *oh, unsigned null_idx,
     const H5O_msg_class_t *new_type, void *new_native, size_t new_size);
-static htri_t H5O_alloc_extend_chunk(H5F_t *f, H5O_t *oh, unsigned chunkno,
-    size_t size, unsigned * msg_idx);
+static htri_t H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    unsigned chunkno, size_t size, unsigned * msg_idx);
 static unsigned H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     size_t size);
 static htri_t H5O_move_msgs_forward(H5O_t *oh);
@@ -457,6 +457,7 @@ done:
  */
 static htri_t
 H5O_alloc_extend_chunk(H5F_t *f,
+                       hid_t dxpl_id,
                        H5O_t *oh,
                        unsigned chunkno,
                        size_t size,
@@ -466,7 +467,7 @@ H5O_alloc_extend_chunk(H5F_t *f,
     size_t      aligned_size = H5O_ALIGN_OH(oh, size);
     uint8_t     *old_image;     /* Old address of chunk's image in memory */
     size_t      old_size;       /* Old size of chunk */
-    htri_t      tri_result;     /* Result from checking if chunk can be extended */
+    htri_t      extended;       /* If chunk can be extended */
     int         extend_msg = -1;/* Index of null message to extend */
     uint8_t     new_size_flags = 0;     /* New chunk #0 size flags */
     hbool_t     adjust_size_flags = FALSE;      /* Whether to adjust the chunk #0 size flags */
@@ -534,16 +535,12 @@ H5O_alloc_extend_chunk(H5F_t *f,
     } /* end if */
 
     /* Determine whether the chunk can be extended */
-    tri_result = H5MF_can_extend(f, H5FD_MEM_OHDR, oh->chunk[chunkno].addr,
+    extended = H5MF_try_extend(f, dxpl_id, H5FD_MEM_OHDR, oh->chunk[chunkno].addr,
                                  (hsize_t)(oh->chunk[chunkno].size), (hsize_t)(delta + extra_prfx_size));
-    if(tri_result == FALSE)     /* can't extend -- we are done */
+    if(extended < 0) /* error */
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTEXTEND, FAIL, "can't tell if we can extend chunk")
+    else if(extended == FALSE)     /* can't extend -- we are done */
         HGOTO_DONE(FALSE)
-    else if(tri_result < 0) /* error */
-        HGOTO_ERROR(H5E_RESOURCE, H5E_SYSTEM, FAIL, "can't tell if we can extend chunk")
-
-    /* If we get this far, we should be able to extend the chunk */
-    if(H5MF_extend(f, H5FD_MEM_OHDR, oh->chunk[chunkno].addr, (hsize_t)(oh->chunk[chunkno].size), (hsize_t)(delta + extra_prfx_size)) < 0 )
-        HGOTO_ERROR(H5E_RESOURCE, H5E_SYSTEM, FAIL, "can't extend chunk")
 
     /* Adjust object header prefix flags */
     if(adjust_size_flags) {
@@ -994,13 +991,13 @@ H5O_alloc(H5F_t *f, hid_t dxpl_id, H5O_t *oh, const H5O_msg_class_t *type,
 
             HDassert(H5F_addr_defined(oh->chunk[chunkno].addr));
 
-            tri_result = H5O_alloc_extend_chunk(f, oh, chunkno, raw_size, &idx);
+            tri_result = H5O_alloc_extend_chunk(f, dxpl_id, oh, chunkno, raw_size, &idx);
             if(tri_result == TRUE)
 		break;
             else if(tri_result == FALSE)
                 idx = UFAIL;
             else
-                HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, UFAIL, "H5O_alloc_extend_chunk failed unexpectedly")
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTEXTEND, UFAIL, "H5O_alloc_extend_chunk failed unexpectedly")
         } /* end for */
 
         /* If idx is still UFAIL, we were not able to extend a chunk,

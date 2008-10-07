@@ -395,13 +395,9 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
         } /* end for */
     } /* end if */
 
-    /* Release index block's disk space */
-    if(H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_IBLOCK, dxpl_id, hdr->idx_blk_addr, (hsize_t)iblock->size) < 0)
-        H5E_THROW(H5E_CANTFREE, "unable to free extensible array index block")
-
 CATCH
     /* Finished deleting index block in metadata cache */
-    if(iblock && H5EA__iblock_unprotect(iblock, dxpl_id, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG) < 0)
+    if(iblock && H5EA__iblock_unprotect(iblock, dxpl_id, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array index block")
 
 END_FUNC(PKG)   /* end H5EA__iblock_delete() */

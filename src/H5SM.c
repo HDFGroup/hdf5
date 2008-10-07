@@ -529,23 +529,31 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_delete_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id, hbool_t delete_heap)
+H5SM_delete_index(H5F_t *f, H5SM_index_header_t *header, hid_t dxpl_id,
+    hbool_t delete_heap)
 {
-    hsize_t     list_size;        /* Size of list on disk */
-    herr_t ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5SM_delete_index)
 
     /* Determine whether index is a list or a B-tree. */
     if(header->index_type == H5SM_LIST) {
-        /* Eject entry from cache */
-        if(H5AC_expunge_entry(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove list index from cache")
+        unsigned index_status = 0;         /* Index list's status in the metadata cache */
 
-        /* Free the file space used */
-        list_size = H5SM_LIST_SIZE(f, header->list_max);
-        if(H5MF_xfree(f, H5FD_MEM_SOHM_INDEX, dxpl_id, header->index_addr, list_size) < 0)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to free shared message list")
+        /* Check the index list's status in the metadata cache */
+        if(H5AC_get_entry_status(f, header->index_addr, &index_status) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "unable to check metadata cache status for direct block")
+
+        /* If the index list is in the cache, expunge it now */
+        if(index_status & H5AC_ES__IN_CACHE) {
+            /* Sanity checks on index list */
+            HDassert(!(index_status & H5AC_ES__IS_PINNED));
+            HDassert(!(index_status & H5AC_ES__IS_PROTECTED));
+
+            /* Evict the index list from the metadata cache */
+            if(H5AC_expunge_entry(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, H5AC__FREE_FILE_SPACE_FLAG) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove list index from cache")
+        } /* end if */
     } /* end if */
     else {
         HDassert(header->index_type == H5SM_BTREE);
@@ -727,7 +735,7 @@ H5SM_convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header,
     } /* end for */
 
     /* Unprotect list in cache and release heap */
-    if(H5AC_unprotect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, list, H5AC__DELETED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, list, H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
 	HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to release SOHM list")
     *_list = list = NULL;
 
@@ -1691,7 +1699,7 @@ H5SM_delete_from_index(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
         if(header->num_messages == 0) {
 
             /* Unprotect cache and release heap */
-            if(list && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, list, H5AC__DELETED_FLAG) < 0)
+            if(list && H5AC_unprotect(f, dxpl_id, H5AC_SOHM_LIST, header->index_addr, list, H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
 	        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "unable to release SOHM list")
             list = NULL;
 
@@ -2064,11 +2072,15 @@ H5SM_get_refcount(H5F_t *f, hid_t dxpl_id, unsigned type_id,
         message = list->messages[list_pos];
     } /* end if */
     else {
+        htri_t msg_exists;      /* Whether the message exists in the v2 B-tree */
+
         /* Index is a B-tree */
         HDassert(header->index_type == H5SM_BTREE);
 
         /* Look up the message in the v2 B-tree */
-        if(H5B2_find(f, dxpl_id, H5SM_INDEX, header->index_addr, &key, H5SM_get_refcount_bt2_cb, &message) < 0)
+        if((msg_exists = H5B2_find(f, dxpl_id, H5SM_INDEX, header->index_addr, &key, H5SM_get_refcount_bt2_cb, &message)) < 0)
+            HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "error finding message in index")
+        if(!msg_exists)
 	    HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
     } /* end else */
 

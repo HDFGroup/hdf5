@@ -206,6 +206,7 @@ H5FS_section_class_t H5HF_FSPACE_SECT_CLS_SINGLE[1] = {{
     H5HF_sect_single_shrink,		/* Shrink container w/section   */
     H5HF_sect_single_free,		/* Free section                 */
     H5HF_sect_single_valid,		/* Check validity of section    */
+    NULL,				/* Split section node for alignment */
     NULL,				/* Dump debugging for section   */
 }};
 
@@ -234,6 +235,7 @@ H5FS_section_class_t H5HF_FSPACE_SECT_CLS_FIRST_ROW[1] = {{
     H5HF_sect_row_shrink,		/* Shrink container w/section   */
     H5HF_sect_row_free,			/* Free section                 */
     H5HF_sect_row_valid,		/* Check validity of section    */
+    NULL,				/* Split section node for alignment */
     H5HF_sect_row_debug,		/* Dump debugging for section   */
 }};
 
@@ -259,6 +261,7 @@ H5FS_section_class_t H5HF_FSPACE_SECT_CLS_NORMAL_ROW[1] = {{
     NULL,				/* Shrink container w/section   */
     H5HF_sect_row_free,			/* Free section                 */
     H5HF_sect_row_valid,		/* Check validity of section    */
+    NULL,				/* Split section node for alignment */
     H5HF_sect_row_debug,		/* Dump debugging for section   */
 }};
 
@@ -287,6 +290,7 @@ H5FS_section_class_t H5HF_FSPACE_SECT_CLS_INDIRECT[1] = {{
     NULL,				/* Shrink container w/section   */
     NULL,				/* Free section                 */
     NULL,				/* Check validity of section    */
+    NULL,				/* Split section node for alignment */
     NULL,				/* Dump debugging for section   */
 }};
 

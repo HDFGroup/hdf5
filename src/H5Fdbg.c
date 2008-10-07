@@ -82,7 +82,7 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "File open reference count:", f->shared->nrefs);
     HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
-	      "Address of super block:", f->shared->super_addr);
+	      "Address of super block:", f->shared->base_addr);
     HDfprintf(stream, "%*s%-*s %Hu bytes\n", indent, "", fwidth,
 	      "Size of userblock:", userblock_size);
 
@@ -107,8 +107,6 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
 	      "Symbol table internal node 1/2 rank:", f->shared->btree_k[H5B_SNODE_ID]);
     HDfprintf(stream, "%*s%-*s 0x%02x\n", indent, "", fwidth,
 	      "File status flags:", (unsigned)(f->shared->status_flags));
-    HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
-	      "Base address:", f->shared->base_addr);
     HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
 	      "Superblock extension address:", f->shared->extension_addr);
     HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,

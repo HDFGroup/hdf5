@@ -163,14 +163,14 @@ static herr_t H5FD_direct_close(H5FD_t *_file);
 static int H5FD_direct_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t H5FD_direct_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_direct_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t H5FD_direct_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr);
+static herr_t H5FD_direct_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD_direct_get_eof(const H5FD_t *_file);
 static herr_t  H5FD_direct_get_handle(H5FD_t *_file, hid_t fapl, void** file_handle);
 static herr_t H5FD_direct_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			     size_t size, void *buf);
 static herr_t H5FD_direct_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      size_t size, const void *buf);
-static herr_t H5FD_direct_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_direct_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 
 static const H5FD_class_t H5FD_direct_g = {
     "direct",					/*name			*/
@@ -198,7 +198,8 @@ static const H5FD_class_t H5FD_direct_g = {
     H5FD_direct_get_handle,                     /*get_handle            */
     H5FD_direct_read,				/*read			*/
     H5FD_direct_write,				/*write			*/
-    H5FD_direct_flush,				/*flush 		*/
+    NULL,					/*flush			*/
+    H5FD_direct_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
@@ -1238,7 +1239,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_direct_flush
+ * Function:	H5FD_direct_truncate
  *
  * Purpose:	Makes sure that the true file size is the same (or larger)
  *		than the end-of-address.
@@ -1250,17 +1251,15 @@ done:
  * Programmer:	Raymond Lu
  *              Thursday, 21 September 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_direct_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
+H5FD_direct_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
 {
     H5FD_direct_t	*file = (H5FD_direct_t*)_file;
-    herr_t      	ret_value=SUCCEED;       /* Return value */
+    herr_t      	ret_value = SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_direct_flush, FAIL)
+    FUNC_ENTER_NOAPI(H5FD_direct_truncate, FAIL)
 
     assert(file);
 
@@ -1301,5 +1300,6 @@ H5FD_direct_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_direct_truncate() */
 #endif /* H5_HAVE_DIRECT */
+

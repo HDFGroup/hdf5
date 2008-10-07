@@ -707,11 +707,11 @@ coll_chunktest(const char* filename,
                            NULL, NULL, NULL, NULL, NULL, NULL);
                VRFY((status >= 0),"testing property list inserted succeeded");
 
-               prop_value = H5D_XFER_COLL_CHUNK_FIX;   
+               prop_value = H5D_XFER_COLL_CHUNK_FIX;
                status = H5Pinsert2(xfer_plist, H5D_XFER_COLL_CHUNK_LINK_TO_MULTI_OPT, H5D_XFER_COLL_CHUNK_SIZE, &prop_value,
                            NULL, NULL, NULL, NULL, NULL, NULL);
                VRFY((status >= 0),"testing property list inserted succeeded");
- 
+
             break;
 
             case API_LINK_FALSE:

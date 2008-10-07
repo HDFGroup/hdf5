@@ -327,6 +327,7 @@ H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *na
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
     H5HF_t *shared_fheap = NULL;        /* Fractal heap handle for shared header messages */
     htri_t attr_sharable;               /* Flag indicating attributes are sharable */
+    htri_t attr_exists;                 /* Attribute exists in v2 B-tree */
     H5A_t *ret_value = NULL;            /* Return value */
 
     FUNC_ENTER_NOAPI(H5A_dense_open, NULL)
@@ -375,7 +376,9 @@ H5A_dense_open(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *na
     udata.found_op_data = &ret_value;
 
     /* Find & copy the attribute in the 'name' index */
-    if(H5B2_find(f, dxpl_id, H5A_BT2_NAME, ainfo->name_bt2_addr, &udata, NULL, NULL) < 0)
+    if((attr_exists = H5B2_find(f, dxpl_id, H5A_BT2_NAME, ainfo->name_bt2_addr, &udata, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't search for attribute in name index")
+    else if(attr_exists == FALSE)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "can't locate attribute in name index")
 
 done:
@@ -841,6 +844,7 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
     H5A_t *attr_copy = NULL;            /* Copy of attribute to rename */
     htri_t attr_sharable;               /* Flag indicating attributes are sharable */
     htri_t shared_mesg;                 /* Should this message be stored in the Shared Message table? */
+    htri_t attr_exists;                 /* Attribute exists in v2 B-tree */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5A_dense_rename, FAIL)
@@ -890,8 +894,10 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
     udata.found_op_data = &attr_copy;
 
     /* Get copy of attribute through 'name' tracking v2 B-tree */
-    if(H5B2_find(f, dxpl_id, H5A_BT2_NAME, ainfo->name_bt2_addr, &udata, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to find record in v2 B-tree")
+    if((attr_exists = H5B2_find(f, dxpl_id, H5A_BT2_NAME, ainfo->name_bt2_addr, &udata, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't search for attribute in name index")
+    else if(attr_exists == FALSE)
+        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't locate attribute in name index")
     HDassert(attr_copy);
 
     /* Check if message is already shared */
@@ -1656,12 +1662,8 @@ H5A_dense_exists(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
     udata.found_op_data = NULL;
 
     /* Find the attribute in the 'name' index */
-    if(H5B2_find(f, dxpl_id, H5A_BT2_NAME, ainfo->name_bt2_addr, &udata, NULL, NULL) < 0) {
-        /* Assume that the failure was just not finding the attribute & clear stack */
-        H5E_clear_stack(NULL);
-
-        ret_value = FALSE;
-    } /* end if */
+    if((ret_value = H5B2_find(f, dxpl_id, H5A_BT2_NAME, ainfo->name_bt2_addr, &udata, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, FAIL, "can't search for attribute in name index")
 
 done:
     /* Release resources */

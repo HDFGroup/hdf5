@@ -158,7 +158,7 @@ static herr_t H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, hadd
 			     size_t size, void *buf);
 static herr_t H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      size_t size, const void *buf);
-static herr_t H5FD_sec2_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_sec2_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 
 static const H5FD_class_t H5FD_sec2_g = {
     "sec2",					/*name			*/
@@ -186,7 +186,8 @@ static const H5FD_class_t H5FD_sec2_g = {
     H5FD_sec2_get_handle,                       /*get_handle            */
     H5FD_sec2_read,				/*read			*/
     H5FD_sec2_write,				/*write			*/
-    H5FD_sec2_flush,				/*flush			*/
+    NULL,					/*flush			*/
+    H5FD_sec2_truncate,				/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
@@ -419,22 +420,28 @@ done:
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5FD_sec2_close(H5FD_t *_file)
 {
     H5FD_sec2_t	*file = (H5FD_sec2_t*)_file;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_sec2_close, FAIL)
+#ifdef QAK
+HDfprintf(stderr, "%s: file->eof = %a, file->eoa = %a\n", FUNC, file->eof, file->eoa);
+#endif /* QAK */
 
-    if (HDclose(file->fd)<0)
+    /* Sanity check */
+    HDassert(file);
+
+    /* Close the underlying file */
+    if(HDclose(file->fd) < 0)
         HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
-    (void)H5FL_FREE(H5FD_sec2_t,file);
+    /* Release the file info */
+    (void)H5FL_FREE(H5FD_sec2_t, file);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -612,7 +619,7 @@ H5FD_sec2_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_sec2_set_eoa() */
 
 
 /*-------------------------------------------------------------------------
@@ -765,7 +772,7 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_sec2_read() */
 
 
 /*-------------------------------------------------------------------------
@@ -846,11 +853,11 @@ done:
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_sec2_write() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_sec2_flush
+ * Function:	H5FD_sec2_truncate
  *
  * Purpose:	Makes sure that the true file size is the same (or larger)
  *		than the end-of-address.
@@ -862,23 +869,24 @@ done:
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
 static herr_t
-H5FD_sec2_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
+H5FD_sec2_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
 {
-    H5FD_sec2_t	*file = (H5FD_sec2_t*)_file;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5FD_sec2_t *file = (H5FD_sec2_t*)_file;
+    herr_t ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_sec2_flush, FAIL)
+    FUNC_ENTER_NOAPI(H5FD_sec2_truncate, FAIL)
+#ifdef QAK
+HDfprintf(stderr, "%s: file->eof = %a, file->eoa = %a\n", FUNC, file->eof, file->eoa);
+#endif /* QAK */
 
-    assert(file);
+    HDassert(file);
 
     /* Extend the file to make sure it's large enough */
-    if (file->eoa!=file->eof) {
+    if(!H5F_addr_eq(file->eoa, file->eof)) {
 #ifdef _WIN32
         HFILE filehandle;   /* Windows file handle */
         LARGE_INTEGER li;   /* 64-bit integer for SetFilePointer() call */
@@ -889,11 +897,11 @@ H5FD_sec2_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
         /* Translate 64-bit integers into form Windows wants */
         /* [This algorithm is from the Windows documentation for SetFilePointer()] */
         li.QuadPart = (LONGLONG)file->eoa;
-        (void)SetFilePointer((HANDLE)filehandle,li.LowPart,&li.HighPart,FILE_BEGIN);
-        if(SetEndOfFile((HANDLE)filehandle)==0)
+        (void)SetFilePointer((HANDLE)filehandle, li.LowPart, &li.HighPart, FILE_BEGIN);
+        if(SetEndOfFile((HANDLE)filehandle) == 0)
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #else /* _WIN32 */
-        if (-1==file_truncate(file->fd, (file_offset_t)file->eoa))
+        if(-1 == file_truncate(file->fd, (file_offset_t)file->eoa))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #endif /* _WIN32 */
 
@@ -903,8 +911,9 @@ H5FD_sec2_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_sec2_truncate() */
+

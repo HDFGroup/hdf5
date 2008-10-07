@@ -1062,8 +1062,10 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
 
     /* check args */
     HDassert(f);
+    HDassert(f->intent & H5F_ACC_RDWR);
     HDassert(loc);
     HDassert(TRUE == H5P_isa_class(ocpl_id, H5P_OBJECT_CREATE));
+
 
     /* Make certain we allocate at least a reasonable size for the object header */
     size_hint = H5O_ALIGN_F(f, MAX(H5O_MIN_SIZE, size_hint));
@@ -1448,7 +1450,7 @@ H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file")
 
                     /* Mark the object header as deleted */
-                    oh_flags = H5C__DELETED_FLAG;
+                    oh_flags = H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
                 } /* end else */
             } /* end if */
         } else {
@@ -1833,7 +1835,7 @@ H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "can't delete object from file")
 
 done:
-    if(oh && H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh, H5AC__DIRTIED_FLAG | H5C__DELETED_FLAG) < 0)
+    if(oh && H5AC_unprotect(f, dxpl_id, H5AC_OHDR, addr, oh, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
 	HDONE_ERROR(H5E_OHDR, H5E_PROTECT, FAIL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1878,10 +1880,6 @@ H5O_delete_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
         if(H5O_delete_mesg(f, dxpl_id, oh, curr_msg) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to delete file space for object header message")
     } /* end for */
-
-    /* Free main (first) object header "chunk" */
-    if(H5MF_xfree(f, H5FD_MEM_OHDR, dxpl_id, oh->chunk[0].addr, (hsize_t)oh->chunk[0].size) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free object header")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

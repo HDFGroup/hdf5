@@ -314,10 +314,10 @@ done:
  *              OP_DATA pointer, to allow caller to return information about
  *              the record.
  *
- *              If 'OP' is NULL, then this routine just returns "SUCCEED" when
+ *              If 'OP' is NULL, then this routine just returns "TRUE" when
  *              a record is present in the B-tree.
  *
- * Return:	Non-negative on success, negative on failure.
+ * Return:	Non-negative (TRUE/FALSE) on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -325,7 +325,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+htri_t
 H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     void *udata, H5B2_found_t op, void *op_data)
 {
@@ -337,7 +337,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
     unsigned    depth;                  /* Current depth of the tree */
     int         cmp;                    /* Comparison value of records */
     unsigned    idx;                    /* Location of record which matches key */
-    herr_t	ret_value = SUCCEED;
+    htri_t	ret_value = TRUE        /* Return value */;
 
     FUNC_ENTER_NOAPI(H5B2_find, FAIL)
 
@@ -372,7 +372,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
 
     /* Check for empty tree */
     if(curr_node_ptr.node_nrec == 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree has no records")
+        HGOTO_DONE(FALSE)
 
     /* Walk down B-tree to find record or leaf node where record is located */
     cmp = -1;
@@ -404,7 +404,7 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             /* Make callback for current record */
             if(op && (op)(H5B2_INT_NREC(internal, shared, idx), op_data) < 0) {
                 /* Unlock current node */
-                if (H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
+                if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
                     HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
                 HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "'found' callback failed for B-tree find operation")
@@ -414,7 +414,8 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_INT, curr_node_ptr.addr, internal, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
-            HGOTO_DONE(SUCCEED);
+            /* Indicate record found */
+            HGOTO_DONE(TRUE)
         } /* end else */
 
         /* Decrement depth we're at in B-tree */
@@ -436,15 +437,8 @@ H5B2_find(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
             if(H5AC_unprotect(f, dxpl_id, H5AC_BT2_LEAF, curr_node_ptr.addr, leaf, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
-            /* Note: don't push error on stack, leave that to next higher level,
-             *      since many times the B-tree is searched in order to determine
-             *      if an object exists in the B-tree or not. -QAK
-             */
-#ifdef OLD_WAY
-                HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in leaf node")
-#else /* OLD_WAY */
-                HGOTO_DONE(FAIL)
-#endif /* OLD_WAY */
+            /* Record not found */
+            HGOTO_DONE(FALSE)
         } /* end if */
         else {
             /* Make callback for current record */
@@ -992,13 +986,9 @@ H5B2_delete(H5F_t *f, hid_t dxpl_id, const H5B2_class_t *type, haddr_t addr,
         if(H5B2_delete_node(f, dxpl_id, bt2->shared, shared->depth, &bt2->root, op, op_data) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTDELETE, FAIL, "unable to delete B-tree nodes")
 
-    /* Release space for B-tree node on disk */
-    if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)H5B2_HEADER_SIZE(f))<0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree header info")
-
 done:
     /* Release the B-tree header info */
-    if(bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__DELETED_FLAG) < 0)
+    if(bt2 && H5AC_unprotect(f, dxpl_id, H5AC_BT2_HDR, addr, bt2, H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
         HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to delete B-tree header info")
 
     FUNC_LEAVE_NOAPI(ret_value)

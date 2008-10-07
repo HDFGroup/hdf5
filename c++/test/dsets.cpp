@@ -413,8 +413,10 @@ filter_bogus(unsigned int flags, size_t cd_nelmts,
 static herr_t
 test_compression(H5File& file)
 {
+#ifndef H5_HAVE_FILTER_DEFLATE
     const char		*not_supported;
     not_supported = "    Deflate compression is not enabled.";
+#endif /* H5_HAVE_FILTER_DEFLATE */
     int		points[100][200];
     int		check[100][200];
     hsize_t	i, j, n;

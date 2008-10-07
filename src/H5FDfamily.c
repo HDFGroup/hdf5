@@ -107,6 +107,7 @@ static herr_t H5FD_family_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, ha
 static herr_t H5FD_family_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 				size_t size, const void *_buf);
 static herr_t H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
 
 /* The class struct */
 static const H5FD_class_t H5FD_family_g = {
@@ -136,6 +137,7 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_read,				/*read			*/
     H5FD_family_write,				/*write			*/
     H5FD_family_flush,				/*flush			*/
+    H5FD_family_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
@@ -1051,13 +1053,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
+H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
-    haddr_t		addr=eoa;
+    haddr_t		addr = abs_eoa;
     char		memb_name[4096];
-    unsigned		u;              /* Local index variable */
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    unsigned		u;                      /* Local index variable */
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_family_set_eoa, FAIL)
 
@@ -1076,32 +1078,34 @@ H5FD_family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
         } /* end if */
 
         /* Create another file if necessary */
-        if (u>=file->nmembs || !file->memb[u]) {
+        if(u >= file->nmembs || !file->memb[u]) {
             file->nmembs = MAX(file->nmembs, u+1);
             sprintf(memb_name, file->name, u);
             H5E_BEGIN_TRY {
-                H5_CHECK_OVERFLOW(file->memb_size,hsize_t,haddr_t);
-                file->memb[u] = H5FDopen(memb_name, file->flags|H5F_ACC_CREAT,
+                H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
+                file->memb[u] = H5FDopen(memb_name, file->flags | H5F_ACC_CREAT,
                              file->memb_fapl_id, (haddr_t)file->memb_size);
             } H5E_END_TRY;
-            if (NULL==file->memb[u])
+            if(NULL == file->memb[u])
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open member file")
-        }
+        } /* end if */
 
         /* Set the EOA marker for the member */
-        H5_CHECK_OVERFLOW(file->memb_size,hsize_t,haddr_t);
-        if (addr>(haddr_t)file->memb_size) {
-            if(H5FD_set_eoa(file->memb[u], type, (haddr_t)file->memb_size)<0)
+        /* (Note compensating for base address addition in internal routine) */
+        H5_CHECK_OVERFLOW(file->memb_size, hsize_t, haddr_t);
+        if(addr > (haddr_t)file->memb_size) {
+            if(H5FD_set_eoa(file->memb[u], type, ((haddr_t)file->memb_size - file->pub.base_addr)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to set file eoa")
             addr -= file->memb_size;
-        } else {
-            if(H5FD_set_eoa(file->memb[u], type, addr)<0)
+        } /* end if */
+        else {
+            if(H5FD_set_eoa(file->memb[u], type, (addr - file->pub.base_addr)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to set file eoa")
             addr = 0;
-        }
-    }
+        } /* end else */
+    } /* end for */
 
-    file->eoa = eoa;
+    file->eoa = abs_eoa;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1142,13 +1146,16 @@ H5FD_family_get_eof(const H5FD_t *_file)
      * with `i' equal to that member. If all members have zero EOF then exit
      * loop with i==0.
      */
-    assert(file->nmembs>0);
-    for (i=(int)file->nmembs-1; i>=0; --i) {
-        if ((eof=H5FD_get_eof(file->memb[i]))!=0)
+    HDassert(file->nmembs > 0);
+    for(i = (int)file->nmembs - 1; i >= 0; --i) {
+        if((eof = H5FD_get_eof(file->memb[i])) != 0)
             break;
-        if (0==i)
+        if(0 == i)
             break;
-    }
+    } /* end for */
+
+    /* Adjust for base address for file */
+    eof += file->pub.base_addr;
 
     /*
      * The file size is the number of members before the i'th member plus the
@@ -1157,7 +1164,7 @@ H5FD_family_get_eof(const H5FD_t *_file)
     eof += ((unsigned)i)*file->memb_size;
 
     /* Set return value */
-    ret_value=MAX(eof, file->eoa);
+    ret_value = MAX(eof, file->eoa);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1396,3 +1403,39 @@ H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_family_truncate
+ *
+ * Purpose:	Truncates all family members.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1, as many files truncated as possible.
+ *
+ * Programmer:	Quincey Koziol
+ *              Saturday, February 23, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_family_truncate(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
+{
+    H5FD_family_t	*file = (H5FD_family_t*)_file;
+    unsigned		u, nerrors = 0;
+    herr_t      	ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_family_truncate, FAIL)
+
+    for(u = 0; u < file->nmembs; u++)
+        if(file->memb[u] && H5FD_truncate(file->memb[u], dxpl_id, closing) < 0)
+            nerrors++;
+
+    if(nerrors)
+        HGOTO_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "unable to flush member files")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_family_truncate() */
+

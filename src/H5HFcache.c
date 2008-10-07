@@ -30,6 +30,7 @@
 
 #define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
 
+
 /***********/
 /* Headers */
 /***********/
@@ -40,6 +41,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
+
 
 /****************/
 /* Local Macros */
@@ -88,6 +90,7 @@ static H5HF_direct_t *H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t ad
 static herr_t H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_direct_t *dblock, unsigned UNUSED * flags_ptr);
 static herr_t H5HF_cache_dblock_clear(H5F_t *f, H5HF_direct_t *dblock, hbool_t destroy);
 static herr_t H5HF_cache_dblock_size(const H5F_t *f, const H5HF_direct_t *dblock, size_t *size_ptr);
+
 
 /*********************/
 /* Package Variables */
@@ -593,17 +596,29 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
-H5HF_cache_hdr_dest(H5F_t UNUSED *f, H5HF_hdr_t *hdr)
+H5HF_cache_hdr_dest(H5F_t *f, H5HF_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_hdr_dest)
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_cache_hdr_dest)
 
     /*
      * Check arguments.
      */
     HDassert(hdr);
     HDassert(hdr->rc == 0);
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!hdr->cache_info.free_file_space_on_destroy || H5F_addr_defined(hdr->cache_info.addr));
+
+    /* Check for freeing file space for heap header */
+    if(hdr->cache_info.free_file_space_on_destroy) {
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_FHEAP_HDR, H5AC_dxpl_id, hdr->cache_info.addr, (hsize_t)hdr->heap_size) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap header")
+    } /* end if */
 
     /* Free the block size lookup table for the doubling table */
     H5HF_dtable_dest(&hdr->man_dtable);
@@ -615,7 +630,8 @@ H5HF_cache_hdr_dest(H5F_t UNUSED *f, H5HF_hdr_t *hdr)
     /* Free the shared info itself */
     (void)H5FL_FREE(H5HF_hdr_t, hdr);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_hdr_dest() */
 
 
@@ -1071,7 +1087,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
 H5HF_cache_iblock_dest(H5F_t *f, H5HF_indirect_t *iblock)
 {
@@ -1088,6 +1103,17 @@ H5HF_cache_iblock_dest(H5F_t *f, H5HF_indirect_t *iblock)
 #ifdef QAK
 HDfprintf(stderr, "%s: Destroying indirect block\n", FUNC);
 #endif /* QAK */
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!iblock->cache_info.free_file_space_on_destroy || H5F_addr_defined(iblock->cache_info.addr));
+
+    /* Check for freeing file space for indirect block */
+    if(iblock->cache_info.free_file_space_on_destroy) {
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_FHEAP_IBLOCK, H5AC_dxpl_id, iblock->cache_info.addr, (hsize_t)iblock->size) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block")
+    } /* end if */
 
     /* Set the shared heap header's file context for this operation */
     iblock->hdr->f = f;
@@ -1234,6 +1260,7 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
 
     /* Set block's internal information */
     dblock->size = *size;
+    dblock->file_size = 0;
     dblock->blk_off_size = H5HF_SIZEOF_OFFSET_LEN(dblock->size);
 
     /* Allocate block buffer */
@@ -1622,7 +1649,6 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
 H5HF_cache_dblock_dest(H5F_t *f, H5HF_direct_t *dblock)
 {
@@ -1637,6 +1663,20 @@ H5HF_cache_dblock_dest(H5F_t *f, H5HF_direct_t *dblock)
 #ifdef QAK
 HDfprintf(stderr, "%s: Destroying direct block, dblock = %p\n", FUNC, dblock);
 #endif /* QAK */
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!dblock->cache_info.free_file_space_on_destroy || H5F_addr_defined(dblock->cache_info.addr));
+
+    /* Check for freeing file space for direct block */
+    if(dblock->cache_info.free_file_space_on_destroy) {
+        /* Sanity check */
+        HDassert(dblock->file_size > 0);
+
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, H5AC_dxpl_id, dblock->cache_info.addr, dblock->file_size) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+    } /* end if */
 
     /* Set the shared heap header's file context for this operation */
     dblock->hdr->f = f;

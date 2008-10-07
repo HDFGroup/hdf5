@@ -62,9 +62,6 @@
 /* Local Macros */
 /****************/
 
-/* Metadata accumulator controls */
-#define H5FD_ACCUM_THROTTLE     8
-#define H5FD_ACCUM_THRESHOLD    2048
 
 /******************/
 /* Local Typedefs */
@@ -1053,23 +1050,23 @@ done:
 H5FD_t *
 H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_class_t	*driver;
-    H5FD_t		*file = NULL;
-    hid_t               driver_id = -1;
-    hsize_t             meta_block_size = 0;
-    hsize_t             sdata_block_size = 0;
-    H5P_genplist_t *plist;      /* Property list pointer */
-    H5FD_t		*ret_value;
+    H5FD_class_t	*driver;                /* VFD for file */
+    H5FD_t		*file = NULL;           /* VFD file struct */
+    hid_t               driver_id = -1;         /* VFD ID */
+    H5P_genplist_t      *plist;                 /* Property list pointer */
+    H5FD_t		*ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_open, NULL)
 
-    /* Get file access property list */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-
+    /* Sanity check */
     if(0 == maxaddr)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "zero format address range")
 
+    /* Get file access property list */
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list");
+
+    /* Get the VFD to open the file with */
     if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver ID")
 
@@ -1094,16 +1091,6 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINC, NULL, "unable to increment ref count on VFL driver")
     file->cls = driver;
     file->maxaddr = maxaddr;
-    HDmemset(file->fl, 0, sizeof(file->fl));
-    if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, &(meta_block_size)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get meta data block size")
-    file->meta_aggr.feature_flag = H5FD_FEAT_AGGREGATE_METADATA;
-    file->meta_aggr.alloc_size = meta_block_size;
-    if(H5P_get(plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(sdata_block_size)) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'small data' block size")
-    file->sdata_aggr.feature_flag = H5FD_FEAT_AGGREGATE_SMALLDATA;
-    file->sdata_aggr.alloc_size = sdata_block_size;
-    file->accum_loc = HADDR_UNDEF;
     if(H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, &(file->threshold)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get alignment threshold")
     if(H5P_get(plist, H5F_ACS_ALIGN_NAME, &(file->alignment)) < 0)
@@ -1119,6 +1106,10 @@ H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "unable to get file serial number")
     } /* end if */
     file->fileno = file_serial_no;
+
+    /* Start with base address set to 0 */
+    /* (This will be changed later, when the superblock is located) */
+    file->base_addr = 0;
 
     /* Set return value */
     ret_value = file;
@@ -1202,10 +1193,6 @@ H5FD_close(H5FD_t *file)
 
     /* check args */
     HDassert(file && file->cls);
-
-    /* Free the freelist */
-    if(H5FD_free_freelist(file) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't release file space free list")
 
     /* Prepare to close file by clearing all public fields */
     driver = file->cls;
@@ -1423,6 +1410,8 @@ done:
  *              Tuesday, July 27, 1999
  *
  * Modifications:
+ *	Vailin Choi, 29th July 2008
+ *	  Two more parameters were added to H5FD_alloc() for handling alignment
  *
  *-------------------------------------------------------------------------
  */
@@ -1448,12 +1437,15 @@ H5FDalloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a data transfer property list")
 
     /* Do the real work */
-    if(HADDR_UNDEF == (ret_value = H5FD_alloc(file, type, dxpl_id, size)))
+    if(HADDR_UNDEF == (ret_value = H5FD_alloc(file, dxpl_id, type, size, NULL, NULL)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate file memory")
+
+    /* (Note compensating for base address subtraction in internal routine) */
+    ret_value += file->base_addr;
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5FDalloc() */
 
 
 /*-------------------------------------------------------------------------
@@ -1497,54 +1489,13 @@ H5FDfree(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t siz
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
 
     /* Do the real work */
-    if(H5FD_free(file, type, dxpl_id, addr, size) < 0)
+    /* (Note compensating for base address addition in internal routine) */
+    if(H5FD_free(file, dxpl_id, type, addr - file->base_addr, size) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "file deallocation request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDfree() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FDrealloc
- *
- * Purpose:	Changes the size of an allocated chunk of memory, possibly
- *		also changing its location in the file.
- *
- * Return:	Success:	New address of the block of memory, not
- *				necessarily the same as the original address.
- *
- *		Failure:	HADDR_UNDEF
- *
- * Programmer:	Robb Matzke
- *              Tuesday, August  3, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-haddr_t
-H5FDrealloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr, hsize_t old_size,
-	    hsize_t new_size)
-{
-    haddr_t	ret_value = HADDR_UNDEF;
-
-    FUNC_ENTER_API(H5FDrealloc, HADDR_UNDEF)
-    H5TRACE6("a", "*xMtiahh", file, type, dxpl_id, old_addr, old_size, new_size);
-
-    /* Check args */
-    if(H5P_DEFAULT == dxpl_id)
-        dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else
-        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, HADDR_UNDEF, "not a data transfer property list")
-
-    if(HADDR_UNDEF == (ret_value = H5FD_realloc(file, type, dxpl_id, old_addr, old_size, new_size)))
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file reallocation request failed")
-
-done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5FDrealloc() */
 
 
 /*-------------------------------------------------------------------------
@@ -1554,16 +1505,10 @@ done:
  *		allocated memory in the file.
  *
  * Return:	Success:	First byte after allocated memory.
- *
  *		Failure:	HADDR_UNDEF
  *
  * Programmer:	Robb Matzke
  *              Friday, July 30, 1999
- *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
@@ -1578,52 +1523,19 @@ H5FDget_eoa(H5FD_t *file, H5FD_mem_t type)
     /* Check args */
     if(!file || !file->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file pointer")
-    if(type<H5FD_MEM_DEFAULT || type >= H5FD_MEM_NTYPES)
+    if(type < H5FD_MEM_DEFAULT || type >= H5FD_MEM_NTYPES)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file type")
 
     /* The real work */
-    if(HADDR_UNDEF==(ret_value=H5FD_get_eoa(file, type)))
+    if(HADDR_UNDEF == (ret_value = H5FD_get_eoa(file, type)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file get eoa request failed")
+
+    /* (Note compensating for base address subtraction in internal routine) */
+    ret_value += file->base_addr;
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_get_eoa
- *
- * Purpose:	Private version of H5FDget_eoa()
- *
- * Return:	Success:	First byte after allocated memory.
- *
- *		Failure:	HADDR_UNDEF
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
- *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
- *
- *-------------------------------------------------------------------------
- */
-haddr_t
-H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type)
-{
-    haddr_t	ret_value;
-
-    FUNC_ENTER_NOAPI(H5FD_get_eoa, HADDR_UNDEF)
-    assert(file && file->cls);
-
-    /* Dispatch to driver */
-    if(HADDR_UNDEF==(ret_value=(file->cls->get_eoa)(file, type)))
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FDget_eoa() */
 
 
 /*-------------------------------------------------------------------------
@@ -1643,23 +1555,17 @@ done:
  *		    and the driver didn't supply an allocation callback.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative, no side effect
  *
  * Programmer:	Robb Matzke
  *              Friday, July 30, 1999
- *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5FDset_eoa, FAIL)
     H5TRACE3("e", "*xMta", file, type, addr);
@@ -1667,57 +1573,19 @@ H5FDset_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
     /* Check args */
     if(!file || !file->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
-    if(type<H5FD_MEM_DEFAULT || type >= H5FD_MEM_NTYPES)
+    if(type < H5FD_MEM_DEFAULT || type >= H5FD_MEM_NTYPES)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file type")
-
-    if(!H5F_addr_defined(addr) || addr>file->maxaddr)
+    if(!H5F_addr_defined(addr) || addr > file->maxaddr)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid end-of-address value")
 
     /* The real work */
-    if(H5FD_set_eoa(file, type, addr) < 0)
+    /* (Note compensating for base address addition in internal routine) */
+    if(H5FD_set_eoa(file, type, addr - file->base_addr) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file set eoa request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_set_eoa
- *
- * Purpose:	Private version of H5FDset_eoa()
- *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative, no side effect
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
- *
- * Modifications:
- *              Raymond Lu
- *              21 Dec. 2006
- *              Added the parameter TYPE.  It's only used for MULTI driver.
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_set_eoa(H5FD_t *file, H5FD_mem_t UNUSED type, haddr_t addr)
-{
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5FD_set_eoa, FAIL)
-
-    assert(file && file->cls);
-    assert(H5F_addr_defined(addr) && addr<=file->maxaddr);
-
-    /* Dispatch to driver */
-    if((file->cls->set_eoa)(file, type, addr) < 0)
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver set_eoa request failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FDset_eoa() */
 
 
 /*-------------------------------------------------------------------------
@@ -1759,50 +1627,15 @@ H5FDget_eof(H5FD_t *file)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, HADDR_UNDEF, "invalid file pointer")
 
     /* The real work */
-    if(HADDR_UNDEF==(ret_value=H5FD_get_eof(file)))
+    if(HADDR_UNDEF == (ret_value = H5FD_get_eof(file)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "file get eof request failed")
+
+    /* (Note compensating for base address subtraction in internal routine) */
+    ret_value += file->base_addr;
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_get_eof
- *
- * Purpose:	Private version of H5FDget_eof()
- *
- * Return:	Success:	The EOF address.
- *
- *		Failure:	HADDR_UNDEF
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-haddr_t
-H5FD_get_eof(const H5FD_t *file)
-{
-    haddr_t	ret_value;
-
-    FUNC_ENTER_NOAPI(H5FD_get_eof, HADDR_UNDEF)
-
-    assert(file && file->cls);
-
-    /* Dispatch to driver */
-    if(file->cls->get_eof) {
-	if(HADDR_UNDEF==(ret_value=(file->cls->get_eof)(file)))
-	    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eof request failed")
-    } else {
-	ret_value = file->maxaddr;
-    }
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FDget_eof() */
 
 
 /*-------------------------------------------------------------------------
@@ -1836,6 +1669,62 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_get_feature_flags
+ *
+ * Purpose:	Retrieve the feature flags for the VFD
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, January  8, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_get_feature_flags(const H5FD_t *file, unsigned long *feature_flags)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_get_feature_flags)
+
+    HDassert(file);
+    HDassert(feature_flags);
+
+    /* Set feature flags to return */
+    *feature_flags = file->feature_flags;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD_get_feature_flags() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_get_fs_type_map
+ *
+ * Purpose:	Retrieve the free space type mapping for the VFD
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, January 17, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_get_fs_type_map)
+
+    HDassert(file);
+    HDassert(type_map);
+
+    /* Copy free space type mapping */
+    HDmemcpy(type_map, file->cls->fl_map, sizeof(file->cls->fl_map));
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD_get_fs_type_map() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FDread
  *
  * Purpose:	Reads SIZE bytes from FILE beginning at address ADDR
@@ -1860,7 +1749,7 @@ herr_t
 H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 	 void *buf/*out*/)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5FDread, FAIL)
     H5TRACE6("e", "*xMtiazx", file, type, dxpl_id, addr, size, buf);
@@ -1873,197 +1762,19 @@ H5FDread(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size
     if(H5P_DEFAULT == dxpl_id)
         dxpl_id= H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
     if(!buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null result buffer")
 
     /* Do the real work */
-    if(H5FD_read(file, type, dxpl_id, addr, size, buf) < 0)
+    /* (Note compensating for base address addition in internal routine) */
+    if(H5FD_read(file, dxpl_id, type, addr - file->base_addr, size, buf) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file read request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_read
- *
- * Purpose:	Private version of H5FDread()
- *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
- *
- * Modifications:
- *	Albert Cheng, 2000-11-21
- *	Disable the code that does early return when size==0 for
- *	Parallel mode since a collective call would require the process
- *	to continue on with "nothing" to transfer.
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
-	  void *buf/*out*/)
-{
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5FD_read, FAIL)
-
-    assert(file && file->cls);
-    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-    assert(buf);
-
-#ifndef H5_HAVE_PARALLEL
-    /* Do not return early for Parallel mode since the I/O could be a */
-    /* collective transfer. */
-    /* The no-op case */
-    if(0==size)
-        HGOTO_DONE(SUCCEED)
-#endif /* H5_HAVE_PARALLEL */
-
-    /* Check if this information is in the metadata accumulator */
-    if((file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) && type!=H5FD_MEM_DRAW) {
-        /* Current read overlaps with metadata accumulator */
-        if(H5F_addr_overlap(addr,size,file->accum_loc,file->accum_size)) {
-            unsigned char *read_buf=(unsigned char *)buf; /* Pointer to the buffer being read in */
-            size_t amount_read;         /* Amount to read at a time */
-#ifndef NDEBUG
-            hsize_t tempamount_read;         /* Amount to read at a time */
-#endif /* NDEBUG */
-            hsize_t read_off;           /* Offset to read from */
-
-            /* Double check that we aren't reading raw data */
-            assert(type!=H5FD_MEM_DRAW);
-
-            /* Read the part before the metadata accumulator */
-            if(addr<file->accum_loc) {
-                /* Set the amount to read */
-                H5_ASSIGN_OVERFLOW(amount_read,file->accum_loc-addr,hsize_t,size_t);
-
-                /* Dispatch to driver */
-                if((file->cls->read)(file, type, dxpl_id, addr, amount_read, read_buf) < 0)
-                    HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
-
-                /* Adjust the buffer, address & size */
-                read_buf+=amount_read;
-                addr+=amount_read;
-                size-=amount_read;
-            } /* end if */
-
-            /* Copy the part overlapping the metadata accumulator */
-            if(size>0 && (addr>=file->accum_loc && addr<(file->accum_loc+file->accum_size))) {
-                /* Set the offset to "read" from */
-                read_off=addr-file->accum_loc;
-
-                /* Set the amount to "read" */
-#ifndef NDEBUG
-                tempamount_read = file->accum_size-read_off;
-                H5_CHECK_OVERFLOW(tempamount_read,hsize_t,size_t);
-                amount_read = MIN(size, (size_t)tempamount_read);
-#else /* NDEBUG */
-                amount_read = MIN(size, (size_t)(file->accum_size-read_off));
-#endif /* NDEBUG */
-
-                /* Copy the data out of the buffer */
-                HDmemcpy(read_buf,file->meta_accum+read_off,amount_read);
-
-                /* Adjust the buffer, address & size */
-                read_buf+=amount_read;
-                addr+=amount_read;
-                size-=amount_read;
-            } /* end if */
-
-            /* Read the part after the metadata accumulator */
-            if(size>0 && addr>=(file->accum_loc+file->accum_size)) {
-                /* Dispatch to driver */
-                if((file->cls->read)(file, type, dxpl_id, addr, size, read_buf) < 0)
-                    HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
-
-                /* Adjust the buffer, address & size */
-                read_buf+=size;
-                addr+=size;
-                size-=size;
-            } /* end if */
-
-            /* Make certain we've read it all */
-            assert(size==0);
-        } /* end if */
-        /* Current read doesn't overlap with metadata accumulator, read it into accumulator */
-        else {
-            /* Only update the metadata accumulator if it is not dirty or if
-             * we are allowed to write the accumulator out during reads (when
-             * it is dirty)
-             */
-            if(file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA_READ || !file->accum_dirty) {
-                /* Flush current contents, if dirty */
-                if(file->accum_dirty) {
-                    if((file->cls->write)(file, H5FD_MEM_DEFAULT, dxpl_id, file->accum_loc, file->accum_size, file->meta_accum) < 0)
-                        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed")
-
-                    /* Reset accumulator dirty flag */
-                    file->accum_dirty=FALSE;
-                } /* end if */
-
-                /* Cache the new piece of metadata */
-                /* Check if we need to resize the buffer */
-                if(size>file->accum_buf_size) {
-                    /* Grow the metadata accumulator buffer */
-                    if((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,size))==NULL)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-
-                    /* Note the new buffer size */
-                    file->accum_buf_size=size;
-                } /* end if */
-                else {
-                    /* Check if we should shrink the accumulator buffer */
-                    if(size<(file->accum_buf_size/H5FD_ACCUM_THROTTLE) &&
-                            file->accum_buf_size>H5FD_ACCUM_THRESHOLD) {
-                        size_t new_size=(file->accum_buf_size/H5FD_ACCUM_THROTTLE); /* New size of accumulator buffer */
-
-                        /* Shrink the accumulator buffer */
-                        if((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,new_size))==NULL)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-
-                        /* Note the new buffer size */
-                        file->accum_buf_size=new_size;
-                    } /* end if */
-                } /* end else */
-
-                /* Update accumulator information */
-                file->accum_loc=addr;
-                file->accum_size=size;
-                file->accum_dirty=FALSE;
-
-                /* Read into accumulator */
-                if((file->cls->read)(file, H5FD_MEM_DEFAULT, dxpl_id, file->accum_loc, file->accum_size, file->meta_accum) < 0)
-                    HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
-
-                /* Copy into buffer */
-                HDmemcpy(buf,file->meta_accum,size);
-            } /* end if */
-            else {
-                /* Dispatch to driver */
-                if((file->cls->read)(file, type, dxpl_id, addr, size, buf) < 0)
-                    HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
-            } /* end else */
-        } /* end else */
-    } /* end if */
-    else {
-        /* Dispatch to driver */
-        if((file->cls->read)(file, type, dxpl_id, addr, size, buf) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "driver read request failed")
-    } /* end else */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FDread() */
 
 
 /*-------------------------------------------------------------------------
@@ -2089,7 +1800,7 @@ herr_t
 H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
 	  const void *buf)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5FDwrite, FAIL)
     H5TRACE6("e", "*xMtiaz*x", file, type, dxpl_id, addr, size, buf);
@@ -2099,279 +1810,21 @@ H5FDwrite(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t siz
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
     /* Get the default dataset transfer property list if the user didn't provide one */
     if(H5P_DEFAULT == dxpl_id)
-        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
     if(!buf)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null buffer")
 
     /* The real work */
-    if(H5FD_write(file, type, dxpl_id, addr, size, buf) < 0)
+    /* (Note compensating for base address addition in internal routine) */
+    if(H5FD_write(file, dxpl_id, type, addr - file->base_addr, size, buf) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file write request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5FD_write
- *
- * Purpose:	Private version of H5FDwrite()
- *
- * Return:	Success:	Non-negative
- *
- *		Failure:	Negative
- *
- * Programmer:	Robb Matzke
- *              Wednesday, August  4, 1999
- *
- * Modifications:
- *	Albert Cheng, 2000-11-21
- *	Disable the code that does early return when size==0 for
- *	Parallel mode since a collective call would require the process
- *	to continue on with "nothing" to transfer.
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
-	   const void *buf)
-{
-    size_t new_size;    /* New size of the accumulator buffer */
-    size_t old_offset;  /* Offset of old data within the accumulator buffer */
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5FD_write, FAIL)
-
-    assert(file && file->cls);
-    assert(H5I_GENPROP_LST==H5I_get_type(dxpl_id));
-    assert(TRUE==H5P_isa_class(dxpl_id,H5P_DATASET_XFER));
-    assert(buf);
-
-#ifndef H5_HAVE_PARALLEL
-    /* Do not return early for Parallel mode since the I/O could be a */
-    /* collective transfer. */
-    /* The no-op case */
-    if(0==size)
-        HGOTO_DONE(SUCCEED)
-#endif /* H5_HAVE_PARALLEL */
-
-    /* Check for accumulating metadata */
-    if((file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) && type!=H5FD_MEM_DRAW) {
-        /* Check if there is already metadata in the accumulator */
-        if(file->accum_size>0) {
-            /* Check if the piece of metadata being written adjoins or is inside the metadata accumulator */
-            if((addr>=file->accum_loc && addr<=(file->accum_loc+file->accum_size))
-                || ((addr+size)>file->accum_loc && (addr+size)<=(file->accum_loc+file->accum_size))
-                || (addr<file->accum_loc && (addr+size)>=file->accum_loc)) {
-
-                /* Check if the new metadata adjoins the beginning of the current accumulator */
-                if((addr+size)==file->accum_loc) {
-                    /* Check if we need more buffer space */
-                    if((size+file->accum_size)>file->accum_buf_size) {
-                        /* Adjust the buffer size, by doubling it */
-                        file->accum_buf_size = MAX(file->accum_buf_size*2,size+file->accum_size);
-
-                        /* Reallocate the metadata accumulator buffer */
-                        if((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,file->accum_buf_size))==NULL)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-#ifdef H5_CLEAR_MEMORY
-HDmemset(file->meta_accum + file->accum_size, 0, (file->accum_buf_size - (file->accum_size + size)));
-#endif /* H5_CLEAR_MEMORY */
-                    } /* end if */
-
-                    /* Move the existing metadata to the proper location */
-                    HDmemmove(file->meta_accum+size,file->meta_accum,file->accum_size);
-
-                    /* Copy the new metadata at the front */
-                    HDmemcpy(file->meta_accum,buf,size);
-
-                    /* Set the new size & location of the metadata accumulator */
-                    file->accum_loc=addr;
-                    file->accum_size=file->accum_size+size;
-
-                    /* Mark it as written to */
-                    file->accum_dirty=TRUE;
-                } /* end if */
-                /* Check if the new metadata adjoins the end of the current accumulator */
-                else if(addr==(file->accum_loc+file->accum_size)) {
-                    /* Check if we need more buffer space */
-                    if((size+file->accum_size)>file->accum_buf_size) {
-                        /* Adjust the buffer size, by doubling it */
-                        file->accum_buf_size = MAX(file->accum_buf_size*2,size+file->accum_size);
-
-                        /* Reallocate the metadata accumulator buffer */
-                        if((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,file->accum_buf_size))==NULL)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-#ifdef H5_CLEAR_MEMORY
-HDmemset(file->meta_accum + file->accum_size + size, 0, (file->accum_buf_size - (file->accum_size + size)));
-#endif /* H5_CLEAR_MEMORY */
-                    } /* end if */
-
-                    /* Copy the new metadata to the end */
-                    HDmemcpy(file->meta_accum+file->accum_size,buf,size);
-
-                    /* Set the new size of the metadata accumulator */
-                    file->accum_size=file->accum_size+size;
-
-                    /* Mark it as written to */
-                    file->accum_dirty=TRUE;
-                } /* end if */
-                /* Check if the new metadata is entirely within the current accumulator */
-                else if(addr>=file->accum_loc && (addr+size)<=(file->accum_loc+file->accum_size)) {
-                    /* Copy the new metadata to the proper location within the accumulator */
-                    HDmemcpy(file->meta_accum+(addr-file->accum_loc),buf,size);
-
-                    /* Mark it as written to */
-                    file->accum_dirty=TRUE;
-                } /* end if */
-                /* Check if the new metadata overlaps the beginning of the current accumulator */
-                else if(addr<file->accum_loc && (addr+size)<=(file->accum_loc+file->accum_size)) {
-                    /* Calculate the new accumulator size, based on the amount of overlap */
-                    H5_ASSIGN_OVERFLOW(new_size,(file->accum_loc-addr)+file->accum_size,hsize_t,size_t);
-
-                    /* Check if we need more buffer space */
-                    if(new_size>file->accum_buf_size) {
-                        /* Adjust the buffer size, by doubling it */
-                        file->accum_buf_size = MAX(file->accum_buf_size*2,new_size);
-
-                        /* Reallocate the metadata accumulator buffer */
-                        if((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,file->accum_buf_size))==NULL)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-#ifdef H5_CLEAR_MEMORY
-HDmemset(file->meta_accum + file->accum_size, 0, (file->accum_buf_size - file->accum_size));
-#endif /* H5_CLEAR_MEMORY */
-                    } /* end if */
-
-                    /* Calculate the proper offset of the existing metadata */
-                    H5_ASSIGN_OVERFLOW(old_offset,(addr+size)-file->accum_loc,hsize_t,size_t);
-
-                    /* Move the existing metadata to the proper location */
-                    HDmemmove(file->meta_accum+size,file->meta_accum+old_offset,(file->accum_size-old_offset));
-
-                    /* Copy the new metadata at the front */
-                    HDmemcpy(file->meta_accum,buf,size);
-
-                    /* Set the new size & location of the metadata accumulator */
-                    file->accum_loc=addr;
-                    file->accum_size=new_size;
-
-                    /* Mark it as written to */
-                    file->accum_dirty=TRUE;
-                } /* end if */
-                /* Check if the new metadata overlaps the end of the current accumulator */
-                else if(addr>=file->accum_loc && (addr+size)>(file->accum_loc+file->accum_size)) {
-                    /* Calculate the new accumulator size, based on the amount of overlap */
-                    H5_ASSIGN_OVERFLOW(new_size,(addr-file->accum_loc)+size,hsize_t,size_t);
-
-                    /* Check if we need more buffer space */
-                    if(new_size>file->accum_buf_size) {
-                        /* Adjust the buffer size, by doubling it */
-                        file->accum_buf_size = MAX(file->accum_buf_size*2,new_size);
-
-                        /* Reallocate the metadata accumulator buffer */
-                        if((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,file->accum_buf_size))==NULL)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-#ifdef H5_CLEAR_MEMORY
-HDmemset(file->meta_accum + file->accum_size, 0, (file->accum_buf_size - file->accum_size));
-#endif /* H5_CLEAR_MEMORY */
-                    } /* end if */
-
-                    /* Copy the new metadata to the end */
-                    HDmemcpy(file->meta_accum+(addr-file->accum_loc),buf,size);
-
-                    /* Set the new size & location of the metadata accumulator */
-                    file->accum_size=new_size;
-
-                    /* Mark it as written to */
-                    file->accum_dirty=TRUE;
-                } /* end if */
-                else {
-                    assert(0 && "New metadata overlapped both beginning and end of existing metadata accumulator!");
-                } /* end else */
-            } /* end if */
-            /* New piece of metadata doesn't adjoin or overlap the existing accumulator */
-            else {
-                /* Write out the existing metadata accumulator, with dispatch to driver */
-                if(file->accum_dirty) {
-                    if((file->cls->write)(file, H5FD_MEM_DEFAULT, dxpl_id, file->accum_loc, file->accum_size, file->meta_accum) < 0)
-                        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed")
-                    /* Reset accumulator dirty flag */
-                    file->accum_dirty=FALSE;
-                } /* end if */
-
-                /* Cache the new piece of metadata */
-                /* Check if we need to resize the buffer */
-                if(size>file->accum_buf_size) {
-                    /* Grow the metadata accumulator buffer */
-                    if((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,size))==NULL)
-                        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-
-                    /* Note the new buffer size */
-                    file->accum_buf_size=size;
-#ifdef H5_CLEAR_MEMORY
-{
-size_t clear_size = MAX(file->accum_size, size);
-HDmemset(file->meta_accum + clear_size, 0, (file->accum_buf_size - clear_size));
-}
-#endif /* H5_CLEAR_MEMORY */
-                } /* end if */
-                else {
-                    /* Check if we should shrink the accumulator buffer */
-                    if(size<(file->accum_buf_size/H5FD_ACCUM_THROTTLE) &&
-                            file->accum_buf_size>H5FD_ACCUM_THRESHOLD) {
-                        size_t tmp_size=(file->accum_buf_size/H5FD_ACCUM_THROTTLE); /* New size of accumulator buffer */
-
-                        /* Shrink the accumulator buffer */
-                        if((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,tmp_size))==NULL)
-                            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-
-                        /* Note the new buffer size */
-                        file->accum_buf_size=tmp_size;
-                    } /* end if */
-                } /* end else */
-
-                /* Update the metadata accumulator information */
-                file->accum_loc=addr;
-                file->accum_size=size;
-                file->accum_dirty=TRUE;
-
-                /* Store the piece of metadata in the accumulator */
-                HDmemcpy(file->meta_accum,buf,size);
-            } /* end else */
-        } /* end if */
-        /* No metadata in the accumulator, grab this piece and keep it */
-        else {
-            /* Check if we need to reallocate the buffer */
-            if(size>file->accum_buf_size) {
-                /* Reallocate the metadata accumulator buffer */
-                if((file->meta_accum=H5FL_BLK_REALLOC(meta_accum,file->meta_accum,size))==NULL)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate metadata accumulator buffer")
-
-                /* Note the new buffer size */
-                file->accum_buf_size=size;
-            } /* end if */
-
-            /* Update the metadata accumulator information */
-            file->accum_loc=addr;
-            file->accum_size=size;
-            file->accum_dirty=TRUE;
-
-            /* Store the piece of metadata in the accumulator */
-            HDmemcpy(file->meta_accum,buf,size);
-        } /* end else */
-    } /* end if */
-    else {
-        /* Dispatch to driver */
-        if((file->cls->write)(file, type, dxpl_id, addr, size, buf) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "driver write request failed")
-    } /* end else */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FDwrite() */
 
 
 /*-------------------------------------------------------------------------
@@ -2396,7 +1849,7 @@ done:
 herr_t
 H5FDflush(H5FD_t *file, hid_t dxpl_id, unsigned closing)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_API(H5FDflush, FAIL)
     H5TRACE3("e", "*xiIu", file, dxpl_id, closing);
@@ -2405,14 +1858,14 @@ H5FDflush(H5FD_t *file, hid_t dxpl_id, unsigned closing)
     if(!file || !file->cls)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
     if(H5P_DEFAULT == dxpl_id)
-        dxpl_id= H5P_DATASET_XFER_DEFAULT;
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
     else
-        if(TRUE!=H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
+        if(TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
 
     /* Do the real work */
-    if(H5FD_flush(file,dxpl_id,closing) < 0)
-	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "file flush request failed")
+    if(H5FD_flush(file, dxpl_id, closing) < 0)
+	HGOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "file flush request failed")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2425,44 +1878,97 @@ done:
  * Purpose:	Private version of H5FDflush()
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
- *              Quincey Koziol, May 20, 2002
- *              Added 'closing' parameter
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5FD_flush(H5FD_t *file, hid_t dxpl_id, unsigned closing)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_flush, FAIL)
 
-    assert(file && file->cls);
+    HDassert(file && file->cls);
 
-    /* Check if we need to flush out the metadata accumulator */
-    if((file->feature_flags&H5FD_FEAT_ACCUMULATE_METADATA) && file->accum_dirty && file->accum_size>0) {
-        /* Flush the metadata contents */
-        /* Not certain if the type and dxpl should be the way they are... -QAK */
-        if((file->cls->write)(file, H5FD_MEM_DEFAULT, dxpl_id, file->accum_loc, file->accum_size, file->meta_accum) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver write request failed")
-
-        /* Reset the dirty flag */
-        file->accum_dirty=FALSE;
-    } /* end if */
-
-    if(file->cls->flush && (file->cls->flush)(file,dxpl_id,closing) < 0)
+    if(file->cls->flush && (file->cls->flush)(file, dxpl_id, closing) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver flush request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FDtruncate
+ *
+ * Purpose:	Notify driver to truncate the file back to the allocated size.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, January 31, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDtruncate(H5FD_t *file, hid_t dxpl_id, unsigned closing)
+{
+    herr_t ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_API(H5FDtruncate, FAIL)
+    H5TRACE3("e", "*xiIu", file, dxpl_id, closing);
+
+    /* Check args */
+    if(!file || !file->cls)
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file pointer")
+    if(H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else
+        if(TRUE != H5P_isa_class(dxpl_id,H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+
+    /* Do the real work */
+    if(H5FD_truncate(file, dxpl_id, closing) < 0)
+	HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "file flush request failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_truncate
+ *
+ * Purpose:	Private version of H5FDtruncate()
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, January 31, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_truncate(H5FD_t *file, hid_t dxpl_id, unsigned closing)
+{
+    herr_t      ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_truncate, FAIL)
+
+    HDassert(file && file->cls);
+
+    if(file->cls->truncate && (file->cls->truncate)(file, dxpl_id, closing) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "driver truncate request failed")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_truncate() */
 
 
 /*-------------------------------------------------------------------------
@@ -2562,4 +2068,34 @@ H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void **file_handle)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_get_vfd_handle() */
+
+
+/*--------------------------------------------------------------------------
+ * Function:    H5FD_set_base_addr
+ *
+ * Purpose:     Set the base address for the file
+ *
+ * Return:      Non-negative if succeed; negative if fails.
+ *
+ * Programmer:  Quincey Koziol
+ *              Jan. 17, 2008
+ *
+ *--------------------------------------------------------------------------
+ */
+herr_t
+H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5FD_set_base_addr, FAIL)
+
+    HDassert(file);
+    HDassert(H5F_addr_defined(base_addr));
+
+    /* Set the file's base address */
+    file->base_addr = base_addr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_set_base_addr() */
 

@@ -190,7 +190,7 @@ static herr_t H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr
 			     size_t size, void *buf);
 static herr_t H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      size_t size, const void *buf);
-static herr_t H5FD_log_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_log_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 
 #ifdef OLD_WAY
 /*
@@ -233,14 +233,11 @@ static const H5FD_class_t H5FD_log_g = {
     H5FD_log_get_handle,                        /*get_handle            */
     H5FD_log_read,				/*read			*/
     H5FD_log_write,				/*write			*/
-    H5FD_log_flush,				/*flush			*/
+    NULL,					/*flush			*/
+    H5FD_log_truncate,				/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
-#ifdef OLD_WAY
-    H5FD_FLMAP_NOLIST 				/*fl_map		*/
-#else /* OLD_WAY */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
-#endif /* OLD_WAY */
 };
 
 
@@ -1306,30 +1303,27 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_log_flush
+ * Function:	H5FD_log_truncate
  *
  * Purpose:	Makes sure that the true file size is the same (or larger)
  *		than the end-of-address.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
 static herr_t
-H5FD_log_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
+H5FD_log_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 {
     H5FD_log_t	*file = (H5FD_log_t*)_file;
     herr_t      ret_value=SUCCEED;       /* Return value */
 
-    FUNC_ENTER_NOAPI(H5FD_log_flush, FAIL)
+    FUNC_ENTER_NOAPI(H5FD_log_truncate, FAIL)
 
     if(file->eoa>file->eof) {
         if(-1 == file_seek(file->fd, (file_offset_t)(file->eoa - 1), SEEK_SET))
@@ -1343,4 +1337,5 @@ H5FD_log_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_log_truncate() */
+

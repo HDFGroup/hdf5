@@ -152,6 +152,7 @@ static herr_t H5FD_multi_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, had
 static herr_t H5FD_multi_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 			       size_t size, const void *_buf);
 static herr_t H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 
 /* The class struct */
 static const H5FD_class_t H5FD_multi_g = {
@@ -181,6 +182,7 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_read,				/*read			*/
     H5FD_multi_write,				/*write			*/
     H5FD_multi_flush,				/*flush			*/
+    H5FD_multi_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
     H5FD_FLMAP_DEFAULT 				/*fl_map		*/
@@ -1461,7 +1463,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
     const H5FD_multi_t	*file = (const H5FD_multi_t*)_file;
     haddr_t eoa = 0;
     haddr_t memb_eoa = 0;
-    static const char *func="H5FD_multi_eof";  /* Function Name for error reporting */
+    static const char *func="H5FD_multi_eoa";  /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1470,7 +1472,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
      * taken out because it makes little sense for MULTI files.
      * However, the library sometimes queries it through H5F_get_eoa.
      * Here the code finds the biggest EOA for individual file if
-     * the query is from H5F_get_eoa (TYPE is H5FD_MEM_DEFAULT).
+     * the query is for TYPE == H5FD_MEM_DEFAULT.
      */
     if(H5FD_MEM_DEFAULT == type) {
         UNIQUE_MEMBERS(file->fa.memb_map, mt) {
@@ -1507,6 +1509,7 @@ H5FD_multi_get_eoa(const H5FD_t *_file, H5FD_mem_t type)
 
 	    if (HADDR_UNDEF==eoa)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eoa", HADDR_UNDEF)
+	    if (eoa>0) eoa += file->fa.memb_addr[mmt];
 	} else if (file->fa.relax) {
 	    /*
 	     * The member is not open yet (maybe it doesn't exist). Make the
@@ -1551,14 +1554,22 @@ static herr_t
 H5FD_multi_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t eoa)
 {
     H5FD_multi_t	*file = (H5FD_multi_t*)_file;
+    H5FD_mem_t		mmt;
     herr_t		status;
     static const char *func="H5FD_multi_set_eoa";  /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
+    mmt = file->fa.memb_map[type];
+    if(H5FD_MEM_DEFAULT == mmt)
+        mmt = type;
+
+    assert(eoa >= file->fa.memb_addr[mmt]);
+    assert(eoa < file->memb_next[mmt]);
+
     H5E_BEGIN_TRY {
-	status = H5FDset_eoa(file->memb[type], type, eoa);
+	status = H5FDset_eoa(file->memb[mmt], mmt, (eoa - file->fa.memb_addr[mmt]));
     } H5E_END_TRY;
     if (status<0)
         H5Epush_ret(func, H5E_ERR_CLS, H5E_FILE, H5E_BADVALUE, "member H5FDset_eoa failed", -1)
@@ -1596,7 +1607,7 @@ H5FD_multi_get_eof(const H5FD_t *_file)
     const H5FD_multi_t	*file = (const H5FD_multi_t*)_file;
     haddr_t		eof=0, tmp_eof;
     haddr_t		eoa=0, tmp_eoa;
-    static const char *func="H5FD_multi_eof";  /* Function Name for error reporting */
+    static const char *func="H5FD_multi_get_eof";  /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -1619,6 +1630,7 @@ H5FD_multi_get_eof(const H5FD_t *_file)
 
 	    if (HADDR_UNDEF==tmp_eoa)
                 H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file has unknown eoa", HADDR_UNDEF)
+	    if (tmp_eoa>0) tmp_eoa += file->fa.memb_addr[mt];
 	} else if (file->fa.relax) {
 	    /*
 	     * The member is not open yet (maybe it doesn't exist). Make the
@@ -1701,7 +1713,7 @@ H5FD_multi_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size)
     mmt = file->fa.memb_map[type];
     if (H5FD_MEM_DEFAULT==mmt) mmt = type;
 
-    if (HADDR_UNDEF==(addr=H5FDalloc(file->memb[mmt], type, dxpl_id, size)))
+    if (HADDR_UNDEF==(addr=H5FDalloc(file->memb[mmt], mmt, dxpl_id, size)))
         H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "member file can't alloc", HADDR_UNDEF)
     addr += file->fa.memb_addr[mmt];
 
@@ -1753,7 +1765,7 @@ H5FD_multi_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsi
 
     assert(addr>=file->fa.memb_addr[mmt]);
     assert(addr+size<=file->memb_next[mmt]);
-    return H5FDfree(file->memb[mmt], type, dxpl_id, addr-file->fa.memb_addr[mmt], size);
+    return H5FDfree(file->memb[mmt], mmt, dxpl_id, addr-file->fa.memb_addr[mmt], size);
 }
 
 
@@ -1940,6 +1952,46 @@ H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 
     return 0;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_multi_truncate
+ *
+ * Purpose:	Truncates all multi members.
+ *
+ * Return:	Success:	0
+ *		Failure:	-1, as many files truncated as possible.
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, January 31, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
+{
+    H5FD_multi_t	*file = (H5FD_multi_t*)_file;
+    H5FD_mem_t		mt;
+    int			nerrors=0;
+    static const char *func="H5FD_multi_truncate";  /* Function Name for error reporting */
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    /* Truncate each file */
+    for(mt = H5FD_MEM_SUPER; mt < H5FD_MEM_NTYPES; mt = (H5FD_mem_t)(mt + 1)) {
+	if(file->memb[mt]) {
+	    H5E_BEGIN_TRY {
+		if(H5FDtruncate(file->memb[mt], dxpl_id, closing) < 0)
+                    nerrors++;
+	    } H5E_END_TRY;
+	}
+    }
+    if(nerrors)
+        H5Epush_ret(func, H5E_ERR_CLS, H5E_INTERNAL, H5E_BADVALUE, "error truncating member files", -1)
+
+    return 0;
+} /* end H5FD_multi_truncate() */
 
 
 /*-------------------------------------------------------------------------

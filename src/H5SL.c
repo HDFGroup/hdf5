@@ -1290,6 +1290,187 @@ done:
 
 /*--------------------------------------------------------------------------
  NAME
+    H5SL_below
+ PURPOSE
+    Search for _node_ in a skip list whose object is less than or equal to 'key'
+ USAGE
+    H5SL_node_t *H5SL_below(slist, key)
+        H5SL_t *slist;          IN/OUT: Pointer to skip list
+        void *key;              IN: Key for item to search for
+
+ RETURNS
+    Returns pointer to _node_ who key is less than or equal to 'key' on success,
+        NULL on failure
+ DESCRIPTION
+    Search for a node with an object in a skip list, according to it's key,
+    returning the node itself (for an exact match), or the node with the next
+    highest key that is less than 'key'
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+H5SL_node_t *
+H5SL_below(H5SL_t *slist, const void *key)
+{
+    H5SL_node_t *x;                             /* Current node to examine */
+    uint32_t hashval = 0;                       /* Hash value for key */
+    H5SL_node_t *ret_value;                     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_below)
+
+    /* Check args */
+    HDassert(slist);
+    HDassert(key);
+
+    /* Check internal consistency */
+    /* (Pre-condition) */
+
+    /* Insert item into skip list */
+
+    /* Work through the forward pointers for a node, finding the node at each
+     * level that is before the location to insert
+     */
+    x = slist->header;
+    switch(slist->type) {
+        case H5SL_TYPE_INT:
+            H5SL_FIND(SCALAR, slist, x, -, const int, key, -)
+            break;
+
+        case H5SL_TYPE_HADDR:
+            H5SL_FIND(SCALAR, slist, x, -, const haddr_t, key, -)
+            break;
+
+        case H5SL_TYPE_STR:
+            H5SL_FIND(STRING, slist, x, -, char *, key, hashval)
+            break;
+
+        case H5SL_TYPE_HSIZE:
+            H5SL_FIND(SCALAR, slist, x, -, const hsize_t, key, -)
+            break;
+
+        case H5SL_TYPE_UNSIGNED:
+            H5SL_FIND(SCALAR, slist, x, -, const unsigned, key, -)
+            break;
+
+        case H5SL_TYPE_SIZE:
+            H5SL_FIND(SCALAR, slist, x, -, const size_t, key, -)
+            break;
+
+        case H5SL_TYPE_OBJ:
+            H5SL_FIND(OBJ, slist, x, -, const H5_obj_t, key, -)
+            break;
+    } /* end switch */
+
+    /* An exact match for 'key' must not have been found in list, if we get here */
+    /* Check for a node with a key that is less than the given 'key' */
+    if(NULL == x) {
+        /* Check for walking off the list */
+        if(slist->last != slist->header)
+            ret_value = slist->last;
+        else
+            ret_value = NULL;
+    } /* end if */
+    else {
+        if(x->backward != slist->header)
+            ret_value = x->backward;
+        else
+            ret_value = NULL;
+    } /* end else */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5SL_below() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5SL_above
+ PURPOSE
+    Search for _node_ in a skip list whose object is greater than or equal to 'key'
+ USAGE
+    H5SL_node_t *H5SL_above(slist, key)
+        H5SL_t *slist;          IN/OUT: Pointer to skip list
+        void *key;              IN: Key for item to search for
+
+ RETURNS
+    Returns pointer to _node_ with object that has a key is greater than or
+        equal to 'key' on success, NULL on failure
+ DESCRIPTION
+    Search for a node with an object in a skip list, according to it's key,
+    returning the node itself (for an exact match), or the node with the next
+    lowest key that is greater than 'key'
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+H5SL_node_t *
+H5SL_above(H5SL_t *slist, const void *key)
+{
+    H5SL_node_t *x;                             /* Current node to examine */
+    uint32_t hashval = 0;                       /* Hash value for key */
+    H5SL_node_t *ret_value;                     /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5SL_above)
+
+    /* Check args */
+    HDassert(slist);
+    HDassert(key);
+
+    /* Check internal consistency */
+    /* (Pre-condition) */
+
+    /* Insert item into skip list */
+
+    /* Work through the forward pointers for a node, finding the node at each
+     * level that is before the location to insert
+     */
+    x = slist->header;
+    switch(slist->type) {
+        case H5SL_TYPE_INT:
+            H5SL_FIND(SCALAR, slist, x, -, const int, key, -)
+            break;
+
+        case H5SL_TYPE_HADDR:
+            H5SL_FIND(SCALAR, slist, x, -, const haddr_t, key, -)
+            break;
+
+        case H5SL_TYPE_STR:
+            H5SL_FIND(STRING, slist, x, -, char *, key, hashval)
+            break;
+
+        case H5SL_TYPE_HSIZE:
+            H5SL_FIND(SCALAR, slist, x, -, const hsize_t, key, -)
+            break;
+
+        case H5SL_TYPE_UNSIGNED:
+            H5SL_FIND(SCALAR, slist, x, -, const unsigned, key, -)
+            break;
+
+        case H5SL_TYPE_SIZE:
+            H5SL_FIND(SCALAR, slist, x, -, const size_t, key, -)
+            break;
+
+        case H5SL_TYPE_OBJ:
+            H5SL_FIND(OBJ, slist, x, -, const H5_obj_t, key, -)
+            break;
+    } /* end switch */
+
+    /* An exact match for 'key' must not have been found in list, if we get here */
+    /* ('x' must be the next node with a key greater than the 'key', or NULL) */
+    if(x)
+        ret_value = x;
+    else
+        ret_value = NULL;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5SL_above() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5SL_first
  PURPOSE
     Gets a pointer to the first node in a skip list

@@ -72,6 +72,8 @@ H5_DLL void *H5SL_search(H5SL_t *slist, const void *key);
 H5_DLL void *H5SL_less(H5SL_t *slist, const void *key);
 H5_DLL void *H5SL_greater(H5SL_t *slist, const void *key);
 H5_DLL H5SL_node_t *H5SL_find(H5SL_t *slist, const void *key);
+H5_DLL H5SL_node_t *H5SL_below(H5SL_t *slist, const void *key);
+H5_DLL H5SL_node_t *H5SL_above(H5SL_t *slist, const void *key);
 H5_DLL H5SL_node_t *H5SL_first(H5SL_t *slist);
 H5_DLL H5SL_node_t *H5SL_next(H5SL_node_t *slist_node);
 H5_DLL H5SL_node_t *H5SL_prev(H5SL_node_t *slist_node);

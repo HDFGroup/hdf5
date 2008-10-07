@@ -55,27 +55,25 @@ H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id,
 H5_DLL herr_t H5FD_close(H5FD_t *file);
 H5_DLL int H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2);
 H5_DLL int H5FD_query(const H5FD_t *f, unsigned long *flags/*out*/);
-H5_DLL haddr_t H5FD_alloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
-H5_DLL herr_t H5FD_free(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, hsize_t size);
-H5_DLL haddr_t H5FD_realloc(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t old_addr,
-		     hsize_t old_size, hsize_t new_size);
+H5_DLL haddr_t H5FD_alloc(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, hsize_t size, haddr_t *align_addr, hsize_t *align_size);
+H5_DLL herr_t H5FD_free(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type, haddr_t addr, hsize_t size);
+H5_DLL htri_t H5FD_try_extend(H5FD_t *file, H5FD_mem_t type, haddr_t blk_end,
+    hsize_t extra_requested);
 H5_DLL haddr_t H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type);
 H5_DLL herr_t H5FD_set_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr);
 H5_DLL haddr_t H5FD_get_eof(const H5FD_t *file);
 H5_DLL haddr_t H5FD_get_maxaddr(const H5FD_t *file);
-H5_DLL herr_t H5FD_read(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
-		 void *buf/*out*/);
-H5_DLL herr_t H5FD_write(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
-		  const void *buf);
+H5_DLL herr_t H5FD_get_feature_flags(const H5FD_t *file, unsigned long *feature_flags);
+H5_DLL herr_t H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map);
+H5_DLL herr_t H5FD_read(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,
+    haddr_t addr, size_t size, void *buf/*out*/);
+H5_DLL herr_t H5FD_write(H5FD_t *file, hid_t dxpl_id, H5FD_mem_t type,
+    haddr_t addr, size_t size, const void *buf);
 H5_DLL herr_t H5FD_flush(H5FD_t *file, hid_t dxpl_id, unsigned closing);
+H5_DLL herr_t H5FD_truncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum);
 H5_DLL herr_t H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void** file_handle);
-H5_DLL hssize_t H5FD_get_freespace(const H5FD_t *file);
-H5_DLL htri_t H5FD_can_extend(const H5FD_t *file, H5FD_mem_t type, haddr_t addr,
-    hsize_t size, hsize_t extra_requested);
-H5_DLL herr_t H5FD_extend(H5FD_t *file, H5FD_mem_t type, haddr_t addr,
-    hsize_t size, hsize_t extra_requested);
-H5_DLL herr_t H5FD_aggr_reset(H5FD_t *file, H5FD_blk_aggr_t *aggr, hid_t dxpl_id);
+H5_DLL herr_t H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr);
 
 #endif /* !_H5FDprivate_H */
 

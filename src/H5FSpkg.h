@@ -28,8 +28,14 @@
 #ifndef _H5FSpkg_H
 #define _H5FSpkg_H
 
-/* Uncomment this macro to enable extra sanity checking */
+/* Uncomment this macro to enable debugging output for free space manager */
 /* #define H5FS_DEBUG */
+
+/* Uncomment this macro to enable debugging output for free space sections */
+/* #define H5FS_SINFO_DEBUG */
+
+/* Uncomment this macro to enable extra sanity checking */
+/* #define H5FS_DEBUG_ASSERT */
 
 /* Get package's private header */
 #include "H5FSprivate.h"	/* File free space                      */
@@ -110,7 +116,7 @@ typedef struct H5FS_node_t {
     H5SL_t *sect_list;          /* Skip list to hold pointers to actual free list section node */
 } H5FS_node_t;
 
-/* Information about sections managed */
+/* Free space section info */
 typedef struct H5FS_sinfo_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
     H5AC_info_t cache_info;
@@ -119,6 +125,7 @@ typedef struct H5FS_sinfo_t {
     H5FS_bin_t *bins;           /* Array of lists of lists of free sections   */
 
 /* Computed/cached values */
+    hbool_t dirty;              /* Whether this info in memory is out of sync w/info in file */
     unsigned nbins;             /* Number of bins                             */
     size_t serial_size;         /* Total size of all serializable sections    */
     size_t tot_size_count;      /* Total number of differently sized sections */
@@ -133,7 +140,7 @@ typedef struct H5FS_sinfo_t {
     H5SL_t *merge_list;         /* Skip list to hold sections for detecting merges */
 } H5FS_sinfo_t;
 
-/* Main free space info */
+/* Free space header info */
 struct H5FS_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
     H5AC_info_t cache_info;
@@ -159,8 +166,17 @@ struct H5FS_t {
     hsize_t alloc_sect_size;    /* Allocated size of the section info in the file */
 
 /* Computed/cached values */
+    unsigned rc;                /* Count of outstanding references to struct  */
     haddr_t addr;               /* Address of free space header on disk       */
     H5FS_sinfo_t *sinfo;        /* Section information                        */
+    unsigned sinfo_lock_count;  /* # of times the section info has been locked */
+    hbool_t sinfo_protected;    /* Whether the section info was protected when locked */
+    hbool_t sinfo_modified;     /* Whether the section info has been modified while locked */
+    H5AC_protect_t sinfo_accmode; /* Access mode for protecting the section info */
+    size_t max_cls_serial_size; /* Max. additional size of serialized form of section */
+    hsize_t    threshold;      	/* Threshold for alignment              */
+    hsize_t    alignment;      	/* Alignment                            */
+
 
 /* Memory data structures (not stored directly) */
     H5FS_section_class_t *sect_cls; /* Array of section classes for this free list */
@@ -197,6 +213,9 @@ H5FL_EXTERN(H5FS_t);
 /* Free space manager header routines */
 H5_DLL H5FS_t *H5FS_new(size_t nclasses, const H5FS_section_class_t *classes[],
     void *cls_init_udata);
+H5_DLL herr_t H5FS_incr(H5F_t *f, H5FS_t *fspace);
+H5_DLL herr_t H5FS_decr(H5F_t *f, H5FS_t *fspace);
+H5_DLL herr_t H5FS_dirty(H5F_t *f, H5FS_t *fspace);
 
 /* Free space section routines */
 H5_DLL H5FS_sinfo_t *H5FS_sinfo_new(H5F_t *f, H5FS_t *fspace);
@@ -210,6 +229,12 @@ H5_DLL herr_t H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo);
 H5_DLL herr_t H5FS_assert(const H5FS_t *fspace);
 H5_DLL herr_t H5FS_sect_assert(const H5FS_t *fspace);
 #endif /* H5FS_DEBUG */
+
+/* Testing routines */
+#ifdef H5FS_TESTING
+H5_DLL herr_t H5FS_get_cparam_test(const H5FS_t *fh, H5FS_create_t *cparam);
+H5_DLL int H5FS_cmp_cparam_test(const H5FS_create_t *cparam1, const H5FS_create_t *cparam2);
+#endif /* H5FS_TESTING */
 
 #endif /* _H5FSpkg_H */
 

@@ -363,13 +363,9 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, dblk_addr, dblk_nelmts, H5AC_WRITE)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long_long)dblk_addr)
 
-    /* Release data block's disk space */
-    if(H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, dblk_addr, (hsize_t)dblock->size) < 0)
-        H5E_THROW(H5E_CANTFREE, "unable to free extensible array data block")
-
 CATCH
     /* Finished deleting data block in metadata cache */
-    if(dblock && H5EA__dblock_unprotect(dblock, dxpl_id, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG) < 0)
+    if(dblock && H5EA__dblock_unprotect(dblock, dxpl_id, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array data block")
 
 END_FUNC(PKG)   /* end H5EA__dblock_delete() */

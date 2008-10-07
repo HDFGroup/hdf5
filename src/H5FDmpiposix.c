@@ -190,7 +190,7 @@ static herr_t H5FD_mpiposix_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, 
         size_t size, void *buf);
 static herr_t H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
         size_t size, const void *buf);
-static herr_t H5FD_mpiposix_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_mpiposix_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static int H5FD_mpiposix_mpi_rank(const H5FD_t *_file);
 static int H5FD_mpiposix_mpi_size(const H5FD_t *_file);
 static MPI_Comm H5FD_mpiposix_communicator(const H5FD_t *_file);
@@ -229,7 +229,8 @@ static const H5FD_class_mpi_t H5FD_mpiposix_g = {
     H5FD_mpiposix_get_handle,                   /*get_handle            */
     H5FD_mpiposix_read,				/*read			*/
     H5FD_mpiposix_write,			/*write			*/
-    H5FD_mpiposix_flush,			/*flush			*/
+    NULL,					/*flush			*/
+    H5FD_mpiposix_truncate,			/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
@@ -1365,9 +1366,10 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_mpiposix_flush
+ * Function:    H5FD_mpiposix_truncate
  *
- * Purpose:     Makes sure that all data is on disk.  This is collective.
+ * Purpose:	Makes sure that the true file size is the same (or larger)
+ *		than the end-of-address.
  *
  * Return:      Success:	Non-negative
  * 		Failure:	Negative
@@ -1375,12 +1377,10 @@ done:
  * Programmer:  Quincey Koziol
  *              Thursday, July 11, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpiposix_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
+H5FD_mpiposix_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
 {
     H5FD_mpiposix_t	*file = (H5FD_mpiposix_t*)_file;
 #ifdef _WIN32
@@ -1388,15 +1388,15 @@ H5FD_mpiposix_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing
     LARGE_INTEGER li;   /* 64-bit integer for SetFilePointer() call */
 #endif /* _WIN32 */
     int			mpi_code;	/* MPI return code */
-    herr_t              ret_value=SUCCEED;
+    herr_t              ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5FD_mpiposix_flush, FAIL)
+    FUNC_ENTER_NOAPI(H5FD_mpiposix_truncate, FAIL)
 
-    assert(file);
-    assert(H5FD_MPIPOSIX==file->pub.driver_id);
+    HDassert(file);
+    HDassert(H5FD_MPIPOSIX == file->pub.driver_id);
 
     /* Extend the file to make sure it's large enough */
-    if(file->eoa>file->last_eoa) {
+    if(file->eoa > file->last_eoa) {
         /* Use the round-robin process to truncate (extend) the file */
         if(file->mpi_rank == H5_PAR_META_WRITE) {
 #ifdef _WIN32
@@ -1406,8 +1406,8 @@ H5FD_mpiposix_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing
             /* Translate 64-bit integers into form Windows wants */
             /* [This algorithm is from the Windows documentation for SetFilePointer()] */
             li.QuadPart = file->eoa;
-            SetFilePointer((HANDLE)filehandle,li.LowPart,&li.HighPart,FILE_BEGIN);
-            if(SetEndOfFile((HANDLE)filehandle)==0)
+            SetFilePointer((HANDLE)filehandle, li.LowPart, &li.HighPart, FILE_BEGIN);
+            if(SetEndOfFile((HANDLE)filehandle) == 0)
                 HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #else /* _WIN32 */
             if(-1==file_truncate(file->fd, (file_offset_t)file->eoa))
@@ -1421,11 +1421,11 @@ H5FD_mpiposix_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing
          * it the shorter length, potentially truncating the file and dropping
          * the new data written)
          */
-        if (MPI_SUCCESS!= (mpi_code=MPI_Barrier(file->comm)))
+        if(MPI_SUCCESS != (mpi_code = MPI_Barrier(file->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
         /* Update the 'last' eoa and eof values */
-        file->last_eoa=file->eoa;
+        file->last_eoa = file->eoa;
         file->eof = file->eoa;
 
         /* Reset last file I/O information */
@@ -1435,7 +1435,7 @@ H5FD_mpiposix_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_mpiposix_flush() */
+} /* end H5FD_mpiposix_truncate() */
 
 
 /*-------------------------------------------------------------------------

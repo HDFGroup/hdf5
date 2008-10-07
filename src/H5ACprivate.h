@@ -253,6 +253,8 @@ extern hid_t H5AC_ind_dxpl_id;
 #define H5AC__FLUSH_CLEAR_ONLY_FLAG	  H5C__FLUSH_CLEAR_ONLY_FLAG
 #define H5AC__FLUSH_MARKED_ENTRIES_FLAG   H5C__FLUSH_MARKED_ENTRIES_FLAG
 #define H5AC__FLUSH_IGNORE_PROTECTED_FLAG H5C__FLUSH_IGNORE_PROTECTED_FLAG
+#define H5AC__FREE_FILE_SPACE_FLAG	  H5C__FREE_FILE_SPACE_FLAG
+#define H5AC__TAKE_OWNERSHIP_FLAG         H5C__TAKE_OWNERSHIP_FLAG
 
 
 /* #defines of flags used to report entry status in the
@@ -298,7 +300,8 @@ H5_DLL herr_t H5AC_rename(H5F_t *f, const H5AC_class_t *type,
 H5_DLL herr_t H5AC_dest(H5F_t *f, hid_t dxpl_id);
 
 H5_DLL herr_t H5AC_expunge_entry(H5F_t *f, hid_t dxpl_id,
-                                 const H5AC_class_t *type, haddr_t addr);
+                                 const H5AC_class_t *type, haddr_t addr,
+                                 unsigned flags);
 
 H5_DLL herr_t H5AC_set_write_done_callback(H5C_t * cache_ptr,
                                            void (* write_done)(void));

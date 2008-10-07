@@ -120,3 +120,4 @@ H5_DLL MPI_Comm H5FD_mpi_get_comm(const H5FD_t *_file);
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* H5FDmpi_H */
+

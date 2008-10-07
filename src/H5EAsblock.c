@@ -340,13 +340,9 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
         } /* end for */
     } /* end if */
 
-    /* Release super block's disk space */
-    if(H5MF_xfree(hdr->f, H5FD_MEM_EARRAY_SBLOCK, dxpl_id, sblk_addr, (hsize_t)sblock->size) < 0)
-        H5E_THROW(H5E_CANTFREE, "unable to free extensible array super block")
-
 CATCH
     /* Finished deleting super block in metadata cache */
-    if(sblock && H5EA__sblock_unprotect(sblock, dxpl_id, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG) < 0)
+    if(sblock && H5EA__sblock_unprotect(sblock, dxpl_id, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array super block")
 
 END_FUNC(PKG)   /* end H5EA__sblock_delete() */

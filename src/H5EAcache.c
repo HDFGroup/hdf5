@@ -458,10 +458,28 @@ END_FUNC(STATIC)   /* end H5EA__cache_hdr_size() */
 /* ARGSUSED */
 BEGIN_FUNC(STATIC, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__cache_hdr_dest(H5F_t UNUSED *f, H5EA_hdr_t *hdr))
+H5EA__cache_hdr_dest(H5F_t *f, H5EA_hdr_t *hdr))
 
     /* Check arguments */
+    HDassert(f);
     HDassert(hdr);
+
+    /* Verify that header is clean */
+    HDassert(hdr->cache_info.is_dirty == FALSE);
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!hdr->cache_info.free_file_space_on_destroy || H5F_addr_defined(hdr->cache_info.addr));
+
+    /* Check for freeing file space for extensible array header */
+    if(hdr->cache_info.free_file_space_on_destroy) {
+        /* Sanity check address */
+        HDassert(H5F_addr_eq(hdr->addr, hdr->cache_info.addr));
+
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_EARRAY_HDR, H5AC_dxpl_id, hdr->cache_info.addr, (hsize_t)hdr->size) < 0)
+            H5E_THROW(H5E_CANTFREE, "unable to free extensible array header")
+    } /* end if */
 
     /* Release the extensible array header */
     if(H5EA__hdr_dest(hdr) < 0)
@@ -803,7 +821,25 @@ herr_t, SUCCEED, FAIL,
 H5EA__cache_iblock_dest(H5F_t *f, H5EA_iblock_t *iblock))
 
     /* Sanity check */
+    HDassert(f);
     HDassert(iblock);
+
+    /* Verify that index block is clean */
+    HDassert(iblock->cache_info.is_dirty == FALSE);
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!iblock->cache_info.free_file_space_on_destroy || H5F_addr_defined(iblock->cache_info.addr));
+
+    /* Check for freeing file space for extensible array index block */
+    if(iblock->cache_info.free_file_space_on_destroy) {
+        /* Sanity check address */
+        HDassert(H5F_addr_eq(iblock->addr, iblock->cache_info.addr));
+
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_EARRAY_IBLOCK, H5AC_dxpl_id, iblock->cache_info.addr, (hsize_t)iblock->size) < 0)
+            H5E_THROW(H5E_CANTFREE, "unable to free extensible array index block")
+    } /* end if */
 
     /* Release the index block */
     if(H5EA__iblock_dest(f, iblock) < 0)
@@ -1112,7 +1148,25 @@ herr_t, SUCCEED, FAIL,
 H5EA__cache_sblock_dest(H5F_t *f, H5EA_sblock_t *sblock))
 
     /* Sanity check */
+    HDassert(f);
     HDassert(sblock);
+
+    /* Verify that super block is clean */
+    HDassert(sblock->cache_info.is_dirty == FALSE);
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!sblock->cache_info.free_file_space_on_destroy || H5F_addr_defined(sblock->cache_info.addr));
+
+    /* Check for freeing file space for extensible array super block */
+    if(sblock->cache_info.free_file_space_on_destroy) {
+        /* Sanity check address */
+        HDassert(H5F_addr_eq(sblock->addr, sblock->cache_info.addr));
+
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_EARRAY_SBLOCK, H5AC_dxpl_id, sblock->cache_info.addr, (hsize_t)sblock->size) < 0)
+            H5E_THROW(H5E_CANTFREE, "unable to free extensible array super block")
+    } /* end if */
 
     /* Release the super block */
     if(H5EA__sblock_dest(f, sblock) < 0)
@@ -1314,7 +1368,7 @@ H5EA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         /* Metadata checksum */
         UINT32ENCODE(p, metadata_chksum);
 
-	/* Write the index block */
+	/* Write the data block */
         HDassert((size_t)(p - buf) == size);
 	if(H5F_block_write(f, H5FD_MEM_EARRAY_DBLOCK, addr, size, dxpl_id, buf) < 0)
             H5E_THROW(H5E_WRITEERROR, "unable to save extensible array data block to disk")
@@ -1418,7 +1472,25 @@ herr_t, SUCCEED, FAIL,
 H5EA__cache_dblock_dest(H5F_t *f, H5EA_dblock_t *dblock))
 
     /* Sanity check */
+    HDassert(f);
     HDassert(dblock);
+
+    /* Verify that data block is clean */
+    HDassert(dblock->cache_info.is_dirty == FALSE);
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!dblock->cache_info.free_file_space_on_destroy || H5F_addr_defined(dblock->cache_info.addr));
+
+    /* Check for freeing file space for extensible array data block */
+    if(dblock->cache_info.free_file_space_on_destroy) {
+        /* Sanity check address */
+        HDassert(H5F_addr_eq(dblock->addr, dblock->cache_info.addr));
+
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_EARRAY_DBLOCK, H5AC_dxpl_id, dblock->cache_info.addr, (hsize_t)dblock->size) < 0)
+            H5E_THROW(H5E_CANTFREE, "unable to free extensible array data block")
+    } /* end if */
 
     /* Release the data block */
     if(H5EA__dblock_dest(f, dblock) < 0)
