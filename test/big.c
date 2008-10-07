@@ -80,8 +80,8 @@ randll(hsize_t limit, int current_index)
     /* does not overlap with any previous writes */
     while(overlap != 0 && tries < MAX_TRIES)
     {
-        acc = rand ();
-        acc *= rand ();
+        acc = HDrandom();
+        acc *= HDrandom();
         acc = acc % limit;
         overlap = 0;
 
@@ -294,11 +294,6 @@ writer (char* filename, hid_t fapl, int wrt_n)
  *  or it will take some time to write a file.
  *  We should create a dataset allocating space late and never writing fill values.
  *  EIP 4/8/03
-
-    if((d1 = H5Dcreate2(file, "d1", H5T_NATIVE_INT, space1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0 ||
-	(d2 = H5Dcreate2(file, "d2", H5T_NATIVE_INT, space2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-	goto error;
-    }
 */
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE);
@@ -381,14 +376,14 @@ reader(char *filename, hid_t fapl)
     script = fopen(DNAME, "r");
 
     /* Open HDF5 file */
-    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) goto error;
+    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
 
     /* Open the dataset */
-    if((d2 = H5Dopen2(file, "d2", H5P_DEFAULT)) < 0) goto error;
-    if((fspace = H5Dget_space(d2)) < 0) goto error;
+    if((d2 = H5Dopen2(file, "d2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((fspace = H5Dget_space(d2)) < 0) FAIL_STACK_ERROR
 
     /* Describe `buf' */
-    if((mspace = H5Screate_simple(1, hs_size, hs_size)) < 0) goto error;
+    if((mspace = H5Screate_simple(1, hs_size, hs_size)) < 0) FAIL_STACK_ERROR
 
     /* Read each region */
     while(fgets(ln, (int)sizeof(ln), script)) {
@@ -400,9 +395,9 @@ reader(char *filename, hid_t fapl)
 	fflush(stdout);
 
 	if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL,
-				 hs_size, NULL) < 0) goto error;
+				 hs_size, NULL) < 0) FAIL_STACK_ERROR
 	if(H5Dread(d2, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf) < 0)
-	    goto error;
+	    FAIL_STACK_ERROR
 
 	/* Check */
 	for(j = zero = wrong = 0; j < WRT_SIZE; j++) {
@@ -423,10 +418,10 @@ reader(char *filename, hid_t fapl)
 	}
     }
 
-    if(H5Dclose(d2) < 0) goto error;
-    if(H5Sclose(mspace) < 0) goto error;
-    if(H5Sclose(fspace) < 0) goto error;
-    if(H5Fclose(file) < 0) goto error;
+    if(H5Dclose(d2) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(mspace) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(fspace) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
     free(buf);
     fclose(script);
 
@@ -511,6 +506,7 @@ main (int ac, char **av)
     hsize_t	family_size;
     hsize_t	family_size_def;	/* default family file size */
     double	family_size_def_dbl;	/* default family file size */
+    unsigned long seed = 0;             /* Random # seed */
     int		cflag=1;		/* check file system before test */
     char	filename[1024];
 
@@ -546,6 +542,14 @@ main (int ac, char **av)
 	    return 1;
 	}
     }
+
+    /* Choose random # seed */
+    seed = (unsigned long)HDtime(NULL);
+#ifdef QAK
+/* seed = (unsigned long)1155438845; */
+HDfprintf(stderr, "Random # seed was: %lu\n", seed);
+#endif /* QAK */
+    HDsrandom(seed);
 
     /* Reset library */
     h5_reset();
@@ -657,3 +661,4 @@ error:
     puts("*** TEST FAILED ***");
     return 1;
 }
+

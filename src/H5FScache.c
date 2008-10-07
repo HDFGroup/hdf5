@@ -36,6 +36,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FSpkg.h"		/* File free space			*/
+#include "H5MFprivate.h"	/* File memory management		*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
@@ -299,12 +300,68 @@ H5FS_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5F
     FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_hdr_flush)
 #ifdef QAK
 HDfprintf(stderr, "%s: Flushing free space header, addr = %a, destroy = %u\n", FUNC, addr, (unsigned)destroy);
+HDfprintf(stderr, "%s: fspace->sect_addr = %a, fspace->sinfo = %p\n", FUNC, fspace->sect_addr, fspace->sinfo);
+HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n", FUNC, fspace->alloc_sect_size, fspace->sect_size);
 #endif /* QAK */
 
     /* check arguments */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
     HDassert(fspace);
+    HDassert(H5F_addr_defined(fspace->addr));
+
+    /* Check if the header "owns" the section info */
+    if(fspace->sinfo) {
+        /* Sanity check - should not be trying to destroy header if it still
+         *      "owns" section info
+         */
+        HDassert(!destroy);
+
+        /* Check if the section info is dirty */
+        if(fspace->sinfo->dirty) {
+            if(fspace->serial_sect_count > 0) {
+                /* Check if we need to allocate space for  section info */
+                if(!H5F_addr_defined(fspace->sect_addr)) {
+                    /* Sanity check */
+                    HDassert(fspace->sect_size > 0);
+
+                    /* Allocate space for the section info in file */
+                    if(HADDR_UNDEF == (fspace->sect_addr = H5MF_alloc(f, H5FD_MEM_FSPACE_SINFO, dxpl_id, fspace->sect_size)))
+                        HGOTO_ERROR(H5E_FSPACE, H5E_NOSPACE, FAIL, "file allocation failed for free space sections")
+                    fspace->alloc_sect_size = (size_t)fspace->sect_size;
+
+                    /* Mark header dirty */
+                    /* (don't use cache API, since we're in a callback) */
+                    fspace->cache_info.is_dirty = TRUE;
+                } /* end if */
+
+                /* Write section info to file */
+                if(H5FS_cache_sinfo_flush(f, dxpl_id, FALSE, fspace->sect_addr, fspace->sinfo, NULL) < 0)
+                    HGOTO_ERROR(H5E_FSPACE, H5E_CANTFLUSH, FAIL, "unable to save free space section info to disk")
+            } /* end if */
+            else {
+                /* Sanity check that section info doesn't have address */
+                HDassert(!H5F_addr_defined(fspace->sect_addr));
+            } /* end else */
+#ifdef QAK
+HDfprintf(stderr, "%s: Check 2.0\n", FUNC);
+HDfprintf(stderr, "%s: fspace->sect_addr = %a, fspace->sinfo = %p\n", FUNC, fspace->sect_addr, fspace->sinfo);
+HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n", FUNC, fspace->alloc_sect_size, fspace->sect_size);
+#endif /* QAK */
+
+            /* Mark section info clean */
+            fspace->sinfo->dirty = FALSE;
+        } /* end if */
+    } /* end if */
+    else {
+        /* Just sanity checks... */
+        if(fspace->serial_sect_count > 0)
+            /* Sanity check that section info has address */
+            HDassert(H5F_addr_defined(fspace->sect_addr));
+        else
+            /* Sanity check that section info doesn't have address */
+            HDassert(!H5F_addr_defined(fspace->sect_addr));
+    } /* end else */
 
     if(fspace->cache_info.is_dirty) {
         uint8_t	*hdr;                   /* Pointer to header buffer */
@@ -412,9 +469,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
-H5FS_cache_hdr_dest(H5F_t UNUSED *f, H5FS_t *fspace)
+H5FS_cache_hdr_dest(H5F_t *f, H5FS_t *fspace)
 {
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -426,6 +482,12 @@ H5FS_cache_hdr_dest(H5F_t UNUSED *f, H5FS_t *fspace)
      */
     HDassert(fspace);
 
+    /* We should not still be holding on to the free space section info */
+    HDassert(!fspace->sinfo);
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!fspace->cache_info.free_file_space_on_destroy || H5F_addr_defined(fspace->cache_info.addr));
+
     /* Terminate the section classes for this free space list */
     for(u = 0; u < fspace->nclasses ; u++) {
         /* Call the class termination routine, if there is one */
@@ -433,6 +495,17 @@ H5FS_cache_hdr_dest(H5F_t UNUSED *f, H5FS_t *fspace)
             if((fspace->sect_cls[u].term_cls)(&fspace->sect_cls[u]) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "unable to finalize section class")
     } /* end for */
+
+    /* Check for freeing file space for free space header */
+    if(fspace->cache_info.free_file_space_on_destroy) {
+        /* Sanity check */
+        HDassert(H5F_addr_defined(fspace->addr));
+
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_FSPACE_HDR, H5AC_dxpl_id, fspace->cache_info.addr, (hsize_t)H5FS_HEADER_SIZE(f)) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space header")
+    } /* end if */
 
     /* Release the memory for the free space section classes */
     if(fspace->sect_cls)
@@ -555,11 +628,6 @@ HDfprintf(stderr, "%s: Load free space sections, addr = %a\n", FUNC, addr);
     /* Allocate a new free space section info */
     if(NULL == (sinfo = H5FS_sinfo_new(f, fspace)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    /* Link free space manager to section info */
-    /* (for deserializing sections) */
-    HDassert(fspace->sinfo == NULL);
-    fspace->sinfo = sinfo;
 
     /* Sanity check address */
     if(H5F_addr_ne(addr, fspace->sect_addr))
@@ -872,7 +940,7 @@ HDfprintf(stderr, "%s: Flushing free space header, addr = %a, destroy = %u\n", F
     HDassert(sinfo->fspace);
     HDassert(sinfo->fspace->sect_cls);
 
-    if(sinfo->cache_info.is_dirty) {
+    if(sinfo->cache_info.is_dirty || sinfo->dirty) {
         H5FS_iter_ud_t udata;       /* User data for callbacks */
         uint8_t	*buf = NULL;        /* Temporary raw data buffer */
         uint8_t *p;                 /* Pointer into raw data buffer */
@@ -944,6 +1012,7 @@ HDfprintf(stderr, "%s: sinfo->fspace->alloc_sect_size = %Hu\n", FUNC, sinfo->fsp
         (void)H5FL_BLK_FREE(sect_block, buf);
 
 	sinfo->cache_info.is_dirty = FALSE;
+        sinfo->dirty = FALSE;
     } /* end if */
 
     if(destroy)
@@ -966,6 +1035,10 @@ done:
  * Programmer:	Quincey Koziol
  *              Saturday, March 11, 2006
  *
+ * Modifications:
+ *	Vailin Choi, July 29th, 2008
+ *	  Add HDassert() to make sure "free" method exists before calling
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -978,6 +1051,7 @@ H5FS_sinfo_free_sect_cb(void *_sect, void UNUSED *key, void *op_data)
 
     HDassert(sect);
     HDassert(sinfo);
+    HDassert(sinfo->fspace->sect_cls[sect->type].free);
 
     /* Call the section's class 'free' method on the section */
     (*sinfo->fspace->sect_cls[sect->type].free)(sect);
@@ -1033,7 +1107,6 @@ H5FS_sinfo_free_node_cb(void *item, void UNUSED *key, void *op_data)
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
 H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo)
 {
@@ -1041,6 +1114,9 @@ H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5FS_cache_sinfo_dest)
+#ifdef QAK
+HDfprintf(stderr, "%s: Destroying section info, sinfo->fspace->addr = %a\n", FUNC, sinfo->fspace->addr);
+#endif /* QAK */
 
     /*
      * Check arguments.
@@ -1048,6 +1124,20 @@ H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo)
     HDassert(sinfo);
     HDassert(sinfo->fspace);
     HDassert(sinfo->bins);
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!sinfo->cache_info.free_file_space_on_destroy || H5F_addr_defined(sinfo->cache_info.addr));
+
+    /* Check for freeing file space for free space section info */
+    if(sinfo->cache_info.free_file_space_on_destroy) {
+        /* Sanity check */
+        HDassert(sinfo->fspace->alloc_sect_size > 0);
+
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_FSPACE_SINFO, H5AC_dxpl_id, sinfo->cache_info.addr, (hsize_t)sinfo->fspace->alloc_sect_size) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTFREE, FAIL, "unable to free free space section info")
+    } /* end if */
 
     /* Clear out lists of nodes */
     for(u = 0; u < sinfo->nbins; u++)
@@ -1064,12 +1154,14 @@ H5FS_cache_sinfo_dest(H5F_t *f, H5FS_sinfo_t *sinfo)
         if(H5SL_close(sinfo->merge_list) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTCLOSEOBJ, FAIL, "can't destroy section merging skip list")
 
-    /* Unpin the free space header in the cache */
+    /* Decrement the reference count on free space header */
     /* (make certain this is last action with section info, to allow for header
      *  disappearing immediately)
      */
-    if(H5AC_unpin_entry(f, sinfo->fspace) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPIN, FAIL, "unable to unpin free space header")
+    sinfo->fspace->sinfo = NULL;
+    if(H5FS_decr(f, sinfo->fspace) < 0)
+        HGOTO_ERROR(H5E_FSPACE, H5E_CANTDEC, FAIL, "unable to decrement ref. count on free space header")
+    sinfo->fspace = NULL;
 
     /* Release free space section info */
     (void)H5FL_FREE(H5FS_sinfo_t, sinfo);
@@ -1141,7 +1233,7 @@ H5FS_cache_sinfo_size(const H5F_t UNUSED *f, const H5FS_sinfo_t *sinfo, size_t *
     HDassert(size_ptr);
 
     /* Set size value */
-    H5_ASSIGN_OVERFLOW(/* To: */ *size_ptr, /* From: */ sinfo->fspace->sect_size, /* From: */ hsize_t, /* To: */ size_t);
+    H5_ASSIGN_OVERFLOW(/* To: */ *size_ptr, /* From: */ sinfo->fspace->alloc_sect_size, /* From: */ hsize_t, /* To: */ size_t);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5FS_cache_sinfo_size() */

@@ -139,11 +139,12 @@ static herr_t H5FD_windows_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, h
 static herr_t H5FD_windows_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      size_t size, const void *buf);
 static herr_t H5FD_windows_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_windows_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 
 static const H5FD_class_t H5FD_windows_g = {
-    "windows",				/*name			*/
-    MAXADDR,				/*maxaddr		*/
-    H5F_CLOSE_WEAK,			/* fc_degree	*/
+    "windows",					/*name			*/
+    MAXADDR,					/*maxaddr		*/
+    H5F_CLOSE_WEAK,				/* fc_degree	*/
     NULL,					/*sb_size		*/
     NULL,					/*sb_encode		*/
     NULL,					/*sb_decode		*/
@@ -154,22 +155,23 @@ static const H5FD_class_t H5FD_windows_g = {
     0,						/*dxpl_size		*/
     NULL,					/*dxpl_copy		*/
     NULL,					/*dxpl_free		*/
-    H5FD_windows_open,	    /*open			*/
-    H5FD_windows_close,	    /*close			*/
-    H5FD_windows_cmp,	    /*cmp			*/
-    H5FD_windows_query,	    /*query			*/
+    H5FD_windows_open,				/*open			*/
+    H5FD_windows_close,				/*close			*/
+    H5FD_windows_cmp,				/*cmp			*/
+    H5FD_windows_query,				/*query			*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
-    H5FD_windows_get_eoa,	/*get_eoa		*/
-    H5FD_windows_set_eoa, 	/*set_eoa		*/
-    H5FD_windows_get_eof,	/*get_eof		*/
-    H5FD_windows_get_handle,/*get_handle    */
-    H5FD_windows_read,		/*read			*/
-    H5FD_windows_write,		/*write			*/
-    H5FD_windows_flush,		/*flush			*/
-    NULL,                   /*lock          */
-    NULL,                   /*unlock        */
-    H5FD_FLMAP_SINGLE 		/*fl_map		*/
+    H5FD_windows_get_eoa,			/*get_eoa		*/
+    H5FD_windows_set_eoa,			/*set_eoa		*/
+    H5FD_windows_get_eof,			/*get_eof		*/
+    H5FD_windows_get_handle,			/*get_handle    */
+    H5FD_windows_read,				/*read			*/
+    H5FD_windows_write,				/*write			*/
+    H5FD_windows_flush,				/*flush			*/
+    H5FD_windows_truncate,			/*truncate		*/
+    NULL,					/*lock          */
+    NULL,					/*unlock        */
+    H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
 
 /* Declare a free list to manage the H5FD_windows_t struct */
@@ -941,21 +943,19 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_windows_flush
  *
  * Purpose:	Makes sure that the true file size is the same (or larger)
- *			than the end-of-address.
+ *		than the end-of-address.
  *
  * Return:	Success:	Non-negative
- *
- *			Failure:	Negative
+ *		Failure:	Negative
  *
  * Programmer:	Scott Wegner
- *				Based on code by Robb Matzke
+ *		Based on code by Robb Matzke
  *              Thursday, May 24 2007
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -964,58 +964,96 @@ static herr_t
 H5FD_windows_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned closing)
 {
     H5FD_windows_t	*file = (H5FD_windows_t*)_file;
-    herr_t			ret_value=SUCCEED;       /* Return value */
-#ifndef WINDOWS_USE_STDIO
-	LARGE_INTEGER	li;
-	HANDLE			filehandle;
-#else
-	int				fd;
-#endif /* WINDOWS_USE_STDIO */
+    herr_t		ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_windows_flush, FAIL)
 
-    assert(file);
+    HDassert(file);
 
-	if (file->eoa != file->eof) {
-#ifndef WINDOWS_USE_STDIO
-
-		/* Extend the file to make sure it's large enough */
-		if( (filehandle = (HANDLE)_get_osfhandle(file->fd)) == INVALID_HANDLE_VALUE)
-			HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL, "unable to get file handle for file")
-
-		li.QuadPart = (__int64)file->eoa;
-		(void)SetFilePointer((HANDLE)filehandle,li.LowPart,&li.HighPart,FILE_BEGIN);
-		if(SetEndOfFile(filehandle) == 0)
-			HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
-
-#else /* WINDOWS_USE_STDIO */
-		/* Only try to flush if we have write access */
-		if(!file->write_access)
-			HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush without write access")
-
-		if((fd = _fileno(file->fp)) == -1)
-			HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to get file descriptor for file")
-		if(_chsize_s(fd, file->eoa))
-			HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
-
-		/* Flush */
-		if(!closing)
-			if (fflush(file->fp) == EOF)
-				HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "fflush failed")
+    /* Only try to flush if we have write access */
+    if(file->write_access) {
+        /* Flush */
+        if(!closing) {
+#ifdef WINDOWS_USE_STDIO
+            if(fflush(file->fp) == EOF)
+                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "fflush failed")
 #endif /* WINDOWS_USE_STDIO */
 
-		/* Update the eof value */
-		file->eof = file->eoa;
-
-		/* Reset last file I/O information */
-		file->pos = HADDR_UNDEF;
-		file->op = OP_UNKNOWN;
-
-	}
+            /* Reset last file I/O information */
+            file->pos = HADDR_UNDEF;
+            file->op = OP_UNKNOWN;
+        } /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_windows_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_windows_truncate
+ *
+ * Purpose:	Makes sure that the true file size is the same (or larger)
+ *		than the end-of-address.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Scott Wegner
+ *		Based on code by Robb Matzke
+ *              Thursday, May 24 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5FD_windows_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t closing)
+{
+    H5FD_windows_t	*file = (H5FD_windows_t*)_file;
+#ifndef WINDOWS_USE_STDIO
+    LARGE_INTEGER	li;
+    HANDLE		filehandle;
+#else
+    int			fd;
+#endif /* WINDOWS_USE_STDIO */
+    herr_t		ret_value = SUCCEED;       /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_windows_truncate, FAIL)
+
+    HDassert(file);
+
+    if(file->eoa != file->eof) {
+#ifndef WINDOWS_USE_STDIO
+        /* Extend the file to make sure it's large enough */
+        if((filehandle = (HANDLE)_get_osfhandle(file->fd)) == INVALID_HANDLE_VALUE)
+            HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL, "unable to get file handle for file")
+
+        li.QuadPart = (__int64)file->eoa;
+        (void)SetFilePointer((HANDLE)filehandle, li.LowPart, &li.HighPart, FILE_BEGIN);
+        if(SetEndOfFile(filehandle) == 0)
+            HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+#else /* WINDOWS_USE_STDIO */
+        /* Only try to flush if we have write access */
+        if(!file->write_access)
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush without write access")
+
+        if((fd = _fileno(file->fp)) == -1)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to get file descriptor for file")
+        if(_chsize_s(fd, file->eoa))
+            HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+#endif /* WINDOWS_USE_STDIO */
+
+        /* Update the eof value */
+        file->eof = file->eoa;
+
+        /* Reset last file I/O information */
+        file->pos = HADDR_UNDEF;
+        file->op = OP_UNKNOWN;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_windows_truncate() */
 
 #endif /* H5_HAVE_WINDOWS */
 

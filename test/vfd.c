@@ -212,10 +212,11 @@ test_direct(void)
     if(H5Fget_filesize(file, &file_size) < 0)
         TEST_ERROR;
 
-    /* There is no garantee the size of metadata in file is constant.
-     * Just try to check if it's reasonable.  It's 2KB right now.
+    /* There is no guarantee of the number of metadata allocations, but it's
+     * 4 currently and the size of the file should be between 3 & 4 file buffer
+     * sizes..
      */
-    if(file_size<1*KB || file_size>4*KB)
+    if(file_size < (FBSIZE * 3) || file_size >= (FBSIZE * 4))
         TEST_ERROR;
 
     /* Allocate aligned memory for data set 1. For data set 1, everything is aligned including

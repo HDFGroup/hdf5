@@ -2302,7 +2302,7 @@ expunge_entry(H5C_t * cache_ptr,
 	HDassert( ! ( entry_ptr->is_pinned ) );
 
         result = H5C_expunge_entry(NULL, -1, -1, cache_ptr, &(types[type]),
-                                   entry_ptr->addr);
+                                   entry_ptr->addr, H5AC__NO_FLAGS_SET);
 
         if ( result < 0 ) {
 

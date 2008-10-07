@@ -128,6 +128,7 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD_core_read,				/*read			*/
     H5FD_core_write,				/*write			*/
     H5FD_core_flush,				/*flush			*/
+    NULL,					/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
@@ -898,3 +899,4 @@ H5FD_core_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+

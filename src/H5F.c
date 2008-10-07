@@ -29,6 +29,7 @@
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Gprivate.h"		/* Groups				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
+#include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5SMprivate.h"	/* Shared Object Header Messages	*/
@@ -321,11 +322,11 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set alignment")
     if(H5P_set(new_plist, H5F_ACS_GARBG_COLCT_REF_NAME, &(f->shared->gc_ref)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set garbage collect reference")
-    if(H5P_set(new_plist, H5F_ACS_META_BLOCK_SIZE_NAME, &(f->shared->lf->meta_aggr.alloc_size)) < 0)
+    if(H5P_set(new_plist, H5F_ACS_META_BLOCK_SIZE_NAME, &(f->shared->meta_aggr.alloc_size)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set metadata cache size")
     if(H5P_set(new_plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &(f->shared->sieve_buf_size)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't sieve buffer size")
-    if(H5P_set(new_plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(f->shared->lf->sdata_aggr.alloc_size)) < 0)
+    if(H5P_set(new_plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(f->shared->sdata_aggr.alloc_size)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' cache size")
     if(H5P_set(new_plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
@@ -797,31 +798,31 @@ done:
 htri_t
 H5Fis_hdf5(const char *name)
 {
-    H5FD_t	*file = NULL;
-    htri_t	ret_value;
+    H5FD_t	*file = NULL;           /* Low-level file struct */
+    htri_t	ret_value;              /* Return value */
 
     FUNC_ENTER_API(H5Fis_hdf5, FAIL)
     H5TRACE1("t", "*s", name);
 
     /* Check args and all the boring stuff. */
-    if (!name || !*name)
+    if(!name || !*name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "no file name specified")
 
     /* Open the file at the virtual file layer */
-    if (NULL==(file=H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
+    if(NULL == (file = H5FD_open(name, H5F_ACC_RDONLY, H5P_FILE_ACCESS_DEFAULT, HADDR_UNDEF)))
 	HGOTO_ERROR(H5E_IO, H5E_CANTINIT, FAIL, "unable to open file")
 
     /* The file is an hdf5 file if the hdf5 file signature can be found */
-    ret_value = (HADDR_UNDEF!=H5F_locate_signature(file, H5AC_ind_dxpl_id));
+    ret_value = (HADDR_UNDEF != H5F_locate_signature(file, H5AC_ind_dxpl_id));
 
 done:
     /* Close the file */
-    if (file)
-        if(H5FD_close(file) < 0 && ret_value>=0)
+    if(file)
+        if(H5FD_close(file) < 0 && ret_value >= 0)
             HDONE_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
 
     FUNC_LEAVE_API(ret_value)
-}
+} /* end H5Fis_hdf5() */
 
 
 /*-------------------------------------------------------------------------
@@ -879,17 +880,20 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
     } /* end if */
     else {
         unsigned super_vers = HDF5_SUPERBLOCK_VERSION_DEF;      /* Superblock version for file */
-        H5P_genplist_t *plist;              /* Property list */
+        H5P_genplist_t *plist;          /* Property list */
+        size_t u;                       /* Local index variable */
 
         HDassert(lf != NULL);
         if(NULL == (f->shared = H5FL_CALLOC(H5F_file_t)))
             HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared file structure")
-	f->shared->super_addr = HADDR_UNDEF;
 	f->shared->base_addr = HADDR_UNDEF;
 	f->shared->extension_addr = HADDR_UNDEF;
 	f->shared->sohm_addr = HADDR_UNDEF;
 	f->shared->sohm_vers = HDF5_SHAREDHEADER_VERSION;
+        for(u = 0; u < NELMTS(f->shared->fs_addr); u++)
+            f->shared->fs_addr[u] = HADDR_UNDEF;
 	f->shared->driver_addr = HADDR_UNDEF;
+	f->shared->accum.loc = HADDR_UNDEF;
         f->shared->lf = lf;
 
 	/*
@@ -935,11 +939,23 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get sieve buffer size")
         if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &(f->shared->latest_format)) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'latest format' flag")
+        if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, &(f->shared->meta_aggr.alloc_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get metadata cache size")
+        f->shared->meta_aggr.feature_flag = H5FD_FEAT_AGGREGATE_METADATA;
+        if(H5P_get(plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &(f->shared->sdata_aggr.alloc_size)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get 'small data' cache size")
+        f->shared->sdata_aggr.feature_flag = H5FD_FEAT_AGGREGATE_SMALLDATA;
 
         /* Get the VFD values to cache */
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
         if(!H5F_addr_defined(f->shared->maxaddr))
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad maximum address from VFD")
+        if(H5FD_get_feature_flags(lf, &f->shared->feature_flags) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get feature flags from VFD")
+        if(H5FD_get_fs_type_map(lf, f->shared->fs_type_map) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get free space type mapping from VFD")
+        if(H5MF_init_merge_flags(f) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "problem initializing free space merge flags")
 
         /* Bump superblock version if we are to use the latest version of the format */
         if(f->shared->latest_format)
@@ -1071,6 +1087,9 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
             f->shared->root_grp = NULL;
         } /* end if */
         if(H5AC_dest(f, dxpl_id))
+            /* Push error, but keep going*/
+            HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
+        if(H5F_accum_reset(f) < 0)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "problems closing file")
         if(H5FO_dest(f) < 0)
@@ -1765,6 +1784,18 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     if(H5D_flush(f, dxpl_id, flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
+    /* If we will be closing the file, we should release the free space
+     *  information now (needs to happen before truncating the file and
+     *  before the metadata cache is shut down, since the free space manager is
+     *  holding some data structures in memory and also because releasing free
+     *  space can shrink the file's 'eoa' value)
+     */
+    if(flags & H5F_FLUSH_CLOSING) {
+        /* Shutdown file free space manager(s) */
+        if(H5MF_close(f, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
+    } /* end if */
+
     /* flush (and invalidate, if requested) the entire metadata cache */
     H5AC_flags = 0;
     if((flags & H5F_FLUSH_INVALIDATE) != 0 )
@@ -1772,22 +1803,20 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
     if(H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
 
-    /*
-     * If we are invalidating everything (which only happens just before
-     * the file closes), release the unused portion of the metadata and
-     * "small data" blocks back to the free lists in the file.
+    /* Truncate the file to the current allocated size */
+    /* (needs to happen before superblock write, since the 'eoa' value is
+     *  written in superblock -QAK)
      */
-    if(flags & H5F_FLUSH_INVALIDATE) {
-        if(H5FD_aggr_reset(f->shared->lf, &(f->shared->lf->meta_aggr), dxpl_id) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't reset metadata block")
-
-        if(H5FD_aggr_reset(f->shared->lf, &(f->shared->lf->sdata_aggr), dxpl_id) < 0)
-            HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "can't reset 'small data' block")
-    } /* end if */
+    if(H5FD_truncate(f->shared->lf, dxpl_id, (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level truncate failed")
 
     /* Write the superblock to disk */
     if(H5F_super_write(f, dxpl_id) != SUCCEED)
         HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to write superblock to file")
+
+    /* Flush out the metadata accumulator */
+    if(H5F_accum_flush(f, dxpl_id) < 0)
+        HGOTO_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "unable to flush metadata accumulator")
 
     /* Flush file buffers to disk. */
     if(H5FD_flush(f->shared->lf, dxpl_id, (unsigned)((flags & H5F_FLUSH_CLOSING) > 0)) < 0)
@@ -2004,7 +2033,7 @@ H5F_try_close(H5F_t *f)
      */
     if(f->intent&H5F_ACC_RDWR) {
         /* Flush and destroy all caches */
-        if(H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL, H5C__NO_FLAGS_SET) < 0)
+        if(H5F_flush(f, H5AC_dxpl_id, H5F_SCOPE_LOCAL, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
@@ -2138,410 +2167,37 @@ done:
  * Programmer:	James Laird
  *		August 23, 2006
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5Fget_intent(hid_t file_id, unsigned *intent_flags)
 {
-    H5F_t * file = NULL;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Fget_intent, FAIL)
     H5TRACE2("e", "i*Iu", file_id, intent_flags);
 
-    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
-
     /* If no intent flags were passed in, exit quietly */
-    if(!intent_flags)
-	HGOTO_DONE(SUCCEED)
+    if(intent_flags) {
+        H5F_t * file;           /* Pointer to file structure */
 
-    *intent_flags = H5F_get_intent(file);
+        /* Get the internal file structure */
+        if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
 
-    /* HDF5 uses some flags internally that users don't know about.
-     * Simplify things for them so that they get one of H5F_ACC_RDWR
-     * or H5F_ACC_RDONLY.
-     */
-    if(*intent_flags & H5F_ACC_RDWR)
-        *intent_flags = H5F_ACC_RDWR;
-    else
-        *intent_flags = H5F_ACC_RDONLY;
+        /* HDF5 uses some flags internally that users don't know about.
+         * Simplify things for them so that they only get either H5F_ACC_RDWR
+         * or H5F_ACC_RDONLY.
+         */
+        if(H5F_INTENT(file) & H5F_ACC_RDWR)
+            *intent_flags = H5F_ACC_RDWR;
+        else
+            *intent_flags = H5F_ACC_RDONLY;
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_get_intent
- *
- * Purpose:	Quick and dirty routine to retrieve the file's 'intent' flags
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
- *
- * Return:	'intent' on success/abort on failure (shouldn't fail)
- *
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		September 29, 2000
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-unsigned
-H5F_get_intent(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_intent)
-
-    HDassert(f);
-
-    FUNC_LEAVE_NOAPI(f->intent)
-} /* end H5F_get_intent() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_get_extpath
- *
- * Purpose:	Retrieve the file's 'extpath' flags
- *		This is used by H5L_extern_traverse() to retrieve the main file's location
- *		when searching the target file.
- *
- * Return:	'extpath' on success/abort on failure (shouldn't fail)
- *
- * Programmer:	Vailin Choi, April 2, 2008
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-char *
-H5F_get_extpath(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_extpath)
-
-    HDassert(f);
-
-    FUNC_LEAVE_NOAPI(f->extpath)
-} /* end H5F_get_extpath() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_sizeof_addr
- *
- * Purpose:	Quick and dirty routine to retrieve the size of the file's size_t
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
- *
- * Return:	'sizeof_addr' on success/abort on failure (shouldn't fail)
- *
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		September 29, 2000
- *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *		Changed to generic property list.
- *
- *-------------------------------------------------------------------------
- */
-size_t
-H5F_sizeof_addr(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_sizeof_addr)
-
-    assert(f);
-    assert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->sizeof_addr)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_sizeof_size
- *
- * Purpose:	Quick and dirty routine to retrieve the size of the file's off_t
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
- *
- * Return:	'sizeof_size' on success/abort on failure (shouldn't fail)
- *
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		September 29, 2000
- *
- *-------------------------------------------------------------------------
- */
-size_t
-H5F_sizeof_size(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_sizeof_size)
-
-    assert(f);
-    assert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->sizeof_size)
-} /* H5F_sizeof_size() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_sym_leaf_k
- *
- * Purpose:	Replaced a macro to retrieve the symbol table leaf size,
- *              now that the generic properties are being used to store
- *              the values.
- *
- * Return:	Success:	Non-negative, and the symbol table leaf size is
- *                              returned.
- *
- * 		Failure:	Negative (should not happen)
- *
- * Programmer:	Raymond Lu
- *		slu@ncsa.uiuc.edu
- *		Oct 14 2001
- *
- *-------------------------------------------------------------------------
- */
-unsigned
-H5F_sym_leaf_k(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_sym_leaf_k)
-
-    assert(f);
-    assert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->sym_leaf_k)
-} /* end H5F_sym_leaf_k() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_Kvalue
- *
- * Purpose:	Replaced a macro to retrieve a B-tree key value for a certain
- *              type, now that the generic properties are being used to store
- *              the B-tree values.
- *
- * Return:	Success:	Non-negative, and the B-tree key value is
- *                              returned.
- *
- * 		Failure:	Negative (should not happen)
- *
- * Programmer:	Raymond Lu
- *		slu@ncsa.uiuc.edu
- *		Oct 14 2001
- *
- *-------------------------------------------------------------------------
- */
-unsigned
-H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_Kvalue)
-
-    assert(f);
-    assert(f->shared);
-    assert(type);
-
-    FUNC_LEAVE_NOAPI(f->shared->btree_k[type->id])
-} /* end H5F_Kvalue() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_rdcc_nelmts
- *
- * Purpose:	Replaced a macro to retrieve the raw data cache number of elments,
- *              now that the generic properties are being used to store
- *              the values.
- *
- * Return:	Success:	Non-negative, and the raw data cache number of
- *                              of elemnts is returned.
- *
- * 		Failure:	Negative (should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jun  1 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-size_t
-H5F_rdcc_nelmts(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_rdcc_nelmts)
-
-    assert(f);
-    assert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->rdcc_nelmts)
-} /* end H5F_rdcc_nelmts() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_rdcc_nbytes
- *
- * Purpose:	Replaced a macro to retrieve the raw data cache number of bytes,
- *              now that the generic properties are being used to store
- *              the values.
- *
- * Return:	Success:	Non-negative, and the raw data cache number of
- *                              of bytes is returned.
- *
- * 		Failure:	Negative (should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jun  1 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-size_t
-H5F_rdcc_nbytes(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_rdcc_nbytes)
-
-    assert(f);
-    assert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->rdcc_nbytes)
-} /* end H5F_rdcc_nbytes() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_rdcc_w0
- *
- * Purpose:	Replaced a macro to retrieve the raw data cache 'w0' value
- *              now that the generic properties are being used to store
- *              the values.
- *
- * Return:	Success:	Non-negative, and the raw data cache 'w0' value
- *                              is returned.
- *
- * 		Failure:	Negative (should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jun  2 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-double
-H5F_rdcc_w0(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_rdcc_w0)
-
-    assert(f);
-    assert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->rdcc_w0)
-} /* end H5F_rdcc_w0() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_has_feature
- *
- * Purpose:	Check if a file has a particular feature enabled
- *
- * Return:	Success:	Non-negative - TRUE or FALSE
- * 		Failure:	Negative (should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May 31 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-hbool_t
-H5F_has_feature(const H5F_t *f, unsigned feature)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_has_feature)
-
-    assert(f);
-    assert(f->shared);
-
-    FUNC_LEAVE_NOAPI((hbool_t)(f->shared->lf->feature_flags&feature))
-} /* end H5F_has_feature() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_get_driver_id
- *
- * Purpose:	Quick and dirty routine to retrieve the file's 'driver_id' value
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
- *
- * Return:	'driver_id' on success/abort on failure (shouldn't fail)
- *
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		October 10, 2000
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5F_get_driver_id(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_driver_id)
-
-    assert(f);
-    assert(f->shared);
-    assert(f->shared->lf);
-
-    FUNC_LEAVE_NOAPI(f->shared->lf->driver_id)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_get_fileno
- *
- * Purpose:	Quick and dirty routine to retrieve the file's 'fileno' value
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		March 27, 2002
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_get_fileno(const H5F_t *f, unsigned long *filenum)
-{
-    herr_t	ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5F_get_fileno, FAIL)
-
-    HDassert(f);
-    HDassert(f->shared);
-    HDassert(f->shared->lf);
-    HDassert(filenum);
-
-    /* Retrieve the file's serial number */
-    if(H5FD_get_fileno(f->shared->lf, filenum) < 0)
-	HGOTO_ERROR(H5E_FILE, H5E_BADRANGE, FAIL, "can't retrieve fileno")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_get_fileno() */
+} /* end H5Fget_intent() */
 
 
 /*-------------------------------------------------------------------------
@@ -2584,35 +2240,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_base_addr
- *
- * Purpose:	Quick and dirty routine to retrieve the file's 'base_addr' value
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Raymond Lu <slu@ncsa.uiuc.edu>
- *		December 20, 2002
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-haddr_t
-H5F_get_base_addr(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_base_addr)
-
-    assert(f);
-    assert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->base_addr)
-} /* end H5F_get_base_addr() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5F_get_eoa
  *
  * Purpose:	Quick and dirty routine to retrieve the file's 'eoa' value
@@ -2622,313 +2249,25 @@ H5F_get_base_addr(const H5F_t *f)
  * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
  *		June 1, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 haddr_t
-H5F_get_eoa(const H5F_t *f)
+H5F_get_eoa(const H5F_t *f, H5FD_mem_t type)
 {
     haddr_t	ret_value;
 
     FUNC_ENTER_NOAPI(H5F_get_eoa, HADDR_UNDEF)
 
-    assert(f);
-    assert(f->shared);
+    HDassert(f);
+    HDassert(f->shared);
 
     /* Dispatch to driver */
-    if (HADDR_UNDEF==(ret_value=H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
+    if(HADDR_UNDEF == (ret_value = H5FD_get_eoa(f->shared->lf, type)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_eoa() */
-
-#ifdef H5_HAVE_PARALLEL
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_mpi_get_rank
- *
- * Purpose:	Retrieves the rank of an MPI process.
- *
- * Return:	Success:	The rank (non-negative)
- *
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, January 30, 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-int
-H5F_mpi_get_rank(const H5F_t *f)
-{
-    int	ret_value;
-
-    FUNC_ENTER_NOAPI(H5F_mpi_get_rank, FAIL)
-
-    assert(f && f->shared);
-
-    /* Dispatch to driver */
-    if ((ret_value=H5FD_mpi_get_rank(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_rank request failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_mpi_get_rank() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_mpi_get_comm
- *
- * Purpose:	Retrieves the file's communicator
- *
- * Return:	Success:	The communicator (non-negative)
- *
- *		Failure:	Negative
- *
- * Programmer:	Quincey Koziol
- *              Friday, January 30, 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-MPI_Comm
-H5F_mpi_get_comm(const H5F_t *f)
-{
-    MPI_Comm	ret_value;
-
-    FUNC_ENTER_NOAPI(H5F_mpi_get_comm, MPI_COMM_NULL)
-
-    assert(f && f->shared);
-
-    /* Dispatch to driver */
-    if ((ret_value=H5FD_mpi_get_comm(f->shared->lf))==MPI_COMM_NULL)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, MPI_COMM_NULL, "driver get_comm request failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_mpi_get_comm() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5F_mpi_get_size
- *
- * Purpose:     Retrieves the size of an MPI process.
- *
- * Return:      Success:        The size (positive)
- *
- *              Failure:        Negative
- *
- * Programmer:  John Mainzer
- *              Friday, May 6, 2005
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-int
-H5F_mpi_get_size(const H5F_t *f)
-{
-    int ret_value;
-
-    FUNC_ENTER_NOAPI(H5F_mpi_get_size, FAIL)
-
-    assert(f && f->shared);
-
-    /* Dispatch to driver */
-    if ((ret_value=H5FD_mpi_get_size(f->shared->lf)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_size request failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_mpi_get_size() */
-#endif /* H5_HAVE_PARALLEL */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_grp_btree_shared
- *
- * Purpose:	Replaced a macro to retrieve the shared B-tree node info
- *              now that the generic properties are being used to store
- *              the values.
- *
- * Return:	Success:	Non-void, and the shared B-tree node info
- *                              is returned.
- *
- * 		Failure:	void (should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jul  5 2004
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-H5RC_t *
-H5F_grp_btree_shared(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_grp_btree_shared)
-
-    assert(f);
-    assert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->grp_btree_shared)
-} /* end H5F_grp_btree_shared() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_sieve_buf_size
- *
- * Purpose:	Replaced a macro to retrieve the dataset sieve buffer size
- *              now that the generic properties are being used to store
- *              the values.
- *
- * Return:	Success:	Non-void, and the dataset sieve buffer size
- *                              is returned.
- *
- * 		Failure:	void (should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jul  8 2005
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-size_t
-H5F_sieve_buf_size(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_sieve_buf_size)
-
-    assert(f);
-    assert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->sieve_buf_size)
-} /* end H5F_sieve_buf_size() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_gc_ref
- *
- * Purpose:	Replaced a macro to retrieve the "garbage collect
- *              references flag" now that the generic properties are being used
- *              to store the values.
- *
- * Return:	Success:	The "garbage collect references flag"
- *                              is returned.
- *
- * 		Failure:	(should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		Jul  8 2005
- *
- *-------------------------------------------------------------------------
- */
-unsigned
-H5F_gc_ref(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_gc_ref)
-
-    HDassert(f);
-    HDassert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->gc_ref)
-} /* end H5F_gc_ref() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_get_fcpl
- *
- * Purpose:	Retrieve the value of a file's FCPL.
- *
- * Return:	Success:	The FCPL for the file.
- *
- * 		Failure:	? (should not happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
- *		May 25 2005
- *
- *-------------------------------------------------------------------------
- */
-hid_t
-H5F_get_fcpl(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_fcpl)
-
-    assert(f);
-    assert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->fcpl_id)
-} /* end H5F_get_fcpl() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_use_latest_format
- *
- * Purpose:	Retrieve the 'use the latest version of the format' flag for
- *              the file.
- *
- * Return:	Success:	Non-negative, the 'use the latest format' flag
- *
- * 		Failure:	(can't happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Oct  2 2006
- *
- *-------------------------------------------------------------------------
- */
-hbool_t
-H5F_use_latest_format(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_use_latest_format)
-
-    HDassert(f);
-    HDassert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->latest_format)
-} /* end H5F_use_latest_format() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_get_fc_degree
- *
- * Purpose:	Retrieve the 'file close degree' for the file.
- *
- * Return:	Success:	Non-negative, the 'file close degree'
- *
- * 		Failure:	(can't happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Mar  5 2007
- *
- *-------------------------------------------------------------------------
- */
-H5F_close_degree_t
-H5F_get_fc_degree(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_fc_degree)
-
-    HDassert(f);
-    HDassert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->fc_degree)
-} /* end H5F_get_fc_degree() */
 
 
 /*-------------------------------------------------------------------------
@@ -2983,148 +2322,6 @@ H5F_decr_nopen_objs(H5F_t *f)
 
     FUNC_LEAVE_NOAPI(--f->nopen_objs)
 } /* end H5F_decr_nopen_objs() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_store_msg_crt_idx
- *
- * Purpose:	Retrieve the 'store message creation index' flag for the file.
- *
- * Return:	Success:	Non-negative, the 'store message creation index' flag
- *
- * 		Failure:	(can't happen)
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Mar  6 2007
- *
- *-------------------------------------------------------------------------
- */
-hbool_t
-H5F_store_msg_crt_idx(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_store_msg_crt_idx)
-
-    HDassert(f);
-    HDassert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->store_msg_crt_idx)
-} /* end H5F_store_msg_crt_idx() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_block_read
- *
- * Purpose:	Reads some data from a file/server/etc into a buffer.
- *		The data is contiguous.	 The address is relative to the base
- *		address for the file.
- *
- * Errors:
- *		IO	  READERROR	Low-level read failed.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
- *
- * Modifications:
- *		Albert Cheng, 1998-06-02
- *		Added XFER_MODE argument
- *
- * 		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- * 		Robb Matzke, 1999-08-02
- *		Modified to use the virtual file layer. The data transfer
- *		property list is passed in by object ID since that's how the
- *		virtual file layer needs it.
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, hid_t dxpl_id,
-	       void *buf/*out*/)
-{
-    haddr_t		    abs_addr;
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5F_block_read, FAIL)
-
-    assert (f);
-    assert (f->shared);
-    assert(size<SIZET_MAX);
-    assert (buf);
-
-    /* convert the relative address to an absolute address */
-    abs_addr = f->shared->base_addr + addr;
-
-    /* Read the data */
-    if(H5FD_read(f->shared->lf, type, dxpl_id, abs_addr, size, buf) < 0)
-	HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_block_write
- *
- * Purpose:	Writes some data from memory to a file/server/etc.  The
- *		data is contiguous.  The address is relative to the base
- *		address.
- *
- * Errors:
- *		IO	  WRITEERROR	Low-level write failed.
- *		IO	  WRITEERROR	No write intent.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *		matzke@llnl.gov
- *		Jul 10 1997
- *
- * Modifications:
- *		Albert Cheng, 1998-06-02
- *		Added XFER_MODE argument
- *
- * 		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- * 		Robb Matzke, 1999-08-02
- *		Modified to use the virtual file layer. The data transfer
- *		property list is passed in by object ID since that's how the
- *		virtual file layer needs it.
- *-------------------------------------------------------------------------
- */
-herr_t
-H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
-        hid_t dxpl_id, const void *buf)
-{
-    haddr_t		    abs_addr;
-    herr_t      ret_value=SUCCEED;       /* Return value */
-
-    FUNC_ENTER_NOAPI(H5F_block_write, FAIL)
-
-    assert (f);
-    assert (f->shared);
-    assert (size<SIZET_MAX);
-    assert (buf);
-
-    if (0==(f->intent & H5F_ACC_RDWR))
-	HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "no write intent")
-
-    /* Convert the relative address to an absolute address */
-    abs_addr = f->shared->base_addr + addr;
-
-    /* Write the data */
-    if (H5FD_write(f->shared->lf, type, dxpl_id, abs_addr, size, buf))
-	HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-}
 
 
 /*-------------------------------------------------------------------------
@@ -3234,7 +2431,7 @@ H5F_addr_decode(const H5F_t *f, const uint8_t **pp/*in,out*/, haddr_t *addr_p/*o
 hssize_t
 H5Fget_freespace(hid_t file_id)
 {
-    H5F_t      *file=NULL;      /* File object for file ID */
+    H5F_t      *file;           /* File object for file ID */
     hssize_t    ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Fget_freespace, FAIL)
@@ -3245,7 +2442,7 @@ H5Fget_freespace(hid_t file_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Go get the actual amount of free space in the file */
-    if((ret_value = H5FD_get_freespace(file->shared->lf)) < 0)
+    if((ret_value = H5MF_get_freespace(file, H5AC_ind_dxpl_id)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
 done:
@@ -3275,19 +2472,19 @@ herr_t
 H5Fget_filesize(hid_t file_id, hsize_t *size)
 {
     H5F_t      *file;                   /* File object for file ID */
-    haddr_t    eof;
-    herr_t     ret_value = SUCCEED;      /* Return value */
+    haddr_t    eof;                     /* End of file address */
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(H5Fget_filesize, FAIL)
     H5TRACE2("e", "i*h", file_id, size);
 
     /* Check args */
     if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
-         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Go get the actual file size */
-    if((eof = H5FDget_eof(file->shared->lf)) == HADDR_UNDEF)
-         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
+    if(HADDR_UNDEF == (eof = H5FDget_eof(file->shared->lf)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
 
     *size = (hsize_t)eof;
 

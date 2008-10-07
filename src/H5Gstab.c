@@ -810,7 +810,7 @@ done:
  *
  * Purpose:	Look up an object relative to a group, using symbol table
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -818,7 +818,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+htri_t
 H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     hid_t dxpl_id)
 {
@@ -826,7 +826,7 @@ H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     H5G_bt_lkp_t bt_udata;      /* Data to pass through B-tree	*/
     H5G_stab_fnd_ud_t udata;    /* 'User data' to give to callback */
     H5O_stab_t stab;		/* Symbol table message		*/
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    htri_t     ret_value;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_lookup, FAIL)
 
@@ -856,7 +856,7 @@ H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     bt_udata.op_data = &udata;
 
     /* Search the B-tree */
-    if(H5B_find(grp_oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, &bt_udata) < 0)
+    if((ret_value = H5B_find(grp_oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, &bt_udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found")
 
 done:

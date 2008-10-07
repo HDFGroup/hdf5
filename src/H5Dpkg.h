@@ -264,7 +264,7 @@ typedef herr_t (*H5D_chunk_init_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef herr_t (*H5D_chunk_create_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef herr_t (*H5D_chunk_insert_func_t)(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
-typedef haddr_t (*H5D_chunk_get_addr_func_t)(const H5D_chk_idx_info_t *idx_info,
+typedef herr_t (*H5D_chunk_get_addr_func_t)(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 typedef int (*H5D_chunk_iterate_func_t)(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_cb_func_t chunk_cb, void *chunk_udata);
@@ -564,7 +564,7 @@ H5_DLL hbool_t H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr);
 H5_DLL herr_t H5D_chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
 H5_DLL herr_t H5D_chunk_create(H5D_t *dset /*in,out*/, hid_t dxpl_id);
 H5_DLL herr_t H5D_chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset);
-H5_DLL haddr_t H5D_chunk_get_addr(const H5D_t *dset, hid_t dxpl_id,
+H5_DLL herr_t H5D_chunk_get_info(const H5D_t *dset, hid_t dxpl_id,
     const hsize_t *chunk_offset, H5D_chunk_ud_t *udata);
 H5_DLL void *H5D_chunk_lock(const H5D_io_info_t *io_info,
     H5D_chunk_ud_t *udata, hbool_t relax, unsigned *idx_hint/*in,out*/);

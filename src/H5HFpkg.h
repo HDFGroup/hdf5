@@ -403,6 +403,7 @@ typedef struct H5HF_direct_t {
     H5HF_indirect_t *parent;	/* Shared parent indirect block info          */
     unsigned    par_entry;      /* Entry in parent's table                    */
     size_t      size;           /* Size of direct block                       */
+    hsize_t     file_size;      /* Size of direct block in file (only valid when block's space is being freed) */
     unsigned    blk_off_size;   /* Size of offsets in the block               */
     uint8_t     *blk;           /* Pointer to buffer containing block data    */
 

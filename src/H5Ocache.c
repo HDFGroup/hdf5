@@ -37,6 +37,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5FLprivate.h"	/* Free lists                           */
+#include "H5MFprivate.h"	/* File memory management		*/
 #include "H5Opkg.h"             /* Object headers			*/
 
 
@@ -130,8 +131,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     unsigned    merged_null_msgs = 0;   /* Number of null messages merged together */
     haddr_t	chunk_addr;     /* Address of first chunk */
     size_t	chunk_size;     /* Size of first chunk */
-    haddr_t     abs_eoa;	/* Absolute end of file address	*/
-    haddr_t     rel_eoa;	/* Relative end of file address	*/
+    haddr_t     eoa;		/* Relative end of file address	*/
     H5O_t	*ret_value;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5O_load, NULL)
@@ -143,14 +143,11 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
     HDassert(!_udata2);
 
     /* Make certain we don't speculatively read off the end of the file */
-    if(HADDR_UNDEF == (abs_eoa = H5F_get_eoa(f)))
+    if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_OHDR)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, NULL, "unable to determine file size")
 
-    /* Adjust absolute EOA address to relative EOA address */
-    rel_eoa = abs_eoa - H5F_get_base_addr(f);
-
     /* Compute the size of the speculative object header buffer */
-    H5_ASSIGN_OVERFLOW(spec_read_size, MIN(rel_eoa - addr, H5O_SPEC_READ_SIZE), /* From: */ hsize_t, /* To: */ size_t);
+    H5_ASSIGN_OVERFLOW(spec_read_size, MIN(eoa - addr, H5O_SPEC_READ_SIZE), /* From: */ hsize_t, /* To: */ size_t);
 
     /* Attempt to speculatively read both object header prefix and first chunk */
     if(H5F_block_read(f, H5FD_MEM_OHDR, addr, spec_read_size, dxpl_id, read_buf) < 0)
@@ -415,7 +412,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 #endif /* NDEBUG */
 
             /* Check for combining two adjacent 'null' messages */
-            if((H5F_get_intent(f) & H5F_ACC_RDWR) &&
+            if((H5F_INTENT(f) & H5F_ACC_RDWR) &&
                     H5O_NULL_ID == id && oh->nmesgs > 0 &&
                     H5O_NULL_ID == oh->mesg[oh->nmesgs - 1].type->id &&
                     oh->mesg[oh->nmesgs - 1].chunkno == chunkno) {
@@ -468,7 +465,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                     /* Check for "mark if unknown" message flag, etc. */
                     else if((flags & H5O_MSG_FLAG_MARK_IF_UNKNOWN) &&
                             !(flags & H5O_MSG_FLAG_WAS_UNKNOWN) &&
-                            (H5F_get_intent(f) & H5F_ACC_RDWR)) {
+                            (H5F_INTENT(f) & H5F_ACC_RDWR)) {
 
                         /* Mark the message as "unknown" */
                         /* This is a bit aggressive, since the application may
@@ -838,20 +835,37 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
+H5O_dest(H5F_t *f, H5O_t *oh)
 {
     unsigned	u;                      /* Local index variable */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_dest)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_dest)
+#ifdef QAK
+HDfprintf(stderr, "%s: oh->cache_info.addr = %a\n", FUNC, oh->cache_info.addr);
+HDfprintf(stderr, "%s: oh->cache_info.free_file_space_on_destroy = %t\n", FUNC, oh->cache_info.free_file_space_on_destroy);
+#endif /* QAK */
 
     /* check args */
     HDassert(oh);
 
     /* Verify that node is clean */
-    HDassert(oh->cache_info.is_dirty == FALSE);
+    HDassert(!oh->cache_info.is_dirty);
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!oh->cache_info.free_file_space_on_destroy || H5F_addr_defined(oh->cache_info.addr));
 
     /* destroy chunks */
     if(oh->chunk) {
+        /* Check for releasing file space for object header */
+        if(oh->cache_info.free_file_space_on_destroy) {
+            /* Free main (first) object header "chunk" */
+            /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+            if(H5MF_xfree(f, H5FD_MEM_OHDR, H5AC_dxpl_id, oh->chunk[0].addr, (hsize_t)oh->chunk[0].size) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free object header")
+        } /* end if */
+
+        /* Release buffer for each chunk */
         for(u = 0; u < oh->nchunks; u++) {
             /* Verify that chunk is clean */
             HDassert(oh->chunk[u].dirty == 0);
@@ -859,6 +873,7 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
             oh->chunk[u].image = H5FL_BLK_FREE(chunk_image, oh->chunk[u].image);
         } /* end for */
 
+        /* Release array of chunk info */
         oh->chunk = (H5O_chunk_t *)H5FL_SEQ_FREE(H5O_chunk_t, oh->chunk);
     } /* end if */
 
@@ -877,7 +892,8 @@ H5O_dest(H5F_t UNUSED *f, H5O_t *oh)
     /* destroy object header */
     (void)H5FL_FREE(H5O_t, oh);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_dest() */
 
 

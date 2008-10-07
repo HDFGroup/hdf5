@@ -63,6 +63,7 @@ New Features
 
         Library
         -------
+        - Improved free space tracking in file to be faster. (QAK - 2008/10/06)
         - Added 'mounted' field to H5G_info_t struct. (QAK - 2008/07/15)
 
         Parallel Library
@@ -109,6 +110,8 @@ Bug Fixes since HDF5-1.8.1
 
         Library
         -------
+        - Corrected alignment+threshold errors to work correctly when metadata
+            aggregation is enabled. (QAK - 2008/10/06)
         - Changed H5Fget_obj_count and H5Fget_obj_ids to ignore objects
             registered by the library for internal library use.
             (NAF - 2008/10/06)

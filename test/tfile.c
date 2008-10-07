@@ -1191,6 +1191,8 @@ static void
 test_file_freespace(void)
 {
     hid_t    file;      /* File opened with read-write permission */
+    h5_stat_size_t empty_filesize;      /* Size of file when empty */
+    h5_stat_size_t mod_filesize;        /* Size of file after being modified */
     hssize_t free_space;        /* Amount of free space in file */
     hid_t    dspace;    /* Dataspace ID */
     hid_t    dset;      /* Dataset ID */
@@ -1202,9 +1204,19 @@ test_file_freespace(void)
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Low-Level File Free Space\n"));
 
-    /* Create the file (with read-write permission) */
+    /* Create an "empty" file */
     file = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(file, FAIL, "H5Fcreate");
+
+    ret = H5Fclose(file);
+    CHECK_I(ret, "H5Fclose");
+
+    /* Get the "empty" file size */
+    empty_filesize = h5_get_file_size(FILE1);
+
+    /* Re-open the file (with read-write permission) */
+    file = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK_I(file, "H5Fopen");
 
     /* Check that the free space is 0 */
     free_space = H5Fget_freespace(file);
@@ -1244,7 +1256,7 @@ test_file_freespace(void)
     /* Check that there is the right amount of free space in the file */
     free_space = H5Fget_freespace(file);
     CHECK(free_space, FAIL, "H5Fget_freespace");
-    VERIFY(free_space, 2376, "H5Fget_freespace");
+    VERIFY(free_space, 2008, "H5Fget_freespace");
 
     /* Delete datasets in file */
     for(u = 0; u < 10; u++) {
@@ -1261,6 +1273,12 @@ test_file_freespace(void)
     /* Close file */
     ret = H5Fclose(file);
     CHECK(ret, FAIL, "H5Fclose");
+
+    /* Get the file size after modifications*/
+    mod_filesize = h5_get_file_size(FILE1);
+
+    /* Check that the file reverted to empty size */
+    VERIFY(mod_filesize, empty_filesize, "H5Fget_freespace");
 } /* end test_file_freespace() */
 
 /****************************************************************

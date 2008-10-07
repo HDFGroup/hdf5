@@ -1505,6 +1505,7 @@ done:
 herr_t
 H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
 {
+    unsigned cache_flags = H5AC__NO_FLAGS_SET;      /* Flags for unprotecting heap header */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5HF_hdr_delete, FAIL)
@@ -1585,18 +1586,12 @@ HDfprintf(stderr, "%s: hdr->huge_bt2_addr = %a\n", FUNC, hdr->huge_bt2_addr);
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap 'huge' objects and tracker")
     } /* end if */
 
-    /* Release header's disk space */
-    if(H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_HDR, dxpl_id, hdr->heap_addr, (hsize_t)hdr->heap_size) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap header")
-
-    /* Finished deleting header */
-    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
-    hdr = NULL;
+    /* Indicate that the heap header should be deleted & file space freed */
+    cache_flags |= H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 
 done:
-    /* Unprotect the header, if an error occurred */
-    if(hdr && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    /* Unprotect the header with appropriate flags */
+    if(hdr && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, cache_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)

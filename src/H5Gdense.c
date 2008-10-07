@@ -490,7 +490,7 @@ done:
  *
  * Purpose:	Look up a link within a group that uses dense link storage
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		koziol@hdfgroup.org
@@ -498,13 +498,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+htri_t
 H5G_dense_lookup(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     const char *name, H5O_link_t *lnk)
 {
     H5G_bt2_ud_common_t udata;          /* User data for v2 B-tree link lookup */
     H5HF_t *fheap = NULL;               /* Fractal heap handle */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    htri_t ret_value;                   /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_dense_lookup, FAIL)
 
@@ -530,7 +530,7 @@ H5G_dense_lookup(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
     udata.found_op_data = lnk;
 
     /* Find & copy the named link in the 'name' index */
-    if(H5B2_find(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, &udata, NULL, NULL) < 0)
+    if((ret_value = H5B2_find(f, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, &udata, NULL, NULL)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to locate link in name index")
 
 done:

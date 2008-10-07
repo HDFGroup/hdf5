@@ -137,6 +137,7 @@ H5HF_man_dblock_create(hid_t dxpl_id, H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblo
         dblock->block_off = 0;
         dblock->size = hdr->man_dtable.cparam.start_block_size;
     } /* end else */
+    dblock->file_size = 0;
     dblock->blk_off_size = H5HF_SIZEOF_OFFSET_LEN(dblock->size);
     free_space = dblock->size - H5HF_MAN_ABS_DIRECT_OVERHEAD(hdr);
 
@@ -220,6 +221,7 @@ H5HF_man_dblock_destroy(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_direct_t *dblock,
     haddr_t dblock_addr)
 {
     hsize_t dblock_size;                /* Size of direct block on disk */
+    unsigned cache_flags = H5AC__NO_FLAGS_SET;      /* Flags for unprotecting indirect block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_man_dblock_destroy)
@@ -325,16 +327,15 @@ HDfprintf(stderr, "%s: Reversing iterator\n", FUNC);
 HDfprintf(stderr, "%s: Before releasing direct block's space, dblock_addr = %a, dblock_size = %Hu\n", FUNC, dblock_addr, dblock_size);
 #endif /* QAK */
 
-    /* Release direct block's disk space */
-    if(H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, dblock_addr, dblock_size) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
-
-    /* Remove direct block from metadata cache */
-    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
-    dblock = NULL;
+    /* Indicate that the indirect block should be deleted & file space freed */
+    dblock->file_size = dblock_size;
+    cache_flags |= H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 
 done:
+    /* Unprotect the indirect block, with appropriate flags */
+    if(dblock && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, cache_flags) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap direct block")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_dblock_destroy() */
 
@@ -688,7 +689,7 @@ HDfprintf(stderr, "%s: dblock_addr = %a, dblock_size = %Hu\n", FUNC, dblock_addr
 HDfprintf(stderr, "%s: Expunging direct block from cache\n", FUNC);
 #endif /* QAK */
         /* Evict the direct block from the metadata cache */
-        if(H5AC_expunge_entry(f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr) < 0)
+        if(H5AC_expunge_entry(f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, H5AC__NO_FLAGS_SET) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove direct block from cache")
 #ifdef QAK
 HDfprintf(stderr, "%s: Done expunging direct block from cache\n", FUNC);
@@ -696,6 +697,19 @@ HDfprintf(stderr, "%s: Done expunging direct block from cache\n", FUNC);
     } /* end if */
 
     /* Release direct block's disk space */
+    /* (XXX: Under the best of circumstances, this block's space in the file
+     *          would be freed in the H5AC_expunge_entry() call above (and the
+     *          H5AC__FREE_FILE_SPACE_FLAG used there), but since the direct
+     *          block structure might have a different size on disk than in
+     *          the heap's 'abstract' address space, we would need to set the
+     *          "file_size" field for the direct block structure.  In order to
+     *          do that, we'd have to protect/unprotect the direct block and
+     *          that would add a bunch of unnecessary overhead to the process,
+     *          so we just release the file space here, directly.  When the
+     *          revised metadata cache is operating, it will "know" the file
+     *          size of each entry in the cache and we can the the
+     *          H5AC_expunge_entry() method.  -QAK)
+     */
     if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, dblock_addr, dblock_size) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
 

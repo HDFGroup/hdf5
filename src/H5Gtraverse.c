@@ -633,7 +633,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
     /* Traverse the path */
     while((name = H5G_component(name, &nchars)) && *name) {
         const char *s;                  /* Temporary string pointer */
-        herr_t lookup_status;           /* Status from object lookup */
+        htri_t lookup_status;           /* Status from object lookup */
 
 	/*
 	 * Copy the component name into a null-terminated buffer so
@@ -661,11 +661,11 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         } /* end if */
 
         /* Get information for object in current group */
-        /* (Defer issuing error for bad lookup until later) */
-        lookup_status = H5G_obj_lookup(grp_loc.oloc, H5G_comp_g, &lnk/*out*/, dxpl_id);
+        if((lookup_status = H5G_obj_lookup(grp_loc.oloc, H5G_comp_g, &lnk/*out*/, dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't look up component")
 
         /* If the lookup was OK, build object location and traverse special links, etc. */
-        if(lookup_status >= 0) {
+        if(lookup_status) {
             /* Sanity check link and indicate it's valid */
             HDassert(lnk.type >= H5L_TYPE_HARD);
             HDassert(!HDstrcmp(H5G_comp_g, lnk.name));
@@ -688,14 +688,14 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
             H5G_loc_t          *cb_loc;    /* Pointer to object location for callback */
 
             /* Set callback parameters appropriately, based on link being found */
-            if(lookup_status < 0) {
+            if(lookup_status) {
+                cb_lnk = &lnk;
+                cb_loc = &obj_loc;
+            } /* end if */
+            else {
                 HDassert(!obj_loc_valid);
                 cb_lnk = NULL;
                 cb_loc = NULL;
-            } /* end if */
-            else {
-                cb_lnk = &lnk;
-                cb_loc = &obj_loc;
             } /* end else */
 
             /* Call 'operator' routine */
@@ -706,7 +706,7 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
         } /* end if */
 
         /* Handle lookup failures now */
-        if(lookup_status < 0) {
+        if(!lookup_status) {
             /* If an intermediate group doesn't exist & flag is set, create the group */
             if(target & H5G_CRT_INTMD_GROUP) {
                 const H5O_ginfo_t def_ginfo = H5G_CRT_GROUP_INFO_DEF;   /* Default group info settings */
@@ -714,31 +714,32 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
                 H5O_ginfo_t	par_ginfo;	/* Group info settings for parent group */
                 H5O_linfo_t	par_linfo;	/* Link info settings for parent group */
                 H5O_linfo_t	tmp_linfo;	/* Temporary link info settings */
+                htri_t          exists;         /* Whether a group or link info message exists */
                 const H5O_ginfo_t *ginfo;	/* Group info settings for new group */
                 const H5O_linfo_t *linfo;	/* Link info settings for new group */
 
-                /* Get the group info for parent group */
+                /* Check for the parent group having a group info message */
                 /* (OK if not found) */
-                if(NULL == H5O_msg_read(grp_loc.oloc, H5O_GINFO_ID, &par_ginfo, dxpl_id)) {
-                    /* Clear error stack from not finding the group info message */
-                    H5E_clear_stack(NULL);
+                if((exists = H5O_msg_exists(grp_loc.oloc, H5O_GINFO_ID, dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read object header")
+                if(exists) {
+                    /* Get the group info for parent group */
+                    if(NULL == H5O_msg_read(grp_loc.oloc, H5O_GINFO_ID, &par_ginfo, dxpl_id))
+                        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "group info message not present")
 
-                    /* Use default group info settings */
-                    ginfo = &def_ginfo;
+                    /* Use parent group info settings */
+                    ginfo = &par_ginfo;
                 } /* end if */
                 else
-                    ginfo = &par_ginfo;
+                    /* Use default group info settings */
+                    ginfo = &def_ginfo;
 
-                /* Get the link info for parent group */
+                /* Check for the parent group having a link info message */
                 /* (OK if not found) */
-                if(NULL == H5G_obj_get_linfo(grp_loc.oloc, &par_linfo, dxpl_id)) {
-                    /* Clear error stack from not finding the link info message */
-                    H5E_clear_stack(NULL);
-
-                    /* Use default link info settings */
-                    linfo = &def_linfo;
-                } /* end if */
-                else {
+                /* Get the link info for parent group */
+                if((exists = H5G_obj_get_linfo(grp_loc.oloc, &par_linfo, dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read object header")
+                if(exists) {
                     /* Only keep the creation order information from the parent
                      *  group's link info
                      */
@@ -746,7 +747,10 @@ H5G_traverse_real(const H5G_loc_t *_loc, const char *name, unsigned target,
                     tmp_linfo.track_corder = par_linfo.track_corder;
                     tmp_linfo.index_corder = par_linfo.index_corder;
                     linfo = &tmp_linfo;
-                } /* end else */
+                } /* end if */
+                else
+                    /* Use default link info settings */
+                    linfo = &def_linfo;
 
                 /* Create the intermediate group */
 /* XXX: Should we allow user to control the group creation params here? -QAK */

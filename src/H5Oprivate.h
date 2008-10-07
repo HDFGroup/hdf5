@@ -580,7 +580,7 @@ H5_DLL herr_t H5O_msg_reset(unsigned type_id, void *native);
 H5_DLL void *H5O_msg_free(unsigned type_id, void *mesg);
 H5_DLL void *H5O_msg_copy(unsigned type_id, const void *mesg, void *dst);
 H5_DLL int H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
-H5_DLL htri_t H5O_msg_exists(H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
+H5_DLL htri_t H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence,
     hbool_t adj_link, hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,

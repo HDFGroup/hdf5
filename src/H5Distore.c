@@ -139,7 +139,7 @@ static int H5D_istore_cmp2(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata,
 			    void *_rt_key);
 static int H5D_istore_cmp3(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata,
 			    void *_rt_key);
-static herr_t H5D_istore_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_lt_key,
+static htri_t H5D_istore_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_lt_key,
 			       void *_udata);
 static H5B_ins_t H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
 				   hbool_t *lt_key_changed, void *_md_key,
@@ -162,7 +162,7 @@ static herr_t H5D_istore_idx_init(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D_istore_idx_create(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D_istore_idx_insert(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
-static haddr_t H5D_istore_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
+static herr_t H5D_istore_idx_get_addr(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_ud_t *udata);
 static int H5D_istore_idx_iterate(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_cb_func_t chunk_cb, void *chunk_udata);
@@ -583,8 +583,8 @@ done:
  *		called with the maximum stored chunk indices less than the
  *		requested chunk indices.
  *
- * Return:	Non-negative on success with information about the chunk
- *		returned through the UDATA argument. Negative on failure.
+ * Return:	Non-negative (TRUE/FALSE) on success with information about the
+ *              chunk returned through the UDATA argument. Negative on failure.
  *
  * Programmer:	Robb Matzke
  *		Thursday, October  9, 1997
@@ -592,14 +592,14 @@ done:
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
-static herr_t
+static htri_t
 H5D_istore_found(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr, const void *_lt_key,
 		 void *_udata)
 {
     H5D_chunk_ud_t	   *udata = (H5D_chunk_ud_t *) _udata;
     const H5D_istore_key_t *lt_key = (const H5D_istore_key_t *) _lt_key;
     unsigned		u;
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    htri_t      ret_value = TRUE;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_found)
 
@@ -612,7 +612,7 @@ H5D_istore_found(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr, const void
     /* Is this *really* the requested chunk? */
     for(u = 0; u < udata->common.mesg->u.chunk.ndims; u++)
         if(udata->common.offset[u] >= lt_key->offset[u] + udata->common.mesg->u.chunk.dim[u])
-            HGOTO_DONE(FAIL)
+            HGOTO_DONE(FALSE)
 
     /* Initialize return values */
     HDassert(lt_key->nbytes > 0);
@@ -971,12 +971,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static haddr_t
+static herr_t
 H5D_istore_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 {
-    haddr_t	ret_value;		/* Return value */
+    herr_t	ret_value = SUCCEED;	/* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_istore_idx_get_addr)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_istore_idx_get_addr)
 
     HDassert(idx_info);
     HDassert(idx_info->f);
@@ -984,23 +984,9 @@ H5D_istore_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udat
     HDassert(idx_info->layout->u.chunk.ndims > 0);
     HDassert(udata);
 
-    /* Go get the chunk information */
-    if(H5B_find(idx_info->f, idx_info->dxpl_id, H5B_ISTORE, idx_info->layout->u.chunk.addr, udata) < 0) {
-        /* Note: don't push error on stack, leave that to next higher level,
-         *      since many times the B-tree is searched in order to determine
-         *      if a chunk exists in the B-tree or not. -QAK
-         */
-#ifdef OLD_WAY
-        H5E_clear_stack(NULL);
-
-        HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, HADDR_UNDEF, "Can't locate chunk info")
-#else /* OLD_WAY */
-        HGOTO_DONE(HADDR_UNDEF)
-#endif /* OLD_WAY */
-    } /* end if */
-
-    /* Success!  Set the return value */
-    ret_value = udata->addr;
+    /* Go get the chunk information from the B-tree */
+    if(H5B_find(idx_info->f, idx_info->dxpl_id, H5B_ISTORE, idx_info->layout->u.chunk.addr, udata) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

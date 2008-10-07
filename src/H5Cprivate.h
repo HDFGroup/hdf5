@@ -364,6 +364,11 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  * destroy_in_progress:  Boolean flag that is set to true iff the entry
  * 		is in the process of being flushed and destroyed.
  *
+ * free_file_space_on_destroy:  Boolean flag that is set to true iff the entry
+ * 		is in the process of being flushed and destroyed and the file
+ *              space used by the object should be freed by the cache client's
+ *              'dest' callback routine.
+ *
  *
  * Fields supporting the hash table:
  *
@@ -489,6 +494,7 @@ typedef struct H5C_cache_entry_t
 #endif /* H5_HAVE_PARALLEL */
     hbool_t		flush_in_progress;
     hbool_t		destroy_in_progress;
+    hbool_t		free_file_space_on_destroy;
 
     /* fields supporting the hash table: */
 
@@ -893,7 +899,12 @@ typedef struct H5C_auto_size_ctl_t
  * 	H5C__SIZE_CHANGED_FLAG
  * 	H5C__PIN_ENTRY_FLAG
  * 	H5C__UNPIN_ENTRY_FLAG
+ * 	H5C__FREE_FILE_SPACE_FLAG
+ *      H5C__TAKE_OWNERSHIP_FLAG
  *
+ * These flags apply to H5C_expunge_entry():
+ *
+ * 	H5C__FREE_FILE_SPACE_FLAG
  *
  * These flags apply to H5C_flush_cache():
  *
@@ -908,6 +919,7 @@ typedef struct H5C_auto_size_ctl_t
  * 	H5C__FLUSH_INVALIDATE_FLAG
  * 	H5C__FLUSH_CLEAR_ONLY_FLAG
  * 	H5C__FLUSH_MARKED_ENTRIES_FLAG
+ *      H5C__TAKE_OWNERSHIP_FLAG
  */
 
 #define H5C__NO_FLAGS_SET			0x0000
@@ -922,6 +934,8 @@ typedef struct H5C_auto_size_ctl_t
 #define H5C__FLUSH_MARKED_ENTRIES_FLAG		0x0100
 #define H5C__FLUSH_IGNORE_PROTECTED_FLAG	0x0200
 #define H5C__READ_ONLY_FLAG			0x0400
+#define H5C__FREE_FILE_SPACE_FLAG		0x0800
+#define H5C__TAKE_OWNERSHIP_FLAG		0x1000
 
 
 H5_DLL H5C_t * H5C_create(size_t                     max_cache_size,
@@ -954,7 +968,8 @@ H5_DLL herr_t H5C_expunge_entry(H5F_t *             f,
                                 hid_t               secondary_dxpl_id,
                                 H5C_t *             cache_ptr,
                                 const H5C_class_t * type,
-                                haddr_t             addr);
+                                haddr_t             addr,
+                                unsigned            flags);
 
 H5_DLL herr_t H5C_flush_cache(H5F_t *  f,
                               hid_t    primary_dxpl_id,

@@ -110,6 +110,19 @@ typedef struct H5G_entry_t {
 } H5G_entry_t;
 
 /*
+ * A symbol table node is a collection of symbol table entries.  It can
+ * be thought of as the lowest level of the B-link tree that points to
+ * a collection of symbol table entries that belong to a specific symbol
+ * table or group.
+ */
+typedef struct H5G_node_t {
+    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
+                            /* first field in structure */
+    unsigned nsyms;                     /*number of symbols                  */
+    H5G_entry_t *entry;                 /*array of symbol table entries      */
+} H5G_node_t;
+
+/*
  * Shared information for all open group objects
  */
 struct H5G_shared_t {
@@ -412,6 +425,7 @@ H5_DLL herr_t H5G_ent_debug(H5F_t *f, const H5G_entry_t *ent,
 
 /* Functions that understand symbol table nodes */
 H5_DLL herr_t H5G_node_init(H5F_t *f);
+H5_DLL size_t H5G_node_size_real(const H5F_t *f);
 H5_DLL int H5G_node_iterate(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
 		     const void *_rt_key, void *_udata);
 H5_DLL int H5G_node_sumup(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t addr,
@@ -462,7 +476,7 @@ H5_DLL herr_t H5G_compact_remove_by_idx(const H5O_loc_t *oloc, hid_t dxpl_id,
 H5_DLL herr_t H5G_compact_iterate(const H5O_loc_t *oloc, hid_t dxpl_id,
     const H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
     hsize_t skip, hsize_t *last_lnk, H5G_lib_iterate_t op, void *op_data);
-H5_DLL herr_t H5G_compact_lookup(H5O_loc_t *grp_oloc, const char *name,
+H5_DLL htri_t H5G_compact_lookup(H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *lnk, hid_t dxpl_id);
 H5_DLL herr_t H5G_compact_lookup_by_idx(H5O_loc_t *oloc, hid_t dxpl_id,
     const H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
@@ -478,7 +492,7 @@ H5_DLL herr_t H5G_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *
 H5_DLL herr_t H5G_dense_create(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo);
 H5_DLL herr_t H5G_dense_insert(H5F_t *f, hid_t dxpl_id,
     const H5O_linfo_t *linfo, const H5O_link_t *lnk);
-H5_DLL herr_t H5G_dense_lookup(H5F_t *f, hid_t dxpl_id,
+H5_DLL htri_t H5G_dense_lookup(H5F_t *f, hid_t dxpl_id,
     const H5O_linfo_t *linfo, const char *name, H5O_link_t *lnk);
 H5_DLL herr_t H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id,
     const H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
@@ -504,8 +518,8 @@ H5_DLL H5G_obj_t H5G_dense_get_type_by_idx(H5F_t  *f, hid_t dxpl_id,
 /* Functions that understand group objects */
 H5_DLL herr_t H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
     const H5O_linfo_t *linfo, hid_t gcpl_id, H5O_loc_t *oloc/*out*/);
-H5_DLL H5O_linfo_t * H5G_obj_get_linfo(const H5O_loc_t *grp_oloc,
-    H5O_linfo_t *linfo, hid_t dxpl_id);
+H5_DLL htri_t H5G_obj_get_linfo(const H5O_loc_t *grp_oloc, H5O_linfo_t *linfo,
+    hid_t dxpl_id);
 H5_DLL herr_t H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *obj_lnk, hbool_t adj_link, hid_t dxpl_id);
 H5_DLL herr_t H5G_obj_iterate(const H5O_loc_t *grp_oloc,
@@ -518,7 +532,7 @@ H5_DLL herr_t H5G_obj_remove(H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r,
     const char *name, hid_t dxpl_id);
 H5_DLL herr_t H5G_obj_remove_by_idx(H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t dxpl_id);
-H5_DLL herr_t H5G_obj_lookup(H5O_loc_t *grp_oloc, const char *name,
+H5_DLL htri_t H5G_obj_lookup(H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *lnk, hid_t dxpl_id);
 H5_DLL herr_t H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5O_link_t *lnk, hid_t dxpl_id);

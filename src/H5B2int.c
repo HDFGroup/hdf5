@@ -1350,9 +1350,7 @@ H5B2_merge2(H5F_t *f, hid_t dxpl_id, unsigned depth,
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
     /* Delete right node & remove from cache (marked as dirty) */
-    if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, right_addr, (hsize_t)shared->node_size) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
-    if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -1574,9 +1572,7 @@ H5B2_merge3(H5F_t *f, hid_t dxpl_id, unsigned depth,
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
     /* Delete right node & remove from cache (marked as dirty) */
-    if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, right_addr, (hsize_t)shared->node_size) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
-    if (H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
+    if(H5AC_unprotect(f, dxpl_id, child_class, right_addr, right_child, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree child node")
 
 done:
@@ -2280,12 +2276,8 @@ H5B2_remove_leaf(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
             HDmemmove(H5B2_LEAF_NREC(leaf, shared, idx), H5B2_LEAF_NREC(leaf, shared, (idx + 1)), shared->type->nrec_size * (leaf->nrec-idx));
     } /* end if */
     else {
-        /* Release space for B-tree node on disk */
-        if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, leaf_addr, (hsize_t)shared->node_size) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
-
         /* Let the cache know that the object is deleted */
-        leaf_flags |= H5AC__DELETED_FLAG;
+        leaf_flags |= H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 
         /* Reset address of parent node pointer */
         curr_node_ptr->addr = HADDR_UNDEF;
@@ -2367,12 +2359,8 @@ H5B2_remove_internal(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
                 parent_cache_info_flags_ptr, internal, &internal_flags, 0) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
 
-        /* Release space for root B-tree node on disk */
-        if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, internal_addr, (hsize_t)shared->node_size) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
-
         /* Let the cache know that the object is deleted */
-        internal_flags |= H5AC__DELETED_FLAG;
+        internal_flags |= H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 
         /* Reset information in header's root node pointer */
         curr_node_ptr->addr = internal->node_ptrs[0].addr;
@@ -2580,12 +2568,8 @@ H5B2_remove_leaf_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
             HDmemmove(H5B2_LEAF_NREC(leaf, shared, idx), H5B2_LEAF_NREC(leaf, shared, (idx + 1)), shared->type->nrec_size * (leaf->nrec-idx));
     } /* end if */
     else {
-        /* Release space for B-tree node on disk */
-        if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, leaf_addr, (hsize_t)shared->node_size) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
-
         /* Let the cache know that the object is deleted */
-        leaf_flags |= H5AC__DELETED_FLAG;
+        leaf_flags |= H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 
         /* Reset address of parent node pointer */
         curr_node_ptr->addr = HADDR_UNDEF;
@@ -2671,12 +2655,8 @@ H5B2_remove_internal_by_idx(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared,
                 parent_cache_info_flags_ptr, internal, &internal_flags, 0) < 0)
             HGOTO_ERROR(H5E_BTREE, H5E_CANTSPLIT, FAIL, "unable to merge child node")
 
-        /* Release space for root B-tree node on disk */
-        if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, internal_addr, (hsize_t)shared->node_size) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree leaf node")
-
         /* Let the cache know that the object is deleted */
-        internal_flags |= H5AC__DELETED_FLAG;
+        internal_flags |= H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 
         /* Reset information in header's root node pointer */
         curr_node_ptr->addr = internal->node_ptrs[0].addr;
@@ -3134,15 +3114,10 @@ H5B2_delete_node(H5F_t *f, hid_t dxpl_id, H5RC_t *bt2_shared, unsigned depth,
         } /* end for */
     } /* end if */
 
-    /* Release space for current B-tree node on disk */
-    if(H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, curr_node->addr, (hsize_t)shared->node_size) < 0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree node")
-
 done:
     /* Unlock & delete current node */
-    if(node)
-        if(H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__DELETED_FLAG) < 0)
-            HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
+    if(node && H5AC_unprotect(f, dxpl_id, curr_node_class, curr_node->addr, node, H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
+        HDONE_ERROR(H5E_BTREE, H5E_CANTUNPROTECT, FAIL, "unable to release B-tree node")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5B2_delete_node() */

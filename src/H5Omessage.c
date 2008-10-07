@@ -879,7 +879,7 @@ H5O_msg_count_real(const H5O_t *oh, const H5O_msg_class_t *type)
  *-------------------------------------------------------------------------
  */
 htri_t
-H5O_msg_exists(H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
+H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id)
 {
     H5O_t	*oh = NULL;             /* Object header for location */
     htri_t      ret_value;              /* Return value */

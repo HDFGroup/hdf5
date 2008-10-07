@@ -103,7 +103,7 @@ typedef struct H5B_class_t {
     herr_t	(*new_node)(H5F_t*, hid_t, H5B_ins_t, void*, void*, void*, haddr_t*);
     int         (*cmp2)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 2 keys */
     int         (*cmp3)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 3 keys */
-    herr_t	(*found)(H5F_t*, hid_t, haddr_t, const void*, void*);
+    htri_t	(*found)(H5F_t*, hid_t, haddr_t, const void*, void*);
 
     /* insert new data */
     H5B_ins_t	(*insert)(H5F_t*, hid_t, haddr_t, void*, hbool_t*, void*, void*,

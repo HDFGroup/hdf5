@@ -16778,7 +16778,7 @@ check_expunge_entry_errs(void)
     if ( pass ) {
 
 	result = H5C_expunge_entry(NULL, -1, -1, cache_ptr,
-                                   &(types[0]), entry_ptr->addr);
+                                   &(types[0]), entry_ptr->addr, H5AC__NO_FLAGS_SET);
 
         if ( result > 0 ) {
 
@@ -16796,7 +16796,7 @@ check_expunge_entry_errs(void)
     if ( pass ) {
 
 	result = H5C_expunge_entry(NULL, -1, -1, cache_ptr,
-                                   &(types[0]), entry_ptr->addr);
+                                   &(types[0]), entry_ptr->addr, H5AC__NO_FLAGS_SET);
 
         if ( result > 0 ) {
 
@@ -16814,7 +16814,7 @@ check_expunge_entry_errs(void)
     if ( pass ) {
 
 	result = H5C_expunge_entry(NULL, -1, -1, cache_ptr,
-                                   &(types[0]), entry_ptr->addr);
+                                   &(types[0]), entry_ptr->addr, H5AC__NO_FLAGS_SET);
 
         if ( result < 0 ) {
 

@@ -429,8 +429,9 @@ done:
 hid_t
 H5Gget_create_plist(hid_t group_id)
 {
-    htri_t	        ginfo_exists = 0;
-    htri_t	        linfo_exists = 0;
+    H5O_linfo_t         linfo;		        /* Link info message            */
+    htri_t	        ginfo_exists;
+    htri_t	        linfo_exists;
     H5G_t		*grp = NULL;
     H5P_genplist_t      *gcpl_plist;
     H5P_genplist_t      *new_plist;
@@ -472,15 +473,9 @@ H5Gget_create_plist(hid_t group_id)
     } /* end if */
 
     /* Check for the group having a link info message */
-    if((linfo_exists = H5O_msg_exists(&(grp->oloc), H5O_LINFO_ID, H5AC_ind_dxpl_id)) < 0)
+    if((linfo_exists = H5G_obj_get_linfo(&(grp->oloc), &linfo, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to read object header")
     if(linfo_exists) {
-        H5O_linfo_t linfo;		/* Link info message            */
-
-        /* Read the link info */
-        if(NULL == H5G_obj_get_linfo(&(grp->oloc), &linfo, H5AC_ind_dxpl_id))
-            HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
-
         /* Set the link info for the property list */
         if(H5P_set(new_plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set link info")
@@ -1828,6 +1823,7 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
                 H5G_loc_t *old_loc = udata->curr_loc;       /* Pointer to previous group location info */
                 H5_index_t idx_type = udata->idx_type;      /* Type of index to use */
                 H5O_linfo_t	linfo;		        /* Link info message */
+                htri_t linfo_exists;                    /* Whether the link info message exists */
 
                 /* Add the path separator to the current path */
                 HDassert(udata->path[udata->curr_path_len] == '\0');
@@ -1835,7 +1831,9 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
                 udata->curr_path_len++;
 
                 /* Attempt to get the link info for this group */
-                if(H5G_obj_get_linfo(&obj_oloc, &linfo, udata->dxpl_id)) {
+                if((linfo_exists = H5G_obj_get_linfo(&obj_oloc, &linfo, udata->dxpl_id)) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5_ITER_ERROR, "can't check for link info message")
+                if(linfo_exists) {
                     /* Check for creation order tracking, if creation order index lookup requested */
                     if(idx_type == H5_INDEX_CRT_ORDER) {
                         /* Check if creation order is tracked */
@@ -1847,9 +1845,6 @@ H5G_visit_cb(const H5O_link_t *lnk, void *_udata)
                         HDassert(idx_type == H5_INDEX_NAME);
                 } /* end if */
                 else {
-                    /* Clear error stack from not finding the link info message */
-                    H5E_clear_stack(NULL);
-
                     /* Can only perform name lookups on groups with symbol tables */
                     if(idx_type != H5_INDEX_NAME)
                         /* Switch to name order for this group */
@@ -1918,6 +1913,7 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
 {
     H5G_iter_visit_ud_t udata;      /* User data for callback */
     H5O_linfo_t	linfo;		    /* Link info message */
+    htri_t linfo_exists;            /* Whether the link info message exists */
     hid_t       gid = (-1);         /* Group ID */
     H5G_t      *grp = NULL;         /* Group opened */
     H5G_loc_t	loc;                /* Location of group passed in */
@@ -1987,7 +1983,9 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     } /* end if */
 
     /* Attempt to get the link info for this group */
-    if(H5G_obj_get_linfo(&(grp->oloc), &linfo, dxpl_id)) {
+    if((linfo_exists = H5G_obj_get_linfo(&(grp->oloc), &linfo, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check for link info message")
+    if(linfo_exists) {
         /* Check for creation order tracking, if creation order index lookup requested */
         if(idx_type == H5_INDEX_CRT_ORDER) {
             /* Check if creation order is tracked */
@@ -1999,9 +1997,6 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
             HDassert(idx_type == H5_INDEX_NAME);
     } /* end if */
     else {
-        /* Clear error stack from not finding the link info message */
-        H5E_clear_stack(NULL);
-
         /* Can only perform name lookups on groups with symbol tables */
         if(idx_type != H5_INDEX_NAME)
             /* Switch to name order for this group */

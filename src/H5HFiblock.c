@@ -310,12 +310,8 @@ HDfprintf(stderr, "%s: Removing indirect block from cache, iblock->addr = %a\n",
                 iblock->par_entry = 0;
             } /* end if */
 
-            /* Release space for indirect block on disk */
-            if(H5MF_xfree(iblock->hdr->f, H5FD_MEM_FHEAP_IBLOCK, H5AC_dxpl_id, iblock->addr, (hsize_t)iblock->size) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block disk space")
-
             /* Evict the indirect block from the metadata cache */
-            if(H5AC_expunge_entry(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr) < 0)
+            if(H5AC_expunge_entry(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr, H5AC__FREE_FILE_SPACE_FLAG) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove indirect block from cache")
         } /* end if */
     } /* end if */
@@ -1489,6 +1485,7 @@ H5HF_man_iblock_delete(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t iblock_addr,
     H5HF_indirect_t *iblock;            /* Pointer to indirect block */
     unsigned row, col;                  /* Current row & column in indirect block */
     unsigned entry;                     /* Current entry in row */
+    unsigned cache_flags = H5AC__NO_FLAGS_SET;      /* Flags for unprotecting indirect block */
     hbool_t did_protect;                /* Whether we protected the indirect block or not */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1550,10 +1547,6 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
         } /* end for */
     } /* end row */
 
-    /* Release indirect block's disk space */
-    if(H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, iblock_addr, (hsize_t)iblock->size) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block")
-
 #ifndef NDEBUG
 {
     unsigned iblock_status = 0;         /* Indirect block's status in the metadata cache */
@@ -1567,12 +1560,14 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
 }
 #endif /* NDEBUG */
 
-    /* Finished deleting indirect block in metadata cache */
-    if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG, did_protect) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
-    iblock = NULL;
+    /* Indicate that the indirect block should be deleted & file space freed */
+    cache_flags |= H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 
 done:
+    /* Unprotect the indirect block, with appropriate flags */
+    if(iblock && H5HF_man_iblock_unprotect(iblock, dxpl_id, cache_flags, did_protect) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_iblock_delete() */
 

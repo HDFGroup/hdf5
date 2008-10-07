@@ -141,6 +141,10 @@ H5G_obj_create(H5F_t *f, hid_t dxpl_id, const H5O_ginfo_t *ginfo,
     HDassert(ginfo);
     HDassert(oloc);
 
+    /* Check for invalid access request */
+    if(0 == (f->intent & H5F_ACC_RDWR))
+	HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "no write intent on file")
+
     /* Check for using the latest version of the group format */
     /* (add more checks for creating "new format" groups when needed) */
     if(H5F_USE_LATEST_FORMAT(f) || linfo->track_corder)
@@ -322,36 +326,41 @@ H5G_obj_ent_encode(const H5F_t *f, uint8_t **pp, const H5O_loc_t *oloc)
  *
  *-------------------------------------------------------------------------
  */
-H5O_linfo_t *
+htri_t
 H5G_obj_get_linfo(const H5O_loc_t *grp_oloc, H5O_linfo_t *linfo, hid_t dxpl_id)
 {
-    H5O_linfo_t *ret_value;     /* Return value */
+    htri_t ret_value;           /* Return value */
 
-    FUNC_ENTER_NOAPI(H5G_obj_get_linfo, NULL)
+    FUNC_ENTER_NOAPI(H5G_obj_get_linfo, FAIL)
 
     /* check arguments */
     HDassert(grp_oloc);
+    HDassert(linfo);
 
-    /* Retrieve the "link info" structure */
-    if((ret_value = (H5O_linfo_t *)H5O_msg_read(grp_oloc, H5O_LINFO_ID, linfo, dxpl_id))) {
+    /* Check for the group having a link info message */
+    if((ret_value = H5O_msg_exists(grp_oloc, H5O_LINFO_ID, dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to read object header")
+    if(ret_value) {
+        /* Retrieve the "link info" structure */
+        if(NULL == H5O_msg_read(grp_oloc, H5O_LINFO_ID, linfo, dxpl_id))
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "link info message not present")
+
         /* Check if we don't know how many links there are */
-        if(ret_value->nlinks == HSIZET_MAX) {
+        if(linfo->nlinks == HSIZET_MAX) {
             /* Check if we are using "dense" link storage */
-            if(H5F_addr_defined(ret_value->fheap_addr)) {
+            if(H5F_addr_defined(linfo->fheap_addr)) {
                 /* Retrieve # of records in "name" B-tree */
                 /* (should be same # of records in all indices) */
-                if(H5B2_get_nrec(grp_oloc->file, dxpl_id, H5G_BT2_NAME, ret_value->name_bt2_addr, &ret_value->nlinks) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't retrieve # of records in index")
+                if(H5B2_get_nrec(grp_oloc->file, dxpl_id, H5G_BT2_NAME, linfo->name_bt2_addr, &linfo->nlinks) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve # of records in index")
             } /* end if */
             else {
                 /* Retrieve # of links from object header */
-                if(H5O_get_nlinks(grp_oloc, dxpl_id, &ret_value->nlinks) < 0)
-                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "can't retrieve # of links for object")
+                if(H5O_get_nlinks(grp_oloc, dxpl_id, &linfo->nlinks) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve # of links for object")
             } /* end if */
         } /* end if */
     } /* end if */
-    else
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, NULL, "link info message not present")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -452,6 +461,7 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
     hbool_t adj_link, hid_t dxpl_id)
 {
     H5O_linfo_t linfo;		/* Link info message */
+    htri_t linfo_exists;        /* Whether the link info message exists */
     hbool_t use_old_format;     /* Whether to use 'old format' (symbol table) for insertions or not */
     hbool_t use_new_dense = FALSE;      /* Whether to use "dense" form of 'new format' group */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -465,7 +475,9 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
 
     /* Check if we have information about the number of objects in this group */
     /* (by attempting to get the link info message for this group) */
-    if(H5G_obj_get_linfo(grp_oloc, &linfo, dxpl_id)) {
+    if((linfo_exists = H5G_obj_get_linfo(grp_oloc, &linfo, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check for link info message")
+    if(linfo_exists) {
         H5O_ginfo_t ginfo;	/* Group info message */
         size_t link_msg_size;   /* Size of new link message in the file */
 
@@ -525,9 +537,6 @@ H5G_obj_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_lnk,
         } /* end else */
     } /* end if */
     else {
-        /* Clear error stack from not finding the link info message */
-        H5E_clear_stack(NULL);
-
         /* Check for new-style link information */
         if(obj_lnk->cset != H5T_CSET_ASCII || obj_lnk->type > H5L_TYPE_BUILTIN_MAX) {
             H5O_linfo_t new_linfo = H5G_CRT_LINK_INFO_DEF;  /* Link information */
@@ -636,6 +645,7 @@ H5G_obj_iterate(const H5O_loc_t *grp_oloc,
     H5G_lib_iterate_t op, void *op_data, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		/* Link info message */
+    htri_t linfo_exists;        /* Whether the link info message exists */
     herr_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_iterate, FAIL)
@@ -645,7 +655,9 @@ H5G_obj_iterate(const H5O_loc_t *grp_oloc,
     HDassert(op);
 
     /* Attempt to get the link info for this group */
-    if(H5G_obj_get_linfo(grp_oloc, &linfo, dxpl_id)) {
+    if((linfo_exists = H5G_obj_get_linfo(grp_oloc, &linfo, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check for link info message")
+    if(linfo_exists) {
         /* Check for going out of bounds */
         if(skip > 0 && (size_t)skip >= linfo.nlinks)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
@@ -669,9 +681,6 @@ H5G_obj_iterate(const H5O_loc_t *grp_oloc,
         } /* end else */
     } /* end if */
     else {
-        /* Clear error stack from not finding the link info message */
-        H5E_clear_stack(NULL);
-
         /* Can only perform name lookups on groups with symbol tables */
         if(idx_type != H5_INDEX_NAME)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
@@ -707,6 +716,7 @@ H5G_obj_info(H5O_loc_t *oloc, H5G_info_t *grp_info, hid_t dxpl_id)
     H5G_name_t  grp_path;            	/* Group hier. path */
     H5O_loc_t   grp_oloc;            	/* Group object location */
     H5O_linfo_t	linfo;		        /* Link info message */
+    htri_t linfo_exists;                /* Whether the link info message exists */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_info, FAIL)
@@ -732,7 +742,9 @@ H5G_obj_info(H5O_loc_t *oloc, H5G_info_t *grp_info, hid_t dxpl_id)
     grp_info->mounted = H5G_MOUNTED(grp);
 
     /* Attempt to get the link info for this group */
-    if(H5G_obj_get_linfo(oloc, &linfo, dxpl_id)) {
+    if((linfo_exists = H5G_obj_get_linfo(oloc, &linfo, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check for link info message")
+    if(linfo_exists) {
         /* Retrieve the information about the links */
         grp_info->nlinks = linfo.nlinks;
         grp_info->max_corder = linfo.max_corder;
@@ -744,9 +756,6 @@ H5G_obj_info(H5O_loc_t *oloc, H5G_info_t *grp_info, hid_t dxpl_id)
             grp_info->storage_type = H5G_STORAGE_TYPE_COMPACT;
     } /* end if */
     else {
-        /* Clear error stack from not finding the link info message */
-        H5E_clear_stack(NULL);
-
         /* Get the number of objects in this group by iterating over symbol table */
         if(H5G_stab_count(oloc, &grp_info->nlinks, dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTCOUNT, FAIL, "can't count objects")
@@ -783,6 +792,7 @@ H5G_obj_get_name_by_idx(H5O_loc_t *oloc, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, char* name, size_t size, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		/* Link info message */
+    htri_t linfo_exists;        /* Whether the link info message exists */
     ssize_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_get_name_by_idx, FAIL)
@@ -791,7 +801,9 @@ H5G_obj_get_name_by_idx(H5O_loc_t *oloc, H5_index_t idx_type,
     HDassert(oloc && oloc->file);
 
     /* Attempt to get the link info for this group */
-    if(H5G_obj_get_linfo(oloc, &linfo, dxpl_id)) {
+    if((linfo_exists = H5G_obj_get_linfo(oloc, &linfo, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check for link info message")
+    if(linfo_exists) {
         /* Check for creation order tracking, if creation order index lookup requested */
         if(idx_type == H5_INDEX_CRT_ORDER) {
             /* Check if creation order is tracked */
@@ -812,9 +824,6 @@ H5G_obj_get_name_by_idx(H5O_loc_t *oloc, H5_index_t idx_type,
         } /* end else */
     } /* end if */
     else {
-        /* Clear error stack from not finding the link info message */
-        H5E_clear_stack(NULL);
-
         /* Can only perform name lookups on groups with symbol tables */
         if(idx_type != H5_INDEX_NAME)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
@@ -955,6 +964,7 @@ herr_t
 H5G_obj_remove(H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *name, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		/* Link info message            */
+    htri_t linfo_exists;        /* Whether the link info message exists */
     hbool_t     use_old_format; /* Whether to use 'old format' (symbol table) for deletion or not */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
@@ -965,7 +975,9 @@ H5G_obj_remove(H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *name, h
     HDassert(name && *name);
 
     /* Attempt to get the link info for this group */
-    if(H5G_obj_get_linfo(oloc, &linfo, dxpl_id)) {
+    if((linfo_exists = H5G_obj_get_linfo(oloc, &linfo, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check for link info message")
+    if(linfo_exists) {
         /* Using the new format for groups */
         use_old_format = FALSE;
 
@@ -982,9 +994,6 @@ H5G_obj_remove(H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const char *name, h
         } /* end else */
     } /* end if */
     else {
-        /* Clear error stack from not finding the link info message */
-        H5E_clear_stack(NULL);
-
         /* Using the old format for groups */
         use_old_format = TRUE;
 
@@ -1021,6 +1030,7 @@ H5G_obj_remove_by_idx(H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		/* Link info message            */
+    htri_t linfo_exists;        /* Whether the link info message exists */
     hbool_t     use_old_format; /* Whether to use 'old format' (symbol table) for deletion or not */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
@@ -1030,7 +1040,9 @@ H5G_obj_remove_by_idx(H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
     HDassert(grp_oloc && grp_oloc->file);
 
     /* Attempt to get the link info for this group */
-    if(H5G_obj_get_linfo(grp_oloc, &linfo, dxpl_id)) {
+    if((linfo_exists = H5G_obj_get_linfo(grp_oloc, &linfo, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check for link info message")
+    if(linfo_exists) {
         /* Check for creation order tracking, if creation order index lookup requested */
         if(idx_type == H5_INDEX_CRT_ORDER) {
             /* Check if creation order is tracked */
@@ -1093,12 +1105,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+htri_t
 H5G_obj_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     hid_t dxpl_id)
 {
     H5O_linfo_t linfo;		        /* Link info message */
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    htri_t linfo_exists;                /* Whether the link info message exists */
+    htri_t     ret_value = FALSE;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_lookup, FAIL)
 
@@ -1107,25 +1120,24 @@ H5G_obj_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     HDassert(name && *name);
 
     /* Attempt to get the link info message for this group */
-    if(H5G_obj_get_linfo(grp_oloc, &linfo, dxpl_id)) {
+    if((linfo_exists = H5G_obj_get_linfo(grp_oloc, &linfo, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check for link info message")
+    if(linfo_exists) {
         /* Check for dense link storage */
         if(H5F_addr_defined(linfo.fheap_addr)) {
             /* Get the object's info from the dense link storage */
-            if(H5G_dense_lookup(grp_oloc->file, dxpl_id, &linfo, name, lnk) < 0)
+            if((ret_value = H5G_dense_lookup(grp_oloc->file, dxpl_id, &linfo, name, lnk)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
         } /* end if */
         else {
             /* Get the object's info from the link messages */
-            if(H5G_compact_lookup(grp_oloc, name, lnk, dxpl_id) < 0)
+            if((ret_value = H5G_compact_lookup(grp_oloc, name, lnk, dxpl_id)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
         } /* end else */
     } /* end if */
     else {
-        /* Clear error stack from not finding the link info message */
-        H5E_clear_stack(NULL);
-
         /* Get the object's info from the symbol table */
-        if(H5G_stab_lookup(grp_oloc, name, lnk, dxpl_id) < 0)
+        if((ret_value = H5G_stab_lookup(grp_oloc, name, lnk, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate object")
     } /* end else */
 
@@ -1153,6 +1165,7 @@ H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, H5O_link_t *lnk, hid_t dxpl_id)
 {
     H5O_linfo_t linfo;		        /* Link info message */
+    htri_t linfo_exists;                /* Whether the link info message exists */
     herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_lookup_by_idx, FAIL)
@@ -1161,7 +1174,9 @@ H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5_index_t idx_type,
     HDassert(grp_oloc && grp_oloc->file);
 
     /* Attempt to get the link info message for this group */
-    if(H5G_obj_get_linfo(grp_oloc, &linfo, dxpl_id)) {
+    if((linfo_exists = H5G_obj_get_linfo(grp_oloc, &linfo, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check for link info message")
+    if(linfo_exists) {
         /* Check for creation order tracking, if creation order index lookup requested */
         if(idx_type == H5_INDEX_CRT_ORDER) {
             /* Check if creation order is tracked */
@@ -1182,9 +1197,6 @@ H5G_obj_lookup_by_idx(H5O_loc_t *grp_oloc, H5_index_t idx_type,
         } /* end else */
     } /* end if */
     else {
-        /* Clear error stack from not finding the link info message */
-        H5E_clear_stack(NULL);
-
         /* Can only perform name lookups on groups with symbol tables */
         if(idx_type != H5_INDEX_NAME)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")

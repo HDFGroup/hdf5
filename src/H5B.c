@@ -294,9 +294,9 @@ done:
  *		pointers since it assumes that all nodes can be reached
  *		from the parent node.
  *
- * Return:	Non-negative on success (if found, values returned through the
- *              UDATA argument). Negative on failure (if not found, UDATA is
- *              undefined).
+ * Return:	Non-negative (TRUE/FALSE) on success (if found, values returned
+ *              through the UDATA argument). Negative on failure (if not found,
+ *              UDATA is undefined).
  *
  * Programmer:	Robb Matzke
  *		matzke@llnl.gov
@@ -307,90 +307,65 @@ done:
  *		The ADDR argument is passed by value.
  *-------------------------------------------------------------------------
  */
-herr_t
+htri_t
 H5B_find(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void *udata)
 {
     H5B_t	*bt = NULL;
-    H5B_shared_t        *shared;        /* Pointer to shared B-tree info */
-    unsigned    idx=0, lt = 0, rt;        /* Final, left & right key indices */
+    H5B_shared_t *shared;               /* Pointer to shared B-tree info */
+    unsigned    idx = 0, lt = 0, rt;    /* Final, left & right key indices */
     int	        cmp = 1;                /* Key comparison value */
-    int		ret_value = SUCCEED;    /* Return value */
+    htri_t	ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5B_find, FAIL)
 
     /*
      * Check arguments.
      */
-    assert(f);
-    assert(type);
-    assert(type->decode);
-    assert(type->cmp3);
-    assert(type->found);
-    assert(H5F_addr_defined(addr));
+    HDassert(f);
+    HDassert(type);
+    HDassert(type->decode);
+    HDassert(type->cmp3);
+    HDassert(type->found);
+    HDassert(H5F_addr_defined(addr));
 
     /*
      * Perform a binary search to locate the child which contains
      * the thing for which we're searching.
      */
-    if (NULL == (bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata, H5AC_READ)))
+    if(NULL == (bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, udata, H5AC_READ)))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree node")
-    shared=(H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
+    shared = (H5B_shared_t *)H5RC_GET_OBJ(bt->rc_shared);
     HDassert(shared);
-    rt = bt->nchildren;
 
-    while (lt < rt && cmp) {
+    rt = bt->nchildren;
+    while(lt < rt && cmp) {
 	idx = (lt + rt) / 2;
 	/* compare */
-	if ((cmp = (type->cmp3) (f, dxpl_id, H5B_NKEY(bt,shared,idx), udata,
-				 H5B_NKEY(bt,shared,idx+1))) < 0) {
+	if((cmp = (type->cmp3)(f, dxpl_id, H5B_NKEY(bt, shared, idx), udata, H5B_NKEY(bt, shared, (idx + 1)))) < 0)
 	    rt = idx;
-	} else {
-	    lt = idx+1;
-	}
-    }
-    if (cmp)
-        /* Note: don't push error on stack, leave that to next higher level,
-         *      since many times the B-tree is searched in order to determine
-         *      if an object exists in the B-tree or not. -QAK
-         */
-#ifdef OLD_WAY
-	HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "B-tree key not found")
-#else /* OLD_WAY */
-	HGOTO_DONE(FAIL)
-#endif /* OLD_WAY */
+	else
+	    lt = idx + 1;
+    } /* end while */
+    /* Check if not found */
+    if(cmp)
+	HGOTO_DONE(FALSE)
 
     /*
      * Follow the link to the subtree or to the data node.
      */
     assert(idx < bt->nchildren);
 
-    if (bt->level > 0) {
-	if (H5B_find(f, dxpl_id, type, bt->child[idx], udata) < 0)
-        /* Note: don't push error on stack, leave that to next higher level,
-         *      since many times the B-tree is searched in order to determine
-         *      if an object exists in the B-tree or not. -QAK
-         */
-#ifdef OLD_WAY
-	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in subtree")
-#else /* OLD_WAY */
-            HGOTO_DONE(FAIL)
-#endif /* OLD_WAY */
-    } else {
-	if ((type->found) (f, dxpl_id, bt->child[idx], H5B_NKEY(bt,shared,idx), udata) < 0)
-        /* Note: don't push error on stack, leave that to next higher level,
-         *      since many times the B-tree is searched in order to determine
-         *      if an object exists in the B-tree or not. -QAK
-         */
-#ifdef OLD_WAY
-            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "key not found in leaf node")
-#else /* OLD_WAY */
-            HGOTO_DONE(FAIL)
-#endif /* OLD_WAY */
-    }
+    if(bt->level > 0) {
+	if((ret_value = H5B_find(f, dxpl_id, type, bt->child[idx], udata)) < 0)
+	    HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "can't lookup key in subtree")
+    } /* end if */
+    else {
+	if((ret_value = (type->found)(f, dxpl_id, bt->child[idx], H5B_NKEY(bt, shared, idx), udata)) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "can't lookup key in leaf node")
+    } /* end else */
 
 done:
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET)
-              < 0)
+    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release node")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1533,16 +1508,14 @@ H5B_remove_helper(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type
 	    bt->left = HADDR_UNDEF;
 	    bt->right = HADDR_UNDEF;
             H5_CHECK_OVERFLOW(shared->sizeof_rnode,size_t,hsize_t);
-	    if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)shared->sizeof_rnode)<0
-                    || H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, bt_flags | H5C__DELETED_FLAG)<0) {
+	    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, bt_flags | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0) {
 		bt = NULL;
                 bt_flags = H5AC__NO_FLAGS_SET;
 		HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, H5B_INS_ERROR, "unable to free B-tree node")
-	    }
+	    } /* end if */
 	    bt = NULL;
             bt_flags = H5AC__NO_FLAGS_SET;
-	}
-
+	} /* end if */
     } else if (H5B_INS_REMOVE==ret_value && 0==idx) {
 	/*
 	 * The subtree is the left-most child of this node. We discard the
@@ -1766,12 +1739,8 @@ H5B_delete(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr, void 
         } /* end if */
     } /* end else */
 
-    /* Delete this node from disk */
-    if (H5MF_xfree(f, H5FD_MEM_BTREE, dxpl_id, addr, (hsize_t)shared->sizeof_rnode)<0)
-        HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free B-tree node")
-
 done:
-    if (bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5C__DELETED_FLAG)<0)
+    if(bt && H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG)<0)
         HDONE_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node in cache")
 
     FUNC_LEAVE_NOAPI(ret_value)

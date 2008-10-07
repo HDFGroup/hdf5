@@ -76,9 +76,9 @@ iter_cb(const void *_record, void *_op_data)
  *
  * Purpose:	v2 B-tree find callback
  *
- * Return:	Success:	0
+ * Return:	Success:	TRUE/FALSE
  *
- *		Failure:	1
+ *		Failure:	FAIL
  *
  * Programmer:	Quincey Koziol
  *              Thursday, February 24, 2005
@@ -92,9 +92,9 @@ find_cb(const void *_record, void *_op_data)
     hsize_t *search = (hsize_t *)_op_data;
 
     if(*record != *search)
-        return(-1);
+        return(FALSE);
 
-    return(0);
+    return(TRUE);
 } /* end find_cb() */
 
 
@@ -261,11 +261,7 @@ test_insert_basic(hid_t fapl)
 
     /* Attempt to find record in B-tree with no records */
     idx = 0;
-    H5E_BEGIN_TRY {
-	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, NULL);
-    } H5E_END_TRY;
-    /* Should fail */
-    if(ret != FAIL)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, NULL) != FALSE)
         TEST_ERROR
 
     /* Attempt to index record in B-tree with no records */
@@ -286,29 +282,23 @@ test_insert_basic(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Attempt to find non-existant record in B-tree with 1 record */
+    /* (Should not be found, but not fail) */
     idx = 41;
-    H5E_BEGIN_TRY {
-	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx);
-    } H5E_END_TRY;
-    /* Should fail */
-    if(ret != FAIL)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) != FALSE)
         TEST_ERROR
 
     /* Try again with NULL 'op' */
-    H5E_BEGIN_TRY {
-	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, NULL, NULL);
-    } H5E_END_TRY;
-    /* Should fail */
-    if(ret != FAIL)
+    /* (Should not be found, but not fail) */
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, NULL, NULL) != FALSE)
         TEST_ERROR
 
     /* Attempt to find existant record in B-tree with 1 record */
     idx = 42;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) != TRUE)
         TEST_ERROR
 
     /* Try again with NULL 'op' */
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, NULL, NULL)<0)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, NULL, NULL) != TRUE)
         TEST_ERROR
 
     /* Attempt to index non-existant record in B-tree with 1 record */
@@ -347,17 +337,14 @@ test_insert_basic(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Attempt to find non-existant record in level-0 B-tree with several records */
+    /* (Should not be found, but not fail) */
     idx = 41;
-    H5E_BEGIN_TRY {
-	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx);
-    } H5E_END_TRY;
-    /* Should fail */
-    if(ret != FAIL)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) != FALSE)
         TEST_ERROR
 
     /* Attempt to find existant record in level-0 B-tree with several record */
     idx = 56;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx)<0)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) != TRUE)
         TEST_ERROR
 
     /* Attempt to index non-existant record in B-tree with several records */
@@ -521,22 +508,19 @@ test_insert_split_root(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to find non-existant record in level-1 B-tree */
+    /* (Should not be found, but not fail) */
     idx = INSERT_SPLIT_ROOT_NREC + 10;
-    H5E_BEGIN_TRY {
-	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx);
-    } H5E_END_TRY;
-    /* Should fail */
-    if(ret != FAIL)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) != FALSE)
         TEST_ERROR
 
     /* Attempt to find existant record in root of level-1 B-tree */
     idx = 33;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) < 0)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) != TRUE)
         FAIL_STACK_ERROR
 
     /* Attempt to find existant record in leaf of level-1 B-tree */
     idx = 56;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) < 0)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) != TRUE)
         FAIL_STACK_ERROR
 
     /* Attempt to index non-existant record in level-1 B-tree */
@@ -1286,17 +1270,14 @@ test_insert_make_level2(hid_t fapl)
         TEST_ERROR
 
     /* Attempt to find non-existant record in level-2 B-tree */
+    /* (Should not be found, but not fail) */
     idx = INSERT_SPLIT_ROOT_NREC * 30;
-    H5E_BEGIN_TRY {
-	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx);
-    } H5E_END_TRY;
-    /* Should fail */
-    if(ret != FAIL)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) != FALSE)
         TEST_ERROR
 
     /* Attempt to find existant record in root of level-2 B-tree */
     idx = 948;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) < 0)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) != TRUE)
         FAIL_STACK_ERROR
 
     /* Check with B-tree */
@@ -1308,7 +1289,7 @@ test_insert_make_level2(hid_t fapl)
 
     /* Attempt to find existant record in internal node of level-2 B-tree */
     idx = 505;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) < 0)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) != TRUE)
         FAIL_STACK_ERROR
 
     /* Check with B-tree */
@@ -1320,7 +1301,7 @@ test_insert_make_level2(hid_t fapl)
 
     /* Attempt to find existant record in leaf of level-2 B-tree */
     idx = 555;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) < 0)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) != TRUE)
         FAIL_STACK_ERROR
 
     /* Check with B-tree */
@@ -2838,12 +2819,9 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         TEST_ERROR
 
     /* Attempt to find non-existant record in level-4 B-tree */
-    idx = INSERT_MANY*2;
-    H5E_BEGIN_TRY {
-	ret = H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx);
-    } H5E_END_TRY;
-    /* Should fail */
-    if(ret != FAIL)
+    /* (Should not be found, but not fail) */
+    idx = INSERT_MANY * 2;
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) != FALSE)
         TEST_ERROR
 
     /* Find random records */
@@ -2852,7 +2830,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         idx = (hsize_t)(HDrandom()%INSERT_MANY);
 
         /* Attempt to find existant record in root of level-4 B-tree */
-        if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) < 0)
+        if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &idx, find_cb, &idx) != TRUE)
             FAIL_STACK_ERROR
     } /* end for */
 
@@ -7310,7 +7288,7 @@ test_modify(hid_t fapl)
     /* Attempt to find modified record */
     record = 4331;
     found = 4331;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, find_cb, &found) < 0)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, find_cb, &found) != TRUE)
         FAIL_STACK_ERROR
     if(found != 4331)
         TEST_ERROR
@@ -7354,7 +7332,7 @@ test_modify(hid_t fapl)
     /* Attempt to find modified record */
     record = 5352;
     found = 5352;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, find_cb, &found) < 0)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, find_cb, &found) != TRUE)
         STACK_ERROR
     if(found != 5352)
         TEST_ERROR
@@ -7398,7 +7376,7 @@ test_modify(hid_t fapl)
     /* Attempt to find modified record */
     record = 9448;
     found = 9448;
-    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, find_cb, &found) < 0)
+    if(H5B2_find(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record, find_cb, &found) != TRUE)
         STACK_ERROR
     if(found != 9448)
         TEST_ERROR

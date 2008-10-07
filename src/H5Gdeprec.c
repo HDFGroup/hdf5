@@ -1136,6 +1136,7 @@ static H5G_obj_t
 H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		/* Link info message */
+    htri_t linfo_exists;        /* Whether the link info message exists */
     H5G_obj_t ret_value;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_get_type_by_idx, H5G_UNKNOWN)
@@ -1144,7 +1145,9 @@ H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
     HDassert(oloc);
 
     /* Attempt to get the link info for this group */
-    if(H5G_obj_get_linfo(oloc, &linfo, dxpl_id)) {
+    if((linfo_exists = H5G_obj_get_linfo(oloc, &linfo, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5G_UNKNOWN, "can't check for link info message")
+    if(linfo_exists) {
         if(H5F_addr_defined(linfo.fheap_addr)) {
             /* Get the object's name from the dense link storage */
             if((ret_value = H5G_dense_get_type_by_idx(oloc->file, dxpl_id, &linfo, idx)) < 0)
@@ -1157,9 +1160,6 @@ H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
         } /* end else */
     } /* end if */
     else {
-        /* Clear error stack from not finding the link info message */
-        H5E_clear_stack(NULL);
-
         /* Get the object's type from the symbol table */
         if((ret_value = H5G_stab_get_type_by_idx(oloc, idx, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "can't locate type")

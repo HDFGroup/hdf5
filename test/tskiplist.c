@@ -1165,6 +1165,164 @@ test_skiplist_greater(void)
 
 /****************************************************************
 **
+**  test_skiplist_below(): Test H5SL (skip list) code.
+**      Tests 'below' operation in skip lists.
+**
+****************************************************************/
+static void
+test_skiplist_below(void)
+{
+    H5SL_t *slist;      /* Skip list created */
+    H5SL_node_t *node;  /* Skip list node */
+    size_t u;           /* Local index variable */
+    unsigned data[10]={ 10, 20, 15, 5, 50, 30, 31, 32, 80, 90};
+    /* unsigned sorted_data[10]={ 5, 10, 15, 20, 30, 31, 32, 50, 80, 90}; */
+    unsigned *found_item;    /* Item found in skip list */
+    unsigned find_item;  /* Item to add to skip list */
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(7, ("Testing Skip List 'Less' Operation\n"));
+
+    /* Create a skip list */
+    slist = H5SL_create(H5SL_TYPE_UNSIGNED, 0.5, (size_t)16);
+    CHECK(slist, NULL, "H5SL_create");
+
+    /* Insert objects into the skip list */
+    for(u = 0; u < 10; u++) {
+        ret = H5SL_insert(slist, &data[u], &data[u]);
+        CHECK(ret, FAIL, "H5SL_insert");
+    } /* end for */
+
+    /* Check for exact match of items in various positions */
+    find_item = 20;
+    node = H5SL_below(slist, &find_item);
+    CHECK(node, NULL, "H5SL_below");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, find_item, "H5SL_below");
+    find_item = 90;
+    node = H5SL_below(slist, &find_item);
+    CHECK(node, NULL, "H5SL_below");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, find_item, "H5SL_below");
+    find_item = 5;
+    node = H5SL_below(slist, &find_item);
+    CHECK(node, NULL, "H5SL_below");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, find_item, "H5SL_below");
+
+    /* Find item less than a missing key, in various positions */
+    find_item = 19;
+    node = H5SL_below(slist, &find_item);
+    CHECK(node, NULL, "H5SL_below");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, 15, "H5SL_below");
+    find_item = 89;
+    node = H5SL_below(slist, &find_item);
+    CHECK(node, NULL, "H5SL_below");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, 80, "H5SL_below");
+    find_item = 100;
+    node = H5SL_below(slist, &find_item);
+    CHECK(node, NULL, "H5SL_below");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, 90, "H5SL_below");
+    find_item = 9;
+    node = H5SL_below(slist, &find_item);
+    CHECK(node, NULL, "H5SL_below");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, 5, "H5SL_below");
+    find_item = 4;
+    node = H5SL_less(slist, &find_item);
+    VERIFY(node, NULL, "H5SL_below");
+
+    /* Close the skip list */
+    ret = H5SL_close(slist);
+    CHECK(ret, FAIL, "H5SL_close");
+
+} /* end test_skiplist_below() */
+
+/****************************************************************
+**
+**  test_skiplist_above(): Test H5SL (skip list) code.
+**      Tests 'above' operation in skip lists.
+**
+****************************************************************/
+static void
+test_skiplist_above(void)
+{
+    H5SL_t *slist;      /* Skip list created */
+    H5SL_node_t *node;  /* Skip list node */
+    size_t u;           /* Local index variable */
+    unsigned data[10]={ 10, 20, 15, 5, 50, 30, 31, 32, 80, 90};
+    /* unsigned sorted_data[10]={ 5, 10, 15, 20, 30, 31, 32, 50, 80, 90}; */
+    unsigned *found_item;    /* Item found in skip list */
+    unsigned find_item;  /* Item to add to skip list */
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(7, ("Testing Skip List 'Greater' Operation\n"));
+
+    /* Create a skip list */
+    slist = H5SL_create(H5SL_TYPE_UNSIGNED, 0.5, (size_t)16);
+    CHECK(slist, NULL, "H5SL_create");
+
+    /* Insert objects into the skip list */
+    for(u = 0; u < 10; u++) {
+        ret = H5SL_insert(slist, &data[u], &data[u]);
+        CHECK(ret, FAIL, "H5SL_insert");
+    } /* end for */
+
+    /* Check for exact match of items in various positions */
+    find_item = 20;
+    node = H5SL_above(slist, &find_item);
+    CHECK(node, NULL, "H5SL_above");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, find_item, "H5SL_above");
+    find_item = 90;
+    node = H5SL_above(slist, &find_item);
+    CHECK(node, NULL, "H5SL_above");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, find_item, "H5SL_above");
+    find_item = 5;
+    node = H5SL_above(slist, &find_item);
+    CHECK(node, NULL, "H5SL_above");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, find_item, "H5SL_above");
+
+    /* Find item greater than a missing key, in various positions */
+    find_item = 19;
+    node = H5SL_above(slist, &find_item);
+    CHECK(node, NULL, "H5SL_above");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, 20, "H5SL_above");
+    find_item = 89;
+    node = H5SL_above(slist, &find_item);
+    CHECK(node, NULL, "H5SL_above");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, 90, "H5SL_above");
+    find_item = 100;
+    node = H5SL_above(slist, &find_item);
+    VERIFY(node, NULL, "H5SL_above");
+    find_item = 6;
+    node = H5SL_above(slist, &find_item);
+    CHECK(node, NULL, "H5SL_above");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, 10, "H5SL_above");
+    find_item = 4;
+    node = H5SL_above(slist, &find_item);
+    CHECK(node, NULL, "H5SL_above");
+    found_item = H5SL_item(node);
+    VERIFY(*found_item, 5, "H5SL_above");
+
+    /* Close the skip list */
+    ret = H5SL_close(slist);
+    CHECK(ret, FAIL, "H5SL_close");
+
+} /* end test_skiplist_above() */
+
+/****************************************************************
+**
 **  test_skiplist_remote_first(): Test H5SL (skip list) code.
 **      Tests 'remove first' operation in skip lists.
 **
@@ -1240,7 +1398,9 @@ test_skiplist(void)
     test_skiplist_free();       /* Test 'free' operation */
     test_skiplist_less();       /* Test 'less' operation */
     test_skiplist_greater();    /* Test 'greater' operation */
-    test_skiplist_remove_first();       /* Test 'remove first' operation */
+    test_skiplist_below();      /* Test 'below' operation */
+    test_skiplist_above();      /* Test 'above' operation */
+    test_skiplist_remove_first();   /* Test 'remove first' operation */
 
 }   /* end test_skiplist() */
 

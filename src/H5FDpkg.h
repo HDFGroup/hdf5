@@ -48,15 +48,11 @@
 /* Package Private Variables */
 /*****************************/
 
-/* Declare a PQ free list to manage the metadata accumulator buffer */
-H5FL_BLK_EXTERN(meta_accum);
-
 
 /******************************/
 /* Package Private Prototypes */
 /******************************/
 H5_DLL herr_t H5FD_init(void);
-H5_DLL herr_t H5FD_free_freelist(H5FD_t *file);
 
 
 /* Testing routines */

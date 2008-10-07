@@ -848,6 +848,7 @@ H5D_link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type
      *  equivalent of compressed contiguous datasets - QAK]
      */
     if(total_chunks == 1) {
+        H5D_chunk_ud_t udata;           /* User data for querying chunk info */
         hsize_t coords[H5O_LAYOUT_NDIMS];   /* Coordinates of chunk in file dataset's dataspace */
         H5SL_node_t *chunk_node;        /* Pointer to chunk node for selection */
         H5S_t *fspace;                  /* Dataspace describing chunk & selection in it */
@@ -858,8 +859,9 @@ H5D_link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type
         HDmemset(coords, 0, sizeof(coords));
 
         /* Look up address of chunk */
-        if(HADDR_UNDEF == (ctg_store.contig.dset_addr = H5D_chunk_get_addr(io_info->dset, io_info->dxpl_id, coords, NULL)))
+        if(H5D_chunk_get_info(io_info->dset, io_info->dxpl_id, coords, &udata) < 0)
             HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
+        ctg_store.contig.dset_addr = udata.addr;
 
         /* Check for this process having selection in this chunk */
         chunk_node = H5SL_first(fm->sel_chunks);
@@ -1207,7 +1209,6 @@ if(H5DEBUG(D))
                 void *chunk;                    /* Pointer to the data chunk in cache */
                 uint32_t accessed_bytes;          /* Total accessed size in a chunk */
                 unsigned idx_hint = 0;          /* Cache index hint      */
-                haddr_t caddr;                  /* Address of the cached chunk */
 
                 /* Switch to independent I/O */
                 if(last_xfer_mode != H5FD_MPIO_INDEPENDENT) {
@@ -1219,11 +1220,11 @@ if(H5DEBUG(D))
                 /* Load the chunk into cache.  But if the whole chunk is written,
                  * simply allocate space instead of load the chunk.
                  */
-                if(HADDR_UNDEF == (caddr = H5D_chunk_get_addr(io_info->dset, io_info->dxpl_id, chunk_info->coords, &udata)))
+                if(H5D_chunk_get_info(io_info->dset, io_info->dxpl_id, chunk_info->coords, &udata) < 0)
                     HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
 
                 /* Load the chunk into cache and lock it. */
-                if(H5D_chunk_cacheable(io_info, caddr)) {
+                if(H5D_chunk_cacheable(io_info, udata.addr)) {
                     hbool_t entire_chunk = TRUE;         /* Whether whole chunk is selected */
 
                     /* Compute # of bytes accessed in chunk */
@@ -1246,7 +1247,7 @@ if(H5DEBUG(D))
                 } /* end if */
                 else {
                     /* Set up the storage address information for this chunk */
-                    ctg_store.contig.dset_addr = caddr;
+                    ctg_store.contig.dset_addr = udata.addr;
 
                     /* No chunk cached */
                     chunk = NULL;
@@ -1396,7 +1397,6 @@ if(H5DEBUG(D)) {
      /* Iterate through chunks to be operated on */
     while(chunk_node) {
         H5D_chunk_info_t *chunk_info;   /* chunk information */
-        haddr_t chunk_addr;             /* Address of chunk in file */
         H5D_chunk_ud_t udata;		/* B-tree pass-through	*/
         hbool_t make_ind, make_coll;    /* Flags to indicate that the MPI mode should change */
 
@@ -1434,8 +1434,8 @@ if(H5DEBUG(D)) {
 #endif /* H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS */
 
         /* Retrieve the chunk's address */
-        if(HADDR_UNDEF == (chunk_addr = H5D_chunk_get_addr(io_info->dset, io_info->dxpl_id, chunk_info->coords, &udata)))
-            HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get chunk info from skipped list")
+        if(H5D_chunk_get_info(io_info->dset, io_info->dxpl_id, chunk_info->coords, &udata) < 0)
+            HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
 
         /* Independent I/O */
         if(make_ind) {
@@ -1449,7 +1449,7 @@ if(H5DEBUG(D)) {
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't switch to independent I/O")
 
             /* Load the chunk into cache and lock it. */
-            if(H5D_chunk_cacheable(io_info, chunk_addr)) {
+            if(H5D_chunk_cacheable(io_info, udata.addr)) {
                 hbool_t entire_chunk = TRUE;         /* Whether whole chunk is selected */
 
                 /* Compute # of bytes accessed in chunk */
@@ -1472,7 +1472,7 @@ if(H5DEBUG(D)) {
             } /* end if */
             else {
                 /* Set up the storage address information for this chunk */
-                ctg_store.contig.dset_addr = chunk_addr;
+                ctg_store.contig.dset_addr = udata.addr;
 
                 /* No chunk cached */
                 chunk = NULL;
@@ -1499,7 +1499,7 @@ if(H5DEBUG(D)) {
         } /* end if */
         else { /*collective I/O */
             /* Set up the storage address information for this chunk */
-            ctg_store.contig.dset_addr = chunk_addr;
+            ctg_store.contig.dset_addr = udata.addr;
 
             if(H5D_inter_collective_io(&ctg_io_info, type_info, chunk_info->fspace, chunk_info->mspace) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL,"couldn't finish shared collective MPI-IO")
@@ -1743,8 +1743,12 @@ if(H5DEBUG(D))
             HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL,"couldn't get chunk info from skipped list")
 
         if(many_chunk_opt == H5D_OBTAIN_ONE_CHUNK_ADDR_IND) {
-            if(HADDR_UNDEF == (chunk_addr = H5D_chunk_get_addr(io_info->dset, io_info->dxpl_id, chunk_info->coords, NULL)))
+            H5D_chunk_ud_t udata;   /* User data for querying chunk info */
+
+            /* Get address of chunk */
+            if(H5D_chunk_get_info(io_info->dset, io_info->dxpl_id, chunk_info->coords, &udata) < 0)
                 HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
+            chunk_addr = udata.addr;
         } /* end if */
         else
             chunk_addr = total_chunk_addr_array[chunk_info->index];

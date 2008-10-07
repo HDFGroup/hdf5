@@ -38,6 +38,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5FOprivate.h"        /* File objects                         */
+#include "H5FSprivate.h"	/* File free space                      */
 #include "H5Gprivate.h"		/* Groups 			  	*/
 #include "H5Oprivate.h"         /* Object header messages               */
 #include "H5RCprivate.h"	/* Reference counted object functions	*/
@@ -61,6 +62,35 @@
 
 /* Mask for removing private file access flags */
 #define H5F_ACC_PUBLIC_FLAGS 	0x00ffu
+
+/* Free space section+aggregator merge flags */
+#define H5F_FS_MERGE_METADATA           0x01    /* Section can merge with metadata aggregator */
+#define H5F_FS_MERGE_RAWDATA            0x02    /* Section can merge with small 'raw' data aggregator */
+
+/* Structure for metadata & "small [raw] data" block aggregation fields */
+struct H5F_blk_aggr_t {
+    unsigned long       feature_flag;   /* Feature flag type */
+    hsize_t             alloc_size;     /* Size for allocating new blocks */
+    hsize_t             tot_size;       /* Total amount of bytes aggregated into block */
+    hsize_t             size;           /* Current size of block left */
+    haddr_t             addr;           /* Location of block left */
+};
+
+/* Structure for metadata accumulator fields */
+typedef struct H5F_meta_accum_t {
+    unsigned char      *buf;            /* Buffer to hold the accumulated metadata */
+    haddr_t             loc;            /* File location (offset) of the accumulated metadata */
+    size_t              size;           /* Size of the accumulated metadata buffer used (in bytes) */
+    size_t              alloc_size;     /* Size of the accumulated metadata buffer allocated (in bytes) */
+    hbool_t             dirty;          /* Flag to indicate that the accumulated metadata is dirty */
+} H5F_meta_accum_t;
+
+/* Enum for free space manager state */
+typedef enum H5F_fs_state_t {
+    H5F_FS_STATE_CLOSED,                /* Free space manager is closed */
+    H5F_FS_STATE_OPEN,                  /* Free space manager has been opened */
+    H5F_FS_STATE_DELETING               /* Free space manager is being deleted */
+} H5F_fs_state_t;
 
 /* A record of the mount table */
 typedef struct H5F_mount_t {
@@ -97,13 +127,14 @@ typedef struct H5F_file_t {
     unsigned    btree_k[H5B_NUM_BTREE_ID];  /* B-tree key values for each type  */
     size_t	sizeof_addr;	/* Size of addresses in file            */
     size_t	sizeof_size;	/* Size of offsets in file              */
-    haddr_t	super_addr;	/* Absolute address of super block	*/
     haddr_t	base_addr;	/* Absolute base address for rel.addrs. */
+                                /* (superblock for file is at this offset) */
     haddr_t	extension_addr;	/* Relative address of superblock extension	*/
     haddr_t	sohm_addr;	/* Relative address of shared object header message table */
     unsigned	sohm_vers;	/* Version of shared message table on disk */
     unsigned	sohm_nindexes;	/* Number of shared messages indexes in the table */
     haddr_t	driver_addr;	/* File driver information block address*/
+    unsigned long feature_flags; /* VFL Driver feature Flags            */
     haddr_t	maxaddr;	/* Maximum address for file             */
 
     H5AC_t      *cache;		/* The object cache			*/
@@ -129,6 +160,20 @@ typedef struct H5F_file_t {
     struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5RC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
+
+    /* File space allocation information */
+    unsigned fs_aggr_merge[H5FD_MEM_NTYPES];    /* Flags for whether free space can merge with aggregator(s) */
+    H5F_fs_state_t fs_state[H5FD_MEM_NTYPES];   /* State of free space manager for each type */
+    haddr_t fs_addr[H5FD_MEM_NTYPES];   /* Address of free space manager info for each type */
+    H5FS_t *fs_man[H5FD_MEM_NTYPES];    /* Free space manager for each file space type */
+    H5FD_mem_t fs_type_map[H5FD_MEM_NTYPES]; /* Mapping of "real" file space type into tracked type */
+    H5F_blk_aggr_t meta_aggr;   /* Metadata aggregation info */
+                                /* (if aggregating metadata allocations) */
+    H5F_blk_aggr_t sdata_aggr;  /* "Small data" aggregation info */
+                                /* (if aggregating "small data" allocations) */
+
+    /* Metadata accumulator information */
+    H5F_meta_accum_t accum;     /* Metadata accumulator info           */
 } H5F_file_t;
 
 /*
@@ -182,6 +227,15 @@ H5_DLL herr_t H5F_super_write(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc);
 H5_DLL herr_t H5F_super_ext_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_ext_info);
 
+/* Metadata accumulator routines */
+H5_DLL htri_t H5F_accum_read(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
+    haddr_t addr, size_t size, void *buf);
+H5_DLL htri_t H5F_accum_write(const H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
+    haddr_t addr, size_t size, const void *buf);
+H5_DLL herr_t H5F_accum_free(H5F_t *f, hid_t dxpl_id, H5FD_mem_t type,
+    haddr_t addr, hsize_t size);
+H5_DLL herr_t H5F_accum_flush(H5F_t *f, hid_t dxpl_id);
+H5_DLL herr_t H5F_accum_reset(H5F_t *f);
 
 /* Shared file list related routines */
 H5_DLL herr_t H5F_sfile_add(H5F_file_t *shared);

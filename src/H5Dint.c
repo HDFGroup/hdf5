@@ -1484,7 +1484,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
      * This is important only for parallel I/O where the space must
      * be fully allocated before I/O can happen.
      */
-    if((H5F_get_intent(dataset->oloc.file) & H5F_ACC_RDWR)
+    if((H5F_INTENT(dataset->oloc.file) & H5F_ACC_RDWR)
             && ((dataset->shared->layout.type == H5D_CONTIGUOUS && !H5F_addr_defined(dataset->shared->layout.u.contig.addr))
                 || (dataset->shared->layout.type == H5D_CHUNKED && !H5F_addr_defined(dataset->shared->layout.u.chunk.addr)))
             && IS_H5FD_MPI(dataset->oloc.file)) {
@@ -1727,33 +1727,6 @@ H5D_typeof(const H5D_t *dset)
 
     FUNC_LEAVE_NOAPI(dset->shared->type)
 } /* end H5D_typeof() */
-
-
-/*-------------------------------------------------------------------------
- * Function:  H5D_get_file
- *
- * Purpose:   Returns the dataset's file pointer.
- *
- * Return:    Success:        Ptr to the dataset's file pointer.
- *
- *            Failure:        NULL
- *
- * Programmer:        Quincey Koziol
- *              Thursday, October 22, 1998
- *
- *-------------------------------------------------------------------------
- */
-static H5F_t *
-H5D_get_file(const H5D_t *dset)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_get_file)
-
-    HDassert(dset);
-    HDassert(dset->oloc.file);
-
-    FUNC_LEAVE_NOAPI(dset->oloc.file)
-} /* end H5D_get_file() */
 
 
 /*-------------------------------------------------------------------------
@@ -2036,8 +2009,6 @@ done:
 haddr_t
 H5D_get_offset(const H5D_t *dset)
 {
-    haddr_t     base_addr;
-    H5F_t       *f;
     haddr_t	ret_value = HADDR_UNDEF;
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_get_offset)
@@ -2052,15 +2023,9 @@ H5D_get_offset(const H5D_t *dset)
         case H5D_CONTIGUOUS:
             /* If dataspace hasn't been allocated or dataset is stored in
              * an external file, the value will be HADDR_UNDEF. */
-            f =  H5D_get_file(dset);
-            base_addr = H5F_get_base_addr(f);
-
-            /* If there's user block in file, returns the absolute dataset offset
-             * from the beginning of file. */
-            if(base_addr != HADDR_UNDEF)
-                ret_value = dset->shared->layout.u.contig.addr + base_addr;
-            else
-                ret_value = dset->shared->layout.u.contig.addr;
+            if(dset->shared->dcpl_cache.efl.nused == 0 || H5F_addr_defined(dset->shared->layout.u.contig.addr))
+                /* Return the absolute dataset offset from the beginning of file. */
+                ret_value = dset->shared->layout.u.contig.addr + H5F_BASE_ADDR(dset->oloc.file);
             break;
 
         default:
@@ -2325,7 +2290,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
     HDassert(size);
 
     /* Check if we are allowed to modify this file */
-    if(0 == (H5F_get_intent(dset->oloc.file) & H5F_ACC_RDWR))
+    if(0 == (H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR))
     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Check if the filters in the DCPL will need to encode, and if so, can they? */
