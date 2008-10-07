@@ -3196,7 +3196,7 @@ error:
  *	H5MF_try_extend() the block with aligned address should succeed
  */
 static int
-test_mf_align_eoa(hid_t fapl, hid_t new_fapl)
+test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
     hid_t		fapl1;
@@ -3213,187 +3213,214 @@ test_mf_align_eoa(hid_t fapl, hid_t new_fapl)
 
     TESTING("H5MM_alloc() of file allocation with alignment: test 1");
 
-    /* Set the filename to use for this test (dependent on fapl) */
-    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+    /* Skip test when using VFDs that have their own 'alloc' callback, which
+     *  don't push mis-aligned space fragments on the file free space list
+     */
+    if(HDstrcmp(env_h5_drvr, "stdio")) {
+        /* Set the filename to use for this test (dependent on fapl) */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
-    /* Turn off using meta/small data aggregator */
-    if((fapl1 = H5Pcopy(new_fapl)) < 0) TEST_ERROR
+        /* Turn off using meta/small data aggregator */
+        if((fapl1 = H5Pcopy(new_fapl)) < 0) TEST_ERROR
 
-    H5Pset_meta_block_size(fapl1, (hsize_t)0);
-    H5Pset_small_data_block_size(fapl1, (hsize_t)0);
+        H5Pset_meta_block_size(fapl1, (hsize_t)0);
+        H5Pset_small_data_block_size(fapl1, (hsize_t)0);
 
-    /* Create the file to work on (without alignment) */
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
+        /* Create the file to work on (without alignment) */
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Close file */
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        /* Close file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
-        TEST_ERROR
+        /* Get the size of the file */
+        if((file_size = h5_get_file_size(filename)) < 0)
+            TEST_ERROR
 
-    /* get alignment setting */
-    if(H5Pget_alignment(fapl1, NULL, &alignment) < 0)
-        TEST_ERROR
+        /* get alignment setting */
+        if(H5Pget_alignment(fapl1, NULL, &alignment) < 0)
+            TEST_ERROR
 
-    /* Re-open the file with alignment and meta/sdata setting */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
-        FAIL_STACK_ERROR
+        /* Re-open the file with alignment and meta/sdata setting */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
-        FAIL_STACK_ERROR
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = H5I_object(file)))
+            FAIL_STACK_ERROR
 
-    /* calculate fragment for alignment of block 30 */
-    if ((tmp = file_size % alignment))
-	 mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 30 */
+        if ((tmp = file_size % alignment))
+             mis_align = alignment - tmp;
 
-    accum = mis_align + TEST_BLOCK_SIZE30;
+        accum = mis_align + TEST_BLOCK_SIZE30;
 
-    /* Allocate a block of 30 from file allocation */
-    type = H5FD_MEM_SUPER;
-    addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+        /* Allocate a block of 30 from file allocation */
+        type = H5FD_MEM_SUPER;
+        addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
 
-    /* Verify that the allocated block is aligned */
-    if (addr1 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr1 % alignment) TEST_ERROR
 
-    /* there should be nothing in the aggregator */
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
-    if (ma_addr || ma_size) TEST_ERROR
+        /* there should be nothing in the aggregator */
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        if (ma_addr || ma_size) TEST_ERROR
 
-    HDmemset(&state, 0, sizeof(frspace_state_t));
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-	if(check_stats(f->shared->fs_man[type], &state))
-	    TEST_ERROR
-    }
+        HDmemset(&state, 0, sizeof(frspace_state_t));
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+            if(check_stats(f->shared->fs_man[type], &state))
+                TEST_ERROR
+        }
 
-    /* calculate fragment for alignment of block 50 */
-    mis_align = 0;
-    if ((tmp = (file_size + accum) % alignment))
-	 mis_align = alignment - tmp;
-    accum += (mis_align + TEST_BLOCK_SIZE50);
+        /* calculate fragment for alignment of block 50 */
+        mis_align = 0;
+        if ((tmp = (file_size + accum) % alignment))
+             mis_align = alignment - tmp;
+        accum += (mis_align + TEST_BLOCK_SIZE50);
 
-    addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
+        addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
 
-    /* Verify that the allocated block is aligned */
-    if (addr2 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr2 % alignment) TEST_ERROR
 
-    /* there should be nothing in the aggregator */
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
-    if (ma_addr || ma_size) TEST_ERROR
+        /* there should be nothing in the aggregator */
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        if (ma_addr || ma_size) TEST_ERROR
 
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-	if(check_stats(f->shared->fs_man[type], &state))
-	    TEST_ERROR
-    }
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+            if(check_stats(f->shared->fs_man[type], &state))
+                TEST_ERROR
+        }
 
-    H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30);
-    H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr2, (hsize_t)TEST_BLOCK_SIZE50);
+        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30);
+        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr2, (hsize_t)TEST_BLOCK_SIZE50);
 
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    if((new_file_size = h5_get_file_size(filename)) < 0)
-        TEST_ERROR
+        if((new_file_size = h5_get_file_size(filename)) < 0)
+            TEST_ERROR
 
-    if (new_file_size != file_size)
-        TEST_ERROR
+        if (new_file_size != file_size)
+            TEST_ERROR
 
-    PASSED()
+        PASSED()
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support mis-aligned fragments");
+    } /* end else */
 
     TESTING("H5MF_try_shrink() of file allocation with alignment: test 2");
 
-    /* Re-open the file with alignment and meta/sdata setting */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
-        FAIL_STACK_ERROR
+    /* Skip test when using VFDs that have their own 'alloc' callback, which
+     *  don't push mis-aligned space fragments on the file free space list
+     */
+    if(HDstrcmp(env_h5_drvr, "stdio")) {
+        /* Re-open the file with alignment and meta/sdata setting */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
-        FAIL_STACK_ERROR
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = H5I_object(file)))
+            FAIL_STACK_ERROR
 
-    /* allocate a block of 50 from meta_aggr */
-    type = H5FD_MEM_SUPER;
-    addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
+        /* allocate a block of 50 from meta_aggr */
+        type = H5FD_MEM_SUPER;
+        addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
 
-    /* address should be aligned */
-    if (addr1 % alignment) TEST_ERROR
+        /* address should be aligned */
+        if (addr1 % alignment) TEST_ERROR
 
-    /* Close file */
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        /* Close file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    if((file_size = h5_get_file_size(filename)) < 0)
-        TEST_ERROR
+        if((file_size = h5_get_file_size(filename)) < 0)
+            TEST_ERROR
 
-    /* Re-open the file */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
-        FAIL_STACK_ERROR
+        /* Re-open the file */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
+            FAIL_STACK_ERROR
 
-    /* shrink the block */
-    status = H5MF_try_shrink(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE50);
-    if (status <= 0)
-	TEST_ERROR
+        /* shrink the block */
+        status = H5MF_try_shrink(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE50);
+        if (status <= 0)
+            TEST_ERROR
 
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    if((new_file_size = h5_get_file_size(filename)) < 0)
-        TEST_ERROR
+        if((new_file_size = h5_get_file_size(filename)) < 0)
+            TEST_ERROR
 
-    if (new_file_size != (file_size-TEST_BLOCK_SIZE50)) TEST_ERROR
+        if (new_file_size != (file_size-TEST_BLOCK_SIZE50)) TEST_ERROR
 
-    PASSED()
+        PASSED()
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support mis-aligned fragments");
+    } /* end else */
 
     TESTING("H5MF_try_extend() of file allocation with alignment: test 3");
 
-    /* Re-open the file with alignment and meta/sdata setting */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
-        FAIL_STACK_ERROR
+    /* Skip test when using VFDs that have their own 'alloc' callback, which
+     *  don't push mis-aligned space fragments on the file free space list
+     */
+    if(HDstrcmp(env_h5_drvr, "stdio")) {
+        /* Re-open the file with alignment and meta/sdata setting */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
-        FAIL_STACK_ERROR
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = H5I_object(file)))
+            FAIL_STACK_ERROR
 
-    /* allocate a block of 50 */
-    type = H5FD_MEM_SUPER;
-    addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
+        /* allocate a block of 50 */
+        type = H5FD_MEM_SUPER;
+        addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
 
-    /* address should be aligned */
-    if (addr1 % alignment) TEST_ERROR
+        /* address should be aligned */
+        if (addr1 % alignment) TEST_ERROR
 
-    /* Close file */
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        /* Close file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    if((file_size = h5_get_file_size(filename)) < 0)
-        TEST_ERROR
+        if((file_size = h5_get_file_size(filename)) < 0)
+            TEST_ERROR
 
-    /* Re-open the file */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
-        FAIL_STACK_ERROR
+        /* Re-open the file */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
+            FAIL_STACK_ERROR
 
-    /* try to extend the block */
-    extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)addr1, (hsize_t)TEST_BLOCK_SIZE50, (hsize_t)TEST_BLOCK_SIZE30);
+        /* try to extend the block */
+        extended = H5MF_try_extend(f, H5P_DATASET_XFER_DEFAULT, type, (haddr_t)addr1, (hsize_t)TEST_BLOCK_SIZE50, (hsize_t)TEST_BLOCK_SIZE30);
 
-    if (extended <=0) TEST_ERROR
+        if (extended <=0) TEST_ERROR
 
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    if((new_file_size = h5_get_file_size(filename)) < 0)
-        TEST_ERROR
+        if((new_file_size = h5_get_file_size(filename)) < 0)
+            TEST_ERROR
 
-    if (new_file_size != (file_size+TEST_BLOCK_SIZE30)) TEST_ERROR
+        if (new_file_size != (file_size+TEST_BLOCK_SIZE30)) TEST_ERROR
 
-    PASSED()
+        PASSED()
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support mis-aligned fragments");
+    } /* end else */
 
     return(0);
 
@@ -3435,7 +3462,7 @@ error:
  *	The block is allocated from file allocation and should be aligned
  */
 static int
-test_mf_align_fs(hid_t fapl, hid_t new_fapl)
+test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
     char		filename[FILENAME_LEN]; /* Filename to use */
@@ -3611,76 +3638,85 @@ test_mf_align_fs(hid_t fapl, hid_t new_fapl)
 
     TESTING("H5MF_alloc() of free-space manager with alignment: test 3");
 
-    if((file_size = h5_get_file_size(filename)) < 0)
-        TEST_ERROR
-
-    /* Re-open the file with alignment setting */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-        FAIL_STACK_ERROR
-
-    /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
-        FAIL_STACK_ERROR
-
-    type = H5FD_MEM_SUPER;
-    if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
-	TEST_ERROR
-    if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
-	TEST_ERROR
-    if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
-	TEST_ERROR
-
-    sect_node = H5MF_sect_simple_new((haddr_t)TEST_BLOCK_ADDR70, (hsize_t)TEST_BLOCK_SIZE700);
-
-    /* Construct user data for callbacks */
-    udata.f = f;
-    udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    udata.alloc_type = type;
-    udata.allow_sect_absorb = TRUE;
-
-    /* Add section A to free-space manager */
-    if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node, H5FS_ADD_RETURNED_SPACE, &udata))
-	    FAIL_STACK_ERROR
-
-    HDmemset(&state, 0, sizeof(frspace_state_t));
-    state.tot_space += TEST_BLOCK_SIZE700;
-    state.tot_sect_count += 1;
-    state.serial_sect_count += 1;
-
-    if(check_stats(f->shared->fs_man[type], &state))
-        TEST_ERROR
-    /*
-     * Allocate a block of 40
-     * Since free-space manager cannot fulfull the request because of alignment,
-     * the block is obtained from file allocation
+    /* Skip test when using VFDs that have their own 'alloc' callback, which
+     *  don't push mis-aligned space fragments on the file free space list
      */
-    addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)(TEST_BLOCK_SIZE40));
+    if(HDstrcmp(env_h5_drvr, "stdio")) {
+        if((file_size = h5_get_file_size(filename)) < 0)
+            TEST_ERROR
 
-    /* Verify that the allocated block is aligned */
-    if (addr % alignment)
-	TEST_ERROR
+        /* Re-open the file with alignment setting */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* verify that the allocated block is from file allocation, not section A in free-space */
-    if (!(addr >= (haddr_t)file_size)) TEST_ERROR
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = H5I_object(file)))
+            FAIL_STACK_ERROR
 
-    /* calculate fragment for alignment of block 40 from file allocation */
-    if ((tmp = file_size % alignment))
-	mis_align = alignment - tmp;
+        type = H5FD_MEM_SUPER;
+        if(H5MF_alloc_start(f, H5P_DATASET_XFER_DEFAULT, type, TRUE) < 0)
+            TEST_ERROR
+        if (f->shared->fs_state[type] != H5F_FS_STATE_OPEN)
+            TEST_ERROR
+        if (f->shared->fs_man[type]->client != H5FS_CLIENT_FILE_ID)
+            TEST_ERROR
 
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        sect_node = H5MF_sect_simple_new((haddr_t)TEST_BLOCK_ADDR70, (hsize_t)TEST_BLOCK_SIZE700);
 
-    /* free-space info should be the same  */
-    if(check_stats(f->shared->fs_man[type], &state))
-        TEST_ERROR
+        /* Construct user data for callbacks */
+        udata.f = f;
+        udata.dxpl_id = H5P_DATASET_XFER_DEFAULT;
+        udata.alloc_type = type;
+        udata.allow_sect_absorb = TRUE;
 
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        /* Add section A to free-space manager */
+        if (H5FS_sect_add(f, H5P_DATASET_XFER_DEFAULT, f->shared->fs_man[type], (H5FS_section_info_t *)sect_node, H5FS_ADD_RETURNED_SPACE, &udata))
+                FAIL_STACK_ERROR
 
-    PASSED()
+        HDmemset(&state, 0, sizeof(frspace_state_t));
+        state.tot_space += TEST_BLOCK_SIZE700;
+        state.tot_sect_count += 1;
+        state.serial_sect_count += 1;
+
+        if(check_stats(f->shared->fs_man[type], &state))
+            TEST_ERROR
+        /*
+         * Allocate a block of 40
+         * Since free-space manager cannot fulfull the request because of alignment,
+         * the block is obtained from file allocation
+         */
+        addr = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)(TEST_BLOCK_SIZE40));
+
+        /* Verify that the allocated block is aligned */
+        if (addr % alignment)
+            TEST_ERROR
+
+        /* verify that the allocated block is from file allocation, not section A in free-space */
+        if (!(addr >= (haddr_t)file_size)) TEST_ERROR
+
+        /* calculate fragment for alignment of block 40 from file allocation */
+        if ((tmp = file_size % alignment))
+            mis_align = alignment - tmp;
+
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
+
+        /* free-space info should be the same  */
+        if(check_stats(f->shared->fs_man[type], &state))
+            TEST_ERROR
+
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
+
+        PASSED()
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support mis-aligned fragments");
+    } /* end else */
 
     return(0);
 
@@ -3788,7 +3824,7 @@ error:
  *		EOA is at 20372
  */
 static int
-test_mf_align_alloc1(hid_t fapl, hid_t new_fapl)
+test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
     char		filename[FILENAME_LEN]; /* Filename to use */
@@ -3805,138 +3841,147 @@ test_mf_align_alloc1(hid_t fapl, hid_t new_fapl)
 
     TESTING("H5MF_alloc() of meta/sdata aggregator with alignment: test 1");
 
-    /* Set the filename to use for this test (dependent on fapl) */
-    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+    /* Skip test when using VFDs that have their own 'alloc' callback, which
+     *  don't push mis-aligned space fragments on the file free space list
+     */
+    if(HDstrcmp(env_h5_drvr, "stdio")) {
+        /* Set the filename to use for this test (dependent on fapl) */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
-    /* Create the file to work on (without alignment) */
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
+        /* Create the file to work on (without alignment) */
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Close file */
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        /* Close file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
-        TEST_ERROR
+        /* Get the size of the file */
+        if((file_size = h5_get_file_size(filename)) < 0)
+            TEST_ERROR
 
-    /* get alignment setting */
-    if(H5Pget_alignment(new_fapl, NULL, &alignment) < 0)
-        TEST_ERROR
+        /* get alignment setting */
+        if(H5Pget_alignment(new_fapl, NULL, &alignment) < 0)
+            TEST_ERROR
 
-    /* Re-open the file with alignment setting */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-        FAIL_STACK_ERROR
+        /* Re-open the file with alignment setting */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
-        FAIL_STACK_ERROR
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = H5I_object(file)))
+            FAIL_STACK_ERROR
 
-    /* calculate fragment for alignment of block 30 */
-    if ((tmp = file_size % alignment))
-	mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 30 */
+        if ((tmp = file_size % alignment))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 30 from meta_aggr */
-    type = H5FD_MEM_SUPER;
-    addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+        /* Allocate a block of 30 from meta_aggr */
+        type = H5FD_MEM_SUPER;
+        addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
 
-    /* Verify that the allocated block is aligned */
-    if (addr1 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr1 % alignment) TEST_ERROR
 
-    /* fragment for alignment of block 30 is freed to free-space */
-    HDmemset(&state, 0, sizeof(frspace_state_t));
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 30 is freed to free-space */
+        HDmemset(&state, 0, sizeof(frspace_state_t));
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
-    if ((addr1 + TEST_BLOCK_SIZE30) != ma_addr)
-	TEST_ERROR
+        if ((addr1 + TEST_BLOCK_SIZE30) != ma_addr)
+            TEST_ERROR
 
-    /* calculate fragment for alignment of block 50 */
-    mis_align = 0;
-    if ((tmp = ma_addr % alignment))
-	mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 50 */
+        mis_align = 0;
+        if ((tmp = ma_addr % alignment))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 50 from meta_aggr */
-    addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
+        /* Allocate a block of 50 from meta_aggr */
+        addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
 
-    /* Verify that the allocated block is aligned */
-    if (addr2 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr2 % alignment) TEST_ERROR
 
-    /* fragment for alignment of block 50 is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 50 is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
-    if ((addr2 + TEST_BLOCK_SIZE50) != ma_addr)
-	TEST_ERROR
+        if ((addr2 + TEST_BLOCK_SIZE50) != ma_addr)
+            TEST_ERROR
 
-    /* calculate fragment for alignment of block 80 */
-    mis_align = 0;
-    if ((tmp = ma_addr % alignment))
-	mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 80 */
+        mis_align = 0;
+        if ((tmp = ma_addr % alignment))
+            mis_align = alignment - tmp;
 
-    addr3 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE80);
+        addr3 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE80);
 
-    /* Verify that the allocated block is aligned */
-    if (addr3 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr3 % alignment) TEST_ERROR
 
-    /* fragment for alignment of block 80 is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 80 is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
-    if ((addr3 + TEST_BLOCK_SIZE80) != ma_addr)
-	TEST_ERROR
+        if ((addr3 + TEST_BLOCK_SIZE80) != ma_addr)
+            TEST_ERROR
 
-    /* calculate fragment for alignment of block 1970 */
-    mis_align = 0;
-    if ((tmp = ma_addr % alignment))
-	mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 1970 */
+        mis_align = 0;
+        if ((tmp = ma_addr % alignment))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 1970 from meta_aggr */
-    addr4 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE1970);
+        /* Allocate a block of 1970 from meta_aggr */
+        addr4 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE1970);
 
-    /* Verify that the allocated block is aligned */
-    if (addr4 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr4 % alignment) TEST_ERROR
 
-    /* fragment for alignment of block 1970 is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 1970 is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
-    if ((addr4 + TEST_BLOCK_SIZE1970) != ma_addr)
-	TEST_ERROR
+        if ((addr4 + TEST_BLOCK_SIZE1970) != ma_addr)
+            TEST_ERROR
 
-    /* Verify total size of free space after all the allocations */
-    if(check_stats(f->shared->fs_man[type], &state))
-        TEST_ERROR
+        /* Verify total size of free space after all the allocations */
+        if(check_stats(f->shared->fs_man[type], &state))
+            TEST_ERROR
 
-    H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30);
-    H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr2, (hsize_t)TEST_BLOCK_SIZE50);
-    H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr3, (hsize_t)TEST_BLOCK_SIZE80);
-    H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr3, (hsize_t)TEST_BLOCK_SIZE1970);
+        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30);
+        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr2, (hsize_t)TEST_BLOCK_SIZE50);
+        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr3, (hsize_t)TEST_BLOCK_SIZE80);
+        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr3, (hsize_t)TEST_BLOCK_SIZE1970);
 
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    PASSED()
+        PASSED()
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support mis-aligned fragments");
+    } /* end else */
 
     return(0);
 
@@ -4035,7 +4080,7 @@ error:
  *		EOA is at 18432
  */
 static int
-test_mf_align_alloc2(hid_t fapl, hid_t new_fapl)
+test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
     char		filename[FILENAME_LEN]; /* Filename to use */
@@ -4050,160 +4095,169 @@ test_mf_align_alloc2(hid_t fapl, hid_t new_fapl)
 
     TESTING("H5MF_alloc() of meta/sdata aggregator with alignment: test 2");
 
-    /* Set the filename to use for this test (dependent on fapl) */
-    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
-
-    /* Create the file to work on (without alignment) */
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
-
-    /* Close file */
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
-
-    /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
-        TEST_ERROR
-
-    /* get alignment setting */
-    if(H5Pget_alignment(new_fapl, NULL, &alignment) < 0)
-        TEST_ERROR
-
-    /* Re-open the file with alignment setting */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-        FAIL_STACK_ERROR
-
-    /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
-        FAIL_STACK_ERROR
-
-    /* calculate fragment for alignment of block 30 */
-    if ((tmp = file_size % alignment))
-	mis_align = alignment - tmp;
-
-    /* Allocate a block of 30 from meta_aggr */
-    type = H5FD_MEM_SUPER;
-    addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
-
-    /* Verify that the allocated block is aligned */
-    if (addr1 % alignment) TEST_ERROR
-
-    /* fragment for alignment of block 30 is freed to free-space */
-    HDmemset(&state, 0, sizeof(frspace_state_t));
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
-
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
-
-    if ((addr1 + TEST_BLOCK_SIZE30) != ma_addr)
-	TEST_ERROR
-
-    /* fragment for alignment of block 50 is freed to free-space */
-    mis_align = 0;
-    if ((tmp = ma_addr % alignment))
-	mis_align = alignment - tmp;
-
-    addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
-
-    /* Verify that the allocated block is aligned */
-    if (addr2 % alignment) TEST_ERROR
-
-    /* fragment for alignment of block 50 is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
-
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
-
-    if ((addr2 + TEST_BLOCK_SIZE50) != ma_addr)
-	TEST_ERROR
-
-    /*
-     * Calculate fragment for alignment of block 30 in sdata_aggr:
-     *
-     * For alignment = 1024, alloc_size = 2048:
-     *  block 30 is allocated from (ma_addr + ma_size),
-     *	which is already aligned
-     *
-     * For alignment = 4096, alloc_size = 2048:
-     *	since remaining space in meta_aggr is freed and shrunk,
-     *	block 30 is allocated from ma_addr
+    /* Skip test when using VFDs that have their own 'alloc' callback, which
+     *  don't push mis-aligned space fragments on the file free space list
      */
-    mis_align = 0;
-    if ((alignment == TEST_ALIGN1024) && (tmp = ((ma_addr + ma_size) % alignment)))
-	mis_align = alignment - tmp;
-    else if ((alignment == TEST_ALIGN4096) && (tmp = (ma_addr % alignment)))
-	mis_align = alignment - tmp;
+    if(HDstrcmp(env_h5_drvr, "stdio")) {
+        /* Set the filename to use for this test (dependent on fapl) */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
-    /* Allocate a block of 30 from sdata_aggr */
-    stype = H5FD_MEM_DRAW;
-    saddr1 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+        /* Create the file to work on (without alignment) */
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* fragment for alignment of block 30 for sdata_aggr is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* Close file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    /* Verify that the allocated block is aligned */
-    if (saddr1 % alignment) TEST_ERROR
+        /* Get the size of the file */
+        if((file_size = h5_get_file_size(filename)) < 0)
+            TEST_ERROR
 
-    H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        /* get alignment setting */
+        if(H5Pget_alignment(new_fapl, NULL, &alignment) < 0)
+            TEST_ERROR
 
-    if (sdata_addr != (saddr1 + TEST_BLOCK_SIZE30)) TEST_ERROR
+        /* Re-open the file with alignment setting */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /*
-     * Calculate fragment for the allocation of block 80 from meta_aggr:
-     *
-     * For alignment = 1024, alloc_size = 2048:
-     * 	fragment for unused space in meta_aggr is freed to free-space
-     * For alignment = 4096, alloc_size = 2048:
-     * 	fragment from alignment of file allocation absorbs sdata_aggr's remaining space
-     */
-    mis_align = 0;
-    if ((alignment == TEST_ALIGN1024) && (tmp = (ma_addr % alignment)))
-	mis_align = alignment - tmp;
-    else if ((alignment == TEST_ALIGN4096) && (tmp = (sdata_addr % alignment)))
-	mis_align = alignment - tmp;
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = H5I_object(file)))
+            FAIL_STACK_ERROR
 
-    /* Allocate a block of 80 from meta_aggr */
-    addr3 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE80);
+        /* calculate fragment for alignment of block 30 */
+        if ((tmp = file_size % alignment))
+            mis_align = alignment - tmp;
 
-    /* Verify that the allocated block is aligned */
-    if (addr3 % alignment) TEST_ERROR
+        /* Allocate a block of 30 from meta_aggr */
+        type = H5FD_MEM_SUPER;
+        addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
 
-    /* fragment for alignment of block 80 is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* Verify that the allocated block is aligned */
+        if (addr1 % alignment) TEST_ERROR
 
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        /* fragment for alignment of block 30 is freed to free-space */
+        HDmemset(&state, 0, sizeof(frspace_state_t));
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    if ((addr3 + TEST_BLOCK_SIZE80) != ma_addr)
-	TEST_ERROR
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
-    /* Verify total size of free space after all the allocations */
-    if(check_stats(f->shared->fs_man[type], &state))
-        TEST_ERROR
+        if ((addr1 + TEST_BLOCK_SIZE30) != ma_addr)
+            TEST_ERROR
 
-    H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30);
-    H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr2, (hsize_t)TEST_BLOCK_SIZE50);
-    H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr3, (hsize_t)TEST_BLOCK_SIZE80);
-    H5MF_xfree(f, stype, H5P_DATASET_XFER_DEFAULT, saddr1, (hsize_t)TEST_BLOCK_SIZE30);
+        /* fragment for alignment of block 50 is freed to free-space */
+        mis_align = 0;
+        if ((tmp = ma_addr % alignment))
+            mis_align = alignment - tmp;
 
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
 
-    PASSED()
+        /* Verify that the allocated block is aligned */
+        if (addr2 % alignment) TEST_ERROR
+
+        /* fragment for alignment of block 50 is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
+
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+
+        if ((addr2 + TEST_BLOCK_SIZE50) != ma_addr)
+            TEST_ERROR
+
+        /*
+         * Calculate fragment for alignment of block 30 in sdata_aggr:
+         *
+         * For alignment = 1024, alloc_size = 2048:
+         *  block 30 is allocated from (ma_addr + ma_size),
+         *	which is already aligned
+         *
+         * For alignment = 4096, alloc_size = 2048:
+         *	since remaining space in meta_aggr is freed and shrunk,
+         *	block 30 is allocated from ma_addr
+         */
+        mis_align = 0;
+        if ((alignment == TEST_ALIGN1024) && (tmp = ((ma_addr + ma_size) % alignment)))
+            mis_align = alignment - tmp;
+        else if ((alignment == TEST_ALIGN4096) && (tmp = (ma_addr % alignment)))
+            mis_align = alignment - tmp;
+
+        /* Allocate a block of 30 from sdata_aggr */
+        stype = H5FD_MEM_DRAW;
+        saddr1 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+
+        /* fragment for alignment of block 30 for sdata_aggr is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
+
+        /* Verify that the allocated block is aligned */
+        if (saddr1 % alignment) TEST_ERROR
+
+        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+
+        if (sdata_addr != (saddr1 + TEST_BLOCK_SIZE30)) TEST_ERROR
+
+        /*
+         * Calculate fragment for the allocation of block 80 from meta_aggr:
+         *
+         * For alignment = 1024, alloc_size = 2048:
+         * 	fragment for unused space in meta_aggr is freed to free-space
+         * For alignment = 4096, alloc_size = 2048:
+         * 	fragment from alignment of file allocation absorbs sdata_aggr's remaining space
+         */
+        mis_align = 0;
+        if ((alignment == TEST_ALIGN1024) && (tmp = (ma_addr % alignment)))
+            mis_align = alignment - tmp;
+        else if ((alignment == TEST_ALIGN4096) && (tmp = (sdata_addr % alignment)))
+            mis_align = alignment - tmp;
+
+        /* Allocate a block of 80 from meta_aggr */
+        addr3 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE80);
+
+        /* Verify that the allocated block is aligned */
+        if (addr3 % alignment) TEST_ERROR
+
+        /* fragment for alignment of block 80 is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
+
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+
+        if ((addr3 + TEST_BLOCK_SIZE80) != ma_addr)
+            TEST_ERROR
+
+        /* Verify total size of free space after all the allocations */
+        if(check_stats(f->shared->fs_man[type], &state))
+            TEST_ERROR
+
+        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30);
+        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr2, (hsize_t)TEST_BLOCK_SIZE50);
+        H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr3, (hsize_t)TEST_BLOCK_SIZE80);
+        H5MF_xfree(f, stype, H5P_DATASET_XFER_DEFAULT, saddr1, (hsize_t)TEST_BLOCK_SIZE30);
+
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
+
+        PASSED()
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support mis-aligned fragments");
+    } /* end else */
 
     return(0);
 
@@ -4350,7 +4404,7 @@ error:
  *		There is space of 1014 left in meta_aggr
  */
 static int
-test_mf_align_alloc3(hid_t fapl, hid_t new_fapl)
+test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
     char		filename[FILENAME_LEN]; /* Filename to use */
@@ -4367,198 +4421,207 @@ test_mf_align_alloc3(hid_t fapl, hid_t new_fapl)
 
     TESTING("H5MF_alloc() of meta/sdata aggregator with alignment: test 3");
 
-    /* Set the filename to use for this test (dependent on fapl) */
-    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
-
-    /* Create the file to work on (without alignment) */
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
-
-    /* Close file */
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
-
-    /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
-        TEST_ERROR
-
-    /* get alignment setting */
-    if(H5Pget_alignment(new_fapl, NULL, &alignment) < 0)
-        TEST_ERROR
-
-    /* Re-open the file with alignment setting */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-        FAIL_STACK_ERROR
-
-    /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
-        FAIL_STACK_ERROR
-
-    /* calculate fragment for alignment of block 30 */
-    if ((tmp = file_size % alignment))
-        mis_align = alignment - tmp;
-
-    /* Allocate a block of 30 from meta_aggr */
-    type = H5FD_MEM_SUPER;
-    addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
-
-    /* Verify that the allocated block is aligned */
-    if (addr1 % alignment) TEST_ERROR
-
-    /* fragment for alignment of block 30 is freed to free-space */
-    HDmemset(&state, 0, sizeof(frspace_state_t));
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
-
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
-    if ((addr1 + TEST_BLOCK_SIZE30) != ma_addr)
-	TEST_ERROR
-
-    /* calculate fragment for alignment of block 50 */
-    mis_align = 0;
-    if ((tmp = ma_addr % alignment))
-        mis_align = alignment - tmp;
-
-    /* Allocate a block of 50 from meta_aggr */
-    addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
-
-    /* Verify that the allocated block is aligned */
-    if (addr2 % alignment) TEST_ERROR
-
-    /* fragment for alignment of block 50 is freed to free-space */
-    if (mis_align) {
-        state.tot_space += mis_align;
-        state.tot_sect_count += 1;
-        state.serial_sect_count += 1;
-    }
-
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
-    if ((addr2 + TEST_BLOCK_SIZE50) != ma_addr)
-        TEST_ERROR
-
-    /*
-     * Calculate fragment for alignment of block 30 in sdata_aggr:
-     *
-     * For alignment = 1024, alloc_size = 2048:
-     *  block 30 is allocated from (ma_addr + ma_size),
-     *  which is already aligned
-     *
-     * For alignment = 4096, alloc_size = 2048:
-     *  since remaining space in meta_aggr is freed and shrunk,
-     *  block 30 is allocated from ma_addr
+    /* Skip test when using VFDs that have their own 'alloc' callback, which
+     *  don't push mis-aligned space fragments on the file free space list
      */
-    mis_align = 0;
-    if ((alignment == TEST_ALIGN1024) && (tmp = ((ma_addr + ma_size) % alignment)))
-	mis_align = alignment - tmp;
-    else if ((alignment == TEST_ALIGN4096) && (tmp = ma_addr % alignment))
-	mis_align = alignment - tmp;
+    if(HDstrcmp(env_h5_drvr, "stdio")) {
+        /* Set the filename to use for this test (dependent on fapl) */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
-    /* Allocate a block of 30 from sdata_aggr */
-    stype = H5FD_MEM_DRAW;
-    saddr1 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+        /* Create the file to work on (without alignment) */
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Verify that the allocated block is aligned */
-    if (saddr1 % alignment) TEST_ERROR
+        /* Close file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    /* fragment for alignment of block 30 for sdata_aggr is freed to free-space */
-    if (mis_align) {
-        state.tot_space += mis_align;
-        state.tot_sect_count += 1;
-        state.serial_sect_count += 1;
-    }
+        /* Get the size of the file */
+        if((file_size = h5_get_file_size(filename)) < 0)
+            TEST_ERROR
 
-    H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
-    if (sdata_addr != (saddr1+TEST_BLOCK_SIZE30)) TEST_ERROR
+        /* get alignment setting */
+        if(H5Pget_alignment(new_fapl, NULL, &alignment) < 0)
+            TEST_ERROR
 
-    /* calculate fragment for alignment of block 50 in sdata_aggr */
-    mis_align = 0;
-    if ((tmp = sdata_addr % alignment))
-	mis_align = alignment - tmp;
+        /* Re-open the file with alignment setting */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Allocate a block of 50 from sdata_aggr */
-    saddr2 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = H5I_object(file)))
+            FAIL_STACK_ERROR
 
-    /* Verify that the allocated block is aligned */
-    if (saddr2 % alignment) TEST_ERROR
+        /* calculate fragment for alignment of block 30 */
+        if ((tmp = file_size % alignment))
+            mis_align = alignment - tmp;
 
-    /* fragment for alignment of block 50 for sdata_aggr is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* Allocate a block of 30 from meta_aggr */
+        type = H5FD_MEM_SUPER;
+        addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
 
-    H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
-    if (sdata_addr != (saddr2 + TEST_BLOCK_SIZE50)) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr1 % alignment) TEST_ERROR
 
-    /* calculate fragment for alignment of block 80 in sdata_aggr */
-    mis_align = 0;
-    if ((tmp = sdata_addr % alignment))
-	mis_align = alignment - tmp;
+        /* fragment for alignment of block 30 is freed to free-space */
+        HDmemset(&state, 0, sizeof(frspace_state_t));
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    /* Allocate a block of 80 from sdata_aggr */
-    saddr3 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE80);
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        if ((addr1 + TEST_BLOCK_SIZE30) != ma_addr)
+            TEST_ERROR
 
-    /* Verify that the allocated block is aligned */
-    if (saddr3 % alignment) TEST_ERROR
+        /* calculate fragment for alignment of block 50 */
+        mis_align = 0;
+        if ((tmp = ma_addr % alignment))
+            mis_align = alignment - tmp;
 
-    /* fragment for alignment of block 80 for sdata_aggr is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* Allocate a block of 50 from meta_aggr */
+        addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
 
-    H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
-    if ((saddr3 + TEST_BLOCK_SIZE80) != sdata_addr)
-	TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr2 % alignment) TEST_ERROR
 
-    /* calculate fragment for alignment of block 1034 */
-    mis_align = 0;
-    if ((tmp = sdata_addr % alignment))
-	mis_align = alignment - tmp;
+        /* fragment for alignment of block 50 is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    /* Allocate a block of 1034 for meta_aggr */
-    addr3 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE1034);
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        if ((addr2 + TEST_BLOCK_SIZE50) != ma_addr)
+            TEST_ERROR
 
-    /* Verify that the allocated block is aligned */
-    if (addr3 % alignment) TEST_ERROR
+        /*
+         * Calculate fragment for alignment of block 30 in sdata_aggr:
+         *
+         * For alignment = 1024, alloc_size = 2048:
+         *  block 30 is allocated from (ma_addr + ma_size),
+         *  which is already aligned
+         *
+         * For alignment = 4096, alloc_size = 2048:
+         *  since remaining space in meta_aggr is freed and shrunk,
+         *  block 30 is allocated from ma_addr
+         */
+        mis_align = 0;
+        if ((alignment == TEST_ALIGN1024) && (tmp = ((ma_addr + ma_size) % alignment)))
+            mis_align = alignment - tmp;
+        else if ((alignment == TEST_ALIGN4096) && (tmp = ma_addr % alignment))
+            mis_align = alignment - tmp;
 
-    /* fragment for alignment of block 1034 for meta_aggr is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* Allocate a block of 30 from sdata_aggr */
+        stype = H5FD_MEM_DRAW;
+        saddr1 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
 
-    /* calculate unused space in meta_aggr that is freed to free-space after block 1034 */
-    mis_align = 0;
-    if ((alignment == TEST_ALIGN1024) && (tmp = (ma_addr % alignment)))
-	mis_align = alignment - tmp;
+        /* Verify that the allocated block is aligned */
+        if (saddr1 % alignment) TEST_ERROR
 
-    /* fragment for unused space in meta_aggr after block 1034 is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 30 for sdata_aggr is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        if (sdata_addr != (saddr1+TEST_BLOCK_SIZE30)) TEST_ERROR
 
-    if ((addr3 + TEST_BLOCK_SIZE1034) != ma_addr)
-	TEST_ERROR
+        /* calculate fragment for alignment of block 50 in sdata_aggr */
+        mis_align = 0;
+        if ((tmp = sdata_addr % alignment))
+            mis_align = alignment - tmp;
 
-    /* Verify total size of free space after all allocations */
-    if(check_stats(f->shared->fs_man[type], &state))
-        TEST_ERROR
+        /* Allocate a block of 50 from sdata_aggr */
+        saddr2 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
 
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        /* Verify that the allocated block is aligned */
+        if (saddr2 % alignment) TEST_ERROR
 
-    PASSED()
+        /* fragment for alignment of block 50 for sdata_aggr is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
+
+        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        if (sdata_addr != (saddr2 + TEST_BLOCK_SIZE50)) TEST_ERROR
+
+        /* calculate fragment for alignment of block 80 in sdata_aggr */
+        mis_align = 0;
+        if ((tmp = sdata_addr % alignment))
+            mis_align = alignment - tmp;
+
+        /* Allocate a block of 80 from sdata_aggr */
+        saddr3 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE80);
+
+        /* Verify that the allocated block is aligned */
+        if (saddr3 % alignment) TEST_ERROR
+
+        /* fragment for alignment of block 80 for sdata_aggr is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
+
+        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        if ((saddr3 + TEST_BLOCK_SIZE80) != sdata_addr)
+            TEST_ERROR
+
+        /* calculate fragment for alignment of block 1034 */
+        mis_align = 0;
+        if ((tmp = sdata_addr % alignment))
+            mis_align = alignment - tmp;
+
+        /* Allocate a block of 1034 for meta_aggr */
+        addr3 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE1034);
+
+        /* Verify that the allocated block is aligned */
+        if (addr3 % alignment) TEST_ERROR
+
+        /* fragment for alignment of block 1034 for meta_aggr is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
+
+        /* calculate unused space in meta_aggr that is freed to free-space after block 1034 */
+        mis_align = 0;
+        if ((alignment == TEST_ALIGN1024) && (tmp = (ma_addr % alignment)))
+            mis_align = alignment - tmp;
+
+        /* fragment for unused space in meta_aggr after block 1034 is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
+
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+
+        if ((addr3 + TEST_BLOCK_SIZE1034) != ma_addr)
+            TEST_ERROR
+
+        /* Verify total size of free space after all allocations */
+        if(check_stats(f->shared->fs_man[type], &state))
+            TEST_ERROR
+
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
+
+        PASSED()
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support mis-aligned fragments");
+    } /* end else */
 
     return(0);
 
@@ -4635,7 +4698,7 @@ error:
  *
  */
 static int
-test_mf_align_alloc4(hid_t fapl, hid_t new_fapl)
+test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
     char		filename[FILENAME_LEN]; /* Filename to use */
@@ -4651,107 +4714,116 @@ test_mf_align_alloc4(hid_t fapl, hid_t new_fapl)
 
     TESTING("H5MF_alloc() of meta/sdata aggregator with alignment: test 4");
 
-    /* Set the filename to use for this test (dependent on fapl) */
-    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+    /* Skip test when using VFDs that have their own 'alloc' callback, which
+     *  don't push mis-aligned space fragments on the file free space list
+     */
+    if(HDstrcmp(env_h5_drvr, "stdio")) {
+        /* Set the filename to use for this test (dependent on fapl) */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
-    /* Create the file to work on (without alignment) */
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
+        /* Create the file to work on (without alignment) */
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Close file */
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        /* Close file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
-        TEST_ERROR
+        /* Get the size of the file */
+        if((file_size = h5_get_file_size(filename)) < 0)
+            TEST_ERROR
 
-    /* Re-open the file with alignment setting and meta/sdata setting */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-        FAIL_STACK_ERROR
+        /* Re-open the file with alignment setting and meta/sdata setting */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
-        FAIL_STACK_ERROR
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = H5I_object(file)))
+            FAIL_STACK_ERROR
 
-    /* get alignment setting */
-    if(H5Pget_alignment(new_fapl, NULL, &alignment) < 0)
-        TEST_ERROR
+        /* get alignment setting */
+        if(H5Pget_alignment(new_fapl, NULL, &alignment) < 0)
+            TEST_ERROR
 
-    /* calculate fragment for alignment of block 30 */
-    if ((tmp = file_size % alignment))
-        mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 30 */
+        if ((tmp = file_size % alignment))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 30 from meta_aggr */
-    type = H5FD_MEM_SUPER;
-    addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+        /* Allocate a block of 30 from meta_aggr */
+        type = H5FD_MEM_SUPER;
+        addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
 
-    /* Verify that the allocated block is aligned */
-    if (addr1 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr1 % alignment) TEST_ERROR
 
-    /* fragment for alignment of block 30 is freed to free-space */
-    HDmemset(&state, 0, sizeof(frspace_state_t));
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 30 is freed to free-space */
+        HDmemset(&state, 0, sizeof(frspace_state_t));
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
-    saved_ma_size = ma_size;
-    if ((addr1+TEST_BLOCK_SIZE30) != ma_addr) TEST_ERROR
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        saved_ma_size = ma_size;
+        if ((addr1+TEST_BLOCK_SIZE30) != ma_addr) TEST_ERROR
 
-    /* calculate fragment for alignment of block 2058 */
-    mis_align = 0;
-    if ((tmp = ma_addr % alignment))
-        mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 2058 */
+        mis_align = 0;
+        if ((tmp = ma_addr % alignment))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 2058 from meta_aggr */
-    addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE2058);
+        /* Allocate a block of 2058 from meta_aggr */
+        addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE2058);
 
-    /* Verify that the allocated block is aligned */
-    if (addr2 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr2 % alignment) TEST_ERROR
 
-    /* fragment for alignment of block 2058 is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 2058 is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
-    if ((addr2 + TEST_BLOCK_SIZE2058) != ma_addr) TEST_ERROR
+        if ((addr2 + TEST_BLOCK_SIZE2058) != ma_addr) TEST_ERROR
 
-    /* meta_aggr->size remains the same */
-    if (ma_size != saved_ma_size) TEST_ERROR
+        /* meta_aggr->size remains the same */
+        if (ma_size != saved_ma_size) TEST_ERROR
 
-    /* calculate fragment for alignment of block 5 from meta_aggr */
-    mis_align = 0;
-    if ((tmp = ma_addr % alignment))
-        mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 5 from meta_aggr */
+        mis_align = 0;
+        if ((tmp = ma_addr % alignment))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 5 from meta_aggr */
-    addr3 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE5);
+        /* Allocate a block of 5 from meta_aggr */
+        addr3 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE5);
 
-    /* fragment for alignment of block 5 is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 5 is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    /* Verify that the allocated block is aligned */
-    if (addr3 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr3 % alignment) TEST_ERROR
 
-    /* Verify total size of free space after all allocations */
-    if(check_stats(f->shared->fs_man[type], &state))
-        TEST_ERROR
+        /* Verify total size of free space after all allocations */
+        if(check_stats(f->shared->fs_man[type], &state))
+            TEST_ERROR
 
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    PASSED()
+        PASSED()
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support mis-aligned fragments");
+    } /* end else */
 
     return(0);
 
@@ -4829,7 +4901,7 @@ error:
  *		meta_aggr and sdata_aggr are all 0
  */
 static int
-test_mf_align_alloc5(hid_t fapl, hid_t new_fapl)
+test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
     char		filename[FILENAME_LEN]; /* Filename to use */
@@ -4846,122 +4918,131 @@ test_mf_align_alloc5(hid_t fapl, hid_t new_fapl)
 
     TESTING("H5MF_alloc() of meta/sdata aggregator with alignment: test 5");
 
-    /* Set the filename to use for this test (dependent on fapl) */
-    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+    /* Skip test when using VFDs that have their own 'alloc' callback, which
+     *  don't push mis-aligned space fragments on the file free space list
+     */
+    if(HDstrcmp(env_h5_drvr, "stdio")) {
+        /* Set the filename to use for this test (dependent on fapl) */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
-    /* Create the file to work on (without alignment) */
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
+        /* Create the file to work on (without alignment) */
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Close file */
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        /* Close file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
-        TEST_ERROR
+        /* Get the size of the file */
+        if((file_size = h5_get_file_size(filename)) < 0)
+            TEST_ERROR
 
-    /* Re-open the file with alignment setting and meta/sdata setting */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-        FAIL_STACK_ERROR
+        /* Re-open the file with alignment setting and meta/sdata setting */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
-        FAIL_STACK_ERROR
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = H5I_object(file)))
+            FAIL_STACK_ERROR
 
-    /* get alignment setting */
-    if(H5Pget_alignment(new_fapl, NULL, &alignment) < 0)
-        TEST_ERROR
+        /* get alignment setting */
+        if(H5Pget_alignment(new_fapl, NULL, &alignment) < 0)
+            TEST_ERROR
 
-    /* calculate fragment for alignment of block 30 */
-    if ((tmp = file_size % alignment))
-        mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 30 */
+        if ((tmp = file_size % alignment))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 30 from meta_aggr */
-    type = H5FD_MEM_SUPER;
-    addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+        /* Allocate a block of 30 from meta_aggr */
+        type = H5FD_MEM_SUPER;
+        addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
 
-    /* Verify that the allocated block is aligned */
-    if (addr1 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr1 % alignment) TEST_ERROR
 
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 
-    if ((addr1 + TEST_BLOCK_SIZE30) != ma_addr) TEST_ERROR
+        if ((addr1 + TEST_BLOCK_SIZE30) != ma_addr) TEST_ERROR
 
-    /* fragment for alignment of block 30 is freed to free-space */
-    HDmemset(&state, 0, sizeof(frspace_state_t));
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 30 is freed to free-space */
+        HDmemset(&state, 0, sizeof(frspace_state_t));
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    /* calculate fragment for alignment of block 30 from sdata_aggr */
-    mis_align = 0;
-    if ((alignment == TEST_ALIGN1024) && (tmp = (ma_addr + ma_size) % alignment))
-        mis_align = alignment - tmp;
-    else if ((alignment == TEST_ALIGN4096) && (tmp = (ma_addr % alignment)))
-        mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 30 from sdata_aggr */
+        mis_align = 0;
+        if ((alignment == TEST_ALIGN1024) && (tmp = (ma_addr + ma_size) % alignment))
+            mis_align = alignment - tmp;
+        else if ((alignment == TEST_ALIGN4096) && (tmp = (ma_addr % alignment)))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 30 from sdata_aggr */
-    stype = H5FD_MEM_DRAW;
-    saddr1 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+        /* Allocate a block of 30 from sdata_aggr */
+        stype = H5FD_MEM_DRAW;
+        saddr1 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
 
-    /* Verify that the allocated block is aligned */
-    if (saddr1 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (saddr1 % alignment) TEST_ERROR
 
-    /* fragment of alignment for block 30 in sdata_aggr is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment of alignment for block 30 in sdata_aggr is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
-    if ((saddr1+TEST_BLOCK_SIZE30) != sdata_addr) TEST_ERROR
+        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        if ((saddr1+TEST_BLOCK_SIZE30) != sdata_addr) TEST_ERROR
 
-    /* calculate fragment for alignment of block 2058 from meta_aggr */
-    mis_align = 0;
-    if ((alignment == TEST_ALIGN1024) && (tmp = (sdata_addr + sdata_size) % alignment))
-        mis_align = alignment - tmp;
-    else if ((alignment == TEST_ALIGN4096) && (tmp = (sdata_addr % alignment)))
-        mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 2058 from meta_aggr */
+        mis_align = 0;
+        if ((alignment == TEST_ALIGN1024) && (tmp = (sdata_addr + sdata_size) % alignment))
+            mis_align = alignment - tmp;
+        else if ((alignment == TEST_ALIGN4096) && (tmp = (sdata_addr % alignment)))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 2058 from meta_aggr */
-    addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE2058);
+        /* Allocate a block of 2058 from meta_aggr */
+        addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE2058);
 
-    /* Verify that the allocated block is aligned */
-    if (addr2 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr2 % alignment) TEST_ERROR
 
-    /* fragment for alignment of block 2058 is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 2058 is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    /* Verify total size of free space after all allocations */
-    if(check_stats(f->shared->fs_man[type], &state))
-        TEST_ERROR
+        /* Verify total size of free space after all allocations */
+        if(check_stats(f->shared->fs_man[type], &state))
+            TEST_ERROR
 
-    /* nothing is changed in meta_aggr */
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
-    if (alignment == TEST_ALIGN1024 && (new_ma_addr != ma_addr || new_ma_size != ma_size))
-	TEST_ERROR
-    else if (alignment == TEST_ALIGN4096 && (new_ma_addr != 0 || new_ma_size != 0))
-	TEST_ERROR
+        /* nothing is changed in meta_aggr */
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        if (alignment == TEST_ALIGN1024 && (new_ma_addr != ma_addr || new_ma_size != ma_size))
+            TEST_ERROR
+        else if (alignment == TEST_ALIGN4096 && (new_ma_addr != 0 || new_ma_size != 0))
+            TEST_ERROR
 
-    /* nothing is changed in sdata_aggr */
-    H5MF_aggr_query(f, &(f->shared->sdata_aggr), &new_sdata_addr, &new_sdata_size);
-    if (alignment == TEST_ALIGN1024 && (new_sdata_addr != sdata_addr || new_sdata_size != sdata_size))
-	TEST_ERROR
-    else if (alignment == TEST_ALIGN4096 && ((new_sdata_addr != 0 || new_sdata_size != 0)))
-	TEST_ERROR
+        /* nothing is changed in sdata_aggr */
+        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &new_sdata_addr, &new_sdata_size);
+        if (alignment == TEST_ALIGN1024 && (new_sdata_addr != sdata_addr || new_sdata_size != sdata_size))
+            TEST_ERROR
+        else if (alignment == TEST_ALIGN4096 && ((new_sdata_addr != 0 || new_sdata_size != 0)))
+            TEST_ERROR
 
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    PASSED()
+        PASSED()
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support mis-aligned fragments");
+    } /* end else */
 
     return(0);
 
@@ -5087,7 +5168,7 @@ error:
  *		meta_aggr is unchanged
  */
 static int
-test_mf_align_alloc6(hid_t fapl, hid_t new_fapl)
+test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
     char		filename[FILENAME_LEN]; /* Filename to use */
@@ -5103,159 +5184,168 @@ test_mf_align_alloc6(hid_t fapl, hid_t new_fapl)
 
     TESTING("H5MF_alloc() of meta/sdata aggregator with alignment: test 6");
 
-    /* Set the filename to use for this test (dependent on fapl) */
-    h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+    /* Skip test when using VFDs that have their own 'alloc' callback, which
+     *  don't push mis-aligned space fragments on the file free space list
+     */
+    if(HDstrcmp(env_h5_drvr, "stdio")) {
+        /* Set the filename to use for this test (dependent on fapl) */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
-    /* Create the file to work on (without alignment) */
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
+        /* Create the file to work on (without alignment) */
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Close file */
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        /* Close file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
-        TEST_ERROR
+        /* Get the size of the file */
+        if((file_size = h5_get_file_size(filename)) < 0)
+            TEST_ERROR
 
-    /* Re-open the file with alignment setting and meta/sdata setting */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
-        FAIL_STACK_ERROR
+        /* Re-open the file with alignment setting and meta/sdata setting */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, new_fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
-        FAIL_STACK_ERROR
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = H5I_object(file)))
+            FAIL_STACK_ERROR
 
-    /* get alignment setting */
-    if(H5Pget_alignment(new_fapl, NULL, &alignment) < 0)
-        TEST_ERROR
+        /* get alignment setting */
+        if(H5Pget_alignment(new_fapl, NULL, &alignment) < 0)
+            TEST_ERROR
 
-    /* calculate fragment for alignment of block 30 */
-    if ((tmp = file_size % alignment))
-        mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 30 */
+        if ((tmp = file_size % alignment))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 30 from meta_aggr */
-    type = H5FD_MEM_SUPER;
-    addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+        /* Allocate a block of 30 from meta_aggr */
+        type = H5FD_MEM_SUPER;
+        addr1 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
 
-    /* Verify that the allocated block is aligned */
-    if (addr1 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr1 % alignment) TEST_ERROR
 
-    /* fragment for alignment of block 30 in meta_aggr is freed to free-space */
-    HDmemset(&state, 0, sizeof(frspace_state_t));
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 30 in meta_aggr is freed to free-space */
+        HDmemset(&state, 0, sizeof(frspace_state_t));
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
-    if ((addr1+TEST_BLOCK_SIZE30) != ma_addr)
-        TEST_ERROR
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+        if ((addr1+TEST_BLOCK_SIZE30) != ma_addr)
+            TEST_ERROR
 
-    /* calculate fragment for alignment of block 30 in sdata_aggr */
-    mis_align = 0;
-    if ((alignment == TEST_ALIGN1024) && (tmp = (ma_addr + ma_size) % alignment))
-        mis_align = alignment - tmp;
-    else if ((alignment == TEST_ALIGN4096) && (tmp = (ma_addr % alignment)))
-        mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 30 in sdata_aggr */
+        mis_align = 0;
+        if ((alignment == TEST_ALIGN1024) && (tmp = (ma_addr + ma_size) % alignment))
+            mis_align = alignment - tmp;
+        else if ((alignment == TEST_ALIGN4096) && (tmp = (ma_addr % alignment)))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 30 from sdata_aggr */
-    stype = H5FD_MEM_DRAW;
-    saddr1 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
+        /* Allocate a block of 30 from sdata_aggr */
+        stype = H5FD_MEM_DRAW;
+        saddr1 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE30);
 
-    /* Verify that the allocated block is aligned */
-    if (saddr1 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (saddr1 % alignment) TEST_ERROR
 
-    /* fragment for alignment of block 30 in sdata_aggr is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 30 in sdata_aggr is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
-    if (sdata_addr != (saddr1+TEST_BLOCK_SIZE30)) TEST_ERROR
+        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        if (sdata_addr != (saddr1+TEST_BLOCK_SIZE30)) TEST_ERROR
 
-    /* calculate fragment for alignment of block 50 in sdata_aggr */
-    mis_align = 0;
-    if ((tmp = sdata_addr % alignment))
-        mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 50 in sdata_aggr */
+        mis_align = 0;
+        if ((tmp = sdata_addr % alignment))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 50 from sdata_aggr */
-    saddr2 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
+        /* Allocate a block of 50 from sdata_aggr */
+        saddr2 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE50);
 
-    /* Verify that the allocated block is aligned */
-    if (saddr2 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (saddr2 % alignment) TEST_ERROR
 
-    /* fragment for alignment of block 50 in sdata_aggr is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 50 in sdata_aggr is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
-    if (sdata_addr != (saddr2+TEST_BLOCK_SIZE50)) TEST_ERROR
+        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        if (sdata_addr != (saddr2+TEST_BLOCK_SIZE50)) TEST_ERROR
 
-    /* calculate fragment for alignment of block 80 in sdata_aggr */
-    mis_align = 0;
-    if ((tmp = sdata_addr % alignment))
-        mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 80 in sdata_aggr */
+        mis_align = 0;
+        if ((tmp = sdata_addr % alignment))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 80 from sdata_aggr */
-    saddr3 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE80);
+        /* Allocate a block of 80 from sdata_aggr */
+        saddr3 = H5MF_alloc(f, stype, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE80);
 
-    /* Verify that the allocated block is aligned */
-    if (saddr3 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (saddr3 % alignment) TEST_ERROR
 
-    /* fragment for alignment of block 80 in sdata_aggr is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 80 in sdata_aggr is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
-    if (sdata_addr != (saddr3+TEST_BLOCK_SIZE80)) TEST_ERROR
+        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        if (sdata_addr != (saddr3+TEST_BLOCK_SIZE80)) TEST_ERROR
 
-    /* calculate fragment for alignment of block 2058 */
-    /* remaining space in sdata_aggr is freed and shrunk */
-    mis_align = 0;
-    if ((tmp = sdata_addr % alignment))
-        mis_align = alignment - tmp;
+        /* calculate fragment for alignment of block 2058 */
+        /* remaining space in sdata_aggr is freed and shrunk */
+        mis_align = 0;
+        if ((tmp = sdata_addr % alignment))
+            mis_align = alignment - tmp;
 
-    /* Allocate a block of 2058 from meta_aggr */
-    addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE2058);
+        /* Allocate a block of 2058 from meta_aggr */
+        addr2 = H5MF_alloc(f, type, H5P_DATASET_XFER_DEFAULT, (hsize_t)TEST_BLOCK_SIZE2058);
 
-    /* Verify that the allocated block is aligned */
-    if (addr2 % alignment) TEST_ERROR
+        /* Verify that the allocated block is aligned */
+        if (addr2 % alignment) TEST_ERROR
 
-    /* fragment for alignment of block 2058 is freed to free-space */
-    if (mis_align) {
-	state.tot_space += mis_align;
-	state.tot_sect_count += 1;
-	state.serial_sect_count += 1;
-    }
+        /* fragment for alignment of block 2058 is freed to free-space */
+        if (mis_align) {
+            state.tot_space += mis_align;
+            state.tot_sect_count += 1;
+            state.serial_sect_count += 1;
+        }
 
-    H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
-    H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
+        H5MF_aggr_query(f, &(f->shared->meta_aggr), &new_ma_addr, &new_ma_size);
+        H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sdata_addr, &sdata_size);
 
-    if (alignment == TEST_ALIGN1024 && (new_ma_addr != ma_addr || new_ma_size != ma_size))
-	TEST_ERROR
-    else if (alignment == TEST_ALIGN4096 && (new_ma_addr != 0 || new_ma_size != 0))
-	TEST_ERROR
+        if (alignment == TEST_ALIGN1024 && (new_ma_addr != ma_addr || new_ma_size != ma_size))
+            TEST_ERROR
+        else if (alignment == TEST_ALIGN4096 && (new_ma_addr != 0 || new_ma_size != 0))
+            TEST_ERROR
 
-    if (sdata_addr != 0 || sdata_size != 0)
-	TEST_ERROR
+        if (sdata_addr != 0 || sdata_size != 0)
+            TEST_ERROR
 
-    if(check_stats(f->shared->fs_man[type], &state))
-        TEST_ERROR
+        if(check_stats(f->shared->fs_man[type], &state))
+            TEST_ERROR
 
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
 
-    PASSED()
+        PASSED()
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support mis-aligned fragments");
+    } /* end else */
 
     return(0);
 
@@ -5274,6 +5364,12 @@ main(void)
     hid_t       	new_fapl = -1;	/* File access property list for alignment & aggr setting */
     unsigned    	nerrors = 0;    /* Cumulative error count */
     test_type_t		curr_test;
+    const char *env_h5_drvr = NULL;     /* File Driver value from environment */
+
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if(env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
 
     fapl = h5_fileaccess();
     if((new_fapl = H5Pcopy(fapl)) < 0) TEST_ERROR
@@ -5359,14 +5455,14 @@ main(void)
                 TEST_ERROR;
 	} /* end switch */
 
-	nerrors += test_mf_align_eoa(fapl, new_fapl);
-	nerrors += test_mf_align_fs(fapl, new_fapl);
-	nerrors += test_mf_align_alloc1(fapl, new_fapl);
-	nerrors += test_mf_align_alloc2(fapl, new_fapl);
-	nerrors += test_mf_align_alloc3(fapl, new_fapl);
-	nerrors += test_mf_align_alloc4(fapl, new_fapl);
-	nerrors += test_mf_align_alloc5(fapl, new_fapl);
-	nerrors += test_mf_align_alloc6(fapl, new_fapl);
+	nerrors += test_mf_align_eoa(env_h5_drvr, fapl, new_fapl);
+	nerrors += test_mf_align_fs(env_h5_drvr, fapl, new_fapl);
+	nerrors += test_mf_align_alloc1(env_h5_drvr, fapl, new_fapl);
+	nerrors += test_mf_align_alloc2(env_h5_drvr, fapl, new_fapl);
+	nerrors += test_mf_align_alloc3(env_h5_drvr, fapl, new_fapl);
+	nerrors += test_mf_align_alloc4(env_h5_drvr, fapl, new_fapl);
+	nerrors += test_mf_align_alloc5(env_h5_drvr, fapl, new_fapl);
+	nerrors += test_mf_align_alloc6(env_h5_drvr, fapl, new_fapl);
     }
 
     if(nerrors)
