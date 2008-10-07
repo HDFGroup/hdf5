@@ -1009,15 +1009,15 @@ H5G_name_replace(const H5O_link_t *lnk, H5G_names_op_t op, H5F_t *src_file,
 
             /* Search through group IDs */
             if(search_group)
-                H5I_search(H5I_GROUP, H5G_name_replace_cb, &names);
+                H5I_search(H5I_GROUP, H5G_name_replace_cb, &names, FALSE);
 
             /* Search through dataset IDs */
             if(search_dataset)
-                H5I_search(H5I_DATASET, H5G_name_replace_cb, &names);
+                H5I_search(H5I_DATASET, H5G_name_replace_cb, &names, FALSE);
 
             /* Search through datatype IDs */
             if(search_datatype)
-                H5I_search(H5I_DATATYPE, H5G_name_replace_cb, &names);
+                H5I_search(H5I_DATATYPE, H5G_name_replace_cb, &names, FALSE);
         } /* end if */
     } /* end if */
 

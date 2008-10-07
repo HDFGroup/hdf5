@@ -4348,7 +4348,7 @@ H5P_open_class_path(const char *path)
         check_info.name=curr_name;
 
         /* Find the class with this name & parent by iterating over the open classes */
-        if(NULL == (curr_class = (H5P_genclass_t *)H5I_search(H5I_GENPROP_CLS, H5P_check_class, &check_info)))
+        if(NULL == (curr_class = (H5P_genclass_t *)H5I_search(H5I_GENPROP_CLS, H5P_check_class, &check_info, FALSE)))
             HGOTO_ERROR (H5E_PLIST, H5E_NOTFOUND, NULL, "can't locate class");
 
         /* Advance the pointer in the path to the start of the next component */
@@ -4362,7 +4362,7 @@ H5P_open_class_path(const char *path)
     check_info.name = curr_name;
 
     /* Find the class with this name & parent by iterating over the open classes */
-    if(NULL == (curr_class = (H5P_genclass_t *)H5I_search(H5I_GENPROP_CLS, H5P_check_class, &check_info)))
+    if(NULL == (curr_class = (H5P_genclass_t *)H5I_search(H5I_GENPROP_CLS, H5P_check_class, &check_info, FALSE)))
         HGOTO_ERROR(H5E_PLIST, H5E_NOTFOUND, NULL, "can't locate class")
 
     /* Copy it */

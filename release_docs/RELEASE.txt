@@ -93,6 +93,9 @@ New Features
          the same. (PVN - 2008/08/26)
      - h5ls: added capability to traverse through external links when the -r
          (recursive) flag is given. (NAF - 2008/09/16)
+     - h5ls: added -E option to enable traversal of external links.  h5ls will
+         not traverse external links without this flag being set.
+         (NAF - 2008/10/06)
 
 
 
@@ -111,6 +114,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Changed H5Fget_obj_count and H5Fget_obj_ids to ignore objects registered
+            by the library for internal library use.  (NAF - 2008/10/06)
+      - Fixed potential memory leak during compound conversion.
+            (NAF - 2008/10/06)
       - Changed the return value of H5Fget_obj_count from INT to SSIZE_T. Also
             changed the return value of H5Fget_obj_ids from HERR_T to SSIZE_T and
             the type of the parameter MAX_OBJS from INT to SIZE_T. (SLU - 2008/09/26) 

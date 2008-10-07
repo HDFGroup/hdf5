@@ -2570,7 +2570,7 @@ H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags)
     udata.flags = flags;
 
     /* Iterate over all the open datasets */
-    H5I_search(H5I_DATASET, H5D_flush_cb, &udata);
+    H5I_search(H5I_DATASET, H5D_flush_cb, &udata, FALSE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
