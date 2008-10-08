@@ -163,6 +163,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - "make DESTDIR=xxx install" failed to install some tools and files
+      (e.g., h5cc and fortran modules). Fixed. AKC - 2008/10/8.
 
     Performance
     -------------
