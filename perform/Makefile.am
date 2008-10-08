@@ -50,7 +50,7 @@ h5perf_serial_SOURCES=sio_perf.c sio_engine.c sio_timer.c
 
 # These are the files that `make clean' (and derivatives) will remove from
 # this directory.
-CLEANFILES=*.h5 *.raw *.dat x-gnuplot
+CLEANFILES=*.h5 *.raw *.dat x-gnuplot perftest.out
 
 # All of the programs depend on the main hdf5 library, and some of them
 # depend on test or tools library.

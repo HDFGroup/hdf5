@@ -361,7 +361,8 @@ TRACE = perl $(top_srcdir)/bin/trace
 # Temporary files
 # MPItest.h5 is from t_mpi
 # Para*.h5 are from testphdf
-CHECK_CLEANFILES = *.chkexe *.chklog *.clog MPItest.h5 Para*.h5
+CHECK_CLEANFILES = *.chkexe *.chklog *.clog MPItest.h5 Para*.h5 \
+	CacheTestDummy.h5
 INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/test
 
 # Test programs and scripts.  These are our main targets.
