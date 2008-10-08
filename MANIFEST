@@ -2017,6 +2017,8 @@
 ./windows/test/flush1dll/flush1dll.vcproj
 ./windows/test/flush2/flush2.vcproj
 ./windows/test/flush2dll/flush2dll.vcproj
+./windows/test/freespace/freespace.vcproj
+./windows/test/freespacedll/freespacedll.vcproj
 ./windows/test/getname/getname.vcproj
 ./windows/test/getnamedll/getnamedll.vcproj
 ./windows/test/getub/getub.vcproj
@@ -2034,6 +2036,8 @@
 ./windows/test/libtestdll/libtestdll.vcproj
 ./windows/test/links/links.vcproj
 ./windows/test/linksdll/linksdll.vcproj
+./windows/test/mf/mf.vcproj
+./windows/test/mfdll/mfdll.vcproj
 ./windows/test/mount/mount.vcproj
 ./windows/test/mountdll/mountdll.vcproj
 ./windows/test/mtime/mtime.vcproj
