@@ -9368,6 +9368,58 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath="..\..\..\src\H5Faccum.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\src\H5FDint.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\src\H5Fio.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\src\H5Fmpi.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\src\H5Fquery.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\src\H5FSstat.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\src\H5FStest.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\src\H5Gcache.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\src\H5HGcache.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\src\H5HLcache.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\src\H5MFaggr.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\src\H5MFdbg.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\..\src\H5MFsection.c"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
