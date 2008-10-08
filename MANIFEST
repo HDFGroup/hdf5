@@ -1498,18 +1498,17 @@
 ./tools/h5jam/getub.c
 
 # test files for jam
-./tools/testfiles/twithub.h5
-./tools/testfiles/twithub513.h5
-./tools/testfiles/u10.txt
-./tools/testfiles/u511.txt
-./tools/testfiles/u512.txt
-./tools/testfiles/u513.txt
+./tools/h5jam/testfiles/twithub.h5
+./tools/h5jam/testfiles/u10.txt
+./tools/h5jam/testfiles/tall.h5
+./tools/h5jam/testfiles/u511.txt
+./tools/h5jam/testfiles/u512.txt
+./tools/h5jam/testfiles/twithub513.h5
+./tools/h5jam/testfiles/u513.txt
 
 # test files for h5copy
 ./tools/h5copy/testfiles/h5copytst.out.ls
 ./tools/h5copy/testfiles/h5copytst.h5
-
-
 
 # test files for h5mkgrp
 ./tools/testfiles/h5mkgrp_help.ls
