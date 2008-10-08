@@ -589,6 +589,7 @@
 ./src/H5HFtest.c
 ./src/H5HFtiny.c
 ./src/H5HG.c
+./src/H5HGcache.c
 ./src/H5HGdbg.c
 ./src/H5HGpkg.h
 ./src/H5HGprivate.h

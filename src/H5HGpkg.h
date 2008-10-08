@@ -32,13 +32,17 @@
 #include "H5HGprivate.h"
 
 /* Other private headers needed by this file */
+#include "H5AC2private.h"	/* Metadata cache			*/
+
+#define H5F_PACKAGE
+#include "H5Fpkg.h"	       
 
 /*****************************/
 /* Package Private Variables */
 /*****************************/
 
 /* The cache subclass */
-H5_DLLVAR const H5AC_class_t H5AC_GHEAP[1];
+H5_DLLVAR const H5AC2_class_t H5AC2_GHEAP[1];
 
 /**************************/
 /* Package Private Macros */
@@ -65,6 +69,71 @@ H5_DLLVAR const H5AC_class_t H5AC_GHEAP[1];
 	       4 +			/*reserved		*/	      \
 	       H5F_SIZEOF_SIZE(f))	/*object data size	*/
 
+/*
+ * Global heap collection version.
+ */
+#define H5HG_VERSION	1
+
+/*
+ * All global heap collections are at least this big.  This allows us to read
+ * most collections with a single read() since we don't have to read a few
+ * bytes of header to figure out the size.  If the heap is larger than this
+ * then a second read gets the rest after we've decoded the header.
+ */
+#define H5HG_MINSIZE	4096
+
+/*
+ * Limit global heap collections to the some reasonable size.  This is
+ * fairly arbitrary, but needs to be small enough that no more than H5HG_MAXIDX
+ * objects will be allocated from a single heap.
+ */
+#define H5HG_MAXSIZE	65536
+
+/*
+ * Maximum length of the CWFS list, the list of remembered collections that
+ * have free space.
+ */
+#define H5HG_NCWFS	16
+
+/*
+ * The maximum number of links allowed to a global heap object.
+ */
+#define H5HG_MAXLINK	65535
+
+/*
+ * The maximum number of indices allowed in a global heap object.
+ */
+#define H5HG_MAXIDX	65535
+
+/*
+ * The size of the collection header, always a multiple of the alignment so
+ * that the stuff that follows the header is aligned.
+ */
+#define H5HG_SIZEOF_HDR(f)						      \
+    H5HG_ALIGN(4 +			/*magic number		*/	      \
+	       1 +			/*version number	*/	      \
+	       3 +			/*reserved		*/	      \
+	       H5F_SIZEOF_SIZE(f))	/*collection size	*/
+
+/*
+ * The initial guess for the number of messages in a collection.  We assume
+ * that all objects in that collection are zero length, giving the maximum
+ * possible number of objects in the collection.  The collection itself has
+ * some overhead and each message has some overhead.  The `+2' accounts for
+ * rounding and for the free space object.
+ */
+#define H5HG_NOBJS(f,z) (int)((((z)-H5HG_SIZEOF_HDR(f))/		      \
+			       H5HG_SIZEOF_OBJHDR(f)+2))
+
+/*
+ * Makes a global heap object pointer undefined, or checks whether one is
+ * defined.
+ */
+#define H5HG_undef(HGP)	((HGP)->idx=0)
+#define H5HG_defined(HGP) ((HGP)->idx!=0)
+
+#define H5HG_SPEC_READ_SIZE 4096
+
 /****************************/
 /* Package Private Typedefs */
 /****************************/
@@ -76,7 +145,7 @@ typedef struct H5HG_obj_t {
 } H5HG_obj_t;
 
 struct H5HG_heap_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
+    H5AC2_info_t cache_info; /* Information for H5AC2 cache functions, _must_ be */
                             /* first field in structure */
     haddr_t		addr;		/*collection address		*/
     size_t		size;		/*total size of collection	*/
@@ -86,12 +155,25 @@ struct H5HG_heap_t {
                                         /* If this value is >65535 then all indices */
                                         /* have been used at some time and the */
                                         /* correct new index should be searched for */
+    H5F_file_t          *shared;        /* shared file */
     H5HG_obj_t	*obj;		/*array of object descriptions	*/
 };
 
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+
+H5_DLL herr_t H5HG_dest(H5HG_heap_t *heap);
+
+/* Declare a free list to manage the H5HG_t struct */
+H5FL_EXTERN(H5HG_heap_t);
+
+/* Declare a free list to manage sequences of H5HG_obj_t's */
+H5FL_SEQ_EXTERN(H5HG_obj_t);
+
+/* Declare a PQ free list to manage heap chunks */
+H5FL_BLK_EXTERN(heap_chunk);
+
 
 #endif
 

@@ -98,8 +98,8 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5HFcache.lo H5HFdbg.lo H5HFdblock.lo H5HFdtable.lo H5HFhdr.lo \
 	H5HFhuge.lo H5HFiblock.lo H5HFiter.lo H5HFman.lo \
 	H5HFsection.lo H5HFspace.lo H5HFstat.lo H5HFtest.lo \
-	H5HFtiny.lo H5HG.lo H5HGdbg.lo H5HL.lo H5HLdbg.lo H5HP.lo \
-	H5I.lo H5L.lo H5Lexternal.lo H5MF.lo H5MM.lo H5MP.lo \
+	H5HFtiny.lo H5HG.lo H5HGcache.lo H5HGdbg.lo H5HL.lo H5HLdbg.lo \
+	H5HP.lo H5I.lo H5L.lo H5Lexternal.lo H5MF.lo H5MM.lo H5MP.lo \
 	H5MPtest.lo H5O.lo H5Oainfo.lo H5Oalloc.lo H5Oattr.lo \
 	H5Oattribute.lo H5Obogus.lo H5Obtreek.lo H5Ocache.lo \
 	H5Ochunk.lo H5Ocont.lo H5Ocopy.lo H5Odbg.lo H5Odrvinfo.lo \
@@ -442,7 +442,7 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5HF.c H5HFbtree2.c H5HFcache.c H5HFdbg.c H5HFdblock.c H5HFdtable.c \
         H5HFhdr.c H5HFhuge.c H5HFiblock.c H5HFiter.c H5HFman.c H5HFsection.c \
         H5HFspace.c H5HFstat.c H5HFtest.c H5HFtiny.c \
-        H5HG.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5L.c H5Lexternal.c \
+        H5HG.c H5HGcache.c H5HGdbg.c H5HL.c H5HLdbg.c H5HP.c H5I.c H5L.c H5Lexternal.c \
         H5MF.c H5MM.c H5MP.c H5MPtest.c \
         H5O.c H5Oainfo.c H5Oalloc.c H5Oattr.c \
         H5Oattribute.c H5Obogus.c H5Obtreek.c H5Ocache.c H5Ochunk.c \
@@ -702,6 +702,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HFtest.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HFtiny.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HG.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HGcache.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HGdbg.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HL.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HLdbg.Plo@am__quote@
