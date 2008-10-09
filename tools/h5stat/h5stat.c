@@ -882,6 +882,9 @@ print_file_metadata(const iter_t *iter)
  *             Saturday, August 12, 2006
  *
  * Modifications:
+ *	bug #1253; Oct 6th 2008; Vailin Choi
+ *	Fixed segmentation fault: print iter->group_bins[0] when
+ *	there is iter->group_nbins
  *
  *-------------------------------------------------------------------------
  */
@@ -904,7 +907,7 @@ print_group_info(const iter_t *iter)
 
     printf("Group bins:\n");
     total = 0;
-    if(iter->group_bins[0] > 0) {
+    if((iter->group_nbins > 0) && (iter->group_bins[0] > 0)) {
        printf("\t# of groups of size 0: %lu\n", iter->group_bins[0]);
        total = iter->group_bins[0];
     } /* end if */
@@ -1165,6 +1168,15 @@ print_statistics(const char *name, const iter_t *iter)
         print_file_statistics(iter);
 }
 
+/*-------------------------------------------------------------------------
+ * 
+ * Modifications:
+ *	bug #1253; Oct 6th 2008; Vailin Choi
+ *	Call print_statistics() when objects/links are successfully traversed.
+ *	Otherwise, return warning message.
+ *
+ *-------------------------------------------------------------------------
+ */
 
 int
 main(int argc, const char *argv[])
@@ -1174,7 +1186,6 @@ main(int argc, const char *argv[])
     hid_t           	fid;
     struct handler_t   *hand;
     H5F_info_t      	finfo;
-
 
     /* Disable error reporting */
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
@@ -1216,17 +1227,21 @@ main(int argc, const char *argv[])
 
         u = 0;
         while(hand[u].obj) {
-            h5trav_visit(fid, hand[u].obj, TRUE, TRUE, obj_stats, lnk_stats, &iter);
-            print_statistics(hand[u].obj, &iter);
+            if (h5trav_visit(fid, hand[u].obj, TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0) 
+		warn_msg(progname, "Unable to traverse object \"%s\"\n", hand[u].obj);
+	    else
+		print_statistics(hand[u].obj, &iter);
             u++;
         } /* end while */
     } /* end if */
     else {
-        h5trav_visit(fid, "/", TRUE, TRUE, obj_stats, lnk_stats, &iter);
-        print_statistics("/", &iter);
+        if (h5trav_visit(fid, "/", TRUE, TRUE, obj_stats, lnk_stats, &iter) < 0)
+	    warn_msg(progname, "Unable to traverse objects/links in file \"%s\"\n", fname);
+	else
+	    print_statistics("/", &iter);
     } /* end else */
 
-    free(hand);
+    if (hand) free(hand);
 
     if(H5Fclose(fid) < 0) {
         error_msg(progname, "unable to close file \"%s\"\n", fname);
