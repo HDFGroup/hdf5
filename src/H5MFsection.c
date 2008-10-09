@@ -310,7 +310,7 @@ H5MF_sect_simple_can_shrink(const H5FS_section_info_t *_sect, void *_udata)
     HDassert(udata->f);
 
     /* Retrieve the end of the file's address space */
-    if(HADDR_UNDEF == (eoa = H5FD_get_eoa(udata->f->shared->lf, H5FD_MEM_DEFAULT)))
+    if(HADDR_UNDEF == (eoa = H5FD_get_eoa(udata->f->shared->lf, udata->alloc_type)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
 
     /* Compute address of end of section to check */
@@ -405,7 +405,7 @@ H5MF_sect_simple_shrink(H5FS_section_info_t **_sect, void *_udata)
     /* Check for shrinking file */
     if(H5MF_SHRINK_EOA == udata->shrink) {
         /* Release section's space at EOA with file driver */
-        if(H5FD_free(udata->f->shared->lf, udata->dxpl_id, H5FD_MEM_DEFAULT, (*sect)->sect_info.addr, (*sect)->sect_info.size) < 0)
+        if(H5FD_free(udata->f->shared->lf, udata->dxpl_id, udata->alloc_type, (*sect)->sect_info.addr, (*sect)->sect_info.size) < 0)
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "driver free request failed")
     } /* end if */
     else {
@@ -456,7 +456,7 @@ H5MF_sect_simple_free(H5FS_section_info_t *_sect)
     HDassert(sect);
 
     /* Release the section */
-    H5FL_FREE(H5MF_free_section_t, sect);
+    (void)H5FL_FREE(H5MF_free_section_t, sect);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5MF_sect_simple_free() */
