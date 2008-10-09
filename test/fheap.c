@@ -1927,8 +1927,6 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
     H5HF_create_t test_cparam;          /* Creation parameters for heap */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
-    h5_stat_size_t       empty_size;             /* File size, w/o heap */
-    h5_stat_size_t       file_size;              /* File size, after deleting heap */
     size_t      id_len;                 /* Size of fractal heap IDs */
     fheap_heap_state_t state;           /* State of fractal heap */
 
@@ -1938,18 +1936,6 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
     /* Create the file to work on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
-
-    /* Close file */
-    if(H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
-
-    /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
-        TEST_ERROR
-
-    /* Re-open the file */
-    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-        FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = H5I_object(file)))
@@ -2000,14 +1986,6 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename, fapl)) < 0)
-        TEST_ERROR
-
-    /* Verify the file is correct size */
-    if(file_size != empty_size)
-        TEST_ERROR
-
     /* All tests passed */
     PASSED()
 
@@ -2048,8 +2026,6 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     H5HF_t      *fh2 = NULL;            /* 2nd fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
-    h5_stat_size_t       empty_size;             /* File size, w/o heap */
-    h5_stat_size_t       file_size;              /* File size, after deleting heap */
     size_t      id_len;                 /* Size of fractal heap IDs */
     fheap_heap_state_t state;           /* State of fractal heap */
 
@@ -2063,10 +2039,6 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
     /* Get a pointer to the internal file object */
     if(NULL == (f = H5I_object(file)))
         STACK_ERROR
-
-    /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
-        TEST_ERROR
 
     /* Re-open the file */
     if((file2 = H5Freopen(file)) < 0)
@@ -2144,14 +2116,6 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
     /* Close the second file */
     if(H5Fclose(file2) < 0)
         FAIL_STACK_ERROR
-
-    /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename, fapl)) < 0)
-        TEST_ERROR
-
-    /* Verify the file is correct size */
-    if(file_size != empty_size)
-        TEST_ERROR
 
     /* All tests passed */
     PASSED()
