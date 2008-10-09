@@ -1043,9 +1043,9 @@ static void test_attr_dtype_shared()
 
 	// Get size of file
 	h5_stat_size_t empty_filesize;       // Size of empty file
-	empty_filesize = h5_get_file_size(FILENAME.c_str());
+	empty_filesize = h5_get_file_size(FILENAME.c_str(), H5P_DEFAULT);
 	if (empty_filesize < 0)
-    	TestErrPrintf("Line %d: file size wrong!\n",__LINE__);
+            TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
 	// Open the file again
 	fid1.openFile(FILENAME, H5F_ACC_RDWR);
@@ -1162,7 +1162,7 @@ static void test_attr_dtype_shared()
 	fid1.close();
 
 	// Check size of file
-	filesize=h5_get_file_size(FILENAME.c_str());
+	filesize = h5_get_file_size(FILENAME.c_str(), H5P_DEFAULT);
 	verify_val((long)filesize, (long)empty_filesize, "Checking file size", __LINE__, __FILE__);
 
 	PASSED();

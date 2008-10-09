@@ -1212,7 +1212,7 @@ test_file_freespace(void)
     CHECK_I(ret, "H5Fclose");
 
     /* Get the "empty" file size */
-    empty_filesize = h5_get_file_size(FILE1);
+    empty_filesize = h5_get_file_size(FILE1, H5P_DEFAULT);
 
     /* Re-open the file (with read-write permission) */
     file = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -1275,7 +1275,7 @@ test_file_freespace(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Get the file size after modifications*/
-    mod_filesize = h5_get_file_size(FILE1);
+    mod_filesize = h5_get_file_size(FILE1, H5P_DEFAULT);
 
     /* Check that the file reverted to empty size */
     VERIFY(mod_filesize, empty_filesize, "H5Fget_freespace");

@@ -763,7 +763,7 @@ static void test_sohm_size1(void)
     CHECK_I(ret, "H5Fclose");
 
     /* Get the file size */
-    norm_empty_filesize = h5_get_file_size(FILENAME);
+    norm_empty_filesize = h5_get_file_size(FILENAME, fapl_id);
 
     /* Add a bunch of large datatypes to the file */
     file = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl_id);
@@ -779,7 +779,7 @@ static void test_sohm_size1(void)
     norm_oh_size = oinfo.hdr.space.total;
 
     /* Get the new file size */
-    norm_final_filesize = h5_get_file_size(FILENAME);
+    norm_final_filesize = h5_get_file_size(FILENAME, fapl_id);
 
     /* Use the same property list to create a new file. */
     file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, fapl_id);
@@ -795,7 +795,7 @@ static void test_sohm_size1(void)
     CHECK_I(ret, "H5Fclose");
 
     /* Get the file size */
-    norm_final_filesize2 = h5_get_file_size(FILENAME);
+    norm_final_filesize2 = h5_get_file_size(FILENAME, fapl_id);
 
 
 
@@ -819,7 +819,7 @@ static void test_sohm_size1(void)
     ret = H5Fclose(file);
     CHECK_I(ret, "H5Fclose");
 
-    sohm_empty_filesize = h5_get_file_size(FILENAME);
+    sohm_empty_filesize = h5_get_file_size(FILENAME, fapl_id);
 
     /* Add a bunch of datatypes to this file */
     file = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl_id);
@@ -835,7 +835,7 @@ static void test_sohm_size1(void)
     sohm_oh_size = oinfo.hdr.space.total;
 
     /* Get the new file size */
-    sohm_final_filesize = h5_get_file_size(FILENAME);
+    sohm_final_filesize = h5_get_file_size(FILENAME, fapl_id);
 
     /* Use the same property list to create a new file. */
     file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, fapl_id);
@@ -851,7 +851,7 @@ static void test_sohm_size1(void)
     CHECK_I(ret, "H5Fclose");
 
     /* Get the file size */
-    sohm_final_filesize2 = h5_get_file_size(FILENAME);
+    sohm_final_filesize2 = h5_get_file_size(FILENAME, fapl_id);
 
 
 
@@ -874,7 +874,7 @@ static void test_sohm_size1(void)
     ret = H5Fclose(file);
     CHECK_I(ret, "H5Fclose");
 
-    sohm_btree_empty_filesize = h5_get_file_size(FILENAME);
+    sohm_btree_empty_filesize = h5_get_file_size(FILENAME, fapl_id);
 
     /* Add a bunch of datatypes to this file */
     file = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl_id);
@@ -890,7 +890,7 @@ static void test_sohm_size1(void)
     sohm_btree_oh_size = oinfo.hdr.space.total;
 
     /* Get the new file size */
-    sohm_btree_final_filesize = h5_get_file_size(FILENAME);
+    sohm_btree_final_filesize = h5_get_file_size(FILENAME, fapl_id);
 
     /* Use the same property list to create a new file. */
     file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, fapl_id);
@@ -906,7 +906,7 @@ static void test_sohm_size1(void)
     CHECK_I(ret, "H5Fclose");
 
     /* Get the file size */
-    sohm_btree_final_filesize2 = h5_get_file_size(FILENAME);
+    sohm_btree_final_filesize2 = h5_get_file_size(FILENAME, fapl_id);
 
 
 
@@ -1441,7 +1441,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     CHECK_I(ret, "H5Fclose");
 
     /* Get the file size */
-    ret_sizes->empty_size = h5_get_file_size(FILENAME);
+    ret_sizes->empty_size = h5_get_file_size(FILENAME, H5P_DEFAULT);
 
     /* Re-open the file and set up messages to write */
     file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -1544,9 +1544,9 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
 
             /* Get the file's size now */
             if(x == 0)
-                ret_sizes->first_dset = h5_get_file_size(FILENAME);
+                ret_sizes->first_dset = h5_get_file_size(FILENAME, H5P_DEFAULT);
             else
-                ret_sizes->second_dset = h5_get_file_size(FILENAME);
+                ret_sizes->second_dset = h5_get_file_size(FILENAME, H5P_DEFAULT);
 
             file_id = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
             CHECK_I(file_id, "H5Fopen");
@@ -1561,7 +1561,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     /* Close file and get its size now */
     ret = H5Fclose(file_id);
     CHECK_I(ret, "H5Fclose");
-    ret_sizes->dsets1 = h5_get_file_size(FILENAME);
+    ret_sizes->dsets1 = h5_get_file_size(FILENAME, H5P_DEFAULT);
 
 
     /* Now create a new group filled with datasets that use all different messages */
@@ -1602,7 +1602,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     CHECK_I(ret, "H5Gclose");
     ret = H5Fclose(file_id);
     CHECK_I(ret, "H5Fclose");
-    ret_sizes->dsets2 = h5_get_file_size(FILENAME);
+    ret_sizes->dsets2 = h5_get_file_size(FILENAME, H5P_DEFAULT);
 
 
     /* Create a new group and interleave writes of datasets types 1 and 2. */
@@ -1656,7 +1656,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     CHECK_I(ret, "H5Gclose");
     ret = H5Fclose(file_id);
     CHECK_I(ret, "H5Fclose");
-    ret_sizes->interleaved = h5_get_file_size(FILENAME);
+    ret_sizes->interleaved = h5_get_file_size(FILENAME, H5P_DEFAULT);
 
     /* Create lots of new attribute messages on the group
      * (using different strings for the attribute)
@@ -1699,7 +1699,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     CHECK_I(ret, "H5Gclose");
     ret = H5Fclose(file_id);
     CHECK_I(ret, "H5Fclose");
-    ret_sizes->attrs1 = h5_get_file_size(FILENAME);
+    ret_sizes->attrs1 = h5_get_file_size(FILENAME, H5P_DEFAULT);
 
 
     /* Create all of the attributes again on the other group */
@@ -1738,7 +1738,7 @@ size2_helper(hid_t fcpl_id, int test_file_closing, size2_helper_struct *ret_size
     CHECK_I(ret, "H5Gclose");
     ret = H5Fclose(file_id);
     CHECK_I(ret, "H5Fclose");
-    ret_sizes->attrs2 = h5_get_file_size(FILENAME);
+    ret_sizes->attrs2 = h5_get_file_size(FILENAME, H5P_DEFAULT);
 
 
     /* Close everything */
@@ -2723,7 +2723,7 @@ static void delete_helper(hid_t fcpl_id, hid_t *dspace_id, hid_t *dcpl_id)
     /* Close file and get filesize */
     ret = H5Fclose(file_id);
     CHECK_I(ret, "H5Fclose");
-    norm_filesize = h5_get_file_size(FILENAME);
+    norm_filesize = h5_get_file_size(FILENAME, H5P_DEFAULT);
 
     /* Create a new file with messages 0 to (HALF_DELETE_NUM_MESGS - 1) */
     file_id = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl_id, H5P_DEFAULT);
@@ -2755,7 +2755,7 @@ static void delete_helper(hid_t fcpl_id, hid_t *dspace_id, hid_t *dcpl_id)
     /* Close file and get filesize */
     ret = H5Fclose(file_id);
     CHECK_I(ret, "H5Fclose");
-    deleted_filesize = h5_get_file_size(FILENAME);
+    deleted_filesize = h5_get_file_size(FILENAME, H5P_DEFAULT);
 
     /* The two filesizes should be almost the same */
     if(norm_filesize > deleted_filesize * OVERHEAD_ALLOWED)
@@ -2950,7 +2950,7 @@ test_sohm_delete_revert_helper(hid_t fcpl_id)
     /* Close the file and get its size */
     ret = H5Fclose(file_id);
     CHECK_I(ret, "H5Fclose");
-    initial_filesize = h5_get_file_size(FILENAME);
+    initial_filesize = h5_get_file_size(FILENAME, H5P_DEFAULT);
 
 
     /* Re-create the file and create a dataset in it */
@@ -2969,7 +2969,7 @@ test_sohm_delete_revert_helper(hid_t fcpl_id)
     /* Close the file and get its size */
     ret = H5Fclose(file_id);
     CHECK_I(ret, "H5Fclose");
-    deleted_filesize = h5_get_file_size(FILENAME);
+    deleted_filesize = h5_get_file_size(FILENAME, H5P_DEFAULT);
 
     VERIFY(deleted_filesize, initial_filesize, "h5_get_file_size");
 
@@ -2999,7 +2999,7 @@ test_sohm_delete_revert_helper(hid_t fcpl_id)
     /* Close the file and get its size */
     ret = H5Fclose(file_id);
     CHECK_I(ret, "H5Fclose");
-    deleted_filesize = h5_get_file_size(FILENAME);
+    deleted_filesize = h5_get_file_size(FILENAME, H5P_DEFAULT);
 
     VERIFY(deleted_filesize, initial_filesize, "h5_get_file_size");
 

@@ -1631,7 +1631,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Get size of file */
-    empty_filesize = h5_get_file_size(FILENAME);
+    empty_filesize = h5_get_file_size(FILENAME, fapl);
     if(empty_filesize < 0)
         TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
@@ -1770,7 +1770,7 @@ test_attr_dtype_shared(hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Check size of file */
-    filesize = h5_get_file_size(FILENAME);
+    filesize = h5_get_file_size(FILENAME, fapl);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dtype_shared() */
 
@@ -2129,7 +2129,7 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Get size of file */
-    empty_filesize = h5_get_file_size(FILENAME);
+    empty_filesize = h5_get_file_size(FILENAME, fapl);
     if(empty_filesize < 0)
         TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
@@ -2220,7 +2220,7 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Check size of file */
-    filesize = h5_get_file_size(FILENAME);
+    filesize = h5_get_file_size(FILENAME, fapl);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_create() */
 
@@ -2260,7 +2260,7 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Get size of file */
-    empty_filesize = h5_get_file_size(FILENAME);
+    empty_filesize = h5_get_file_size(FILENAME, fapl);
     if(empty_filesize < 0)
         TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
@@ -2359,7 +2359,7 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Check size of file */
-    filesize = h5_get_file_size(FILENAME);
+    filesize = h5_get_file_size(FILENAME, fapl);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_open() */
 
@@ -2400,7 +2400,7 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Get size of file */
-    empty_filesize = h5_get_file_size(FILENAME);
+    empty_filesize = h5_get_file_size(FILENAME, fapl);
     if(empty_filesize < 0)
         TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
@@ -2537,7 +2537,7 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Check size of file */
-    filesize = h5_get_file_size(FILENAME);
+    filesize = h5_get_file_size(FILENAME, fapl);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_delete() */
 
@@ -2579,7 +2579,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Get size of file */
-    empty_filesize = h5_get_file_size(FILENAME);
+    empty_filesize = h5_get_file_size(FILENAME, fapl);
     if(empty_filesize < 0)
         TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
@@ -2696,7 +2696,7 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Check size of file */
-    filesize = h5_get_file_size(FILENAME);
+    filesize = h5_get_file_size(FILENAME, fapl);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_rename() */
 
@@ -2738,7 +2738,7 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Get size of file */
-    empty_filesize = h5_get_file_size(FILENAME);
+    empty_filesize = h5_get_file_size(FILENAME, fapl);
     if(empty_filesize < 0)
         TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
@@ -2826,7 +2826,7 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Check size of file */
-    filesize = h5_get_file_size(FILENAME);
+    filesize = h5_get_file_size(FILENAME, fapl);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_unlink() */
 
@@ -2866,7 +2866,7 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Get size of file */
-    empty_filesize = h5_get_file_size(FILENAME);
+    empty_filesize = h5_get_file_size(FILENAME, fapl);
     if(empty_filesize < 0)
         TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
@@ -2991,7 +2991,7 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Check size of file */
-    filesize = h5_get_file_size(FILENAME);
+    filesize = h5_get_file_size(FILENAME, fapl);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_limits() */
 
@@ -3559,7 +3559,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Get size of file */
-    empty_filesize = h5_get_file_size(FILENAME);
+    empty_filesize = h5_get_file_size(FILENAME, fapl);
     if(empty_filesize < 0)
         TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
@@ -3784,7 +3784,7 @@ test_attr_big(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Check size of file */
-    filesize = h5_get_file_size(FILENAME);
+    filesize = h5_get_file_size(FILENAME, fapl);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_big() */
 
@@ -3825,7 +3825,7 @@ test_attr_null_space(hid_t fcpl, hid_t fapl)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Get size of file */
-    empty_filesize = h5_get_file_size(FILENAME);
+    empty_filesize = h5_get_file_size(FILENAME, fapl);
     if(empty_filesize < 0)
         TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
@@ -4002,7 +4002,7 @@ test_attr_null_space(hid_t fcpl, hid_t fapl)
 
 
     /* Check size of file */
-    filesize = h5_get_file_size(FILENAME);
+    filesize = h5_get_file_size(FILENAME, fapl);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_null_space() */
 
@@ -8081,7 +8081,7 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Fclose");
 
         /* Get size of file */
-        empty_filesize = h5_get_file_size(FILENAME);
+        empty_filesize = h5_get_file_size(FILENAME, fapl);
         if(empty_filesize < 0)
             TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
@@ -8301,7 +8301,7 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Fclose");
 
         /* Check size of file */
-        filesize = h5_get_file_size(FILENAME);
+        filesize = h5_get_file_size(FILENAME, fapl);
         VERIFY(filesize, empty_filesize, "h5_get_file_size");
     } /* end for */
 
@@ -8407,7 +8407,7 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Fclose");
 
         /* Get size of file */
-        empty_filesize = h5_get_file_size(FILENAME);
+        empty_filesize = h5_get_file_size(FILENAME, fapl);
         if(empty_filesize < 0)
             TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
@@ -8743,7 +8743,7 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Fclose");
 
         /* Check size of file */
-        filesize = h5_get_file_size(FILENAME);
+        filesize = h5_get_file_size(FILENAME, fapl);
         VERIFY(filesize, empty_filesize, "h5_get_file_size");
     } /* end for */
 
@@ -8848,7 +8848,7 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Fclose");
 
         /* Get size of file */
-        empty_filesize = h5_get_file_size(FILENAME);
+        empty_filesize = h5_get_file_size(FILENAME, fapl);
         if(empty_filesize < 0)
             TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
@@ -9107,7 +9107,7 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Fclose");
 
         /* Check size of file */
-        filesize = h5_get_file_size(FILENAME);
+        filesize = h5_get_file_size(FILENAME, fapl);
         VERIFY(filesize, empty_filesize, "h5_get_file_size");
     } /* end for */
 
@@ -9212,7 +9212,7 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Fclose");
 
         /* Get size of file */
-        empty_filesize = h5_get_file_size(FILENAME);
+        empty_filesize = h5_get_file_size(FILENAME, fapl);
         if(empty_filesize < 0)
             TestErrPrintf("Line %d: file size wrong!\n", __LINE__);
 
@@ -9457,7 +9457,7 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
         CHECK(ret, FAIL, "H5Fclose");
 
         /* Check size of file */
-        filesize = h5_get_file_size(FILENAME);
+        filesize = h5_get_file_size(FILENAME, fapl);
         VERIFY(filesize, empty_filesize, "h5_get_file_size");
     } /* end for */
 

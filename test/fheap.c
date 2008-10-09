@@ -663,7 +663,7 @@ open_heap(char *filename, hid_t fapl, hid_t dxpl, const H5HF_create_t *cparam,
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((*empty_size = h5_get_file_size(filename)) < 0)
+    if((*empty_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -748,7 +748,6 @@ error:
  * Purpose:	Perform common "close" operations on file & heap for testing
  *
  * Return:	Success:	0
- *
  *		Failure:	1
  *
  * Programmer:	Quincey Koziol
@@ -757,7 +756,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-close_heap(char *filename, hid_t dxpl, fheap_test_param_t *tparam,
+close_heap(char *filename, hid_t fapl, hid_t dxpl, fheap_test_param_t *tparam,
     hid_t file, H5F_t *f, H5HF_t **fh, haddr_t fh_addr,
     fheap_heap_state_t *state, fheap_heap_ids_t *keep_ids,
     h5_stat_size_t empty_size)
@@ -796,7 +795,7 @@ close_heap(char *filename, hid_t dxpl, fheap_test_param_t *tparam,
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -1831,7 +1830,7 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename)) < 0)
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -1883,7 +1882,7 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -1928,6 +1927,8 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
     H5HF_create_t test_cparam;          /* Creation parameters for heap */
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
+    h5_stat_size_t       empty_size;             /* File size, w/o heap */
+    h5_stat_size_t       file_size;              /* File size, after deleting heap */
     size_t      id_len;                 /* Size of fractal heap IDs */
     fheap_heap_state_t state;           /* State of fractal heap */
 
@@ -1937,6 +1938,18 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
     /* Create the file to work on */
     if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* Get the size of a file w/empty heap*/
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
+        TEST_ERROR
+
+    /* Re-open the file */
+    if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+        FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
     if(NULL == (f = H5I_object(file)))
@@ -1987,6 +2000,14 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tparam
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
+    /* Get the size of the file */
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
+        TEST_ERROR
+
+    /* Verify the file is correct size */
+    if(file_size != empty_size)
+        TEST_ERROR
+
     /* All tests passed */
     PASSED()
 
@@ -2027,6 +2048,8 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
     H5HF_t      *fh = NULL;             /* Fractal heap wrapper */
     H5HF_t      *fh2 = NULL;            /* 2nd fractal heap wrapper */
     haddr_t     fh_addr;                /* Address of fractal heap */
+    h5_stat_size_t       empty_size;             /* File size, w/o heap */
+    h5_stat_size_t       file_size;              /* File size, after deleting heap */
     size_t      id_len;                 /* Size of fractal heap IDs */
     fheap_heap_state_t state;           /* State of fractal heap */
 
@@ -2040,6 +2063,10 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
     /* Get a pointer to the internal file object */
     if(NULL == (f = H5I_object(file)))
         STACK_ERROR
+
+    /* Get the size of a file w/empty heap*/
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
+        TEST_ERROR
 
     /* Re-open the file */
     if((file2 = H5Freopen(file)) < 0)
@@ -2118,6 +2145,14 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *tp
     if(H5Fclose(file2) < 0)
         FAIL_STACK_ERROR
 
+    /* Get the size of the file */
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
+        TEST_ERROR
+
+    /* Verify the file is correct size */
+    if(file_size != empty_size)
+        TEST_ERROR
+
     /* All tests passed */
     PASSED()
 
@@ -2176,7 +2211,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *t
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/no heap*/
-    if((empty_size = h5_get_file_size(filename)) < 0)
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -2261,7 +2296,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t UNUSED *t
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -6187,7 +6222,7 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename)) < 0)
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -6252,7 +6287,7 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -6343,7 +6378,7 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename)) < 0)
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -6436,7 +6471,7 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -6528,7 +6563,7 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename)) < 0)
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -6596,7 +6631,7 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -6689,7 +6724,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename)) < 0)
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -6827,7 +6862,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -6925,7 +6960,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         FAIL_STACK_ERROR
 
     /* Get the size of a file w/empty heap*/
-    if((empty_size = h5_get_file_size(filename)) < 0)
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -7122,7 +7157,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         TEST_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -7198,7 +7233,7 @@ test_man_remove_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -7287,7 +7322,7 @@ test_man_remove_two_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -7358,7 +7393,7 @@ test_man_remove_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -7431,7 +7466,7 @@ test_man_remove_first_two_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -7508,7 +7543,7 @@ test_man_remove_first_four_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -7579,7 +7614,7 @@ test_man_remove_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -7654,7 +7689,7 @@ test_man_remove_2nd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -7733,7 +7768,7 @@ test_man_remove_3rd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -7815,7 +7850,7 @@ test_man_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -7913,7 +7948,7 @@ test_man_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -8023,7 +8058,7 @@ test_man_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_t
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -8117,7 +8152,7 @@ test_man_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -8260,7 +8295,7 @@ test_man_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -8427,7 +8462,7 @@ test_man_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -8557,7 +8592,7 @@ test_man_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -8685,7 +8720,7 @@ test_man_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -8808,7 +8843,7 @@ test_man_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_crea
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -8936,7 +8971,7 @@ test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_
         TEST_ERROR
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -9079,7 +9114,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -9254,7 +9289,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -9406,7 +9441,7 @@ test_man_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -9587,7 +9622,7 @@ test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -9714,7 +9749,7 @@ test_man_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t 
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -9853,7 +9888,7 @@ test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -10004,7 +10039,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -10166,7 +10201,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -10328,7 +10363,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -10497,7 +10532,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -10657,7 +10692,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -10835,7 +10870,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -11048,7 +11083,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -11245,7 +11280,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -11478,7 +11513,7 @@ HDfprintf(stderr, "obj_size = %Zu\n", obj_size);
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -11613,7 +11648,7 @@ test_man_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -11783,7 +11818,7 @@ test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -11896,7 +11931,7 @@ HDfprintf(stderr, "num_first_indirect_rows = %u\n", num_first_indirect_rows);
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -12015,7 +12050,7 @@ test_man_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
 
 
     /* Perform common file & heap close operations */
-    if(close_heap(filename, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
+    if(close_heap(filename, fapl, dxpl, tparam, file, f, &fh, fh_addr, &state, &keep_ids, empty_size) < 0)
         TEST_ERROR
 
     /* Free resources */
@@ -12161,7 +12196,7 @@ test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -12392,7 +12427,7 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -12698,7 +12733,7 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -13122,7 +13157,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -13339,7 +13374,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "empty_size = %lu, file_size = %lu\n", (unsigned long)empty_size, (unsigned long)file_size);
@@ -13493,7 +13528,7 @@ test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -13724,7 +13759,7 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -14325,7 +14360,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -14515,9 +14550,10 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
+/* Needs file free space to be persistent */
 #ifdef NOT_YET
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "empty_size = %lu, file_size = %lu\n", (unsigned long)empty_size, (unsigned long)file_size);
@@ -14823,9 +14859,10 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     if(H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
+/* Needs file free space to be persistent */
 #ifdef NOT_YET
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "empty_size = %lu, file_size = %lu\n", (unsigned long)empty_size, (unsigned long)file_size);
@@ -14948,7 +14985,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
     total_obj_added = 0;
     while(total_obj_added < size_limit) {
         /* Choose a random size of object (from 1 up to above standalone block size limit) */
-        obj_size = (HDrandom() % (tmp_cparam.max_man_size + 255)) + 1;
+        obj_size = (((uint32_t)HDrandom() % (tmp_cparam.max_man_size + 255)) + 1);
         obj_loc = (tmp_cparam.max_man_size + 255) - obj_size;
 
         /* Insert object */
@@ -14972,7 +15009,7 @@ HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %
 
         /* Choose a position to swap with */
         /* (0 is current position) */
-        pos = HDrandom() % (keep_ids.num_ids - u);
+        pos = ((size_t)HDrandom() % (keep_ids.num_ids - u));
 
         /* If we chose a different position, swap with it */
         if(pos > 0) {
@@ -15021,7 +15058,7 @@ HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "file_size = %lu\n", (unsigned long)file_size);
@@ -15164,7 +15201,7 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
             size_range = tmp_cparam.max_man_size + 255;
 
         /* Choose a random size of object (from 1 up to stand alone block size) */
-        obj_size = (HDrandom() % (size_range - 1)) + 1;
+        obj_size = (((unsigned)HDrandom() % (size_range - 1)) + 1);
         obj_loc = (tmp_cparam.max_man_size + 255) - obj_size;
 
         /* Insert object */
@@ -15188,7 +15225,7 @@ HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %
 
         /* Choose a position to swap with */
         /* (0 is current position) */
-        pos = HDrandom() % (keep_ids.num_ids - u);
+        pos = ((size_t)HDrandom() % (keep_ids.num_ids - u));
 
         /* If we chose a different position, swap with it */
         if(pos > 0) {
@@ -15237,7 +15274,7 @@ HDfprintf(stderr, "keep_ids.num_ids = %Zu, total_obj_added = %Hu, size_limit = %
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 #ifdef QAK
 HDfprintf(stderr, "empty_size = %lu\n", (unsigned long)empty_size);

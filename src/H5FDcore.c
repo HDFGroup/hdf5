@@ -91,6 +91,7 @@ static H5FD_t *H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
 			      haddr_t maxaddr);
 static herr_t H5FD_core_close(H5FD_t *_file);
 static int H5FD_core_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
+static herr_t H5FD_core_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_core_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t H5FD_core_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD_core_get_eof(const H5FD_t *_file);
@@ -100,6 +101,7 @@ static herr_t H5FD_core_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, hadd
 static herr_t H5FD_core_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr,
 			      size_t size, const void *buf);
 static herr_t H5FD_core_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing);
+static herr_t H5FD_core_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 
 static const H5FD_class_t H5FD_core_g = {
     "core",					/*name			*/
@@ -118,7 +120,7 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD_core_open,				/*open			*/
     H5FD_core_close,				/*close			*/
     H5FD_core_cmp,				/*cmp			*/
-    NULL,				        /*query			*/
+    H5FD_core_query,			        /*query			*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
     H5FD_core_get_eoa,				/*get_eoa		*/
@@ -128,7 +130,7 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD_core_read,				/*read			*/
     H5FD_core_write,				/*write			*/
     H5FD_core_flush,				/*flush			*/
-    NULL,					/*truncate		*/
+    H5FD_core_truncate,				/*truncate		*/
     NULL,                                       /*lock                  */
     NULL,                                       /*unlock                */
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
@@ -344,7 +346,7 @@ H5FD_core_fapl_get(H5FD_t *_file)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     fa->increment = file->increment;
-    fa->backing_store = (file->fd>=0);
+    fa->backing_store = (hbool_t)(file->fd >= 0);
 
     /* Set return value */
     ret_value=fa;
@@ -558,6 +560,42 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5FD_core_query
+ *
+ * Purpose:	Set the flags that this VFL driver is capable of supporting.
+ *              (listed in H5FDpublic.h)
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, October  7, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5FD_core_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_core_query, FAIL)
+
+    /* Set the VFL feature flags that this driver supports */
+    if(flags) {
+        *flags = 0;
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
+        *flags |= H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
+        *flags |= H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_core_query() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5FD_core_get_eoa
  *
  * Purpose:	Gets the end-of-address marker for the file. The EOA marker
@@ -620,18 +658,18 @@ static herr_t
 H5FD_core_set_eoa(H5FD_t *_file, H5FD_mem_t UNUSED type, haddr_t addr)
 {
     H5FD_core_t	*file = (H5FD_core_t*)_file;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_core_set_eoa, FAIL)
 
-    if (ADDR_OVERFLOW(addr))
+    if(ADDR_OVERFLOW(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "address overflow")
 
     file->eoa = addr;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_core_set_eoa() */
 
 
 /*-------------------------------------------------------------------------
@@ -795,18 +833,18 @@ static herr_t
 H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
 		size_t size, const void *buf)
 {
-    H5FD_core_t		*file = (H5FD_core_t*)_file;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    H5FD_core_t *file = (H5FD_core_t*)_file;
+    herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_core_write, FAIL)
 
-    assert(file && file->pub.cls);
-    assert(buf);
+    HDassert(file && file->pub.cls);
+    HDassert(buf);
 
     /* Check for overflow conditions */
-    if (REGION_OVERFLOW(addr, size))
+    if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
-    if (addr+size>file->eoa)
+    if(addr + size > file->eoa)
         HGOTO_ERROR(H5E_IO, H5E_OVERFLOW, FAIL, "file address overflowed")
 
     /*
@@ -815,34 +853,33 @@ H5FD_core_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
      * careful of non-Posix realloc() that doesn't understand what to do when
      * the first argument is null.
      */
-    if (addr+size>file->eof) {
+    if(addr + size > file->eof) {
         unsigned char *x;
         size_t new_eof;
 
-        H5_ASSIGN_OVERFLOW(new_eof,file->increment*((addr+size)/file->increment),hsize_t,size_t);
-
+        /* Determine new size of memory buffer */
+        H5_ASSIGN_OVERFLOW(new_eof, file->increment * ((addr + size) / file->increment), hsize_t, size_t);
         if((addr + size) % file->increment)
             new_eof += file->increment;
-        if(NULL == file->mem)
-            x = (unsigned char *)H5MM_malloc(new_eof);
-        else
-            x = (unsigned char *)H5MM_realloc(file->mem, new_eof);
+
+        /* (Re)allocate memory for the file buffer */
+        if(NULL == (x = (unsigned char *)H5MM_realloc(file->mem, new_eof)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block")
 #ifdef H5_CLEAR_MEMORY
 HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
 #endif /* H5_CLEAR_MEMORY */
-        if (!x)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block")
         file->mem = x;
+
         file->eof = new_eof;
-    }
+    } /* end if */
 
     /* Write from BUF to memory */
-    HDmemcpy(file->mem+addr, buf, size);
+    HDmemcpy(file->mem + addr, buf, size);
     file->dirty = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_core_write() */
 
 
 /*-------------------------------------------------------------------------
@@ -899,4 +936,63 @@ H5FD_core_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5FD_core_truncate
+ *
+ * Purpose:	Makes sure that the true file size is the same (or larger)
+ *		than the end-of-address.
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, October  7, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5FD_core_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
+{
+    H5FD_core_t *file = (H5FD_core_t*)_file;
+    size_t new_eof;                             /* New size of memory buffer */
+    herr_t ret_value = SUCCEED;                 /* Return value */
+
+    FUNC_ENTER_NOAPI(H5FD_core_truncate, FAIL)
+
+    HDassert(file);
+
+    /* Determine new size of memory buffer */
+    H5_ASSIGN_OVERFLOW(new_eof, file->increment * (file->eoa / file->increment), hsize_t, size_t);
+    if(file->eoa % file->increment)
+        new_eof += file->increment;
+
+    /* Extend the file to make sure it's large enough */
+    if(!H5F_addr_eq((haddr_t)new_eof, file->eof)) {
+        unsigned char *x;       /* Pointer to new buffer for file data */
+
+        /* (Re)allocate memory for the file buffer */
+        if(NULL == (x = (unsigned char *)H5MM_realloc(file->mem, new_eof)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block")
+#ifdef H5_CLEAR_MEMORY
+if(file->eof < new_eof)
+    HDmemset(x + file->eof, 0, (size_t)(new_eof - file->eof));
+#endif /* H5_CLEAR_MEMORY */
+        file->mem = x;
+
+        /* Update backing store, if using it */
+        if(file->fd >= 0 && file->backing_store) {
+            if(-1 == HDftruncate(file->fd, (off_t)new_eof))
+                HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
+        } /* end if */
+
+        /* Update the eof value */
+        file->eof = new_eof;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_core_truncate() */
 

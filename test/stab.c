@@ -342,7 +342,7 @@ lifecycle(hid_t fapl2)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Get size of file as empty */
-    if((empty_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((empty_size = h5_get_file_size(filename, fapl2)) < 0) TEST_ERROR
 
     /* Re-open file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl2)) < 0) TEST_ERROR
@@ -491,7 +491,7 @@ lifecycle(hid_t fapl2)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Get size of file as empty */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl2)) < 0) TEST_ERROR
 
     /* Verify that file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -547,7 +547,7 @@ long_compact(hid_t fapl2)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Get size of file as empty */
-    if((empty_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((empty_size = h5_get_file_size(filename, fapl2)) < 0) TEST_ERROR
 
     /* Construct very long object name template */
     if((objname = (char *)HDmalloc((size_t)(LONG_COMPACT_LENGTH + 1))) == NULL) TEST_ERROR
@@ -624,7 +624,7 @@ long_compact(hid_t fapl2)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Get size of file as empty */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl2)) < 0) TEST_ERROR
 
     /* Verify that file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -794,7 +794,7 @@ no_compact(hid_t fapl2)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Get size of file as empty */
-    if((empty_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((empty_size = h5_get_file_size(filename, fapl2)) < 0) TEST_ERROR
 
     /* Re-open file */
     if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl2)) < 0) TEST_ERROR
@@ -851,7 +851,7 @@ no_compact(hid_t fapl2)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Get size of file as empty */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl2)) < 0) TEST_ERROR
 
     /* Verify that file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -1006,7 +1006,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-old_api(hid_t fapl, const char *driver)
+old_api(hid_t fapl)
 {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     hid_t	fid = (-1);             /* File ID */
@@ -1034,11 +1034,8 @@ old_api(hid_t fapl, const char *driver)
     /* Close file */
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
-    /* Avoid size comparisons if we are using the core VFD */
-    if(HDstrcmp(driver, "core")) {
-        /* Get the size of the file with a "small" heap for group */
-        if((small_file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
-    } /* end if */
+    /* Get the size of the file with a "small" heap for group */
+    if((small_file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
 
     /* Create file */
@@ -1059,20 +1056,16 @@ old_api(hid_t fapl, const char *driver)
     /* Close file */
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
-    /* Avoid size comparisons if we are using the core VFD */
-    if(HDstrcmp(driver, "core")) {
-        /* Get the size of the file with a "large" heap for group */
-        if((large_file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    /* Get the size of the file with a "large" heap for group */
+    if((large_file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
-        /* Check that the file with a "large" group heap is actually bigger */
-        if(large_file_size <= small_file_size) TEST_ERROR
-    } /* end if */
+    /* Check that the file with a "large" group heap is actually bigger */
+    if(large_file_size <= small_file_size) TEST_ERROR
 
     PASSED();
 #else /* H5_NO_DEPRECATED_SYMBOLS */
     /* Shut compiler up */
     fapl = fapl;
-    driver = driver;
 
     SKIPPED();
     puts("    Deprecated API symbols not enabled");
@@ -1147,7 +1140,7 @@ main(void)
 	nerrors += gcpl_on_root(fapl2);
 
         /* Old group API specific tests */
-	nerrors += old_api(fapl, envval);
+	nerrors += old_api(fapl);
 
         /* Close 2nd FAPL */
 	H5Pclose(fapl2);

@@ -37,10 +37,8 @@
 #include "H5Vprivate.h"
 
 #define FILENAME_LEN		1024
-#define TEST_FSPACE_CLIENT_ID	2
 
 #define TEST_BLOCK_SIZE5	5
-#define TEST_BLOCK_SIZE10	10
 #define TEST_BLOCK_SIZE20	20
 #define TEST_BLOCK_SIZE30	30
 #define TEST_BLOCK_SIZE40	40
@@ -54,7 +52,6 @@
 #define TEST_BLOCK_SIZE2058	2058
 #define TEST_BLOCK_SIZE8000	8000
 #define TEST_BLOCK_SIZE2048	2048
-#define TEST_BLOCK_SIZE1024	1024
 
 #define TEST_BLOCK_ADDR70	70
 #define TEST_BLOCK_ADDR100	100
@@ -133,7 +130,7 @@ error:
  *
  * Allocate two blocks which should be from file allocation
  */
-static int
+static unsigned
 test_mf_eoa(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -162,7 +159,7 @@ test_mf_eoa(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Turn off using meta/small data aggregator */
@@ -174,7 +171,7 @@ test_mf_eoa(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -204,7 +201,7 @@ test_mf_eoa(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -216,7 +213,7 @@ test_mf_eoa(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30);
@@ -226,7 +223,7 @@ test_mf_eoa(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -261,7 +258,7 @@ error:
  * 		H5MF_try_shrink() the block by 20 from the end: succeed
  *
  */
-static int
+static unsigned
 test_mf_eoa_shrink(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -291,7 +288,7 @@ test_mf_eoa_shrink(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Turn off using meta/small data aggregator */
@@ -303,7 +300,7 @@ test_mf_eoa_shrink(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -323,7 +320,7 @@ test_mf_eoa_shrink(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -335,7 +332,7 @@ test_mf_eoa_shrink(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -354,7 +351,7 @@ test_mf_eoa_shrink(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -370,7 +367,7 @@ test_mf_eoa_shrink(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -394,7 +391,7 @@ test_mf_eoa_shrink(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -411,7 +408,7 @@ test_mf_eoa_shrink(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -430,7 +427,7 @@ test_mf_eoa_shrink(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -446,7 +443,7 @@ test_mf_eoa_shrink(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -465,7 +462,7 @@ test_mf_eoa_shrink(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -496,7 +493,7 @@ error:
  * Test 2: Allocate a block of 30
  * 	H5MF_try_extend() the block of size 20 by 50: fail
  */
-static int
+static unsigned
 test_mf_eoa_extend(hid_t fapl)
 {
     hid_t		file = -1;              	/* File ID */
@@ -526,7 +523,7 @@ test_mf_eoa_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of a file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Turn off using meta/small data aggregator */
@@ -538,7 +535,7 @@ test_mf_eoa_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -557,7 +554,7 @@ test_mf_eoa_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -569,7 +566,7 @@ test_mf_eoa_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* should succeed */
@@ -587,7 +584,7 @@ test_mf_eoa_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -603,11 +600,11 @@ test_mf_eoa_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
@@ -638,7 +635,7 @@ test_mf_eoa_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -662,7 +659,7 @@ error:
  * Set up:
  * 	Turn off using meta/small data aggregator
  */
-static int
+static unsigned
 test_mf_fs_start(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -690,7 +687,7 @@ test_mf_fs_start(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file  */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Turn off using meta/small data aggregator */
@@ -702,7 +699,7 @@ test_mf_fs_start(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Start up free-space manager */
@@ -723,7 +720,7 @@ test_mf_fs_start(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -767,7 +764,7 @@ error:
  *	Deallocate the block which will be returned to free-space manager
  *	(the space is shrunk and freed since it is at end of file)
  */
-static int
+static unsigned
 test_mf_fs_alloc_free(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -799,7 +796,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of a file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Turn off using meta/small data aggregator */
@@ -811,7 +808,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
@@ -878,7 +875,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -894,7 +891,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
@@ -960,7 +957,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -976,7 +973,7 @@ test_mf_fs_alloc_free(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
@@ -1051,11 +1048,11 @@ test_mf_fs_alloc_free(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
-    if (file_size != file_size)
+    if (new_file_size != file_size)
 	TEST_ERROR
 
     PASSED()
@@ -1107,7 +1104,7 @@ error:
  *	Fail: section A does not adjoin section B (70+20 != address of section B) even though
  *	      the requested-size (50) equal to size of section B (50)
  */
-static int
+static unsigned
 test_mf_fs_extend(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -1140,7 +1137,7 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of a file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Turn off using meta/small data aggregator */
@@ -1152,7 +1149,7 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
@@ -1251,7 +1248,7 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -1267,7 +1264,7 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
@@ -1361,7 +1358,7 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -1377,7 +1374,7 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
@@ -1471,7 +1468,7 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -1487,7 +1484,7 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
@@ -1590,7 +1587,7 @@ test_mf_fs_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl_new)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -1632,7 +1629,7 @@ error:
  *			  section size + remaining size of aggregator is > aggr->alloc_size,
  *			  section is allowed to absorb an aggregator (allow_sect_absorb is true)
  */
-static int
+static unsigned
 test_mf_fs_absorb(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -1665,7 +1662,7 @@ test_mf_fs_absorb(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
@@ -1725,7 +1722,7 @@ test_mf_fs_absorb(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
@@ -1808,7 +1805,7 @@ error:
  *		The second block of 50 is allocated from meta_aggr
  *		There is space of 1968 left in meta_aggr
  */
-static int
+static unsigned
 test_mf_aggr_alloc1(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -1834,7 +1831,7 @@ test_mf_aggr_alloc1(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of a file  */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -1842,7 +1839,7 @@ test_mf_aggr_alloc1(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate first block from meta_aggr */
@@ -1866,7 +1863,7 @@ test_mf_aggr_alloc1(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -1878,7 +1875,7 @@ test_mf_aggr_alloc1(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Free the two blocks */
@@ -1889,7 +1886,7 @@ test_mf_aggr_alloc1(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -1930,7 +1927,7 @@ error:
  *		The block of 2058 is allocated out of meta_aggr
  *		There is space of 1968 left in meta_aggr
  */
-static int
+static unsigned
 test_mf_aggr_alloc2(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -1956,7 +1953,7 @@ test_mf_aggr_alloc2(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of a file */
-    if((file_size= h5_get_file_size(filename)) < 0)
+    if((file_size= h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -1964,7 +1961,7 @@ test_mf_aggr_alloc2(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
@@ -1997,7 +1994,7 @@ test_mf_aggr_alloc2(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -2010,7 +2007,7 @@ test_mf_aggr_alloc2(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     H5MF_xfree(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE30+TEST_BLOCK_SIZE50+TEST_BLOCK_SIZE2058);
@@ -2019,7 +2016,7 @@ test_mf_aggr_alloc2(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -2073,7 +2070,7 @@ error:
  *		The fourth block of 50 is allocated from what is left in meta_aggr
  *		There is space of 1968 left in meta_aggr
  */
-static int
+static unsigned
 test_mf_aggr_alloc3(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -2101,7 +2098,7 @@ test_mf_aggr_alloc3(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -2109,7 +2106,7 @@ test_mf_aggr_alloc3(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate first block from meta_aggr */
@@ -2168,7 +2165,7 @@ test_mf_aggr_alloc3(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -2227,7 +2224,7 @@ error:
  *		The block does not adjoin meta_aggr
  *		meta_aggr's info is unchanged
  */
-static int
+static unsigned
 test_mf_aggr_alloc4(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -2253,7 +2250,7 @@ test_mf_aggr_alloc4(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file  */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -2261,7 +2258,7 @@ test_mf_aggr_alloc4(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate first block from meta_aggr */
@@ -2324,7 +2321,7 @@ test_mf_aggr_alloc4(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -2364,7 +2361,7 @@ error:
  *		There is space of 2046 left in meta_aggr
  *
  */
-static int
+static unsigned
 test_mf_aggr_alloc5(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -2390,7 +2387,7 @@ test_mf_aggr_alloc5(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -2398,7 +2395,7 @@ test_mf_aggr_alloc5(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate first block from meta_aggr */
@@ -2436,7 +2433,7 @@ test_mf_aggr_alloc5(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -2486,7 +2483,7 @@ error:
  *		meta_aggr's unused space of [880, 1968] is freed to free-space
  *		meta_aggr is updated to point to the new block
  */
-static int
+static unsigned
 test_mf_aggr_alloc6(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -2513,7 +2510,7 @@ test_mf_aggr_alloc6(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -2521,7 +2518,7 @@ test_mf_aggr_alloc6(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate first block from meta_aggr */
@@ -2580,7 +2577,7 @@ test_mf_aggr_alloc6(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((new_file_size = h5_get_file_size(filename)) < 0)
+    if((new_file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -2641,7 +2638,7 @@ error:
  *		meta_aggr's unused space of [880, 1968] is freed to free-space
  *		meta_aggr is updated to point to the new block
  */
-static int
+static unsigned
 test_mf_aggr_alloc7(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -2668,7 +2665,7 @@ test_mf_aggr_alloc7(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((empty_size = h5_get_file_size(filename)) < 0)
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -2676,7 +2673,7 @@ test_mf_aggr_alloc7(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate the first block from meta_aggr */
@@ -2753,7 +2750,7 @@ test_mf_aggr_alloc7(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is the correct size */
@@ -2788,7 +2785,7 @@ error:
  *		Try to extend a block which adjoins meta_aggr but meta_aggr cannot fulfill the extended-request
  *		H5MF_try_extend() fails
  */
-static int
+static unsigned
 test_mf_aggr_extend(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -2815,7 +2812,7 @@ test_mf_aggr_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((empty_size = h5_get_file_size(filename)) < 0)
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -2823,7 +2820,7 @@ test_mf_aggr_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate the first block from meta_aggr */
@@ -2872,7 +2869,7 @@ test_mf_aggr_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate the first block from meta_aggr */
@@ -2927,7 +2924,7 @@ test_mf_aggr_extend(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate first block from meta_aggr */
@@ -3003,7 +3000,7 @@ error:
  *		H5MF_try_shrink() block B should fail since it does not adjoin the
  *			beginning nor the end of meta_aggr
  */
-static int
+static unsigned
 test_mf_aggr_absorb(hid_t fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -3032,7 +3029,7 @@ test_mf_aggr_absorb(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((empty_size = h5_get_file_size(filename)) < 0)
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Re-open the file */
@@ -3040,7 +3037,7 @@ test_mf_aggr_absorb(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate block A from meta_aggr */
@@ -3072,7 +3069,7 @@ test_mf_aggr_absorb(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate block A from meta_aggr */
@@ -3116,7 +3113,7 @@ test_mf_aggr_absorb(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Allocate block A from meta_aggr */
@@ -3195,7 +3192,7 @@ error:
  *	The return address should be aligned
  *	H5MF_try_extend() the block with aligned address should succeed
  */
-static int
+static unsigned
 test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -3216,7 +3213,8 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    if(HDstrcmp(env_h5_drvr, "stdio")) {
+    if(HDstrcmp(env_h5_drvr, "stdio") && HDstrcmp(env_h5_drvr, "split") &&
+            HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
@@ -3235,7 +3233,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get the size of the file */
-        if((file_size = h5_get_file_size(filename)) < 0)
+        if((file_size = h5_get_file_size(filename, fapl)) < 0)
             TEST_ERROR
 
         /* get alignment setting */
@@ -3247,11 +3245,11 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
         /* calculate fragment for alignment of block 30 */
-        if ((tmp = file_size % alignment))
+        if ((tmp = (hsize_t)file_size % alignment))
              mis_align = alignment - tmp;
 
         accum = mis_align + TEST_BLOCK_SIZE30;
@@ -3278,7 +3276,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* calculate fragment for alignment of block 50 */
         mis_align = 0;
-        if ((tmp = (file_size + accum) % alignment))
+        if ((tmp = ((hsize_t)file_size + accum) % alignment))
              mis_align = alignment - tmp;
         accum += (mis_align + TEST_BLOCK_SIZE50);
 
@@ -3305,7 +3303,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        if((new_file_size = h5_get_file_size(filename)) < 0)
+        if((new_file_size = h5_get_file_size(filename, fapl1)) < 0)
             TEST_ERROR
 
         if (new_file_size != file_size)
@@ -3323,13 +3321,14 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    if(HDstrcmp(env_h5_drvr, "stdio")) {
+    if(HDstrcmp(env_h5_drvr, "stdio") && HDstrcmp(env_h5_drvr, "split") &&
+            HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         /* Re-open the file with alignment and meta/sdata setting */
         if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
         /* allocate a block of 50 from meta_aggr */
@@ -3343,7 +3342,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        if((file_size = h5_get_file_size(filename)) < 0)
+        if((file_size = h5_get_file_size(filename, fapl1)) < 0)
             TEST_ERROR
 
         /* Re-open the file */
@@ -3358,7 +3357,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        if((new_file_size = h5_get_file_size(filename)) < 0)
+        if((new_file_size = h5_get_file_size(filename, fapl1)) < 0)
             TEST_ERROR
 
         if (new_file_size != (file_size-TEST_BLOCK_SIZE50)) TEST_ERROR
@@ -3375,13 +3374,14 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    if(HDstrcmp(env_h5_drvr, "stdio")) {
+    if(HDstrcmp(env_h5_drvr, "stdio") && HDstrcmp(env_h5_drvr, "split") &&
+            HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         /* Re-open the file with alignment and meta/sdata setting */
         if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
         /* allocate a block of 50 */
@@ -3395,7 +3395,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        if((file_size = h5_get_file_size(filename)) < 0)
+        if((file_size = h5_get_file_size(filename, fapl1)) < 0)
             TEST_ERROR
 
         /* Re-open the file */
@@ -3410,7 +3410,7 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if(H5Fclose(file) < 0)
             FAIL_STACK_ERROR
 
-        if((new_file_size = h5_get_file_size(filename)) < 0)
+        if((new_file_size = h5_get_file_size(filename, fapl1)) < 0)
             TEST_ERROR
 
         if (new_file_size != (file_size+TEST_BLOCK_SIZE30)) TEST_ERROR
@@ -3461,7 +3461,7 @@ error:
  *	The free-space manager is unable to fulfill the request
  *	The block is allocated from file allocation and should be aligned
  */
-static int
+static unsigned
 test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -3498,7 +3498,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
@@ -3565,7 +3565,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     type = H5FD_MEM_SUPER;
@@ -3641,8 +3641,9 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    if(HDstrcmp(env_h5_drvr, "stdio")) {
-        if((file_size = h5_get_file_size(filename)) < 0)
+    if(HDstrcmp(env_h5_drvr, "stdio") && HDstrcmp(env_h5_drvr, "split") &&
+            HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
+        if((file_size = h5_get_file_size(filename, new_fapl)) < 0)
             TEST_ERROR
 
         /* Re-open the file with alignment setting */
@@ -3650,7 +3651,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
         type = H5FD_MEM_SUPER;
@@ -3695,7 +3696,7 @@ test_mf_align_fs(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if (!(addr >= (haddr_t)file_size)) TEST_ERROR
 
         /* calculate fragment for alignment of block 40 from file allocation */
-        if ((tmp = file_size % alignment))
+        if ((tmp = (hsize_t)file_size % alignment))
             mis_align = alignment - tmp;
 
         if (mis_align) {
@@ -3823,7 +3824,7 @@ error:
  *		There is space of 2018 left in meta_aggr
  *		EOA is at 20372
  */
-static int
+static unsigned
 test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -3844,7 +3845,8 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    if(HDstrcmp(env_h5_drvr, "stdio")) {
+    if(HDstrcmp(env_h5_drvr, "stdio") && HDstrcmp(env_h5_drvr, "split") &&
+            HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
@@ -3857,7 +3859,7 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get the size of the file */
-        if((file_size = h5_get_file_size(filename)) < 0)
+        if((file_size = h5_get_file_size(filename, fapl)) < 0)
             TEST_ERROR
 
         /* get alignment setting */
@@ -3869,11 +3871,11 @@ test_mf_align_alloc1(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
         /* calculate fragment for alignment of block 30 */
-        if ((tmp = file_size % alignment))
+        if ((tmp = (hsize_t)file_size % alignment))
             mis_align = alignment - tmp;
 
         /* Allocate a block of 30 from meta_aggr */
@@ -4079,7 +4081,7 @@ error:
  *		There is space of 1968 left in meta_aggr
  *		EOA is at 18432
  */
-static int
+static unsigned
 test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -4098,7 +4100,8 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    if(HDstrcmp(env_h5_drvr, "stdio")) {
+    if(HDstrcmp(env_h5_drvr, "stdio") && HDstrcmp(env_h5_drvr, "split") &&
+            HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
@@ -4111,7 +4114,7 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get the size of the file */
-        if((file_size = h5_get_file_size(filename)) < 0)
+        if((file_size = h5_get_file_size(filename, fapl)) < 0)
             TEST_ERROR
 
         /* get alignment setting */
@@ -4123,11 +4126,11 @@ test_mf_align_alloc2(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
         /* calculate fragment for alignment of block 30 */
-        if ((tmp = file_size % alignment))
+        if ((tmp = (hsize_t)file_size % alignment))
             mis_align = alignment - tmp;
 
         /* Allocate a block of 30 from meta_aggr */
@@ -4403,7 +4406,7 @@ error:
  *		The block of 1034 is allocated from the new block and should be aligned
  *		There is space of 1014 left in meta_aggr
  */
-static int
+static unsigned
 test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -4424,7 +4427,8 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    if(HDstrcmp(env_h5_drvr, "stdio")) {
+    if(HDstrcmp(env_h5_drvr, "stdio") && HDstrcmp(env_h5_drvr, "split") &&
+            HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
@@ -4437,7 +4441,7 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get the size of the file */
-        if((file_size = h5_get_file_size(filename)) < 0)
+        if((file_size = h5_get_file_size(filename, fapl)) < 0)
             TEST_ERROR
 
         /* get alignment setting */
@@ -4449,11 +4453,11 @@ test_mf_align_alloc3(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
         /* calculate fragment for alignment of block 30 */
-        if ((tmp = file_size % alignment))
+        if ((tmp = (hsize_t)file_size % alignment))
             mis_align = alignment - tmp;
 
         /* Allocate a block of 30 from meta_aggr */
@@ -4697,7 +4701,7 @@ error:
  *		There is space of 2023 left in meta_aggr
  *
  */
-static int
+static unsigned
 test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -4717,7 +4721,8 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    if(HDstrcmp(env_h5_drvr, "stdio")) {
+    if(HDstrcmp(env_h5_drvr, "stdio") && HDstrcmp(env_h5_drvr, "split") &&
+            HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
@@ -4730,7 +4735,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get the size of the file */
-        if((file_size = h5_get_file_size(filename)) < 0)
+        if((file_size = h5_get_file_size(filename, fapl)) < 0)
             TEST_ERROR
 
         /* Re-open the file with alignment setting and meta/sdata setting */
@@ -4738,7 +4743,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
         /* get alignment setting */
@@ -4746,7 +4751,7 @@ test_mf_align_alloc4(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR
 
         /* calculate fragment for alignment of block 30 */
-        if ((tmp = file_size % alignment))
+        if ((tmp = (hsize_t)file_size % alignment))
             mis_align = alignment - tmp;
 
         /* Allocate a block of 30 from meta_aggr */
@@ -4900,7 +4905,7 @@ error:
  *		EOA is 14346
  *		meta_aggr and sdata_aggr are all 0
  */
-static int
+static unsigned
 test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -4921,7 +4926,8 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    if(HDstrcmp(env_h5_drvr, "stdio")) {
+    if(HDstrcmp(env_h5_drvr, "stdio") && HDstrcmp(env_h5_drvr, "split") &&
+            HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
@@ -4934,7 +4940,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get the size of the file */
-        if((file_size = h5_get_file_size(filename)) < 0)
+        if((file_size = h5_get_file_size(filename, fapl)) < 0)
             TEST_ERROR
 
         /* Re-open the file with alignment setting and meta/sdata setting */
@@ -4942,7 +4948,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
         /* get alignment setting */
@@ -4950,7 +4956,7 @@ test_mf_align_alloc5(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR
 
         /* calculate fragment for alignment of block 30 */
-        if ((tmp = file_size % alignment))
+        if ((tmp = (hsize_t)file_size % alignment))
             mis_align = alignment - tmp;
 
         /* Allocate a block of 30 from meta_aggr */
@@ -5167,7 +5173,7 @@ error:
  *		EOA is at 22538
  *		meta_aggr is unchanged
  */
-static int
+static unsigned
 test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 {
     hid_t		file = -1;              /* File ID */
@@ -5187,7 +5193,8 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
     /* Skip test when using VFDs that have their own 'alloc' callback, which
      *  don't push mis-aligned space fragments on the file free space list
      */
-    if(HDstrcmp(env_h5_drvr, "stdio")) {
+    if(HDstrcmp(env_h5_drvr, "stdio") && HDstrcmp(env_h5_drvr, "split") &&
+            HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
@@ -5200,7 +5207,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get the size of the file */
-        if((file_size = h5_get_file_size(filename)) < 0)
+        if((file_size = h5_get_file_size(filename, fapl)) < 0)
             TEST_ERROR
 
         /* Re-open the file with alignment setting and meta/sdata setting */
@@ -5208,7 +5215,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             FAIL_STACK_ERROR
 
         /* Get a pointer to the internal file object */
-        if(NULL == (f = H5I_object(file)))
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
         /* get alignment setting */
@@ -5216,7 +5223,7 @@ test_mf_align_alloc6(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
             TEST_ERROR
 
         /* calculate fragment for alignment of block 30 */
-        if ((tmp = file_size % alignment))
+        if ((tmp = (hsize_t)file_size % alignment))
             mis_align = alignment - tmp;
 
         /* Allocate a block of 30 from meta_aggr */
