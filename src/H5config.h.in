@@ -122,6 +122,9 @@
 /* Define to 1 if you have the `ftello' function. */
 #undef HAVE_FTELLO
 
+/* Define to 1 if you have the `ftruncate64' function. */
+#undef HAVE_FTRUNCATE64
+
 /* Define if the compiler understand the __FUNCTION__ keyword */
 #undef HAVE_FUNCTION
 

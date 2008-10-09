@@ -696,7 +696,7 @@ long_links(hid_t fapl, hbool_t new_format)
     if((gid = H5Gcreate2(fid, "grp1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Construct very long file name */
-    if((objname = HDmalloc((size_t)(MAX_NAME_LEN + 1))) == NULL) TEST_ERROR
+    if((objname = (char *)HDmalloc((size_t)(MAX_NAME_LEN + 1))) == NULL) TEST_ERROR
     for(u = 0; u < MAX_NAME_LEN; u++)
         objname[u] = 'a';
     objname[MAX_NAME_LEN] = '\0';
@@ -3699,7 +3699,8 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
     hid_t       core_fapl, space, dset, did, dapl_id, dcpl;
     hsize_t     dims[2];
     int		points[NUM1000][NUM1000];
-    int		filesize, new_filesize, i, j, n;
+    h5_stat_size_t	filesize, new_filesize;
+    int		i, j, n;
 
     if(new_format)
         TESTING("H5Pset/get_elink_fapl() with same physical layout (w/new group format)")
@@ -3753,7 +3754,7 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* get size of target file */
-    filesize = h5_get_file_size(filename2);
+    filesize = h5_get_file_size(filename2, core_fapl);
 
     /* Create the main file */
     if((fid=H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
@@ -3788,15 +3789,16 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
     if(H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
 	TEST_ERROR
 
-    if(H5Pclose(core_fapl) < 0) TEST_ERROR
     if(H5Pclose(dapl_id) < 0) TEST_ERROR
     if(H5Dclose(did) < 0) TEST_ERROR
     if(H5Fclose(fid) < 0) TEST_ERROR
 
-    new_filesize = h5_get_file_size(filename2);
+    new_filesize = h5_get_file_size(filename2, core_fapl);
 
     /* the file size should remain the same since there is no backing store */
     if (new_filesize != filesize) TEST_ERROR
+
+    if(H5Pclose(core_fapl) < 0) TEST_ERROR
 
     PASSED();
     return 0;
@@ -3922,7 +3924,6 @@ external_set_elink_fapl3(hbool_t new_format)
 	H5Pclose(core_fapl);
 	H5Pclose(stdio_fapl);
     } H5E_END_TRY;
-    return -1;
     return -1;
 } /* end external_set_elink_fapl3() */
 
@@ -5874,7 +5875,7 @@ ud_hard_links(hid_t fapl)
 
     /* Get the size of the empty file for reference */
     if(H5Fclose(fid) < 0) TEST_ERROR
-    if((empty_size = h5_get_file_size(filename))<0) TEST_ERROR
+    if((empty_size = h5_get_file_size(filename, fapl))<0) TEST_ERROR
 
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
@@ -5904,7 +5905,7 @@ ud_hard_links(hid_t fapl)
 
     /* Close and re-open file to ensure that data is written to disk */
     if(H5Fclose(fid) < 0) TEST_ERROR
-    if((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
 
     /* Open group through UD link */
     if((gid = H5Gopen2(fid, "ud_link", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -5959,7 +5960,7 @@ ud_hard_links(hid_t fapl)
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     /* The file should be empty again. */
-    if(empty_size != h5_get_file_size(filename)) TEST_ERROR
+    if(empty_size != h5_get_file_size(filename, fapl)) TEST_ERROR
 
     if(H5Lunregister(UD_HARD_TYPE) < 0) FAIL_STACK_ERROR
 
@@ -6041,7 +6042,7 @@ ud_link_reregister(hid_t fapl)
 
     /* Get the size of the empty file for reference */
     if(H5Fclose(fid) < 0) TEST_ERROR
-    if((empty_size=h5_get_file_size(filename))<0) TEST_ERROR
+    if((empty_size=h5_get_file_size(filename, fapl))<0) TEST_ERROR
 
     if((fid=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
 
@@ -6144,7 +6145,7 @@ ud_link_reregister(hid_t fapl)
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     /* The file should be empty again. */
-    if(empty_size != h5_get_file_size(filename)) TEST_ERROR
+    if(empty_size != h5_get_file_size(filename, fapl)) TEST_ERROR
 
     if(H5Lunregister(UD_HARD_TYPE) < 0) FAIL_STACK_ERROR
     if(H5Lis_registered(UD_HARD_TYPE) != FALSE) FAIL_STACK_ERROR
@@ -6187,8 +6188,8 @@ UD_cb_create(const char * link_name, hid_t loc_group, const void *udata,
     if(udata_size > 0 && !udata) TEST_ERROR
     if(lcpl_id < 0) TEST_ERROR
 
-    if(strcmp(link_name, UD_CB_LINK_NAME) && strcmp(link_name, NEW_UD_CB_LINK_NAME)) TEST_ERROR
-    if(strcmp(udata, UD_CB_TARGET)) TEST_ERROR
+    if(HDstrcmp(link_name, UD_CB_LINK_NAME) && strcmp(link_name, NEW_UD_CB_LINK_NAME)) TEST_ERROR
+    if(HDstrcmp((const char *)udata, UD_CB_TARGET)) TEST_ERROR
     if(udata_size != UD_CB_TARGET_LEN) TEST_ERROR
 
     return 0;
@@ -6208,8 +6209,8 @@ UD_cb_traverse(const char * link_name, hid_t cur_group, const void *udata,
     if(cur_group < 0) TEST_ERROR
     if(udata_size > 0 && !udata) TEST_ERROR
 
-    if(strcmp(link_name, UD_CB_LINK_NAME) && strcmp(link_name, NEW_UD_CB_LINK_NAME)) TEST_ERROR
-    if(strcmp(udata, UD_CB_TARGET)) TEST_ERROR
+    if(HDstrcmp(link_name, UD_CB_LINK_NAME) && strcmp(link_name, NEW_UD_CB_LINK_NAME)) TEST_ERROR
+    if(HDstrcmp((const char *)udata, UD_CB_TARGET)) TEST_ERROR
     if(udata_size != UD_CB_TARGET_LEN) TEST_ERROR
 
     if((ret_value = H5Oopen(cur_group, target, lapl_id)) < 0)
@@ -6231,7 +6232,7 @@ UD_cb_move(const char *new_name, hid_t new_loc, const void *udata,
     if(udata_size > 0 && !udata) TEST_ERROR
 
     if(HDstrcmp(new_name, NEW_UD_CB_LINK_NAME)) TEST_ERROR
-    if(HDstrcmp(udata, UD_CB_TARGET)) TEST_ERROR
+    if(HDstrcmp((const char *)udata, UD_CB_TARGET)) TEST_ERROR
     if(udata_size != UD_CB_TARGET_LEN) TEST_ERROR
 
     return 0;
@@ -6250,7 +6251,7 @@ UD_cb_delete(const char *link_name, hid_t file, const void *udata,
     if(udata_size > 0 && !udata) TEST_ERROR
 
     if(HDstrcmp(link_name, UD_CB_LINK_NAME) && HDstrcmp(link_name, NEW_UD_CB_LINK_NAME)) TEST_ERROR
-    if(HDstrcmp(udata, UD_CB_TARGET)) TEST_ERROR
+    if(HDstrcmp((const char *)udata, UD_CB_TARGET)) TEST_ERROR
     if(udata_size != UD_CB_TARGET_LEN) TEST_ERROR
 
     return 0;
@@ -6267,13 +6268,13 @@ UD_cb_query(const char * link_name, const void *udata, size_t udata_size,
     if(!link_name) TEST_ERROR
     if(udata_size > 0 && !udata) TEST_ERROR
 
-    if(strcmp(link_name, UD_CB_LINK_NAME)) TEST_ERROR
-    if(strcmp(udata, UD_CB_TARGET)) TEST_ERROR
+    if(HDstrcmp(link_name, UD_CB_LINK_NAME)) TEST_ERROR
+    if(HDstrcmp((const char *)udata, UD_CB_TARGET)) TEST_ERROR
     if(udata_size != UD_CB_TARGET_LEN) TEST_ERROR
 
     if(buf) {
       if(buf_size < 16) TEST_ERROR
-      strcpy(buf, "query succeeded");
+      HDstrcpy((char *)buf, "query succeeded");
     } /* end if */
 
     /* There are 15 characters and a NULL in "query succeeded" */
@@ -6673,7 +6674,7 @@ UD_cbsucc_query(const char UNUSED *link_name, const void UNUSED *udata,
      */
 
     if(buf != NULL && buf_size >= 8)
-        strcpy(buf, "succeed");
+        HDstrcpy((char *)buf, "succeed");
 
     return 8;
 } /* end UD_cbsucc_query() */
@@ -8144,7 +8145,7 @@ corder_transition(hid_t fapl)
     if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file with an empty group */
-    if((empty_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
 
     /* Re-open the file */
@@ -8293,7 +8294,7 @@ corder_transition(hid_t fapl)
     if(H5Fclose(file_id) < 0) TEST_ERROR
 
     /* Get the size of the file now */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
     if(file_size != empty_size) TEST_ERROR
 
     PASSED();
@@ -8354,7 +8355,7 @@ corder_delete(hid_t fapl)
         if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
 
         /* Get the size of an empty file */
-        if((empty_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+        if((empty_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
         /* Re-open the file */
         if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
@@ -8419,7 +8420,7 @@ corder_delete(hid_t fapl)
         } /* end if */
 
         /* Get the size of the file now */
-        if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+        if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
         if(file_size != empty_size) TEST_ERROR
     } /* end for */
 

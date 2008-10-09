@@ -44,8 +44,6 @@ const char *FILENAME[] = {
     NULL
 };
 
-#define THE_OBJECT	"/foo"
-
 /* Macros for test_create_unlink() & test_filespace */
 #define GROUPNAME       "group"
 #define GROUP2NAME      "group2"
@@ -564,7 +562,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) TEST_ERROR
 
     /* Get the size of an empty file */
-    if((empty_size=h5_get_file_size(filename))<0) TEST_ERROR
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
 /* Create common objects for datasets */
 
@@ -602,7 +600,7 @@ test_filespace(hid_t fapl)
     if((space = H5Screate_simple(FILESPACE_NDIMS, dims, NULL)) < 0) TEST_ERROR
 
     /* Create buffer for writing dataset */
-    if((data = HDmalloc(sizeof(int)*FILESPACE_DIM0*FILESPACE_DIM1*FILESPACE_DIM2))==NULL) TEST_ERROR
+    if(NULL == (data = (int *)HDmalloc(sizeof(int) * FILESPACE_DIM0 * FILESPACE_DIM1 * FILESPACE_DIM2))) TEST_ERROR
 
 
 /* Create single dataset (with contiguous storage & late allocation), remove it & verify file size */
@@ -622,7 +620,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -647,7 +645,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename))<0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -672,7 +670,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename))<0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -697,7 +695,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -722,7 +720,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -746,7 +744,7 @@ test_filespace(hid_t fapl)
     for(u = 0; u < FILESPACE_REWRITE; u++) {
         /* Set buffer to some compressible values */
         for(v = 0, tmp_data = data; v < (FILESPACE_DIM0 * FILESPACE_DIM1 * FILESPACE_DIM2); v++)
-            *tmp_data++ = v * u;
+            *tmp_data++ = (int)(v * u);
 
         /* Write the buffer to the dataset */
         if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data) < 0) FAIL_STACK_ERROR
@@ -769,7 +767,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl_nocache)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -794,7 +792,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -858,7 +856,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -886,7 +884,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -911,7 +909,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -943,7 +941,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -973,7 +971,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -1063,7 +1061,7 @@ test_filespace(hid_t fapl)
         if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
         /* Get the size of the file */
-        if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+        if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
         /* Verify the file is correct size */
         if(file_size != empty_size) TEST_ERROR
@@ -1098,7 +1096,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename))<0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -1132,7 +1130,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -1170,7 +1168,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -1220,7 +1218,7 @@ test_filespace(hid_t fapl)
     if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != empty_size) TEST_ERROR
@@ -1517,7 +1515,7 @@ test_unlink_rightleaf(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if(NULL == (gids = (hid_t *)HDmalloc(ngroups * sizeof(hid_t)))) TEST_ERROR
+    if(NULL == (gids = (hid_t *)HDmalloc((size_t)ngroups * sizeof(hid_t)))) TEST_ERROR
 
     if((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
@@ -1580,7 +1578,7 @@ test_unlink_rightnode(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if(NULL == (gids = (hid_t *)HDmalloc(ngroups * sizeof(hid_t)))) TEST_ERROR
+    if(NULL == (gids = (hid_t *)HDmalloc((size_t)ngroups * sizeof(hid_t)))) TEST_ERROR
 
     if((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
@@ -1643,7 +1641,7 @@ test_unlink_middlenode(hid_t fid)
     TESTING("deleting right-most child in non-leaf B-tree node");
 
     /* Allocate space for the group IDs */
-    if(NULL == (gids = (hid_t *)HDmalloc(ngroups * sizeof(hid_t)))) TEST_ERROR
+    if(NULL == (gids = (hid_t *)HDmalloc((size_t)ngroups * sizeof(hid_t)))) TEST_ERROR
 
     if((rootid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
@@ -2165,7 +2163,7 @@ test_full_group_compact(hid_t fapl)
     if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file with only the objects to keep */
-    if((keep_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((keep_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Re-open the file */
     if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
@@ -2229,7 +2227,7 @@ test_full_group_compact(hid_t fapl)
     if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != keep_size) TEST_ERROR
@@ -2299,7 +2297,7 @@ test_full_group_dense(hid_t fapl)
     if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file with only the objects to keep */
-    if((keep_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((keep_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Re-open the file */
     if((file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
@@ -2375,7 +2373,7 @@ test_full_group_dense(hid_t fapl)
     if(H5Fclose(file_id) < 0) FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0) TEST_ERROR
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
 
     /* Verify the file is correct size */
     if(file_size != keep_size) TEST_ERROR
@@ -2419,7 +2417,7 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL)
         envval = "nomatch";
-    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
+    if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
         hid_t	fapl, fapl2, file;
         int	nerrors = 0;
         char	filename[1024];

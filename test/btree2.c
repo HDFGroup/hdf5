@@ -219,7 +219,7 @@ remove_cb(const void *_record, void *_op_data)
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_basic(hid_t fapl)
 {
     hid_t	file = -1;              /* File ID */
@@ -238,7 +238,7 @@ test_insert_basic(hid_t fapl)
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -404,7 +404,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_split_root(hid_t fapl)
 {
     hid_t	file=-1;
@@ -425,7 +425,7 @@ test_insert_split_root(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -580,7 +580,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_level1_2leaf_redistrib(hid_t fapl)
 {
     hid_t	file=-1;
@@ -599,7 +599,7 @@ test_insert_level1_2leaf_redistrib(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -740,7 +740,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_level1_side_split(hid_t fapl)
 {
     hid_t	file=-1;
@@ -759,7 +759,7 @@ test_insert_level1_side_split(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -911,7 +911,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_level1_3leaf_redistrib(hid_t fapl)
 {
     hid_t	file=-1;
@@ -931,7 +931,7 @@ test_insert_level1_3leaf_redistrib(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -1059,7 +1059,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_level1_middle_split(hid_t fapl)
 {
     hid_t	file=-1;
@@ -1079,7 +1079,7 @@ test_insert_level1_middle_split(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -1183,7 +1183,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_make_level2(hid_t fapl)
 {
     hid_t	file=-1;
@@ -1204,7 +1204,7 @@ test_insert_make_level2(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -1367,7 +1367,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_level2_leaf_redistrib(hid_t fapl)
 {
     hid_t	file=-1;
@@ -1387,7 +1387,7 @@ test_insert_level2_leaf_redistrib(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -1632,7 +1632,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_level2_leaf_split(hid_t fapl)
 {
     hid_t	file=-1;
@@ -1652,7 +1652,7 @@ test_insert_level2_leaf_split(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -1908,7 +1908,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_level2_2internal_redistrib(hid_t fapl)
 {
     hid_t	file=-1;
@@ -1928,7 +1928,7 @@ test_insert_level2_2internal_redistrib(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -2101,7 +2101,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_level2_2internal_split(hid_t fapl)
 {
     hid_t	file=-1;
@@ -2121,7 +2121,7 @@ test_insert_level2_2internal_split(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -2304,7 +2304,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_level2_3internal_redistrib(hid_t fapl)
 {
     hid_t	file=-1;
@@ -2324,7 +2324,7 @@ test_insert_level2_3internal_redistrib(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -2506,7 +2506,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_level2_3internal_split(hid_t fapl)
 {
     hid_t	file=-1;
@@ -2526,7 +2526,7 @@ test_insert_level2_3internal_split(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -2711,7 +2711,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_insert_lots(hid_t fapl)
 {
     hid_t	file=-1;
@@ -2743,7 +2743,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     TESTING("B-tree insert: create random level 4 B-tree");
 
     /* Allocate space for the records */
-    if((records = HDmalloc(sizeof(hsize_t) * INSERT_MANY)) == NULL)
+    if((records = (hsize_t *)HDmalloc(sizeof(hsize_t) * INSERT_MANY)) == NULL)
         TEST_ERROR
 
     /* Initialize record #'s */
@@ -2752,7 +2752,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
 
     /* Shuffle record #'s */
     for(u=0; u<INSERT_MANY; u++) {
-        swap_idx = (unsigned)(HDrandom()%(INSERT_MANY-u))+u;
+        swap_idx = ((unsigned)HDrandom() % (INSERT_MANY - u)) + u;
         temp_rec = records[u];
         records[u] = records[swap_idx];
         records[swap_idx] = temp_rec;
@@ -2765,7 +2765,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         TEST_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /*
@@ -2798,7 +2798,7 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Check up on B-tree after re-open */
@@ -2917,7 +2917,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_basic(hid_t fapl)
 {
     hid_t	file=-1;
@@ -2937,7 +2937,7 @@ test_remove_basic(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /* Record removal tests */
@@ -3202,7 +3202,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level1_noredistrib(hid_t fapl)
 {
     hid_t	file=-1;
@@ -3224,7 +3224,7 @@ test_remove_level1_noredistrib(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /* B-tree record removal tests */
@@ -3425,7 +3425,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level1_redistrib(hid_t fapl)
 {
     hid_t	file=-1;
@@ -3446,7 +3446,7 @@ test_remove_level1_redistrib(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /* More complex record removals */
@@ -3625,7 +3625,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level1_2leaf_merge(hid_t fapl)
 {
     hid_t	file=-1;
@@ -3647,7 +3647,7 @@ test_remove_level1_2leaf_merge(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: merge 2 leaves to 1 in level-1 B-tree (r->l)");
@@ -3809,7 +3809,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level1_3leaf_merge(hid_t fapl)
 {
     hid_t	file=-1;
@@ -3831,7 +3831,7 @@ test_remove_level1_3leaf_merge(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: merge 3 leaves to 2 in level-1 B-tree");
@@ -3937,7 +3937,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level1_promote(hid_t fapl)
 {
     hid_t	file=-1;
@@ -3959,7 +3959,7 @@ test_remove_level1_promote(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: promote from right leaf of level-1 B-tree");
@@ -4181,7 +4181,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
 {
     hid_t	file=-1;
@@ -4203,7 +4203,7 @@ test_remove_level1_promote_2leaf_redistrib(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: promote from leaf of level-1 B-tree w/2 node redistrib");
@@ -4334,7 +4334,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
 {
     hid_t	file=-1;
@@ -4356,7 +4356,7 @@ test_remove_level1_promote_3leaf_redistrib(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: promote from leaf of level-1 B-tree w/3 node redistrib");
@@ -4487,7 +4487,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level1_promote_2leaf_merge(hid_t fapl)
 {
     hid_t	file=-1;
@@ -4509,7 +4509,7 @@ test_remove_level1_promote_2leaf_merge(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: promote from leaf of level-1 B-tree w/2->1 merge");
@@ -4635,7 +4635,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level1_promote_3leaf_merge(hid_t fapl)
 {
     hid_t	file=-1;
@@ -4657,7 +4657,7 @@ test_remove_level1_promote_3leaf_merge(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: promote from leaf of level-1 B-tree w/3->2 merge");
@@ -4783,7 +4783,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level1_collapse(hid_t fapl)
 {
     hid_t	file=-1;
@@ -4804,7 +4804,7 @@ test_remove_level1_collapse(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: collapse level-1 B-tree back to level-0");
@@ -4922,7 +4922,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level2_promote(hid_t fapl)
 {
     hid_t	file=-1;
@@ -4944,7 +4944,7 @@ test_remove_level2_promote(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: promote from right internal of level-2 B-tree");
@@ -5213,7 +5213,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level2_promote_2internal_redistrib(hid_t fapl)
 {
     hid_t	file=-1;
@@ -5235,7 +5235,7 @@ test_remove_level2_promote_2internal_redistrib(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: promote from right internal of level-2 B-tree w/redistrib");
@@ -5366,7 +5366,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level2_promote_3internal_redistrib(hid_t fapl)
 {
     hid_t	file=-1;
@@ -5388,7 +5388,7 @@ test_remove_level2_promote_3internal_redistrib(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: promote from left internal of level-2 B-tree w/redistrib");
@@ -5519,7 +5519,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level2_promote_2internal_merge(hid_t fapl)
 {
     hid_t	file=-1;
@@ -5541,7 +5541,7 @@ test_remove_level2_promote_2internal_merge(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: promote from right internal of level-2 B-tree w/merge");
@@ -5675,7 +5675,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level2_promote_3internal_merge(hid_t fapl)
 {
     hid_t	file=-1;
@@ -5697,7 +5697,7 @@ test_remove_level2_promote_3internal_merge(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: promote from middle internal of level-2 B-tree w/merge");
@@ -5831,7 +5831,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level2_2internal_merge_left(hid_t fapl)
 {
     hid_t	file=-1;
@@ -5853,7 +5853,7 @@ test_remove_level2_2internal_merge_left(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: merge 2 internal nodes to 1 in level-2 B-tree (l->r)");
@@ -5959,7 +5959,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level2_2internal_merge_right(hid_t fapl)
 {
     hid_t	file=-1;
@@ -5981,7 +5981,7 @@ test_remove_level2_2internal_merge_right(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: merge 2 internal nodes to 1 in level-2 B-tree (r->l)");
@@ -6087,7 +6087,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level2_3internal_merge(hid_t fapl)
 {
     hid_t	file=-1;
@@ -6109,7 +6109,7 @@ test_remove_level2_3internal_merge(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: merge 3 internal nodes to 2 in level-2 B-tree");
@@ -6215,7 +6215,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_level2_collapse_right(hid_t fapl)
 {
     hid_t	file=-1;
@@ -6238,7 +6238,7 @@ test_remove_level2_collapse_right(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     TESTING("B-tree remove: collapse level-2 B-tree back to level-1 (r->l)");
@@ -6343,7 +6343,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_remove_lots(hid_t fapl)
 {
     hid_t	file = -1;
@@ -6376,7 +6376,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
      */
 
     /* Allocate space for the records */
-    if(NULL == (records = HDmalloc(sizeof(hsize_t) * INSERT_MANY)))
+    if(NULL == (records = (hsize_t *)HDmalloc(sizeof(hsize_t) * INSERT_MANY)))
         TEST_ERROR
 
     /* Initialize record #'s */
@@ -6388,7 +6388,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         hsize_t     temp_rec;               /* Temporary record */
         unsigned    swap_idx;               /* Location to swap with when shuffling */
 
-        swap_idx = (unsigned)(HDrandom() % (INSERT_MANY - u)) + u;
+        swap_idx = ((unsigned)HDrandom() % (INSERT_MANY - u)) + u;
         temp_rec = records[u];
         records[u] = records[swap_idx];
         records[swap_idx] = temp_rec;
@@ -6401,7 +6401,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -6461,7 +6461,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Re-shuffle record #'s */
@@ -6469,7 +6469,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         hsize_t     temp_rec;               /* Temporary record */
         unsigned    swap_idx;               /* Location to swap with when shuffling */
 
-        swap_idx = (unsigned)(HDrandom() % (INSERT_MANY - u)) + u;
+        swap_idx = ((unsigned)HDrandom() % (INSERT_MANY - u)) + u;
         temp_rec = records[u];
         records[u] = records[swap_idx];
         records[swap_idx] = temp_rec;
@@ -6536,13 +6536,13 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Remove all records */
     for(u = 0; u < INSERT_MANY; u++) {
         /* Pick a record index to remove from randomly */
-        rem_idx = (unsigned)(HDrandom() % (INSERT_MANY - u));
+        rem_idx = ((unsigned)HDrandom() % (INSERT_MANY - u));
         rrecord = HSIZET_MAX;
 
         /* Remove random record */
@@ -6603,7 +6603,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Remove all records */
@@ -6667,7 +6667,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         FAIL_STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         FAIL_STACK_ERROR
 
     /* Remove all records */
@@ -6738,7 +6738,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_find_neighbor(hid_t fapl)
 {
     hid_t	file=-1;
@@ -6753,7 +6753,7 @@ test_find_neighbor(hid_t fapl)
     herr_t      ret;                    /* Generic error return value */
 
     /* Allocate space for the records */
-    if((records = HDmalloc(sizeof(hsize_t)*FIND_NEIGHBOR))==NULL)
+    if((records = (hsize_t *)HDmalloc(sizeof(hsize_t)*FIND_NEIGHBOR))==NULL)
         TEST_ERROR
 
     /* Initialize record #'s */
@@ -6772,7 +6772,7 @@ test_find_neighbor(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -6959,7 +6959,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_delete(hid_t fapl)
 {
     hid_t	file=-1;
@@ -6988,7 +6988,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get the size of an empty file */
-    if((empty_size = h5_get_file_size(filename)) < 0)
+    if((empty_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Create the file to work on */
@@ -6996,7 +6996,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -7016,7 +7016,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -7033,7 +7033,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -7066,7 +7066,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -7083,7 +7083,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -7116,7 +7116,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -7133,7 +7133,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -7166,7 +7166,7 @@ test_delete(hid_t fapl)
         STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename)) < 0)
+    if((file_size = h5_get_file_size(filename, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -7200,7 +7200,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static int
+static unsigned
 test_modify(hid_t fapl)
 {
     hid_t	file=-1;
@@ -7227,7 +7227,7 @@ test_modify(hid_t fapl)
         STACK_ERROR
 
     /* Get a pointer to the internal file object */
-    if(NULL == (f = H5I_object(file)))
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
         STACK_ERROR
 
     /*
@@ -7432,7 +7432,7 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL)
         envval = "nomatch";
-    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
+    if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
 	/* Reset library */
 	h5_reset();
 	fapl = h5_fileaccess();

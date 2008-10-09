@@ -442,7 +442,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-finish(hid_t file, H5F_t *f, H5EA_t *ea, haddr_t ea_addr)
+finish(hid_t file, hid_t fapl, H5F_t *f, H5EA_t *ea, haddr_t ea_addr)
 {
     h5_stat_size_t file_size;           /* File size, after deleting array */
 
@@ -466,7 +466,7 @@ HDsystem("cp earray.h5 earray.h5.save");
 
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename_g)) < 0)
+    if((file_size = h5_get_file_size(filename_g, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -634,7 +634,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
         TEST_ERROR
 
     /* Close array, delete array, close file & verify file is empty */
-    if(finish(file, f, ea, ea_addr) < 0)
+    if(finish(file, fapl, f, ea, ea_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -704,7 +704,7 @@ test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         TEST_ERROR
 
     /* Close array, delete array, close file & verify file is empty */
-    if(finish(file, f, ea, ea_addr) < 0)
+    if(finish(file, fapl, f, ea, ea_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -808,7 +808,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Close array, delete array, close file & verify file is empty */
-    if(finish(file2, f2, ea2, ea_addr) < 0)
+    if(finish(file2, fapl, f2, ea2, ea_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -923,7 +923,7 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Get the size of the file */
-    if((file_size = h5_get_file_size(filename_g)) < 0)
+    if((file_size = h5_get_file_size(filename_g, fapl)) < 0)
         TEST_ERROR
 
     /* Verify the file is correct size */
@@ -1099,7 +1099,7 @@ HDfprintf(stderr, "state.nsuper_blks = %Hu\n", state.nsuper_blks);
     } /* end for */
 
     /* Close array, delete array, close file & verify file is empty */
-    if(finish(file, f, ea, ea_addr) < 0)
+    if(finish(file, fapl, f, ea, ea_addr) < 0)
         TEST_ERROR
 
     /* All tests passed */
@@ -1152,8 +1152,7 @@ main(void)
     if(NULL == (envval = HDgetenv("HDF5_DRIVER")))
         envval = "nomatch";
 
-    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") &&
-            HDstrcmp(envval, "family")) {
+    if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
         /* Set the filename to use for this test (dependent on fapl) */
         h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));
 
@@ -1170,7 +1169,7 @@ main(void)
                 FAIL_STACK_ERROR
 
             /* Get the size of a file w/no array */
-            if((empty_size_g = h5_get_file_size(filename_g)) < 0)
+            if((empty_size_g = h5_get_file_size(filename_g, fapl)) < 0)
                 TEST_ERROR
         }
 

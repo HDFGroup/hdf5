@@ -101,24 +101,16 @@ typedef struct H5FD_sec2_t {
  * file_offset_t:	The datatype for file offsets, the second argument of
  *			the lseek() or lseek64() call.
  *
- * file_seek:		The function which adjusts the current file position,
- *			either lseek() or lseek64().
  */
 /* adding for windows NT file system support. */
 
 #ifdef H5_HAVE_LSEEK64
 #   define file_offset_t	off64_t
-#   define file_seek		lseek64
-#   define file_truncate	ftruncate64
 #elif defined (_WIN32) && !defined(__MWERKS__)
 # /*MSVC*/
-#   define file_offset_t __int64
-#   define file_seek _lseeki64
-#   define file_truncate	_chsize
+#   define file_offset_t        __int64
 #else
 #   define file_offset_t	off_t
-#   define file_seek		lseek
-#   define file_truncate	HDftruncate
 #endif
 
 /*
@@ -517,13 +509,10 @@ done:
  *              (listed in H5FDpublic.h)
  *
  * Return:	Success:	non-negative
- *
  *		Failure:	negative
  *
  * Programmer:	Quincey Koziol
  *              Friday, August 25, 2000
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -531,22 +520,22 @@ done:
 static herr_t
 H5FD_sec2_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
 {
-    herr_t ret_value=SUCCEED;
+    herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_sec2_query, FAIL)
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
         *flags = 0;
-        *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
-        *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
-        *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
-        *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
-    }
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
+        *flags |= H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
+        *flags |= H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_sec2_query() */
 
 
 /*-------------------------------------------------------------------------
@@ -733,7 +722,7 @@ H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, hadd
 
     /* Seek to the correct location */
     if ((addr!=file->pos || OP_READ!=file->op) &&
-            file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
+            HDlseek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
         HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
 
     /*
@@ -817,7 +806,7 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
 
     /* Seek to the correct location */
     if ((addr!=file->pos || OP_WRITE!=file->op) &&
-            file_seek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
+            HDlseek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
         HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
 
     /*
@@ -901,7 +890,7 @@ HDfprintf(stderr, "%s: file->eof = %a, file->eoa = %a\n", FUNC, file->eof, file-
         if(SetEndOfFile((HANDLE)filehandle) == 0)
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #else /* _WIN32 */
-        if(-1 == file_truncate(file->fd, (file_offset_t)file->eoa))
+        if(-1 == HDftruncate(file->fd, (file_offset_t)file->eoa))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #endif /* _WIN32 */
 

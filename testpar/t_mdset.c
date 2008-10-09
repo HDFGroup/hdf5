@@ -456,7 +456,7 @@ void big_dataset(void)
     VRFY((ret >= 0), "H5Fclose succeeded");
 
     /* Check that file of the correct size was created */
-    file_size=h5_get_file_size(filename);
+    file_size = h5_get_file_size(filename, fapl);
     VRFY((file_size == 2147485696ULL), "File is correct size(~2GB)");
 
     /*
@@ -485,7 +485,7 @@ void big_dataset(void)
     VRFY((ret >= 0), "H5Fclose succeeded");
 
     /* Check that file of the correct size was created */
-    file_size=h5_get_file_size(filename);
+    file_size = h5_get_file_size(filename, fapl);
     VRFY((file_size == 4294969344ULL), "File is correct size(~4GB)");
 
     /*
@@ -514,7 +514,7 @@ void big_dataset(void)
     VRFY((ret >= 0), "H5Fclose succeeded");
 
     /* Check that file of the correct size was created */
-    file_size=h5_get_file_size(filename);
+    file_size = h5_get_file_size(filename, fapl);
     VRFY((file_size == 8589936640ULL), "File is correct size(~8GB)");
 
     /* Close fapl */

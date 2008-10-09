@@ -779,7 +779,11 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
     #define HDftell(F)		ftell(F)
 #endif /* HDftell */
 #ifndef HDftruncate
+  #ifdef H5_HAVE_FTRUNCATE64
+    #define HDftruncate(F,L)        ftruncate64(F,L)
+  #else
     #define HDftruncate(F,L)        ftruncate(F,L)
+  #endif
 #endif /* HDftruncate */
 #ifndef HDfwrite
     #define HDfwrite(M,Z,N,F)	fwrite(M,Z,N,F)
@@ -920,7 +924,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
     #define HDlongjmp(J,N)		longjmp(J,N)
 #endif /* HDlongjmp */
 #ifndef HDlseek
-    #ifdef H5_HAVE_FSEEK64
+    #ifdef H5_HAVE_LSEEK64
        #define HDlseek(F,O,W)	lseek64(F,O,W)
     #else
        #define HDlseek(F,O,W)	lseek(F,O,W)
