@@ -1054,7 +1054,7 @@ output_times(const struct options *opts, const char *name, minmax *table,
         output_report("Minimum Accumulated Time using %d file(s): %7.5f s\n", opts->num_files,(total_mm.min));
 
     print_indent(4);
-        output_report("Average Time per file: %7.5f s\n", ((total_mm.sum / opts->num_files) / total_mm.num));
+        output_report("Average Accumulated Time using %d file(s): %7.5f s\n", opts->num_files,(total_mm.sum / total_mm.num));
 
     print_indent(4);
         output_report("Maximum Accumulated Time using %d file(s): %7.5f s\n", opts->num_files,(total_mm.max));
