@@ -54,7 +54,8 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/testerror.sh.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am COPYING
 check_PROGRAMS = $(am__EXEEXT_1) error_test$(EXEEXT) \
-	err_compat$(EXEEXT) testmeta$(EXEEXT)
+	err_compat$(EXEEXT) testmeta$(EXEEXT) \
+	cache2_jnl_file_marking$(EXEEXT)
 @BUILD_ALL_CONDITIONAL_TRUE@noinst_PROGRAMS = $(am__EXEEXT_2)
 TESTS = $(check_PROGRAMS) $(check_SCRIPTS)
 subdir = test
@@ -115,6 +116,10 @@ cache2_api_SOURCES = cache2_api.c
 cache2_api_OBJECTS = cache2_api.$(OBJEXT)
 cache2_api_LDADD = $(LDADD)
 cache2_api_DEPENDENCIES = libh5test.la $(LIBHDF5)
+cache2_jnl_file_marking_SOURCES = cache2_jnl_file_marking.c
+cache2_jnl_file_marking_OBJECTS = cache2_jnl_file_marking.$(OBJEXT)
+cache2_jnl_file_marking_LDADD = $(LDADD)
+cache2_jnl_file_marking_DEPENDENCIES = libh5test.la $(LIBHDF5)
 cache2_journal_SOURCES = cache2_journal.c
 cache2_journal_OBJECTS = cache2_journal.$(OBJEXT)
 cache2_journal_LDADD = $(LDADD)
@@ -346,23 +351,24 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c cache.c \
-	cache2.c cache2_api.c cache2_journal.c cache_api.c cmpd_dset.c \
-	cross_read.c dangle.c dsets.c dt_arith.c dtransform.c dtypes.c \
-	enum.c err_compat.c error_test.c extend.c external.c fheap.c \
-	fillval.c flush1.c flush2.c gen_bad_ohdr.c gen_bogus.c \
-	gen_cross.c gen_deflate.c gen_filters.c gen_new_array.c \
-	gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c \
-	gen_noencoder.c gen_nullspace.c gen_udlinks.c getname.c \
-	gheap.c hyperslab.c istore.c lheap.c links.c mount.c mtime.c \
-	ntypes.c objcopy.c ohdr.c pool.c reserved.c set_extent.c \
-	space_overflow.c stab.c $(testhdf5_SOURCES) testmeta.c \
-	$(ttsafe_SOURCES) unlink.c vfd.c
+	cache2.c cache2_api.c cache2_jnl_file_marking.c \
+	cache2_journal.c cache_api.c cmpd_dset.c cross_read.c dangle.c \
+	dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
+	error_test.c extend.c external.c fheap.c fillval.c flush1.c \
+	flush2.c gen_bad_ohdr.c gen_bogus.c gen_cross.c gen_deflate.c \
+	gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c \
+	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
+	gen_nullspace.c gen_udlinks.c getname.c gheap.c hyperslab.c \
+	istore.c lheap.c links.c mount.c mtime.c ntypes.c objcopy.c \
+	ohdr.c pool.c reserved.c set_extent.c space_overflow.c stab.c \
+	$(testhdf5_SOURCES) testmeta.c $(ttsafe_SOURCES) unlink.c \
+	vfd.c
 DIST_SOURCES = $(libh5test_la_SOURCES) big.c bittests.c btree2.c \
-	cache.c cache2.c cache2_api.c cache2_journal.c cache_api.c \
-	cmpd_dset.c cross_read.c dangle.c dsets.c dt_arith.c \
-	dtransform.c dtypes.c enum.c err_compat.c error_test.c \
-	extend.c external.c fheap.c fillval.c flush1.c flush2.c \
-	gen_bad_ohdr.c gen_bogus.c gen_cross.c gen_deflate.c \
+	cache.c cache2.c cache2_api.c cache2_jnl_file_marking.c \
+	cache2_journal.c cache_api.c cmpd_dset.c cross_read.c dangle.c \
+	dsets.c dt_arith.c dtransform.c dtypes.c enum.c err_compat.c \
+	error_test.c extend.c external.c fheap.c fillval.c flush1.c \
+	flush2.c gen_bad_ohdr.c gen_bogus.c gen_cross.c gen_deflate.c \
 	gen_filters.c gen_new_array.c gen_new_fill.c gen_new_group.c \
 	gen_new_mtime.c gen_new_super.c gen_noencoder.c \
 	gen_nullspace.c gen_udlinks.c getname.c gheap.c hyperslab.c \
@@ -648,9 +654,11 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog cmpd_dset.h5 \
 INCLUDES = -I$(top_srcdir)/src -I$(top_builddir)/src
 
 # Test script for error_test and err_compat
-TEST_SCRIPT = testerror.sh
+TEST_SCRIPT = testerror.sh ${srcdir}/testjnlfilemarking.sh
 check_SCRIPTS = $(TEST_SCRIPT)
-SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT)
+SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) \
+                cache2_jnl_file_marking.c$(EXEEXT)
+
 
 # These are our main targets. They should be listed in the order to be
 # executed, generally most specific tests to least specific tests.
@@ -702,7 +710,7 @@ testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
 
 
 # Temporary files.
-DISTCLEANFILES = testerror.sh
+DISTCLEANFILES = testerror.sh 
 
 # Automake needs to be taught how to build lib, progs, and tests targets.
 # These will be filled in automatically for the most part (e.g.,
@@ -797,6 +805,9 @@ cache2$(EXEEXT): $(cache2_OBJECTS) $(cache2_DEPENDENCIES)
 cache2_api$(EXEEXT): $(cache2_api_OBJECTS) $(cache2_api_DEPENDENCIES) 
 	@rm -f cache2_api$(EXEEXT)
 	$(LINK) $(cache2_api_OBJECTS) $(cache2_api_LDADD) $(LIBS)
+cache2_jnl_file_marking$(EXEEXT): $(cache2_jnl_file_marking_OBJECTS) $(cache2_jnl_file_marking_DEPENDENCIES) 
+	@rm -f cache2_jnl_file_marking$(EXEEXT)
+	$(LINK) $(cache2_jnl_file_marking_OBJECTS) $(cache2_jnl_file_marking_LDADD) $(LIBS)
 cache2_journal$(EXEEXT): $(cache2_journal_OBJECTS) $(cache2_journal_DEPENDENCIES) 
 	@rm -f cache2_journal$(EXEEXT)
 	$(LINK) $(cache2_journal_OBJECTS) $(cache2_journal_LDADD) $(LIBS)
@@ -967,6 +978,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache2_api.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache2_common.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache2_jnl_file_marking.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache2_journal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache_api.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache_common.Plo@am__quote@

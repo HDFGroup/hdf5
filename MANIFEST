@@ -772,6 +772,7 @@
 ./test/cache2_common.c
 ./test/cache_common.h
 ./test/cache2_common.h
+./test/cache2_jnl_file_marking.c
 ./test/cache2_journal.c
 ./test/cmpd_dset.c
 ./test/cross_read.c
@@ -848,6 +849,7 @@
 ./test/testframe.c
 ./test/testhdf5.c
 ./test/testhdf5.h
+./test/testjnlfilemarking.sh
 ./test/testmeta.c
 ./test/tfile.c
 ./test/tgenprop.c
