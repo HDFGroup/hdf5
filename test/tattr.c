@@ -1402,6 +1402,67 @@ test_attr_delete(void)
 
 /****************************************************************
 **
+**  test_attr_compat(): Test H5A (attribute) version
+**                      compatibility macros.
+**
+****************************************************************/
+static void
+test_attr_compat(void)
+{
+    hid_t   file;		/* HDF5 File ID 		*/
+    hid_t   dataset;	/* Dataset ID			*/
+    hid_t   sid;	/* Dataspace ID			*/
+    hid_t   attr;       /* Attribute ID             */
+    H5A_operator1_t op; /* Operator function; test H5A_operator1_1 */
+    unsigned start;     /* Starting attribute to look up */
+    int     count;      /* operator data for the iterator */
+    herr_t  ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Basic Attribute Functions\n"));
+
+    /* Open file */
+    file = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(file, FAIL, "H5Fopen");
+
+    /* Open existing dataset */
+    dataset=H5Dopen(file,DSET2_NAME);
+    CHECK(dataset, FAIL, "H5Dopen");
+
+    /* Create dataspace for attribute */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Create attribute for the dataset (test H5Acreate1) */
+    attr=H5Acreate1(dataset,ATTR1_NAME,H5T_NATIVE_INT,sid,H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate1");
+
+    /* Close attribute */
+    ret=H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close attribute's dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Iterate over attributes on dataset (test H5Aiterate1) */
+    start=0;
+    count=0;
+    op = &attr_op1;
+    ret = H5Aiterate1(dataset,&start,op,&count);
+    VERIFY(ret, 0, "H5Aiterate1");
+
+    /* Close dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(file);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_iterate() */
+
+/****************************************************************
+**
 **  test_attr_dtype_shared(): Test H5A (attribute) code for using
 **                              shared datatypes in attributes.
 **
@@ -1598,11 +1659,12 @@ test_attr(void)
     test_attr_scalar_write();  /* Test scalar dataspace H5A writing code */
     test_attr_scalar_read();   /* Test scalar dataspace H5A reading code */
 
-    /* These next four tests use the same file information */
+    /* These next five tests use the same file information */
     test_attr_mult_write();     /* Test H5A writing code for multiple attributes */
     test_attr_mult_read();      /* Test H5A reading code for multiple attributes */
     test_attr_iterate();        /* Test H5A iterator code */
     test_attr_delete();         /* Test H5A code for deleting attributes */
+    test_attr_compat();         /* Test H5A version compatibility macros */
 
     /* This next test use the same file information */
     test_attr_dtype_shared();   /* Test using shared dataypes in attributes */

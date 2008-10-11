@@ -744,8 +744,62 @@ error:
     H5E_BEGIN_TRY {
         H5Fclose(fid);
     } H5E_END_TRY
-    return 1;
+    return -1;
 } /* end ud_link_compat() */
+
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    group_version_macros
+ *
+ * Purpose:     Test H5G version compatibility macros.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              Saturday, October 11, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+group_version_macros(hid_t fapl)
+{
+    hid_t   fid, gid;
+    char    filename[NAME_BUF_SIZE]; 
+
+    /* Output message about test being performed */
+    TESTING("H5G version compatibility macros");
+
+    /* Create file */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
+
+    /* Create a group (test H5Gcreate1) */
+    if ((gid = H5Gcreate1(fid, "group", 0)) < 0) TEST_ERROR;
+
+    /* Close group */
+    if (H5Gclose(gid) < 0) TEST_ERROR;
+
+    /* Open group (test H5Gopen1) */
+    if ((gid = H5Gopen1(fid, "group")) < 0) TEST_ERROR;
+
+    /* Close group */
+    if (H5Gclose(gid) < 0) TEST_ERROR;
+
+    /* Close file */
+    if (H5Fclose(fid) < 0) TEST_ERROR;
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(gid);
+        H5Gclose(fid);
+    } H5E_END_TRY
+    return -1;
+} /* end group_version_macros() */
 
 
 /*-------------------------------------------------------------------------
@@ -781,6 +835,7 @@ main(void)
     nerrors += long_links(fapl) < 0 ? 1 : 0;
     nerrors += toomany(fapl) < 0 ? 1 : 0;
     nerrors += ud_link_compat(fapl) < 0 ? 1 : 0;
+    nerrors += group_version_macros(fapl) < 0 ? 1 : 0;
 
     /* Results */
     if (nerrors) {

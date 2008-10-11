@@ -53,6 +53,15 @@ typedef hid_t H5P_class_t;      /* Alias H5P_class_t to hid_t */
 #define H5P_DATA_XFER H5P_DATASET_XFER
 #endif /* H5_WANT_H5_V1_4_COMPAT */
 
+/*
+ * API compatibility macros - for backward compatibility of programs that
+ * explicitly use the 1.6 API functions (H5Gcreate1, etc.)
+ */
+#define H5Pget_filter1 H5Pget_filter
+#define H5Pget_filter_by_id1 H5Pget_filter_by_id
+#define H5Pinsert1 H5Pinsert
+#define H5Pregister1 H5Pregister
+
 #ifdef __cplusplus
 extern "C" {
 #endif

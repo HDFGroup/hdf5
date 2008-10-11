@@ -1530,6 +1530,64 @@ test_genprop_refcount(void)
 
 /****************************************************************
 **
+**  test_genprop_version(): Test basic generic property list code.
+**      Tests version compatibility macros
+**
+****************************************************************/
+static void
+test_genprop_version(void)
+{
+    hid_t		cid1;		/* Generic Property class ID */
+    hid_t		lid1;		/* Generic Property list ID */
+    size_t      nprops;     /* Number of properties */
+    herr_t		ret;		/* Generic return value	*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Basic Generic Property List Version Macro Functionality\n"));
+
+    /* Create a new generic class, derived from the root of the class hierarchy */
+    cid1 = H5Pcreate_class(H5P_NO_CLASS,CLASS1_NAME,NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(cid1, "H5Pcreate_class");
+
+    /* Insert property into class (with no callbacks) */
+    ret = H5Pregister1(cid1,PROP1_NAME,PROP1_SIZE,PROP1_DEF_VALUE,NULL,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pregister");
+
+    /* Check the number of properties in class */
+    ret = H5Pget_nprops(cid1,&nprops);
+    CHECK_I(ret, "H5Pget_nprops");
+    VERIFY(nprops, 1, "H5Pget_nprops");
+
+    /* Create a property list from the class */
+    lid1 = H5Pcreate(cid1);
+    CHECK_I(lid1, "H5Pcreate");
+
+    /* Insert temporary property into class (with no callbacks) */
+    ret = H5Pinsert1(lid1,PROP3_NAME,PROP3_SIZE,PROP3_DEF_VALUE,NULL,NULL,NULL,NULL,NULL);
+    CHECK_I(ret, "H5Pinsert");
+
+    /* Check the number of properties in list */
+    ret = H5Pget_nprops(lid1,&nprops);
+    CHECK_I(ret, "H5Pget_nprops");
+    VERIFY(nprops, 2, "H5Pget_nprops");
+
+    /* Check existence of all properties */
+    ret = H5Pexist(lid1,PROP1_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+    ret = H5Pexist(lid1,PROP3_NAME);
+    VERIFY(ret, 1, "H5Pexist");
+
+    /* Close list */
+    ret = H5Pclose(lid1);
+    CHECK_I(ret, "H5Pclose");
+
+    /* Close class */
+    ret = H5Pclose_class(cid1);
+    CHECK_I(ret, "H5Pclose_class");
+} /* end test_genprop_version() */
+
+/****************************************************************
+**
 **  test_genprop(): Main generic property testing routine.
 **
 ****************************************************************/
@@ -1556,6 +1614,7 @@ test_genprop(void)
     test_genprop_equal();       /* Tests for more H5Pequal verification */
     test_genprop_path();        /* Tests for class path verification */
     test_genprop_refcount();    /* Tests for class reference counting */
+    test_genprop_version();     /* Tests for version compatibility macros */
 
 }   /* test_genprop() */
 

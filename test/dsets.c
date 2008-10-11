@@ -77,6 +77,7 @@ const char *FILENAME[] = {
 #define DSET_ONEBYTE_SHUF_NAME   "onebyte_shuffle"
 #define DSET_COMPARE_DCPL_NAME	"compare_dcpl"
 #define DSET_COMPARE_DCPL_NAME_2	"compare_dcpl_2"
+#define DSET_COMPAT_NAME        "compat"
 
 #define USER_BLOCK              1024
 #define SIXTY_FOUR_KB           65536
@@ -4110,6 +4111,73 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_compat
+ *
+ * Purpose:	Test H5D version compatibility macros.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	-1
+ *
+ * Programmer:	Neil Fortner
+ *		Monday, October  6, 2008
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_compat(hid_t file)
+{
+    hid_t           dataset, space, dcpl;
+    H5Z_filter_t    filtn;
+    herr_t          status;
+
+    TESTING("version compatibility macros");
+
+    /* Create the data space */
+    space = H5Screate(H5S_SCALAR);
+    assert(space>=0);
+
+    /* Create a dataset (test H5Dcreate1) */
+    if ((dataset = H5Dcreate1(file, DSET_COMPAT_NAME, H5T_NATIVE_INT, space,
+			H5P_DEFAULT)) < 0) goto error;
+
+    /* Close the dataset */
+    if (H5Dclose(dataset) < 0) goto error;
+
+    /* Reopen the dataset (test H5Dopen1) */
+    if ((dataset = H5Dopen1(file, DSET_COMPAT_NAME)) < 0) goto error;
+
+    /* Create dataset creation property list */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
+
+    /* Set the shuffle filter */
+    if (H5Pset_filter(dcpl, H5Z_FILTER_SHUFFLE, 0, 0, NULL) < 0) goto error;
+
+    /* Get the filter info (test H5Pget_filter1 and H5Pget_filter_by_id1) */
+    if (H5Pget_filter1(dcpl, 0, NULL, NULL, NULL, 0, NULL) < 0) goto error;
+    if (H5Pget_filter_by_id1(dcpl, H5Z_FILTER_SHUFFLE, NULL, NULL, NULL, 0, NULL) < 0) goto error;
+
+    /* Close */
+    if (H5Pclose(dcpl) < 0) goto error;
+    if (H5Dclose(dataset) < 0) goto error;
+    if (H5Sclose(space) < 0) goto error;
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(dataset);
+        H5Sclose(space);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_compat() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests the dataset interface (H5D)
@@ -4182,6 +4250,7 @@ main(void)
     nerrors += test_zero_dims(file)<0	?1:0;
     nerrors += test_missing_chunk(file)<0	?1:0;
     nerrors += test_random_chunks()<0   ?1:0;
+    nerrors += test_compat(file)<0      ?1:0;
 
     if (H5Fclose(file)<0) goto error;
     if (nerrors) goto error;

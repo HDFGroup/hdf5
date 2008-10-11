@@ -1135,6 +1135,43 @@ test_reference_group(void)
 
 /****************************************************************
 **
+**  test_reference_version(): Test H5R (reference) object reference code.
+**      Tests version compatibility macro
+**
+****************************************************************/
+static void
+test_reference_version(void)
+{
+    hid_t fid = -1;             /* File ID */
+    hid_t gid = -1;             /* Group ID */
+    hobj_ref_t ref;             /* Reference */
+    herr_t ret;
+
+    /* Create file with a group */
+    fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create group to refer to */
+    gid = H5Gcreate(fid, GROUPNAME, (size_t)0);
+    CHECK(gid, FAIL, "H5Gcreate");
+
+    /* Create reference to group */
+    ret = H5Rcreate(&ref, fid, GROUPNAME, H5R_OBJECT, -1);
+    CHECK(ret, FAIL, "H5Rcreate");
+
+    /* Get type of referenced object (test H5Rget_obj_type1) */
+    ret = H5Rget_obj_type1(fid,H5R_OBJECT,&ref);
+    VERIFY(ret, H5G_GROUP, "H5Rget_obj_type1");
+
+    /* Close objects */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+}   /* test_reference_version() */
+
+/****************************************************************
+**
 **  test_reference(): Main H5R reference testing routine.
 **
 ****************************************************************/
@@ -1149,6 +1186,7 @@ test_reference(void)
     test_reference_region_1D(); /* Test H5R dataset region reference code for 1-D datasets */
     test_reference_obj_deleted(); /* Test H5R object reference code for deleted objects */
     test_reference_group();     /* Test operations on dereferenced groups */
+    test_reference_version();   /* Test version compatibility macro */
 
 }   /* test_reference() */
 

@@ -6246,6 +6246,70 @@ run_integer_tests(const char *name)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_version
+ *
+ * Purpose:     Tests cversion compatibility macros.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              Wednesday, October 8, 2008
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_version(void)
+{
+    hid_t       file;
+    hid_t       tid;
+    hsize_t     dim1[1] = {5}, dim2[1];
+    char        filename[1024];
+
+    TESTING("version compatibility macros");
+
+    /* Create File */
+    h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof filename);
+    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create array datatype (test H5Tarray_create1) */
+    if ((tid = H5Tarray_create1(H5T_NATIVE_INT, 1, dim1, NULL)) < 0) TEST_ERROR
+
+    /* Commit array datatype (test H5Tcommit1) */
+    if (H5Tcommit(file, "array", tid) < 0) TEST_ERROR
+
+    /* Close datatype */
+    if (H5Tclose(tid) < 0) TEST_ERROR
+
+    /* Open datatype (test H5Topen1) */
+    if ((tid = H5Topen(file, "array")) < 0) TEST_ERROR
+
+    /* Get array dimenstions (test H5Tget_array_dims1) */
+    if (H5Tget_array_dims1(tid, dim2, NULL) < 0) TEST_ERROR
+
+    /* Check array dimenstions */
+    if (dim1[0] != dim2[0]) TEST_ERROR
+
+    /* Close */
+    if(H5Tclose(tid)<0) TEST_ERROR
+    if(H5Fclose(file)<0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+        H5Tclose(tid);
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_verion() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Test the data type interface.
@@ -6350,6 +6414,9 @@ main(void)
     nerrors += test_conv_flt_1("sw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_FLOAT);
     nerrors += test_conv_flt_1("sw", H5T_NATIVE_LDOUBLE, H5T_NATIVE_DOUBLE);
 #endif
+
+    /* Test version compatibility macros */
+    nerrors += test_version();
 
     if (nerrors) {
         printf("***** %lu FAILURE%s! *****\n",

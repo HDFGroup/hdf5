@@ -73,6 +73,20 @@
 }
 
 /*
+ * API compatibility macros - for backward compatibility of programs that
+ * explicitly use the 1.6 API functions (H5Gcreate1, etc.)
+ */
+#define H5Eclear1 H5Eclear
+#define H5Eget_auto1 H5Eget_auto
+#define H5Eprint1 H5Eprint
+#define H5Epush1 H5Epush
+#define H5Eset_auto1 H5Eset_auto
+#define H5Ewalk1 H5Ewalk
+#define H5E_walk1_t H5E_walk_t
+#define H5E_error1_t H5E_error_t
+#define H5E_auto1_t H5E_auto_t
+
+/*
  * Declare an enumerated type which holds all the valid major HDF error codes.
  */
 typedef enum H5E_major_t {

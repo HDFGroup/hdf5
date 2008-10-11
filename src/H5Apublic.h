@@ -22,6 +22,14 @@
 /* Public headers needed by this file */
 #include "H5Ipublic.h"
 
+/*
+ * API compatibility macros - for backward compatibility of programs that
+ * explicitly use the 1.6 API functions (H5Gcreate1, etc.)
+ */
+#define H5Acreate1 H5Acreate
+#define H5Aiterate1 H5Aiterate
+#define H5A_operator1_t H5A_operator_t
+
 #ifdef __cplusplus
 extern "C" {
 #endif

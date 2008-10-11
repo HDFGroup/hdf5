@@ -27,6 +27,13 @@
 /* Public Macros */
 /*****************/
 
+/*
+ * API compatibility macros - for backward compatibility of programs that
+ * explicitly use the 1.6 API functions (H5Gcreate1, etc.)
+ */
+#define H5Dcreate1 H5Dcreate
+#define H5Dopen1 H5Dopen
+
 /*******************/
 /* Public Typedefs */
 /*******************/

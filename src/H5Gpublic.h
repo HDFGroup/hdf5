@@ -34,6 +34,13 @@
 #include "H5Ipublic.h"
 #include "H5Opublic.h"
 
+/*
+ * API compatibility macros - for backward compatibility of programs that
+ * explicitly use the 1.6 API functions (H5Gcreate1, etc.)
+ */
+#define H5Gcreate1 H5Gcreate
+#define H5Gopen1 H5Gopen
+
 #ifdef __cplusplus
 extern "C" {
 #endif

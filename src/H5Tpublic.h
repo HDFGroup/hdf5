@@ -25,6 +25,15 @@
 
 #define HOFFSET(S,M)    (offsetof(S,M))
 
+/*
+ * API compatibility macros - for backward compatibility of programs that
+ * explicitly use the 1.6 API functions (H5Gcreate1, etc.)
+ */
+#define H5Tarray_create1 H5Tarray_create
+#define H5Tcommit1 H5Tcommit
+#define H5Tget_array_dims1 H5Tget_array_dims
+#define H5Topen1 H5Topen
+
 /* These are the various classes of datatypes */
 /* If this goes over 16 types (0-15), the file format will need to change) */
 typedef enum H5T_class_t {

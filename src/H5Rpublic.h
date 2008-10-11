@@ -25,6 +25,12 @@
 #include "H5Ipublic.h"
 
 /*
+ * API compatibility macros - for backward compatibility of programs that
+ * explicitly use the 1.6 API functions (H5Gcreate1, etc.)
+ */
+#define H5Rget_obj_type1 H5Rget_obj_type
+
+/*
  * Reference types allowed.
  */
 typedef enum {
