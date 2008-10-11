@@ -53,7 +53,9 @@ New Features
     ========================
     Library:
     --------
-    None
+     - Added version compatibility macros for functions changed in 1.8.  For
+           example, H5Gcreate1 will work the same in both 1.6 and 1.8.
+           (NAF - 2008/10/11)
 
     Parallel Library:
     -----------------
