@@ -1339,6 +1339,7 @@
 ./test/dsets.c
 ./test/dtypes.c
 ./test/enum.c
+./test/err_vers.c
 ./test/extend.c
 ./test/external.c
 ./test/family_v1.7_00000.h5
