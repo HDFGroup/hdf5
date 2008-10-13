@@ -13,7 +13,7 @@ rem is linked from the top-level documents page.  It can also be found at
 rem http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 rem access to either file, you may request a copy from help@hdfgroup.org.
 rem
-rem Tests for the h5jam tool
+rem Tests for the h5jam/h5unjam tools
 rem
 rem    Created:  Scott Wegner, 8/27/07
 rem    Modified:
@@ -61,7 +61,7 @@ set getub_bin=%CD%\%getub%
 set nerrors=0
 set verbose=yes
 
-set testfiles=%CD%\..\testfiles
+set testfiles=%CD%\testfiles
 
 goto main
 
