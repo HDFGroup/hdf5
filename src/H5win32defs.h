@@ -33,6 +33,7 @@ typedef __int64             h5_stat_size_t;
 #define HDdup(F)            _dup(F)
 #define HDfdopen(N,S)       _fdopen(N,S)
 #define HDfileno(F)         _fileno(F)
+#define HDftruncate(F,L)    _chsize_s(F,L)
 #define HDfstat(F,B)        _fstati64(F,B)
 #define HDisatty(F)         _isatty(F)
 #define HDstat(S,B)         _stati64(S,B)
