@@ -59,6 +59,19 @@
 
 hbool_t H5C2__check_for_journaling = TRUE;
 
+/**************************************************************************/
+/***************************** local prototypes ***************************/
+/**************************************************************************/
+
+static herr_t H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr,
+                                        hid_t dxpl_id,
+                                        H5C2_mdj_config_t * config_ptr);
+
+static herr_t H5C2_grow_mdjsc_callback_table(H5C2_t * cache_ptr);
+
+static herr_t H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr);
+
+
 
 /**************************************************************************/
 /************************* journaling code proper *************************/
@@ -193,7 +206,7 @@ H5C2_begin_journaling(H5F_t * f,
                     "H5C2_get_journal_config() failed.")
     }
 
-    result = H5C2_call_mdjsc_callbacks(cache_ptr, &config);
+    result = H5C2_call_mdjsc_callbacks(cache_ptr, dxpl_id, &config);
 
     if ( result < 0 ) {
 
@@ -384,7 +397,7 @@ H5C2_end_journaling(H5F_t * f,
                         "H5C2_get_journal_config() failed.")
         }
 
-        result = H5C2_call_mdjsc_callbacks(cache_ptr, &config);
+        result = H5C2_call_mdjsc_callbacks(cache_ptr, dxpl_id, &config);
 
         if ( result < 0 ) {
 
@@ -1950,8 +1963,9 @@ done:
  *-------------------------------------------------------------------------
  */
 
-herr_t
+static herr_t
 H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr, 
+		          hid_t dxpl_id,
 		          H5C2_mdj_config_t * config_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
@@ -1960,7 +1974,7 @@ H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr,
     H5C2_mdj_status_change_func_t func_ptr;
     void * data_ptr;
 
-    FUNC_ENTER_NOAPI(H5C2_call_mdjsc_callbacks, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C2_call_mdjsc_callbacks)
 
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
@@ -2009,7 +2023,7 @@ H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr,
 	    func_ptr = ((cache_ptr->mdjsc_cb_tbl)[i]).fcn_ptr;
 	    data_ptr = ((cache_ptr->mdjsc_cb_tbl)[i]).data_ptr;
 
-	    func_ptr(config_ptr, data_ptr);
+	    func_ptr(config_ptr, dxpl_id, data_ptr);
 
 	    funcs_called++;
 	}
@@ -2236,7 +2250,7 @@ done:
  *-------------------------------------------------------------------------
  */
 
-herr_t
+static herr_t
 H5C2_grow_mdjsc_callback_table(H5C2_t * cache_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
@@ -2246,7 +2260,7 @@ H5C2_grow_mdjsc_callback_table(H5C2_t * cache_ptr)
     H5C2_mdjsc_record_t * old_mdjsc_cb_tbl = NULL;
     H5C2_mdjsc_record_t * new_mdjsc_cb_tbl = NULL;
 
-    FUNC_ENTER_NOAPI(H5C2_grow_mdjsc_callback_table, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C2_grow_mdjsc_callback_table)
 
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
@@ -2491,7 +2505,7 @@ done:
  *-------------------------------------------------------------------------
  */
 
-herr_t
+static herr_t
 H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
@@ -2504,7 +2518,7 @@ H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr)
     H5C2_mdjsc_record_t * old_mdjsc_cb_tbl = NULL;
     H5C2_mdjsc_record_t * new_mdjsc_cb_tbl = NULL;
 
-    FUNC_ENTER_NOAPI(H5C2_shrink_mdjsc_callback_table, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5C2_shrink_mdjsc_callback_table)
 
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );

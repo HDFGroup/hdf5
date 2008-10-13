@@ -179,6 +179,7 @@ static void check_superblock_extensions(void);
 static void check_mdjsc_callbacks(void);
 
 static void test_mdjsc_callback(H5C2_mdj_config_t * config_ptr,
+                                hid_t dxpl_id,
                                 void * data_ptr);
 
 static void deregister_mdjsc_callback(H5F_t * file_ptr,
@@ -6546,6 +6547,7 @@ static int callback_test_null_data_ptr_count   = 0;
 
 static void 
 test_mdjsc_callback(H5C2_mdj_config_t * config_ptr,
+                    hid_t dxpl_id,
                     void * data_ptr)
 {
     if ( config_ptr == NULL )

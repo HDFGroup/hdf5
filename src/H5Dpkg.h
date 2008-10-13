@@ -415,6 +415,7 @@ struct H5D_t {
     H5O_loc_t           oloc;           /* Object header location       */
     H5G_name_t          path;           /* Group hierarchy path         */
     H5D_shared_t        *shared;        /* cached information from file */
+    int32_t             mdjsc_idx;      /* Journaling status change index */
 };
 
 /* Enumerated type for allocating dataset's storage */

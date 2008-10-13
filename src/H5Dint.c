@@ -502,6 +502,47 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_journal_status_cb
+ *
+ * Purpose:	Update journal status for dataset
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Sunday, October 12, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5D_journal_status_cb(const H5C2_mdj_config_t *mdj_config, hid_t dxpl_id,
+    void *udata)
+{
+    H5D_t    *dset = (H5D_t *)udata;      /* User callback data */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_journal_status_cb)
+
+    /* Sanity check */
+    HDassert(mdj_config);
+    HDassert(dset);
+
+    /* Check if journaling is now enabled */
+    if(mdj_config->enable_journaling) {
+        /* Flush any cached dataset information */
+        if(H5D_flush_real(dset, dxpl_id, (unsigned)H5F_FLUSH_NONE) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
+    } /* end if */
+
+    /* Keep current journaling state */
+    dset->shared->journaling_enabled = mdj_config->enable_journaling;
+
+done:
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5D_journal_status_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_new
  *
  * Purpose:	Creates a new, empty dataset structure
@@ -536,7 +577,7 @@ H5D_new(const H5F_t *file, hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
     /* Copy the default dataset information */
     HDmemcpy(new_dset, &H5D_def_dset, sizeof(H5D_shared_t));
 
-    /* Remember whether journaling is enabled, to help managed future behavior */
+    /* Remember whether journaling is enabled, to help manage future behavior */
     new_dset->journaling_enabled = journaling_enabled;
 
     /* If we are using the default dataset creation property list, during creation
@@ -544,7 +585,7 @@ H5D_new(const H5F_t *file, hid_t dcpl_id, hbool_t creating, hbool_t vl_type)
      */
     if(!vl_type && creating && dcpl_id == H5P_DATASET_CREATE_DEFAULT) {
         if(H5I_inc_ref(dcpl_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "Can't increment default DCPL ID")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINC, NULL, "can't increment default DCPL ID")
         new_dset->dcpl_id = dcpl_id;
     } /* end if */
     else {
@@ -1055,6 +1096,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
     /* Initialize the dataset object */
     if(NULL == (new_dset = H5FL_CALLOC(H5D_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    new_dset->mdjsc_idx = (-1);
 
     /* Set up & reset dataset location */
     dset_loc.oloc = &(new_dset->oloc);
@@ -1162,6 +1204,10 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
 
     new_dset->shared->fo_count = 1;
 
+    /* Register callback for this dataset with cache, when journaling status changes */
+    if(H5AC2_register_mdjsc_callback(new_dset->oloc.file, H5D_journal_status_cb, new_dset, &new_dset->mdjsc_idx, NULL) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't register journal status callback")
+
     /* Success */
     ret_value = new_dset;
 
@@ -1232,6 +1278,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dxpl_id)
     /* Allocate the dataset structure */
     if(NULL == (dataset = H5FL_CALLOC(H5D_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    dataset->mdjsc_idx = (-1);
 
     /* Shallow copy (take ownership) of the object location object */
     if(H5O_loc_copy(&(dataset->oloc), loc->oloc, H5_COPY_SHALLOW) < 0)
@@ -1249,6 +1296,10 @@ H5D_open(const H5G_loc_t *loc, hid_t dxpl_id)
         /* Open the dataset object */
         if(H5D_open_oid(dataset, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found")
+
+        /* Register callback for this dataset with cache, when journaling status changes */
+        if(H5AC2_register_mdjsc_callback(dataset->oloc.file, H5D_journal_status_cb, dataset, &dataset->mdjsc_idx, NULL) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't register journal status callback")
 
         /* Add the dataset to the list of opened objects in the file */
         if(H5FO_insert(dataset->oloc.file, dataset->oloc.addr, dataset->shared, FALSE) < 0)
@@ -1568,6 +1619,11 @@ H5D_close(H5D_t *dataset)
 #ifdef H5D_CHUNK_DEBUG
     H5D_chunk_stats(dataset, FALSE);
 #endif /* H5D_CHUNK_DEBUG */
+
+    /* Deregister callback for this dataset with cache, when journaling status changes */
+    if(dataset->mdjsc_idx >= 0)
+        if(H5AC2_deregister_mdjsc_callback(dataset->oloc.file, dataset->mdjsc_idx) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't deregister journal status callback")
 
     dataset->shared->fo_count--;
     if(dataset->shared->fo_count == 0) {

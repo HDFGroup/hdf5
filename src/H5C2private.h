@@ -1340,7 +1340,8 @@ typedef struct H5C2_mdj_config_t
  * configuration changes.
  */
 
-typedef void (*H5C2_mdj_status_change_func_t)(H5C2_mdj_config_t * config_ptr,
+typedef void (*H5C2_mdj_status_change_func_t)(const H5C2_mdj_config_t * config_ptr,
+                                              hid_t dxpl_id,
 		                              void * data_ptr);
 
 
@@ -1675,20 +1676,13 @@ H5_DLL herr_t H5C2_unmark_journaling_in_progress(H5F_t * f,
 /****** metadata journaling status change callback management code ********/
 /**************************************************************************/
 
-H5_DLL herr_t H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr,
-                                        H5C2_mdj_config_t * config_ptr);
-
 H5_DLL herr_t H5C2_deregister_mdjsc_callback(H5C2_t * cache_ptr,
                                              int32_t idx);
-
-H5_DLL herr_t H5C2_grow_mdjsc_callback_table(H5C2_t * cache_ptr);
 
 H5_DLL herr_t H5C2_register_mdjsc_callback(H5C2_t * cache_ptr,
                                          H5C2_mdj_status_change_func_t fcn_ptr,
                                          void * data_ptr,
                                          int32_t * idx_ptr);
-
-H5_DLL herr_t H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr);
 
 #endif /* !_H5C2private_H */
 

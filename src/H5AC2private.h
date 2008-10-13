@@ -360,7 +360,7 @@ H5_DLL herr_t H5AC2_get_cache_hit_rate(H5AC2_t * cache_ptr,
 H5_DLL herr_t H5AC2_get_jnl_config(H5AC2_t * cache_ptr,
                                    H5AC2_jnl_config_t * config_ptr);
 
-H5_DLL herr_t H5AC2_register_mdjsc_callback(H5F_t * file_ptr,
+H5_DLL herr_t H5AC2_register_mdjsc_callback(const H5F_t * file_ptr,
                                          H5C2_mdj_status_change_func_t fcn_ptr,
                                          void * data_ptr,
                                          int32_t * idx_ptr,
