@@ -12298,9 +12298,7 @@ main(void)
 	    exit(1);
 	}
 	printf("All link tests passed.\n");
-#ifdef OUT
 	h5_cleanup(FILENAME, fapl);
-#endif
 	/* clean up tmp directory created by external link tests */
 	HDrmdir(TMPDIR);
     }
