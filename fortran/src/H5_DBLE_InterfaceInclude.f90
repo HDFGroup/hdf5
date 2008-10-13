@@ -1,3 +1,19 @@
+!****h* fortran/src/H5_DBLE_InterfaceInclude.f90
+!
+! NAME
+!   H5_DBLE_INTERFACE
+!  
+! FUNCTION
+!   This module is used for when the default REAL is not of the type DOUBLE PRECISION.
+!   We only do not include the double precision interfaces if the defaut REAL is
+!   DOUBLE PRECISION since this would lead to a non-unique conflict with the
+!   generic interfaces declared as REAL. Otherwise it is okay to include the interfaces.
+!
+! NOTES
+!   This module contains all the DOUBLE PRECISION interfaces and corresponding subroutines 
+!   from the HDF function catagory H5A, H5D and H5P.
+!
+! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 !   Copyright by The HDF Group.                                               *
 !   Copyright by the Board of Trustees of the University of Illinois.         *
@@ -13,14 +29,11 @@
 !   access to either file, you may request a copy from help@hdfgroup.org.     *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 !
+! AUTHOR
+!  M.S. Breitenfeld
 !
-! FUNCTION
-!   This module is included for when the default REAL is not of the type DOUBLE PRECISION.
-!   We do not include the double precision interfaces if the defaut REAL is
-!   DOUBLE PRECISION since this would lead to a non-unique conflict with the
-!   generic interfaces declared as REAL. Otherwise it is okay to include the interfaces.
-!   
-!
+!*****
+
 MODULE H5_DBLE_INTERFACE
 
   USE H5GLOBAL
