@@ -854,6 +854,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
 {
     char temp[2048];    /* Temporary buffer for file names */
     h5_stat_t	sb;     /* Structure for querying file info */
+	int j = 0;
 
     if(fapl == H5P_DEFAULT) {
         /* Get the file's statistics */
@@ -910,7 +911,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
             h5_stat_size_t tot_size = 0;
 
             /* Try all filenames possible, until we find one that's missing */
-            for(int j = 0; /*void*/; j++) {
+            for(j = 0; /*void*/; j++) {
                 /* Create the filename to query */
                 HDsnprintf(temp, sizeof temp, filename, j);
 
