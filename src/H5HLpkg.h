@@ -37,8 +37,12 @@
 /* Package Private Variables */
 /*****************************/
 
-/* The cache subclass */
-H5_DLLVAR const H5AC_class_t H5AC_LHEAP[1];
+/* The local heap prefix cache subclass */
+H5_DLLVAR const H5AC2_class_t H5AC2_LHEAP_PRFX[1];
+
+/* The local heap data block cache subclass */
+H5_DLLVAR const H5AC2_class_t H5AC2_LHEAP_DBLK[1];
+
 
 /**************************/
 /* Package Private Macros */
@@ -46,10 +50,15 @@ H5_DLLVAR const H5AC_class_t H5AC_LHEAP[1];
 
 #define H5HL_SIZEOF_HDR(F)						      \
     H5HL_ALIGN(H5HL_SIZEOF_MAGIC +	/*heap signature		*/    \
-	       4 +			/*reserved			*/    \
-	       H5F_SIZEOF_SIZE (F) +	/*data size			*/    \
-	       H5F_SIZEOF_SIZE (F) +	/*free list head		*/    \
-	       H5F_SIZEOF_ADDR (F))	/*data address			*/
+	       1 +			/*version			*/    \
+	       3 +			/*reserved			*/    \
+	       H5F_SIZEOF_SIZE(F) +	/*data size			*/    \
+	       H5F_SIZEOF_SIZE(F) +	/*free list head		*/    \
+	       H5F_SIZEOF_ADDR(F))	/*data address			*/
+
+/* Value indicating end of free list on disk */
+#define H5HL_FREE_NULL	1
+
 
 /****************************/
 /* Package Private Typedefs */
@@ -62,18 +71,75 @@ typedef struct H5HL_free_t {
     struct H5HL_free_t	*next;		/*next entry in free list	*/
 } H5HL_free_t;
 
+/* Forward declarations */
+typedef struct H5HL_dblk_t H5HL_dblk_t;
+typedef struct H5HL_prfx_t H5HL_prfx_t;
+
 struct H5HL_t {
-    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
-                            /* first field in structure */
-    haddr_t		    addr;	/*address of data		*/
-    size_t		    heap_alloc;	/*size of heap on disk and in mem */
-    uint8_t		   *chunk;	/*the chunk, including header	*/
+    size_t                  rc;         /* Ref. count for prefix & data block using this struct */
+    size_t                  prots;      /* # of times the heap has been protected */
+    H5HL_prfx_t            *prfx;       /* The prefix object for the heap */
+    haddr_t                 prfx_addr;  /* address of heap prefix */
+    size_t                  prfx_size;  /* size of heap prefix */
+    H5HL_dblk_t            *dblk;       /* The data block object for the heap */
+    haddr_t		    dblk_addr;	/* address of data block	*/
+    size_t		    dblk_size;	/* size of heap data block on disk and in mem */
+    hbool_t                 single_cache_obj;   /* Indicate if the heap is a single object in the cache */
+    uint8_t		   *image;	/*the heap image, including header */
     H5HL_free_t		   *freelist;	/*the free list			*/
 };
+
+/* Struct for heap data block */
+struct H5HL_dblk_t {
+    H5AC2_info_t cache_info;    /* Information for H5AC2 cache functions, _must_ be */
+                                /* first field in structure */
+    H5HL_t                 *heap;       /* Pointer to heap for data block */
+};
+
+/* Struct for heap prefix */
+struct H5HL_prfx_t {
+    H5AC2_info_t cache_info;    /* Information for H5AC2 cache functions, _must_ be */
+                                /* first field in structure */
+    H5HL_t                 *heap;       /* Pointer to heap for prefix */
+};
+
+/* Callback information for loading local heap prefix from disk */
+typedef struct H5HL_cache_prfx_ud_t {
+    /* Downwards */
+    hbool_t made_attempt;               /* Whether the deserialize routine was already attempted */
+    H5F_t *f;                           /* File pointer */
+
+    /* Upwards */
+    hbool_t loaded;                     /* Whether prefix was loaded from file */
+    hsize_t free_block;                 /* First free block in heap */
+} H5HL_cache_prfx_ud_t;
+
+/* Callback information for loading local heap data block from disk */
+typedef struct H5HL_cache_dblk_ud_t {
+    /* Downwards */
+    H5F_t *f;                           /* File pointer */
+    H5HL_t *heap;                       /* Local heap */
+    hsize_t free_block;                 /* First free block in heap */
+
+    /* Upwards */
+    hbool_t loaded;                     /* Whether data block was loaded from file */
+} H5HL_cache_dblk_ud_t;
+
 
 /******************************/
 /* Package Private Prototypes */
 /******************************/
+
+/* Heap routines */
+H5_DLL herr_t H5HL_dest(H5HL_t *heap);
+
+/* Heap prefix routines */
+H5_DLL H5HL_prfx_t *H5HL_prfx_new(H5HL_t *heap);
+H5_DLL herr_t H5HL_prfx_dest(H5HL_prfx_t *prfx);
+
+/* Heap data block routines */
+H5_DLL H5HL_dblk_t *H5HL_dblk_new(H5HL_t *heap);
+H5_DLL herr_t H5HL_dblk_dest(H5HL_dblk_t *dblk);
 
 #endif
 

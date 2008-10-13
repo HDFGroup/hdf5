@@ -122,14 +122,14 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
 #ifndef NDEBUG
     HDassert(H5F_addr_defined(mesg->heap_addr));
 
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr, H5AC_READ)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr, H5AC2_READ)))
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
 
-    s = H5HL_offset_into(f, heap, 0);
+    s = H5HL_offset_into(heap, 0);
 
     HDassert(s && !*s);
 
-    if(H5HL_unprotect(f, dxpl_id, heap, mesg->heap_addr) < 0)
+    if(H5HL_unprotect(heap) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
     heap = NULL;
 #endif
@@ -139,13 +139,13 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
     if(NULL == mesg->slot)
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
-    if(NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr, H5AC_READ)))
+    if(NULL == (heap = H5HL_protect(f, dxpl_id, mesg->heap_addr, H5AC2_READ)))
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read protect link value")
     for(u = 0; u < mesg->nused; u++) {
 	/* Name */
 	H5F_DECODE_LENGTH (f, p, mesg->slot[u].name_offset);
 
-        s = H5HL_offset_into(f, heap, mesg->slot[u].name_offset);
+        s = H5HL_offset_into(heap, mesg->slot[u].name_offset);
 	HDassert(s && *s);
 	mesg->slot[u].name = H5MM_xstrdup (s);
         HDassert(mesg->slot[u].name);
@@ -158,7 +158,7 @@ H5O_efl_decode(H5F_t *f, hid_t dxpl_id, unsigned UNUSED mesg_flags,
 	HDassert(mesg->slot[u].size > 0);
     } /* end for */
 
-    if(H5HL_unprotect(f, dxpl_id, heap, mesg->heap_addr) < 0)
+    if(H5HL_unprotect(heap) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, NULL, "unable to read unprotect link value")
     heap = NULL;
 
@@ -450,7 +450,7 @@ H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
         HGOTO_ERROR(H5E_EFL, H5E_CANTINIT, NULL, "can't create heap")
 
     /* Pin the heap down in memory */
-    if(NULL == (heap = H5HL_protect(file_dst, dxpl_id, efl_dst->heap_addr, H5AC_WRITE)))
+    if(NULL == (heap = H5HL_protect(file_dst, dxpl_id, efl_dst->heap_addr, H5AC2_WRITE)))
         HGOTO_ERROR(H5E_EFL, H5E_PROTECT, NULL, "unable to protect EFL file name heap")
 
     /* Insert "empty" name first */
@@ -481,7 +481,7 @@ H5O_efl_copy_file(H5F_t UNUSED *file_src, void *mesg_src, H5F_t *file_dst,
 
 done:
     /* Release resources */
-    if(heap && H5HL_unprotect(file_dst, dxpl_id, heap, efl_dst->heap_addr) < 0)
+    if(heap && H5HL_unprotect(heap) < 0)
         HDONE_ERROR(H5E_EFL, H5E_PROTECT, NULL, "unable to unprotect EFL file name heap")
     if(!ret_value)
         if(efl_dst)

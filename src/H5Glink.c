@@ -217,13 +217,12 @@ H5G_link_cmp_corder_dec(const void *lnk1, const void *lnk2)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_ent_to_link(H5F_t *f, H5O_link_t *lnk, const H5HL_t *heap,
+H5G_ent_to_link(H5O_link_t *lnk, const H5HL_t *heap,
     const H5G_entry_t *ent, const char *name)
 {
     FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_to_link)
 
     /* check arguments */
-    HDassert(f);
     HDassert(lnk);
     HDassert(heap);
     HDassert(ent);
@@ -240,7 +239,7 @@ H5G_ent_to_link(H5F_t *f, H5O_link_t *lnk, const H5HL_t *heap,
     if(ent->type == H5G_CACHED_SLINK) {
         const char *s;          /* Pointer to link value */
 
-        s = H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);
+        s = H5HL_offset_into(heap, ent->cache.slink.lval_offset);
         HDassert(s);
 
         /* Copy the link value */
@@ -259,61 +258,6 @@ H5G_ent_to_link(H5F_t *f, H5O_link_t *lnk, const H5HL_t *heap,
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_ent_to_link() */
-
-
-/*-------------------------------------------------------------------------
- * Function:	H5G_ent_to_info
- *
- * Purpose:     Make link info for a symbol table entry
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Nov 16 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5G_ent_to_info(H5F_t *f, H5L_info_t *info, const H5HL_t *heap,
-    const H5G_entry_t *ent)
-{
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_ent_to_info)
-
-    /* check arguments */
-    HDassert(f);
-    HDassert(info);
-    HDassert(heap);
-    HDassert(ent);
-
-    /* Set (default) common info for info */
-    info->cset = H5F_DEFAULT_CSET;
-    info->corder = 0;
-    info->corder_valid = FALSE;       /* Creation order not valid for this link */
-
-    /* Object is a symbolic or hard link */
-    if(ent->type == H5G_CACHED_SLINK) {
-        const char *s;          /* Pointer to link value */
-
-        s = H5HL_offset_into(f, heap, ent->cache.slink.lval_offset);
-        HDassert(s);
-
-        /* Get the link value size */
-        info->u.val_size = HDstrlen(s) + 1;
-
-        /* Set link type */
-        info->type = H5L_TYPE_SOFT;
-    } /* end if */
-    else {
-        /* Set address of object */
-        info->u.address = ent->header;
-
-        /* Set link type */
-        info->type = H5L_TYPE_HARD;
-    } /* end else */
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_ent_to_info() */
 
 
 /*-------------------------------------------------------------------------

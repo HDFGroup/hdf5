@@ -60,12 +60,12 @@
 
 /* Metadata cache callbacks */
 static void *H5HG_deserialize(haddr_t addr, size_t len, const void *image, 
-    const void *udata, hbool_t *dirty);
+    void *udata, hbool_t *dirty);
+static herr_t H5HG_image_len(const void *thing, size_t *image_len_ptr);
 static herr_t H5HG_serialize(const H5F_t *f, hid_t dxpl_id, haddr_t addr, size_t len,
     void *image, void *thing, unsigned *flags, haddr_t *new_addr,
     size_t *new_len, void **new_image);
 static herr_t H5HG_free_icr(haddr_t addr, size_t len, void *thing);
-static herr_t H5HG_image_len(const void *thing, size_t *image_len_ptr);
 
 /*********************/
 /* Package Variables */
@@ -122,16 +122,16 @@ const H5AC2_class_t H5AC2_GHEAP[1] = {{
  */
 static void *
 H5HG_deserialize(haddr_t addr, size_t UNUSED len, const void *image,
-    const void *_udata, hbool_t UNUSED *dirty)
+    void *_udata, hbool_t UNUSED *dirty)
 {
 
     H5HG_heap_t	*heap = NULL;
-    uint8_t	*p = NULL;
-    int	i;
+    H5F_t *f = (H5F_t *)_udata;
+    uint8_t	*p;
     size_t	nalloc, need;
     size_t      max_idx=0;              /* The maximum index seen */
-    H5HG_heap_t	*ret_value = NULL;      /* Return value */
-    H5F_t *f = (H5F_t *)_udata;
+    int	i;
+    H5HG_heap_t	*ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI(H5HG_deserialize, NULL);
 

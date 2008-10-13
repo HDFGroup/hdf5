@@ -44,6 +44,16 @@
 /* The cache subclass */
 H5_DLLVAR const H5AC2_class_t H5AC2_GHEAP[1];
 
+/* Declare a free list to manage the H5HG_t struct */
+H5FL_EXTERN(H5HG_heap_t);
+
+/* Declare a free list to manage sequences of H5HG_obj_t's */
+H5FL_SEQ_EXTERN(H5HG_obj_t);
+
+/* Declare a PQ free list to manage heap chunks */
+H5FL_BLK_EXTERN(heap_chunk);
+
+
 /**************************/
 /* Package Private Macros */
 /**************************/
@@ -162,18 +172,7 @@ struct H5HG_heap_t {
 /******************************/
 /* Package Private Prototypes */
 /******************************/
-
 H5_DLL herr_t H5HG_dest(H5HG_heap_t *heap);
-
-/* Declare a free list to manage the H5HG_t struct */
-H5FL_EXTERN(H5HG_heap_t);
-
-/* Declare a free list to manage sequences of H5HG_obj_t's */
-H5FL_SEQ_EXTERN(H5HG_obj_t);
-
-/* Declare a PQ free list to manage heap chunks */
-H5FL_BLK_EXTERN(heap_chunk);
-
 
 #endif
 

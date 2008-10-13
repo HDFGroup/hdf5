@@ -97,6 +97,7 @@ static void *H5HF_cache_dblock_deserialize(haddr_t addr, size_t len,
 static herr_t H5HF_cache_dblock_serialize(const H5F_t * f, hid_t dxpl_id, 
     haddr_t addr, size_t len, void *image, void *_thing, unsigned *flags, 
     haddr_t *new_addr, size_t *new_len, void **new_image);
+static herr_t H5HF_cache_dblock_free_icr(haddr_t addr, size_t len, void *thing);
 
 
 /*********************/
@@ -421,7 +422,7 @@ HDfprintf(stderr, "%s: hdr->fspace = %p\n", FUNC, hdr->fspace);
 done:
     /* Release resources */
     if(!ret_value && hdr)
-        (void)H5HF_cache_hdr_dest(hdr);
+        (void)H5HF_hdr_dest(hdr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_hdr_deserialize() */ /*lint !e818 Can't make udata a pointer to const */
@@ -618,7 +619,7 @@ H5HF_cache_hdr_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
     HDassert(thing);
 
     /* Destroy B-tree node */
-    H5HF_cache_hdr_dest(thing);
+    H5HF_hdr_dest(thing);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_cache_hdr_free_icr() */
@@ -816,7 +817,7 @@ HDfprintf(stderr, "%s: iblock->ents[%Zu] = {%a}\n", FUNC, u, iblock->ents[u].add
 done:
     /* Release resources */
     if(!ret_value && iblock)
-        (void)H5HF_cache_iblock_dest(iblock);
+        (void)H5HF_man_iblock_dest(iblock);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_iblock_deserialize() */
@@ -992,11 +993,10 @@ H5HF_cache_iblock_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
     HDassert(thing);
 
     /* Destroy fractal heap indirect block */
-    H5HF_cache_iblock_dest(thing);
+    H5HF_man_iblock_dest(thing);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_cache_iblock_free_icr() */
-
 
 
 /*-------------------------------------------------------------------------
@@ -1608,7 +1608,6 @@ done:
 
 } /* H5HF_cache_dblock_serialize() */
 
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF_cache_dblock_free_icr
@@ -1626,63 +1625,19 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t 
-H5HF_cache_dblock_free_icr(haddr_t UNUSED addr, 
-		           size_t UNUSED len, 
-			   void *thing)
+H5HF_cache_dblock_free_icr(haddr_t UNUSED addr, size_t UNUSED len, void *thing)
 {
-    herr_t          ret_value = SUCCEED;    /* Return value */
-    H5HF_direct_t * dblock;
-
-    FUNC_ENTER_NOAPI_NOINIT(H5HF_cache_dblock_free_icr)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_dblock_free_icr)
 
     /*
      * Check arguments.
      */
-    HDassert( thing );
+    HDassert(thing);
 
-    dblock = (H5HF_direct_t *)thing;
+    /* Destroy fractal heap direct block */
+    H5HF_man_dblock_dest(thing);
 
-#ifdef QAK
-HDfprintf(stderr, "%s: Destroying direct block, dblock = %p\n", FUNC, dblock);
-#endif /* QAK */
-
-    /* Set the shared heap header's file context for this operation */
-    /* This doesn't seem to be necessary, and at present, we don't pass
-     * in the file pointer to this callback -- will comment it out 
-     * for now.
-     * 					-- JRM
-     */
-    /* dblock->hdr->f = f; */
-
-    /* Decrement reference count on shared fractal heap info */
-    HDassert( dblock->hdr != NULL );
-
-    if ( H5HF_hdr_decr(dblock->hdr) < 0 ) {
-
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, \
-		    "can't decrement reference count on shared heap header")
-    }
-
-    if ( dblock->parent ) {
-
-        if ( H5HF_iblock_decr(dblock->parent) < 0 ) {
-
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, \
-		"can't decrement reference count on shared indirect block")
-        }
-    }
-
-    /* Free block's buffer */
-    dblock->blk = H5FL_BLK_FREE(direct_block, dblock->blk);
-
-    /* Free fractal heap direct block info */
-    H5FL_FREE(H5HF_direct_t, dblock);
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HF_cache_dblock_free_icr() */
 

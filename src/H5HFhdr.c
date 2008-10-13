@@ -131,7 +131,7 @@ H5HF_hdr_alloc(H5F_t *f)
 done:
     if(!ret_value)
         if(hdr)
-            (void)H5HF_cache_hdr_dest(hdr);
+            (void)H5HF_hdr_dest(hdr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_alloc() */
@@ -510,7 +510,7 @@ HDfprintf(stderr, "%s: hdr->id_len = %Zu\n", FUNC, hdr->id_len);
 done:
     if(!H5F_addr_defined(ret_value))
         if(hdr)
-            (void)H5HF_cache_hdr_dest(hdr);
+            (void)H5HF_hdr_dest(hdr);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_create() */
@@ -1610,4 +1610,42 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_hdr_delete() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5HF_hdr_dest
+ *
+ * Purpose:	Destroys a fractal heap header in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@ncsa.uiuc.edu
+ *		Feb 24 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5HF_hdr_dest(H5HF_hdr_t *hdr)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_hdr_dest)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(hdr);
+    HDassert(hdr->rc == 0);
+
+    /* Free the block size lookup table for the doubling table */
+    H5HF_dtable_dest(&hdr->man_dtable);
+
+    /* Release any I/O pipeline filter information */
+    if(hdr->pline.nused)
+        H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline));
+
+    /* Free the shared info itself */
+    H5FL_FREE(H5HF_hdr_t, hdr);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5HF_hdr_dest() */
 

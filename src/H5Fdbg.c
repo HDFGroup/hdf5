@@ -138,7 +138,7 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
         root_ent.header = root_oloc->addr;
 
         /* Display root group symbol table entry info */
-	H5G_ent_debug(f, &root_ent, stream, indent + 3, MAX(0, fwidth - 3), NULL);
+	H5G_ent_debug(&root_ent, stream, indent + 3, MAX(0, fwidth - 3), NULL);
     } /* end if */
 
 done:

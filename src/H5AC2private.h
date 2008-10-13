@@ -54,7 +54,8 @@
 typedef enum {
     H5AC2_BT_ID = 0, 	  /*B-tree nodes			       */
     H5AC2_SNODE_ID,	  /*symbol table nodes			       */
-    H5AC2_LHEAP_ID,	  /*local heap				       */
+    H5AC2_LHEAP_PRFX_ID,  /*local heap prefix			       */
+    H5AC2_LHEAP_DBLK_ID,  /*local heap data block		       */
     H5AC2_GHEAP_ID,	  /*global heap				       */
     H5AC2_OHDR_ID,	  /*object header			       */
     H5AC2_OHDR_CHK_ID,	  /*object header chunk			       */

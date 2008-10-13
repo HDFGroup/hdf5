@@ -100,8 +100,8 @@ typedef struct H5B_class_t {
     size_t	sizeof_nkey;			/*size of native (memory) key*/
     H5RC_t *    (*get_shared)(const H5F_t*, const void*);    /*shared info for node */
     herr_t	(*new_node)(H5F_t*, hid_t, H5B_ins_t, void*, void*, void*, haddr_t*);
-    int         (*cmp2)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 2 keys */
-    int         (*cmp3)(H5F_t*, hid_t, void*, void*, void*);	    /*compare 3 keys */
+    int         (*cmp2)(void*, void*, void*);	    /*compare 2 keys */
+    int         (*cmp3)(void*, void*, void*);	    /*compare 3 keys */
     herr_t	(*found)(H5F_t*, hid_t, haddr_t, const void*, void*);
 
     /* insert new data */
@@ -119,7 +119,7 @@ typedef struct H5B_class_t {
     /* encode, decode, debug key values */
     herr_t	(*decode)(const H5B_shared_t*, const uint8_t*, void*);
     herr_t	(*encode)(const H5B_shared_t*, uint8_t*, const void*);
-    herr_t	(*debug_key)(FILE*, H5F_t*, hid_t, int, int, const void*, const void*);
+    herr_t	(*debug_key)(FILE*, int, int, const void*, const void*);
 } H5B_class_t;
 
 /* Information about B-tree */

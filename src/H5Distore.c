@@ -135,10 +135,8 @@ static H5RC_t *H5D_istore_get_shared(const H5F_t *f, const void *_udata);
 static herr_t H5D_istore_new_node(H5F_t *f, hid_t dxpl_id, H5B_ins_t, void *_lt_key,
 				  void *_udata, void *_rt_key,
 				  haddr_t *addr_p /*out*/);
-static int H5D_istore_cmp2(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata,
-			    void *_rt_key);
-static int H5D_istore_cmp3(H5F_t *f, hid_t dxpl_id, void *_lt_key, void *_udata,
-			    void *_rt_key);
+static int H5D_istore_cmp2(void *_lt_key, void *_udata, void *_rt_key);
+static int H5D_istore_cmp3(void *_lt_key, void *_udata, void *_rt_key);
 static herr_t H5D_istore_found(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_lt_key,
 			       void *_udata);
 static H5B_ins_t H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
@@ -151,9 +149,8 @@ static H5B_ins_t H5D_istore_remove( H5F_t *f, hid_t dxpl_id, haddr_t addr, void 
                   hbool_t *rt_key_changed);
 static herr_t H5D_istore_decode_key(const H5B_shared_t *shared, const uint8_t *raw, void *_key);
 static herr_t H5D_istore_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key);
-static herr_t H5D_istore_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
-                                int indent, int fwidth, const void *key,
-                                    const void *udata);
+static herr_t H5D_istore_debug_key(FILE *stream, int indent, int fwidth,
+    const void *key, const void *udata);
 
 /* Chunked layout indexing callbacks */
 static herr_t H5D_istore_idx_init(const H5D_chk_idx_info_t *idx_info);
@@ -345,8 +342,8 @@ H5D_istore_encode_key(const H5B_shared_t *shared, uint8_t *raw, const void *_key
  */
 /* ARGSUSED */
 static herr_t
-H5D_istore_debug_key(FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int indent, int fwidth,
-		      const void *_key, const void *_udata)
+H5D_istore_debug_key(FILE *stream, int indent, int fwidth, const void *_key,
+    const void *_udata)
 {
     const H5D_istore_key_t	*key = (const H5D_istore_key_t *)_key;
     const H5D_istore_ud0_t	*udata = (const H5D_istore_ud0_t *)_udata;
@@ -388,8 +385,7 @@ H5D_istore_debug_key(FILE *stream, H5F_t UNUSED *f, hid_t UNUSED dxpl_id, int in
  */
 /* ARGSUSED */
 static int
-H5D_istore_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_udata,
-		void *_rt_key)
+H5D_istore_cmp2(void *_lt_key, void *_udata, void *_rt_key)
 {
     H5D_istore_key_t	*lt_key = (H5D_istore_key_t *) _lt_key;
     H5D_istore_key_t	*rt_key = (H5D_istore_key_t *) _rt_key;
@@ -439,8 +435,7 @@ H5D_istore_cmp2(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_uda
  */
 /* ARGSUSED */
 static int
-H5D_istore_cmp3(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, void *_lt_key, void *_udata,
-		void *_rt_key)
+H5D_istore_cmp3(void *_lt_key, void *_udata, void *_rt_key)
 {
     H5D_istore_key_t	*lt_key = (H5D_istore_key_t *) _lt_key;
     H5D_istore_key_t	*rt_key = (H5D_istore_key_t *) _rt_key;
@@ -668,7 +663,7 @@ H5D_istore_insert(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key,
     HDassert(rt_key);
     HDassert(new_node_p);
 
-    cmp = H5D_istore_cmp3(f, dxpl_id, lt_key, udata, rt_key);
+    cmp = H5D_istore_cmp3(lt_key, udata, rt_key);
     HDassert(cmp <= 0);
 
     if(cmp < 0) {

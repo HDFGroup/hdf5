@@ -904,7 +904,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
     /* Update external storage message, if it's used */
     if(dset->shared->dcpl_cache.efl.nused > 0) {
         H5O_efl_t *efl = &dset->shared->dcpl_cache.efl; /* Dataset's external file list */
-        H5HL_t *heap;                           /* Pointer to local heap for EFL file names */
+        H5HL_t *heap;              /* Pointer to local heap for EFL file names */
         size_t heap_size = H5HL_ALIGN(1);
         size_t u;
 
@@ -917,12 +917,12 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create EFL file name heap")
 
         /* Pin the heap down in memory */
-        if(NULL == (heap = H5HL_protect(file, dxpl_id, efl->heap_addr, H5AC_WRITE)))
+        if(NULL == (heap = H5HL_protect(file, dxpl_id, efl->heap_addr, H5AC2_WRITE)))
             HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect EFL file name heap")
 
         /* Insert "empty" name first */
         if((size_t)(-1) == H5HL_insert(file, dxpl_id, heap, (size_t)1, "")) {
-            H5HL_unprotect(file, dxpl_id, heap, efl->heap_addr);
+            H5HL_unprotect(heap);
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert file name into heap")
         } /* end if */
 
@@ -932,7 +932,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
             /* Insert file name into heap */
             if((size_t)(-1) == (offset = H5HL_insert(file, dxpl_id, heap,
                         HDstrlen(efl->slot[u].name) + 1, efl->slot[u].name))) {
-                H5HL_unprotect(file, dxpl_id, heap, efl->heap_addr);
+                H5HL_unprotect(heap);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert file name into heap")
             } /* end if */
 
@@ -942,7 +942,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
         } /* end for */
 
         /* Release the heap */
-        if(H5HL_unprotect(file, dxpl_id, heap, efl->heap_addr) < 0)
+        if(H5HL_unprotect(heap) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to unprotect EFL file name heap")
         heap = NULL;
 
@@ -1572,7 +1572,7 @@ H5D_close(H5D_t *dataset)
     dataset->shared->fo_count--;
     if(dataset->shared->fo_count == 0) {
         /* Flush the dataset's information */
-        if(H5D_flush_real(dataset, H5AC_dxpl_id, H5F_FLUSH_NONE) < 0)
+        if(H5D_flush_real(dataset, H5AC2_dxpl_id, H5F_FLUSH_NONE) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to flush cached dataset info")
 
         /* Free the data sieve buffer, if it's been allocated */
@@ -1608,7 +1608,7 @@ H5D_close(H5D_t *dataset)
                 } /* end if */
 
                 /* Flush and destroy chunks in the cache */
-                if(H5D_chunk_dest(dataset->oloc.file, H5AC_dxpl_id, dataset) < 0)
+                if(H5D_chunk_dest(dataset->oloc.file, H5AC2_dxpl_id, dataset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy chunk cache")
                 break;
 
@@ -1634,7 +1634,7 @@ H5D_close(H5D_t *dataset)
         /* Remove the dataset from the list of opened objects in the file */
         if(H5FO_top_decr(dataset->oloc.file, dataset->oloc.addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't decrement count for object")
-        if(H5FO_delete(dataset->oloc.file, H5AC_dxpl_id, dataset->oloc.addr) < 0)
+        if(H5FO_delete(dataset->oloc.file, H5AC2_dxpl_id, dataset->oloc.addr) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't remove dataset from list of open objects")
 
         /* Close the dataset object */
@@ -2196,7 +2196,7 @@ H5D_vlen_get_buf_size_alloc(size_t size, void *info)
     H5D_vlen_bufsize_t *vlen_bufsize = (H5D_vlen_bufsize_t *)info;
     void *ret_value;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_vlen_get_buf_size_alloc)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_vlen_get_buf_size_alloc)
 
     /* Get a temporary pointer to space for the VL data */
     if((vlen_bufsize->vl_tbuf = H5FL_BLK_REALLOC(vlen_vl_buf, vlen_bufsize->vl_tbuf, size)) != NULL)

@@ -498,7 +498,8 @@ static const char * H5AC2_entry_type_names[H5AC2_NTYPES] =
 {
     "B-tree nodes",
     "symbol table nodes",
-    "local heaps",
+    "local heap prefixes",
+    "local heap data blocks",
     "global heaps",
     "object headers",
     "object header chunks",
