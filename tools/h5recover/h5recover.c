@@ -489,6 +489,7 @@ main (int argc, const char *argv[])
         if ( fgetc(journal_fp) == '3' ) {
 
             last_trans_found = 1;
+            pos_end = ftell(journal_fp);
             fseek(journal_fp, -1, SEEK_CUR);
             fgets(last_trans_msg, 50, journal_fp);
 
@@ -516,9 +517,6 @@ main (int argc, const char *argv[])
         /*    - max journal size (for buffer allocation)                     */
         /*    - max EOA size (for superblock update, to preserve raw data)   */
         /* ================================================================= */
-
-        fseek(journal_fp, 0, SEEK_END);
-        pos_end = ftell(journal_fp);
 
         fseek(journal_fp, 0, SEEK_SET);
     
