@@ -53,6 +53,7 @@ New Features
     ========================
     Library:
     --------
+     - Added support for $(DESTDIR) to the install feature. AKC - 2008/10/13.
      - Added version compatibility macros for functions changed in 1.8.  For
            example, H5Gcreate1 will work the same in both 1.6 and 1.8.
            (NAF - 2008/10/11)
