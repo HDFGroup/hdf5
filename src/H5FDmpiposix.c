@@ -221,6 +221,7 @@ static const H5FD_class_mpi_t H5FD_mpiposix_g = {
     H5FD_mpiposix_close,			/*close			*/
     H5FD_mpiposix_cmp,			        /*cmp			*/
     H5FD_mpiposix_query,		        /*query			*/
+    NULL,					/*get_type_map		*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
     H5FD_mpiposix_get_eoa,			/*get_eoa		*/

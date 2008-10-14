@@ -111,6 +111,8 @@ Bug Fixes since HDF5-1.8.1
 
         Library
         -------
+      - Corrected error with family/split/multi VFD not updating driver info
+            when "latest" version of the file format used. (QAK - 2008/10/14)
         - Corrected alignment+threshold errors to work correctly when metadata
             aggregation is enabled. (QAK - 2008/10/06)
         - Changed H5Fget_obj_count and H5Fget_obj_ids to ignore objects

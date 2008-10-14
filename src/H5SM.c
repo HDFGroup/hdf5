@@ -1759,6 +1759,7 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
     H5F_file_t *shared = f->shared;     /* Shared file info (convenience variable) */
     H5O_shmesg_table_t sohm_table;      /* SOHM message from superblock extension */
     H5SM_master_table_t *table = NULL;  /* SOHM master table */
+    htri_t status;                      /* Status for message existing */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5SM_get_info, FAIL)
@@ -1768,26 +1769,19 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
     HDassert(f && shared);
     HDassert(fc_plist);
 
-    /* Read in shared message information, if it exists */
-    if(NULL == H5O_msg_read(ext_loc, H5O_SHMESG_ID, &sohm_table, dxpl_id)) {
-        /* Reset error from "failed" message read */
-        H5E_clear_stack(NULL);
-
-        /* No SOHM info in file */
-        shared->sohm_addr = HADDR_UNDEF;
-        shared->sohm_nindexes = 0;
-        shared->sohm_vers = 0;
-
-        /* Shared object header messages are disabled */
-        if(H5P_set(fc_plist, H5F_CRT_SHMSG_NINDEXES_NAME, &shared->sohm_nindexes) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes")
-    } /* end if */
-    else {
+    /* Check for the extension having a 'shared message info' message */
+    if((status = H5O_msg_exists(ext_loc, H5O_SHMESG_ID, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to read object header")
+    if(status) {
         unsigned index_flags[H5O_SHMESG_MAX_NINDEXES];  /* Message flags for each index */
         unsigned minsizes[H5O_SHMESG_MAX_NINDEXES];     /* Minimum message size for each index */
         unsigned sohm_l2b;           /* SOHM list-to-btree cutoff */
         unsigned sohm_b2l;           /* SOHM btree-to-list cutoff */
         unsigned u;                  /* Local index variable */
+
+        /* Retrieve the 'shared message info' structure */
+        if(NULL == H5O_msg_read(ext_loc, H5O_SHMESG_ID, &sohm_table, dxpl_id))
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "shared message info message not present")
 
         /* Portably initialize the arrays */
         HDmemset(index_flags, 0, sizeof(index_flags));
@@ -1836,6 +1830,16 @@ H5SM_get_info(const H5O_loc_t *ext_loc, H5P_genplist_t *fc_plist, hid_t dxpl_id)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set SOHM cutoff in property list")
         if(H5P_set(fc_plist, H5F_CRT_SHMSG_BTREE_MIN_NAME, &sohm_b2l) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set SOHM cutoff in property list")
+    } /* end if */
+    else {
+        /* No SOHM info in file */
+        shared->sohm_addr = HADDR_UNDEF;
+        shared->sohm_nindexes = 0;
+        shared->sohm_vers = 0;
+
+        /* Shared object header messages are disabled */
+        if(H5P_set(fc_plist, H5F_CRT_SHMSG_NINDEXES_NAME, &shared->sohm_nindexes) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set number of SOHM indexes")
     } /* end else */
 
 done:

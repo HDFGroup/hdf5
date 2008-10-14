@@ -1139,8 +1139,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_dest() */
 
-
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_open
@@ -1796,13 +1794,6 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
             HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file free space info")
     } /* end if */
 
-    /* flush (and invalidate, if requested) the entire metadata cache */
-    H5AC_flags = 0;
-    if((flags & H5F_FLUSH_INVALIDATE) != 0 )
-        H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
-    if(H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
-
     /* Truncate the file to the current allocated size */
     /* (needs to happen before superblock write, since the 'eoa' value is
      *  written in superblock -QAK)
@@ -1811,8 +1802,18 @@ H5F_flush(H5F_t *f, hid_t dxpl_id, H5F_scope_t scope, unsigned flags)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "low level truncate failed")
 
     /* Write the superblock to disk */
-    if(H5F_super_write(f, dxpl_id) != SUCCEED)
+    /* (needs to happen before metadata flush (H5AC_flush), since the information
+     *  in the superblock extension may be updated - 2008/10/14, QAK)
+     */
+    if(H5F_super_write(f, dxpl_id) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, "unable to write superblock to file")
+
+    /* Flush (and invalidate, if requested) the entire metadata cache */
+    H5AC_flags = 0;
+    if((flags & H5F_FLUSH_INVALIDATE) != 0 )
+        H5AC_flags |= H5AC__FLUSH_INVALIDATE_FLAG;
+    if(H5AC_flush(f, dxpl_id, H5AC_flags) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush metadata cache")
 
     /* Flush out the metadata accumulator */
     if(H5F_accum_flush(f, dxpl_id) < 0)

@@ -1735,7 +1735,7 @@ external_link_root(hid_t fapl, hbool_t new_format)
 
     /* Close and re-open file to ensure that data is written to disk */
     if(H5Fclose(fid) < 0) TEST_ERROR
-    if((fid = H5Fopen(filename2, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename2, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
 
 
     /* Open object through external link */
@@ -1768,7 +1768,7 @@ external_link_root(hid_t fapl, hbool_t new_format)
     if(H5F_sfile_assert_num(0) != 0) TEST_ERROR
 
     /* Open first file again with read-only access and check on objects created */
-    if((fid = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* Open objects created through external link */
     if((gid = H5Gopen2(fid, "new_group", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -1794,7 +1794,7 @@ external_link_root(hid_t fapl, hbool_t new_format)
     /* Verify that new objects can't be created through a read-only external
      * link.
      */
-    if((fid = H5Fopen(filename2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename2, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     H5E_BEGIN_TRY {
         gid = H5Gcreate2(fid, "ext_link/readonly_group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -1901,7 +1901,7 @@ external_link_path(hid_t fapl, hbool_t new_format)
 
 
     /* Open first file again and check on object created */
-    if((fid = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* Open object created through external link */
     if((gid = H5Gopen2(fid, "/A/B/C/new_group", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -2048,7 +2048,7 @@ external_link_mult(hid_t fapl, hbool_t new_format)
 
 
     /* Open first file again and check on object created */
-    if((fid = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* Open object created through external link */
     if((gid = H5Gopen2(fid, "/A/B/C/new_group", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -2065,7 +2065,7 @@ external_link_mult(hid_t fapl, hbool_t new_format)
 
 
     /* Open an object through external links */
-    if((fid = H5Fopen(filename4, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename4, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
     if((gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* The intermediate files should not stay open. Replace one of them with a new file. */
@@ -2200,7 +2200,7 @@ external_link_self(hid_t fapl, hbool_t new_format)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Open file1 and create an extlink pointing to file3 */
-    if((fid=H5Fopen(filename1, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid=H5Fopen(filename1, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
 
     if(H5Lcreate_external(filename3, "/", fid, "/X/Y/Z", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
 
@@ -2209,7 +2209,7 @@ external_link_self(hid_t fapl, hbool_t new_format)
 
 
     /* Re-open file2 and traverse through file1 (with its recursive extlink) to file3 */
-    if((fid=H5Fopen(filename2, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid=H5Fopen(filename2, H5F_ACC_RDWR, fapl)) < 0) TEST_ERROR
 
     if((gid = H5Gopen2(fid, "ext_link/B/C/Y/Z/end", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
@@ -2222,7 +2222,7 @@ external_link_self(hid_t fapl, hbool_t new_format)
     if(H5Fclose(fid) < 0) TEST_ERROR
 
     /* Open up file3 and make sure the object was created successfully */
-    if((fid = H5Fopen(filename3, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((fid = H5Fopen(filename3, H5F_ACC_RDWR, fapl)) < 0) FAIL_STACK_ERROR
 
     if((gid = H5Gopen2(fid, "end/newer_group", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
@@ -2338,7 +2338,7 @@ external_link_pingpong(hid_t fapl, hbool_t new_format)
 
 
     /* Open first file again and check on object created */
-    if((fid = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename1, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* Open object created through external link */
     if((gid = H5Gopen2(fid, "/final/new_group", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -5554,61 +5554,73 @@ external_link_endian(hid_t fapl, hbool_t new_format)
     char      * srcdir = getenv("srcdir");      /* The source directory */
     char        pathbuf[NAME_BUF_SIZE];         /* Path to the files */
     char        namebuf[NAME_BUF_SIZE];
+    const char  *envval = NULL;
 
     if(new_format)
         TESTING("endianness of external links (w/new group format)")
     else
         TESTING("endianness of external links")
 
-    /*
-     * Create the name of the file to open (in case we are using the --srcdir
-     * option and the file is in a different directory from this test).
-     */
-    if (srcdir && ((HDstrlen(srcdir) + 2) < sizeof(pathbuf)) )
-    {
-        HDstrcpy(pathbuf, srcdir);
-        HDstrcat(pathbuf, "/");
-    }
-    else
-        HDstrcpy(pathbuf, "");
+    envval = HDgetenv("HDF5_DRIVER");
+    if(envval == NULL)
+        envval = "nomatch";
+    if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
 
-    /* Create a link access property list with the path to the srcdir */
-    if((lapl_id = H5Pcreate(H5P_LINK_ACCESS)) < 0) TEST_ERROR
-    if(H5Pset_elink_prefix(lapl_id, pathbuf) < 0) TEST_ERROR
+        /*
+         * Create the name of the file to open (in case we are using the --srcdir
+         * option and the file is in a different directory from this test).
+         */
+        if (srcdir && ((HDstrlen(srcdir) + 2) < sizeof(pathbuf)) )
+        {
+            HDstrcpy(pathbuf, srcdir);
+            HDstrcat(pathbuf, "/");
+        }
+        else
+            HDstrcpy(pathbuf, "");
 
-    if(HDstrlen(pathbuf) + HDstrlen(LE_FILENAME) >= sizeof(namebuf)) TEST_ERROR
-    HDstrcpy(namebuf, pathbuf);
-    HDstrcat(namebuf, LE_FILENAME);
+        /* Create a link access property list with the path to the srcdir */
+        if((lapl_id = H5Pcreate(H5P_LINK_ACCESS)) < 0) TEST_ERROR
+        if(H5Pset_elink_prefix(lapl_id, pathbuf) < 0) TEST_ERROR
 
-    /* Test LE file; try to open a group through the external link */
-    if((fid = H5Fopen(namebuf, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
-    if((gid = H5Oopen(fid, "ext_link", lapl_id)) < 0) TEST_ERROR
+        if(HDstrlen(pathbuf) + HDstrlen(LE_FILENAME) >= sizeof(namebuf)) TEST_ERROR
+        HDstrcpy(namebuf, pathbuf);
+        HDstrcat(namebuf, LE_FILENAME);
 
-    /* Open a group in the external file using that group ID */
-    if((gid2 = H5Gopen2(gid, "subgroup", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        /* Test LE file; try to open a group through the external link */
+        if((fid = H5Fopen(namebuf, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+        if((gid = H5Oopen(fid, "ext_link", lapl_id)) < 0) TEST_ERROR
 
-    /* Close the IDs */
-    if(H5Gclose(gid2) < 0) TEST_ERROR
-    if(H5Gclose(gid) < 0) TEST_ERROR
-    if(H5Fclose(fid) < 0) TEST_ERROR
+        /* Open a group in the external file using that group ID */
+        if((gid2 = H5Gopen2(gid, "subgroup", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-    if(HDstrlen(pathbuf) + HDstrlen(BE_FILENAME) >= sizeof(namebuf)) TEST_ERROR
-    HDstrcpy(namebuf, pathbuf);
-    HDstrcat(namebuf, BE_FILENAME);
+        /* Close the IDs */
+        if(H5Gclose(gid2) < 0) TEST_ERROR
+        if(H5Gclose(gid) < 0) TEST_ERROR
+        if(H5Fclose(fid) < 0) TEST_ERROR
 
-    /* Test BE file; try to open a group through the external link */
-    if((fid = H5Fopen(namebuf, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
-    if((gid = H5Oopen(fid, "ext_link", lapl_id)) < 0) TEST_ERROR
+        if(HDstrlen(pathbuf) + HDstrlen(BE_FILENAME) >= sizeof(namebuf)) TEST_ERROR
+        HDstrcpy(namebuf, pathbuf);
+        HDstrcat(namebuf, BE_FILENAME);
 
-    /* Open a group in the external file using that group ID */
-    if((gid2 = H5Gopen2(gid, "subgroup", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        /* Test BE file; try to open a group through the external link */
+        if((fid = H5Fopen(namebuf, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+        if((gid = H5Oopen(fid, "ext_link", lapl_id)) < 0) TEST_ERROR
 
-    /* Close the IDs */
-    if(H5Gclose(gid2) < 0) TEST_ERROR
-    if(H5Gclose(gid) < 0) TEST_ERROR
-    if(H5Fclose(fid) < 0) TEST_ERROR
+        /* Open a group in the external file using that group ID */
+        if((gid2 = H5Gopen2(gid, "subgroup", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-    PASSED();
+        /* Close the IDs */
+        if(H5Gclose(gid2) < 0) TEST_ERROR
+        if(H5Gclose(gid) < 0) TEST_ERROR
+        if(H5Fclose(fid) < 0) TEST_ERROR
+
+        PASSED();
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't apply to existing test files");
+    } /* end else */
+
     return 0;
 
 error:
@@ -9660,7 +9672,7 @@ link_iterate_check(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order,
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Iterate over links in group, with H5Giterate */
-    iter_info->nskipped = gskip = 0;
+    iter_info->nskipped = (unsigned)(gskip = 0);
     iter_info->order = order;
     iter_info->stop = -1;
     iter_info->ncalled = 0;
@@ -9821,7 +9833,7 @@ link_iterate(hid_t fapl)
 
     /* Allocate the "visited link" array */
     iter_info.max_visit = max_compact * 2;
-    if(NULL == (visited = HDmalloc(sizeof(hbool_t) * iter_info.max_visit))) TEST_ERROR
+    if(NULL == (visited = (hbool_t *)HDmalloc(sizeof(hbool_t) * iter_info.max_visit))) TEST_ERROR
     iter_info.visited = visited;
 
     /* Loop over operating on different indices on link fields */
@@ -10280,7 +10292,7 @@ link_iterate_old(hid_t fapl)
 
     /* Allocate the "visited link" array */
     iter_info.max_visit = CORDER_NLINKS;
-    if(NULL == (visited = HDmalloc(sizeof(hbool_t) * iter_info.max_visit))) TEST_ERROR
+    if(NULL == (visited = (hbool_t *)HDmalloc(sizeof(hbool_t) * iter_info.max_visit))) TEST_ERROR
     iter_info.visited = visited;
 
     /* Loop over operating in different orders */
@@ -10518,7 +10530,7 @@ open_by_idx(hid_t fapl)
     if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) TEST_ERROR
 
     /* Allocate object address array */
-    if(NULL == (objno = HDmalloc(sizeof(haddr_t) * (max_compact * 2)))) TEST_ERROR
+    if(NULL == (objno = (haddr_t *)HDmalloc(sizeof(haddr_t) * (max_compact * 2)))) TEST_ERROR
 
     /* Create file to mount */
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
@@ -10960,7 +10972,7 @@ object_info(hid_t fapl)
     if(H5Pget_link_phase_change(gcpl_id, &max_compact, &min_dense) < 0) TEST_ERROR
 
     /* Allocate object address array */
-    if(NULL == (objno = HDmalloc(sizeof(haddr_t) * (max_compact * 2)))) TEST_ERROR
+    if(NULL == (objno = (haddr_t *)HDmalloc(sizeof(haddr_t) * (max_compact * 2)))) TEST_ERROR
 
     /* Create dataspace for attributes */
     if((space_id = H5Screate(H5S_SCALAR)) < 0) TEST_ERROR
@@ -12068,7 +12080,7 @@ timestamps(hid_t fapl)
 
 
     /* Re-open the file */
-    if((file_id = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if((file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
 
     /* Open groups */
     if((group_id = H5Gopen2(file_id, TIMESTAMP_GROUP_1, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
@@ -12151,7 +12163,7 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL)
         envval = "nomatch";
-    if(HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
+    if(HDstrcmp(envval, "core")) {
         hid_t	fapl, fapl2;    /* File access property lists */
         int	nerrors = 0;
         hbool_t new_format;     /* Whether to use the new format or not */

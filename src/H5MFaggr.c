@@ -196,9 +196,6 @@ HDfprintf(stderr, "%s: Allocating block\n", FUNC);
 		    aggr->size += (ext_size - frag_size);
 		    aggr->tot_size += ext_size;
 		} else {
-                    haddr_t unused_addr = HADDR_UNDEF;  /* Address of unused portion */
-                    hsize_t unused_size = 0;    	/* Size of unused portion */
-
 		    if ((other_aggr->size > 0) && (H5F_addr_eq((other_aggr->addr + other_aggr->size), eoa)) &&
 			((other_aggr->tot_size - other_aggr->size) >= other_aggr->alloc_size)) {
 

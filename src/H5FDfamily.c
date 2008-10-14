@@ -128,6 +128,7 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD_family_close,				/*close			*/
     H5FD_family_cmp,				/*cmp			*/
     H5FD_family_query,		                /*query			*/
+    NULL,					/*get_type_map		*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
     H5FD_family_get_eoa,			/*get_eoa		*/
@@ -976,22 +977,22 @@ done:
 static herr_t
 H5FD_family_query(const H5FD_t UNUSED * _f, unsigned long *flags /* out */)
 {
-    herr_t ret_value=SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5FD_family_query, FAIL)
 
     /* Set the VFL feature flags that this driver supports */
     if(flags) {
-        *flags=0;
-        *flags|=H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
-        *flags|=H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes. */
-        *flags|=H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
-        *flags|=H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
-    }
+        *flags = 0;
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA; /* OK to aggregate metadata allocations */
+        *flags |= H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes. */
+        *flags |= H5FD_FEAT_DATA_SIEVE;       /* OK to perform data sieving for faster raw data reads & writes */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_family_query() */
 
 
 /*-------------------------------------------------------------------------
@@ -1372,13 +1373,10 @@ done:
  * Purpose:	Flushes all family members.
  *
  * Return:	Success:	0
- *
  *		Failure:	-1, as many files flushed as possible.
  *
  * Programmer:	Robb Matzke
  *              Wednesday, August  4, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1386,21 +1384,21 @@ static herr_t
 H5FD_family_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 {
     H5FD_family_t	*file = (H5FD_family_t*)_file;
-    unsigned		u, nerrors=0;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    unsigned		u, nerrors = 0;
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_family_flush, FAIL)
 
-    for (u=0; u<file->nmembs; u++)
-        if (file->memb[u] && H5FD_flush(file->memb[u], dxpl_id, closing)<0)
+    for(u = 0; u < file->nmembs; u++)
+        if(file->memb[u] && H5FD_flush(file->memb[u], dxpl_id, closing) < 0)
             nerrors++;
 
-    if (nerrors)
+    if(nerrors)
         HGOTO_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "unable to flush member files")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_family_flush() */
 
 
 /*-------------------------------------------------------------------------

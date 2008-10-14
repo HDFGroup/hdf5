@@ -190,6 +190,7 @@ static const H5FD_class_t H5FD_direct_g = {
     H5FD_direct_close,		                /*close			*/
     H5FD_direct_cmp,			        /*cmp			*/
     H5FD_direct_query,		                /*query			*/
+    NULL,					/*get_type_map		*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
     H5FD_direct_get_eoa,			/*get_eoa		*/

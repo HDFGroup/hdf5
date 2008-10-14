@@ -186,6 +186,7 @@ static const H5FD_class_t H5FD_stdio_g = {
     H5FD_stdio_close,		                /*close			*/
     H5FD_stdio_cmp,			        /*cmp			*/
     H5FD_stdio_query,		                /*query			*/
+    NULL,					/*get_type_map		*/
     H5FD_stdio_alloc,				/*alloc			*/
     NULL,					/*free			*/
     H5FD_stdio_get_eoa,		                /*get_eoa		*/
