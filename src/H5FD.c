@@ -1712,15 +1712,27 @@ H5FD_get_feature_flags(const H5FD_t *file, unsigned long *feature_flags)
 herr_t
 H5FD_get_fs_type_map(const H5FD_t *file, H5FD_mem_t *type_map)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5FD_get_fs_type_map)
+    herr_t ret_value = SUCCEED;         /* Return value */
 
+    FUNC_ENTER_NOAPI(H5FD_get_fs_type_map, FAIL)
+
+    /* Sanity check */
     HDassert(file);
+    HDassert(file && file->cls);
     HDassert(type_map);
 
-    /* Copy free space type mapping */
-    HDmemcpy(type_map, file->cls->fl_map, sizeof(file->cls->fl_map));
+    /* Check for VFD class providing a type map retrieval rouine */
+    if(file->cls->get_type_map) {
+        /* Retrieve type mapping for this file */
+        if((file->cls->get_type_map)(file, type_map) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get type map failed")
+    } /* end if */
+    else
+        /* Copy class's default free space type mapping */
+        HDmemcpy(type_map, file->cls->fl_map, sizeof(file->cls->fl_map));
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_get_fs_type_map() */
 
 

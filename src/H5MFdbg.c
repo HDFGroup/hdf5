@@ -41,6 +41,7 @@
 #include "H5Fpkg.h"             /* File access				*/
 #include "H5MFpkg.h"		/* File memory management		*/
 
+#ifdef H5MF_ALLOC_DEBUG_DUMP
 
 /****************/
 /* Local Macros */
@@ -161,10 +162,14 @@ H5MF_sects_dump(H5F_t *f, hid_t dxpl_id, FILE *stream)
     haddr_t sda_addr = HADDR_UNDEF;     /* Base "small data aggregator" address */
     hsize_t sda_size = 0;               /* Size of "small data aggregator" */
     H5FD_mem_t type;                    /* Memory type for iteration */
+    int indent = 0;                     /* Amount to indent */
+    int fwidth = 50;                    /* Field width */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5MF_sects_dump, FAIL)
+#ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: Dumping file free space sections\n", FUNC);
+#endif /* H5MF_ALLOC_DEBUG */
 
     /*
      * Check arguments.
@@ -175,43 +180,67 @@ HDfprintf(stderr, "%s: Dumping file free space sections\n", FUNC);
     /* Retrieve the 'eoa' for the file */
     if(HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-HDfprintf(stderr, "%s: eoa = %a\n", FUNC, eoa);
+#ifdef H5MF_ALLOC_DEBUG
+HDfprintf(stderr, "%s: for type = H5FD_MEM_DEFAULT, eoa = %a\n", FUNC, eoa);
+#endif /* H5MF_ALLOC_DEBUG */
 
     /* Retrieve metadata aggregator info, if available */
     H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
+#ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: ma_addr = %a, ma_size = %Hu, end of ma = %a\n", FUNC, ma_addr, ma_size, (haddr_t)((ma_addr + ma_size) - 1));
+#endif /* H5MF_ALLOC_DEBUG */
 
     /* Retrieve 'small data' aggregator info, if available */
     H5MF_aggr_query(f, &(f->shared->sdata_aggr), &sda_addr, &sda_size);
+#ifdef H5MF_ALLOC_DEBUG
 HDfprintf(stderr, "%s: sda_addr = %a, sda_size = %Hu, end of sda = %a\n", FUNC, sda_addr, sda_size, (haddr_t)((sda_addr + sda_size) - 1));
+#endif /* H5MF_ALLOC_DEBUG */
 
     /* Iterate over all the free space types that have managers and dump each free list's space */
     for(type = H5FD_MEM_DEFAULT; type < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, type)) {
-#ifdef QAK
-        /* Check if the free space for the file has been initialized */
-        if(!f->shared->fs_man[type])
-            if(H5MF_alloc_start(f, dxpl_id, type, FALSE) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't initialize file free space")
-#endif /* QAK */
+        /* Print header for type */
+        HDfprintf(stream, "%*sFile Free Space Info for type = %u:\n", indent, "", (unsigned)type);
 
-        /* If there is a free space manager for this type, iterate over them */
-        if(f->shared->fs_man[type]) {
-            H5MF_debug_iter_ud_t udata;        /* User data for callbacks */
+        /* Check for this type being mapped to another type */
+        if(H5FD_MEM_DEFAULT == f->shared->fs_type_map[type] ||
+                type == f->shared->fs_type_map[type]) {
+            /* Retrieve the 'eoa' for this file memory type */
+            if(HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, type)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
+            HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", MAX(0, fwidth - 3),
+                      "eoa:",
+                      eoa);
 
-            /* Prepare user data for section iteration callback */
-            udata.fspace = f->shared->fs_man[type];
-            udata.stream = stream;
-            udata.indent = 0;
-            udata.fwidth = 3;
+            /* Print header for sections */
+            HDfprintf(stream, "%*sSections:\n", indent + 3, "");
 
-            /* Iterate over all the free space sections */
-            if(H5FS_sect_iterate(f, dxpl_id, f->shared->fs_man[type], H5MF_sects_debug_cb, &udata) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
+            /* If there is a free space manager for this type, iterate over them */
+            if(f->shared->fs_man[type]) {
+                H5MF_debug_iter_ud_t udata;        /* User data for callbacks */
+
+                /* Prepare user data for section iteration callback */
+                udata.fspace = f->shared->fs_man[type];
+                udata.stream = stream;
+                udata.indent = indent + 6;
+                udata.fwidth = MAX(0, fwidth - 6);
+
+                /* Iterate over all the free space sections */
+                if(H5FS_sect_iterate(f, dxpl_id, f->shared->fs_man[type], H5MF_sects_debug_cb, &udata) < 0)
+                    HGOTO_ERROR(H5E_HEAP, H5E_BADITER, FAIL, "can't iterate over heap's free space")
+            } /* end if */
+            else {
+                /* No sections of this type */
+                HDfprintf(stream, "%*s<none>\n", indent + 6, "");
+            } /* end else */
         } /* end if */
+        else {
+            HDfprintf(stream, "%*sMapped to type = %u\n", indent, "", (unsigned)f->shared->fs_type_map[type]);
+        } /* end else */
     } /* end for */
 
 done:
 HDfprintf(stderr, "%s: Done dumping file free space sections\n", FUNC);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_sects_dump() */
+#endif /* H5MF_ALLOC_DEBUG_DUMP */
 

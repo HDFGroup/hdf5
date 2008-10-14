@@ -356,7 +356,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
         /* File status flags (not really used yet) */
         UINT32DECODE(p, status_flags);
         HDassert(status_flags <= 255);
-        shared->status_flags = status_flags;
+        shared->status_flags = (uint8_t)status_flags;
         if(shared->status_flags & ~H5F_SUPER_ALL_FLAGS)
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "bad flag value for superblock")
 
@@ -567,11 +567,24 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
         H5O_loc_t ext_loc;      /* "Object location" for superblock extension */
         H5O_btreek_t btreek;    /* v1 B-tree 'K' value message from superblock extension */
         H5O_drvinfo_t drvinfo;  /* Driver info message from superblock extension */
+        htri_t status;          /* Status for message existing */
 
         /* Sanity check - superblock extension should only be defined for
          *      superblock version >= 2.
          */
         HDassert(super_vers >= HDF5_SUPERBLOCK_VERSION_2);
+
+        /* Check for superblock extension being located "outside" the stored
+         *      'eoa' value, which can occur with the split/multi VFD.
+         */
+        if(H5F_addr_gt(shared->extension_addr, stored_eoa)) {
+            /* Set the 'eoa' for the object header memory type large enough
+             *  to give some room for a reasonably sized superblock extension.
+             *  (This is _rather_ a kludge -QAK)
+             */
+            if(H5FD_set_eoa(lf, H5FD_MEM_OHDR, (haddr_t)(shared->extension_addr + 1024)) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to set end-of-address marker for file")
+        } /* end if */
 
         /* Set up "fake" object location for superblock extension */
         H5O_loc_reset(&ext_loc);
@@ -580,41 +593,16 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
 
         /* Open the superblock extension */
         if(H5O_open(&ext_loc) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, "unable to open superblock extension")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to open superblock extension")
 
-        /* Read in the shared OH message information if there is any */
-        if(H5SM_get_info(&ext_loc, c_plist, dxpl_id) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read SOHM table information")
+        /* Check for the extension having a 'driver info' message */
+        if((status = H5O_msg_exists(&ext_loc, H5O_DRVINFO_ID, dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to read object header")
+        if(status) {
+            /* Retrieve the 'driver info' structure */
+            if(NULL == H5O_msg_read(&ext_loc, H5O_DRVINFO_ID, &drvinfo, dxpl_id))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "driver info message not present")
 
-        /* Read in v1 B-tree 'K' value message, if it exists */
-        if(NULL == H5O_msg_read(&ext_loc, H5O_BTREEK_ID, &btreek, dxpl_id)) {
-            /* Reset error from "failed" message read */
-            H5E_clear_stack(NULL);
-
-            /* No non-default v1 B-tree 'K' value info in file, use defaults */
-            shared->btree_k[H5B_ISTORE_ID] = HDF5_BTREE_ISTORE_IK_DEF;
-            shared->btree_k[H5B_SNODE_ID] = HDF5_BTREE_SNODE_IK_DEF;
-            shared->sym_leaf_k = H5F_CRT_SYM_LEAF_DEF;
-        } /* end if */
-        else {
-            /* Set non-default v1 B-tree 'K' value info from file */
-            shared->btree_k[H5B_ISTORE_ID] = btreek.btree_k[H5B_ISTORE_ID];
-            shared->btree_k[H5B_SNODE_ID] = btreek.btree_k[H5B_SNODE_ID];
-            shared->sym_leaf_k = btreek.sym_leaf_k;
-
-            /* Set non-default v1 B-tree 'K' values in the property list */
-            if(H5P_set(c_plist, H5F_CRT_BTREE_RANK_NAME, btreek.btree_k) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set rank for btree internal nodes")
-            if(H5P_set(c_plist, H5F_CRT_SYM_LEAF_NAME, &btreek.sym_leaf_k) < 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set rank for symbol table leaf nodes")
-        } /* end else */
-
-        /* Read in driver info message, if it exists */
-        if(NULL == H5O_msg_read(&ext_loc, H5O_DRVINFO_ID, &drvinfo, dxpl_id)) {
-            /* Reset error from "failed" message read */
-            H5E_clear_stack(NULL);
-        } /* end if */
-        else {
             /* Check if driver matches driver information saved. Unfortunately, we can't push this
              * function to each specific driver because we're checking if the driver is correct.
              */
@@ -629,7 +617,37 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
 
             /* Reset driver info message */
             H5O_msg_reset(H5O_DRVINFO_ID, &drvinfo);
-        } /* end else */
+        } /* end if */
+
+        /* Read in the shared OH message information if there is any */
+        if(H5SM_get_info(&ext_loc, c_plist, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read SOHM table information")
+
+        /* Check for the extension having a 'v1 B-tree "K"' message */
+        if((status = H5O_msg_exists(&ext_loc, H5O_BTREEK_ID, dxpl_id)) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to read object header")
+        if(status) {
+            /* Retrieve the 'v1 B-tree "K"' structure */
+            if(NULL == H5O_msg_read(&ext_loc, H5O_BTREEK_ID, &btreek, dxpl_id))
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "v1 B-tree 'K' info message not present")
+
+            /* Set non-default v1 B-tree 'K' value info from file */
+            shared->btree_k[H5B_ISTORE_ID] = btreek.btree_k[H5B_ISTORE_ID];
+            shared->btree_k[H5B_SNODE_ID] = btreek.btree_k[H5B_SNODE_ID];
+            shared->sym_leaf_k = btreek.sym_leaf_k;
+
+            /* Set non-default v1 B-tree 'K' values in the property list */
+            if(H5P_set(c_plist, H5F_CRT_BTREE_RANK_NAME, btreek.btree_k) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set rank for btree internal nodes")
+            if(H5P_set(c_plist, H5F_CRT_SYM_LEAF_NAME, &btreek.sym_leaf_k) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set rank for symbol table leaf nodes")
+        } /* end if */
+        else {
+            /* No non-default v1 B-tree 'K' value info in file, use defaults */
+            shared->btree_k[H5B_ISTORE_ID] = HDF5_BTREE_ISTORE_IK_DEF;
+            shared->btree_k[H5B_SNODE_ID] = HDF5_BTREE_SNODE_IK_DEF;
+            shared->sym_leaf_k = H5F_CRT_SYM_LEAF_DEF;
+        } /* end if */
 
         /* Close the extension.  Twiddle the number of open objects to avoid
          * closing the file (since this will be the only open object).
@@ -818,7 +836,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
             /* Write driver info information to the superblock extension */
             drvinfo.len = driver_size;
             drvinfo.buf = dbuf;
-            if(H5O_msg_create(&ext_loc, H5O_DRVINFO_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &drvinfo, dxpl_id) < 0)
+            if(H5O_msg_create(&ext_loc, H5O_DRVINFO_ID, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &drvinfo, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update driver info header message")
         } /* end if */
 
@@ -983,6 +1001,47 @@ H5F_super_write(H5F_t *f, hid_t dxpl_id)
     /* Write superblock (always at relative offset 0) */
     if(H5FD_write(f->shared->lf, dxpl_id, H5FD_MEM_SUPER, (haddr_t)0, superblock_size, buf) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write superblock")
+
+    /* Check for newer version of superblock format & superblock extension */
+    if(super_vers >= HDF5_SUPERBLOCK_VERSION_2 && H5F_addr_defined(f->shared->extension_addr)) {
+        /* Check for driver info message */
+        H5_ASSIGN_OVERFLOW(driver_size, H5FD_sb_size(f->shared->lf), hsize_t, size_t);
+        if(driver_size > 0) {
+            H5O_loc_t ext_loc;      /* "Object location" for superblock extension */
+            H5O_drvinfo_t drvinfo;      /* Driver info */
+            uint8_t dbuf[H5F_MAX_DRVINFOBLOCK_SIZE];  /* Driver info block encoding buffer */
+
+            /* Sanity check */
+            HDassert(driver_size <= H5F_MAX_DRVINFOBLOCK_SIZE);
+
+            /* Encode driver-specific data */
+            if(H5FD_sb_encode(f->shared->lf, drvinfo.name, dbuf) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode driver information")
+
+            /* Set up "fake" object location for superblock extension */
+            H5O_loc_reset(&ext_loc);
+            ext_loc.file = f;
+            ext_loc.addr = f->shared->extension_addr;
+
+            /* Open the superblock extension */
+            if(H5O_open(&ext_loc) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, "unable to open superblock extension")
+
+            /* Write driver info information to the superblock extension */
+            drvinfo.len = driver_size;
+            drvinfo.buf = dbuf;
+            if(H5O_msg_write(&ext_loc, H5O_DRVINFO_ID, H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &drvinfo, dxpl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update driver info header message")
+
+            /* Close the extension.  Twiddle the number of open objects to avoid
+             * closing the file (since this will be the only open object).
+             */
+            f->nopen_objs++;
+            if(H5O_close(&ext_loc) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, "unable to close superblock extension")
+            f->nopen_objs--;
+        } /* end if */
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

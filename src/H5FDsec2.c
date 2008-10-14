@@ -170,6 +170,7 @@ static const H5FD_class_t H5FD_sec2_g = {
     H5FD_sec2_close,		                /*close			*/
     H5FD_sec2_cmp,			        /*cmp			*/
     H5FD_sec2_query,		                /*query			*/
+    NULL,					/*get_type_map		*/
     NULL,					/*alloc			*/
     NULL,					/*free			*/
     H5FD_sec2_get_eoa,				/*get_eoa		*/
@@ -568,11 +569,11 @@ H5FD_sec2_get_eoa(const H5FD_t *_file, H5FD_mem_t UNUSED type)
     FUNC_ENTER_NOAPI(H5FD_sec2_get_eoa, HADDR_UNDEF)
 
     /* Set return value */
-    ret_value=file->eoa;
+    ret_value = file->eoa;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5FD_sec2_get_eoa() */
 
 
 /*-------------------------------------------------------------------------
@@ -688,73 +689,70 @@ done:
  *
  * Return:	Success:	Zero. Result is stored in caller-supplied
  *				buffer BUF.
- *
  *		Failure:	-1, Contents of buffer BUF are undefined.
  *
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 /* ARGSUSED */
 static herr_t
-H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, haddr_t addr,
-	       size_t size, void *buf/*out*/)
+H5FD_sec2_read(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id,
+    haddr_t addr, size_t size, void *buf/*out*/)
 {
     H5FD_sec2_t		*file = (H5FD_sec2_t*)_file;
     ssize_t		nbytes;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_sec2_read, FAIL)
 
-    assert(file && file->pub.cls);
-    assert(buf);
+    HDassert(file && file->pub.cls);
+    HDassert(buf);
 
     /* Check for overflow conditions */
-    if (HADDR_UNDEF==addr)
+    if(!H5F_addr_defined(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined")
-    if (REGION_OVERFLOW(addr, size))
+    if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
-    if (addr+size>file->eoa)
+    if((addr + size) > file->eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
 
     /* Seek to the correct location */
-    if ((addr!=file->pos || OP_READ!=file->op) &&
-            HDlseek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
+    if((addr != file->pos || OP_READ != file->op) &&
+            HDlseek(file->fd, (file_offset_t)addr, SEEK_SET) < 0)
         HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
 
     /*
      * Read data, being careful of interrupted system calls, partial results,
      * and the end of the file.
      */
-    while (size>0) {
+    while(size > 0) {
         do {
             nbytes = HDread(file->fd, buf, size);
-        } while (-1==nbytes && EINTR==errno);
-        if (-1==nbytes) /* error */
+        } while(-1 == nbytes && EINTR == errno);
+        if(-1 == nbytes) /* error */
             HSYS_GOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
-        if (0==nbytes) {
+        if(0 == nbytes) {
             /* end of file but not end of format address space */
             HDmemset(buf, 0, size);
             break;
-        }
-        assert(nbytes>=0);
-        assert((size_t)nbytes<=size);
-        H5_CHECK_OVERFLOW(nbytes,ssize_t,size_t);
+        } /* end if */
+        HDassert(nbytes >= 0);
+        HDassert((size_t)nbytes <= size);
+        H5_CHECK_OVERFLOW(nbytes, ssize_t, size_t);
         size -= (size_t)nbytes;
-        H5_CHECK_OVERFLOW(nbytes,ssize_t,haddr_t);
+        H5_CHECK_OVERFLOW(nbytes, ssize_t, haddr_t);
         addr += (haddr_t)nbytes;
-        buf = (char*)buf + nbytes;
-    }
+        buf = (char *)buf + nbytes;
+    } /* end while */
 
     /* Update current position */
     file->pos = addr;
     file->op = OP_READ;
 
 done:
-    if(ret_value<0) {
+    if(ret_value < 0) {
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
@@ -772,13 +770,10 @@ done:
  *		DXPL_ID.
  *
  * Return:	Success:	Zero
- *
  *		Failure:	-1
  *
  * Programmer:	Robb Matzke
  *              Thursday, July 29, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -789,53 +784,53 @@ H5FD_sec2_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, had
 {
     H5FD_sec2_t		*file = (H5FD_sec2_t*)_file;
     ssize_t		nbytes;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_sec2_write, FAIL)
 
-    assert(file && file->pub.cls);
-    assert(buf);
+    HDassert(file && file->pub.cls);
+    HDassert(buf);
 
     /* Check for overflow conditions */
-    if (HADDR_UNDEF==addr)
+    if(!H5F_addr_defined(addr))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "addr undefined")
-    if (REGION_OVERFLOW(addr, size))
+    if(REGION_OVERFLOW(addr, size))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
-    if (addr+size>file->eoa)
+    if((addr + size) > file->eoa)
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL, "addr overflow")
 
     /* Seek to the correct location */
-    if ((addr!=file->pos || OP_WRITE!=file->op) &&
-            HDlseek(file->fd, (file_offset_t)addr, SEEK_SET)<0)
+    if((addr != file->pos || OP_WRITE != file->op) &&
+            HDlseek(file->fd, (file_offset_t)addr, SEEK_SET) < 0)
         HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
 
     /*
      * Write the data, being careful of interrupted system calls and partial
      * results
      */
-    while (size>0) {
+    while(size > 0) {
         do {
             nbytes = HDwrite(file->fd, buf, size);
-        } while (-1==nbytes && EINTR==errno);
-        if (-1==nbytes) /* error */
+        } while(-1 == nbytes && EINTR == errno);
+        if(-1 == nbytes) /* error */
             HSYS_GOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
-        assert(nbytes>0);
-        assert((size_t)nbytes<=size);
-        H5_CHECK_OVERFLOW(nbytes,ssize_t,size_t);
+        HDassert(nbytes > 0);
+        HDassert((size_t)nbytes <= size);
+        H5_CHECK_OVERFLOW(nbytes, ssize_t, size_t);
         size -= (size_t)nbytes;
-        H5_CHECK_OVERFLOW(nbytes,ssize_t,haddr_t);
+        H5_CHECK_OVERFLOW(nbytes, ssize_t, haddr_t);
         addr += (haddr_t)nbytes;
-        buf = (const char*)buf + nbytes;
-    }
+        buf = (const char *)buf + nbytes;
+    } /* end while */
 
     /* Update current position and eof */
     file->pos = addr;
     file->op = OP_WRITE;
-    if (file->pos>file->eof)
+    if(file->pos > file->eof)
         file->eof = file->pos;
 
 done:
-    if(ret_value<0) {
+    if(ret_value < 0) {
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;

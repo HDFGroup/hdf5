@@ -5559,27 +5559,6 @@ main(void)
     if(H5Pset_small_data_block_size(fapl, (hsize_t)TEST_BLOCK_SIZE2048) < 0)
 	TEST_ERROR
 
-    nerrors += test_mf_eoa(env_h5_drvr, fapl);
-    nerrors += test_mf_eoa_shrink(env_h5_drvr, fapl);
-    nerrors += test_mf_eoa_extend(env_h5_drvr, fapl);
-
-    /* interaction with free-space manager */
-    nerrors += test_mf_fs_start(fapl);
-    nerrors += test_mf_fs_alloc_free(fapl);
-    nerrors += test_mf_fs_extend(fapl);
-    nerrors += test_mf_fs_absorb(env_h5_drvr, fapl);
-
-    /* interaction with meta/sdata aggregator */
-    nerrors += test_mf_aggr_alloc1(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_alloc2(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_alloc3(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_alloc4(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_alloc5(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_alloc6(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_alloc7(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_extend(env_h5_drvr, fapl);
-    nerrors += test_mf_aggr_absorb(env_h5_drvr, fapl);
-
     /* interaction with file allocation */
     nerrors += test_mf_eoa(env_h5_drvr, fapl);
     nerrors += test_mf_eoa_shrink(env_h5_drvr, fapl);

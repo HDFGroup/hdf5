@@ -218,6 +218,7 @@ typedef struct H5FD_class_t {
     herr_t  (*close)(H5FD_t *file);
     int     (*cmp)(const H5FD_t *f1, const H5FD_t *f2);
     herr_t  (*query)(const H5FD_t *f1, unsigned long *flags);
+    herr_t  (*get_type_map)(const H5FD_t *file, H5FD_mem_t *type_map);
     haddr_t (*alloc)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size);
     herr_t  (*free)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id,
                     haddr_t addr, hsize_t size);

@@ -225,6 +225,7 @@ static const H5FD_class_t H5FD_log_g = {
     H5FD_log_close,				/*close			*/
     H5FD_log_cmp,				/*cmp			*/
     H5FD_log_query,				/*query			*/
+    NULL,					/*get_type_map		*/
     H5FD_log_alloc,				/*alloc			*/
     NULL,					/*free			*/
     H5FD_log_get_eoa,				/*get_eoa		*/
