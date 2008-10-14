@@ -203,37 +203,37 @@ check-vfd:
 ## Make installation directories directories if they don't exist.
 ##
 $(libdir):
-	-$(top_srcdir)/bin/mkdirs $@
+	-$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
 
 $(includedir):
-	-$(top_srcdir)/bin/mkdirs $@
+	-$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
 
 $(bindir):
-	-$(top_srcdir)/bin/mkdirs $@
+	-$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
 
 $(DOCDIR):
-	-$(top_srcdir)/bin/mkdirs $@
+	-$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
 
 $(EXAMPLEDIR):
-	-$(top_srcdir)/bin/mkdirs $@
+	-$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
 
 ## Install the library, the public header files, and public programs.
 ##
 install: $(AUX_LIB) $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	@for f in X $(PUB_LIB); do					      \
 	   if test $$f != X; then					      \
-	      ($(LT_INSTALL_LIB) $$f $(libdir)/. || exit 1);		      \
+	      ($(LT_INSTALL_LIB) $$f $(DESTDIR)$(libdir)/. || exit 1);		      \
 	   fi;								      \
 	done
 	@if test -f libhdf5.settings; then				      \
-	   (set -x; $(INSTALL_DATA) libhdf5.settings $(libdir)/. || exit 1);  \
+	   (set -x; $(INSTALL_DATA) libhdf5.settings $(DESTDIR)$(libdir)/. || exit 1);  \
 	fi
 	@for f in X $(PUB_HDR); do					      \
 	   if test $$f != X; then					      \
 	      if test -f $$f; then					      \
-		 (set -x; $(INSTALL_DATA) $$f $(includedir)/. || exit 1);     \
+		 (set -x; $(INSTALL_DATA) $$f $(DESTDIR)$(includedir)/. || exit 1);     \
 	      else							      \
-	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(includedir)/. ||    \
+	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(includedir)/. ||    \
 		    exit 1);						      \
 	      fi;							      \
 	   fi;								      \
@@ -242,14 +242,14 @@ install: $(AUX_LIB) $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $
 	   if test $$f != X; then					      \
 	     if test "X$(PARALLEL)" != "Xno"; then                            \
 	       if test $$f = "h5cc"; then                     		      \
-	         ($(LT_INSTALL_PROG) $$f $(bindir)/h5pcc || exit 1);          \
+	         ($(LT_INSTALL_PROG) $$f $(DESTDIR)$(bindir)/h5pcc || exit 1);          \
 	       elif test $$f = "h5fc"; then                                   \
-	         ($(LT_INSTALL_PROG) $$f $(bindir)/h5pfc || exit 1);          \
+	         ($(LT_INSTALL_PROG) $$f $(DESTDIR)$(bindir)/h5pfc || exit 1);          \
 	       else							      \
-	         ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);	      \
+	         ($(LT_INSTALL_PROG) $$f $(DESTDIR)$(bindir)/. || exit 1);	      \
 	       fi;							      \
 	     else                                                             \
-	       ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);		      \
+	       ($(LT_INSTALL_PROG) $$f $(DESTDIR)$(bindir)/. || exit 1);		      \
 	     fi;							      \
 	   fi;							              \
 	done
@@ -262,30 +262,30 @@ install: $(AUX_LIB) $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $
 install-examples: $(EXAMPLE_PROGS) $(EXAMPLEDIR)
 	@for f in X $(EXAMPLE_PROGS); do				      \
 	  if test $$f != X; then					      \
-	    (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
+	    (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(EXAMPLEDIR)/. || exit 1);\
 	  fi;								      \
 	done
 
 uninstall-examples:
 	@if test -n "$(EXAMPLE_PROGS)"; then 				      \
-	  set -x; cd $(EXAMPLEDIR) && $(RM) $(EXAMPLE_PROGS);		      \
+	  set -x; cd $(DESTDIR)$(EXAMPLEDIR) && $(RM) $(EXAMPLE_PROGS);		      \
 	fi
 
 ## Install the documents.
 ##
 install-doc: $(PUB_DOCS) $(DOCDIR)
 	@if test -n "$(DOCDIR)"; then                                         \
-	    if test -d "$(DOCDIR)"; then                                      \
+	    if test -d "$(DESTDIR)$(DOCDIR)"; then                                      \
 	       :;                                                             \
 	    else                                                              \
-	       mkdir $(DOCDIR) && chmod 755 $(DOCDIR);                        \
+	       mkdir $(DESTDIR)$(DOCDIR) && chmod 755 $(DESTDIR)$(DOCDIR);                        \
 	    fi;                                                               \
 	fi
 	@if test -n "$(SUBDOCDIR)"; then                                      \
-	    if test -d "$(SUBDOCDIR)" ; then                                  \
+	    if test -d "$(DESTDIR)$(SUBDOCDIR)" ; then                                  \
 	       :;                                                             \
 	    else                                                              \
-	       mkdir $(SUBDOCDIR) && chmod 755 $(SUBDOCDIR);                  \
+	       mkdir $(DESTDIR)$(SUBDOCDIR) && chmod 755 $(DESTDIR)$(SUBDOCDIR);                  \
 	    fi;                                                               \
 	fi
 	@for d in X $(SUBDIRS); do                                            \
@@ -296,9 +296,9 @@ install-doc: $(PUB_DOCS) $(DOCDIR)
 	@for f in X $(PUB_DOCS); do                                           \
 	   if test $$f != X; then                                             \
 	      if test -f $$f; then                                            \
-		 (set -x; $(INSTALL_DATA) $$f $(DOCDIR)/. || exit 1);         \
+		 (set -x; $(INSTALL_DATA) $$f $(DESTDIR)$(DOCDIR)/. || exit 1);         \
 	      else                                                            \
-	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DOCDIR)/. ||        \
+	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(DOCDIR)/. ||        \
 		    exit 1);                                                  \
 	      fi;                                                             \
 	   fi;                                                                \
@@ -306,9 +306,9 @@ install-doc: $(PUB_DOCS) $(DOCDIR)
 	@for f in X $(PUB_SUBDOCS); do                                        \
 	   if test $$f != X; then                                             \
 	      if test -f $$f; then                                            \
-		 (set -x; $(INSTALL_DATA) $$f $(SUBDOCDIR)/. || exit 1);      \
+		 (set -x; $(INSTALL_DATA) $$f $(DESTDIR)$(SUBDOCDIR)/. || exit 1);      \
 	      else                                                            \
-	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(SUBDOCDIR)/. ||     \
+	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(SUBDOCDIR)/. ||     \
 		    exit 1);                                                  \
 	      fi;                                                             \
 	   fi;                                                                \
@@ -318,14 +318,14 @@ install-doc: $(PUB_DOCS) $(DOCDIR)
 ##
 uninstall:
 	@for f in libhdf5.settings $(LIB); do				      \
-          $(LT_UNINSTALL) $(libdir)/$$f;				      \
+          $(LT_UNINSTALL) $(DESTDIR)$(libdir)/$$f;				      \
 	done
 	@if test -n "$(PUB_HDR)"; then                                        \
-	  set -x; cd $(includedir) && $(RM) $(PUB_HDR);			      \
+	  set -x; cd $(DESTDIR)$(includedir) && $(RM) $(PUB_HDR);			      \
 	fi
 	@for f in X $(PUB_PROGS); do					      \
 	    if test $$f != X; then					      \
-	        $(LT_UNINSTALL) $(bindir)/$$f;				      \
+	        $(LT_UNINSTALL) $(DESTDIR)$(bindir)/$$f;				      \
 	    fi;								      \
 	done
 
@@ -338,10 +338,10 @@ uninstall-doc:
 	  fi;								      \
 	done
 	@if test -n "$(PUB_DOCS)"; then 				      \
-	  set -x; cd $(DOCDIR) && $(RM) $(PUB_DOCS);			      \
+	  set -x; cd $(DESTDIR)$(DOCDIR) && $(RM) $(PUB_DOCS);			      \
 	fi
 	@if test -n "$(PUB_SUBDOCS)"; then				      \
-	  set -x; cd $(DOCDIR) && $(RM) $(PUB_SUBDOCS);			      \
+	  set -x; cd $(DESTDIR)$(DOCDIR) && $(RM) $(PUB_SUBDOCS);			      \
 	fi
 
 # General rule for recursive cleaning targets.  Like the rule above,
