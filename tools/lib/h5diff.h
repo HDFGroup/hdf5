@@ -202,6 +202,23 @@ hsize_t diff_double(unsigned char *mem1,
  const char    *obj2,
  int           *ph);
 
+#if H5_SIZEOF_LONG_DOUBLE !=0
+
+hsize_t diff_ldouble(unsigned char *mem1,
+                     unsigned char *mem2,
+                     hsize_t       nelmts,
+                     hsize_t       hyper_start,
+                     int           rank,
+                     hsize_t       *dims,
+                     hsize_t       *acc,
+                     hsize_t       *pos,
+                     diff_opt_t    *options,
+                     const char    *obj1,
+                     const char    *obj2,
+                     int           *ph);
+
+#endif
+
 hsize_t diff_schar(unsigned char *mem1,
  unsigned char *mem2,
  hsize_t       nelmts,

@@ -726,13 +726,19 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
     
     if ( (H5Tequal(f_tid1, f_tid2)==0) && options->m_verbose && obj1_name)
     {
+        
+        H5T_class_t cl = H5Tget_class(f_tid1);
+        
         printf("Warning: different storage datatype\n");
-        printf("<%s> has file datatype ", obj1_name);
-        print_type(f_tid1);
-        printf("\n");
-        printf("<%s> has file datatype ", obj2_name);
-        print_type(f_tid2);
-        printf("\n");
+        if ( cl == H5T_INTEGER || cl == H5T_FLOAT )
+        {
+            printf("<%s> has file datatype ", obj1_name);
+            print_type(f_tid1);
+            printf("\n");
+            printf("<%s> has file datatype ", obj2_name);
+            print_type(f_tid2);
+            printf("\n");
+        }
     }
     
    /*-------------------------------------------------------------------------
