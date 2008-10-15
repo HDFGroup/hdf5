@@ -525,16 +525,6 @@ test_filespace(hid_t fapl)
     size_t rdcc_nelmts;
     size_t rdcc_nbytes;
     double rdcc_w0;
-    const char *envval = NULL;
-    int    ExpressMode;
-
-    /* Don't run some tests for some drivers */
-    envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL)
-        envval = "nomatch";
-
-    /* See if some tests can be skipped */
-    ExpressMode = GetTestExpress();
 
     puts("Testing file space gets reused:");
 
@@ -982,92 +972,83 @@ test_filespace(hid_t fapl)
 /* Create complex group hiearchy, remove it & verify file size */
     TESTING("    complex group hierarchy");
 
-    if (ExpressMode > 1 && !HDstrcmp(envval, "direct")) {
-        /* This test case with Direct driver has a poor performance on
-         * NCSA copper, though it works.  Skip it for now and worry
-         * about the performance later.
-         */
-        SKIPPED();
-    } else {
+    /* Create file */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
 
-        /* Create file */
-        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+    /* Create a complex group hierarchy to remove */
+    for(u = 0; u < FILESPACE_TOP_GROUPS; u++) {
+        /* Create group */
+        sprintf(objname,"%s %u",GROUPNAME,u);
+        if((group = H5Gcreate2(file, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-        /* Create a complex group hierarchy to remove */
-        for(u = 0; u < FILESPACE_TOP_GROUPS; u++) {
+        /* Create nested groups inside top groups */
+        for(v = 0; v < FILESPACE_NESTED_GROUPS; v++) {
             /* Create group */
-            sprintf(objname,"%s %u",GROUPNAME,u);
-            if((group = H5Gcreate2(file, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+            sprintf(objname, "%s %u", GROUP2NAME, v);
+            if((group2 = H5Gcreate2(group, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-            /* Create nested groups inside top groups */
-            for(v = 0; v < FILESPACE_NESTED_GROUPS; v++) {
-                /* Create group */
-                sprintf(objname, "%s %u", GROUP2NAME, v);
-                if((group2 = H5Gcreate2(group, objname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-
-                /* Create datasets inside nested groups */
-                for(w = 0; w < FILESPACE_NDATASETS; w++) {
-                    /* Create & close a dataset */
-                    sprintf(objname, "%s %u", DATASETNAME, w);
-                    if((dataset = H5Dcreate2(group2, objname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-                    if(H5Dclose(dataset) < 0) FAIL_STACK_ERROR
-                } /* end for */
-
-                /* Close nested group */
-                if(H5Gclose(group2) < 0) FAIL_STACK_ERROR
+            /* Create datasets inside nested groups */
+            for(w = 0; w < FILESPACE_NDATASETS; w++) {
+                /* Create & close a dataset */
+                sprintf(objname, "%s %u", DATASETNAME, w);
+                if((dataset = H5Dcreate2(group2, objname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+                if(H5Dclose(dataset) < 0) FAIL_STACK_ERROR
             } /* end for */
 
-            /* Close top group */
-            if(H5Gclose(group) < 0) FAIL_STACK_ERROR
+            /* Close nested group */
+            if(H5Gclose(group2) < 0) FAIL_STACK_ERROR
         } /* end for */
 
-        /* Remove complex group hierarchy */
-        /* (Remove them in reverse order just to make file size calculation easier -QAK) */
-        for(u = FILESPACE_TOP_GROUPS; u > 0; u--) {
-            /* Open group */
-            sprintf(objname, "%s %u", GROUPNAME, (u - 1));
-            if((group = H5Gopen2(file, objname, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+        /* Close top group */
+        if(H5Gclose(group) < 0) FAIL_STACK_ERROR
+    } /* end for */
 
-            /* Open nested groups inside top groups */
-            for(v = 0; v < FILESPACE_NESTED_GROUPS; v++) {
-                /* Create group */
-                sprintf(objname, "%s %u", GROUP2NAME, v);
-                if((group2 = H5Gopen2(group, objname, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    /* Remove complex group hierarchy */
+    /* (Remove them in reverse order just to make file size calculation easier -QAK) */
+    for(u = FILESPACE_TOP_GROUPS; u > 0; u--) {
+        /* Open group */
+        sprintf(objname, "%s %u", GROUPNAME, (u - 1));
+        if((group = H5Gopen2(file, objname, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-                /* Remove datasets inside nested groups */
-                for(w = 0; w < FILESPACE_NDATASETS; w++) {
-                    /* Remove dataset */
-                    sprintf(objname, "%s %u", DATASETNAME, w);
-                    if(H5Ldelete(group2, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
-                } /* end for */
+        /* Open nested groups inside top groups */
+        for(v = 0; v < FILESPACE_NESTED_GROUPS; v++) {
+            /* Create group */
+            sprintf(objname, "%s %u", GROUP2NAME, v);
+            if((group2 = H5Gopen2(group, objname, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-                /* Close nested group */
-                if(H5Gclose(group2) < 0) FAIL_STACK_ERROR
-
-                /* Remove nested group */
-                sprintf(objname, "%s %u",GROUP2NAME, v);
-                if(H5Ldelete(group, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+            /* Remove datasets inside nested groups */
+            for(w = 0; w < FILESPACE_NDATASETS; w++) {
+                /* Remove dataset */
+                sprintf(objname, "%s %u", DATASETNAME, w);
+                if(H5Ldelete(group2, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
             } /* end for */
 
-            /* Close top group */
-            if(H5Gclose(group) < 0) FAIL_STACK_ERROR
+            /* Close nested group */
+            if(H5Gclose(group2) < 0) FAIL_STACK_ERROR
 
-            /* Remove top group */
-            sprintf(objname, "%s %u", GROUPNAME, (u - 1));
-            if(H5Ldelete(file, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+            /* Remove nested group */
+            sprintf(objname, "%s %u",GROUP2NAME, v);
+            if(H5Ldelete(group, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
         } /* end for */
 
-        /* Close file */
-        if(H5Fclose(file) < 0) FAIL_STACK_ERROR
+        /* Close top group */
+        if(H5Gclose(group) < 0) FAIL_STACK_ERROR
 
-        /* Get the size of the file */
-        if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
+        /* Remove top group */
+        sprintf(objname, "%s %u", GROUPNAME, (u - 1));
+        if(H5Ldelete(file, objname, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+    } /* end for */
 
-        /* Verify the file is correct size */
-        if(file_size != empty_size) TEST_ERROR
+    /* Close file */
+    if(H5Fclose(file) < 0) FAIL_STACK_ERROR
 
-        PASSED();
-    }
+    /* Get the size of the file */
+    if((file_size = h5_get_file_size(filename, fapl)) < 0) TEST_ERROR
+
+    /* Verify the file is correct size */
+    if(file_size != empty_size) TEST_ERROR
+
+    PASSED();
 
 
 /* Create dataset and duplicate dataset, remove original & verify file size */
@@ -2411,132 +2392,123 @@ error:
 int
 main(void)
 {
-    const char *envval = NULL;
+    hid_t	fapl, fapl2, file;
+    int	nerrors = 0;
+    char	filename[1024];
+    hbool_t new_format;
 
-    /* Don't run this test using the wrong file drivers */
-    envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL)
-        envval = "nomatch";
-    if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
-        hid_t	fapl, fapl2, file;
-        int	nerrors = 0;
-        char	filename[1024];
-        hbool_t new_format;
+    /* Metadata cache parameters */
+    int mdc_nelmts;
+    size_t rdcc_nelmts;
+    size_t rdcc_nbytes;
+    double rdcc_w0;
 
-	/* Metadata cache parameters */
-	int mdc_nelmts;
-	size_t rdcc_nelmts;
-	size_t rdcc_nbytes;
-	double rdcc_w0;
+    /* Set the random # seed */
+    HDsrandom((unsigned long)HDtime(NULL));
 
-	/* Set the random # seed */
-	HDsrandom((unsigned long)HDtime(NULL));
+    /* Open */
+    h5_reset();
+    fapl = h5_fileaccess();
 
-	/* Open */
-	h5_reset();
-	fapl = h5_fileaccess();
+    /* Copy the file access property list */
+    if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
-        /* Copy the file access property list */
-        if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
+    /* Set the "use the latest version of the format" bounds for creating objects in the file */
+    if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
-        /* Set the "use the latest version of the format" bounds for creating objects in the file */
-        if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
+    /* Test with old & new format groups */
+    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+        hid_t my_fapl;
 
-        /* Test with old & new format groups */
-        for(new_format = FALSE; new_format <= TRUE; new_format++) {
-            hid_t my_fapl;
+        /* Set the FAPL for the type of format */
+        if(new_format) {
+            puts("\nTesting with new group format:");
+            my_fapl = fapl2;
+        } /* end if */
+        else {
+            puts("Testing with old group format:");
+            my_fapl = fapl;
+        } /* end else */
 
-            /* Set the FAPL for the type of format */
-            if(new_format) {
-                puts("\nTesting with new group format:");
-                my_fapl = fapl2;
-            } /* end if */
-            else {
-                puts("Testing with old group format:");
-                my_fapl = fapl;
-            } /* end else */
+        h5_fixname(FILENAME[0], my_fapl, filename, sizeof filename);
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) TEST_ERROR
 
-            h5_fixname(FILENAME[0], my_fapl, filename, sizeof filename);
-            if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0) TEST_ERROR
+        /* Tests */
+        nerrors += test_one(file);
+        nerrors += test_many(file);
+        nerrors += test_symlink(file);
+        nerrors += test_rename(file);
 
-            /* Tests */
-            nerrors += test_one(file);
-            nerrors += test_many(file);
-            nerrors += test_symlink(file);
-            nerrors += test_rename(file);
+        nerrors += test_new_move(my_fapl);
+        nerrors += check_new_move(my_fapl);
+        nerrors += test_filespace(my_fapl);
 
-            nerrors += test_new_move(my_fapl);
-            nerrors += check_new_move(my_fapl);
-            nerrors += test_filespace(my_fapl);
+        /* Test creating & unlinking lots of objects with default FAPL */
+        nerrors += test_create_unlink("create and unlink large number of objects", my_fapl);
 
-            /* Test creating & unlinking lots of objects with default FAPL */
-            nerrors += test_create_unlink("create and unlink large number of objects", my_fapl);
+        {
+            hid_t fapl_small_mdc;
 
-            {
-                hid_t fapl_small_mdc;
+            /* Make copy of regular fapl, to turn down the elements in the metadata cache */
+            if((fapl_small_mdc = H5Pcopy(my_fapl)) < 0)
+                goto error;
 
-                /* Make copy of regular fapl, to turn down the elements in the metadata cache */
-                if((fapl_small_mdc = H5Pcopy(my_fapl)) < 0)
-                    goto error;
+            /* Get FAPL cache settings */
+            if(H5Pget_cache(fapl_small_mdc, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
+                printf("H5Pget_cache failed\n");
 
-                /* Get FAPL cache settings */
-                if(H5Pget_cache(fapl_small_mdc, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
-                    printf("H5Pget_cache failed\n");
+            /* Change FAPL cache settings */
+            mdc_nelmts=1;
+            if(H5Pset_cache(fapl_small_mdc, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
+                printf("H5Pset_cache failed\n");
 
-                /* Change FAPL cache settings */
-                mdc_nelmts=1;
-                if(H5Pset_cache(fapl_small_mdc, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
-                    printf("H5Pset_cache failed\n");
+            /* Test creating & unlinking lots of objects with a 1-element metadata cache FAPL */
+            nerrors += test_create_unlink("create and unlink large number of objects with small cache", fapl_small_mdc);
 
-                /* Test creating & unlinking lots of objects with a 1-element metadata cache FAPL */
-                nerrors += test_create_unlink("create and unlink large number of objects with small cache", fapl_small_mdc);
+            if(H5Pclose(fapl_small_mdc) < 0) TEST_ERROR
+        } /* end block */
 
-                if(H5Pclose(fapl_small_mdc) < 0) TEST_ERROR
-            } /* end block */
+        nerrors += test_link_slashes(my_fapl);
+        nerrors += test_unlink_slashes(my_fapl);
 
-            nerrors += test_link_slashes(my_fapl);
-            nerrors += test_unlink_slashes(my_fapl);
+        /* Test specific B-tree removal issues */
+        /* (only for old format groups) */
+        if(!new_format) {
+            nerrors += test_unlink_rightleaf(file);
+            nerrors += test_unlink_rightnode(file);
+            nerrors += test_unlink_middlenode(file);
+        } /* end if */
 
-            /* Test specific B-tree removal issues */
-            /* (only for old format groups) */
-            if(!new_format) {
-                nerrors += test_unlink_rightleaf(file);
-                nerrors += test_unlink_rightnode(file);
-                nerrors += test_unlink_middlenode(file);
-            } /* end if */
+        /* Test "resurrecting" objects */
+        nerrors += test_resurrect_dataset(my_fapl);
+        nerrors += test_resurrect_datatype(my_fapl);
+        nerrors += test_resurrect_group(my_fapl);
 
-            /* Test "resurrecting" objects */
-            nerrors += test_resurrect_dataset(my_fapl);
-            nerrors += test_resurrect_datatype(my_fapl);
-            nerrors += test_resurrect_group(my_fapl);
+        /* Test unlinking chunked datasets */
+        nerrors += test_unlink_chunked_dataset(my_fapl);
 
-            /* Test unlinking chunked datasets */
-            nerrors += test_unlink_chunked_dataset(my_fapl);
+        /* Test unlinked groups which still have objects in them */
+        /* (only for new format groups) */
+        if(new_format) {
+            nerrors += test_full_group_compact(my_fapl);
+            nerrors += test_full_group_dense(my_fapl);
+        } /* end if */
 
-            /* Test unlinked groups which still have objects in them */
-            /* (only for new format groups) */
-            if(new_format) {
-                nerrors += test_full_group_compact(my_fapl);
-                nerrors += test_full_group_dense(my_fapl);
-            } /* end if */
+        /* Close */
+        if(H5Fclose(file) < 0) TEST_ERROR
+    } /* end for */
 
-            /* Close */
-            if(H5Fclose(file) < 0) TEST_ERROR
-        } /* end for */
+    /* Close 2nd FAPL */
+    H5Pclose(fapl2);
 
-        /* Close 2nd FAPL */
-	H5Pclose(fapl2);
-
-        if (nerrors) {
-            printf("***** %d FAILURE%s! *****\n", nerrors, 1==nerrors?"":"S");
-	    exit(1);
-	}
-
-	puts("All unlink tests passed.");
-	h5_cleanup(FILENAME, fapl);
+    if (nerrors) {
+        printf("***** %d FAILURE%s! *****\n", nerrors, 1==nerrors?"":"S");
+        exit(1);
     }
-    else
-        puts("All unlink tests skipped - Incompatible with current Virtual File Driver");
+
+    puts("All unlink tests passed.");
+
+    h5_cleanup(FILENAME, fapl);
 
     return 0;
 

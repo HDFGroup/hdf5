@@ -167,15 +167,25 @@ H5MF_init_merge_flags(H5F_t *f)
     /* Based on mapping type, initialize merging flags for each free list type */
     switch(mapping_type) {
         case H5MF_AGGR_MERGE_SEPARATE:
+            /* Don't merge any metadata together */
             HDmemset(f->shared->fs_aggr_merge, 0, sizeof(f->shared->fs_aggr_merge));
+
+            /* Check if merging raw data should be allowed */
+            if(H5FD_MEM_DRAW == f->shared->fs_type_map[H5FD_MEM_DRAW] ||
+                    H5FD_MEM_DEFAULT == f->shared->fs_type_map[H5FD_MEM_DRAW])
+                f->shared->fs_aggr_merge[H5FD_MEM_DRAW] = H5F_FS_MERGE_RAWDATA;
             break;
 
         case H5MF_AGGR_MERGE_DICHOTOMY:
+            /* Merge all metadata together (but not raw data) */
             HDmemset(f->shared->fs_aggr_merge, H5F_FS_MERGE_METADATA, sizeof(f->shared->fs_aggr_merge));
+
+            /* Allow merging raw data allocations together */
             f->shared->fs_aggr_merge[H5FD_MEM_DRAW] = H5F_FS_MERGE_RAWDATA;
             break;
 
         case H5MF_AGGR_MERGE_TOGETHER:
+            /* Merge all allocation types together */
             HDmemset(f->shared->fs_aggr_merge, (H5F_FS_MERGE_METADATA | H5F_FS_MERGE_RAWDATA), sizeof(f->shared->fs_aggr_merge));
             break;
     } /* end switch */

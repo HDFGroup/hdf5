@@ -211,58 +211,48 @@ test_tr1(hid_t file)
     static c_e1	data1[10] = {E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
 			   E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED};
     c_e1	data2[10];
-    const char  *envval = NULL;
 
     TESTING("O(1) conversions");
 
-    envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL)
-        envval = "nomatch";
-    if(HDstrcmp(envval, "split")) {
-	if((cwg = H5Gcreate2(file, "test_tr1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((cwg = H5Gcreate2(file, "test_tr1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-	if((m_type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(m_type, "RED",   CPTR(eval, E1_RED  )) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(m_type, "GREEN", CPTR(eval, E1_GREEN)) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(m_type, "BLUE",  CPTR(eval, E1_BLUE )) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(m_type, "WHITE", CPTR(eval, E1_WHITE)) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(m_type, "BLACK", CPTR(eval, E1_BLACK)) < 0) FAIL_STACK_ERROR
+    if((m_type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(m_type, "RED",   CPTR(eval, E1_RED  )) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(m_type, "GREEN", CPTR(eval, E1_GREEN)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(m_type, "BLUE",  CPTR(eval, E1_BLUE )) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(m_type, "WHITE", CPTR(eval, E1_WHITE)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(m_type, "BLACK", CPTR(eval, E1_BLACK)) < 0) FAIL_STACK_ERROR
 
 
-	if((f_type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(f_type, "RED",   CPTR(ival, 105)) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(f_type, "GREEN", CPTR(ival, 104)) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(f_type, "BLUE",  CPTR(ival, 103)) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(f_type, "WHITE", CPTR(ival, 102)) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(f_type, "BLACK", CPTR(ival, 101)) < 0) FAIL_STACK_ERROR
+    if((f_type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(f_type, "RED",   CPTR(ival, 105)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(f_type, "GREEN", CPTR(ival, 104)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(f_type, "BLUE",  CPTR(ival, 103)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(f_type, "WHITE", CPTR(ival, 102)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(f_type, "BLACK", CPTR(ival, 101)) < 0) FAIL_STACK_ERROR
 
-	if((space = H5Screate_simple(1, ds_size, NULL)) < 0) FAIL_STACK_ERROR
-	if((dset = H5Dcreate2(cwg, "color_table", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-	if(H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1) < 0) FAIL_STACK_ERROR
-	if(H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2) < 0) FAIL_STACK_ERROR
+    if((space = H5Screate_simple(1, ds_size, NULL)) < 0) FAIL_STACK_ERROR
+    if((dset = H5Dcreate2(cwg, "color_table", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1) < 0) FAIL_STACK_ERROR
+    if(H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2) < 0) FAIL_STACK_ERROR
 
-	for(i = 0; i < (size_t)ds_size[0]; i++)
-	    if(data1[i] != data2[i]) {
-		H5_FAILED();
-		printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n",
-			(unsigned long)i, (int)(data1[i]),
-			(unsigned long)i, (int)(data2[i]));
-		goto error;
-	    }
+    for(i = 0; i < (size_t)ds_size[0]; i++)
+        if(data1[i] != data2[i]) {
+            H5_FAILED();
+            printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n",
+                    (unsigned long)i, (int)(data1[i]),
+                    (unsigned long)i, (int)(data2[i]));
+            goto error;
+        }
 
-	if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
-	if(H5Sclose(space) < 0) FAIL_STACK_ERROR
-	if(H5Tclose(m_type) < 0) FAIL_STACK_ERROR
-	if(H5Tclose(f_type) < 0) FAIL_STACK_ERROR
-	if(H5Gclose(cwg) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(space) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(m_type) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(f_type) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(cwg) < 0) FAIL_STACK_ERROR
 
-	PASSED();
-    }
-    else
-    {
-        SKIPPED();
-        puts("    Test not compatible with current Virtual File Driver");
-    }
+    PASSED();
+
     return 0;
 
 error:
@@ -304,56 +294,47 @@ test_tr2(hid_t file)
     static c_e1	data1[10] = {E1_RED,   E1_GREEN, E1_BLUE,  E1_GREEN, E1_WHITE,
 			   E1_WHITE, E1_BLACK, E1_GREEN, E1_BLUE,  E1_RED};
     c_e1	data2[10];
-    const char  *envval = NULL;
 
     TESTING("O(log N) converions");
 
-    envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL)
-        envval = "nomatch";
-    if(HDstrcmp(envval, "split")) {
-	if((cwg = H5Gcreate2(file, "test_tr2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((cwg = H5Gcreate2(file, "test_tr2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-	if((m_type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(m_type, "RED",   CPTR(val1, E1_RED  )) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(m_type, "GREEN", CPTR(val1, E1_GREEN)) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(m_type, "BLUE",  CPTR(val1, E1_BLUE )) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(m_type, "WHITE", CPTR(val1, E1_WHITE)) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(m_type, "BLACK", CPTR(val1, E1_BLACK)) < 0) FAIL_STACK_ERROR
+    if((m_type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(m_type, "RED",   CPTR(val1, E1_RED  )) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(m_type, "GREEN", CPTR(val1, E1_GREEN)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(m_type, "BLUE",  CPTR(val1, E1_BLUE )) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(m_type, "WHITE", CPTR(val1, E1_WHITE)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(m_type, "BLACK", CPTR(val1, E1_BLACK)) < 0) FAIL_STACK_ERROR
 
-	if((f_type = H5Tcreate(H5T_ENUM, sizeof(int))) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(f_type, "RED",   CPTR(val2, 1050)) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(f_type, "GREEN", CPTR(val2, 1040)) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(f_type, "BLUE",  CPTR(val2, 1030)) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(f_type, "WHITE", CPTR(val2, 1020)) < 0) FAIL_STACK_ERROR
-	if(H5Tenum_insert(f_type, "BLACK", CPTR(val2, 1010)) < 0) FAIL_STACK_ERROR
+    if((f_type = H5Tcreate(H5T_ENUM, sizeof(int))) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(f_type, "RED",   CPTR(val2, 1050)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(f_type, "GREEN", CPTR(val2, 1040)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(f_type, "BLUE",  CPTR(val2, 1030)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(f_type, "WHITE", CPTR(val2, 1020)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(f_type, "BLACK", CPTR(val2, 1010)) < 0) FAIL_STACK_ERROR
 
-	if((space = H5Screate_simple(1, ds_size, NULL)) < 0) FAIL_STACK_ERROR
-	if((dset = H5Dcreate2(cwg, "color_table", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-	if(H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1) < 0) FAIL_STACK_ERROR
-	if(H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2) < 0) FAIL_STACK_ERROR
+    if((space = H5Screate_simple(1, ds_size, NULL)) < 0) FAIL_STACK_ERROR
+    if((dset = H5Dcreate2(cwg, "color_table", f_type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Dwrite(dset, m_type, space, space, H5P_DEFAULT, data1) < 0) FAIL_STACK_ERROR
+    if(H5Dread(dset, m_type, space, space, H5P_DEFAULT, data2) < 0) FAIL_STACK_ERROR
 
-	for(i = 0; i < (size_t)ds_size[0]; i++)
-	    if(data1[i] != data2[i]) {
-		H5_FAILED();
-		printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n",
-			(unsigned long)i, (int)(data1[i]),
-			(unsigned long)i, (int)(data2[i]));
-		goto error;
-	    }
+    for(i = 0; i < (size_t)ds_size[0]; i++)
+        if(data1[i] != data2[i]) {
+            H5_FAILED();
+            printf("    data1[%lu]=%d, data2[%lu]=%d (should be same)\n",
+                    (unsigned long)i, (int)(data1[i]),
+                    (unsigned long)i, (int)(data2[i]));
+            goto error;
+        }
 
-	if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
-	if(H5Sclose(space) < 0) FAIL_STACK_ERROR
-	if(H5Tclose(m_type) < 0) FAIL_STACK_ERROR
-	if(H5Tclose(f_type) < 0) FAIL_STACK_ERROR
-	if(H5Gclose(cwg) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dset) < 0) FAIL_STACK_ERROR
+    if(H5Sclose(space) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(m_type) < 0) FAIL_STACK_ERROR
+    if(H5Tclose(f_type) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(cwg) < 0) FAIL_STACK_ERROR
 
-	PASSED();
-    }
-    else {
-        SKIPPED();
-        puts("    Test not compatible with current Virtual File Driver");
-    }
+    PASSED();
+
     return 0;
 
 error:
@@ -473,7 +454,8 @@ test_funcs(void)
 {
     hid_t	type=-1;
     c_e1	val;
-    int         size;
+    size_t      size;
+    int         offset;
     H5T_pad_t   inpad;
     H5T_cset_t  cset;
     herr_t      ret;
@@ -490,7 +472,7 @@ test_funcs(void)
 
     if ((size=H5Tget_precision(type))==0) goto error;
     if ((size=H5Tget_size(type))==0) goto error;
-    if ((size=H5Tget_offset(type))<0) goto error;
+    if ((offset=H5Tget_offset(type))<0) goto error;
     if (H5Tget_sign(type)<0) goto error;
     if (H5Tget_super(type)<0) goto error;
 

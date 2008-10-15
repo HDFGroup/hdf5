@@ -423,6 +423,8 @@ main(void)
 {
     /* This test is currently not working properly; it should be revisted
      * when we have time.
+     *
+     * (Also, we should try to make this test work with all the VFDs)
      */
 #ifdef BROKEN
     int num_errs=0;

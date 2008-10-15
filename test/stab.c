@@ -657,7 +657,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-read_old(hid_t fapl2)
+read_old(void)
 {
     int	fd_old = (-1), fd_new = (-1);   /* File descriptors for copying data */
     hid_t fid = (-1);                   /* File ID */
@@ -681,7 +681,7 @@ read_old(hid_t fapl2)
     HDstrcat(filename, FILE_OLD_GROUPS);
 
     /* Create filename */
-    h5_fixname(FILENAME[0], fapl2, filename2, sizeof(filename2));
+    h5_fixname(FILENAME[0], H5P_DEFAULT, filename2, sizeof(filename2));
 
     /* Copy old file into temporary file */
     if((fd_old = HDopen(filename, O_RDONLY, 0666)) < 0) TEST_ERROR
@@ -697,7 +697,7 @@ read_old(hid_t fapl2)
 
 
     /* Open copied file */
-    if((fid = H5Fopen(filename2, H5F_ACC_RDWR, fapl2)) < 0) TEST_ERROR
+    if((fid = H5Fopen(filename2, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Attempt to open "old" group */
     if((gid = H5Gopen2(fid, "old", H5P_DEFAULT)) < 0) TEST_ERROR
@@ -1103,58 +1103,50 @@ error:
 int
 main(void)
 {
-    const char *envval = NULL;
+    hid_t	fapl, fapl2;    /* File access property list IDs */
+    hbool_t new_format;     /* Whether to use the new format or not */
+    int	nerrors = 0;
 
-    /* Don't run this test using the split file driver */
-    envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL)
-        envval = "nomatch";
-    if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
-        hid_t	fapl, fapl2;    /* File access property list IDs */
-        hbool_t new_format;     /* Whether to use the new format or not */
-        int	nerrors = 0;
+    /* Reset library */
+    h5_reset();
+    fapl = h5_fileaccess();
 
-	/* Reset library */
-	h5_reset();
-	fapl = h5_fileaccess();
+    /* Copy the file access property list */
+    if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
-        /* Copy the file access property list */
-        if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
+    /* Set the "use the latest version of the format" bounds for creating objects in the file */
+    if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
-        /* Set the "use the latest version of the format" bounds for creating objects in the file */
-        if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
+    /* Loop over using new group format */
+    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+        /* Perform basic tests, with old & new style groups */
+        nerrors += test_misc((new_format ? fapl2 : fapl), new_format);
+        nerrors += test_long((new_format ? fapl2 : fapl), new_format);
+        nerrors += test_large((new_format ? fapl2 : fapl), new_format);
+    } /* end for */
 
-        /* Loop over using new group format */
-        for(new_format = FALSE; new_format <= TRUE; new_format++) {
-            /* Perform basic tests, with old & new style groups */
-            nerrors += test_misc((new_format ? fapl2 : fapl), new_format);
-            nerrors += test_long((new_format ? fapl2 : fapl), new_format);
-            nerrors += test_large((new_format ? fapl2 : fapl), new_format);
-        } /* end for */
+    /* New format group specific tests (require new format features) */
+    nerrors += lifecycle(fapl2);
+    nerrors += long_compact(fapl2);
+    nerrors += read_old();
+    nerrors += no_compact(fapl2);
+    nerrors += gcpl_on_root(fapl2);
 
-        /* New format group specific tests (require new format features) */
-	nerrors += lifecycle(fapl2);
-	nerrors += long_compact(fapl2);
-	nerrors += read_old(fapl2);
-	nerrors += no_compact(fapl2);
-	nerrors += gcpl_on_root(fapl2);
+    /* Old group API specific tests */
+    nerrors += old_api(fapl);
 
-        /* Old group API specific tests */
-	nerrors += old_api(fapl);
+    /* Close 2nd FAPL */
+    H5Pclose(fapl2);
 
-        /* Close 2nd FAPL */
-	H5Pclose(fapl2);
+    /* Check for test errors */
+    if(nerrors)
+        goto error;
 
-        /* Check for test errors */
-	if(nerrors)
-            goto error;
+    puts("All symbol table tests passed.");
 
-	/* Cleanup */
-	puts("All symbol table tests passed.");
-	h5_cleanup(FILENAME, fapl);
-    } /* end if */
-    else
-	puts("All symbol table tests skipped - Incompatible with current Virtual File Driver");
+    /* Cleanup */
+    h5_cleanup(FILENAME, fapl);
+
     return 0;
 
 error:

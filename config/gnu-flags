@@ -187,7 +187,7 @@ case "$cc_vendor-$cc_version" in
 # Closer to the gcc 4.4 release, we should check for additional flags to
 # include and break it out into it's own section, like the other versions
 # below. -QAK
-  gcc-4.3*)
+  gcc-4.[34]*)
     # Replace -ansi flag with -std=c99 flag
     H5_CFLAGS="`echo $H5_CFLAGS | sed -e 's/-ansi/-std=c99/g'`"
 

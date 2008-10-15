@@ -4222,59 +4222,51 @@ main(void)
 {
     int		nerrors = 0;
     hid_t	fapl = -1;
-    const char *envval = NULL;
 
-    envval = HDgetenv("HDF5_DRIVER");
-    if (envval == NULL)
-        envval = "nomatch";
-    if (HDstrcmp(envval, "split") && HDstrcmp(envval, "multi")) {
-	h5_reset();
-	fapl = h5_fileaccess();
-	if (setup(fapl) < 0) goto error;
+    h5_reset();
+    fapl = h5_fileaccess();
+    if (setup(fapl) < 0) goto error;
 
-	nerrors += test_basic(fapl);
-	nerrors += test_illegal(fapl);
-	nerrors += test_samefile(fapl);
-	nerrors += test_hide(fapl);
-	nerrors += test_assoc(fapl);
-	nerrors += test_mntlnk(fapl);
-	nerrors += test_unlink(fapl);
-	nerrors += test_move(fapl);
-	nerrors += test_mvmpt(fapl);
-	nerrors += test_preopen(fapl);
-	nerrors += test_postopen(fapl);
-	nerrors += test_interlink(fapl);
-	nerrors += test_uniformity(fapl);
-	nerrors += test_close(fapl);
-	nerrors += test_mount_after_close(fapl);
-	nerrors += test_mount_after_unmount(fapl);
-	nerrors += test_missing_unmount(fapl);
-	nerrors += test_hold_open_file(fapl);
-	nerrors += test_hold_open_group(fapl);
-	nerrors += test_fcdegree_same(fapl);
-	nerrors += test_fcdegree_semi(fapl);
-	nerrors += test_fcdegree_strong(fapl);
-	nerrors += test_acc_perm(fapl);
-	nerrors += test_mult_mount(fapl);
-	nerrors += test_nested_survive(fapl);
-	nerrors += test_close_parent(fapl);
-	nerrors += test_cut_graph(fapl);
-	nerrors += test_symlink(fapl);
-	nerrors += test_sharedacc(fapl);
-	nerrors += test_sharedclose(fapl);
+    nerrors += test_basic(fapl);
+    nerrors += test_illegal(fapl);
+    nerrors += test_samefile(fapl);
+    nerrors += test_hide(fapl);
+    nerrors += test_assoc(fapl);
+    nerrors += test_mntlnk(fapl);
+    nerrors += test_unlink(fapl);
+    nerrors += test_move(fapl);
+    nerrors += test_mvmpt(fapl);
+    nerrors += test_preopen(fapl);
+    nerrors += test_postopen(fapl);
+    nerrors += test_interlink(fapl);
+    nerrors += test_uniformity(fapl);
+    nerrors += test_close(fapl);
+    nerrors += test_mount_after_close(fapl);
+    nerrors += test_mount_after_unmount(fapl);
+    nerrors += test_missing_unmount(fapl);
+    nerrors += test_hold_open_file(fapl);
+    nerrors += test_hold_open_group(fapl);
+    nerrors += test_fcdegree_same(fapl);
+    nerrors += test_fcdegree_semi(fapl);
+    nerrors += test_fcdegree_strong(fapl);
+    nerrors += test_acc_perm(fapl);
+    nerrors += test_mult_mount(fapl);
+    nerrors += test_nested_survive(fapl);
+    nerrors += test_close_parent(fapl);
+    nerrors += test_cut_graph(fapl);
+    nerrors += test_symlink(fapl);
+    nerrors += test_sharedacc(fapl);
+    nerrors += test_sharedclose(fapl);
 
-	if (nerrors) goto error;
-	puts("All mount tests passed.");
-	h5_cleanup(FILENAME, fapl);
-    }
-    else
-    {
-        puts("All mount tests skipped - Incompatible with current Virtual File Driver");
-    }
+    if (nerrors) goto error;
+
+    puts("All mount tests passed.");
+    h5_cleanup(FILENAME, fapl);
+
     return 0;
 
-    error:
-        puts("***** MOUNT ERRORS *****");
-        return 1;
+error:
+    puts("***** MOUNT ERRORS *****");
+    return 1;
 }
 

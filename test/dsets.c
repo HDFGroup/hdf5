@@ -355,7 +355,7 @@ test_create(hid_t file)
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_simple_io(hid_t fapl)
+test_simple_io(const char *env_h5_drvr, hid_t fapl)
 {
     char                filename[FILENAME_BUF_SIZE];
     hid_t		file, dataset, space, xfer;
@@ -368,83 +368,91 @@ test_simple_io(hid_t fapl)
 
     TESTING("simple I/O");
 
-    h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
+    /* Can't run this test with multi-file VFDs */
+    if(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
+        h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
 
-    /* Initialize the dataset */
-    for(i = n = 0; i < DSET_DIM1; i++)
-	for(j = 0; j < DSET_DIM2; j++)
-	    points[i][j] = n++;
+        /* Initialize the dataset */
+        for(i = n = 0; i < DSET_DIM1; i++)
+            for(j = 0; j < DSET_DIM2; j++)
+                points[i][j] = n++;
 
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	goto error;
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            goto error;
 
-    /* Create the data space */
-    dims[0] = DSET_DIM1;
-    dims[1] = DSET_DIM2;
-    if((space = H5Screate_simple(2, dims, NULL)) < 0) goto error;
+        /* Create the data space */
+        dims[0] = DSET_DIM1;
+        dims[1] = DSET_DIM2;
+        if((space = H5Screate_simple(2, dims, NULL)) < 0) goto error;
 
-    /* Create a small conversion buffer to test strip mining */
-    tconv_buf = HDmalloc((size_t)1000);
-    xfer = H5Pcreate(H5P_DATASET_XFER);
-    assert(xfer>=0);
-    if(H5Pset_buffer (xfer, (size_t)1000, tconv_buf, NULL) < 0) goto error;
+        /* Create a small conversion buffer to test strip mining */
+        tconv_buf = HDmalloc((size_t)1000);
+        xfer = H5Pcreate(H5P_DATASET_XFER);
+        assert(xfer>=0);
+        if(H5Pset_buffer (xfer, (size_t)1000, tconv_buf, NULL) < 0) goto error;
 
-    /* Create the dataset */
-    if((dataset = H5Dcreate2(file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
-			     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
+        /* Create the dataset */
+        if((dataset = H5Dcreate2(file, DSET_SIMPLE_IO_NAME, H5T_NATIVE_INT, space,
+                                 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
 
-    /* Test dataset address.  Should be undefined. */
-    if(H5Dget_offset(dataset) != HADDR_UNDEF) goto error;
+        /* Test dataset address.  Should be undefined. */
+        if(H5Dget_offset(dataset) != HADDR_UNDEF) goto error;
 
-    /* Write the data to the dataset */
-    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points) < 0)
-	goto error;
+        /* Write the data to the dataset */
+        if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, points) < 0)
+            goto error;
 
-    /* Test dataset address in file. Open the same file as a C file, seek
-     * the data position as H5Dget_offset points to, read the dataset, and
-     * compare it with the data written in.*/
-    if((offset=H5Dget_offset(dataset))==HADDR_UNDEF) goto error;
+        /* Test dataset address in file. Open the same file as a C file, seek
+         * the data position as H5Dget_offset points to, read the dataset, and
+         * compare it with the data written in.*/
+        if((offset=H5Dget_offset(dataset))==HADDR_UNDEF) goto error;
 
-    /* Read the dataset back */
-    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check) < 0)
-	goto error;
+        /* Read the dataset back */
+        if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, xfer, check) < 0)
+            goto error;
 
-    /* Check that the values read are the same as the values written */
-    for(i = 0; i < DSET_DIM1; i++) {
-	for(j = 0; j < DSET_DIM2; j++) {
-	    if(points[i][j] != check[i][j]) {
-		H5_FAILED();
-		printf("    Read different values than written.\n");
-		printf("    At index %d,%d\n", i, j);
-		goto error;
-	    }
-	}
-    }
+        /* Check that the values read are the same as the values written */
+        for(i = 0; i < DSET_DIM1; i++) {
+            for(j = 0; j < DSET_DIM2; j++) {
+                if(points[i][j] != check[i][j]) {
+                    H5_FAILED();
+                    printf("    Read different values than written.\n");
+                    printf("    At index %d,%d\n", i, j);
+                    goto error;
+                }
+            }
+        }
 
-    if(H5Pclose (xfer) < 0) goto error;
-    if(H5Dclose(dataset) < 0) goto error;
-    if(H5Fclose(file) < 0) goto error;
+        if(H5Pclose (xfer) < 0) goto error;
+        if(H5Dclose(dataset) < 0) goto error;
+        if(H5Fclose(file) < 0) goto error;
 
-    f = HDopen(filename, O_RDONLY, 0);
-    HDlseek(f, (off_t)offset, SEEK_SET);
-    HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2);
+        f = HDopen(filename, O_RDONLY, 0);
+        HDlseek(f, (off_t)offset, SEEK_SET);
+        HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2);
 
-    /* Check that the values read are the same as the values written */
-    for(i = 0; i < DSET_DIM1; i++) {
-	for(j = 0; j < DSET_DIM2; j++) {
-	    if(points[i][j] != rdata[i][j]) {
-		H5_FAILED();
-		printf("    Read different values than written.\n");
-		printf("    At index %d,%d\n", i, j);
-		goto error;
-	    }
-	}
-    }
+        /* Check that the values read are the same as the values written */
+        for(i = 0; i < DSET_DIM1; i++) {
+            for(j = 0; j < DSET_DIM2; j++) {
+                if(points[i][j] != rdata[i][j]) {
+                    H5_FAILED();
+                    printf("    Read different values than written.\n");
+                    printf("    At index %d,%d\n", i, j);
+                    goto error;
+                }
+            }
+        }
 
-    HDclose(f);
+        HDclose(f);
 
-    free (tconv_buf);
-    PASSED();
+        free (tconv_buf);
+        PASSED();
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support continuous address space");
+    } /* end else */
+
     return 0;
 
 error:
@@ -469,7 +477,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_userblock_offset(hid_t fapl)
+test_userblock_offset(const char *env_h5_drvr, hid_t fapl)
 {
     char                filename[FILENAME_BUF_SIZE];
     hid_t		file, fcpl, dataset, space;
@@ -481,54 +489,62 @@ test_userblock_offset(hid_t fapl)
 
     TESTING("dataset offset with user block");
 
-    h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
+    /* Can't run this test with multi-file VFDs */
+    if(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
+        h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
-    if((fcpl=H5Pcreate(H5P_FILE_CREATE)) < 0) goto error;
-    if(H5Pset_userblock(fcpl, (hsize_t)USER_BLOCK) < 0) goto error;
+        if((fcpl=H5Pcreate(H5P_FILE_CREATE)) < 0) goto error;
+        if(H5Pset_userblock(fcpl, (hsize_t)USER_BLOCK) < 0) goto error;
 
-    if((file=H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
-	goto error;
+        if((file=H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+            goto error;
 
-    /* Create the data space */
-    dims[0] = DSET_DIM1;
-    dims[1] = DSET_DIM2;
-    if((space = H5Screate_simple(2, dims, NULL)) < 0) goto error;
+        /* Create the data space */
+        dims[0] = DSET_DIM1;
+        dims[1] = DSET_DIM2;
+        if((space = H5Screate_simple(2, dims, NULL)) < 0) goto error;
 
-    /* Create the dataset */
-    if((dataset = H5Dcreate2(file, DSET_USERBLOCK_IO_NAME, H5T_NATIVE_INT, space,
-			     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
+        /* Create the dataset */
+        if((dataset = H5Dcreate2(file, DSET_USERBLOCK_IO_NAME, H5T_NATIVE_INT, space,
+                                 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) goto error;
 
-    /* Write the data to the dataset */
-    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
-	goto error;
+        /* Write the data to the dataset */
+        if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, points) < 0)
+            goto error;
 
-    /* Test dataset address in file. Open the same file as a C file, seek
-     * the data position as H5Dget_offset points to, read the dataset, and
-     * compare it with the data written in.*/
-    if((offset = H5Dget_offset(dataset)) == HADDR_UNDEF) goto error;
+        /* Test dataset address in file. Open the same file as a C file, seek
+         * the data position as H5Dget_offset points to, read the dataset, and
+         * compare it with the data written in.*/
+        if((offset = H5Dget_offset(dataset)) == HADDR_UNDEF) goto error;
 
-    if(H5Dclose(dataset) < 0) goto error;
-    if(H5Fclose(file) < 0) goto error;
+        if(H5Dclose(dataset) < 0) goto error;
+        if(H5Fclose(file) < 0) goto error;
 
-    f = HDopen(filename, O_RDONLY, 0);
-    HDlseek(f, (off_t)offset, SEEK_SET);
-    HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2);
+        f = HDopen(filename, O_RDONLY, 0);
+        HDlseek(f, (off_t)offset, SEEK_SET);
+        HDread(f, rdata, sizeof(int)*DSET_DIM1*DSET_DIM2);
 
-    /* Check that the values read are the same as the values written */
-    for(i = 0; i < DSET_DIM1; i++) {
-	for(j = 0; j < DSET_DIM2; j++) {
-	    if(points[i][j] != rdata[i][j]) {
-		H5_FAILED();
-		printf("    Read different values than written.\n");
-		printf("    At index %d,%d\n", i, j);
-		goto error;
-	    }
-	}
-    }
+        /* Check that the values read are the same as the values written */
+        for(i = 0; i < DSET_DIM1; i++) {
+            for(j = 0; j < DSET_DIM2; j++) {
+                if(points[i][j] != rdata[i][j]) {
+                    H5_FAILED();
+                    printf("    Read different values than written.\n");
+                    printf("    At index %d,%d\n", i, j);
+                    goto error;
+                }
+            }
+        }
 
-    HDclose(f);
+        HDclose(f);
 
-    PASSED();
+        PASSED();
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support continuous address space");
+    } /* end else */
+
     return 0;
 
 error:
@@ -1662,7 +1678,7 @@ error:
  */
 #ifdef H5_HAVE_FILTER_SZIP
 static herr_t
-test_filter_noencoder(const char *dset_name, hid_t fapl)
+test_filter_noencoder(const char *dset_name)
 {
     hid_t file_id = -1;
     hid_t dset_id = -1;
@@ -1687,7 +1703,7 @@ test_filter_noencoder(const char *dset_name, hid_t fapl)
     }
     HDstrcat(testfile, NOENCODER_FILENAME);
 
-    file_id = H5Fopen(testfile, H5F_ACC_RDWR, fapl);
+    file_id = H5Fopen(testfile, H5F_ACC_RDWR, H5P_DEFAULT);
     if(file_id < 0) goto error;
 
     dset_id = H5Dopen2(file_id, dset_name, H5P_DEFAULT);
@@ -2017,7 +2033,7 @@ UNUSED
 
     if( h5_szip_can_encode() != 1) {
 	puts("");
-	if(test_filter_noencoder(NOENCODER_SZIP_DATASET, fapl) < 0) goto error;
+	if(test_filter_noencoder(NOENCODER_SZIP_DATASET) < 0) goto error;
     } else {
 	SKIPPED();
     }
@@ -2112,7 +2128,7 @@ UNUSED
 
     if( h5_szip_can_encode() != 1) {
 	puts("");
-	if(test_filter_noencoder(NOENCODER_SZIP_SHUFF_FLETCH_DATASET,fapl) < 0) goto error;
+	if(test_filter_noencoder(NOENCODER_SZIP_SHUFF_FLETCH_DATASET) < 0) goto error;
     } else {
 		SKIPPED();
     }
@@ -5729,76 +5745,48 @@ test_filters_endianess(hid_t fapl)
 
 #if defined H5_HAVE_FILTER_FLETCHER32
    /*-------------------------------------------------------------------------
-    * step1: create a file
-    *-------------------------------------------------------------------------
-    */
-    /* create a file using default properties */
-    if((fid = H5Fcreate("test_filters.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) goto error;
-
-    /* create a data space */
-    if((sid = H5Screate_simple(rank,dims,NULL)) < 0) goto error;
-
-    /* create dcpl  */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
-    if(H5Pset_chunk(dcpl,rank,chunk_dims) < 0) goto error;
-
-    if(H5Pset_fletcher32 (dcpl) < 0) goto error;
-
-    /* create a dataset */
-    if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) goto error;
-
-    if(H5Dwrite(dsid,H5T_NATIVE_INT,H5S_ALL,H5S_ALL,H5P_DEFAULT,buf) < 0)
-     goto error;
-
-    /* close */
-    if(H5Pclose (dcpl) < 0) goto error;
-    if(H5Dclose (dsid) < 0) goto error;
-    if(H5Sclose (sid) < 0) goto error;
-    if(H5Fclose (fid) < 0) goto error;
-
-   /*-------------------------------------------------------------------------
-    * step 2: open a file written on a little-endian machine in step 1
+    * step 1: open a file written on a little-endian machine
     *-------------------------------------------------------------------------
     */
 
     /* compose the name of the file to open, using the srcdir, if appropriate */
     HDstrcpy(data_file, "");
-    if( srcdir ) {
+    if(srcdir) {
         HDstrcpy(data_file, srcdir);
         HDstrcat(data_file, "/");
     }
-   strcat( data_file, "test_filters_le.hdf5");
+    HDstrcat(data_file, "test_filters_le.hdf5");
 
     /* open */
-    if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) goto error;
+    if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* read */
-    if(auxread_fdata(fid,"dset") < 0) goto error;
+    if(auxread_fdata(fid,"dset") < 0) TEST_ERROR
 
     /* close */
-    if(H5Fclose(fid) < 0) goto error;
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
    /*-------------------------------------------------------------------------
-    * step 3: open a file written on a big-endian machine in step 1
+    * step 2: open a file written on a big-endian machine
     *-------------------------------------------------------------------------
     */
 
     /* compose the name of the file to open, using the srcdir, if appropriate */
     HDstrcpy(data_file, "");
-    if( srcdir ) {
+    if(srcdir) {
         HDstrcpy(data_file, srcdir);
         HDstrcat(data_file, "/");
     }
-    HDstrcat( data_file, "test_filters_be.hdf5");
+    HDstrcat(data_file, "test_filters_be.hdf5");
 
     /* open */
-    if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) goto error;
+    if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* read */
-    if(auxread_fdata(fid,"dset") < 0) goto error;
+    if(auxread_fdata(fid,"dset") < 0) TEST_ERROR
 
     /* close */
-    if(H5Fclose(fid) < 0) goto error;
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     PASSED();
 #else
@@ -6036,8 +6024,8 @@ test_random_chunks(hid_t fapl)
         } while (check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row+chunk_col+1;
-        coord[i][0] = chunk_row * csize[0];
-        coord[i][1] = chunk_col * csize[1];
+        coord[i][0] = (hsize_t)chunk_row * csize[0];
+        coord[i][1] = (hsize_t)chunk_col * csize[1];
     }
 
     /* Create dataspace for write buffer */
@@ -6126,8 +6114,8 @@ test_random_chunks(hid_t fapl)
         } while (check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
-        coord[i][0] = chunk_row * csize[0];
-        coord[i][1] = chunk_col * csize[1];
+        coord[i][0] = (hsize_t)chunk_row * csize[0];
+        coord[i][1] = (hsize_t)chunk_col * csize[1];
     }
 
     /* Create dataspace for write buffer */
@@ -6504,6 +6492,13 @@ error:
 int
 main(void)
 {
+    char		filename[FILENAME_BUF_SIZE];
+    hid_t		file, grp, fapl, fapl2;
+    hbool_t new_format;
+    int mdc_nelmts;
+    size_t rdcc_nelmts;
+    size_t rdcc_nbytes;
+    double rdcc_w0;
     int	nerrors = 0;
     const char *envval;
 
@@ -6511,116 +6506,105 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL)
         envval = "nomatch";
-    if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
-        char		filename[FILENAME_BUF_SIZE];
-        hid_t		file, grp, fapl, fapl2;
-        hbool_t new_format;
-        int mdc_nelmts;
-        size_t rdcc_nelmts;
-        size_t rdcc_nbytes;
-        double rdcc_w0;
 
-	/* Set the random # seed */
-	HDsrandom((unsigned long)HDtime(NULL));
+    /* Set the random # seed */
+    HDsrandom((unsigned long)HDtime(NULL));
 
-	/* Testing setup */
-	h5_reset();
-	fapl = h5_fileaccess();
+    /* Testing setup */
+    h5_reset();
+    fapl = h5_fileaccess();
 
-        /* Turn off the chunk cache, so all the chunks are immediately written to disk */
-        if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
+    /* Turn off the chunk cache, so all the chunks are immediately written to disk */
+    if(H5Pget_cache(fapl, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
+        goto error;
+    rdcc_nbytes = 0;
+    if(H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
+        goto error;
+
+    /* Copy the file access property list */
+    if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
+
+    /* Set the "use the latest version of the format" bounds for creating objects in the file */
+    if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
+
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+
+    /* Test with old & new format groups */
+    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+        hid_t my_fapl;
+
+        /* Set the FAPL for the type of format */
+        if(new_format) {
+            puts("\nTesting with new file format:");
+            my_fapl = fapl2;
+        } /* end if */
+        else {
+            puts("Testing with old file format:");
+            my_fapl = fapl;
+        } /* end else */
+
+        /* Create the file for this test */
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
             goto error;
-        rdcc_nbytes = 0;
-        if(H5Pset_cache(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0) < 0)
+
+        /* Cause the library to emit initial messages */
+        if((grp = H5Gcreate2(file, "emit diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            goto error;
+        if(H5Oset_comment(grp, "Causes diagnostic messages to be emitted") < 0)
+            goto error;
+        if(H5Gclose(grp) < 0)
             goto error;
 
-        /* Copy the file access property list */
-        if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
-
-        /* Set the "use the latest version of the format" bounds for creating objects in the file */
-        if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
-
-	h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-
-        /* Test with old & new format groups */
-        for(new_format = FALSE; new_format <= TRUE; new_format++) {
-            hid_t my_fapl;
-
-            /* Set the FAPL for the type of format */
-            if(new_format) {
-                puts("\nTesting with new file format:");
-                my_fapl = fapl2;
-            } /* end if */
-            else {
-                puts("Testing with old file format:");
-                my_fapl = fapl;
-            } /* end else */
-
-            /* Create the file for this test */
-            if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, my_fapl)) < 0)
-                goto error;
-
-            /* Cause the library to emit initial messages */
-            if((grp = H5Gcreate2(file, "emit diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-                goto error;
-            if(H5Oset_comment(grp, "Causes diagnostic messages to be emitted") < 0)
-                goto error;
-            if(H5Gclose(grp) < 0)
-                goto error;
-
-            nerrors += (test_create(file) < 0 			? 1 : 0);
-            nerrors += (test_simple_io(my_fapl) < 0		? 1 : 0);
-            nerrors += (test_compact_io(my_fapl) < 0  		? 1 : 0);
-            nerrors += (test_max_compact(my_fapl) < 0  		? 1 : 0);
-            nerrors += (test_conv_buffer(file) < 0		? 1 : 0);
-            nerrors += (test_tconv(file) < 0			? 1 : 0);
-            nerrors += (test_filters(file, my_fapl) < 0		? 1 : 0);
-            nerrors += (test_onebyte_shuffle(file) < 0 		? 1 : 0);
-            nerrors += (test_nbit_int(file) < 0 		? 1 : 0);
-            nerrors += (test_nbit_float(file) < 0         	? 1 : 0);
-            nerrors += (test_nbit_double(file) < 0         	? 1 : 0);
-            nerrors += (test_nbit_array(file) < 0 		? 1 : 0);
-            nerrors += (test_nbit_compound(file) < 0 		? 1 : 0);
-            nerrors += (test_nbit_compound_2(file) < 0 		? 1 : 0);
-            nerrors += (test_nbit_compound_3(file) < 0 		? 1 : 0);
-            nerrors += (test_scaleoffset_int(file) < 0 		? 1 : 0);
-            nerrors += (test_scaleoffset_int_2(file) < 0 	? 1 : 0);
-            nerrors += (test_scaleoffset_float(file) < 0 	? 1 : 0);
-            nerrors += (test_scaleoffset_float_2(file) < 0 	? 1 : 0);
-            nerrors += (test_scaleoffset_double(file) < 0 	? 1 : 0);
-            nerrors += (test_scaleoffset_double_2(file) < 0 	? 1 : 0);
-            nerrors += (test_multiopen (file) < 0		? 1 : 0);
-            nerrors += (test_types(file) < 0       		? 1 : 0);
-            nerrors += (test_userblock_offset(my_fapl) < 0     	? 1 : 0);
-            nerrors += (test_missing_filter(file) < 0		? 1 : 0);
-            nerrors += (test_can_apply(file) < 0		? 1 : 0);
-            nerrors += (test_set_local(my_fapl) < 0		? 1 : 0);
-            nerrors += (test_can_apply_szip(file) < 0		? 1 : 0);
-            nerrors += (test_compare_dcpl(file) < 0		? 1 : 0);
-            nerrors += (test_filter_delete(file) < 0		? 1 : 0);
-            nerrors += (test_filters_endianess(my_fapl) < 0	? 1 : 0);
-            nerrors += (test_zero_dims(file) < 0		? 1 : 0);
-            nerrors += (test_missing_chunk(file) < 0		? 1 : 0);
-            nerrors += (test_random_chunks(my_fapl) < 0		? 1 : 0);
+        nerrors += (test_create(file) < 0 			? 1 : 0);
+        nerrors += (test_simple_io(envval, my_fapl) < 0		? 1 : 0);
+        nerrors += (test_compact_io(my_fapl) < 0  		? 1 : 0);
+        nerrors += (test_max_compact(my_fapl) < 0  		? 1 : 0);
+        nerrors += (test_conv_buffer(file) < 0		? 1 : 0);
+        nerrors += (test_tconv(file) < 0			? 1 : 0);
+        nerrors += (test_filters(file, my_fapl) < 0		? 1 : 0);
+        nerrors += (test_onebyte_shuffle(file) < 0 		? 1 : 0);
+        nerrors += (test_nbit_int(file) < 0 		? 1 : 0);
+        nerrors += (test_nbit_float(file) < 0         	? 1 : 0);
+        nerrors += (test_nbit_double(file) < 0         	? 1 : 0);
+        nerrors += (test_nbit_array(file) < 0 		? 1 : 0);
+        nerrors += (test_nbit_compound(file) < 0 		? 1 : 0);
+        nerrors += (test_nbit_compound_2(file) < 0 		? 1 : 0);
+        nerrors += (test_nbit_compound_3(file) < 0 		? 1 : 0);
+        nerrors += (test_scaleoffset_int(file) < 0 		? 1 : 0);
+        nerrors += (test_scaleoffset_int_2(file) < 0 	? 1 : 0);
+        nerrors += (test_scaleoffset_float(file) < 0 	? 1 : 0);
+        nerrors += (test_scaleoffset_float_2(file) < 0 	? 1 : 0);
+        nerrors += (test_scaleoffset_double(file) < 0 	? 1 : 0);
+        nerrors += (test_scaleoffset_double_2(file) < 0 	? 1 : 0);
+        nerrors += (test_multiopen (file) < 0		? 1 : 0);
+        nerrors += (test_types(file) < 0       		? 1 : 0);
+        nerrors += (test_userblock_offset(envval, my_fapl) < 0     	? 1 : 0);
+        nerrors += (test_missing_filter(file) < 0		? 1 : 0);
+        nerrors += (test_can_apply(file) < 0		? 1 : 0);
+        nerrors += (test_set_local(my_fapl) < 0		? 1 : 0);
+        nerrors += (test_can_apply_szip(file) < 0		? 1 : 0);
+        nerrors += (test_compare_dcpl(file) < 0		? 1 : 0);
+        nerrors += (test_filter_delete(file) < 0		? 1 : 0);
+        nerrors += (test_filters_endianess(my_fapl) < 0	? 1 : 0);
+        nerrors += (test_zero_dims(file) < 0		? 1 : 0);
+        nerrors += (test_missing_chunk(file) < 0		? 1 : 0);
+        nerrors += (test_random_chunks(my_fapl) < 0		? 1 : 0);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-            nerrors += (test_deprec(file) < 0			? 1 : 0);
+        nerrors += (test_deprec(file) < 0			? 1 : 0);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-            nerrors += (test_huge_chunks(my_fapl) < 0		? 1 : 0);
+        nerrors += (test_huge_chunks(my_fapl) < 0		? 1 : 0);
 
-            if(H5Fclose(file) < 0)
-                goto error;
-        } /* end for */
-
-        /* Close 2nd FAPL */
-	H5Pclose(fapl2);
-
-	if(nerrors)
+        if(H5Fclose(file) < 0)
             goto error;
-	printf("All dataset tests passed.\n");
-	h5_cleanup(FILENAME, fapl);
-    } /* end if */
-    else
-	puts("All dataset tests skipped - Incompatible with current Virtual File Driver");
+    } /* end for */
+
+    /* Close 2nd FAPL */
+    H5Pclose(fapl2);
+
+    if(nerrors)
+        goto error;
+    printf("All dataset tests passed.\n");
+    h5_cleanup(FILENAME, fapl);
 
     return 0;
 
