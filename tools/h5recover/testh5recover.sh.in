@@ -79,6 +79,9 @@ TOOLTEST() {
     # Run test.
     TESTING $TOOL $@
     # Generate the data, journal and the control files.
+    # The testing shell will still print "Terminated" though the signal is
+    # trapped. Need to find a way to block or filter it out.
+    trap true 15
     $RUNSERIAL $TOOL_BIN $@
     # expect first diff to fail
     $RUNSERIAL $H5DIFF $TOOLDataFile $TOOLCTLDataFile > /dev/null 2>&1
@@ -86,7 +89,7 @@ TOOLTEST() {
 	echo first diff did not fail as expected
     fi
     # Recover the file.
-    $RUNSERIAL $RECOVERTOOL_BIN -j $TOOLJournalFile $TOOLDataFile
+    $RUNSERIAL $RECOVERTOOL_BIN -j $TOOLJournalFile $TOOLDataFile > /dev/null
     if [ $? != 0 ]; then
 	echo $RECOVERTOOL failed
 	nerrors="`expr $nerrors + 1`"
@@ -159,7 +162,7 @@ MYH5DIFF(){
 TOOLTEST default.txt
 
 # async crash
-TOOLTEST async_crash.txt -a 0.005
+TOOLTEST async_crash.txt -a 0.05
 
 
 if test $nerrors -eq 0 ; then
@@ -171,6 +174,5 @@ if test $nerrors -eq 0 ; then
     exit 0
 else
     echo $nerrors errors encountered.
-    #exit 1
-    exit 0
+    exit 1
 fi
