@@ -1,5 +1,0 @@
-#############################
-Expected output for 'h5diff -n 2 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4'
-#############################
-dataset: </g1/dset3> and </g1/dset4>
-2 differences found
