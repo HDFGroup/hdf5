@@ -15772,28 +15772,14 @@ main(void)
     fheap_test_type_t curr_test;        /* Current test being worked on */
     unsigned    u;                      /* Local index variable */
     unsigned	nerrors = 0;            /* Cumulative error count */
-    int		ExpressMode;
-    const char *envval = NULL;          /* File Driver value from environment */
+    int		ExpressMode;            /* Express testing level */
 
     /* Reset library */
     h5_reset();
     fapl = h5_fileaccess();
     ExpressMode = GetTestExpress();
-    if (ExpressMode > 1)
+    if(ExpressMode > 1)
 	printf("***Express test mode on.  Some tests may be skipped\n");
-
-    envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL)
-        envval = "nomatch";
-
-    /* This test case with Direct driver has a poor performance on
-     * NCSA copper, though it works.  Skip it if the express mode is set on
-     * and worry about the performance later.
-     */
-    if((HDstrcmp(envval, "core") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") &&
-        HDstrcmp(envval, "family") && HDstrcmp(envval, "stdio")) &&
-        !(!HDstrcmp(envval, "direct") && (ExpressMode > 1)))
-    {
 
     /* Initialize heap creation parameters */
     init_small_cparam(&small_cparam);
@@ -15925,7 +15911,7 @@ fill = FHEAP_TEST_FILL_LARGE;
              * level of complexity gradually. -QAK
              */
 #ifndef QAK
-            if (ExpressMode > 1)
+            if(ExpressMode > 1)
                 printf("***Express test mode on.  test_man_start_5th_recursive_indirect is skipped\n");
             else
                 nerrors += test_man_start_5th_recursive_indirect(fapl, &small_cparam, &tparam);
@@ -15984,7 +15970,7 @@ tparam.drain_half = FHEAP_DEL_DRAIN_ALL;
                     nerrors += test_man_remove_first_row(fapl, &small_cparam, &tparam);
                     nerrors += test_man_remove_first_two_rows(fapl, &small_cparam, &tparam);
                     nerrors += test_man_remove_first_four_rows(fapl, &small_cparam, &tparam);
-                    if (ExpressMode > 1)
+                    if(ExpressMode > 1)
                         printf("***Express test mode on.  Some tests skipped\n");
                     else {
                         nerrors += test_man_remove_all_root_direct(fapl, &small_cparam, &tparam);
@@ -16016,7 +16002,7 @@ tparam.drain_half = FHEAP_DEL_DRAIN_ALL;
                     nerrors += test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(fapl, &small_cparam, &tparam);
                     nerrors += test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
                     nerrors += test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_skipped(fapl, &small_cparam, &tparam);
-                    if (ExpressMode > 1)
+                    if(ExpressMode > 1)
                         printf("***Express test mode on.  Some tests skipped\n");
                     else {
                         nerrors += test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(fapl, &small_cparam, &tparam);
@@ -16104,11 +16090,15 @@ HDfprintf(stderr, "Uncomment tests!\n");
                 tparam.del_dir = del_dir;
 
                 /* Test 'huge' object insert & delete */
+#ifndef QAK
                 nerrors += test_huge_insert_one(fapl, &small_cparam, &tparam);
                 nerrors += test_huge_insert_two(fapl, &small_cparam, &tparam);
                 nerrors += test_huge_insert_three(fapl, &small_cparam, &tparam);
                 nerrors += test_huge_insert_mix(fapl, &small_cparam, &tparam);
                 nerrors += test_filtered_huge(fapl, &small_cparam, &tparam);
+#else /* QAK */
+HDfprintf(stderr, "Uncomment tests!\n");
+#endif /* QAK */
 
 #ifndef QAK
                 /* Test 'tiny' object insert & delete */
@@ -16162,7 +16152,7 @@ HDfprintf(stderr, "Uncomment tests!\n");
 
 #ifndef QAK
         /* Random object insertion & deletion */
-        if (ExpressMode > 1)
+        if(ExpressMode > 1)
             printf("***Express test mode on.  Some tests skipped\n");
         else {
 #ifndef QAK
@@ -16250,10 +16240,6 @@ HDfprintf(stderr, "Uncomment tests!\n");
 #else /* QAK */
 HDfprintf(stderr, "Uncomment cleanup!\n");
 #endif /* QAK */
-    } /* end if(HDstrcmp(envval=="...")) */
-    else {
-        printf("All fractal heap tests skipped - Incompatible with current Virtual File Driver\n");
-    }
 
     return 0;
 

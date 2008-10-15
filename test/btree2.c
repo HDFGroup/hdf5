@@ -6329,6 +6329,71 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	gen_l4_btree2
+ *
+ * Purpose:	Generate a level-4 v2 B-tree for testing.
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, October 14, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+gen_l4_btree2(const char *filename, hid_t fapl, haddr_t *bt2_addr,
+    const hsize_t *records)
+{
+    hid_t	file = -1;
+    H5F_t	*f = NULL;
+    hsize_t     record;                 /* Record to insert into tree */
+    unsigned    u;                      /* Local index variable */
+    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
+
+    /* Create the file to work on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        STACK_ERROR
+
+    /* Get a pointer to the internal file object */
+    if(NULL == (f = (H5F_t *)H5I_object(file)))
+        STACK_ERROR
+
+    /*
+     * Create v2 B-tree
+     */
+    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, bt2_addr/*out*/) < 0)
+        FAIL_STACK_ERROR
+
+    /* Insert random records */
+    for(u = 0; u < INSERT_MANY; u++) {
+        record = records[u];
+        if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, *bt2_addr, &record) < 0)
+            FAIL_STACK_ERROR
+    } /* end for */
+
+    /* Check up on B-tree */
+    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, *bt2_addr, &bt2_stat) < 0)
+        FAIL_STACK_ERROR
+    if(bt2_stat.depth != 4)
+        TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(file) < 0)
+        STACK_ERROR
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+
+    return 1;
+} /* gen_l4_btree2() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_remove_lots
  *
  * Purpose:	Basic tests for the B-tree v2 code.  This test inserts many
@@ -6344,7 +6409,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static unsigned
-test_remove_lots(hid_t fapl)
+test_remove_lots(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t	file = -1;
     char	filename[1024];
@@ -6360,8 +6425,8 @@ test_remove_lots(hid_t fapl)
     hsize_t     *records;               /* Record #'s for random insertion */
     unsigned    u;                      /* Local index variable */
     unsigned    rem_idx;                /* Location to remove */
-    H5B2_stat_t bt2_stat;               /* Statistics about B-tree created */
     hsize_t     nrec;                   /* Number of records in B-tree */
+    hbool_t     single_file_vfd;        /* Whether VFD used stores data in a single file */
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
@@ -6396,62 +6461,36 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
-    /* Create the file to work on */
-    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        STACK_ERROR
-
-    /* Get a pointer to the internal file object */
-    if(NULL == (f = (H5F_t *)H5I_object(file)))
-        STACK_ERROR
-
-    /*
-     * Create v2 B-tree
-     */
-    if(H5B2_create(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, 512, 8, 100, 40, &bt2_addr/*out*/) < 0)
-        FAIL_STACK_ERROR
-
-    /* Insert random records */
-    for(u = 0; u < INSERT_MANY; u++) {
-        record = records[u];
-        if(H5B2_insert(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &record) < 0)
-            FAIL_STACK_ERROR
-    } /* end for */
-
-    /* Check up on B-tree */
-    if(H5B2_stat_info(f, H5P_DATASET_XFER_DEFAULT, H5B2_TEST, bt2_addr, &bt2_stat) < 0)
-        FAIL_STACK_ERROR
-    if(bt2_stat.depth != 4)
+    /* Generate the v2 B-tree to test */
+    if(gen_l4_btree2(filename, fapl, &bt2_addr, records))
         TEST_ERROR
 
-    /* Close file */
-    if(H5Fclose(file) < 0)
-        STACK_ERROR
+    /* Check for VFD which stores data in multiple files */
+    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family"));
+    if(single_file_vfd) {
+        /* Make a copy of the file in memory, in order to speed up deletion testing */
 
+        /* Open the file just created */
+        if((fd = HDopen(filename, O_RDONLY, 0)) < 0)
+            TEST_ERROR
 
-    /* Make a copy of the file in memory, in order to speed up deletion testing */
+        /* Retrieve the file's size */
+        if(HDfstat(fd, &sb) < 0)
+            TEST_ERROR
 
-    /* Open the file just created */
-    if((fd = HDopen(filename, O_RDONLY, 0)) < 0)
-        TEST_ERROR
+        /* Allocate space for the file data */
+        if(NULL == (file_data = HDmalloc((size_t)sb.st_size)))
+            TEST_ERROR
 
-    /* Retrieve the file's size */
-    if(HDfstat(fd, &sb) < 0)
-        TEST_ERROR
+        /* Read file's data into memory */
+        if(HDread(fd, file_data, (size_t)sb.st_size) < (ssize_t)sb.st_size)
+            TEST_ERROR
 
-    /* Allocate space for the file data */
-    if(NULL == (file_data = HDmalloc((size_t)sb.st_size)))
-        TEST_ERROR
-
-    /* Read file's data into memory */
-    if(HDread(fd, file_data, (size_t)sb.st_size) < (ssize_t)sb.st_size)
-        TEST_ERROR
-
-    /* Close the file */
-    if(HDclose(fd) < 0)
-        TEST_ERROR
-    fd = -1;
-
-
+        /* Close the file */
+        if(HDclose(fd) < 0)
+            TEST_ERROR
+        fd = -1;
+    } /* end if */
 
     /* Print banner for this test */
     TESTING("B-tree remove: create random level 4 B-tree and delete all records in random order");
@@ -6511,21 +6550,28 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
 
 
-    /* Re-write the file's data with the copy in memory */
+    /* Check for VFD which stores data in multiple files */
+    if(single_file_vfd) {
+        /* Re-write the file's data with the copy in memory */
 
-    /* Open the file just created */
-    if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
-        TEST_ERROR
+        /* Open the file just created */
+        if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
+            TEST_ERROR
 
-    /* Write file's data from memory */
-    if(HDwrite(fd, file_data, (size_t)sb.st_size) < (ssize_t)sb.st_size)
-        TEST_ERROR
+        /* Write file's data from memory */
+        if(HDwrite(fd, file_data, (size_t)sb.st_size) < (ssize_t)sb.st_size)
+            TEST_ERROR
 
-    /* Close the file */
-    if(HDclose(fd) < 0)
-        TEST_ERROR
-    fd = -1;
-
+        /* Close the file */
+        if(HDclose(fd) < 0)
+            TEST_ERROR
+        fd = -1;
+    } /* end if */
+    else {
+        /* Re-generate the v2 B-tree to test */
+        if(gen_l4_btree2(filename, fapl, &bt2_addr, records))
+            TEST_ERROR
+    } /* end else */
 
 
     /* Print banner for this test */
@@ -6578,20 +6624,28 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
 
 
-    /* Re-write the file's data with the copy in memory */
+    /* Check for VFD which stores data in multiple files */
+    if(single_file_vfd) {
+        /* Re-write the file's data with the copy in memory */
 
-    /* Open the file just created */
-    if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
-        TEST_ERROR
+        /* Open the file just created */
+        if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
+            TEST_ERROR
 
-    /* Write file's data from memory */
-    if(HDwrite(fd, file_data, (size_t)sb.st_size) < (ssize_t)sb.st_size)
-        TEST_ERROR
+        /* Write file's data from memory */
+        if(HDwrite(fd, file_data, (size_t)sb.st_size) < (ssize_t)sb.st_size)
+            TEST_ERROR
 
-    /* Close the file */
-    if(HDclose(fd) < 0)
-        TEST_ERROR
-    fd = -1;
+        /* Close the file */
+        if(HDclose(fd) < 0)
+            TEST_ERROR
+        fd = -1;
+    } /* end if */
+    else {
+        /* Re-generate the v2 B-tree to test */
+        if(gen_l4_btree2(filename, fapl, &bt2_addr, records))
+            TEST_ERROR
+    } /* end else */
 
 
 
@@ -6642,20 +6696,28 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
 
 
-    /* Re-write the file's data with the copy in memory */
+    /* Check for VFD which stores data in multiple files */
+    if(single_file_vfd) {
+        /* Re-write the file's data with the copy in memory */
 
-    /* Open the file just created */
-    if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
-        TEST_ERROR
+        /* Open the file just created */
+        if((fd = HDopen(filename, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0)
+            TEST_ERROR
 
-    /* Write file's data from memory */
-    if(HDwrite(fd, file_data, (size_t)sb.st_size) < (ssize_t)sb.st_size)
-        TEST_ERROR
+        /* Write file's data from memory */
+        if(HDwrite(fd, file_data, (size_t)sb.st_size) < (ssize_t)sb.st_size)
+            TEST_ERROR
 
-    /* Close the file */
-    if(HDclose(fd) < 0)
-        TEST_ERROR
-    fd = -1;
+        /* Close the file */
+        if(HDclose(fd) < 0)
+            TEST_ERROR
+        fd = -1;
+    } /* end if */
+    else {
+        /* Re-generate the v2 B-tree to test */
+        if(gen_l4_btree2(filename, fapl, &bt2_addr, records))
+            TEST_ERROR
+    } /* end else */
 
 
 
@@ -6704,8 +6766,10 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
 
     PASSED();
 
-    HDfree(records);
-    HDfree(file_data);
+    if(records)
+        HDfree(records);
+    if(file_data)
+        HDfree(file_data);
 
     return 0;
 
@@ -6716,8 +6780,10 @@ error:
 
     if(fd > 0)
         HDclose(fd);
-    HDfree(records);
-    HDfree(file_data);
+    if(records)
+        HDfree(records);
+    if(file_data)
+        HDfree(file_data);
 
     return 1;
 } /* test_remove_lots() */
@@ -7432,79 +7498,76 @@ main(void)
     envval = HDgetenv("HDF5_DRIVER");
     if(envval == NULL)
         envval = "nomatch";
-    if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
-	/* Reset library */
-	h5_reset();
-	fapl = h5_fileaccess();
-	ExpressMode = GetTestExpress();
-	if (ExpressMode > 1)
-	    printf("***Express test mode on.  Some tests may be skipped\n");
 
-	/* Test B-tree record insertion */
-	/* Iteration, find & index routines tested in these routines as well */
-	nerrors += test_insert_basic(fapl);
-	nerrors += test_insert_split_root(fapl);
-	nerrors += test_insert_level1_2leaf_redistrib(fapl);
-	nerrors += test_insert_level1_side_split(fapl);
-	nerrors += test_insert_level1_3leaf_redistrib(fapl);
-	nerrors += test_insert_level1_middle_split(fapl);
-	nerrors += test_insert_make_level2(fapl);
-	nerrors += test_insert_level2_leaf_redistrib(fapl);
-	nerrors += test_insert_level2_leaf_split(fapl);
-	nerrors += test_insert_level2_2internal_redistrib(fapl);
-	nerrors += test_insert_level2_2internal_split(fapl);
-	nerrors += test_insert_level2_3internal_redistrib(fapl);
-	nerrors += test_insert_level2_3internal_split(fapl);
-	if (ExpressMode > 1)
-	    printf("***Express test mode on.  test_insert_lots skipped\n");
-	else
-	    nerrors += test_insert_lots(fapl);
+    /* Reset library */
+    h5_reset();
+    fapl = h5_fileaccess();
+    ExpressMode = GetTestExpress();
+    if (ExpressMode > 1)
+        printf("***Express test mode on.  Some tests may be skipped\n");
 
-	/* Test B-tree record removal */
-	/* Querying the number of records routine also tested in these routines as well */
-	nerrors += test_remove_basic(fapl);
-	nerrors += test_remove_level1_noredistrib(fapl);
-	nerrors += test_remove_level1_redistrib(fapl);
-	nerrors += test_remove_level1_2leaf_merge(fapl);
-	nerrors += test_remove_level1_3leaf_merge(fapl);
-	nerrors += test_remove_level1_promote(fapl);
-	nerrors += test_remove_level1_promote_2leaf_redistrib(fapl);
-	nerrors += test_remove_level1_promote_3leaf_redistrib(fapl);
-	nerrors += test_remove_level1_promote_2leaf_merge(fapl);
-	nerrors += test_remove_level1_promote_3leaf_merge(fapl);
-	nerrors += test_remove_level1_collapse(fapl);
-	nerrors += test_remove_level2_promote(fapl);
-	nerrors += test_remove_level2_promote_2internal_redistrib(fapl);
-	nerrors += test_remove_level2_promote_3internal_redistrib(fapl);
-	nerrors += test_remove_level2_promote_2internal_merge(fapl);
-	nerrors += test_remove_level2_promote_3internal_merge(fapl);
-	nerrors += test_remove_level2_2internal_merge_left(fapl);
-	nerrors += test_remove_level2_2internal_merge_right(fapl);
-	nerrors += test_remove_level2_3internal_merge(fapl);
-	nerrors += test_remove_level2_collapse_right(fapl);
-	if (ExpressMode > 1)
-	    printf("***Express test mode on.  test_remove_lots skipped\n");
-	else
-	    nerrors += test_remove_lots(fapl);
-
-	/* Test more complex B-tree queries */
-	nerrors += test_find_neighbor(fapl);
-
-	/* Test deleting B-trees */
-	nerrors += test_delete(fapl);
-
-	/* Test modifying B-tree records */
-	nerrors += test_modify(fapl);
-
-	if(nerrors)
-	    goto error;
-
-	puts("All v2 B-tree tests passed.");
-
-	h5_cleanup(FILENAME, fapl);
-    } /* end if */
+    /* Test B-tree record insertion */
+    /* Iteration, find & index routines tested in these routines as well */
+    nerrors += test_insert_basic(fapl);
+    nerrors += test_insert_split_root(fapl);
+    nerrors += test_insert_level1_2leaf_redistrib(fapl);
+    nerrors += test_insert_level1_side_split(fapl);
+    nerrors += test_insert_level1_3leaf_redistrib(fapl);
+    nerrors += test_insert_level1_middle_split(fapl);
+    nerrors += test_insert_make_level2(fapl);
+    nerrors += test_insert_level2_leaf_redistrib(fapl);
+    nerrors += test_insert_level2_leaf_split(fapl);
+    nerrors += test_insert_level2_2internal_redistrib(fapl);
+    nerrors += test_insert_level2_2internal_split(fapl);
+    nerrors += test_insert_level2_3internal_redistrib(fapl);
+    nerrors += test_insert_level2_3internal_split(fapl);
+    if (ExpressMode > 1)
+        printf("***Express test mode on.  test_insert_lots skipped\n");
     else
-        puts("All v2 B-tree tests skipped - Incompatible with current Virtual File Driver");
+        nerrors += test_insert_lots(fapl);
+
+    /* Test B-tree record removal */
+    /* Querying the number of records routine also tested in these routines as well */
+    nerrors += test_remove_basic(fapl);
+    nerrors += test_remove_level1_noredistrib(fapl);
+    nerrors += test_remove_level1_redistrib(fapl);
+    nerrors += test_remove_level1_2leaf_merge(fapl);
+    nerrors += test_remove_level1_3leaf_merge(fapl);
+    nerrors += test_remove_level1_promote(fapl);
+    nerrors += test_remove_level1_promote_2leaf_redistrib(fapl);
+    nerrors += test_remove_level1_promote_3leaf_redistrib(fapl);
+    nerrors += test_remove_level1_promote_2leaf_merge(fapl);
+    nerrors += test_remove_level1_promote_3leaf_merge(fapl);
+    nerrors += test_remove_level1_collapse(fapl);
+    nerrors += test_remove_level2_promote(fapl);
+    nerrors += test_remove_level2_promote_2internal_redistrib(fapl);
+    nerrors += test_remove_level2_promote_3internal_redistrib(fapl);
+    nerrors += test_remove_level2_promote_2internal_merge(fapl);
+    nerrors += test_remove_level2_promote_3internal_merge(fapl);
+    nerrors += test_remove_level2_2internal_merge_left(fapl);
+    nerrors += test_remove_level2_2internal_merge_right(fapl);
+    nerrors += test_remove_level2_3internal_merge(fapl);
+    nerrors += test_remove_level2_collapse_right(fapl);
+    if (ExpressMode > 1)
+        printf("***Express test mode on.  test_remove_lots skipped\n");
+    else
+        nerrors += test_remove_lots(envval, fapl);
+
+    /* Test more complex B-tree queries */
+    nerrors += test_find_neighbor(fapl);
+
+    /* Test deleting B-trees */
+    nerrors += test_delete(fapl);
+
+    /* Test modifying B-tree records */
+    nerrors += test_modify(fapl);
+
+    if(nerrors)
+        goto error;
+
+    puts("All v2 B-tree tests passed.");
+
+    h5_cleanup(FILENAME, fapl);
 
     return 0;
 

@@ -85,184 +85,175 @@ test_atomic_dtype(hid_t file)
     int			i, j, n;
     hsize_t		dims[2];
     void                *tmp;
-    const char          *envval = NULL;
 
     TESTING("atomic datatype");
-    envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL)
-        envval = "nomatch";
-    if(HDstrcmp(envval, "split") && HDstrcmp(envval, "multi")) {
-	/* Initialize the dataset */
-	for(i = n = 0; i < DIM0; i++)
-	    for(j = 0; j < DIM1; j++)
-		ipoints2[i][j] = n++;
 
-	/* Create the data space */
-	dims[0] = DIM0;
-	dims[1] = DIM1;
-	if((space = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR;
+    /* Initialize the dataset */
+    for(i = n = 0; i < DIM0; i++)
+        for(j = 0; j < DIM1; j++)
+            ipoints2[i][j] = n++;
 
-	/*------------------- Test data values ------------------------*/
-	/* Create the dataset */
-	if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_1, H5T_STD_I32BE, space,
-				    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    /* Create the data space */
+    dims[0] = DIM0;
+    dims[1] = DIM1;
+    if((space = H5Screate_simple(2, dims, NULL)) < 0) TEST_ERROR;
 
-	/* Write the data to the dataset */
-	if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2) < 0)
-	    TEST_ERROR;
+    /*------------------- Test data values ------------------------*/
+    /* Create the dataset */
+    if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_1, H5T_STD_I32BE, space,
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-	/* Close dataset */
-	if(H5Dclose(dataset) < 0) TEST_ERROR;
+    /* Write the data to the dataset */
+    if(H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2) < 0)
+        TEST_ERROR;
 
-	/* Open dataset again to check H5Tget_native_type */
-	if((dataset = H5Dopen2(file, DSET_ATOMIC_NAME_1, H5P_DEFAULT)) < 0) TEST_ERROR;
+    /* Close dataset */
+    if(H5Dclose(dataset) < 0) TEST_ERROR;
 
-	if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
+    /* Open dataset again to check H5Tget_native_type */
+    if((dataset = H5Dopen2(file, DSET_ATOMIC_NAME_1, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-	if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
-	    TEST_ERROR;
+    if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
 
-	/* Verify the datatype retrieved and converted */
-	if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_INT))
-	    TEST_ERROR;
-	if(H5Tget_size(native_type) < H5Tget_size(H5T_STD_I32BE))
-	    TEST_ERROR;
-	if(H5T_INTEGER != H5Tget_class(native_type))
-	    TEST_ERROR;
+    if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
+        TEST_ERROR;
 
-	/* Read the dataset back.  The temporary buffer is for special platforms
-	    * like Cray. */
-	tmp = malloc((size_t)(DIM0 * DIM1 * H5Tget_size(native_type)));
+    /* Verify the datatype retrieved and converted */
+    if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_INT))
+        TEST_ERROR;
+    if(H5Tget_size(native_type) < H5Tget_size(H5T_STD_I32BE))
+        TEST_ERROR;
+    if(H5T_INTEGER != H5Tget_class(native_type))
+        TEST_ERROR;
 
-	if(H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
-	    TEST_ERROR;
+    /* Read the dataset back.  The temporary buffer is for special platforms
+        * like Cray. */
+    tmp = malloc((size_t)(DIM0 * DIM1 * H5Tget_size(native_type)));
 
-	/* Copy data from temporary buffer to destination buffer */
-	memcpy(icheck2, tmp, (size_t)(DIM0 * DIM1 * H5Tget_size(native_type)));
-	free(tmp);
+    if(H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
+        TEST_ERROR;
 
-	/* Convert to the integer type */
-	if(H5Tconvert(native_type, H5T_NATIVE_INT, (DIM0*DIM1), icheck2, NULL, H5P_DEFAULT) < 0)
-	    TEST_ERROR;
+    /* Copy data from temporary buffer to destination buffer */
+    memcpy(icheck2, tmp, (size_t)(DIM0 * DIM1 * H5Tget_size(native_type)));
+    free(tmp);
 
-	/* Check that the values read are the same as the values written */
-	for(i = 0; i < DIM0; i++)
-	    for(j = 0; j < DIM1; j++)
-		if(ipoints2[i][j] != icheck2[i][j]) {
-		    H5_FAILED();
-		    printf("    Read different values than written.\n");
-		    printf("    At index %d,%d\n", i, j);
-		    goto error;
-		} /* end if */
+    /* Convert to the integer type */
+    if(H5Tconvert(native_type, H5T_NATIVE_INT, (DIM0*DIM1), icheck2, NULL, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
-	if(H5Dclose(dataset) < 0) TEST_ERROR;
-	if(H5Tclose(native_type) < 0) TEST_ERROR;
-	if(H5Tclose(dtype) < 0) TEST_ERROR;
+    /* Check that the values read are the same as the values written */
+    for(i = 0; i < DIM0; i++)
+        for(j = 0; j < DIM1; j++)
+            if(ipoints2[i][j] != icheck2[i][j]) {
+                H5_FAILED();
+                printf("    Read different values than written.\n");
+                printf("    At index %d,%d\n", i, j);
+                goto error;
+            } /* end if */
 
-	/*------------------ Test different data types ----------------*/
+    if(H5Dclose(dataset) < 0) TEST_ERROR;
+    if(H5Tclose(native_type) < 0) TEST_ERROR;
+    if(H5Tclose(dtype) < 0) TEST_ERROR;
 
-	/* Create the dataset of H5T_STD_I64LE */
-	if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_2, H5T_STD_I64LE, space,
-				    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    /*------------------ Test different data types ----------------*/
 
-	if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
+    /* Create the dataset of H5T_STD_I64LE */
+    if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_2, H5T_STD_I64LE, space,
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-	if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
-	    TEST_ERROR;
+    if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
 
-	/* Verify the datatype retrieved and converted */
-	if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_LLONG))
-	    TEST_ERROR;
-	if(H5Tget_size(native_type) < H5Tget_size(H5T_STD_I64LE))
-	    TEST_ERROR;
-	if(H5T_INTEGER!=H5Tget_class(native_type))
-	    TEST_ERROR;
+    if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
+        TEST_ERROR;
 
-	if(H5Dclose(dataset) < 0) TEST_ERROR;
-	if(H5Tclose(native_type) < 0) TEST_ERROR;
-	if(H5Tclose(dtype) < 0) TEST_ERROR;
+    /* Verify the datatype retrieved and converted */
+    if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_LLONG))
+        TEST_ERROR;
+    if(H5Tget_size(native_type) < H5Tget_size(H5T_STD_I64LE))
+        TEST_ERROR;
+    if(H5T_INTEGER!=H5Tget_class(native_type))
+        TEST_ERROR;
+
+    if(H5Dclose(dataset) < 0) TEST_ERROR;
+    if(H5Tclose(native_type) < 0) TEST_ERROR;
+    if(H5Tclose(dtype) < 0) TEST_ERROR;
 
 
-	/* Create the dataset of H5T_STD_I8LE */
-	if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_3, H5T_STD_I8LE, space,
-				    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    /* Create the dataset of H5T_STD_I8LE */
+    if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_3, H5T_STD_I8LE, space,
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-	if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
+    if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
 
-	if((native_type = H5Tget_native_type(dtype, H5T_DIR_ASCEND)) < 0)
-	    TEST_ERROR;
+    if((native_type = H5Tget_native_type(dtype, H5T_DIR_ASCEND)) < 0)
+        TEST_ERROR;
 
-	/* Verify the datatype retrieved and converted */
-	if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_CHAR))
-	    TEST_ERROR;
-	if(H5Tget_size(native_type) < H5Tget_size(H5T_STD_I8LE))
-	    TEST_ERROR;
-	if(H5T_INTEGER!=H5Tget_class(native_type))
-	    TEST_ERROR;
+    /* Verify the datatype retrieved and converted */
+    if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_CHAR))
+        TEST_ERROR;
+    if(H5Tget_size(native_type) < H5Tget_size(H5T_STD_I8LE))
+        TEST_ERROR;
+    if(H5T_INTEGER!=H5Tget_class(native_type))
+        TEST_ERROR;
 
-	if(H5Dclose(dataset) < 0) TEST_ERROR;
-	if(H5Tclose(native_type) < 0) TEST_ERROR;
-	if(H5Tclose(dtype) < 0) TEST_ERROR;
-
-
-	/* Create the dataset of H5T_IEEE_F32BE */
-	if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_4, H5T_IEEE_F32BE, space,
-				    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
-
-	if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
-
-	if((native_type = H5Tget_native_type(dtype, H5T_DIR_DESCEND)) < 0)
-	    TEST_ERROR;
-
-	/* Verify the datatype retrieved and converted */
-	if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_FLOAT))
-	    TEST_ERROR;
-	if(H5Tget_size(native_type) < H5Tget_size(H5T_IEEE_F32BE))
-	    TEST_ERROR;
-	if(H5T_FLOAT!=H5Tget_class(native_type))
-	    TEST_ERROR;
-
-	if(H5Dclose(dataset) < 0) TEST_ERROR;
-	if(H5Tclose(native_type) < 0) TEST_ERROR;
-	if(H5Tclose(dtype) < 0) TEST_ERROR;
+    if(H5Dclose(dataset) < 0) TEST_ERROR;
+    if(H5Tclose(native_type) < 0) TEST_ERROR;
+    if(H5Tclose(dtype) < 0) TEST_ERROR;
 
 
-	/* Create the dataset of H5T_IEEE_F64BE */
-	if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_5, H5T_IEEE_F64BE, space,
-				    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
+    /* Create the dataset of H5T_IEEE_F32BE */
+    if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_4, H5T_IEEE_F32BE, space,
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-	if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
+    if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
 
-	if((native_type = H5Tget_native_type(dtype, H5T_DIR_DESCEND)) < 0)
-	    TEST_ERROR;
+    if((native_type = H5Tget_native_type(dtype, H5T_DIR_DESCEND)) < 0)
+        TEST_ERROR;
 
-	/* Verify the datatype retrieved and converted */
-	if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_DOUBLE))
-	    TEST_ERROR;
-	if(H5Tget_size(native_type) < H5Tget_size(H5T_IEEE_F64BE))
-	    TEST_ERROR;
-	if(H5T_FLOAT != H5Tget_class(native_type))
-	    TEST_ERROR;
+    /* Verify the datatype retrieved and converted */
+    if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_FLOAT))
+        TEST_ERROR;
+    if(H5Tget_size(native_type) < H5Tget_size(H5T_IEEE_F32BE))
+        TEST_ERROR;
+    if(H5T_FLOAT!=H5Tget_class(native_type))
+        TEST_ERROR;
 
-	if(H5Dclose(dataset) < 0) TEST_ERROR;
-	if(H5Tclose(native_type) < 0) TEST_ERROR;
-	if(H5Tclose(dtype) < 0) TEST_ERROR;
+    if(H5Dclose(dataset) < 0) TEST_ERROR;
+    if(H5Tclose(native_type) < 0) TEST_ERROR;
+    if(H5Tclose(dtype) < 0) TEST_ERROR;
 
 
-	/* Close dataspace */
-	if(H5Sclose(space) < 0) TEST_ERROR;
+    /* Create the dataset of H5T_IEEE_F64BE */
+    if((dataset = H5Dcreate2(file, DSET_ATOMIC_NAME_5, H5T_IEEE_F64BE, space,
+                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;
 
-	PASSED();
-    }
-    else
-    {
-        SKIPPED();
-        puts("    Test not compatible with current Virtual File Driver");
-    }
+    if((dtype = H5Dget_type(dataset)) < 0) TEST_ERROR;
+
+    if((native_type = H5Tget_native_type(dtype, H5T_DIR_DESCEND)) < 0)
+        TEST_ERROR;
+
+    /* Verify the datatype retrieved and converted */
+    if(H5Tget_order(native_type) != H5Tget_order(H5T_NATIVE_DOUBLE))
+        TEST_ERROR;
+    if(H5Tget_size(native_type) < H5Tget_size(H5T_IEEE_F64BE))
+        TEST_ERROR;
+    if(H5T_FLOAT != H5Tget_class(native_type))
+        TEST_ERROR;
+
+    if(H5Dclose(dataset) < 0) TEST_ERROR;
+    if(H5Tclose(native_type) < 0) TEST_ERROR;
+    if(H5Tclose(dtype) < 0) TEST_ERROR;
+
+
+    /* Close dataspace */
+    if(H5Sclose(space) < 0) TEST_ERROR;
+
+    PASSED();
+
     return 0;
 
-    error:
-        return -1;
+error:
+    return -1;
 }
 
 
@@ -307,9 +298,9 @@ test_compound_dtype2(hid_t file)
     TESTING("nested compound datatype");
 
     /* Allocate space for the points & check arrays */
-    if((points=malloc(sizeof(s1)*DIM0*DIM1))==NULL)
+    if(NULL == (points = (s1 *)HDmalloc(sizeof(s1) * DIM0 * DIM1)))
         TEST_ERROR;
-    if((check=calloc(sizeof(s1),DIM0*DIM1))==NULL)
+    if(NULL == (check = (s1 *)HDcalloc(sizeof(s1), DIM0 * DIM1)))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -317,9 +308,9 @@ test_compound_dtype2(hid_t file)
 	for (j = 0; j < DIM1; j++,temp_point++) {
 	    temp_point->c = 't';
 	    temp_point->i = n++;
-	    temp_point->st.c2 = i+j;
-	    temp_point->st.l2 = (i*5+j*50)*n;
-	    temp_point->l = (i*10+j*100)*n;
+	    temp_point->st.c2 = (short)(i + j);
+	    temp_point->st.l2 = (i * 5 + j * 50) * n;
+	    temp_point->l = (unsigned long_long)((i * 10 + j * 100) * n);
 	}
     }
 
@@ -554,16 +545,16 @@ test_compound_dtype(hid_t file)
 
 
     /* Allocate space for the points & check arrays */
-    if((points=malloc(sizeof(s1)*DIM0*DIM1))==NULL)
+    if(NULL == (points = (s1 *)HDmalloc(sizeof(s1) * DIM0 * DIM1)))
         TEST_ERROR;
-    if((check = calloc(sizeof(s1), DIM0 * DIM1)) == NULL)
+    if(NULL == (check = (s1 *)HDcalloc(sizeof(s1), DIM0 * DIM1)))
         TEST_ERROR;
 
     /* Initialize the dataset */
     for(i = n = 0, temp_point=points; i < DIM0; i++)
 	for(j = 0; j < DIM1; j++,temp_point++) {
 	    temp_point->c = 't';
-	    temp_point->i = n++;
+	    temp_point->i = (unsigned int)(n++);
 	    temp_point->l = (i*10+j*100)*n;
 	} /* end for */
 
@@ -727,9 +718,9 @@ test_compound_dtype3(hid_t file)
     TESTING("compound datatype with array as field");
 
     /* Allocate space for the points & check arrays */
-    if((points=malloc(sizeof(s1)*DIM0*DIM1))==NULL)
+    if(NULL == (points = (s1 *)HDmalloc(sizeof(s1) * DIM0 * DIM1)))
         TEST_ERROR;
-    if((check=calloc(sizeof(s1),DIM0*DIM1))==NULL)
+    if(NULL == (check = (s1 *)HDcalloc(sizeof(s1), DIM0 * DIM1)))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -925,9 +916,9 @@ test_compound_opaque(hid_t file)
     TESTING("compound datatype with opaque field");
 
     /* Allocate space for the points & check arrays */
-    if((points=HDmalloc(sizeof(s1)*DIM0*DIM1))==NULL)
+    if(NULL == (points = (s1 *)HDmalloc(sizeof(s1) * DIM0 * DIM1)))
         TEST_ERROR;
-    if((check=HDcalloc(sizeof(s1),DIM0*DIM1))==NULL)
+    if(NULL == (check = (s1 *)HDcalloc(sizeof(s1), DIM0 * DIM1)))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -936,7 +927,7 @@ test_compound_opaque(hid_t file)
 	    temp_point->c = 't';
 	    temp_point->l = (i*10+j*100)*n;
 	    for(k = 0; k < 5; k++)
-	        (temp_point->o)[k] = n++;
+	        (temp_point->o)[k] = (unsigned char)(n++);
 	} /* end for */
 
     /* Create the data space */
@@ -1117,7 +1108,7 @@ test_enum_dtype(hid_t file)
     /* Initialize the dataset */
     for(i = 0; i < DIM0; i++)
         for(j = 0, n = 0; j < DIM1; j++, n++)
-	    spoints2[i][j] = (i*10+j*100+n)%8;
+	    spoints2[i][j] = (short)((i * 10 + j * 100 + n) % 8);
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -1128,7 +1119,7 @@ test_enum_dtype(hid_t file)
     if((tid = H5Tenum_create(H5T_STD_I16LE)) < 0) TEST_ERROR;
 
     for(i = 0; i < 8; i++) {
-        sub_colors[i * 2] = i;
+        sub_colors[i * 2] = (unsigned char)i;
         sub_colors[i * 2 + 1] = 0;
         if(H5Tenum_insert(tid, mname[i], &(sub_colors[i*2])) < 0) TEST_ERROR;
     } /* end for */
@@ -1141,7 +1132,7 @@ test_enum_dtype(hid_t file)
     if((tid_m = H5Tenum_create(H5T_NATIVE_SHORT)) < 0) TEST_ERROR;
 
     for(i = 0; i < 8; i++) {
-        colors[i] = i;
+        colors[i] = (short)i;
         if(H5Tenum_insert(tid_m, mname[i], &(colors[i])) < 0) TEST_ERROR;
     } /* end for */
 
@@ -1240,9 +1231,9 @@ test_array_dtype(hid_t file)
     TESTING("array of compound datatype");
 
     /* Allocate space for the points & check arrays */
-    if((points=malloc(sizeof(s1)*DIM0*DIM1*5))==NULL)
+    if(NULL == (points = (s1 *)HDmalloc(sizeof(s1) * DIM0 * DIM1 * 5)))
         TEST_ERROR;
-    if((check=calloc(sizeof(s1),DIM0*DIM1*5))==NULL)
+    if(NULL == (check = (s1 *)HDcalloc(sizeof(s1), DIM0 * DIM1 * 5)))
         TEST_ERROR;
 
     /* Initialize the dataset */
@@ -1307,7 +1298,7 @@ test_array_dtype(hid_t file)
 
     /* Read the dataset back. Temporary buffer is for special platforms like
      * Cray */
-    tmp = malloc(DIM0 * DIM1 * H5Tget_size(native_type));
+    tmp = HDmalloc(DIM0 * DIM1 * H5Tget_size(native_type));
 
     if(H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
 	TEST_ERROR;
@@ -1429,7 +1420,7 @@ test_array_dtype2(hid_t file)
 
     /* Read the dataset back.  Temporary buffer is for special platforms like
      * Cray */
-    tmp = malloc(DIM0 * DIM1 * H5Tget_size(native_type));
+    tmp = HDmalloc(DIM0 * DIM1 * H5Tget_size(native_type));
 
     if(H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp) < 0)
 	TEST_ERROR;
@@ -1500,15 +1491,15 @@ test_vl_dtype(hid_t file)
 
     /* Allocate and initialize VL data to write */
     for(i=0; i<SPACE1_DIM1; i++) {
-        wdata[i].p=malloc((i+1)*sizeof(hvl_t));
+        wdata[i].p = HDmalloc((i + 1) * sizeof(hvl_t));
         if(wdata[i].p==NULL) {
             H5_FAILED();
             printf("    Cannot allocate memory for VL data! i=%u\n",(unsigned)i);
             goto error;
         } /* end if */
         wdata[i].len=i+1;
-        for(t1=wdata[i].p,j=0; j<(i+1); j++, t1++) {
-            t1->p=malloc((j+1)*sizeof(unsigned int));
+        for(t1 = (hvl_t *)wdata[i].p, j = 0; j < (i + 1); j++, t1++) {
+            t1->p = HDmalloc((j + 1) * sizeof(unsigned int));
             if(t1->p==NULL) {
                 H5_FAILED();
                 printf("    Cannot allocate memory for VL data! i=%u, j=%u\n",(unsigned)i,(unsigned)j);
@@ -1575,7 +1566,7 @@ test_vl_dtype(hid_t file)
             printf("    VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
             goto error;
         } /* end if */
-        for(t1 = wdata[i].p, t2 = rdata[i].p, j = 0; j<rdata[i].len; j++, t1++, t2++) {
+        for(t1 = (hvl_t *)wdata[i].p, t2 = (hvl_t *)rdata[i].p, j = 0; j<rdata[i].len; j++, t1++, t2++) {
             if(t1->len != t2->len) {
                 H5_FAILED();
                 printf("    VL data length don't match!, wdata[%d].len=%d, rdata[%d].len=%d\n",(int)i,(int)wdata[i].len,(int)i,(int)rdata[i].len);
@@ -1584,8 +1575,8 @@ test_vl_dtype(hid_t file)
 
             /* use temporary buffer to convert datatype.  This is for special
              * platforms like Cray */
-            tmp=malloc(t2->len*sizeof(unsigned int));
-            memcpy(tmp, t2->p, t2->len*H5Tget_size(nat_super_type));
+            tmp = (void **)HDmalloc(t2->len * sizeof(unsigned int));
+            HDmemcpy(tmp, t2->p, t2->len * H5Tget_size(nat_super_type));
 
             if(H5Tconvert(nat_super_type, H5T_NATIVE_UINT, t2->len, tmp, NULL, H5P_DEFAULT))
                 TEST_ERROR;
@@ -1878,135 +1869,124 @@ test_refer_dtype(hid_t file)
     hid_t		sid1;       /* Dataspace ID			*/
     hid_t		tid1, dtype, native_type;       /* Datatype ID	*/
     hsize_t		dims1[] = {1};
+    H5O_type_t          obj_type;       /* Object type */
     hobj_ref_t          *wbuf,      /* buffer to write to disk */
                         *rbuf;       /* buffer read from disk */
-    const char          *envval = NULL;
 
     /* Output message about test being performed */
     TESTING("reference datatype");
-    envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL)
-        envval = "nomatch";
-    if(HDstrcmp(envval, "multi")) {
-        H5O_type_t          obj_type;       /* Object type */
 
-	/* Allocate write & read buffers */
-	wbuf=HDmalloc(MAX(sizeof(unsigned),sizeof(hobj_ref_t)));
-	rbuf=HDmalloc(MAX(sizeof(unsigned),sizeof(hobj_ref_t)));
+    /* Allocate write & read buffers */
+    wbuf = (hobj_ref_t *)HDmalloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)));
+    rbuf = (hobj_ref_t *)HDmalloc(MAX(sizeof(unsigned), sizeof(hobj_ref_t)));
 
-	/* Create dataspace for datasets */
-	if((sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL)) < 0)
-	    TEST_ERROR;
+    /* Create dataspace for datasets */
+    if((sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL)) < 0)
+        TEST_ERROR;
 
-	/* Create a group */
-	if((group = H5Gcreate2(file, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    /* Create a group */
+    if((group = H5Gcreate2(file, "Group1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
-	/* Create a datatype to refer to */
-	if((tid1 = H5Tcreate (H5T_COMPOUND, sizeof(s1_t))) < 0)
-	    TEST_ERROR;
+    /* Create a datatype to refer to */
+    if((tid1 = H5Tcreate (H5T_COMPOUND, sizeof(s1_t))) < 0)
+        TEST_ERROR;
 
-	/* Insert fields */
-	if(H5Tinsert (tid1, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT) < 0)
-	    TEST_ERROR;
+    /* Insert fields */
+    if(H5Tinsert (tid1, "a", HOFFSET(s1_t,a), H5T_NATIVE_INT) < 0)
+        TEST_ERROR;
 
-	if(H5Tinsert (tid1, "b", HOFFSET(s1_t, b), H5T_NATIVE_INT) < 0)
-	    TEST_ERROR;
+    if(H5Tinsert (tid1, "b", HOFFSET(s1_t, b), H5T_NATIVE_INT) < 0)
+        TEST_ERROR;
 
-	if(H5Tinsert(tid1, "c", HOFFSET(s1_t, c), H5T_NATIVE_FLOAT) < 0)
-	    TEST_ERROR;
+    if(H5Tinsert(tid1, "c", HOFFSET(s1_t, c), H5T_NATIVE_FLOAT) < 0)
+        TEST_ERROR;
 
-	/* Save datatype for later */
-	if(H5Tcommit2(group, "Datatype1", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
-	    TEST_ERROR;
+    /* Save datatype for later */
+    if(H5Tcommit2(group, "Datatype1", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        TEST_ERROR;
 
-	/* Close datatype */
-	if(H5Tclose(tid1) < 0)
-	    TEST_ERROR;
+    /* Close datatype */
+    if(H5Tclose(tid1) < 0)
+        TEST_ERROR;
 
-	/* Close group */
-	if(H5Gclose(group) < 0)
-	    TEST_ERROR;
+    /* Close group */
+    if(H5Gclose(group) < 0)
+        TEST_ERROR;
 
-	/* Create a dataset */
-	if((dataset = H5Dcreate2(file, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-	    TEST_ERROR;
+    /* Create a dataset */
+    if((dataset = H5Dcreate2(file, "Dataset3", H5T_STD_REF_OBJ, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
-	/* Create reference to named datatype */
-	if(H5Rcreate(wbuf, file, "/Group1/Datatype1", H5R_OBJECT, -1) < 0)
-	    TEST_ERROR;
-	if(H5Rget_obj_type2(dataset, H5R_OBJECT, wbuf, &obj_type) < 0)
-	    TEST_ERROR;
-	if(obj_type != H5O_TYPE_NAMED_DATATYPE)
-	    TEST_ERROR;
+    /* Create reference to named datatype */
+    if(H5Rcreate(wbuf, file, "/Group1/Datatype1", H5R_OBJECT, -1) < 0)
+        TEST_ERROR;
+    if(H5Rget_obj_type2(dataset, H5R_OBJECT, wbuf, &obj_type) < 0)
+        TEST_ERROR;
+    if(obj_type != H5O_TYPE_NAMED_DATATYPE)
+        TEST_ERROR;
 
-	/* Write selection to disk */
-	if(H5Dwrite(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
-	    TEST_ERROR;
+    /* Write selection to disk */
+    if(H5Dwrite(dataset, H5T_STD_REF_OBJ, H5S_ALL, H5S_ALL, H5P_DEFAULT, wbuf) < 0)
+        TEST_ERROR;
 
-	/* Close disk dataspace */
-	if(H5Sclose(sid1) < 0)
-	    TEST_ERROR;
+    /* Close disk dataspace */
+    if(H5Sclose(sid1) < 0)
+        TEST_ERROR;
 
-	/* Close Dataset */
-	if(H5Dclose(dataset) < 0)
-	    TEST_ERROR;
+    /* Close Dataset */
+    if(H5Dclose(dataset) < 0)
+        TEST_ERROR;
 
 
-	/* Open the dataset */
-	if((dataset = H5Dopen2(file, "/Dataset3", H5P_DEFAULT)) < 0)
-	    TEST_ERROR;
+    /* Open the dataset */
+    if((dataset = H5Dopen2(file, "/Dataset3", H5P_DEFAULT)) < 0)
+        TEST_ERROR;
 
-	/* Get datatype for dataset */
-	if((dtype = H5Dget_type(dataset)) < 0)
-	    TEST_ERROR;
+    /* Get datatype for dataset */
+    if((dtype = H5Dget_type(dataset)) < 0)
+        TEST_ERROR;
 
-	/* Construct native type */
-	if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
-	    TEST_ERROR;
+    /* Construct native type */
+    if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) < 0)
+        TEST_ERROR;
 
-	/* Check if the data type is equal */
-	if(!H5Tequal(native_type, H5T_STD_REF_OBJ))
-	    TEST_ERROR;
+    /* Check if the data type is equal */
+    if(!H5Tequal(native_type, H5T_STD_REF_OBJ))
+        TEST_ERROR;
 
-	/* Read selection from disk */
-	if(H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
-	    TEST_ERROR;
+    /* Read selection from disk */
+    if(H5Dread(dataset, native_type, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0)
+        TEST_ERROR;
 
-	/* Open datatype object */
-	if((tid1 = H5Rdereference(dataset, H5R_OBJECT, rbuf)) < 0)
-	    TEST_ERROR;
+    /* Open datatype object */
+    if((tid1 = H5Rdereference(dataset, H5R_OBJECT, rbuf)) < 0)
+        TEST_ERROR;
 
-	/* Verify correct datatype */
-	if(H5Tget_class(tid1) != H5T_COMPOUND)
-	    TEST_ERROR;
+    /* Verify correct datatype */
+    if(H5Tget_class(tid1) != H5T_COMPOUND)
+        TEST_ERROR;
 
-	if(H5Tget_nmembers(tid1)!=3)
-	    TEST_ERROR;
+    if(H5Tget_nmembers(tid1)!=3)
+        TEST_ERROR;
 
-	/* Close datatype */
-	if(H5Tclose(tid1) < 0)
-	    TEST_ERROR;
+    /* Close datatype */
+    if(H5Tclose(tid1) < 0)
+        TEST_ERROR;
 
-	/* Close Dataset */
-	if(H5Dclose(dataset) < 0)
-	    TEST_ERROR;
+    /* Close Dataset */
+    if(H5Dclose(dataset) < 0)
+        TEST_ERROR;
 
-	/* Free memory buffers */
-	free(wbuf);
-	free(rbuf);
+    /* Free memory buffers */
+    free(wbuf);
+    free(rbuf);
 
-	PASSED();
-    }
-    else
-    {
-        SKIPPED();
-        puts("    Test not compatible with current Virtual File Driver");
-    }
+    PASSED();
+
     return 0;
 
-    error:
-        return -1;
-
+error:
+    return -1;
 }   /* test_refer_dtype() */
 
 
@@ -2052,8 +2032,8 @@ test_refer_dtype2(hid_t file)
     TESTING("dataset region reference");
 
     /* Allocate write & read buffers */
-    dwbuf = malloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
-    drbuf = calloc(sizeof(uint8_t), SPACE2_DIM1 * SPACE2_DIM2);
+    dwbuf = (uint8_t *)HDmalloc(sizeof(uint8_t) * SPACE2_DIM1 * SPACE2_DIM2);
+    drbuf = (uint8_t *)HDcalloc(sizeof(uint8_t), SPACE2_DIM1 * SPACE2_DIM2);
 
     /* Create dataspace for datasets */
     if((sid2 = H5Screate_simple(SPACE2_RANK, dims2, NULL)) < 0)
@@ -2064,7 +2044,7 @@ test_refer_dtype2(hid_t file)
         TEST_ERROR;
 
     for(tu8 = dwbuf, i = 0; i < SPACE2_DIM1 * SPACE2_DIM2; i++)
-        *tu8++=i*3;
+        *tu8++ = (uint8_t)(i * 3);
 
     /* Write selection to disk */
     if(H5Dwrite(dset2, H5T_STD_U8LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dwbuf) < 0)

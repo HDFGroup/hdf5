@@ -842,65 +842,67 @@ test_4 (hid_t fapl)
     char	filename[1024];		/*file name			*/
     char        pathname[1024];
     char       *srcdir = getenv("srcdir"); /*where the src code is located*/
-    const char *envval = NULL;
 
     TESTING("opening external link twice");
 
-    /* Don't run this test using the multi file driver */
-    envval = HDgetenv("HDF5_DRIVER");
-    if (envval == NULL)
-        envval = "nomatch";
-    if (HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
-        h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
+    /* Make a copy of the FAPL, in order to switch to the sec2 driver */
+    /* (useful when running test with another VFD) */
+    if((fapl = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR;
 
-        if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-	    goto error;
+    /* Switch local copy of the fapl to the sec2 driver */
+    if(H5Pset_fapl_sec2(fapl) < 0) FAIL_STACK_ERROR;
 
-        if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
-	    goto error;
+    h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
 
-        pathname[0] = '\0';
-        /* Generate correct name for test file by prepending the source path */
-        if(srcdir && ((HDstrlen(srcdir) + HDstrlen(LINKED_FILE) + 1) < sizeof(pathname))) {
-            HDstrcpy(pathname, srcdir);
-            HDstrcat(pathname, "/");
-        }
-        HDstrcat(pathname, LINKED_FILE);
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+        goto error;
 
-        /* Create an external link to an existing file*/
-        if(H5Lcreate_external(pathname, "/group", gid, " link", H5P_DEFAULT, H5P_DEFAULT) < 0)
-	    goto error;
+    if((gid = H5Gopen2(fid, "/", H5P_DEFAULT)) < 0)
+        goto error;
 
-        if(H5Gclose(gid) < 0)
-	    goto error;
+    pathname[0] = '\0';
+    /* Generate correct name for test file by prepending the source path */
+    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(LINKED_FILE) + 1) < sizeof(pathname))) {
+        HDstrcpy(pathname, srcdir);
+        HDstrcat(pathname, "/");
+    }
+    HDstrcat(pathname, LINKED_FILE);
 
-        if(H5Fclose(fid) < 0)
-	    goto error;
+    /* Create an external link to an existing file*/
+    if(H5Lcreate_external(pathname, "/group", gid, " link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto error;
 
-        /* Reopen the file */
-        if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
-	    goto error;
+    if(H5Gclose(gid) < 0)
+        goto error;
 
-        /* Open the external link */
-        if((xid = H5Gopen2(fid, "/ link", H5P_DEFAULT)) < 0)
-	    goto error;
+    if(H5Fclose(fid) < 0)
+        goto error;
 
-        /* Open the external link twice */
-        if((xid2 = H5Gopen2(xid, ".", H5P_DEFAULT)) < 0)
-	    goto error;
+    /* Reopen the file */
+    if((fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        goto error;
 
-        if(H5Gclose(xid2) < 0)
-	    goto error;
+    /* Open the external link */
+    if((xid = H5Gopen2(fid, "/ link", H5P_DEFAULT)) < 0)
+        goto error;
 
-        if(H5Gclose(xid) < 0)
-	    goto error;
+    /* Open the external link twice */
+    if((xid2 = H5Gopen2(xid, ".", H5P_DEFAULT)) < 0)
+        goto error;
 
-        if(H5Fclose(fid) < 0)
-	    goto error;
+    if(H5Gclose(xid2) < 0)
+        goto error;
 
-        PASSED();
-    } else
-        SKIPPED();
+    if(H5Gclose(xid) < 0)
+        goto error;
+
+    if(H5Fclose(fid) < 0)
+        goto error;
+
+    if(H5Pclose(fapl) < 0)
+        TEST_ERROR
+
+    PASSED();
 
     return 0;
 
@@ -939,58 +941,48 @@ main (void)
     char	filename[1024];		/*file name for test_1* funcs	*/
     hid_t	grp=-1;			/*group to emit diagnostics	*/
     int		nerrors=0;		/*number of errors		*/
-    const char *envval = NULL;
 
-    /* Don't run this test using the split file driver */
-    envval = HDgetenv("HDF5_DRIVER");
-    if (envval == NULL)
-        envval = "nomatch";
-    if (HDstrcmp(envval, "split")) {
-	h5_reset();
-	fapl = h5_fileaccess();
-	h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-	if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
-	if((grp = H5Gcreate2(file, "emit-diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-	if(H5Gclose(grp) < 0) goto error;
+    h5_reset();
+    fapl = h5_fileaccess();
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+    if((grp = H5Gcreate2(file, "emit-diagnostics", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if(H5Gclose(grp) < 0) goto error;
 
-	nerrors += test_1a(file);
-	nerrors += test_1b(file);
-	nerrors += test_1c(file);
-	nerrors += test_1d(file);
-	nerrors += test_1e(file);
-	nerrors += test_1f(file);
-	nerrors += test_1g();
-	nerrors += test_1h();
-	nerrors += test_2(fapl);
-	nerrors += test_3(fapl);
-	nerrors += test_4(fapl);
-	if (nerrors>0) goto error;
+    nerrors += test_1a(file);
+    nerrors += test_1b(file);
+    nerrors += test_1c(file);
+    nerrors += test_1d(file);
+    nerrors += test_1e(file);
+    nerrors += test_1f(file);
+    nerrors += test_1g();
+    nerrors += test_1h();
+    nerrors += test_2(fapl);
+    nerrors += test_3(fapl);
+    nerrors += test_4(fapl);
+    if (nerrors>0) goto error;
 
-	if (H5Fclose(file) < 0) goto error;
-	puts("All external storage tests passed.");
-	if (h5_cleanup(FILENAME, fapl)) {
-	    remove("extern_1a.raw");
-	    remove("extern_1b.raw");
-	    remove("extern_2a.raw");
-	    remove("extern_2b.raw");
-	    remove("extern_3a.raw");
-	    remove("extern_3b.raw");
-	    remove("extern_4a.raw");
-	    remove("extern_4b.raw");
-	}
+    if (H5Fclose(file) < 0) goto error;
+    puts("All external storage tests passed.");
+    if (h5_cleanup(FILENAME, fapl)) {
+        remove("extern_1a.raw");
+        remove("extern_1b.raw");
+        remove("extern_2a.raw");
+        remove("extern_2b.raw");
+        remove("extern_3a.raw");
+        remove("extern_3b.raw");
+        remove("extern_4a.raw");
+        remove("extern_4b.raw");
     }
-    else
-    {
-	puts("All external storage tests skipped - Incompatible with current Virtual File Driver");
-    }
+
     return 0;
 
-    error:
-	H5E_BEGIN_TRY {
-	    H5Fclose(file);
-	    H5Pclose(fapl);
-	} H5E_END_TRY;
-	nerrors = MAX(1, nerrors);
-	printf ("%d TEST%s FAILED.\n", nerrors, 1==nerrors?"":"s");
-	return 1;
+error:
+    H5E_BEGIN_TRY {
+        H5Fclose(file);
+        H5Pclose(fapl);
+    } H5E_END_TRY;
+    nerrors = MAX(1, nerrors);
+    printf ("%d TEST%s FAILED.\n", nerrors, 1==nerrors?"":"s");
+    return 1;
 }

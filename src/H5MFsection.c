@@ -477,15 +477,20 @@ H5MF_sect_simple_free(H5FS_section_info_t *_sect)
  */
 static herr_t
 H5MF_sect_simple_valid(const H5FS_section_class_t UNUSED *cls,
-    const H5FS_section_info_t *_sect)
+    const H5FS_section_info_t 
+#ifdef NDEBUG
+    UNUSED
+#endif /* NDEBUG */
+    *_sect)
 {
+#ifndef NDEBUG
     const H5MF_free_section_t *sect = (const H5MF_free_section_t *)_sect;   /* File free section */
+#endif /* NDEBUG */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5MF_sect_simple_valid)
 
     /* Check arguments. */
     HDassert(sect);
-
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }   /* H5MF_sect_simple_valid() */

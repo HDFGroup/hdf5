@@ -171,49 +171,38 @@ main(void)
 {
     hid_t file, fapl;
     char	name[1024];
-    const char  *envval = NULL;
 
     h5_reset();
     fapl = h5_fileaccess();
 
     TESTING("H5Fflush (part1)");
-    envval = HDgetenv("HDF5_DRIVER");
-    if (envval == NULL)
-        envval = "nomatch";
-    if (HDstrcmp(envval, "split")) {
-	/* Create the file */
-	h5_fixname(FILENAME[0], fapl, name, sizeof name);
-	file = create_file(name, fapl);
-	/* Flush and exit without closing the library */
-	if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
 
-	/* Create the file */
-	h5_fixname(FILENAME[2], fapl, name, sizeof name);
-	file = create_file(name, fapl);
-	/* Flush and exit without closing the library */
-	if(H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
-	/* Add a bit to the file and don't flush the new part */
-	extend_file(file);
+    /* Create the file */
+    h5_fixname(FILENAME[0], fapl, name, sizeof name);
+    file = create_file(name, fapl);
+    /* Flush and exit without closing the library */
+    if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
 
-	/* Create the other file which will not be flushed */
-	h5_fixname(FILENAME[1], fapl, name, sizeof name);
-	file = create_file(name, fapl);
+    /* Create the file */
+    h5_fixname(FILENAME[2], fapl, name, sizeof name);
+    file = create_file(name, fapl);
+    /* Flush and exit without closing the library */
+    if(H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
+    /* Add a bit to the file and don't flush the new part */
+    extend_file(file);
+
+    /* Create the other file which will not be flushed */
+    h5_fixname(FILENAME[1], fapl, name, sizeof name);
+    file = create_file(name, fapl);
 
 
-	PASSED();
-	fflush(stdout);
-	fflush(stderr);
-    }
-    else
-    {
-        SKIPPED();
-        puts("    Test not compatible with current Virtual File Driver");
-    }
+    PASSED();
+    fflush(stdout);
+    fflush(stderr);
 
     HD_exit(0);
 
-    error:
-        HD_exit(1);
-        return 1;
-
+error:
+    HD_exit(1);
+    return 1;
 }

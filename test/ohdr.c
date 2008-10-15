@@ -72,7 +72,6 @@ main(void)
     time_t	time_new, ro;
     int		i;
     hbool_t     b;                      /* Index for "new format" loop */
-    const char  *envval = NULL;
     herr_t      ret;                    /* Generic return value */
 
     /* Reset library */
@@ -93,7 +92,7 @@ main(void)
 
         /* Create the file to operate on */
         if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
-        if(NULL == (f = H5I_object(file))) FAIL_STACK_ERROR
+        if(NULL == (f = (H5F_t *)H5I_object(file))) FAIL_STACK_ERROR
 
 
         /*
@@ -174,27 +173,18 @@ main(void)
          *  works correctly - QAK)
          */
         TESTING("close & re-open object header");
-        envval = HDgetenv("HDF5_DRIVER");
-        if(envval == NULL)
-            envval = "nomatch";
-        if(HDstrcmp(envval, "multi") && HDstrcmp(envval, "split") && HDstrcmp(envval, "family")) {
-            if(H5O_close(&oh_loc) < 0)
-                FAIL_STACK_ERROR
-            if(H5Fclose(file) < 0)
-                FAIL_STACK_ERROR
-            if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
-                FAIL_STACK_ERROR
-            if(NULL == (f = H5I_object(file)))
-                FAIL_STACK_ERROR
-            oh_loc.file = f;
-            if(H5O_open(&oh_loc) < 0)
-                FAIL_STACK_ERROR
-            PASSED();
-        } /* end if */
-        else {
-            SKIPPED();
-            puts("   Test not compatible with current Virtual File Driver");
-        } /* end else */
+        if(H5O_close(&oh_loc) < 0)
+            FAIL_STACK_ERROR
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            FAIL_STACK_ERROR
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
+            FAIL_STACK_ERROR
+        oh_loc.file = f;
+        if(H5O_open(&oh_loc) < 0)
+            FAIL_STACK_ERROR
+        PASSED();
 
         /*
          * Test creation of a bunch of messages one after another to see
@@ -259,10 +249,7 @@ main(void)
 
         /* Test reading datasets with undefined object header messages */
         HDputs("Accessing objects with unknown header messages:");
-        envval = HDgetenv("HDF5_DRIVER");
-        if(envval == NULL)
-            envval = "nomatch";
-        if(HDstrcmp(envval, "multi") && HDstrcmp(envval, "split") && HDstrcmp(envval, "family")) {
+        {
             hid_t file2;                    /* File ID for 'bogus' object file */
             char testpath[512] = "";
             char testfile[512] = "";
@@ -282,7 +269,7 @@ main(void)
             TESTING("object with unknown header message and no flags set");
 
             /* Open the file with objects that have unknown header messages (generated with gen_bogus.c) */
-            if((file2 = H5Fopen(testfile, H5F_ACC_RDONLY, fapl)) < 0)
+            if((file2 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
                 TEST_ERROR
 
             /* Open the dataset with the unknown header message, but no extra flags */
@@ -372,11 +359,7 @@ main(void)
                 TEST_ERROR
 
             PASSED();
-        } /* end if */
-        else {
-            SKIPPED();
-            puts("   Test not compatible with current Virtual File Driver");
-        } /* end else */
+        }
 
         /* Close the file we created */
         if(H5Fclose(file) < 0)
