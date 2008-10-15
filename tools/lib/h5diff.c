@@ -337,31 +337,29 @@ hsize_t diff_match(hid_t file1_id,
     } /* end if */
 
     /*-------------------------------------------------------------------------
-    * contents mode. we do an "absolute" compare criteria, the number of objects
+    * the number of objects
     * in file1 must be the same as in file2
     *-------------------------------------------------------------------------
     */
-    if ( options->m_contents )
+   
+    /* assume equal contents initially */
+    options->contents = 1;
+    
+    /* number of different objects */
+    if ( nobjects1 != nobjects2 )
     {
-        /* assume equal contents initially */
-        options->contents = 1;
-        
-        /* number of different objects */
-        if ( nobjects1 != nobjects2 )
+        options->contents = 0;
+    }
+    
+    
+    for( i = 0; i < table->nobjs; i++) 
+    {
+        if( table->objs[i].flags[0] != table->objs[i].flags[1] ) 
         {
             options->contents = 0;
         }
-        
-        
-        for( i = 0; i < table->nobjs; i++) 
-        {
-            if( table->objs[i].flags[0] != table->objs[i].flags[1] ) 
-            {
-                options->contents = 0;
-            }
-        }
-        
     }
+        
 
     
     

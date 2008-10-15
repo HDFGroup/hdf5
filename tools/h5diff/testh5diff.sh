@@ -303,9 +303,6 @@ TOOLTEST h5diff_17.txt -v $FILE1 $FILE2
 # 1.8 quiet mode 
 TOOLTEST h5diff_18.txt -q $FILE1 $FILE2 
 
-# 1.9 contents mode 
-TOOLTEST h5diff_19.txt -v -c $FILE1 $FILE11 
-
 
 # ##############################################################################
 # # not comparable types
