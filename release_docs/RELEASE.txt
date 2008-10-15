@@ -63,6 +63,8 @@ New Features
 
         Library
         -------
+	- Added two new public routines: H5Pget_elink_fapl() and
+      	  H5Pset_elink_fapl(). (see bug #1247) (VC - 2008/10/13)
         - Improved free space tracking in file to be faster. (QAK - 2008/10/06)
         - Added 'mounted' field to H5G_info_t struct. (QAK - 2008/07/15)
 
@@ -157,6 +159,9 @@ Bug Fixes since HDF5-1.8.1
 
         Tools
         -----
+	- Fixed bugs in h5stat:segmemtation fault when printing groups and
+          print warning message when traversal of objects is unsuccessful.
+          (see bug #1253) (VC- 2008/10/13)
         - Fixed bug in h5ls that prevented relative group listings (like
             "h5ls foo.h5/bar") from working correctly (QAK - 2008/06/03)
         - h5dump: when doing binary output (-b), the stdout printing of attributes 
