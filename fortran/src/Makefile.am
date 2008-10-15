@@ -57,7 +57,7 @@ else
 endif
 
 # Source files for the library.
-libhdf5_fortran_la_SOURCES=H5fortran_flags.f90 H5f90global.f90          \
+libhdf5_fortran_la_SOURCES= H5f90global.f90          \
          H5fortran_types.f90 H5_ff.f90 H5Aff.f90 H5Dff.f90 H5Eff.f90    \
          H5Fff.f90 H5Gff.f90 H5Iff.f90 H5Lff.f90 H5Off.f90 H5Pff.f90 H5Rff.f90 H5Sff.f90    \
          H5Tff.f90 H5Zff.f90                                            \
@@ -174,8 +174,7 @@ FORTRAN_API=yes
 # determining this automagically (like we do with the C files). So, when
 # doing a parallel make, some modules could be made way before the
 # modules they depend upon are actually made. *sigh*
-H5fortran_flags.lo:  $(srcdir)/H5fortran_flags.f90
-H5f90global.lo:      $(srcdir)/H5f90global.f90 H5fortran_flags.lo H5fortran_types.lo
+H5f90global.lo:      $(srcdir)/H5f90global.f90 H5fortran_types.lo
 H5fortran_types.lo:  H5fortran_types.f90
 H5fortran_detect.lo: H5fortran_detect.f90
 H5test_kind.lo:      $(srcdir)/H5test_kind.f90
