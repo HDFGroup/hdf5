@@ -1905,22 +1905,25 @@
 
 
 # h5repack test files
-./tools/testfiles/h5repack_early.h5
-./tools/testfiles/h5repack_layout.h5
-./tools/testfiles/h5repack_filters.h5
-./tools/testfiles/h5repack_fill.h5
-./tools/testfiles/h5repack_fletcher.h5
-./tools/testfiles/h5repack_objs.h5
-./tools/testfiles/h5repack_early2.h5
-./tools/testfiles/h5repack_hlink.h5
-./tools/testfiles/info.h5repack
-./tools/testfiles/h5repack_big.h5
-./tools/testfiles/h5repack_shuffle.h5
-./tools/testfiles/h5repack_attr.h5
-./tools/testfiles/h5repack_deflate.h5
-./tools/testfiles/h5repack_szip.h5
-./tools/testfiles/h5repack_ext.h5
-./tools/testfiles/ublock.bin
+./tools/h5repack/testfiles/h5repack_szip.h5
+./tools/h5repack/testfiles/h5repack_fill.h5
+./tools/h5repack/testfiles/ublock.bin
+./tools/h5repack/testfiles/h5repack_shuffle.h5
+./tools/h5repack/testfiles/h5repack_fletcher.h5
+./tools/h5repack/testfiles/h5repack_objs.h5
+./tools/h5repack/testfiles/h5repack_early2.h5
+./tools/h5repack/testfiles/h5repack.info
+./tools/h5repack/testfiles/h5repack_ext.h5
+./tools/h5repack/testfiles/h5repack_big.h5
+./tools/h5repack/testfiles/h5repack_deflate.h5
+./tools/h5repack/testfiles/h5repack_hlink.h5
+./tools/h5repack/testfiles/h5repack_filters.h5
+./tools/h5repack/testfiles/h5repack_attr.h5
+./tools/h5repack/testfiles/h5repack_early.h5
+./tools/h5repack/testfiles/h5repack_layout.h5
+
+
+
 
 # jam utility and tests
 ./tools/h5jam/Dependencies
