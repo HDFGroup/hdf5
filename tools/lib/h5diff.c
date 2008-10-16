@@ -340,10 +340,7 @@ hsize_t diff_match(hid_t file1_id,
     * the number of objects
     * in file1 must be the same as in file2
     *-------------------------------------------------------------------------
-    */
-   
-    /* assume equal contents initially */
-    options->contents = 1;
+    */     
     
     /* number of different objects */
     if ( nobjects1 != nobjects2 )
