@@ -115,7 +115,7 @@ TOOLTEST()
     fi
     
     if [ $runh5diff != no ]; then
-     H5DIFFTEST $inputfile $outputfile 
+     H5DIFFTEST $inputfile $outputfile $7 $9
     fi
 }
 
