@@ -819,7 +819,8 @@ END SUBROUTINE h5fget_name_f
 <dl>
 <dt><strong>Name:</strong> <a name="File-GetObjCount">H5Fget_obj_count</a>
 <dt><strong>Signature:</strong>
-    <dd><em>int </em><code>H5Fget_obj_count</code>(<em>hid_t</em> <code>file_id</code>,
+    <dd><em>ssize_t </em><code>H5Fget_obj_count</code>(
+            <em>hid_t</em> <code>file_id</code>,
 	    <em>unsigned int</em> <code>types</code>
             )
 <dt><strong>Purpose:</strong>
@@ -913,20 +914,25 @@ END SUBROUTINE h5fget_obj_count_f
 <dt><strong>History:</strong>
 	<ul><table width="90%">
         <tr>
-		  <td valign="top" align="left" width="10%">
-		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
           <td valign="top" align="left">
-		    <strong>C</strong></td></tr>
+            <strong>Change</strong></td></tr>
         <tr>
-		  <td valign="top">1.6.5</td>
+          <td valign="top">1.6.5</td>
           <td valign="top">
-		    <code>H5F_OBJ_LOCAL</code> has been added as a qualifier 
-			on the types of objects to be counted. <code>H5F_OBJ_LOCAL</code> 
-			restricts the search to objects opened through current 
-			file identifier.</td></tr>
-    </table></ul>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
+            <code>H5F_OBJ_LOCAL</code> has been added as a qualifier 
+            on the types of objects to be counted. 
+            <code>H5F_OBJ_LOCAL</code> restricts the search to objects 
+            opened through current file identifier.</td></tr>
+        <tr>
+          <td valign="top">1.6.8</td>
+          <td valign="top">
+              C function return type changed to <code><em>ssize_t</em></code>.
+              </td></tr>
+    </table></ul>
+
+        <!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
         <img src="Graphics/Java.gif"> 
@@ -940,9 +946,10 @@ END SUBROUTINE h5fget_obj_count_f
 <dl>
 <dt><strong>Name:</strong> <a name="File-GetObjIDs">H5Fget_obj_ids</a>
 <dt><strong>Signature:</strong>
-    <dd><em>int </em><code>H5Fget_obj_ids</code>(<em>hid_t</em> <code>file_id</code>,
+    <dd><em>ssize_t </em><code>H5Fget_obj_ids</code>(
+            <em>hid_t</em> <code>file_id</code>,
             <em>unsigned int</em> <code>types</code>,
-            <em>int</em> <code>max_objs</code>,
+            <em>size_t</em> <code>max_objs</code>,
             <em>hid_t *</em><code>obj_id_list</code>
             )
 <dt><strong>Purpose:</strong>
@@ -973,7 +980,7 @@ END SUBROUTINE h5fget_obj_count_f
 		    <td valign="top"><em>unsigned int</em> <code>types</code></td>
             <td valign="top">IN: Type of object for which identifiers are to be returned.</td></tr> 
         <tr>
-		    <td valign="top"><em>int</em> <code>max_objs</code></td>
+            <td valign="top"><em>size_t</em> <code>max_objs</code></td>
             <td valign="top">IN: Maximum number of object identifiers to place into 
 			<code>obj_id_list</code>.</td></tr>
         <tr>
@@ -1015,14 +1022,21 @@ END SUBROUTINE h5fget_obj_ids_f
 <dt><strong>History:</strong>
     <ul><table width="90%">
         <tr>
-		  <td valign="top" align="left" width="10%">
-		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left" width="10%">
+              <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
           <td valign="top" align="left">
-		    <strong>C</strong></td></tr>
+              <strong>Change</strong></td></tr>
         <tr>
-		  <td valign="top">1.6.0</td>
+          <td valign="top">1.6.0</td>
           <td valign="top">
-		    Function introduced in this release.</td></tr>
+              C function introduced in this release.</td></tr>
+        <tr>
+          <td valign="top">1.6.8</td>
+          <td valign="top">
+              C function return type changed to <code><em>ssize_t</em></code>
+              <br>&nbsp;&nbsp;&nbsp;&nbsp;
+              and <code>max_objs</code> parameter datatype changed to 
+              <code><em>size_t</em></code>.</td></tr>
     </table></ul>
 </dl>
 
@@ -1509,7 +1523,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 10 September 2008");
+document.writeln("Last modified: 16 October 2008");
 -->
 </SCRIPT>
  
