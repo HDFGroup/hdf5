@@ -144,6 +144,9 @@ void parse_command_line(int argc,
     
     /* process the command-line */
     memset(options, 0, sizeof (diff_opt_t));
+
+    /* assume equal contents initially */
+    options->contents = 1;
     
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) 
