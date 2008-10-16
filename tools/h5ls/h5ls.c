@@ -1845,8 +1845,8 @@ elink_trav_visited(elink_trav_t *visited, const char *file, const char *path)
     /* Didn't find elink */
     return(FALSE);
 } /* end elink_trav_visited() */
-
 
+
 /*-------------------------------------------------------------------------
  * Function: list_lnk
  *

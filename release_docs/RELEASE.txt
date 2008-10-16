@@ -175,6 +175,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - h5dump now checks for uniqueness of committed datatypes.
+            (NAF - 2008/10/15)
+        - Fixed unnecessary indentation of committed datatypes in h5dump.
+            (NAF - 2008/10/15)
 	- Fixed bugs in h5stat:segmemtation fault when printing groups and
           print warning message when traversal of objects is unsuccessful.
           (see bug #1253) (VC- 2008/10/13)

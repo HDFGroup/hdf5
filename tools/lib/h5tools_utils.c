@@ -485,21 +485,21 @@ find_objs_cb(const char *name, const H5O_info_t *oinfo, const char *already_seen
             break;
 
         case H5O_TYPE_NAMED_DATATYPE:
-        {
-            obj_t *found_obj;
+            if(NULL == already_seen) {
+                obj_t *found_obj;
 
-            if((found_obj = search_obj(info->type_table, oinfo->addr)) == NULL)
-                add_obj(info->type_table, oinfo->addr, name, TRUE);
-            else {
-                /* Use latest version of name */
-                HDfree(found_obj->objname);
-                found_obj->objname = HDstrdup(name);
+                if((found_obj = search_obj(info->type_table, oinfo->addr)) == NULL)
+                    add_obj(info->type_table, oinfo->addr, name, TRUE);
+                else {
+                    /* Use latest version of name */
+                    HDfree(found_obj->objname);
+                    found_obj->objname = HDstrdup(name);
 
-                /* Mark named datatype as having valid name */
-                found_obj->recorded = TRUE;
-            } /* end else */
+                    /* Mark named datatype as having valid name */
+                    found_obj->recorded = TRUE;
+                } /* end else */
+            } /* end if */
             break;
-        }
 
         default:
             break;

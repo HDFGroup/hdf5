@@ -595,6 +595,10 @@ rem ############################################################################
     rem to handle it specially.  --SJW 5/12/08
     call :tooltest tfpformat.ddl -m PERCENT.7f tfpformat.h5
 
+    rem tests for traversal of external links
+    call :tooltest textlinksrc.ddl textlinksrc.h5
+    call :tooltest textlinkfar.ddl textlinkfar.h5
+
     
     
     if %nerrors% equ 0 (
