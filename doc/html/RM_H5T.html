@@ -1286,8 +1286,8 @@ SUBROUTINE
 <dt><strong>Signature:</strong>
     <dd><em>int</em> <code>H5Tget_array_dims</code>(
                        <em>hid_t</em> <code>adtype_id</code>,
-                       <em>hsize_t *</em><code>dims[]</code>,
-                       <em>int *</em><code>perm[]</code>
+                       <em>hsize_t </em><code>dims[]</code>,
+                       <em>int </em><code>perm[]</code>
     )
 <dt><strong>Purpose:</strong>
     <dd>Retrieves sizes of array dimensions and dimension permutations.
@@ -1301,13 +1301,13 @@ SUBROUTINE
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>adtype_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>adtype_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Datatype identifier of array object.</td></tr>
         <tr>
-		    <td valign="top"><em>hsize_t *</em><code>dims[]</code></td>
+            <td valign="top"><em>hsize_t </em><code>dims[]</code></td>
             <td valign="top">OUT: Sizes of array dimensions.</td></tr>
         <tr>
-		    <td valign="top"><em>int *</em><code>perm[]</code></td>
+            <td valign="top"><em>int </em><code>perm[]</code></td>
             <td valign="top">OUT: Dimension permutations.</td></tr>
     </table></ul>
 <dt><strong>Returns:</strong>
@@ -4280,7 +4280,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 14 August 2008");
+document.writeln("Last modified: 16 October 2008");
 -->
 </SCRIPT>
  
