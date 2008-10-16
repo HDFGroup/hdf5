@@ -314,23 +314,6 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
 #endif /* H5_SIZEOF_LONG_DOUBLE */
 
 
-#if H5_SIZEOF_LONG_DOUBLE !=0
-    {
-        
-    /*-------------------------------------------------------------------------
-    * H5T_NATIVE_LDOUBLE
-    *-------------------------------------------------------------------------
-    */
-        
-        long double data15[3][2] ={{1,1},{1,1},{1,1}};
-        
-        write_dset(gid1,2,dims2,"ld",H5T_NATIVE_LDOUBLE,data15);
-        
-    }
-#endif /* H5_SIZEOF_LONG_DOUBLE */
-
-        
-   
    /*-------------------------------------------------------------------------
     * close
     *-------------------------------------------------------------------------
