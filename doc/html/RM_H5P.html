@@ -158,10 +158,6 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-GetCache">H5Pget_cache</a>
     <li><a href="#Property-SetGCReferences">H5Pset_gc_references</a>
     <li><a href="#Property-GetGCReferences">H5Pget_gc_references</a>
-    <li><a href="#Property-SetFaplGass">H5Pset_fapl_gass</a>
-    <li><a href="#Property-GetFaplGass">H5Pget_fapl_gass</a>
-    <li><a href="#Property-SetFaplSrb">H5Pset_fapl_srb</a>
-    <li><a href="#Property-GetFaplSrb">H5Pget_fapl_srb</a>
     <li><a href="#Property-SetSmallData">H5Pset_small_data_block_size</a>
     <li><a href="#Property-GetSmallData">H5Pget_small_data_block_size</a>
 <!-- FOR USE WITH PRINT VERSION ---------------------------------------->
@@ -387,10 +383,6 @@ which require many different parameters to be easily manipulated.
     <li><a href="#Property-GetCache">H5Pget_cache</a>
     <li><a href="#Property-SetGCReferences">H5Pset_gc_references</a>
     <li><a href="#Property-GetGCReferences">H5Pget_gc_references</a>
-    <li><a href="#Property-SetFaplGass">H5Pset_fapl_gass</a>
-    <li><a href="#Property-GetFaplGass">H5Pget_fapl_gass</a>
-    <li><a href="#Property-SetFaplSrb">H5Pset_fapl_srb</a>
-    <li><a href="#Property-GetFaplSrb">H5Pget_fapl_srb</a>
     <li><a href="#Property-SetSmallData">H5Pset_small_data_block_size</a>
     <li><a href="#Property-GetSmallData">H5Pget_small_data_block_size</a>
 <!-- FOR USE WITH ELECTRONIC VERSION ----------------------------------->
@@ -519,11 +511,9 @@ See further notes in the description of each function.
       <li><a href="#Property-GetFamilyOffset">H5Pget_family_offset</a>
       <li><a href="#Property-GetFaplCore">H5Pget_fapl_core</a>
       <li><a href="#Property-GetFaplFamily">H5Pget_fapl_family</a>
-      <li><a href="#Property-GetFaplGass">H5Pget_fapl_gass</a>
       <li><a href="#Property-GetFaplMpio">H5Pget_fapl_mpio</a>&nbsp;&nbsp;&nbsp;||
       <li><a href="#Property-GetFaplMpiPosix">H5Pget_fapl_mpiposix</a>&nbsp;&nbsp;&nbsp;||
       <li><a href="#Property-GetFaplMulti">H5Pget_fapl_multi</a>
-      <li><a href="#Property-GetFaplSrb">H5Pget_fapl_srb</a>
 <!--  <li><a href="#Property-GetFaplStream">H5Pget_fapl_stream</a>       -->
       <li><a href="#Property-GetFcloseDegree">H5Pget_fclose_degree</a>
       <li><a href="#Property-GetFillTime">H5Pget_fill_time</a>
@@ -585,14 +575,12 @@ See further notes in the description of each function.
       <li><a href="#Property-SetFamilyOffset">H5Pset_family_offset</a>
       <li><a href="#Property-SetFaplCore">H5Pset_fapl_core</a>
       <li><a href="#Property-SetFaplFamily">H5Pset_fapl_family</a>
-      <li><a href="#Property-SetFaplGass">H5Pset_fapl_gass</a>
       <li><a href="#Property-SetFaplLog">H5Pset_fapl_log</a>
       <li><a href="#Property-SetFaplMpio">H5Pset_fapl_mpio</a>&nbsp;&nbsp;&nbsp;||
       <li><a href="#Property-SetFaplMpiPosix">H5Pset_fapl_mpiposix</a>&nbsp;&nbsp;&nbsp;||
       <li><a href="#Property-SetFaplMulti">H5Pset_fapl_multi</a>
       <li><a href="#Property-SetFaplSec2">H5Pset_fapl_sec2</a>
       <li><a href="#Property-SetFaplSplit">H5Pset_fapl_split</a>
-      <li><a href="#Property-SetFaplSrb">H5Pset_fapl_srb</a>
       <li><a href="#Property-SetFaplStdio">H5Pset_fapl_stdio</a>
 <!--  <li><a href="#Property-SetFaplStream">H5Pset_fapl_stream</a>       -->
       <li><a href="#Property-SetFcloseDegree">H5Pset_fclose_degree</a>
@@ -2325,7 +2313,6 @@ END SUBROUTINE h5pget_class_parent_f
         <pre>
            H5FD_CORE
            H5FD_FAMILY
-           H5FD_GASS
            H5FD_LOG
            H5FD_MPIO
            H5FD_MULTI
@@ -2966,59 +2953,6 @@ END SUBROUTINE h5pget_fapl_family_f
     </table></ul>
 </dl>
 
-<!-- NEW PAGE -->
-<!-- HEADER RIGHT "H5Pget_fapl_gass" -->
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-GetFaplGass">H5Pget_fapl_gass</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pget_fapl_gass</code>(
-                     <em>hid_t</em> <code>fapl_id</code>,
-                     <em>GASS_Info *</em><code>info</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Retrieves GASS information.
-  <dt><strong>Description:</strong>
-    <dd>If the file access property list <code>fapl_id</code> is set 
-        for use of the <code>H5FD_GASS</code> driver, 
-        <code>H5Pget_fapl_gass</code> returns the <em>GASS_Info</em>
-        object through the <code>info</code> pointer.
-        <p>
-        The <em>GASS_Info</em> information is copied, so it is valid 
-        only until the file access property list is modified or closed.
-  <dt><strong>Note:</strong>
-    <dd><code>H5Pget_fapl_gass</code> is an experimental function.
-        It is designed for use only when accessing files via the 
-        GASS facility of the Globus environment. 
-        For further information, see 
-        <a href="http://www.globus.org/">http//www.globus.org/</a>.
-  <dt><strong>Parameters:</strong>
-    <ul><table>
-        <tr>
-		    <td valign="top"><em>hid_t</em> <code>fapl_id</code>,</td>
-            <td valign="top">IN: File access property list identifier.</td></tr>
-        <tr>
-		    <td valign="top"><em>GASS_Info&nbsp;*</em><code>info&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">OUT: Pointer to the GASS information structure.</td></tr>
-    </table></ul>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful.
-        Otherwise returns a negative value.
-  <dt><strong>Fortran90 Interface:</strong>
-    <dd>None.
-<!--
-	<pre>
-SUBROUTINE
-	</pre>		
--->
-
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pget_fapl_mpio" -->
@@ -3280,57 +3214,6 @@ END SUBROUTINE h5pget_fapl_multi_f
     </table></ul>
 </dl>
 
-<!-- NEW PAGE -->
-<!-- HEADER RIGHT "H5Pget_fapl_srb" -->
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-GetFaplSrb">H5Pget_fapl_srb</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pget_fapl_srb</code>(
-                     <em>hid_t</em> <code>fapl_id</code>,
-                     <em>SRB_Info *</em><code>info</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Retrieves SRB information.
-  <dt><strong>Description:</strong>
-    <dd>If the file access property list <code>fapl_id</code> is set 
-        for use of the <code>H5FD_SRB</code> driver, 
-        <code>H5Pget_fapl_srb</code> returns the <em>SRB_Info</em>
-        object through the <code>info</code> pointer.
-        <p>
-        The <em>SRB_Info</em> information is copied, so it is valid 
-        only until the file access property list is modified or closed.
-  <dt><strong>Note:</strong>
-    <dd><code>H5Pset_fapl_gass</code> is an experimental function.
-        It is designed for use only when accessing files via the 
-        Storage Resource Broker (SRB).  For further information, see 
-        <a href="http://www.npaci.edu/Research/DI/srb/">http//www.npaci.edu/Research/DI/srb/</a>.
-  <dt><strong>Parameters:</strong>
-    <ul><table>
-        <tr>
-		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
-            <td valign="top">IN: File access property list identifier.</td></tr>
-        <tr>
-		    <td valign="top"><em>SRB_Info&nbsp;*</em><code>info&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">OUT: Pointer to the SRB information structure.</td></tr>
-    </table></ul>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful.
-        Otherwise returns a negative value.
-  <dt><strong>Fortran90 Interface:</strong>
-    <dd>None.
-<!--
-	<pre>
-SUBROUTINE
-	</pre>		
--->		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
 
 <!-- HEADER RIGHT "H5Pget_fapl_stream" -->
 <!--
@@ -7261,63 +7144,6 @@ END SUBROUTINE h5pset_fapl_family_f
     </table></ul>
 </dl>
 
-<!-- NEW PAGE -->
-<!-- HEADER RIGHT "H5Pset_fapl_gass" -->
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SetFaplGass">H5Pset_fapl_gass</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_fapl_gass</code>(
-                     <em>hid_t</em> <code>fapl_id</code>,
-                     <em>GASS_Info</em> <code>info</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Stores user-supplied GASS information.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pset_fapl_gass</code> stores user-supplied GASS information,
-        the <em>GASS_Info</em> struct data as passed in <code>info</code>, 
-        to the file access property list <code>fapl_id</code>.
-        <code>fapl_id</code> can then be used to create and/or open the file. 
-        <p>
-        The <em>GASS_Info</em> object, <code>info</code>, is used for 
-        file open operations when using GASS in the Globus environment. 
-        <p>
-        Any modification to <code>info</code> after this function call 
-        returns may have undetermined effect to the access property list.  
-        Users must call <code>H5Pset_fapl_gass</code> again to setup 
-        the property list.   
-  <dt><strong>Note:</strong>
-    <dd><code>H5Pset_fapl_gass</code> is an experimental function.
-        It is designed for use only when accessing files via the 
-        GASS facility of the Globus environment. 
-        For further information, see 
-        <a href="http://www.globus.org/">http//www.globus.org/</a>.
-  <dt><strong>Parameters:</strong>
-    <ul><table>
-        <tr>
-		    <td valign="top"><em>hid_t</em> <code>fapl_id</code>,</td>
-            <td valign="top">IN: File access property list identifier.</td></tr>
-        <tr>
-		    <td valign="top"><em>GASS_Info</em>&nbsp;<code>info&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">IN: Pointer to the GASS information structure.</td></tr>
-    </table></ul>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful.
-        Otherwise returns a negative value.
-  <dt><strong>Fortran90 Interface:</strong>
-    <dd>None.
-<!--
-	<pre>
-SUBROUTINE
-	</pre>		
--->		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pset_fapl_log" -->
@@ -8211,59 +8037,6 @@ END SUBROUTINE h5pset_fapl_split_f
     </table></ul>
 </dl>
 
-<!-- NEW PAGE -->
-<!-- HEADER RIGHT "H5Pset_fapl_srb" -->
-<hr>
-<dl>
-  <dt><strong>Name:</strong> <a name="Property-SetFaplSrb">H5Pset_fapl_srb</a>
-  <dt><strong>Signature:</strong>
-    <dd><em>herr_t</em> <code>H5Pset_fapl_srb</code>(
-                     <em>hid_t</em> <code>fapl_id</code>,
-                     <em>SRB_Info</em> <code>info</code>
-    )
-  <dt><strong>Purpose:</strong>
-    <dd>Saves SRB connection handler and sets SRB settings.
-  <dt><strong>Description:</strong>
-    <dd><code>H5Pset_fapl_srb</code> stores the SRB client-to-server 
-        connection handler <code>SRB_CONN</code> after the connection
-        is established and other user-supplied SRB information.
-        <p>
-        The  user-supplied SRB information is contained in the 
-        <em>SRB_Info</em> struct pointed to by <code>info</code>
-        and is stored in the file access property list <code>fapl_id</code>.
-        This information can then be used to create or open a file.           
-  <dt><strong>Note:</strong>
-    <dd><code>H5Pset_fapl_gass</code> is an experimental function.
-        It is designed for use only when accessing files via the 
-        Storage Resource Broker (SRB).  For further information, see 
-        <a href="http://www.npaci.edu/Research/DI/srb/">http//www.npaci.edu/Research/DI/srb/</a>.
-  <dt><strong>Parameters:</strong>
-    <ul><table>
-        <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">IN: File access property list identifier.</td></tr>
-        <tr>
-		    <td valign="top"><em>SRB_Info</em> <code>info</code></td>
-            <td valign="top">IN: Pointer to the SRB information structure.</td></tr>
-    </table></ul>
-  <dt><strong>Returns:</strong>
-    <dd>Returns a non-negative value if successful.
-        Otherwise returns a negative value.
-  <dt><strong>Fortran90 Interface:</strong>
-    <dd>None.
-<!--
-	<pre>
-SUBROUTINE
-	</pre>		
--->
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
-</dl>
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pset_fapl_stdio" -->
@@ -10853,7 +10626,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 27 August 2008");
+document.writeln("Last modified: 16 October 2008");
 -->
 </SCRIPT>
  
