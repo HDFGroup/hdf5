@@ -90,11 +90,18 @@ int main(int argc, const char *argv[])
 
     ret = (nfound == 0 ? 0 : 1 );
 
+    /* if graph difference return 1 for differences  */
     if ( options.contents == 0 )
         ret = 1;
 
-    if(options.err_stat)
+    /* but return 0 for no differences if graph comparison not required */
+    if ( options.m_no_contents == 1 )
+        ret = 0;
+
+    /* and return 2 for error */
+    if (options.err_stat)
         ret = 2;
+
     return ret;
 }
 

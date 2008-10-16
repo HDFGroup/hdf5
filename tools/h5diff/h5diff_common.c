@@ -31,7 +31,7 @@ const char  *progname = "h5diff";
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVrvqn:d:p:";
+static const char *s_opts = "hVrvqn:d:p:c";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -41,6 +41,7 @@ static struct long_options l_opts[] = {
     { "count", require_arg, 'n' },
     { "delta", require_arg, 'd' },
     { "relative", require_arg, 'p' },
+    { "contents", no_arg, 'c' },
     { NULL, 0, '\0' }
 };
 
@@ -93,6 +94,10 @@ void parse_command_line(int argc,
             break;
         case 'r':
             options->m_report = 1;
+            break;
+        case 'c':
+            /* ignore graph comparison in return value */
+            options->m_no_contents = 1;
             break;
         case 'd':
             options->d=1;
@@ -322,6 +327,7 @@ void usage(void)
  printf("   -r, --report            Report mode. Print differences\n");
  printf("   -v, --verbose           Verbose mode. Print differences, list of objects\n");
  printf("   -q, --quiet             Quiet mode. Do not do output\n");
+ printf("   -c, --contents          Ignore graph contents differences in return value\n");
 
 
  printf("   -n C, --count=C         Print differences up to C number\n");

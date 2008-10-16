@@ -25,7 +25,7 @@
  */
 
 typedef struct {
-    int    m_quiet;   /* quiet mide: no output at all */
+    int    m_quiet;   /* quiet mode: no output at all */
     int    m_report;  /* report mode: print the data */
     int    m_verbose; /* verbose mode: print the data, list of objcets, warnings */
     int    d;         /* delta, absolute value to compare */
@@ -38,6 +38,7 @@ typedef struct {
     int    cmn_objs;  /* do we have comparable objects */
     int    not_cmp;   /* are the objects comparable */
     int    contents;  /* equal contents */
+    int    m_no_contents; /* ignore graph comparison in return value */
 } diff_opt_t;
 
 
