@@ -10,3 +10,5 @@ ext_link1                External Link {textlinktar.h5//group} {Group}
 /elink_t1/ext_link4      External Link {textlinktar.h5//group/elink_t2} {**NOT FOUND**}
 /elink_t1/ext_link5      External Link {textlinktar.h5//empty_group} {Group}
 /elink_t2                External Link {textlinksrc.h5//ext_link4} {**NOT FOUND**}
+/subgroup                Group
+/subgroup/link_to_group  Group, same as /ext_link1

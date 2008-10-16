@@ -90,6 +90,7 @@
 #define FILE60  "tfpformat.h5"
 #define FILE61  "textlinksrc.h5"
 #define FILE62  "textlinktar.h5"
+#define FILE63  "textlinkfar.h5"
 
 
 
@@ -225,6 +226,7 @@ typedef struct s1_t {
 #define F42_DSETNAME "Dataset"
 #define F42_TYPENAME "Datatype"
 #define F42_ATTRNAME "Attribute"
+#define F42_LINKNAME "Link_to_Datatype"
 
 /* "File 43" macros */
 /* Name of dataset to create in datafile                              */
@@ -4417,6 +4419,10 @@ static void gent_named_dtype_attr(void)
    ret = H5Tcommit2(fid, F42_TYPENAME, tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
    assert(ret >= 0);
 
+   /* Create a hard link to the datatype */
+   ret = H5Lcreate_hard(fid, F42_TYPENAME, fid, F42_LINKNAME, H5P_DEFAULT, H5P_DEFAULT);
+   assert(ret >= 0);
+
    /* Create a scalar dataspace used for all objects */
    sid = H5Screate(H5S_SCALAR);
    assert(sid > 0);
@@ -6179,27 +6185,28 @@ gent_fpformat(void)
 /*-------------------------------------------------------------------------
  * Function:    gent_extlinks
  *
- * Purpose:     Generate 2 files to be used in the external links test
- *   External links point from one HDF5 file to an object (Group, Dataset, or
- *    committed Datatype) in another file.
+ * Purpose:     Generate 3 files to be used in the external links test
+ *   External links point from one HDF5 file to an object (Group, Dataset,
+ *    or committed Datatype) in another file.  Try to create cycles.
  *
  *-------------------------------------------------------------------------
  */
 static void
 gent_extlinks(void)
 {
- hid_t    source_fid, target_fid, sid, did, gid, tid;
+ hid_t    source_fid, target_fid, far_fid, sid, did, gid, gid2, tid;
  hsize_t  dims[1]  = {6};
  int      buf[6]  = {1, 2, 3, 4, 5, 6};
 
  /* create two files, a source and a target */
  source_fid = H5Fcreate(FILE61, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
  target_fid = H5Fcreate(FILE62, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+ far_fid = H5Fcreate(FILE63, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
 
 /*-------------------------------------------------------------------------
- * create Groups, a Dataset, a committed Datatype, and external links in
- * the target
+ * create Groups, a Dataset, a committed Datatype, external links, and a
+ * cycle in the target
  *-------------------------------------------------------------------------
  */
 
@@ -6210,8 +6217,13 @@ gent_extlinks(void)
  H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
  H5Lcreate_external(FILE61, "/", gid, "elink_t1", H5P_DEFAULT, H5P_DEFAULT);
  H5Lcreate_external(FILE61, "/ext_link4", gid, "elink_t2", H5P_DEFAULT, H5P_DEFAULT);
+
+ gid2 = H5Gcreate2(gid, "subgroup", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+ H5Lcreate_hard(target_fid, "/group", gid2, "link_to_group", H5P_DEFAULT, H5P_DEFAULT);
+
  H5Dclose(did);
  H5Sclose(sid);
+ H5Gclose(gid2);
  H5Gclose(gid);
 
 
@@ -6236,9 +6248,16 @@ gent_extlinks(void)
  H5Lcreate_external(FILE62, "group/elink_t2", source_fid, "ext_link4", H5P_DEFAULT, H5P_DEFAULT);
  H5Lcreate_external(FILE62, "empty_group", source_fid, "ext_link5", H5P_DEFAULT, H5P_DEFAULT);
 
+/*-------------------------------------------------------------------------
+ * create external link in the "far" file pointing to the source file
+ *-------------------------------------------------------------------------
+ */
+ H5Lcreate_external(FILE61, "/", far_fid, "src_file", H5P_DEFAULT, H5P_DEFAULT);
+
  /* close */
  H5Fclose(source_fid);
  H5Fclose(target_fid);
+ H5Fclose(far_fid);
 }
 
 

@@ -1139,6 +1139,9 @@
 ./tools/testfiles/textlink.h5
 ./tools/testfiles/textlink.h5.xml
 ./tools/testfiles/textlink-1.ls
+./tools/testfiles/textlinkfar.ddl
+./tools/testfiles/textlinkfar.h5
+./tools/testfiles/textlinksrc.ddl
 ./tools/testfiles/textlinksrc.h5
 ./tools/testfiles/textlinksrc-1.ls
 ./tools/testfiles/textlinksrc-2.ls
