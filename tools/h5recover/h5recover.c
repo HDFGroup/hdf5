@@ -563,7 +563,7 @@ main (int argc, const char *argv[])
 
                     } /* end for */
                 
-                    size = HDstrtod(tok[5], NULL);
+                    size = HDstrtod(tok[3], NULL);
 
                     if (max_size < size) {
 
