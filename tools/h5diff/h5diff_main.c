@@ -94,7 +94,7 @@ int main(int argc, const char *argv[])
     *-------------------------------------------------------------------------
     */
 
-    parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
+    parse_command_line(argc, argv, &options);
 
     /*-------------------------------------------------------------------------
     * file and object names
@@ -139,10 +139,6 @@ int main(int argc, const char *argv[])
     /* if graph difference return 1 for differences  */
     if ( options.contents == 0 )
         ret = 1;
-
-    /* but return 0 for no differences if graph comparison not required */
-    if ( options.m_no_contents == 1 )
-        ret = 0;
 
     /* and return 2 for error */
     if (options.err_stat)

@@ -38,7 +38,6 @@ typedef struct {
     int    cmn_objs;  /* do we have comparable objects */
     int    not_cmp;   /* are the objects comparable */
     int    contents;  /* equal contents */
-    int    m_no_contents; /* ignore graph comparison in return value */
 } diff_opt_t;
 
 
