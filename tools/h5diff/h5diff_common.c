@@ -65,12 +65,7 @@ void parse_command_line(int argc,
 
     int opt;
 
-    /* process the command-line */
-    memset(options, 0, sizeof (diff_opt_t));
-
-    /* assume equal contents initially */
-    options->contents = 1;
-
+   
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF)
     {
@@ -146,25 +141,7 @@ void parse_command_line(int argc,
         h5diff_exit(EXIT_FAILURE);
     }
 
-    *fname1 = argv[ opt_ind ];
-    *fname2 = argv[ opt_ind + 1 ];
-    *objname1 = argv[ opt_ind + 2 ];
-
-    if ( *objname1 == NULL )
-    {
-        *objname2 = NULL;
-        return;
-    }
-
-    if ( argv[ opt_ind + 3 ] != NULL)
-    {
-        *objname2 = argv[ opt_ind + 3 ];
-    }
-    else
-    {
-        *objname2 = *objname1;
-    }
-
+   
 
 }
 

@@ -974,6 +974,10 @@ hsize_t diff(hid_t file1_id,
             /* if "path1" != "path2" then the groups are "different" */
             nfound = (ret != 0) ? 1 : 0;
 
+            /* if the ignore graph is present, consider a no difference */
+            if ( options->m_no_contents == 1 )
+                nfound = 0;
+
             if(print_objname(options, nfound))
                 do_print_objname("group", path1, path2);
 

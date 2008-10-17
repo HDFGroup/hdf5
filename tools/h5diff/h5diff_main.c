@@ -13,10 +13,12 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "h5diff.h"
 #include <stdlib.h>
 #include <assert.h>
+#include <memory.h>
+#include "h5diff.h"
 #include "h5diff_common.h"
+#include "h5tools_utils.h"
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -69,14 +71,58 @@
 int main(int argc, const char *argv[])
 {
     int        ret;
-    char       *fname1 = NULL;
-    char       *fname2 = NULL;
-    char       *objname1  = NULL;
-    char       *objname2  = NULL;
+    const char *fname1 = NULL;
+    const char *fname2 = NULL;
+    const char *objname1  = NULL;
+    const char *objname2  = NULL;
     hsize_t    nfound=0;
     diff_opt_t options;
 
+    /*-------------------------------------------------------------------------
+    * initialize options
+    *-------------------------------------------------------------------------
+    */
+
+    /* zero defaults */
+    memset(&options, 0, sizeof (diff_opt_t));
+
+    /* assume equal contents initially */
+    options.contents = 1;
+
+    /*-------------------------------------------------------------------------
+    * process the command-line
+    *-------------------------------------------------------------------------
+    */
+
     parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
+
+    /*-------------------------------------------------------------------------
+    * file and object names
+    *-------------------------------------------------------------------------
+    */
+
+    fname1 = argv[ opt_ind ];
+    fname2 = argv[ opt_ind + 1 ];
+    objname1 = argv[ opt_ind + 2 ];
+
+    if ( objname1 == NULL )
+    {
+        objname2 = NULL;
+    }
+
+    if ( argv[ opt_ind + 3 ] != NULL)
+    {
+        objname2 = argv[ opt_ind + 3 ];
+    }
+    else
+    {
+        objname2 = objname1;
+    }
+
+    /*-------------------------------------------------------------------------
+    * do the diff
+    *-------------------------------------------------------------------------
+    */
 
     nfound = h5diff(fname1,fname2,objname1,objname2,&options);
 

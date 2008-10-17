@@ -113,9 +113,9 @@ TOOLTEST()
            rm -f output.out
         fi
     fi
-    
+   
     if [ $runh5diff != no ]; then
-     H5DIFFTEST -c $inputfile $outputfile $7 $9
+     H5DIFFTEST -c $inputfile $outputfile 
     fi
 }
 
@@ -130,6 +130,7 @@ H5DIFFTEST()
         $RUNSERIAL $H5DIFF_BIN -q "$@" 
     fi
     RET=$?
+
     if [ $RET != 0 ] ; then
          echo "*FAILED*"
          nerrors="`expr $nerrors + 1`"
