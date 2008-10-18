@@ -79,45 +79,11 @@ int main(int argc, const char *argv[])
     diff_opt_t options;
 
     /*-------------------------------------------------------------------------
-    * initialize options
-    *-------------------------------------------------------------------------
-    */
-
-    /* zero defaults */
-    memset(&options, 0, sizeof (diff_opt_t));
-
-    /* assume equal contents initially */
-    options.contents = 1;
-
-    /*-------------------------------------------------------------------------
     * process the command-line
     *-------------------------------------------------------------------------
     */
 
-    parse_command_line(argc, argv, &options);
-
-    /*-------------------------------------------------------------------------
-    * file and object names
-    *-------------------------------------------------------------------------
-    */
-
-    fname1 = argv[ opt_ind ];
-    fname2 = argv[ opt_ind + 1 ];
-    objname1 = argv[ opt_ind + 2 ];
-
-    if ( objname1 == NULL )
-    {
-        objname2 = NULL;
-    }
-
-    if ( argv[ opt_ind + 3 ] != NULL)
-    {
-        objname2 = argv[ opt_ind + 3 ];
-    }
-    else
-    {
-        objname2 = objname1;
-    }
+    parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
 
     /*-------------------------------------------------------------------------
     * do the diff
