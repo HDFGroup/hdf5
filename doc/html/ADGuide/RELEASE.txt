@@ -1,4 +1,4 @@
-HDF5 version 1.6.7-snap21 released on Sun Oct  5 17:14:19 CDT 2008
+HDF5 version 1.6.7-snap22 released on Sun Oct 19 14:47:00 CDT 2008
 ================================================================================
 
 INTRODUCTION
@@ -53,7 +53,10 @@ New Features
     ========================
     Library:
     --------
-    None
+     - Added support for $(DESTDIR) to the install feature. AKC - 2008/10/13.
+     - Added version compatibility macros for functions changed in 1.8.  For
+           example, H5Gcreate1 will work the same in both 1.6 and 1.8.
+           (NAF - 2008/10/11)
 
     Parallel Library:
     -----------------
