@@ -599,6 +599,10 @@ rem ############################################################################
     call :tooltest textlinksrc.ddl textlinksrc.h5
     call :tooltest textlinkfar.ddl textlinkfar.h5
 
+    rem tests for traversal of external links
+    call :tooltest textlinksrc.ddl textlinksrc.h5
+    call :tooltest textlinkfar.ddl textlinkfar.h5
+    
     
     
     if %nerrors% equ 0 (
