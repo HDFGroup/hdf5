@@ -136,16 +136,17 @@ void writeFloatToFiles(const char* fortran_type, const char* c_type, unsigned in
 
 int main()
 {
-  /* Open target files */
-  c_header = fopen(CFILE, "w");
-  fort_header = fopen(FFILE, "w");
-
   int FoundIntSize[4];
   int FoundRealSize[4];
   int i,j,flag;
   char chrA[20],chrB[20];
   int H5_C_HAS_REAL_NATIVE_16;
   int H5_C_HAS_REAL_NATIVE_12;
+
+  /* Open target files */
+  c_header = fopen(CFILE, "w");
+  fort_header = fopen(FFILE, "w");
+
 
 /* Default is C has 16 byte float */
   H5_C_HAS_REAL_NATIVE_16 = 1; 
