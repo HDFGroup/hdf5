@@ -237,10 +237,6 @@ rem ############################################################################
     call :testing %h5diff% -q %srcfile1% %srcfile2%
     call :tooltest h5diff_18.txt -q %file1% %file2% 
     
-    rem 1.9 contents mode 
-    call :testing %h5diff% -v -c %srcfile1% %srcfile11%
-    call :tooltest h5diff_19.txt -v -c %file1% %file11% 
-
 
     rem ##############################################################################
     rem # not comparable types
