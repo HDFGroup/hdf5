@@ -32,7 +32,6 @@
 #
 
 
-
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -52,8 +51,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = README $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/h5fc.in $(srcdir)/libhdf5_fortran.settings.in \
-	$(top_srcdir)/config/commence.am \
+	$(srcdir)/h5fc.in $(top_srcdir)/config/commence.am \
 	$(top_srcdir)/config/conclude.am
 noinst_PROGRAMS = H5match_types$(EXEEXT) H5fortran_detect$(EXEEXT) \
 	H5test_kind$(EXEEXT)
@@ -65,14 +63,14 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES = h5fc libhdf5_fortran.settings
+CONFIG_CLEAN_FILES = h5fc
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(settingsdir)"
+am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_fortran_la_LIBADD =
@@ -132,8 +130,6 @@ SOURCES = $(libhdf5_fortran_la_SOURCES) $(H5fortran_detect_SOURCES) \
 DIST_SOURCES = $(am__libhdf5_fortran_la_SOURCES_DIST) \
 	$(H5fortran_detect_SOURCES) H5match_types.c \
 	$(am__H5test_kind_SOURCES_DIST)
-settingsDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(settings_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -422,9 +418,9 @@ libhdf5_fortran_la_SOURCES = H5f90global.f90          \
          $(PARALLEL_COND_SRC)
 
 
-# h5fc and libhdf5_fortran.settings are generated during configure.
-# Remove them only when distclean.
-DISTCLEANFILES = h5fc libhdf5_fortran.settings
+# h5fc is generated during configure.
+# Remove it only when distclean.
+DISTCLEANFILES = h5fc
 
 # H5fortran_types.f90 and H5f90i.h are automatically generaed by
 # H5match_types, and must be cleaned explicitly.  H5fort_type_defines.h
@@ -432,10 +428,6 @@ DISTCLEANFILES = h5fc libhdf5_fortran.settings
 MOSTLYCLEANFILES = H5fortran_types.f90 H5f90i_gen.h H5fort_type_defines.h \
          H5fortran_detect.f90
 
-
-# Install libhdf5_fortran.settings in lib directory
-settingsdir = $(libdir)
-settings_DATA = libhdf5_fortran.settings
 @BUILD_PARALLEL_CONDITIONAL_FALSE@H5FC_NAME = h5fc
 
 # Custom rule for installing h5fc, since it will be named h5pfc if hdf5
@@ -509,8 +501,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 h5fc: $(top_builddir)/config.status $(srcdir)/h5fc.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-libhdf5_fortran.settings: $(top_builddir)/config.status $(srcdir)/libhdf5_fortran.settings.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
@@ -629,23 +619,6 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-settingsDATA: $(settings_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(settingsdir)" || $(MKDIR_P) "$(DESTDIR)$(settingsdir)"
-	@list='$(settings_DATA)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  f=$(am__strip_dir) \
-	  echo " $(settingsDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(settingsdir)/$$f'"; \
-	  $(settingsDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(settingsdir)/$$f"; \
-	done
-
-uninstall-settingsDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(settings_DATA)'; for p in $$list; do \
-	  f=$(am__strip_dir) \
-	  echo " rm -f '$(DESTDIR)$(settingsdir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(settingsdir)/$$f"; \
-	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -724,9 +697,9 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(DATA) all-local
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) all-local
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(settingsdir)"; do \
+	for dir in "$(DESTDIR)$(libdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -778,7 +751,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-data-local install-settingsDATA
+install-data-am: install-data-local
 
 install-dvi: install-dvi-am
 
@@ -815,8 +788,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES uninstall-local \
-	uninstall-settingsDATA
+uninstall-am: uninstall-libLTLIBRARIES uninstall-local
 
 .MAKE: install-am install-strip
 
@@ -830,13 +802,12 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-local \
 	install-exec-am install-exec-local install-html \
 	install-html-am install-info install-info-am \
 	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-settingsDATA install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic maintainer-clean-local mostlyclean \
 	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
 	mostlyclean-local pdf pdf-am ps ps-am tags uninstall \
-	uninstall-am uninstall-libLTLIBRARIES uninstall-local \
-	uninstall-settingsDATA
+	uninstall-am uninstall-libLTLIBRARIES uninstall-local
 
 
 # List all build rules defined by HDF5 Makefiles as "PHONY" targets here.
