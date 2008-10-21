@@ -15,6 +15,11 @@
 
 #include <string>
 
+// remove when done
+#include <iostream>
+    using std::cerr;
+    using std::endl;
+
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -239,7 +244,13 @@ DataSet CommonFG::openDataSet( const H5std_string& name ) const
 ///\par Description
 ///		Note that both names are interpreted relative to the
 ///		specified location.
+///		For information on creating hard link and soft link, please 
+///		refer to the C layer Reference Manual at:
+/// http://hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateHard and
+/// http://hdfgroup.org/HDF5/doc/RM/RM_H5L.html#Link-CreateSoft
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//	2007: QAK modified to use H5L APIs - BMR
 //--------------------------------------------------------------------------
 void CommonFG::link( H5L_type_t link_type, const char* curr_name, const char* new_name ) const
 {
@@ -283,6 +294,8 @@ void CommonFG::link( H5L_type_t link_type, const H5std_string& curr_name, const 
 ///\param	name  - IN: Name of the object to be removed
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//	2007: QAK modified to use H5L APIs - BMR
 //--------------------------------------------------------------------------
 void CommonFG::unlink( const char* name ) const
 {
@@ -317,6 +330,8 @@ void CommonFG::unlink( const H5std_string& name ) const
 ///		to the Group Interface in the HDF5 User's Guide at:
 /// http://hdf.ncsa.uiuc.edu/HDF5/doc/Groups.html
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//	2007: QAK modified to use H5L APIs - BMR
 //--------------------------------------------------------------------------
 void CommonFG::move( const char* src, const char* dst ) const
 {
@@ -380,6 +395,7 @@ void CommonFG::getObjinfo( const H5std_string& name, hbool_t follow_link, H5G_st
 ///		It differs from the above functions in that it doesn't have
 ///		the paramemter \a follow_link.
 // Programmer	Binh-Minh Ribler - Nov, 2005
+// Note: need to modify to use H5Oget_info and H5Lget_info - BMR
 //--------------------------------------------------------------------------
 void CommonFG::getObjinfo( const char* name, H5G_stat_t& statbuf ) const
 {
@@ -452,6 +468,11 @@ H5std_string CommonFG::getLinkval( const H5std_string& name, size_t size ) const
 ///		object header, e.g., data sets, groups, named data types,
 ///		and data spaces, but not symbolic links.
 // Programmer	Binh-Minh Ribler - 2000
+// Modification
+//	2007: QAK modified to use H5O APIs; however the first parameter is
+//		no longer just file or group, this function should be moved
+//		to another class to accommodate attribute, dataset, and named
+//		datatype. - BMR
 //--------------------------------------------------------------------------
 void CommonFG::setComment( const char* name, const char* comment ) const
 {
@@ -480,6 +501,10 @@ void CommonFG::setComment( const H5std_string& name, const H5std_string& comment
 ///\param	name  - IN: Name of the object
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - May 2005
+//	2007: QAK modified to use H5O APIs; however the first parameter is
+//		no longer just file or group, this function should be moved
+//		to another class to accommodate attribute, dataset, and named
+//		datatype. - BMR
 //--------------------------------------------------------------------------
 void CommonFG::removeComment(const char* name) const
 {
@@ -509,6 +534,10 @@ void CommonFG::removeComment(const H5std_string& name) const
 ///\return	Comment string
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - May 2005
+//	2007: QAK modified to use H5O APIs; however the first parameter is
+//		no longer just file or group, this function should be moved
+//		to another class to accommodate attribute, dataset, and named
+//		datatype. - BMR
 //--------------------------------------------------------------------------
 H5std_string CommonFG::getComment (const H5std_string& name) const
 {
@@ -549,6 +578,10 @@ H5std_string CommonFG::getComment (const H5std_string& name) const
 ///\return	Comment string
 ///\exception	H5::FileIException or H5::GroupIException
 // Programmer	Binh-Minh Ribler - 2000
+//	2007: QAK modified to use H5O APIs; however the first parameter is
+//		no longer just file or group, this function should be moved
+//		to another class to accommodate attribute, dataset, and named
+//		datatype. - BMR
 //--------------------------------------------------------------------------
 H5std_string CommonFG::getComment( const char* name, size_t bufsize ) const
 {

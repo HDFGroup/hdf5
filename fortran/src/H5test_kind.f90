@@ -17,131 +17,131 @@
 ! This fortran program generates H5fortran_detect.f90
 ! 
 !
-         program test_kind
-         integer :: i, j, ii, last, kind_numbers(10)
-         integer :: jr, jd
+         PROGRAM test_kind
+         INTEGER :: i, j, ii, last, kind_numbers(10)
+         INTEGER :: jr, jd
          last = -1
          ii = 0
-         j = selected_int_kind(18)
+         j = SELECTED_INT_KIND(18)
 !         write(*,*) j
-         do i = 1,100
-            j = selected_int_kind(i)
-            if(j .ne. last) then
-              if(last .ne. -1) then
+         DO i = 1,100
+            j = SELECTED_INT_KIND(i)
+            IF(j .NE. last) THEN
+              IF(last .NE. -1) THEN
                   ii = ii + 1
                   kind_numbers(ii) = last
-              endif
+              ENDIF
             last = j
-            if(j .eq. -1) exit
-            endif
-          enddo
+            IF(j .EQ. -1) EXIT
+            ENDIF
+          ENDDO
 !          write(*,*) kind_numbers(1:ii)
 ! Generate a program
-          write(*,*) "program int_kind"
-          write(*,*) "write(*,*) "" /*generating header file*/ """
+          WRITE(*,*) "program int_kind"
+          WRITE(*,*) "write(*,*) "" /*generating header file*/ """
              j = 0
-             write(*, "("" call i"", i2.2,""()"")") j
+             WRITE(*, "("" call i"", i2.2,""()"")") j
              jr = 0
-             write(*, "("" call r"", i2.2,""()"")") jr
+             WRITE(*, "("" call r"", i2.2,""()"")") jr
              jd = 0
-             write(*, "("" call d"", i2.2,""()"")") jd
-          do i = 1, ii
+             WRITE(*, "("" call d"", i2.2,""()"")") jd
+          DO i = 1, ii
              j = kind_numbers(i)
-             write(*, "("" call i"", i2.2,""()"")") j
-          enddo
-          write(*,*) "end program int_kind"
+             WRITE(*, "("" call i"", i2.2,""()"")") j
+          ENDDO
+          WRITE(*,*) "end program int_kind"
               j = 0
-             write(*, "("" subroutine i"" i2.2,""()"")") j
-             write(*,*)"   implicit none"
-             write(*,*)"   integer :: a = 0"
-             write(*,*)"   integer :: a_size"
-             write(*,*)"   a_size = bit_size(a)"
-             write(*,*)"   if (a_size .eq. 8) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_NATIVE_1"" "
-             write(*,*)"   endif"
-             write(*,*)"   if (a_size .eq. 16) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_NATIVE_2"" "
-             write(*,*)"   endif"
-             write(*,*)"   if (a_size .eq. 32) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_NATIVE_4"" "
-             write(*,*)"   endif"
-             write(*,*)"   if (a_size .eq. 64) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_NATIVE_8"" "
-             write(*,*)"   endif"
-             write(*,*)"   if (a_size .eq. 128) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_NATIVE_16"" "
-             write(*,*)"   endif"
-             write(*,*)"   return"
-             write(*,*)"   end subroutine"    
+             WRITE(*, "("" subroutine i"", i2.2,""()"")") j
+             WRITE(*,*)"   implicit none"
+             WRITE(*,*)"   integer :: a = 0"
+             WRITE(*,*)"   integer :: a_size"
+             WRITE(*,*)"   a_size = bit_size(a)"
+             WRITE(*,*)"   if (a_size .eq. 8) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_NATIVE_1"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   if (a_size .eq. 16) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_NATIVE_2"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   if (a_size .eq. 32) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_NATIVE_4"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   if (a_size .eq. 64) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_NATIVE_8"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   if (a_size .eq. 128) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_NATIVE_16"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   return"
+             WRITE(*,*)"   end subroutine"    
               jr = 0
-             write(*, "("" subroutine r"" i2.2,""()"")") j
-             write(*,*)"   implicit none"
-             write(*,*)"   real :: b(1) = 0"
-             write(*,*)"   integer :: a(1) = 0"
-             write(*,*)"   integer :: a_size"
-             write(*,*)"   integer :: real_size"
-             write(*,*)"   integer :: ab_size ! How many integers needed to hold a real"
-             write(*,*)"   integer :: ba_size ! How many reals needed to hold an integer"
-             write(*,*)"   a_size = bit_size(a(1)) ! Size in bits for integer"
-             write(*,*)"   ab_size = size(transfer(b,a))"
-             write(*,*)"   ba_size = size(transfer(a,b))"
-             write(*,*)"   if (ab_size .eq. ba_size) real_size=a_size"
-             write(*,*)"   if (ab_size .gt. ba_size) real_size=a_size*ba_size"
-             write(*,*)"   if (ab_size .lt. ba_size) real_size=a_size/ba_size"
-             write(*,*)"   if (real_size .eq. 32) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_REAL_NATIVE_4"" "
-             write(*,*)"   endif"
-             write(*,*)"   if (real_size .eq. 64) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_REAL_NATIVE_8"" "
-             write(*,*)"   endif"
-             write(*,*)"   if (real_size .eq. 128) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_REAL_NATIVE_16"" "
-             write(*,*)"   endif"
-             write(*,*)"   return"
-             write(*,*)"   end subroutine"    
+             WRITE(*, "("" subroutine r"", i2.2,""()"")") j
+             WRITE(*,*)"   implicit none"
+             WRITE(*,*)"   real :: b(1) = 0"
+             WRITE(*,*)"   integer :: a(1) = 0"
+             WRITE(*,*)"   integer :: a_size"
+             WRITE(*,*)"   integer :: real_size"
+             WRITE(*,*)"   integer :: ab_size ! How many integers needed to hold a real"
+             WRITE(*,*)"   integer :: ba_size ! How many reals needed to hold an integer"
+             WRITE(*,*)"   a_size = bit_size(a(1)) ! Size in bits for integer"
+             WRITE(*,*)"   ab_size = size(transfer(b,a))"
+             WRITE(*,*)"   ba_size = size(transfer(a,b))"
+             WRITE(*,*)"   if (ab_size .eq. ba_size) real_size=a_size"
+             WRITE(*,*)"   if (ab_size .gt. ba_size) real_size=a_size*ba_size"
+             WRITE(*,*)"   if (ab_size .lt. ba_size) real_size=a_size/ba_size"
+             WRITE(*,*)"   if (real_size .eq. 32) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_REAL_NATIVE_4"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   if (real_size .eq. 64) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_REAL_NATIVE_8"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   if (real_size .eq. 128) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_REAL_NATIVE_16"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   return"
+             WRITE(*,*)"   end subroutine"    
               jd = 0
-             write(*, "("" subroutine d"" i2.2,""()"")") jd
-             write(*,*)"   implicit none"
-             write(*,*)"   double precision :: b = 0"
-             write(*,*)"   integer :: a(8) = 0"
-             write(*,*)"   integer :: a_size"
-             write(*,*)"   integer :: b_size"
-             write(*,*)"   a_size = bit_size(a(1))"
-             write(*,*)"   b_size = size(transfer(b,a))*a_size"
-             write(*,*)"   if (b_size .eq. 64) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_DOUBLE_NATIVE_8"" "
-             write(*,*)"   endif"
-             write(*,*)"   if (b_size .eq. 128) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_DOUBLE_NATIVE_16"" "
-             write(*,*)"   endif"
-             write(*,*)"   return"
-             write(*,*)"   end subroutine"    
-          do i = 1, ii
+             WRITE(*, "("" subroutine d"", i2.2,""()"")") jd
+             WRITE(*,*)"   implicit none"
+             WRITE(*,*)"   double precision :: b = 0"
+             WRITE(*,*)"   integer :: a(8) = 0"
+             WRITE(*,*)"   integer :: a_size"
+             WRITE(*,*)"   integer :: b_size"
+             WRITE(*,*)"   a_size = bit_size(a(1))"
+             WRITE(*,*)"   b_size = size(transfer(b,a))*a_size"
+             WRITE(*,*)"   if (b_size .eq. 64) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_DOUBLE_NATIVE_8"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   if (b_size .eq. 128) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_DOUBLE_NATIVE_16"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   return"
+             WRITE(*,*)"   end subroutine"    
+          DO i = 1, ii
               j = kind_numbers(i)
-             write(*, "("" subroutine i"" i2.2,""()"")") j
-             write(*,*)"   implicit none"
-             write(*,*)"   integer(",j,") :: a = 0"
-             write(*,*)"   integer :: a_size"
-             write(*,*)"   a_size = bit_size(a)"
-             write(*,*)"   if (a_size .eq. 8) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_INTEGER_1"" "
-             write(*,*)"   endif"
-             write(*,*)"   if (a_size .eq. 16) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_INTEGER_2"" "
-             write(*,*)"   endif"
-             write(*,*)"   if (a_size .eq. 32) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_INTEGER_4"" "
-             write(*,*)"   endif"
-             write(*,*)"   if (a_size .eq. 64) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_INTEGER_8"" "
-             write(*,*)"   endif"
-             write(*,*)"   if (a_size .eq. 128) then"
-             write(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_INTEGER_16"" "
-             write(*,*)"   endif"
-             write(*,*)"   return"
-             write(*,*)"   end subroutine"    
-          enddo
-          end program
+             WRITE(*, "("" subroutine i"", i2.2,""()"")") j
+             WRITE(*,*)"   implicit none"
+             WRITE(*,*)"   integer(",j,") :: a = 0"
+             WRITE(*,*)"   integer :: a_size"
+             WRITE(*,*)"   a_size = bit_size(a)"
+             WRITE(*,*)"   if (a_size .eq. 8) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_INTEGER_1"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   if (a_size .eq. 16) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_INTEGER_2"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   if (a_size .eq. 32) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_INTEGER_4"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   if (a_size .eq. 64) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_INTEGER_8"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   if (a_size .eq. 128) then"
+             WRITE(*,*)"       write(*,*) ""#define H5_FORTRAN_HAS_INTEGER_16"" "
+             WRITE(*,*)"   endif"
+             WRITE(*,*)"   return"
+             WRITE(*,*)"   end subroutine"    
+          ENDDO
+          END PROGRAM
               
             
 

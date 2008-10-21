@@ -37,6 +37,8 @@ typedef struct {
     int    err_stat;  /* an error ocurred (1, error, 0, no error) */
     int    cmn_objs;  /* do we have comparable objects */
     int    not_cmp;   /* are the objects comparable */
+    int    m_contents;/* contents mode */
+    int    contents;  /* equal contents */
 } diff_opt_t;
 
 

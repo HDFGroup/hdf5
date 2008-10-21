@@ -72,16 +72,11 @@
 /****************************/
 /* Package Private Typedefs */
 /****************************/
-
-/* Define the main attribute structure */
-struct H5A_t {
-    H5O_shared_t sh_loc;    /* Shared message info (must be first) */
-
+/* Define the shared attribute structure */
+typedef struct H5A_shared_t {
     unsigned    version;    /* Version to encode attribute with */
     hbool_t     initialized;/* Indicate whether the attribute has been modified */
-    hbool_t     obj_opened; /* Object header entry opened? */
     H5O_loc_t   oloc;       /* Object location for object attribute is on */
-    H5G_name_t  path;       /* Group hierarchy path */
 
     char        *name;      /* Attribute's name */
     H5T_cset_t  encoding;   /* Character encoding of attribute name */
@@ -95,6 +90,15 @@ struct H5A_t {
     void        *data;      /* Attribute data (on a temporary basis) */
     size_t      data_size;  /* Size of data on disk */
     H5O_msg_crt_idx_t crt_idx;  /* Attribute's creation index in the object header */
+    unsigned	nrefs;		/* Ref count for times this object is refered	*/
+} H5A_shared_t;
+
+/* Define the main attribute structure */
+struct H5A_t {
+    H5O_shared_t sh_loc;     /* Shared message info (must be first) */
+    hbool_t      obj_opened; /* Object header entry opened? */
+    H5G_name_t   path;       /* Group hierarchy path */
+    H5A_shared_t *shared;    /* Shared attribute information */
 };
 
 /* Typedefs for "dense" attribute storage */
@@ -152,7 +156,7 @@ typedef struct H5A_bt2_ud_ins_t {
 /* Data structure to hold table of attributes for an object */
 typedef struct {
     size_t      nattrs;         /* # of attributes in table */
-    H5A_t       *attrs;         /* Pointer to array of attributes */
+    H5A_t       **attrs;        /* Pointer to array of attribute pointers */
 } H5A_attr_table_t;
 
 /* Attribute iteration operator for internal library callbacks */
@@ -184,6 +188,9 @@ struct H5A_attr_iter_op_t {
 /* Declare extern the free list for H5A_t's */
 H5FL_EXTERN(H5A_t);
 
+/* Declare the external free lists for H5A_shared_t's */
+H5FL_EXTERN(H5A_shared_t);
+
 /* Declare extern a free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(attr_buf);
 
@@ -206,6 +213,7 @@ H5_DLL H5A_t * H5A_open_by_name(const H5G_loc_t *loc, const char *obj_name,
     const char *attr_name, hid_t lapl_id, hid_t dxpl_id);
 H5_DLL H5A_t *H5A_open_by_idx(const H5G_loc_t *loc, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t dxpl_id);
+H5_DLL ssize_t H5A_get_name(H5A_t *attr, size_t buf_size, char *buf);
 H5_DLL H5A_t *H5A_copy(H5A_t *new_attr, const H5A_t *old_attr);
 H5_DLL herr_t H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo);
 H5_DLL herr_t H5A_free(H5A_t *attr);

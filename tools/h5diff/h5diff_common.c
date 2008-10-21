@@ -31,7 +31,7 @@ const char  *progname = "h5diff";
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVrvqn:d:p:";
+static const char *s_opts = "hVrvqn:d:p:c";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -41,6 +41,7 @@ static struct long_options l_opts[] = {
     { "count", require_arg, 'n' },
     { "delta", require_arg, 'd' },
     { "relative", require_arg, 'p' },
+    { "contents", no_arg, 'c' },
     { NULL, 0, '\0' }
 };
 
@@ -90,6 +91,9 @@ void parse_command_line(int argc,
             break;
         case 'r':
             options->m_report = 1;
+            break;
+        case 'c':
+            options->m_contents = 1;
             break;
         case 'd':
             options->d=1;
@@ -170,7 +174,7 @@ void parse_command_line(int argc,
 
  void  print_info(diff_opt_t* options)
  {
-     if (options->m_quiet || options->err_stat)
+     if (options->m_quiet || options->err_stat || options->m_contents)
          return;
      
      if (options->cmn_objs==0)
@@ -318,8 +322,10 @@ void usage(void)
  printf("   -V, --version           Print version number and exit\n");
  printf("   -r, --report            Report mode. Print differences\n");
  printf("   -v, --verbose           Verbose mode. Print differences, list of objects\n");
-  
  printf("   -q, --quiet             Quiet mode. Do not do output\n");
+ printf("   -c, --contents          Contents mode. Objects in both files must match\n");
+
+
  printf("   -n C, --count=C         Print differences up to C number\n");
  printf("   -d D, --delta=D         Print difference when greater than limit D\n");
  printf("   -p R, --relative=R      Print difference when greater than relative limit R\n");
@@ -339,6 +345,22 @@ void usage(void)
  printf("  -r Report mode: print the above plus the differences\n");
  printf("  -v Verbose mode: print the above plus a list of objects and warnings\n");
  printf("  -q Quiet mode: do not print output\n");
+ printf("  -c Contents mode: objects in both files must match\n");
+
+ printf("\n");
+
+ printf(" Compare criteria\n");
+ printf("\n");
+ printf(" If no objects [obj1[obj2]] are specified, h5diff only compares objects\n");
+ printf("   with the same absolute path in both files. However,\n");
+ printf("   when the -c flag is present, (contents mode) the objects in file1\n");
+ printf("   must match exactly the objects in file2\n");
+ printf("\n");
+   
+ printf(" The compare criteria is:\n");
+ printf("   1) datasets: numerical array differences 2) groups: name string difference\n");
+ printf("   3) datatypes: the return value of H5Tequal 2) links: name string difference\n");
+ printf("   of the linked value\n");
 
  printf("\n");
 
@@ -368,11 +390,7 @@ void usage(void)
  printf("\n");
  printf("    to compare '/g1/dset1' and '/g1/dset2' in the same file\n");
  printf("\n");
- printf(" If no objects [obj1[obj2]] are specified, h5diff only compares objects\n");
- printf("   with the same absolute path in both files. The compare criteria is:\n");
- printf("   1) datasets: numerical array differences 2) groups: name string difference\n");
- printf("   3) datatypes: the return value of H5Tequal 2) links: name string difference\n");
- printf("   of the linked value\n");
+
 
 }
 

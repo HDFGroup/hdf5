@@ -702,6 +702,10 @@ done:
 herr_t
 H5G_obj_info(H5O_loc_t *oloc, H5G_info_t *grp_info, hid_t dxpl_id)
 {
+    H5G_t *grp = NULL;                  /* Group to query */
+    H5G_loc_t   grp_loc;                /* Entry of group to be queried */
+    H5G_name_t  grp_path;            	/* Group hier. path */
+    H5O_loc_t   grp_oloc;            	/* Group object location */
     H5O_linfo_t	linfo;		        /* Link info message */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -710,6 +714,22 @@ H5G_obj_info(H5O_loc_t *oloc, H5G_info_t *grp_info, hid_t dxpl_id)
     /* Sanity check */
     HDassert(oloc);
     HDassert(grp_info);
+
+    /* Set up group location to fill in */
+    grp_loc.oloc = &grp_oloc;
+    grp_loc.path = &grp_path;
+    H5G_loc_reset(&grp_loc);
+
+    /* Deep copy (duplicate) of the group location object */
+    if(H5O_loc_copy(&grp_oloc, oloc, H5_COPY_DEEP) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, FAIL, "can't copy object location")
+
+    /* Open the group */
+    if(NULL == (grp = H5G_open(&grp_loc, dxpl_id)))
+        HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount point not found")
+
+    /* Get information from the group */
+    grp_info->mounted = H5G_MOUNTED(grp);
 
     /* Attempt to get the link info for this group */
     if(H5G_obj_get_linfo(oloc, &linfo, dxpl_id)) {
@@ -737,6 +757,10 @@ H5G_obj_info(H5O_loc_t *oloc, H5G_info_t *grp_info, hid_t dxpl_id)
     } /* end else */
 
 done:
+    /* Clean up resources */
+    if(grp && H5G_close(grp) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_CANTCLOSEOBJ, FAIL, "unable to close queried group")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_obj_info() */
 

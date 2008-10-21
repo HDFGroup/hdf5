@@ -100,6 +100,8 @@ static herr_t H5A_attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type,
 /* Local Variables */
 /*******************/
 
+typedef H5A_t*	H5A_t_ptr;
+H5FL_SEQ_DEFINE(H5A_t_ptr);
 
 
 /*-------------------------------------------------------------------------
@@ -114,6 +116,10 @@ static herr_t H5A_attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type,
  *		koziol@hdfgroup.org
  *		Dec 18 2006
  *
+ * Modification:Raymond Lu
+ *              24 June 2008
+ *              Changed the table of attribute objects to be the table of
+ *              pointers to attribute objects for the ease of operation.
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -128,11 +134,23 @@ H5A_compact_build_table_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     /* check args */
     HDassert(mesg);
 
-    /* Check for re-allocating table */
+    /* Re-allocate the table if necessary */
     if(udata->curr_attr == udata->atable->nattrs) {
+        size_t i;
         size_t n = MAX(1, 2 * udata->atable->nattrs);
-        H5A_t *table = (H5A_t *)H5MM_realloc(udata->atable->attrs,
-                                          n * sizeof(H5A_t));
+        H5A_t **table = (H5A_t **)H5FL_SEQ_CALLOC(H5A_t_ptr, n);
+
+        /* Use attribute functions for operation */
+        for(i=0; i<udata->atable->nattrs; i++) {
+            table[i] = (H5A_t *)H5FL_CALLOC(H5A_t);
+            if(NULL == H5A_copy(table[i], udata->atable->attrs[i]))
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
+            if(H5A_close(udata->atable->attrs[i]) < 0)
+                HGOTO_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "can't close attribute")
+        }
+
+        if(udata->atable->nattrs)
+            udata->atable->attrs = (H5A_t **)H5FL_SEQ_FREE(H5A_t_ptr, udata->atable->attrs);
 
         if(!table)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "unable to extend attribute table")
@@ -141,12 +159,14 @@ H5A_compact_build_table_cb(H5O_t UNUSED *oh, H5O_mesg_t *mesg/*in,out*/,
     } /* end if */
 
     /* Copy attribute into table */
-    if(NULL == H5A_copy(&udata->atable->attrs[udata->curr_attr], (const H5A_t *)mesg->native))
+    udata->atable->attrs[udata->curr_attr] = (H5A_t *)H5FL_CALLOC(H5A_t);
+
+    if(NULL == H5A_copy(udata->atable->attrs[udata->curr_attr], (const H5A_t *)mesg->native))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
 
     /* Assign [somewhat arbitrary] creation order value, if requested */
     if(udata->bogus_crt_idx)
-        udata->atable->attrs[udata->curr_attr].crt_idx = sequence;
+        ((udata->atable->attrs[udata->curr_attr])->shared)->crt_idx = sequence;
 
     /* Increment current attribute */
     udata->curr_attr++;
@@ -246,8 +266,8 @@ H5A_dense_build_table_cb(const H5A_t *attr, void *_udata)
     HDassert(udata);
     HDassert(udata->curr_attr < udata->atable->nattrs);
 
-    /* Copy attribute information */
-    if(NULL == H5A_copy(&udata->atable->attrs[udata->curr_attr], attr))
+    /* Copy attribute information.  Share the attribute object in copying. */
+    if(NULL == H5A_copy(udata->atable->attrs[udata->curr_attr], attr))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy attribute")
 
     /* Increment number of attributes stored */
@@ -305,10 +325,16 @@ H5A_dense_build_table(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
     if(atable->nattrs > 0) {
         H5A_dense_bt_ud_t udata;       /* User data for iteration callback */
         H5A_attr_iter_op_t attr_op;    /* Attribute operator */
+        unsigned i;
 
         /* Allocate the table to store the attributes */
-        if((atable->attrs = (H5A_t *)H5MM_malloc(sizeof(H5A_t) * atable->nattrs)) == NULL)
+        if((atable->attrs = (H5A_t **)H5FL_SEQ_MALLOC(H5A_t_ptr, atable->nattrs)) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+        /* Allocate pointers for each entry in the table */
+        for(i=0; i<atable->nattrs; i++)
+            if((atable->attrs[i] = (H5A_t *)H5FL_CALLOC(H5A_t)) == NULL)
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Set up user data for iteration */
         udata.atable = atable;
@@ -358,7 +384,8 @@ H5A_attr_cmp_name_inc(const void *attr1, const void *attr2)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_name_inc)
 
-    FUNC_LEAVE_NOAPI(HDstrcmp(((const H5A_t *)attr1)->name, ((const H5A_t *)attr2)->name))
+    FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t **)attr1)->shared->name, 
+            (*(const H5A_t **)attr2)->shared->name))
 } /* end H5A_attr_cmp_name_inc() */
 
 
@@ -385,7 +412,8 @@ H5A_attr_cmp_name_dec(const void *attr1, const void *attr2)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_name_dec)
 
-    FUNC_LEAVE_NOAPI(HDstrcmp(((const H5A_t *)attr2)->name, ((const H5A_t *)attr1)->name))
+    FUNC_LEAVE_NOAPI(HDstrcmp((*(const H5A_t **)attr2)->shared->name, 
+            (*(const H5A_t **)attr1)->shared->name))
 } /* end H5A_attr_cmp_name_dec() */
 
 
@@ -413,9 +441,9 @@ H5A_attr_cmp_corder_inc(const void *attr1, const void *attr2)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_corder_inc)
 
-    if(((const H5A_t *)attr1)->crt_idx < ((const H5A_t *)attr2)->crt_idx)
+    if((*(const H5A_t **)attr1)->shared->crt_idx < (*(const H5A_t **)attr2)->shared->crt_idx)
         ret_value = -1;
-    else if(((const H5A_t *)attr1)->crt_idx > ((const H5A_t *)attr2)->crt_idx)
+    else if((*(const H5A_t **)attr1)->shared->crt_idx > (*(const H5A_t **)attr2)->shared->crt_idx)
         ret_value = 1;
     else
         ret_value = 0;
@@ -448,9 +476,9 @@ H5A_attr_cmp_corder_dec(const void *attr1, const void *attr2)
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5A_attr_cmp_corder_dec)
 
-    if(((const H5A_t *)attr1)->crt_idx < ((const H5A_t *)attr2)->crt_idx)
+    if((*(const H5A_t **)attr1)->shared->crt_idx < (*(const H5A_t **)attr2)->shared->crt_idx)
         ret_value = 1;
-    else if(((const H5A_t *)attr1)->crt_idx > ((const H5A_t *)attr2)->crt_idx)
+    else if((*(const H5A_t **)attr1)->shared->crt_idx > (*(const H5A_t **)attr2)->shared->crt_idx)
         ret_value = -1;
     else
         ret_value = 0;
@@ -484,18 +512,18 @@ H5A_attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type,
     /* Pick appropriate comparison routine */
     if(idx_type == H5_INDEX_NAME) {
         if(order == H5_ITER_INC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t), H5A_attr_cmp_name_inc);
+            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t*), H5A_attr_cmp_name_inc);
         else if(order == H5_ITER_DEC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t), H5A_attr_cmp_name_dec);
+            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t*), H5A_attr_cmp_name_dec);
         else
             HDassert(order == H5_ITER_NATIVE);
     } /* end if */
     else {
         HDassert(idx_type == H5_INDEX_CRT_ORDER);
         if(order == H5_ITER_INC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t), H5A_attr_cmp_corder_inc);
+            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t*), H5A_attr_cmp_corder_inc);
         else if(order == H5_ITER_DEC)
-            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t), H5A_attr_cmp_corder_dec);
+            HDqsort(atable->attrs, atable->nattrs, sizeof(H5A_t*), H5A_attr_cmp_corder_dec);
         else
             HDassert(order == H5_ITER_NATIVE);
     } /* end else */
@@ -546,24 +574,24 @@ H5A_attr_iterate_table(const H5A_attr_table_t *atable, hsize_t skip,
                 H5A_info_t ainfo;               /* Info for attribute */
 
                 /* Get the attribute information */
-                if(H5A_get_info(&atable->attrs[u], &ainfo) < 0)
+                if(H5A_get_info(atable->attrs[u], &ainfo) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5_ITER_ERROR, "unable to get attribute info")
 
                 /* Make the application callback */
-                ret_value = (attr_op->u.app_op2)(loc_id, atable->attrs[u].name, &ainfo, op_data);
+                ret_value = (attr_op->u.app_op2)(loc_id, ((atable->attrs[u])->shared)->name, &ainfo, op_data);
                 break;
             }
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             case H5A_ATTR_OP_APP:
                 /* Make the application callback */
-                ret_value = (attr_op->u.app_op)(loc_id, atable->attrs[u].name, op_data);
+                ret_value = (attr_op->u.app_op)(loc_id, ((atable->attrs[u])->shared)->name, op_data);
                 break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
             case H5A_ATTR_OP_LIB:
                 /* Call the library's callback */
-                ret_value = (attr_op->u.lib_op)(&(atable->attrs[u]), op_data);
+                ret_value = (attr_op->u.lib_op)((atable->attrs[u]), op_data);
                 break;
 
             default:
@@ -588,22 +616,25 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5A_attr_release_table
+ * Function:	  H5A_attr_release_table
  *
- * Purpose:     Release table containing a list of attributes for an object
+ * Purpose:       Release table containing a list of attributes for an object
  *
- * Return:	Success:        Non-negative
- *		Failure:	Negative
+ * Return:	  Success:        Non-negative
+ *		  Failure:	Negative
  *
- * Programmer:	Quincey Koziol
- *	        Dec 11, 2006
+ * Programmer:	  Quincey Koziol
+ *	          Dec 11, 2006
  *
+ * Modification:  Raymond Lu
+ *                4 June 2008
+ *                Changed from H5A_free to H5A_close to release attributes.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5A_attr_release_table(H5A_attr_table_t *atable)
 {
-    size_t      u;                      /* Local index variable */
+    size_t      u;               /* Local index variable */
     herr_t	ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_attr_release_table)
@@ -611,18 +642,18 @@ H5A_attr_release_table(H5A_attr_table_t *atable)
     /* Sanity check */
     HDassert(atable);
 
-    /* Release attribute info, if any */
+    /* Release attribute info, if any. */
     if(atable->nattrs > 0) {
         /* Free attribute message information */
-        for(u = 0; u < atable->nattrs; u++)
-            if(H5A_free(&(atable->attrs[u])) < 0)
+        for(u = 0; u < atable->nattrs; u++) {
+            if(H5A_close((atable->attrs[u])) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTFREE, FAIL, "unable to release attribute")
-
-        /* Free table of attributes */
-        H5MM_xfree(atable->attrs);
+        }
     } /* end if */
     else
         HDassert(atable->attrs == NULL);
+
+    atable->attrs = (H5A_t **)H5FL_SEQ_FREE(H5A_t_ptr, atable->attrs);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -711,25 +742,25 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
     use_latest_format = H5F_USE_LATEST_FORMAT(f);
 
     /* Check whether datatype and dataspace are shared */
-    if(H5O_msg_is_shared(H5O_DTYPE_ID, attr->dt) > 0)
+    if(H5O_msg_is_shared(H5O_DTYPE_ID, attr->shared->dt) > 0)
         type_shared = TRUE;
     else
         type_shared = FALSE;
 
-    if(H5O_msg_is_shared(H5O_SDSPACE_ID, attr->ds) > 0)
+    if(H5O_msg_is_shared(H5O_SDSPACE_ID, attr->shared->ds) > 0)
         space_shared = TRUE;
     else
         space_shared = FALSE;
 
     /* Check which version to encode attribute with */
     if(use_latest_format)
-        attr->version = H5O_ATTR_VERSION_LATEST;      /* Write out latest version of format */
-    else if(attr->encoding != H5T_CSET_ASCII)
-        attr->version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
+        attr->shared->version = H5O_ATTR_VERSION_LATEST;      /* Write out latest version of format */
+    else if(attr->shared->encoding != H5T_CSET_ASCII)
+        attr->shared->version = H5O_ATTR_VERSION_3;   /* Write version which includes the character encoding */
     else if(type_shared || space_shared)
-        attr->version = H5O_ATTR_VERSION_2;   /* Write out version with flag for indicating shared datatype or dataspace */
+        attr->shared->version = H5O_ATTR_VERSION_2;   /* Write out version with flag for indicating shared datatype or dataspace */
     else
-        attr->version = H5O_ATTR_VERSION_1;   /* Write out basic version */
+        attr->shared->version = H5O_ATTR_VERSION_1;   /* Write out basic version */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5A_set_version() */

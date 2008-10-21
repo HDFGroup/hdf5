@@ -191,7 +191,6 @@ test_attr_basic_write(hid_t fapl)
     sid2 = H5Screate_simple(ATTR1_RANK, dims2, NULL);
     CHECK(sid2, FAIL, "H5Screate_simple");
 
-
     /* Try to create an attribute on the file (should create an attribute on root group) */
     attr = H5Acreate2(fid1, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
@@ -215,7 +214,6 @@ test_attr_basic_write(hid_t fapl)
     /* Close root group */
     ret = H5Gclose(group);
     CHECK(ret, FAIL, "H5Gclose");
-
 
     /* Create an attribute for the dataset */
     attr = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
@@ -1779,6 +1777,251 @@ test_attr_dtype_shared(hid_t fapl)
 
 /****************************************************************
 **
+**  test_attr_duplicate_ids(): Test operations with more than
+**      one ID handles.
+**
+****************************************************************/
+static int
+test_attr_duplicate_ids(hid_t fapl)
+{
+    hid_t		fid1;		/* HDF5 File IDs		*/
+    hid_t		dataset;	/* Dataset ID			*/
+    hid_t		gid1, gid2;	/* Group ID			*/ 
+    hid_t		sid1,sid2;	/* Dataspace ID			*/
+    hid_t		attr, attr2;	    /* Attribute ID		*/
+    hsize_t		dims1[] = {SPACE1_DIM1, SPACE1_DIM2, SPACE1_DIM3};
+    hsize_t		dims2[] = {ATTR1_DIM1};
+    int                 read_data1[ATTR1_DIM1]={0}; /* Buffer for reading 1st attribute */
+    int                 rewrite_data[ATTR1_DIM1]={1234, -423, 9907256}; /* Test data for rewrite */
+    int                 i;
+    herr_t		ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing operations with two ID handles\n"));
+
+    /*-----------------------------------------------------------------------------------
+     *        Create an attribute in a new file and fill it with fill value.
+     */
+    /* Create file */
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Create dataspace for dataset */
+    sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+
+    /* Create a dataset */
+    dataset = H5Dcreate2(fid1, DSET1_NAME, H5T_NATIVE_UCHAR, sid1, H5P_DEFAULT, 
+        H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
+
+    /* Create dataspace for attribute */
+    sid2 = H5Screate_simple(ATTR1_RANK, dims2, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Try to create an attribute on the dataset */
+    attr = H5Acreate2(dataset, ATTR1_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate2");
+
+    /* Open the attribute just created and get a second ID */
+    attr2 = H5Aopen(dataset, ATTR1_NAME, H5P_DEFAULT); 
+    CHECK(attr2, FAIL, "H5Aopen");
+
+    /* Close attribute */
+    ret = H5Aclose(attr2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /*-----------------------------------------------------------------------------------
+     *        Reopen the file and verify the fill value for attribute.  Also write 
+     *        some real data.
+     */
+
+    /* Open file */
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    dataset = H5Dopen2(fid1, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
+
+    /* Open first attribute for the dataset */
+    attr = H5Aopen(dataset, ATTR1_NAME, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Read attribute with fill value */
+    ret = H5Aread(attr, H5T_NATIVE_INT, read_data1);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    for(i = 0; i < ATTR1_DIM1; i++)
+        if(0 != read_data1[i])
+            TestErrPrintf("%d: attribute data different: read_data1[%d]=%d\n", __LINE__, i, read_data1[i]);
+
+    /* Open attribute for the second time */
+    attr2 = H5Aopen(dataset, ATTR1_NAME, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Write attribute information */
+    ret = H5Awrite(attr2, H5T_NATIVE_INT, attr_data1);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Close attribute */
+    ret = H5Aclose(attr2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /*-----------------------------------------------------------------------------------
+     *        Reopen the file and verify the data.  Also rewrite the data and verify it.
+     */
+
+    /* Open file */
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    dataset = H5Dopen2(fid1, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
+
+    /* Open first attribute for the dataset */
+    attr = H5Aopen(dataset, ATTR1_NAME, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Read attribute information */
+    ret = H5Aread(attr, H5T_NATIVE_INT, read_data1);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    for(i = 0; i < ATTR1_DIM1; i++)
+        if(attr_data1[i] != read_data1[i])
+            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n", __LINE__, i, attr_data1[i], i, read_data1[i]);
+
+    /* Open attribute for the second time */
+    attr2 = H5Aopen(dataset, ATTR1_NAME, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Write attribute information */
+    ret = H5Awrite(attr2, H5T_NATIVE_INT, rewrite_data);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Read attribute information */
+    ret = H5Aread(attr, H5T_NATIVE_INT, read_data1);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    for(i = 0; i < ATTR1_DIM1; i++)
+        if(read_data1[i] != rewrite_data[i])
+            TestErrPrintf("%d: attribute data different: read_data1[%d]=%d, rewrite_data[%d]=%d\n", __LINE__, i, read_data1[i], i, rewrite_data[i]);
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Aclose(attr2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /*-----------------------------------------------------------------------------------
+     *        Verify that the attribute being pointed to by different paths shares 
+     *        the same data.
+     */
+    /* Open file */
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid1, FAIL, "H5Fopen");
+
+    /* Create a group */
+    gid1 = H5Gcreate2(fid1, GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid1, FAIL, "H5Gcreate2");
+
+    /* Create hard link to the first group */
+    ret = H5Lcreate_hard(gid1, GROUP1_NAME, H5L_SAME_LOC, GROUP2_NAME, H5P_DEFAULT, 
+        H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lcreate_hard");
+
+    /* Try to create an attribute on the group */
+    attr = H5Acreate2(gid1, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate2");
+
+    /* Open the hard link just created */
+    gid2 = H5Gopen2(fid1, GROUP2_NAME, H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gopen2");
+
+    /* Open the attribute of the group for the second time */
+    attr2 = H5Aopen(gid2, ATTR2_NAME, H5P_DEFAULT);
+    CHECK(attr2, FAIL, "H5Aopen");
+
+    /* Write attribute information with the first attribute handle */
+    ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data1);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Read attribute information with the second attribute handle */
+    ret = H5Aread(attr2, H5T_NATIVE_INT, read_data1);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    for(i = 0; i < ATTR1_DIM1; i++)
+        if(attr_data1[i] != read_data1[i])
+            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n", __LINE__, i, attr_data1[i], i, read_data1[i]);
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Aclose(attr2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close group */
+    ret = H5Gclose(gid1);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Gclose(gid2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close Attribute dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close Dataset dataspace */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close file */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_duplicate_ids() */
+
+
+/****************************************************************
+**
 **  test_attr_dense_verify(): Test basic H5A (attribute) code.
 **      Verify attributes on object
 **
@@ -2747,6 +2990,529 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
     filesize = h5_get_file_size(FILENAME);
     VERIFY(filesize, empty_filesize, "h5_get_file_size");
 }   /* test_attr_dense_limits() */
+
+
+/****************************************************************
+**
+**  test_attr_dense_dup_ids(): Test operations with multiple ID
+**      handles with "dense" attribute storage creation
+**
+****************************************************************/
+static void
+test_attr_dense_dup_ids(hid_t fcpl, hid_t fapl)
+{
+    hid_t	fid;		/* HDF5 File ID			*/
+    hid_t	dataset;	/* Dataset ID			*/
+    hid_t	gid1, gid2;	/* Group ID			*/ 
+    hid_t	sid, sid2;	/* Dataspace ID			*/
+    hid_t	attr, attr2, add_attr;	/* Attribute ID			*/
+    hid_t	dcpl;	        /* Dataset creation property list ID */
+    char	attrname[NAME_BUF_SIZE];        /* Name of attribute */
+    hsize_t	dims[] = {ATTR1_DIM1};
+    int         read_data1[ATTR1_DIM1]={0}; /* Buffer for reading attribute */
+    int         rewrite_data[ATTR1_DIM1]={1234, -423, 9907256}; /* Test data for rewrite */
+    unsigned    scalar_data = 1317; /* scalar data for attribute */
+    unsigned    read_scalar;    /* variable for reading attribute*/
+    unsigned    max_compact;    /* Maximum # of attributes to store compactly */
+    unsigned    min_dense;      /* Minimum # of attributes to store "densely" */
+    htri_t	is_dense;	/* Are attributes stored densely? */
+    unsigned    u, i;           /* Local index variable */
+    herr_t	ret;		/* Generic return value		*/
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing operations with two IDs for Dense Storage\n"));
+
+    /*-----------------------------------------------------------------------------------
+     *        Create an attribute in dense storage and fill it with fill value.
+     */
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Re-open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Create dataspace for dataset */
+    sid = H5Screate(H5S_SCALAR);
+    CHECK(sid, FAIL, "H5Screate");
+
+    /* Query the group creation properties */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+
+    /* Create a dataset */
+    dataset = H5Dcreate2(fid, DSET1_NAME, H5T_NATIVE_UCHAR, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dcreate2");
+
+    /* Retrieve limits for compact/dense attribute storage */
+    ret = H5Pget_attr_phase_change(dcpl, &max_compact, &min_dense);
+    CHECK(ret, FAIL, "H5Pget_attr_phase_change");
+
+    /* Close property list */
+    ret = H5Pclose(dcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Add attributes, until just before converting to dense storage */
+    for(u = 0; u < max_compact; u++) {
+        /* Create attribute */
+        sprintf(attrname, "attr %02u", u);
+        attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(attr, FAIL, "H5Acreate2");
+
+        /* Write data into the attribute */
+        ret = H5Awrite(attr, H5T_NATIVE_UINT, &u);
+        CHECK(ret, FAIL, "H5Awrite");
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+    } /* end for */
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Add one more attribute, to push into "dense" storage */
+    /* Create dataspace for attribute */
+    sid2 = H5Screate_simple(ATTR1_RANK, dims, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Create attribute */
+    sprintf(attrname, "attr %02u", u);
+    attr = H5Acreate2(dataset, attrname, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate2");
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
+
+    /* Open the attribute just created and get a second ID */
+    attr2 = H5Aopen(dataset, attrname, H5P_DEFAULT); 
+    CHECK(attr2, FAIL, "H5Aopen");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Aclose(attr2);
+    CHECK(ret, FAIL, "H5Aclose");
+ 
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /*-----------------------------------------------------------------------------------
+     *        Reopen the file and verify the fill value for attribute.  Also write 
+     *        some real data.
+     */
+    /* Open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    dataset = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
+
+    /* Open first attribute for the dataset */
+    attr = H5Aopen(dataset, attrname, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Read attribute with fill value */
+    ret = H5Aread(attr, H5T_NATIVE_INT, read_data1);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    for(i = 0; i < ATTR1_DIM1; i++)
+        if(0 != read_data1[i])
+            TestErrPrintf("%d: attribute data different: read_data1[%d]=%d\n", __LINE__, 
+                i, read_data1[i]);
+
+    /* Open attribute for the second time */
+    attr2 = H5Aopen(dataset, attrname, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Write attribute information */
+    ret = H5Awrite(attr2, H5T_NATIVE_INT, attr_data1);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Close attribute */
+    ret = H5Aclose(attr2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /*-----------------------------------------------------------------------------------
+     *        Reopen the file and verify the data.  Also rewrite the data and verify it.
+     */
+    /* Open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    dataset = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
+
+    /* Open first attribute for the dataset */
+    attr = H5Aopen(dataset, attrname, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Read attribute information */
+    ret = H5Aread(attr, H5T_NATIVE_INT, read_data1);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    for(i = 0; i < ATTR1_DIM1; i++)
+        if(attr_data1[i] != read_data1[i])
+            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n", __LINE__, i, attr_data1[i], i, read_data1[i]);
+
+    /* Open attribute for the second time */
+    attr2 = H5Aopen(dataset, attrname, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Write attribute information with the second ID */
+    ret = H5Awrite(attr2, H5T_NATIVE_INT, rewrite_data);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Read attribute information with the first ID */
+    ret = H5Aread(attr, H5T_NATIVE_INT, read_data1);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    for(i = 0; i < ATTR1_DIM1; i++)
+        if(read_data1[i] != rewrite_data[i])
+            TestErrPrintf("%d: attribute data different: read_data1[%d]=%d, rewrite_data[%d]=%d\n", __LINE__, i, read_data1[i], i, rewrite_data[i]);
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Aclose(attr2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /*-----------------------------------------------------------------------------------
+     *        Open the attribute by index.  Verify the data is shared when the attribute
+     *        is opened twice. 
+     */
+    /* Open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    dataset = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
+
+    /* Open first attribute for the dataset */
+    attr = H5Aopen_by_idx(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)4, 
+        H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Open attribute for the second time */
+    attr2 = H5Aopen_by_idx(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)4, 
+        H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Write attribute information with the second ID */
+    ret = H5Awrite(attr2, H5T_NATIVE_UINT, &scalar_data);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Read attribute information with the first ID */
+    ret = H5Aread(attr, H5T_NATIVE_INT, &read_scalar);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    if(read_scalar != scalar_data)
+        TestErrPrintf("%d: attribute data different: read_scalar=%d, scalar_data=%d\n", 
+            __LINE__, read_scalar, scalar_data);
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Aclose(attr2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /*-----------------------------------------------------------------------------------
+     *        Open one attribute.  As it remains open, delete some attributes.  The 
+     *        attribute storage should switch from dense to compact.  Then open the
+     *        same attribute for the second time and verify that the attribute data
+     *        is shared.
+     */
+    /* Open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    dataset = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
+
+    /* Open attribute of the dataset for the first time */
+    attr = H5Aopen_by_idx(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)2, 
+        H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Delete a few attributes until the storage switches to compact */
+    for(u = max_compact; u >= min_dense - 1; u--) {
+        ret = H5Adelete_by_idx(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)u, 
+            H5P_DEFAULT);
+        CHECK(ret, FAIL, "H5Adelete_by_idx");
+    }
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Open attribute for the second time */
+    attr2 = H5Aopen_by_idx(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)2, 
+        H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Write attribute information with the second ID */
+    ret = H5Awrite(attr2, H5T_NATIVE_UINT, &scalar_data);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Read attribute information with the first ID */
+    ret = H5Aread(attr, H5T_NATIVE_INT, &read_scalar);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    if(read_scalar != scalar_data)
+        TestErrPrintf("%d: attribute data different: read_scalar=%d, scalar_data=%d\n", 
+            __LINE__, read_scalar, scalar_data);
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Aclose(attr2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /*-----------------------------------------------------------------------------------
+     *        Open one attribute.  As it remains open, create some attributes.  The 
+     *        attribute storage should switch from compact to dense.  Then open the
+     *        same attribute for the second time and verify that the attribute data
+     *        is shared.
+     */
+    /* Open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Open the dataset */
+    dataset = H5Dopen2(fid, DSET1_NAME, H5P_DEFAULT);
+    CHECK(dataset, FAIL, "H5Dopen2");
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, FALSE, "H5O_is_attr_dense_test");
+
+    /* Open attribute of the dataset for the first time */
+    attr = H5Aopen_by_idx(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)3, 
+        H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Delete a few attributes until the storage switches to compact */
+    for(u = min_dense-1; u <= max_compact; u++) {
+        /* Create attribute */
+        sprintf(attrname, "attr %02u", u);
+        add_attr = H5Acreate2(dataset, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(add_attr, FAIL, "H5Acreate2");
+
+        /* Write data into the attribute */
+        ret = H5Awrite(add_attr, H5T_NATIVE_UINT, &u);
+        CHECK(ret, FAIL, "H5Awrite");
+
+        /* Close attribute */
+        ret = H5Aclose(add_attr);
+        CHECK(ret, FAIL, "H5Aclose");
+    }
+
+    /* Check on dataset's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(dataset);
+    VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
+
+    /* Open attribute for the second time */
+    attr2 = H5Aopen_by_idx(dataset, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)3, 
+        H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Aopen");
+
+    /* Write attribute information with the second ID */
+    ret = H5Awrite(attr2, H5T_NATIVE_UINT, &scalar_data);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Read attribute information with the first ID */
+    ret = H5Aread(attr, H5T_NATIVE_INT, &read_scalar);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    if(read_scalar != scalar_data)
+        TestErrPrintf("%d: attribute data different: read_scalar=%d, scalar_data=%d\n", 
+            __LINE__, read_scalar, scalar_data);
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Aclose(attr2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close Dataset */
+    ret = H5Dclose(dataset);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /*-----------------------------------------------------------------------------------
+     *        Verify that the attribute being pointed to by different paths shares 
+     *        the same data.
+     */
+    /* Open file */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    /* Create a group */
+    gid1 = H5Gcreate2(fid, GROUP1_NAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(gid1, FAIL, "H5Gcreate2");
+
+    /* Create hard link to the first group */
+    ret = H5Lcreate_hard(gid1, GROUP1_NAME, H5L_SAME_LOC, GROUP2_NAME, H5P_DEFAULT, 
+        H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Lcreate_hard");
+
+    /* Add attributes, until just before converting to dense storage */
+    for(u = 0; u < max_compact; u++) {
+        /* Create attribute */
+        sprintf(attrname, "attr %02u", u);
+        attr = H5Acreate2(gid1, attrname, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(attr, FAIL, "H5Acreate2");
+
+        /* Write data into the attribute */
+        ret = H5Awrite(attr, H5T_NATIVE_UINT, &u);
+        CHECK(ret, FAIL, "H5Awrite");
+
+        /* Close attribute */
+        ret = H5Aclose(attr);
+        CHECK(ret, FAIL, "H5Aclose");
+    } /* end for */
+
+    /* Try to create another attribute to make dense storage */
+    attr = H5Acreate2(gid1, ATTR2_NAME, H5T_NATIVE_INT, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(attr, FAIL, "H5Acreate2");
+
+    /* Check on group's attribute storage status */
+    is_dense = H5O_is_attr_dense_test(gid1);
+    VERIFY(is_dense, TRUE, "H5O_is_attr_dense_test");
+
+    /* Open the hard link just created */
+    gid2 = H5Gopen2(fid, GROUP2_NAME, H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gopen2");
+
+    /* Open the attribute of the group for the second time */
+    attr2 = H5Aopen(gid2, ATTR2_NAME, H5P_DEFAULT);
+    CHECK(attr2, FAIL, "H5Aopen");
+
+    /* Write attribute information with the first attribute handle */
+    ret = H5Awrite(attr, H5T_NATIVE_INT, attr_data1);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Read attribute information with the second attribute handle */
+    ret = H5Aread(attr2, H5T_NATIVE_INT, read_data1);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Verify values read in */
+    for(i = 0; i < ATTR1_DIM1; i++)
+        if(attr_data1[i] != read_data1[i])
+            TestErrPrintf("%d: attribute data different: attr_data1[%d]=%d, read_data1[%d]=%d\n", __LINE__, i, attr_data1[i], i, read_data1[i]);
+
+    /* Close attribute */
+    ret = H5Aclose(attr);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Aclose(attr2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close group */
+    ret = H5Gclose(gid1);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Gclose(gid2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close Attribute dataspace */
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close Dataset dataspace */
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_dense_dup_ids() */
 
 
 /****************************************************************
@@ -6077,7 +6843,7 @@ test_attr_iterate2(hbool_t new_format, hid_t fcpl, hid_t fapl)
 
     /* Allocate the "visited link" array */
     iter_info.max_visit = max_compact * 2;
-    visited = HDmalloc(sizeof(hbool_t) * iter_info.max_visit);
+    visited = (hbool_t*)HDmalloc(sizeof(hbool_t) * iter_info.max_visit);
     CHECK(visited, NULL, "HDmalloc");
     iter_info.visited = visited;
 
@@ -8925,6 +9691,9 @@ test_attr(void)
         /* This next test uses its own file information */
         test_attr_dtype_shared(my_fapl);   /* Test using shared dataypes in attributes */
 
+        /* This next test uses its own file information */
+        test_attr_duplicate_ids(my_fapl);
+
         /* Tests on "new format" attribute storage */
         if(new_format == TRUE) {
             /* Loop over using shared attributes */
@@ -8948,6 +9717,8 @@ test_attr(void)
                 test_attr_dense_rename(my_fcpl, my_fapl);       /* Test renaming attributes in dense storage */
                 test_attr_dense_unlink(my_fcpl, my_fapl);       /* Test unlinking object with attributes in dense storage */
                 test_attr_dense_limits(my_fcpl, my_fapl);       /* Test dense attribute storage limits */
+                test_attr_dense_dup_ids(my_fcpl, my_fapl);      /* Test duplicated IDs for dense attribute storage */
+
                 test_attr_big(my_fcpl, my_fapl);                /* Test storing big attribute */
                 test_attr_null_space(my_fcpl, my_fapl);         /* Test storing attribute with NULL dataspace */
                 test_attr_deprec(fcpl, my_fapl);                /* Test deprecated API routines */

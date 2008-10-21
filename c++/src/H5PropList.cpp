@@ -46,7 +46,7 @@ const PropList PropList::DEFAULT( H5P_DEFAULT );
 ///\brief	Default constructor: creates a stub property list object.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PropList::PropList() : IdComponent( 0 ) {}
+PropList::PropList() : IdComponent(), id(0) {}
 
 //--------------------------------------------------------------------------
 // Function:	PropList copy constructor
@@ -54,7 +54,11 @@ PropList::PropList() : IdComponent( 0 ) {}
 ///\param	original - IN: The original property list to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PropList::PropList( const PropList& original ) : IdComponent( original ) {}
+PropList::PropList(const PropList& original) : IdComponent(original)
+{
+    id = original.getId();
+    incRefCount(); // increment number of references to this id
+}
 
 //--------------------------------------------------------------------------
 // Function:	PropList overloaded constructor
@@ -70,7 +74,7 @@ PropList::PropList( const PropList& original ) : IdComponent( original ) {}
 //		description was what I came up with from reading the code.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PropList::PropList( const hid_t plist_id ) : IdComponent(0)
+PropList::PropList( const hid_t plist_id ) : IdComponent()
 {
     if (H5I_GENPROP_CLS == H5Iget_type(plist_id)) {
 	// call C routine to create the new property
@@ -205,6 +209,46 @@ void PropList::copyProp( PropList& dest, PropList& src, const H5std_string& name
 }
 
 //--------------------------------------------------------------------------
+// Function:    PropList::getId
+// Purpose:     Get the id of this attribute
+// Description:
+//              Class hierarchy is revised to address bugzilla 1068.  Class
+//              AbstractDS and Attribute are moved out of H5Object.  In
+//              addition, member IdComponent::id is moved into subclasses, and
+//              IdComponent::getId now becomes pure virtual function.
+// Programmer   Binh-Minh Ribler - May, 2008
+//--------------------------------------------------------------------------
+hid_t PropList::getId() const
+{
+   return(id);
+}
+
+//--------------------------------------------------------------------------
+// Function:    PropList::p_setId
+///\brief       Sets the identifier of this object to a new value.
+///
+///\exception   H5::IdComponentException when the attempt to close the HDF5
+///             object fails
+// Description:
+//              The underlaying reference counting in the C library ensures
+//              that the current valid id of this object is properly closed.
+//              Then the object's id is reset to the new id.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void PropList::p_setId(const hid_t new_id)
+{
+    // handling references to this old id
+    try {
+        close();
+    }
+    catch (Exception close_error) {
+        throw PropListIException(inMemFunc("p_setId"), close_error.getDetailMsg());
+    }
+   // reset object's id to the given id
+   id = new_id;
+}
+
+//--------------------------------------------------------------------------
 // Function:	PropList::close
 ///\brief	Closes the property list if it is not a default one.
 ///
@@ -220,8 +264,10 @@ void PropList::close()
 	{
 	    throw PropListIException(inMemFunc("close"), "H5Pclose failed");
 	}
-	// reset the id because the property list that it represents is now closed
-	id = 0;
+	// reset the id when the property list that it represents is no longer
+	// referenced
+	if (getCounter() == 0)
+	    id = 0;
     }
 }
 

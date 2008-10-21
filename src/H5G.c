@@ -1362,8 +1362,8 @@ H5G_rootof(H5F_t *f)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_rootof)
 
-    while(f->mtab.parent)
-        f = f->mtab.parent;
+    while(f->parent)
+        f = f->parent;
 
     FUNC_LEAVE_NOAPI(f->shared->root_grp)
 } /* end H5G_rootof() */
@@ -1525,6 +1525,30 @@ H5G_mount(H5G_t *grp)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5G_mount() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_mounted
+ *
+ * Purpose:	Retrieves the 'mounted' flag for a group
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, July 15, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5G_mounted(H5G_t *grp)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5G_mounted)
+
+    /* Check args */
+    HDassert(grp && grp->shared);
+
+    FUNC_LEAVE_NOAPI(grp->shared->mounted)
+} /* end H5G_mounted() */
 
 
 /*-------------------------------------------------------------------------

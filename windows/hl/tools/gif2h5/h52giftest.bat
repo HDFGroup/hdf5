@@ -31,8 +31,8 @@ set gif2h5=gif2h5%2
 rem The path to the gif2h5 binary
 set gif2h5_bin=%CD%\..\gifconv%2\%gif2h5%\%1\%gif2h5%
 
-set testfile1=%CD%\..\testfiles\h52giftst.h5
-set testfile2=%CD%\..\testfiles\image1.gif
+set testfile1=%CD%\testfiles\h52giftst.h5
+set testfile2=%CD%\testfiles\image1.gif
 
 rem initialze errors variable
 set errors=0

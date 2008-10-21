@@ -64,6 +64,22 @@
 /* Mask for removing private file access flags */
 #define H5F_ACC_PUBLIC_FLAGS 	0x00ffu
 
+/* A record of the mount table */
+typedef struct H5F_mount_t {
+    struct H5G_t	*group;	/* Mount point group held open		*/
+    struct H5F_t	*file;	/* File mounted at that point		*/
+} H5F_mount_t;
+
+/*
+ * The mount table describes what files are attached to (mounted on) the file
+ * to which this table belongs.
+ */
+typedef struct H5F_mtab_t {
+    unsigned		nmounts;/* Number of children which are mounted	*/
+    unsigned		nalloc;	/* Number of mount slots allocated	*/
+    H5F_mount_t		*child;	/* An array of mount records		*/
+} H5F_mtab_t;
+
 /*
  * Define the structure to store the file information for HDF5 files. One of
  * these structures is allocated per file, not per H5Fopen(). That is, set of
@@ -76,6 +92,7 @@ typedef struct H5F_file_t {
     unsigned	nrefs;		/* Ref count for times file is opened	*/
     uint8_t	status_flags;	/* File status flags			*/
     unsigned	flags;		/* Access Permissions for file		*/
+    H5F_mtab_t	mtab;		/* File mount table		*/
 
     /* Cached values from FCPL/superblock */
     unsigned	sym_leaf_k;	/* Size of leaves in symbol tables      */
@@ -126,23 +143,6 @@ typedef struct H5F_file_t {
     hsize_t mdc_jrnl_block_len; /* Length of mdc journal block		*/
 } H5F_file_t;
 
-/* A record of the mount table */
-typedef struct H5F_mount_t {
-    struct H5G_t	*group;	/* Mount point group held open		*/
-    struct H5F_t	*file;	/* File mounted at that point		*/
-} H5F_mount_t;
-
-/*
- * The mount table describes what files are attached to (mounted on) the file
- * to which this table belongs.
- */
-typedef struct H5F_mtab_t {
-    struct H5F_t	*parent;/* Parent file				*/
-    unsigned		nmounts;/* Number of children which are mounted	*/
-    unsigned		nalloc;	/* Number of mount slots allocated	*/
-    H5F_mount_t		*child;	/* An array of mount records		*/
-} H5F_mtab_t;
-
 /*
  * This is the top-level file descriptor.  One of these structures is
  * allocated every time H5Fopen() is called although they may contain pointers
@@ -160,7 +160,8 @@ struct H5F_t {
     H5FO_t              *obj_count;     /* # of time each object is opened through top file structure */
     hid_t               file_id;        /* ID of this file              */
     hbool_t             closing;        /* File is in the process of being closed */
-    H5F_mtab_t		mtab;		/* File mount table		*/
+    struct H5F_t	    *parent;        /* Parent file that this file is mounted to */
+    unsigned            nmounts;        /* Number of children mounted to this file */
 };
 
 /*****************************/

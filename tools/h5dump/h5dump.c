@@ -2216,6 +2216,20 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     outputformat->do_escape=display_escape;
     /* print the matrix indices */
     outputformat->pindex=display_index;
+
+    /* do not print indices for regions */
+    if(obj_data == DATASET_DATA) 
+    {
+        hid_t f_type = H5Dget_type(obj_id);
+        
+        if (H5Tequal(f_type, H5T_STD_REF_DSETREG)) 
+        {
+            outputformat->pindex = 0;
+        }
+        H5Tclose(f_type);
+    }
+
+
     if (outputformat->pindex) {
         outputformat->idx_fmt   = "(%s): ";
         outputformat->idx_n_fmt = HSIZE_T_FORMAT;
@@ -2279,7 +2293,6 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
             string_dataformat.line_suf = "\"";
             outputformat = &string_dataformat;
         }
-
 
         status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
 

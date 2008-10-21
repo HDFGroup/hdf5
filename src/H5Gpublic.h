@@ -61,6 +61,7 @@ typedef struct H5G_info_t {
     H5G_storage_type_t 	storage_type;	/* Type of storage for links in group */
     hsize_t 	nlinks;		        /* Number of links in group */
     int64_t     max_corder;             /* Current max. creation order value for group */
+    hbool_t     mounted;                /* Whether group has a file mounted on it */
 } H5G_info_t;
 
 /********************/

@@ -152,6 +152,9 @@ int main (void)
  memset(&diff_options, 0, sizeof (diff_opt_t));
  memset(&pack_options, 0, sizeof (pack_opt_t));
 
+ /* set h5diff "contents" mode */
+ diff_options.m_contents = 1;
+
  /* run tests  */
  puts("Testing h5repack:");
 

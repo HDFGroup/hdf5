@@ -22,6 +22,6 @@
 include $(top_srcdir)/config/commence.am
 
 # All subdirectories
-SUBDIRS=gif2h5
+SUBDIRS=gif2h5 
 
 include $(top_srcdir)/config/conclude.am

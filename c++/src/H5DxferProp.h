@@ -104,7 +104,6 @@ class H5_DLLCPP DSetMemXferPropList : public PropList {
 
 	// Noop destructor
 	virtual ~DSetMemXferPropList();
-
 };
 #ifndef H5_NO_NAMESPACE
 }

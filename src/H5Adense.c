@@ -502,10 +502,10 @@ H5A_dense_insert(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
     udata.common.dxpl_id = dxpl_id;
     udata.common.fheap = fheap;
     udata.common.shared_fheap = shared_fheap;
-    udata.common.name = attr->name;
-    udata.common.name_hash = H5_checksum_lookup3(attr->name, HDstrlen(attr->name), 0);
+    udata.common.name = attr->shared->name;
+    udata.common.name_hash = H5_checksum_lookup3(attr->shared->name, HDstrlen(attr->shared->name), 0);
     H5_ASSIGN_OVERFLOW(udata.common.flags, mesg_flags, unsigned, uint8_t);
-    udata.common.corder = attr->crt_idx;
+    udata.common.corder = attr->shared->crt_idx;
     udata.common.found_op = NULL;
     udata.common.found_op_data = NULL;
     /* udata.id already set */
@@ -624,7 +624,7 @@ H5A_dense_write_bt2_cb(void *_record, void *_op_data, hbool_t *changed)
             udata.name = NULL;
             udata.name_hash = 0;
             udata.flags = 0;
-            udata.corder = op_data->attr->crt_idx;
+            udata.corder = op_data->attr->shared->crt_idx;
             udata.found_op = NULL;
             udata.found_op_data = NULL;
 
@@ -744,8 +744,8 @@ H5A_dense_write(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, H5A_t *attr)
     udata.dxpl_id = dxpl_id;
     udata.fheap = fheap;
     udata.shared_fheap = shared_fheap;
-    udata.name = attr->name;
-    udata.name_hash = H5_checksum_lookup3(attr->name, HDstrlen(attr->name), 0);
+    udata.name = attr->shared->name;
+    udata.name_hash = H5_checksum_lookup3(attr->shared->name, HDstrlen(attr->shared->name), 0);
     udata.flags = 0;
     udata.corder = 0;
     udata.found_op = NULL;
@@ -807,7 +807,7 @@ H5A_dense_copy_fh_cb(const void *obj, size_t UNUSED obj_len, void *_udata)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDECODE, FAIL, "can't decode attribute")
 
     /* Set the creation order index for the attribute */
-    udata->attr->crt_idx = udata->record->corder;
+    udata->attr->shared->crt_idx = udata->record->corder;
 
     /* Check whether we should "reconstitute" the shared message info */
     if(udata->record->flags & H5O_MSG_FLAG_SHARED)
@@ -904,8 +904,8 @@ H5A_dense_rename(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo, const char *
     } /* end if */
 
     /* Change name of attribute */
-    H5MM_xfree(attr_copy->name);
-    attr_copy->name = H5MM_xstrdup(new_name);
+    H5MM_xfree(attr_copy->shared->name);
+    attr_copy->shared->name = H5MM_xstrdup(new_name);
 
     /* Recompute the version to encode the attribute with */
     if(H5A_set_version(f, attr_copy) < 0)
@@ -1020,14 +1020,14 @@ H5A_dense_iterate_bt2_cb(const void *_record, void *_bt2_udata)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5_ITER_ERROR, "unable to get attribute info")
 
                 /* Make the application callback */
-                ret_value = (bt2_udata->attr_op->u.app_op2)(bt2_udata->loc_id, fh_udata.attr->name, &ainfo, bt2_udata->op_data);
+                ret_value = (bt2_udata->attr_op->u.app_op2)(bt2_udata->loc_id, fh_udata.attr->shared->name, &ainfo, bt2_udata->op_data);
                 break;
             }
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
             case H5A_ATTR_OP_APP:
                 /* Make the application callback */
-                ret_value = (bt2_udata->attr_op->u.app_op)(bt2_udata->loc_id, fh_udata.attr->name, bt2_udata->op_data);
+                ret_value = (bt2_udata->attr_op->u.app_op)(bt2_udata->loc_id, fh_udata.attr->shared->name, bt2_udata->op_data);
                 break;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
@@ -1220,7 +1220,7 @@ H5A_dense_remove_bt2_cb(const void *_record, void *_udata)
     /* Check for removing the link from the creation order index */
     if(H5F_addr_defined(udata->corder_bt2_addr)) {
         /* Set up the user data for the v2 B-tree 'record remove' callback */
-        udata->common.corder = attr->crt_idx;
+        udata->common.corder = attr->shared->crt_idx;
 
         /* Remove the record from the creation order index v2 B-tree */
         if(H5B2_remove(udata->common.f, udata->common.dxpl_id, H5A_BT2_CORDER, udata->corder_bt2_addr, udata, NULL, NULL) < 0)
@@ -1400,7 +1400,7 @@ H5A_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
             other_bt2_class = H5A_BT2_CORDER;
 
             /* Set up the user data for the v2 B-tree 'record remove' callback */
-            other_bt2_udata.corder = fh_udata.attr->crt_idx;
+            other_bt2_udata.corder = fh_udata.attr->shared->crt_idx;
         } /* end if */
         else {
             HDassert(bt2_udata->idx_type == H5_INDEX_CRT_ORDER);
@@ -1413,8 +1413,8 @@ H5A_dense_remove_by_idx_bt2_cb(const void *_record, void *_bt2_udata)
             other_bt2_udata.dxpl_id = bt2_udata->dxpl_id;
             other_bt2_udata.fheap = bt2_udata->fheap;
             other_bt2_udata.shared_fheap = bt2_udata->shared_fheap;
-            other_bt2_udata.name = fh_udata.attr->name;
-            other_bt2_udata.name_hash = H5_checksum_lookup3(fh_udata.attr->name, HDstrlen(fh_udata.attr->name), 0);
+            other_bt2_udata.name = fh_udata.attr->shared->name;
+            other_bt2_udata.name_hash = H5_checksum_lookup3(fh_udata.attr->shared->name, HDstrlen(fh_udata.attr->shared->name), 0);
             other_bt2_udata.found_op = NULL;
             other_bt2_udata.found_op_data = NULL;
         } /* end else */
@@ -1570,7 +1570,7 @@ H5A_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_ainfo_t *ainfo,
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index specified")
 
         /* Delete appropriate attribute from dense storage */
-        if(H5A_dense_remove(f, dxpl_id, ainfo, atable.attrs[n].name) < 0)
+        if(H5A_dense_remove(f, dxpl_id, ainfo, ((atable.attrs[n])->shared)->name) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute in dense storage")
     } /* end else */
 
