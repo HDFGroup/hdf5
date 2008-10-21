@@ -202,9 +202,6 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	      ((cp *.$(F9XMODEXT) $(DESTDIR)$(libdir)/. && chmod 644 $(DESTDIR)$(libdir)/*.$(F9XMODEXT)) || exit 1); \
 	   fi;                                                                \
 	fi
-	@if test -f libhdf5_fortran.settings; then			      \
-	   (set -x; $(INSTALL_DATA) libhdf5_fortran.settings $(DESTDIR)$(libdir)/. || exit 1);  \
-	fi
 	@for f in X $(PUB_HDR); do					      \
 	   if test $$f != X; then					      \
 	      if test -f $$f; then					      \
@@ -239,9 +236,6 @@ uninstall-examples:
 
 ## Removes those things that `make install' (would have) installed.
 uninstall:
-	@for f in libhdf5_fortran.settings $(LIB); do			      \
-          $(LT_UNINSTALL) $(DESTDIR)$(libdir)/$$f;				      \
-	done
 	@if test -n "$(PUB_HDR)"; then  				      \
 	  set -x; cd $(DESTDIR)$(includedir) && $(RM) $(PUB_HDR);			      \
 	fi

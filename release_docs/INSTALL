@@ -526,8 +526,7 @@
         support for compression, etc., was compiled into the HDF5 Library.
 
         A summary of the current HDF5 installation can be found in the
-        libhdf5.settings and libhdf5_fortran.settings files in the bin
-        subdirectory. 
+        libhdf5.settings file in the lib subdirectory. 
 
         Users are encouraged to use the helper compiler scripts h5cc, h5fc, 
         and h5c++ to build HDF5 C, Fortran, and C++ applications, 

@@ -924,7 +924,6 @@
 ./fortran/src/Makefile.in
 ./fortran/src/README
 ./fortran/src/h5fc.in
-./fortran/src/libhdf5_fortran.settings.in
 
 ./fortran/test/Dependencies
 ./fortran/test/Makefile.in

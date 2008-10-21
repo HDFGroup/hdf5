@@ -30,9 +30,9 @@ CPPFLAGS=-I. -I$(hdf5_builddir) -I$(hdf5_srcdir) @CPPFLAGS@
 ## This is our main target
 LIB=libhdf5_fortran.la
 
-## h5fc and libhdf5_fortran.settings are generated during configure. 
-## Remove them only when distclean.
-DISTCLEAN=H5fortran_types.f90 h5fc libhdf5_fortran.settings
+## h5fc is generated during configure. 
+## Remove it only when distclean.
+DISTCLEAN=H5fortran_types.f90 h5fc
 
 ## Public header files (to be installed)...
 PUB_HDR=H5pubconf_fortran.h

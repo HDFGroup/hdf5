@@ -1231,7 +1231,6 @@ AC_CONFIG_FILES([config/depend1
                  Makefile
                  src/h5fc
                  src/H5fortran_types.f90
-                 src/libhdf5_fortran.settings
                  src/Makefile
                  test/Makefile
                  $PARALLEL_MAKE
