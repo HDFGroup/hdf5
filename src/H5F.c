@@ -1107,8 +1107,6 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_dest() */
 
-
-
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_open

@@ -2023,7 +2023,9 @@ H5C2_call_mdjsc_callbacks(H5C2_t * cache_ptr,
 	    func_ptr = ((cache_ptr->mdjsc_cb_tbl)[i]).fcn_ptr;
 	    data_ptr = ((cache_ptr->mdjsc_cb_tbl)[i]).data_ptr;
 
-	    func_ptr(config_ptr, dxpl_id, data_ptr);
+            /* Try the callback */
+	    if(func_ptr(config_ptr, dxpl_id, data_ptr) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "metadata journaling status change callback failed!");
 
 	    funcs_called++;
 	}

@@ -178,7 +178,7 @@ static void check_superblock_extensions(void);
 
 static void check_mdjsc_callbacks(void);
 
-static void test_mdjsc_callback(H5C2_mdj_config_t * config_ptr,
+static herr_t test_mdjsc_callback(H5C2_mdj_config_t * config_ptr,
                                 hid_t dxpl_id,
                                 void * data_ptr);
 
@@ -6545,7 +6545,7 @@ static hbool_t callback_test_null_data_ptr     = FALSE;
 static hbool_t callback_test_cache_is_dirty    = FALSE;
 static int callback_test_null_data_ptr_count   = 0;
 
-static void 
+static herr_t 
 test_mdjsc_callback(H5C2_mdj_config_t * config_ptr,
                     hid_t dxpl_id,
                     void * data_ptr)
@@ -6581,7 +6581,7 @@ test_mdjsc_callback(H5C2_mdj_config_t * config_ptr,
         *((int *)data_ptr) += 1;
     }
 
-    return;
+    return SUCCEED;
 
 } /* test_mdjsc_callback() */
 

@@ -514,11 +514,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static void
+static herr_t
 H5D_journal_status_cb(const H5C2_mdj_config_t *mdj_config, hid_t dxpl_id,
     void *udata)
 {
-    H5D_t    *dset = (H5D_t *)udata;      /* User callback data */
+    H5D_t *dset = (H5D_t *)udata;       /* User callback data */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_journal_status_cb)
@@ -538,7 +538,7 @@ H5D_journal_status_cb(const H5C2_mdj_config_t *mdj_config, hid_t dxpl_id,
     dset->shared->journaling_enabled = mdj_config->enable_journaling;
 
 done:
-    FUNC_LEAVE_NOAPI_VOID
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_journal_status_cb() */
 
 
@@ -1620,7 +1620,7 @@ H5D_close(H5D_t *dataset)
     H5D_chunk_stats(dataset, FALSE);
 #endif /* H5D_CHUNK_DEBUG */
 
-    /* Deregister callback for this dataset with cache, when journaling status changes */
+    /* Deregister journaling status change cache callback for this dataset */
     if(dataset->mdjsc_idx >= 0)
         if(H5AC2_deregister_mdjsc_callback(dataset->oloc.file, dataset->mdjsc_idx) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "can't deregister journal status callback")

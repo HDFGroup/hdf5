@@ -1340,7 +1340,7 @@ typedef struct H5C2_mdj_config_t
  * configuration changes.
  */
 
-typedef void (*H5C2_mdj_status_change_func_t)(const H5C2_mdj_config_t * config_ptr,
+typedef herr_t (*H5C2_mdj_status_change_func_t)(const H5C2_mdj_config_t * config_ptr,
                                               hid_t dxpl_id,
 		                              void * data_ptr);
 
