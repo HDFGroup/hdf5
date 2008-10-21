@@ -119,6 +119,8 @@ Bug Fixes since HDF5-1.6.7 Release
 
     Configuration
     -------------
+     - The file libhdf5_fortran.settings is not installed since its content
+       is included in libhdf5.settings now. AKC - 2008/10/21
      - The GASS and SRB virtual file drivers have been retired and removed
        from the HDF5 library. AKC - 2008/9/26
 
