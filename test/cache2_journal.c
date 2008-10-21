@@ -8463,8 +8463,8 @@ verify_mdjsc_callback_execution(void)
 	    {
 	        double fraction_in_use;
 
-	        while ( ( free_entries[expected_max_idx] ) &&
-		        ( expected_max_idx >= 0 ) )
+	        while ( ( expected_max_idx >= 0 ) &&
+                        ( free_entries[expected_max_idx] ) )
 	        {
 	            expected_max_idx--;
 	        }
@@ -8632,8 +8632,8 @@ verify_mdjsc_callback_execution(void)
 	    {
 	        double fraction_in_use;
 
-	        while ( ( free_entries[expected_max_idx] ) &&
-		        ( expected_max_idx >= 0 ) )
+	        while ( ( expected_max_idx >= 0 ) &&
+                        ( free_entries[expected_max_idx] ) )
 	        {
 	            expected_max_idx--;
 	        }
@@ -9458,8 +9458,8 @@ verify_mdjsc_callback_registration_deregistration(void)
 	    {
 		double fraction_in_use;
 
-		while ( ( free_entries[expected_max_idx] ) &&
-			( expected_max_idx >= 0 ) )
+		while ( ( expected_max_idx >= 0 ) &&
+                        ( free_entries[expected_max_idx] ) )
 		{
 		    expected_max_idx--;
 		}
@@ -9547,8 +9547,8 @@ verify_mdjsc_callback_registration_deregistration(void)
 	    {
 		double fraction_in_use;
 
-		while ( ( free_entries[expected_max_idx] ) &&
-			( expected_max_idx >= 0 ) )
+		while ( ( expected_max_idx >= 0 ) &&
+                        ( free_entries[expected_max_idx] ) )
 		{
 		    expected_max_idx--;
 		}
@@ -9682,8 +9682,8 @@ verify_mdjsc_callback_registration_deregistration(void)
 	        {
 		    double fraction_in_use;
 
-		    while ( ( free_entries[expected_max_idx] ) &&
-			    ( expected_max_idx >= 0 ) )
+		    while ( ( expected_max_idx >= 0 ) &&
+                            ( free_entries[expected_max_idx] ) )
 		    {
 		        expected_max_idx--;
 		    }
@@ -9737,8 +9737,8 @@ verify_mdjsc_callback_registration_deregistration(void)
 	    {
 	        double fraction_in_use;
 
-	        while ( ( free_entries[expected_max_idx] ) &&
-		        ( expected_max_idx >= 0 ) )
+	        while ( ( expected_max_idx >= 0 ) &&
+                        ( free_entries[expected_max_idx] ) )
 	        {
 	            expected_max_idx--;
 	        }
@@ -9791,8 +9791,8 @@ verify_mdjsc_callback_registration_deregistration(void)
 	    {
 	        double fraction_in_use;
 
-	        while ( ( free_entries[expected_max_idx] ) &&
-		        ( expected_max_idx >= 0 ) )
+	        while ( ( expected_max_idx >= 0 ) &&
+                        ( free_entries[expected_max_idx] ) )
 	        {
 	            expected_max_idx--;
 	        }
@@ -9845,8 +9845,8 @@ verify_mdjsc_callback_registration_deregistration(void)
 	    {
 	        double fraction_in_use;
 
-	        while ( ( free_entries[expected_max_idx] ) &&
-		        ( expected_max_idx >= 0 ) )
+	        while ( ( expected_max_idx >= 0 ) &&
+                        ( free_entries[expected_max_idx] ) )
 	        {
 	            expected_max_idx--;
 	        }
