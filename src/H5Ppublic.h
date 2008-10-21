@@ -257,7 +257,7 @@ H5_DLL herr_t H5Pset_mdc_config(hid_t    plist_id,
 H5_DLL herr_t H5Pget_mdc_config(hid_t     plist_id,
        H5AC_cache_config_t * config_ptr);	/* out */
 H5_DLL herr_t H5Pset_jnl_config(hid_t    plist_id,
-       H5AC2_jnl_config_t * config_ptr);
+       const H5AC2_jnl_config_t * config_ptr);
 H5_DLL herr_t H5Pget_jnl_config(hid_t     plist_id,
        H5AC2_jnl_config_t * config_ptr);	/* out */
 H5_DLL herr_t H5Pset_gc_references(hid_t fapl_id, unsigned gc_ref);

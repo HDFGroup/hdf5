@@ -3369,49 +3369,29 @@ done:
  * Programmer:  John Mainzer
  *              8/1/08
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5Fget_jnl_config(hid_t file_id,
-		  H5AC2_jnl_config_t *config_ptr)
+H5Fget_jnl_config(hid_t file_id, H5AC2_jnl_config_t *config_ptr)
 {
-    H5F_t      *file=NULL;      /* File object for file ID */
-    herr_t     ret_value = SUCCEED;      /* Return value */
-    herr_t     result;
+    H5F_t      *file;                   /* File object for file ID */
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(H5Fget_jnl_config, FAIL)
     H5TRACE2("e", "i*x", file_id, config_ptr);
 
     /* Check args */
-    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
-
+    if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)) )
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-    }
-
-    if ( ( NULL == config_ptr ) ||
-         ( ! H5AC2_validate_jnl_config_ver(config_ptr->version) ) ) {
-
+    if((NULL == config_ptr) || (!H5AC2_validate_jnl_config_ver(config_ptr->version)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Bad config_ptr")
-    }
 
     /* Go get the journaling configuration */
-    result = H5AC2_get_jnl_config(file->shared->cache2, config_ptr);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC_get_jnl_config() failed.");
-    }
+    if(H5AC2_get_jnl_config(file->shared->cache2, config_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5AC_get_jnl_config() failed.")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* H5Fget_jnl_config() */
 
 
@@ -3428,46 +3408,27 @@ done:
  * Programmer:  John Mainzer
  *              8/1/08
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5Fset_jnl_config(hid_t file_id,
-		  H5AC2_jnl_config_t *config_ptr)
+H5Fset_jnl_config(hid_t file_id, const H5AC2_jnl_config_t *config_ptr)
 {
-    H5F_t      *file=NULL;      /* File object for file ID */
-    herr_t     ret_value = SUCCEED;      /* Return value */
-    herr_t     result;
+    H5F_t      *file;                   /* File object for file ID */
+    herr_t     ret_value = SUCCEED;     /* Return value */
 
     FUNC_ENTER_API(H5Fset_jnl_config, FAIL)
     H5TRACE2("e", "i*x", file_id, config_ptr);
 
     /* Check args */
-    if ( NULL == (file = H5I_object_verify(file_id, H5I_FILE)) ) {
-
+    if(NULL == (file = H5I_object_verify(file_id, H5I_FILE)))
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
-    }
 
-    /* set the resize configuration  */
-    result = H5AC2_set_jnl_config(file, 
-		                  H5P_DATASET_XFER_DEFAULT, 
-		                  config_ptr, 
-				  FALSE);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "H5AC2_set_jnl_config() failed.");
-    }
+    /* Set the resize configuration  */
+    if(H5AC2_set_jnl_config(file, H5P_DATASET_XFER_DEFAULT, config_ptr, FALSE) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "H5AC2_set_jnl_config() failed.")
 
 done:
-
     FUNC_LEAVE_API(ret_value)
-
 } /* H5Fset_jnl_config() */
 
 

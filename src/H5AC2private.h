@@ -373,12 +373,12 @@ H5_DLL herr_t H5AC2_set_cache_auto_resize_config(H5F_t * f,
 
 H5_DLL herr_t H5AC2_set_jnl_config(H5F_t * f,
                                    hid_t dxpl_id,
-                                   H5AC2_jnl_config_t *config_ptr,
+                                   const H5AC2_jnl_config_t *config_ptr,
 				   hbool_t initializing);
 
 H5_DLL herr_t H5AC2_validate_config(H5AC2_cache_config_t * config_ptr);
 
-H5_DLL herr_t H5AC2_validate_jnl_config(H5AC2_jnl_config_t * config_ptr);
+H5_DLL herr_t H5AC2_validate_jnl_config(const H5AC2_jnl_config_t *config_ptr);
 
 H5_DLL hbool_t H5AC2_validate_jnl_config_ver(int version_num);
 

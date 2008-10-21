@@ -3665,22 +3665,21 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5AC2_set_jnl_config(H5F_t * f,
                      hid_t dxpl_id,
-                     H5AC2_jnl_config_t *config_ptr,
+                     const H5AC2_jnl_config_t *config_ptr,
 		     hbool_t initializing)
 {
     /* const char *        fcn_name = "H5AC2_set_jnl_config"; */
     H5AC2_t *           cache_ptr;
     herr_t              result;
-    herr_t              ret_value = SUCCEED;      /* Return value */
     H5C2_mdj_config_t	internal_config;
 #if H5AC2__TRACE_FILE_ENABLED
     H5AC2_jnl_config_t  trace_config = H5AC2__DEFAULT_JNL_CONFIG;
     FILE *              trace_file_ptr = NULL;
 #endif /* H5AC2__TRACE_FILE_ENABLED */
+    herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC2_set_jnl_config, FAIL)
 
@@ -4014,15 +4013,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
 H5AC2_validate_config(H5AC2_cache_config_t * config_ptr)
-
 {
     herr_t              result;
-    herr_t              ret_value = SUCCEED;    /* Return value */
     int		        name_len;
     H5C2_auto_size_ctl_t internal_config;
+    herr_t              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC2_validate_config, FAIL)
 
@@ -4146,23 +4143,17 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5AC2_validate_jnl_config(H5AC2_jnl_config_t * config_ptr)
-
+H5AC2_validate_jnl_config(const H5AC2_jnl_config_t *config_ptr)
 {
     herr_t	ret_value = SUCCEED;    /* Return value */
-    int	        name_len;
 
     FUNC_ENTER_NOAPI(H5AC2_validate_jnl_config, FAIL)
 
-    if ( config_ptr == NULL ) {
-
+    if(config_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
-    }
 
     if ( config_ptr->version != H5AC2__CURR_JNL_CONFIG_VER ) {
-
 #if 0 /* JRM */
 	HDfprintf(stdout, "version = %d(%d).\n", config_ptr->version,
 		  H5AC2__CURR_JNL_CONFIG_VER);
@@ -4203,6 +4194,11 @@ H5AC2_validate_jnl_config(H5AC2_jnl_config_t * config_ptr)
 
     /* don't test journal_file_path unless enable_journaling is TRUE */
     if ( config_ptr->enable_journaling ) {
+        size_t name_len;
+
+        /* Check for NULL journal file path string */
+	if(NULL == config_ptr->journal_file_path)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "config_ptr->journal_file_path is NULL.")
 
 	/* Can't really test the journal_file_path field without trying to 
 	 * open the file, so we will content ourselves with a couple of
@@ -4210,7 +4206,7 @@ H5AC2_validate_jnl_config(H5AC2_jnl_config_t * config_ptr)
 	 */
 	name_len = HDstrlen(config_ptr->journal_file_path);
 
-	if ( name_len <= 0 ) {
+	if ( name_len == 0 ) {
 
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
                         "config_ptr->journal_file_path is empty.")
@@ -4251,9 +4247,7 @@ H5AC2_validate_jnl_config(H5AC2_jnl_config_t * config_ptr)
     }
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5AC2_validate_jnl_config() */
 
 
@@ -4274,19 +4268,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-
 hbool_t
 H5AC2_validate_jnl_config_ver(int version_num)
 {
-    hbool_t valid = FALSE;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5AC2_validate_jnl_config_ver)
 
-    if ( version_num == H5AC2__CURR_JNL_CONFIG_VER )
-    {
-        valid = TRUE;
-    }
-
-    return(valid);
-
+    FUNC_LEAVE_NOAPI(version_num == H5AC2__CURR_JNL_CONFIG_VER)
 } /* H5AC2_validate_jnl_config_ver() */
 
 
@@ -4307,19 +4294,12 @@ H5AC2_validate_jnl_config_ver(int version_num)
  *
  *-------------------------------------------------------------------------
  */
-
 hbool_t
 H5AC2_validate_cache_config_ver(int version_num)
 {
-    hbool_t valid = FALSE;
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5AC2_validate_cache_config_ver)
 
-    if ( version_num == H5AC2__CURR_CACHE_CONFIG_VERSION )
-    {
-        valid = TRUE;
-    }
-
-    return(valid);
-
+    FUNC_LEAVE_NOAPI(version_num == H5AC2__CURR_CACHE_CONFIG_VERSION)
 } /* H5AC2_validate_cache_config_ver() */
 
 

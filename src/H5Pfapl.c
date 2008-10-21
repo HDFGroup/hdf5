@@ -1455,56 +1455,39 @@ done:
  * Programmer:	J. Mainzer
  *              Thursday, July 31, 2008
  *
- * Modifications:
- *
- *		Done.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_jnl_config(hid_t                plist_id,
-                  H5AC2_jnl_config_t * config_ptr)
+H5Pset_jnl_config(hid_t plist_id, const H5AC2_jnl_config_t *config_ptr)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* return value */
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* return value */
 
-    FUNC_ENTER_API(H5Pset_jnl_config, FAIL);
+    FUNC_ENTER_API(H5Pset_jnl_config, FAIL)
     H5TRACE2("e", "i*x", plist_id, config_ptr);
 
     /* Get the plist structure */
-    if( NULL == ( plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS) ) ) {
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    }
+    /* Validate the new configuration */
+    if(H5AC2_validate_jnl_config(config_ptr) < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid journaling configuration")
 
-    /* validate the new configuration */
-    if ( H5AC2_validate_jnl_config(config_ptr) < 0 ) {
-
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
-                    "invalid journaling configuration");
-    }
-
-    /* set the modified config */
-
-    /* If we ever support multiple versions of H5AC_jnl_config_t, we
-     * will have to test the version and do translation here.
+    /* Set the modified config */
+    /* (If we ever support multiple versions of H5AC_jnl_config_t, we
+     * will have to test the version and do translation here.)
      */
-
-    if(H5P_set(plist, H5F_ACS_JNL_INIT_CONFIG_NAME, config_ptr)<0) {
-
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, \
-                    "can't set initial journaling config");
-    }
+    if(H5P_set(plist, H5F_ACS_JNL_INIT_CONFIG_NAME, config_ptr) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set initial journaling config")
 
 done:
-
-    FUNC_LEAVE_API(ret_value);
-
+    FUNC_LEAVE_API(ret_value)
 } /* H5Pset_jnl_config() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_mdc_config
+ * Function:	H5Pget_jnl_config
  *
  * Purpose:	Retrieve the journaling initial configuration
  *		from the target FAPL.
@@ -1518,39 +1501,26 @@ done:
  * Programmer:	J. Mainzer
  *              Thursday, July 31, 2008
  *
- * Modifications:
- *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
-
 herr_t
-H5Pget_jnl_config(hid_t                plist_id,
-                  H5AC2_jnl_config_t * config_ptr)
+H5Pget_jnl_config(hid_t plist_id, H5AC2_jnl_config_t *config_ptr)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pget_jnl_config, FAIL);
+    FUNC_ENTER_API(H5Pget_jnl_config, FAIL)
     H5TRACE2("e", "i*x", plist_id, config_ptr);
 
-    /* Get the plist structure */
-    if ( NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)) ) {
-
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
-    }
-
-    /* validate the config_ptr */
-    if ( config_ptr == NULL ) {
-
+    /* Validate the config_ptr */
+    if(NULL == config_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
-    }
-
-    if ( ! H5AC2_validate_jnl_config_ver(config_ptr->version) ) {
-
+    if(!H5AC2_validate_jnl_config_ver(config_ptr->version))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
-    }
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* If we ever support multiple versions of H5AC_jnl_config_t, we
      * will have to get the cannonical version here, and then translate
@@ -1558,16 +1528,11 @@ H5Pget_jnl_config(hid_t                plist_id,
      */
 
     /* Get the current initial metadata cache resize configuration */
-    if ( H5P_get(plist, H5F_ACS_JNL_INIT_CONFIG_NAME, config_ptr) < 0 ) {
-
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, \
-                    "can't get initial journaling config");
-    }
+    if(H5P_get(plist, H5F_ACS_JNL_INIT_CONFIG_NAME, config_ptr) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get initial journaling config")
 
 done:
-
-    FUNC_LEAVE_API(ret_value);
-
+    FUNC_LEAVE_API(ret_value)
 } /* H5Pget_jnl_config() */
 
 
