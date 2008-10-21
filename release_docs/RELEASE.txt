@@ -167,6 +167,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - The file libhdf5_fortran.settings is not installed since its content
+      is included in libhdf5.settings now. AKC - 2008/10/21
     - "make DESTDIR=xxx install" failed to install some tools and files
       (e.g., h5cc and fortran modules). Fixed. AKC - 2008/10/8.
 
