@@ -30,14 +30,17 @@ static void
 print_size (int rank, hsize_t *dims)
 {
     int i;
+    unsigned long_long dim;
     
     parallel_print("[" );
     for ( i = 0; i < rank-1; i++)
     {
-        parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[i]);
+        dim = dims[i];
+        parallel_print("%"H5_PRINTF_LL_WIDTH"u", *((unsigned long_long *)((void *)dim))));
         parallel_print("x");
     }
-    parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[rank-1]);
+    dim = dims[rank-1];
+    parallel_print("%"H5_PRINTF_LL_WIDTH"u",  *((unsigned long_long *)((void *)dim)))));
     parallel_print("]\n" );
     
 }
