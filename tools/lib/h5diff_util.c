@@ -100,15 +100,19 @@ void parallel_print(const char* format, ...)
 void
 print_dimensions (int rank, hsize_t *dims)
 {
-    int i;
+    int  i;
+    char fmt_ullong[8];
 
+    sprintf(fmt_ullong, "%%llu");
+    
     parallel_print("[" );
     for ( i = 0; i < rank-1; i++)
     {
-        parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[i]);
+        parallel_print(fmt_ullong, dims[i]);
         parallel_print("x");
     }
-    parallel_print("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[rank-1]);
+    
+    parallel_print(fmt_ullong,  dims[rank-1]);
     parallel_print("]" );
 
 }

@@ -247,7 +247,7 @@ void print_pos( int        *ph,       /* print header */
     parallel_print("[ " );
     for ( i = 0; i < rank; i++)
     {
-        parallel_print("%"H5_PRINTF_LL_WIDTH"u ", (unsigned long_long)pos[i]);
+        parallel_print("%llu ", (unsigned long_long)pos[i]);
     }
     parallel_print("]" );
 }

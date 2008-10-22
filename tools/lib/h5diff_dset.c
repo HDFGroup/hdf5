@@ -18,35 +18,6 @@
 #include "H5private.h"
 #include "h5tools.h"
 
-/*-------------------------------------------------------------------------
-* Function: print_size
-*
-* Purpose: print dimensions
-*
-*-------------------------------------------------------------------------
-*/
-#if defined (H5DIFF_DEBUG)
-static void
-print_size (int rank, hsize_t *dims)
-{
-    int i;
-    unsigned long_long dim;
-    
-    parallel_print("[" );
-    for ( i = 0; i < rank-1; i++)
-    {
-        dim = dims[i];
-        parallel_print("%"H5_PRINTF_LL_WIDTH"u", *((unsigned long_long *)((void *)dim))));
-        parallel_print("x");
-    }
-    dim = dims[rank-1];
-    parallel_print("%"H5_PRINTF_LL_WIDTH"u",  *((unsigned long_long *)((void *)dim)))));
-    parallel_print("]\n" );
-    
-}
-#endif /* H5DIFF_DEBUG */
-
-
 
 /*-------------------------------------------------------------------------
 * Function: diff_dataset
