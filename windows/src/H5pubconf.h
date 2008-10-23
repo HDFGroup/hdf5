@@ -627,7 +627,7 @@
 /* #undef H5_ULONG_TO_FP_BOTTOM_BIT_ACCURATE */
 
 /* Define using v1.6 public API symbols by default */
-/* #undef H5_USE_16_API */
+/* #undef H5_USE_16_API_DEFAULT */
 
 /* Define if a memory checking tool will be used on the library, to cause
    library to be very picky about memory operations and also disable the
