@@ -162,6 +162,9 @@ MYH5DIFF(){
 TOOLTEST default.txt
 
 # async crash
+# Since the async crash is highly dependent on machine speeds, system load,
+# the results may not always match.  One would need to compare the results
+# against the expected results by hand.
 TOOLTEST async_crash.txt -a 0.05
 
 
