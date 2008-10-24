@@ -3753,7 +3753,7 @@ AC_ARG_WITH([default-api-version],
 if test "X$withval" = "Xv16"; then
     AC_MSG_RESULT([v16])
     DEFAULT_API_VERSION=v16
-    AC_DEFINE([USE_16_API], [1],
+    AC_DEFINE([USE_16_API_DEFAULT], [1],
               [Define using v1.6 public API symbols by default])
 elif test "X$withval" = "Xv18"; then
     AC_MSG_RESULT([v18])

@@ -170,13 +170,13 @@ H5E_set_default_auto(H5E_t *stk)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5E_set_default_auto)
 
-#ifdef H5_USE_16_API
+#if defined(H5_USE_16_API) || defined(H5_USE_16_API_DEFAULT)
     stk->auto_op.vers = 1;
     stk->auto_op.u.func1 = (H5E_auto1_t)H5Eprint1;
-#else /* H5_USE_16_API */
+#else /* H5_USE_16_API || H5_USE_16_API_DEFAULT */
     stk->auto_op.vers = 2;
     stk->auto_op.u.func2 = (H5E_auto2_t)H5Eprint2;
-#endif /* H5_USE_16_API */
+#endif /* H5_USE_16_API || H5_USE_16_API_DEFAULT */
     stk->auto_data = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)

@@ -51131,7 +51131,7 @@ echo "${ECHO_T}v16" >&6; }
     DEFAULT_API_VERSION=v16
 
 cat >>confdefs.h <<\_ACEOF
-#define USE_16_API 1
+#define USE_16_API_DEFAULT 1
 _ACEOF
 
 elif test "X$withval" = "Xv18"; then
