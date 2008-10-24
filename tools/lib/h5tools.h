@@ -48,7 +48,7 @@
 #define H5TOOLS_MALLOCSIZE      (128 * 1024 * 1024)
 
 /* format for hsize_t */
-#define HSIZE_T_FORMAT   "%llu"
+#define HSIZE_T_FORMAT   "%"H5_PRINTF_LL_WIDTH"u"
 
 /*
  * Information about how to format output.
