@@ -118,7 +118,9 @@ Bug Fixes since HDF5-1.8.1
 
         Library
         -------
-      - Corrected error with family/split/multi VFD not updating driver info
+        - Fixed an error where a null message could be created that was larger
+            than could be written to the file.  (NAF - 2008/10/23)
+        - Corrected error with family/split/multi VFD not updating driver info
             when "latest" version of the file format used. (QAK - 2008/10/14)
         - Corrected alignment+threshold errors to work correctly when metadata
             aggregation is enabled. (QAK - 2008/10/06)

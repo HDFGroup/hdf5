@@ -69,8 +69,9 @@ static htri_t H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
 static unsigned H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     size_t size);
 static htri_t H5O_move_msgs_forward(H5O_t *oh);
-static htri_t H5O_merge_null(H5O_t *oh);
+static htri_t H5O_merge_null(H5F_t *f, H5O_t *oh, hid_t dxpl_id);
 static htri_t H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh, hid_t dxpl_id);
+static herr_t H5O_alloc_shrink_chunk(H5F_t *f, H5O_t *oh, hid_t dxpl_id, unsigned chunkno);
 
 
 /*********************/
@@ -1331,13 +1332,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O_merge_null(H5O_t *oh)
+H5O_merge_null(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
 {
     hbool_t merged_msg;                 /* Flag to indicate that messages were merged */
     hbool_t did_merging = FALSE;        /* Whether any messages were merged */
     htri_t ret_value; 	                /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_merge_null)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_merge_null)
 
     /* check args */
     HDassert(oh != NULL);
@@ -1400,6 +1401,11 @@ H5O_merge_null(H5O_t *oh)
                             /* (Don't bother reducing size of message array for now -QAK) */
                             oh->nmesgs--;
 
+                            /* If the merged message is too large, shrink the chunk */
+                            if(curr_msg->raw_size >= H5O_MESG_MAX_SIZE)
+                                if(H5O_alloc_shrink_chunk(f, oh, dxpl_id, curr_msg->chunkno) < 0)
+                                    HGOTO_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "unable to shrink chunk")
+
                             /* Get out of loop */
                             break;
                         } /* end if */
@@ -1420,6 +1426,7 @@ H5O_merge_null(H5O_t *oh)
     /* Set return value */
     ret_value = did_merging;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_merge_null() */
 
@@ -1603,7 +1610,7 @@ H5O_condense_header(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
             rescan_header = TRUE;
 
         /* Scan for adjacent null messages & merge them */
-        result = H5O_merge_null(oh);
+        result = H5O_merge_null(f, oh, dxpl_id);
         if(result < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't pack null header messages")
         if(result > 0)
@@ -1624,3 +1631,174 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_condense_header() */
 
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5O_alloc_shrink_chunk
+ *
+ * Purpose:     Shrinks a chunk, removing all null messages and any gap.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Neil Fortner
+ *		nfortne2@hdfgroup.org
+ *		Oct 20 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_alloc_shrink_chunk(H5F_t *f,
+                       H5O_t *oh,
+                       hid_t dxpl_id,
+                       unsigned chunkno)
+{
+    H5O_chunk_t *chunk = &oh->chunk[chunkno];   /* Chunk to shrink */
+    H5O_mesg_t  *curr_msg;
+    uint8_t     *old_image = chunk->image;      /* Old address of chunk's image in memory */
+    size_t      old_size = chunk->size;         /* Old size of chunk */
+    size_t      new_size = chunk->size - chunk->gap; /* Size of shrunk chunk */
+    size_t      sizeof_chksum = H5O_SIZEOF_CHKSUM_OH(oh); /* Size of chunk checksum */
+    size_t      sizeof_msghdr = H5O_SIZEOF_MSGHDR_OH(oh); /* Size of message header */
+    size_t      sizeof_chkhdr = H5O_SIZEOF_CHKHDR_OH(oh); /* Size of chunk header */
+    uint8_t     new_size_flags = 0;             /* New chunk #0 size flags */
+    hbool_t     adjust_size_flags = FALSE;      /* Whether to adjust the chunk #0 size flags */
+    size_t      less_prfx_size = 0;             /* Bytes removed from object header prefix */
+    herr_t      ret_value = SUCCEED;            /* Return value */
+    unsigned    u;                              /* Index */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_alloc_shrink_chunk)
+
+    /* check args */
+    HDassert(f != NULL);
+
+    /* Loop backwards to increase the chance of seeing more null messages at the
+     * end of the chunk.  Note that we rely on unsigned u wrapping around at the
+     * end.
+     */
+    for (u = oh->nmesgs - 1, curr_msg = &oh->mesg[u]; u < oh->nmesgs; u--, curr_msg--) {
+        if ((H5O_NULL_ID == curr_msg->type->id) && (chunkno == curr_msg->chunkno)) {
+            /* Check if the message is the only one in the chunk */
+            if (chunkno > 0 && (sizeof_msghdr + curr_msg->raw_size) == (new_size - sizeof_chkhdr)) {
+                /* Shrink the message to the minimum size */
+                new_size -= curr_msg->raw_size;
+                curr_msg->raw_size = 0;
+                curr_msg->dirty = TRUE;
+                HDassert(new_size == sizeof_msghdr + sizeof_chkhdr);
+
+                /* There are no more messages in this chunk, so we can exit the loop */
+                break;
+            } /* end if  */
+            else {
+                /* Remove the message entirely */
+                size_t shrink_size = curr_msg->raw_size + sizeof_msghdr; /* Amount to shrink the chunk by */
+                /* If the current message is not at the end of the chunk, copy the
+                 * data after it (except the checksum).
+                 */
+                if (curr_msg->raw + curr_msg->raw_size
+                    < old_image + new_size - sizeof_chksum) {
+                    unsigned    v;              /* Index */
+                    H5O_mesg_t  *curr_msg2;
+                    uint8_t     *src = curr_msg->raw + curr_msg->raw_size; /* Source location */
+
+                    /* Slide down the raw data */
+                    HDmemmove(curr_msg->raw - sizeof_msghdr, src,
+                        (size_t)(old_image + new_size - sizeof_chksum - src));
+
+                    /* Update the raw data pointers for messages after this one */
+                    for (v = 0, curr_msg2 = &oh->mesg[0]; v < oh->nmesgs; v++, curr_msg2++)
+                        if ((chunkno == curr_msg2->chunkno) && (curr_msg2->raw > curr_msg->raw))
+                            curr_msg2->raw -= shrink_size;
+                } /* end if */
+
+                /* Adjust the new chunk size */
+                new_size -= shrink_size;
+
+                /* Release any information/memory for the message */
+                H5O_msg_free_mesg(curr_msg);
+
+                /* Remove the deleted null message from list of messages */
+                if (u < (oh->nmesgs - 1))
+                    HDmemmove(&oh->mesg[u], &oh->mesg[u+1], ((oh->nmesgs - 1) - u) * sizeof(H5O_mesg_t));
+
+                /* Decrement # of messages */
+                /* (Don't bother reducing size of message array for now) */
+                oh->nmesgs--;
+            } /* end else */
+        } /* end if */
+    } /* end for */
+
+    /* Check for changing the chunk #0 data size enough to need adjusting the flags */
+    if(oh->version > H5O_VERSION_1 && chunkno == 0) {
+        uint64_t chunk0_newsize = new_size - H5O_SIZEOF_HDR(oh);  /* New size of chunk 0's data */
+        size_t   orig_prfx_size = 1 << (oh->flags & H5O_HDR_CHUNK0_SIZE); /* Original prefix size */
+                
+        /* Check for moving to a 1-byte size encoding */
+        if (orig_prfx_size > 1 && chunk0_newsize <= 255) {
+            less_prfx_size = orig_prfx_size - 1;
+            new_size_flags = H5O_HDR_CHUNK0_1;
+            adjust_size_flags = TRUE;
+        } /* end if */
+        /* Check for moving to a 2-byte size encoding */
+        else if (orig_prfx_size > 2 && chunk0_newsize <= 65535) {
+            less_prfx_size = orig_prfx_size - 2;
+            new_size_flags = H5O_HDR_CHUNK0_2;
+            adjust_size_flags = TRUE;
+        } /* end if */
+        /* Check for moving to a 4-byte size encoding */
+        else if (orig_prfx_size > 4 && chunk0_newsize <= 4294967295) {
+            less_prfx_size = orig_prfx_size - 4;
+            new_size_flags = H5O_HDR_CHUNK0_4;
+            adjust_size_flags = TRUE;
+        } /* end if */
+    } /* end if */
+
+    if(adjust_size_flags) {
+        /* Adjust object header prefix flags */
+        oh->flags &= ~H5O_HDR_CHUNK0_SIZE;
+        oh->flags |= new_size_flags;
+
+        /* Slide chunk 0 data down */
+        HDmemmove(chunk->image + H5O_SIZEOF_HDR(oh) - sizeof_chksum,
+            chunk->image + H5O_SIZEOF_HDR(oh) - sizeof_chksum + less_prfx_size,
+            new_size - H5O_SIZEOF_HDR(oh));
+
+        /* Adjust chunk size */
+        new_size -= less_prfx_size;
+    } /* end if */
+
+    /* Allocate less memory space for chunk's image */
+    chunk->size = new_size;
+    chunk->image = H5FL_BLK_REALLOC(chunk_image, old_image, chunk->size);
+    chunk->gap = 0;
+    chunk->dirty = TRUE;
+    if (NULL == oh->chunk[chunkno].image)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+    /* Spin through existing messages, adjusting them */
+    for (u = 0, curr_msg = &oh->mesg[0]; u < oh->nmesgs; u++, curr_msg++) {
+        if (adjust_size_flags || (chunk->image != old_image))
+            /* Adjust raw addresses for messages in this chunk to reflect new 'image' address */
+            if (curr_msg->chunkno == chunkno)
+                curr_msg->raw = chunk->image - less_prfx_size + (curr_msg->raw - old_image);
+
+        /* Find continuation message which points to this chunk and adjust chunk's size */
+        /* (Chunk 0 doesn't have a continuation message that points to it and
+         * its size is directly encoded in the object header) */
+        if (chunkno > 0 && (H5O_CONT_ID == curr_msg->type->id) &&
+            (((H5O_cont_t *)(curr_msg->native))->chunkno == chunkno)) {
+            /* Adjust size of continuation message */
+            HDassert(((H5O_cont_t *)(curr_msg->native))->size == old_size);
+            ((H5O_cont_t *)(curr_msg->native))->size = chunk->size;
+
+            /* Flag continuation message as dirty */
+            curr_msg->dirty = TRUE;
+        } /* end if */
+    } /* end for */
+
+    /* Free the unused space in the file */
+    if (H5MF_xfree(f, H5FD_MEM_OHDR, dxpl_id, chunk->addr + new_size, (hsize_t)(old_size - new_size)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to shrink object header chunk")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_alloc_shrink_chunk() */
