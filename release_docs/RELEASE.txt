@@ -56,7 +56,7 @@ New Features
 
         Configuration
         -------------
-        - None
+        - Upgraded libtool to version 2.2.6a. MAM 2008/10/15.
 
         Source code distribution
         ========================
@@ -108,6 +108,11 @@ Bug Fixes since HDF5-1.8.1
 
         Configuration
         -------------
+        - Fixed error with 'make check install' failing due to h5dump
+          needing other tools built first. MAM - 2008/10/15.
+        - When using shared szip, it is no longer necessary to specify
+          the path to the shared szip libraries in LD_LIBRARY_PATH. MAM - 
+          2008/10/15.
 	- The file libhdf5_fortran.settings is not installed since its content
 	  is included in libhdf5.settings now. AKC - 2008/10/21
         - "make DESTDIR=xxx install" failed to install some tools and files
