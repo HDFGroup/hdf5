@@ -39,9 +39,10 @@ New Features
 
     Configuration:
     -------------
+    - Configuration suite now uses Libtool 2.2.6a. MAM 2008/10/24
 
-    - Configuration suite now uses Autoconf 2.61, Automake 1.10.1, and 
-      Libtool 2.2.2 (MAM - 2008/05/05)
+    - Configuration suite now uses Autoconf 2.61, Automake 1.10.1. 
+      MAM 2008/05/05. 
 
     - The new configure option "--disable-sharedlib-rpath" disables
       embedding the '-Wl,-rpath' information into executables when
@@ -169,6 +170,11 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - Fixed error with 'make check install' failing due to h5dump
+      needing other tools built first. MAM - 2008/10/24.
+    - When using shared szip, it is no longer necessary to specify
+      the path to the shared szip libraries in LD_LIBRARY_PATH. MAM - 
+      2008/10/24.
     - The file libhdf5_fortran.settings is not installed since its content
       is included in libhdf5.settings now. AKC - 2008/10/21
     - "make DESTDIR=xxx install" failed to install some tools and files

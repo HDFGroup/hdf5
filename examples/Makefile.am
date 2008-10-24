@@ -91,5 +91,9 @@ h5_extlink: $(srcdir)/h5_extlink.c $(EXTLINK_DIRS)
 h5_elink_unix2win: $(srcdir)/h5_elink_unix2win.c $(EXTLINK_DIRS)
 h5_shared_mesg: $(srcdir)/h5_shared_mesg.c
 
+if BUILD_SZIP_CONDITIONAL
+export LD_LIBRARY_PATH=$(LL_PATH)
+endif
+
 include $(top_srcdir)/config/examples.am
 include $(top_srcdir)/config/conclude.am

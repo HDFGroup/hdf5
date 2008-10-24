@@ -1672,17 +1672,12 @@ esac
 if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
     dnl SZLIB library is available.  Check if it can encode
     AC_MSG_CHECKING([for szlib encoder])
-    
-    AC_CACHE_VAL([hdf5_cv_szlib_functional],
-        [AC_TRY_RUN([
-        #include <szlib.h>
-        
-        int main(void)
-        {   
-            SZ_encoder_enabled();
-            exit(0);
-        }
-        ], [hdf5_cv_szlib_functional=yes], [hdf5_cv_szlib_functional=no],)])
+
+    dnl Set LD_LIBRARY_PATH so encoder test can find the library and run.
+    dnl Also add LL_PATH substitution to Makefiles so they can use the 
+    dnl path as well, for testing examples.
+    export LD_LIBRARY_PATH="$szlib_lib"
+    AC_SUBST([LL_PATH]) LL_PATH="$szlib_lib"
     
     AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
         [AC_TRY_RUN([
@@ -1698,13 +1693,9 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
         }
         ], [hdf5_cv_szlib_can_encode=yes], [hdf5_cv_szlib_can_encode=no],)])
     
-    if test ${hdf5_cv_szlib_functional} = "no"; then
-        hdf5_cv_szlib_can_encode=broken
-    else
-        AC_DEFINE(HAVE_FILTER_SZIP, 1, 
-                [Define if support for szip filter is enabled])
-        USE_FILTER_SZIP="yes"
-    fi
+    AC_DEFINE(HAVE_FILTER_SZIP, 1, 
+            [Define if support for szip filter is enabled])
+    USE_FILTER_SZIP="yes"
     
     if test ${hdf5_cv_szlib_can_encode} = "yes"; then
         AC_MSG_RESULT([yes])
@@ -1712,9 +1703,6 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
     if test ${hdf5_cv_szlib_can_encode} = "no"; then
         AC_MSG_RESULT([no])
     fi 
-    if test ${hdf5_cv_szlib_can_encode} = "broken"; then
-        AC_MSG_RESULT([shared szlib doesn't work. disabling szip.])
-    fi
     
     dnl Add "szip" to external filter list
     if test ${hdf5_cv_szlib_can_encode} = "yes"; then
@@ -1731,6 +1719,8 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
     fi
 
 fi
+
+AM_CONDITIONAL([BUILD_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xyes"])
 
 dnl Checkpoint the cache
 AC_CACHE_SAVE

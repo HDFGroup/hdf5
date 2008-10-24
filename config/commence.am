@@ -22,12 +22,6 @@
 RM=rm -f
 CP=cp
 
-# Hardcode SHELL to be /bin/sh.  Most machines have this shell, and
-# on at least one machine configure fails to detect its existence (janus).
-# Also, when HDF5 is configured on one machine but run on another,
-# configure's automatic SHELL detection may not work on the build machine.
-SHELL=/bin/sh
-
 # Some machines need a command to run executables; this is that command
 # so that our tests will run.
 # We use RUNTESTS instead of RUNSERIAL directly because it may be that

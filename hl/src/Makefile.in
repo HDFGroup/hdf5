@@ -185,6 +185,8 @@ LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LINUX_LFS = @LINUX_LFS@
+LIPO = @LIPO@
+LL_PATH = @LL_PATH@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 LT_STATIC_EXEC = @LT_STATIC_EXEC@
@@ -195,8 +197,11 @@ MPE = @MPE@
 MPI_GET_SIZE = @MPI_GET_SIZE@
 NM = @NM@
 NMEDIT = @NMEDIT@
+OBJDUMP = @OBJDUMP@
 OBJECT_NAMELEN_DEFAULT_F = @OBJECT_NAMELEN_DEFAULT_F@
 OBJEXT = @OBJEXT@
+OTOOL = @OTOOL@
+OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -217,12 +222,7 @@ SEARCH = @SEARCH@
 SED = @SED@
 SETX = @SETX@
 SET_MAKE = @SET_MAKE@
-
-# Hardcode SHELL to be /bin/sh.  Most machines have this shell, and
-# on at least one machine configure fails to detect its existence (janus).
-# Also, when HDF5 is configured on one machine but run on another,
-# configure's automatic SHELL detection may not work on the build machine.
-SHELL = /bin/sh
+SHELL = @SHELL@
 SIZE_T = @SIZE_T@
 STATIC_EXEC = @STATIC_EXEC@
 STATIC_SHARED = @STATIC_SHARED@
