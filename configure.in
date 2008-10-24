@@ -1676,8 +1676,13 @@ if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
     dnl Set LD_LIBRARY_PATH so encoder test can find the library and run.
     dnl Also add LL_PATH substitution to Makefiles so they can use the 
     dnl path as well, for testing examples.
+    if test -z "$LD_LIBRARY_PATH"; then
     export LD_LIBRARY_PATH="$szlib_lib"
-    AC_SUBST([LL_PATH]) LL_PATH="$szlib_lib"    
+    else
+    export LD_LIBRARY_PATH="$szlib_lib:$LD_LIBRARY_PATH"
+    fi
+
+    AC_SUBST([LL_PATH]) LL_PATH="$LD_LIBRARY_PATH"    
 
     AC_CACHE_VAL([hdf5_cv_szlib_can_encode],
         [AC_TRY_RUN([
