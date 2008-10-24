@@ -132,6 +132,9 @@ float attr_data5=(float)-5.123;        /* Test data for 5th attribute */
 #define NATTR_MANY_OLD  350
 #define NATTR_MANY_NEW  35000
 
+#define BUG2_NATTR  100
+#define BUG2_NATTR2 16
+
 /* Attribute iteration struct */
 typedef struct {
     H5_iter_order_t order;      /* Direction of iteration */
@@ -1781,7 +1784,7 @@ test_attr_dtype_shared(hid_t fapl)
 **      one ID handles.
 **
 ****************************************************************/
-static int
+static void
 test_attr_duplicate_ids(hid_t fapl)
 {
     hid_t		fid1;		/* HDF5 File IDs		*/
@@ -9611,6 +9614,165 @@ test_attr_bug1(hid_t fcpl, hid_t fapl)
 
 /****************************************************************
 **
+**  test_attr_bug2(): Test basic H5A (attribute) code.
+**      Tests deleting a large number of attributes with the
+**      intention of creating a null message with a size that
+**      is too large.  This routine deletes every other
+**      attribute, but the original bug could also be
+**      reproduced by deleting every attribute except a few to
+**      keep the chunk open.
+**
+****************************************************************/
+static void
+test_attr_bug2(hid_t fcpl, hid_t fapl)
+{
+    hid_t   fid;            /* File ID */
+    hid_t   gid;            /* Group ID */
+    hid_t   aid;            /* Attribute ID */
+    hid_t   sid;            /* Dataspace ID */
+    hid_t   tid;            /* Datatype ID */
+    hid_t   gcpl;           /* Group creation property list */
+    hsize_t dims[2] = {10, 100}; /* Attribute dimensions */
+    char    aname[4];       /* Attribute name */
+    unsigned i;             /* index */
+    herr_t  ret;            /* Generic return status */
+    htri_t  tri_ret;        /* htri_t return status */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Allocating and De-allocating Attributes in Unusual Way\n"));
+
+    /* Create group creation property list */
+    gcpl = H5Pcreate(H5P_GROUP_CREATE);
+    CHECK(gcpl, FAIL, "H5Pcreate");
+
+    /* Prevent the library from switching to dense attribute storage */
+    /* Not doing this with the latest format actually triggers a different bug.
+     * This will be tested here as soon as it is fixed.  -NAF
+     */
+    ret = H5Pset_attr_phase_change (gcpl, BUG2_NATTR+10, BUG2_NATTR+5);
+    CHECK(ret, FAIL, "H5Pset_attr_phase_change");
+
+    /* Create dataspace ID for attributes */
+    sid = H5Screate_simple(2, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create main group to operate on */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    gid = H5Gcreate2(fid, GROUP1_NAME, H5P_DEFAULT, gcpl, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
+
+    /* Create attributes on group */
+    for (i=0; i<BUG2_NATTR; i++) {
+        sprintf(aname, "%03u", i);
+        aid = H5Acreate2(gid, aname, H5T_STD_I32LE, sid, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(aid, FAIL, "H5Acreate2");
+
+        ret = H5Aclose(aid);
+        CHECK(ret, FAIL, "H5Aclose");
+    }
+
+    /* Delete every other attribute */
+    for (i=1; i<BUG2_NATTR; i+=2) {
+        sprintf(aname, "%03u", i);
+        ret = H5Adelete(gid, aname);
+        CHECK(ret, FAIL, "H5Adelete");
+    }
+
+    /* Close IDs */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Reopen file and group */
+    fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl);
+    CHECK(fid, FAIL, "H5Fopen");
+
+    gid = H5Gopen2(fid, GROUP1_NAME, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Open an attribute in the middle */
+    i = (BUG2_NATTR / 4) * 2;
+    sprintf(aname, "%03u", i);
+    aid = H5Aopen(gid, aname, H5P_DEFAULT);
+    CHECK(aid, FAIL, "H5Aopen");
+
+    /* Verify that the attribute has the correct datatype */
+    tid = H5Aget_type(aid);
+    CHECK(tid, FAIL, "H5Aget_type");
+
+    tri_ret = H5Tequal(tid, H5T_STD_I32LE);
+    VERIFY(tri_ret, TRUE, "H5Tequal");
+
+    /* Close IDs */
+    ret = H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    ret = H5Aclose(aid);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Now test a variation on this bug - where either the size of chunk 0 goes
+     * down a "notch" or two, or chunk 1 becomes completely null at the same
+     * time that a null message that is too large is formed */
+    dims[0] = 25;
+    dims[1] = 41; /* 1025*4 byte attribute size */
+
+    /* Create dataspace ID for attributes */
+    sid = H5Screate_simple(2, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create main group to operate on */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    gid = H5Gcreate2(fid, GROUP1_NAME, H5P_DEFAULT, gcpl, H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
+
+    /* Create attributes on group */
+    for (i=0; i<BUG2_NATTR2; i++) {
+        sprintf(aname, "%03u", i);
+        aid = H5Acreate2(gid, aname, H5T_STD_I32LE, sid, H5P_DEFAULT, H5P_DEFAULT);
+        CHECK(aid, FAIL, "H5Acreate2");
+
+        ret = H5Aclose(aid);
+        CHECK(ret, FAIL, "H5Aclose");
+    }
+
+    /* Delete every other attribute */
+    for (i=0; i<BUG2_NATTR2; i++) {
+        sprintf(aname, "%03u", i);
+        ret = H5Adelete(gid, aname);
+        CHECK(ret, FAIL, "H5Adelete");
+    }
+
+    /* Close IDs */
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    ret = H5Pclose(gcpl);
+    CHECK(ret, FAIL, "H5Pclose");
+}   /* test_attr_bug2() */
+
+/****************************************************************
+**
 **  test_attr(): Main H5A (attribute) testing routine.
 **
 ****************************************************************/
@@ -9750,6 +9912,7 @@ test_attr(void)
 
                 /* Tests that address specific bugs */
                 test_attr_bug1(my_fcpl, my_fapl);               /* Test odd allocation operations */
+                test_attr_bug2(my_fcpl, my_fapl);               /* Test many deleted attributes */
             } /* end for */
         } /* end if */
         else {
@@ -9769,6 +9932,7 @@ test_attr(void)
 
             /* Tests that address specific bugs */
             test_attr_bug1(fcpl, my_fapl);                      /* Test odd allocation operations */
+            test_attr_bug2(fcpl, my_fapl);                      /* Test many deleted attributes */
         } /* end else */
     } /* end for */
 
