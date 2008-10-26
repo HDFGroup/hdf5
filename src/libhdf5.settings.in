@@ -11,15 +11,7 @@ General Information:
 	      Uname information: @UNAME_INFO@
 		       Byte sex: @BYTESEX@
 		      Libraries: @STATIC_SHARED@
-	       Parallel support: @PARALLEL@
 	     Installation point: @prefix@
-		       Compiler: @CC_VERSION@
-	      Compiler switches: @CFLAGS@ @CPPFLAGS@
-		Extra libraries: @LDFLAGS@ @LIBS@
-		       Archiver: @AR@
-			 Ranlib: @RANLIB@
-	      Debugged Packages: @DEBUG_PKG@
-		    API Tracing: @TRACE_API@
 
 Compiling Options:
 ------------------
@@ -27,37 +19,40 @@ Compiling Options:
                      C Compiler: @CC_VERSION@
 	       CFLAGS/H5_CFLAGS: @CFLAGS@/@H5_CFLAGS@
            CPPFLAGS/H5_CPPFLAGS: @CPPFLAGS@/@H5_CPPFLAGS@
-                        LDFLAGS: @LDFLAGS@
-                     Debug Mode: @DEBUG_PKG@
                Shared Libraries: @enable_shared@
                Static Libraries: @enable_static@
   Statically Linked Executables: @STATIC_EXEC@
- Default Public Symbols Version: @DEFAULT_API_VERSION@
- With Deprecated Public Symbols: @DEPRECATED_SYMBOLS@
-                        Tracing: @TRACE_API@
-Clear file buffers before write: @CLEARFILEBUF@
-           Using memory checker: @USINGMEMCHECKER@
-   Optimization Instrumentation: @INSTRUMENT@
+		Extra libraries: @LDFLAGS@ @LIBS@
+		       Archiver: @AR@
+			 Ranlib: @RANLIB@
+	      Debugged Packages: @DEBUG_PKG@
+		    API Tracing: @TRACE_API@
 
 Languages:
 ----------
                         Fortran: @HDF_FORTRAN@
-@BUILD_FORTRAN_CONDITIONAL_TRUE@               Fortran Compiler: @FC@ @FCFLAGS@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@               Fortran Compiler: @FC@
+@BUILD_FORTRAN_CONDITIONAL_TRUE@                  Fortran Flags: @FCFLAGS@
                             C++: @HDF_CXX@
-@BUILD_CXX_CONDITIONAL_TRUE@                  C++ Compiler:  @CXX@@CXXFLAGS@
+@BUILD_CXX_CONDITIONAL_TRUE@                   C++ Compiler: @CXX@
+@BUILD_CXX_CONDITIONAL_TRUE@                      C++ Flags: @CXXFLAGS@
 
 Features:
 ---------
+                  Parallel HDF5: @PARALLEL@
+             High Level library: @HDF5_HL@
+                   Threadsafety: @THREADSAFE@
+            Default API Mapping: @DEFAULT_API_VERSION@
+ With Deprecated Public Symbols: @DEPRECATED_SYMBOLS@
+         I/O filters (external): @EXTERNAL_FILTERS@
+         I/O filters (internal): @FILTERS@
+                            MPE: @MPE@
+                     Direct VFD: @DIRECT_VFD@
                         dmalloc: @HAVE_DMALLOC@
+Clear file buffers before write: @CLEARFILEBUF@
+           Using memory checker: @USINGMEMCHECKER@
          Function Stack Tracing: @CODESTACK@
                            GPFS: @GPFS@
       Strict File Format Checks: @STRICT_FORMAT_CHECKS@
-            Default API Mapping: @DEFAULT_API_VERSION@
-         I/O filters (external): @EXTERNAL_FILTERS@
-         I/O filters (internal): @FILTERS@
+   Optimization Instrumentation: @INSTRUMENT@
  Linux Large File Support (LFS): @LINUX_LFS@
-                            MPE: @MPE@
-                  Parallel HDF5: @PARALLEL@
-                     Direct VFD: @DIRECT_VFD@
-                   Threadsafety: @THREADSAFE@
-             High Level library: @HDF5_HL@
