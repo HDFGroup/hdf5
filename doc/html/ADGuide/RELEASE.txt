@@ -1,4 +1,4 @@
-HDF5 version 1.6.7-snap22 released on Sun Oct 19 14:47:00 CDT 2008
+HDF5 version 1.6.7-snap23 released on Sun Oct 26 14:47:07 CDT 2008
 ================================================================================
 
 INTRODUCTION
@@ -119,6 +119,13 @@ Bug Fixes since HDF5-1.6.7 Release
 
     Configuration
     -------------
+     - Fixed error with 'make check install' failing due to h5dump
+       needing other tools built first. MAM - 2008/10/22.
+     - Fixed error with exampples/ph5example getting built even in serial
+       mode. Will now only get built and tested if parallel is enabled.
+       MAM - 2008/09/18
+     - The file libhdf5_fortran.settings is not installed since its content
+       is included in libhdf5.settings now. AKC - 2008/10/21
      - The GASS and SRB virtual file drivers have been retired and removed
        from the HDF5 library. AKC - 2008/9/26
 
