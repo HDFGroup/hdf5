@@ -21,7 +21,7 @@
 #define _H5version_H
 
 /* Issue error if contradicting macros have been defined. */
-#if (defined(H5_USE_16_API) || defined(H5_USE_16_API_DEFAULT)) && defined(H5_NO_DEPRECATED_SYMBOLS)
+#if defined(H5_USE_16_API) || defined(H5_USE_16_API_DEFAULT)) && defined(H5_NO_DEPRECATED_SYMBOLS)
 #error "Can't choose old API versions when deprecated APIs are disabled"
 #endif /* (defined(H5_USE_16_API) || defined(H5_USE_16_API_DEFAULT)) && defined(H5_NO_DEPRECATED_SYMBOLS) */
 
@@ -32,7 +32,7 @@
  * Note: If an application has already chosen a particular version for an
  *      API symbol, the individual API version macro takes priority.
  */
-#ifdef H5_USE_16_API_DEFAULT
+#ifdef H5_USE_16_API
 
 /*************/
 /* Functions */
@@ -130,7 +130,7 @@
 #define H5E_auto_t_vers 1
 #endif /* !defined(H5E_auto_t_vers) */
 
-#endif /* H5_USE_16_API_DEFAULT */
+#endif /* H5_USE_16_API */
 
 
 /* Choose the correct version of each API symbol, defaulting to the latest
