@@ -155,6 +155,9 @@ Bug Fixes since HDF5-1.8.0 release
             attribute structure.  SLU - 2008/07/22
       - Fixed issue where a group could have a file mounted on it twice.
             (QAK - 2008/07/15)
+      - Fixed a Windows-specific issue in the ohdr test which was causing users
+        in some timezones to get false errors.  This a deficiency in the Windows
+        mktime() function, and has been handled properly.  SJW  - 2008/06/19
       - Fixed the problem with the searching of target file for H5Lcreate_external().
 	    The searching pattern will depend on whether the target file's
 	    pathname is an absolute or a relative path. Please see the description
