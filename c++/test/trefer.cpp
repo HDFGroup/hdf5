@@ -59,17 +59,9 @@ const int SPACE1_DIM1 = 4;
 
 // 2-D dataset with fixed dimensions
 const H5std_string      SPACE2_NAME("Space2");
-const int SPACE2_RANK = 2;
-const int SPACE2_DIM1 = 10;
-const int SPACE2_DIM2 = 10;
 
 // Larger 1-D dataset with fixed dimensions
 const H5std_string      SPACE3_NAME("Space3");
-const int SPACE3_RANK = 1;
-const int SPACE3_DIM1 = 100;
-
-// Element selection information
-const int POINT1_NPOINTS = 10;
 
 // Compound datatype
 typedef struct s1_t {
@@ -84,7 +76,7 @@ typedef struct s1_t {
 **      Tests references to various kinds of objects
 **
 ****************************************************************/
-static void test_reference_obj()
+static void test_reference_obj(void)
 {
     int    i;          // counting variables
     const  H5std_string write_comment="Foo!"; // Comments for group
@@ -100,9 +92,9 @@ static void test_reference_obj()
 
 	// Allocate write & read buffers
 	int temp_size = MAX(sizeof(unsigned),sizeof(hobj_ref_t));
-	wbuf=(hobj_ref_t*)malloc(temp_size*SPACE1_DIM1);
-	rbuf=(hobj_ref_t*)malloc(temp_size*SPACE1_DIM1);
-	tbuf=(hobj_ref_t*)malloc(temp_size*SPACE1_DIM1);
+	wbuf=(hobj_ref_t*)HDmalloc(temp_size*SPACE1_DIM1);
+	rbuf=(hobj_ref_t*)HDmalloc(temp_size*SPACE1_DIM1);
+	tbuf=(hobj_ref_t*)HDmalloc(temp_size*SPACE1_DIM1);
 
         // Create file FILE1
         file1 = new H5File (FILE1, H5F_ACC_TRUNC);
@@ -207,7 +199,7 @@ static void test_reference_obj()
 	// Check information in the referenced dataset
 	sid1 = dset2.getSpace();
 	hssize_t n_elements = sid1.getSimpleExtentNpoints();
-	verify_val((long)n_elements, (long)4, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
+	verify_val((long)n_elements, 4, "DataSpace::getSimpleExtentNpoints", __LINE__, __FILE__);
 
 	// Read from disk
 	dset2.read(tbuf, PredType::NATIVE_UINT);
@@ -239,7 +231,7 @@ static void test_reference_obj()
 	Group new_group(dataset, &rbuf[2]);
 	H5std_string read_comment3 = new_group.getComment(".", 10);
 	verify_val(read_comment3, write_comment, "Group::getComment", __LINE__, __FILE__);
-	group.close();
+	new_group.close();
 
 	// Dereference datatype object from the location where 'dataset'
 	// is located
@@ -270,9 +262,9 @@ static void test_reference_obj()
 	file1->close();
 
 	// Free memory buffers
-	free(wbuf);
-	free(rbuf);
-	free(tbuf);
+	HDfree(wbuf);
+	HDfree(rbuf);
+	HDfree(tbuf);
 
 	PASSED();
     } // end try
@@ -289,7 +281,7 @@ static void test_reference_obj()
 #ifdef __cplusplus
 extern "C"
 #endif
-void test_reference()
+void test_reference(void)
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing References\n"));
@@ -307,7 +299,7 @@ void test_reference()
 #ifdef __cplusplus
 extern "C"
 #endif
-void cleanup_reference()
+void cleanup_reference(void)
 {
     HDremove(FILE1.c_str());
 }
