@@ -57,8 +57,64 @@
 This document is intended to assist application developers who must keep 
 an application synchronized with the HDF5 library or related software.
 
+<a name="168">
+<h2>Release 1.6.8 (current release) versus Release 1.6.7</h2> 
+</a>
 
-<h2>Release 1.6.7 (current release) versus Release 1.6.6</h2> 
+<dir>
+
+This section lists the API-level changes that have been made in the 
+transition from the HDF5 Release 1.6.7 to Release 1.6.8.
+As this is primarily a bug-fix release, 
+the only interface changes are one changed function signature and
+the changes related to the removal of the 
+stream I/O driver, as outlined below.
+
+
+    <h3>Functions with Changed Syntax</h3>
+
+        The following function syntaxes have changed;
+        the affected return values and parameter are noted as 
+        <font color=red><u>underscored red text</u></font>.
+        <p>
+        <dl>
+        <dt><u>C function:</u>
+        <dt><code>H5Fget_obj_count</code>
+          <dd><code>
+              <font color=red><u>
+              ssize_t</u></font> H5Fget_obj_count(
+              <em>hid_t </em><code>file_id</code>,
+              <em>unsigned int</em> <code>types</code>,
+              )
+              </code>
+        <p>
+        <dt><code>H5Fget_obj_ids</code>
+          <dd><code>
+              <font color=red><u>
+              ssize_t</u></font> H5Fget_obj_ids(
+              <em>hid_t </em><code>file_id</code>,
+              <em>unsigned int</em> <code>types</code>,
+              <br>
+              &nbsp; &nbsp; &nbsp; &nbsp;
+              <font color=red><u>
+              <em>size_t</em> <code>max_objs</code></u></font>,
+              <em>hid_t *</em><code>obj_id_list</code>
+              )
+              </code>
+         </dl>
+         <p>
+
+
+    <h3>Tools with Changed Interface</h3>
+    
+
+</dir>
+
+
+
+<a name="167">
+<h2>Release 1.6.7 versus Release 1.6.6</h2> 
+</a>
 
 <dir>
 
@@ -120,7 +176,9 @@ stream I/O driver, as outlined below.
 
 </dir>
 
+<a name="166">
 <h2>Release 1.6.6 versus Release 1.6.5</h2> 
+</a>
 
 <dir>
 
@@ -2810,7 +2868,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 10 September 2008 
+Last modified: 27 October 2008 
 <!-- hhmts end -->
 
 </body>
