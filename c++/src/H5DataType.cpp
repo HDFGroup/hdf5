@@ -38,6 +38,7 @@
 #include "H5AbstractDs.h"
 #include "H5DataSet.h"
 #include "H5File.h"
+#include "H5Attribute.h"
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -87,27 +88,74 @@ DataType::DataType( const H5T_class_t type_class, size_t size ) : H5Object()
 
 //--------------------------------------------------------------------------
 // Function:	DataType overload constructor - dereference
-///\brief	Given a reference to some object, returns that datatype
-///\param       obj - IN: Location reference object is in
+///\brief	Given a reference, ref, to an hdf5 group, creates a
+///		DataType object
+///\param       obj - IN: Specifying location referenced object is in
 ///\param	ref - IN: Reference pointer
-///\parDescription
-///		\c obj can be DataSet, Group, H5File, or named DataType, that
+///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\exception	H5::ReferenceException
+///\par Description
+///		\c obj can be DataSet, Group, or named DataType, that 
 ///		is a datatype that has been named by DataType::commit.
 // Programmer	Binh-Minh Ribler - Oct, 2006
+// Modification
+//	Jul, 2008
+//		Added for application convenience.
 //--------------------------------------------------------------------------
- /* DataType::DataType(IdComponent& obj, void* ref) : H5Object()
+DataType::DataType(H5Object& obj, const void* ref, H5R_type_t ref_type) : H5Object()
 {
-   H5Object::dereference(obj, ref);
-}
- */
-DataType::DataType(H5Object& obj, void* ref) : H5Object()
-{
-   id = obj.p_dereference(ref);
+    try {
+	id = p_dereference(obj.getId(), ref, ref_type);
+    } catch (ReferenceException deref_error) {
+	throw ReferenceException("DataType constructor - located by an H5Object",
+		deref_error.getDetailMsg());
+    }
 }
 
-DataType::DataType(H5File& file, void* ref) : H5Object()
+//--------------------------------------------------------------------------
+// Function:	DataType overload constructor - dereference
+///\brief	Given a reference, ref, to an hdf5 group, creates a
+///		DataType object
+///\param       h5file - IN: Location referenced object is in
+///\param	ref - IN: Reference pointer
+///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\exception	H5::ReferenceException
+// Programmer	Binh-Minh Ribler - Oct, 2006
+// Modification
+//	Jul, 2008
+//		Added for application convenience.
+//--------------------------------------------------------------------------
+DataType::DataType(H5File& h5file, const void* ref, H5R_type_t ref_type) : H5Object()
 {
-   id = file.p_dereference(ref);
+    try {
+	id = p_dereference(h5file.getId(), ref, ref_type);
+    } catch (ReferenceException deref_error) {
+	throw ReferenceException("DataType constructor - located by an H5File",
+		deref_error.getDetailMsg());
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:	DataType overload constructor - dereference
+///\brief	Given a reference, ref, to an hdf5 group, creates a
+///		DataType object
+///\param       attr - IN: Specifying location where the referenced object is in
+///\param	ref - IN: Reference pointer
+///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\exception	H5::ReferenceException
+// Programmer	Binh-Minh Ribler - Oct, 2006
+// Modification
+//	Jul, 2008
+//		Added for application convenience.
+//--------------------------------------------------------------------------
+DataType::DataType(Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object()
+{
+    try {
+	id = p_dereference(attr.getId(), ref, ref_type);
+    } catch (ReferenceException deref_error) {
+	throw ReferenceException("DataType constructor - located by an Attribute",
+		deref_error.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------

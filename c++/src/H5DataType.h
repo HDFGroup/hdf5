@@ -30,8 +30,9 @@ class H5_DLLCPP DataType : public H5Object {
 	DataType( const DataType& original );
 
 	// Creates a datatype by way of dereference.
-	DataType(H5Object& obj, void* ref);
-	DataType(H5File& file, void* ref);
+	DataType(H5Object& obj, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	DataType(H5File& h5file, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	DataType(Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
 
 	// Closes this datatype.
 	virtual void close();

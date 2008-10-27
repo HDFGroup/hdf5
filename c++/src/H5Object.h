@@ -86,9 +86,11 @@ class H5_DLLCPP H5Object : public IdComponent {
 	void reference(void* ref, const char* name) const;
 	void reference(void* ref, const H5std_string& name) const;
 
-	// Open a referenced HDF5 object.
-	void dereference(H5File& h5file, void* ref);
-	void dereference(H5Object& obj, void* ref);
+	// Open a referenced HDF5 object whose location is specified by either
+	// a file, an HDF5 object, or an attribute.
+	void dereference(H5File& h5file, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	void dereference(H5Object& obj, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+	void dereference(Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
 
 	// Copy constructor: makes copy of an H5Object object.
 	H5Object(const H5Object& original);
@@ -109,6 +111,9 @@ class H5_DLLCPP H5Object : public IdComponent {
 
 	// Creates a reference to an HDF5 object or a dataset region.
 	void p_reference(void* ref, const char* name, hid_t space_id, H5R_type_t ref_type) const;
+
+	// Dereferences a ref into an hdf5 id.
+	hid_t p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type);
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 	// Retrieves the type of object that an object reference points to.

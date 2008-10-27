@@ -44,8 +44,9 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	virtual hid_t getLocId() const;
 
 	// Creates a group by way of dereference.
-	Group(H5Object& obj, void* ref);
-	Group(H5File& obj, void* ref);
+	Group(H5Object& obj, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+        Group(H5File& h5file, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
+        Group(Attribute& attr, const void* ref, H5R_type_t ref_type = H5R_OBJECT);
 
 	// default constructor
 	Group();

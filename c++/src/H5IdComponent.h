@@ -44,9 +44,6 @@ class H5_DLLCPP IdComponent {
 	// Assignment operator.
 	IdComponent& operator=( const IdComponent& rhs );
 
-	// Opens the HDF5 object referenced.
-	hid_t p_dereference(void* ref);
-
 	// Gets the identifier of this object.
 	virtual hid_t getId () const = 0;
 
