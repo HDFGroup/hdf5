@@ -161,6 +161,9 @@ Bug Fixes since HDF5-1.8.1
           object structure, and the empty one overwrote the data with fill value.  This is
           fixed by making some attribute information like the data be shared in the 
           attribute structure.  SLU - 2008/07/07
+        - Fixed a Windows-specific issue in the ohdr test which was causing users
+          in some timezones to get false errors.  This a deficiency in the Windows
+          mktime() function, and has been handled properly.  SJW  - 2008/06/19
 
         Parallel Library
         ----------------
