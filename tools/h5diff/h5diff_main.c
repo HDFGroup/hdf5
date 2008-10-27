@@ -109,7 +109,7 @@ int main(int argc, const char *argv[])
 
    /*-------------------------------------------------------------------------
     * exit code
-    *   1 if differences, 0 if no differences, -1 if error
+    *   1 if differences, 0 if no differences, 2 if error
     *-------------------------------------------------------------------------
     */
 
