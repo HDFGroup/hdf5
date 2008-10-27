@@ -386,7 +386,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b:F:s:S:Aq:z:m:";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -493,7 +493,7 @@ static struct long_options l_opts[] = {
     { "onlyattr", no_arg, 'A' },
     { "escape", no_arg, 'e' },
     { "noindex", no_arg, 'y' },
-    { "binary", require_arg, 'b' },
+    { "binary", optional_arg, 'b' },
     { "form", require_arg, 'F' },
     { "sort_by", require_arg, 'q' },
     { "sort_order", require_arg, 'z' },
@@ -683,10 +683,10 @@ usage(const char *prog)
     fprintf(stdout, "        number of dimensions in the dataspace being queried\n");
     fprintf(stdout, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
     fprintf(stdout, "        updated by [IETF RFC 2732])\n");
-    fprintf(stdout, "  B - is the form of binary output: MEMORY for a memory type, FILE for the\n");
+    fprintf(stdout, "  B - is the form of binary output: NATIVE for a memory type, FILE for the\n");
     fprintf(stdout, "        file type, LE or BE for pre-existing little or big endian types.\n");
     fprintf(stdout, "        Must be used with -o (output file) and it is recommended that\n");
-    fprintf(stdout, "        -d (dataset) is used\n");
+    fprintf(stdout, "        -d (dataset) is used. B is an optional argument, defaults to NATIVE\n");
     fprintf(stdout, "  Q - is the sort index type. It can be \"creation_order\" or \"name\" (default)\n");
     fprintf(stdout, "  Z - is the sort order type. It can be \"descending\" or \"ascending\" (default)\n");
     fprintf(stdout, "\n");
@@ -3220,7 +3220,7 @@ set_binary_form(const char *form)
 {
  int bform=-1;
 
- if (strcmp(form,"MEMORY")==0) /* native form */
+ if (strcmp(form,"NATIVE")==0) /* native form */
   bform = 0;
  else if (strcmp(form,"FILE")==0) /* file type form */
   bform = 1;
@@ -3998,23 +3998,29 @@ parse_start:
 
        case 'b':
 
-        if ( ( bin_form = set_binary_form(opt_arg)) < 0){
-         /* failed to set binary form */
-         usage(progname);
-         leave(EXIT_FAILURE);
-        }
-        bin_output = TRUE;
-        if (outfname!=NULL) {
-         if (set_output_file(outfname, 1) < 0){
-          /* failed to set output file */
-          usage(progname);
-          leave(EXIT_FAILURE);
-         }
-
-         last_was_dset = FALSE;
-        }
-
-        break;
+        if ( opt_arg != NULL)
+           {
+               if ( ( bin_form = set_binary_form(opt_arg)) < 0)
+               {
+                   /* failed to set binary form */
+                   usage(progname);
+                   leave(EXIT_FAILURE);
+               }
+           }
+           bin_output = TRUE;
+           if (outfname!=NULL) 
+           {
+               if (set_output_file(outfname, 1) < 0)
+               {
+                   /* failed to set output file */
+                   usage(progname);
+                   leave(EXIT_FAILURE);
+               }
+               
+               last_was_dset = FALSE;
+           }
+           
+           break;
 
        case 'q':
 
