@@ -48,10 +48,6 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
 	void write(const DataType& mem_type, const void *buf ) const;
 	void write(const DataType& mem_type, const H5std_string& strg ) const;
 
-	// Creates an attribute by way of dereference.
-	Attribute(H5Object& obj, void* ref);
-	Attribute(H5File& file, void* ref);
-
 	// Returns this class name
 	virtual H5std_string fromClass () const { return("Attribute"); }
 

@@ -299,24 +299,6 @@ H5std_string IdComponent::p_get_file_name() const
    return(file_name);
 }
 
-//--------------------------------------------------------------------------
-// Function:    H5Object::p_dereference (protected)
-// Purpose      Opens the HDF5 object referenced.
-// Parameters
-//              ref - IN: Reference pointer
-// Exception    H5::IdComponentException
-// Programmer   Binh-Minh Ribler - Oct, 2006
-//--------------------------------------------------------------------------
-hid_t IdComponent::p_dereference(void* ref)
-{
-   hid_t temp_id = H5Rdereference(getId(), H5R_OBJECT, ref);
-   if (temp_id < 0)
-   {
-      throw ReferenceException("", "H5Rdereference failed");
-   }
-   return(temp_id);
-}
-
 //
 // Local functions used in this class
 //

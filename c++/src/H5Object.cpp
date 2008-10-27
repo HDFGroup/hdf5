@@ -420,41 +420,101 @@ void H5Object::reference(void* ref, const H5std_string& name) const
 }
 
 //--------------------------------------------------------------------------
-// Function:    H5Object::dereference
-// Purpose      Dereference a ref into a DataSet object.
+// Function:	H5Object::p_dereference (protected)
+// Purpose	Dereference a ref into an hdf5 object.
 // Parameters
-//              ref - IN: Reference pointer
-// Exception    H5::IdComponentException
-// Programmer   Binh-Minh Ribler - Oct, 2006
+//		loc_id - IN: An hdf5 identifier specifying the location of the 
+//			 referenced object
+//		ref - IN: Reference pointer
+//		ref_type - IN: Reference type
+// Exception	H5::ReferenceException
+// Programmer	Binh-Minh Ribler - Oct, 2006
 // Modification
 //	May 2008 - BMR
-//		Moved from IdComponent into H5File and H5Object
+//		Moved from IdComponent.
 //--------------------------------------------------------------------------
-void H5Object::dereference(H5File& h5file, void* ref)
+hid_t H5Object::p_dereference(hid_t loc_id, const void* ref, H5R_type_t ref_type)
 {
    hid_t temp_id;
-   try {
-      temp_id = h5file.p_dereference(ref);
-   }
-   catch (ReferenceException ref_err) {
-      throw (inMemFunc("dereference"), ref_err.getDetailMsg());
+   temp_id = H5Rdereference(loc_id, ref_type, ref);
+   if (temp_id < 0)
+   {
+      throw ReferenceException("", "H5Rdereference failed");
    }
 
    // No failure, set id to the object
+   return(temp_id);
+}
+
+//--------------------------------------------------------------------------
+// Function:	H5Object::dereference
+///\brief	Dereferences a reference into an HDF5 object, given an HDF5 object.
+///\param	obj - IN: Object specifying the location of the referenced object
+///\param	ref - IN: Reference pointer
+///\param	ref_type - IN: Reference type
+///\exception	H5::ReferenceException
+// Programmer   Binh-Minh Ribler - Oct, 2006
+// Modification
+//	May, 2008
+//		Corrected missing parameters. - BMR
+//--------------------------------------------------------------------------
+void H5Object::dereference(H5Object& obj, const void* ref, H5R_type_t ref_type)
+{
+   hid_t temp_id;
+   try {
+      temp_id = p_dereference(obj.getId(), ref, ref_type);
+   }
+   catch (ReferenceException E) {
+      throw ReferenceException("H5Object::dereference - located by object", E.getDetailMsg());
+   }
    p_setId(temp_id);
 }
 
-void H5Object::dereference(H5Object& obj, void* ref)
+//--------------------------------------------------------------------------
+// Function:	H5Object::dereference
+///\brief	Dereferences a reference into an HDF5 object, given an HDF5 file.
+///\param	h5file - IN: HDF5 file specifying the location of the referenced object
+///\param	ref - IN: Reference pointer
+///\param	ref_type - IN: Reference type
+///\exception	H5::ReferenceException
+// Programmer   Binh-Minh Ribler - Oct, 2006
+// Modification
+//	May, 2008
+//		Corrected missing parameters. - BMR
+//--------------------------------------------------------------------------
+void H5Object::dereference(H5File& h5file, const void* ref, H5R_type_t ref_type)
 {
    hid_t temp_id;
    try {
-      temp_id = obj.p_dereference(ref);
+      temp_id = p_dereference(h5file.getId(), ref, ref_type);
    }
-   catch (ReferenceException ref_err) {
-      throw (inMemFunc("dereference"), ref_err.getDetailMsg());
+   catch (ReferenceException E) {
+      throw ReferenceException("H5Object::dereference - located by file", E.getDetailMsg());
    }
+   p_setId(temp_id);
+}
 
-   // No failure, set id to the object
+//--------------------------------------------------------------------------
+// Function:	H5Object::dereference
+///\brief	Dereferences a reference into an HDF5 object, given an attribute.
+///\param	attr - IN: Attribute specifying the location of the referenced object
+///\param	ref - IN: Reference pointer
+///\param	ref_type - IN: Reference type
+///\exception	H5::ReferenceException
+// Programmer   Binh-Minh Ribler - Oct, 2006
+// Modification
+//	May, 2008
+//		Corrected missing parameters. - BMR
+//--------------------------------------------------------------------------
+void H5Object::dereference(Attribute& attr, const void* ref, H5R_type_t ref_type)
+{
+   hid_t temp_id;
+   try {
+      temp_id = p_dereference(attr.getId(), ref, ref_type);
+   }
+   catch (ReferenceException E) {
+      throw ReferenceException("H5Object::dereference - located by attribute", E.getDetailMsg());
+   }
    p_setId(temp_id);
 }
 

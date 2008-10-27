@@ -341,27 +341,6 @@ hsize_t Attribute::getStorageSize() const
 }
 
 //--------------------------------------------------------------------------
-// Function:    Attribute::dereference
-// Purpose      Dereference a ref into a DataSet object.
-// Parameters
-//              ref - IN: Reference pointer
-// Exception    H5::IdComponentException
-// Programmer   Binh-Minh Ribler - Oct, 2006
-// Modification
-//      May 2008 - BMR
-//              Moved from IdComponent into H5File, H5Object, and Attribute
-//--------------------------------------------------------------------------
-Attribute::Attribute(H5Object& obj, void* ref) : AbstractDs(), IdComponent()
-{
-   id = obj.p_dereference(ref);
-}
-
-Attribute::Attribute(H5File& h5file, void* ref) : AbstractDs(), IdComponent()
-{
-   id = h5file.p_dereference(ref);
-}
-
-//--------------------------------------------------------------------------
 // Function:    Attribute::getId
 // Purpose:     Get the id of this attribute
 // Description:
