@@ -21,9 +21,9 @@
 #define _H5version_H
 
 /* Issue error if contradicting macros have been defined. */
-#if (defined(H5_USE_16_API) || defined(H5_USE_16_API_DEFAULT)) && defined(H5_NO_DEPRECATED_SYMBOLS)
+#if defined(H5_USE_16_API) && defined(H5_NO_DEPRECATED_SYMBOLS)
 #error "Can't choose old API versions when deprecated APIs are disabled"
-#endif /* (defined(H5_USE_16_API) || defined(H5_USE_16_API_DEFAULT)) && defined(H5_NO_DEPRECATED_SYMBOLS) */
+#endif /* defined(H5_USE_16_API) && defined(H5_NO_DEPRECATED_SYMBOLS) */
 
 
 /* If a particular "global" version of the library's interfaces is chosen,
