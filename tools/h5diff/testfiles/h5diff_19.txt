@@ -19,6 +19,7 @@ file1     file2
     x           /g1/fp17       
     x           /g1/fp18       
     x           /g1/fp2        
+    x           /g1/ld         
 
 group  : </> and </>
 0 differences found
