@@ -3220,8 +3220,11 @@ set_binary_form(const char *form)
 {
  int bform=-1;
 
- if (strcmp(form,"NATIVE")==0) /* native form */
+ if (strcmp(form,"NATIVE")==0 ||
+     strcmp(form,"MEMORY")==0) 
+ {/* native form */
   bform = 0;
+ }
  else if (strcmp(form,"FILE")==0) /* file type form */
   bform = 1;
  else if (strcmp(form,"LE")==0) /* convert to little endian */
