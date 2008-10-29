@@ -450,10 +450,12 @@ hsize_t diff_match(hid_t file1_id,
 
 
     /*-------------------------------------------------------------------------
-    * the number of objects
-    * in file1 must be the same as in file2
+    * regarding the return value of h5diff (0, no difference in files, 1 difference )
+    * 1) the number of objects in file1 must be the same as in file2
+    * 2) the graph must match, i.e same names (absolute path)
+    * 3) objects with the same name must be of the same type
     *-------------------------------------------------------------------------
-    */
+    */     
        
     /* number of different objects */
     if ( info1->nused != info2->nused )
@@ -461,12 +463,24 @@ hsize_t diff_match(hid_t file1_id,
         options->contents = 0;
     }
     
-    
+    /* objects in one file and not the other */
     for( i = 0; i < table->nobjs; i++)
     {
         if( table->objs[i].flags[0] != table->objs[i].flags[1] )
         {
             options->contents = 0;
+        }
+    }
+
+    /* objects with the same name but different HDF5 types */
+    for( i = 0; i < table->nobjs; i++) 
+    {
+        if ( table->objs[i].flags[0] && table->objs[i].flags[1] )
+        {
+            if ( table->objs[i].type != table->objs[i].type )
+            {
+                options->contents = 0;
+            }
         }
     }
 
