@@ -26,14 +26,17 @@ static void read_info(const char *filename,pack_opt_t *options);
 
 
 /* module-scoped variables */
-const char *progname = "h5repack";
-int d_status = EXIT_SUCCESS;
+const char  *progname = "h5repack";
+int         d_status = EXIT_SUCCESS;
+static int  has_i_o = 0;
+const char  *infile  = NULL;
+const char  *outfile = NULL;
 
 /*
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nu:b:t:a:";
+static const char *s_opts = "hVvf:l:m:e:nu:b:t:a:i:o:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -47,6 +50,8 @@ static struct long_options l_opts[] = {
     { "block", require_arg, 'b' },
     { "threshold", require_arg, 't' },
     { "alignment", require_arg, 'a' },
+    { "infile", require_arg, 'i' },   /* -i for backward compability */
+    { "outfile", require_arg, 'o' },  /* -o for backward compability */
     { NULL, 0, '\0' }
 };
 
@@ -82,35 +87,38 @@ static struct long_options l_opts[] = {
  */
 int main(int argc, char **argv)
 {
-    const char    *infile  = NULL;
-    const char    *outfile = NULL;
     pack_opt_t    options;            /*the global options */
-    int           ret=-1;
+    int           ret;
     
     /* initialize options  */
     h5repack_init (&options,0);
 
     parse_command_line(argc, argv, &options);
-    
-    if ( argv[ opt_ind ] != NULL && argv[ opt_ind + 1 ] != NULL ) 
-    {
-        infile = argv[ opt_ind ];
-        outfile = argv[ opt_ind + 1 ];
 
-        if ( strcmp( infile, outfile ) == 0 )
+    /* get file names if they were not yet got */
+    if ( has_i_o == 0 )
+    {
+        
+        if ( argv[ opt_ind ] != NULL && argv[ opt_ind + 1 ] != NULL ) 
         {
-            error_msg(progname, "file names cannot be the same\n");
+            infile = argv[ opt_ind ];
+            outfile = argv[ opt_ind + 1 ];
+            
+            if ( strcmp( infile, outfile ) == 0 )
+            {
+                error_msg(progname, "file names cannot be the same\n");
+                usage(progname);
+                exit(EXIT_FAILURE);
+                
+            }
+        }
+        
+        else
+        {
+            error_msg(progname, "file names missing\n");
             usage(progname);
             exit(EXIT_FAILURE);
-            
         }
-    }
-    
-    else
-    {
-        error_msg(progname, "file names missing\n");
-        usage(progname);
-        exit(EXIT_FAILURE);
     }
 
   
@@ -251,6 +259,18 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
     {
         switch ((char)opt) 
         {
+
+        /* -i for backward compability */
+        case 'i':
+            infile = opt_arg;
+            has_i_o = 1;
+            break;
+        /* -o for backward compability */
+        case 'o':
+            outfile = opt_arg;
+            has_i_o = 1;
+            break;
+
         case 'h':
             usage(progname);
             exit(EXIT_SUCCESS);
@@ -330,12 +350,15 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
         
     } /* while */
     
-    /* check for file names to be processed */
-    if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL) 
+    if ( has_i_o == 0 )
     {
-        error_msg(progname, "missing file names\n");
-        usage(progname);
-        exit(EXIT_FAILURE);
+        /* check for file names to be processed */
+        if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL) 
+        {
+            error_msg(progname, "missing file names\n");
+            usage(progname);
+            exit(EXIT_FAILURE);
+        }
     }
       
 
