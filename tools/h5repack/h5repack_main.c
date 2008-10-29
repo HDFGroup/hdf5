@@ -27,16 +27,18 @@ static void read_info(const char *filename,pack_opt_t *options);
 
 
 /* module-scoped variables */
-const char *progname = "h5repack";
-int d_status = EXIT_SUCCESS;
-static int has_i_o = 0;
+const char  *progname = "h5repack";
+int         d_status = EXIT_SUCCESS;
+static int  has_i_o = 0;
+const char  *infile  = NULL;
+const char  *outfile = NULL;
 
 
 /*
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:t:a:";
+static const char *s_opts = "hVvf:l:m:e:nLc:d:s:u:b:t:a:i:o:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -54,6 +56,8 @@ static struct long_options l_opts[] = {
     { "block", require_arg, 'b' },
     { "threshold", require_arg, 't' },
     { "alignment", require_arg, 'a' },
+    { "infile", require_arg, 'i' },   /* -i for backward compability */
+    { "outfile", require_arg, 'o' },  /* -o for backward compability */
     { NULL, 0, '\0' }
 };
 
@@ -95,209 +99,48 @@ static struct long_options l_opts[] = {
  */
 int main(int argc, const char **argv)
 {
-    const char    *infile  = NULL;
-    const char    *outfile = NULL;
+    
     pack_opt_t    options;            /*the global options */
     int           ret=-1;
-    int           i;
-
+    
     /* initialize options  */
-    h5repack_init (&options,0);
-
-    /* detect -i or -o for file names */
-    for ( i = 1; i < argc; i++)
+    h5repack_init (&options,0);        
+    
+    parse_command_line(argc, argv, &options);
+    
+    /* get file names if they were not yet got */
+    if ( has_i_o == 0 )
     {
-
-        if (strcmp(argv[i], "-i") == 0)
-        {
-            has_i_o = 1;
-        }
-        if (strcmp(argv[i], "-o") == 0)
-        {
-            has_i_o = 1;
-        }
-    }
-
-    if (has_i_o)
-    {
-
-        for ( i = 1; i < argc; i++)
-        {
-            if (strcmp(argv[i], "-h") == 0)
-            {
-                usage(progname);
-                exit(0);
-            }
-            if (strcmp(argv[i], "-i") == 0)
-            {
-                infile = argv[++i];
-            }
-            else if (strcmp(argv[i], "-o") == 0)
-            {
-                outfile = argv[++i];
-            }
-            else if (strcmp(argv[i], "-v") == 0)
-            {
-                options.verbose = 1;
-            }
-            else if (strcmp(argv[i], "-f") == 0)
-            {
-
-                /* add the -f filter option */
-                if (h5repack_addfilter(argv[i+1],&options)<0)
-                {
-                    error_msg(progname, "in parsing filter\n");
-                    exit(1);
-                }
-
-                /* jump to next */
-                ++i;
-            }
-            else if (strcmp(argv[i], "-l") == 0)
-            {
-
-                /* parse the -l layout option */
-                if (h5repack_addlayout(argv[i+1],&options)<0)
-                {
-                    error_msg(progname, "in parsing layout\n");
-                    exit(1);
-                }
-
-                /* jump to next */
-                ++i;
-            }
-
-            else if (strcmp(argv[i], "-m") == 0)
-            {
-                options.min_comp = atoi(argv[i+1]);
-                if ((int)options.min_comp<=0)
-                {
-                    error_msg(progname, "invalid minimum compress size <%s>\n",argv[i+1]);
-                    exit(1);
-                }
-                ++i;
-            }
-
-            else if (strcmp(argv[i], "-e") == 0)
-            {
-                read_info(argv[++i],&options);
-            }
-            else if (strcmp(argv[i], "-n") == 0)
-            {
-                options.use_native = 1;
-            }
-
-            else if (strcmp(argv[i], "-L") == 0)
-            {
-                options.latest = 1;
-            }
-            else if (strcmp(argv[i], "-c") == 0)
-            {
-                options.grp_compact = atoi( argv[++i] );
-                if (options.grp_compact>0)
-                    options.latest = 1; /* must use latest format */
-            }
-            else if (strcmp(argv[i], "-d") == 0)
-            {
-                options.grp_indexed = atoi( argv[++i] );
-                if (options.grp_indexed>0)
-                    options.latest = 1; /* must use latest format */
-            }
-            else if (strcmp(argv[i], "-s") == 0)
-            {
-
-                const char *s = argv[++i];
-                int idx = 0;
-                int ssize = 0;
-                char *msgPtr = strchr( s, ':');
-                options.latest = 1; /* must use latest format */
-                if (msgPtr == NULL)
-                {
-                    ssize = atoi( s );
-                    for (idx=0; idx<5; idx++)
-                        options.msg_size[idx] = ssize;
-                }
-                else
-                {
-                    char msgType[10];
-                    strcpy(msgType, msgPtr+1);
-                    msgPtr[0] = '\0';
-                    ssize = atoi( s );
-                    if (strncmp(msgType, "dspace",6) == 0) {
-                        options.msg_size[0] = ssize;
-                    }
-                    else if (strncmp(msgType, "dtype",5) == 0) {
-                        options.msg_size[1] = ssize;
-                    }
-                    else if (strncmp(msgType, "fill",4) == 0) {
-                        options.msg_size[2] = ssize;
-                    }
-                    else if (strncmp(msgType, "pline",5) == 0) {
-                        options.msg_size[3] = ssize;
-                    }
-                    else if (strncmp(msgType, "attr",4) == 0) {
-                        options.msg_size[4] = ssize;
-                    }
-                }
-
-            }
-
-
-
-            else if (argv[i][0] == '-') {
-                error_msg(progname, " - is not a valid argument\n");
-                usage(progname);
-                exit(1);
-            }
-        }
-
-        if (infile == NULL || outfile == NULL)
-        {
-            error_msg(progname, "file names missing\n");
-            usage(progname);
-            exit(1);
-        }
-
-    }
-
-    else
-
-    {
-
-        parse_command_line(argc, argv, &options);
-
-
-
+        
         if ( argv[ opt_ind ] != NULL && argv[ opt_ind + 1 ] != NULL )
         {
             infile = argv[ opt_ind ];
             outfile = argv[ opt_ind + 1 ];
-
+            
             if ( strcmp( infile, outfile ) == 0 )
             {
                 error_msg(progname, "file names cannot be the same\n");
                 usage(progname);
                 exit(EXIT_FAILURE);
-
+                
             }
         }
-
+        
         else
         {
             error_msg(progname, "file names missing\n");
             usage(progname);
             exit(EXIT_FAILURE);
         }
-
     }
-
-
+    
+    
     /* pack it */
     ret=h5repack(infile,outfile,&options);
-
+    
     /* free tables */
     h5repack_end(&options);
-
+    
     if (ret==-1)
         return 1;
     else
@@ -441,6 +284,19 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
     {
         switch ((char)opt)
         {
+
+        /* -i for backward compability */
+        case 'i':
+            infile = opt_arg;
+            has_i_o = 1;
+            break;
+        /* -o for backward compability */
+        case 'o':
+            outfile = opt_arg;
+            has_i_o = 1;
+            break;
+
+
         case 'h':
             usage(progname);
             exit(EXIT_SUCCESS);
@@ -579,12 +435,15 @@ void parse_command_line(int argc, const char **argv, pack_opt_t* options)
 
     } /* while */
 
-    /* check for file names to be processed */
-    if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL)
+    if ( has_i_o == 0 )
     {
-        error_msg(progname, "missing file names\n");
-        usage(progname);
-        exit(EXIT_FAILURE);
+        /* check for file names to be processed */
+        if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL)
+        {
+            error_msg(progname, "missing file names\n");
+            usage(progname);
+            exit(EXIT_FAILURE);
+        }
     }
 
 }
