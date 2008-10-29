@@ -115,9 +115,52 @@ TOOLTEST()
     fi
     
     if [ $runh5diff != no ]; then
-     H5DIFFTEST $inputfile $outputfile 
+     H5DIFFTEST $inputfile $outputfile $7 $9
     fi
 }
+
+
+TOOLTEST_FAIL() 
+{
+     runh5diff=yes
+     if [ "$1" = -i ]; then
+      inputfile=$2
+     else
+      runh5diff=no
+     fi
+     if [ "$3" = -o ]; then
+      outputfile=$4
+     else 
+      runh5diff=no
+     fi
+  
+    TESTING $H5COPY $@
+    (
+    echo "#############################"
+    echo " output for '$H5COPY $@'"
+    echo "#############################"
+    $RUNSERIAL $H5COPY_BIN $@
+    ) > output.out
+    RET=$?
+    if [ $RET != 0 ]; then
+        echo "*FAILED*"
+        echo "failed result is:"
+        cat output.out
+        nerrors="`expr $nerrors + 1`"
+    else
+        echo " PASSED"
+
+        # Clean up output file
+        if test -z "$HDF5_NOCLEANUP"; then
+           rm -f output.out
+        fi
+    fi
+   
+    if [ $runh5diff != no ]; then
+     H5DIFFTEST_FAIL $inputfile $outputfile $7 $9
+    fi
+}
+
 
 # Call the h5diff tool
 #
@@ -131,6 +174,26 @@ H5DIFFTEST()
     fi
     RET=$?
     if [ $RET != 0 ] ; then
+         echo "*FAILED*"
+         nerrors="`expr $nerrors + 1`"
+    else
+         echo " PASSED"
+    fi
+}
+
+# Call the h5diff tool with a call that is expected to fail
+#
+H5DIFFTEST_FAIL() 
+{
+    VERIFY  $@
+    if [ "`uname -s`" = "TFLOPS O/S" ]; then
+        $RUNSERIAL $H5DIFF_BIN -q $@ 
+    else
+        $RUNSERIAL $H5DIFF_BIN -q "$@" 
+    fi
+    RET=$?
+
+    if [ $RET != 1 ] ; then
          echo "*FAILED*"
          nerrors="`expr $nerrors + 1`"
     else
@@ -215,17 +278,17 @@ COPYOBJECTS()
     TOOLTEST -i $TESTFILE -o $FILEOUT -v -s /grp_dsets/simple  -d /grp_dsets/simple_group
 
     echo "Test copying & renaming group"
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d grp_rename
+    TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d grp_rename
 
     echo "Test copying 'full' group hierarchy into group in destination file"
-    TOOLTEST -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d /grp_rename/grp_dsets
+    TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -v -s grp_dsets  -d /grp_rename/grp_dsets
 
     echo "Test copying objects into group hier. that doesn't exist yet in destination file"
     TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s simple    -d /A/B1/simple
     TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s simple    -d /A/B2/simple2
     TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets/simple    -d /C/D/simple
-    TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets -d /E/F/grp_dsets
-    TOOLTEST -i $TESTFILE -o $FILEOUT -vp -s /grp_nested -d /G/H/grp_nested
+    TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_dsets -d /E/F/grp_dsets
+    TOOLTEST_FAIL -i $TESTFILE -o $FILEOUT -vp -s /grp_nested -d /G/H/grp_nested
 
     # Verify that the file created above is correct
     H5LSTEST $FILEOUT

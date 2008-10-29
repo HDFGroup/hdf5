@@ -13,10 +13,12 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "h5diff.h"
 #include <stdlib.h>
 #include <assert.h>
+#include <memory.h>
+#include "h5diff.h"
 #include "h5diff_common.h"
+#include "h5tools_utils.h"
 
 /*-------------------------------------------------------------------------
  * Function: main
@@ -62,12 +64,6 @@
  *  November 19, 2007
  *    adopted the syntax h5diff  [OPTIONS]  file1 file2  [obj1[obj2]]
  *
- * Aug 2008
- *    Added a "contents" mode check.
- *    If this mode is present, objects in both files must match (must be exactly the same)
- *    If this does not happen, the tool returns an error code of 1
- *    (instead of the success code of 0)
- *
  *-------------------------------------------------------------------------
  */
 
@@ -75,14 +71,24 @@
 int main(int argc, const char *argv[])
 {
     int        ret;
-    char       *fname1 = NULL;
-    char       *fname2 = NULL;
-    char       *objname1  = NULL;
-    char       *objname2  = NULL;
+    const char *fname1 = NULL;
+    const char *fname2 = NULL;
+    const char *objname1  = NULL;
+    const char *objname2  = NULL;
     hsize_t    nfound=0;
     diff_opt_t options;
 
+    /*-------------------------------------------------------------------------
+    * process the command-line
+    *-------------------------------------------------------------------------
+    */
+
     parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
+
+    /*-------------------------------------------------------------------------
+    * do the diff
+    *-------------------------------------------------------------------------
+    */
 
     nfound = h5diff(fname1,fname2,objname1,objname2,&options);
 
@@ -96,11 +102,14 @@ int main(int argc, const char *argv[])
 
     ret = (nfound == 0 ? 0 : 1 );
 
+    /* if graph difference return 1 for differences  */
     if ( options.contents == 0 )
         ret = 1;
 
-    if(options.err_stat)
+    /* and return 2 for error */
+    if (options.err_stat)
         ret = 2;
+
     return ret;
 }
 

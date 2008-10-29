@@ -67,6 +67,9 @@ void parse_command_line(int argc,
     /* process the command-line */
     memset(options, 0, sizeof (diff_opt_t));
 
+    /* assume equal contents initially */
+    options->contents = 1;
+
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF)
     {
@@ -159,6 +162,7 @@ void parse_command_line(int argc,
 
 
 }
+
 
 /*-------------------------------------------------------------------------
  * Function: print_info
@@ -319,7 +323,6 @@ void usage(void)
  printf("   -r, --report            Report mode. Print differences\n");
  printf("   -v, --verbose           Verbose mode. Print differences, list of objects\n");
  printf("   -q, --quiet             Quiet mode. Do not do output\n");
-
 
  printf("   -n C, --count=C         Print differences up to C number\n");
  printf("   -d D, --delta=D         Print difference when greater than limit D\n");
