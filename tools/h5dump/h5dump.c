@@ -79,6 +79,7 @@ static const char   *driver = NULL;      /* The driver to open the file with. */
 static const h5dump_header_t *dump_header_format;
 static const char   *fp_format = NULL;
 
+
 /* things to display or which are set via command line parameters */
 static int          display_all       = TRUE;
 static int          display_oid       = FALSE;
@@ -122,6 +123,7 @@ static void     add_prefix(char **prfx, size_t *prfx_len, const char *name);
 /* callback function used by H5Literate() */
 static herr_t   dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void *op_data);
 static int      dump_extlink(hid_t group, const char *linkname, const char *objname);
+
 
 
 static h5tool_format_t         dataformat = {
@@ -384,7 +386,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b:F:s:S:Aq:z:m:";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -491,7 +493,7 @@ static struct long_options l_opts[] = {
     { "onlyattr", no_arg, 'A' },
     { "escape", no_arg, 'e' },
     { "noindex", no_arg, 'y' },
-    { "binary", require_arg, 'b' },
+    { "binary", optional_arg, 'b' },
     { "form", require_arg, 'F' },
     { "sort_by", require_arg, 'q' },
     { "sort_order", require_arg, 'z' },
@@ -681,10 +683,10 @@ usage(const char *prog)
     fprintf(stdout, "        number of dimensions in the dataspace being queried\n");
     fprintf(stdout, "  U - is a URI reference (as defined in [IETF RFC 2396],\n");
     fprintf(stdout, "        updated by [IETF RFC 2732])\n");
-    fprintf(stdout, "  B - is the form of binary output: MEMORY for a memory type, FILE for the\n");
+    fprintf(stdout, "  B - is the form of binary output: NATIVE for a memory type, FILE for the\n");
     fprintf(stdout, "        file type, LE or BE for pre-existing little or big endian types.\n");
     fprintf(stdout, "        Must be used with -o (output file) and it is recommended that\n");
-    fprintf(stdout, "        -d (dataset) is used\n");
+    fprintf(stdout, "        -d (dataset) is used. B is an optional argument, defaults to NATIVE\n");
     fprintf(stdout, "  Q - is the sort index type. It can be \"creation_order\" or \"name\" (default)\n");
     fprintf(stdout, "  Z - is the sort order type. It can be \"descending\" or \"ascending\" (default)\n");
     fprintf(stdout, "\n");
@@ -1514,7 +1516,7 @@ dump_selected_attr(hid_t loc_id, const char *name)
  *  RMcG, November 2000
  *   Added XML support. Also, optionally checks the op_data argument
  *
- *  PVN, May 2008
+ * PVN, May 2008
  *   Dump external links
  *
  *-------------------------------------------------------------------------
@@ -1806,7 +1808,6 @@ dump_all_cb(hid_t group, const char *name, const H5L_info_t *linfo, void UNUSED 
                             printf("TARGETFILE \"%s\"\n", filename);
                             indentation(indent + COL);
                             printf("TARGETPATH \"%s\"\n", targname);
-
 
                             /* dump the external link */
                             dump_extlink(group, name, targname);
@@ -2231,7 +2232,7 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     if ( !bin_output )
     {
 
-        /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
+       /* attribute iteration: if there is a request to do H5_INDEX_CRT_ORDER and tracking order is set
         in the group for attributes, then, sort by creation order, otherwise by name */
 
         if( (sort_by == H5_INDEX_CRT_ORDER) && (attr_crt_order_flags & H5P_CRT_ORDER_TRACKED))
@@ -2391,7 +2392,6 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
         H5Tclose(f_type);
     }
 
-
     if (outputformat->pindex) {
         outputformat->idx_fmt   = "(%s): ";
         outputformat->idx_n_fmt = HSIZE_T_FORMAT;
@@ -2455,6 +2455,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
             string_dataformat.line_suf = "\"";
             outputformat = &string_dataformat;
         }
+
 
         status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
 
@@ -2656,7 +2657,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
     unsigned         szip_pixels_per_block;
     hsize_t          chsize[64];     /* chunk size in elements */
     int              rank;           /* rank */
-    char             name[256];      /* external file name       */
+    char                name[256];          /* external file name       */
     off_t            offset;         /* offset of external file     */
     hsize_t          size;           /* size of external file   */
     H5D_fill_value_t fvstatus;
@@ -2673,7 +2674,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
     next=H5Pget_external_count(dcpl_id);
     strcpy(f_name,"\0");
 
-   /*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * STORAGE_LAYOUT
     *-------------------------------------------------------------------------
     */
@@ -2694,7 +2695,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
         indentation(indent + COL);
 
 
-        /* if there are filters, print a compression ratio */
+       /* if there are filters, print a compression ratio */
         if ( nfilters )
         {
 
@@ -2736,7 +2737,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
                 }
                 size = nelmts * datum_size;
 
-                a = size; b = storage_size;
+                 a = size; b = storage_size;
 
                 /* compression ratio = uncompressed size /  compressed size */
 
@@ -2826,7 +2827,7 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
             printf("%s\n",END);
         }
     }
-    /*-------------------------------------------------------------------------
+   /*-------------------------------------------------------------------------
     * FILTERS
     *-------------------------------------------------------------------------
     */
@@ -2836,10 +2837,8 @@ dump_dcpl(hid_t dcpl_id,hid_t type_id, hid_t obj_id)
     printf("%s %s\n", FILTERS, BEGIN);
     indent += COL;
 
-    if (nfilters)
-    {
-        for (i=0; i<nfilters; i++)
-        {
+    if (nfilters) {
+        for (i=0; i<nfilters; i++) {
             cd_nelmts = NELMTS(cd_values);
             filtn = H5Pget_filter2(dcpl_id, (unsigned)i, &filt_flags, &cd_nelmts,
                 cd_values, sizeof(f_name), f_name, NULL);
@@ -3221,7 +3220,7 @@ set_binary_form(const char *form)
 {
  int bform=-1;
 
- if (strcmp(form,"MEMORY")==0) /* native form */
+ if (strcmp(form,"NATIVE")==0) /* native form */
   bform = 0;
  else if (strcmp(form,"FILE")==0) /* file type form */
   bform = 1;
@@ -3305,7 +3304,8 @@ set_sort_order(const char *form)
  *              Tuesday, 9. January 2001
  *
  * Modifications:
- *  PVN, May 2008
+ *
+ * PVN, May 2008
  *   add an extra parameter PE, to allow printing/not printing of error messages
  *
  *-------------------------------------------------------------------------
@@ -3452,8 +3452,8 @@ parse_subset_params(char *dset)
  *              Tuesday, 9. January 2001
  *
  * Modifications:
- *  Pedro Vicente, January 15, 2008
- *  check for block overlap
+ *  Pedro Vicente, Tuesday, January 15, 2008
+ *  check for block overlap\
  *
  *  Pedro Vicente, May 8, 2008
  *   added a flag PE that prints/not prints error messages
@@ -3482,7 +3482,6 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
                 dump_header_format->datasetblockend);
             d_status = EXIT_FAILURE;
         }
-
         return;
     } /* end if */
 
@@ -3610,9 +3609,7 @@ handle_datasets(hid_t fid, const char *dset, void *data, int pe, const char *dis
  * Programmer:  Bill Wendling
  *              Tuesday, 9. January 2001
  *
- * Modifications:
- *
- * Pedro Vicente, September 26, 2007
+ * Modifications: Pedro Vicente, September 26, 2007
  *  handle creation order
  *
  * Pedro Vicente, May 8, 2008
@@ -3639,7 +3636,6 @@ handle_groups(hid_t fid, const char *group, void UNUSED * data, int pe, const ch
             end_obj(dump_header_format->groupend, dump_header_format->groupblockend);
             d_status = EXIT_FAILURE;
         }
-
     }
     else
     {
@@ -3716,6 +3712,8 @@ handle_links(hid_t fid, const char *links, void UNUSED * data, int UNUSED pe, co
 
                     if(H5Lunpack_elink_val(buf, linfo.u.val_size, NULL, &elink_file, &elink_path)>=0) {
                         indentation(COL);
+                        printf("LINKCLASS %d\n", linfo.type);
+                        indentation(COL);
                         printf("TARGETFILE \"%s\"\n", elink_file);
                         indentation(COL);
                         printf("TARGETPATH \"%s\"\n", elink_path);
@@ -3781,7 +3779,8 @@ handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe, const 
         {
             char name[128];
 
-            if(!type_table->objs[idx].recorded) {
+            if(!type_table->objs[idx].recorded)
+            {
                 /* unamed datatype */
                 sprintf(name, "/#"H5_PRINTF_HADDR_FMT, type_table->objs[idx].objno);
 
@@ -3805,7 +3804,6 @@ handle_datatypes(hid_t fid, const char *type, void UNUSED * data, int pe, const 
                     dump_header_format->datatypeblockend);
                 d_status = EXIT_FAILURE;
             }
-
         }
         else
         {
@@ -4000,23 +3998,29 @@ parse_start:
 
        case 'b':
 
-        if ( ( bin_form = set_binary_form(opt_arg)) < 0){
-         /* failed to set binary form */
-         usage(progname);
-         leave(EXIT_FAILURE);
-        }
-        bin_output = TRUE;
-        if (outfname!=NULL) {
-         if (set_output_file(outfname, 1) < 0){
-          /* failed to set output file */
-          usage(progname);
-          leave(EXIT_FAILURE);
-         }
-
-         last_was_dset = FALSE;
-        }
-
-        break;
+        if ( opt_arg != NULL)
+           {
+               if ( ( bin_form = set_binary_form(opt_arg)) < 0)
+               {
+                   /* failed to set binary form */
+                   usage(progname);
+                   leave(EXIT_FAILURE);
+               }
+           }
+           bin_output = TRUE;
+           if (outfname!=NULL) 
+           {
+               if (set_output_file(outfname, 1) < 0)
+               {
+                   /* failed to set output file */
+                   usage(progname);
+                   leave(EXIT_FAILURE);
+               }
+               
+               last_was_dset = FALSE;
+           }
+           
+           break;
 
        case 'q':
 
@@ -4065,6 +4069,9 @@ parse_start:
             /* specify alternative floating point printing format */
             fp_format = opt_arg;
             break;
+
+
+
 
         case 'X':
             /* specify XML namespace (default="hdf5:"), or none */
@@ -7002,3 +7009,4 @@ fail:
     return FAIL;
 
 }
+

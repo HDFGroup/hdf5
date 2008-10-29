@@ -58,10 +58,10 @@ usage: h5dump [OPTIONS] file
         number of dimensions in the dataspace being queried
   U - is a URI reference (as defined in [IETF RFC 2396],
         updated by [IETF RFC 2732])
-  B - is the form of binary output: MEMORY for a memory type, FILE for the
+  B - is the form of binary output: NATIVE for a memory type, FILE for the
         file type, LE or BE for pre-existing little or big endian types.
         Must be used with -o (output file) and it is recommended that
-        -d (dataset) is used
+        -d (dataset) is used. B is an optional argument, defaults to NATIVE
   Q - is the sort index type. It can be "creation_order" or "name" (default)
   Z - is the sort order type. It can be "descending" or "ascending" (default)
 
