@@ -329,9 +329,7 @@ TOOLTEST h5diff_17.txt -v $FILE1 $FILE2
 TESTING $H5DIFF -q $SRCFILE1 $SRCFILE2
 TOOLTEST h5diff_18.txt -q $FILE1 $FILE2 
 
-# 1.9 contents mode 
-TESTING $H5DIFF -v -c $SRCFILE1 $SRCFILE11
-TOOLTEST h5diff_19.txt -v -c $FILE1 $FILE11 
+
 
 # ##############################################################################
 # # not comparable types

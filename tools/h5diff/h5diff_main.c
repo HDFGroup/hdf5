@@ -90,17 +90,17 @@ int main(int argc, const char *argv[])
 
    /*-------------------------------------------------------------------------
     * exit code
-    *   1 if differences, 0 if no differences, -1 if error
+    *   1 if differences, 0 if no differences, 2 if error
     *-------------------------------------------------------------------------
     */
 
     ret = (nfound == 0 ? 0 : 1 );
 
-    if ( options.m_contents && options.contents == 0 )
+    if ( options.contents == 0 )
         ret = 1;
 
     if(options.err_stat)
-        ret = -1;
+        ret = 2;
     return ret;
 }
 
