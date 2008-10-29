@@ -17,16 +17,12 @@
 #include "h5diff.h"
 #include "ph5diff.h"
 #include "H5private.h"
+#include "h5tools.h"
+
 
 #include <sys/timeb.h>
 #include <time.h>
 
-#if 0
-#define H5DIFF_DO_TIME
-#endif
-#if 1
-#define H5DIFF_DO_NAN
-#endif
 
 /*-------------------------------------------------------------------------
  * printf formatting
@@ -247,7 +243,8 @@ void print_pos( int        *ph,       /* print header */
     parallel_print("[ " );
     for ( i = 0; i < rank; i++)
     {
-        parallel_print("%"H5_PRINTF_LL_WIDTH"u ", (unsigned long_long)pos[i]);
+        parallel_print(HSIZE_T_FORMAT, (unsigned long_long)pos[i]);
+        parallel_print(" ");
     }
     parallel_print("]" );
 }
@@ -2999,20 +2996,7 @@ hsize_t diff_float(unsigned char *mem1,
     else
     {
 
-#if defined (H5DIFF_DO_TIME)
-          int time;
 
-     #if defined (WIN32)
-          struct _timeb *tbstart = malloc(sizeof(struct _timeb));
-	      struct _timeb *tbstop = malloc(sizeof(struct _timeb));
-          _ftime( tbstart);
-     #else
-          struct timeb *tbstart = malloc(sizeof(struct timeb));
-	      struct timeb *tbstop = malloc(sizeof(struct timeb));
-          ftime( tbstart);
-     #endif
-
-#endif
 
         for ( i = 0; i < nelmts; i++)
         {
@@ -3040,18 +3024,6 @@ hsize_t diff_float(unsigned char *mem1,
 
 
 
-#if defined (H5DIFF_DO_TIME)
-
-      #if defined (WIN32)
-          _ftime( tbstop );
-      #else
-          ftime( tbstop );
-      #endif
-
-          time = tbstop->time - tbstart->time;
-          printf(" TIME = %d sec\n", time );
-
-#endif
 
 
     }
@@ -5289,8 +5261,6 @@ hbool_t equal_double(double value, double expected)
     int both_zero;
     int is_zero;
 
-#if defined (H5DIFF_DO_NAN)
-
 /*-------------------------------------------------------------------------
  * detect NaNs
  *-------------------------------------------------------------------------
@@ -5320,8 +5290,6 @@ hbool_t equal_double(double value, double expected)
     * both are not NaNs, compare
     *-------------------------------------------------------------------------
     */
-
-#endif
 
     BOTH_ZERO(value,expected)
     if (both_zero)
@@ -5354,8 +5322,6 @@ hbool_t equal_ldouble(long double value, long double expected)
     int both_zero;
     int is_zero;
 
-#if defined (H5DIFF_DO_NAN)
-
 /*-------------------------------------------------------------------------
  * detect NaNs
  *-------------------------------------------------------------------------
@@ -5385,8 +5351,6 @@ hbool_t equal_ldouble(long double value, long double expected)
     * both are not NaNs, compare
     *-------------------------------------------------------------------------
     */
-
-#endif
 
     BOTH_ZERO(value,expected)
     if (both_zero)
@@ -5423,8 +5387,6 @@ hbool_t equal_float(float value, float expected)
     int both_zero;
     int is_zero;
 
-#if defined (H5DIFF_DO_NAN)
-
 /*-------------------------------------------------------------------------
  * detect NaNs
  *-------------------------------------------------------------------------
@@ -5454,8 +5416,6 @@ hbool_t equal_float(float value, float expected)
     * both are not NaNs, compare
     *-------------------------------------------------------------------------
     */
-
-#endif
 
     BOTH_ZERO(value,expected)
     if (both_zero)
