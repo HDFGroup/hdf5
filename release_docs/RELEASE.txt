@@ -81,7 +81,8 @@ New Features
         - h5ls: added -E option to enable traversal of external links.  h5ls will
             not traverse external links without this flag being set.
             (NAF - 2008/10/06)
-
+        - h5dump: binary output defaults to NATIVE with -b optionally accepting
+            the form of binary output (NATIVE, FILE, BE, LE). (PVN - 2008/10/30)
 
 
         F90 API
