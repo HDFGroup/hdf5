@@ -106,6 +106,15 @@ sub print_globalapivers ($) {
     print $fh " *      API symbol, the individual API version macro takes priority.\n";
     print $fh " */\n";
 
+    for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
+        # Print API version ifdef
+        print $fh "#if defined(H5_USE_1", ($curr_idx * 2), "_API_DEFAULT) && !defined(H5_USE_1", ($curr_idx * 2), "_API)\n";
+        # Print API version definition
+        print $fh "#define H5_USE_1", ($curr_idx * 2), "_API 1\n";
+        # Print API version endif
+        print $fh "#endif /* H5_USE_1", ($curr_idx * 2), "_API_DEFAULT && !H5_USE_1", ($curr_idx * 2), "_API */\n\n";
+    }
+
     # Loop over supported older library APIs and define the appropriate macros
     for $curr_idx ($min_sup_idx .. ($max_idx - 1)) {
         # Print API version ifdef
