@@ -103,9 +103,8 @@ New Features
             the form of binary output (NATIVE, FILE, BE, LE). (PVN - 2008/10/30)
      - h5diff: return 1 for file differences when both file graphs differ by any object. 
             Error return code was changed to 2 from -1. (PVN - 2008/10/30)
-
-
-
+     - h5import: TEXTFPE (scientific format) was deprecated. Use TEXTFP 
+            instead (PVN - 2008/10/30)
 
 
     High-Level APIs:
