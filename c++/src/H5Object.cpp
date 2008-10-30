@@ -124,7 +124,7 @@ Attribute H5Object::createAttribute( const char* name, const DataType& data_type
 // Function:	H5Object::createAttribute
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes
-///		a reference to an \c std::string for \a name.
+///		a reference to an \c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Attribute H5Object::createAttribute( const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const PropList& create_plist ) const
@@ -158,7 +158,7 @@ Attribute H5Object::openAttribute( const char* name ) const
 // Function:	H5Object::openAttribute
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes
-///		a reference to an \c std::string for \a name.
+///		a reference to an \c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Attribute H5Object::openAttribute( const H5std_string& name ) const
@@ -194,7 +194,7 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
 ///\brief	Iterates a user's function over all the attributes of an H5
 ///		object, which may be a group, dataset or named datatype.
 ///\param	user_op - IN: User's function to operate on each attribute
-///\param	idx - IN/OUT: Starting (IN) and ending (OUT) attribute indices
+///\param	_idx - IN/OUT: Starting (IN) and ending (OUT) attribute indices
 ///\param	op_data - IN: User's data to pass to user's operator function
 ///\return	Returned value of the last operator if it was non-zero, or
 ///		zero if all attributes were processed
@@ -202,7 +202,7 @@ Attribute H5Object::openAttribute( const unsigned int idx ) const
 ///\par Description
 ///		For information, please refer to the C layer Reference Manual
 ///		at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5A.html#Annot-Iterate
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5A.html#Annot-Create2
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int H5Object::iterateAttrs( attr_operator_t user_op, unsigned *_idx, void *op_data )
@@ -266,7 +266,7 @@ void H5Object::removeAttr( const char* name ) const
 // Function:	H5Object::removeAttr
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes
-///		a reference to an \c std::string for \a name.
+///		a reference to an \c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void H5Object::removeAttr( const H5std_string& name ) const
@@ -293,7 +293,7 @@ void H5Object::renameAttr(const char* oldname, const char* newname) const
 // Function:	H5Object::renameAttr
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes
-///		a reference to an \c std::string for the names.
+///		a reference to an \c H5std_string for the names.
 // Programmer	Binh-Minh Ribler - Mar, 2005
 //--------------------------------------------------------------------------
 void H5Object::renameAttr(const H5std_string& oldname, const H5std_string& newname) const
@@ -365,8 +365,8 @@ void H5Object::p_reference(void* ref, const char* name, hid_t space_id, H5R_type
 ///\param       name - IN: Name of the object to be referenced
 ///\param       dataspace - IN: Dataspace with selection
 ///\param       ref_type - IN: Type of reference to query, valid values are:
-///             \li \c H5R_OBJECT \tReference is an object reference.
-///             \li \c H5R_DATASET_REGION \tReference is a dataset region
+///             \li \c H5R_OBJECT         - Reference is an object reference.
+///             \li \c H5R_DATASET_REGION - Reference is a dataset region
 ///                     reference. - this is the default
 ///\exception   H5::IdComponentException
 // Programmer   Binh-Minh Ribler - May, 2004
@@ -409,9 +409,9 @@ void H5Object::reference(void* ref, const char* name) const
 // Function:    H5Object::reference
 ///\brief       This is an overloaded function, provided for your convenience.
 ///             It differs from the above function in that it takes an
-///             \c std::string for the object's name.
+///             \c H5std_string for the object's name.
 ///\param       ref - IN: Reference pointer
-///\param       name - IN: Name of the object to be referenced - \c std::string
+///\param       name - IN: Name of the object to be referenced - \c H5std_string
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
 void H5Object::reference(void* ref, const H5std_string& name) const

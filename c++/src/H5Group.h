@@ -34,7 +34,7 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 	// Retrieves a dataspace with the region pointed to selected.
 	DataSpace getRegion(void *ref, H5R_type_t ref_type = H5R_DATASET_REGION) const;
 
-	// Returns this class name
+	///\brief Returns this class name
 	virtual H5std_string fromClass () const { return("Group"); }
 
 	// Throw group exception.

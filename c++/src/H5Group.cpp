@@ -79,7 +79,7 @@ hid_t Group::getLocId() const
 //--------------------------------------------------------------------------
 // Function:	Group overloaded constructor
 ///\brief	Creates a Group object using the id of an existing group.
-///\param	group_id - IN: Id of an existing group
+///\param	existing_id - IN: Id of an existing group
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Group::Group(const hid_t existing_id) : H5Object()
@@ -153,13 +153,13 @@ Group::Group(Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object()
 ///\brief	Retrieves the type of object that an object reference points to.
 ///\param	ref      - IN: Reference to query
 ///\param	ref_type - IN: Type of reference to query, valid values are:
-///		\li \c H5R_OBJECT \tReference is an object reference.
-///		\li \c H5R_DATASET_REGION \tReference is a dataset region reference.
+///		\li \c H5R_OBJECT         - Reference is an object reference.
+///		\li \c H5R_DATASET_REGION - Reference is a dataset region reference.
 ///\return	An object type, which can be one of the following:
-///			H5G_LINK Object is a symbolic link.
-///			H5G_GROUP Object is a group.
-///			H5G_DATASET   Object is a dataset.
-///			H5G_TYPE Object is a named datatype
+///		\li \c H5G_LINK (0)    - Object is a symbolic link.
+///		\li \c H5G_GROUP (1)   - Object is a group.
+///		\li \c H5G_DATASET (2) - Object is a dataset.
+///		\li \c H5G_TYPE (3)    - Object is a named datatype
 ///\exception	H5::GroupIException
 // Programmer	Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
@@ -199,10 +199,10 @@ DataSpace Group::getRegion(void *ref, H5R_type_t ref_type) const
 // Purpose:     Get the id of this attribute
 // Modification:
 //      May 2008 - BMR
-//              Class hierarchy is revised to address bugzilla 1068.  Class
-//              AbstractDS and Attribute are moved out of H5Object.  In
-//              addition, member IdComponent::id is moved into subclasses, and
-//              IdComponent::getId now becomes pure virtual function.
+//		Class hierarchy is revised to address bugzilla 1068.  Class
+//		AbstractDS and Attribute are moved out of H5Object.  In
+//		addition, member IdComponent::id is moved into subclasses, and
+//		IdComponent::getId now becomes pure virtual function.
 // Programmer   Binh-Minh Ribler - May, 2008
 //--------------------------------------------------------------------------
 hid_t Group::getId() const
@@ -215,11 +215,11 @@ hid_t Group::getId() const
 ///\brief       Sets the identifier of this object to a new value.
 ///
 ///\exception   H5::IdComponentException when the attempt to close the HDF5
-///             object fails
+///		object fails
 // Description:
-//              The underlaying reference counting in the C library ensures
-//              that the current valid id of this object is properly closed.
-//              Then the object's id is reset to the new id.
+//		The underlaying reference counting in the C library ensures
+//		that the current valid id of this object is properly closed.
+//		Then the object's id is reset to the new id.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void Group::p_setId(const hid_t new_id)

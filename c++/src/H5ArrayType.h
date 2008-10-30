@@ -36,7 +36,7 @@ class H5_DLLCPP ArrayType : public DataType {
 	// Returns the sizes of dimensions of this array datatype.
 	int getArrayDims(hsize_t* dims);
 
-	// Returns this class name
+	///\brief Returns this class name
 	virtual H5std_string fromClass () const { return("ArrayType"); }
 
 	// Copy constructor: makes copy of the original object.

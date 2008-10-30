@@ -100,7 +100,7 @@ Group CommonFG::createGroup( const char* name, size_t size_hint ) const
 // Function:	CommonFG::createGroup
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Group CommonFG::createGroup( const H5std_string& name, size_t size_hint ) const
@@ -138,7 +138,7 @@ Group CommonFG::openGroup( const char* name ) const
 // Function:	CommonFG::openGroup
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 Group CommonFG::openGroup( const H5std_string& name ) const
@@ -182,7 +182,7 @@ DataSet CommonFG::createDataSet( const char* name, const DataType& data_type, co
 // Function:	CommonFG::createDataSet
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataSet CommonFG::createDataSet( const H5std_string& name, const DataType& data_type, const DataSpace& data_space, const DSetCreatPropList& create_plist ) const
@@ -217,7 +217,7 @@ DataSet CommonFG::openDataSet( const char* name ) const
 // Function:	CommonFG::openDataSet
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataSet CommonFG::openDataSet( const H5std_string& name ) const
@@ -275,7 +275,7 @@ void CommonFG::link( H5L_type_t link_type, const char* curr_name, const char* ne
 // Function:	CommonFG::link
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a curr_name and \a new_name.
+///		\c H5std_string for \a curr_name and \a new_name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void CommonFG::link( H5L_type_t link_type, const H5std_string& curr_name, const H5std_string& new_name ) const
@@ -305,7 +305,7 @@ void CommonFG::unlink( const char* name ) const
 // Function:	CommonFG::unlink
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void CommonFG::unlink( const H5std_string& name ) const
@@ -323,7 +323,7 @@ void CommonFG::unlink( const H5std_string& name ) const
 ///		Exercise care in moving groups as it is possible to render
 ///		data in a file inaccessible with Group::move. Please refer
 ///		to the Group Interface in the HDF5 User's Guide at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/Groups.html
+/// http://www.hdfgroup.org/HDF5/doc/UG/UG_frame09Groups.html
 // Programmer	Binh-Minh Ribler - 2000
 // Modification
 //	2007: QAK modified to use H5L APIs - BMR
@@ -341,7 +341,7 @@ void CommonFG::move( const char* src, const char* dst ) const
 // Function:	CommonFG::move
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a src and \a dst.
+///		\c H5std_string for \a src and \a dst.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void CommonFG::move( const H5std_string& src, const H5std_string& dst ) const
@@ -360,7 +360,7 @@ void CommonFG::move( const H5std_string& src, const H5std_string& dst ) const
 ///\par Description
 ///		For more information, please refer to the C layer Reference
 ///		Manual at:
-/// http://hdf.ncsa.uiuc.edu/HDF5/doc/RM_H5G.html#Group-GetObjinfo
+/// http://www.hdfgroup.org/HDF5/doc/RM/RM_H5G.html#Group-GetObjinfo
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void CommonFG::getObjinfo( const char* name, hbool_t follow_link, H5G_stat_t& statbuf ) const
@@ -376,7 +376,7 @@ void CommonFG::getObjinfo( const char* name, hbool_t follow_link, H5G_stat_t& st
 // Function:	CommonFG::getObjinfo
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void CommonFG::getObjinfo( const H5std_string& name, hbool_t follow_link, H5G_stat_t& statbuf ) const
@@ -405,7 +405,7 @@ void CommonFG::getObjinfo( const char* name, H5G_stat_t& statbuf ) const
 // Function:	CommonFG::getObjinfo
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - Nov, 2005
 //--------------------------------------------------------------------------
 void CommonFG::getObjinfo( const H5std_string& name, H5G_stat_t& statbuf ) const
@@ -441,7 +441,7 @@ H5std_string CommonFG::getLinkval( const char* name, size_t size ) const
 // Function:	CommonFG::getLinkval
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5std_string CommonFG::getLinkval( const H5std_string& name, size_t size ) const
@@ -482,7 +482,7 @@ void CommonFG::setComment( const char* name, const char* comment ) const
 // Function:	CommonFG::setComment
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name and \a comment.
+///		\c H5std_string for \a name and \a comment.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void CommonFG::setComment( const H5std_string& name, const H5std_string& comment ) const
@@ -514,7 +514,7 @@ void CommonFG::removeComment(const char* name) const
 // Function:	CommonFG::removeComment
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - May 2005
 //--------------------------------------------------------------------------
 void CommonFG::removeComment(const H5std_string& name) const
@@ -599,7 +599,7 @@ H5std_string CommonFG::getComment( const char* name, size_t bufsize ) const
 // Function:	CommonFG::getComment
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 H5std_string CommonFG::getComment( const H5std_string& name, size_t bufsize ) const
@@ -636,7 +636,7 @@ void CommonFG::mount( const char* name, H5File& child, PropList& plist ) const
 // Function:	CommonFG::mount
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void CommonFG::mount( const H5std_string& name, H5File& child, PropList& plist ) const
@@ -667,7 +667,7 @@ void CommonFG::unmount( const char* name ) const
 // Function:	CommonFG::unmount
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void CommonFG::unmount( const H5std_string& name ) const
@@ -702,7 +702,7 @@ DataType CommonFG::openDataType( const char* name ) const
 // Function:	CommonFG::openDataType
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 DataType CommonFG::openDataType( const H5std_string& name ) const
@@ -737,7 +737,7 @@ ArrayType CommonFG::openArrayType( const char* name ) const
 // Function:	CommonFG::openArrayType
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - Jul, 2005
 //--------------------------------------------------------------------------
 ArrayType CommonFG::openArrayType( const H5std_string& name ) const
@@ -772,7 +772,7 @@ CompType CommonFG::openCompType( const char* name ) const
 // Function:	CommonFG::openCompType
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 CompType CommonFG::openCompType( const H5std_string& name ) const
@@ -807,7 +807,7 @@ EnumType CommonFG::openEnumType( const char* name ) const
 // Function:	CommonFG::openEnumType
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 EnumType CommonFG::openEnumType( const H5std_string& name ) const
@@ -842,7 +842,7 @@ IntType CommonFG::openIntType( const char* name ) const
 // Function:	CommonFG::openIntType
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 IntType CommonFG::openIntType( const H5std_string& name ) const
@@ -877,7 +877,7 @@ FloatType CommonFG::openFloatType( const char* name ) const
 // Function:	CommonFG::openFloatType
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 FloatType CommonFG::openFloatType( const H5std_string& name ) const
@@ -912,7 +912,7 @@ StrType CommonFG::openStrType( const char* name ) const
 // Function:	CommonFG::openStrType
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 StrType CommonFG::openStrType( const H5std_string& name ) const
@@ -947,7 +947,7 @@ VarLenType CommonFG::openVarLenType( const char* name ) const
 // Function:	CommonFG::openVarLenType
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - Jul, 2005
 //--------------------------------------------------------------------------
 VarLenType CommonFG::openVarLenType( const H5std_string& name ) const
@@ -983,7 +983,7 @@ int CommonFG::iterateElems( const char* name, int *idx, H5G_iterate_t op , void*
 // Function:	CommonFG::iterateElems
 ///\brief	This is an overloaded member function, provided for convenience.
 ///		It differs from the above function in that it takes an
-///		\c std::string for \a name.
+///		\c H5std_string for \a name.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 int CommonFG::iterateElems( const H5std_string& name, int *idx, H5G_iterate_t op , void* op_data )

@@ -28,7 +28,7 @@ namespace H5 {
 
 class H5_DLLCPP PredType : public AtomType {
    public:
-	// Returns this class name
+	///\brief Returns this class name
 	virtual H5std_string fromClass () const { return("PredType"); }
 
 	// Makes a copy of the predefined type and stores the new

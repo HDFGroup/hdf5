@@ -57,7 +57,7 @@ class H5_DLLCPP EnumType : public DataType {
 	void valueOf( const char* name, void *value ) const;
 	void valueOf( const H5std_string& name, void *value ) const;
 
-	// Returns this class name
+	///\brief Returns this class name
 	virtual H5std_string fromClass () const { return("EnumType"); }
 
 	// Default constructor

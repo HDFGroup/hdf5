@@ -123,7 +123,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
 	// Returns garbage collecting references setting.
 	unsigned getGcReferences() const;
 
-	// Returns this class name
+	///\brief Returns this class name
 	virtual H5std_string fromClass () const { return("FileAccPropList"); }
 
 	// Copy constructor: creates a copy of a FileAccPropList object.

@@ -57,7 +57,7 @@ class H5_DLLCPP AtomType : public DataType {
 	// Sets the total size for an atomic datatype.
 	void setSize( size_t size ) const;
 
-	// Returns this class name
+	///\brief Returns this class name
 	virtual H5std_string fromClass () const { return("AtomType"); }
 
 	// Copy constructor - makes copy of the original object

@@ -107,7 +107,7 @@ class H5_DLLCPP DSetCreatPropList : public PropList {
 	// Sets SZIP compression method.
 	void setSzip(unsigned int options_mask, unsigned int pixels_per_block) const;
 
-	// Returns this class name
+	///\brief Returns this class name
 	virtual H5std_string fromClass () const { return("DSetCreatPropList"); }
 
 	// Copy constructor: creates a copy of a DSetCreatPropList object.
