@@ -99,13 +99,13 @@ test_error(hid_t file)
 	TEST_ERROR;
     if (!old_func)
 	TEST_ERROR;
-#ifdef H5_USE_16_API_DEFAULT
+#ifdef H5_USE_16_API
     if (old_func != (H5E_auto1_t)H5Eprint1)
 	TEST_ERROR;
-#else /* H5_USE_16_API_DEFAULT */
+#else /* H5_USE_16_API */
     if (old_func != (H5E_auto1_t)H5Eprint2)
 	TEST_ERROR;
-#endif /* H5_USE_16_API_DEFAULT */
+#endif /* H5_USE_16_API */
 
     if(H5Eset_auto1(NULL, NULL)<0)
         TEST_ERROR;
