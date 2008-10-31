@@ -78,6 +78,8 @@ static char         *prefix;
 static const char   *driver = NULL;      /* The driver to open the file with. */
 static const h5dump_header_t *dump_header_format;
 static const char   *fp_format = NULL;
+const char          *outfname=NULL;
+
 
 
 /* things to display or which are set via command line parameters */
@@ -3852,10 +3854,6 @@ parse_command_line(int argc, const char *argv[])
     struct handler_t   *hand, *last_dset = NULL;
     int                 i, opt, last_was_dset = FALSE;
 
-    /* some logic to handle both -o and -b order */
-    const char          *outfname=NULL;
-    bin_form = -1;
-
      /* no arguments */
     if (argc == 1) {
         usage(progname);
@@ -3979,7 +3977,7 @@ parse_start:
 
         case 'o':
 
-         if (bin_form > 0 )
+         if ( bin_output )
          {
           if (set_output_file(opt_arg, 1) < 0){
            usage(progname);
@@ -4264,6 +4262,12 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
     hand = parse_command_line(argc, argv);
+
+    if ( bin_output && outfname == NULL )
+    {
+        error_msg(progname, "binary output requires a file name, use -o <filename>\n");
+        leave(EXIT_FAILURE);
+    }
 
     /* Check for conflicting options */
     if (doxml) {
