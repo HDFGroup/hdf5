@@ -31,21 +31,9 @@ fi
 
 # The default Fortran 90 compiler
 if test "X-" = "X-$FC"; then
-    # Assume Absoft compiler
-    FC=xlf
-    FC_BASENAME=xlf
-  else
-
-    # Neither xlf nor f95 have a working "version" command.
-    # If FC is set, try to guess which one is being used by examining
-    # the last element in the path to the compiler.
-
-    TEMP_BASENAME=`basename $FC`
-    if test "xlf" = "${TEMP_BASENAME}"; then
-      FC_BASENAME=xlf
-    else
-      FC_BASENAME=f95
-    fi
+    # Assume G95 compiler
+    FC=g95
+    FC_BASENAME=g95
 fi
 
 case $FC_BASENAME in
@@ -72,10 +60,14 @@ case $FC_BASENAME in
         PROFILE_FCFLAGS="-g -pg"
         f9x_flags_set=yes
 
-# f95 doesn't support shared libraries
-        echo '    warning: shared libraries are not supported for f95!'
+# Fortran doesn't support shared libraries
+# Works with static executable only.
+if test "X-" != "X-$enable_fortran"; then
+        echo '    warning: shared libraries are not supported with Fortran'
         echo '    disabling shared libraries'
         enable_shared="no"
+fi
+
         ;;
 
 esac  

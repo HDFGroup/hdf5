@@ -120,7 +120,17 @@ New Features
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-        - None
+        - Intel 10.1 is supported on Mac OS X 10.5.4.
+          Note:
+          When Fortran is enabled, configure automatically
+          disables the build of shared libraries (i.e., only
+          static C and C++ HDF5 libraries will be built
+          along with the static HDF5 Fortran library).
+          Intel 10.1 C and C++ compilers require 
+          "-no-multibyte-chars" compilation flag due to the known
+          bug in the compilers.
+
+                                   (EIP - 2008/10/30)
 
 
 Bug Fixes since HDF5-1.8.1 
@@ -330,10 +340,11 @@ The following platforms and compilers have been tested for this release.
 
     Windows Vista                 Visual Studio 2005
 
-    MAC OS  10.5.2 (Intel)        i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
+    MAC OS  10.5.4 (Intel)        i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
                                   GNU Fortran (GCC) 4.3.0 20070810
                                   G95 (GCC 4.0.3 (g95 0.91!) Apr 24 2008)
-
+                                  Intel C, C++ and Fortran compilers 10.1
+                                  
 
 Supported Configuration Features Summary
 ========================================
@@ -383,7 +394,7 @@ IRIX64_6.5 32-bit        y       dna       y         y
 Windows XP               y       y(15)     y         y        
 Windows XP x64           y       y(15)     y         y        
 Windows Vista            y       n         n         y        
-Mac OS X 10.3            y                           n        
+Mac OS X 10.5            y       n         y         n        
 FreeBSD 4.11             y       n         y         y        
 RedHat EL3  W       (3)  y       y(10)     y         y        
 RedHat EL3  W Intel (3)  y       y         y         n        
