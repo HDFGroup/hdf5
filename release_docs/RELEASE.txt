@@ -104,7 +104,7 @@ New Features
 
 Support for New Platforms, Languages and Compilers
 ==================================================
-
+    None
 
 Bug Fixes since HDF5-1.6.7 Release
 ==================================
@@ -280,8 +280,7 @@ Platforms Tested
                                   cygwin (gcc 3.4.4)
 
     Windows Vista                 Visual studio 2005
-    MAC OS X Intel                Darwin 8.10.1
-                                  i686-apple-darwin8-gcc-4.0.1 (GCC) 4.0.1
+    Mac OS X Intel 10.5.4         i686-apple-darwin9-gcc-4.0.1 (GCC) 4.0.1
                                   g95 0.91
 
 
