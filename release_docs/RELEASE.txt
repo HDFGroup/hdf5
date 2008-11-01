@@ -315,14 +315,13 @@ WinVista 2005                         n        n    n        y    y     y
 Mac OS X 10.4.10                      n        y    n        y    y     y
 AIX-5.2 & 5.3 32- and 64-bit          y        y    y        y    y     y
 FreeBSD 6.2 32- and 64-bit            n        n    n        y    y     y
-RedHat Linux 2.4.21               W   n        n    n        n    y     n
-RedHat Linux 2.6.9-42 i686 GNU(1) W   y        y    y        y    y     y
-RedHat Linux 2.6.9-42 i686 Intel  W   n        y    n        y    y     n
-RedHat Linux 2.6.9-42 i686 PGI    W   n        y    n        y    y     n
+RedHat EL4 2.6.9-42 i686 GNU (1)  W   y        y    y        y    y     y
+RedHat EL4 2.6.9-42 i686 Intel    W   n        y    n        y    y     n
+RedHat EL4 2.6.9-42 i686 PGI      W   n        y    n        y    y     n
 SuSE Linux 2.6.16 x86_64 GNU (1)  W   y        y    n        y    y     y
 SuSE Linux 2.6.16 x86_64 Intel    W   n        y    n        y    y     n
 SuSE Linux 2.6.16 x86_64 PGI      W   n        y    n        y    y     n
-RHEL 4 Linux 2.6.9 Xeon Lustre    C   n        y    n        y    y     y
+RedHat EL 4 2.6.9 Xeon Lustre     C   n        y    n        y    y     y
 SuSE Linux 2.4.21 ia64            C   y        y    y        y    y     y
 SuSe Linux 2.6.16 SGI Altix ia64  C   n        y    n        y    y     y
 
@@ -340,14 +339,13 @@ WinVista 2005                         y             n        n
 Mac OS X 10.4.10                      y             n        n        
 AIX-5.2 & 5.3 32- and 64-bit          n             n        n        
 FreeBSD 6.2 32- and 64-bit            y             n        n        
-RedHat Linux 2.4.21               W   y             n        n        
-SuSE Linux 2.6.9-42 i686 GNU (1)  W   y             n        y        
-SuSE Linux 2.6.9-42 i686 Intel    W   y             n        n        
-SuSE Linux 2.6.9-42 i686 PGI      W   n             n        n        
+RedHat EL4 2.6.9-42 i686 GNU (1)  W   y             n        y        
+RedHat EL4 2.6.9-42 i686 Intel    W   y             n        n        
+RedHat EL4 2.6.9-42 i686 PGI      W   n             n        n        
 SuSE Linux 2.6.16 x86_64 GNU (1)  W   y             n        y        
 SuSE Linux 2.6.16 x86_64 Intel    W   y             n        n        
 SuSE Linux 2.6.16 x86_64 PGI      W   n             n        n        
-RHEL 4 Linux 2.6.9 Xeon Lustre    C   y             n        n        
+RedHat EL4 2.6.9 Xeon Lustre      C   y             n        n        
 SuSE Linux 2.4.21 ia64            C   y             n        n        
 SuSe Linux 2.6.16 SGI Altix ia64  C   n             n        n        
 
