@@ -279,7 +279,7 @@ Platforms Tested
     IA-64 Linux 2.4.21-309.tg1 #1 SMP
         ia64                      gcc (GCC) 3.2.2
     (NCSA tg-login)               Intel(R) C++ Version 8.1.037
-                                  Intel(R) Fortran Compiler Version 8.1.037
+                                  Intel(R) Fortran Compiler Version 8.1.033
                                   mpich-gm-1.2.7p1..16-intel-8.1.037-r1
 
     Windows XP                    Visual Studio 6.0
