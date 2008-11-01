@@ -287,43 +287,55 @@ The following platforms and compilers have been tested for this release.
                                   F90 MIPSpro 7.4.4m 
                                   C++ MIPSpro cc 7.4.4m
 
-    Linux 2.6.9 (RHEL4)           Intel 10.0 compilers
-    (abe.ncsa.uiuc.edu)
+    Linux 2.6.9-42.0.10.ELsmp #1  gcc (GCC) 3.4.6
+         SMP i686 i386            G95 (GCC 4.0.3 (g95 0.92!) April 18 2007)
+    (kagiso)                      PGI C, Fortran, C++ 7.2-1 32-bit
+                                  Intel(R) C Compiler for 32-bit
+                                      applications, Version 10.1
+                                  Intel(R) C++ Compiler for 32-bit
+                                      applications, Version 10.1
+                                  Intel(R) Fortran Compiler for 32-bit
+                                      applications, Version 10.1
+                                  Absoft 32-bit Fortran 95 10.0.4
+                                  MPICH mpich-1.2.7 compiled with
+                                  gcc 3.4.6 and G95  (GCC 4.0.3 (g95 0.92!)
+                                  MPICH mpich2-1.0.6p1 compiled with
+                                  gcc 3.4.6 and G95 (GCC 4.0.3 (g95 0.92!)
 
-    Linux 2.4.21-47               gcc 3.2.3 20030502
-    (osage)
+    Linux 2.6.16.46-0.14-smp #1   Intel(R) C++ for Intel(R) EM64T Ver.
+10.1.013
+        SMP x86_64 GNU/Linux      Intel(R) Fortran Intel(R) EM64T Ver.
+10.1.013
+    (smirom)                      PGI C, Fortran, C++ Version 7.2-1
+                                         for 64-bit target on x86-64
+                                  MPICH mpich-1.2.7 compiled with
+                                  gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!)
+                                  MPICH mpich2-1.0.7 compiled with
+                                  gcc 4.1.2 and G95 (GCC 4.0.3 (g95 0.92!)
+                                  tested for both 32- and 64-bit binaries
 
-    Linux 2.6.9-42.0.10           gcc,g++ 3.4.6 20060404, G95 (GCC 4.0.3) 
-    (kagiso)                      PGI 7.1-6 (pgcc, pgf90, pgCC)
-                                  Intel 9.1 (icc, ifort, icpc)
+    Linux 2.6.16.54-0.2.5 #1      Intel(R) C++ Version 10.1.017
+        Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 10.1.017
+    (cobalt)                      SGI MPI 1.16
 
-    Linux 2.6.16.27 x86_64 AMD    gcc 4.1.0 (SuSE Linux), g++ 4.1.0, 
-    (smirom)                          g95 (GCC 4.0.3)
-                                  PGI 7.2-1 (pgcc, pgf90, pgCC)
-                                  Intel 10.1 (icc, ifort, icpc)
+    SunOS 5.10 32- and 64-bit     Sun WorkShop 6 update 2 C 5.8
+    (linew)                       Sun WorkShop 6 update 2 Fortran 95 8.2
+                                  Sun WorkShop 6 update 2 C++ 5.8
+                                  Patch 121019-06
 
-    Linux 2.6.5-7.252.1-rtgfx #1  Intel(R) C++ Version 9.0
-          SMP ia64                Intel(R) Fortran Itanium(R) Version 9.0 
-    (cobalt)                      SGI MPI
+    Xeon Linux 2.6.9-42.0.10.EL_lustre-1.4.10.1smp
+    (abe)                         Intel(R) C++ Version 10.0.026
+                                  Intel(R) Fortran Compiler Version 10.0.026
+                                  Open MPI 1.2.2
+                                  MVAPICH2-0.9.8p28p2patched-intel-ofed-1.2
+                                  compiled with icc v10.0.026 and ifort
+10.0.026
 
-    SunOS 5.8 32,46               Sun WorkShop 6 update 2 C 5.3
-     (Solaris 2.8)                Sun WorkShop 6 update 2 Fortran 95 6.2
-                                  Sun WorkShop 6 update 2 C++ 5.3
-
-    SunOS 5.10                    cc: Sun C 5.8 
-    (linew)                       f90: Sun Fortran 95 8.2 
-                                  CC: Sun C++ 5.8 
-
-    Xeon Linux 2.4.21-32.0.1.ELsmp-perfctr-lustre
-    (tungsten)                    gcc 3.2.2 20030222
-                                  Intel(R) C++ Version 9.0
-                                  Intel(R) Fortran Compiler Version 9.0
-
-    IA-64 Linux 2.4.21.SuSE_309.tg1 ia64
-    (NCSA tg-login)               gcc 3.2.2
-                                  Intel(R) C++ Version 8.1
-                                  Intel(R) Fortran Compiler Version 8.1
-                                  mpich-gm-1.2.6..14b-intel-r2
+    IA-64 Linux 2.4.21-309.tg1 #1 SMP
+        ia64                      gcc (GCC) 3.2.2
+    (NCSA tg-login)               Intel(R) C++ Version 8.1.037
+                                  Intel(R) Fortran Compiler Version 8.1.037
+                                  mpich-gm-1.2.7p1..16-intel-8.1.037-r1
 
     Intel 64 Linux 2.6.9-42.0.10.EL_lustre-1.4.10.1smp
     (abe)                         gcc 3.4.6 20060404
@@ -359,57 +371,53 @@ Supported Configuration Features Summary
 
 Platform                 C        F90    F90      C++   zlib  SZIP
                          parallel        parallel
-SunOS5.10 64-bit         n        y      n        y     y     y
-SunOS5.10 32-bit         n        y      n        y     y     y
-IRIX64_6.5 64-bit        n        y      y        y     y     y
+Solaris2.10 32-bit       n        y      n        y     y     y
+Solaris2.10 64-bit       n        y      n        y     y     y
 IRIX64_6.5 32-bit        n        n      n        n     y     y
+IRIX64_6.5 64-bit        n        y      y        y     y     y
 Windows XP               n        y(15)  n(15)    y     y     y
 Windows XP x64           n        y(15)  n(15)    y     y     y
 Windows Vista            n        n      n        y     y     y
 Mac OS X 10.5 Intel      n        y      n        y     y     y
-FreeBSD 4.11             n        n      n        y     y     y
-RedHat EL3  W       (3)  y(1)     y(10)  y(1)     y     y     y
-RedHat EL3  W Intel (3)  n        y      n        y     y     n
-RedHat EL3  W PGI   (3)  n        y      n        y     y     n
-SuSe x86_64 gcc  (3,12)  y(2)     y(11)  y(2)     y     y     y
-SuSe x86_64 Int  (3,12)  n        y(13)  n        y     y     n
-SuSe x86_64 PGI  (3,12)  n        y(8)   n        y     y     y
-Linux 2.4 Xeon C 
-    Lustre Intel  (3,6)  n        y      n        y     y     n
-Linux 2.6 SuSE ia64 C 
-    Intel         (3,7)  y        y      y        y     y     n
+FreeBSD 6.2 32&64 bit    n        n      n        y     y     y
+RedHat EL4       (3)  W  y(1)     y(10)  y(1)     y     y     y
+RedHat EL4 Intel (3)  W  n        y      n        y     y     n
+RedHat EL4 PGI   (3)  W  n        y      n        y     y     n
+SuSe x86_64 gcc(3,12) W  y(2)     y(11)  y(2)     y     y     y
+SuSe x86_64 Int(3,12) W  n        y(13)  n        y     y     n
+SuSe x86_64 PGI(3,12) W  n        y(8)   n        y     y     y
+Linux 2.6 SuSE ia64   C 
+    Intel       (3,7)    y        y      y        y     y     n
 Linux 2.6 SGI Altix 
-    ia64 Intel      (3)  y        y      y        y     y     y
-Linux 2.6 RHEL C
-    Lustre Intel    (5)  y(4)     y      y(4)     y     y     n
+    ia64 Intel    (3)    y        y      y        y     y     y
+Linux 2.6 RHEL        C
+    Lustre Intel  (5)    y(4)     y      y(4)     y     y     n
 Cray XT3 2.0.41          y        y      y        y     y     n
 
 
 Platform                 Shared  Shared    Shared    Thread-  
                          C libs  F90 libs  C++ libs  safe     
-Solaris2.10 64-bit       y       y         y         y        
 Solaris2.10 32-bit       y       y         y         y        
-IRIX64_6.5 64-bit        y       y         n         y        
+Solaris2.10 64-bit       y       y         y         y        
 IRIX64_6.5 32-bit        y       dna       y         y        
+IRIX64_6.5 64-bit        y       y         n         y        
 Windows XP               y       y(15)     y         y        
 Windows XP x64           y       y(15)     y         y        
 Windows Vista            y       n         n         y        
 Mac OS X 10.5            y       n         y         n        
-FreeBSD 4.11             y       n         y         y        
-RedHat EL3  W       (3)  y       y(10)     y         y        
-RedHat EL3  W Intel (3)  y       y         y         n        
-RedHat EL3  W PGI   (3)  y       y         y         n        
-SuSe x86_64 W GNU (3,12) y       y         y         y        
-SuSe x86_64 W Int (3,12) y       y         y         n        
-SuSe x86_64 W PGI (3,12) y       y         y         n        
-Linux 2.4 Xeon C 
-    Lustre Intel    (6)  y       y         y         n        
-Linux 2.4 SuSE 
-    ia64 C Intel    (7)  y       y         y         n        
-Linux 2.4 SGI Altix 
+FreeBSD 6.2 32&64 bit    y       n         y         y        
+RedHat EL4       (3)  W  y       y(10)     y         y        
+RedHat EL4 Intel (3)  W  y       y         y         n        
+RedHat EL4 PGI   (3)  W  y       y         y         n        
+SuSe x86_64 GNU(3,12) W  y       y         y         y        
+SuSe x86_64 Int(3,12) W  y       y         y         n        
+SuSe x86_64 PGI(3,12) W  y       y         y         n        
+Linux 2.4 SuSE        C
+    ia64 C Intel (7)     y       y         y         n        
+Linux 2.4 SGI Altix   C
     ia64 Intel           y                           n        
-Linux 2.6 RHEL C
-    Lustre Intel    (5)  y        y        y         n
+Linux 2.6 RHEL        C
+    Lustre Intel (5)     y        y        y         n
 Cray XT3 2.0.41          n       n         n         n        n
 
     Notes: (1)  Using mpich2 1.0.6.
