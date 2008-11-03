@@ -153,6 +153,9 @@ Bug Fixes since HDF5-1.8.1
 
         Library
         -------
+        - H5Ovisit and H5Ovisit_by_name will now properly terminate when the
+            callback function returns a positive value on the starting object.
+            (NAF - 2008/11/03)
         - Fixed an error where a null message could be created that was larger
             than could be written to the file.  (NAF - 2008/10/23)
         - Corrected error with family/split/multi VFD not updating driver info
