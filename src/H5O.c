@@ -2810,6 +2810,10 @@ H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
     if((ret_value = op(obj_id, ".", &oinfo, op_data)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "can't visit objects")
 
+    /* Check return value of first callback */
+    if(ret_value != H5_ITER_CONT)
+        HGOTO_DONE(ret_value);
+
     /* Check for object being a group */
     if(oinfo.type == H5O_TYPE_GROUP) {
         H5G_loc_t	start_loc;          /* Location of starting group */
