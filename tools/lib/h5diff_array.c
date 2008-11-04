@@ -139,13 +139,18 @@ static int   not_comparable;
 static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id,hid_t region1_id, hid_t region2_id, diff_opt_t *options);
 static hbool_t all_zero(const void *_mem, size_t size);
 static int     ull2float(unsigned long_long ull_value, float *f_value);
-static hsize_t character_compare(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
+static hsize_t character_compare(unsigned char *mem1,unsigned char *mem2,hsize_t i,unsigned u,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 static hsize_t character_compare_opt(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 static hbool_t equal_float(float value, float expected);
 static hbool_t equal_double(double value, double expected);
 #if H5_SIZEOF_LONG_DOUBLE !=0
 static hbool_t equal_ldouble(long double value, long double expected);
 #endif
+static int print_data(diff_opt_t *options);
+static void print_pos(int *ph,int pp,hsize_t curr_pos,hsize_t *acc,hsize_t *pos,int rank,hsize_t *dims,const char *obj1,const char *obj2 );
+static void print_char_pos(int *ph,int pp,hsize_t curr_pos,unsigned u,hsize_t *acc,hsize_t *pos,int rank,hsize_t *dims,const char *obj1,const char *obj2 );
+static void h5diff_print_char(char ch);
+
 
 /*-------------------------------------------------------------------------
  * NaN detection
@@ -161,93 +166,6 @@ typedef enum dtype_t
 
 static int my_isnan(dtype_t type, void *val);
 
-/*-------------------------------------------------------------------------
- *
- * Local functions
- *
- *-------------------------------------------------------------------------
- */
-
-/*-------------------------------------------------------------------------
- * Function: print_data
- *
- * Purpose: print data only in report or verbose modes, and do not print in quiet mode
- *-------------------------------------------------------------------------
- */
-static
-int print_data(diff_opt_t *options)
-{
-    return ( (options->m_report || options->m_verbose) && !options->m_quiet)?1:0;
-}
-
-/*-------------------------------------------------------------------------
- * Function: print_pos
- *
- * Purpose: print in matrix notation, converting from an array index position
- *
- *-------------------------------------------------------------------------
- */
-
-static
-void print_pos( int        *ph,       /* print header */
-                int        pp,        /* print percentage */
-                hsize_t    curr_pos,
-                hsize_t    *acc,
-                hsize_t    *pos,
-                int        rank,
-                hsize_t    *dims,
-                const char *obj1,
-                const char *obj2 )
-{
-    int i;
-
-    /* print header */
-    if ( *ph==1 )
-    {
-        *ph=0;
-
-        parallel_print("%-16s","size:");
-        print_dimensions (rank,dims);
-        parallel_print("%-11s","");
-        print_dimensions (rank,dims);
-        parallel_print("\n");
-
-        if (pp)
-        {
-            parallel_print("%-15s %-15s %-15s %-15s %-15s\n",
-                "position",
-                (obj1!=NULL) ? obj1 : " ",
-                (obj2!=NULL) ? obj2 : " ",
-                "difference",
-                "relative");
-            parallel_print("------------------------------------------------------------------------\n");
-        }
-        else
-        {
-            parallel_print("%-15s %-15s %-15s %-20s\n",
-                "position",
-                (obj1!=NULL) ? obj1 : " ",
-                (obj2!=NULL) ? obj2 : " ",
-                "difference");
-            parallel_print("------------------------------------------------------------\n");
-        }
-    } /* end print header */
-
-    for ( i = 0; i < rank; i++)
-    {
-        pos[i] = curr_pos/acc[i];
-        curr_pos -= acc[i]*pos[i];
-    }
-    assert( curr_pos == 0 );
-
-    parallel_print("[ " );
-    for ( i = 0; i < rank; i++)
-    {
-        parallel_print(HSIZE_T_FORMAT, (unsigned long_long)pos[i]);
-        parallel_print(" ");
-    }
-    parallel_print("]" );
-}
 
 
 /*-------------------------------------------------------------------------
@@ -558,6 +476,7 @@ hsize_t diff_datum(void       *_mem1,
                         mem1 + u,
                         mem2 + u, /* offset */
                         i,        /* index position */
+                        u,        /* string character position */
                         rank,
                         dims,
                         acc,
@@ -2676,6 +2595,7 @@ static
 hsize_t character_compare(unsigned char *mem1,
                   unsigned char *mem2,
                   hsize_t       i,
+                  unsigned      u,
                   int           rank,
                   hsize_t       *dims,
                   hsize_t       *acc,
@@ -2696,9 +2616,12 @@ hsize_t character_compare(unsigned char *mem1,
     {
         if ( print_data(options) )
         {
-            print_pos(ph,0,i,acc,pos,rank,dims,obj1,obj2);
-            parallel_print(SPACES);
-            parallel_print(C_FORMAT,temp1_uchar,temp2_uchar);
+            print_char_pos(ph,0,i,u,acc,pos,rank,dims,obj1,obj2);
+            parallel_print("            ");
+            h5diff_print_char(temp1_uchar);
+            parallel_print("            ");
+            h5diff_print_char(temp2_uchar);
+            parallel_print("\n");
         }
         nfound++;
     }
@@ -5561,3 +5484,215 @@ my_isnan(dtype_t type, void *val)
 
 
 
+/*-------------------------------------------------------------------------
+ *
+ * Local functions
+ *
+ *-------------------------------------------------------------------------
+ */
+
+/*-------------------------------------------------------------------------
+ * Function: print_data
+ *
+ * Purpose: print data only in report or verbose modes, and do not print in quiet mode
+ *-------------------------------------------------------------------------
+ */
+static
+int print_data(diff_opt_t *options)
+{
+    return ( (options->m_report || options->m_verbose) && !options->m_quiet)?1:0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: print_pos
+ *
+ * Purpose: print in matrix notation, converting from an array index position
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static
+void print_pos( int        *ph,       /* print header */
+                int        pp,        /* print percentage */
+                hsize_t    curr_pos,
+                hsize_t    *acc,
+                hsize_t    *pos,
+                int        rank,
+                hsize_t    *dims,
+                const char *obj1,
+                const char *obj2 )
+{
+    int i;
+
+    /* print header */
+    if ( *ph==1 )
+    {
+        *ph=0;
+
+        parallel_print("%-16s","size:");
+        print_dimensions (rank,dims);
+        parallel_print("%-11s","");
+        print_dimensions (rank,dims);
+        parallel_print("\n");
+
+        if (pp)
+        {
+            parallel_print("%-15s %-15s %-15s %-15s %-15s\n",
+                "position",
+                (obj1!=NULL) ? obj1 : " ",
+                (obj2!=NULL) ? obj2 : " ",
+                "difference",
+                "relative");
+            parallel_print("------------------------------------------------------------------------\n");
+        }
+        else
+        {
+            parallel_print("%-15s %-15s %-15s %-20s\n",
+                "position",
+                (obj1!=NULL) ? obj1 : " ",
+                (obj2!=NULL) ? obj2 : " ",
+                "difference");
+            parallel_print("------------------------------------------------------------\n");
+        }
+    } /* end print header */
+
+    for ( i = 0; i < rank; i++)
+    {
+        pos[i] = curr_pos/acc[i];
+        curr_pos -= acc[i]*pos[i];
+    }
+    assert( curr_pos == 0 );
+
+    if ( rank > 0 )
+    {
+        parallel_print("[ " );
+        for ( i = 0; i < rank; i++)
+        {
+            parallel_print(HSIZE_T_FORMAT, (unsigned long_long)pos[i]);
+            parallel_print(" ");
+        }
+        parallel_print("]" );
+    }
+}
+
+/*-------------------------------------------------------------------------
+ * Function: print_char_pos
+ *
+ * Purpose: print character position in string
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static
+void print_char_pos( int        *ph,       /* print header */
+                     int        pp,        /* print percentage */
+                     hsize_t    curr_pos,
+                     unsigned   u,
+                     hsize_t    *acc,
+                     hsize_t    *pos,
+                     int        rank,
+                     hsize_t    *dims,
+                     const char *obj1,
+                     const char *obj2 )
+{
+    int i;
+
+    /* print header */
+    if ( *ph==1 )
+    {
+        *ph=0;
+
+        parallel_print("%-16s","size:");
+        print_dimensions (rank,dims);
+        parallel_print("%-11s","");
+        print_dimensions (rank,dims);
+        parallel_print("\n");
+
+        if (pp)
+        {
+            parallel_print("%-15s %-15s %-15s %-15s %-15s\n",
+                "position",
+                (obj1!=NULL) ? obj1 : " ",
+                (obj2!=NULL) ? obj2 : " ",
+                "difference",
+                "relative");
+            parallel_print("------------------------------------------------------------------------\n");
+        }
+        else
+        {
+            parallel_print("%-15s %-15s %-15s %-20s\n",
+                "position",
+                (obj1!=NULL) ? obj1 : " ",
+                (obj2!=NULL) ? obj2 : " ",
+                "difference");
+            parallel_print("------------------------------------------------------------\n");
+        }
+    } /* end print header */
+
+    for ( i = 0; i < rank; i++)
+    {
+        pos[i] = curr_pos/acc[i];
+        curr_pos -= acc[i]*pos[i];
+    }
+    assert( curr_pos == 0 );
+
+    parallel_print("[ " );
+    if ( rank > 0 )
+    {
+        
+        for ( i = 0; i < rank; i++)
+        {
+            parallel_print(HSIZE_T_FORMAT, (unsigned long_long)pos[i]);
+            parallel_print(" ");
+        }
+        
+    }
+    else
+    {
+        parallel_print("%u", (unsigned)u);
+    }
+    parallel_print("]" );
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5diff_print_char. Adapted from h5tools_print_char
+ *
+ * Purpose: Print a char
+ *
+ *-------------------------------------------------------------------------
+ */
+static void h5diff_print_char(char ch)
+{
+    
+    switch (ch) 
+    {
+    case '"':
+        parallel_print("\\\"");
+        break;
+    case '\\':
+        parallel_print( "\\\\");
+        break;
+    case '\b':
+        parallel_print("\\b");
+        break;
+    case '\f':
+        parallel_print("\\f");
+        break;
+    case '\n':
+        parallel_print("\\n");
+        break;
+    case '\r':
+        parallel_print("\\r");
+        break;
+    case '\t':
+        parallel_print("\\t");
+        break;
+    default:
+        if (isprint(ch))
+            parallel_print( "%c", ch);
+        else
+            parallel_print( "\\%03o", ch);
+        
+        break;
+    }
+}
