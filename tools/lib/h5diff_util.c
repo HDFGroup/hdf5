@@ -103,24 +103,16 @@ void
 print_dimensions (int rank, hsize_t *dims)
 {
     int  i;
-
-    if ( rank > 0 )
-    {
         
-        parallel_print("[" );
-        for ( i = 0; i < rank-1; i++)
-        {
-            parallel_print(HSIZE_T_FORMAT, dims[i]);
-            parallel_print("x");
-        }
-        
-        parallel_print(HSIZE_T_FORMAT,  dims[rank-1]);
-        parallel_print("]" );
-    }
-    else
+    parallel_print("[" );
+    for ( i = 0; i < rank-1; i++)
     {
-        parallel_print("H5S_SCALAR" );
+        parallel_print(HSIZE_T_FORMAT, dims[i]);
+        parallel_print("x");
     }
+    
+    parallel_print(HSIZE_T_FORMAT,  dims[rank-1]);
+    parallel_print("]" );
 
 }
 
