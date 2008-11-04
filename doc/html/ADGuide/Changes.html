@@ -65,10 +65,6 @@ an application synchronized with the HDF5 library or related software.
 
 This section lists the API-level changes that have been made in the 
 transition from the HDF5 Release 1.6.7 to Release 1.6.8.
-As this is primarily a bug-fix release, 
-the only interface changes are one changed function signature and
-the changes related to the removal of the 
-stream I/O driver, as outlined below.
 
 
     <h3>Functions with Changed Syntax</h3>
@@ -105,8 +101,33 @@ stream I/O driver, as outlined below.
          <p>
 
 
-    <h3>Tools with Changed Interface</h3>
+    <h3>Tools with Changed Interface or Behavior</h3>
     
+
+        <p>
+        <i>List....</i>
+        <p>
+
+    <h3>Deprecated Functions</h3>
+
+        The following functions are deprecated as of this release: 
+        <pre>
+              H5Pset_preserve
+              H5Pget_preserve
+        </pre>
+        <p>
+        The original role of these functions is now 
+        part of the core HDF5 Library functionality.
+        <p>
+
+
+    <h3>Changed Library Configuration</h3>
+    
+
+        <p>
+        <i>List....</i>
+        <p>
+
 
 </dir>
 
@@ -2868,7 +2889,7 @@ Describes HDF5 Release 1.6.7, January 2008
 
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 27 October 2008 
+Last modified: 4 November 2008 
 <!-- hhmts end -->
 
 </body>
