@@ -60,6 +60,8 @@ case $FC_BASENAME in
         PROFILE_FCFLAGS="-g -pg"
         f9x_flags_set=yes
 
+        ;;
+esac  
 # Fortran doesn't support shared libraries
 # Works with static executable only.
 if test "X-" != "X-$enable_fortran"; then
@@ -68,6 +70,3 @@ if test "X-" != "X-$enable_fortran"; then
         enable_shared="no"
 fi
 
-        ;;
-
-esac  
