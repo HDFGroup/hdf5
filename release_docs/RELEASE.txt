@@ -392,14 +392,9 @@ Known Problems
   We believe this is a libtool problem. One way to get rid of this is to
   add the paths of libh5test.so.1 and libh5.so.1 to the shared library path.
 
-  For 32-bit:
   You may do this, under csh:
-  setenv LD_LIBRARYN32_PATH .......(existing paths):[full path of HDF5
-  directory/test/.libs]:[full path of HDF5 directory/src/.libs]
-
-  For 64-bit:
-  setenv LD_LIBRARY64_PATH ......(existing paths):[full path of HDF5
-  directory/test/.libs]:[full path of HDF5 directory/src/.libs]
+  setenv LD_LIBRARYN32_PATH [full path of HDF5 directory/test/.libs]:[full 
+  path of HDF5 directory/src/.libs]:(existing paths)...
 
   NOTE: This problem ONLY affects the testing of the HDF5 library when you 
   build from source. It won't affect any applications that would like to link 
