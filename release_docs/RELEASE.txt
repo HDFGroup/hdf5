@@ -1,12 +1,11 @@
-HDF5 version 1.6.8-pre1 currently under development
+HDF5 version 1.6.8-pre1 released on Mon Nov  3 16:27:51 CST 2008
 ================================================================================
 
 INTRODUCTION
 ============
-This document describes the differences between HDF5-1.6.7 and
-HDF5-1.6.7-snap*.  
+This document describes the differences between HDF5-1.6.7 and HDF5-1.6.8.  
 It contains information on the platforms tested and known problems in
-HDF5-1.6.7-snap*. For more details, check the HISTORY.txt file in the HDF5 source.
+HDF5-1.6.8. For more details, check the HISTORY.txt file in the HDF5 source.
 
 HDF5 documentation can be found in the distributed release source code
 in the subdirectory doc/html/ or on the THG (The HDF Group) FTP server: 
@@ -56,7 +55,7 @@ New Features
      - Added support for $(DESTDIR) to the install feature. AKC - 2008/10/13.
      - Added version compatibility macros for functions changed in 1.8.  For
            example, H5Gcreate1 will work the same in both 1.6 and 1.8.
-           (NAF - 2008/10/11)
+           NAF - 2008/10/11
 
     Parallel Library:
     -----------------
@@ -68,17 +67,21 @@ New Features
            similar to h5dump, adding also long switch names. PVN - 2008/2/13
      - h5repack now supports adding multiple filters to all objects. 
 	     PVN - 2008/2/13
-     - h5import imports string (text) data. PVN - 2008/2/19
-     - h5dump: add a printing of the compression ratio of uncompressed and compressed 
-           sizes for cases where compression  filters are present. (PVN - 2008/05/01)
-     - h5dump: added an option to allow a user defined formatting string for printf 
-         regarding floating point numbers. (PVN - 2008/05/06)
-     - h5repack: add a userblock to an HDF5 file during the repack. (PVN - 2008/08/26)
-     - h5repack: copy userblock from HDF5 file during the repack. (PVN - 2008/08/26)
-     - h5diff: return 1 for file differences when both file graphs differ by any object. 
-            Error return code was changed to 2 from -1. (PVN - 2008/10/30)
+     - h5import imports string (text) data.  PVN - 2008/2/19
+     - h5dump: add a printing of the compression ratio of uncompressed and 
+       compressed sizes for cases where compression  filters are present. 
+             PVN - 2008/05/01
+     - h5dump: added an option to allow a user defined formatting string for 
+       printf regarding floating point numbers.  PVN - 2008/05/06
+     - h5repack: add a userblock to an HDF5 file during the repack. 
+             PVN - 2008/08/26
+     - h5repack: copy userblock from HDF5 file during the repack. 
+             PVN - 2008/08/26
+     - h5diff: return 1 for file differences when both file graphs differ by 
+       any object. Error return code was changed to 2 from -1. 
+             PVN - 2008/10/30
      - h5import: TEXTFPE (scientific format) was deprecated. Use TEXTFP 
-            instead (PVN - 2008/10/30)
+       instead.  PVN - 2008/10/30
     
 
     
@@ -105,7 +108,7 @@ New Features
                 Group(H5Object& obj, void* ref);
                 Group(H5File& obj, void* ref);
                 Group(Attribute& attr, void* ref);
-          (BMR - 2008/08/10)
+          BMR - 2008/08/10
 
 
 Support for New Platforms, Languages and Compilers
@@ -118,8 +121,9 @@ Bug Fixes since HDF5-1.6.7 Release
     Library
     -------
      - Changed the return value of H5Fget_obj_count from INT to SSIZE_T. Also
-           changed the return value of H5Fget_obj_ids from HERR_T to SSIZE_T and
-           the type of the parameter MAX_OBJS from INT to SIZE_T. (SLU - 2008/09/26)
+       changed the return value of H5Fget_obj_ids from HERR_T to SSIZE_T and
+       the type of the parameter MAX_OBJS from INT to SIZE_T. 
+       SLU - 2008/09/26
 
     Configuration
     -------------
@@ -141,23 +145,21 @@ Bug Fixes since HDF5-1.6.7 Release
 
     Tools
     -----
-     - h5import bug on Windows w/binary datasets. fread in windows needs a binary file 
-        to be open with 'rb' instead of 'r' otherwise it terminates execution if an end 
-        of file character is found on the input file. Besides that the binary file 
-        generated needs to be open with 'wb', otherwise an end of line character is 
-        read twice. PVN - 2008/2/19
-     - Fixed h5diff regarding the display of NaN (Not a Number) values. PVN 2008/03/04
-     - Fixed h5dump regarding the display of array indices and block selections in 
-        subsetting. PVN 2008/03/10 
-     - Fixed bug in h5dump that caused binary output to be made only for the first 
-        dataset, when several datasets were requested. PVN - 2008/04/07
+     - h5import bug on Windows w/binary datasets. fread in windows needs a 
+       binary file to be open with 'rb' instead of 'r' otherwise it terminates 
+       execution if an end of file character is found on the input file. 
+       Besides that the binary file generated needs to be open with 'wb', 
+       otherwise an end of line character is read twice. PVN - 2008/2/19
+     - Fixed h5diff regarding the display of NaN (Not a Number) values. 
+       PVN - 2008/03/04
+     - Fixed h5dump regarding the display of array indices and block 
+       selections in subsetting. PVN - 2008/03/10 
+     - Fixed bug in h5dump that caused binary output to be made only for 
+       the first dataset, when several datasets were requested. 
+       PVN - 2008/04/07
      - h5dump: when doing binary output (-b), the stdout printing of attributes 
        was done incorrectly. Removed printing of attributes when doing binary 
        output. PVN - 2008/06/05
-
- 
-
-
 
     Documentation 
     ------------- 
@@ -181,7 +183,7 @@ Bug Fixes since HDF5-1.6.7 Release
           H5File, Group, and PropList. (BMR - 2008/08/10)
         - IdComponent::dereference was incorrect and replaced as described
           in "New Features" section.
-          (BMR - 2008/08/10)
+          BMR - 2008/08/10
 
 
 Documentation
@@ -209,10 +211,6 @@ Documentation
 
 Platforms Tested
 ================
-
-    AIX 5.2 (32/64 bit)           xlc 8.0.0.11
-    (datastar)                    xlC 8.0
-                                  xlf 10.01.0000.0002
 
     FreeBSD 6.2-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
     (duty)                        g++ 3.4.6 [FreeBSD] 20060305
@@ -313,7 +311,7 @@ WinXP 2005                            n        y    n        y    y     y
 WinXP .Net                            n        y    n        y    y     y
 WinVista 2005                         n        n    n        y    y     y
 Mac OS X 10.4.10                      n        y    n        y    y     y
-AIX-5.2 & 5.3 32- and 64-bit          y        y    y        y    y     y
+AIX 5.3 32- and 64-bit                y        y    y        y    y     y
 FreeBSD 6.2 32- and 64-bit            n        n    n        y    y     y
 RedHat EL4 2.6.9-42 i686 GNU (1)  W   y        y    y        y    y     y
 RedHat EL4 2.6.9-42 i686 Intel    W   n        y    n        y    y     n
@@ -337,7 +335,7 @@ WinXP 2005                            y             n        n
 WinXP .Net                            y             n        n        
 WinVista 2005                         y             n        n        
 Mac OS X 10.4.10                      y             n        n        
-AIX-5.2 & 5.3 32- and 64-bit          n             n        n        
+AIX 5.3 32- and 64-bit                n             n        n        
 FreeBSD 6.2 32- and 64-bit            y             n        n        
 RedHat EL4 2.6.9-42 i686 GNU (1)  W   y             n        y        
 RedHat EL4 2.6.9-42 i686 Intel    W   y             n        n        
@@ -440,11 +438,6 @@ Known Problems
   after 1.6.4 can still read datasets created or rewritten with an HDF5 
   library of v1.6.2 or before.  SLU - 2005/7/8
 
-* For version 6 (6.02 and 6.04) of the Portland Group compiler on AMD Opteron
-  processor, there's a bug in the compiler for optimization(-O2).  The library
-  failed in several tests, all related to the multi driver.  The problem has 
-  been reported to the vendor.  
-
 * test/big fails sometimes with the message "Possible overlap with another
   region."  The test selects regions randomly, and this error occurs when
   two regions overlap each other; it is a bug in the test and not in
@@ -505,60 +498,4 @@ Known Problems
 
   All other tests have passed.
 
-* On at least one system, SDSC DataStar, the scheduler (in this case
-  LoadLeveler) sends job status updates to standard error when you run
-  any executable that was compiled with the parallel compilers.
-
-  This causes problems when running "make check" on parallel builds, as
-  many of the tool tests function by saving the output from test runs,
-  and comparing it to an exemplar.
-
-  The best solution is to reconfigure the target system so it no longer
-  inserts the extra text.  However, this may not be practical.
-
-  In such cases, one solution is to "setenv HDF5_Make_Ignore yes" prior to
-  the configure and build.  This will cause "make check" to continue after
-  detecting errors in the tool tests.  However, in the case of SDSC DataStar,
-  it also leaves you with some 150 "failed" tests to examine by hand.
-
-  A second solution is to write a script to run serial tests and filter
-  out the text added by the scheduler.  A sample script used on SDSC
-  DataStar is given below, but you will probably have to customize it
-  for your installation.
-
-  Observe that the basic idea is to insert the script as the first item
-  on the command line which executes the test.  The script then
-  executes the test and filters out the offending text before passing
-  it on.
-
-        #!/bin/csh
-
-        set STDOUT_FILE=~/bin/serial_filter.stdout
-        set STDERR_FILE=~/bin/serial_filter.stderr
-
-        rm -f $STDOUT_FILE $STDERR_FILE
-
-        ($* > $STDOUT_FILE) >& $STDERR_FILE
-
-        set RETURN_VALUE=$status
-
-        cat $STDOUT_FILE
-
-        tail +3 $STDERR_FILE
-
-        exit $RETURN_VALUE
-
-  You get the HDF5 make files and test scripts to execute your filter script
-  by setting the environment variable "RUNSERIAL" to the full path of the
-  script prior to running configure for parallel builds.  Remember to
-  "unsetenv RUNSERIAL" before running configure for a serial build.
-
-  Note that the RUNSERIAL environment variable exists so that we can
-  prefix serial runs as necessary on the target system.  On DataStar,
-  no prefix is necessary.  However, on an MPICH system, the prefix might
-  have to be set to something like "/usr/local/mpi/bin/mpirun -np 1" to
-  get the serial tests to run at all.
-
-  In such cases, you will have to include the regular prefix in your
-  filter script.  JM - 2004/9/15
 
