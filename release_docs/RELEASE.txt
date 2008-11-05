@@ -1,16 +1,15 @@
-HDF5 version 1.8.2-pre1 currently under development
+HDF5 version 1.8.2-pre1 released on Mon Nov  3 16:57:33 CST 2008
 ================================================================================
 
 INTRODUCTION
 ============
 
-This document describes the differences between the HDF5-1.8.1-snap* releases 
-and HDF5 1.8.1, and contains information on the platforms tested and known 
-problems in HDF5-1.8.1-snap*.  For more details, see the files
-HISTORY-1_0-1_8_0_rc3.txt and HISTORY-1_8.txt in the release_docs/ directory 
-of the HDF5 source.
+This document describes the differences between HDF5-1.8.1 and HDF5 1.8.2, 
+and contains information on the platforms tested and known problems in 
+HDF5-1.8.2. For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
+and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
-Links to the HDF5 1.8.1 source code, documentation, and additional materials
+Links to the HDF5 1.8.2 source code, documentation, and additional materials
 can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
@@ -19,7 +18,7 @@ The HDF5 1.8.1 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
-User documentation for 1.8.1 can be accessed directly at this location: 
+User documentation for 1.8.2 can be accessed directly at this location: 
 
      http://www.hdfgroup.org/HDF5/doc/
 
@@ -30,8 +29,8 @@ in 1.8.0?" document:
      http://www.hdfgroup.org/HDF5/doc/ADGuide/WhatsNew180.html
 
 All new and modified APIs are listed in detail in the "HDF5 Software Changes 
-from Release to Release" document, in the section "Release 1.8.1 (current 
-release) versus Release 1.8.0":
+from Release to Release" document, in the section "Release 1.8.2 (current 
+release) versus Release 1.8.1":
 
      http://www.hdfgroup.org/HDF5/doc/ADGuide/Changes.html
 
@@ -56,7 +55,7 @@ New Features
 
         Configuration
         -------------
-        - Upgraded libtool to version 2.2.6a. MAM 2008/10/15.
+        - Upgraded libtool to version 2.2.6a. (MAM - 2008/10/15).
 
         Source code distribution
         ========================
@@ -74,26 +73,29 @@ New Features
 
         Tools
         -----
-        - h5repack: add a userblock to an HDF5 file during the repack. (PVN - 2008/08/26)
-        - h5repack: add 2 options that call H5Pset_alignment in the repacked file. (PVN - 2008/08/29)
+        - h5repack: add a userblock to an HDF5 file during the repack. 
+            (PVN - 2008/08/26)
+        - h5repack: add 2 options that call H5Pset_alignment in the repacked 
+          file. (PVN - 2008/08/29)
         - h5ls: added capability to traverse through external links when the -r
-            (recursive) flag is given. (NAF - 2008/09/16)
-        - h5ls: added -E option to enable traversal of external links.  h5ls will
-            not traverse external links without this flag being set.
+          (recursive) flag is given. (NAF - 2008/09/16)
+        - h5ls: added -E option to enable traversal of external links.  
+          h5ls will not traverse external links without this flag being set.
             (NAF - 2008/10/06)
         - h5dump: binary output defaults to NATIVE with -b optionally accepting
-            the form of binary output (NATIVE, FILE, BE, LE). (PVN - 2008/10/30)
-        - h5diff: return 1 for file differences when both file graphs differ by any object. 
-            Error return code was changed to 2 from -1. (PVN - 2008/10/30)
+          the form of binary output (NATIVE, FILE, BE, LE). (PVN - 2008/10/30)
+        - h5diff: return 1 for file differences when both file graphs 
+          differ by any object.  Error return code was changed to 2 from -1. 
+            (PVN - 2008/10/30)
         - h5import: TEXTFPE (scientific format) was deprecated. Use TEXTFP 
-            instead (PVN - 2008/10/30)
+          instead (PVN - 2008/10/30)
 
 
 
         F90 API
         ------
-         - Added optional parameter 'mounted' to H5Gget_info_f, H5Gget_info_by_idx_f,
-           H5Gget_info_by_name_f (MSB - 2008/09/24)
+         - Added optional parameter 'mounted' to H5Gget_info_f, 
+           H5Gget_info_by_idx_f, H5Gget_info_by_name_f (MSB - 2008/09/24)
 	 - Added H5Tget_native_type_f (MSB - 2008/09/30)
 	 
 	 
@@ -129,8 +131,7 @@ Support for New Platforms, Languages, and Compilers
           Intel 10.1 C and C++ compilers require 
           "-no-multibyte-chars" compilation flag due to the known
           bug in the compilers.
-
-                                   (EIP - 2008/10/30)
+            (EIP - 2008/10/30)
 
 
 Bug Fixes since HDF5-1.8.1 
@@ -139,14 +140,14 @@ Bug Fixes since HDF5-1.8.1
         Configuration
         -------------
         - Fixed error with 'make check install' failing due to h5dump
-          needing other tools built first. MAM - 2008/10/15.
+          needing other tools built first. (MAM - 2008/10/15).
         - When using shared szip, it is no longer necessary to specify
-          the path to the shared szip libraries in LD_LIBRARY_PATH. MAM - 
-          2008/10/15.
+          the path to the shared szip libraries in LD_LIBRARY_PATH.
+           (MAM - 2008/10/15).
 	- The file libhdf5_fortran.settings is not installed since its content
-	  is included in libhdf5.settings now. AKC - 2008/10/21
+	  is included in libhdf5.settings now. (AKC - 2008/10/21)
         - "make DESTDIR=xxx install" failed to install some tools and files
-          (e.g., h5cc and fortran modules). Fixed. AKC - 2008/10/8.
+          (e.g., h5cc and fortran modules). Fixed. (AKC - 2008/10/8).
 
         Source code distribution
         ========================
@@ -167,9 +168,10 @@ Bug Fixes since HDF5-1.8.1
             (NAF - 2008/10/06)
         - Fixed potential memory leak during compound conversion.
             (NAF - 2008/10/06)
-        - Changed the return value of H5Fget_obj_count from INT to SSIZE_T. Also
-            changed the return value of H5Fget_obj_ids from HERR_T to SSIZE_T and
-            the type of the parameter MAX_OBJS from INT to SIZE_T. (SLU - 2008/09/26)
+        - Changed the return value of H5Fget_obj_count from INT to SSIZE_T. 
+            Also changed the return value of H5Fget_obj_ids from HERR_T to 
+            SSIZE_T and the type of the parameter MAX_OBJS from INT to SIZE_T. 
+            (SLU - 2008/09/26)
         - Fixed an issue that could cause data to be improperly overwritten
             during compound type conversion.  (NAF - 2008/09/19)
         - Fixed pointer alignment violations that could occur during vlen
@@ -183,20 +185,22 @@ Bug Fixes since HDF5-1.8.1
             (NAF - 2008/08/08)
         - Fixed an issue where mount point traversal would fail when using
             multiple handles for the child.  (NAF - 2008/08/07)
-        - Fixed an issue where mount points were inaccessible when using multiple
-            file handles for the parent.  The mount table is now in the shared
-            file structure (the parent pointer is still in the top structure).
-            (NAF - 2008/08/07)
+        - Fixed an issue where mount points were inaccessible when using 
+            multiple file handles for the parent. The mount table is now in 
+            the shared file structure (the parent pointer is still in the 
+            top structure).  (NAF - 2008/08/07)
         - Fixed issue where a group could have a file mounted on it twice.
             (QAK - 2008/07/15)
-        - when an attribute was opened twice and data was written with one of the handles, 
-          the file didn't have the data.  It happened because each handle had its own 
-          object structure, and the empty one overwrote the data with fill value.  This is
-          fixed by making some attribute information like the data be shared in the 
-          attribute structure.  SLU - 2008/07/07
-        - Fixed a Windows-specific issue in the ohdr test which was causing users
-          in some timezones to get false errors.  This a deficiency in the Windows
-          mktime() function, and has been handled properly.  SJW  - 2008/06/19
+        - When an attribute was opened twice and data was written with 
+            one of the handles, the file didn't have the data. It happened 
+            because each handle had its own object structure, and the empty 
+            one overwrote the data with fill value.  This is fixed by making 
+            some attribute information like the data be shared in the 
+            attribute structure.  (SLU - 2008/07/07)
+        - Fixed a Windows-specific issue in the ohdr test which was causing 
+            users in some timezones to get false errors. This a deficiency in 
+            the Windows mktime() function, and has been handled properly.  
+            (SJW  - 2008/06/19)
 
         Parallel Library
         ----------------
@@ -213,41 +217,48 @@ Bug Fixes since HDF5-1.8.1
           (see bug #1253) (VC- 2008/10/13)
         - Fixed bug in h5ls that prevented relative group listings (like
             "h5ls foo.h5/bar") from working correctly (QAK - 2008/06/03)
-        - h5dump: when doing binary output (-b), the stdout printing of attributes 
-           was done incorrectly. Removed printing of attributes when doing binary 
-           output. PVN - 2008/06/05
+        - h5dump: when doing binary output (-b), the stdout printing of 
+             attributes was done incorrectly. Removed printing of attributes 
+             when doing binary output. (PVN - 2008/06/05)
 
 
         F90 API
         ------
-        - h5sselect_elements_f: Added additional operators H5S_SELECT_APPEND and 
-           H5S_SELECT_PREPEND (MSB 9/30/2008)
-	- h5sget_select_elem_pointlist: Fixed list of returned points by rearranging the point
-           list correctly by accounting for C conventions.(MSB 9/30/2008)
-        - h5sget_select_hyper_blocklist_f: Fixed error in transposed dimension of 
-           arrays.(MSB 9/30/2008)
-        - h5sget_select_bounds_f: Swapped array bounds to account for C and Fortran reversed 
-           array notation (MSB 9/30/2008)
-	- Changed to initializing string to a blank character instead of a null type in
-           tH5P.f90 to fix compiling error using AIX 5.3.0 (MSB 7/29/2008)
-        - Fixed missing commas in H5test_kind.f90 detected by NAG compiler (MSB 7/29/2008)
+        - h5sselect_elements_f: Added additional operators H5S_SELECT_APPEND 
+            and H5S_SELECT_PREPEND (MSB - 2008/09/30)
+	- h5sget_select_elem_pointlist: Fixed list of returned points by 
+            rearranging the point list correctly by accounting for C 
+            conventions. (MSB - 2008/09/30)
+        - h5sget_select_hyper_blocklist_f: Fixed error in transposed dimension 
+            of arrays.(MSB - 2008/9/30)
+        - h5sget_select_bounds_f: Swapped array bounds to account for C and 
+            Fortran reversed array notation (MSB - 2008/9/30)
+	- Changed to initializing string to a blank character instead of a 
+            null type in tH5P.f90 to fix compiling error using AIX 5.3.0 
+            (MSB - 2008/7/29)
+        - Fixed missing commas in H5test_kind.f90 detected by NAG compiler 
+            (MSB - 2008/7/29)
         - Fixed passing and array to a scalar in tH5A_1_8.f90 detected by 
-           NAG compiler (MSB 7/29/2008)
-	- Added the ability of the test programs to use the status of HDF5_NOCLEANUP to
-	   determine if the *.h5 files should be removed or not after the tests are 
-           completed (MSB 10/1/2008)
+            NAG compiler (MSB - 2008/7/29)
+	- Added the ability of the test programs to use the status of 
+            HDF5_NOCLEANUP to determine if the *.h5 files should be removed 
+            or not after the tests are completed (MSB - 2008/10/1)
 	- In nh5tget_offset_c: (MSB 9/12/2008)
-           If offset was equal to 0 it returned the error code of -1, this was changed to return 
-	   an error code of -1 when the offset value is < 0.
-        - Uses intrinsic Fortran function SIZEOF if available when detecting type of INTEGERs
-           and REALs in H5test_kind.f90 (MSB 9/3/2008)
-        - Put the DOUBLE PRECISION interfaces in a separate module and added a USE statement for 
-           the module. The interfaces are included/excluded depending on
-           the state of FORTRAN_DEFAULT_REALisDBLE_F which detects if the default REAL 
-           is DOUBLE PRECISION. This allows the library to be compiled with -r8 Fortran flag 
-           without the user needing to edit the source code. (MSB 8/27/2008)
-        - Enable building shared library for fortran by adding the flag -fPIC to the compile 
-           flags for versions of Intel Fortran compiler >=9  (MSB 8/26/2008)
+           If offset was equal to 0 it returned the error code of -1, 
+           this was changed to return an error code of -1 when the offset 
+           value is < 0.
+        - Uses intrinsic Fortran function SIZEOF if available when detecting 
+           type of INTEGERs and REALs in H5test_kind.f90 (MSB - 2008/9/3)
+        - Put the DOUBLE PRECISION interfaces in a separate module and 
+           added a USE statement for the module. The interfaces are 
+           included/excluded depending on the state of FORTRAN_DEFAULT_REAL
+           is DBLE_F which detects if the default REAL is DOUBLE PRECISION.
+           This allows the library to be compiled with -r8 Fortran flag 
+           without the user needing to edit the source code. 
+           (MSB - 200/8/27)
+        - Enable building shared library for fortran by adding the flag -fPIC 
+          to the compile flags for versions of Intel Fortran compiler >=9
+           (MSB  - 2008/8/26)
 
         C++ API
         ------
@@ -586,12 +597,7 @@ Known Problems
   compiled with -O1 or -O0.  Only -O (same as -O2) causes the test
   program to fail.
 
-* Not all platforms behave correctly with Szip's shared libraries. Szip is
-  disabled in these cases, and a message is relayed at configure time. Static
-  libraries should be working on all systems that support Szip and should be
-  used when shared libraries are unavailable. 
-
-  There is also a configure error on Altix machines that incorrectly reports 
+* There is also a configure error on Altix machines that incorrectly reports 
   when a version of Szip without an encoder is being used.
 
 * On some platforms that use Intel and Absoft compilers to build the HDF5 
@@ -601,70 +607,4 @@ Known Problems
 
 * Information about building with PGI and Intel compilers is available in
   the INSTALL file sections 4.7 and 4.8.
-
-* On at least one system, SDSC DataStar, the scheduler (in this case
-  LoadLeveler) sends job status updates to standard error when you run 
-  any executable that was compiled with the parallel compilers.
-
-  This causes problems when running "make check" on parallel builds, as 
-  many of the tool tests function by saving the output from test runs,
-  and comparing it to an exemplar.  
-
-  The best solution is to reconfigure the target system so it no longer
-  inserts the extra text.  However, this may not be practical.
-
-  In such cases, one solution is to "setenv HDF5_Make_Ignore yes" prior to 
-  the configure and build.  This will cause "make check" to continue after 
-  detecting errors in the tool tests.  However, in the case of SDSC DataStar,
-  it also leaves you with some 150 "failed" tests to examine by hand.
-
-  A second solution is to write a script to run serial tests and filter
-  out the text added by the scheduler.  A sample script used on SDSC
-  DataStar is given below, but you will probably have to customize it 
-  for your installation.  
-
-  Observe that the basic idea is to insert the script as the first item 
-  on the command line which executes the the test.  The script then 
-  executes the test and filters out the offending text before passing
-  it on.
-
-        #!/bin/csh
-
-        set STDOUT_FILE=~/bin/serial_filter.stdout
-        set STDERR_FILE=~/bin/serial_filter.stderr
-
-        rm -f $STDOUT_FILE $STDERR_FILE
-
-        ($* > $STDOUT_FILE) >& $STDERR_FILE
-
-        set RETURN_VALUE=$status
-
-        cat $STDOUT_FILE
-
-        tail +3 $STDERR_FILE
-
-        exit $RETURN_VALUE
-
-  You get the HDF5 make files and test scipts to execute your filter script
-  by setting the environment variable "RUNSERIAL" to the full path of the 
-  script prior to running configure for parallel builds.  Remember to 
-  "unsetenv RUNSERIAL" before running configure for a serial build.
-
-  Note that the RUNSERIAL environment variable exists so that we can 
-  prefix serial runs as necessary on the target system.  On DataStar,
-  no prefix is necessary.  However on an MPICH system, the prefix might
-  have to be set to something like "/usr/local/mpi/bin/mpirun -np 1" to
-  get the serial tests to run at all.
-
-  In such cases, you will have to include the regular prefix in your
-  filter script.
-
-* H5Ocopy() does not copy reg_ref attributes correctly when shared-message
-  is turn on. The value of the reference in the destination attriubte is
-  wrong. This H5Ocopy problem will affect the h5copy tool.
-
-* In the C++ API, it appears that there are bugs in Attribute::write/read
-  and DataSet::write/read for fixed- and variable-len strings.  The problems
-  are being worked on and a patch will be provided when the fixes are
-  available.
 
