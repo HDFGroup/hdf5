@@ -14,7 +14,7 @@ can be found on the HDF5 web page at:
 
      http://www.hdfgroup.org/products/hdf5/
 
-The HDF5 1.8.1 release can be obtained from:
+The HDF5 1.8.2 release can be obtained from:
 
      http://www.hdfgroup.org/HDF5/release/obtain5.html
 
@@ -56,9 +56,6 @@ New Features
         Configuration
         -------------
         - Upgraded libtool to version 2.2.6a. (MAM - 2008/10/15).
-
-        Source code distribution
-        ========================
 
         Library
         -------
@@ -149,9 +146,6 @@ Bug Fixes since HDF5-1.8.1
         - "make DESTDIR=xxx install" failed to install some tools and files
           (e.g., h5cc and fortran modules). Fixed. (AKC - 2008/10/8).
 
-        Source code distribution
-        ========================
-
         Library
         -------
         - H5Ovisit and H5Ovisit_by_name will now properly terminate when the
@@ -189,6 +183,8 @@ Bug Fixes since HDF5-1.8.1
             multiple file handles for the parent. The mount table is now in 
             the shared file structure (the parent pointer is still in the 
             top structure).  (NAF - 2008/08/07)
+        - Fixed assertion failure caused by incorrect array datatype version.
+            (NAF - 2008/08/04)
         - Fixed issue where a group could have a file mounted on it twice.
             (QAK - 2008/07/15)
         - When an attribute was opened twice and data was written with 
@@ -285,24 +281,24 @@ The following platforms and compilers have been tested for this release.
                                   mpicc 1.0.2
                                   mpif90 1.0.2
 
-    FreeBSD 6.2-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
+    FreeBSD 6.3-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
     (duty)                        g++ 3.4.6 [FreeBSD] 20060305
-                                  gcc 4.2.1 20080123
-                                  g++ 4.2.1 20080123
-                                  gfortran 4.2.1 20070620
+                                  gcc 4.2.5 20080702
+                                  g++ 4.2.5 20080702
+                                  gfortran 4.2.5 20070
 
-    FreeBSD 6.2-STABLE amd64      gcc 3.4.6 [FreeBSD] 20060305
+    FreeBSD 6.3-STABLE amd64      gcc 3.4.6 [FreeBSD] 20060305
     (liberty)                     g++ 3.4.6 [FreeBSD] 20060305
-                                  gcc 4.2.1 20080123
-                                  g++ 4.2.1 20080123
-                                  gfortran 4.2.1 20080123
+                                  gcc 4.2.5 20080702
+                                  g++ 4.2.5 20080702
+                                  gfortran 4.2.5 20080702
 
     IRIX64 6.5 (64 & n32)         MIPSpro cc 7.4.4m
                                   F90 MIPSpro 7.4.4m 
                                   C++ MIPSpro cc 7.4.4m
 
     Linux 2.6.9-42.0.10.ELsmp #1  gcc (GCC) 3.4.6
-         SMP i686 i386            G95 (GCC 4.0.3 (g95 0.92!) April 18 2007)
+    SMP i686 i386                 G95 (GCC 4.0.3 (g95 0.92!) April 18 2007)
     (kagiso)                      PGI C, Fortran, C++ 7.2-1 32-bit
                                   Intel(R) C Compiler for 32-bit
                                       applications, Version 10.1
@@ -316,11 +312,11 @@ The following platforms and compilers have been tested for this release.
                                   MPICH mpich2-1.0.6p1 compiled with
                                   gcc 3.4.6 and G95 (GCC 4.0.3 (g95 0.92!)
 
-    Linux 2.6.16.46-0.14-smp #1   Intel(R) C++ for Intel(R) EM64T Ver.
-10.1.013
-        SMP x86_64 GNU/Linux      Intel(R) Fortran Intel(R) EM64T Ver.
-10.1.013
-    (smirom)                      PGI C, Fortran, C++ Version 7.2-1
+    Linux 2.6.16.46-0.14-smp #1   Intel(R) C++ for Intel(R) EM64T 
+    SMP x86_64 GNU/Linux          Ver.  10.1.013
+    (smirom)                      Intel(R) Fortran Intel(R) EM64T 
+                                  Ver.  10.1.013
+                                  PGI C, Fortran, C++ Version 7.2-1
                                          for 64-bit target on x86-64
                                   MPICH mpich-1.2.7 compiled with
                                   gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!)
@@ -329,7 +325,7 @@ The following platforms and compilers have been tested for this release.
                                   tested for both 32- and 64-bit binaries
 
     Linux 2.6.16.54-0.2.5 #1      Intel(R) C++ Version 10.1.017
-        Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 10.1.017
+    Altix SMP ia64                Intel(R) Fortran Itanium(R) Version 10.1.017
     (cobalt)                      SGI MPI 1.16
 
     SunOS 5.10 32- and 64-bit     Sun WorkShop 6 update 2 C 5.8
@@ -342,8 +338,8 @@ The following platforms and compilers have been tested for this release.
                                   Intel(R) Fortran Compiler Version 10.0.026
                                   Open MPI 1.2.2
                                   MVAPICH2-0.9.8p28p2patched-intel-ofed-1.2
-                                  compiled with icc v10.0.026 and ifort
-10.0.026
+                                  compiled with icc v10.0.026 and 
+                                  ifort 10.0.026
 
     IA-64 Linux 2.4.21-309.tg1 #1 SMP
         ia64                      gcc (GCC) 3.2.2
@@ -393,7 +389,8 @@ Windows XP               n        y(15)  n(15)    y     y     y
 Windows XP x64           n        y(15)  n(15)    y     y     y
 Windows Vista            n        n      n        y     y     y
 Mac OS X 10.5 Intel      n        y      n        y     y     y
-FreeBSD 6.2 32&64 bit    n        n      n        y     y     y
+FreeBSD 6.3-STABLE 
+32&64 bit                n        y      n        y     y     y
 RedHat EL4       (3)  W  y(1)     y(10)  y(1)     y     y     y
 RedHat EL4 Intel (3)  W  n        y      n        y     y     n
 RedHat EL4 PGI   (3)  W  n        y      n        y     y     n
@@ -502,9 +499,6 @@ Known Problems
 
   KY - 2007/08/24
 
-* For SNL, spirit/liberty/thunderbird: The serial tests pass but parallel
-  tests failed with MPI-IO file locking message. AKC - 2007/6/25
-
 * On Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers, 
   use -mp -O1 compilation flags to build the libraries. A higher level of 
   optimization causes failures in several HDF5 library tests. 
@@ -512,26 +506,6 @@ Known Problems
 * For LLNL, uP: both serial and parallel tests pass.  
   Zeus: Serial tests pass but parallel tests fail with a known problem in MPI.
   ubgl: Serial tests pass but parallel tests fail. 
-
-* Configuring with --enable-debug=all produces compiler errors on most
-  platforms:  Users who want to run HDF5 in debug mode should use
-  --enable-debug rather than --enable-debug=all to enable debugging
-  information on most modules.
-
-* On Mac OS 10.4, test/dt_arith.c has some errors in conversion from long
-  double to (unsigned) long long and from (unsigned) long long to long double. 
-+       - Fixed assertion failure caused by incorrect array datatype version.
-+             (NAF - 2008/08/04)
-* On Altix SGI with Intel 9.0, testmeta.c would not compile with -O3
-  optimization flag.
-
-* On VAX, the Scaleoffset filter is not supported.  The Scaleoffset filter 
-  supports only the IEEE standard for floating-point data; it cannot be applied 
-  to HDF5 data generated on VAX. 
-
-* On Cray X1, a lone colon on the command line of h5dump --xml (as in
-  the testh5dumpxml.sh script) is misinterpereted by the operating system
-  and causes an error.
 
 * On mpich 1.2.5 and 1.2.6, if more than two processes contribute no IO and 
   the application asks to do collective IO, we have found that when using 4 
@@ -553,11 +527,6 @@ Known Problems
   before on little-endian system.  Library releases after 1.6.4 can still read 
   datasets created or rewritten with an HDF5 library of v1.6.2 or before.  
   SLU - 2005/6/30
-
-* For version 6 (6.02 and 6.04) of the Portland Group compiler on the AMD 
-  Opteron processor, there is a bug in the compiler for optimization(-O2).  
-  The library failed in several tests, all related to the MULTI driver.  
-  The problem has been reported to the vendor.  
 
 * On IBM AIX systems, parallel HDF5 mode will fail some tests with error
   messages like "INFO: 0031-XXX ...".  This is from the command `poe'.
@@ -583,27 +552,8 @@ Known Problems
   It is suggested that you do not use this option on these platforms
   during configuration.
 
-* With the gcc 2.95.2 compiler, HDF5 uses the `-ansi' flag during
-  compilation. The ANSI version of the compiler complains about not being
-  able to handle the `long long' datatype with the warning:
-
-        warning: ANSI C does not support `long long'
-  
-  This warning is innocuous and can be safely ignored.
-
-* The ./dsets tests fail on the TFLOPS machine if the test program,
-  dsets.c, is compiled with the -O option.  The HDF5 library still works
-  correctly with the -O option.  The test program works fine if it is
-  compiled with -O1 or -O0.  Only -O (same as -O2) causes the test
-  program to fail.
-
 * There is also a configure error on Altix machines that incorrectly reports 
   when a version of Szip without an encoder is being used.
-
-* On some platforms that use Intel and Absoft compilers to build the HDF5 
-  Fortran library, compilation may fail for fortranlib_test.f90, fflush1.f90 
-  and fflush2.f90 complaining about the exit subroutine. Comment out the line 
-  IF (total_error .ne. 0) CALL exit (total_error).
 
 * Information about building with PGI and Intel compilers is available in
   the INSTALL file sections 4.7 and 4.8.
