@@ -48,8 +48,6 @@ New Features
 	  by "make check-clean" which removes all check-success markers and
 	  let all tests run again. AKC - 2008/2/22.
 
-    Source code distribution
-    ========================
     Library:
     --------
      - Added support for $(DESTDIR) to the install feature. AKC - 2008/10/13.
@@ -180,7 +178,7 @@ Bug Fixes since HDF5-1.6.7 Release
           IdComponent and AbstractDs and class DataSet from H5Object and
           AbstractDs.  In addition, the data member IdComponent::id was
           moved into subclasses: Attribute, DataSet, DataSpace, DataType,
-          H5File, Group, and PropList. (BMR - 2008/08/10)
+          H5File, Group, and PropList. BMR - 2008/08/10
         - IdComponent::dereference was incorrect and replaced as described
           in "New Features" section.
           BMR - 2008/08/10
@@ -212,17 +210,17 @@ Documentation
 Platforms Tested
 ================
 
-    FreeBSD 6.2-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
+    FreeBSD 6.3-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
     (duty)                        g++ 3.4.6 [FreeBSD] 20060305
-                                  gcc 4.2.5 20080702 (prerelease)
-                                  g++ 4.2.5 20080702 (prerelease)
-                                  gfortran 4.2.1 20070620
+                                  gcc 4.2.5 20080702 
+                                  g++ 4.2.5 20080702 
+                                  gfortran 4.2.5 20080702
 
-    FreeBSD 6.2-STABLE amd64      gcc 3.4.6 [FreeBSD] 20060305
+    FreeBSD 6.3-STABLE amd64      gcc 3.4.6 [FreeBSD] 20060305
     (liberty)                     g++ 3.4.6 [FreeBSD] 20060305
-                                  gcc 4.2.5 20080702 (prerelease)
-                                  g++ 4.2.5 20080702 (prerelease)
-                                  gfortran 4.2.1 20080123
+                                  gcc 4.2.5 20080702 
+                                  g++ 4.2.5 20080702 
+                                  gfortran 4.2.5 20080702
 
     IRIX64 6.5                    MIPSpro cc 7.4.4m
     (ucar mop1 64 & n32)          F90 MIPSpro 7.4.4m (64 only)
@@ -312,7 +310,7 @@ WinXP .Net                            n        y    n        y    y     y
 WinVista 2005                         n        n    n        y    y     y
 Mac OS X 10.4.10                      n        y    n        y    y     y
 AIX 5.3 32- and 64-bit                y        y    y        y    y     y
-FreeBSD 6.2 32- and 64-bit            n        n    n        y    y     y
+FreeBSD 6.3 32- and 64-bit            n        n    n        y    y     y
 RedHat EL4 2.6.9-42 i686 GNU (1)  W   y        y    y        y    y     y
 RedHat EL4 2.6.9-42 i686 Intel    W   n        y    n        y    y     n
 RedHat EL4 2.6.9-42 i686 PGI      W   n        y    n        y    y     n
@@ -336,7 +334,7 @@ WinXP .Net                            y             n        n
 WinVista 2005                         y             n        n        
 Mac OS X 10.4.10                      y             n        n        
 AIX 5.3 32- and 64-bit                n             n        n        
-FreeBSD 6.2 32- and 64-bit            y             n        n        
+FreeBSD 6.3 32- and 64-bit            y             n        n        
 RedHat EL4 2.6.9-42 i686 GNU (1)  W   y             n        y        
 RedHat EL4 2.6.9-42 i686 Intel    W   y             n        n        
 RedHat EL4 2.6.9-42 i686 PGI      W   n             n        n        
@@ -406,11 +404,6 @@ Known Problems
   chunked storage created by serial HDF5 may not work properly with parallel 
   HDF5.  The calloc test can be skipped by running "prun ... testphdf5 -x 
   calloc".  AKC - 2007/7/12.
-
-* The Intel C Compiler for the Linux x86_64 platform (EM64T-based, v8.1) has
-  an optimization error in the datatypes conversion code.  Before running
-  configure, edit the file config/intel-flags by changing the setting of
-  PROD_CFLAGS from -O3 to -O0.  Then run configure.  AKC - 2005/11/10.
 
 * When testing parallel HDF5 with the C compiler version MIPSpro 7.4.3 on IRIX
   6.5, set the environment variable MPI_TYPE_MAX to be a bigger number, for 
