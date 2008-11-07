@@ -66,6 +66,7 @@ typedef enum {
 typedef enum {
     EARRAY_ITER_FW,             /* "Forward" iteration */
     EARRAY_ITER_RV,             /* "Reverse" iteration */
+    EARRAY_ITER_RND,            /* "Random" iteration */
     EARRAY_ITER_NITERS          /* The number of iteration types, must be last */
 } earray_iter_type_t;
 
@@ -1416,6 +1417,166 @@ static const earray_iter_t ea_iter_rv = {
     eiter_rv_term               /* Iterator term */
 };
 
+/* Extensible array iterator info for random iteration */
+typedef struct eiter_rnd_t {
+    hsize_t max;                /* Max. array index used */
+    hsize_t pos;                /* Position in shuffled array */
+    hsize_t *idx;               /* Array of shuffled indices */
+} eiter_rnd_t;
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_rnd_init
+ *
+ * Purpose:	Initialize element interator (random iteration)
+ *
+ * Return:	Success:	Pointer to iteration status object
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November  6, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+eiter_rnd_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam, 
+    hsize_t cnt)
+{
+    eiter_rnd_t *eiter;         /* Random element iteration object */
+    size_t u;                   /* Local index variable */
+
+    /* Allocate space for the element iteration object */
+    eiter = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
+    HDassert(eiter);
+
+    /* Allocate space for the array of shuffled indices */
+    eiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
+    HDassert(eiter->idx);
+
+    /* Initialize reverse iteration info */
+    eiter->max = 0;
+    eiter->pos = 0;
+    for(u = 0; u < (size_t)cnt; u++)
+        eiter->idx[u] = (hsize_t)u;
+
+    /* Randomly shuffle array indices */
+    if(cnt > 1) {
+        for(u = 0; u < (size_t)cnt; u++) {
+            size_t swap_idx;            /* Location to swap with when shuffling */
+            hsize_t temp_idx;           /* Temporary index */
+
+            swap_idx = ((size_t)HDrandom() % ((size_t)cnt - u)) + u;
+            temp_idx = eiter->idx[u];
+            eiter->idx[u] = eiter->idx[swap_idx];
+            eiter->idx[swap_idx] = temp_idx;
+        } /* end for */
+    } /* end if */
+
+    /* Return iteration object */
+    return(eiter);
+} /* end eiter_rnd_init() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_rnd_next
+ *
+ * Purpose:	Get next element index (random iteration)
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November  6, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static hssize_t
+eiter_rnd_next(void *_eiter)
+{
+    eiter_rnd_t *eiter = (eiter_rnd_t *)_eiter;
+    hssize_t ret_val;
+
+    /* Sanity check */
+    HDassert(eiter);
+
+    /* Get the next array index to test */
+    ret_val = (hssize_t)eiter->idx[eiter->pos];
+    eiter->pos++;
+
+    /* Check for new max. value */
+    if((hsize_t)ret_val > eiter->max)
+        eiter->max = (hsize_t)ret_val;
+
+    return(ret_val);
+} /* end eiter_rnd_next() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_rv_max
+ *
+ * Purpose:	Get max. element index (random iteration)
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November  6, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static hssize_t
+eiter_rnd_max(const void *_eiter)
+{
+    const eiter_rnd_t *eiter = (const eiter_rnd_t *)_eiter;
+
+    /* Sanity check */
+    HDassert(eiter);
+
+    /* Return the max. array index used */
+    return((hssize_t)eiter->max);
+} /* end eiter_rnd_max() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_rnd_term
+ *
+ * Purpose:	Shut down element interator (random iteration)
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November  6, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+eiter_rnd_term(void *_eiter)
+{
+    eiter_rnd_t *eiter = (eiter_rnd_t *)_eiter;
+
+    /* Sanity check */
+    HDassert(eiter);
+    HDassert(eiter->idx);
+
+    /* Free shuffled index array */
+    HDfree(eiter->idx);
+
+    /* Free iteration object */
+    HDfree(eiter);
+
+    return(0);
+} /* end eiter_rnd_term() */
+
+/* Extensible array iterator class for random iteration */
+static const earray_iter_t ea_iter_rnd = {
+    eiter_rnd_init,             /* Iterator init */
+    eiter_rnd_next,             /* Next array index */
+    eiter_rnd_max,              /* Max. array index written */
+    NULL,                       /* State of the extensible array */
+    eiter_rnd_term              /* Iterator term */
+};
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_set_elmts
@@ -1616,6 +1777,7 @@ main(void)
     earray_iter_type_t curr_iter;       /* Current iteration type being worked on */
     hid_t	fapl = -1;              /* File access property list for data files */
     unsigned	nerrors = 0;            /* Cumulative error count */
+    time_t      curr_time;              /* Current time, for seeding random number generator */
     int		ExpressMode;            /* Test express value */
 
     /* Reset library */
@@ -1628,6 +1790,9 @@ main(void)
     /* Set the filename to use for this test (dependent on fapl) */
     h5_fixname(FILENAME[0], fapl, filename_g, sizeof(filename_g));
 
+    /* Seed random #'s */
+    curr_time = HDtime(NULL);
+    HDsrandom((unsigned long)curr_time);
 
     /* Create an empty file to retrieve size */
     {
@@ -1694,6 +1859,12 @@ main(void)
                 case EARRAY_ITER_RV:
                     puts("Testing with reverse iteration");
                     tparam.eiter = &ea_iter_rv;
+                    break;
+
+                /* "Random" testing parameters */
+                case EARRAY_ITER_RND:
+                    puts("Testing with random iteration");
+                    tparam.eiter = &ea_iter_rnd;
                     break;
 
                 /* An unknown iteration? */
