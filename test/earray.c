@@ -43,6 +43,16 @@
 #define SUP_BLK_MIN_DATA_PTRS   4
 #define DATA_BLK_MIN_ELMTS      16
 
+/* Convenience macros for computing earray state */
+#define EA_NELMTS(cparam, tparam, idx, sblk_idx)                \
+        (hsize_t)(cparam->idx_blk_elmts +                       \
+                tparam->sblk_info[sblk_idx].start_idx +         \
+                ((1 + ((idx - (cparam->idx_blk_elmts + tparam->sblk_info[sblk_idx].start_idx)) / tparam->sblk_info[sblk_idx].dblk_nelmts)) \
+                    * tparam->sblk_info[sblk_idx].dblk_nelmts))
+#define EA_NDATA_BLKS(cparam, tparam, idx, sblk_idx)            \
+        (1 + tparam->sblk_info[sblk_idx].start_dblk +           \
+                ((idx - (cparam->idx_blk_elmts + tparam->sblk_info[sblk_idx].start_idx)) / tparam->sblk_info[sblk_idx].dblk_nelmts))
+
 /* Local typedefs */
 
 /* Types of tests to perform */
@@ -51,6 +61,13 @@ typedef enum {
     EARRAY_TEST_REOPEN,         /* Set the reopen_array flag */
     EARRAY_TEST_NTESTS          /* The number of test types, must be last */
 } earray_test_type_t;
+
+/* Types of iteration to perform */
+typedef enum {
+    EARRAY_ITER_FW,             /* "Forward" iteration */
+    EARRAY_ITER_RV,             /* "Reverse" iteration */
+    EARRAY_ITER_NITERS          /* The number of iteration types, must be last */
+} earray_iter_type_t;
 
 /* Orders to operate on entries */
 typedef enum {
@@ -70,16 +87,6 @@ typedef enum {
     EARRAY_TEST_COMP_N          /* The number of different ways to test compressing array blocks, must be last */
 } earray_test_comp_t;
 
-/* Testing parameters */
-typedef struct earray_test_param_t {
-    earray_test_type_t reopen_array;    /* Whether to re-open the array during the test */
-    earray_test_comp_t comp;            /* Whether to compress the blocks or not */
-
-    /* Super block information */
-    size_t nsblks;                      /* Number of superblocks needed for array */
-    H5EA_sblk_info_t *sblk_info;        /* Array of information for each super block */
-} earray_test_param_t;
-
 /* Extensible array state information */
 typedef struct earray_state_t {
     hsize_t max_idx_set;        /* Highest element index stored (+1 - i.e. if element 0 has been set, this value with be '1', if no elements have been stored, this value will be '0') */
@@ -87,6 +94,30 @@ typedef struct earray_state_t {
     hsize_t ndata_blks;         /* # of data blocks */
     hsize_t nelmts;             /* # of elements "realized" */
 } earray_state_t;
+
+/* Forward decl. */
+typedef struct earray_test_param_t earray_test_param_t;
+
+/* Extensible array iterator class */
+typedef struct earray_iter_t {
+    void *(*init)(hsize_t cnt); /* Initialize/allocate iterator private info */
+    hssize_t (*next)(void *info);       /* Get the next element to test */
+    hssize_t (*max)(const void *info);  /* Get the max. element set */
+    int (*state)(void *_eiter, const H5EA_create_t *cparam,
+            const earray_test_param_t *tparam, earray_state_t *state, hsize_t idx);  /* Get the state of the extensible array */
+    herr_t (*term)(void *info); /* Shutdown/free iterator private info */
+} earray_iter_t;
+
+/* Testing parameters */
+struct earray_test_param_t {
+    earray_test_type_t reopen_array;    /* Whether to re-open the array during the test */
+    earray_test_comp_t comp;            /* Whether to compress the blocks or not */
+    const earray_iter_t *eiter;         /* Iterator to use for this test */
+
+    /* Super block information */
+    size_t nsblks;                      /* Number of superblocks needed for array */
+    H5EA_sblk_info_t *sblk_info;        /* Array of information for each super block */
+};
 
 /* Local variables */
 const char *FILENAME[] = {
@@ -268,16 +299,16 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
         HDfprintf(stdout, "earray_stats.max_idx_set = %Hu, state->max_idx_set = %Hu\n", earray_stats.max_idx_set, state->max_idx_set);
         TEST_ERROR
     } /* end if */
-    if(earray_stats.nsuper_blks != state->nsuper_blks) {
-        HDfprintf(stdout, "earray_stats.nsuper_blks = %Hu, state->nsuper_blks = %Hu\n", earray_stats.nsuper_blks, state->nsuper_blks);
+    if(earray_stats.nelmts != state->nelmts) {
+        HDfprintf(stdout, "earray_stats.nelmts = %Hu, state->nelmts = %Hu\n", earray_stats.nelmts, state->nelmts);
         TEST_ERROR
     } /* end if */
     if(earray_stats.ndata_blks != state->ndata_blks) {
         HDfprintf(stdout, "earray_stats.ndata_blks = %Hu, state->ndata_blks = %Hu\n", earray_stats.ndata_blks, state->ndata_blks);
         TEST_ERROR
     } /* end if */
-    if(earray_stats.nelmts != state->nelmts) {
-        HDfprintf(stdout, "earray_stats.nelmts = %Hu, state->nelmts = %Hu\n", earray_stats.nelmts, state->nelmts);
+    if(earray_stats.nsuper_blks != state->nsuper_blks) {
+        HDfprintf(stdout, "earray_stats.nsuper_blks = %Hu, state->nsuper_blks = %Hu\n", earray_stats.nsuper_blks, state->nsuper_blks);
         TEST_ERROR
     } /* end if */
 
@@ -947,6 +978,433 @@ error:
     return 1;
 } /* test_delete_open() */
 
+/* Extensible array iterator info for forward iteration */
+typedef struct eiter_fw_t {
+    hsize_t idx;        /* Index of next array location */
+    unsigned base_sblk_idx;       /* Starting index for actual superblocks */
+} eiter_fw_t;
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_fw_init
+ *
+ * Purpose:	Initialize element interator (forward iteration)
+ *
+ * Return:	Success:	Pointer to iteration status object
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, October  2, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+eiter_fw_init(hsize_t UNUSED cnt)
+{
+    eiter_fw_t *eiter;          /* Forward element iteration object */
+
+    /* Allocate space for the element iteration object */
+    eiter = HDmalloc(sizeof(eiter_fw_t));
+    HDassert(eiter);
+
+    /* Initialize the element iteration object */
+    eiter->idx = 0;
+    eiter->base_sblk_idx = UINT_MAX;
+
+    /* Return iteration object */
+    return(eiter);
+} /* end eiter_fw_init() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_fw_next
+ *
+ * Purpose:	Get next element index (forward iteration)
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November  4, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static hssize_t
+eiter_fw_next(void *_eiter)
+{
+    eiter_fw_t *eiter = (eiter_fw_t *)_eiter;
+    hssize_t ret_val;
+
+    /* Sanity check */
+    HDassert(eiter);
+
+    /* Get the next array index to test */
+    ret_val = eiter->idx++;
+
+    return(ret_val);
+} /* end eiter_fw_next() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_fw_max
+ *
+ * Purpose:	Get max. element index (forward iteration)
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November  4, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static hssize_t
+eiter_fw_max(const void *_eiter)
+{
+    const eiter_fw_t *eiter = (const eiter_fw_t *)_eiter;
+
+    /* Sanity check */
+    HDassert(eiter);
+
+    /* Return the max. array index used */
+    return((hsize_t)(eiter->idx - 1));
+} /* end eiter_fw_max() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_fw_state
+ *
+ * Purpose:	Get extensible array state (forward iteration)
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November  4, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+eiter_fw_state(void *_eiter, const H5EA_create_t *cparam,
+    const earray_test_param_t *tparam, earray_state_t *state, hsize_t idx)
+{
+    eiter_fw_t *eiter = (eiter_fw_t *)_eiter;
+
+    /* Sanity check */
+    HDassert(eiter);
+    HDassert(cparam);
+    HDassert(tparam);
+    HDassert(state);
+
+    /* Reset the state */
+    HDmemset(state, 0, sizeof(*state));
+
+    /* Compute the state of the extensible array */
+    state->max_idx_set = idx + 1;
+    if(idx < cparam->idx_blk_elmts)
+        state->nelmts = (hsize_t)cparam->idx_blk_elmts;
+    else {
+        unsigned sblk_idx;      /* Which superblock does this index fall in? */
+
+        /* Compute super block index for element index */
+        /* (same eqn. as in H5EA__dblock_sblk_idx()) */
+        sblk_idx = H5V_log2_gen((uint64_t)(((idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
+#ifdef QAK
+HDfprintf(stderr, "idx = %Hu, tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", idx, sblk_idx, tparam->sblk_info[sblk_idx].ndblks, tparam->sblk_info[sblk_idx].dblk_nelmts, tparam->sblk_info[sblk_idx].start_idx, tparam->sblk_info[sblk_idx].start_dblk);
+#endif /* QAK */
+
+        state->nelmts = EA_NELMTS(cparam, tparam, idx, sblk_idx);
+#ifdef QAK
+HDfprintf(stderr, "state->nelmts = %Hu\n", state->nelmts);
+#endif /* QAK */
+
+        state->ndata_blks = EA_NDATA_BLKS(cparam, tparam, idx, sblk_idx);
+#ifdef QAK
+HDfprintf(stderr, "state->ndata_blks = %Hu\n", state->ndata_blks);
+#endif /* QAK */
+
+        /* Check if we have any super blocks yet */
+        if(tparam->sblk_info[sblk_idx].ndblks >= cparam->sup_blk_min_data_ptrs) {
+            /* Check if this is the first superblock */
+            if(sblk_idx < eiter->base_sblk_idx)
+                eiter->base_sblk_idx = sblk_idx;
+
+            state->nsuper_blks = (sblk_idx - eiter->base_sblk_idx) + 1;
+#ifdef QAK
+HDfprintf(stderr, "state->nsuper_blks = %Hu\n", state->nsuper_blks);
+#endif /* QAK */
+        } /* end if */
+    } /* end else */
+
+    return(0);
+} /* end eiter_fw_state() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_fw_term
+ *
+ * Purpose:	Shut down element interator (forward iteration)
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, October  2, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+eiter_fw_term(void *eiter)
+{
+    /* Sanity check */
+    HDassert(eiter);
+
+    /* Free iteration object */
+    HDfree(eiter);
+
+    return(0);
+} /* end eiter_fw_term() */
+
+/* Extensible array iterator class for forward iteration */
+static const earray_iter_t ea_iter_fw = {
+    eiter_fw_init,              /* Iterator init */
+    eiter_fw_next,              /* Next array index */
+    eiter_fw_max,               /* Max. array index */
+    eiter_fw_state,             /* State of the extensible array */
+    eiter_fw_term               /* Iterator term */
+};
+
+/* Extensible array iterator info for reverse iteration */
+typedef struct eiter_rv_t {
+    hsize_t idx;                        /* Index of next array location */
+    hsize_t max;                        /* Index of max. array location */
+} eiter_rv_t;
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_rv_init
+ *
+ * Purpose:	Initialize element interator (reverse iteration)
+ *
+ * Return:	Success:	Pointer to iteration status object
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November  4, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+eiter_rv_init(hsize_t cnt)
+{
+    eiter_rv_t *eiter;          /* Reverse element iteration object */
+
+    /* Allocate space for the element iteration object */
+    eiter = HDmalloc(sizeof(eiter_rv_t));
+    HDassert(eiter);
+
+    /* Initialize reverse iteration info */
+    eiter->idx = cnt - 1;
+    eiter->max = cnt - 1;
+
+    /* Return iteration object */
+    return(eiter);
+} /* end eiter_rv_init() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_rv_next
+ *
+ * Purpose:	Get next element index (reverse iteration)
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November  4, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static hssize_t
+eiter_rv_next(void *_eiter)
+{
+    eiter_rv_t *eiter = (eiter_rv_t *)_eiter;
+    hssize_t ret_val;
+
+    /* Sanity check */
+    HDassert(eiter);
+
+    /* Get the next array index to test */
+    ret_val = eiter->idx--;
+
+    return(ret_val);
+} /* end eiter_rv_next() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_rv_max
+ *
+ * Purpose:	Get max. element index (reverse iteration)
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November  4, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static hssize_t
+eiter_rv_max(const void *_eiter)
+{
+    const eiter_rv_t *eiter = (const eiter_rv_t *)_eiter;
+
+    /* Sanity check */
+    HDassert(eiter);
+
+    /* Return the max. array index used */
+    return((hssize_t)eiter->max);
+} /* end eiter_rv_max() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_rv_state
+ *
+ * Purpose:	Get extensible array state (reverse iteration)
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November  4, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+eiter_rv_state(void *_eiter, const H5EA_create_t *cparam,
+    const earray_test_param_t *tparam, earray_state_t *state, hsize_t idx)
+{
+    eiter_rv_t *eiter = (eiter_rv_t *)_eiter;
+
+    /* Sanity check */
+    HDassert(eiter);
+    HDassert(cparam);
+    HDassert(tparam);
+    HDassert(state);
+
+    /* Reset the state */
+    HDmemset(state, 0, sizeof(*state));
+
+    /* Compute the state of the extensible array */
+    state->max_idx_set = eiter->max + 1;
+    if(eiter->max < cparam->idx_blk_elmts)
+        state->nelmts = (hsize_t)cparam->idx_blk_elmts;
+    else {
+        hsize_t max_nelmts;     /* Max. # of elements for array */
+        hsize_t idx_nelmts;     /* # of elements for array index */
+        hsize_t max_ndata_blks; /* Max. # of data blocks for array */
+        hsize_t idx_ndata_blks; /* # of data blocks for array index */
+hsize_t tmp_idx;
+        unsigned max_sblk_idx;  /* Which superblock does the max. index fall in? */
+        unsigned idx_sblk_idx;  /* Which superblock does this index fall in? */
+unsigned tmp_sblk_idx;  /* Which superblock does this index fall in? */
+
+        /* Compute super block index for element index */
+        /* (same eqn. as in H5EA__dblock_sblk_idx()) */
+        max_sblk_idx = H5V_log2_gen((uint64_t)(((eiter->max - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
+        if(idx < cparam->idx_blk_elmts + cparam->data_blk_min_elmts)
+            idx_sblk_idx = 0;
+        else {
+            hsize_t loc_idx;
+            hsize_t dblk_idx;
+
+            idx_sblk_idx = H5V_log2_gen((uint64_t)(((idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
+            loc_idx = idx - (cparam->idx_blk_elmts + tparam->sblk_info[idx_sblk_idx].start_idx);
+            dblk_idx = loc_idx / tparam->sblk_info[idx_sblk_idx].dblk_nelmts;
+            if(dblk_idx > 0)
+                tmp_idx = idx - tparam->sblk_info[idx_sblk_idx].dblk_nelmts;
+            else
+                tmp_idx = cparam->idx_blk_elmts + tparam->sblk_info[idx_sblk_idx].start_idx - 1;
+            tmp_sblk_idx = H5V_log2_gen((uint64_t)(((tmp_idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
+        } /* end else */
+#ifdef QAK
+HDfprintf(stderr, "idx = %Hu, tmp_idx = %Hu, max_sblk_idx = %u, idx_sblk_idx = %u, tmp_sblk_idx = %u\n", idx, tmp_idx, max_sblk_idx, idx_sblk_idx, tmp_sblk_idx);
+HDfprintf(stderr, "tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", idx_sblk_idx, tparam->sblk_info[idx_sblk_idx].ndblks, tparam->sblk_info[idx_sblk_idx].dblk_nelmts, tparam->sblk_info[idx_sblk_idx].start_idx, tparam->sblk_info[idx_sblk_idx].start_dblk);
+HDfprintf(stderr, "tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", max_sblk_idx, tparam->sblk_info[max_sblk_idx].ndblks, tparam->sblk_info[max_sblk_idx].dblk_nelmts, tparam->sblk_info[max_sblk_idx].start_idx, tparam->sblk_info[max_sblk_idx].start_dblk);
+#endif /* QAK */
+
+        max_nelmts = EA_NELMTS(cparam, tparam, eiter->max, max_sblk_idx);
+        if(idx < cparam->idx_blk_elmts + cparam->data_blk_min_elmts)
+            idx_nelmts = (hsize_t)cparam->idx_blk_elmts;
+        else
+            idx_nelmts = EA_NELMTS(cparam, tparam, tmp_idx, tmp_sblk_idx);
+        state->nelmts = (max_nelmts - idx_nelmts) + cparam->idx_blk_elmts;
+#ifdef QAK
+HDfprintf(stderr, "max_nelmts = %Hu, idx_nelmts = %Hu, state->nelmts = %Hu\n", max_nelmts, idx_nelmts, state->nelmts);
+#endif /* QAK */
+
+        max_ndata_blks = EA_NDATA_BLKS(cparam, tparam, eiter->max, max_sblk_idx);
+        if(idx < cparam->idx_blk_elmts + cparam->data_blk_min_elmts)
+            idx_ndata_blks = 0;
+        else
+            idx_ndata_blks = EA_NDATA_BLKS(cparam, tparam, tmp_idx, tmp_sblk_idx);
+        state->ndata_blks = max_ndata_blks - idx_ndata_blks;
+#ifdef QAK
+HDfprintf(stderr, "max_ndata_blks = %Hu, idx_ndata_blks = %Hu, state->ndata_blks = %Hu\n", max_ndata_blks, idx_ndata_blks, state->ndata_blks);
+#endif /* QAK */
+
+        /* Check if we have any super blocks yet */
+        if(tparam->sblk_info[max_sblk_idx].ndblks >= cparam->sup_blk_min_data_ptrs) {
+            hsize_t idx_blk_nsblks = 2 * H5V_log2_of2((uint32_t)cparam->sup_blk_min_data_ptrs);
+
+            if(idx_sblk_idx > idx_blk_nsblks)
+                state->nsuper_blks = (max_sblk_idx - idx_sblk_idx) + 1;
+            else
+                state->nsuper_blks = (max_sblk_idx - idx_blk_nsblks) + 1;
+#ifdef QAK
+HDfprintf(stderr, "idx_blk_nsblks = %Hu, state->nsuper_blks = %Hu\n", idx_blk_nsblks, state->nsuper_blks);
+#endif /* QAK */
+        } /* end if */
+    } /* end else */
+
+    return(0);
+} /* end eiter_rv_state() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_rv_term
+ *
+ * Purpose:	Shut down element interator (reverse iteration)
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November  4, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+eiter_rv_term(void *eiter)
+{
+    /* Sanity check */
+    HDassert(eiter);
+
+    /* Free iteration object */
+    HDfree(eiter);
+
+    return(0);
+} /* end eiter_rv_term() */
+
+/* Extensible array iterator class for reverse iteration */
+static const earray_iter_t ea_iter_rv = {
+    eiter_rv_init,              /* Iterator init */
+    eiter_rv_next,              /* Next array index */
+    eiter_rv_max,               /* Max. array index written */
+    eiter_rv_state,             /* State of the extensible array */
+    eiter_rv_term               /* Iterator term */
+};
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_set_elmts
@@ -968,11 +1426,15 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
     hid_t	file = -1;              /* File ID */
     H5F_t	*f = NULL;              /* Internal file object pointer */
     H5EA_t      *ea = NULL;             /* Extensible array wrapper */
+    void        *eiter_info;            /* Extensible array iterator info */
     earray_state_t state;               /* State of extensible array */
-    unsigned    base_sblk_idx = UINT_MAX;       /* Starting index for actual superblocks */
     uint64_t    welmt;                  /* Element to write */
     uint64_t    relmt;                  /* Element to read */
     hsize_t     nelmts_written;         /* Highest element written in array */
+    hsize_t     cnt;                    /* Count of array indices */
+    hssize_t    smax;                   /* Index value of max. element set */
+    hsize_t     max;                    /* Index value of max. element set */
+    hssize_t    sidx;                   /* Index value of first element of first data block */
     hsize_t     idx;                    /* Index value of first element of first data block */
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
 
@@ -1009,6 +1471,7 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
     if(check_stats(ea, &state))
         TEST_ERROR
 
+#ifdef OLD_WAY
     /* Retrieve elements of array in data block (not set yet) */
     for(idx = 0; idx < nelmts; idx++) {
         /* Retrieve element of array (not set yet) */
@@ -1020,9 +1483,19 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
         if(relmt != H5EA_TEST_FILL)
             TEST_ERROR
     } /* end for */
+#endif /* OLD_WAY */
+
+    /* Initialize iterator */
+    if(NULL == (eiter_info = tparam->eiter->init(nelmts)))
+        TEST_ERROR
 
     /* Set elements of array */
-    for(idx = 0; idx < nelmts; idx++) {
+    for(cnt = 0; cnt < nelmts; cnt++) {
+        /* Get the array index */
+        if((sidx = tparam->eiter->next(eiter_info)) < 0)
+            TEST_ERROR
+        idx = (hsize_t)sidx;
+
         /* Retrieve element of array (not set yet) */
         relmt = (uint64_t)0;
         if(H5EA_get(ea, H5P_DATASET_XFER_DEFAULT, idx, &relmt) < 0)
@@ -1037,56 +1510,28 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
         if(H5EA_set(ea, H5P_DATASET_XFER_DEFAULT, idx, &welmt) < 0)
             FAIL_STACK_ERROR
 
+        /* Get the max. array index */
+        if((smax = tparam->eiter->max(eiter_info)) < 0)
+            TEST_ERROR
+        max = (hsize_t)smax;
+
         /* Verify high-water # of elements written */
         nelmts_written = (hsize_t)ULLONG_MAX;
         if(H5EA_get_nelmts(ea, &nelmts_written) < 0)
             FAIL_STACK_ERROR
-        if(nelmts_written != (idx + 1))
+        if(nelmts_written != (max + 1))
             TEST_ERROR
 
-        /* Verify array state */
-        HDmemset(&state, 0, sizeof(state));
-        state.max_idx_set = idx + 1;
-        if(idx < cparam->idx_blk_elmts)
-            state.nelmts = (hsize_t)cparam->idx_blk_elmts;
-        else {
-            unsigned sblk_idx;      /* Which superblock does this index fall in? */
+        /* Check if array state is available */
+        if(tparam->eiter->state) {
+            /* Get the extensible array state */
+            if(tparam->eiter->state(eiter_info, cparam, tparam, &state, idx) < 0)
+                TEST_ERROR
 
-            /* Compute super block index for element index */
-            /* (same eqn. as in H5EA__dblock_sblk_idx()) */
-            sblk_idx = H5V_log2_gen((uint64_t)(((idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
-#ifdef QAK
-HDfprintf(stderr, "idx = %Hu, tparam->sblk_info[%u] = {%Zu, %Zu, %Hu, %Hu}\n", idx, sblk_idx, tparam->sblk_info[sblk_idx].ndblks, tparam->sblk_info[sblk_idx].dblk_nelmts, tparam->sblk_info[sblk_idx].start_idx, tparam->sblk_info[sblk_idx].start_dblk);
-#endif /* QAK */
-
-            state.nelmts = (hsize_t)(cparam->idx_blk_elmts + 
-                    tparam->sblk_info[sblk_idx].start_idx + 
-                    ((1 + ((idx - (cparam->idx_blk_elmts + tparam->sblk_info[sblk_idx].start_idx)) / tparam->sblk_info[sblk_idx].dblk_nelmts))
-                        * tparam->sblk_info[sblk_idx].dblk_nelmts));
-#ifdef QAK
-HDfprintf(stderr, "state.nelmts = %Hu\n", state.nelmts);
-#endif /* QAK */
-
-            state.ndata_blks = 1 + tparam->sblk_info[sblk_idx].start_dblk + 
-                    ((idx - (cparam->idx_blk_elmts + tparam->sblk_info[sblk_idx].start_idx)) / tparam->sblk_info[sblk_idx].dblk_nelmts);
-#ifdef QAK
-HDfprintf(stderr, "state.ndata_blks = %Hu\n", state.ndata_blks);
-#endif /* QAK */
-
-            /* Check if we have any super blocks yet */
-            if(tparam->sblk_info[sblk_idx].ndblks >= cparam->sup_blk_min_data_ptrs) {
-                /* Check if this is the first superblock */
-                if(sblk_idx < base_sblk_idx)
-                    base_sblk_idx = sblk_idx;
-
-                state.nsuper_blks = (sblk_idx - base_sblk_idx) + 1;
-#ifdef QAK
-HDfprintf(stderr, "state.nsuper_blks = %Hu\n", state.nsuper_blks);
-#endif /* QAK */
-            } /* end if */
-        } /* end else */
-        if(check_stats(ea, &state))
-            TEST_ERROR
+            /* Verify array state */
+            if(check_stats(ea, &state))
+                TEST_ERROR
+        } /* end if */
 
         /* Retrieve element of array (set now) */
         relmt = (uint64_t)0;
@@ -1097,6 +1542,10 @@ HDfprintf(stderr, "state.nsuper_blks = %Hu\n", state.nsuper_blks);
         if(relmt != welmt)
             TEST_ERROR
     } /* end for */
+
+    /* Shutdown iterator */
+    if(tparam->eiter->term(eiter_info) < 0)
+        TEST_ERROR
 
     /* Close array, delete array, close file & verify file is empty */
     if(finish(file, fapl, f, ea, ea_addr) < 0)
@@ -1116,6 +1565,7 @@ error:
 
     return 1;
 } /* test_set_elmts() */
+
 
 
 /*-------------------------------------------------------------------------
@@ -1137,6 +1587,7 @@ main(void)
     H5EA_create_t cparam;               /* Creation parameters for extensible array */
     earray_test_param_t tparam;         /* Testing parameters */
     earray_test_type_t curr_test;       /* Current test being worked on */
+    earray_iter_type_t curr_iter;       /* Current iteration type being worked on */
     hid_t	fapl = -1;              /* File access property list for data files */
     unsigned	nerrors = 0;            /* Cumulative error count */
     int		ExpressMode;            /* Test express value */
@@ -1192,6 +1643,7 @@ main(void)
                 break;
 
             /* An unknown test? */
+            case EARRAY_TEST_NTESTS:
             default:
                 goto error;
         } /* end switch */
@@ -1202,77 +1654,101 @@ main(void)
         nerrors += test_open_twice(fapl, &cparam, &tparam);
         nerrors += test_delete_open(fapl, &cparam, &tparam);
 
-        /* Basic capacity tests */
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)0, "setting first element of array");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)cparam.idx_blk_elmts, "setting index block elements of array");
-        /* Super block #0 ("virtual" super block, in index block) */
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + 1), "setting first element of array's 1st data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + cparam.data_blk_min_elmts), "setting all elements of array's 1st data block");
-        /* Super block #1 ("virtual" super block, in index block) */
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + cparam.data_blk_min_elmts + 1), "setting first element of array's 2nd data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (3 * cparam.data_blk_min_elmts)), "setting all elements of array's 2nd data block");
-        /* Super block #2 ("virtual" super block, in index block) */
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (3 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 3rd data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (5 * cparam.data_blk_min_elmts)), "setting all elements of array's 3rd data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (5 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 4th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (7 * cparam.data_blk_min_elmts)), "setting all elements of array's 4th data block");
-        /* Super block #3 ("virtual" super block, in index block) */
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (7 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 5th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (11 * cparam.data_blk_min_elmts)), "setting all elements of array's 5th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (11 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 6th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (15 * cparam.data_blk_min_elmts)), "setting all elements of array's 6th data block");
-        /* Super block #4 (actual super block, from index block) */
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (15 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 7th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (19 * cparam.data_blk_min_elmts)), "setting all elements of array's 7th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (19 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 8th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (23 * cparam.data_blk_min_elmts)), "setting all elements of array's 8th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (23 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 9th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (27 * cparam.data_blk_min_elmts)), "setting all elements of array's 9th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (27 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 10th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (31 * cparam.data_blk_min_elmts)), "setting all elements of array's 10th data block");
-        /* Super block #5 (actual super block, from index block) */
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (31 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 11th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (39 * cparam.data_blk_min_elmts)), "setting all elements of array's 11th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (39 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 12th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (47 * cparam.data_blk_min_elmts)), "setting all elements of array's 12th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (47 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 13th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (55 * cparam.data_blk_min_elmts)), "setting all elements of array's 13th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (55 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 14th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (63 * cparam.data_blk_min_elmts)), "setting all elements of array's 14th data block");
-        /* Super block #6 (actual super block, from index block) */
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (63 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 15th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (71 * cparam.data_blk_min_elmts)), "setting all elements of array's 15th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (71 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 16th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (79 * cparam.data_blk_min_elmts)), "setting all elements of array's 16th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (79 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 17th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (87 * cparam.data_blk_min_elmts)), "setting all elements of array's 17th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (87 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 18th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (95 * cparam.data_blk_min_elmts)), "setting all elements of array's 18th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (95 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 19th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (103 * cparam.data_blk_min_elmts)), "setting all elements of array's 19th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (103 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 20th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (111 * cparam.data_blk_min_elmts)), "setting all elements of array's 20th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (111 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 21st data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (119 * cparam.data_blk_min_elmts)), "setting all elements of array's 21st data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (119 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 22nd data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (127 * cparam.data_blk_min_elmts)), "setting all elements of array's 22nd data block");
-        /* Super block #7 (actual super block, from index block) */
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (127 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 23rd data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (143 * cparam.data_blk_min_elmts)), "setting all elements of array's 23rd data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (143 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 24th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (159 * cparam.data_blk_min_elmts)), "setting all elements of array's 24th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (159 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 25th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (175 * cparam.data_blk_min_elmts)), "setting all elements of array's 25th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (175 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 26th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (191 * cparam.data_blk_min_elmts)), "setting all elements of array's 26th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (191 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 27th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (207 * cparam.data_blk_min_elmts)), "setting all elements of array's 27th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (207 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 28th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (223 * cparam.data_blk_min_elmts)), "setting all elements of array's 28th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (223 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 29th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (239 * cparam.data_blk_min_elmts)), "setting all elements of array's 29th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (239 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 30th data block");
-        nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (255 * cparam.data_blk_min_elmts)), "setting all elements of array's 30th data block");
+        /* Iterate over the type of capacity tests */
+        for(curr_iter = EARRAY_ITER_FW; curr_iter < EARRAY_ITER_NITERS; curr_iter++) {
+            /* Set appropriate parameters for each type of iteration */
+            switch(curr_iter) {
+                /* "Forward" testing parameters */
+                case EARRAY_ITER_FW:
+                    puts("Testing with forward iteration");
+                    tparam.eiter = &ea_iter_fw;
+                    break;
+
+                /* "Reverse" testing parameters */
+                case EARRAY_ITER_RV:
+                    puts("Testing with reverse iteration");
+                    tparam.eiter = &ea_iter_rv;
+                    break;
+
+                /* An unknown iteration? */
+                case EARRAY_ITER_NITERS:
+                default:
+                    goto error;
+            } /* end switch */
+
+            /* Basic capacity tests */
+/* Need separate test to read elements from empty array */
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)1, "setting first element of array");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)cparam.idx_blk_elmts, "setting index block elements of array");
+            /* Super block #0 ("virtual" super block, in index block) */
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + 1), "setting first element of array's 1st data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + cparam.data_blk_min_elmts), "setting all elements of array's 1st data block");
+            /* Super block #1 ("virtual" super block, in index block) */
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + cparam.data_blk_min_elmts + 1), "setting first element of array's 2nd data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (3 * cparam.data_blk_min_elmts)), "setting all elements of array's 2nd data block");
+            /* Super block #2 ("virtual" super block, in index block) */
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (3 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 3rd data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (5 * cparam.data_blk_min_elmts)), "setting all elements of array's 3rd data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (5 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 4th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (7 * cparam.data_blk_min_elmts)), "setting all elements of array's 4th data block");
+            /* Super block #3 ("virtual" super block, in index block) */
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (7 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 5th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (11 * cparam.data_blk_min_elmts)), "setting all elements of array's 5th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (11 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 6th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (15 * cparam.data_blk_min_elmts)), "setting all elements of array's 6th data block");
+            /* Super block #4 (actual super block, from index block) */
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (15 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 7th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (19 * cparam.data_blk_min_elmts)), "setting all elements of array's 7th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (19 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 8th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (23 * cparam.data_blk_min_elmts)), "setting all elements of array's 8th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (23 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 9th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (27 * cparam.data_blk_min_elmts)), "setting all elements of array's 9th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (27 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 10th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (31 * cparam.data_blk_min_elmts)), "setting all elements of array's 10th data block");
+            /* Super block #5 (actual super block, from index block) */
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (31 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 11th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (39 * cparam.data_blk_min_elmts)), "setting all elements of array's 11th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (39 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 12th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (47 * cparam.data_blk_min_elmts)), "setting all elements of array's 12th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (47 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 13th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (55 * cparam.data_blk_min_elmts)), "setting all elements of array's 13th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (55 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 14th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (63 * cparam.data_blk_min_elmts)), "setting all elements of array's 14th data block");
+            /* Super block #6 (actual super block, from index block) */
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (63 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 15th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (71 * cparam.data_blk_min_elmts)), "setting all elements of array's 15th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (71 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 16th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (79 * cparam.data_blk_min_elmts)), "setting all elements of array's 16th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (79 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 17th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (87 * cparam.data_blk_min_elmts)), "setting all elements of array's 17th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (87 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 18th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (95 * cparam.data_blk_min_elmts)), "setting all elements of array's 18th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (95 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 19th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (103 * cparam.data_blk_min_elmts)), "setting all elements of array's 19th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (103 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 20th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (111 * cparam.data_blk_min_elmts)), "setting all elements of array's 20th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (111 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 21st data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (119 * cparam.data_blk_min_elmts)), "setting all elements of array's 21st data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (119 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 22nd data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (127 * cparam.data_blk_min_elmts)), "setting all elements of array's 22nd data block");
+            /* Super block #7 (actual super block, from index block) */
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (127 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 23rd data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (143 * cparam.data_blk_min_elmts)), "setting all elements of array's 23rd data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (143 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 24th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (159 * cparam.data_blk_min_elmts)), "setting all elements of array's 24th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (159 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 25th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (175 * cparam.data_blk_min_elmts)), "setting all elements of array's 25th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (175 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 26th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (191 * cparam.data_blk_min_elmts)), "setting all elements of array's 26th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (191 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 27th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (207 * cparam.data_blk_min_elmts)), "setting all elements of array's 27th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (207 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 28th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (223 * cparam.data_blk_min_elmts)), "setting all elements of array's 28th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (223 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 29th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (239 * cparam.data_blk_min_elmts)), "setting all elements of array's 29th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (239 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 30th data block");
+            nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (255 * cparam.data_blk_min_elmts)), "setting all elements of array's 30th data block");
+        } /* end for */
 
         /* Close down testing parameters */
         finish_tparam(&tparam);
