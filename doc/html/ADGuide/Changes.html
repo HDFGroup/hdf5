@@ -63,8 +63,8 @@ an application synchronized with the HDF5 library or related software.
 
 <dir>
 
-This section lists the API-level changes that have been made in the 
-transition from the HDF5 Release 1.6.7 to Release 1.6.8.
+This section lists API-level changes and changes in behavior 
+in the transition from HDF5 Release 1.6.7 to Release 1.6.8.
 
 
     <h3>Functions with Changed Syntax</h3>
@@ -100,13 +100,134 @@ transition from the HDF5 Release 1.6.7 to Release 1.6.8.
          </dl>
          <p>
 
+</dir>
+<dir>
 
     <h3>Tools with Changed Interface or Behavior</h3>
     
+        <dl>    
+            <dt><code>h5repack</code> and <code>h5diff</code>
+                <dd>The standard command-line syntax of both tools
+                    has been changed to parallel that of <code>h5dump</code>.
+                    The new syntax of each is as follows:
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>
+                    h5repack [<i>OPTIONS</i>] <i>file1 file2</i> 
+                    </code>
+                    <p>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>
+                    h5diff [<i>OPTIONS</i>] <i>file1 file2</i> 
+                           [<i>object1</i> [<i>object2</i>]]
+                    </code>
+                    <p>
+                    In each case, 
+                    the old syntax remains available (though undocumented)
+                    to avoid breaking existing scripts. 
+                    <p>
+        </dl>    
 
-        <p>
-        <i>List....</i>
-        <p>
+</dir>
+<dir>
+                   
+        <dl>    
+            <dt><code>h5diff</code>
+                <dd><code>h5diff</code> now returns <code>1</code>
+                    if the files differ in structure, 
+                    i.e., if the file graphs differ by any object. 
+                    <p>     
+                    The tool&rsquo;s error return code has been changed 
+                    to <code>2</code>.
+                    <p>     
+
+            <dt><code>h5repack</code> 
+                <dd>The following new options control the addition of
+                    user block data to an existing HDF5 file:
+                    <dir>
+                    <table>
+                    <tr valign=top><td>
+                          <code>-u <em>U</em></code>
+                          <br>
+                          <code>--ublock=<em>U</em></code>
+                        </td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+                          Specifies the name of the file containing the
+                          user block data to be added.
+                        </td></tr>
+                    <tr valign=top><td>
+                          <br>
+                          <code>-b <em>B</em></code>
+                          <br>
+                          <code>--block=<em>B</em></code>
+                        </td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+                          <br>
+                          Specifies the size of the block to be added.
+                        </td></tr>
+                    </table>
+                    </dir>
+                    <p>
+
+                <dd>The following new options set parameters
+                    governing the tool&rsquo;s use of
+                    <code>H5Pset_alignment</code>:
+                    <dir>
+                    <table>
+                    <tr valign=top><td>
+                          <code>-t <em>T</em></code>
+                          <br>
+                          <code>--threshold=<em>T</em></code>
+                        </td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+                          Specifies the threshold value for
+                          <code>H5Pset_alignment</code>.
+                        </td></tr>
+                    <tr valign=top><td>
+                          <br>
+                          <code>-a <em>A</em></code>
+                          <br>
+                          <code>--alignment=<em>A</em></code>
+                        </td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+                          <br>
+                          Specifies the alignment value for
+                          <code>H5Pset_alignment</code>.
+                        </td></tr>
+                    </table>
+                    </dir>
+                    <p>
+
+                <dd><code>h5repack</code> now supports multiple instances of
+                    the <code>'-f'</code> or <code>'--filter'</code> option, 
+                    allowing the use of multiple I/O filters with an object.
+                    <p>
+                <dd>With no change in the command-line syntax, 
+                    <code>h5repack</code> now retains an existing userblock
+                    when repacking an HDF5 file.
+                    <p>
+
+            <dt><code>h5import</code> 
+                <dd>The floating point format flag <code>TEXTFPE</code>,
+                    for scientific notation, has been deprecated.
+                    The flag <code>TEXTFP</code>, which accepts
+                    scientific notation, should be used instead.
+                    <p>
+
+                <dd><code>h5import</code> now imports string data 
+                    with the <code>STR</code> keyword 
+                    in the <code>INPUT-CLASS</code> configuration field.
+                    <p>
+                   
+            <dt><code>h5dump</code> 
+                <dd>The new <code>'-m <i>T</i>'</code> or 
+                    <code>'--format <i>T</i>'</code> option 
+                    enables a user-defined formatting string 
+                    for printing floating-point numbers.
+                    <p>
+                <dd>With no change in the command-line syntax, 
+                    <code>h5dump</code> now prints a compression ratio
+                    when compression filters are in use.
+                    
+        </dl>    
+
+</dir>
+<dir>
+
 
     <h3>Deprecated Functions</h3>
 
@@ -2889,7 +3010,7 @@ Describes HDF5 Release 1.6.8, November 2008
 
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 4 November 2008 
+Last modified: 7 November 2008 
 <!-- hhmts end -->
 
 </body>
