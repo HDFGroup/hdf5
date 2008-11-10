@@ -70,20 +70,20 @@ New Features
 
         Tools
         -----
-        - h5repack: add a userblock to an HDF5 file during the repack. 
-            (PVN - 2008/08/26)
-        - h5repack: add 2 options that call H5Pset_alignment in the repacked 
-          file. (PVN - 2008/08/29)
+        - h5repack: added new options -u and -b to add a userblock to an HDF5 
+          file during the repack.  (PVN - 2008/08/26)
+        - h5repack: added options -t and -a to call H5Pset_alignment while 
+          creating a repacked file. (PVN - 2008/08/29)
         - h5ls: added capability to traverse through external links when the -r
           (recursive) flag is given. (NAF - 2008/09/16)
         - h5ls: added -E option to enable traversal of external links.  
           h5ls will not traverse external links without this flag being set.
             (NAF - 2008/10/06)
-        - h5dump: binary output defaults to NATIVE with -b optionally accepting
-          the form of binary output (NATIVE, FILE, BE, LE). (PVN - 2008/10/30)
-        - h5diff: return 1 for file differences when both file graphs 
-          differ by any object.  Error return code was changed to 2 from -1. 
-            (PVN - 2008/10/30)
+        - h5dump: when -b flag is used without a keyword after it, binary 
+          output defaults to NATIVE. MEMORY keyword was deprecated 
+          and replaced by NATIVE keyword. (PVN - 2008/10/30)
+        - h5diff: returns 1 when file graphs differ by any object.  
+          Error return code was changed to 2 from -1.  (PVN - 2008/10/30)
         - h5import: TEXTFPE (scientific format) was deprecated. Use TEXTFP 
           instead (PVN - 2008/10/30)
 
@@ -209,7 +209,7 @@ Bug Fixes since HDF5-1.8.1
             (NAF - 2008/10/15)
         - Fixed unnecessary indentation of committed datatypes in h5dump.
             (NAF - 2008/10/15)
-	- Fixed bugs in h5stat:segmemtation fault when printing groups and
+	- Fixed bugs in h5stat: segmemtation fault when printing groups and
           print warning message when traversal of objects is unsuccessful.
           (see bug #1253) (VC- 2008/10/13)
         - Fixed bug in h5ls that prevented relative group listings (like
