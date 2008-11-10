@@ -85,7 +85,7 @@ Preconditions:
 
 
       6.2 HDF5 uses Szip version 2.1 for compression and Szip compression 
-          software is provided with HDF5 products in 1.8.1 release.  To use 
+          software is provided with HDF5 products in 1.8.2 release.  To use 
           Szip 2.1 library, you can download Szip source codes and binaries from
           ftp://ftp.hdfgroup.org/lib-external/szip/2.1/bin/windows
 

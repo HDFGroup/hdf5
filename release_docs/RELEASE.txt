@@ -357,7 +357,6 @@ The following platforms and compilers have been tested for this release.
     Windows XP                    Visual Studio .NET
                                   Visual Studio 2005 w/ Intel Fortran 9.1
                                   Cygwin(native gcc compiler and g95)
-                                  MinGW(native gcc compiler and g95)
 
     Windows XP x64                Visual Studio 2005 w/ Intel Fortran 9.1
 

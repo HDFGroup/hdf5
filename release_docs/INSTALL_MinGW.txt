@@ -15,7 +15,7 @@ Preconditions:
 
 2. Compilers Installed
 
-   2.1 C/C++ Compilers HDF5-1.8.1 Supported
+   2.1 C/C++ Compilers HDF5-1.8.2 Supported
 
        gcc-3.4.2 is included in MinGW, which includes: 
        gcc    : GNU C compiler
@@ -63,29 +63,29 @@ Build HDF5 on MinGW
 
    The HDF5 source code is distributed in a variety of formats which
    can be unpacked with the following commands, each of which creates 
-   an `hdf5-1.8.1' directory.
+   an `hdf5-1.8.2' directory.
 
    2.1 Non-compressed tar archive (*.tar)
 
-            $ tar xf hdf5-1.8.1.tar
+            $ tar xf hdf5-1.8.2.tar
 
    2.2 Gzip'd tar archive (*.tar.gz)
 
-            $ gunzip < hdf5-1.8.1.tar.gz | tar xf -
+            $ gunzip < hdf5-1.8.2.tar.gz | tar xf -
 
    2.3 Bzip'd tar archive (*.tar.bz2)
 
-            $ bunzip2 < hdf5-1.8.1.tar.bz2 | tar xf - 
+            $ bunzip2 < hdf5-1.8.2.tar.bz2 | tar xf - 
             
 3. Setup Environment
 
-   Building HDF5 1.8.1 requires an explicit link to libws2_32.a
+   Building HDF5 1.8.2 requires an explicit link to libws2_32.a
    to handle Windows Sockets.  To do this, issue the command:
    
             $ export LIBS=-lws2_32
             
    Also, the default search path can cause trouble using ./configure in HDF5
-   1.8.1.  Check that non-MinGW or non-msys directories are not added to the
+   1.8.2.  Check that non-MinGW or non-msys directories are not added to the
    PATH.  You can do this by:
    
             $ echo $PATH
@@ -155,7 +155,7 @@ Build HDF5 on MinGW
           MinGW g95, but is untested.  Keep in mind that this is UNSUPPORTED, 
           and any Fortran binaries build should be considered experimental.
        
-       2) Shared libraries can not be built on MinGW in release 1.8.1.
+       2) Shared libraries can not be built on MinGW in release 1.8.2.
           
        3) See detailed information in hdf5/release_docs/INSTALL, 
           part 5. Full installation instructions for source 
