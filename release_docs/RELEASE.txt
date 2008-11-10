@@ -1,4 +1,4 @@
-HDF5 version 1.8.2-pre1 released on Mon Nov  3 16:57:33 CST 2008
+HDF5 version 1.8.2 released on Mon Nov 10 15:43:09 CST 2008
 ================================================================================
 
 INTRODUCTION
