@@ -211,6 +211,12 @@ Documentation
 Platforms Tested
 ================
 
+    AIX 5.3			  xlc 7.0.0.8
+				  xlf 09.01.0000.0008
+				  xlC 7.0.0.8
+				  mpcc_r 7.0.0.8
+				  mpxlf_r 09.01.0000.0008
+
     FreeBSD 6.3-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
     (duty)                        g++ 3.4.6 [FreeBSD] 20060305
                                   gcc 4.2.5 20080702 
@@ -310,7 +316,7 @@ WinXP 2005                            n        y    n        y    y     y
 WinXP .Net                            n        y    n        y    y     y
 WinVista 2005                         n        n    n        y    y     y
 Mac OS X 10.4.10                      n        y    n        y    y     y
-AIX 5.3 32- and 64-bit                y        y    y        y    y     y
+AIX 5.3 32-bit                	      n        y    n        y    y     n
 FreeBSD 6.3 32- and 64-bit            n        n    n        y    y     y
 RedHat EL4 2.6.9-42 i686 GNU (1)  W   y        y    y        y    y     y
 RedHat EL4 2.6.9-42 i686 Intel    W   n        y    n        y    y     n
@@ -334,7 +340,7 @@ WinXP 2005                            y             n        n
 WinXP .Net                            y             n        n        
 WinVista 2005                         y             n        n        
 Mac OS X 10.4.10                      y             n        n        
-AIX 5.3 32- and 64-bit                n             n        n        
+AIX 5.3 32-bit                        n             n        n        
 FreeBSD 6.3 32- and 64-bit            y             n        n        
 RedHat EL4 2.6.9-42 i686 GNU (1)  W   y             n        y        
 RedHat EL4 2.6.9-42 i686 Intel    W   y             n        n        
