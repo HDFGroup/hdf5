@@ -118,7 +118,7 @@ not been verified.
 $ cd hdf5
 $ bin/yodconfigure configure
 $ env RUNSERIAL="yod -sz 1" \
-    CC=cc F9X=ftn CXX=CC \
+    CC=cc FC=ftn CXX=CC \
     ./configure --prefix=/project/hdf5/hdf5
 $ make
 $ make check
@@ -139,7 +139,7 @@ not been verified.
 $ cd hdf5
 $ bin/yodconfigure configure
 $ env RUNSERIAL="yod -sz 1" RUNPARALLEL="yod -sz 3" \
-    CC=mpicc F9X=mpif90 \
+    CC=cc FC=ftn \
     ./configure --enable-parallel --prefix=/project/hdf5/phdf5
 $ make
 $ make check
