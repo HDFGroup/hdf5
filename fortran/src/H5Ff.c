@@ -397,7 +397,7 @@ nh5fclose_c ( hid_t_f *file_id )
   int ret_value = 0;
   hid_t c_file_id;
 
-  c_file_id = (hid_t*)*file_id;
+  c_file_id = (hid_t)*file_id;
   if ( H5Fclose(c_file_id) < 0  ) ret_value = -1;
   return ret_value;
 }
