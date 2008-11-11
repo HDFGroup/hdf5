@@ -53,6 +53,10 @@
         (1 + tparam->sblk_info[sblk_idx].start_dblk +           \
                 ((idx - (cparam->idx_blk_elmts + tparam->sblk_info[sblk_idx].start_idx)) / tparam->sblk_info[sblk_idx].dblk_nelmts))
 
+/* Iterator parameter values */
+#define EA_RND2_SCALE           100
+#define EA_CYC_COUNT            4
+
 /* Local typedefs */
 
 /* Types of tests to perform */
@@ -67,6 +71,8 @@ typedef enum {
     EARRAY_ITER_FW,             /* "Forward" iteration */
     EARRAY_ITER_RV,             /* "Reverse" iteration */
     EARRAY_ITER_RND,            /* "Random" iteration */
+    EARRAY_ITER_CYC,            /* "Cyclic" iteration */
+    EARRAY_ITER_RND2,           /* "Random #2" iteration */
     EARRAY_ITER_NITERS          /* The number of iteration types, must be last */
 } earray_iter_type_t;
 
@@ -1512,7 +1518,7 @@ eiter_rnd_next(void *_eiter)
 
 
 /*-------------------------------------------------------------------------
- * Function:	eiter_rv_max
+ * Function:	eiter_rnd_max
  *
  * Purpose:	Get max. element index (random iteration)
  *
@@ -1575,6 +1581,223 @@ static const earray_iter_t ea_iter_rnd = {
     eiter_rnd_max,              /* Max. array index written */
     NULL,                       /* State of the extensible array */
     eiter_rnd_term              /* Iterator term */
+};
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_rnd2_init
+ *
+ * Purpose:	Initialize element interator (random #2 iteration)
+ *
+ * Return:	Success:	Pointer to iteration status object
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, November 11, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+eiter_rnd2_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam, 
+    hsize_t cnt)
+{
+    eiter_rnd_t *eiter;        /* Random element iteration object */
+    size_t u;                  /* Local index variable */
+
+    /* Allocate space for the element iteration object */
+    eiter = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
+    HDassert(eiter);
+
+    /* Allocate space for the array of shuffled indices */
+    eiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
+    HDassert(eiter->idx);
+
+    /* Initialize reverse iteration info */
+    eiter->max = 0;
+    eiter->pos = 0;
+
+    /* Randomly shuffle array indices */
+    if(cnt > 1) {
+        hsize_t *tmp_idx;           /* Temporary index array */
+        hsize_t sparse_cnt = (hsize_t)(cnt * EA_RND2_SCALE);         /* Sparse range to choose from */
+
+        /* Allocate temporary index array */
+        tmp_idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)sparse_cnt);
+        HDassert(tmp_idx);
+
+        /* Initialize temporary index array, for shuffling */
+        for(u = 0; u < (size_t)sparse_cnt; u++)
+            tmp_idx[u] = (hsize_t)u;
+
+        /* Shuffle index elements & store in final array */
+        for(u = 0; u < (size_t)cnt; u++) {
+            size_t swap_idx;            /* Location to swap with when shuffling */
+
+            swap_idx = ((size_t)HDrandom() % ((size_t)sparse_cnt - u)) + u;
+            eiter->idx[u] = tmp_idx[swap_idx];
+            tmp_idx[swap_idx] = tmp_idx[u];
+        } /* end for */
+
+        /* Release temporary array */
+        HDfree(tmp_idx);
+    } /* end if */
+    else {
+        for(u = 0; u < (size_t)cnt; u++)
+            eiter->idx[u] = (hsize_t)u;
+    } /* end else */
+
+    /* Return iteration object */
+    return(eiter);
+} /* end eiter_rnd2_init() */
+
+/* Extensible array iterator class for random iteration */
+static const earray_iter_t ea_iter_rnd2 = {
+    eiter_rnd2_init,            /* Iterator init */
+    eiter_rnd_next,             /* Next array index */
+    eiter_rnd_max,              /* Max. array index written */
+    NULL,                       /* State of the extensible array */
+    eiter_rnd_term              /* Iterator term */
+};
+
+/* Extensible array iterator info for cyclic iteration */
+typedef struct eiter_cyc_t {
+    hsize_t max;                /* Max. array index used */
+    hsize_t pos;                /* Position in shuffled array */
+    hsize_t cnt;                /* # of elements to store */
+    hsize_t cyc;                /* Cycle of elements to choose from */
+} eiter_cyc_t;
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_cyc_init
+ *
+ * Purpose:	Initialize element interator (cyclic iteration)
+ *
+ * Return:	Success:	Pointer to iteration status object
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 11, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static void *
+eiter_cyc_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam, 
+    hsize_t cnt)
+{
+    eiter_cyc_t *eiter;         /* Cyclic element iteration object */
+
+    /* Allocate space for the element iteration object */
+    eiter = (eiter_cyc_t *)HDmalloc(sizeof(eiter_cyc_t));
+    HDassert(eiter);
+
+    /* Initialize reverse iteration info */
+    eiter->max = 0;
+    eiter->pos = 0;
+    eiter->cnt = cnt;
+    eiter->cyc = 0;
+
+    /* Return iteration object */
+    return(eiter);
+} /* end eiter_cyc_init() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_cyc_next
+ *
+ * Purpose:	Get next element index (cyclic iteration)
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 11, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static hssize_t
+eiter_cyc_next(void *_eiter)
+{
+    eiter_cyc_t *eiter = (eiter_cyc_t *)_eiter;
+    hssize_t ret_val;
+
+    /* Sanity check */
+    HDassert(eiter);
+
+    /* Get the next array index to test */
+    ret_val = eiter->pos;
+    eiter->pos += EA_CYC_COUNT;
+    if(eiter->pos >= eiter->cnt)
+        eiter->pos = ++eiter->cyc;
+
+    /* Check for new max. value */
+    if((hsize_t)ret_val > eiter->max)
+        eiter->max = (hsize_t)ret_val;
+
+    return(ret_val);
+} /* end eiter_cyc_next() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_cyc_max
+ *
+ * Purpose:	Get max. element index (cyclic iteration)
+ *
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 11, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static hssize_t
+eiter_cyc_max(const void *_eiter)
+{
+    const eiter_cyc_t *eiter = (const eiter_cyc_t *)_eiter;
+
+    /* Sanity check */
+    HDassert(eiter);
+
+    /* Return the max. array index used */
+    return((hssize_t)eiter->max);
+} /* end eiter_cyc_max() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	eiter_cyc_term
+ *
+ * Purpose:	Shut down element interator (cyclic iteration)
+ *
+ * Return:	Success:	0
+ *		Failure:	-1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 11, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+eiter_cyc_term(void *_eiter)
+{
+    eiter_cyc_t *eiter = (eiter_cyc_t *)_eiter;
+
+    /* Sanity check */
+    HDassert(eiter);
+
+    /* Free iteration object */
+    HDfree(eiter);
+
+    return(0);
+} /* end eiter_cyc_term() */
+
+/* Extensible array iterator class for cyclic iteration */
+static const earray_iter_t ea_iter_cyc = {
+    eiter_cyc_init,             /* Iterator init */
+    eiter_cyc_next,             /* Next array index */
+    eiter_cyc_max,              /* Max. array index written */
+    NULL,                       /* State of the extensible array */
+    eiter_cyc_term              /* Iterator term */
 };
 
 
@@ -1756,6 +1979,159 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_skip_elmts
+ *
+ * Purpose:	Skip some elements when writing element
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 11, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
+    hsize_t skip_elmts, const char *test_str)
+{
+    hid_t	file = -1;              /* File ID */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5EA_t      *ea = NULL;             /* Extensible array wrapper */
+    earray_state_t state;               /* State of extensible array */
+    uint64_t    welmt;                  /* Element to write */
+    uint64_t    relmt;                  /* Element to read */
+    hsize_t     nelmts_written;         /* Highest element written in array */
+    hsize_t     idx;                    /* Index value of element to get */
+    hsize_t     cnt;                    /* Count of array indices */
+    haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
+
+    /*
+     * Display testing message
+     */
+    TESTING(test_str);
+
+    /* Create file & retrieve pointer to internal file object */
+    if(create_file(fapl, &file, &f) < 0)
+        TEST_ERROR
+
+    /* Create array */
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr) < 0)
+        TEST_ERROR
+
+    /* Verify the creation parameters */
+    if(verify_cparam(ea, cparam) < 0)
+        TEST_ERROR
+
+    /* Check for closing & re-opening the file */
+    if(reopen_file(&file, &f, fapl, H5P_DATASET_XFER_DEFAULT, &ea, ea_addr, cparam->cls, tparam) < 0)
+        TEST_ERROR
+
+    /* Verify high-water # of elements written */
+    nelmts_written = (hsize_t)ULLONG_MAX;
+    if(H5EA_get_nelmts(ea, &nelmts_written) < 0)
+        FAIL_STACK_ERROR
+    if(nelmts_written != 0)
+        TEST_ERROR
+
+    /* Verify array state */
+    HDmemset(&state, 0, sizeof(state));
+    if(check_stats(ea, &state))
+        TEST_ERROR
+
+    /* Set (& get) element after skipping elements */
+    idx = skip_elmts;
+
+    /* Retrieve element of array (not set yet) */
+    relmt = (uint64_t)0;
+    if(H5EA_get(ea, H5P_DATASET_XFER_DEFAULT, idx, &relmt) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify element is fill value for array */
+    if(relmt != H5EA_TEST_FILL)
+        TEST_ERROR
+
+    /* Set element of array */
+    welmt = (uint64_t)7 + idx;
+    if(H5EA_set(ea, H5P_DATASET_XFER_DEFAULT, idx, &welmt) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify high-water # of elements written */
+    nelmts_written = (hsize_t)ULLONG_MAX;
+    if(H5EA_get_nelmts(ea, &nelmts_written) < 0)
+        FAIL_STACK_ERROR
+    if(nelmts_written != (idx + 1))
+        TEST_ERROR
+
+    /* Set array state */
+    HDmemset(&state, 0, sizeof(state));
+    state.max_idx_set = idx + 1;
+    if(1 == skip_elmts) {
+        state.nelmts = (hsize_t)cparam->idx_blk_elmts;
+        state.nsuper_blks = state.ndata_blks = (hsize_t)0;
+    } /* end if */
+    else if(cparam->idx_blk_elmts == skip_elmts) {
+        state.nelmts = (hsize_t)cparam->idx_blk_elmts + cparam->data_blk_min_elmts;
+        state.ndata_blks = (hsize_t)1;
+        state.nsuper_blks = (hsize_t)0;
+    } /* end if */
+    else {
+        unsigned sblk_idx;      /* Which superblock does this index fall in? */
+
+        /* Compute super block index for element index */
+        /* (same eqn. as in H5EA__dblock_sblk_idx()) */
+        sblk_idx = H5V_log2_gen((uint64_t)(((idx - cparam->idx_blk_elmts) / cparam->data_blk_min_elmts) + 1));
+        state.nelmts = (hsize_t)cparam->idx_blk_elmts + tparam->sblk_info[sblk_idx].dblk_nelmts;
+        state.ndata_blks = (hsize_t)1;
+        state.nsuper_blks = (hsize_t)1;
+    } /* end if */
+
+    /* Verify array state */
+    if(check_stats(ea, &state))
+        TEST_ERROR
+
+    /* Retrieve element of array (set now) */
+    relmt = (uint64_t)0;
+    if(H5EA_get(ea, H5P_DATASET_XFER_DEFAULT, idx, &relmt) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify element is value written */
+    if(relmt != welmt)
+        TEST_ERROR
+
+    /* Get unset elements of array */
+    for(cnt = 0; cnt < skip_elmts; cnt++) {
+        /* Retrieve element of array (not set yet) */
+        relmt = (uint64_t)0;
+        if(H5EA_get(ea, H5P_DATASET_XFER_DEFAULT, cnt, &relmt) < 0)
+            FAIL_STACK_ERROR
+
+        /* Verify element is fill value for array */
+        if(relmt != H5EA_TEST_FILL)
+            TEST_ERROR
+    } /* end for */
+
+    /* Close array, delete array, close file & verify file is empty */
+    if(finish(file, fapl, f, ea, ea_addr) < 0)
+        TEST_ERROR
+
+    /* All tests passed */
+    PASSED()
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        if(ea)
+            H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+	H5Fclose(file);
+    } H5E_END_TRY;
+
+    return 1;
+} /* test_skip_elmts() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test the extensible array code
@@ -1867,6 +2243,18 @@ main(void)
                     tparam.eiter = &ea_iter_rnd;
                     break;
 
+                /* "Random #2" testing parameters */
+                case EARRAY_ITER_RND2:
+                    puts("Testing with random #2 iteration");
+                    tparam.eiter = &ea_iter_rnd2;
+                    break;
+
+                /* "Cyclic" testing parameters */
+                case EARRAY_ITER_CYC:
+                    puts("Testing with cyclic iteration");
+                    tparam.eiter = &ea_iter_cyc;
+                    break;
+
                 /* An unknown iteration? */
                 case EARRAY_ITER_NITERS:
                 default:
@@ -1945,6 +2333,14 @@ main(void)
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (239 * cparam.data_blk_min_elmts) + 1), "setting first element of array's 30th data block");
             nerrors += test_set_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (255 * cparam.data_blk_min_elmts)), "setting all elements of array's 30th data block");
         } /* end for */
+
+        /* Check skipping elements */
+        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)1, "skipping 1st element");
+        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)cparam.idx_blk_elmts, "skipping index block elements");
+        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (15 * cparam.data_blk_min_elmts) + 1), "skipping index block & data block elements");
+        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (31 * cparam.data_blk_min_elmts) + 1), "skipping 1st super block elements");
+        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (63 * cparam.data_blk_min_elmts) + 1), "skipping 2nd super block elements");
+        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (127 * cparam.data_blk_min_elmts) + 1), "skipping 3rd super block elements");
 
         /* Close down testing parameters */
         finish_tparam(&tparam);
