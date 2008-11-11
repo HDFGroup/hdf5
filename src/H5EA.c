@@ -408,9 +408,11 @@ HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_i
             /* Check if the data block has been allocated on disk yet */
             if(!H5F_addr_defined(iblock->dblk_addrs[dblk_idx])) {
                 haddr_t dblk_addr;        /* Address of data block created */
+                hsize_t dblk_off;         /* Offset of data block in array */
 
                 /* Create data block */
-                dblk_addr = H5EA__dblock_create(hdr, dxpl_id, hdr->sblk_info[sblk_idx].dblk_nelmts);
+                dblk_off = hdr->sblk_info[sblk_idx].start_idx + (dblk_idx * hdr->sblk_info[sblk_idx].dblk_nelmts);
+                dblk_addr = H5EA__dblock_create(hdr, dxpl_id, dblk_off, hdr->sblk_info[sblk_idx].dblk_nelmts);
                 if(!H5F_addr_defined(dblk_addr))
                     H5E_THROW(H5E_CANTCREATE, "unable to create extensible array data block")
 
@@ -476,9 +478,11 @@ HDfprintf(stderr, "%s: dblk_idx = %u, sblock->ndblks = %Zu\n", FUNC, dblk_idx, s
             /* Check if the data block has been allocated on disk yet */
             if(!H5F_addr_defined(sblock->dblk_addrs[dblk_idx])) {
                 haddr_t dblk_addr;        /* Address of data block created */
+                hsize_t dblk_off;         /* Offset of data block in array */
 
                 /* Create data block */
-                dblk_addr = H5EA__dblock_create(hdr, dxpl_id, sblock->dblk_nelmts);
+                dblk_off = hdr->sblk_info[sblk_idx].start_idx + (dblk_idx * hdr->sblk_info[sblk_idx].dblk_nelmts);
+                dblk_addr = H5EA__dblock_create(hdr, dxpl_id, dblk_off, sblock->dblk_nelmts);
                 if(!H5F_addr_defined(dblk_addr))
                     H5E_THROW(H5E_CANTCREATE, "unable to create extensible array data block")
 

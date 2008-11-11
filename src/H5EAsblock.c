@@ -185,6 +185,12 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 HDfprintf(stderr, "%s: sblock->size = %Zu\n", FUNC, sblock->size);
 #endif /* QAK */
 
+    /* Set offset of block in array's address space */
+    sblock->block_off = hdr->sblk_info[sblk_idx].start_idx;
+#ifdef QAK
+HDfprintf(stderr, "%s: sblock->block_off = %Hu\n", FUNC, sblock->block_off);
+#endif /* QAK */
+
     /* Allocate space for the super block on disk */
     if(HADDR_UNDEF == (sblock->addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_SBLOCK, dxpl_id, (hsize_t)sblock->size)))
 	H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array super block")

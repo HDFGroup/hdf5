@@ -386,6 +386,7 @@ func_init_failed:							      \
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* Extensible Array Index Block specific fields */			      \
+    + (i)->hdr->sizeof_addr          /* File address of array owning the block */ \
     + ((size_t)(i)->hdr->cparam.idx_blk_elmts * (size_t)(i)->hdr->cparam.raw_elmt_size) /* Elements in index block  */ \
     + ((i)->ndblk_addrs * (i)->hdr->sizeof_addr) /* Data block addresses in index block  */ \
     + ((i)->nsblk_addrs * (i)->hdr->sizeof_addr) /* Super block addresses in index block  */ \
@@ -397,6 +398,8 @@ func_init_failed:							      \
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* Extensible Array Super Block specific fields */			      \
+    + (s)->hdr->sizeof_addr          /* File address of array owning the block */ \
+    + (s)->hdr->arr_off_size         /* Offset of the block in the array */   \
     + ((s)->ndblks * (s)->hdr->sizeof_addr) /* Data block addresses in super block  */ \
     )
 
@@ -406,8 +409,13 @@ func_init_failed:							      \
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* Extensible Array Data Block specific fields */			      \
+    + (d)->hdr->sizeof_addr          /* File address of array owning the block */ \
+    + (d)->hdr->arr_off_size         /* Offset of the block in the array */   \
     + ((d)->nelmts * (size_t)(d)->hdr->cparam.raw_elmt_size) /* Elements in index block  */  \
     )
+
+/* Compute the # of bytes required to store an offset into a given buffer size */
+#define H5EA_SIZEOF_OFFSET_BITS(b)   (((b) + 7) / 8)
 
 
 /****************************/
@@ -454,6 +462,7 @@ typedef struct H5EA_hdr_t {
     hbool_t pending_delete;             /* Array is pending deletion */
     size_t sizeof_addr;                 /* Size of file addresses */
     size_t sizeof_size;                 /* Size of file sizes */
+    unsigned char arr_off_size;         /* Size of array offsets (in bytes) */
 
     /* Super block information (not stored) */
     size_t nsblks;                      /* Number of superblocks needed for array */
@@ -488,6 +497,7 @@ typedef struct H5EA_sblock_t {
     H5AC_info_t cache_info;
 
     /* Extensible array information (stored) */
+    hsize_t     block_off;      /* Offset of the block within the array's address space */
     haddr_t     *dblk_addrs;    /* Buffer for addresses of data blocks in super block */
 
     /* Internal array information (not stored) */
@@ -508,6 +518,7 @@ typedef struct H5EA_dblock_t {
     H5AC_info_t cache_info;
 
     /* Extensible array information (stored) */
+    hsize_t     block_off;      /* Offset of the block within the array's address space */
     void        *elmts;         /* Buffer for elements stored in data block  */
 
     /* Internal array information (not stored) */
@@ -590,7 +601,7 @@ H5_DLL herr_t H5EA__sblock_dest(H5F_t *f, H5EA_sblock_t *sblock);
 /* Data block routines */
 H5_DLL H5EA_dblock_t *H5EA__dblock_alloc(H5EA_hdr_t *hdr, size_t nelmts);
 H5_DLL haddr_t H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    size_t nelmts);
+    hsize_t dblk_off, size_t nelmts);
 H5_DLL unsigned H5EA__dblock_sblk_idx(const H5EA_hdr_t *hdr, hsize_t idx);
 H5_DLL H5EA_dblock_t *H5EA__dblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
     haddr_t dblk_addr, size_t dblk_nelmts, H5AC_protect_t rw);

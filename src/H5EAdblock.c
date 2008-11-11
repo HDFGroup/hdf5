@@ -152,7 +152,7 @@ END_FUNC(PKG)   /* end H5EA__dblock_alloc() */
  */
 BEGIN_FUNC(PKG, ERR,
 haddr_t, HADDR_UNDEF, HADDR_UNDEF,
-H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, size_t nelmts))
+H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hsize_t dblk_off, size_t nelmts))
 
     /* Local variables */
     H5EA_dblock_t *dblock = NULL;      /* Extensible array data block */
@@ -173,6 +173,12 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     dblock->size = H5EA_DBLOCK_SIZE(dblock);
 #ifdef QAK
 HDfprintf(stderr, "%s: dblock->size = %Zu\n", FUNC, dblock->size);
+#endif /* QAK */
+
+    /* Set offset of block in array's address space */
+    dblock->block_off = dblk_off;
+#ifdef QAK
+HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
 #endif /* QAK */
 
     /* Allocate space for the data block on disk */

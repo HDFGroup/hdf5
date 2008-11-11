@@ -519,6 +519,7 @@ H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     const uint8_t	*p;             /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
+    haddr_t             arr_addr;       /* Address of array header in the file */
 
     /* Sanity check */
     HDassert(f);
@@ -558,6 +559,11 @@ H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     /* Version */
     if(*p++ != H5EA_IBLOCK_VERSION)
 	H5E_THROW(H5E_VERSION, "wrong extensible array index block version")
+
+    /* Address of header for array that owns this block (just for file integrity checks) */
+    H5F_addr_decode(f, &p, &arr_addr);
+    if(H5F_addr_ne(arr_addr, hdr->addr))
+	H5E_THROW(H5E_BADVALUE, "wrong extensible array header address")
 
     /* Extensible array type */
     if(*p++ != (uint8_t)hdr->cparam.cls->id)
@@ -680,6 +686,9 @@ H5EA__cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 
         /* Version # */
         *p++ = H5EA_IBLOCK_VERSION;
+
+        /* Address of array header for array which owns this block */
+        H5F_addr_encode(f, &p, iblock->hdr->addr);
 
         /* Extensible array type */
         *p++ = iblock->hdr->cparam.cls->id;
@@ -880,6 +889,7 @@ H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     const uint8_t	*p;             /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
+    haddr_t             arr_addr;       /* Address of array header in the file */
 
     /* Sanity check */
     HDassert(f);
@@ -920,6 +930,14 @@ H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     /* Version */
     if(*p++ != H5EA_SBLOCK_VERSION)
 	H5E_THROW(H5E_VERSION, "wrong extensible array super block version")
+
+    /* Address of header for array that owns this block (just for file integrity checks) */
+    H5F_addr_decode(f, &p, &arr_addr);
+    if(H5F_addr_ne(arr_addr, hdr->addr))
+	H5E_THROW(H5E_BADVALUE, "wrong extensible array header address")
+
+    /* Offset of block within the array's address space */
+    UINT64DECODE_VAR(p, sblock->block_off, hdr->arr_off_size);
 
     /* Extensible array type */
     if(*p++ != (uint8_t)hdr->cparam.cls->id)
@@ -1025,6 +1043,12 @@ H5EA__cache_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 
         /* Version # */
         *p++ = H5EA_SBLOCK_VERSION;
+
+        /* Address of array header for array which owns this block */
+        H5F_addr_encode(f, &p, sblock->hdr->addr);
+
+        /* Offset of block in array */
+        UINT64ENCODE_VAR(p, sblock->block_off, sblock->hdr->arr_off_size);
 
         /* Extensible array type */
         *p++ = sblock->hdr->cparam.cls->id;
@@ -1207,6 +1231,7 @@ H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     const uint8_t	*p;             /* Pointer into raw data buffer */
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
+    haddr_t             arr_addr;       /* Address of array header in the file */
 
     /* Sanity check */
     HDassert(f);
@@ -1247,6 +1272,14 @@ H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     /* Version */
     if(*p++ != H5EA_DBLOCK_VERSION)
 	H5E_THROW(H5E_VERSION, "wrong extensible array data block version")
+
+    /* Address of header for array that owns this block (just for file integrity checks) */
+    H5F_addr_decode(f, &p, &arr_addr);
+    if(H5F_addr_ne(arr_addr, hdr->addr))
+	H5E_THROW(H5E_BADVALUE, "wrong extensible array header address")
+
+    /* Offset of block within the array's address space */
+    UINT64DECODE_VAR(p, dblock->block_off, hdr->arr_off_size);
 
     /* Extensible array type */
     if(*p++ != (uint8_t)hdr->cparam.cls->id)
@@ -1349,6 +1382,12 @@ H5EA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 
         /* Version # */
         *p++ = H5EA_DBLOCK_VERSION;
+
+        /* Address of array header for array which owns this block */
+        H5F_addr_encode(f, &p, dblock->hdr->addr);
+
+        /* Offset of block in array */
+        UINT64ENCODE_VAR(p, dblock->block_off, dblock->hdr->arr_off_size);
 
         /* Extensible array type */
         *p++ = dblock->hdr->cparam.cls->id;
