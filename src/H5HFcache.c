@@ -1261,7 +1261,6 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
     /* Set block's internal information */
     dblock->size = *size;
     dblock->file_size = 0;
-    dblock->blk_off_size = H5HF_SIZEOF_OFFSET_LEN(dblock->size);
 
     /* Allocate block buffer */
 /* XXX: Change to using free-list factories */

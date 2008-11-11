@@ -440,9 +440,6 @@ H5HF_dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream,
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of block header:",
               blk_prefix_size);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
-	      "Size of block offsets:",
-	      dblock->blk_off_size);
 
     /* Allocate space for the free space markers */
     if(NULL == (marker = (uint8_t *)H5MM_calloc(dblock->size)))
