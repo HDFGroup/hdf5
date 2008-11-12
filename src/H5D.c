@@ -249,7 +249,7 @@ H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not dataset access property list")
 
     /* build and open the new dataset */
-    if(NULL == (dset = H5D_create(loc.oloc->file, type_id, space, dcpl_id, H5AC_dxpl_id)))
+    if(NULL == (dset = H5D_create(loc.oloc->file, type_id, space, dcpl_id, dapl_id, H5AC_dxpl_id)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create dataset")
 
     /* Register the new dataset to get an ID for it */
@@ -328,7 +328,7 @@ H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id)
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "not a dataset")
 
     /* Open the dataset */
-    if((dset = H5D_open(&dset_loc, dxpl_id)) == NULL)
+    if((dset = H5D_open(&dset_loc, dapl_id, dxpl_id)) == NULL)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open dataset")
 
     /* Register an atom for the dataset */
@@ -649,6 +649,85 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Dget_create_plist() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Dget_access_plist
+ *
+ * Purpose:	Returns a copy of the dataset creation property list.
+ *
+ * Description: H5Dget_access_plist returns the dataset access property
+ *      list identifier of the specified dataset.
+ *
+ *      The chunk cache parameters in the returned property lists will be
+ *      those used by the dataset.  If the properties in the file access
+ *      property list were used to determine the dataset’s chunk cache
+ *      configuration, then those properties will be present in the
+ *      returned dataset access property list.  If the dataset does not
+ *      use a chunked layout, then the chunk cache properties will be set
+ *      to the default.  The chunk cache properties in the returned list
+ *      are considered to be “set”, and any use of this list will override
+ *      the corresponding properties in the file’s file access property
+ *      list. 
+ *
+ *      All link access properties in the returned list will be set to the
+ *      default values.
+ *
+ * Return:	Success:	ID for a copy of the dataset access
+ *				property list.  The template should be
+ *				released by calling H5Pclose().
+ *
+ *		Failure:	FAIL
+ *
+ * Programmer:	Neil Fortner
+ *		Wednesday, October 29, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Dget_access_plist(hid_t dset_id)
+{
+    H5D_t           *dset;          /* Dataset structure */
+    H5P_genplist_t  *old_plist;     /* Default DAPL */
+    H5P_genplist_t  *new_plist;     /* New DAPL */
+    hid_t           new_dapl_id = FAIL;
+    hid_t           ret_value;      /* Return value */
+
+    FUNC_ENTER_API(H5Dget_access_plist, FAIL)
+    H5TRACE1("i", "i", dset_id);
+
+    /* Check args */
+    if (NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    /* Make a copy of the default dataset access property list */
+    if (NULL == (old_plist = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_ACCESS_g)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+    if ((new_dapl_id = H5P_copy_plist(old_plist, TRUE)) < 0)
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTINIT, FAIL, "can't copy dataset access property list")
+    if (NULL == (new_plist = (H5P_genplist_t *)H5I_object(new_dapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+    /* If the dataset is chunked then copy the rdcc parameters */
+    if (dset->shared->layout.type == H5D_CHUNKED) {
+        if (H5P_set(new_plist, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &(dset->shared->cache.chunk.nslots)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache number of slots")
+        if (H5P_set(new_plist, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &(dset->shared->cache.chunk.nbytes)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache byte size")
+        if (H5P_set(new_plist, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &(dset->shared->cache.chunk.w0)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set preempt read chunks")
+    } /* end if */
+
+    /* Set the return value */
+    ret_value = new_dapl_id;
+
+done:
+    if(ret_value < 0)
+        if(new_dapl_id >= 0)
+            (void)H5I_dec_ref(new_dapl_id, TRUE);
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Dget_access_plist() */
 
 
 /*-------------------------------------------------------------------------

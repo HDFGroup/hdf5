@@ -100,7 +100,7 @@ struct H5D_io_info_t;
 struct H5D_chunk_map_t;
 
 /* Function pointers for I/O on particular types of dataset layouts */
-typedef herr_t (*H5D_layout_new_func_t)(H5F_t *f, hid_t dxpl_id,
+typedef herr_t (*H5D_layout_new_func_t)(H5F_t *f, hid_t dapl_id, hid_t dxpl_id,
     H5D_t *dset, const H5P_genplist_t *dc_plist);
 typedef herr_t (*H5D_layout_io_init_func_t)(const struct H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info,
@@ -358,6 +358,7 @@ typedef struct H5D_rdcc_t {
     } stats;
     size_t		nbytes;	/* Current cached raw data in bytes	*/
     size_t		nslots;	/* Number of chunk slots allocated	*/
+    double      w0;     /* Chunk preemption policy          */
     struct H5D_rdcc_ent_t *head; /* Head of doubly linked list		*/
     struct H5D_rdcc_ent_t *tail; /* Tail of doubly linked list		*/
     int		nused;	/* Number of chunk slots in use		*/
@@ -426,6 +427,7 @@ typedef struct {
     hid_t type_id;              /* Datatype for dataset */
     const H5S_t *space;         /* Dataspace for dataset */
     hid_t dcpl_id;              /* Dataset creation property list */
+    hid_t dapl_id;              /* Dataset access property list */
 } H5D_obj_create_t;
 
 /* Typedef for filling a buffer with a fill value */
@@ -502,7 +504,7 @@ H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_ISTORE[1];
 /******************************/
 
 H5_DLL H5D_t *H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space,
-    hid_t dcpl_id, hid_t dxpl_id);
+    hid_t dcpl_id, hid_t dapl_id, hid_t dxpl_id);
 H5_DLL H5D_t *H5D_create_named(const H5G_loc_t *loc, const char *name,
     hid_t type_id, const H5S_t *space, hid_t lcpl_id, hid_t dcpl_id,
     hid_t dapl_id, hid_t dxpl_id);
@@ -563,7 +565,7 @@ H5_DLL herr_t H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_
 H5_DLL hbool_t H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr);
 H5_DLL herr_t H5D_chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
 H5_DLL herr_t H5D_chunk_create(H5D_t *dset /*in,out*/, hid_t dxpl_id);
-H5_DLL herr_t H5D_chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset);
+H5_DLL herr_t H5D_chunk_init(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, const H5D_t *dset);
 H5_DLL herr_t H5D_chunk_get_info(const H5D_t *dset, hid_t dxpl_id,
     const hsize_t *chunk_offset, H5D_chunk_ud_t *udata);
 H5_DLL void *H5D_chunk_lock(const H5D_io_info_t *io_info,

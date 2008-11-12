@@ -29,6 +29,11 @@
 /* Public Macros */
 /*****************/
 
+/* Macros used to "unset" chunk cache configuration parameters */
+#define H5D_CHUNK_CACHE_NSLOTS_DEFAULT     ((size_t) -1)
+#define H5D_CHUNK_CACHE_NBYTES_DEFAULT      ((size_t) -1)
+#define H5D_CHUNK_CACHE_W0_DEFAULT          -1.
+
 /*******************/
 /* Public Typedefs */
 /*******************/
@@ -101,6 +106,7 @@ H5_DLL hid_t H5Dget_space(hid_t dset_id);
 H5_DLL herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation);
 H5_DLL hid_t H5Dget_type(hid_t dset_id);
 H5_DLL hid_t H5Dget_create_plist(hid_t dset_id);
+H5_DLL hid_t H5Dget_access_plist(hid_t dset_id);
 H5_DLL hsize_t H5Dget_storage_size(hid_t dset_id);
 H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
 H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,

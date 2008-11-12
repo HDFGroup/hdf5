@@ -145,7 +145,7 @@ typedef struct H5F_file_t {
                                 /* not change thereafter.               */
     hid_t       fcpl_id;	/* File creation property list ID 	*/
     H5F_close_degree_t fc_degree;   /* File close behavior degree	*/
-    size_t	rdcc_nelmts;	/* Size of raw data chunk cache (elmts)	*/
+    size_t	rdcc_nslots;	/* Size of raw data chunk cache (slots)	*/
     size_t	rdcc_nbytes;	/* Size of raw data chunk cache	(bytes)	*/
     double	rdcc_w0;	/* Preempt read chunks first? [0.0..1.0]*/
     size_t      sieve_buf_size; /* Size of the data sieve buffer allocated (in bytes) */

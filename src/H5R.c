@@ -461,10 +461,11 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
 
         case H5O_TYPE_DATASET:
             {
+                hid_t dapl_id = H5P_DATASET_ACCESS_DEFAULT; /* dapl to use to open dataset */
                 H5D_t *dset;                /* Pointer to dataset to open */
 
                 /* Open the dataset */
-                if(NULL == (dset = H5D_open(&loc, dxpl_id)))
+                if(NULL == (dset = H5D_open(&loc, dapl_id, dxpl_id)))
                     HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
 
                 /* Create an atom for the dataset */

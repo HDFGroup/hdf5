@@ -66,7 +66,7 @@ static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
 static herr_t H5D_init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t H5D_set_io_ops(H5D_t *dataset);
 static herr_t H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset);
-static herr_t H5D_open_oid(H5D_t *dataset, hid_t dxpl_id);
+static herr_t H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
 static herr_t H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 
 
@@ -418,6 +418,7 @@ H5D_create_named(const H5G_loc_t *loc, const char *name, hid_t type_id,
     dcrt_info.type_id = type_id;
     dcrt_info.space = space;
     dcrt_info.dcpl_id = dcpl_id;
+    dcrt_info.dapl_id = dapl_id;
 
     /* Set up object creation information */
     ocrt_info.obj_type = H5O_TYPE_DATASET;
@@ -1001,7 +1002,7 @@ done:
  */
 H5D_t *
 H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
-    hid_t dxpl_id)
+    hid_t dapl_id, hid_t dxpl_id)
 {
     const H5T_t         *type;                  /* Datatype for dataset */
     H5D_t		*new_dset = NULL;
@@ -1128,7 +1129,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations")
 
     /* Create the layout information for the new dataset */
-    if((new_dset->shared->layout.ops->new)(file, dxpl_id, new_dset, dc_plist) < 0)
+    if((new_dset->shared->layout.ops->new)(file, dapl_id, dxpl_id, new_dset, dc_plist) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize layout information")
 
     /* Indicate that the layout information was initialized */
@@ -1198,7 +1199,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5D_t *
-H5D_open(const H5G_loc_t *loc, hid_t dxpl_id)
+H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id)
 {
     H5D_shared_t    *shared_fo = NULL;
     H5D_t           *dataset = NULL;
@@ -1227,7 +1228,7 @@ H5D_open(const H5G_loc_t *loc, hid_t dxpl_id)
         H5E_clear_stack(NULL);
 
         /* Open the dataset object */
-        if(H5D_open_oid(dataset, dxpl_id) < 0)
+        if(H5D_open_oid(dataset, dapl_id, dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, NULL, "not found")
 
         /* Add the dataset to the list of opened objects in the file */
@@ -1295,7 +1296,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
+H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
 {
     H5P_genplist_t *plist;              /* Property list */
     H5O_fill_t *fill_prop;              /* Pointer to dataset's fill value info */
@@ -1411,7 +1412,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dxpl_id)
                      HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk size")
 
                 /* Initialize the chunk cache for the dataset */
-                if(H5D_chunk_init(dataset->oloc.file, dxpl_id, dataset) < 0)
+                if(H5D_chunk_init(dataset->oloc.file, dapl_id, dxpl_id, dataset) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize chunk cache")
             }
             break;

@@ -43,6 +43,7 @@ const char *FILENAME[] = {
     "set_local",
     "random_chunks",
     "huge_chunks",
+    "chunk_cache",
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -6474,6 +6475,214 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function: test_chunk_cache
+ *
+ * Purpose: Tests API for setting rdcc info on a DAPL, and interaction
+ *          with the corresponding properties in the file structure.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Neil Fortner
+ *              Wednesday, October 29, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_chunk_cache(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       /* File ID */
+    hid_t       fapl_local = -1; /* Local fapl */
+    hid_t       fapl_def = -1;  /* Default fapl */
+    hid_t       dcpl = -1;      /* Dataset creation property list ID */
+    hid_t       dapl1 = -1;     /* Dataset access property list ID */
+    hid_t       dapl2 = -1;     /* Dataset access property list ID */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hid_t       dsid = -1;      /* Dataset ID */
+    hsize_t     dim, chunk_dim; /* Dataset and chunk dimensions */
+    size_t      nslots_1, nslots_2, nslots_3, nslots_4; /* rdcc number of elements */
+    size_t      nbytes_1, nbytes_2, nbytes_3, nbytes_4; /* rdcc number of bytes */
+    size_t      nlinks;         /* Number of link traversals */
+    double      w0_1, w0_2, w0_3, w0_4; /* rdcc preemption policy */
+
+    TESTING("dataset chunk cache configuration");
+
+    /* Create a default fapl and dapl */
+    if ((fapl_def = H5Pcreate(H5P_FILE_ACCESS)) < 0) FAIL_STACK_ERROR
+    if ((dapl1 = H5Pcreate(H5P_DATASET_ACCESS)) < 0) FAIL_STACK_ERROR
+
+    /* Verify that H5Pget_chunk_cache(dapl) returns the same values as are in
+     * the default fapl.
+     */
+    if (H5Pget_cache(fapl_def, NULL, &nslots_1, &nbytes_1, &w0_1) < 0) FAIL_STACK_ERROR
+    if (H5Pget_chunk_cache(dapl1, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
+    if ((nslots_1 != nslots_4) || (nbytes_1 != nbytes_4) || !DBL_ABS_EQUAL(w0_1, w0_4))
+        FAIL_PUTS_ERROR("    Cache values from default dapl do not match those from fapl.")
+
+    /* Set a lapl property on dapl1 (to verify inheritance) */
+    if (H5Pset_nlinks(dapl1, 134) < 0) FAIL_STACK_ERROR
+    if (H5Pget_nlinks(dapl1, &nlinks) < 0) FAIL_STACK_ERROR
+    if (nlinks != 134)
+        FAIL_PUTS_ERROR("    nlinks parameter not set properly on dapl.")
+
+    /* Copy fapl passed to this function (as we will be modifying it) */
+    if ((fapl_local = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Set new rdcc settings on fapl */
+    nslots_2 = nslots_1 * 2;
+    nbytes_2 = nbytes_1 * 2;
+    w0_2 = w0_1 / 2.;
+    if (H5Pset_cache(fapl_local, 0, nslots_2, nbytes_2, w0_2) < 0) FAIL_STACK_ERROR
+
+    h5_fixname(FILENAME[8], fapl, filename, sizeof filename);
+
+    /* Create file */
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_local)) < 0) FAIL_STACK_ERROR
+
+    /* Create dataset creation property list */
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+
+    /* Set chunking */
+    chunk_dim = 10;
+    if (H5Pset_chunk(dcpl, 1, &chunk_dim) < 0) FAIL_STACK_ERROR
+
+    /* Create 1-D dataspace */
+    dim = 100;
+    if ((sid = H5Screate_simple(1, &dim, NULL)) < 0) FAIL_STACK_ERROR
+
+    /* Create dataset with default dapl */
+    if ((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl1)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Retrieve dapl from dataset, verfiy cache values are the same as on fapl_local */
+    if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
+    if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
+    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_2, w0_4))
+        FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from fapl.")
+    if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
+
+    /* Set new values on dapl1.  nbytes will be set to default, so the file
+     * property will override this setting */
+    nslots_3 = nslots_2 * 2;
+    nbytes_3 = H5D_CHUNK_CACHE_NBYTES_DEFAULT;
+    w0_3 = w0_2 / 2;
+    if (H5Pset_chunk_cache(dapl1, nslots_3, nbytes_3, w0_3) < 0) FAIL_STACK_ERROR
+
+    /* Close dataset, reopen with dapl1.  Note the use of a dapl with H5Oopen */
+    if (H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+    if ((dsid = H5Oopen(fid, "dset", dapl1)) < 0) FAIL_STACK_ERROR
+
+    /* Retrieve dapl from dataset, verfiy cache values are the same as on dapl1 */
+    /* Note we rely on the knowledge that H5Pget_chunk_cache retrieves these
+     * values directly from the dataset structure, and not from a copy of the
+     * dapl used to open the dataset (which is not preserved).
+     */
+    if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
+    if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
+    if ((nslots_3 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_3, w0_4))
+        FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from dapl1.")
+    if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
+
+    /* Close dataset, reopen with H5P_DEFAULT as dapl */
+    if (H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+    if ((dsid = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Retrieve dapl from dataset, verfiy cache values are the same on fapl_local */
+    if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
+    if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
+    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_2, w0_4))
+        FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from fapl.")
+    if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
+
+    /* Similary, test use of H5Dcreate2 with H5P_DEFAULT */
+    if (H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+    if ((dsid = H5Dcreate2(fid, "dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+    if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
+    if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
+    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_2, w0_4))
+        FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from fapl.")
+    /* Don't close dapl2, we will use it in the next section */
+
+    /* Modify cache values on fapl_local */
+    nbytes_3 = nbytes_2 * 2;
+    if (H5Pset_cache(fapl_local, 0, nslots_3, nbytes_3, w0_3) < 0) FAIL_STACK_ERROR
+
+    /* Close and reopen file with new fapl_local */
+    if (H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+    if (H5Fclose(fid) < 0) FAIL_STACK_ERROR
+    if ((fid = H5Fopen(filename, H5F_ACC_RDWR, fapl_local)) < 0) FAIL_STACK_ERROR
+
+    /* Verify that dapl2 retrieved earlier (using values from the old fapl)
+     * sets its values in the new file (test use of H5Dopen2 with a dapl)
+     */
+    if ((dsid = H5Dopen2(fid, "dset", dapl2)) < 0) FAIL_STACK_ERROR
+    if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR /* Close dapl2, to avoid id leak */
+    if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
+    if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
+    if ((nslots_2 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_2, w0_4))
+        FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from dapl2.")
+
+    /* Test H5D_CHUNK_CACHE_NSLOTS_DEFAULT and H5D_CHUNK_CACHE_W0_DEFAULT */
+    nslots_2 = H5D_CHUNK_CACHE_NSLOTS_DEFAULT;
+    w0_2 = H5D_CHUNK_CACHE_W0_DEFAULT;
+    if (H5Pset_chunk_cache(dapl2, nslots_2, nbytes_2, w0_2) < 0) FAIL_STACK_ERROR
+
+    if (H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+    if ((dsid = H5Dopen2(fid, "dset", dapl2)) < 0) FAIL_STACK_ERROR
+    if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR /* Close dapl2, to avoid id leak */
+    if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
+    if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
+    if ((nslots_3 != nslots_4) || (nbytes_2 != nbytes_4) || !DBL_ABS_EQUAL(w0_3, w0_4))
+        FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those expected.")
+    if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
+
+    /* Verify that the file has indeed started using the new cache values (test
+     * use of H5Oopen with H5P_DEFAULT) */
+    if (H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+    if ((dsid = H5Oopen(fid, "dset", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if ((dapl2 = H5Dget_access_plist(dsid)) < 0) FAIL_STACK_ERROR
+    if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
+    if ((nslots_3 != nslots_4) || (nbytes_3 != nbytes_4) || !DBL_ABS_EQUAL(w0_3, w0_4))
+        FAIL_PUTS_ERROR("    Cache values from retrieved dapl do not match those from fapl.")
+    if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
+
+    /* Verify functionality of H5Pcopy with a dapl */
+    if ((dapl2 = H5Pcopy(dapl1)) < 0) FAIL_STACK_ERROR
+    if (H5Pget_chunk_cache(dapl2, &nslots_4, &nbytes_4, &w0_4) < 0) FAIL_STACK_ERROR
+    if ((nslots_3 != nslots_4) || (nbytes_1 != nbytes_4) || !DBL_ABS_EQUAL(w0_3, w0_4))
+        FAIL_PUTS_ERROR("    Cache values from dapl2 do not match those from dapl1.")
+
+    /* Close */
+    if (H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+    if (H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if (H5Pclose(fapl_local) < 0) FAIL_STACK_ERROR
+    if (H5Pclose(fapl_def) < 0) FAIL_STACK_ERROR
+    if (H5Pclose(dapl1) < 0) FAIL_STACK_ERROR
+    if (H5Pclose(dapl2) < 0) FAIL_STACK_ERROR
+    if (H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+    if (H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(fapl_local);
+        H5Pclose(fapl_def);
+        H5Pclose(dapl1);
+        H5Pclose(dapl2);
+        H5Pclose(dcpl);
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_chunk_cache() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests the dataset interface (H5D)
@@ -6593,6 +6802,7 @@ main(void)
         nerrors += (test_deprec(file) < 0			? 1 : 0);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
         nerrors += (test_huge_chunks(my_fapl) < 0		? 1 : 0);
+        nerrors += (test_chunk_cache(my_fapl) < 0		? 1 : 0);
 
         if(H5Fclose(file) < 0)
             goto error;

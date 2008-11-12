@@ -48,8 +48,8 @@
 static void *H5O_dset_get_copy_file_udata(void);
 static void H5O_dset_free_copy_file_udata(void *);
 static htri_t H5O_dset_isa(H5O_t *loc);
-static hid_t H5O_dset_open(const H5G_loc_t *obj_loc, hid_t dxpl_id,
-    hbool_t app_ref);
+static hid_t H5O_dset_open(const H5G_loc_t *obj_loc, hid_t lapl_id,
+    hid_t dxpl_id, hbool_t app_ref);
 static void *H5O_dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc,
     hid_t dxpl_id);
 static H5O_loc_t *H5O_dset_get_oloc(hid_t obj_id);
@@ -220,17 +220,31 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5O_dset_open(const H5G_loc_t *obj_loc, hid_t dxpl_id, hbool_t app_ref)
+H5O_dset_open(const H5G_loc_t *obj_loc, hid_t lapl_id, hid_t dxpl_id, hbool_t app_ref)
 {
     H5D_t       *dset = NULL;           /* Dataset opened */
+    htri_t  isdapl;                 /* lapl_id is a dapl */
+    hid_t   dapl_id;                /* dapl to use to open this dataset */
     hid_t	ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_dset_open)
 
     HDassert(obj_loc);
 
+    /* If the lapl passed in is a dapl, use it.  Otherwise, use the default dapl */
+    if(lapl_id == H5P_DEFAULT)
+        isdapl = FALSE;
+    else
+        if((isdapl = H5P_isa_class(lapl_id, H5P_DATASET_ACCESS)) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOMPARE, FAIL, "unable to compare property list classes")
+
+    if(isdapl)
+        dapl_id = lapl_id;
+    else
+        dapl_id = H5P_DATASET_ACCESS_DEFAULT;
+
     /* Open the dataset */
-    if(NULL == (dset = H5D_open(obj_loc, dxpl_id)))
+    if(NULL == (dset = H5D_open(obj_loc, dapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "unable to open dataset")
 
     /* Register an ID for the dataset */
@@ -274,7 +288,8 @@ H5O_dset_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id)
     HDassert(obj_loc);
 
     /* Create the the dqtaset */
-    if(NULL == (dset = H5D_create(f, crt_info->type_id, crt_info->space, crt_info->dcpl_id, dxpl_id)))
+    if(NULL == (dset = H5D_create(f, crt_info->type_id, crt_info->space,
+        crt_info->dcpl_id, crt_info->dapl_id, dxpl_id)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to create dataset")
 
     /* Set up the new dataset's location */

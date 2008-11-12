@@ -250,7 +250,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_SIZEOF_SIZE(F)      ((F)->shared->sizeof_size)
 #define H5F_SYM_LEAF_K(F)       ((F)->shared->sym_leaf_k)
 #define H5F_KVALUE(F,T)         ((F)->shared->btree_k[(T)->id])
-#define H5F_RDCC_NELMTS(F)      ((F)->shared->rdcc_nelmts)
+#define H5F_RDCC_NSLOTS(F)      ((F)->shared->rdcc_nslots)
 #define H5F_RDCC_NBYTES(F)      ((F)->shared->rdcc_nbytes)
 #define H5F_RDCC_W0(F)          ((F)->shared->rdcc_w0)
 #define H5F_BASE_ADDR(F)        ((F)->shared->base_addr)
@@ -271,7 +271,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_SIZEOF_SIZE(F)      (H5F_sizeof_size(F))
 #define H5F_SYM_LEAF_K(F)       (H5F_sym_leaf_k(F))
 #define H5F_KVALUE(F,T)         (H5F_Kvalue(F,T))
-#define H5F_RDCC_NELMTS(F)      (H5F_rdcc_nelmts(F))
+#define H5F_RDCC_NSLOTS(F)      (H5F_rdcc_nslots(F))
 #define H5F_RDCC_NBYTES(F)      (H5F_rdcc_nbytes(F))
 #define H5F_RDCC_W0(F)          (H5F_rdcc_w0(F))
 #define H5F_BASE_ADDR(F)        (H5F_get_base_addr(F))
@@ -358,7 +358,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 
 /* ========= File Access properties ============ */
 #define H5F_ACS_META_CACHE_INIT_CONFIG_NAME	"mdc_initCacheCfg" /* Initial metadata cache resize configuration */
-#define H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME       "rdcc_nelmts"   /* Size of raw data chunk cache(elements) */
+#define H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME       "rdcc_nslots"   /* Size of raw data chunk cache(slots) */
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME       "rdcc_nbytes"   /* Size of raw data chunk cache(bytes) */
 #define H5F_ACS_PREEMPT_READ_CHUNKS_NAME        "rdcc_w0"       /* Preemption read chunks first */
 #define H5F_ACS_ALIGN_THRHD_NAME                "threshold"     /* Threshold for alignment */
@@ -477,7 +477,7 @@ H5_DLL size_t H5F_sizeof_size(const H5F_t *f);
 H5_DLL unsigned H5F_sym_leaf_k(const H5F_t *f);
 H5_DLL unsigned H5F_Kvalue(const H5F_t *f, const struct H5B_class_t *type);
 H5_DLL size_t H5F_rdcc_nbytes(const H5F_t *f);
-H5_DLL size_t H5F_rdcc_nelmts(const H5F_t *f);
+H5_DLL size_t H5F_rdcc_nslots(const H5F_t *f);
 H5_DLL double H5F_rdcc_w0(const H5F_t *f);
 H5_DLL haddr_t H5F_get_base_addr(const H5F_t *f);
 H5_DLL struct H5RC_t *H5F_grp_btree_shared(const H5F_t *f);
