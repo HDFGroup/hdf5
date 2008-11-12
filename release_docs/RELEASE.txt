@@ -1,12 +1,13 @@
-HDF5 version 1.8.2 released on Mon Nov 10 15:43:09 CST 2008
+HDF5 version 1.8.2-snap0 currently under development
 ================================================================================
 
 INTRODUCTION
 ============
 
-This document describes the differences between HDF5-1.8.1 and HDF5 1.8.2, 
-and contains information on the platforms tested and known problems in 
-HDF5-1.8.2. For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
+This document describes the differences between HDF5-1.8.2 and 
+HDF5 1.8.2-snap*, and contains information on the platforms tested and 
+known problems in HDF5-1.8.2-snap*. 
+For more details, see the files HISTORY-1_0-1_8_0_rc3.txt 
 and HISTORY-1_8.txt in the release_docs/ directory of the HDF5 source.
 
 Links to the HDF5 1.8.2 source code, documentation, and additional materials
@@ -44,7 +45,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.8.1
+- Bug Fixes since HDF5-1.8.2
 - Platforms Tested
 - Supported Configuration Features Summary
 - Known Problems
@@ -55,224 +56,52 @@ New Features
 
         Configuration
         -------------
-        - Upgraded libtool to version 2.2.6a. (MAM - 2008/10/15).
+        - Add description here. Do not exceed 80 characters per line.
+          EIP - 2008/11/12
 
         Library
         -------
-	- Added two new public routines: H5Pget_elink_fapl() and
-      	  H5Pset_elink_fapl(). (see bug #1247) (VC - 2008/10/13)
-        - Improved free space tracking in file to be faster. (QAK - 2008/10/06)
-        - Added 'mounted' field to H5G_info_t struct. (QAK - 2008/07/15)
 
         Parallel Library
         ----------------
-        - None
 
         Tools
         -----
-        - h5repack: added new options -u and -b to add a userblock to an HDF5 
-          file during the repack.  (PVN - 2008/08/26)
-        - h5repack: added options -t and -a to call H5Pset_alignment while 
-          creating a repacked file. (PVN - 2008/08/29)
-        - h5ls: added capability to traverse through external links when the -r
-          (recursive) flag is given. (NAF - 2008/09/16)
-        - h5ls: added -E option to enable traversal of external links.  
-          h5ls will not traverse external links without this flag being set.
-            (NAF - 2008/10/06)
-        - h5dump: when -b flag is used without a keyword after it, binary 
-          output defaults to NATIVE. MEMORY keyword was deprecated 
-          and replaced by NATIVE keyword. (PVN - 2008/10/30)
-        - h5diff: returns 1 when file graphs differ by any object.  
-          Error return code was changed to 2 from -1.  (PVN - 2008/10/30)
-        - h5import: TEXTFPE (scientific format) was deprecated. Use TEXTFP 
-          instead (PVN - 2008/10/30)
-
 
 
         F90 API
         ------
-         - Added optional parameter 'mounted' to H5Gget_info_f, 
-           H5Gget_info_by_idx_f, H5Gget_info_by_name_f (MSB - 2008/09/24)
-	 - Added H5Tget_native_type_f (MSB - 2008/09/30)
 	 
 	 
         C++ API
         ------
-        - These member functions were added as wrapper for H5Rdereference to
-          replace the incorrect IdComponent::dereference().
-             void H5Object::dereference(H5Object& obj, void* ref, 
-                                        H5R_type_t ref_type=H5R_OBJECT)
-             void H5Object::dereference(H5File& h5file, void* ref, 
-                                        H5R_type_t ref_type=H5R_OBJECT)
-             void H5Object::dereference(Attribute& obj, void* ref, 
-                                        H5R_type_t ref_type=H5R_OBJECT)
-
-          In addition, these constructors were added to create the associated
-          objects by way of dereference:
-             DataSet(H5Object& obj, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-             DataSet(H5File& file, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-             DataSet(Attribute& attr, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-             Group(H5Object& obj, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-             Group(H5File& obj, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-             Group(Attribute& attr, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-             DataType(H5Object& obj, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-             DataType(H5File& file, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-             DataType(Attribute& attr, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-          (BMR - 2008/10/29)
 
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
-        - Intel 10.1 is supported on Mac OS X 10.5.4.
-          Note:
-          When Fortran is enabled, configure automatically
-          disables the build of shared libraries (i.e., only
-          static C and C++ HDF5 libraries will be built
-          along with the static HDF5 Fortran library).
-          Intel 10.1 C and C++ compilers require 
-          "-no-multibyte-chars" compilation flag due to the known
-          bug in the compilers.
-            (EIP - 2008/10/30)
 
 
-Bug Fixes since HDF5-1.8.1 
+Bug Fixes since HDF5-1.8.2
 ==========================
 
         Configuration
         -------------
-        - Fixed error with 'make check install' failing due to h5dump
-          needing other tools built first. (MAM - 2008/10/15).
-        - When using shared szip, it is no longer necessary to specify
-          the path to the shared szip libraries in LD_LIBRARY_PATH.
-           (MAM - 2008/10/15).
-	- The file libhdf5_fortran.settings is not installed since its content
-	  is included in libhdf5.settings now. (AKC - 2008/10/21)
-        - "make DESTDIR=xxx install" failed to install some tools and files
-          (e.g., h5cc and fortran modules). Fixed. (AKC - 2008/10/8).
 
         Library
         -------
-        - H5Ovisit and H5Ovisit_by_name will now properly terminate when the
-            callback function returns a positive value on the starting object.
-            (NAF - 2008/11/03)
-        - Fixed an error where a null message could be created that was larger
-            than could be written to the file.  (NAF - 2008/10/23)
-        - Corrected error with family/split/multi VFD not updating driver info
-            when "latest" version of the file format used. (QAK - 2008/10/14)
-        - Corrected alignment+threshold errors to work correctly when metadata
-            aggregation is enabled. (QAK - 2008/10/06)
-        - Changed H5Fget_obj_count and H5Fget_obj_ids to ignore objects
-            registered by the library for internal library use.
-            (NAF - 2008/10/06)
-        - Fixed potential memory leak during compound conversion.
-            (NAF - 2008/10/06)
-        - Changed the return value of H5Fget_obj_count from INT to SSIZE_T. 
-            Also changed the return value of H5Fget_obj_ids from HERR_T to 
-            SSIZE_T and the type of the parameter MAX_OBJS from INT to SIZE_T. 
-            (SLU - 2008/09/26)
-        - Fixed an issue that could cause data to be improperly overwritten
-            during compound type conversion.  (NAF - 2008/09/19)
-        - Fixed pointer alignment violations that could occur during vlen
-            conversion.  (NAF - 2008/09/16)
-        - Fixed problem where library could cause a segmentation fault when
-            an invalid location ID was given to H5Giterate(). (QAK - 2008/08/19)
-        - Fixed improper shutdown when objects have reference count > 1.  The
-            library now tracks reference count due to the application separately
-            from that due to internal library routines.  (NAF - 2008/08/19)
-        - Fixed assertion failure caused by incorrect array datatype version.
-            (NAF - 2008/08/08)
-        - Fixed an issue where mount point traversal would fail when using
-            multiple handles for the child.  (NAF - 2008/08/07)
-        - Fixed an issue where mount points were inaccessible when using 
-            multiple file handles for the parent. The mount table is now in 
-            the shared file structure (the parent pointer is still in the 
-            top structure).  (NAF - 2008/08/07)
-        - Fixed assertion failure caused by incorrect array datatype version.
-            (NAF - 2008/08/04)
-        - Fixed issue where a group could have a file mounted on it twice.
-            (QAK - 2008/07/15)
-        - When an attribute was opened twice and data was written with 
-            one of the handles, the file didn't have the data. It happened 
-            because each handle had its own object structure, and the empty 
-            one overwrote the data with fill value.  This is fixed by making 
-            some attribute information like the data be shared in the 
-            attribute structure.  (SLU - 2008/07/07)
-        - Fixed a Windows-specific issue in the ohdr test which was causing 
-            users in some timezones to get false errors. This a deficiency in 
-            the Windows mktime() function, and has been handled properly.  
-            (SJW  - 2008/06/19)
 
         Parallel Library
         ----------------
-        - None
 
         Tools
         -----
-        - h5dump now checks for uniqueness of committed datatypes.
-            (NAF - 2008/10/15)
-        - Fixed unnecessary indentation of committed datatypes in h5dump.
-            (NAF - 2008/10/15)
-	- Fixed bugs in h5stat: segmemtation fault when printing groups and
-          print warning message when traversal of objects is unsuccessful.
-          (see bug #1253) (VC- 2008/10/13)
-        - Fixed bug in h5ls that prevented relative group listings (like
-            "h5ls foo.h5/bar") from working correctly (QAK - 2008/06/03)
-        - h5dump: when doing binary output (-b), the stdout printing of 
-             attributes was done incorrectly. Removed printing of attributes 
-             when doing binary output. (PVN - 2008/06/05)
 
 
         F90 API
         ------
-        - h5sselect_elements_f: Added additional operators H5S_SELECT_APPEND 
-            and H5S_SELECT_PREPEND (MSB - 2008/09/30)
-	- h5sget_select_elem_pointlist: Fixed list of returned points by 
-            rearranging the point list correctly by accounting for C 
-            conventions. (MSB - 2008/09/30)
-        - h5sget_select_hyper_blocklist_f: Fixed error in transposed dimension 
-            of arrays.(MSB - 2008/9/30)
-        - h5sget_select_bounds_f: Swapped array bounds to account for C and 
-            Fortran reversed array notation (MSB - 2008/9/30)
-	- Changed to initializing string to a blank character instead of a 
-            null type in tH5P.f90 to fix compiling error using AIX 5.3.0 
-            (MSB - 2008/7/29)
-        - Fixed missing commas in H5test_kind.f90 detected by NAG compiler 
-            (MSB - 2008/7/29)
-        - Fixed passing and array to a scalar in tH5A_1_8.f90 detected by 
-            NAG compiler (MSB - 2008/7/29)
-	- Added the ability of the test programs to use the status of 
-            HDF5_NOCLEANUP to determine if the *.h5 files should be removed 
-            or not after the tests are completed (MSB - 2008/10/1)
-	- In nh5tget_offset_c: (MSB 9/12/2008)
-           If offset was equal to 0 it returned the error code of -1, 
-           this was changed to return an error code of -1 when the offset 
-           value is < 0.
-        - Uses intrinsic Fortran function SIZEOF if available when detecting 
-           type of INTEGERs and REALs in H5test_kind.f90 (MSB - 2008/9/3)
-        - Put the DOUBLE PRECISION interfaces in a separate module and 
-           added a USE statement for the module. The interfaces are 
-           included/excluded depending on the state of FORTRAN_DEFAULT_REAL
-           is DBLE_F which detects if the default REAL is DOUBLE PRECISION.
-           This allows the library to be compiled with -r8 Fortran flag 
-           without the user needing to edit the source code. 
-           (MSB - 200/8/27)
-        - Enable building shared library for fortran by adding the flag -fPIC 
-          to the compile flags for versions of Intel Fortran compiler >=9
-           (MSB  - 2008/8/26)
 
         C++ API
         ------
-        - Fixed a design bug which allowed an Attribute object to create/modify
-          attributes (bugzilla #1068).  The API class hierarchy was revised
-          to address the problem.  Classes AbstractDS and Attribute are moved
-          out of H5Object.  Class Attribute now multiply inherits from
-          IdComponent and AbstractDs and class DataSet from H5Object and
-          AbstractDs.  In addition, the data member IdComponent::id was
-          moved into subclasses: Attribute, DataSet, DataSpace, DataType,
-          H5File, Group, and PropList. (BMR - 2008/05/20)
-        - IdComponent::dereference was incorrect and replaced as described
-          in "New Features" section.
-          (BMR - 2008/10/29)
 
 
 Platforms Tested
