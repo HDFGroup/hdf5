@@ -27,15 +27,23 @@ void
 print_dimensions (int rank, hsize_t *dims)
 {
     int i;
-
-    printf("[" );
-    for ( i = 0; i < rank-1; i++)
+    
+    if ( rank > 0 )
     {
-        printf("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[i]);
-        printf("x");
+        
+        printf("[" );
+        for ( i = 0; i < rank-1; i++)
+        {
+            printf("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[i]);
+            printf("x");
+        }
+        printf("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[rank-1]);
+        printf("]" );
     }
-    printf("%"H5_PRINTF_LL_WIDTH"u", (unsigned long_long)dims[rank-1]);
-    printf("]" );
+    else
+    {
+        printf("H5S_SCALAR" );
+    }
     
 }
 
