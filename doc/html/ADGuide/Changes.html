@@ -76,7 +76,8 @@ in the transition from HDF5 Release 1.6.7 to Release 1.6.8.
         <p>
         <dl>
         <dt><u>C function:</u>
-        <dt><code>H5Fget_obj_count</code>
+        <dt><a href="../RM_H5F.html#File-GetObjCount">
+          <code>H5Fget_obj_count</code></a>
           <dd><code>
               <font color=red><u>
               ssize_t</u></font> H5Fget_obj_count(
@@ -85,7 +86,8 @@ in the transition from HDF5 Release 1.6.7 to Release 1.6.8.
               )
               </code>
         <p>
-        <dt><code>H5Fget_obj_ids</code>
+        <dt><a href="../RM_H5F.html#File-GetObjIDs">
+            <code>H5Fget_obj_ids</code></a>
           <dd><code>
               <font color=red><u>
               ssize_t</u></font> H5Fget_obj_ids(
@@ -107,7 +109,8 @@ in the transition from HDF5 Release 1.6.7 to Release 1.6.8.
     <h3>Tools with Changed Interface or Behavior</h3>
     
         <dl>    
-            <dt><code>h5repack</code> and <code>h5diff</code>
+            <dt><a href="../Tools.html#Tools-Repack"><code>h5repack</code></a>
+                and <a href="../Tools.html#Tools-Diff"><code>h5diff</code></a>
                 <dd>The standard command-line syntax of both tools
                     has been changed to parallel that of <code>h5dump</code>.
                     The new syntax of each is as follows:
@@ -131,7 +134,7 @@ in the transition from HDF5 Release 1.6.7 to Release 1.6.8.
 <dir>
                    
         <dl>    
-            <dt><code>h5diff</code>
+            <dt><a href="../Tools.html#Tools-Diff"><code>h5diff</code></a>
                 <dd><code>h5diff</code> now returns <code>1</code>
                     if the files differ in structure, 
                     i.e., if the file graphs differ by any object. 
@@ -140,7 +143,7 @@ in the transition from HDF5 Release 1.6.7 to Release 1.6.8.
                     to <code>2</code>.
                     <p>     
 
-            <dt><code>h5repack</code> 
+            <dt><a href="../Tools.html#Tools-Repack"><code>h5repack</code></a>
                 <dd>The following new options control the addition of
                     user block data to an existing HDF5 file:
                     <dir>
@@ -202,7 +205,7 @@ in the transition from HDF5 Release 1.6.7 to Release 1.6.8.
                     when repacking an HDF5 file.
                     <p>
 
-            <dt><code>h5import</code> 
+            <dt><a href="../Tools.html#Tools-Import"><code>h5import</code></a>
                 <dd>The floating point format flag <code>TEXTFPE</code>,
                     for scientific notation, has been deprecated.
                     The flag <code>TEXTFP</code>, which accepts
@@ -214,7 +217,7 @@ in the transition from HDF5 Release 1.6.7 to Release 1.6.8.
                     in the <code>INPUT-CLASS</code> configuration field.
                     <p>
                    
-            <dt><code>h5dump</code> 
+            <dt><a href="../Tools.html#Tools-Dump"><code>h5dump</code></a>
                 <dd>The new <code>'-m <i>T</i>'</code> or 
                     <code>'--format <i>T</i>'</code> option 
                     enables a user-defined formatting string 
@@ -233,10 +236,8 @@ in the transition from HDF5 Release 1.6.7 to Release 1.6.8.
     <h3>Deprecated Functions</h3>
 
         The following functions are deprecated as of this release: 
-        <pre>
-              H5Pset_preserve
-              H5Pget_preserve
-        </pre>
+        <pre>        <a href="../RM_H5P.html#Property-SetPreserve">H5Pset_preserve</a>
+        <a href="../RM_H5P.html#Property-GetPreserve">H5Pget_preserve</a> </pre>
         <p>
         The original role of these functions is now 
         part of the core HDF5 Library functionality.
@@ -3011,7 +3012,7 @@ Describes HDF5 Release 1.6.8, November 2008
 
 <!-- #EndLibraryItem --><!-- Created: Spring 1999 -->
 <!-- hhmts start -->
-Last modified: 10 November 2008 
+Last modified: 13 November 2008 
 <!-- hhmts end -->
 
 </body>
