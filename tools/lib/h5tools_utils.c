@@ -126,7 +126,9 @@ warn_msg(const char *progname, const char *fmt, ...)
  * Programmer:  Bill Wendling
  *              Friday, 5. January 2001
  *
- * Modifications:
+ * Modifications: Pedro Vicente
+ *                October, 27 2008
+ * Wilcard "*" argument type
  *
  *-------------------------------------------------------------------------
  */
@@ -236,12 +238,33 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
             }
 
             sp = 1;
-        } else {
+        } 
+        
+        /* wildcard argument */
+        else if (*cp == '*')
+        {
+            /* check the next argument */
+            opt_ind++;
+            /* we do have an extra argument, check if not last */
+            if ( argv[opt_ind][0] != '-' && (opt_ind+1) < argc )
+            {
+                opt_arg = argv[opt_ind++];
+            }
+            else
+            {
+                opt_arg = NULL;
+            }
+        }
+        
+        else 
+        {
             /* set up to look at next char in token, next time */
             if (argv[opt_ind][++sp] == '\0') {
                 /* no more in current token, so setup next token */
                 opt_ind++;
                 sp = 1;
+                
+                
             }
 
             opt_arg = NULL;

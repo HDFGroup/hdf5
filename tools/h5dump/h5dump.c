@@ -59,6 +59,8 @@ static char         *prefix;
 static const char   *driver = NULL;      /* The driver to open the file with. */
 static const h5dump_header_t *dump_header_format;
 static const char   *fp_format = NULL;
+static const char   *outfname=NULL;
+
 
 /* things to display or which are set via command line parameters */
 static int          display_all       = TRUE;
@@ -350,7 +352,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b:F:s:S:Am:";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*:F:s:S:Am:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -458,7 +460,7 @@ static struct long_options l_opts[] = {
     { "onlyattr", no_arg, 'A' },
     { "escape", no_arg, 'e' },
     { "noindex", no_arg, 'y' },
-    { "binary", require_arg, 'b' },
+    { "binary", optional_arg, 'b' },
     { "form", require_arg, 'F' },
     { "format", require_arg, 'm' },
     { NULL, 0, '\0' }
@@ -2830,8 +2832,11 @@ set_binary_form(const char *form)
 {
  int bform=-1;
 
- if (strcmp(form,"MEMORY")==0) /* native form */
+ if (strcmp(form,"NATIVE")==0 ||
+     strcmp(form,"MEMORY")==0) 
+ {/* native form */
   bform = 0;
+ }
  else if (strcmp(form,"FILE")==0) /* file type form */
   bform = 1;
  else if (strcmp(form,"LE")==0) /* convert to little endian */
@@ -3320,11 +3325,6 @@ parse_command_line(int argc, const char *argv[])
     struct handler_t   *hand, *last_dset = NULL;
     int                 i, opt, last_was_dset = FALSE;
 
-    /* some logic to handle both -o and -b order */
-    const char          *outfname=NULL;
-    bin_form = -1;
-
-
     /* no arguments */
     if (argc == 1) {
         usage(progname);
@@ -3448,7 +3448,7 @@ parse_start:
 
         case 'o':
          
-         if (bin_form > 0 )
+         if ( bin_output )
          {
           if (set_output_file(opt_arg, 1) < 0){
            usage(progname);
@@ -3462,7 +3462,7 @@ parse_start:
            leave(EXIT_FAILURE);
           }
          }
-      
+
          usingdasho = TRUE;
          last_was_dset = FALSE;
          outfname = opt_arg;
@@ -3470,24 +3470,29 @@ parse_start:
 
        case 'b':
             
-        if ( ( bin_form = set_binary_form(opt_arg)) < 0){
-         /* failed to set binary form */
-         usage(progname);
-         leave(EXIT_FAILURE);
-        }
-        bin_output = TRUE;
-        if (outfname!=NULL) {
-         if (set_output_file(outfname, 1) < 0){
-          /* failed to set output file */
-          usage(progname);
-          leave(EXIT_FAILURE);
-         }
-         
-         
-         last_was_dset = FALSE;
-        }
-        
-        break;
+           if ( opt_arg != NULL)
+           {
+               if ( ( bin_form = set_binary_form(opt_arg)) < 0)
+               {
+                   /* failed to set binary form */
+                   usage(progname);
+                   leave(EXIT_FAILURE);
+               }
+           }
+           bin_output = TRUE;
+           if (outfname!=NULL) 
+           {
+               if (set_output_file(outfname, 1) < 0)
+               {
+                   /* failed to set output file */
+                   usage(progname);
+                   leave(EXIT_FAILURE);
+               }
+               
+               last_was_dset = FALSE;
+           }
+           
+           break;
 
         /** begin XML parameters **/
         case 'x':
@@ -3700,6 +3705,12 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
     hand = parse_command_line(argc, argv);
+
+    if ( bin_output && outfname == NULL )
+    {
+        error_msg(progname, "binary output requires a file name, use -o <filename>\n");
+        leave(EXIT_FAILURE);
+    }
 
     /* Check for conflicting options */
     if (doxml) {
