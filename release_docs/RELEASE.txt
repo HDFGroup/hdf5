@@ -55,6 +55,9 @@ New Features
 
     Tools:
     ------
+     - h5dump: binary output defaults to NATIVE with -b optionally accepting
+            the form of binary output (NATIVE, FILE, BE, LE). (PVN - 2008/11/14)
+
     
 
     F90 API:
