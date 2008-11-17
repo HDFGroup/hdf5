@@ -212,4 +212,9 @@ reserved: reserved.lo
 err_vers: err_vers.lo
 	@$(LT_LINK_EXE) $(CFLAGS) -o $@ err_vers.lo $(LIB) $(LIBHDF5) $(LDFLAGS) $(LIBS)
 
+## Nothing is installed from test directory when 'make install' is invoked, but
+## this will force all test targets to be made, as other directories may need
+## the test library built in order to 'make install' (i.e., perform directory).
+install: all
+
 @CONCLUDE@
