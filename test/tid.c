@@ -112,7 +112,7 @@ static int basic_id_test(void)
 	H5E_END_TRY
 
 	VERIFY(testSize, -1, "H5Iget_name");
-	if(testSize != 0)
+	if(testSize != -1)
 		goto out;
 
 	/* Make sure H5Iremove_verify catches objects of the wrong type */
@@ -332,6 +332,83 @@ out:
 }
 
 
+/* Test the H5Iis_valid function */
+static int test_is_valid(void)
+{
+    hid_t   dtype;      /* datatype id */
+    int     nmembs1;    /* number of type memnbers */
+    int     nmembs2;
+    htri_t  tri_ret;    /* htri_t return value */
+    herr_t  ret;        /* return value */
+
+    /* Create a datatype id */
+    dtype = H5Tcopy(H5T_NATIVE_INT);
+    CHECK(dtype, FAIL, "H5Tcopy");
+    if (dtype < 0)
+        goto out;
+
+    /* Check that the ID is valid */
+    tri_ret = H5Iis_valid(dtype);
+    VERIFY(tri_ret, TRUE, "H5Iis_valid");
+    if (tri_ret != TRUE)
+        goto out;
+
+    /* Artificially manipulate the reference counts so app_count is 0, and dtype
+     * appears to be an internal id.  This takes advantage of the fact that
+     * H5Ipkg is included.
+     */
+    ret = H5I_inc_ref(dtype, FALSE);
+    CHECK(ret, FAIL, "H5I_inc_ref");
+    if (ret < 0)
+        goto out;
+    ret = H5I_dec_ref(dtype, TRUE);
+    CHECK(ret, FAIL, "H5I_dec_ref");
+    if (ret < 0)
+        goto out;
+
+    /* Check that dtype is invalid */
+    tri_ret = H5Iis_valid(dtype);
+    VERIFY(tri_ret, FALSE, "H5Iis_valid");
+    if (tri_ret != FALSE)
+        goto out;
+
+    /* Close dtype and verify that it has been closed */
+    nmembs1 = H5I_nmembers(H5I_DATATYPE);
+    CHECK(nmembs1, FAIL, "H5I_nmembers");
+    if (nmembs1 < 0)
+        goto out;
+    ret = H5I_dec_ref(dtype, FALSE);
+    CHECK(ret, FAIL, "H5I_dec_ref");
+    if (ret < 0)
+        goto out;
+    nmembs2 = H5I_nmembers(H5I_DATATYPE);
+    VERIFY(nmembs2, nmembs1 - 1, "H5I_nmembers");
+    if (nmembs2 != nmembs1 - 1)
+        goto out;
+
+    /* Check that dtype is invalid */
+    tri_ret = H5Iis_valid(dtype);
+    VERIFY(tri_ret, FALSE, "H5Iis_valid");
+    if (tri_ret != FALSE)
+        goto out;
+
+    /* Check that an id of -1 is invalid */
+    tri_ret = H5Iis_valid(-1);
+    VERIFY(tri_ret, FALSE, "H5Iis_valid");
+    if (tri_ret != FALSE)
+        goto out;
+
+    return 0;
+
+out:
+    /* Don't attempt to close dtype as we don't know the exact state of the
+     * reference counts.  Every state in this function will be automatically
+     * closed at library exit anyways, as internal count is never > 1.
+     */
+    return -1;
+}
+
+
 	/* Test boundary cases with lots of types */
 
 /* Type IDs range from H5I_NTYPES to MAX_NUM_TYPES.  The system will assign */
@@ -418,8 +495,9 @@ out:
 
 void test_ids(void)
 {
-	basic_id_test();
-	id_predefined_test();
-	test_id_type_list();
+	if (basic_id_test() < 0) TestErrPrintf("Basic ID test failed\n");
+	if (id_predefined_test() < 0) TestErrPrintf("Predefined ID type test failed\n");
+	if (test_is_valid() < 0) TestErrPrintf("H5Iis_valid test failed\n");
+	if (test_id_type_list() < 0) TestErrPrintf("ID type list test failed\n");
 
 }

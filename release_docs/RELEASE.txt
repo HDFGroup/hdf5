@@ -61,6 +61,8 @@ New Features
 
         Library
         -------
+        - Added H5Iis_valid() function to check if an id is valid without
+          producing an error message.  NAF - 2008/11/5
 
         Parallel Library
         ----------------

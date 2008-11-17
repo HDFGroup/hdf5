@@ -1844,6 +1844,53 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5Iis_valid
+ *
+ * Purpose:	Check if the given id is valid.  And id is valid if it is in
+ *          use and has an application reference count of at least 1.
+ *
+ * Return:	Success: TRUE if the id is valid, FALSE otherwise.
+ *
+ *          Failure:	Negative (never fails currently)
+ *
+ * Programmer:  Neil Fortner
+ *              Friday, October 31, 2008 (boo)
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5Iis_valid(hid_t id)
+{
+    H5I_id_type_t   *type_ptr;          /* ptr to ID's type */
+    H5I_id_info_t   *id_ptr;            /* ptr to the ID */
+    H5I_type_t      type;               /* ID's type */
+    htri_t          ret_value = TRUE;   /* Return value */
+
+    FUNC_ENTER_API(H5Iis_valid, FAIL)
+
+    type = H5I_TYPE(id);
+    /* Check for conditions that would cause H5I_find_id to throw an assertion */
+    if (type <= H5I_BADID || type >= H5I_next_type)
+        HGOTO_DONE(FALSE);
+
+    type_ptr = H5I_id_type_list_g[type];
+    if (!type_ptr || type_ptr->count <= 0)
+        ret_value = FALSE;
+
+    /* Find the ID */
+    else if (NULL == (id_ptr = H5I_find_id(id)))
+        ret_value = FALSE;
+
+    /* Check if the found id is an internal id */
+    else if (!id_ptr->app_count)
+        ret_value = FALSE;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Iis_valid() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5Isearch
  *
  * Purpose:	Apply function FUNC to each member of type TYPE and return a
