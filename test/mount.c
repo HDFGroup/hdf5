@@ -4202,6 +4202,130 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_multisharedclose
+ *
+ * Purpose: Test that multiple files mounted to a shared mount structure
+ *          can be properly closed by closing the groups holding them open.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Neil Fortner
+ *              Friday, November 14, 2008
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+ static int
+test_multisharedclose(hid_t fapl)
+{
+    hid_t fid1 = -1, fid2 = -1; /* File IDs */
+    hid_t gid1 = -1, gid2 = -1, gid3 = -1;
+    char    filename1[NAME_BUF_SIZE],
+            filename2[NAME_BUF_SIZE],
+            filename3[NAME_BUF_SIZE],
+            filename4[NAME_BUF_SIZE]; 	/* Name of files to mount */
+
+    TESTING("closing multiple shared mounts");
+
+    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+    h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
+    h5_fixname(FILENAME[3], fapl, filename4, sizeof filename4);
+
+    /* Create master file with three groups to serve as mount points */
+    if ((fid1 = H5Fcreate(filename4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Gclose(H5Gcreate(fid1, "mnt1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Gclose(H5Gcreate(fid1, "mnt2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Gclose(H5Gcreate(fid1, "mnt3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Fclose(fid1) < 0) TEST_ERROR
+
+    /* Create child file with group */
+    if ((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Gclose(H5Gcreate(fid1, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Fclose(fid1) < 0) TEST_ERROR
+
+    /* Create child file with group */
+    if ((fid1 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Gclose(H5Gcreate(fid1, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Fclose(fid1) < 0) TEST_ERROR
+
+    /* Create child file with group */
+    if ((fid1 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Gclose(H5Gcreate(fid1, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Fclose(fid1) < 0) TEST_ERROR
+
+
+    /* Open master and child 1 and mount child 1 to master */
+    if ((fid1 = H5Fopen(filename4, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if ((fid2 = H5Fopen(filename1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Fmount(fid1, "mnt1", fid2, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Open the group in child 1 */
+    if ((gid1 = H5Gopen(fid1, "mnt1/grp", H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Close both files.  They will be held open by gid1 */
+    if (H5Idec_ref(fid2) < 0) TEST_ERROR
+    if (H5Idec_ref(fid1) < 0) TEST_ERROR
+
+
+    /* Open master and child 2 and mount child 2 to master */
+    if ((fid1 = H5Fopen(filename4, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if ((fid2 = H5Fopen(filename2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Fmount(fid1, "mnt2", fid2, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Open the group in child 2 */
+    if ((gid2 = H5Gopen(fid1, "mnt2/grp", H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Close both files.  They will be held open by gid2 */
+    if (H5Idec_ref(fid2) < 0) TEST_ERROR
+    if (H5Idec_ref(fid1) < 0) TEST_ERROR
+
+
+    /* Open master and child 3 and mount child 3 to master */
+    if ((fid1 = H5Fopen(filename4, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if ((fid2 = H5Fopen(filename3, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Fmount(fid1, "mnt3", fid2, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Open the group in child 3 */
+    if ((gid3 = H5Gopen(fid1, "mnt3/grp", H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Close both files.  They will be held open by gid3 */
+    if (H5Idec_ref(fid2) < 0) TEST_ERROR
+    if (H5Idec_ref(fid1) < 0) TEST_ERROR
+
+
+    /* Close gid1.  This will close child 1. */
+    if (H5Idec_ref(gid1) < 0) TEST_ERROR
+
+    /* Close gid2.  This will close child 2. */
+    if (H5Idec_ref(gid2) < 0) TEST_ERROR
+
+    /* Close gid3.  This will close child 3 and the master file. */
+    if (H5Idec_ref(gid3) < 0) TEST_ERROR
+
+    /* Check that all file IDs have been closed */
+    if(H5I_nmembers(H5I_FILE) != 0) TEST_ERROR
+    if(H5F_sfile_assert_num(0) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+    H5Gclose(gid1);
+    H5Gclose(gid2);
+    H5Gclose(gid3);
+    H5Fclose(fid2);
+    H5Fclose(fid2);
+    } H5E_END_TRY;
+    return 1;
+} /* end test_multisharedclose() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test file mounting
@@ -4257,6 +4381,7 @@ main(void)
     nerrors += test_symlink(fapl);
     nerrors += test_sharedacc(fapl);
     nerrors += test_sharedclose(fapl);
+    nerrors += test_multisharedclose(fapl);
 
     if (nerrors) goto error;
 

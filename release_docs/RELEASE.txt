@@ -89,6 +89,8 @@ Bug Fixes since HDF5-1.8.2
 
         Library
         -------
+        - Fixed a bug that could cause problems when "automatically" unmounting
+          multiple files.  NAF - 2008/11/17
 
         Parallel Library
         ----------------
