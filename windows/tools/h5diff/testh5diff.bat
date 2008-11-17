@@ -248,10 +248,6 @@ rem ############################################################################
     rem 1.8 quiet mode 
     call :testing %h5diff% -q %srcfile1% %srcfile2%
     call :tooltest h5diff_18.txt -q %file1% %file2% 
-
-    rem 1.9 contents mode 
-    call :testing %h5diff% -v -c %srcfile1% %srcfile11%
-    call :tooltest h5diff_19.txt -v -c %file1% %file11%
     
     rem ##############################################################################
     rem # not comparable types
@@ -495,7 +491,7 @@ rem ############################################################################
     call :testing h5diff_101.txt -v %srcfile1% %srcfile1% g1/d1  g1/d2
     rem call :tooltest h5diff_101.txt -v %file1% %file1% g1/d1  g1/d2
     call :results -SKIP-
-    rem
+
     call :testing %h5diff% -v  %srcfile1% %srcfile1%  g1/fp1 g1/fp2
     rem call :tooltest h5diff_102.txt -v %file1% %file1% g1/fp1 g1/fp2
     call :results -SKIP-

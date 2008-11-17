@@ -557,21 +557,26 @@ rem ############################################################################
     rem directory, and using it only gets in the way of the output formatting.
     rem --SJW 8/24/07
     call :tooltest1   tbin1.ddl -d integer -o out1.bin -b LE tbinary.h5
-    call :tooltest1   tbin2.ddl -d float -o out2.bin -b BE   tbinary.h5
 
-    rem the MEMORY test can be validated with h5import/h5diff
-    call :tooltest1   tbin3.ddl -d integer -o out3.bin -b MEMORY tbinary.h5
+    rem NATIVE default. the NATIVE test can be validated with h5import/h5diff
+    call :tooltest1   tbin1.ddl -d integer -o out1.bin -b MEMORY tbinary.h5
+    call :importtest out1.bin -c out3.h5import -o out1.h5
+    call :difftest tbinary.h5 out1.h5 /integer /integer
+    
+    call :tooltest1 tbin2.ddl -b BE -d float -o out2.bin tbinary.h5
+    
+    rem the NATIVE test can be validated with h5import/h5diff
+    call :tooltest1 tbin3.ddl -d integer -o out3.bin -b NATIVE tbinary.h5
     call :importtest out3.bin -c out3.h5import -o out3.h5
     call :difftest tbinary.h5 out3.h5 /integer /integer
 
-    call :tooltest1   tbin4.ddl -d double  -o out4.bin -b FILE   tbinary.h5
+    call :tooltest1   tbin4.ddl -d double  -b FILE -o out4.bin    tbinary.h5
        
     rem Clean up binary output files
     if not defined hdf5_nocleanup (
         for /l %%a in (1,1,4) do del /f %testdir%\out%%a.bin
         del /f %testdir%\out3.h5
     )
-    
 
     rem test for dataset region references 
     call :tooltest tdatareg.ddl tdatareg.h5
