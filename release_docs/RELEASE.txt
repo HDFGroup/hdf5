@@ -61,6 +61,10 @@ New Features
 
         Library
         -------
+        - Added H5Pset_chunk_cache() and H5Pget_chunk_cache() functions to allow
+          individual rdcc configuration for each dataset.  Added
+          H5Dget_access_plist() function to retrieve a dataset access property
+          list form a dataset.  NAF - 2008/11/12
         - Added H5Iis_valid() function to check if an id is valid without
           producing an error message.  NAF - 2008/11/5
 
