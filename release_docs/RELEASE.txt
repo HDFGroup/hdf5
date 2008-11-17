@@ -78,6 +78,8 @@ Bug Fixes since HDF5-1.6.8 Release
 
     Configuration
     -------------
+     - h5perf will now get installed during 'make install'. 
+           MAM - 2008/11/17
 
     Performance
     -------------
