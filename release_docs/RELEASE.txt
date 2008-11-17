@@ -127,6 +127,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a bug that could cause problems when "automatically" unmounting
+            multiple files.  (NAF - 2008/11/17)
       - H5Ovisit and H5Ovisit_by_name will now properly terminate when the
             callback function returns a positive value on the starting object.
             (NAF - 2008/11/03)
