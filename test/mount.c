@@ -4237,24 +4237,24 @@ test_multisharedclose(hid_t fapl)
 
     /* Create master file with three groups to serve as mount points */
     if ((fid1 = H5Fcreate(filename4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if (H5Gclose(H5Gcreate(fid1, "mnt1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if (H5Gclose(H5Gcreate(fid1, "mnt2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if (H5Gclose(H5Gcreate(fid1, "mnt3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Gclose(H5Gcreate2(fid1, "mnt1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Gclose(H5Gcreate2(fid1, "mnt2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Gclose(H5Gcreate2(fid1, "mnt3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if (H5Fclose(fid1) < 0) TEST_ERROR
 
     /* Create child file with group */
     if ((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if (H5Gclose(H5Gcreate(fid1, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Gclose(H5Gcreate2(fid1, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if (H5Fclose(fid1) < 0) TEST_ERROR
 
     /* Create child file with group */
     if ((fid1 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if (H5Gclose(H5Gcreate(fid1, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Gclose(H5Gcreate2(fid1, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if (H5Fclose(fid1) < 0) TEST_ERROR
 
     /* Create child file with group */
     if ((fid1 = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
-    if (H5Gclose(H5Gcreate(fid1, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Gclose(H5Gcreate2(fid1, "grp", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
     if (H5Fclose(fid1) < 0) TEST_ERROR
 
 
@@ -4264,7 +4264,7 @@ test_multisharedclose(hid_t fapl)
     if (H5Fmount(fid1, "mnt1", fid2, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Open the group in child 1 */
-    if ((gid1 = H5Gopen(fid1, "mnt1/grp", H5P_DEFAULT)) < 0) TEST_ERROR
+    if ((gid1 = H5Gopen2(fid1, "mnt1/grp", H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close both files.  They will be held open by gid1 */
     if (H5Idec_ref(fid2) < 0) TEST_ERROR
@@ -4277,7 +4277,7 @@ test_multisharedclose(hid_t fapl)
     if (H5Fmount(fid1, "mnt2", fid2, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Open the group in child 2 */
-    if ((gid2 = H5Gopen(fid1, "mnt2/grp", H5P_DEFAULT)) < 0) TEST_ERROR
+    if ((gid2 = H5Gopen2(fid1, "mnt2/grp", H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close both files.  They will be held open by gid2 */
     if (H5Idec_ref(fid2) < 0) TEST_ERROR
@@ -4290,7 +4290,7 @@ test_multisharedclose(hid_t fapl)
     if (H5Fmount(fid1, "mnt3", fid2, H5P_DEFAULT) < 0) TEST_ERROR
 
     /* Open the group in child 3 */
-    if ((gid3 = H5Gopen(fid1, "mnt3/grp", H5P_DEFAULT)) < 0) TEST_ERROR
+    if ((gid3 = H5Gopen2(fid1, "mnt3/grp", H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* Close both files.  They will be held open by gid3 */
     if (H5Idec_ref(fid2) < 0) TEST_ERROR
