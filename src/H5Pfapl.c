@@ -57,9 +57,9 @@
 /* Definitions for the initial metadata cache resize configuration */
 #define H5F_ACS_META_CACHE_INIT_CONFIG_SIZE	sizeof(H5AC_cache_config_t)
 #define H5F_ACS_META_CACHE_INIT_CONFIG_DEF	H5AC__DEFAULT_CACHE_CONFIG
-/* Definitions for size of raw data chunk cache(elements) */
-#define H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE       sizeof(size_t)
-#define H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF        521
+/* Definitions for size of raw data chunk cache(slots) */
+#define H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE       sizeof(size_t)
+#define H5F_ACS_DATA_CACHE_NUM_SLOTS_DEF        521
 /* Definition for size of raw data chunk cache(bytes) */
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE       sizeof(size_t)
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF        (1024*1024)
@@ -187,7 +187,7 @@ static herr_t
 H5P_facc_reg_prop(H5P_genclass_t *pclass)
 {
     H5AC_cache_config_t mdc_initCacheCfg = H5F_ACS_META_CACHE_INIT_CONFIG_DEF;  /* Default metadata cache settings */
-    size_t rdcc_nelmts = H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF;      /* Default raw data chunk cache # of elements */
+    size_t rdcc_nslots = H5F_ACS_DATA_CACHE_NUM_SLOTS_DEF;      /* Default raw data chunk cache # of slots */
     size_t rdcc_nbytes = H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF;      /* Default raw data chunk cache # of bytes */
     double rdcc_w0 = H5F_ACS_PREEMPT_READ_CHUNKS_DEF;           /* Default raw data chunk cache dirty ratio */
     hsize_t threshold = H5F_ACS_ALIGN_THRHD_DEF;                /* Default allocation alignment threshold */
@@ -213,7 +213,7 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of raw data chunk cache (elements) */
-    if(H5P_register(pclass, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE, &rdcc_nelmts, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register(pclass, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE, &rdcc_nslots, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of raw data chunk cache(bytes) */
@@ -1213,13 +1213,13 @@ done:
  */
 herr_t
 H5Pset_cache(hid_t plist_id, int UNUSED mdc_nelmts,
-	     size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0)
+	     size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_cache, FAIL);
-    H5TRACE5("e", "iIszzd", plist_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes,
+    H5TRACE5("e", "iIszzd", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes,
              rdcc_w0);
 
     /* Check arguments */
@@ -1231,8 +1231,8 @@ H5Pset_cache(hid_t plist_id, int UNUSED mdc_nelmts,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set sizes */
-    if(H5P_set(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &rdcc_nelmts) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache element size");
+    if(H5P_set(plist, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, &rdcc_nslots) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache number of slots");
     if(H5P_set(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc_nbytes) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache byte size");
     if(H5P_set(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &rdcc_w0) < 0)
@@ -1273,13 +1273,13 @@ done:
  */
 herr_t
 H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
-	     size_t *rdcc_nelmts, size_t *rdcc_nbytes, double *rdcc_w0)
+	     size_t *rdcc_nslots, size_t *rdcc_nbytes, double *rdcc_w0)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_cache, FAIL);
-    H5TRACE5("e", "i*Is*z*z*d", plist_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes,
+    H5TRACE5("e", "i*Is*z*z*d", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes,
              rdcc_w0);
 
     /* Get the plist structure */
@@ -1292,9 +1292,9 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
     if (mdc_nelmts)
         *mdc_nelmts = 0;
 
-    if (rdcc_nelmts)
-        if(H5P_get(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, rdcc_nelmts) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache element size");
+    if (rdcc_nslots)
+        if(H5P_get(plist, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, rdcc_nslots) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache number of slots");
     if (rdcc_nbytes)
         if(H5P_get(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, rdcc_nbytes) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache byte size");

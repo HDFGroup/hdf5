@@ -50,6 +50,11 @@
 #define H5D_CRT_EXT_FILE_LIST_NAME "efl"                /* External file list */
 #define H5D_CRT_DATA_PIPELINE_NAME "pline"              /* Data filter pipeline */
 
+/* ========  Dataset access property names ======== */
+#define H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME   "rdcc_nslots"   /* Size of raw data chunk cache(slots) */
+#define H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME   "rdcc_nbytes"   /* Size of raw data chunk cache(bytes) */
+#define H5D_ACS_PREEMPT_READ_CHUNKS_NAME    "rdcc_w0"       /* Preemption read chunks first */
+
 /* ======== Data transfer properties ======== */
 #define H5D_XFER_MAX_TEMP_BUF_NAME      "max_temp_buf"  /* Maximum temp buffer size */
 #define H5D_XFER_TCONV_BUF_NAME         "tconv_buf"     /* Type conversion buffer */
@@ -143,7 +148,7 @@ typedef struct H5D_dcpl_cache_t {
 /******************************/
 
 H5_DLL herr_t H5D_init(void);
-H5_DLL H5D_t *H5D_open(const H5G_loc_t *loc, hid_t dxpl_id);
+H5_DLL H5D_t *H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5D_close(H5D_t *dataset);
 H5_DLL H5O_loc_t *H5D_oloc(H5D_t *dataset);
 H5_DLL H5G_name_t *H5D_nameof(H5D_t *dataset);

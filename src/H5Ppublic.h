@@ -245,11 +245,11 @@ H5_DLL herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset);
 H5_DLL herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type);
 H5_DLL herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type);
 H5_DLL herr_t H5Pset_cache(hid_t plist_id, int mdc_nelmts,
-       size_t rdcc_nelmts, size_t rdcc_nbytes,
+       size_t rdcc_nslots, size_t rdcc_nbytes,
        double rdcc_w0);
 H5_DLL herr_t H5Pget_cache(hid_t plist_id,
        int *mdc_nelmts, /* out */
-       size_t *rdcc_nelmts/*out*/,
+       size_t *rdcc_nslots/*out*/,
        size_t *rdcc_nbytes/*out*/, double *rdcc_w0);
 H5_DLL herr_t H5Pset_mdc_config(hid_t    plist_id,
        H5AC_cache_config_t * config_ptr);
@@ -318,6 +318,14 @@ H5_DLL herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t
 H5_DLL herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
 H5_DLL herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t
 	*fill_time/*out*/);
+
+/* Dataset access property list (DAPL) routines */
+H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots,
+       size_t rdcc_nbytes, double rdcc_w0);
+H5_DLL herr_t H5Pget_chunk_cache(hid_t dapl_id,
+       size_t *rdcc_nslots/*out*/,
+       size_t *rdcc_nbytes/*out*/,
+       double *rdcc_w0/*out*/);
 
 /* Dataset xfer property list (DXPL) routines */
 H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char* expression);

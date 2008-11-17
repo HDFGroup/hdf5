@@ -142,22 +142,6 @@ const H5P_libclass_t H5P_CLS_GACC[1] = {{
     NULL 		        /* Class close callback info    */
 }};
 
-/* Dataset access property list class library initialization object */
-/* (move to proper source code file when used for real) */
-const H5P_libclass_t H5P_CLS_DACC[1] = {{
-    "dataset access",		/* Class name for debugging     */
-    &H5P_CLS_LINK_ACCESS_g,	/* Parent class ID              */
-    &H5P_CLS_DATASET_ACCESS_g,	/* Pointer to class ID          */
-    &H5P_LST_DATASET_ACCESS_g,	/* Pointer to default property list ID */
-    NULL,			/* Default property registration routine */
-    NULL,		        /* Class creation callback      */
-    NULL,		        /* Class creation callback info */
-    NULL,			/* Class copy callback          */
-    NULL,		        /* Class copy callback info     */
-    NULL,			/* Class close callback         */
-    NULL 		        /* Class close callback info    */
-}};
-
 /* Datatype creation property list class library initialization object */
 /* (move to proper source code file when used for real) */
 const H5P_libclass_t H5P_CLS_TCRT[1] = {{
@@ -200,6 +184,7 @@ H5_DLLVAR const H5P_libclass_t H5P_CLS_OCPY[1];         /* Object copy */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FCRT[1];         /* File creation */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FACC[1];         /* File access */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_DCRT[1];         /* Dataset creation */
+H5_DLLVAR const H5P_libclass_t H5P_CLS_DACC[1];         /* Dataset access */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_DXFR[1];         /* Data transfer */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_FMNT[1];         /* File mount */
 H5_DLLVAR const H5P_libclass_t H5P_CLS_ACRT[1];         /* Attribute creation */

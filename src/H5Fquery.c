@@ -275,14 +275,14 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_rdcc_nelmts
+ * Function:	H5F_rdcc_nslots
  *
- * Purpose:	Replaced a macro to retrieve the raw data cache number of elments,
+ * Purpose:	Replaced a macro to retrieve the raw data cache number of slots,
  *              now that the generic properties are being used to store
  *              the values.
  *
  * Return:	Success:	Non-negative, and the raw data cache number of
- *                              of elemnts is returned.
+ *                              of slots is returned.
  *
  * 		Failure:	Negative (should not happen)
  *
@@ -293,15 +293,15 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
  *-------------------------------------------------------------------------
  */
 size_t
-H5F_rdcc_nelmts(const H5F_t *f)
+H5F_rdcc_nslots(const H5F_t *f)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_rdcc_nelmts)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_rdcc_nslots)
 
     HDassert(f);
     HDassert(f->shared);
 
-    FUNC_LEAVE_NOAPI(f->shared->rdcc_nelmts)
+    FUNC_LEAVE_NOAPI(f->shared->rdcc_nslots)
 } /* end H5F_rdcc_nelmts() */
 
 

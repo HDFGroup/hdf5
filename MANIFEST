@@ -664,6 +664,7 @@
 ./src/H5Ounknown.c
 ./src/H5P.c
 ./src/H5Pacpl.c
+./src/H5Pdapl.c
 ./src/H5Pdcpl.c
 ./src/H5Pdeprec.c
 ./src/H5Pdxpl.c
