@@ -6223,6 +6223,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Pdapl.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Pdcpl.c"
 				>
 				<FileConfiguration
