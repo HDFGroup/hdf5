@@ -182,6 +182,7 @@ H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_nbytes, double
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(H5Pset_chunk_cache, FAIL);
+    H5TRACE4("e", "izzd", dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0);
 
     /* Check arguments.  Note that we allow negative values - they are
      * considered to "unset" the property. */
@@ -233,6 +234,7 @@ H5Pget_chunk_cache(hid_t dapl_id, size_t *rdcc_nslots, size_t *rdcc_nbytes, doub
     herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(H5Pget_chunk_cache, FAIL);
+    H5TRACE4("e", "i*z*z*d", dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(dapl_id, H5P_DATASET_ACCESS)))

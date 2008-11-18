@@ -1867,6 +1867,7 @@ H5Iis_valid(hid_t id)
     htri_t          ret_value = TRUE;   /* Return value */
 
     FUNC_ENTER_API(H5Iis_valid, FAIL)
+    H5TRACE1("t", "i", id);
 
     type = H5I_TYPE(id);
     /* Check for conditions that would cause H5I_find_id to throw an assertion */
