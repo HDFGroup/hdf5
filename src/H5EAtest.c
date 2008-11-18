@@ -267,6 +267,7 @@ H5EA_get_cparam_test(const H5EA_t *ea, H5EA_create_t *cparam))
     cparam->idx_blk_elmts = ea->hdr->cparam.idx_blk_elmts;
     cparam->sup_blk_min_data_ptrs = ea->hdr->cparam.sup_blk_min_data_ptrs;
     cparam->data_blk_min_elmts = ea->hdr->cparam.data_blk_min_elmts;
+    cparam->max_dblk_page_nelmts_bits = ea->hdr->cparam.max_dblk_page_nelmts_bits;
 
 END_FUNC(PRIV)  /* end H5EA_get_cparam_test() */
 
@@ -312,6 +313,10 @@ H5EA_cmp_cparam_test(const H5EA_create_t *cparam1, const H5EA_create_t *cparam2)
     if(cparam1->data_blk_min_elmts < cparam2->data_blk_min_elmts)
         H5_LEAVE(-1)
     else if(cparam1->data_blk_min_elmts > cparam2->data_blk_min_elmts)
+        H5_LEAVE(1)
+    if(cparam1->max_dblk_page_nelmts_bits < cparam2->max_dblk_page_nelmts_bits)
+        H5_LEAVE(-1)
+    else if(cparam1->max_dblk_page_nelmts_bits > cparam2->max_dblk_page_nelmts_bits)
         H5_LEAVE(1)
 
 CATCH

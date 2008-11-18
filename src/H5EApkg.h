@@ -354,7 +354,6 @@ func_init_failed:							      \
 #define H5EA_METADATA_PREFIX_SIZE(c) (                                        \
     H5_SIZEOF_MAGIC   /* Signature */                                         \
     + 1 /* Version */                                                         \
-    + 1 /* Array type */                                                      \
     + ((c) ? H5EA_SIZEOF_CHKSUM : 0) /* Metadata checksum */                  \
     )
 
@@ -364,11 +363,13 @@ func_init_failed:							      \
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
     /* General heap information */                                            \
+    + 1 /* Array type */                                                      \
     + 1 /* Element Size */                                                    \
     + 1 /* Max. # of elements bits */                                         \
     + 1 /* # of elements to store in index block */                           \
     + 1 /* Min. # elements per data block */                                  \
     + 1 /* Min. # of data block pointers for a super block */                 \
+    + 1 /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */ \
                                                                               \
     /* Extensible Array Header statistics fields */                           \
     + (h)->sizeof_size /* Max. index set */				      \
@@ -385,8 +386,11 @@ func_init_failed:							      \
     /* General metadata fields */                                             \
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
-    /* Extensible Array Index Block specific fields */			      \
+    /* Sanity-checking fields */					      \
+    + 1 /* Array type */                                                      \
     + (i)->hdr->sizeof_addr          /* File address of array owning the block */ \
+                                                                              \
+    /* Extensible Array Index Block specific fields */			      \
     + ((size_t)(i)->hdr->cparam.idx_blk_elmts * (size_t)(i)->hdr->cparam.raw_elmt_size) /* Elements in index block  */ \
     + ((i)->ndblk_addrs * (i)->hdr->sizeof_addr) /* Data block addresses in index block  */ \
     + ((i)->nsblk_addrs * (i)->hdr->sizeof_addr) /* Super block addresses in index block  */ \
@@ -397,9 +401,12 @@ func_init_failed:							      \
     /* General metadata fields */                                             \
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
-    /* Extensible Array Super Block specific fields */			      \
+    /* Sanity-checking fields */					      \
+    + 1 /* Array type */                                                      \
     + (s)->hdr->sizeof_addr          /* File address of array owning the block */ \
     + (s)->hdr->arr_off_size         /* Offset of the block in the array */   \
+                                                                              \
+    /* Extensible Array Super Block specific fields */			      \
     + ((s)->ndblks * (s)->hdr->sizeof_addr) /* Data block addresses in super block  */ \
     )
 
@@ -408,9 +415,12 @@ func_init_failed:							      \
     /* General metadata fields */                                             \
     H5EA_METADATA_PREFIX_SIZE(TRUE)                                           \
                                                                               \
-    /* Extensible Array Data Block specific fields */			      \
+    /* Sanity-checking fields */					      \
+    + 1 /* Array type */                                                      \
     + (d)->hdr->sizeof_addr          /* File address of array owning the block */ \
     + (d)->hdr->arr_off_size         /* Offset of the block in the array */   \
+                                                                              \
+    /* Extensible Array Data Block specific fields */			      \
     + ((d)->nelmts * (size_t)(d)->hdr->cparam.raw_elmt_size) /* Elements in index block  */  \
     )
 

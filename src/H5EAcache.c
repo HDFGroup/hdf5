@@ -235,13 +235,16 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
     hdr->cparam.idx_blk_elmts = *p++;          /* # of elements to store in index block */
     hdr->cparam.data_blk_min_elmts = *p++;     /* Min. # of elements per data block */
     hdr->cparam.sup_blk_min_data_ptrs = *p++;  /* Min. # of data block pointers for a super block */
+    hdr->cparam.max_dblk_page_nelmts_bits = *p++;  /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */
 
-    /* Internal information */
-    H5F_addr_decode(f, &p, &hdr->idx_blk_addr); /* Address of index block */
+    /* Array statistics */
     H5F_DECODE_LENGTH(f, p, hdr->stats.max_idx_set);    /* Max. index set (+1) */
     H5F_DECODE_LENGTH(f, p, hdr->stats.nsuper_blks);    /* Number of super blocks created */
     H5F_DECODE_LENGTH(f, p, hdr->stats.ndata_blks);     /* Number of data blocks created */
     H5F_DECODE_LENGTH(f, p, hdr->stats.nelmts);         /* Number of elements 'realized' */
+
+    /* Internal information */
+    H5F_addr_decode(f, &p, &hdr->idx_blk_addr); /* Address of index block */
 
     /* Sanity check */
     /* (allow for checksum not decoded yet) */
@@ -343,13 +346,16 @@ H5EA__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         *p++ = hdr->cparam.idx_blk_elmts;          /* # of elements to store in index block */
         *p++ = hdr->cparam.data_blk_min_elmts;     /* Min. # of elements per data block */
         *p++ = hdr->cparam.sup_blk_min_data_ptrs;  /* Min. # of data block pointers for a super block */
+        *p++ = hdr->cparam.max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */
 
-        /* Internal information */
-        H5F_addr_encode(f, &p, hdr->idx_blk_addr);  /* Address of index block */
+        /* Array statistics */
         H5F_ENCODE_LENGTH(f, p, hdr->stats.max_idx_set);    /* Max. index set (+1) */
         H5F_ENCODE_LENGTH(f, p, hdr->stats.nsuper_blks);    /* Number of super blocks created */
         H5F_ENCODE_LENGTH(f, p, hdr->stats.ndata_blks);     /* Number of data blocks created */
         H5F_ENCODE_LENGTH(f, p, hdr->stats.nelmts);         /* Number of elements 'realized' */
+
+        /* Internal information */
+        H5F_addr_encode(f, &p, hdr->idx_blk_addr);  /* Address of index block */
 
         /* Compute metadata checksum */
         metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);

@@ -374,15 +374,17 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     if(cparam->raw_elmt_size == 0)
 	H5E_THROW(H5E_BADVALUE, "element size must be greater than zero")
     if(cparam->max_nelmts_bits == 0)
-	H5E_THROW(H5E_BADVALUE, "max. # of nelmts bitsmust be greater than zero")
+	H5E_THROW(H5E_BADVALUE, "max. # of elements bits must be greater than zero")
     if(cparam->max_nelmts_bits > H5EA_MAX_NELMTS_IDX_MAX)
-	H5E_THROW(H5E_BADVALUE, "element size must be <= %u", (unsigned)H5EA_MAX_NELMTS_IDX_MAX)
+	H5E_THROW(H5E_BADVALUE, "max. # of elements bits must be <= %u", (unsigned)H5EA_MAX_NELMTS_IDX_MAX)
     if(cparam->sup_blk_min_data_ptrs < 2)
 	H5E_THROW(H5E_BADVALUE, "min # of data block pointers in super block must be >= two")
     if(!POWER_OF_TWO(cparam->sup_blk_min_data_ptrs))
-	H5E_THROW(H5E_BADVALUE, "min # of data block pointers in super block not power of two")
+	H5E_THROW(H5E_BADVALUE, "min # of data block pointers in super block must be power of two")
     if(!POWER_OF_TWO(cparam->data_blk_min_elmts))
-	H5E_THROW(H5E_BADVALUE, "min # of elements per data block not power of two")
+	H5E_THROW(H5E_BADVALUE, "min # of elements per data block must be power of two")
+    if(cparam->max_dblk_page_nelmts_bits > cparam->max_nelmts_bits)
+	H5E_THROW(H5E_BADVALUE, "max. # of elements per data block page bits must be <= max. # of elements bits")
 #endif /* NDEBUG */
 
     /* Allocate space for the shared information */

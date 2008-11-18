@@ -131,6 +131,9 @@ H5EA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 	      "Native Element Size (on this platform):",
 	      hdr->cparam.cls->nat_elmt_size);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Log2(Max. # of elements in array):",
+	      (unsigned)hdr->cparam.max_nelmts_bits);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "# of elements in index block:",
 	      (unsigned)hdr->cparam.idx_blk_elmts);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
@@ -139,6 +142,9 @@ H5EA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 	      "Min. # of data block pointers for a super block:",
 	      (unsigned)hdr->cparam.sup_blk_min_data_ptrs);
+    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+	      "Log2(Max. # of elements in data block page):",
+	      (unsigned)hdr->cparam.max_dblk_page_nelmts_bits);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Highest element index stored (+1):",
 	      hdr->stats.max_idx_set);

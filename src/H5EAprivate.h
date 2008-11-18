@@ -76,6 +76,7 @@ typedef struct H5EA_create_t {
     uint8_t idx_blk_elmts;              /* # of elements to store in index block */
     uint8_t data_blk_min_elmts;         /* Min. # of elements per data block */
     uint8_t sup_blk_min_data_ptrs;      /* Min. # of data block pointers for a super block */
+    uint8_t max_dblk_page_nelmts_bits;       /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */
 } H5EA_create_t;
 
 /* Extensible array metadata statistics info */
