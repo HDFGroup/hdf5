@@ -27,12 +27,12 @@ AUTOHEADER_VERSION="autoheader (GNU Autoconf) 2.61"
 
 # If the user has defined environment variables pointing to the autotools,
 # use those (but check their versions first!). Otherwise, assume that
-# we're running on a machine with access to the autotools in home1/packages.
+# we're running on a machine with access to the autotools in mnt/hdf/packages.
 if test -z ${AUTOCONF}; then
-  AUTOCONF=/home1/packages/autoconf/autoconf-2.61/bin/autoconf
+  AUTOCONF=/mnt/hdf/packages/autoconf/autoconf-2.61/bin/autoconf
 fi
 if test -z ${AUTOHEADER}; then
-  AUTOHEADER=/home1/packages/autoconf/autoconf-2.61/bin/autoheader
+  AUTOHEADER=/mnt/hdf/packages/autoconf/autoconf-2.61/bin/autoheader
 fi
 
 
@@ -50,7 +50,7 @@ fi
 
 
 # Make sure tools are in path
-PATH=/home1/packages/autoconf/autoconf-2.61/bin:$PATH
+PATH=/mnt/hdf/packages/autoconf/autoconf-2.61/bin:$PATH
 
 
 # Run commands in order
