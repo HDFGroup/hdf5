@@ -407,6 +407,7 @@ func_init_failed:							      \
     + (s)->hdr->arr_off_size         /* Offset of the block in the array */   \
                                                                               \
     /* Extensible Array Super Block specific fields */			      \
+    + ((s)->ndblks * (s)->dblk_page_init_size) /* Data block 'page init' bitmasks in super block (can be 0 if no pages) */ \
     + ((s)->ndblks * (s)->hdr->sizeof_addr) /* Data block addresses in super block  */ \
     )
 
@@ -425,8 +426,10 @@ func_init_failed:							      \
     )
 
 /* Compute the # of bytes required to store an offset into a given buffer size */
-#define H5EA_SIZEOF_OFFSET_BITS(b)   (((b) + 7) / 8)
+#define H5EA_SIZEOF_OFFSET_BITS(b)      (((b) + 7) / 8)
 
+/* Compute the first super block index that will hold a certain # of data block pointers */
+#define H5EA_SBLK_FIRST_IDX(m)          (2 * H5V_log2_of2((uint32_t)m))
 
 /****************************/
 /* Package Private Typedefs */
@@ -477,6 +480,9 @@ typedef struct H5EA_hdr_t {
     /* Super block information (not stored) */
     size_t nsblks;                      /* Number of superblocks needed for array */
     H5EA_sblk_info_t *sblk_info;        /* Array of information for each super block */
+
+    /* Data block information (not stored) */
+    size_t dblk_page_nelmts;            /* # of elements per data block page */
 } H5EA_hdr_t;
 
 /* The extensible array index block information */
@@ -508,7 +514,8 @@ typedef struct H5EA_sblock_t {
 
     /* Extensible array information (stored) */
     hsize_t     block_off;      /* Offset of the block within the array's address space */
-    haddr_t     *dblk_addrs;    /* Buffer for addresses of data blocks in super block */
+    haddr_t     *dblk_addrs;    /* Addresses of data blocks in super block */
+    uint8_t     *page_init;     /* Bitmap of whether a data block page is initialized */
 
     /* Internal array information (not stored) */
     size_t      rc;             /* Reference count of objects using this block */
@@ -520,6 +527,8 @@ typedef struct H5EA_sblock_t {
     unsigned    idx;            /* Super block index within the extensible array */
     size_t      ndblks;         /* # of data block addresses that are in super block */
     size_t      dblk_nelmts;    /* # of elements for data blocks reachable through this super block */
+    size_t      dblk_npages;    /* # of pages in each data block */
+    size_t      dblk_page_init_size;    /* Size of 'page init' bitmask for each data block */
 } H5EA_sblock_t;
 
 /* The extensible array data block information */

@@ -123,7 +123,7 @@ H5EA__iblock_alloc(H5EA_hdr_t *hdr))
     iblock->addr = HADDR_UNDEF;
 
     /* Compute information */
-    iblock->nsblks = 2 * H5V_log2_of2((uint32_t)hdr->cparam.sup_blk_min_data_ptrs);
+    iblock->nsblks = H5EA_SBLK_FIRST_IDX(hdr->cparam.sup_blk_min_data_ptrs);
     iblock->ndblk_addrs = 2 * ((size_t)hdr->cparam.sup_blk_min_data_ptrs - 1);
     iblock->nsblk_addrs = hdr->nsblks - iblock->nsblks;
 #ifdef QAK

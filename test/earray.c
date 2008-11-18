@@ -565,6 +565,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     if(ea) {
         /* Close opened extensible array */
         H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+        ea = NULL;
 
         /* Indicate error */
         TEST_ERROR
@@ -579,6 +580,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     if(ea) {
         /* Close opened extensible array */
         H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+        ea = NULL;
 
         /* Indicate error */
         TEST_ERROR
@@ -592,6 +594,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     if(ea) {
         /* Close opened extensible array */
         H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+        ea = NULL;
 
         /* Indicate error */
         TEST_ERROR
@@ -606,6 +609,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     if(ea) {
         /* Close opened extensible array */
         H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+        ea = NULL;
 
         /* Indicate error */
         TEST_ERROR
@@ -618,6 +622,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     if(ea) {
         /* Close opened extensible array */
         H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+        ea = NULL;
 
         /* Indicate error */
         TEST_ERROR
@@ -630,6 +635,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     if(ea) {
         /* Close opened extensible array */
         H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+        ea = NULL;
 
         /* Indicate error */
         TEST_ERROR
@@ -644,12 +650,41 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     if(ea) {
         /* Close opened extensible array */
         H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+        ea = NULL;
 
         /* Indicate error */
         TEST_ERROR
     } /* end if */
 
     /* Set invalid max. # of elements per data block page bits */
+    if(test_cparam.idx_blk_elmts > 0) {
+        HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+        test_cparam.max_dblk_page_nelmts_bits = H5V_log2_gen((uint64_t)test_cparam.idx_blk_elmts) - 1;
+        H5E_BEGIN_TRY {
+            ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+        } H5E_END_TRY;
+        if(ea) {
+            /* Close opened extensible array */
+            H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+            ea = NULL;
+
+            /* Indicate error */
+            TEST_ERROR
+        } /* end if */
+    } /* end if */
+    HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
+    test_cparam.max_dblk_page_nelmts_bits = 4;  /* corresponds to 16 elements in data block page, which is less than the 64 elements for the default settings */
+    H5E_BEGIN_TRY {
+        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+    } H5E_END_TRY;
+    if(ea) {
+        /* Close opened extensible array */
+        H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+        ea = NULL;
+
+        /* Indicate error */
+        TEST_ERROR
+    } /* end if */
     HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
     test_cparam.max_dblk_page_nelmts_bits = test_cparam.max_nelmts_bits + 1;
     H5E_BEGIN_TRY {
@@ -658,6 +693,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     if(ea) {
         /* Close opened extensible array */
         H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+        ea = NULL;
 
         /* Indicate error */
         TEST_ERROR

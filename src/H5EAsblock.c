@@ -87,6 +87,9 @@ H5FL_DEFINE_STATIC(H5EA_sblock_t);
 /* Declare a free list to manage the haddr_t sequence information */
 H5FL_SEQ_DEFINE_STATIC(haddr_t);
 
+/* Declare a free list to manage blocks of 'page init' bitmasks */
+H5FL_BLK_DEFINE(page_init);
+
 
 
 /*-------------------------------------------------------------------------
@@ -122,15 +125,35 @@ H5EA__sblock_alloc(H5EA_hdr_t *hdr, unsigned sblk_idx))
     /* Compute/cache information */
     sblock->idx = sblk_idx;
     sblock->ndblks = hdr->sblk_info[sblk_idx].ndblks;
+    HDassert(sblock->ndblks);
     sblock->dblk_nelmts = hdr->sblk_info[sblk_idx].dblk_nelmts;
 #ifdef QAK
-HDfprintf(stderr, "%s: sblock->ndblks = %Zu\n", FUNC, sblock->ndblks);
+HDfprintf(stderr, "%s: hdr->dblk_page_nelmts = %Zu, sblock->ndblks = %Zu, sblock->dblk_nelmts = %Zu\n", FUNC, hdr->dblk_page_nelmts, sblock->ndblks, sblock->dblk_nelmts);
 #endif /* QAK */
 
     /* Allocate buffer for data block addresses in super block */
-    if(sblock->ndblks > 0)
-        if(NULL == (sblock->dblk_addrs = H5FL_SEQ_MALLOC(haddr_t, sblock->ndblks)))
-            H5E_THROW(H5E_CANTALLOC, "memory allocation failed for super block data block addresses")
+    if(NULL == (sblock->dblk_addrs = H5FL_SEQ_MALLOC(haddr_t, sblock->ndblks)))
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for super block data block addresses")
+
+    /* Check if # of elements in data blocks requires paging */
+    if(sblock->dblk_nelmts > hdr->dblk_page_nelmts) {
+        /* Compute # of pages in each data block from this super block */
+        sblock->dblk_npages = sblock->dblk_nelmts / hdr->dblk_page_nelmts;
+
+        /* Sanity check that we have at least 2 pages in data block */
+        HDassert(sblock->dblk_npages > 1);
+
+        /* Sanity check for integer truncation */
+        HDassert((sblock->dblk_npages * hdr->dblk_page_nelmts) == sblock->dblk_nelmts);
+
+        /* Compute size of buffer for each data block's 'page init' bitmask */
+        sblock->dblk_page_init_size = ((sblock->dblk_npages) + 7) / 8;
+        HDassert(sblock->dblk_page_init_size > 0);
+
+        /* Allocate buffer for all 'page init' bitmasks in super block */
+        if(NULL == (sblock->page_init = H5FL_BLK_CALLOC(page_init, sblock->ndblks * sblock->dblk_page_init_size)))
+            H5E_THROW(H5E_CANTALLOC, "memory allocation failed for super block page init bitmask")
+    } /* end if */
 
     /* Share common array information */
     sblock->hdr = hdr;
@@ -167,6 +190,7 @@ H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, unsigned sblk_idx))
 
     /* Local variables */
     H5EA_sblock_t *sblock = NULL;      /* Extensible array super block */
+    haddr_t tmp_addr = HADDR_UNDEF;         /* Address value to fill data block addresses with */
 
 #ifdef QAK
 HDfprintf(stderr, "%s: Called\n", FUNC);
@@ -195,13 +219,8 @@ HDfprintf(stderr, "%s: sblock->block_off = %Hu\n", FUNC, sblock->block_off);
     if(HADDR_UNDEF == (sblock->addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_SBLOCK, dxpl_id, (hsize_t)sblock->size)))
 	H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array super block")
 
-    /* Reset data block addresses */
-    if(sblock->ndblks > 0) {
-        haddr_t tmp_addr = HADDR_UNDEF;         /* Address value to fill data block addresses with */
-
-        /* Set all the data block addresses to "undefined" address value */
-        H5V_array_fill(sblock->dblk_addrs, &tmp_addr, sizeof(haddr_t), sblock->ndblks);
-    } /* end if */
+    /* Reset data block addresses to "undefined" address value */
+    H5V_array_fill(sblock->dblk_addrs, &tmp_addr, sizeof(haddr_t), sblock->ndblks);
 
     /* Cache the new extensible array super block */
     if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_SBLOCK, sblock->addr, sblock, H5AC__NO_FLAGS_SET) < 0)
@@ -317,6 +336,7 @@ H5EA__sblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id, haddr_t sblk_addr,
 
     /* Local variables */
     H5EA_sblock_t *sblock = NULL;       /* Pointer to super block */
+    size_t u;                           /* Local index variable */
 
 #ifdef QAK
 HDfprintf(stderr, "%s: Called\n", FUNC);
@@ -330,21 +350,16 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     if(NULL == (sblock = H5EA__sblock_protect(hdr, dxpl_id, sblk_addr, sblk_idx, H5AC_WRITE)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long_long)sblk_addr)
 
-    /* Check for super block having data block pointers */
-    if(sblock->ndblks > 0) {
-        size_t u;               /* Local index variable */
-
-        /* Iterate over data blocks */
-        for(u = 0; u < sblock->ndblks; u++) {
-            /* Check for data block existing */
-            if(H5F_addr_defined(sblock->dblk_addrs[u])) {
-                /* Delete data block */
-                if(H5EA__dblock_delete(hdr, dxpl_id, sblock->dblk_addrs[u], sblock->dblk_nelmts) < 0)
-                    H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array data block")
-                sblock->dblk_addrs[u] = HADDR_UNDEF;
-            } /* end if */
-        } /* end for */
-    } /* end if */
+    /* Iterate over data blocks */
+    for(u = 0; u < sblock->ndblks; u++) {
+        /* Check for data block existing */
+        if(H5F_addr_defined(sblock->dblk_addrs[u])) {
+            /* Delete data block */
+            if(H5EA__dblock_delete(hdr, dxpl_id, sblock->dblk_addrs[u], sblock->dblk_nelmts) < 0)
+                H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array data block")
+            sblock->dblk_addrs[u] = HADDR_UNDEF;
+        } /* end if */
+    } /* end for */
 
 CATCH
     /* Finished deleting super block in metadata cache */
@@ -375,15 +390,21 @@ H5EA__sblock_dest(H5F_t *f, H5EA_sblock_t *sblock))
     /* Sanity check */
     HDassert(sblock);
     HDassert(sblock->rc == 0);
+#ifdef QAK
+HDfprintf(stderr, "%s: sblock->hdr->dblk_page_nelmts = %Zu, sblock->ndblks = %Zu, sblock->dblk_nelmts = %Zu\n", FUNC, sblock->hdr->dblk_page_nelmts, sblock->ndblks, sblock->dblk_nelmts);
+#endif /* QAK */
 
     /* Set the shared array header's file context for this operation */
     sblock->hdr->f = f;
 
-    /* Check if we've got data block addresses in the super block */
-    if(sblock->ndblks > 0) {
-        /* Free buffer for super block data block addresses */
-        HDassert(sblock->dblk_addrs);
+    /* Free buffer for super block data block addresses, if there are any */
+    if(sblock->dblk_addrs)
         (void)H5FL_SEQ_FREE(haddr_t, sblock->dblk_addrs);
+
+    /* Free buffer for super block 'page init' bitmask, if there is one */
+    if(sblock->page_init) {
+        HDassert(sblock->dblk_npages > 0);
+        (void)H5FL_BLK_FREE(page_init, sblock->page_init);
     } /* end if */
 
     /* Decrement reference count on shared info */

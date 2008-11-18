@@ -896,6 +896,7 @@ H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     uint32_t            stored_chksum;  /* Stored metadata checksum value */
     uint32_t            computed_chksum; /* Computed metadata checksum value */
     haddr_t             arr_addr;       /* Address of array header in the file */
+    size_t              u;              /* Local index variable */
 
     /* Sanity check */
     HDassert(f);
@@ -951,14 +952,18 @@ H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
 
     /* Internal information */
 
-    /* Decode data block addresses */
-    if(sblock->ndblks > 0) {
-        size_t u;               /* Local index variable */
+    /* Check for 'page init' bitmasks for this super block */
+    if(sblock->dblk_npages > 0) {
+        size_t tot_page_init_size = sblock->ndblks * sblock->dblk_page_init_size;        /* Compute total size of 'page init' buffer */
 
-        /* Decode addresses of data blocks in super block */
-        for(u = 0; u < sblock->ndblks; u++)
-            H5F_addr_decode(f, &p, &sblock->dblk_addrs[u]);
+        /* Retrieve the 'page init' bitmasks */
+        HDmemcpy(sblock->page_init, p, tot_page_init_size);
+        p += tot_page_init_size;
     } /* end if */
+
+    /* Decode data block addresses */
+    for(u = 0; u < sblock->ndblks; u++)
+        H5F_addr_decode(f, &p, &sblock->dblk_addrs[u]);
 
     /* Sanity check */
     /* (allow for checksum not decoded yet) */
@@ -1028,6 +1033,7 @@ H5EA__cache_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         uint8_t *p;             /* Pointer into raw data buffer */
         size_t	size;           /* Index block size on disk */
         uint32_t metadata_chksum; /* Computed metadata checksum value */
+        size_t u;               /* Local index variable */
 
         /* Wrap the local buffer for serialized info */
         if(NULL == (wb = H5WB_wrap(ser_buf, sizeof(ser_buf))))
@@ -1061,14 +1067,18 @@ H5EA__cache_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
 
         /* Internal information */
 
-        /* Encode data block addresses */
-        if(sblock->ndblks > 0) {
-            size_t u;               /* Local index variable */
+        /* Check for 'page init' bitmasks for this super block */
+        if(sblock->dblk_npages > 0) {
+            size_t tot_page_init_size = sblock->ndblks * sblock->dblk_page_init_size;        /* Compute total size of 'page init' buffer */
 
-            /* Encode addresses of data blocks in super block */
-            for(u = 0; u < sblock->ndblks; u++)
-                H5F_addr_encode(f, &p, sblock->dblk_addrs[u]);
+            /* Store the 'page init' bitmasks */
+            HDmemcpy(p, sblock->page_init, tot_page_init_size);
+            p += tot_page_init_size;
         } /* end if */
+
+        /* Encode addresses of data blocks in super block */
+        for(u = 0; u < sblock->ndblks; u++)
+            H5F_addr_encode(f, &p, sblock->dblk_addrs[u]);
 
         /* Compute metadata checksum */
         metadata_chksum = H5_checksum_metadata(buf, (size_t)(p - buf), 0);
