@@ -1,4 +1,4 @@
-HDF5 version 1.6.8-snap0 currently under development
+HDF5 version 1.6.8-post0 currently under development
 Please refer to the release_docs/INSTALL file for installation instructions.
 ------------------------------------------------------------------------------
 
