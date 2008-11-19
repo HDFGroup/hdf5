@@ -160,8 +160,9 @@ die "mutually exclusive options given\n" if $set && $inc;
 
 # Determine file to use as H5public.h, README.txt,
 # release_docs/RELEASE.txt, configure.in, windows/src/H5pubconf.h,
-# and config/lt_vers.am. The README.txt, release_docs/RELEASE.txt, 
-# configure.in, windows/src/H5pubconf.h, and config/lt_vers.am 
+# vms/src/h5pubconf.h and config/lt_vers.am. 
+# The README.txt, release_docs/RELEASE.txt, configure.in, 
+# vms/src/h5pubconf.h, windows/src/H5pubconf.h, and config/lt_vers.am 
 # files are always in the directory above H5public.h
 unless ($file) {
   for (@files) {
@@ -189,6 +190,10 @@ die "unable to read file: $CONFIGURE\n" unless -r $file;
 # windows/src/H5pubconf.h
 my $H5PUBCONF = $file;
 $H5PUBCONF =~ s/[^\/]*$/..\/windows\/src\/H5pubconf.h/;
+die "unable to read file: $H5PUBCONF\n" unless -r $file;
+# vms/src/h5pubconf.h
+my $H5PUBCONF = $file;
+$H5PUBCONF =~ s/[^\/]*$/..\/vms\/src\/h5pubconf.h/;
 die "unable to read file: $H5PUBCONF\n" unless -r $file;
 
 # Get the current version number.
