@@ -192,9 +192,9 @@ my $H5PUBCONF = $file;
 $H5PUBCONF =~ s/[^\/]*$/..\/windows\/src\/H5pubconf.h/;
 die "unable to read file: $H5PUBCONF\n" unless -r $file;
 # vms/src/h5pubconf.h
-my $H5PUBCONF = $file;
-$H5PUBCONF =~ s/[^\/]*$/..\/vms\/src\/h5pubconf.h/;
-die "unable to read file: $H5PUBCONF\n" unless -r $file;
+my $H5VMSPUBCONF = $file;
+$H5VMSPUBCONF =~ s/[^\/]*$/..\/vms\/src\/h5pubconf.h/;
+die "unable to read file: $H5VMSPUBCONF\n" unless -r $file;
 
 # Get the current version number.
 open FILE, $file or die "unable to open $file: $!\n";
@@ -243,6 +243,7 @@ if ($set) {
   $RELEASE = "";
   $CONFIGURE = "";
   $H5PUBCONF = "";
+  $H5VMSPUBCONF = "";
   $LT_VERS = "";
   @newver = @curver;
 }
@@ -393,6 +394,9 @@ sub gen_h5pubconf {
 
 # Update the Windows-maintained H5pubconf.h file
 gen_h5pubconf("HDF5", $H5PUBCONF, @newver) if $H5PUBCONF;
+    
+# Update the VMS-maintained h5pubconf.h file
+gen_h5pubconf("HDF5", $H5VMSPUBCONF, @newver) if $H5VMSPUBCONF;
     
 # Print the new version number
 if ($verbose) {
