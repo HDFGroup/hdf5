@@ -14,41 +14,23 @@ $!# access to either file, you may request a copy from help@hdfgroup.org.
 $!#
 $! Makefile for VMS systems.
 $!
-$! Make h5repack tool 
+$! Make h5stat tool 
 $!
 $ ccopt = "/float=ieee_float"
 $
 $ ccc := cc 'ccopt /include=([-.-.src], [-.lib], [-.-.test])
 $ type sys$input
-       Creating h5repack ...
+    	Creating h5stat
 $!
-$ cobj= " h5repack_main, h5repack, h5repack_copy, h5repack_refs," +-
-        "h5repack_filters, h5repack_opttable, h5repack_parse, " +-
-        "h5repack_verify, h5repacktst"
-
+$ cobj= " h5stat " 
 $!                               
 $ ccc 'cobj 
-$ link/exe=h5repack.exe -
-           h5repack_main, h5repack, h5repack_copy, h5repack_refs, h5repack_filters, -
-           h5repack_opttable, h5repack_parse, -
-           h5repack_verify, -
-           [-.lib]libh5tools.olb/lib, -
-           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib 
 $ type sys$input
-       Finished  h5repack
-
-$
+$ link/exe=h5stat.exe -
+           h5stat, -
+           [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib 
 $ type sys$input
-       Creating h5repacktst ...
-$ link/exe=h5repacktst.exe -
-           h5repacktst,  -
-           h5repack, h5repack_copy, h5repack_refs, h5repack_filters, -
-           h5repack_opttable, h5repack_parse, -
-           h5repack_verify, -
-           [-.lib]libh5tools.olb/lib,[-.-.test]libh5test.olb/lib, -
-           [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$
-$ type sys$input
-       Finished  h5repacktst
+	Created  h5stat
+$!
 $!
 $ exit

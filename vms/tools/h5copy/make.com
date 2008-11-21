@@ -16,7 +16,7 @@ $! Makefile for VMS systems.
 $!
 $! Make h5copy tool 
 $!
-$! ccopt = "/float=ieee_float"
+$ ccopt = "/float=ieee_float"
 $
 $ ccc := cc 'ccopt /include=([-.-.src], [-.lib], [-.-.test])
 $ type sys$input

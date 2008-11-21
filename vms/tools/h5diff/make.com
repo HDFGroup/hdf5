@@ -16,7 +16,7 @@ $! Makefile for VAX/VMX systems.
 $!
 $! Make h5diff tool 
 $!
-$! ccopt = "/float=ieee_float"
+$ ccopt = "/float=ieee_float"
 $
 $ ccc := cc 'ccopt /include=([-.-.src], [-.lib])
 $!
