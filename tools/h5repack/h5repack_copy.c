@@ -433,17 +433,44 @@ int do_copy_objects(hid_t fidin,
     unsigned u;
     int      j;
     
-   /*-------------------------------------------------------------------------
-    * copy the suppplied object list
-    *-------------------------------------------------------------------------
-    */
-    
+ 
     if (options->verbose) 
     {
         printf("-----------------------------------------\n");
         printf(" Type     Filter (Compression)     Name\n");
         printf("-----------------------------------------\n");
     }
+
+    /*-------------------------------------------------------------------------
+    * the root is a special case, we get an ID for the root group
+    * and copy its attributes using that ID
+    *-------------------------------------------------------------------------
+    */
+
+    if (options->verbose)
+        printf(FORMAT_OBJ,"group","/" );
+    
+    if ((grp_out = H5Gopen(fidout,"/"))<0)
+        goto error;
+    
+    if ((grp_in  = H5Gopen(fidin,"/"))<0)
+        goto error;
+    
+    if (copy_attr(grp_in,grp_out,options)<0)
+        goto error;
+    
+    if (H5Gclose(grp_out)<0)
+        goto error;
+    if (H5Gclose(grp_in)<0)
+    {
+        goto error;
+    }
+    
+    /*-------------------------------------------------------------------------
+    * copy the suppplied object list
+    *-------------------------------------------------------------------------
+    */
+    
     
     for ( i = 0; i < travt->nobjs; i++)
     {
@@ -875,25 +902,7 @@ int do_copy_objects(hid_t fidin,
    
     } /* i */
  
-     /*-------------------------------------------------------------------------
-      * the root is a special case, we get an ID for the root group
-      * and copy its attributes using that ID
-      *-------------------------------------------------------------------------
-      */
-      
-      if ((grp_out = H5Gopen(fidout,"/"))<0)
-          goto error;
-      
-      if ((grp_in  = H5Gopen(fidin,"/"))<0)
-          goto error;
-      
-      if (copy_attr(grp_in,grp_out,options)<0)
-          goto error;
-      
-      if (H5Gclose(grp_out)<0)
-          goto error;
-      if (H5Gclose(grp_in)<0)
-          goto error;
+     
       
       return 0;
    
