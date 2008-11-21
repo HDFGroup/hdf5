@@ -292,15 +292,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
 
             obj.chunk.rank = rank;
 
-
-#if 0
-            for ( i = 0; i < rank; i++)
-            {
-                obj.chunk.chunk_lengths[i] = dims[i];
-            }
-
-#else
-
             /*
             * determine the strip mine size. The strip mine is
             * a hyperslab whose size is manageable.
@@ -319,10 +310,6 @@ int apply_filters(const char* name,    /* object name from traverse list */
             {
                 obj.chunk.chunk_lengths[i] = sm_size[i];
             }
-
-#endif
-
-
 
         }
 
