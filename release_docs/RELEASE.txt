@@ -73,6 +73,8 @@ New Features
 
         Tools
         -----
+        - h5repack: Define a default chunk whose size is manageable. (PVN - 2008/11/21)
+
 
 
         F90 API
