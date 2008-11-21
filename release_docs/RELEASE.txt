@@ -57,6 +57,8 @@ New Features
     ------
      - h5dump: binary output defaults to NATIVE with -b optionally accepting
             the form of binary output (NATIVE, FILE, BE, LE). (PVN - 2008/11/14)
+     - h5repack: Define a default chunk whose size is manageable. (PVN - 2008/11/21)
+
 
     
 
