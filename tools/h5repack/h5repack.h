@@ -169,9 +169,11 @@ int print_filters(hid_t dcpl_id);
 int apply_filters(const char* name,    /* object name from traverse list */
                   int rank,            /* rank of dataset */
                   hsize_t *dims,       /* dimensions of dataset */
-                  hid_t dcpl_id,       /* (IN,OUT) dataset creation property list */
+                  size_t msize,        /* size of type */
+                  hid_t dcpl_id,       /* dataset creation property list */
                   pack_opt_t *options, /* repack options */
-                  int *has_filter);     /* (OUT) object NAME has a filter */
+                  int *has_filter);    /* (OUT) object NAME has a filter */
+
 
 int has_filter(hid_t dcpl_id,
                H5Z_filter_t filtnin);

@@ -15,6 +15,8 @@
 
 #include "h5repack.h"
 #include "h5test.h"
+#include "h5tools.h"
+
 
 
 /*-------------------------------------------------------------------------
@@ -193,7 +195,8 @@ int aux_assign_obj(const char* name,            /* object name from traverse lis
 int apply_filters(const char* name,    /* object name from traverse list */
                   int rank,            /* rank of dataset */
                   hsize_t *dims,       /* dimensions of dataset */
-                  hid_t dcpl_id,       /* (IN,OUT) dataset creation property list */
+                  size_t msize,        /* size of type */
+                  hid_t dcpl_id,       /* dataset creation property list */
                   pack_opt_t *options, /* repack options */
                   int *has_filter)     /* (OUT) object NAME has a filter */
 {
@@ -279,9 +282,31 @@ int apply_filters(const char* name,    /* object name from traverse list */
      */
         if (obj.layout==-1)
         {
-            obj.chunk.rank=rank;
-            for (i=0; i<rank; i++)
-                obj.chunk.chunk_lengths[i] = dims[i];
+            /* stripmine info */
+            hsize_t sm_size[H5S_MAX_RANK]; /*stripmine size */
+            hsize_t sm_nbytes;             /*bytes per stripmine */
+
+            obj.chunk.rank = rank;
+
+            /*
+            * determine the strip mine size. The strip mine is
+            * a hyperslab whose size is manageable.
+            */
+            
+            sm_nbytes = msize;
+            for ( i = rank; i > 0; --i) 
+            {
+                sm_size[i - 1] = MIN(dims[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
+                sm_nbytes *= sm_size[i - 1];
+                assert(sm_nbytes > 0);
+              
+            }
+
+            for ( i = 0; i < rank; i++)
+            {
+                obj.chunk.chunk_lengths[i] = sm_size[i];
+            }
+
         }
         
         for ( i=0; i<obj.nfilters; i++)

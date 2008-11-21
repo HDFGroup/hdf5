@@ -574,8 +574,15 @@ int do_copy_objects(hid_t fidin,
                     /* apply the filter */
                     if (apply_s)
                     {
-                        if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,options,&has_filter)<0)
-                            goto error;
+                       
+                        if (apply_filters(travt->objs[i].name,
+                                    rank,
+                                    dims,
+                                    msize,
+                                    dcpl_out,
+                                    options,
+                                    &has_filter) < 0)
+                                    goto error;
                     }
                     
                    /*-------------------------------------------------------------------------
