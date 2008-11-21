@@ -176,6 +176,7 @@ void init_packobject(pack_info_t *obj);
 int apply_filters(const char* name,    /* object name from traverse list */
                   int rank,            /* rank of dataset */
                   hsize_t *dims,       /* dimensions of dataset */
+                  size_t msize,        /* size of type */
                   hid_t dcpl_id,       /* dataset creation property list */
                   pack_opt_t *options, /* repack options */
                   int *has_filter);    /* (OUT) object NAME has a filter */

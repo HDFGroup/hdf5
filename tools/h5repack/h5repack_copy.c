@@ -23,9 +23,6 @@
 
 extern char  *progname;
 
-#if 0
-#define H5REPACK_DEBUG
-#endif
 
 /*-------------------------------------------------------------------------
  * macros
@@ -41,7 +38,7 @@ static void  print_dataset_info(hid_t dcpl_id,char *objname,double per, int pr);
 static int   do_copy_objects(hid_t fidin,hid_t fidout,trav_table_t *travt,pack_opt_t *options);
 static int   copy_attr(hid_t loc_in,hid_t loc_out,pack_opt_t *options);
 static int   copy_user_block(const char *infile, const char *outfile, hsize_t size);
-#if defined (H5REPACK_DEBUG)  
+#if defined (H5REPACK_DEBUG_USER_BLOCK)  
 static void  print_user_block(const char *filename, hid_t fid);
 #endif
 
@@ -212,7 +209,7 @@ int copy_objects(const char* fnamein,
    
 
 
-#if defined (H5REPACK_DEBUG)  
+#if defined (H5REPACK_DEBUG_USER_BLOCK)  
     print_user_block(fnamein,fidin);
 #endif
 
@@ -713,7 +710,13 @@ int do_copy_objects(hid_t fidin,
                             /* apply the filter */
                             if (apply_s) 
                             {
-                                if (apply_filters(travt->objs[i].name,rank,dims,dcpl_out,options,&has_filter) < 0)
+                                if (apply_filters(travt->objs[i].name,
+                                    rank,
+                                    dims,
+                                    msize,
+                                    dcpl_out,
+                                    options,
+                                    &has_filter) < 0)
                                     goto error;
                             }
 
@@ -1453,7 +1456,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#if defined (H5REPACK_DEBUG)  
+#if defined (H5REPACK_DEBUG_USER_BLOCK)  
 static 
 void print_user_block(const char *filename, hid_t fid)
 {
