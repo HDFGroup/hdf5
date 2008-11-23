@@ -1,11 +1,13 @@
-HDF5 version 1.6.8 released on Mon Nov 10 15:36:46 CST 2008
+HDF5 version 1.6.8-post0 released on Sun Nov 23 14:48:40 CST 2008
 ================================================================================
 
 INTRODUCTION
 ============
-This document describes the differences between HDF5-1.6.7 and HDF5-1.6.8.  
+This document describes the differences between HDF5-1.6.8 and
+HDF5-1.6.8-snap*.  
 It contains information on the platforms tested and known problems in
-HDF5-1.6.8. For more details, check the HISTORY.txt file in the HDF5 source.
+HDF5-1.6.8-snap*. For more details, check the HISTORY.txt file in 
+the HDF5 source.
 
 HDF5 documentation can be found in the distributed release source code
 in the subdirectory doc/html/ or on the THG (The HDF Group) FTP server: 
@@ -31,7 +33,7 @@ CONTENTS
 ========
 - New Features
 - Support for New Platforms, Languages and Compilers
-- Bug Fixes since HDF5-1.6.7
+- Bug Fixes since HDF5-1.6.8
 - Documentation
 - Platforms Tested
 - Supported Configuration Features Summary
@@ -42,150 +44,61 @@ New Features
 ============
     Configuration:
     -------------------------
-	- Added no-repeat test feature from v1.8 to this branch.  What it does
-	  is that if a test has passed in previous "make check", it will not
-	  run again unless its executable has changed. This can be overridden
-	  by "make check-clean" which removes all check-success markers and
-	  let all tests run again. AKC - 2008/2/22.
+     - Add description here. Do not exceed 80 characters for a line
+           EIP - 2008/11/12 (year/month/day format)
 
     Library:
     --------
-     - Added support for $(DESTDIR) to the install feature. AKC - 2008/10/13.
-     - Added version compatibility macros for functions changed in 1.8.  For
-           example, H5Gcreate1 will work the same in both 1.6 and 1.8.
-           NAF - 2008/10/11
 
     Parallel Library:
     -----------------
-    None      
 
     Tools:
     ------
-     - h5repack and h5diff changed command line parameter syntax to be
-           similar to h5dump, adding also long switch names. PVN - 2008/2/13
-     - h5repack now supports adding multiple filters to all objects. 
-	     PVN - 2008/2/13
-     - h5import imports string (text) data.  PVN - 2008/2/19
-     - h5dump: add a printing of the compression ratio of uncompressed and 
-       compressed sizes for cases where compression  filters are present. 
-             PVN - 2008/05/01
-     - h5dump: added an option to allow a user defined formatting string for 
-       printf regarding floating point numbers.  PVN - 2008/05/06
-     - h5repack: add a userblock to an HDF5 file during the repack. 
-             PVN - 2008/08/26
-     - h5repack: copy userblock from HDF5 file during the repack. 
-             PVN - 2008/08/26
-     - h5diff: return 1 for file differences when both file graphs differ by 
-       any object. Error return code was changed to 2 from -1. 
-             PVN - 2008/10/30
-     - h5import: TEXTFPE (scientific format) was deprecated. Use TEXTFP 
-       instead.  PVN - 2008/10/30
-    
+     - h5dump: binary output defaults to NATIVE with -b optionally accepting
+            the form of binary output (NATIVE, FILE, BE, LE). (PVN - 2008/11/14)
+     - h5repack: Define a default chunk whose size is manageable. (PVN - 2008/11/21)
+
 
     
 
     F90 API:
     --------
-    None
 
     C++ API:
     --------
-        - These member functions were added as wrapper for H5Rdereference to
-          replace the incorrect IdComponent::dereference().
-             void H5Object::dereference(H5Object& obj, void* ref, 
-                                        H5R_type_t ref_type=H5R_OBJECT)
-             void H5Object::dereference(H5File& h5file, void* ref, 
-                                        H5R_type_t ref_type=H5R_OBJECT)
-             void H5Object::dereference(Attribute& obj, void* ref, 
-                                        H5R_type_t ref_type=H5R_OBJECT)
-
-          In addition, these constructors were added to create the associated
-          objects by way of dereference:
-            DataSet(H5Object& obj, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-            DataSet(H5File& file, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-            DataSet(Attribute& attr, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-            Group(H5Object& obj, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-            Group(H5File& obj, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-            Group(Attribute& attr, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-            DataType(H5Object& obj, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-            DataType(H5File& file, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-            DataType(Attribute& attr, void* ref, H5R_type_t ref_type=H5R_OBJECT)
-          BMR - 2008/10/29
 
 
 Support for New Platforms, Languages and Compilers
 ==================================================
-    None
 
-Bug Fixes since HDF5-1.6.7 Release
+Bug Fixes since HDF5-1.6.8 Release
 ==================================
 
     Library
     -------
-     - Changed the return value of H5Fget_obj_count from INT to SSIZE_T. Also
-       changed the return value of H5Fget_obj_ids from HERR_T to SSIZE_T and
-       the type of the parameter MAX_OBJS from INT to SIZE_T. 
-       SLU - 2008/09/26
 
     Configuration
     -------------
-     - Fixed error with 'make check install' failing due to h5dump
-       needing other tools built first. MAM - 2008/10/22.
-     - Fixed error with exampples/ph5example getting built even in serial
-       mode. Will now only get built and tested if parallel is enabled.
-       MAM - 2008/09/18
-     - The file libhdf5_fortran.settings is not installed since its content
-       is included in libhdf5.settings now. AKC - 2008/10/21
-     - The GASS and SRB virtual file drivers have been retired and removed
-       from the HDF5 library. AKC - 2008/9/26
-
+     - h5perf will now get installed during 'make install'. 
+           MAM - 2008/11/17
 
     Performance
     -------------
-     None
-   
 
     Tools
     -----
-     - h5import bug on Windows w/binary datasets. fread in windows needs a 
-       binary file to be open with 'rb' instead of 'r' otherwise it terminates 
-       execution if an end of file character is found on the input file. 
-       Besides that the binary file generated needs to be open with 'wb', 
-       otherwise an end of line character is read twice. PVN - 2008/2/19
-     - Fixed h5diff regarding the display of NaN (Not a Number) values. 
-       PVN - 2008/03/04
-     - Fixed h5dump regarding the display of array indices and block 
-       selections in subsetting. PVN - 2008/03/10 
-     - Fixed bug in h5dump that caused binary output to be made only for 
-       the first dataset, when several datasets were requested. 
-       PVN - 2008/04/07
-     - h5dump: when doing binary output (-b), the stdout printing of attributes 
-       was done incorrectly. Removed printing of attributes when doing binary 
-       output. PVN - 2008/06/05
 
     Documentation 
     ------------- 
-     None
 
 
     F90 API
     -------
-     None
 
                                 
     C++ API
     -------
-        - Fixed a design bug which allowed an Attribute object to create/modify
-          attributes (bugzilla #1068).  The API class hierarchy was revised
-          to address the problem.  Classes AbstractDS and Attribute are moved
-          out of H5Object.  Class Attribute now multiply inherits from
-          IdComponent and AbstractDs and class DataSet from H5Object and
-          AbstractDs.  In addition, the data member IdComponent::id was
-          moved into subclasses: Attribute, DataSet, DataSpace, DataType,
-          H5File, Group, and PropList. BMR - 2008/08/10
-        - IdComponent::dereference was incorrect and replaced as described
-          in "New Features" section.
-          BMR - 2008/08/10
 
 
 Documentation
