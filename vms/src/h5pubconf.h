@@ -30,10 +30,10 @@
 
 /* Define to a macro mangling the given C identifier (in lower and upper
    case), which must not contain underscores, for linking with Fortran. */
-#define H5_FC_FUNC(name,NAME) name ## _
+/* #define H5_FC_FUNC(name,NAME) name ## _ */
 
 /* As FC_FUNC, but for C identifiers containing underscores. */
-#define H5_FC_FUNC_(name,NAME) name ## __
+/* #define H5_FC_FUNC_(name,NAME) name ## __ */
 
 /* Define if your system can handle overflow converting floating-point to
    integer values. */
@@ -45,7 +45,7 @@
 
 /* Define if your system has right maximum convert floating-point to unsigned
    long long values. */
-/* #undef H5_FP_TO_ULLONG_RIGHT_MAXIMUM */
+#define H5_FP_TO_ULLONG_RIGHT_MAXIMUM 1
 
 /* Define if gettimeofday() populates the tz pointer passed in */
 #define H5_GETTIMEOFDAY_GIVES_TZ 1
@@ -54,7 +54,7 @@
 #define H5_HAVE_ALARM 1
 
 /* Define if the __attribute__(()) extension is present */
-#define H5_HAVE_ATTRIBUTE 1
+/* #define H5_HAVE_ATTRIBUTE 1 */
 
 /* Define to 1 if you have the `BSDgettimeofday' function. */
 /* #undef H5_HAVE_BSDGETTIMEOFDAY */
@@ -100,7 +100,7 @@
 /* #undef H5_HAVE_FILTER_SZIP */
 
 /* Define to 1 if you have the `fork' function. */
-#define H5_HAVE_FORK 1
+/* #define H5_HAVE_FORK 1 */
 
 /* Define to 1 if you have the `frexpf' function. */
 #define H5_HAVE_FREXPF 1
@@ -133,10 +133,10 @@
 #define H5_HAVE_GETHOSTNAME 1
 
 /* Define to 1 if you have the `getpwuid' function. */
-#define H5_HAVE_GETPWUID 1
+/* #define H5_HAVE_GETPWUID 1 */
 
 /* Define to 1 if you have the `getrusage' function. */
-#define H5_HAVE_GETRUSAGE 1
+/* #define H5_HAVE_GETRUSAGE 1 */
 
 /* Define to 1 if you have the `gettextinfo' function. */
 /* #undef H5_HAVE_GETTEXTINFO */
@@ -155,7 +155,7 @@
 
 /* Define if library will contain instrumentation to detect correct
    optimization operation */
-/* #undef H5_HAVE_INSTRUMENTED_LIBRARY */
+#define H5_HAVE_INSTRUMENTED_LIBRARY 1
 
 /* Define to 1 if you have the <inttypes.h> header file. */
 #define H5_HAVE_INTTYPES_H 1
@@ -200,7 +200,7 @@
 /* #undef H5_HAVE_LIBSZ */
 
 /* Define to 1 if you have the `z' library (-lz). */
-#define H5_HAVE_LIBZ 1
+/* #define H5_HAVE_LIBZ 1 */
 
 /* Define to 1 if you have the `longjmp' function. */
 #define H5_HAVE_LONGJMP 1
@@ -263,7 +263,7 @@
 #define H5_HAVE_STAT64 1
 
 /* Define if `struct stat' has the `st_blocks' field */
-#define H5_HAVE_STAT_ST_BLOCKS 1
+/* #define H5_HAVE_STAT_ST_BLOCKS 1 */
 
 /* Define to 1 if you have the <stddef.h> header file. */
 #define H5_HAVE_STDDEF_H 1
@@ -335,7 +335,7 @@
 /* #undef H5_HAVE_THREADSAFE */
 
 /* Define if `timezone' is a global variable */
-/* #undef H5_HAVE_TIMEZONE */
+#define H5_HAVE_TIMEZONE 1
 
 /* Define if the ioctl TIOCGETD is defined */
 #define H5_HAVE_TIOCGETD 1
@@ -361,7 +361,7 @@
 #define H5_HAVE_UNISTD_H 1
 
 /* Define to 1 if you have the `vasprintf' function. */
-#define H5_HAVE_VASPRINTF 1
+/* #define H5_HAVE_VASPRINTF 1 */
 
 /* Define to 1 if you have the `vsnprintf' function. */
 #define H5_HAVE_VSNPRINTF 1
@@ -444,7 +444,7 @@
 /* #undef H5_NO_DEPRECATED_SYMBOLS */
 
 /* Define if shared writing must be disabled (CodeWarrior only) */
-/* #undef H5_NO_SHARED_WRITING */
+#define H5_NO_SHARED_WRITING 1
 
 /* Name of package */
 #define H5_PACKAGE "hdf5"
@@ -492,34 +492,34 @@
 #define H5_SIZEOF_INT8_T 1
 
 /* The size of `int_fast16_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_FAST16_T 4
+/* #define H5_SIZEOF_INT_FAST16_T 4 */
 
 /* The size of `int_fast32_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_FAST32_T 4
+/* #define H5_SIZEOF_INT_FAST32_T 4 */
 
 /* The size of `int_fast64_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_FAST64_T 8
+/* #define H5_SIZEOF_INT_FAST64_T 8 */
 
 /* The size of `int_fast8_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_FAST8_T 1
+/* #define H5_SIZEOF_INT_FAST8_T 1 */
 
 /* The size of `int_least16_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_LEAST16_T 2
+/* #define H5_SIZEOF_INT_LEAST16_T 2 */
 
 /* The size of `int_least32_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_LEAST32_T 4
+/* #define H5_SIZEOF_INT_LEAST32_T 4 */
 
 /* The size of `int_least64_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_LEAST64_T 8
+/* #define H5_SIZEOF_INT_LEAST64_T 8 */
 
 /* The size of `int_least8_t', as computed by sizeof. */
-#define H5_SIZEOF_INT_LEAST8_T 1
+/* #define H5_SIZEOF_INT_LEAST8_T 1 */
 
 /* The size of `long', as computed by sizeof. */
 #define H5_SIZEOF_LONG 4
 
 /* The size of `long double', as computed by sizeof. */
-#define H5_SIZEOF_LONG_DOUBLE 12
+#define H5_SIZEOF_LONG_DOUBLE 16
 
 /* The size of `long long', as computed by sizeof. */
 #define H5_SIZEOF_LONG_LONG 8
@@ -528,7 +528,7 @@
 #define H5_SIZEOF_OFF64_T 8
 
 /* The size of `off_t', as computed by sizeof. */
-#define H5_SIZEOF_OFF_T 8
+#define H5_SIZEOF_OFF_T 4
 
 /* The size of `short', as computed by sizeof. */
 #define H5_SIZEOF_SHORT 2
@@ -561,7 +561,7 @@
 #define H5_SIZEOF_UINT_FAST64_T 8
 
 /* The size of `uint_fast8_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_FAST8_T 1
+/* #define H5_SIZEOF_UINT_FAST8_T 1 */
 
 /* The size of `uint_least16_t', as computed by sizeof. */
 #define H5_SIZEOF_UINT_LEAST16_T 2
@@ -648,3 +648,5 @@
 
 /* Define to `long' if <sys/types.h> does not define. */
 /* #undef H5_ssize_t */
+#define H5_HAVE_FILE_VERSIONS 1
+#define H5_CANNOT_OPEN_TWICE  1

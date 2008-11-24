@@ -38,7 +38,7 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5Faccum, H5F, H5Fdbg, H5FD, H5FDcore,"+-
         "H5FDdirect, H5FDfamily, H5FDint, H5FDlog, H5FDmpi, H5FDmpio,"+-
         "H5FDmpiposix, H5FDmulti, H5FDsec2, H5FDspace, H5FDstdio,"+-
-        "H5FDwindows, H5Ffake, H5Fio, H5FL, H5Fmount H5Fmpi, H5FO, H5Fquery, H5FS, "+-
+        "H5FDwindows, H5Ffake, H5Fio, H5FL, H5Fmount, H5Fmpi, H5FO, H5Fquery, H5FS, "+-
         "H5FScache, H5FSdbg, H5FSfile, H5FSsection, H5FSstat, H5FStest, H5Fsuper, H5Ftest,"+-
         "H5Gbtree2, H5G, H5Gcache, H5Gcompact, H5Gdense, H5Gdeprec, H5Gent, H5Gint,"+-
         "H5Glink, H5Gloc, H5Gname, H5Gnode, H5Gobj, H5Goh, H5Gstab, H5Gtest, H5Gtraverse,"+-
@@ -61,7 +61,7 @@ $ cobj1= "H5Oname, H5Onull, H5Opline, H5Orefcount, H5Osdspace, H5Oshared, H5Oshm
         "H5Tcompound, H5Tconv, H5Tcset, H5Tdbg, H5Tdeprec, H5Tenum, H5Tfields, H5Tfixed,"+-
         "H5Tfloat, H5Tinit, H5Tnative, H5Toffset, H5Toh, H5Topaque, H5Torder,"+-
         "H5Tpad, H5Tprecis, H5TS, H5Tstrpad, H5Tvisit, H5Tvlen, H5V, H5WB, H5Z,"+-
-        "H5Zdeflate, H5Zfletcher32, H5Znbit, H5Zscaleoffset, H5Zshuffle, H5Zszip, H5Ztrans"+-
+        "H5Zdeflate, H5Zfletcher32, H5Znbit, H5Zscaleoffset, H5Zshuffle, H5Zszip, H5Ztrans"
 $!
 $ ccc 'cobj
 $ ccc 'cobj1 
