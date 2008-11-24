@@ -117,6 +117,8 @@ New Features
 
     High-Level APIs:
     ------
+     - Table: In version 3.0 of Table, "NROWS" (used to store number of records) was 
+           deprecated (PVN - 2008/11/24)
     
     Documentation 
     ------------- 
