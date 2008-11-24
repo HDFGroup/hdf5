@@ -79,7 +79,7 @@
 /* #undef H5_HAVE_DMALLOC_H */
 
 /* Define to 1 if you have the <features.h> header file. */
-#define H5_HAVE_FEATURES_H 1
+/* #define H5_HAVE_FEATURES_H 1 */
 
 /* Define if support for deflate (zlib) filter is enabled */
 #define H5_HAVE_FILTER_DEFLATE 1
@@ -124,7 +124,7 @@
 #define H5_HAVE_FTRUNCATE64 1
 
 /* Define if the compiler understand the __FUNCTION__ keyword */
-#define H5_HAVE_FUNCTION 1
+/* #define H5_HAVE_FUNCTION 1 */
 
 /* Define to 1 if you have the `GetConsoleScreenBufferInfo' function. */
 /* #undef H5_HAVE_GETCONSOLESCREENBUFFERINFO */
@@ -206,7 +206,7 @@
 #define H5_HAVE_LONGJMP 1
 
 /* Define to 1 if you have the `lseek64' function. */
-#define H5_HAVE_LSEEK64 1
+/* #define H5_HAVE_LSEEK64 1 */
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define H5_HAVE_MEMORY_H 1
@@ -269,7 +269,7 @@
 #define H5_HAVE_STDDEF_H 1
 
 /* Define to 1 if you have the <stdint.h> header file. */
-#define H5_HAVE_STDINT_H 1
+/* #define H5_HAVE_STDINT_H 1 */
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define H5_HAVE_STDLIB_H 1
