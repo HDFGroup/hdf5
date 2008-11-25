@@ -818,6 +818,22 @@ int test_table(hid_t fid, int write)
                 goto out;
             }
         }
+
+        /*-------------------------------------------------------------------------
+        * Delete records, start at 0, delete 1
+        * pos = 0
+        * data= empty
+        *-------------------------------------------------------------------------
+        */
+        dstart=0; drecords=1;
+        if (H5TBdelete_record(fid,"table3",dstart,drecords)<0)
+            goto out;
+        
+        if (H5TBget_table_info(fid,"table3",&rfields,&rrecords)<0)
+            goto out;
+        
+        if (rrecords)
+            goto out;
         
         PASSED();
     }
