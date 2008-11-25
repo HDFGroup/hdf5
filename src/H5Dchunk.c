@@ -3483,7 +3483,7 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dims)
 
         /* Check for chunk offset outside of new dimensions */
         for(u = 0; u < rank; u++)
-            if((hsize_t)ent->offset[u] > curr_dims[u]) {
+            if((hsize_t)ent->offset[u] >= curr_dims[u]) {
                 /* Evict the entry from the cache, but do not flush it to disk */
                 if(H5D_chunk_cache_evict(dset, dxpl_id, dxpl_cache, ent, FALSE) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "unable to evict chunk")
