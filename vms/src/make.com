@@ -24,7 +24,7 @@ $ type sys$input
         Running h5detect to create h5tinit.c
 $ define/user_mode sys$output h5tinit.c
 $ run h5detect
-$
+$!
 $ type sys$input
          Creating  HDF5 library
 $!
@@ -44,19 +44,19 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5Glink, H5Gloc, H5Gname, H5Gnode, H5Gobj, H5Goh, H5Gstab, H5Gtest, H5Gtraverse,"+-
         "H5HFbtree2, H5HF, H5HFcache, H5HFdbg, H5HFdblock, H5HFdtable, H5HFhdr, H5HFhuge,"+-
         "H5HFiblock, H5HFiter, H5HFman, H5HFsection, H5HFspace, H5HFstat, H5HFtest, H5HFtiny,"+-
-        "H5HG, H5HGcache, H5HGdbg, H5HL, H5HLdbg, H5HP, H5I, H5L, H5Lexternal,"+-
-        "H5MFaggr.c, H5MF.c, H5MFdbg.c, H5MFsection.c, H5MM, H5MP, H5MPtest,"+-
+        "H5HG, H5HGcache, H5HGdbg, H5HL, H5HLcache, H5HLdbg, H5HP, H5I, H5L, H5Lexternal"
+$ cobj1= "H5MFaggr, H5MF, H5MFdbg, H5MFsection, H5MM, H5MP, H5MPtest,"+-
         "H5Oainfo, H5Oalloc, H5Oattr, H5Oattribute,"+-
         "H5Obogus, H5Obtreek, H5O, H5Ocache, H5Ocont, H5Ocopy, H5Odbg, H5Odrvinfo,"+-
         "H5Odtype, H5Oefl, H5Ofill, H5Oginfo, H5Olayout,"+-
         "H5Olinfo, H5Olink, H5Omessage, H5Omtime"
-$ cobj1= "H5Oname, H5Onull, H5Opline, H5Orefcount, H5Osdspace, H5Oshared, H5Oshmesg,"+-
+$ cobj2= "H5Oname, H5Onull, H5Opline, H5Orefcount, H5Osdspace, H5Oshared, H5Oshmesg,"+-
         "H5Ostab, H5Otest, H5Ounknown,"+-
         "H5Pacpl, H5P, H5Pdapl, H5Pdcpl, H5Pdeprec, H5Pdxpl, H5Pfapl, H5Pfcpl, H5Pfmpl,"+-
         "H5Pgcpl, H5Pint, H5Plapl, H5Plcpl, H5Pocpl, H5Pocpypl, H5Pstrcpl, H5Ptest,"+-
         "H5R, H5RC, H5Rdeprec, H5RS,"+-
         "H5Sall, H5S, H5Sdbg, H5Shyper, H5SL, H5SMbtree2, H5SM, H5SMcache, H5Smpio,"+- 
-        "H5SMtest,H5Snone, H5Spoint, H5Sselect, H5ST, H5Stest, H5SMcache, H5SMtest,"+-
+        "H5SMtest,H5Snone, H5Spoint, H5Sselect, H5ST, H5Stest,"+-
         "H5Tarray, H5Tbit, H5T, H5Tcommit,"+-
         "H5Tcompound, H5Tconv, H5Tcset, H5Tdbg, H5Tdeprec, H5Tenum, H5Tfields, H5Tfixed,"+-
         "H5Tfloat, H5Tinit, H5Tnative, H5Toffset, H5Toh, H5Topaque, H5Torder,"+-
@@ -64,9 +64,10 @@ $ cobj1= "H5Oname, H5Onull, H5Opline, H5Orefcount, H5Osdspace, H5Oshared, H5Oshm
         "H5Zdeflate, H5Zfletcher32, H5Znbit, H5Zscaleoffset, H5Zshuffle, H5Zszip, H5Ztrans"
 $!
 $ ccc 'cobj
-$ ccc 'cobj1 
+$ ccc 'cobj1
+$ ccc 'cobj2 
 $ library/create []hdf5
-$ library/insert []hdf5 'cobj, 'cobj1
+$ library/insert []hdf5 'cobj, 'cobj1, 'cobj2
 $ type sys$input
 	Done
 $!

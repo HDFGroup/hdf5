@@ -17,15 +17,15 @@ $!
 $! Make HDF5 library tests
 $!
 $ ccopt = "/float=ieee_float/define=H5_VMS"
-$
+$!
 $ ccc := cc 'ccopt /include=([-.src])
 $ type sys$input
  	Creating  testhdf5
-$
+$!
 $ cobj= "h5test.c, testframe.c, testhdf5.c, tarray.c, tattr.c, tchecksum.c, tconfig.c,"+-
         "tcoords.c, tfile.c, tgenprop.c, th5o.c, th5s.c, theap.c, tid.c,"+- 
         "titerate.c, tmeta.c, tmisc.c, trefer.c, trefstr.c, tselect.c, tskiplist.c,"+- 
-        "tsohm.c, ttime.c, ttst.c, tunicode.c, tvlstr.c, tvltypes.c, cache_common.c"+-
+        "tsohm.c, ttime.c, ttst.c, tunicode.c, tvlstr.c, tvltypes.c, cache_common.c"
 $!                              
 $ ccc 'cobj 
 $ library/create/replace []libh5test h5test, testframe, cache_common

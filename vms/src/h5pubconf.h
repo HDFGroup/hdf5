@@ -121,7 +121,7 @@
 #define H5_HAVE_FTELLO 1
 
 /* Define to 1 if you have the `ftruncate64' function. */
-#define H5_HAVE_FTRUNCATE64 1
+/* #define H5_HAVE_FTRUNCATE64 1 */
 
 /* Define if the compiler understand the __FUNCTION__ keyword */
 /* #define H5_HAVE_FUNCTION 1 */
@@ -525,7 +525,7 @@
 #define H5_SIZEOF_LONG_LONG 8
 
 /* The size of `off64_t', as computed by sizeof. */
-#define H5_SIZEOF_OFF64_T 8
+/* #define H5_SIZEOF_OFF64_T 8 */
 
 /* The size of `off_t', as computed by sizeof. */
 #define H5_SIZEOF_OFF_T 4
@@ -552,28 +552,28 @@
 #define H5_SIZEOF_UINT8_T 1
 
 /* The size of `uint_fast16_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_FAST16_T 4
+/* #define H5_SIZEOF_UINT_FAST16_T 4 */
 
 /* The size of `uint_fast32_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_FAST32_T 4
+/* #define H5_SIZEOF_UINT_FAST32_T 4 */
 
 /* The size of `uint_fast64_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_FAST64_T 8
+/* #define H5_SIZEOF_UINT_FAST64_T 8 */
 
 /* The size of `uint_fast8_t', as computed by sizeof. */
 /* #define H5_SIZEOF_UINT_FAST8_T 1 */
 
 /* The size of `uint_least16_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_LEAST16_T 2
+/* #define H5_SIZEOF_UINT_LEAST16_T 2 */
 
 /* The size of `uint_least32_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_LEAST32_T 4
+/* #define H5_SIZEOF_UINT_LEAST32_T 4  */
 
 /* The size of `uint_least64_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_LEAST64_T 8
+/* #define H5_SIZEOF_UINT_LEAST64_T 8 */
 
 /* The size of `uint_least8_t', as computed by sizeof. */
-#define H5_SIZEOF_UINT_LEAST8_T 1
+/* #define H5_SIZEOF_UINT_LEAST8_T 1 */
 
 /* The size of `__int64', as computed by sizeof. */
 #define H5_SIZEOF___INT64 0
