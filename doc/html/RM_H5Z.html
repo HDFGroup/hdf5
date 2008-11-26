@@ -262,17 +262,21 @@ END SUBROUTINE h5zfilter_avail_f
       <p>
       Valid filter configuration flags include the following:
       <table>
-        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-          <td><code>H5Z_FILTER_CONFIG_ENCODE_ENABLED</code></td>
-          <td>Encoding is enabled for this filter
+        <tr valign="top"><td><code>&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td><code>H5Z_FILTER_CONFIG_ENCODE_ENABLED</code>&nbsp;</td>
+          <td>Encoding is enabled for this filter.
+              <br>
+              In Fortran, <code>H5Z_FILTER_ENCODE_ENABLED_F</code>.
         </td></tr>
-        <tr><td>&nbsp;</td>
+        <tr valign="top"><td>&nbsp;</td>
           <td><code>H5Z_FILTER_CONFIG_DECODE_ENABLED</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-          <td>Decoding is enabled for this filter
+          <td>Decoding is enabled for this filter.
+              <br>
+              In Fortran, <code>H5Z_FILTER_DECODE_ENABLED_F</code>.
         </td></tr>
         <tr><td>&nbsp;</td>
           <td colspan="2" align="right"><small>(These flags 
-          are defined in the HDF5 Library source code file 
+          are defined for C in the HDF5 Library source code file 
           <code>H5Zpublic.h</code>.)</small>
         </td></tr>
        </table>
@@ -716,7 +720,7 @@ Describes HDF5 Release 1.6.8, November 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 25 August 2008");
+document.writeln("Last modified: 26 November 2008");
 -->
 </SCRIPT>
  
