@@ -903,6 +903,9 @@ H5FD_sec2_flush(H5FD_t *_file, hid_t UNUSED dxpl_id, unsigned UNUSED closing)
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op = OP_UNKNOWN;
+#if 1 /* JRM */
+	fsync(file->fd);
+#endif /* JRM */
     }
 
 done:

@@ -1723,7 +1723,7 @@ H5C2_flush_cache(const H5F_t *f,
 
     if ( cache_ptr->mdj_enabled ) {
 
-        status = H5C2_journal_post_flush(cache_ptr, 
+        status = H5C2_journal_post_flush(f, dxpl_id, cache_ptr, 
 			              (hbool_t)(flush_marked_entries == FALSE));
 
 	if ( status != SUCCEED ) {
@@ -9179,8 +9179,11 @@ H5C2_load_entry(H5F_t *              f,
     {
 #if 0 /* JRM */
         HDfprintf(stdout, "can't read image.\n.");
+	HDfprintf(stdout, "%s: addr = 0X%llx, len = %d.\n",
+		  FUNC, (long long)addr, (int)len);
+	fflush(stdout);
 #endif /* JRM */
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image")
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image*")
     }
 
     thing = type->deserialize(addr, len, image_ptr, udata_ptr, &dirty);

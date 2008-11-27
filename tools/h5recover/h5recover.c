@@ -563,7 +563,7 @@ main (int argc, const char *argv[])
 
                     } /* end for */
                 
-                    size = HDstrtod(tok[3], NULL);
+                    size = (size_t)HDstrtoll(tok[3], NULL, 10);
 
                     if (max_size < size) {
 
@@ -587,15 +587,30 @@ main (int argc, const char *argv[])
 
                     fgets(temp, 100, journal_fp);
                     p = &temp[11];
-    
-                    eoa = HDstrtod(p, NULL);
+
+		    /* according to the man page, strtoll() should accept a 
+		     * "0x" prefix on any base 16 value -- seems this is 
+		     * not the case.  Deal with this by incrementing p
+		     * past the prefix.
+		     */
+
+		    while ( HDisspace(*(p)) ) { p++; }
+
+		    if ( ( *(p) == '0' ) &&
+		         ( *(p + 1) == 'x' ) ) {
+
+		            p += 2;
+		    }
+
+                    eoa = (haddr_t)HDstrtoll(p, NULL, 16);
                     if (eoa == 0) {
     
-                        error_msg(progname, "Could not convert eoa to integer\n");
+                        error_msg(progname, 
+				  "Could not convert eoa to integer\n");
                         leave( EXIT_FAILURE);
 
                     } /* end if */
-        
+
                     if (update_eoa < eoa) {
 
                         update_eoa = eoa;
@@ -851,7 +866,19 @@ main (int argc, const char *argv[])
                 if ( verbose ) printf("Converting data from character strings.\n");
 
                 /* convert address from character character string */
-                address = HDstrtod(tok[6], NULL);
+
+		/* according to the man page, strtoll() should accept a 
+		 * "0x" prefix on any base 16 value -- seems this is 
+		 * not the case.  Deal with this by incrementing tok[6]
+		 * past the prefix.
+		 */
+		while ( HDisspace(*(tok[6])) ) { (tok[6])++; }
+		if ( ( *(tok[6]) == '0' ) &&
+		     ( *(tok[6] + 1) == 'x' ) ) {
+
+		        (tok[6]) += 2;
+		}
+                address = (off_t)HDstrtoll(tok[6], NULL, 16);
                 if (address == 0) {
     
                     error_msg(progname, "Could not convert address to integer\n");
@@ -862,7 +889,7 @@ main (int argc, const char *argv[])
                 if ( verbose ) printf("  address  : %llx\n", address);
 
                 /* convert size from character string*/
-                size = HDstrtod(tok[4], NULL);
+                size = (size_t)HDstrtoll(tok[4], NULL, 10);
                 if (size == 0) {
 
                     error_msg(progname, "Could not convert size to double\n");

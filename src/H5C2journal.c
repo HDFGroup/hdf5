@@ -184,6 +184,7 @@ H5C2_begin_journaling(H5F_t * f,
 		  FUNC);
 #endif /* JRM */ 
 
+    /* Note that this call flushes the HDF5 file in passing */
     result = H5C2_mark_journaling_in_progress(f, dxpl_id, 
 		                              config_ptr->journal_file_path);
 
@@ -305,7 +306,8 @@ done:
  *                 journal file.
  *
  *              2) Mark the superblock to indicate that we are no longer
- *                 journaling.
+ *                 journaling.  Note that this will flush the HDF5 file 
+ *                 again in passing.
  *
  *              3) Tell the journal file write code to shutdown.  This will
  *                 also cause the journal file to be deleted.
@@ -631,9 +633,11 @@ done:
  *
  * 		3) If the cache_is_clean parameter is true:
  *
- * 		   a) Truncate the journal file
+ * 		   a) Flush the HDF5 file
  *
- * 		   b) Reset cache_ptr->trans_num and 
+ * 		   b) Truncate the journal file
+ *
+ * 		   c) Reset cache_ptr->trans_num and 
  * 		      cache_ptr->last_trans_on_disk to zero.
  * 		
  * Return:      Success:        SUCCEED
@@ -646,7 +650,9 @@ done:
  */
 
 herr_t
-H5C2_journal_post_flush(H5C2_t * cache_ptr,
+H5C2_journal_post_flush(const H5F_t * f,
+                        hid_t dxpl_id,
+                        H5C2_t * cache_ptr,
 		        hbool_t cache_is_clean)
 {
     herr_t result;
@@ -654,6 +660,7 @@ H5C2_journal_post_flush(H5C2_t * cache_ptr,
 
     FUNC_ENTER_NOAPI(H5C2_journal_post_flush, FAIL)
 
+    HDassert( f != NULL );
     HDassert( cache_ptr != NULL );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
     HDassert( cache_ptr->mdj_enabled );
@@ -671,6 +678,24 @@ H5C2_journal_post_flush(H5C2_t * cache_ptr,
     }
 
     if ( cache_is_clean ) {
+
+        /* Write the superblock to disk */
+
+        result = H5F_super_write(f, dxpl_id);
+
+        if ( result != SUCCEED ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_WRITEERROR, FAIL, \
+                        "unable to write superblock to file")
+        }
+
+	result = H5FD_flush(f->shared->lf, dxpl_id, (unsigned)0);
+
+	if ( result > 0 ) {
+
+	    HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
+		        "low level flush failed")
+	}
 
         result = H5C2_jb__trunc(&(cache_ptr->mdj_jbrb));
 
@@ -705,7 +730,7 @@ done:
  *
  * 		3) Get the ID of the last transaction on disk.
  *
- * 		4) If the value obtained in 2) above has changed,
+ * 		4) If the value obtained in 3) above has changed,
  * 		   remove all entries whose last transaction has 
  * 		   made it to disk from the journal write in progress
  * 		   list.

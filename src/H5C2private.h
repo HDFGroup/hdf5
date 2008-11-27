@@ -1570,7 +1570,9 @@ H5_DLL herr_t H5C2_end_transaction(H5F_t * f,
 H5_DLL herr_t H5C2_get_journal_config(H5C2_t * cache_ptr,
 		                      H5C2_mdj_config_t * config_ptr);
 
-H5_DLL herr_t H5C2_journal_post_flush(H5C2_t * cache_ptr,
+H5_DLL herr_t H5C2_journal_post_flush(const H5F_t * f,
+                                      hid_t dxpl_id,
+				      H5C2_t * cache_ptr,
                                       hbool_t cache_is_clean);
 
 H5_DLL herr_t H5C2_journal_pre_flush(H5C2_t * cache_ptr);

@@ -155,6 +155,224 @@ MYH5DIFF(){
 
 
 ##############################################################################
+##                                                                          ##
+## The following functions are used to perform a sort of "temporal scan"    ##
+## of the possible HDF5 file and journal file value created by trecover.    ##
+##                                                                          ##
+## The basic idea is to do run trecover -a n over a wide selection of       ##
+## values for n in the hope that if there is a window in which the journal  ##
+## is not maintained properly, we will find it when we force a crash, and   ##
+## then attempt to recover.                                                 ##
+##                                                                          ##
+## The following pseudo code describes the test:                            ##
+##                                                                          ##
+## let n = 0.01;       // these values are arbitrary                        ##
+## let incr = 0.001;   // for now                                           ##
+## let fail = false;                                                        ##
+##                                                                          ##
+## do {                                                                     ##
+##     trecover -a n                                                        ##
+##                                                                          ##
+##     if ( trecover.h5.jnl exists )                                        ##
+##     {                                                                    ##
+##         if ( h5dump trecover.h5 is able to open trecover.h5 )            ##
+##         {                                                                ##
+##                                                                          ##
+##             fail = true;                                                 ##
+##                                                                          ##
+##         } else if ( h5recover -j trecover.h5.jnl trecover.h5 fails ) {   ##
+##                                                                          ##
+##             fail = true;                                                 ##
+##                                                                          ##
+##         } else if ( h5dump trecover.h5 can't open trecover.h5 ) {        ##
+##                                                                          ##
+##             fail = true;                                                 ##
+##         }                                                                ##
+##     } else if ( h5dump trecover.h5 can't open trecover.h5 ) {            ##
+##                                                                          ##
+##         fail = true;                                                     ##
+##     }                                                                    ##
+##                                                                          ##
+##     n += incr;                                                           ##
+##                                                                          ##
+## } while ( ( trecover.h5.jnl exists ) && ( not fail ) )                   ##
+##                                                                          ##
+##############################################################################
+
+test_point() {
+
+    pass=1
+    seconds=$1
+    msecs=$2
+
+    if [ $msecs -lt 10 ] 
+    then
+
+    	delay=${seconds}.00${msecs}
+
+    else
+    
+    	if [ $msecs -lt 100 ] 
+	then
+
+            delay=${seconds}.0${msecs}
+
+        else
+
+            delay=${seconds}.${msecs}
+
+        fi
+    fi
+
+    echo "trecover -a $delay"
+
+    ./trecover -a $delay > /dev/null 2>&1
+
+    if [ -f trecover.h5 ]
+    then
+
+    	# echo "trecover.h5 exists"
+
+	../h5dump/h5dump trecover.h5 > /dev/null 2>&1
+
+	if [ $? -ne 0 ]
+	then
+
+	    # echo "h5dump trecover.h5 failed (1)"
+
+	    if [ -f trecover.h5.jnl ]
+	    then
+
+	    	# echo "trecover.h5.jnl exists -- try to recover"
+
+		# echo "./h5recover -j trecover.h5.jnl trecover.h5"
+
+		./h5recover -j trecover.h5.jnl trecover.h5 > /dev/null 2>&1
+
+		if [ $? -ne 0 ]
+		then
+
+		    # echo "h5recover failed!!! FAILED"
+		    pass=0
+
+		else
+
+		    # echo "h5recover succeeded -- try h5dump again"
+
+	            ../h5dump/h5dump trecover.h5 > /dev/null 2>&1
+
+	            if [ $? -ne 0 ]
+	            then
+
+	                # echo "h5dump trecover.h5 failed again?!? FAILED"
+			pass=0
+
+                    else
+
+		        # echo "h5dump trecover.h5 succeeded (2) -- PASS"
+			pass=1
+
+		    fi
+
+		fi
+
+	    else
+
+	    	# echo "trecover.h5.jnl doesn't exist!!! FAILED"
+		pass=0
+
+	    fi
+
+	else
+
+	    # echo "h5dump trecover.h5 succeeded (1) -- PASS"
+	    pass=1
+
+        fi
+    fi
+
+    return $pass
+}
+
+run_jnl_invarient_test() {
+
+    echo "Starting journaling invarients test:"
+    echo ""
+    echo "This test runs the same journaled test application repeatedly, "
+    echo "but with a gradually increasing delay before the test procees is"
+    echo "killed.  The opjective is to search for windows in which the "
+    echo "the journaling invarients are not maintained.  If the test finds "
+    echo "such a case, the file should be unreadable after the journal is "
+    echo "recovered."
+    echo ""
+    echo "This test generates a lot of garbage output, as we are killing the "
+    echo "test application repeatedly.  Ignore this output, and only look at"
+    echo "the last line."
+    echo ""
+    echo "Starting the test now:"
+    echo ""
+    echo "Testing journaling invarients...."
+    echo ""
+
+    finished=0;
+    sec=0;
+    msec=0;
+
+    while [ $finished -eq 0 ] 
+    do
+	msec="`expr $msec + 1`"
+
+	if [ $msec -ge 1000 ]
+	then
+
+	    msec=0;
+	    sec="`expr $sec + 1`"
+
+	fi
+
+	test_point $sec $msec
+
+	pass=$?
+
+	echo "pass = $pass"
+
+	if [ $pass -eq 0 ]
+	then
+
+	    finished=1
+
+	fi
+
+	if [ ! -f trecover.h5.jnl ]
+	then
+
+	    finished=1
+
+	fi
+
+    done
+
+    echo -n "Testing journaling invarients"
+    echo -n "                                          "
+
+    if [ $pass -eq 0 ]
+    then
+
+        echo "FAILED"
+	nerrors="`expr $nerrors + 1`"
+
+    else
+
+        echo "PASSED"
+
+    fi
+
+    return
+
+}
+
+
+##############################################################################
 ###			  T H E   T E S T S                                ###
 ##############################################################################
 
@@ -167,6 +385,12 @@ TOOLTEST default.txt
 # against the expected results by hand.
 TOOLTEST async_crash.txt -a 0.05
 
+# Invarient test
+# This is a very different test from the previous TOOLTEST calls -- 
+# basic idea is to scan the execution time of a journaled process to 
+# look for points in time at which the journaling invarients are not
+# maintained.  see comments for details.
+run_jnl_invarient_test
 
 if test $nerrors -eq 0 ; then
    echo "All $TOOL tests passed."
