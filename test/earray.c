@@ -2325,7 +2325,7 @@ main(void)
 
             /* Super Block capacity tests */
             ndblks = 0;
-            for(sblk = 0; sblk < 8; sblk++) {
+            for(sblk = 0; sblk < 9; sblk++) {
                 for(dblk = 0; dblk < tparam.sblk_info[sblk].ndblks; dblk ++) {
                     /* Test first element in data block */
                     nelmts = (hsize_t)(1 + cparam.idx_blk_elmts + 
@@ -2354,6 +2354,7 @@ main(void)
         nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (31 * cparam.data_blk_min_elmts) + 1), "skipping 1st super block elements");
         nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (63 * cparam.data_blk_min_elmts) + 1), "skipping 2nd super block elements");
         nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (127 * cparam.data_blk_min_elmts) + 1), "skipping 3rd super block elements");
+        nerrors += test_skip_elmts(fapl, &cparam, &tparam, (hsize_t)(cparam.idx_blk_elmts + (255 * cparam.data_blk_min_elmts) + 1), "skipping 4th super block elements");
 
         /* Close down testing parameters */
         finish_tparam(&tparam);

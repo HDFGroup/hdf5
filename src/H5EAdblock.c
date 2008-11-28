@@ -104,7 +104,7 @@ H5EA_dblock_t *, NULL, NULL,
 H5EA__dblock_alloc(H5EA_hdr_t *hdr, size_t nelmts))
 
     /* Local variables */
-    H5EA_dblock_t *dblock = NULL;          /* Extensible array index block */
+    H5EA_dblock_t *dblock = NULL;          /* Extensible array data block */
 
     /* Check arguments */
     HDassert(hdr);
@@ -114,17 +114,25 @@ H5EA__dblock_alloc(H5EA_hdr_t *hdr, size_t nelmts))
     if(NULL == (dblock = H5FL_CALLOC(H5EA_dblock_t)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array data block")
 
+    /* Share common array information */
+    if(H5EA__hdr_incr(hdr) < 0)
+	H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
+    dblock->hdr = hdr;
+
     /* Set non-zero internal fields */
     dblock->nelmts = nelmts;
 
-    /* Allocate buffer for elements in index block */
-    if(NULL == (dblock->elmts = H5EA__hdr_alloc_elmts(hdr, nelmts)))
-        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for data block element buffer")
-
-    /* Share common array information */
-    dblock->hdr = hdr;
-    if(H5EA__hdr_incr(hdr) < 0)
-	H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
+    /* Check if the data block is not going to be paged */
+    if(nelmts > hdr->dblk_page_nelmts) {
+        /* Set the # of pages in the direct block */
+        dblock->npages = nelmts / hdr->dblk_page_nelmts;
+        HDassert(nelmts == (dblock->npages * hdr->dblk_page_nelmts));
+    } /* end if */
+    else {
+        /* Allocate buffer for elements in data block */
+        if(NULL == (dblock->elmts = H5EA__hdr_alloc_elmts(hdr, nelmts)))
+            H5E_THROW(H5E_CANTALLOC, "memory allocation failed for data block element buffer")
+    } /* end else */
 
     /* Set the return value */
     ret_value = dblock;
@@ -158,7 +166,7 @@ H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hsize_t dblk_off, size_t nel
     H5EA_dblock_t *dblock = NULL;      /* Extensible array data block */
 
 #ifdef QAK
-HDfprintf(stderr, "%s: Called\n", FUNC);
+HDfprintf(stderr, "%s: Called, hdr->dblk_page_nelmts = %Zu, nelmts = %Zu\n", FUNC, hdr->dblk_page_nelmts, nelmts);
 #endif /* QAK */
 
     /* Sanity check */
@@ -185,15 +193,17 @@ HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
     if(HADDR_UNDEF == (dblock->addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
 	H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array data block")
 
-    /* Clear any elements in index block to fill value */
-    if((hdr->cparam.cls->fill)(dblock->elmts, (size_t)dblock->nelmts) < 0)
-        H5E_THROW(H5E_CANTSET, "can't set extensible array data block elements to class's fill value")
+    /* Don't initialize elements if paged */
+    if(!dblock->npages)
+        /* Clear any elements in data block to fill value */
+        if((hdr->cparam.cls->fill)(dblock->elmts, (size_t)dblock->nelmts) < 0)
+            H5E_THROW(H5E_CANTSET, "can't set extensible array data block elements to class's fill value")
 
     /* Cache the new extensible array data block */
     if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblock->addr, dblock, H5AC__NO_FLAGS_SET) < 0)
-	H5E_THROW(H5E_CANTINSERT, "can't add extensible array index block to cache")
+	H5E_THROW(H5E_CANTINSERT, "can't add extensible array data block to cache")
 
-    /* Set address of index block to return */
+    /* Set address of data block to return */
     ret_value = dblock->addr;
 
 CATCH
@@ -369,6 +379,36 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, dblk_addr, dblk_nelmts, H5AC_WRITE)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long_long)dblk_addr)
 
+    /* Check if this is a paged data block */
+    if(dblk_nelmts > hdr->dblk_page_nelmts) {
+        size_t npages = dblk_nelmts / hdr->dblk_page_nelmts;    /* Number of pages in data block */
+        haddr_t dblk_page_addr;         /* Address of each data block page */
+        size_t dblk_page_size;          /* Size of each data block page */
+        size_t u;                       /* Local index variable */
+
+        /* Set up initial state */
+        dblk_page_addr = dblk_addr + H5EA_DBLOCK_PREFIX_SIZE(dblock);
+        dblk_page_size = (hdr->dblk_page_nelmts * hdr->cparam.raw_elmt_size)
+                + H5EA_SIZEOF_CHKSUM;
+
+        /* Iterate over pages in data block */
+        for(u = 0; u < npages; u++) {
+#ifdef QAK
+HDfprintf(stderr, "%s: Expunging data block page from cache\n", FUNC);
+#endif /* QAK */
+            /* Evict the data block page from the metadata cache */
+            /* (OK to call if it doesn't exist in the cache) */
+            if(H5AC_expunge_entry(hdr->f, dxpl_id, H5AC_EARRAY_DBLK_PAGE, dblk_page_addr, H5AC__NO_FLAGS_SET) < 0)
+                H5E_THROW(H5E_CANTEXPUNGE, "unable to remove array data block page from metadata cache")
+#ifdef QAK
+HDfprintf(stderr, "%s: Done expunging data block page from cache\n", FUNC);
+#endif /* QAK */
+
+            /* Advance to next page address */
+            dblk_page_addr += dblk_page_size;
+        } /* end for */
+    } /* end if */
+
 CATCH
     /* Finished deleting data block in metadata cache */
     if(dblock && H5EA__dblock_unprotect(dblock, dxpl_id, H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG) < 0)
@@ -397,20 +437,24 @@ H5EA__dblock_dest(H5F_t UNUSED *f, H5EA_dblock_t *dblock))
 
     /* Sanity check */
     HDassert(dblock);
-    HDassert(dblock->hdr);
 
-    /* Check if we've got elements in the index block */
-    if(dblock->nelmts > 0) {
-        /* Free buffer for data block elements */
-        HDassert(dblock->elmts);
-        if(H5EA__hdr_free_elmts(dblock->hdr, dblock->nelmts, dblock->elmts) < 0)
-            H5E_THROW(H5E_CANTFREE, "unable to free extensible array data block element buffer")
-        dblock->elmts = NULL;
+    /* Check if shared header field has been initialized */
+    if(dblock->hdr) {
+        /* Check if we've got elements in the data block */
+        if(dblock->elmts && !dblock->npages) {
+            /* Free buffer for data block elements */
+            HDassert(dblock->nelmts > 0);
+            if(H5EA__hdr_free_elmts(dblock->hdr, dblock->nelmts, dblock->elmts) < 0)
+                H5E_THROW(H5E_CANTFREE, "unable to free extensible array data block element buffer")
+            dblock->elmts = NULL;
+            dblock->nelmts = 0;
+        } /* end if */
+
+        /* Decrement reference count on shared info */
+        if(H5EA__hdr_decr(dblock->hdr) < 0)
+            H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
+        dblock->hdr = NULL;
     } /* end if */
-
-    /* Decrement reference count on shared info */
-    if(H5EA__hdr_decr(dblock->hdr) < 0)
-        H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
 
     /* Free the data block itself */
     (void)H5FL_FREE(H5EA_dblock_t, dblock);

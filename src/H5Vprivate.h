@@ -428,5 +428,65 @@ H5V_limit_enc_size(uint64_t limit)
     return (H5V_log2_gen(limit) / 8) + 1;
 } /* end H5V_limit_enc_size() */
 
+static const unsigned char H5V_bit_set_g[8] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
+static const unsigned char H5V_bit_clear_g[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 0xFB, 0xFD, 0xFE};
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5V_bit_get
+ *
+ * Purpose:     Determine the value of the n'th bit in a buffer.
+ *
+ * Note:	No range checking on <offset> is performed!
+ *
+ * Note #2:	Bits are sequentially stored in the buffer, starting with bit
+ *              offset 0 in the first byte's high-bit position, proceeding down
+ *              to bit offset 7 in the first byte's low-bit position, then to
+ *              bit offset 8 in the second byte's high-bit position, etc.
+ *
+ * Return:      TRUE/FALSE
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, November 25, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5_inline hbool_t UNUSED
+H5V_bit_get(const unsigned char *buf, size_t offset)
+{
+    /* Test the appropriate bit in the buffer */
+    return (hbool_t)((buf[offset / 8] & (H5V_bit_set_g[offset % 8])) ? TRUE : FALSE);
+} /* end H5V_bit_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5V_bit_set
+ *
+ * Purpose:     Set/reset the n'th bit in a buffer.
+ *
+ * Note:	No range checking on <offset> is performed!
+ *
+ * Note #2:	Bits are sequentially stored in the buffer, starting with bit
+ *              offset 0 in the first byte's high-bit position, proceeding down
+ *              to bit offset 7 in the first byte's low-bit position, then to
+ *              bit offset 8 in the second byte's high-bit position, etc.
+ *
+ * Return:      None
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, November 25, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5_inline void UNUSED
+H5V_bit_set(unsigned char *buf, size_t offset, hbool_t val)
+{
+    /* Set/reset the appropriate bit in the buffer */
+    if(val)
+        buf[offset / 8] |= H5V_bit_set_g[offset % 8];
+    else
+        buf[offset / 8] &= H5V_bit_clear_g[offset % 8];
+} /* end H5V_bit_set() */
+
 #endif /* H5Vprivate_H */
 

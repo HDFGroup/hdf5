@@ -331,7 +331,7 @@ typedef struct H5FL_seq_head_t {
 #define H5FL_SEQ_CALLOC(t,elem) (t *)H5FL_seq_calloc(&(H5FL_SEQ_NAME(t)),elem H5FL_TRACK_INFO)
 
 /* Free a sequence of type 't' */
-#define H5FL_SEQ_FREE(t,obj) H5FL_seq_free(&(H5FL_SEQ_NAME(t)),obj)
+#define H5FL_SEQ_FREE(t,obj) (t *)H5FL_seq_free(&(H5FL_SEQ_NAME(t)),obj)
 
 /* Re-allocate a sequence of type 't' */
 #define H5FL_SEQ_REALLOC(t,obj,new_elem) (t *)H5FL_seq_realloc(&(H5FL_SEQ_NAME(t)),obj,new_elem H5FL_TRACK_INFO)

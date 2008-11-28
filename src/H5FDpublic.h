@@ -99,8 +99,8 @@ typedef enum H5FD_mem_t {
  * Map "extensible array" super blocks to 'btree' type file memory, since they
  * are similar enough to B-tree nodes.
  *
- * Map "extensible array" data blocks to 'lheap' type file memory, since they
- * are similar enough to local heap info.
+ * Map "extensible array" data blocks & pages to 'lheap' type file memory, since
+ * they are similar enough to local heap info.
  *
  *      -QAK
  */
@@ -108,6 +108,7 @@ typedef enum H5FD_mem_t {
 #define H5FD_MEM_EARRAY_IBLOCK  H5FD_MEM_OHDR
 #define H5FD_MEM_EARRAY_SBLOCK  H5FD_MEM_BTREE
 #define H5FD_MEM_EARRAY_DBLOCK  H5FD_MEM_LHEAP
+#define H5FD_MEM_EARRAY_DBLK_PAGE  H5FD_MEM_LHEAP
 
 /*
  * A free-list map which maps all types of allocation requests to a single

@@ -119,6 +119,11 @@ H5EA__sblock_alloc(H5EA_hdr_t *hdr, unsigned sblk_idx))
     if(NULL == (sblock = H5FL_CALLOC(H5EA_sblock_t)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array super block")
 
+    /* Share common array information */
+    if(H5EA__hdr_incr(hdr) < 0)
+	H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
+    sblock->hdr = hdr;
+
     /* Set non-zero internal fields */
     sblock->addr = HADDR_UNDEF;
 
@@ -153,12 +158,11 @@ HDfprintf(stderr, "%s: hdr->dblk_page_nelmts = %Zu, sblock->ndblks = %Zu, sblock
         /* Allocate buffer for all 'page init' bitmasks in super block */
         if(NULL == (sblock->page_init = H5FL_BLK_CALLOC(page_init, sblock->ndblks * sblock->dblk_page_init_size)))
             H5E_THROW(H5E_CANTALLOC, "memory allocation failed for super block page init bitmask")
-    } /* end if */
 
-    /* Share common array information */
-    sblock->hdr = hdr;
-    if(H5EA__hdr_incr(hdr) < 0)
-	H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
+        /* Compute data block page size */
+        sblock->dblk_page_size = (hdr->dblk_page_nelmts * hdr->cparam.raw_elmt_size)
+                + H5EA_SIZEOF_CHKSUM;
+    } /* end if */
 
     /* Set the return value */
     ret_value = sblock;
@@ -394,22 +398,26 @@ H5EA__sblock_dest(H5F_t *f, H5EA_sblock_t *sblock))
 HDfprintf(stderr, "%s: sblock->hdr->dblk_page_nelmts = %Zu, sblock->ndblks = %Zu, sblock->dblk_nelmts = %Zu\n", FUNC, sblock->hdr->dblk_page_nelmts, sblock->ndblks, sblock->dblk_nelmts);
 #endif /* QAK */
 
-    /* Set the shared array header's file context for this operation */
-    sblock->hdr->f = f;
+    /* Check if shared header field has been initialized */
+    if(sblock->hdr) {
+        /* Set the shared array header's file context for this operation */
+        sblock->hdr->f = f;
 
-    /* Free buffer for super block data block addresses, if there are any */
-    if(sblock->dblk_addrs)
-        (void)H5FL_SEQ_FREE(haddr_t, sblock->dblk_addrs);
+        /* Free buffer for super block data block addresses, if there are any */
+        if(sblock->dblk_addrs)
+            sblock->dblk_addrs = H5FL_SEQ_FREE(haddr_t, sblock->dblk_addrs);
 
-    /* Free buffer for super block 'page init' bitmask, if there is one */
-    if(sblock->page_init) {
-        HDassert(sblock->dblk_npages > 0);
-        (void)H5FL_BLK_FREE(page_init, sblock->page_init);
+        /* Free buffer for super block 'page init' bitmask, if there is one */
+        if(sblock->page_init) {
+            HDassert(sblock->dblk_npages > 0);
+            sblock->page_init = H5FL_BLK_FREE(page_init, sblock->page_init);
+        } /* end if */
+
+        /* Decrement reference count on shared info */
+        if(H5EA__hdr_decr(sblock->hdr) < 0)
+            H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
+        sblock->hdr = NULL;
     } /* end if */
-
-    /* Decrement reference count on shared info */
-    if(H5EA__hdr_decr(sblock->hdr) < 0)
-        H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
 
     /* Free the super block itself */
     (void)H5FL_FREE(H5EA_sblock_t, sblock);

@@ -205,7 +205,7 @@ H5EA__hdr_init(H5EA_hdr_t *hdr))
     /* Compute general information */
     hdr->nsblks = 1 + (hdr->cparam.max_nelmts_bits - H5V_log2_of2(hdr->cparam.data_blk_min_elmts));
     hdr->dblk_page_nelmts = (size_t)1 << hdr->cparam.max_dblk_page_nelmts_bits;
-    hdr->arr_off_size = H5EA_SIZEOF_OFFSET_BITS(hdr->cparam.max_nelmts_bits);
+    hdr->arr_off_size = (unsigned char)H5EA_SIZEOF_OFFSET_BITS(hdr->cparam.max_nelmts_bits);
 #ifdef QAK
 HDfprintf(stderr, "%s: hdr->nsblks = %Zu\n", FUNC, hdr->nsblks);
 #endif /* QAK */

@@ -119,6 +119,11 @@ H5EA__iblock_alloc(H5EA_hdr_t *hdr))
     if(NULL == (iblock = H5FL_CALLOC(H5EA_iblock_t)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array index block")
 
+    /* Share common array information */
+    if(H5EA__hdr_incr(hdr) < 0)
+	H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
+    iblock->hdr = hdr;
+
     /* Set non-zero internal fields */
     iblock->addr = HADDR_UNDEF;
 
@@ -146,11 +151,6 @@ HDfprintf(stderr, "%s: iblock->nsblk_addrs = %Zu\n", FUNC, iblock->nsblk_addrs);
     if(iblock->nsblk_addrs > 0)
         if(NULL == (iblock->sblk_addrs = H5FL_SEQ_MALLOC(haddr_t, iblock->nsblk_addrs)))
             H5E_THROW(H5E_CANTALLOC, "memory allocation failed for index block super block addresses")
-
-    /* Share common array information */
-    iblock->hdr = hdr;
-    if(H5EA__hdr_incr(hdr) < 0)
-	H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
 
     /* Set the return value */
     ret_value = iblock;
@@ -425,33 +425,39 @@ H5EA__iblock_dest(H5F_t *f, H5EA_iblock_t *iblock))
     HDassert(iblock);
     HDassert(iblock->rc == 0);
 
-    /* Set the shared array header's file context for this operation */
-    iblock->hdr->f = f;
+    /* Check if shared header field has been initialized */
+    if(iblock->hdr) {
+        /* Set the shared array header's file context for this operation */
+        iblock->hdr->f = f;
 
-    /* Check if we've got elements in the index block */
-    if(iblock->hdr->cparam.idx_blk_elmts > 0) {
-        /* Free buffer for index block elements */
-        HDassert(iblock->elmts);
-        (void)H5FL_BLK_FREE(idx_blk_elmt_buf, iblock->elmts);
+        /* Check if we've got elements in the index block */
+        if(iblock->elmts) {
+            /* Free buffer for index block elements */
+            HDassert(iblock->hdr->cparam.idx_blk_elmts > 0);
+            iblock->elmts = H5FL_BLK_FREE(idx_blk_elmt_buf, iblock->elmts);
+        } /* end if */
+
+        /* Check if we've got data block addresses in the index block */
+        if(iblock->dblk_addrs) {
+            /* Free buffer for index block data block addresses */
+            HDassert(iblock->ndblk_addrs > 0);
+            iblock->dblk_addrs = H5FL_SEQ_FREE(haddr_t, iblock->dblk_addrs);
+            iblock->ndblk_addrs = 0;
+        } /* end if */
+
+        /* Check if we've got super block addresses in the index block */
+        if(iblock->sblk_addrs) {
+            /* Free buffer for index block super block addresses */
+            HDassert(iblock->nsblk_addrs > 0);
+            iblock->sblk_addrs = H5FL_SEQ_FREE(haddr_t, iblock->sblk_addrs);
+            iblock->nsblk_addrs = 0;
+        } /* end if */
+
+        /* Decrement reference count on shared info */
+        if(H5EA__hdr_decr(iblock->hdr) < 0)
+            H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
+        iblock->hdr = NULL;
     } /* end if */
-
-    /* Check if we've got data block addresses in the index block */
-    if(iblock->ndblk_addrs > 0) {
-        /* Free buffer for index block data block addresses */
-        HDassert(iblock->dblk_addrs);
-        (void)H5FL_SEQ_FREE(haddr_t, iblock->dblk_addrs);
-    } /* end if */
-
-    /* Check if we've got super block addresses in the index block */
-    if(iblock->nsblk_addrs > 0) {
-        /* Free buffer for index block super block addresses */
-        HDassert(iblock->sblk_addrs);
-        (void)H5FL_SEQ_FREE(haddr_t, iblock->sblk_addrs);
-    } /* end if */
-
-    /* Decrement reference count on shared info */
-    if(H5EA__hdr_decr(iblock->hdr) < 0)
-        H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
 
     /* Free the index block itself */
     (void)H5FL_FREE(H5EA_iblock_t, iblock);
