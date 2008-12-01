@@ -1078,10 +1078,7 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(!size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
-    /* layout must be chunked */
-    if(H5D_CHUNKED != dset->shared->layout.type)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "layout must be chunked")
-    
+ 
     /* Private function */
     if(H5D_set_extent(dset, size, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset")

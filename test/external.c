@@ -784,6 +784,17 @@ test_3 (hid_t fapl)
 	} /* end if */
     } /* end for */
 
+      /* Extend the dataset by another 100 elements */
+    if(H5Dset_extent(dset, &max_size) < 0) goto error;
+    if(H5Sclose(file_space) < 0) goto error;
+    if((file_space = H5Dget_space(dset)) < 0) goto error;
+
+    /* Write second half of dataset */
+    for(i = 0; i < hs_count; i++)
+        whole[i] = 100 + i;
+    if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, &hs_start, NULL, &hs_count, NULL) < 0) goto error;
+    if(H5Dwrite(dset, H5T_NATIVE_INT, mem_space, file_space, H5P_DEFAULT, whole) < 0) goto error;
+
 
     if(H5Dclose(dset) < 0) goto error;
     if(H5Pclose(dcpl) < 0) goto error;
