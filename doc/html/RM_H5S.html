@@ -1453,7 +1453,9 @@ END SUBROUTINE h5sselect_elements_f
         <p>
         The <code>start</code>, <code>stride</code>, <code>count</code>,
         and <code>block</code> arrays must be the same size as the rank 
-        of the dataspace.  
+        of the dataspace.  For example, if the dataspace is 4-dimensional,
+        each of these parameters must be a 1-dimensional array of size 
+        <code>4</code>.
         <p>
         The selection operator <code>op</code> determines how the new 
         selection is to be combined with the already existing selection 
@@ -1502,15 +1504,16 @@ END SUBROUTINE h5sselect_elements_f
         </center>
    
         <p>
-        The <code>start</code> array determines the starting coordinates 
-        of the hyperslab to select.  
+        The <code>start</code> array specifies the offset of the 
+        starting element of the specified hyperslab.
         <p>
         The <code>stride</code> array chooses array locations 
         from the dataspace with each value in the <code>stride</code> 
         array determining how many elements to move in each dimension.  
-        Setting a value in the <code>stride</code> array to 1 moves to
+        Setting a value in the <code>stride</code> array to <code>1</code> 
+        moves to
         each element in that dimension of the dataspace; setting a value 
-	of <code>2</code> in alocation in the <code>stride</code> array 
+	of <code>2</code> in allocation in the <code>stride</code> array 
 	moves to every other element in that dimension of the dataspace.  
 	In other words, the <code>stride</code> determines the
         number of elements to move from the <code>start</code> location 
@@ -1518,7 +1521,7 @@ END SUBROUTINE h5sselect_elements_f
         Stride values of <code>0</code> are not allowed.  
 	If the <code>stride</code> parameter is <code>NULL</code>,
         a contiguous hyperslab is selected (as if each value in the 
-        <code>stride</code> array were set to all 1's).  
+        <code>stride</code> array were set to <code>1</code>).  
         <p>
         The <code>count</code> array determines how many blocks to
         select from the dataspace, in each dimension.
@@ -1527,17 +1530,23 @@ END SUBROUTINE h5sselect_elements_f
         the size of the element block selected from the dataspace.  
         If the <code>block</code> parameter is set to <code>NULL</code>, 
         the block size defaults to a single element in each dimension 
-        (as if the <code>block</code> array were set to all 
-	<code>1</code>'s).
+        (as if each value in the <code>block</code> array were set to 
+        <code>1</code>).  
         <p>
-        For example, in a 2-dimensional dataspace, setting 
-        <code>start</code> to [1,1],
-        <code>stride</code> to [4,4], 
-	<code>count</code> to [3,7], and 
-        <code>block</code> to [2,2] 
-	selects 21 2x2 blocks of array elements starting with 
-	location (1,1) and selecting blocks at locations 
-	(1,1), (5,1), (9,1), (1,5), (5,5), etc.
+        For example, consider a 2-dimensional dataspace with
+        hyperslab selection settings as follows: 
+        the <code>start</code> offset is specified as [1,1],
+        <code>stride</code> is [4,4], 
+	<code>count</code> is [3,7], and 
+        <code>block</code> is [2,2].
+	In C, these settings will specify a hyperslab consisting of
+        21 2x2 blocks of array elements starting with location (1,1) 
+        with the selected blocks at locations 
+	(1,1), (5,1), (9,1), (1,5), (5,5), etc.;
+	in Fortran, they will specify a hyperslab consisting of
+        21 2x2 blocks of array elements starting with location (2,2) 
+        with the selected blocks at locations 
+	(2,2), (6,2), (10,2), (2,6), (6,6), etc.
         <p>
         Regions selected with this function call default to C order 
         iteration when I/O is performed.
@@ -1955,7 +1964,7 @@ Describes HDF5 Release 1.6.8, November 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 10 September 2008");
+document.writeln("Last modified: 1 December 2008");
 -->
 </SCRIPT> 
 
