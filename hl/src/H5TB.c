@@ -1294,19 +1294,18 @@ herr_t H5TBdelete_record( hid_t loc_id,
     hsize_t  ntotal_records;
     hsize_t  read_start;
     hsize_t  read_nrecords;
-    hid_t    did;
-    hid_t    tid;
+    hid_t    did=-1;
+    hid_t    tid=-1;
+    hid_t    sid=-1;
+    hid_t    m_sid=-1;
     hsize_t  count[1];
     hsize_t  offset[1];
-    hid_t    sid;
-    hid_t    m_sid;
     hsize_t  mem_size[1];
-    unsigned char *tmp_buf;
+    unsigned char *tmp_buf=NULL;
     size_t   src_size;
     size_t   *src_offset;
     size_t   *src_sizes;
     hsize_t  dims[1];
-    
     
     /*-------------------------------------------------------------------------
     * first we get information about type size and offsets on disk
@@ -1322,9 +1321,15 @@ herr_t H5TBdelete_record( hid_t loc_id,
     
     if (src_offset == NULL )
         return -1;
+    if (src_sizes == NULL )
+        return -1;
     
     /* get field info */
     if (H5TBget_field_info( loc_id, dset_name, NULL, src_sizes, src_offset, &src_size ) < 0)
+        return -1;
+
+    /* open the dataset. */
+    if ((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
         return -1;
     
     /*-------------------------------------------------------------------------
@@ -1334,53 +1339,54 @@ herr_t H5TBdelete_record( hid_t loc_id,
     
     read_start = start + nrecords;
     read_nrecords = ntotal_records - read_start;
-    tmp_buf = (unsigned char *)calloc((size_t) read_nrecords, src_size );
-    
-    if (tmp_buf == NULL )
-        return -1;
-    
-    /* read the records after the deleted one(s) */
-    if (H5TBread_records( loc_id, dset_name, read_start, read_nrecords, src_size, src_offset, src_sizes, tmp_buf ) < 0)
-        return -1;
-    
-    /*-------------------------------------------------------------------------
-    * write the records in another position
-    *-------------------------------------------------------------------------
-    */
-    
-    /* open the dataset. */
-    if ((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
-        return -1;
-    
-    /* get the datatype */
-    if ((tid = H5Dget_type( did )) < 0)
-        goto out;
-    
-    /* get the dataspace handle */
-    if ((sid = H5Dget_space( did )) < 0)
-        goto out;
-    
-    /* define a hyperslab in the dataset of the size of the records */
-    offset[0] = start;
-    count[0]  = read_nrecords;
-    if (H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
-        goto out;
-    
-    /* create a memory dataspace handle */
-    mem_size[0] = count[0];
-    if ((m_sid = H5Screate_simple( 1, mem_size, NULL )) < 0)
-        goto out;
-    
-    if (H5Dwrite( did, tid, m_sid, sid, H5P_DEFAULT, tmp_buf ) < 0)
-        goto out;
-    
-    /* close */
-    if (H5Sclose( m_sid ) < 0)
-        goto out;
-    if (H5Sclose( sid ) < 0)
-        goto out;
-    if (H5Tclose( tid ) < 0)
-        goto out;
+
+    if ( read_nrecords )
+    {
+        tmp_buf = (unsigned char *)calloc((size_t) read_nrecords, src_size );
+        
+        if (tmp_buf == NULL )
+            return -1;
+        
+        /* read the records after the deleted one(s) */
+        if (H5TBread_records( loc_id, dset_name, read_start, read_nrecords, src_size, src_offset, src_sizes, tmp_buf ) < 0)
+            return -1;
+        
+        /*-------------------------------------------------------------------------
+        * write the records in another position
+        *-------------------------------------------------------------------------
+        */
+       
+        /* get the datatype */
+        if ((tid = H5Dget_type( did )) < 0)
+            goto out;
+        
+        /* get the dataspace handle */
+        if ((sid = H5Dget_space( did )) < 0)
+            goto out;
+        
+        /* define a hyperslab in the dataset of the size of the records */
+        offset[0] = start;
+        count[0]  = read_nrecords;
+        if (H5Sselect_hyperslab( sid, H5S_SELECT_SET, offset, NULL, count, NULL) < 0)
+            goto out;
+        
+        /* create a memory dataspace handle */
+        mem_size[0] = count[0];
+        if ((m_sid = H5Screate_simple( 1, mem_size, NULL )) < 0)
+            goto out;
+        
+        if (H5Dwrite( did, tid, m_sid, sid, H5P_DEFAULT, tmp_buf ) < 0)
+            goto out;
+        
+        /* close */
+        if (H5Sclose( m_sid ) < 0)
+            goto out;
+        if (H5Sclose( sid ) < 0)
+            goto out;
+        if (H5Tclose( tid ) < 0)
+            goto out;
+        
+    } /* read_nrecords */
     
     
     /*-------------------------------------------------------------------------
@@ -1395,16 +1401,28 @@ herr_t H5TBdelete_record( hid_t loc_id,
     if (H5Dclose( did ) < 0)
         return -1;
     
-    free( tmp_buf );
+    if (tmp_buf !=NULL)
+        free( tmp_buf );
     free( src_offset );
     free( src_sizes );
     
       
     return 0;
-    
+
+      /* error zone */
 out:
-    H5Dclose( did );
+
+    if (tmp_buf !=NULL )
+        free( tmp_buf );
+    H5E_BEGIN_TRY 
+    {
+        H5Dclose(did);
+        H5Tclose(tid);
+        H5Sclose(sid);
+    } H5E_END_TRY;
     return -1;
+    
+    
 }
 
 /*-------------------------------------------------------------------------
