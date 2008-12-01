@@ -748,9 +748,15 @@ END SUBROUTINE h5fget_freespace_f
 	    is unknown, a preliminary <code>H5Fget_name</code> call 
 	    can be made by setting <code>name</code> to NULL. 
 	    The return value of this call will be the size of the filename;
-	    that value can then be assigned to <code>size</code> 
+	    that value plus one (1) can then be assigned to <code>size</code> 
 	    for a second <code>H5Fget_name</code> call, 
 	    which will retrieve the actual name. 
+            (The value passed in with the parameter <code>size</code> must be 
+            one greater than size in bytes of the actual name in order to
+            accomodate the null terminator; if <code>size</code> is set to
+            the exact size of the name, the last byte passed back will 
+            contain the null terminator and the last character will be 
+            missing from the name passed back to the calling application.)
             <p>
             If an error occurs, the buffer pointed to by 
 	    <code>name</code> is unchanged and 
@@ -1523,7 +1529,7 @@ Describes HDF5 Release 1.6.8, November 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 16 October 2008");
+document.writeln("Last modified: 30 November 2008");
 -->
 </SCRIPT>
  
