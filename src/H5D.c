@@ -1069,21 +1069,24 @@ H5Dset_extent(hid_t dset_id, const hsize_t size[])
 {
     H5D_t *dset;                /* Dataset for this operation */
     herr_t ret_value = SUCCEED; /* Return value */
-
+    
     FUNC_ENTER_API(H5Dset_extent, FAIL)
     H5TRACE2("e", "i*h", dset_id, size);
-
+    
     /* Check args */
     if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
-	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
     if(!size)
-	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
-
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no size specified")
+    /* layout must be chunked */
+    if(H5D_CHUNKED != dset->shared->layout.type)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADSELECT, FAIL, "layout must be chunked")
+    
     /* Private function */
     if(H5D_set_extent(dset, size, H5AC_dxpl_id) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset")
-
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set extend dataset")
+    
 done:
-    FUNC_LEAVE_API(ret_value)
+        FUNC_LEAVE_API(ret_value)
 } /* end H5Dset_extent() */
 
