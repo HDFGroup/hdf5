@@ -43,93 +43,96 @@
 #define ISTORE_IK  64
 
 
-static int test( hid_t fid, int do_compress, int do_fill_value );
+static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_k);
 
 
 /*-------------------------------------------------------------------------
  * main
  *-------------------------------------------------------------------------
  */
+
+
 int main( void )
 {
-    hid_t   fid;
-    hid_t   fcpl;
-    hbool_t do_compress;     /* iterator for looping over compress/no compress */
+    hbool_t do_compress = 0;
+    hbool_t do_fillvalue = 0;
+    hbool_t set_istore_k = 0;
+    
+      
+    TESTING("with fill value, no compression");
+
+    do_fillvalue = 1;
+
+    if (test( do_compress, do_fillvalue, set_istore_k ) < 0)
+    {
+        goto error;
+    }
+    
+
+    PASSED();
+
+    TESTING("no fill value, no compression");
+
+    do_fillvalue = 0;
+
+    if (test( do_compress, do_fillvalue, set_istore_k ) < 0)
+    {
+        goto error;
+    }
    
 
+    PASSED();
+    
+    TESTING("with fill value, with compression");
+
 #ifdef H5_HAVE_FILTER_DEFLATE
-    for (do_compress = FALSE; do_compress <= TRUE; do_compress++) 
+
+    do_compress = 1;
+
+    do_fillvalue = 1;
+
+    if (test( do_compress, do_fillvalue, set_istore_k ) < 0)
     {
-        if(do_compress)
-            puts("Testing WITH compression on chunks.");
-        else
-            puts("Testing with NO compression on chunks.");
-#else /* H5_HAVE_FILTER_DEFLATE */
-        puts("** deflate filter nor available - Skipping tests for compression on chunks. **");
-#endif /* H5_HAVE_FILTER_DEFLATE */
-        
-        /* create a file creation property list */
-        if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) 
-        {
-            goto error;
-        }
-        
-        if ( do_compress )
-        {
-            
-            /* set non-default indexed storage B-tree internal 'K' value */
-            if (H5Pset_istore_k(fcpl,ISTORE_IK) < 0) 
-            {
-                goto error;
-            }
-        }
-        
-        
-        /* create a new file */
-        if ((fid = H5Fcreate("set_extent1.h5", H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0) 
-        {
-            goto error;
-        }
-        
-        
-        /* close property list */
-        if(H5Pclose(fcpl) < 0) 
-        {
-            goto error;
-        }
-        
-        
-        
-        TESTING("extend dataset created with fill value");
-        
-        
-        if (test( fid, do_compress, 1 ) < 0)
-        {
-            goto error;
-        }
-        
-        PASSED();
-        
-        TESTING("extend dataset created without fill value");
-        
-        if (test( fid, do_compress, 0 ) < 0)
-        {
-            goto error;
-        }
-        
-        
-        if (H5Fclose( fid ) < 0)
-        {
-            goto error;
-        }
-        
-        PASSED();
-        
-        
-        
+        goto error;
+    }
+  
+     
+    PASSED();
+#else
+    SKIPPED();
+#endif
+
+    TESTING("no fill value, with compression");
+
 #ifdef H5_HAVE_FILTER_DEFLATE
-    } /* end for */
-#endif /* H5_HAVE_FILTER_DEFLATE */
+
+    do_fillvalue = 0;
+
+    if (test( do_compress, do_fillvalue, set_istore_k ) < 0)
+    {
+        goto error;
+    }
+     
+    PASSED();
+#else
+    SKIPPED();
+#endif
+
+    TESTING("with non-default indexed storage B-tree");
+
+    do_fillvalue = 1;
+    set_istore_k = 1;
+
+    if (test( do_compress, do_fillvalue, set_istore_k ) < 0)
+    {
+        goto error;
+    }
+    
+
+    PASSED();
+
+
+    
     
     puts("All set_extent tests passed.");
     return 0;
@@ -137,15 +140,11 @@ int main( void )
     
 error:
     
-    H5E_BEGIN_TRY 
-    {
-        H5Fclose( fid );
-    } H5E_END_TRY;
+   
     
     H5_FAILED();
     return 1;
 }
-
 
 
 
@@ -154,12 +153,14 @@ error:
  *-------------------------------------------------------------------------
  */
 
-static int test( hid_t fid, int do_compress, int do_fill_value )
+static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_k)
 {
 
+    hid_t   fid;
     hid_t   did;
     hid_t   sid;
     hid_t   dcpl;
+    hid_t   fcpl;
     hsize_t dims_o[RANK] = {DIM0,DIM1};    
     hsize_t dims_s[RANK] = {DIMS0,DIMS1};
     hsize_t dims_e[RANK] = {DIME0,DIME1};
@@ -197,6 +198,33 @@ static int test( hid_t fid, int do_compress, int do_fill_value )
             buf_o[i][j] = 2;
         }
     }
+
+    /* create a file creation property list */
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) 
+    {
+        goto error;
+    }
+    
+    if  ( set_istore_k )
+    {
+        /* set non-default indexed storage B-tree internal 'K' value */
+        if (H5Pset_istore_k(fcpl,ISTORE_IK) < 0) 
+        {
+            goto error;
+        }
+        
+    }
+    /* create a new file */
+    if ((fid = H5Fcreate("set_extent1.h5", H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0) 
+    {
+        goto error;
+    }
+
+    /* close property list */
+    if(H5Pclose(fcpl) < 0) 
+    {
+        goto error;
+    }
     
     /* create the data space with unlimited dimensions. */
     if ((sid = H5Screate_simple(RANK, dims_o, maxdims)) < 0) 
@@ -229,7 +257,6 @@ static int test( hid_t fid, int do_compress, int do_fill_value )
         }
         
     }
-#ifdef H5_HAVE_FILTER_DEFLATE
     if(do_compress)
     {
         if(H5Pset_deflate(dcpl, 9) < 0) 
@@ -237,7 +264,6 @@ static int test( hid_t fid, int do_compress, int do_fill_value )
             goto error;
         }
     }
-#endif /* H5_HAVE_FILTER_DEFLATE */
     
     
     
@@ -615,6 +641,11 @@ static int test( hid_t fid, int do_compress, int do_fill_value )
         goto error;
     }
 
+    if (H5Fclose( fid ) < 0)
+    {
+        goto error;
+    }
+
 
     return 0;
     
@@ -627,6 +658,8 @@ error:
         H5Dclose( did );
         H5Sclose( sid );
         H5Pclose( dcpl  );
+        H5Pclose( fcpl  );
+        H5Fclose( fid );
     } H5E_END_TRY;
     return -1;
     
