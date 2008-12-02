@@ -304,7 +304,7 @@ HDfprintf(stderr, "%s: nelmts = %Zu, hdr->data_blk_min_elmts = %u, idx = %u\n", 
 CATCH
     if(!ret_value)
         if(elmts)
-            (void)H5FL_fac_free(hdr->elmt_fac.fac[idx], elmts);
+            (void)H5FL_FAC_FREE(hdr->elmt_fac.fac[idx], elmts);
 
 END_FUNC(PKG)   /* end H5EA__hdr_alloc_elmts() */
 
