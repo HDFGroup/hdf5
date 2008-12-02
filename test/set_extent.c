@@ -20,10 +20,13 @@
  * Purpose:     Tests the H5Dset_extent call
  */
 
+#if 0
+#define H5_SET_EXTENT_DEBUG
+#endif
+
 
 #include "hdf5.h"
 #include "h5test.h"
-
 
 /*-------------------------------------------------------------------------
  *
@@ -66,10 +69,10 @@ int main( void )
     if (test( do_compress, do_fillvalue, set_istore_k ) < 0)
     {
         goto error;
-    }
-    
+    }    
 
     PASSED();
+
 
     TESTING("no fill value, no compression");
 
@@ -130,9 +133,7 @@ int main( void )
     
 
     PASSED();
-
-
-    
+   
     
     puts("All set_extent tests passed.");
     return 0;
@@ -174,23 +175,17 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
     int     i, j;
     int     fillvalue = 1; 
     int     comp_value; 
-    char    dset_name[255];
-    char    dset_name2[255];
-    
+       
     if ( do_fill_value )
     {
         comp_value = fillvalue;
-        strcpy(dset_name,"dset_fill");
-        strcpy(dset_name2,"dset_fill_noinit");
     }
     else
     {
         comp_value = 0;
-        strcpy(dset_name,"dset_nofill");
-        strcpy(dset_name2,"dset_nofill_noinit");
     }
 
-    
+      
     for( i = 0; i < DIM0; i++ )
     {
         for( j = 0; j < DIM1; j++ )
@@ -269,11 +264,18 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
     
     /*-------------------------------------------------------------------------
     * create and write one dataset
+    * data is
+    *
+    *  2 2 2 2
+    *  2 2 2 2
+    *  2 2 2 2
+    *  2 2 2 2
+    *
     *-------------------------------------------------------------------------
     */
     
     /* create a dataset */
-    if ((did = H5Dcreate2(fid , dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
+    if ((did = H5Dcreate2(fid , "dset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
     {
         goto error;
     }
@@ -296,6 +298,8 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
         printf("\n");
     }
 #endif  
+
+
     
     if (H5Sclose(sid) < 0)
     {
@@ -304,6 +308,16 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
     
     /*-------------------------------------------------------------------------
     * set new dimensions for the array; expand it
+    * data is now, extended space was initialized with fill value or default value
+    *
+    *  2 2 2 2 1 1 1
+    *  2 2 2 2 1 1 1
+    *  2 2 2 2 1 1 1
+    *  2 2 2 2 1 1 1
+    *  1 1 1 1 1 1 1
+    *  1 1 1 1 1 1 1
+    *  1 1 1 1 1 1 1
+    *
     *-------------------------------------------------------------------------
     */
     
@@ -341,6 +355,8 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
     /* read */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_e) < 0) 
         goto error;
+
+   
     
 #if defined (H5_SET_EXTENT_DEBUG)
     printf("\n");
@@ -353,6 +369,7 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
         printf("\n");
     }
 #endif  
+
     
     
     
@@ -381,6 +398,16 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
     
     /*-------------------------------------------------------------------------
     * write to the expanded array. fill the space with fill value with other value
+    * data is now, extended space was written
+    *
+    *  2 2 2 2 2 2 2
+    *  2 2 2 2 2 2 2
+    *  2 2 2 2 2 2 2
+    *  2 2 2 2 2 2 2
+    *  2 2 2 2 2 2 2
+    *  2 2 2 2 2 2 2
+    *  2 2 2 2 2 2 2
+    *
     *-------------------------------------------------------------------------
     */
     
@@ -433,6 +460,11 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
     
     /*-------------------------------------------------------------------------
     * set new dimensions for the array; shrink it
+    * data is now
+    *
+    *  2 2
+    *  2 2
+    *
     *-------------------------------------------------------------------------
     */
     
@@ -489,6 +521,8 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
         printf("\n");
     }
 #endif  
+
+
     
     
     /* compare the read array with the shrinked array */
@@ -508,6 +542,13 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
     
     /*-------------------------------------------------------------------------
     * set new dimensions for the array; expand it back to original size
+    * data is now, extended space was initialized with fill value or default value
+    *
+    *  2 2 1 1
+    *  2 2 1 1
+    *  1 1 1 1
+    *  1 1 1 1
+    *
     *-------------------------------------------------------------------------
     */
     
@@ -557,6 +598,8 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
         printf("\n");
     }
 #endif  
+
+
     
     /* compare the read array with the original array */
     for (i = 0; i < (int)dims_r[0]; i++ )
@@ -607,7 +650,7 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
     {
         goto error;
     }
-    if ((did = H5Dcreate2(fid , dset_name2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
+    if ((did = H5Dcreate2(fid , "dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
     {
         goto error;
     }
@@ -618,6 +661,9 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
     {
         goto error;
     }
+
+
+
     if (H5Dclose(did) < 0) 
     {
         goto error;
@@ -667,3 +713,4 @@ error:
 
 
  
+
