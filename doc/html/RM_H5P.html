@@ -2965,35 +2965,37 @@ END SUBROUTINE h5pget_fapl_family_f
                      <em>MPI_Comm *</em><code>comm</code>,
                      <em>MPI_Info *</em><code>info</code>
     )
+  <p>
   <dt><strong>Purpose:</strong>
     <dd> Returns MPI communicator information.
+  <p>
   <dt><strong>Description:</strong>
     <dd>If the file access property list is set to the <code>H5FD_MPIO</code> 
-        driver, <code>H5Pget_fapl_mpio</code> returns the MPI communicator and 
-        information through the <code>comm</code> and <code>info</code>
+        driver, <code>H5Pget_fapl_mpio</code> returns duplicates of 
+        the stored MPI communicator and information object through the 
+        <code>comm</code> and <code>info</code>
         pointers, if those values are non-null.
-        <p>
-        Neither <code>comm</code> nor <code>info</code> is copied, 
-        so they are valid only until the file access property list 
-        is either modified or closed.
+  <p>
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
-            <td valign="top">IN: File access property list identifier.</td></tr>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier</td></tr>
         <tr>
-		    <td valign="top"><em>MPI_Comm&nbsp;*</em><code>comm&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">OUT: MPI-2 communicator.</td></tr>
+            <td valign="top"><em>MPI_Comm&nbsp;*</em><code>comm&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: MPI-2 communicator</td></tr>
         <tr>
-		    <td valign="top"><em>MPI_Info *</em><code>info</code></td>
-            <td valign="top">OUT: MPI-2 info object.</td></tr>
+            <td valign="top"><em>MPI_Info *</em><code>info</code></td>
+            <td valign="top">OUT: MPI-2 Info object</td></tr>
     </table></ul>
+  <p>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
+  <p>
   <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_mpio_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5pget_fapl_mpio_f(prp_id, comm, info, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
@@ -3003,33 +3005,28 @@ SUBROUTINE h5pget_fapl_mpio_f(prp_id, comm, info, hdferr)
   INTEGER, INTENT(OUT) :: hdferr       ! Error code
                                        ! 0 on success and -1 on failure
 END SUBROUTINE h5pget_fapl_mpio_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
+    </pre>
+
+  <p>
   <dt><strong>History:</strong></dt>
-	<ul><table width="90%">
+    <ul><table width="90%">
         <tr>
-		  <td valign="top" align="left" width="10%">
-		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
           <td valign="top" align="left">
-		    <strong>C</strong></td></tr>
+            <strong>Change</strong></td></tr>
         <tr>
-		  <td valign="top">1.4.5</td>
+          <td valign="top">1.4.5</td>
           <td valign="top">
-		    This function's handling of the MPI Communicator 
-			and Info objects changed at this release. A copy 
-			of each of these objects is now stored in the 
-			property list instead of pointers to each 
-			object.</td></tr>
-	    <tr>
-		  <td valign="top">1.4.0</td>
+            Handling of the MPI Communicator 
+            and Info objects changed at this release. A copy 
+            of each of these objects is now stored in the 
+            property list instead of pointers to each 
+            object.</td></tr>
+        <tr>
+          <td valign="top">1.4.0</td>
           <td valign="top">
-		    Function introduced in this release.</td></tr>
+            C function introduced in this release.</td></tr>
     </table></ul>
 </dl>
 
@@ -7457,51 +7454,55 @@ SUBROUTINE
                      <em>MPI_Comm</em> <code>comm</code>,
                      <em>MPI_Info</em> <code>info</code>
     )
+  <p>
   <dt><strong>Purpose:</strong>
     <dd>Stores MPI IO communicator information to the file access property list.
+  <p>
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_fapl_mpio</code> stores the user-supplied 
         MPI IO parameters <code>comm</code>, for communicator, and 
         <code>info</code>, for information, in
         the file access property list <code>fapl_id</code>. 
-        That property list can then be used to create and/or open the file.  
+        That property list can then be used to create and/or open a file.  
         <p>
         <code>H5Pset_fapl_mpio</code> is available only in the 
         parallel HDF5 library and is not a collective function.
         <p>
         <code>comm</code> is the MPI communicator to be used for 
-        file open as defined in <code>MPI_FILE_OPEN</code> of MPI-2. 
-        This function does not create a duplicated communicator. 
-        Modifications to <code>comm</code> after this function call 
-        returns may have an undetermined effect on the access property list. 
-        Users should not modify the communicator while it is defined 
-        in a property list.
+        file open, as defined in <code>MPI_FILE_OPEN</code> of MPI-2. 
+        This function makes a duplicate of the communicator,  
+        so modifications to <code>comm</code> after this function call 
+        returns have no effect on the file access property list.
         <p>
         <code>info</code> is the MPI info object to be used for 
-        file open as defined in <code>MPI_FILE_OPEN</code> of MPI-2. 
-        This function does not create a duplicated info object. 
-        Any modification to the info object after this function call 
-        returns may have an undetermined effect on the access property list. 
-        Users should not modify the info while it is defined 
-        in a property list.
+        file open, as defined in <code>MPI_FILE_OPEN</code> of MPI-2. 
+        This function makes a duplicate copy of the Info object, 
+        so modifications to the Info object after this function call 
+        returns will have no effect on the file access property list. 
+        <p>
+        If the file access property list already contains previously-set 
+        comm and Info values, those values will be replaced. 
+  <p>
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
-            <td valign="top">IN: File access property list identifier.</td></tr>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier</td></tr>
         <tr>
-		    <td valign="top"><em>MPI_Comm</em>&nbsp;<code>comm&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">IN: MPI-2 communicator.</td></tr>
+            <td valign="top"><em>MPI_Comm</em>&nbsp;<code>comm&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: MPI-2 communicator</td></tr>
         <tr>
-		    <td valign="top"><em>MPI_Info</em> <code>info</code></td>
-            <td valign="top">IN: MPI-2 info object.</td></tr>
+            <td valign="top"><em>MPI_Info</em> <code>info</code></td>
+            <td valign="top">IN: MPI-2 info object</td></tr>
     </table></ul>
+  <p>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
+  <p>
   <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_mpio_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5pset_fapl_mpio_f(prp_id, comm, info, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
@@ -7514,33 +7515,28 @@ SUBROUTINE h5pset_fapl_mpio_f(prp_id, comm, info, hdferr)
   INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                         ! 0 on success and -1 on failure
 END SUBROUTINE h5pset_fapl_mpio_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
+    </pre>
+
+  <p>
   <dt><strong>History:</strong>
-	<ul><table width="90%">
+    <ul><table width="90%">
         <tr>
-		  <td valign="top" align="left" width="10%">
-		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
           <td valign="top" align="left">
-		    <strong>C</strong></td></tr>
+            <strong>Change</strong></td></tr>
         <tr>
-		  <td valign="top">1.4.5</td>
+          <td valign="top">1.4.5</td>
           <td valign="top">
-		    This function's handling of the MPI Communicator 
-			and Info objects changed at this release. A copy 
-			of each of these objects is now stored in the 
-			property list instead of pointers to each 
-			object.</td></tr>
-		<tr>
-		  <td valign="top">1.4.0</td>
+            Handling of the MPI Communicator 
+            and Info objects changed at this release. A copy 
+            of each of these objects is now stored in the 
+            property list instead of pointers to each 
+            object.</td></tr>
+        <tr>
+          <td valign="top">1.4.0</td>
           <td valign="top">
-		    Function introduced in this release.</td></tr>
+    	    C function introduced in this release.</td></tr>
     </table></ul>
 </dl>
 
@@ -7568,10 +7564,11 @@ END SUBROUTINE h5pset_fapl_mpio_f
         parallel HDF5 library and is not a collective function.
         <p>
         <code>comm</code> is the MPI communicator to be used for 
-        file open as defined in <code>MPI_FILE_OPEN</code> of MPI-2. 
+        file open, as defined in <code>MPI_FILE_OPEN</code> of MPI-2. 
         This function does not create a duplicated communicator. 
         Modifications to <code>comm</code> after this function call 
-        returns may have an undetermined effect on the access property list. 
+        returns may have an undetermined effect on the 
+        file access property list. 
         Users should not modify the communicator while it is defined 
         in a property list.
         <p>
@@ -10626,10 +10623,11 @@ Describes HDF5 Release 1.6.8, November 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 16 October 2008");
+document.writeln("Last modified: 2 December 2008");
 -->
 </SCRIPT>
  
+
 </body>
 </html>
 
