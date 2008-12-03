@@ -115,7 +115,7 @@
 #define H5_HAVE_FSEEKO 1
 
 /* Define to 1 if you have the `fstat64' function. */
-#define H5_HAVE_FSTAT64 1
+/* #define H5_HAVE_FSTAT64 1 */
 
 /* Define to 1 if you have the `ftello' function. */
 #define H5_HAVE_FTELLO 1
@@ -260,7 +260,7 @@
 #define H5_HAVE_SRANDOM 1
 
 /* Define to 1 if you have the `stat64' function. */
-#define H5_HAVE_STAT64 1
+/* #define H5_HAVE_STAT64 1 */
 
 /* Define if `struct stat' has the `st_blocks' field */
 /* #define H5_HAVE_STAT_ST_BLOCKS 1 */
