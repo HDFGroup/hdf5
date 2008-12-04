@@ -24,6 +24,10 @@
 #define H5_SET_EXTENT_DEBUG
 #endif
 
+#if 0
+#define H5_SET_EXTENT_DEBUG2
+#endif
+
 
 #include "hdf5.h"
 #include "h5test.h"
@@ -669,7 +673,241 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
     
     
     
+   
+
+     /*-------------------------------------------------------------------------
+    * create and write one dataset
+    * data is
+    *
+    *  2 2 2 2
+    *  2 2 2 2
+    *  2 2 2 2
+    *  2 2 2 2
+    *
+    *-------------------------------------------------------------------------
+    */
+
+    /* create the data space with unlimited dimensions. */
+    if ((sid = H5Screate_simple(RANK, dims_o, maxdims)) < 0) 
+    {
+        goto error;
+    }
+    
+    /* create a dataset */
+    if ((did = H5Dcreate2(fid , "dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
+    {
+        goto error;
+    }
+    
+    /* write */
+    if (H5Dwrite(did , H5T_NATIVE_INT, sid, H5S_ALL, H5P_DEFAULT, buf_o) < 0) 
+    {
+        goto error;
+    }
+    
+    
+#if defined (H5_SET_EXTENT_DEBUG2)
+    printf("\n");
+    for (i = 0; i < (int)dims_o[0]; i++ )
+    {
+        for (j = 0; j < (int)dims_o[1]; j++ )
+        {
+            printf("%d ", buf_o[i][j]);
+        }
+        printf("\n");
+    }
+#endif  
+
+
+    
+    if (H5Sclose(sid) < 0)
+    {
+        goto error;
+    }
+
+
+      /*-------------------------------------------------------------------------
+    * set new dimensions for the array; shrink it
+    * data is now
+    *
+    *  2 2
+    *  2 2
+    *
+    *-------------------------------------------------------------------------
+    */
+    
+    /* set new dimensions for the array. */
+    if (H5Dset_extent(did , dims_s) < 0)
+    {
+        goto error;
+    }
+    
+    /* get the space */
+    if ((sid = H5Dget_space(did)) < 0)
+    {
+        goto error;
+    }
+    
+    /* get dimensions */
+    if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0) 
+    {
+        goto error;
+    }
+    
+    if (H5Sclose(sid) < 0)
+    {
+        goto error;
+    }
+    
+    /* check dimensions */
+    for( i = 0; i < RANK; i++ )
+    {
+        if (dims_r[i] != dims_s[i]) 
+            goto error;
+    }
+    
+    
     /*-------------------------------------------------------------------------
+    * read
+    *-------------------------------------------------------------------------
+    */
+    
+    /* read */
+    if (H5Dread( did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_s ) < 0) 
+    {
+        goto error;
+    }
+    
+#if defined (H5_SET_EXTENT_DEBUG2)
+    printf("\n");
+    for (i = 0; i < (int)dims_r[0]; i++ )
+    {
+        for (j = 0; j < (int)dims_r[1]; j++ )
+        {
+            printf("%d ", buf_s[i][j]);
+        }
+        printf("\n");
+    }
+#endif  
+
+
+    
+    
+    /* compare the read array with the shrinked array */
+    for( i = 0; i < (int)dims_r[0]; i++ )
+    {
+        for( j = 0; j < (int)dims_r[1]; j++ )
+        {
+            if (  buf_s[i][j] != buf_o[i][j] ) 
+            {
+                printf("buf_r[%d][%d] = %d\n", i, j, buf_r[i][j]);
+                printf("buf_o[%d][%d] = %d\n", i, j, buf_o[i][j]);
+                goto error;
+            } 
+        }
+    }
+    
+    
+    /*-------------------------------------------------------------------------
+    * set new dimensions for the array; expand it back to original size
+    * data is now, extended space was initialized with fill value or default value
+    *
+    *  2 2 1 1
+    *  2 2 1 1
+    *  1 1 1 1
+    *  1 1 1 1
+    *
+    *-------------------------------------------------------------------------
+    */
+    
+    /* set new dimensions for the array */
+    if (H5Dset_extent(did, dims_o) < 0)
+    {
+        goto error;
+    }
+    
+    /* get the space */
+    if ((sid = H5Dget_space(did)) < 0) 
+    {
+        goto error;
+    }
+    
+    /* get dimensions. */
+    if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0)
+    {
+        goto error;
+    }
+    
+    /* check dimensions */
+    for( i = 0; i < RANK; i++ )
+    {
+        if (dims_r[i] != dims_o[i]) 
+            goto error;
+    }
+    
+    
+    /*-------------------------------------------------------------------------
+    * read
+    *-------------------------------------------------------------------------
+    */
+    
+    /* read */
+    if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_r) < 0) 
+        goto error;
+    
+#if defined (H5_SET_EXTENT_DEBUG2)
+    printf("\n");
+    for (i = 0; i < (int)dims_r[0]; i++ )
+    {
+        for (j = 0; j < (int)dims_r[1]; j++ )
+        {
+            printf("%d ", buf_r[i][j]);
+        }
+        printf("\n");
+    }
+#endif  
+
+
+    
+    /* compare the read array with the original array */
+    for (i = 0; i < (int)dims_r[0]; i++ )
+    {
+        for (j = 0; j < (int)dims_r[1]; j++ )
+        {
+            if (i >= DIMS0 || j >= DIMS1) 
+            {
+                if(buf_r[i][j] != comp_value) 
+                {
+                    printf("buf_r[%d][%d] = %d\n", i, j, buf_r[i][j]);
+                    printf("value = %d\n", comp_value);
+                    goto error;
+                } 
+            } 
+            else 
+            {
+                if(buf_r[i][j] != buf_o[i][j]) 
+                    goto error;
+            }
+        }
+    }
+    
+    
+    /*-------------------------------------------------------------------------
+    * close dataset and space
+    *-------------------------------------------------------------------------
+    */
+    
+    if (H5Dclose(did) < 0) 
+    {
+        goto error;
+    }
+    if (H5Sclose(sid) < 0)
+    {
+        goto error;
+    }
+    
+    
+     /*-------------------------------------------------------------------------
     * test a dataset with non initialized chunks
     *-------------------------------------------------------------------------
     */
@@ -679,7 +917,7 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
     {
         goto error;
     }
-    if ((did = H5Dcreate2(fid , "dset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
+    if ((did = H5Dcreate2(fid , "dset3", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
     {
         goto error;
     }
@@ -701,7 +939,7 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
     {
         goto error;
     }
-    
+
     
     
     
