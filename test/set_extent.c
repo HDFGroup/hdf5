@@ -497,6 +497,35 @@ static int test( hbool_t do_compress, hbool_t do_fill_value, hbool_t set_istore_
         if (dims_r[i] != dims_s[i]) 
             goto error;
     }
+
+
+
+    /* for this case we close and reopen file */
+    if ( set_istore_k )
+    {
+        
+        if (H5Dclose(did) < 0) 
+        {
+            goto error;
+        }
+        if (H5Fclose(fid) < 0)
+        {
+            goto error;
+        }
+
+        if ((fid = H5Fopen( "set_extent1.h5", H5F_ACC_RDWR, H5P_DEFAULT ))<0) 
+        {
+            goto error;
+        }
+        
+        if ((did = H5Dopen2( fid , "dset1", H5P_DEFAULT ))<0) 
+        {
+            goto error;
+        }
+        
+        
+        
+    }
     
     
     /*-------------------------------------------------------------------------
