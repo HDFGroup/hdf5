@@ -798,6 +798,140 @@ as the corresponding C function.
 </table>
 
 
+<!-- NEW PAGE -->
+<p>
+<a name="Property-FilterBehavior">
+<strong>Filter Behavior in HDF5:</strong></a>
+<br>
+    Filters can be inserted into the HDF5 pipeline to perform functions 
+    such as compression and conversion.  As such, they are a very flexible 
+    aspect of HDF5; for example, a user-defined filter could provide
+    encryption for an HDF5 dataset.
+    <p>
+    A filter can be declared as either <i>required</i> or <i>optional</i>. 
+    Required is the default status; optional status must be explicitly declared.
+    <p>
+    A required filter that fails or is not defined causes an entire 
+    output operation to fail; if it was applied when the data was written, 
+    such a filter will cause an input operation to fail.
+    <p>
+    The following table summarizes required filter behavior.
+    <div align=center>
+    <table border=0 width=80% cellspacing=5>
+      <tr align=left valign=top > 
+        <td width=20%>&nbsp;</td>
+        <td width=25%><b>Required <small>FILTER_X</small><br>not available</b>
+        <td width=25%><b><small>FILTER_X</small> available</b>
+      </tr><tr align=left valign=top>
+        <td><b><code>H5Pset_&lt;<i>FILTER_X</i>&gt;</code>&nbsp;&nbsp;&nbsp;</b></td>
+        <td>Will fail.<font size=1><br>&nbsp;</font></td>
+        <td>Will succeed.</td>
+      </tr><tr align=left valign=top>
+        <td><b><code>H5Dwrite</code><br>with <small>FILTER_X</small> 
+            set</b></td>
+        <td>Will fail.</td>
+        <td>Will succeed; <small>FILTER_X</small> will 
+            be applied to the data.</td>
+      </tr><tr align=left valign=top>
+        <td><b><code>H5Dread</code><br>with <small>FILTER_X</small> set</b></td>
+        <td>Will fail.</td>
+        <td>Will succeed.</td>
+      </tr>
+    </table>
+    </div>
+    <p>
+    An optional filter can be set for an HDF5 dataset 
+    even when the filter is not available.  
+    Such a filter can then be applied to the dataset when it becomes 
+    available on the original system or when the file containing 
+    the dataset is processed on a system on which it is available.
+    <p>
+    A filter can be declared as optional through the use of 
+    the <code>H5Z_FLAG_OPTIONAL</code> flag
+    with <a href="#Property-SetFilter"><code>H5Pset_filter</code></a>.
+    <p>
+    Consider a situation where one is creating files that will normally 
+    be used only on systems where the optional (and fictional) filter 
+    <small>FILTER_Z</small> is routinely available.
+    One can create those files on system A, which lacks 
+    <small>FILTER_Z</small>, create chunked datasets in the files with 
+    <small>FILTER_Z</small> defined in the 
+    dataset creation property list, and even write data to those datasets.
+    The dataset object header will indicate that <small>FILTER_Z</small> has
+    been associated with this dataset.
+    But since system A does not have <small>FILTER_Z</small>, 
+    dataset chunks will be written without it being applied.
+    <p>
+    HDF5 has a mechanism for determining whether chunks are actually 
+    written with the filters specified in the object header, so while the 
+    filter remains unavailable, system A will be able to read the data.
+    Once the file is moved to system B, where <small>FILTER_Z</small> 
+    <i>is</i> available, HDF5 will apply <small>FILTER_Z</small> 
+    to any data rewritten or new data written in these datasets. 
+    Dataset chunks that have been written on system B will then be 
+    unreadable on system A; chunks that have not been re-written since 
+    being written on system A will remain readable on system A.
+    All chunks will be readable on system B.
+    <p>
+    The following table summarizes optional filter behavior.
+    <div align=center>
+    <table border=0 width=80% cellspacing=5>
+      <tr align=left valign=top > 
+        <td width=20%>&nbsp;</td>
+        <td width=25%><b><Optional <small>FILTER_Z</small><br>not available</b>
+        <td width=25%><b><small>FILTER_Z</small> available<br>with 
+            encode and decode</b>
+        <td width=25%><b><small>FILTER_Z</small> available<br>decode only</b>
+      </tr><tr align=left valign=top>
+        <td><b><code>H5Pset_&lt;<i>FILTER_Z</i>&gt;</code>&nbsp;&nbsp;&nbsp;</b></td>
+        <td>Will succeed.<font size=1><br>&nbsp;</font></td>
+        <td>Will succeed.</td>
+        <td>Will succeed.</td>
+      </tr><tr align=left valign=top>
+        <td><b><code>H5Dwrite</code><br>with <small>FILTER_Z</small> 
+            set</b></td>
+        <td>Will succeed;<br><small>FILTER_Z</small> will <i>not</i>
+            be applied to the data.</td>
+        <td>Will succeed;<br><small>FILTER_Z</small> will 
+            be applied to the data.</td>
+        <td>Will succeed;<br><small>FILTER_Z</small> will <i>not</i>
+            be applied to the data.</td>
+      </tr><tr align=left valign=top>
+        <td><b><code>H5Dread</code><br>with <small>FILTER_Z</small> set</b></td>
+        <td>Will succeed if <small>FILTER_Z</small> has not actually been 
+            applied to data.</td>
+        <td>Will succeed.</td>
+        <td>Will succeed.</td>
+<!--
+      </tr><tr align=right valign=top>
+        <td colspan=4><font size=-1>
+            All of the above are <i>expected behaviors</i>;
+            for example, HDF5 does not<br>indicate an error if an application
+            declares SZIP to be an optional filter<br>and calls 
+            <code>H5Pset_szip</code> on a system on which SZIP 
+            is not installed.
+-->
+      </tr>
+    </table>
+    </div>
+    <p>
+    The above principles apply generally in the use of 
+    HDF5 optional filters insofar as HDF5 does as much as possible
+    to complete an operation when an optional filter is unavailable.
+    (The SZIP filter is an exception to this rule; see 
+    <a href="#Property-SetSzip"><code>H5Pset_szip</code></a> for details.)
+    <p>
+    <b>Notes:</b>
+    <br>
+    Filters can be applied only to chunked datasets; 
+    they cannot be used with other dataset storage methods, 
+    such as contiguous, compact, or external datasets. 
+    <p>
+    Dataset elements of variable-length and dataset region reference datatypes
+    are stored in separate structures in the file called heaps.
+    Filters cannot currently be applied to these heaps. 
+    <br>&nbsp;
+
 
 <!-- NEW PAGE -->
 <!-- HEADER RIGHT "H5Pall_filters_avail" -->
@@ -8495,8 +8629,10 @@ END SUBROUTINE h5pset_fill_value_f
         <em>size_t</em> <code>cd_nelmts</code>,
         <em>const unsigned int</em> <code>cd_values[]</code>
     )
+  <p>
   <dt><strong>Purpose:</strong>
     <dd>Adds a filter to the filter pipeline.
+  <p>
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_filter</code> adds the specified 
         <code>filter</code> and corresponding properties to the 
@@ -8570,6 +8706,7 @@ END SUBROUTINE h5pset_fill_value_f
 	<a href="#Property-SetFilterCallback">H5Pset_filter_callback</a>.
 	
 <!-- NEW PAGE -->
+  <p>
   <dt><strong>Notes:</strong>
     <dd>This function currently supports only the permanent filter
         pipeline; <code>plist</code> must be a dataset creation 
@@ -8577,6 +8714,12 @@ END SUBROUTINE h5pset_fill_value_f
 	<p>
 	If multiple filters are set for a property list, they will be 
 	applied to each chunk in the order in which they were set.
+  <p>
+  <dt><strong>See Also:</strong>
+    <dd>For a discussion of optional versus required filter behavior, see 
+        &ldquo;<a href="#Property-FilterBehavior">Filter Behavior in 
+        HDF5</a>.&rdquo;
+  <p>
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
@@ -8597,9 +8740,11 @@ END SUBROUTINE h5pset_fill_value_f
 		    <td valign="top"><em>const&nbsp;unsigned&nbsp;int</em>&nbsp;<code>cd_values[]&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Auxiliary data for the filter.</td></tr>
     </table></ul>
+  <p>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+  <p>
   <dt><strong>Fortran90 Interface:</strong> h5pset_filter_f
     <dd>
 	<pre>
@@ -8618,12 +8763,7 @@ SUBROUTINE h5pset_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
 END SUBROUTINE h5pset_filter_f
 	</pre>		
 		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
+  <p>
   <dt><strong>History:</strong>
     <ul><table width="90%">
         <tr>
@@ -10625,7 +10765,7 @@ Describes HDF5 Release 1.6.8, November 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 2 December 2008");
+document.writeln("Last modified: 4 December 2008");
 -->
 </SCRIPT>
  
