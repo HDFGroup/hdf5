@@ -1792,6 +1792,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5EAdblkpage.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5EAdblock.c"
 				>
 			</File>
