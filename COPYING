@@ -4,7 +4,7 @@ HDF5 (Hierarchical Data Format 5) Software Library and Utilities
 -----------------------------------------------------------------------------
 
 HDF5 (Hierarchical Data Format 5) Software Library and Utilities
-Copyright 2006-2008 by The HDF Group (THG).
+Copyright 2006-2008 by The HDF Group.
 
 NCSA HDF5 (Hierarchical Data Format 5) Software Library and Utilities
 Copyright 1998-2006 by the Board of Trustees of the University of Illinois.
@@ -40,14 +40,14 @@ provided that the following conditions are met:
 5. Neither the name of The HDF Group, the name of the University, nor the 
    name of any Contributor may be used to endorse or promote products derived 
    from this software without specific prior written permission from the 
-   University, THG, or the Contributor, respectively.
+   University, The HDF Group, or the Contributor, respectively.
 
 DISCLAIMER: 
-THIS SOFTWARE IS PROVIDED BY THE HDF GROUP (THG) AND THE CONTRIBUTORS 
+THIS SOFTWARE IS PROVIDED BY THE HDF GROUP AND THE CONTRIBUTORS 
 "AS IS" WITH NO WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED.  In no 
-event shall THG or the Contributors be liable for any damages suffered by 
-the users arising out of the use of this software, even if advised of the 
-possibility of such damage. 
+event shall The HDF Group or the Contributors be liable for any damages 
+suffered by the users arising out of the use of this software, even if 
+advised of the possibility of such damage. 
 
 -----------------------------------------------------------------------------
 Portions of HDF5 were developed with support from the University of 
