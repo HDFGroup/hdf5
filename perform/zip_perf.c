@@ -29,7 +29,6 @@
 #include <fcntl.h>
 #include <math.h>
 #include <sys/time.h>
-#include <sys/uio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -43,13 +42,13 @@
 
 #include <zlib.h>
 
-#if defined(MSDOS) || defined(OS2) || defined(WIN32)
+#if defined(MSDOS) || defined(OS2) || defined(_WIN32)
 #  include <fcntl.h>
 #  include <io.h>
 #  define SET_BINARY_MODE(file)     setmode(fileno(file), O_BINARY)
 #else
 #  define SET_BINARY_MODE(file)     /* nothing */
-#endif  /* MSDOS || OS2 || WIN32 */
+#endif  /* MSDOS || OS2 || _WIN32 */
 
 #ifdef VMS
 #  define unlink        delete
@@ -70,8 +69,6 @@
 #  define GZ_SUFFIX     ".gz"
 #endif  /* GZ_SUFFIX */
 
-#define SUFFIX_LEN          (sizeof(GZ_SUFFIX) - 1)
-
 #define ONE_KB              1024
 #define ONE_MB              (ONE_KB * ONE_KB)
 #define ONE_GB              (ONE_MB * ONE_KB)
@@ -89,8 +86,6 @@
 #define FALSE   (!TRUE)
 #endif  /* FALSE */
 
-#define BUFLEN              (16 * ONE_KB)
-#define MAX_NAME_LEN        ONE_KB
 
 /* internal variables */
 static const char *prog;
@@ -322,7 +317,7 @@ uncompress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
 static void
 get_unique_name(void)
 {
-    const char *prefix = "/tmp", *tmpl = "/zip_perf.data";
+    const char *prefix = NULL, *tmpl = "zip_perf.data";
     const char *env = getenv("HDF5_PREFIX");
 
     if (env)
@@ -331,12 +326,19 @@ get_unique_name(void)
     if (option_prefix)
         prefix = option_prefix;
 
-    filename = calloc(1, strlen(prefix) + strlen(tmpl) + 1);
+    if (prefix)
+	/* 2 = 1 for '/' + 1 for null terminator */
+	filename = (char *) HDmalloc(strlen(prefix) + strlen(tmpl) + 2);
+    else
+	filename = (char *) HDmalloc(strlen(tmpl) + 1);
 
     if (!filename)
         error("out of memory");
 
-    strcpy(filename, prefix);
+    if (prefix){
+	strcpy(filename, prefix);
+	strcat(filename, "/");
+    }
     strcat(filename, tmpl);
 }
 
