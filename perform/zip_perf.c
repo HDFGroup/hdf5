@@ -69,8 +69,6 @@
 #  define GZ_SUFFIX     ".gz"
 #endif  /* GZ_SUFFIX */
 
-#define SUFFIX_LEN          (sizeof(GZ_SUFFIX) - 1)
-
 #define ONE_KB              1024
 #define ONE_MB              (ONE_KB * ONE_KB)
 #define ONE_GB              (ONE_MB * ONE_KB)
@@ -88,8 +86,6 @@
 #define FALSE   (!TRUE)
 #endif  /* FALSE */
 
-#define BUFLEN              (16 * ONE_KB)
-#define MAX_NAME_LEN        ONE_KB
 
 /* internal variables */
 static const char *prog;
@@ -321,25 +317,28 @@ uncompress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source,
 static void
 get_unique_name(void)
 {
-    const char *prefix = "", *tmpl = "zip_perf.data";
+    const char *prefix = NULL, *tmpl = "zip_perf.data";
     const char *env = getenv("HDF5_PREFIX");
 
-    if (env) {
+    if (env)
         prefix = env;
-        strcat(prefix, "/");
-    }
 
-    if (option_prefix) {
+    if (option_prefix)
         prefix = option_prefix;
-        strcat(prefix, "/");
-    }
 
-    filename = calloc(1, strlen(prefix) + strlen(tmpl) + 1);
+    if (prefix)
+	/* 2 = 1 for '/' + 1 for null terminator */
+	filename = (char *) HDmalloc(strlen(prefix) + strlen(tmpl) + 2);
+    else
+	filename = (char *) HDmalloc(strlen(tmpl) + 1);
 
     if (!filename)
         error("out of memory");
 
-    strcpy(filename, prefix);
+    if (prefix){
+	strcpy(filename, prefix);
+	strcat(filename, "/");
+    }
     strcat(filename, tmpl);
 }
 
