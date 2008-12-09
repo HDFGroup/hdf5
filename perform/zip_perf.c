@@ -433,7 +433,7 @@ fill_with_random_data(Bytef *src, uLongf src_len)
     if (stat("/dev/urandom", &stat_buf) == 0) {
         uLongf len = src_len;
         Bytef *buf = src;
-        int fd = open("/dev/urandom", O_RDONLY);
+        int fd = HDopen("/dev/urandom", O_RDONLY, 0);
 
         printf("Using /dev/urandom for random data\n");
 
@@ -507,7 +507,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
 
         /* do uncompressed data write */
         gettimeofday(&timer_start, NULL);
-        output = open(filename, O_RDWR | O_CREAT, S_IRWXU);
+        output = HDopen(filename, O_RDWR | O_CREAT, S_IRWXU);
 
         if (output == -1)
             error(strerror(errno));
@@ -546,7 +546,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size,
         unlink(filename);
 
         /* do compressed data write */
-        output = open(filename, O_RDWR | O_CREAT);
+        output = HDopen(filename, O_RDWR | O_CREAT, S_IRWXU);
 
         if (output == -1)
             error(strerror(errno));
