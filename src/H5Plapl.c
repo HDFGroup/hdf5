@@ -226,7 +226,7 @@ H5P_lacc_elink_fapl_copy(const char UNUSED *name, size_t UNUSED size, void *valu
     l_fapl_id = (*(const hid_t *)value);
 
     if(l_fapl_id > H5P_DEFAULT) {
-        H5P_genplist_t *l_fapl_plist;        
+        H5P_genplist_t *l_fapl_plist;
 
         if(NULL == (l_fapl_plist = (H5P_genplist_t *)H5P_object_verify(l_fapl_id, H5P_FILE_ACCESS)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
@@ -547,10 +547,10 @@ done:
  * Function:    H5Pset_elink_fapl
  *
  * Purpose:     Sets the file access property list for link access
- * 
+ *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	
+ * Programmer:
  *              Vailin Choi; Tuesday, September 12th, 2008
  *
  *-------------------------------------------------------------------------
@@ -559,7 +559,7 @@ herr_t
 H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id)
 {
     H5P_genplist_t 	*plist, *l_fapl_plist, *fapl_plist;	/* Property list pointer */
-    hid_t		l_fapl_id, new_fapl_id;	
+    hid_t		l_fapl_id, new_fapl_id;
     herr_t 		ret_value = SUCCEED;         		/* Return value */
 
     FUNC_ENTER_API(H5Pset_elink_fapl, FAIL)
@@ -601,7 +601,7 @@ done:
  *
  * Return:	Non-negative on success/Negative on failure
  *
- * Programmer:	
+ * Programmer:
  *              Vailin Choi; Tuesday, September 12th, 2008
  *
  *-------------------------------------------------------------------------
