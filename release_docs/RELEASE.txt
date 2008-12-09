@@ -54,39 +54,40 @@ CONTENTS
 New Features
 ============
 
-        Configuration
-        -------------
-        - Add description here. Do not exceed 80 characters per line.
-          EIP - 2008/11/12
+    Configuration
+    -------------
+    - Add description here. Do not exceed 80 characters per line.
+      EIP - 2008/11/12
 
-        Library
-        -------
-        - Added H5Pset_chunk_cache() and H5Pget_chunk_cache() functions to allow
-          individual rdcc configuration for each dataset.  Added
-          H5Dget_access_plist() function to retrieve a dataset access property
-          list form a dataset.  NAF - 2008/11/12
-        - Added H5Iis_valid() function to check if an id is valid without
-          producing an error message.  NAF - 2008/11/5
+    Library
+    -------
+    - Added H5Pset_chunk_cache() and H5Pget_chunk_cache() functions to allow
+      individual rdcc configuration for each dataset.  Added
+      H5Dget_access_plist() function to retrieve a dataset access property
+      list form a dataset.  NAF - 2008/11/12
+    - Added H5Iis_valid() function to check if an id is valid without
+      producing an error message.  NAF - 2008/11/5
 
-        Parallel Library
-        ----------------
+    Parallel Library
+    ----------------
 
-        Tools
-        -----
-        - h5repack: Define a default chunk whose size is manageable. (PVN - 2008/11/21)
+    Tools
+    -----
+    - h5repack: Define a default chunk whose size is manageable. 
+      PVN - 2008/11/21
 
-        High-Level APIs:
-        ------
-        - Table: In version 3.0 of Table, "NROWS" (used to store number of records) was 
-           deprecated (PVN - 2008/11/24)
+    High-Level APIs:
+    ------
+    - Table: In version 3.0 of Table, "NROWS" (used to store number of records)
+      was deprecated. PVN - 2008/11/24
 
 
-        F90 API
-        ------
-	 
-	 
-        C++ API
-        ------
+    F90 API
+    ------
+     
+     
+    C++ API
+    ------
 
 
 Support for New Platforms, Languages, and Compilers
@@ -96,25 +97,27 @@ Support for New Platforms, Languages, and Compilers
 Bug Fixes since HDF5-1.8.2
 ==========================
 
-        Configuration
-        -------------
+    Configuration
+    -------------
 
-        Library
-        -------
-        - Fixed a bug that could cause problems when "automatically" unmounting
-          multiple files.  NAF - 2008/11/17
+    Library
+    -------
+    - Fixed a bug that could cause problems when "automatically" unmounting
+      multiple files.  NAF - 2008/11/17
 
-        Parallel Library
-        ----------------
+    Parallel Library
+    ----------------
 
-        Tools
-        -----
+    Tools
+    -----
+    - zip_perf.c had missing argument on one of the open() calls. Fixed.
+      AKC - 2008/12/9
 
-        F90 API
-        ------
+    F90 API
+    ------
 
-        C++ API
-        ------
+    C++ API
+    ------
 
 
 Platforms Tested
