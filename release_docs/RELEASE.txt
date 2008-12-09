@@ -206,6 +206,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - zip_perf.c had missing argument on one of the open() calls. Fixed.
+            (AKC - 2008/12/9)
         - h5dump now checks for uniqueness of committed datatypes.
             (NAF - 2008/10/15)
         - Fixed unnecessary indentation of committed datatypes in h5dump.
