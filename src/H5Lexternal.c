@@ -171,11 +171,11 @@ done:
  *		Vailin Choi, April 2, 2008
  *		Add handling to search for the target file
  *		See description in RM: H5Lcreate_external
- *		
+ *
  *		Vailin Choi; Sept. 12th, 2008; bug #1247
  *		Retrieve the file access property list identifer that is set
  *		for link access property via H5Pget_elink_fapl().
- *		If the return value is H5P_DEFAULT, the parent's file access 
+ *		If the return value is H5P_DEFAULT, the parent's file access
  *		property is used to H5F_open() the target file;
  *		Otherwise, the file access property retrieved from H5Pget_elink_fapl()
  *		is used to H5F_open() the target file.
