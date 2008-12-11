@@ -19,7 +19,7 @@
  *
  * Purpose:
  *      Contiguous dataset I/O functions. These routines are similar to
- *      the H5D_istore_* routines and really only an abstract way of dealing
+ *      the H5D_chunk_* routines and really only an abstract way of dealing
  *      with the data sieve buffer from H5F_seq_read/write.
  */
 
