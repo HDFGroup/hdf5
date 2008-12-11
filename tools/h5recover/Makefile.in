@@ -77,7 +77,8 @@ h5recover_OBJECTS = h5recover.$(OBJEXT)
 h5recover_LDADD = $(LDADD)
 h5recover_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
 am_trecover_OBJECTS = trecover_main.$(OBJEXT) \
-	trecover_writer.$(OBJEXT) trecover_crasher.$(OBJEXT)
+	trecover_writer.$(OBJEXT) trecover_crasher.$(OBJEXT) \
+	trecover_verifier.$(OBJEXT)
 trecover_OBJECTS = $(am_trecover_OBJECTS)
 trecover_LDADD = $(LDADD)
 trecover_DEPENDENCIES = $(LIBH5TOOLS) $(LIBHDF5)
@@ -361,7 +362,9 @@ check_SCRIPTS = $(TEST_SCRIPT)
 SCRIPT_DEPEND = trecover$(EXEEXT)
 
 # Source files for the program
-trecover_SOURCES = trecover_main.c trecover_writer.c trecover_crasher.c
+trecover_SOURCES = trecover_main.c trecover_writer.c trecover_crasher.c \
+                 trecover_verifier.c
+
 
 # All the programs depend on the hdf5 and h5tools libraries
 LDADD = $(LIBH5TOOLS) $(LIBHDF5)
@@ -472,6 +475,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/h5recover.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trecover_crasher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trecover_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trecover_verifier.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trecover_writer.Po@am__quote@
 
 .c.o:

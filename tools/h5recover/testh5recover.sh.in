@@ -84,40 +84,62 @@ TOOLTEST() {
     trap true 15
     $RUNSERIAL $TOOL_BIN $@
     # expect first diff to fail
-    $RUNSERIAL $H5DIFF $TOOLDataFile $TOOLCTLDataFile > /dev/null 2>&1
+    # $RUNSERIAL $H5DIFF $TOOLDataFile $TOOLCTLDataFile > /dev/null 2>&1
+    try_diff $TOOLDataFile $TOOLCTLDataFile try_diff.stdout try_diff.stderr
     if [ $? = 0 ]; then
 	echo first diff did not fail as expected
     fi
     # Recover the file.
-    $RUNSERIAL $RECOVERTOOL_BIN -j $TOOLJournalFile $TOOLDataFile > /dev/null
+    # $RUNSERIAL $RECOVERTOOL_BIN -j $TOOLJournalFile $TOOLDataFile > /dev/null
+    try_h5recover $TOOLJournalFile $TOOLDataFile
     if [ $? != 0 ]; then
 	echo $RECOVERTOOL failed
 	nerrors="`expr $nerrors + 1`"
     fi
-    # second diff should produce expected output
-    (
-	echo "#############################"
-	echo "Expected output for '$TOOL $@'" 
-	echo "#############################"
-	$RUNSERIAL $H5DIFF $TOOLDataFile $TOOLCTLDataFile
-    ) >$actual 2>$actual_err
-    cat $actual_err >> $actual
+    # JRM -- 12/10/08
+    # Replaced the second diff with a call to try_verify.  While you
+    # should see the source code in trecover_verifier.c for details,
+    # in essence this test checks to see that the metadata is as it
+    # should be, and that the raw data is "reasonable".
 
-    if [ ! -f $expect ]; then
-	echo "missing expected output file($expect)"
-	nerrors="`expr $nerrors + 1`"
-    elif $CMP $expect $actual; then
-	echo " PASSED"
+    try_verify
+
+    if [ $? = 0 ]; then
+        echo " PASSED"
     else
-	echo "*FAILED*"
-	echo "    Expected result (*.ddl) differs from actual result (*.out)"
-	nerrors="`expr $nerrors + 1`"
-	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+        echo "*FAILED*"
+        nerrors="`expr $nerrors + 1`"
     fi
+
+#    # second diff should produce expected output
+#    (
+#	echo "#############################"
+#	echo "Expected output for '$TOOL $@'" 
+#	echo "#############################"
+#	$RUNSERIAL $H5DIFF $TOOLDataFile $TOOLCTLDataFile
+#    ) >$actual 2>$actual_err
+#    cat try_diff.stdout >> $actual
+#    cat try_diff.stderr >> $actual_err
+#    cat $actual_err >> $actual
+#
+#    if [ ! -f $expect ]; then
+#	echo "missing expected output file($expect)"
+#	nerrors="`expr $nerrors + 1`"
+#    elif $CMP $expect $actual; then
+#	echo " PASSED"
+#    else
+#	echo "*FAILED*"
+#	echo "    Expected result (*.ddl) differs from actual result (*.out)"
+#	nerrors="`expr $nerrors + 1`"
+#	test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+#    fi
 
     # Clean up output file
     if test -z "$HDF5_NOCLEANUP"; then
 	 rm -f $actual $actual_err
+	 rm -f try_diff.stderr try_diff.stdout
+	 rm -f try_h5recover.stderr try_h5recover.stdout
+         rm -f try_verify.stdout try_verify.stderr
     fi
 }
 
@@ -145,7 +167,8 @@ MYH5DIFF(){
     cp $2 $xdata
     $RUNSERIAL $H5DUMP $xdata > $xout2 2> $xerr2
     cat $xerr2 >> $xout2
-    $DIFF $xout1 $xout2
+#    $DIFF $xout1 $xout2
+    try_diff $xout1 $xout2 try_diff.stdout try_diff.stderr
     if [ $? = 0 ]; then
 	return 0
     else
@@ -199,41 +222,225 @@ MYH5DIFF(){
 ##                                                                          ##
 ##############################################################################
 
+# On some target systems, the return code of a program is inaccessible.
+# Get around this by storing stdout and stderr to separate files, and 
+# inferring that the files are different if either file is non-empty
+try_diff() {
+
+    return_code=0
+
+    TRY_DIFF_INPUT1=$1
+    TRY_DIFF_INPUT2=$2
+    TRY_DIFF_STDOUT=$3
+    TRY_DIFF_STDERR=$4
+    
+    rm -f $TRY_DIFF_STDOUT $TRY_DIFF_STDERR
+
+    ($DIFF $TRY_DIFF_INPUT1 $TRY_DIFF_INPUT2 > $TRY_DIFF_STDOUT) \
+    			2> $TRY_DIFF_STDERR
+    # check both return code and contents of stdout and stderr files -- 
+    # report files different if either the return code isn't 0, or 
+    # either of the output files is non-empty.
+    if [ $? != 0 ]
+    then
+
+	# echo "$DIFF returned non-zero return code."
+    	return_code=1
+
+    else 
+    
+    	if [ `wc -c < ${TRY_DIFF_STDOUT}` != '0' ]
+        then
+
+	    # echo "#DIFF returned non-empty stdout file."
+            return_code=1
+
+	else
+
+	    if [ `wc -c < ${TRY_DIFF_STDERR}` != '0' ]
+	    then
+
+	        # echo "$DIFF returned non-empty stderr file."
+                return_code=1
+
+	    fi
+        fi
+    fi
+
+    return $return_code
+}
+
+
+# On some target systems, the return code of a program is inaccessible.
+# Get around this by storing stdout and stderr to separate files, and 
+# inferring that the return code is 0 if the stderr file is empty.
+
+try_h5dump() {
+
+    return_code=0
+
+    TRY_H5DUMP_INPUT=$1
+    TRY_H5DUMP_STDOUT=$2
+    TRY_H5DUMP_STDERR=$3
+    
+    rm -f $TRY_H5DUMP_STDOUT $TRY_H5DUMP_STDERR
+
+    # echo "(h5dump $TRY_H5DUMP_INPUT > $TRY_H5DUMP_STDOUT) \
+    #			2> $TRY_H5DUMP_STDERR"
+
+    ( $RUNSERIAL ../h5dump/h5dump $TRY_H5DUMP_INPUT > $TRY_H5DUMP_STDOUT ) \
+			2> $TRY_H5DUMP_STDERR
+
+    # check both return code and contents of stderr file -- report 
+    # failure if either the return code is non-zero or the stderr
+    # file is non-empty.
+    if [ $? != 0 ]
+    then
+
+	# echo "try_h5dump failed by return code."
+    	return_code=1
+
+    else 
+    
+    	if [ `wc -c < $TRY_H5DUMP_STDERR` != '0' ]
+        then
+
+	    # echo "try_h5dump failed by stderr file."
+            return_code=1
+
+        fi
+    fi
+
+    return $return_code
+}
+
+try_h5recover() {
+
+    return_code=0
+    TRY_RECOVER_JNL_FILE=$1
+    TRY_RECOVER_H5_FILE=$2
+
+    rm -f try_h5recover.stdout try_h5recover.stderr
+
+    ( $RUNSERIAL ./h5recover -j $TRY_RECOVER_JNL_FILE $TRY_RECOVER_H5_FILE > \
+		try_h5recover.stdout ) 2> try_h5recover.stderr
+
+    if [ `wc -c < try_h5recover.stderr` != '0' ]
+    then
+
+        return_code=1
+
+    fi
+
+    return $return_code
+}
+
+try_verify() {
+
+    return_code=0
+
+    rm -f try_verify.stdout try_verify.stderr
+
+    ( $RUNSERIAL ./trecover -v > try_verify.stdout) 2> try_verify.stderr
+
+
+    # check both return code and contents of stderr file -- report 
+    # failure and cat the stderr file if either the return code is 
+    # non-zero or the stderr file is non-empty.
+    if [ $? != 0 ]
+    then
+
+	# echo "try_verify reports failure by return code."
+    	return_code=1
+        cat try_verify.stderr
+
+    else
+
+        if [ `wc -c < try_verify.stderr` != '0' ]
+        then
+
+	    # echo "try_verify reports failure by stderr file."
+            return_code=1
+            cat try_verify.stderr
+
+        fi
+    fi
+
+    # cat the stdout file if it is non empty
+    if [ `wc -c < try_h5recover.stdout` != '0' ]
+    then
+
+        cat try_verify.stdout
+
+    fi
+
+    return $return_code
+}
+
+
 test_point() {
 
     pass=1
     seconds=$1
-    msecs=$2
+    usecs=$2
 
-    if [ $msecs -lt 10 ] 
+    if [ $usecs -lt 10 ] 
     then
 
-    	delay=${seconds}.00${msecs}
+    	delay=${seconds}.00000${usecs}
 
     else
     
-    	if [ $msecs -lt 100 ] 
+    	if [ $usecs -lt 100 ] 
 	then
 
-            delay=${seconds}.0${msecs}
+            delay=${seconds}.0000${usecs}
 
         else
 
-            delay=${seconds}.${msecs}
+            if [ $usecs -lt 1000 ]
+            then
 
+                delay=${seconds}.000${usecs}
+
+            else
+
+                if [ $usecs -lt 10000 ]
+                then
+
+                    delay=${seconds}.00${usecs}
+
+                else
+
+                    if [ $usecs -lt 100000 ]
+                    then
+
+                        delay=${seconds}.0${usecs}
+
+                    else
+
+                        delay=${seconds}.${usecs}
+
+                    fi
+                fi
+            fi
         fi
     fi
 
     echo "trecover -a $delay"
 
-    ./trecover -a $delay > /dev/null 2>&1
+    # Generate the data, journal and the control files.
+    # The testing shell will still print "Terminated" though the signal is
+    # trapped. Need to find a way to block or filter it out.
+    trap true 15
+    $RUNSERIAL ./trecover -a $delay > /dev/null 2>&1
 
     if [ -f trecover.h5 ]
     then
 
     	# echo "trecover.h5 exists"
 
-	../h5dump/h5dump trecover.h5 > /dev/null 2>&1
+        try_h5dump trecover.h5 try_h5dump.stdout try_h5dump.stderr
 
 	if [ $? -ne 0 ]
 	then
@@ -247,7 +454,7 @@ test_point() {
 
 		# echo "./h5recover -j trecover.h5.jnl trecover.h5"
 
-		./h5recover -j trecover.h5.jnl trecover.h5 > /dev/null 2>&1
+		try_h5recover trecover.h5.jnl trecover.h5
 
 		if [ $? -ne 0 ]
 		then
@@ -259,7 +466,7 @@ test_point() {
 
 		    # echo "h5recover succeeded -- try h5dump again"
 
-	            ../h5dump/h5dump trecover.h5 > /dev/null 2>&1
+                    try_h5dump trecover.h5 try_h5dump.stdout try_h5dump.stderr
 
 	            if [ $? -ne 0 ]
 	            then
@@ -269,9 +476,23 @@ test_point() {
 
                     else
 
-		        # echo "h5dump trecover.h5 succeeded (2) -- PASS"
-			pass=1
+		        # echo "h5dump trecover.h5 succeeded (2)"
 
+                        # since h5dump works, try to verify the recovery
+                        try_verify
+
+                        if [ $? -ne 0 ]
+                        then
+
+                            # echo "try_verify failed!!! FAILED"
+                            pass=0
+
+                        else
+
+                            # echo "try_verify succeeded -- PASS"
+			    pass=1
+
+                        fi
 		    fi
 
 		fi
@@ -285,7 +506,22 @@ test_point() {
 
 	else
 
-	    # echo "h5dump trecover.h5 succeeded (1) -- PASS"
+	    # echo "h5dump trecover.h5 succeeded on first attempt"
+
+	    if [ -f trecover.h5.jnl ]
+            then
+
+	        # echo "h5dump trecover.h5 succeeded on first attempt"
+                # echo "journal file exists."
+                ls -l trecover.h5.jnl
+
+            # else
+
+	        # echo "h5dump trecover.h5 succeeded on first attempt"
+                # echo "no journal file exists."
+
+            fi
+
 	    pass=1
 
         fi
@@ -316,21 +552,21 @@ run_jnl_invarient_test() {
 
     finished=0;
     sec=0;
-    msec=0;
+    usec=0;
 
     while [ $finished -eq 0 ] 
     do
-	msec="`expr $msec + 1`"
+	usec="`expr $usec + 50`"
 
-	if [ $msec -ge 1000 ]
+	if [ $usec -ge 1000000 ]
 	then
 
-	    msec=0;
+	    usec=0;
 	    sec="`expr $sec + 1`"
 
 	fi
 
-	test_point $sec $msec
+	test_point $sec $usec
 
 	pass=$?
 
@@ -367,6 +603,13 @@ run_jnl_invarient_test() {
 
     fi
 
+    # Clean up output files
+    if test -z "$HDF5_NOCLEANUP"; then
+	 rm -f try_h5dump.stderr try_h5dump.stdout
+	 rm -f try_h5recover.stderr try_h5recover.stdout
+         rm -f try_verify.stderr try_verify.stdout
+    fi
+
     return
 
 }
@@ -383,7 +626,11 @@ TOOLTEST default.txt
 # Since the async crash is highly dependent on machine speeds, system load,
 # the results may not always match.  One would need to compare the results
 # against the expected results by hand.
-TOOLTEST async_crash.txt -a 0.05
+#
+# JRM -- 12/10/08
+# this test is now subsumed in the invarient test.  Delete code for 
+# this test eventually.
+# TOOLTEST async_crash.txt -a 0.05
 
 # Invarient test
 # This is a very different test from the previous TOOLTEST calls -- 

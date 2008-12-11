@@ -43,16 +43,34 @@ TEST() {
    TEST_ERR=$1                  # The test name
    TEST_ERR_BIN=`pwd`/$TEST_ERR # The path of the test binary
    TEST_DESC=$2
+   TEST_STDERR=cache2_jnl_file_marking.stderr
 
    #Run the test:
    trap "" 6
    $RUNSERIAL $TEST_ERR_BIN $TEST_DESC setup
    trap 6
    TESTING $TEST_DESC
-   $RUNSERIAL $TEST_ERR_BIN $TEST_DESC check
+   $RUNSERIAL $TEST_ERR_BIN $TEST_DESC check > $TEST_STDERR
    if [ $? -eq 0 ] 
    then
-      echo " PASSED"
+      
+      # it is possible that we are running on a machine that discards
+      # our return code -- such as red storm.
+      #
+      # Thus check the contents of the stderr file before declaring a
+      # pass.
+
+      if [ `wc -c < $TEST_STDERR` = '0' ]
+      then
+
+         echo " PASSED"
+    
+      else
+
+         echo "*FAILED*"
+         nerrors="`expr $nerrors + 1`"
+
+      fi
    else
       echo "*FAILED*"
       nerrors="`expr $nerrors + 1`"

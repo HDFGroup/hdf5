@@ -218,6 +218,8 @@ static void check_legal_calls(void);
 
 static void check_transaction_tracking(void);
 
+static void mdj_api_example_test(void);
+
 static void mdj_smoke_check_00(void);
 
 static void mdj_smoke_check_01(void);
@@ -5218,7 +5220,873 @@ mdj_smoke_check_02(void)
 
 } /* mdj_smoke_check_02() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	mdj_api_example_test
+ *
+ * Purpose:	Verify that the example code for using the metadata 
+ * 		journaling works as expected
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              4/14/04
+ *
+ * Modifications:
+ *
+ * 		JRM -- 7/12/06
+ * 		Added progress reporting code.
+ *
+ *-------------------------------------------------------------------------
+ */
 
+#define CHUNK_SIZE              10
+#define DSET_SIZE               (40 * CHUNK_SIZE)
+#define NUM_DSETS               6
+#define NUM_RANDOM_ACCESSES     200000
+
+static void
+mdj_api_example_test(void)
+{
+    const char * fcn_name = "mdj_api_example_test()";
+    char filename[512];
+    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    hbool_t valid_chunk;
+    hbool_t report_progress = FALSE;
+    hid_t fapl_id = -1;
+    hid_t file_id = -1;
+    hid_t dataspace_id = -1;
+    hid_t filespace_ids[NUM_DSETS];
+    hid_t memspace_id = -1;
+    hid_t dataset_ids[NUM_DSETS];
+    hid_t properties;
+    char dset_name[64];
+    int i, j, k, l, m, n;
+    int progress_counter;
+    herr_t status;
+    hsize_t dims[2];
+    hsize_t a_size[2];
+    hsize_t offset[2];
+    hsize_t chunk_size[2];
+    int data_chunk[CHUNK_SIZE][CHUNK_SIZE];
+    H5AC2_jnl_config_t jnl_config_0;
+    H5AC2_jnl_config_t jnl_config_1;
+
+
+    TESTING("mdj example code");
+
+    if ( skip_long_tests2 > 0 ) {
+
+        SKIPPED();
+
+        HDfprintf(stdout, "     Long tests disabled.\n");
+
+        return;
+    }
+
+    pass2 = TRUE;
+
+    /* Open a file with journaling enabled. */
+
+
+    /* setup the hdf5 file name */
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout,"\nSetting up file name ... ");
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
+            == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed.\n";
+        }
+    }
+
+
+    /* setup the journal file name */
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout,"\nSetting up journal file name ... ");
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename,
+                        sizeof(journal_filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (2).\n";
+        }
+        else if ( strlen(journal_filename) >=
+                  H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "journal file name too long.\n";
+        }
+    }
+
+
+    /* clean out any existing journal file -- must do this as 
+     * HDF5 will refuse to overwrite an existing journal file.
+     */
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout,"\nRemoving any existing journal file ... ");
+        HDfflush(stdout);
+    }
+
+    HDremove(journal_filename);
+
+
+    /* create a file access propertly list. */
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout,"\nCreating a FAPL ... ");
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
+
+        if ( fapl_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pcreate() failed.\n";
+        }
+    }
+
+
+    /* need latest version of file format to use journaling */
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout,"\nCalling H5Pset_libver_bounds() on FAPL ... ");
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST,
+                                  H5F_LIBVER_LATEST) < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
+        }
+    }
+
+
+    /* Get the current FAPL journaling configuration.  This should be 
+     * the default, and we could just write a predifined journal configuration
+     * structure to the FAPL directly, but doing it this way shows off the
+     * H5Pget_jnl_config() call, and is less suceptible to API definition
+     * changes.
+     */
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout, "\nCalling H5Pget_jnl_config() on FAPL ... ");
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+	jnl_config_0.version = H5AC2__CURR_JNL_CONFIG_VER;
+
+	status = H5Pget_jnl_config(fapl_id, &jnl_config_0);
+
+	if ( status < 0 ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+	}
+    }
+
+
+    /* Modify the current FAPL journaling configuration to enable 
+     * journaling as desired, and then write the revised configuration
+     * back to the FAPL.
+     */
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout,
+	         "\nRevising config & calling H5Pset_jnl_config() on FAPL ... ");
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        jnl_config_0.enable_journaling = TRUE;
+
+        strcpy(jnl_config_0.journal_file_path, journal_filename);
+
+        /* jnl_config_0.journal_recovered should always be FALSE unless
+         * you are writing a new journal recovery tool, and need to 
+         * tell the library that you have recovered the journal and 
+         * that the file is now readable.  As this field is set to 
+         * FALSE by default, we don't touch it here.
+         */
+
+        /* the journal buffer size should  be some multiple of the block 
+         * size of the underlying file system.  
+         */
+        jnl_config_0.jbrb_buf_size = (8 * 1024);
+
+        /* the number of journal buffers should be either 1 or 2 when 
+         * synchronous I/O is used for journal writes.  If AIO is used,
+         * the number should be large enough that the write of a buffer 
+         * will usually be complete by the time that buffer is needed
+         * again.
+         */
+        jnl_config_0.jbrb_num_bufs = 2;
+
+        /* At present we don't support AIO for journal writes, so this 
+         * field will be FALSE.
+         */
+        jnl_config_0.jbrb_use_aio = FALSE;
+
+	/* At present only human readable journal file are supported
+	 * so this field will be TRUE for now.  Once it becomes available,
+	 * machine readable journal files should be smaller and faster.
+	 */
+	jnl_config_0.jbrb_human_readable = TRUE;
+        
+        status = H5Pset_jnl_config(fapl_id, &jnl_config_0);
+
+        if ( status < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Pset_mdc_config() failed.\n";
+        }
+    }
+
+
+    /* Now open the file using the FAPL we have created. */
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout,
+	         "\nCreating the HDF5 file using the new FAPL ... ");
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+
+        if ( file_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fcreate() failed.\n";
+
+        }
+    }
+
+
+    /* create the datasets */
+
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout,"\nCreating datasets ... ");
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+        i = 0;
+
+        while ( ( pass2 ) && ( i < NUM_DSETS ) )
+        {
+            /* create a dataspace for the chunked dataset */
+            dims[0] = DSET_SIZE;
+            dims[1] = DSET_SIZE;
+            dataspace_id = H5Screate_simple(2, dims, NULL);
+
+            if ( dataspace_id < 0 ) {
+
+                pass2 = FALSE;
+                failure_mssg2 = "H5Screate_simple() failed.";
+            }
+
+            /* set the dataset creation plist to specify that the raw data is
+             * to be partioned into 10X10 element chunks.
+             */
+
+            if ( pass2 ) {
+
+                chunk_size[0] = CHUNK_SIZE;
+                chunk_size[1] = CHUNK_SIZE;
+                properties = H5Pcreate(H5P_DATASET_CREATE);
+
+                if ( properties < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Pcreate() failed.";
+                }
+            }
+
+            if ( pass2 ) {
+
+                if ( H5Pset_chunk(properties, 2, chunk_size) < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Pset_chunk() failed.";
+                }
+            }
+
+            /* create the dataset */
+            if ( pass2 ) {
+
+                sprintf(dset_name, "/dset%03d", i);
+                dataset_ids[i] = H5Dcreate2(file_id, dset_name, H5T_STD_I32BE,
+				            dataspace_id, H5P_DEFAULT, 
+					    properties, H5P_DEFAULT);
+
+                if ( dataset_ids[i] < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Dcreate() failed.";
+                }
+            }
+
+            /* get the file space ID */
+            if ( pass2 ) {
+
+                filespace_ids[i] = H5Dget_space(dataset_ids[i]);
+
+                if ( filespace_ids[i] < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Dget_space() failed.";
+                }
+            }
+
+            i++;
+        }
+    }
+
+
+    /* just for purposes of demonstration, turn off journaling, and 
+     * then turn it back on again.  Note that this will force a 
+     * flush of the file, and all metadata with it.  Turning off 
+     * journaling will also cause us to close and discard the 
+     * journal file after all metadata is on disk.
+     */
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout,
+	         "\nTurning off journaling ... ");
+        HDfflush(stdout);
+    }
+
+    if ( pass2 ) {
+
+	jnl_config_1.version = H5AC2__CURR_JNL_CONFIG_VER;
+
+	status = H5Fget_jnl_config(file_id, &jnl_config_1);
+
+	if ( status < 0 ) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5Fget_mdc_config() failed.\n";
+	}
+    }
+
+    if ( pass2 ) {
+
+        jnl_config_1.enable_journaling = FALSE;
+
+        status = H5Fset_jnl_config(file_id, &jnl_config_1);
+
+        if ( status < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fset_mdc_config() failed.\n";
+        }
+    }
+
+
+    /* Note that here we simply set jnl_config_1.enable_journaling to
+     * TRUE, and pass it back to the HDF5 library via the 
+     * H5Fset_jnl_config() call.  
+     *
+     * We can do this because jnl_config_1 reflected the current 
+     * journaling configuration when we got it from the library
+     * via the H5Fget_jnl_config() call, and H5Fset_mdc_config()
+     * doesn't change the values of any fields.
+     */
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout,
+	         "\nTurning journaling back on ... ");
+        HDfflush(stdout);
+    }
+    if ( pass2 ) {
+
+        jnl_config_1.enable_journaling = TRUE;
+
+        status = H5Fset_jnl_config(file_id, &jnl_config_1);
+
+        if ( status < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fset_mdc_config() failed.\n";
+        }
+    }
+
+
+    /* create the mem space to be used to read and write chunks */
+    if ( pass2 ) {
+
+        dims[0] = CHUNK_SIZE;
+        dims[1] = CHUNK_SIZE;
+        memspace_id = H5Screate_simple(2, dims, NULL);
+
+        if ( memspace_id < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Screate_simple() failed.";
+        }
+    }
+
+    /* select in memory hyperslab */
+    if ( pass2 ) {
+
+        offset[0] = 0;  /*offset of hyperslab in memory*/
+        offset[1] = 0;
+        a_size[0] = CHUNK_SIZE;  /*size of hyperslab*/
+        a_size[1] = CHUNK_SIZE;
+        status = H5Sselect_hyperslab(memspace_id, H5S_SELECT_SET, offset, NULL,
+                                     a_size, NULL);
+
+        if ( status < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Sselect_hyperslab() failed.";
+        }
+    }
+
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout,"Done.\n");
+        HDfflush(stdout);
+    }
+
+    /* initialize all datasets on a round robin basis */
+    i = 0;
+    progress_counter = 0;
+
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout, "Initializing datasets ");
+        HDfflush(stdout);
+    }
+
+    while ( ( pass2 ) && ( i < DSET_SIZE ) )
+    {
+        j = 0;
+        while ( ( pass2 ) && ( j < DSET_SIZE ) )
+        {
+            m = 0;
+            while ( ( pass2 ) && ( m < NUM_DSETS ) )
+            {
+                /* initialize the slab */
+                for ( k = 0; k < CHUNK_SIZE; k++ )
+                {
+                    for ( l = 0; l < CHUNK_SIZE; l++ )
+                    {
+                        data_chunk[k][l] = (DSET_SIZE * DSET_SIZE * m) +
+                                           (DSET_SIZE * (i + k)) + j + l;
+                    }
+                }
+
+                /* select on disk hyperslab */
+                offset[0] = i; /*offset of hyperslab in file*/
+                offset[1] = j;
+                a_size[0] = CHUNK_SIZE;   /*size of hyperslab*/
+                a_size[1] = CHUNK_SIZE;
+                status = H5Sselect_hyperslab(filespace_ids[m], H5S_SELECT_SET,
+                                         offset, NULL, a_size, NULL);
+
+                if ( status < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "disk H5Sselect_hyperslab() failed.";
+                }
+
+                /* write the chunk to file */
+                status = H5Dwrite(dataset_ids[m], H5T_NATIVE_INT, memspace_id,
+                                  filespace_ids[m], H5P_DEFAULT, data_chunk);
+
+                if ( status < 0 ) {
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "H5Dwrite() failed.";
+                }
+                m++;
+            }
+            j += CHUNK_SIZE;
+        }
+
+        i += CHUNK_SIZE;
+
+        if ( ( pass2 ) && ( report_progress ) ) {
+
+	    progress_counter += CHUNK_SIZE;
+
+	    if ( progress_counter >= DSET_SIZE / 20 ) {
+
+	        progress_counter = 0;
+	        HDfprintf(stdout, ".");
+                HDfflush(stdout);
+	    }
+	}
+
+	/* We are generating a lot of dirty metadata here, all of which 
+	 * will wind up in the journal file.  To keep the journal file
+	 * from getting too big (and to make sure the raw data is on 
+	 * disk, we should do an occasional flush of the HDF5 file.
+	 *
+	 * This will force all metadata to disk, and cause the journal
+	 * file to be truncated.
+	 *
+	 * On the other hand, it will impose a significant file I/O 
+	 * overhead, and slow us down. (try it both ways).
+	 */
+#if 1 /* JRM */
+	status = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
+
+        if ( status < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fflush() failed.";
+        }
+#endif /* JRM */
+    }
+
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout," Done.\n"); /* initializing data sets */
+        HDfflush(stdout);
+    }
+
+
+    /* do random reads on all datasets */
+
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout, "Doing random reads on all datasets ");
+        HDfflush(stdout);
+    }
+
+    n = 0;
+    progress_counter = 0;
+    while ( ( pass2 ) && ( n < NUM_RANDOM_ACCESSES ) )
+    {
+        m = rand() % NUM_DSETS;
+        i = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
+        j = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
+
+        /* select on disk hyperslab */
+        offset[0] = i; /*offset of hyperslab in file*/
+        offset[1] = j;
+        a_size[0] = CHUNK_SIZE;   /*size of hyperslab*/
+        a_size[1] = CHUNK_SIZE;
+        status = H5Sselect_hyperslab(filespace_ids[m], H5S_SELECT_SET,
+                                     offset, NULL, a_size, NULL);
+
+        if ( status < 0 ) {
+
+           pass2 = FALSE;
+           failure_mssg2 = "disk hyperslab create failed.";
+        }
+
+        /* read the chunk from file */
+        if ( pass2 ) {
+
+            status = H5Dread(dataset_ids[m], H5T_NATIVE_INT, memspace_id,
+                             filespace_ids[m], H5P_DEFAULT, data_chunk);
+
+            if ( status < 0 ) {
+
+               pass2 = FALSE;
+               failure_mssg2 = "disk hyperslab create failed.";
+            }
+        }
+
+        /* validate the slab */
+        if ( pass2 ) {
+
+            valid_chunk = TRUE;
+            for ( k = 0; k < CHUNK_SIZE; k++ )
+            {
+                for ( l = 0; l < CHUNK_SIZE; l++ )
+                {
+                     if ( data_chunk[k][l]
+                          !=
+                          ((DSET_SIZE * DSET_SIZE * m) +
+                           (DSET_SIZE * (i + k)) + j + l) ) {
+
+                         valid_chunk = FALSE;
+#if 0 /* this will be useful from time to time -- lets keep it*/
+                         HDfprintf(stdout,
+                                   "data_chunk[%0d][%0d] = %0d, expect %0d.\n",
+                                   k, l, data_chunk[k][l],
+                                   ((DSET_SIZE * DSET_SIZE * m) +
+                                    (DSET_SIZE * (i + k)) + j + l));
+                         HDfprintf(stdout,
+                                   "m = %d, i = %d, j = %d, k = %d, l = %d\n",
+                                   m, i, j, k, l);
+#endif
+                    }
+                }
+            }
+
+            if ( ! valid_chunk ) {
+#if 1
+                pass2 = FALSE;
+                failure_mssg2 = "slab validation failed.";
+#else /* as above */
+                fprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
+                        i, j, m);
+#endif
+            }
+        }
+
+        n++;
+
+        if ( ( pass2 ) && ( report_progress ) ) {
+
+	    progress_counter++;
+
+	    if ( progress_counter >= NUM_RANDOM_ACCESSES / 20 ) {
+
+	        progress_counter = 0;
+	        HDfprintf(stdout, ".");
+                HDfflush(stdout);
+	    }
+	}
+    }
+
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout, " Done.\n"); /* random reads on all data sets */
+        HDfflush(stdout);
+    }
+
+
+    /* close the file spaces we are done with */
+    i = 1;
+    while ( ( pass2 ) && ( i < NUM_DSETS ) )
+    {
+        if ( H5Sclose(filespace_ids[i]) < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Sclose() failed.";
+        }
+        i++;
+    }
+
+
+    /* close the datasets we are done with */
+    i = 1;
+    while ( ( pass2 ) && ( i < NUM_DSETS ) )
+    {
+        if ( H5Dclose(dataset_ids[i]) < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Dclose() failed.";
+        }
+        i++;
+    }
+
+
+    /* do random reads on data set 0 only */
+
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout, "Doing random reads on dataset 0 ");
+        HDfflush(stdout);
+    }
+
+    m = 0;
+    n = 0;
+    progress_counter = 0;
+    while ( ( pass2 ) && ( n < NUM_RANDOM_ACCESSES ) )
+    {
+        i = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
+        j = (rand() % (DSET_SIZE / CHUNK_SIZE)) * CHUNK_SIZE;
+
+        /* select on disk hyperslab */
+        offset[0] = i; /*offset of hyperslab in file*/
+        offset[1] = j;
+        a_size[0] = CHUNK_SIZE;   /*size of hyperslab*/
+        a_size[1] = CHUNK_SIZE;
+        status = H5Sselect_hyperslab(filespace_ids[m], H5S_SELECT_SET,
+                                     offset, NULL, a_size, NULL);
+
+        if ( status < 0 ) {
+
+           pass2 = FALSE;
+           failure_mssg2 = "disk hyperslab create failed.";
+        }
+
+        /* read the chunk from file */
+        if ( pass2 ) {
+
+            status = H5Dread(dataset_ids[m], H5T_NATIVE_INT, memspace_id,
+                             filespace_ids[m], H5P_DEFAULT, data_chunk);
+
+            if ( status < 0 ) {
+
+               pass2 = FALSE;
+               failure_mssg2 = "disk hyperslab create failed.";
+            }
+        }
+
+        /* validate the slab */
+        if ( pass2 ) {
+
+            valid_chunk = TRUE;
+            for ( k = 0; k < CHUNK_SIZE; k++ )
+            {
+               for ( l = 0; l < CHUNK_SIZE; l++ )
+               {
+                   if ( data_chunk[k][l]
+                        !=
+                        ((DSET_SIZE * DSET_SIZE * m) +
+                         (DSET_SIZE * (i + k)) + j + l) ) {
+
+                       valid_chunk = FALSE;
+                  }
+#if 0 /* this will be useful from time to time -- lets keep it */
+                  HDfprintf(stdout, "data_chunk[%0d][%0d] = %0d, expect %0d.\n",
+                            k, l, data_chunk[k][l],
+                            ((DSET_SIZE * DSET_SIZE * m) +
+                             (DSET_SIZE * (i + k)) + j + l));
+#endif
+                }
+            }
+
+            if ( ! valid_chunk ) {
+
+                pass2 = FALSE;
+                failure_mssg2 = "slab validation failed.";
+#if 0 /* as above */
+                fprintf(stdout, "Chunk (%0d, %0d) in /dset%03d is invalid.\n",
+                        i, j, m);
+#endif
+            }
+        }
+
+        n++;
+
+        if ( ( pass2 ) && ( report_progress ) ) {
+
+	    progress_counter++;
+
+	    if ( progress_counter >= NUM_RANDOM_ACCESSES / 20 ) {
+
+	        progress_counter = 0;
+	        HDfprintf(stdout, ".");
+                HDfflush(stdout);
+	    }
+	}
+    }
+
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout, " Done.\n"); /* random reads data set 0 */
+        HDfflush(stdout);
+    }
+
+
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout,"Shutting down ... ");
+        HDfflush(stdout);
+    }
+
+
+    /* close file space 0 */
+    if ( pass2 ) {
+
+        if ( H5Sclose(filespace_ids[0]) < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Sclose(filespace_ids[0]) failed.";
+        }
+    }
+
+    /* close the data space */
+    if ( pass2 ) {
+
+        if ( H5Sclose(dataspace_id) < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Sclose(dataspace) failed.";
+        }
+    }
+
+    /* close the mem space */
+    if ( pass2 ) {
+
+        if ( H5Sclose(memspace_id) < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Sclose(memspace_id) failed.";
+        }
+    }
+
+    /* close dataset 0 */
+    if ( pass2 ) {
+
+        if ( H5Dclose(dataset_ids[0]) < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Dclose(dataset_ids[0]) failed.";
+        }
+    }
+
+    /* close the file and delete it */
+    if ( pass2 ) {
+
+	if ( H5Fclose(file_id) < 0  ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "H5Fclose() failed.\n";
+
+        }
+        else if ( HDremove(filename) < 0 ) {
+
+            pass2 = FALSE;
+	    failure_mssg2 = "HDremove() failed.\n";
+        }
+    }
+
+    if ( ( pass2 ) && ( report_progress ) ) {
+
+	HDfprintf(stdout,"Done.\n"); /* shutting down */
+        HDfflush(stdout);
+    }
+
+
+    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass2 ) {
+
+	failures2++;
+        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
+                  fcn_name, failure_mssg2);
+    }
+
+    return;
+
+} /* mdj_api_example_test() */
+
+
 /*** metatada journaling config block I/O test code ***/
 
 /*-------------------------------------------------------------------------
@@ -11970,6 +12838,16 @@ main(void)
     H5open();
 
     express_test = GetTestExpress();
+
+    if ( express_test2 >= 3 ) {
+
+        skip_long_tests2 = TRUE;
+
+    } else {
+
+        skip_long_tests2 = FALSE;
+
+    }
     
 #if 1
     mdj_smoke_check_00();
@@ -11979,6 +12857,9 @@ main(void)
 #endif
 #if 1
     mdj_smoke_check_02();
+#endif
+#if 1
+    mdj_api_example_test();
 #endif
 #if 1
     check_buffer_writes();

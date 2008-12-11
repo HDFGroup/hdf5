@@ -3594,6 +3594,11 @@ main(int argc,
         result = 1;
     }
 
+    if ( result != 0 ) { 
+
+        HDfprintf(stderr, "fail\n");
+    }
+
     return(result);
 
 } /* main() */

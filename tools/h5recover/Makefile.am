@@ -32,7 +32,8 @@ check_SCRIPTS=$(TEST_SCRIPT)
 SCRIPT_DEPEND=trecover$(EXEEXT)
 
 # Source files for the program
-trecover_SOURCES=trecover_main.c trecover_writer.c trecover_crasher.c
+trecover_SOURCES=trecover_main.c trecover_writer.c trecover_crasher.c \
+                 trecover_verifier.c
 
 # Our main target, the h5recover tool.
 # For now, it is a dummy program in order to provide a real executable

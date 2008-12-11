@@ -3482,12 +3482,13 @@ H5Fget_mdc_config(hid_t file_id,
     }
 
     /* Go get the resize configuration */
-    result = H5AC_get_cache_auto_resize_config(file->shared->cache, config_ptr);
+    result = H5AC2_get_cache_auto_resize_config(file->shared->cache2, 
+		                                config_ptr);
 
     if ( result != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC_get_cache_auto_resize_config() failed.");
+                    "H5AC2_get_cache_auto_resize_config() failed.");
     }
 
 done:
@@ -3576,8 +3577,6 @@ done:
  *
  * Modifications:
  *
- *		None.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3604,12 +3603,12 @@ H5Fget_mdc_hit_rate(hid_t file_id,
     }
 
     /* Go get the current hit rate */
-    result = H5AC_get_cache_hit_rate(file->shared->cache, hit_rate_ptr);
+    result = H5AC2_get_cache_hit_rate(file->shared->cache2, hit_rate_ptr);
 
     if ( result != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC_get_cache_hit_rate() failed.");
+                    "H5AC2_get_cache_hit_rate() failed.");
     }
 
 done:
@@ -3664,7 +3663,7 @@ H5Fget_mdc_size(hid_t file_id,
     }
 
     /* Go get the size data */
-    result = H5AC_get_cache_size(file->shared->cache,
+    result = H5AC2_get_cache_size(file->shared->cache2,
                                  max_size_ptr,
                                  min_clean_size_ptr,
                                  cur_size_ptr,
@@ -3673,7 +3672,7 @@ H5Fget_mdc_size(hid_t file_id,
     if ( result != SUCCEED ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "H5AC_get_cache_size() failed.");
+                    "H5AC2_get_cache_size() failed.");
 
     } else if ( cur_num_entries_ptr != NULL ) {
 
@@ -3725,7 +3724,7 @@ H5Freset_mdc_hit_rate_stats(hid_t file_id)
          HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a file ID")
 
     /* Reset the hit rate statistic */
-    if(H5AC_reset_cache_hit_rate_stats(file->shared->cache) < 0)
+    if(H5AC2_reset_cache_hit_rate_stats(file->shared->cache2) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "can't reset cache hit rate")
 
 done:

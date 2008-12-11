@@ -5759,3 +5759,408 @@ hl_col_major_scan_backward2(H5F_t * file_ptr,
 
 } /* hl_col_major_scan_backward2() */
 
+
+/*** H5AC2 level utility functions ***/
+
+/*-------------------------------------------------------------------------
+ * Function:	check_and_validate_cache_hit_rate()
+ *
+ * Purpose:	Use the API functions to get and reset the cache hit rate.
+ *		Verify that the value returned by the API call agrees with
+ *		the cache internal data structures.
+ *
+ *		If the number of cache accesses exceeds the value provided
+ *		in the min_accesses parameter, and the hit rate is less than
+ *		min_hit_rate, set pass2 to FALSE, and set failure_mssg2 to
+ *		a string indicating that hit rate was unexpectedly low.
+ *
+ *		Return hit rate in *hit_rate_ptr, and print the data to
+ *		stdout if requested.
+ *
+ *		If an error is detected, set pass2 to FALSE, and set
+ *		failure_mssg2 to an appropriate value.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              4/18/04
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+check_and_validate_cache_hit_rate(hid_t file_id,
+                                  double * hit_rate_ptr,
+                                  hbool_t dump_data,
+                                  int64_t min_accesses,
+                                  double min_hit_rate)
+{
+    /* const char * fcn_name = "check_and_validate_cache_hit_rate()"; */
+    herr_t result;
+    int64_t cache_hits = 0;
+    int64_t cache_accesses = 0;
+    double expected_hit_rate;
+    double hit_rate;
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
+
+    /* get a pointer to the files internal data structure */
+    if ( pass2 ) {
+
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+
+        if ( file_ptr == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "Can't get file_ptr.";
+
+        } else {
+
+            cache_ptr = file_ptr->shared->cache2;
+        }
+    }
+
+    /* verify that we can access the cache data structure */
+    if ( pass2 ) {
+
+        if ( ( cache_ptr == NULL ) ||
+             ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "Can't access cache resize_ctl.";
+        }
+    }
+
+    /* compare the cache's internal configuration with the expected value */
+    if ( pass2 ) {
+
+        cache_hits     = cache_ptr->cache_hits;
+        cache_accesses = cache_ptr->cache_accesses;
+
+        if ( cache_accesses > 0 ) {
+
+            expected_hit_rate = ((double)cache_hits) / ((double)cache_accesses);
+
+        } else {
+
+            expected_hit_rate = 0.0;
+        }
+
+        result = H5Fget_mdc_hit_rate(file_id, &hit_rate);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fget_mdc_hit_rate() failed.";
+
+        } else if ( hit_rate != expected_hit_rate ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "unexpected hit rate (1).";
+#if 1 /* JRM */
+            HDfprintf(stdout, "actual/expected hit rate = %f/%f.\n",
+		      hit_rate, expected_hit_rate);
+	    HDassert(0);
+#endif /* JRM */
+        }
+    }
+
+    if ( pass2 ) { /* reset the hit rate */
+
+        result = H5Freset_mdc_hit_rate_stats(file_id);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Freset_mdc_hit_rate_stats() failed.";
+        }
+    }
+
+    /* set *hit_rate_ptr if appropriate */
+    if ( ( pass2 ) && ( hit_rate_ptr != NULL ) ) {
+
+        *hit_rate_ptr = hit_rate;
+    }
+
+    /* dump data to stdout if requested */
+    if ( ( pass2 ) && ( dump_data ) ) {
+
+        HDfprintf(stdout,
+                  "cache_hits: %ld, cache_accesses: %ld, hit_rate: %lf\n",
+                  (long)cache_hits, (long)cache_accesses, hit_rate);
+    }
+
+    if ( ( pass2 ) &&
+         ( cache_accesses > min_accesses ) &&
+         ( hit_rate < min_hit_rate ) ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "Unexpectedly low hit rate.";
+    }
+
+    return;
+
+} /* check_and_validate_cache_hit_rate() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	check_and_validate_cache_size()
+ *
+ * Purpose:	Use the API function to get the cache size data.  Verify
+ *		that the values returned by the API call agree with
+ *		the cache internal data structures.
+ *
+ *		Return size data in the locations specified by the pointer
+ *		parameters if these parameters are not NULL.  Print the
+ *		data to stdout if requested.
+ *
+ *		If an error is detected, set pass2 to FALSE, and set
+ *		failure_mssg2 to an appropriate value.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              4/18/04
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+check_and_validate_cache_size(hid_t file_id,
+                              size_t * max_size_ptr,
+                              size_t * min_clean_size_ptr,
+                              size_t * cur_size_ptr,
+                              int32_t * cur_num_entries_ptr,
+                              hbool_t dump_data)
+{
+    /* const char * fcn_name = "check_and_validate_cache_size()"; */
+    herr_t result;
+    size_t expected_max_size;
+    size_t max_size;
+    size_t expected_min_clean_size;
+    size_t min_clean_size;
+    size_t expected_cur_size;
+    size_t cur_size;
+    int32_t expected_cur_num_entries;
+    int cur_num_entries;
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
+
+    /* get a pointer to the files internal data structure */
+    if ( pass2 ) {
+
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+
+        if ( file_ptr == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "Can't get file_ptr.";
+
+        } else {
+
+            cache_ptr = file_ptr->shared->cache2;
+        }
+    }
+
+    /* verify that we can access the cache data structure */
+    if ( pass2 ) {
+
+        if ( ( cache_ptr == NULL ) ||
+             ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "Can't access cache data structure.";
+        }
+    }
+
+    /* compare the cache's internal configuration with the expected value */
+    if ( pass2 ) {
+
+        expected_max_size        = cache_ptr->max_cache_size;
+        expected_min_clean_size  = cache_ptr->min_clean_size;
+        expected_cur_size        = cache_ptr->index_size;
+        expected_cur_num_entries = cache_ptr->index_len;
+
+        result = H5Fget_mdc_size(file_id,
+                                 &max_size,
+                                 &min_clean_size,
+                                 &cur_size,
+                                 &cur_num_entries);
+
+        if ( result < 0 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fget_mdc_size() failed.";
+
+        } else if ( ( max_size != expected_max_size ) ||
+                    ( min_clean_size != expected_min_clean_size ) ||
+                    ( cur_size != expected_cur_size ) ||
+                    ( cur_num_entries != (int)expected_cur_num_entries ) ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5Fget_mdc_size() returned unexpected value(s).";
+
+        }
+    }
+
+    /* return size values if requested */
+    if ( ( pass2 ) && ( max_size_ptr != NULL ) ) {
+
+        *max_size_ptr = max_size;
+    }
+
+    if ( ( pass2 ) && ( min_clean_size_ptr != NULL ) ) {
+
+        *min_clean_size_ptr = min_clean_size;
+    }
+
+    if ( ( pass2 ) && ( cur_size_ptr != NULL ) ) {
+
+        *cur_size_ptr = cur_size;
+    }
+
+    if ( ( pass2 ) && ( cur_num_entries_ptr != NULL ) ) {
+
+        *cur_num_entries_ptr = cur_num_entries;
+    }
+
+
+    /* dump data to stdout if requested */
+    if ( ( pass2 ) && ( dump_data ) ) {
+
+        HDfprintf(stdout,
+                  "max_sz: %ld, min_clean_sz: %ld, cur_sz: %ld, cur_ent: %ld\n",
+                  (long)max_size, (long)min_clean_size, (long)cur_size,
+                  (long)cur_num_entries);
+    }
+
+    return;
+
+} /* check_and_validate_cache_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	validate_mdc_config()
+ *
+ * Purpose:	Verify that the file indicated by the file_id parameter
+ *		has both internal and external configuration matching
+ *		*config_ptr.
+ *
+ *		Do nothin on success.  On failure, set pass2 to FALSE, and
+ *		load an error message into failue_mssg.  Note that
+ *		failure_msg is assumed to be at least 128 bytes in length.
+ *
+ * Return:	void
+ *
+ * Programmer:	John Mainzer
+ *              4/14/04
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+validate_mdc_config(hid_t file_id,
+                    H5AC2_cache_config_t * ext_config_ptr,
+                    hbool_t compare_init,
+                    int test_num)
+{
+    /* const char * fcn_name = "validate_mdc_config()"; */
+    static char msg[256];
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
+    H5AC2_cache_config_t scratch;
+    H5C2_auto_size_ctl_t int_config;
+
+    XLATE_EXT_TO_INT_MDC_CONFIG(int_config, (*ext_config_ptr))
+
+    /* get a pointer to the files internal data structure */
+    if ( pass2 ) {
+
+        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
+
+        if ( file_ptr == NULL ) {
+
+            pass2 = FALSE;
+            HDsnprintf(msg, (size_t)128, "Can't get file_ptr #%d.", test_num);
+            failure_mssg2 = msg;
+
+        } else {
+
+            cache_ptr = file_ptr->shared->cache2;
+        }
+    }
+
+    /* verify that we can access the internal version of the cache config */
+    if ( pass2 ) {
+
+        if ( ( cache_ptr == NULL ) ||
+             ( cache_ptr->magic != H5C2__H5C2_T_MAGIC ) ||
+             ( cache_ptr->resize_ctl.version != H5C2__CURR_AUTO_SIZE_CTL_VER ) ){
+
+            pass2 = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "Can't access cache resize_ctl #%d.", test_num);
+            failure_mssg2 = msg;
+        }
+    }
+
+    /* compare the cache's internal configuration with the expected value */
+    if ( pass2 ) {
+
+	if ( ! RESIZE_CONFIGS_ARE_EQUAL(int_config, cache_ptr->resize_ctl,
+                                        compare_init) ) {
+
+            pass2 = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "Unexpected internal config #%d.", test_num);
+            failure_mssg2 = msg;
+        }
+    }
+
+    /* obtain external cache config */
+    if ( pass2 ) {
+
+        scratch.version = H5AC2__CURR_CACHE_CONFIG_VERSION;
+
+        if ( H5Fget_mdc_config(file_id, (H5AC_cache_config_t *)&scratch) < 0 ) {
+
+            pass2 = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "H5Fget_mdc_config() failed #%d.", test_num);
+            failure_mssg2 = msg;
+        }
+    }
+
+    if ( pass2 ) {
+
+        /* Recall that in any configuration supplied by the cache
+         * at run time, the set_initial_size field will always
+         * be FALSE, regardless of the value pass2ed in.  Thus we
+         * always presume that this field need not match that of
+         * the supplied external configuration.
+         *
+         * The cache also sets the initial_size field to the current
+         * cache max size instead of the value initialy supplied.
+         * Depending on circumstances, this may or may not match
+         * the original.  Hence the compare_init parameter.
+         */
+        if ( ! CACHE_CONFIGS_EQUAL((*ext_config_ptr), scratch, \
+                                   FALSE, compare_init) ) {
+
+            pass2 = FALSE;
+            HDsnprintf(msg, (size_t)128,
+                       "Unexpected external config #%d.", test_num);
+            failure_mssg2 = msg;
+        }
+    }
+
+    return;
+
+} /* validate_mdc_config() */
+

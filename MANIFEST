@@ -1026,6 +1026,7 @@
 ./tools/h5recover/trecover_crasher.c
 ./tools/h5recover/trecover.h
 ./tools/h5recover/trecover_main.c
+./tools/h5recover/trecover_verifier.c
 ./tools/h5recover/trecover_writer.c
 ./tools/h5recover/testfiles/default.txt
 ./tools/h5recover/testfiles/async_crash.txt

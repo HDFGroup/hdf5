@@ -44,6 +44,8 @@ char *		dsetname=CHUNKDATASETNAME;		/* dataset name */
 #endif
 extern int	PatchMode=0;		/* patch mode, default no. */
 
+int		VerifyRecovery=0; 	/* verify recovery mode */
+
 /* Command arguments parser.
  * 	-a <seconds>	Do Async crash with a floating value of seconds
  */
@@ -95,13 +97,16 @@ parser(int ac, char **av)
 			exit(1);
 		    }
 		}else{
-		    fprintf(stderr, "Missing async time value\n");
+		    fprintf(stderr, "Missing data type value\n");
 		    help();
 		    exit(1);
 		}
 		break;
 	    case 'p':	/* patch option */
 		PatchMode=1;
+		break;
+	    case 'v':   /* verify option */
+		VerifyRecovery = 1;
 		break;
 	    case 'h':	/* -h help option */
 		help();
@@ -118,6 +123,18 @@ parser(int ac, char **av)
 	    exit(1);
 	}
     } /* end of while */
+
+    if ( ( VerifyRecovery ) &&
+	 ( ( AsyncCrashParam.tinterval > 0 ) ||
+	   ( DSTypes != DSChunked ) ||
+	   ( PatchMode != 0 ) ) ) {
+
+        fprintf(stderr, 
+		"-v option cannot be combined with other options\n");
+        help(); 
+        exit(1);
+    }
+
     if (DSTypes==DSNone){
 	/* reset to default all datasets */
 	DSTypes=DSAll;
@@ -137,67 +154,81 @@ init(void)
 void
 help(void)
 {
-    fprintf(stderr, "Usage: trecover [-a <seconds>] [-d <dataset-type>] [-h]\n"
-		"\t-a\tAsync crash seconds where <seconds> is a real number.\n"
-		"\t-d\tDataset to create. <dataset-type> can be:\n"
-		"\t\t  A\tAll datasets\n"
-		"\t\t  C\tContingous datasets\n"
-		"\t\t  G\tGzip compressed datasets\n"
-		"\t\t  K\tChunked datasets\n"
-		"\t\t  S\tSzip compressed datasets\n"
-		"\t\tDefault is all datasets\n"
-		"\t\tTemp Default is Chunked datasets\n"
-	    );
+    fprintf(stderr, 
+        "Usage: trecover ([-a <seconds>] [-d <dataset-type>] [-h]) | [-v]\n"
+	"\t-a\tAsync crash seconds where <seconds> is a real number.\n"
+	"\t-d\tDataset to create. <dataset-type> can be:\n"
+	"\t\t  A\tAll datasets\n"
+	"\t\t  C\tContingous datasets\n"
+	"\t\t  G\tGzip compressed datasets\n"
+	"\t\t  K\tChunked datasets\n"
+	"\t\t  S\tSzip compressed datasets\n"
+	"\t\tDefault is all datasets\n"
+	"\t\tTemp Default is Chunked datasets\n"
+	"\t-v\tVerify recovery -- may not be combined with any other option.\n"
+   );
 }
 
 
 int
 main (int ac, char **av)
 {
+    int ret_val = 0;
     hsize_t     dims[RANK]={NX,NY};              /* dataset dimensions */
     hsize_t     dimschunk[RANK]={ChunkX,ChunkY}; /* dataset chunk dimensions */
 
     init();
     parser(ac, av);
 
-    if (!PatchMode){
-	/* create/open both files. */
-	create_files(H5FILE_NAME, CTL_H5FILE_NAME);
+    if ( VerifyRecovery ) {
 
-	/* Create datasets in both Control file and data files.  Close both. */
-	create_dataset(ctl_file, DSTypes, RANK, dims, dimschunk);
-	close_file(ctl_file);
-	create_dataset(datafile, DSTypes, RANK, dims, dimschunk);
-	close_file(datafile);
-    }
+        ret_val = verify_recovery();
 
-    /* Open data file with Journaling and control file without. */
-    journal_files(H5FILE_NAME, CTL_H5FILE_NAME, JNL_H5FILE_NAME, PatchMode);
+    } else {
+
+        if (!PatchMode){
+	    /* create/open both files. */
+	    create_files(H5FILE_NAME, CTL_H5FILE_NAME);
+
+	    /* Create datasets in both Control file and data files.  
+	     * Close both. 
+	     */
+	    create_dataset(ctl_file, DSTypes, RANK, dims, dimschunk);
+	    close_file(ctl_file);
+	    create_dataset(datafile, DSTypes, RANK, dims, dimschunk);
+	    close_file(datafile);
+        }
+
+        /* Open data file with Journaling and control file without. */
+        journal_files(H5FILE_NAME, CTL_H5FILE_NAME, JNL_H5FILE_NAME, PatchMode);
     
-    if (PatchMode){
-	/* extend the datafile again without writing data, then close it. */
-	extend_dataset(datafile, NX, 4*NX-1, PatchMode);
-	close_file(datafile);
-	close_file(ctl_file);
-    }else{
-	/* Extend control file, then close it. */
-	extend_dataset(ctl_file, NX, 4*NX-1, 0);
-	close_file(ctl_file);
+        if (PatchMode){
+	    /* extend the datafile again without writing data, then close it. */
+	    extend_dataset(datafile, NX, 4*NX-1, PatchMode);
+	    close_file(datafile);
+	    close_file(ctl_file);
+        }else{
+	    /* Extend control file, then close it. */
+	    extend_dataset(ctl_file, NX, 4*NX-1, 0);
+	    close_file(ctl_file);
 
-	/* Schedule Async crash if requested. */
-	if (AsyncCrashParam.tinterval > 0)
-	    crasher(AsyncCrash, &AsyncCrashParam);
+	    /* Schedule Async crash if requested. */
+	    if (AsyncCrashParam.tinterval > 0)
+	        crasher(AsyncCrash, &AsyncCrashParam);
 
-	/* Extend datafile, then close it. */
-	extend_dataset(datafile, NX, 4*NX-1, 0);
+	    /* Extend datafile, then close it. */
+	    extend_dataset(datafile, NX, 4*NX-1, 0);
 
-	/* Do a sync crash. */
-	if (AsyncCrashParam.tinterval == 0)
-	    CRASH;
+	    /* Do a sync crash. */
+	    if (AsyncCrashParam.tinterval == 0)
+	        CRASH;
 
-	/* Close file only if Async crash is scheduled but has not occurred yet. */
-	close_file(datafile);
+	    /* Close file only if Async crash is scheduled but has 
+	     * not occurred yet. 
+	     */
+	    close_file(datafile);
+        }
     }
 
-    return(0);
+    return(ret_val);
 }     

@@ -80,3 +80,8 @@ int create_files(const char *filename, const char *ctl_filename);
 int journal_files(const char *filename, const char *ctl_filename, const char *jnl_filename, int patch);
 
 int close_file(hid_t fid);
+
+int open_files(const char *filename, const char *ctl_filename);
+int verify_chunked_dset(void);
+int verify_recovery(void);
+
