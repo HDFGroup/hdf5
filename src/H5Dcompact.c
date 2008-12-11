@@ -18,7 +18,7 @@
  *              August 5, 2002
  *
  * Purpose:     Compact dataset I/O functions.  These routines are similar
- *              H5D_contig_* and H5D_istore_*.
+ *              H5D_contig_* and H5D_chunk_*.
  */
 
 /****************/
