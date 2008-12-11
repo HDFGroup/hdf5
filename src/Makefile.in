@@ -84,7 +84,7 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5B2.lo H5B2cache.lo H5B2dbg.lo H5B2int.lo H5B2stat.lo \
 	H5B2test.lo H5C.lo H5CS.lo H5D.lo H5Dchunk.lo H5Dcompact.lo \
 	H5Dcontig.lo H5Ddbg.lo H5Ddeprec.lo H5Defl.lo H5Dfill.lo \
-	H5Dint.lo H5Dio.lo H5Distore.lo H5Dmpio.lo H5Doh.lo \
+	H5Dint.lo H5Dio.lo H5Dbtree.lo H5Dmpio.lo H5Doh.lo \
 	H5Dscatgath.lo H5Dselect.lo H5Dtest.lo H5E.lo H5Edeprec.lo \
 	H5Eint.lo H5F.lo H5Faccum.lo H5Fdbg.lo H5Ffake.lo H5Fio.lo \
 	H5Fmount.lo H5Fmpi.lo H5Fquery.lo H5Fsfile.lo H5Fsuper.lo \
@@ -430,7 +430,7 @@ libhdf5_la_SOURCES = H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5D.c H5Dchunk.c H5Dcompact.c H5Dcontig.c H5Ddbg.c \
         H5Ddeprec.c H5Defl.c H5Dfill.c H5Dint.c \
         H5Dio.c \
-        H5Distore.c H5Dmpio.c H5Doh.c H5Dscatgath.c H5Dselect.c H5Dtest.c \
+        H5Dbtree.c H5Dmpio.c H5Doh.c H5Dscatgath.c H5Dselect.c H5Dtest.c \
         H5E.c H5Edeprec.c H5Eint.c \
         H5F.c H5Faccum.c H5Fdbg.c H5Ffake.c H5Fio.c H5Fmount.c H5Fmpi.c H5Fquery.c \
         H5Fsfile.c H5Fsuper.c H5Ftest.c \
@@ -639,7 +639,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dfill.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dint.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dio.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Distore.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dbtree.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dmpio.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Doh.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5Dscatgath.Plo@am__quote@
