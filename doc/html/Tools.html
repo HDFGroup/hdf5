@@ -721,6 +721,19 @@ installed with HDF5.
 	can be found in the document 
 	<a href="http://www.hdfgroup.org/HDF5/h5diff/h5diff_design.html">
 	<cite>H5diff Examples</cite></a>.
+
+
+        <p>
+        <b><code>h5diff</code> and NaNs:</b>
+        <br>
+        <code>h5diff</code> detects when a value in a dataset is a NaN 
+        (a "not a number" value), but does not differentiate among various 
+        types of NaNs.
+        Thus, when one NaN is compared with another NaN, <code>h5diff</code> 
+        treats them as equal; when a NaN is compared with a valid number,
+        <code>h5diff</code> treats them as not equal.
+
+
 <dt><strong>Options and Parameters:</strong>
     <dl>
         <dt><em>file1</em>
@@ -909,7 +922,7 @@ installed with HDF5.
                 each dimension in the  following format with no intervening 
                 spaces:
                 <br>&nbsp;&nbsp;&nbsp;&nbsp;
-                    <code><em>dim_1</em> x <em>dim_2</em> x ... 
+                    <code><em>dim_1</em> &times; <em>dim_2</em> &times; ... 
                     <em>dim_n</em></code>
                 </dd>
                 </dir>
@@ -1587,7 +1600,7 @@ installed with HDF5.
                     <code><em>dim_list</em></code> is a string of 
                     comma-separated numbers with no spaces 
                     describing the dimensions of the input data.
-                    For example, a 50 x 100 2-dimensional array would be 
+                    For example, a 50 &times; 100 2-dimensional array would be 
                     specified as <code>-dims 50,100</code>.<br>
                     Required argument: if no configuration  file is used, 
                     this command-line argument is mandatory.
