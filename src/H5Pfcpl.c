@@ -53,7 +53,7 @@
 #define H5F_CRT_SYM_LEAF_SIZE        sizeof(unsigned)
 /* Definitions for the 1/2 rank for btree internal nodes    */
 #define H5F_CRT_BTREE_RANK_SIZE      sizeof(unsigned[H5B_NUM_BTREE_ID])
-#define H5F_CRT_BTREE_RANK_DEF       {HDF5_BTREE_SNODE_IK_DEF,HDF5_BTREE_ISTORE_IK_DEF}
+#define H5F_CRT_BTREE_RANK_DEF       {HDF5_BTREE_SNODE_IK_DEF,HDF5_BTREE_CHUNK_IK_DEF}
 /* Definitions for byte number in an address                */
 #define H5F_CRT_ADDR_BYTE_NUM_SIZE   sizeof(size_t)
 #define H5F_CRT_ADDR_BYTE_NUM_DEF    H5F_OBJ_ADDR_SIZE
@@ -593,7 +593,7 @@ H5Pset_istore_k(hid_t plist_id, unsigned ik)
     /* Set value */
     if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree interanl nodes");
-    btree_k[H5B_ISTORE_ID] = ik;
+    btree_k[H5B_CHUNK_ID] = ik;
     if(H5P_set(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set rank for btree interanl nodes");
 
@@ -641,7 +641,7 @@ H5Pget_istore_k(hid_t plist_id, unsigned *ik /*out */ )
     if(ik) {
         if(H5P_get(plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get rank for btree interanl nodes");
-        *ik = btree_k[H5B_ISTORE_ID];
+        *ik = btree_k[H5B_CHUNK_ID];
     } /* end if */
 
 done:

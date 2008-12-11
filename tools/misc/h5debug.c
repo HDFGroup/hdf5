@@ -294,7 +294,7 @@ main(int argc, char *argv[])
                 status = H5G_node_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, extra);
                 break;
 
-            case H5B_ISTORE_ID:
+            case H5B_CHUNK_ID:
                 /* Check for extra parameters */
                 if(extra == 0) {
                     fprintf(stderr, "ERROR: Need number of dimensions of chunk in order to dump chunk B-tree node\n");
@@ -304,7 +304,7 @@ main(int argc, char *argv[])
                 } /* end if */
 
                 ndims = (unsigned)extra;
-                status = H5D_istore_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
+                status = H5D_btree_debug(f, H5P_DATASET_XFER_DEFAULT, addr, stdout, 0, VCOL, ndims);
                 break;
 
             default:

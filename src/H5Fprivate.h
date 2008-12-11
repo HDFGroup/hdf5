@@ -397,7 +397,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 
 /* B-tree internal 'K' values */
 #define HDF5_BTREE_SNODE_IK_DEF         16
-#define HDF5_BTREE_ISTORE_IK_DEF        32      /* Note! this value is assumed
+#define HDF5_BTREE_CHUNK_IK_DEF         32      /* Note! this value is assumed
                                                     to be 32 for version 0
                                                     of the superblock and
                                                     if it is changed, the code

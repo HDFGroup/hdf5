@@ -151,7 +151,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
 
             /* Set the chunk operations */
             /* (Only "istore" indexing type currently supported */
-            mesg->u.chunk.ops = H5D_COPS_ISTORE;
+            mesg->u.chunk.ops = H5D_COPS_BTREE;
         } /* end if */
         else {
             /* Sanity check */
@@ -240,7 +240,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
 
                 /* Set the chunk operations */
                 /* (Only "istore" indexing type currently supported */
-                mesg->u.chunk.ops = H5D_COPS_ISTORE;
+                mesg->u.chunk.ops = H5D_COPS_BTREE;
                 break;
 
             default:

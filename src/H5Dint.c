@@ -720,8 +720,8 @@ H5D_set_io_ops(H5D_t *dataset)
             dataset->shared->layout.ops = H5D_LOPS_CHUNK;
 
             /* Set the chunk operations */
-            /* (Only "istore" indexing type currently supported */
-            dataset->shared->layout.u.chunk.ops = H5D_COPS_ISTORE;
+            /* (Only "B-tree" indexing type currently supported */
+            dataset->shared->layout.u.chunk.ops = H5D_COPS_BTREE;
             break;
 
         case H5D_COMPACT:

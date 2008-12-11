@@ -967,7 +967,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
          * and set the version # of the superblock to 1 if it is a non-default
          * value.
          */
-        else if(f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF)
+        else if(f->shared->btree_k[H5B_CHUNK_ID] != HDF5_BTREE_CHUNK_IK_DEF)
             super_vers = HDF5_SUPERBLOCK_VERSION_1;
 
         /* If a newer superblock version is required, set it here */

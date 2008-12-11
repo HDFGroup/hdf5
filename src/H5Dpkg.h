@@ -496,7 +496,7 @@ H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_COMPACT[1];
 H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_CHUNK[1];
 
 /* Chunked layout operations */
-H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_ISTORE[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
 
 
 /******************************/

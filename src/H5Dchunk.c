@@ -2982,7 +2982,7 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
 
         /* Get the chunk's info */
         if(H5D_chunk_get_info(dset, dxpl_id, chunk_offset, &udata) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "error looking up chunk address")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 
         /* Check if the chunk exists yet on disk */
         if(!H5F_addr_defined(udata.addr)) {
@@ -4219,7 +4219,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_istore_iter_dump
+ * Function:	H5D_chunk_iter_dump
  *
  * Purpose:	If the UDATA.STREAM member is non-null then debugging
  *              information is written to that stream.

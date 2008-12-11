@@ -57,6 +57,16 @@
 /* Library Private Typedefs */
 /****************************/
 
+/* B-tree IDs for various internal things. */
+/* Note - if more of these are added, any 'K' values (for internal or leaf
+ * nodes) they use will need to be stored in the file somewhere. -QAK
+ */
+typedef enum H5B_subid_t {
+    H5B_SNODE_ID	 = 0,	/*B-tree is for symbol table nodes	     */
+    H5B_CHUNK_ID	 = 1,	/*B-tree is for chunked dataset storage	     */
+    H5B_NUM_BTREE_ID            /* Number of B-tree key IDs (must be last)   */
+} H5B_subid_t;
+
 /* Define return values from B-tree insertion callbacks */
 typedef enum H5B_ins_t {
     H5B_INS_ERROR	 = -1,	/*error return value			     */
