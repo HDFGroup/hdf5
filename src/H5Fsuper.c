@@ -365,13 +365,13 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
          * storage B-tree internal 'K' value
          */
         if(super_vers > HDF5_SUPERBLOCK_VERSION_DEF) {
-            UINT16DECODE(p, btree_k[H5B_ISTORE_ID]);
+            UINT16DECODE(p, btree_k[H5B_CHUNK_ID]);
             /* Reserved bytes are present only in version 1 */
             if(super_vers == HDF5_SUPERBLOCK_VERSION_1)
                 p += 2;   /* reserved */
         } /* end if */
         else
-            btree_k[H5B_ISTORE_ID] = HDF5_BTREE_ISTORE_IK_DEF;
+            btree_k[H5B_CHUNK_ID] = HDF5_BTREE_CHUNK_IK_DEF;
 
         /* Set the B-tree internal node values, etc */
         if(H5P_set(c_plist, H5F_CRT_BTREE_RANK_NAME, btree_k) < 0)
@@ -632,7 +632,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "v1 B-tree 'K' info message not present")
 
             /* Set non-default v1 B-tree 'K' value info from file */
-            shared->btree_k[H5B_ISTORE_ID] = btreek.btree_k[H5B_ISTORE_ID];
+            shared->btree_k[H5B_CHUNK_ID] = btreek.btree_k[H5B_CHUNK_ID];
             shared->btree_k[H5B_SNODE_ID] = btreek.btree_k[H5B_SNODE_ID];
             shared->sym_leaf_k = btreek.sym_leaf_k;
 
@@ -644,7 +644,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
         } /* end if */
         else {
             /* No non-default v1 B-tree 'K' value info in file, use defaults */
-            shared->btree_k[H5B_ISTORE_ID] = HDF5_BTREE_ISTORE_IK_DEF;
+            shared->btree_k[H5B_CHUNK_ID] = HDF5_BTREE_CHUNK_IK_DEF;
             shared->btree_k[H5B_SNODE_ID] = HDF5_BTREE_SNODE_IK_DEF;
             shared->sym_leaf_k = H5F_CRT_SYM_LEAF_DEF;
         } /* end if */
@@ -767,7 +767,7 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
     else if(super_vers >= HDF5_SUPERBLOCK_VERSION_2) {
         /* Check for non-default v1 B-tree 'K' values to store */
         if(f->shared->btree_k[H5B_SNODE_ID] != HDF5_BTREE_SNODE_IK_DEF ||
-                f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF ||
+                f->shared->btree_k[H5B_CHUNK_ID] != HDF5_BTREE_CHUNK_IK_DEF ||
                 f->shared->sym_leaf_k != H5F_CRT_SYM_LEAF_DEF)
             need_ext = TRUE;
         /* Check for driver info to store */
@@ -809,12 +809,12 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
 
         /* Check for non-default v1 B-tree 'K' values to store */
         if(f->shared->btree_k[H5B_SNODE_ID] != HDF5_BTREE_SNODE_IK_DEF ||
-                f->shared->btree_k[H5B_ISTORE_ID] != HDF5_BTREE_ISTORE_IK_DEF ||
+                f->shared->btree_k[H5B_CHUNK_ID] != HDF5_BTREE_CHUNK_IK_DEF ||
                 f->shared->sym_leaf_k != H5F_CRT_SYM_LEAF_DEF) {
             H5O_btreek_t btreek;        /* v1 B-tree 'K' value message for superblock extension */
 
             /* Write v1 B-tree 'K' value information to the superblock extension */
-            btreek.btree_k[H5B_ISTORE_ID] = f->shared->btree_k[H5B_ISTORE_ID];
+            btreek.btree_k[H5B_CHUNK_ID] = f->shared->btree_k[H5B_CHUNK_ID];
             btreek.btree_k[H5B_SNODE_ID] = f->shared->btree_k[H5B_SNODE_ID];
             btreek.sym_leaf_k = f->shared->sym_leaf_k;
             if(H5O_msg_create(&ext_loc, H5O_BTREEK_ID, H5O_MSG_FLAG_CONSTANT | H5O_MSG_FLAG_DONTSHARE, H5O_UPDATE_TIME, &btreek, dxpl_id) < 0)
@@ -918,7 +918,7 @@ H5F_super_write(H5F_t *f, hid_t dxpl_id)
          * internal 'K' value stored
          */
         if(super_vers > HDF5_SUPERBLOCK_VERSION_DEF) {
-            UINT16ENCODE(p, f->shared->btree_k[H5B_ISTORE_ID]);
+            UINT16ENCODE(p, f->shared->btree_k[H5B_CHUNK_ID]);
             *p++ = 0;   /*reserved */
             *p++ = 0;   /*reserved */
         } /* end if */

@@ -2113,7 +2113,7 @@ H5B_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 	      "Tree type ID:",
 	      ((shared->type->id)==H5B_SNODE_ID ? "H5B_SNODE_ID" :
-            ((shared->type->id)==H5B_ISTORE_ID ? "H5B_ISTORE_ID" : "Unknown!")));
+            ((shared->type->id)==H5B_CHUNK_ID ? "H5B_CHUNK_ID" : "Unknown!")));
     HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
 	      "Size of node:",
 	      shared->sizeof_rnode);
