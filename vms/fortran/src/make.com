@@ -16,8 +16,9 @@ $! Makefile for VMS systems.
 $!
 $! Make HDF5 Fortran library
 $!
-$ ccopt = "/float=ieee_float/define=H5_VMS"
-$ fcopt = "/float=ieee_float/define=H5_VMS"
+$! define zlib_dir sys$sysusers:[pourmale.zlib-1_2_3]
+$! ccopt = "/float=ieee_float/define=H5_VMS/debug/nooptimize/include=zlib_dir"
+$! fcopt = "/float=ieee_float/define=H5_VMS/debug/nooptimize/include=zlib_dir"
 $ ccc := cc 'ccopt /include=[-.-.src]
 $ fff := fortran 'fcopt 
 $ type sys$input
@@ -48,13 +49,14 @@ $ type sys$input
 	Creating  HDF5 Fortran library
 $!
 $ cobj="H5f90kit, H5_f, H5Af, H5Df, H5Ef, H5Ff, H5Gf, "+-
-       "H5If, H5Pf, H5Rf, H5Sf, H5Tf, H5Zf"
+       "H5If, H5Lf, H5Of, H5Pf, H5Rf, H5Sf, H5Tf, H5Zf"
 $ ffiles= "H5_ff.f90, H5Aff.f90, H5Dff.f90, H5Eff.f90,"+-
+          "H5Lff.f90, H5Off.f90,"+-
           "H5Fff.f90, H5Gff.f90, H5Iff.f90, H5Pff.f90, H5Rff.f90, H5Sff.f90,"+-
           "H5Tff.f90, H5Zff.f90, H5_DBLE_InterfaceInclude.f90, HDF5.f90"
 $ fobj="H5fortran_flags, H5f90global, "+-
        "H5fortran_types, H5_ff, H5Aff, H5Dff, H5Eff,"+-
-       "H5Fff, H5Gff, H5Iff, H5Pff, H5Rff, H5Sff,"+-
+       "H5Fff, H5Gff, H5Iff, H5Lff, H5Off, H5Pff, H5Rff, H5Sff,"+-
        "H5Tff, H5Zff, H5_DBLE_InterfaceInclude, HDF5"
 $!
 $ ccc 'cobj 

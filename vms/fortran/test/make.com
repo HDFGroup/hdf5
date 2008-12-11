@@ -16,8 +16,9 @@ $! Makefile for VMS systems.
 $!
 $! Make HDF5 Fortran tests
 $!
-$ ccopt = "/float=ieee_float/define=H5_VMS"
-$ fcopt = "/float=ieee_float/define=H5_VMS"
+$! define zlib_dir sys$sysusers:[pourmal.zlib-1_2_3]
+$! ccopt = "/float=ieee_float/define=H5_VMS/debug/nooptimize/include=zlib_dir"
+$! fcopt = "/float=ieee_float/define=H5_VMS/debug/nooptimize/include=zlib_dir"
 $ ccc := cc 'ccopt /include=[-.-.src]
 $ fff := fortran 'fcopt /module=[-.src]
 $
@@ -50,7 +51,7 @@ $ link fflush2,h5test_fortran.olb/lib,-
              [-.-.test]libh5test.olb/lib, - 
              [-.src]hdf5_fortran.olb/lib,-
              [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$ link/exec=fortranlib_test.exe -
+$ link/debug/exec=fortranlib_test.exe -
   fortranlib_test.obj, tH5F.obj, tH5D.obj, -
   tH5R.obj, tH5S.obj, tH5T.obj, tH5VL.obj, tH5Z.obj, tH5Sselect.obj, -
   tH5P.obj, tH5A.obj, tH5I.obj, tH5G.obj, tH5E.obj,-
@@ -58,7 +59,7 @@ $ link/exec=fortranlib_test.exe -
   [-.src]hdf5_fortran.olb/lib,-
   [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ link/exec=fortranlib_test_1_8.exe -
-  fortranlib_test_1_8.obj, tH5F.obj, tH5A_1_8.obj, tH5G_1_8.obj,-
+  fortranlib_test_1_8.obj, tH5F.obj, tH5O.obj, tH5A_1_8.obj, tH5G_1_8.obj,-
   h5test_fortran.olb/lib,[-.-.test]libh5test.olb/lib, -
   [-.src]hdf5_fortran.olb/lib,-
   [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
