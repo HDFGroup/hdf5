@@ -1495,7 +1495,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\src\H5Distore.c"
+				RelativePath="..\..\..\src\H5Dbtree.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
