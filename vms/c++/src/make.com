@@ -16,7 +16,7 @@ $! Makefile for VMS systems.
 $!
 $! Make HDF5 C++ library
 $!
-$ cxxopt = "/float=ieee_float/standard=strict_ansi/define=H5_VMS"
+$! cxxopt = "/float=ieee_float/standard=strict_ansi/define=H5_VMS"
 $ ccc := cxx 'cxxopt /include=([-.-.src])
 $!
 $! type sys$input
@@ -25,8 +25,6 @@ $!
 $ lib/create/object hdf5_cplus.olb
 $ ccc H5AbstractDs.cxx
 $ lib/insert/object hdf5_cplus H5AbstractDs
-$ ccc H5Alltypes.cxx
-$ lib/insert/object hdf5_cplus H5Alltypes
 $ ccc H5ArrayType.cxx
 $ lib/insert/object hdf5_cplus H5ArrayType
 $ ccc H5AtomType.cxx
