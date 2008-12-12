@@ -31,6 +31,7 @@ $ copy [.tools.h5diff]*.com     [-.tools.h5diff]
 $ copy [.tools.h5repack]*.com   [-.tools.h5repack]
 $ copy [.tools.h5import]*.com   [-.tools.h5import]
 $ copy [.tools.h5jam]*.com      [-.tools.h5jam]
+$ copy [.tools.h5stat]*.com     [-.tools.h5stat]
 $ copy [.tools.lib]make.com     [-.tools.lib]
 $ copy [.tools.testfiles]*.ddl  [-.tools.testfiles]
 $!
