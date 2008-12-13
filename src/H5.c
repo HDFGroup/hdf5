@@ -262,6 +262,7 @@ H5_term_library(void)
          */
         if(pending == 0) {
             pending += DOWN(AC);
+            pending += DOWN(AC2);
             pending += DOWN(Z);
             pending += DOWN(FD);
             pending += DOWN(P);
