@@ -102,6 +102,9 @@ Bug Fixes since HDF5-1.8.2
 
     Library
     -------
+    - Fixed up some old v2 btree assertions that get run in debug mode that
+      were previously failing on compilation, and removed some of the 
+      more heavily outdated and non-rewritable ones. MAM - 2008/12/15
     - Fixed a bug that could cause problems when "automatically" unmounting
       multiple files.  NAF - 2008/11/17
 
