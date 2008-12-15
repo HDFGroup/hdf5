@@ -885,6 +885,13 @@ HDfprintf(stderr, "%s: file->eof = %a, file->eoa = %a\n", FUNC, file->eof, file-
         if(SetEndOfFile((HANDLE)filehandle) == 0)
             HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #else /* _WIN32 */
+#ifdef H5_VMS
+        /* Reset seek offset to the beginning of the file, so that the file isn't
+         * re-extended later.  This may happen on Open VMS. */
+        if(HDlseek(file->fd, (file_offset_t)0, SEEK_SET) < 0)
+            HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
+#endif
+
         if(-1 == HDftruncate(file->fd, (file_offset_t)file->eoa))
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
 #endif /* _WIN32 */
@@ -900,4 +907,3 @@ HDfprintf(stderr, "%s: file->eof = %a, file->eoa = %a\n", FUNC, file->eof, file-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_sec2_truncate() */
-
