@@ -2052,7 +2052,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AGET_NAME_BY_IDX_C'::h5aget_name_by_idx_c
          !DEC$ ENDIF
-
+         !DEC$ ATTRIBUTES reference :: obj_name, name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          INTEGER, INTENT(IN) :: idx_type
@@ -2370,7 +2370,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5ARENAME_BY_NAME_C'::h5arename_by_name_c
          !DEC$ ENDIF
-         !DEC$ATTRIBUTES reference :: obj_name
+         !DEC$ATTRIBUTES reference :: obj_name,  old_attr_name, new_attr_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          INTEGER(SIZE_T) :: obj_namelen
@@ -2594,7 +2594,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5ADELETE_BY_NAME_C'::h5adelete_by_name_c
          !DEC$ ENDIF
-         !DEC$ATTRIBUTES reference :: obj_name
+         !DEC$ATTRIBUTES reference :: obj_name, attr_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          CHARACTER(LEN=*), INTENT(IN) :: attr_name
@@ -2677,6 +2677,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_BY_IDX_C'::h5aopen_by_idx_c
          !DEC$ ENDIF
+         !DEC$ ATTRIBUTES reference :: obj_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          INTEGER, INTENT(IN) :: idx_type
@@ -2836,6 +2837,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_BY_IDX_C'::h5aget_info_by_idx_c
          !DEC$ ENDIF
+         !DEC$ ATTRIBUTES reference :: obj_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          INTEGER, INTENT(IN) :: idx_type
@@ -2921,6 +2923,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AGET_INFO_BY_NAME_C'::h5aget_info_by_name_c
          !DEC$ ENDIF
+         !DEC$ ATTRIBUTES reference :: obj_name, attr_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          INTEGER(SIZE_T), INTENT(IN) :: obj_namelen
@@ -3011,6 +3014,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5ACREATE_BY_NAME_C'::h5acreate_by_name_c
          !DEC$ ENDIF
+         !DEC$ ATTRIBUTES reference :: obj_name, attr_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          INTEGER(SIZE_T), INTENT(IN) :: obj_namelen
@@ -3082,6 +3086,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AEXISTS_C'::h5aexists_c
          !DEC$ ENDIF
+         !DEC$ ATTRIBUTES reference :: attr_name
          INTEGER(HID_T), INTENT(IN) :: obj_id
          CHARACTER(LEN=*), INTENT(IN) :: attr_name
          INTEGER(SIZE_T) :: attr_namelen
@@ -3146,6 +3151,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AEXISTS_BY_NAME_C'::h5aexists_by_name_c
          !DEC$ ENDIF
+         !DEC$ ATTRIBUTES reference :: obj_name, attr_name 
          INTEGER(HID_T), INTENT(IN) :: loc_id  
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          INTEGER(SIZE_T), INTENT(IN) :: obj_namelen
@@ -3221,6 +3227,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5AOPEN_BY_NAME_C'::h5aopen_by_name_c
          !DEC$ ENDIF
+         !DEC$ ATTRIBUTES reference :: obj_name, attr_name
          INTEGER(HID_T), INTENT(IN) :: loc_id  
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          INTEGER(SIZE_T), INTENT(IN) :: obj_namelen

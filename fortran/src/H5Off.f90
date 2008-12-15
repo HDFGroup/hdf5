@@ -69,6 +69,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5OLINK_C'::h5olink_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: new_link_name
          INTEGER(HID_T), INTENT(IN) :: object_id
          INTEGER(HID_T), INTENT(IN) :: new_loc_id
          CHARACTER(LEN=*), INTENT(IN) :: new_link_name
@@ -134,6 +135,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5OOPEN_C'::h5oopen_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: name
          INTEGER(HID_T) :: lapl_id_default

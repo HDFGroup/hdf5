@@ -79,6 +79,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LCOPY_C'::h5lcopy_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: src_name, dest_name
          INTEGER(HID_T), INTENT(IN) :: src_loc_id
          CHARACTER(LEN=*), INTENT(IN) :: src_name
          INTEGER(HID_T), INTENT(IN) :: dest_loc_id
@@ -147,6 +148,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LDELETE_C'::h5ldelete_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: name
          INTEGER(HID_T) :: lapl_id_default
@@ -214,6 +216,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LCREATE_SOFT_C'::h5lcreate_soft_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: target_path, link_name
          CHARACTER(LEN=*), INTENT(IN) :: target_path
          INTEGER(SIZE_T) :: target_path_len
          INTEGER(HID_T), INTENT(IN) ::   link_loc_id
@@ -295,6 +298,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LCREATE_HARD_C'::h5lcreate_hard_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: obj_name, link_name
          INTEGER(HID_T), INTENT(IN) :: obj_loc_id
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          INTEGER(HID_T), INTENT(IN) :: link_loc_id
@@ -378,6 +382,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LCREATE_EXTERNAL_C'::h5lcreate_external_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: file_name, obj_name, link_name
          CHARACTER(LEN=*), INTENT(IN) :: file_name
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
          INTEGER(HID_T), INTENT(IN) :: link_loc_id
@@ -534,6 +539,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LEXISTS_C'::h5lexists_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: name
          INTEGER(SIZE_T), INTENT(IN) :: namelen
@@ -626,6 +632,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LGET_INFO_C'::h5lget_info_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: link_name
          INTEGER(HID_T), INTENT(IN) :: link_loc_id
          CHARACTER(LEN=*), INTENT(IN) :: link_name
          INTEGER, INTENT(OUT) :: cset 
@@ -719,6 +726,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LGET_INFO_BY_IDX_C'::h5lget_info_by_idx_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: group_name
          INTEGER(HID_T), INTENT(IN) :: loc_id 
          CHARACTER(LEN=*), INTENT(IN) :: group_name
          INTEGER(SIZE_T)  :: group_namelen
@@ -853,7 +861,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LMOVE_C'::h5lmove_c
          !DEC$ ENDIF
-
+         !DEC$ATTRIBUTES reference :: src_name, dest_name
          INTEGER(HID_T), INTENT(IN) :: src_loc_id 
          CHARACTER(LEN=*), INTENT(IN) :: src_name
          INTEGER(SIZE_T) :: src_namelen
@@ -944,6 +952,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LGET_NAME_BY_IDX_C'::h5lget_name_by_idx_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: group_name
          INTEGER(HID_T), INTENT(IN) :: loc_id 
          CHARACTER(LEN=*), INTENT(IN) :: group_name
          INTEGER(SIZE_T)  :: group_namelen
