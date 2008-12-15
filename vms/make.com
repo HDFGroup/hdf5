@@ -34,6 +34,7 @@ $ copy [.tools.h5jam]*.com      [-.tools.h5jam]
 $ copy [.tools.h5stat]*.com     [-.tools.h5stat]
 $ copy [.tools.lib]make.com     [-.tools.lib]
 $ copy [.tools.testfiles]*.ddl  [-.tools.testfiles]
+$ copy [.tools.misc]make.com    [-.tools.misc]
 $!
 $! Define location of ZLIB library. If you do not have it on your system, download
 $! source code from http://www.zlib.net/, build and install on your system
@@ -65,6 +66,7 @@ $ hdf5tools_h5jam      = hdf5top_dir + "TOOLS.H5JAM]"
 $ hdf5tools_h5ls       = hdf5top_dir + "TOOLS.H5LS]"
 $ hdf5tools_h5repack   = hdf5top_dir + "TOOLS.H5REPACK]"
 $ hdf5tools_h5stat     = hdf5top_dir + "TOOLS.H5STAT]"
+$ hdf5tools_misc       = hdf5top_dir + "TOOLS.MISC]"
 $ hdf5fortran_examples = hdf5top_dir + "FORTRAN.EXAMPLES]"
 $ hdf5fortran_src      = hdf5top_dir + "FORTRAN.SRC]"
 $ hdf5fortran_test     = hdf5top_dir + "FORTRAN.TEST]"
@@ -115,6 +117,10 @@ $ @make.com
 $!
 $ write sys$output "Building h5stat"
 $ set def 'hdf5tools_h5stat'
+$ @make.com
+$!
+$ write sys$output "Building misc"
+$ set def 'hdf5tools_misc'
 $ @make.com
 $!
 $ write sys$output "Building Fortran library"
