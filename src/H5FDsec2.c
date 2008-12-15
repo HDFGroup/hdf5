@@ -863,7 +863,7 @@ H5FD_sec2_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_sec2_truncate, FAIL)
-#ifndef QAK
+#ifdef QAK
 HDfprintf(stderr, "%s: file->eof = %a, file->eoa = %a\n", FUNC, file->eof, file->eoa);
 #endif /* QAK */
 
