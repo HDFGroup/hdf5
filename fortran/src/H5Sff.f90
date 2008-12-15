@@ -595,16 +595,6 @@
        c_coord(i,:) = coord(rank-i+1, :) - 1
     ENDDO
     hdferr = h5sselect_elements_c(space_id, OPERATOR, num_elements, c_coord)
-    
-!            ALLOCATE(c_coord(num_elements,rank), stat = error)
-!            IF (error.NE. 0) THEN
-!               hdferr = -1
-!               RETURN
-!            ENDIF
-!
-!            c_coord = TRANSPOSE(coord)
-!            hdferr = h5sselect_elements_c(space_id, OPERATOR, INT(rank,size_t), c_coord)
-
 
     DEALLOCATE(c_coord)
  

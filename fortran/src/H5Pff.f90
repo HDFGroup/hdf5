@@ -6338,6 +6338,7 @@
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_DATA_TRANSFORM_C'::h5pget_data_transform_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: expression
          INTEGER(HID_T), INTENT(IN) :: plist_id 
          CHARACTER(LEN=*), INTENT(OUT) :: expression 
          INTEGER(SIZE_T) :: size_default
@@ -6392,6 +6393,7 @@
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_DATA_TRANSFORM_C'::h5pset_data_transform_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: expression
          INTEGER(HID_T), INTENT(IN) :: plist_id 
          CHARACTER(LEN=*), INTENT(IN) :: expression
          INTEGER :: expression_len

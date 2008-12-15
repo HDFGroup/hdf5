@@ -489,6 +489,7 @@
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5RGET_NAME_OBJECT_C':: h5rget_name_object_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          INTEGER(SIZE_T)  :: size_default
          CHARACTER(LEN=*), INTENT(OUT) :: name
@@ -554,6 +555,7 @@
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5RGET_NAME_REGION_C':: h5rget_name_region_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          INTEGER(SIZE_T)  :: size_default
          CHARACTER(LEN=*), INTENT(OUT) :: name

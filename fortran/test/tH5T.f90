@@ -1119,7 +1119,6 @@ SUBROUTINE test_derived_flt(cleanup, total_error)
   CALL h5fclose_f(file,error)
   CALL check("h5fclose_f", error, total_error)
 
-
   IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
   CALL check("h5_cleanup_f", error, total_error)
 

@@ -1770,7 +1770,7 @@ CONTAINS
 !		index		- filed index (0-based)
 ! Outputs:  
 !		member_name	- buffer to hold member's name
-!		namelen		- name lenght
+!		namelen		- name length
 !		hdferr:		- error code		
 !				 	Success:  0
 !				 	Failure: -1   
@@ -2811,7 +2811,7 @@ CONTAINS
 !----------------------------------------------------------------------
 ! Name:		h5tvlen_create_f 
 !
-! Purpose: 	Creates a new variable-lenght datatype. 
+! Purpose: 	Creates a new variable-length datatype. 
 !
 ! Inputs:  
 !		type_id		- identifier iof base datatype
@@ -3132,6 +3132,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TDECODE_C'::h5tdecode_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: buf
          CHARACTER(LEN=*), INTENT(IN) :: buf
          INTEGER(HID_T), INTENT(OUT) :: obj_id  ! Object ID
        END FUNCTION h5tdecode_c
@@ -3180,6 +3181,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5TENCODE_C'::h5tencode_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: buf
          INTEGER(HID_T), INTENT(IN) :: obj_id
          CHARACTER(LEN=*), INTENT(OUT) :: buf
          INTEGER(SIZE_T), INTENT(INOUT) :: nalloc
@@ -3338,6 +3340,5 @@ CONTAINS
     
     hdferr = h5tget_native_type_c(dtype_id, direction, native_dtype_id)
   END SUBROUTINE h5tget_native_type_f
-
 
 END MODULE H5T
