@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="Windows-1252"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
@@ -626,6 +626,40 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5B2cache.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="AlphaRel|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"
+						RuntimeLibrary="2"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="AlphaDbg|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_HDF5DLL_;$(NoInherit)"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="2"
+						PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_HDF5DLL_;ZLIB_DLL;_SZDLL_;$(NoInherit)"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Bdbg.c">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
