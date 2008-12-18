@@ -35,7 +35,8 @@
 
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_ainfo_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void *H5O_ainfo_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_ainfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_ainfo_copy(const void *_mesg, void *_dest);
 static size_t H5O_ainfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -102,7 +103,7 @@ H5FL_DEFINE_STATIC(H5O_ainfo_t);
  */
 static void *
 H5O_ainfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_ainfo_t	*ainfo = NULL;  /* Attribute info */
     unsigned char flags;        /* Flags for encoding attribute info */
@@ -155,7 +156,7 @@ H5O_ainfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
 
 done:
     if(ret_value == NULL && ainfo != NULL)
-        H5FL_FREE(H5O_ainfo_t, ainfo);
+        (void)H5FL_FREE(H5O_ainfo_t, ainfo);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_ainfo_decode() */
@@ -310,7 +311,7 @@ H5O_ainfo_free(void *mesg)
 
     HDassert(mesg);
 
-    H5FL_FREE(H5O_ainfo_t, mesg);
+    (void)H5FL_FREE(H5O_ainfo_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_ainfo_free() */
@@ -432,7 +433,7 @@ H5O_ainfo_copy_file(H5F_t UNUSED *file_src, void *mesg_src,
 done:
     /* Release destination attribute information on failure */
     if(ret_value == NULL && ainfo_dst != NULL)
-        H5FL_FREE(H5O_ainfo_t, ainfo_dst);
+        (void)H5FL_FREE(H5O_ainfo_t, ainfo_dst);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_ainfo_copy_file() */

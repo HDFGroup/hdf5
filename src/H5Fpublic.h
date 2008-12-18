@@ -107,6 +107,12 @@ typedef struct H5F_info_t {
     } sohm;
 } H5F_info_t;
 
+/* Library's file format versions */
+typedef enum H5F_libver_t {
+    H5F_LIBVER_EARLIEST,        /* Use the earliest possible format for storing objects */
+    H5F_LIBVER_LATEST           /* Use the latest possible format available for storing objects*/
+} H5F_libver_t;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -123,8 +129,8 @@ H5_DLL herr_t H5Fclose(hid_t file_id);
 H5_DLL hid_t  H5Fget_create_plist(hid_t file_id);
 H5_DLL hid_t  H5Fget_access_plist(hid_t file_id);
 H5_DLL herr_t H5Fget_intent(hid_t file_id, unsigned * intent);
-H5_DLL int H5Fget_obj_count(hid_t file_id, unsigned types);
-H5_DLL int H5Fget_obj_ids(hid_t file_id, unsigned types, int max_objs, hid_t *obj_id_list);
+H5_DLL ssize_t H5Fget_obj_count(hid_t file_id, unsigned types);
+H5_DLL ssize_t H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *obj_id_list);
 H5_DLL herr_t H5Fget_vfd_handle(hid_t file_id, hid_t fapl, void **file_handle);
 H5_DLL herr_t H5Fmount(hid_t loc, const char *name, hid_t child, hid_t plist);
 H5_DLL herr_t H5Funmount(hid_t loc, const char *name);

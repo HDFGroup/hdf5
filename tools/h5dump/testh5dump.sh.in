@@ -325,8 +325,7 @@ TOOLTEST tall-2B.ddl -A -r tall.h5
 TOOLTEST tall-4s.ddl --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5
 TOOLTEST tall-5s.ddl -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5
 TOOLTEST tdset-3s.ddl -d "/dset1[1,1;;;]" tdset.h5
-# block
-# TOOLTEST tdset2-1s.ddl -d "/dset1[;3,2;4,4;1,4]" tdset2.h5
+
 
 # test printing characters in ASCII instead of decimal
 TOOLTEST tchar1.ddl -r tchar.h5
@@ -373,11 +372,18 @@ TOOLTEST tstring2.ddl -r -d str4 tstr3.h5
 TOOLTEST tindicesyes.ddl taindices.h5
 TOOLTEST tindicesno.ddl -y taindices.h5
 
-# array indices with subsetting
-TOOLTEST tindicessub1.ddl -d 1d -s 3 -c 40 taindices.h5
-TOOLTEST tindicessub2.ddl -d 2d -s 1,3 -c 6,4 taindices.h5
-TOOLTEST tindicessub3.ddl -d 3d -s 0,1,3 -c 2,6,4 taindices.h5
-TOOLTEST tindicessub4.ddl -d 4d -s 0,0,1,3 -c 2,2,6,4 taindices.h5
+########## array indices with subsetting
+# 1D case
+TOOLTEST tindicessub1.ddl -d 1d -s 1 -S 10 -c 2  -k 3 taindices.h5
+
+# 2D case
+TOOLTEST tindicessub2.ddl -d 2d -s 1,2  -S 3,3 -c 3,2 -k 2,2 taindices.h5
+
+# 3D case
+TOOLTEST tindicessub3.ddl -d 3d -s 0,1,2 -S 1,3,3 -c 2,2,2  -k 1,2,2  taindices.h5
+
+# 4D case
+TOOLTEST tindicessub4.ddl -d 4d -s 0,0,1,2  -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2  taindices.h5
 
 
 # tests for filters
@@ -456,20 +462,28 @@ TOOLTEST tvms.ddl tvms.h5
 
 # test for binary output
 TOOLTEST1   tbin1.ddl -d integer -o $TESTDIR/out1.bin -b LE    tbinary.h5
-TOOLTEST1   tbin2.ddl -d float  -o $TESTDIR/out2.bin -b BE     tbinary.h5
 
-# the MEMORY test can be validated with h5import/h5diff
-TOOLTEST1   tbin3.ddl -d integer -o $TESTDIR/out3.bin -b MEMORY tbinary.h5
+# NATIVE default. the NATIVE test can be validated with h5import/h5diff
+TOOLTEST1   tbin1.ddl -d integer -o $TESTDIR/out1.bin  -b      tbinary.h5
+IMPORTTEST $TESTDIR/out1.bin -c out3.h5import -o $TESTDIR/out1.h5
+DIFFTEST   tbinary.h5 $TESTDIR/out1.h5 /integer /integer
+
+TOOLTEST1   tbin2.ddl -b BE -d float  -o $TESTDIR/out2.bin      tbinary.h5
+
+# the NATIVE test can be validated with h5import/h5diff
+TOOLTEST1   tbin3.ddl -d integer -o $TESTDIR/out3.bin -b NATIVE tbinary.h5
 IMPORTTEST $TESTDIR/out3.bin -c out3.h5import -o $TESTDIR/out3.h5
 DIFFTEST   tbinary.h5 $TESTDIR/out3.h5 /integer /integer
 
-TOOLTEST1   tbin4.ddl -d double  -o $TESTDIR/out4.bin -b FILE   tbinary.h5
+TOOLTEST1   tbin4.ddl -d double  -b FILE -o $TESTDIR/out4.bin    tbinary.h5
    
 # Clean up binary output files
 if test -z "$HDF5_NOCLEANUP"; then
  rm -f $TESTDIR/out[1-4].bin
+ rm -f $TESTDIR/out1.h5
  rm -f $TESTDIR/out3.h5
 fi
+
 
 
 # test for dataset region references 
@@ -488,6 +502,14 @@ TOOLTEST torderattr1.ddl -H --sort_by=name --sort_order=ascending torderattr.h5
 TOOLTEST torderattr2.ddl -H --sort_by=name --sort_order=descending torderattr.h5
 TOOLTEST torderattr3.ddl -H --sort_by=creation_order --sort_order=ascending torderattr.h5
 TOOLTEST torderattr4.ddl -H --sort_by=creation_order --sort_order=descending torderattr.h5
+
+
+# tests for floating point user defined printf format
+TOOLTEST tfpformat.ddl -m %.7f tfpformat.h5
+
+# tests for traversal of external links
+TOOLTEST textlinksrc.ddl textlinksrc.h5
+TOOLTEST textlinkfar.ddl textlinkfar.h5
 
 
 

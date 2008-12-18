@@ -172,9 +172,9 @@ static unsigned long cur_accum = 0;
 static int           cur_bits = 0;
 
 #define MAXCODE(n_bits)     ( (1 << (n_bits)) - 1)
-#ifndef _WIN32
+#ifndef min
 #define min(a,b)        ((a>b) ? b : a)
-#endif
+#endif /* min */
 #define XV_BITS 12    /* BITS was already defined on some systems */
 #define MSDOS 1
 #define HSIZE  5003            /* 80% occupancy */

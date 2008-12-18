@@ -33,7 +33,8 @@
 
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_refcount_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void *H5O_refcount_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_refcount_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_refcount_copy(const void *_mesg, void *_dest);
 static size_t H5O_refcount_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -90,7 +91,7 @@ H5FL_DEFINE_STATIC(H5O_refcount_t);
  */
 static void *
 H5O_refcount_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_refcount_t *refcount = NULL;  /* Reference count */
     void        *ret_value;     /* Return value */
@@ -117,7 +118,7 @@ H5O_refcount_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_
 
 done:
     if(ret_value == NULL && refcount != NULL)
-        H5FL_FREE(H5O_refcount_t, refcount);
+        (void)H5FL_FREE(H5O_refcount_t, refcount);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_refcount_decode() */
@@ -249,7 +250,7 @@ H5O_refcount_free(void *mesg)
 
     HDassert(mesg);
 
-    H5FL_FREE(H5O_refcount_t, mesg);
+    (void)H5FL_FREE(H5O_refcount_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_refcount_free() */

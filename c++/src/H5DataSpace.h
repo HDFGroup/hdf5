@@ -86,7 +86,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
 
 	// Selects array elements to be included in the selection for
 	// this dataspace.
-	void selectElements( H5S_seloper_t op, const size_t num_elements, const hsize_t *coord[ ] ) const;
+	void selectElements( H5S_seloper_t op, const size_t num_elements, const hsize_t *coord) const;
 
 	// Selects a hyperslab region to add to the current selected region.
 	void selectHyperslab( H5S_seloper_t op, const hsize_t *count, const hsize_t *start, const hsize_t *stride = NULL, const hsize_t *block = NULL ) const;
@@ -112,8 +112,18 @@ class H5_DLLCPP DataSpace : public IdComponent {
 	// Copy constructor: makes a copy of the original DataSpace object.
 	DataSpace(const DataSpace& original);
 
+	// Gets the dataspace id.
+	virtual hid_t getId() const;
+
 	// Destructor: properly terminates access to this dataspace.
 	virtual ~DataSpace();
+
+   private:
+	hid_t id;       // HDF5 dataspace id
+
+   protected:
+	// Sets the dataspace id.
+	virtual void p_setId(const hid_t new_id);
 };
 #ifndef H5_NO_NAMESPACE
 }

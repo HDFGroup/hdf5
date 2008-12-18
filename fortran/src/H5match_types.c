@@ -1,4 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
@@ -8,8 +9,8 @@
  * of the source code distribution tree; Copyright.html can be found at the  *
  * root level of an installed copy of the electronic HDF5 document set and   *
  * is linked from the top-level documents page.  It can also be found at     *
- * http://hdf.ncsa.uiuc.edu/HDF5/doc/Copyright.html.  If you do not have     *
- * access to either file, you may request a copy from hdfhelp@ncsa.uiuc.edu. *
+ * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+ * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* C Program to match C types to Fortran types
@@ -39,7 +40,7 @@ initCfile(void)
 {
   fprintf(c_header,
     "/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *\n\
-* Copyright by the Board of Trustees of the University of Illinois.         *\n\
+ * Copyright by the Board of Trustees of the University of Illinois.         *\n\
  * All rights reserved.                                                      *\n\
  *                                                                           *\n\
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *\n\
@@ -110,12 +111,6 @@ void writeFloatTypedef(const char* c_type, unsigned int size)
   fprintf(c_header, "#define c_float_%d %s\n", size, c_type);
 }
 
-/* Define a c_double_x type in the C header */
-void writeDoubleTypedef(const char* c_type, unsigned int size)
-{
-  fprintf(c_header, "#define c_double_%d %s\n", size, c_type);
-}
-
 /* Call this function if there is no matching C type for sizes > 1 */
 void writeTypedefDefault(unsigned int size)
 {
@@ -139,20 +134,24 @@ void writeFloatToFiles(const char* fortran_type, const char* c_type, unsigned in
   fprintf(c_header, "typedef c_float_%d %s;\n", size, c_type);
 }
 
-/* Create matching Fortran and C floating types by writing to both files */
-void writeDoubleToFiles(const char* fortran_type, const char* c_type, unsigned int size)
-{
-  fprintf(fort_header, "        INTEGER, PARAMETER :: %s = %d\n", fortran_type, size);
-
-  fprintf(c_header, "typedef c_double_%d %s;\n", size, c_type);
-}
-
-
 int main()
 {
+  int FoundIntSize[4];
+  int FoundRealSize[4];
+  int i,j,flag;
+  char chrA[20],chrB[20];
+  int H5_C_HAS_REAL_NATIVE_16;
+  int H5_C_HAS_REAL_NATIVE_12;
+
   /* Open target files */
   c_header = fopen(CFILE, "w");
   fort_header = fopen(FFILE, "w");
+
+
+/* Default is C has 16 byte float */
+  H5_C_HAS_REAL_NATIVE_16 = 1; 
+/* Default is C has 12 byte float */
+  H5_C_HAS_REAL_NATIVE_12 = 1; 
 
   /* Write copyright, boilerplate to both files */
   initCfile();
@@ -217,7 +216,7 @@ int main()
 
   /* Define c_float_x */
 
-#if defined H5_FORTRAN_HAS_REAL_NATIVE_4
+#if defined H5_FORTRAN_HAS_REAL_NATIVE_4 || defined H5_FORTRAN_HAS_REAL_4
   if(sizeof(long double) == 4)
     writeFloatTypedef("long double", 4);
   else if(sizeof(double) == 4)
@@ -231,7 +230,7 @@ int main()
    }
 #endif /*H5_FORTRAN_HAS_REAL_NATIVE_4*/
 
-#if defined H5_FORTRAN_HAS_REAL_NATIVE_8
+#if defined H5_FORTRAN_HAS_REAL_NATIVE_8 || defined H5_FORTRAN_HAS_REAL_8
   if(sizeof(long double) == 8)
     writeFloatTypedef("long double", 8);
   else if(sizeof(double) == 8)
@@ -245,49 +244,33 @@ int main()
    }
 #endif /*H5_FORTRAN_HAS_REAL_NATIVE_8*/
 
-#if defined H5_FORTRAN_HAS_REAL_NATIVE_16
+#if defined H5_FORTRAN_HAS_REAL_NATIVE_12 || defined H5_FORTRAN_HAS_REAL_12
+  if(sizeof(long double) == 12)
+    writeFloatTypedef("long double", 12);
+  else if(sizeof(double) == 12)
+   writeFloatTypedef("double", 12);
+  else if(sizeof(float) == 12)
+   writeFloatTypedef("float", 12);
+  else /*C has no 12 byte float so disable it in Fortran*/ 
+   { printf("warning: Fortran REAL is 12 bytes, no corresponding C floating type\n");
+     printf("         Disabling Fortran 12 byte REALs\n");
+     H5_C_HAS_REAL_NATIVE_12 = 0;
+   }
+#endif /*H5_FORTRAN_HAS_REAL_NATIVE_8*/
+
+#if defined H5_FORTRAN_HAS_REAL_NATIVE_16 || defined H5_FORTRAN_HAS_REAL_16
   if(sizeof(long double) == 16)
     writeFloatTypedef("long double", 16);
   else if(sizeof(double) == 16)
    writeFloatTypedef("double", 16);
   else if(sizeof(float) == 16)
    writeFloatTypedef("float", 16);
-  else
-   { printf("Fortran REAL is 16 bytes, no corresponding C floating type\n");
-     printf("Quitting....\n");
-     return -1;
+  else /*C has no 16 byte float so disable it in Fortran*/ 
+   { printf("warning: Fortran REAL is 16 bytes, no corresponding C floating type\n");
+     printf("         Disabling Fortran 16 byte REALs\n");
+     H5_C_HAS_REAL_NATIVE_16 = 0;
    }
 #endif /*H5_FORTRAN_HAS_REAL_NATIVE_16*/
-
-  /* Define c_double_x */
-
-#if defined H5_FORTRAN_HAS_DOUBLE_NATIVE_8
-  if(sizeof(long double) == 8)
-    writeDoubleTypedef("long double", 8);
-  else if(sizeof(double) == 8)
-   writeDoubleTypedef("double", 8);
-  else if(sizeof(float) == 8)
-   writeDoubleTypedef("float", 8);
-  else
-   { printf("Fortran DOUBLE is 16 bytes, no corresponding C floating type\n");
-     printf("Quitting....\n");
-     return -1;
-   }
-#endif /*H5_FORTRAN_HAS_DOUBLE_NATIVE_8*/
-
-#if defined H5_FORTRAN_HAS_DOUBLE_NATIVE_16
-  if(sizeof(long double) == 16)
-    writeDoubleTypedef("long double", 16);
-  else if(sizeof(double) == 16)
-   writeDoubleTypedef("double", 16);
-  else if(sizeof(float) == 16)
-   writeDoubleTypedef("float", 16);
-  else
-   { printf("Fortran DOUBLE is 16 bytes, no corresponding C floating type\n");
-     printf("Quitting....\n");
-     return -1;
-   }
-#endif /*H5_FORTRAN_HAS_DOUBLE_NATIVE_16*/
 
   /* Now begin defining fortran types. */
   fprintf(c_header, "\n");
@@ -362,6 +345,156 @@ int main()
     return -1;
 #endif
 
+
+  /* int_1, int_2, int_4, int_8 */
+
+/* Defined different KINDs of integers:                       */
+/* if the integer kind is not available then we assign        */
+/* it a value of the next larger one, but if the next         */
+/* higher one is not available we assigned it the next lowest */
+
+    FoundIntSize[0] = -1;
+    FoundIntSize[1] = -2;
+    FoundIntSize[2] = -4;
+    FoundIntSize[3] = -8;
+
+#if defined H5_FORTRAN_HAS_INTEGER_1
+    FoundIntSize[0] = 1;
+#endif
+#if defined H5_FORTRAN_HAS_INTEGER_2
+    FoundIntSize[1] = 2;
+#endif
+#if defined H5_FORTRAN_HAS_INTEGER_4
+    FoundIntSize[2] = 4;
+#endif
+#if defined H5_FORTRAN_HAS_INTEGER_8
+    FoundIntSize[3] = 8;
+#endif
+
+    for(i=0;i<4;i++) {
+      if( FoundIntSize[i] > 0) /* Found the integer type */
+	{
+	  sprintf(chrA, "Fortran_INTEGER_%d", FoundIntSize[i]);
+	  sprintf(chrB, "int_%d_f", FoundIntSize[i]);
+	  writeToFiles(chrA, chrB, FoundIntSize[i]);
+	}
+      else  /* Did not find the integer type */
+	{
+	  flag = 0; /* flag indicating if found the next highest */
+	  for(j=i+1;j<4;j++)  /* search for next highest */
+	    {
+	      if( FoundIntSize[j] > 0) /* Found the next highest */
+		{
+		  sprintf(chrA, "Fortran_INTEGER_%d", (-1)*FoundIntSize[i]);
+		  sprintf(chrB, "int_%d_f", (-1)*FoundIntSize[i]);
+		  writeToFiles(chrA, chrB, FoundIntSize[j]);
+		  flag = 1;
+		  break;
+		}
+	    }
+	  if(flag == 0) /* No higher one found, so find next lowest */
+	    {
+	      for(j=2;j>-1;j--)  /* Search for next lowest */
+		{
+		  if( FoundIntSize[j] > 0) /* Found the next lowest */
+		    {
+		      sprintf(chrA, "Fortran_INTEGER_%d", (-1)*FoundIntSize[i]);
+		      sprintf(chrB, "int_%d_f", (-1)*FoundIntSize[i]);
+		      writeToFiles(chrA, chrB, FoundIntSize[j]);
+		      flag = 1;
+		      break;
+		    }
+		}
+	    }
+	  if(flag == 0) /* No higher or lower one found, indicating an error */
+	    {
+	     return -1; 
+	    }
+	}
+    }
+
+  /* real_4, real_8, real_12, real_16 */
+
+/* Defined different KINDs of reals:                          */
+/* if the REAL kind is not available then we assign           */
+/* it a value of the next larger one, but if the next         */
+/* higher one is not available we assigned it the next lowest */
+
+    FoundRealSize[0] = -4;
+    FoundRealSize[1] = -8;
+    FoundRealSize[2] = -12;
+    FoundRealSize[3] = -16;
+
+#if defined H5_FORTRAN_HAS_REAL_4
+    FoundRealSize[0] = 4;
+#endif
+#if defined H5_FORTRAN_HAS_REAL_8
+    FoundRealSize[1] = 8;
+#endif
+#if defined H5_FORTRAN_HAS_REAL_12
+    if(H5_C_HAS_REAL_NATIVE_12 != 0) {
+      FoundRealSize[2] = 12;
+    }
+#endif
+#if defined H5_FORTRAN_HAS_REAL_16
+    if(H5_C_HAS_REAL_NATIVE_16 != 0) {
+      FoundRealSize[3] = 16;
+    }
+#endif
+
+    for(i=0;i<4;i++) {
+      if( FoundRealSize[i] > 0) /* Found the real type */
+	{
+	  sprintf(chrA, "Fortran_REAL_%d", FoundRealSize[i]);
+	  sprintf(chrB, "real_%d_f", FoundRealSize[i]);
+	  writeFloatToFiles(chrA, chrB, FoundRealSize[i]);
+	}
+      else  /* Did not find the real type */
+	{
+	  flag = 0; /* flag indicating if found the next highest */
+	  for(j=i+1;j<4;j++)  /* search for next highest */
+	    {
+	      if( FoundRealSize[j] > 0) /* Found the next highest */
+		{
+		  sprintf(chrA, "Fortran_REAL_%d", (-1)*FoundRealSize[i]);
+		  sprintf(chrB, "real_%d_f", (-1)*FoundRealSize[i]);
+		  if(FoundRealSize[j]>4) {
+		    writeFloatToFiles(chrA, chrB, FoundRealSize[j]);
+		    flag = 1;
+		  }
+		/*   else { */
+/* 		    writeFloatToFiles(chrA, chrB, FoundRealSize[j]); */
+/* 		  } */
+		  flag = 1;
+		  break;
+		}
+	    }
+	  if(flag == 0) /* No higher one found, so find next lowest */
+	    {
+	      for(j=2;j>-1;j--)  /* Search for next lowest */
+		{
+		  if( FoundRealSize[j] > 0) /* Found the next lowest */
+		    {
+		      sprintf(chrA, "Fortran_REAL_%d", (-1)*FoundRealSize[i]);
+		      sprintf(chrB, "real_%d_f", (-1)*FoundRealSize[i]);
+		      if(FoundRealSize[j]>4) {
+			writeFloatToFiles(chrA, chrB, FoundRealSize[j]);
+		      }
+		     /*  else { */
+/* 			writeFloatToFiles(chrA, chrB, FoundRealSize[j]); */
+/* 		      } */
+		      flag = 1;
+		      break;
+		    }
+		}
+	    }
+	  if(flag == 0) /* No higher or lower one found, indicating an error */
+	    {
+	     return -1; 
+	    }
+	}
+    }
+
   /* hid_t */
 #if defined H5_FORTRAN_HAS_INTEGER_8 && H5_SIZEOF_HID_T >= 8
       writeToFiles("HID_T", "hid_t_f", 8);
@@ -380,7 +513,13 @@ int main()
 
   /* real_f */
 #if defined H5_FORTRAN_HAS_REAL_NATIVE_16
+    if(H5_C_HAS_REAL_NATIVE_16 != 0) {
       writeFloatToFiles("Fortran_REAL", "real_f", 16);
+    }
+#elif defined H5_FORTRAN_HAS_REAL_NATIVE_12
+    if(H5_C_HAS_REAL_NATIVE_12 != 0) {
+      writeFloatToFiles("Fortran_REAL", "real_f", 12);
+    }
 #elif defined H5_FORTRAN_HAS_REAL_NATIVE_8
       writeFloatToFiles("Fortran_REAL", "real_f", 8);
 #elif defined H5_FORTRAN_HAS_REAL_NATIVE_4
@@ -392,9 +531,9 @@ int main()
 
   /* double_f */
 #if defined H5_FORTRAN_HAS_DOUBLE_NATIVE_16
-      writeDoubleToFiles("Fortran_DOUBLE", "double_f", 16);
+      writeFloatToFiles("Fortran_DOUBLE", "double_f", 16);
 #elif defined H5_FORTRAN_HAS_DOUBLE_NATIVE_8
-      writeDoubleToFiles("Fortran_DOUBLE", "double_f", 8);
+      writeFloatToFiles("Fortran_DOUBLE", "double_f", 8);
 #else
     /* Error: couldn't find a size for real_f */
     return -1;

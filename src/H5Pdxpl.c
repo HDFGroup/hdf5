@@ -90,9 +90,6 @@
 /* Definitions for I/O transfer mode property */
 #define H5D_XFER_IO_XFER_MODE_SIZE       sizeof(H5FD_mpio_xfer_t)
 #define H5D_XFER_IO_XFER_MODE_DEF        H5FD_MPIO_INDEPENDENT
-/* Definitions for I/O optimization transfer mode property(using MPI-IO independent IO with file set view) */
-#define H5D_XFER_IO_XFER_OPT_MODE_SIZE    sizeof(H5FD_mpio_collective_opt_t)
-#define H5D_XFER_IO_XFER_OPT_MODE_DEF         H5FD_MPIO_COLLECTIVE_IO
 /* Definitions for optimization of MPI-IO transfer mode property */
 #define H5D_XFER_MPIO_COLLECTIVE_OPT_SIZE       sizeof(H5FD_mpio_collective_opt_t)
 #define H5D_XFER_MPIO_COLLECTIVE_OPT_DEF        H5FD_MPIO_COLLECTIVE_IO
@@ -199,7 +196,6 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
     size_t def_hyp_vec_size = H5D_XFER_HYPER_VECTOR_SIZE_DEF;   /* Default value for vector size */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t def_io_xfer_mode = H5D_XFER_IO_XFER_MODE_DEF;      /* Default value for I/O transfer mode */
-    H5FD_mpio_collective_opt_t def_io_xfer_opt_mode = H5D_XFER_IO_XFER_OPT_MODE_DEF;
     H5FD_mpio_chunk_opt_t def_mpio_chunk_opt_mode = H5D_XFER_MPIO_CHUNK_OPT_HARD_DEF;
     H5FD_mpio_collective_opt_t def_mpio_collective_opt_mode = H5D_XFER_MPIO_COLLECTIVE_OPT_DEF;
     unsigned def_mpio_chunk_opt_num = H5D_XFER_MPIO_CHUNK_OPT_NUM_DEF;
@@ -265,8 +261,6 @@ H5P_dxfr_reg_prop(H5P_genclass_t *pclass)
     /* Register the I/O transfer mode property */
     if(H5P_register(pclass, H5D_XFER_IO_XFER_MODE_NAME, H5D_XFER_IO_XFER_MODE_SIZE, &def_io_xfer_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-    if(H5P_register(pclass, H5D_XFER_IO_XFER_OPT_MODE_NAME, H5D_XFER_IO_XFER_OPT_MODE_SIZE, &def_io_xfer_opt_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     if(H5P_register(pclass, H5D_XFER_MPIO_COLLECTIVE_OPT_NAME, H5D_XFER_MPIO_COLLECTIVE_OPT_SIZE, &def_mpio_collective_opt_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
     if(H5P_register(pclass, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME, H5D_XFER_MPIO_CHUNK_OPT_HARD_SIZE, &def_mpio_chunk_opt_mode, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
@@ -329,7 +323,7 @@ H5P_dxfr_create(hid_t dxpl_id, void UNUSED *create_data)
     FUNC_ENTER_NOAPI_NOINIT(H5P_dxfr_create)
 
     /* Check arguments */
-    if(NULL == (plist = H5I_object(dxpl_id)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
     /* Get the driver information */
@@ -378,9 +372,9 @@ H5P_dxfr_copy(hid_t dst_dxpl_id, hid_t src_dxpl_id, void UNUSED *copy_data)
 
     FUNC_ENTER_NOAPI_NOINIT(H5P_dxfr_copy)
 
-    if(NULL == (dst_plist = H5I_object(dst_dxpl_id)))
+    if(NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
-    if(NULL == (src_plist = H5I_object(src_dxpl_id)))
+    if(NULL == (src_plist = (H5P_genplist_t *)H5I_object(src_dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
 
     /* Get values from old property list */
@@ -430,7 +424,7 @@ H5P_dxfr_close(hid_t dxpl_id, void UNUSED *close_data)
     FUNC_ENTER_NOAPI_NOINIT(H5P_dxfr_close)
 
     /* Check arguments */
-    if(NULL == (plist = H5I_object(dxpl_id)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset transfer property list")
 
     if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id) < 0)
@@ -578,7 +572,7 @@ H5Pset_data_transform(hid_t plist_id, const char *expression)
     /* See if a data transform is already set, and free it if it is */
     if(H5P_get(plist, H5D_XFER_XFORM_NAME, &data_xform_prop) >= 0)
 	H5Z_xform_destroy(data_xform_prop);
-	    
+
     /* Create data transform info from expression */
     if(NULL == (data_xform_prop = H5Z_xform_create(expression)))
         HGOTO_ERROR(H5E_PLINE, H5E_NOSPACE, FAIL, "unable to create data transform info")

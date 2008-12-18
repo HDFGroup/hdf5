@@ -45,13 +45,7 @@
 !
 ! Comment:		
 !----------------------------------------------------------------------
-          SUBROUTINE h5zunregister_f(filter, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5zunregister_f
-!DEC$endif
-!
+          SUBROUTINE h5zunregister_f(filter, hdferr)
             IMPLICIT NONE
             INTEGER, INTENT(IN)  :: filter
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
@@ -92,14 +86,7 @@
 ! Modifications: 	
 !
 !----------------------------------------------------------------------
-          SUBROUTINE h5zfilter_avail_f(filter, status, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5zfilter_avail_f
-!DEC$endif
-!
-
+          SUBROUTINE h5zfilter_avail_f(filter, status, hdferr)
             IMPLICIT NONE
             INTEGER, INTENT(IN)  :: filter      ! Filter; may be one of the following:
                                                 ! H5Z_FILTER_DEFLATE_F                  
@@ -156,14 +143,7 @@
 ! Modifications: 	
 !
 !----------------------------------------------------------------------
-          SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5zget_filter_info_f
-!DEC$endif
-!
-
+          SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr)
             IMPLICIT NONE
             INTEGER, INTENT(IN)  :: filter      ! Filter; may be one of the following:
                                                 ! H5Z_FILTER_DEFLATE_F                  

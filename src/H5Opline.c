@@ -33,12 +33,13 @@
 
 /* PRIVATE PROTOTYPES */
 static herr_t H5O_pline_encode(H5F_t *f, uint8_t *p, const void *mesg);
-static void *H5O_pline_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void *H5O_pline_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static void *H5O_pline_copy(const void *_mesg, void *_dest);
 static size_t H5O_pline_size(const H5F_t *f, const void *_mesg);
 static herr_t H5O_pline_reset(void *_mesg);
 static herr_t H5O_pline_free(void *_mesg);
-static herr_t H5O_pline_pre_copy_file(H5F_t *file_src, 
+static herr_t H5O_pline_pre_copy_file(H5F_t *file_src,
     const void *mesg_src, hbool_t *deleted, const H5O_copy_t *cpy_info, void *_udata);
 static herr_t H5O_pline_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
     FILE * stream, int indent, int fwidth);
@@ -107,7 +108,7 @@ H5FL_DEFINE(H5O_pline_t);
  */
 static void *
 H5O_pline_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_pline_t		*pline = NULL;          /* Pipeline message */
     H5Z_filter_info_t   *filter;                /* Filter to decode */
@@ -542,9 +543,9 @@ H5O_pline_free(void *mesg)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_pline_free)
 
-    HDassert (mesg);
+    HDassert(mesg);
 
-    H5FL_FREE(H5O_pline_t, mesg);
+    (void)H5FL_FREE(H5O_pline_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_pline_free() */

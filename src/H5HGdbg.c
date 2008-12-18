@@ -73,7 +73,7 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
     assert(indent >= 0);
     assert(fwidth >= 0);
 
-    if (NULL == (h = H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, NULL, NULL, H5AC_READ)))
+    if (NULL == (h = (H5HG_heap_t *)H5AC_protect(f, dxpl_id, H5AC_GHEAP, addr, NULL, NULL, H5AC_READ)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load global heap collection");
 
     fprintf(stream, "%*sGlobal Heap Collection...\n", indent, "");

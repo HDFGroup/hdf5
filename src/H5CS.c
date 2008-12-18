@@ -135,7 +135,7 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
     HDfprintf (stream, "HDF5-DIAG: Function stack from %s ", H5_lib_vers_info_g);
     /* try show the process or thread id in multiple processes cases*/
 #ifdef H5_HAVE_THREADSAFE
-    HDfprintf (stream, "thread %d.", (int)pthread_self());
+    HDfprintf (stream, "thread %lu.", HDpthread_self_ulong());
 #else  /* H5_HAVE_THREADSAFE */
     HDfprintf (stream, "thread 0.");
 #endif  /* H5_HAVE_THREADSAFE */

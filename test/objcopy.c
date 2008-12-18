@@ -126,7 +126,7 @@ static struct {
 
 /* Local function prototypes */
 static int
-compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
+compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
             const void *buf1, const void *buf2, hid_t obj_owner);
 static int
 compare_datasets(hid_t did, hid_t did2, hid_t pid, const void *wbuf);
@@ -159,7 +159,7 @@ addr_insert(H5O_info_t *oi)
     /* Extend the table */
     if(idtab_g.nobjs >= idtab_g.nalloc) {
         idtab_g.nalloc = MAX(256, 2*idtab_g.nalloc);
-        idtab_g.obj = HDrealloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
+        idtab_g.obj = (haddr_t *)HDrealloc(idtab_g.obj, idtab_g.nalloc * sizeof(idtab_g.obj[0]));
     } /* end if */
 
     /* Insert the entry */
@@ -220,14 +220,14 @@ addr_reset(void)
 
 
 /*-------------------------------------------------------------------------
- * Function:    attach_ref_attr 
+ * Function:    attach_ref_attr
  *
  * Purpose:     Create an attribute with object references
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Peter Cao
- *              Friday, August 4, 2006 
+ *              Friday, August 4, 2006
  *
  * Modifications:
  *
@@ -273,7 +273,7 @@ error:
         H5Sclose(sid_ref);
         H5Dclose(did1);
         H5Dclose(did2);
-        H5Pclose(aid);
+        H5Aclose(aid);
     } H5E_END_TRY;
 
     return(-1);
@@ -281,7 +281,7 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    attach_reg_ref_attr 
+ * Function:    attach_reg_ref_attr
  *
  * Purpose:     Create an attribute with object references
  *
@@ -325,7 +325,7 @@ attach_reg_ref_attr(hid_t file_id, hid_t loc_id)
 
     /* create reg_ref of point selection */
     if(H5Sselect_none(space_id) < 0) TEST_ERROR
-    if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t **)coord) < 0) TEST_ERROR
+    if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t *)coord) < 0) TEST_ERROR
     if(H5Rcreate(&ref[1], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
 
     /* create reg_ref attribute */
@@ -358,14 +358,14 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function:    create_reg_ref_dataset 
+ * Function:    create_reg_ref_dataset
  *
  * Purpose:     Create a dataset with region references
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Peter Cao
- *              Friday, August 4, 2006 
+ *              Friday, August 4, 2006
  *
  * Modifications:
  *
@@ -408,7 +408,7 @@ create_reg_ref_dataset(hid_t file_id, hid_t loc_id)
     if(H5Sselect_hyperslab(space_id,H5S_SELECT_SET,start,NULL,count,NULL) < 0) TEST_ERROR
     if(H5Rcreate(&ref[0], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
     if(H5Sselect_none(space_id) < 0) TEST_ERROR
-    if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t **)coord) < 0) TEST_ERROR
+    if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t *)coord) < 0) TEST_ERROR
     if(H5Rcreate(&ref[1], file_id, dsetnamev, H5R_DATASET_REGION, space_id) < 0) TEST_ERROR
     if(H5Dwrite(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT,ref) < 0) TEST_ERROR
     if(H5Dclose(dsetr_id) < 0) TEST_ERROR
@@ -485,7 +485,7 @@ test_copy_attach_attribute_vl(hid_t loc_id)
         buf[i].len = i*3+1;
         buf[i].p = (int *)HDmalloc(buf[i].len * sizeof(int));
         for(j = 0; j < buf[i].len; j++)
-            ((int *)buf[i].p)[j] = j+1;
+            ((int *)buf[i].p)[j] = (int)(j + 1);
     } /* end for */
 
     if((aid = H5Acreate2(loc_id, "vlen attribute", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
@@ -785,7 +785,7 @@ compare_std_attributes(hid_t oid, hid_t oid2, hid_t pid)
         unsigned i;             /* Local index variable */
 
         /* Compare the number of attributes */
-        if(oinfo1.num_attrs != oinfo1.num_attrs) TEST_ERROR
+        if(oinfo1.num_attrs != oinfo2.num_attrs) TEST_ERROR
 
         /* Check the attributes are equal */
         for(i = 0; i < (unsigned)oinfo1.num_attrs; i++) {
@@ -828,7 +828,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
+compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
         const void *buf1, const void *buf2, hid_t obj_owner)
 {
     size_t elmt_size;           /* Size of an element */
@@ -849,8 +849,8 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
         if((base_tid = H5Tget_super(tid)) < 0) TEST_ERROR
 
         /* Loop over elements in buffers */
-        vl_buf1 = buf1;
-        vl_buf2 = buf2;
+        vl_buf1 = (const hvl_t *)buf1;
+        vl_buf2 = (const hvl_t *)buf2;
         for(u = 0; u < nelmts; u++, vl_buf1++, vl_buf2++) {
             /* Check vlen lengths */
             if(vl_buf1->len != vl_buf2->len) TEST_ERROR
@@ -872,8 +872,8 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
             const hobj_ref_t *ref_buf1, *ref_buf2;      /* Aliases for buffers to compare */
 
             /* Loop over elements in buffers */
-            ref_buf1 = buf1;
-            ref_buf2 = buf2;
+            ref_buf1 = (const hobj_ref_t *)buf1;
+            ref_buf2 = (const hobj_ref_t *)buf2;
             for(u = 0; u < nelmts; u++, ref_buf1++, ref_buf2++) {
                 hid_t obj1_id, obj2_id;         /* IDs for objects referenced */
                 H5O_type_t obj1_type, obj2_type; /* Types of objects referenced */
@@ -928,8 +928,8 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts,
             const hdset_reg_ref_t *ref_buf1, *ref_buf2;      /* Aliases for buffers to compare */
 
             /* Loop over elements in buffers */
-            ref_buf1 = buf1;
-            ref_buf2 = buf2;
+            ref_buf1 = (const hdset_reg_ref_t *)buf1;
+            ref_buf2 = (const hdset_reg_ref_t *)buf2;
             for(u = 0; u < nelmts; u++, ref_buf1++, ref_buf2++) {
                 hid_t obj1_id, obj2_id;         /* IDs for objects referenced */
                 hid_t obj1_sid, obj2_sid;       /* Dataspace IDs for objects referenced */
@@ -1340,7 +1340,7 @@ HDassert(0 && "Unknown type of object");
                 if(linfo.u.val_size != linfo2.u.val_size) TEST_ERROR
 
                 /* Compare link values */
-                if(linfo.type == H5L_TYPE_SOFT || 
+                if(linfo.type == H5L_TYPE_SOFT ||
                         (linfo.type >= H5L_TYPE_UD_MIN && linfo.type <= H5L_TYPE_MAX)) {
                     char linkval[NAME_BUF_SIZE];            /* Link value */
                     char linkval2[NAME_BUF_SIZE];           /* Link value */
@@ -1361,7 +1361,7 @@ HDassert(0 && "Unknown type of link");
     } /* end if */
 
     /* Check if the attributes are equal */
-    if(compare_std_attributes(gid, gid2, pid) != TRUE) TEST_ERROR 
+    if(compare_std_attributes(gid, gid2, pid) != TRUE) TEST_ERROR
 
     /* Groups should be the same. :-) */
     return TRUE;
@@ -3495,7 +3495,7 @@ test_copy_dataset_contig_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
         buf[i].len = i+1;
         buf[i].p = (int *)HDmalloc(buf[i].len * sizeof(int));
         for(j = 0; j < buf[i].len; j++)
-            ((int *)buf[i].p)[j] = i*10+j;
+            ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
 
     /* Initialize the filenames */
@@ -3626,7 +3626,7 @@ test_copy_dataset_chunked_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
         buf[i].len = i+1;
         buf[i].p = (int *)HDmalloc(buf[i].len * sizeof(int));
         for(j = 0; j < buf[i].len; j++)
-            ((int *)buf[i].p)[j] = i*10+j;
+            ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
 
     /* Initialize the filenames */
@@ -3763,7 +3763,7 @@ test_copy_dataset_compact_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
         buf[i].len = i+1;
         buf[i].p = (int *)HDmalloc(buf[i].len * sizeof(int));
         for(j = 0; j < buf[i].len; j++)
-            ((int *)buf[i].p)[j] = i*10+j;
+            ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
 
     /* Initialize the filenames */
@@ -4020,7 +4020,7 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
         for (j = 0; j < DIM_SIZE_2; j++) {
-            buf[i][j].len = j + 1;
+            buf[i][j].len = (size_t)(j + 1);
             buf[i][j].p = (int *)HDmalloc(buf[i][j].len * sizeof(int));
             for (k = 0; k < (int)buf[i][j].len; k++)
                 ((int *)buf[i][j].p)[k] = i * 10000 + j * 100 + k;
@@ -4369,7 +4369,7 @@ error:
  *              Failure:        number of errors
  *
  * Programmer:  Peter Cao
- *              August 8, 2006 
+ *              August 8, 2006
  *
  * Modifications:
  *
@@ -4520,7 +4520,7 @@ test_copy_group_deep(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
     char objname[NAME_BUF_SIZE];                /* Sub-group & dataset name buffer */
     char src_filename[NAME_BUF_SIZE];
     char dst_filename[NAME_BUF_SIZE];
-    
+
     TESTING("H5Ocopy(): deep nested groups");
 
     /* set initial data values */
@@ -5625,7 +5625,7 @@ test_copy_old_layout(hid_t fcpl_dst, hid_t fapl)
     addr_reset();
 
     /* open source file (read-only) */
-    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, fapl)) < 0) TEST_ERROR
+    if((fid_src = H5Fopen(src_filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
 
     /* create destination file */
     if((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, fapl)) < 0) TEST_ERROR
@@ -5706,7 +5706,7 @@ test_copy_dataset_compact_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
         buf[i].len = i+1;
         buf[i].p = (int *)HDmalloc(buf[i].len * sizeof(int));
         for(j = 0; j < buf[i].len; j++)
-            ((int *)buf[i].p)[j] = i*10+j;
+            ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
 
     /* Initialize the filenames */
@@ -5853,7 +5853,7 @@ test_copy_dataset_contig_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
         buf[i].len = i+1;
         buf[i].p = (int *)HDmalloc(buf[i].len * sizeof(int));
         for(j = 0; j < buf[i].len; j++)
-            ((int *)buf[i].p)[j] = i*10+j;
+            ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
 
     /* Initialize the filenames */
@@ -5994,7 +5994,7 @@ test_copy_dataset_chunked_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
         buf[i].len = i+1;
         buf[i].p = (int *)HDmalloc(buf[i].len * sizeof(int));
         for(j = 0; j < buf[i].len; j++)
-            ((int *)buf[i].p)[j] = i*10+j;
+            ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
 
     /* Initialize the filenames */
@@ -6143,7 +6143,7 @@ test_copy_dataset_compressed_named_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl
         buf[i].len = i+1;
         buf[i].p = (int *)HDmalloc(buf[i].len * sizeof(int));
         for(j = 0; j < buf[i].len; j++)
-            ((int *)buf[i].p)[j] = i*10+j;
+            ((int *)buf[i].p)[j] = (int)(i * 10 + j);
     } /* end for */
 
     /* Initialize the filenames */
@@ -6296,7 +6296,7 @@ test_copy_dataset_compact_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
             return 1;
         } /* end if */
         buf[i].len=i+1;
-        for(tvl=buf[i].p,j=0; j<(i+1); j++, tvl++) {
+        for(tvl = (hvl_t *)buf[i].p,j=0; j<(i+1); j++, tvl++) {
             tvl->p=HDmalloc((j+1)*sizeof(unsigned int));
             if(tvl->p==NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
@@ -6451,7 +6451,7 @@ test_copy_dataset_contig_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
             TEST_ERROR
         } /* end if */
         buf[i].len=i+1;
-        for(tvl=buf[i].p,j=0; j<(i+1); j++, tvl++) {
+        for(tvl = (hvl_t *)buf[i].p,j=0; j<(i+1); j++, tvl++) {
             tvl->p=HDmalloc((j+1)*sizeof(unsigned int));
             if(tvl->p==NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
@@ -6606,7 +6606,7 @@ test_copy_dataset_chunked_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
             TEST_ERROR
         } /* end if */
         buf[i].len=i+1;
-        for(tvl=buf[i].p,j=0; j<(i+1); j++, tvl++) {
+        for(tvl = (hvl_t *)buf[i].p,j=0; j<(i+1); j++, tvl++) {
             tvl->p=HDmalloc((j+1)*sizeof(unsigned int));
             if(tvl->p==NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
@@ -6762,7 +6762,7 @@ test_copy_dataset_compressed_vl_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl)
             TEST_ERROR
         } /* end if */
         buf[i].len=i+1;
-        for(tvl=buf[i].p,j=0; j<(i+1); j++, tvl++) {
+        for(tvl = (hvl_t *)buf[i].p,j=0; j<(i+1); j++, tvl++) {
             tvl->p=HDmalloc((j+1)*sizeof(unsigned int));
             if(tvl->p==NULL) {
                 TestErrPrintf("Cannot allocate memory for VL data! i=%u, j=%u\n",i,j);
@@ -6998,9 +6998,7 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t fapl, unsigned flag, hboo
         if(attach_reg_ref_attr(fid_src, gid_ref) < 0) TEST_ERROR
 
         /* create a dataset of region references */
-/*
         if(create_reg_ref_dataset(fid_src, gid_ref) < 0) TEST_ERROR
-*/
 
         /* Close group holding reference objects */
         if(H5Gclose(gid_ref) < 0) TEST_ERROR
@@ -7150,168 +7148,152 @@ error:
 int
 main(void)
 {
-    const char *envval;
-    
-    /* Don't run this test using the core, split, or multi file drivers */
-    envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL)
-        envval = "nomatch";
+    int     nerrors = 0;
+    hid_t	fapl, fapl2;
+    hid_t   fcpl_shared;
+    int     configuration;  /* Configuration of tests. */
+    int	ExpressMode;
 
-    if(HDstrcmp(envval, "stdio") && HDstrcmp(envval, "split") && HDstrcmp(envval, "multi") && HDstrcmp(envval, "family")) {
-        int     nerrors = 0;
-        hid_t	fapl, fapl2;
-        hid_t   fcpl_shared;
-        int     configuration;  /* Configuration of tests. */
-        int	ExpressMode;
+    /* Setup */
+    h5_reset();
+    fapl = h5_fileaccess();
 
-	/* Setup */
-	h5_reset();
-	fapl = h5_fileaccess();
+    ExpressMode = GetTestExpress();
+    if (ExpressMode > 1)
+        printf("***Express test mode on.  Some tests may be skipped\n");
 
-        ExpressMode = GetTestExpress();
-        if (ExpressMode > 1)
-	    printf("***Express test mode on.  Some tests may be skipped\n");
+    /* Copy the file access property list */
+    if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
-        /* Copy the file access property list */
-        if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
+    /* Set the "use the latest version of the format" bounds for creating objects in the file */
+    if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
-        /* Set the "use the latest version of the format" flag for creating objects in the file */
-        if(H5Pset_latest_format(fapl2, TRUE) < 0) TEST_ERROR
+    /* Create an FCPL with sharing enabled */
+    if((fcpl_shared = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR
+    if(H5Pset_shared_mesg_nindexes(fcpl_shared, 1) < 0) TEST_ERROR
+    if(H5Pset_shared_mesg_index(fcpl_shared, 0, H5O_SHMESG_ALL_FLAG, (size_t) 10) < 0) TEST_ERROR
 
-        /* Create an FCPL with sharing enabled */
-        if((fcpl_shared = H5Pcreate(H5P_FILE_CREATE)) < 0) TEST_ERROR
-        if(H5Pset_shared_mesg_nindexes(fcpl_shared, 1) < 0) TEST_ERROR
-        if(H5Pset_shared_mesg_index(fcpl_shared, 0, H5O_MESG_ALL_FLAG, (size_t) 10) < 0) TEST_ERROR 
+    /* Test in all configurations */
+    for(configuration = 0; configuration <= MAX_CONFIGURATION; configuration++) {
+        hid_t my_fapl;
+        hid_t fcpl_src;
+        hid_t fcpl_dst;
 
-        /* Test in all configurations */
-        for(configuration = 0; configuration <= MAX_CONFIGURATION; configuration++) {
-            hid_t my_fapl;
-            hid_t fcpl_src;
-            hid_t fcpl_dst;
+        /* Test with and without shared messages */
+        if(configuration & CONFIG_SHARE_SRC) {
+            puts("\nTesting with shared src messages:");
+            fcpl_src = fcpl_shared;
+        }
+        else {
+            puts("\nTesting without shared src messages:");
+            fcpl_src = H5P_DEFAULT;
+        }
+        if(configuration & CONFIG_SHARE_DST) {
+            puts("Testing with shared dst messages:");
+            fcpl_dst = fcpl_shared;
+        }
+        else {
+            puts("Testing without shared dst messages:");
+            fcpl_dst = H5P_DEFAULT;
+        }
 
-            /* Test with and without shared messages */
-            if(configuration & CONFIG_SHARE_SRC) {
-                puts("\nTesting with shared src messages:");
-                fcpl_src = fcpl_shared;
-            }
-            else {
-                puts("\nTesting without shared src messages:");
-                fcpl_src = H5P_DEFAULT;
-            }
-            if(configuration & CONFIG_SHARE_DST) {
-                puts("Testing with shared dst messages:");
-                fcpl_dst = fcpl_shared;
-            }
-            else {
-                puts("Testing without shared dst messages:");
-                fcpl_dst = H5P_DEFAULT;
-            }
-
-            /* Set the FAPL for the type of format */
-            if(configuration & CONFIG_NEW_FORMAT) {
-                puts("Testing with new group format:");
-                my_fapl = fapl2;
-            } /* end if */
-            else {
-                puts("Testing with old group format:");
-                my_fapl = fapl;
-            } /* end else */
+        /* Set the FAPL for the type of format */
+        if(configuration & CONFIG_NEW_FORMAT) {
+            puts("Testing with new group format:");
+            my_fapl = fapl2;
+        } /* end if */
+        else {
+            puts("Testing with old group format:");
+            my_fapl = fapl;
+        } /* end else */
 
 
-            /* The tests... */
-            nerrors += test_copy_named_datatype(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_named_datatype_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_named_datatype_vl_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_simple(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_simple_empty(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_compound(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_chunked(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_chunked_empty(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_chunked_sparse(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_compressed(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_compact(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_external(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_named_dtype(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_named_dtype_hier(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_named_dtype_hier_outside(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_multi_ohdr_chunks(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_attr_named_dtype(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_contig_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_chunked_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_compact_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_compressed_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_attribute_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_compact_named_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_contig_named_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_chunked_named_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_compressed_named_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_compact_vl_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_contig_vl_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_chunked_vl_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_dataset_compressed_vl_vl(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_group_empty(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_root_group(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_group(fcpl_src, fcpl_dst, my_fapl);
-            if (ExpressMode > 1 && !HDstrcmp(envval, "direct")) { 
-                /* This test case with Direct driver has a poor performance on 
-                 * NCSA copper, though it works.  Skip it for now and worry 
-                 * about the performance later. 
-                 */
-                printf("***Express test mode on.  test_copy_group_deep is skipped");
-                SKIPPED();
-            } else
-                nerrors += test_copy_group_deep(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_group_loop(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_group_wide_loop(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_group_links(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_soft_link(fcpl_src, fcpl_dst, my_fapl);
+        /* The tests... */
+        nerrors += test_copy_named_datatype(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_named_datatype_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_named_datatype_vl_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_simple(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_simple_empty(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_compound(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_chunked(fcpl_src, fcpl_dst, my_fapl);
+
+        nerrors += test_copy_dataset_chunked_empty(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_chunked_sparse(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_compressed(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_compact(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_external(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_named_dtype(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_named_dtype_hier(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_named_dtype_hier_outside(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_multi_ohdr_chunks(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_attr_named_dtype(fcpl_src, fcpl_dst, my_fapl);
+
+        nerrors += test_copy_dataset_contig_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_chunked_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_compact_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_compressed_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_attribute_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_compact_named_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_contig_named_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_chunked_named_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_compressed_named_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_compact_vl_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_contig_vl_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_chunked_vl_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_dataset_compressed_vl_vl(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_group_empty(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_root_group(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_group(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_group_deep(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_group_loop(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_group_wide_loop(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_group_links(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_soft_link(fcpl_src, fcpl_dst, my_fapl);
 #ifndef H5_CANNOT_OPEN_TWICE
-            nerrors += test_copy_ext_link(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_ext_link(fcpl_src, fcpl_dst, my_fapl);
 #endif /* H5_CANNOT_OPEN_TWICE */
-            nerrors += test_copy_exist(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_path(fcpl_src, fcpl_dst, my_fapl);
-            nerrors += test_copy_same_file_named_datatype(fcpl_src, my_fapl);
-            nerrors += test_copy_old_layout(fcpl_dst, my_fapl);
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG, 
-                       FALSE, "H5Ocopy(): without attributes");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, 0, TRUE, 
-                       "H5Ocopy(): with missing groups");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_SOFT_LINK_FLAG, 
-                       FALSE, "H5Ocopy(): expand soft link");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_SHALLOW_HIERARCHY_FLAG, 
-                       FALSE, "H5Ocopy(): shallow group copy");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_REFERENCE_FLAG, 
-                       FALSE, "H5Ocopy(): expand object reference");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_PRESERVE_NULL_FLAG, 
-                       FALSE, "H5Ocopy(): preserve NULL messages");
-            nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG | 
-                       H5O_COPY_PRESERVE_NULL_FLAG, TRUE, "H5Ocopy(): preserve NULL messages");
+        nerrors += test_copy_exist(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_path(fcpl_src, fcpl_dst, my_fapl);
+        nerrors += test_copy_same_file_named_datatype(fcpl_src, my_fapl);
+        nerrors += test_copy_old_layout(fcpl_dst, my_fapl);
+        nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG,
+                   FALSE, "H5Ocopy(): without attributes");
+        nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, 0, TRUE,
+                   "H5Ocopy(): with missing groups");
+        nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_SOFT_LINK_FLAG,
+                   FALSE, "H5Ocopy(): expand soft link");
+        nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_SHALLOW_HIERARCHY_FLAG,
+                   FALSE, "H5Ocopy(): shallow group copy");
+        nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_EXPAND_REFERENCE_FLAG,
+                   FALSE, "H5Ocopy(): expand object reference");
+        nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_PRESERVE_NULL_FLAG,
+                   FALSE, "H5Ocopy(): preserve NULL messages");
+        nerrors += test_copy_option(fcpl_src, fcpl_dst, my_fapl, H5O_COPY_WITHOUT_ATTR_FLAG |
+                   H5O_COPY_PRESERVE_NULL_FLAG, TRUE, "H5Ocopy(): preserve NULL messages");
 
 /* TODO: not implemented
-            nerrors += test_copy_option(my_fapl, H5O_COPY_EXPAND_EXT_LINK_FLAG, FALSE, "H5Ocopy: expand external link");
-            nerrors += test_copy_mount(my_fapl);
- */
-        } /* end for */
+        nerrors += test_copy_option(my_fapl, H5O_COPY_EXPAND_EXT_LINK_FLAG, FALSE, "H5Ocopy: expand external link");
+        nerrors += test_copy_mount(my_fapl);
+*/
+    } /* end for */
 
-	/* Reset file address checking info */
-	addr_reset();
+    /* Reset file address checking info */
+    addr_reset();
 
-	/* Results */
-	if(nerrors) {
-	    printf("***** %d OBJECT COPY TEST%s FAILED! *****\n",
-		    nerrors, (1 == nerrors ? "" : "S"));
-	    exit(1);
-	} /* end if */
-
-	puts ("All object copying tests passed.");
-
-	h5_cleanup(FILENAME, fapl);
+    /* Results */
+    if(nerrors) {
+        printf("***** %d OBJECT COPY TEST%s FAILED! *****\n",
+                nerrors, (1 == nerrors ? "" : "S"));
+        exit(1);
     } /* end if */
-    else
-        puts("All object copying tests skipped - Incompatible with current Virtual File Driver");
+
+    puts ("All object copying tests passed.");
+
+    h5_cleanup(FILENAME, fapl);
 
     return 0;
 
 error:
     return 1;
 } /* main */
+

@@ -21,7 +21,7 @@
 			OutputDirectory="..\..\..\tools\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			>
@@ -53,7 +53,7 @@
 				ProgramDataBaseFileName=".\..\..\..\tools\toolslib\Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="1"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool
@@ -92,7 +92,7 @@
 			OutputDirectory="..\..\..\tools\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			>
@@ -125,7 +125,7 @@
 				ProgramDataBaseFileName=".\..\..\..\tools\toolslib\Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="1"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool
@@ -164,7 +164,7 @@
 			OutputDirectory="..\..\..\tools\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			>
@@ -237,7 +237,7 @@
 			OutputDirectory="..\..\..\tools\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			>

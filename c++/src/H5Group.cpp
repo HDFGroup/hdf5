@@ -33,6 +33,7 @@
 #include "H5DataSpace.h"
 #include "H5DataSet.h"
 #include "H5CommonFG.h"
+#include "H5Attribute.h"
 #include "H5Group.h"
 #include "H5File.h"
 #include "H5Alltypes.h"
@@ -50,7 +51,7 @@ namespace H5 {
 ///\brief	Default constructor: creates a stub Group.
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group::Group() : H5Object() {}
+Group::Group() : H5Object(), id(0) {}
 
 //--------------------------------------------------------------------------
 // Function:	Group copy constructor
@@ -58,7 +59,11 @@ Group::Group() : H5Object() {}
 ///\param	original - IN: Original group to copy
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group::Group( const Group& original ) : H5Object( original ) {}
+Group::Group(const Group& original) : H5Object(original)
+{
+    id = original.getId();
+    incRefCount(); // increment number of references to this id
+}
 
 //--------------------------------------------------------------------------
 // Function:	Group::getLocId
@@ -77,67 +82,69 @@ hid_t Group::getLocId() const
 ///\param	group_id - IN: Id of an existing group
 // Programmer	Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group::Group( const hid_t group_id ) : H5Object( group_id ) {}
+Group::Group(const hid_t existing_id) : H5Object()
+{
+    id = existing_id;
+}
 
 //--------------------------------------------------------------------------
 // Function:	Group overload constructor - dereference
-///\brief	Given a reference to some object, returns that group
-///             obj - IN: Location reference object is in
+///\brief	Given a reference, ref, to an hdf5 group, creates a Group object
+///\param	obj - IN: Specifying location referenced object is in
 ///\param	ref - IN: Reference pointer
-///\parDescription
-///		\c obj can be DataSet, Group, H5File, or named DataType, that 
+///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\exception	H5::ReferenceException
+///\par Description
+///		\c obj can be DataSet, Group, or named DataType, that 
 ///		is a datatype that has been named by DataType::commit.
 // Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
-Group::Group(IdComponent& obj, void* ref) : H5Object()
+Group::Group(H5Object& obj, const void* ref, H5R_type_t ref_type) : H5Object()
 {
-   IdComponent::dereference(obj, ref);
+    try {
+	id = p_dereference(obj.getId(), ref, ref_type);
+    } catch (ReferenceException deref_error) {
+	throw ReferenceException("Group constructor - located by an H5Object",
+		deref_error.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
-// Function:	Group::Reference
-///\brief	Important!!! - This functions may not work correctly, it 
-///		will be removed in the near future.  Please use similar
-///		Group::reference instead!
-// Programmer	Binh-Minh Ribler - May, 2004
+// Function:	Group overload constructor - dereference
+///\brief	Given a reference, ref, to an hdf5 group, creates a Group object
+///\param	h5file - IN: Location referenced object is in
+///\param	ref - IN: Reference pointer
+///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\exception	H5::ReferenceException
+// Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
-void* Group::Reference(const char* name, DataSpace& dataspace, H5R_type_t ref_type) const
+Group::Group(H5File& h5file, const void* ref, H5R_type_t ref_type) : H5Object()
 {
-   try {
-      return(p_reference(name, dataspace.getId(), ref_type));
-   }
-   catch (IdComponentException E) {
-      throw GroupIException("Group::Reference", E.getDetailMsg());
-   }
+    try {
+	id = p_dereference(h5file.getId(), ref, ref_type);
+    } catch (ReferenceException deref_error) {
+	throw ReferenceException("Group constructor - located by an H5File",
+		deref_error.getDetailMsg());
+    }
 }
 
 //--------------------------------------------------------------------------
-// Function:	Group::Reference
-///\brief	Important!!! - This functions may not work correctly, it 
-///		will be removed in the near future.  Please use similar
-///		Group::reference instead!
-// Programmer	Binh-Minh Ribler - May, 2004
+// Function:	Group overload constructor - dereference
+///\brief	Given a reference, ref, to an hdf5 group, creates a Group object
+///\param	attr - IN: Specifying location where the referenced object is in
+///\param	ref - IN: Reference pointer
+///\param	ref_type - IN: Reference type - default to H5R_OBJECT
+///\exception	H5::ReferenceException
+// Programmer	Binh-Minh Ribler - Oct, 2006
 //--------------------------------------------------------------------------
-void* Group::Reference(const char* name) const
+Group::Group(Attribute& attr, const void* ref, H5R_type_t ref_type) : H5Object()
 {
-   try {
-      return(p_reference(name, -1, H5R_OBJECT));
-   }
-   catch (IdComponentException E) {
-      throw GroupIException("Group::Reference", E.getDetailMsg());
-   }
-}
-
-//--------------------------------------------------------------------------
-// Function:	Group::Reference
-///\brief	Important!!! - This functions may not work correctly, it 
-///		will be removed in the near future.  Please use similar
-///		Group::reference instead!
-// Programmer	Binh-Minh Ribler - May, 2004
-//--------------------------------------------------------------------------
-void* Group::Reference(const H5std_string& name) const
-{
-   return(Reference(name.c_str()));
+    try {
+	id = p_dereference(attr.getId(), ref, ref_type);
+    } catch (ReferenceException deref_error) {
+	throw ReferenceException("Group constructor - located by an Attribute",
+		deref_error.getDetailMsg());
+    }
 }
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -188,6 +195,47 @@ DataSpace Group::getRegion(void *ref, H5R_type_t ref_type) const
 }
 
 //--------------------------------------------------------------------------
+// Function:    Group::getId
+// Purpose:     Get the id of this attribute
+// Modification:
+//      May 2008 - BMR
+//              Class hierarchy is revised to address bugzilla 1068.  Class
+//              AbstractDS and Attribute are moved out of H5Object.  In
+//              addition, member IdComponent::id is moved into subclasses, and
+//              IdComponent::getId now becomes pure virtual function.
+// Programmer   Binh-Minh Ribler - May, 2008
+//--------------------------------------------------------------------------
+hid_t Group::getId() const
+{
+   return(id);
+}
+
+//--------------------------------------------------------------------------
+// Function:    Group::p_setId
+///\brief       Sets the identifier of this object to a new value.
+///
+///\exception   H5::IdComponentException when the attempt to close the HDF5
+///             object fails
+// Description:
+//              The underlaying reference counting in the C library ensures
+//              that the current valid id of this object is properly closed.
+//              Then the object's id is reset to the new id.
+// Programmer   Binh-Minh Ribler - 2000
+//--------------------------------------------------------------------------
+void Group::p_setId(const hid_t new_id)
+{
+    // handling references to this old id
+    try {
+        close();
+    }
+    catch (Exception close_error) {
+        throw GroupIException("Group::p_setId", close_error.getDetailMsg());
+    }
+   // reset object's id to the given id
+   id = new_id;
+}
+
+//--------------------------------------------------------------------------
 // Function:	Group::close
 ///\brief	Closes this group.
 ///
@@ -203,8 +251,10 @@ void Group::close()
 	{
 	    throw GroupIException("Group::close", "H5Gclose failed");
 	}
-	// reset the id because the group that it represents is now closed
-	id = 0;
+	// reset the id when the group that it represents is no longer
+	// referenced
+	if (getCounter() == 0)
+	    id = 0;
     }
 }
 

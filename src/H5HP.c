@@ -235,11 +235,11 @@ H5HP_sink_max(H5HP_t *heap, size_t loc)
     } /* end while */
 
     /* Put object into heap at correct location */
-    heap->heap[loc].val=val;
-    heap->heap[loc].obj=obj;
+    heap->heap[loc].val = val;
+    heap->heap[loc].obj = (H5HP_info_t *)obj;
 
     /* Update heap location for object */
-    heap->heap[loc].obj->heap_loc=loc;
+    heap->heap[loc].obj->heap_loc = loc;
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HP_sink_max() */
@@ -304,11 +304,11 @@ H5HP_sink_min(H5HP_t *heap, size_t loc)
     } /* end while */
 
     /* Put object into heap at correct location */
-    heap->heap[loc].val=val;
-    heap->heap[loc].obj=obj;
+    heap->heap[loc].val = val;
+    heap->heap[loc].obj = (H5HP_info_t *)obj;
 
     /* Update heap location for object */
-    heap->heap[loc].obj->heap_loc=loc;
+    heap->heap[loc].obj->heap_loc = loc;
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5HP_sink_min() */
@@ -382,7 +382,7 @@ done:
         if(new_heap!=NULL) {
             if(new_heap->heap!=NULL)
                 H5FL_SEQ_FREE(H5HP_ent_t,new_heap->heap);
-            H5FL_FREE(H5HP_t,new_heap);
+            (void)H5FL_FREE(H5HP_t,new_heap);
         } /* end if */
     } /* end if */
 
@@ -489,9 +489,9 @@ H5HP_insert(H5HP_t *heap, int val, void *obj)
     } /* end if */
 
     /* Insert new object at end of heap */
-    heap->heap[heap->nobjs].val=val;
-    heap->heap[heap->nobjs].obj=obj;
-    heap->heap[heap->nobjs].obj->heap_loc=heap->nobjs;
+    heap->heap[heap->nobjs].val = val;
+    heap->heap[heap->nobjs].obj = (H5HP_info_t *)obj;
+    heap->heap[heap->nobjs].obj->heap_loc = heap->nobjs;
 
     /* Restore heap condition */
     if(heap->type==H5HP_MAX_HEAP) {
@@ -896,25 +896,25 @@ done:
 herr_t
 H5HP_close(H5HP_t *heap)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5HP_close);
+    FUNC_ENTER_NOAPI_NOFUNC(H5HP_close)
 
     /* Check args */
-    assert(heap);
+    HDassert(heap);
 
     /* Check internal consistency */
     /* (Pre-condition) */
-    assert(heap->nobjs<heap->nalloc);
-    assert(heap->heap);
-    assert((heap->type==H5HP_MAX_HEAP && heap->heap[0].val==INT_MAX) ||
-        (heap->type==H5HP_MIN_HEAP && heap->heap[0].val==INT_MIN));
-    assert(heap->heap[0].obj==NULL);
+    HDassert(heap->nobjs < heap->nalloc);
+    HDassert(heap->heap);
+    HDassert((heap->type == H5HP_MAX_HEAP && heap->heap[0].val == INT_MAX) ||
+        (heap->type == H5HP_MIN_HEAP && heap->heap[0].val == INT_MIN));
+    HDassert(NULL == heap->heap[0].obj);
 
     /* Free internal structures for heap */
-    H5FL_SEQ_FREE(H5HP_ent_t,heap->heap);
+    H5FL_SEQ_FREE(H5HP_ent_t, heap->heap);
 
     /* Free actual heap object */
-    H5FL_FREE(H5HP_t,heap);
+    (void)H5FL_FREE(H5HP_t, heap);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5HP_close() */
 

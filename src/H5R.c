@@ -37,7 +37,8 @@
 /* Static functions */
 static herr_t H5R_create(void *ref, H5G_loc_t *loc, const char *name,
         H5R_type_t ref_type, H5S_t *space, hid_t dxpl_id);
-static hid_t H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref);
+static hid_t H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type,
+    const void *_ref, hbool_t app_ref);
 static H5S_t * H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref);
 static ssize_t H5R_get_name(H5F_t *file, hid_t lapl_id, hid_t dxpl_id, hid_t id,
     H5R_type_t ref_type, const void *_ref, char *name, size_t size);
@@ -123,7 +124,7 @@ H5R_term_interface(void)
 
     if (H5_interface_initialize_g) {
 	if ((n=H5I_nmembers(H5I_REFERENCE))) {
-	    H5I_clear_type(H5I_REFERENCE, FALSE);
+	    H5I_clear_type(H5I_REFERENCE, FALSE, FALSE);
 	} else {
 	    H5I_dec_type_ref(H5I_REFERENCE);
 	    H5_interface_initialize_g = 0;
@@ -235,7 +236,7 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5
 
             /* Allocate the space to store the serialized information */
             H5_CHECK_OVERFLOW(buf_size, hssize_t, size_t);
-            if(NULL == (buf = H5MM_malloc((size_t)buf_size)))
+            if(NULL == (buf = (uint8_t *)H5MM_malloc((size_t)buf_size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             /* Serialize information for dataset OID into heap buffer */
@@ -264,7 +265,7 @@ H5R_create(void *_ref, H5G_loc_t *loc, const char *name, H5R_type_t ref_type, H5
         case H5R_BADTYPE:
         case H5R_MAXTYPE:
         default:
-            assert("unknown reference type" && 0);
+            HDassert("unknown reference type" && 0);
             HGOTO_ERROR(H5E_REFERENCE, H5E_UNSUPPORTED, FAIL, "internal error (unknown reference type)")
     } /* end switch */
 
@@ -307,7 +308,7 @@ herr_t
 H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t space_id)
 {
     H5G_loc_t   loc;            /* File location */
-    H5S_t	*space = NULL;          /* Pointer to dataspace containing region */
+    H5S_t	*space;         /* Pointer to dataspace containing region */
     herr_t      ret_value;      /* Return value */
 
     FUNC_ENTER_API(H5Rcreate, FAIL)
@@ -324,7 +325,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid reference type")
     if(ref_type != H5R_OBJECT && ref_type != H5R_DATASET_REGION)
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "reference type not supported")
-    if(space_id != (-1) && (NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE))))
+    if(space_id != (-1) && (NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE))))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     /* Create reference */
@@ -359,7 +360,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hid_t
-H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref)
+H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_ref, hbool_t app_ref)
 {
     H5O_loc_t oloc;             /* Object location */
     H5G_name_t path;            /* Path of object */
@@ -394,7 +395,7 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
             INT32DECODE(p, hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
-            if((buf = H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)) == NULL)
+            if(NULL == (buf = (uint8_t *)H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)))
                 HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL, "Unable to read dataset region information")
 
             /* Get the object oid for the dataset */
@@ -432,11 +433,11 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
             {
                 H5G_t *group;               /* Pointer to group to open */
 
-                if((group = H5G_open(&loc, dxpl_id)) == NULL)
+                if(NULL == (group = H5G_open(&loc, dxpl_id)))
                     HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found")
 
                 /* Create an atom for the group */
-                if((ret_value = H5I_register(H5I_GROUP, group)) < 0) {
+                if((ret_value = H5I_register(H5I_GROUP, group, app_ref)) < 0) {
                     H5G_close(group);
                     HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, FAIL, "can't register group")
                 } /* end if */
@@ -447,11 +448,11 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
             {
                 H5T_t *type;                /* Pointer to datatype to open */
 
-                if((type = H5T_open(&loc, dxpl_id)) == NULL)
+                if(NULL == (type = H5T_open(&loc, dxpl_id)))
                     HGOTO_ERROR(H5E_DATATYPE, H5E_NOTFOUND, FAIL, "not found")
 
                 /* Create an atom for the datatype */
-                if((ret_value = H5I_register(H5I_DATATYPE, type)) < 0) {
+                if((ret_value = H5I_register(H5I_DATATYPE, type, app_ref)) < 0) {
                     H5T_close(type);
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "can't register datatype")
                 } /* end if */
@@ -460,14 +461,15 @@ H5R_dereference(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type, const void *_re
 
         case H5O_TYPE_DATASET:
             {
+                hid_t dapl_id = H5P_DATASET_ACCESS_DEFAULT; /* dapl to use to open dataset */
                 H5D_t *dset;                /* Pointer to dataset to open */
 
                 /* Open the dataset */
-                if((dset = H5D_open(&loc, dxpl_id)) == NULL)
+                if(NULL == (dset = H5D_open(&loc, dapl_id, dxpl_id)))
                     HGOTO_ERROR(H5E_DATASET, H5E_NOTFOUND, FAIL, "not found")
 
                 /* Create an atom for the dataset */
-                if((ret_value = H5I_register(H5I_DATASET, dset)) < 0) {
+                if((ret_value = H5I_register(H5I_DATASET, dset, app_ref)) < 0) {
                     H5D_close(dset);
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register dataset")
                 } /* end if */
@@ -527,7 +529,7 @@ H5Rdereference(hid_t id, H5R_type_t ref_type, const void *_ref)
     file = loc.oloc->file;
 
     /* Create reference */
-    if((ret_value = H5R_dereference(file, H5AC_dxpl_id, ref_type, _ref)) < 0)
+    if((ret_value = H5R_dereference(file, H5AC_dxpl_id, ref_type, _ref, TRUE)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL, "unable dereference object")
 
 done:
@@ -580,7 +582,7 @@ H5R_get_region(H5F_t *file, hid_t dxpl_id, const void *_ref)
     INT32DECODE(p, hobjid.idx);
 
     /* Get the dataset region from the heap (allocate inside routine) */
-    if((buf = H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)) == NULL)
+    if((buf = (uint8_t *)H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)) == NULL)
         HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, NULL, "Unable to read dataset region information")
 
     /* Get the object oid for the dataset */
@@ -650,7 +652,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCREATE, FAIL, "unable to create dataspace")
 
     /* Atomize */
-    if((ret_value = H5I_register (H5I_DATASPACE, space)) < 0)
+    if((ret_value = H5I_register (H5I_DATASPACE, space, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace atom")
 
 done:
@@ -714,7 +716,7 @@ H5R_get_obj_type(H5F_t *file, hid_t dxpl_id, H5R_type_t ref_type,
             INT32DECODE(p, hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
-            if((buf = H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)) == NULL)
+            if((buf = (uint8_t *)H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)) == NULL)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL, "Unable to read dataset region information")
 
             /* Get the object oid for the dataset */
@@ -861,7 +863,7 @@ H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_ty
             INT32DECODE(p, hobjid.idx);
 
             /* Get the dataset region from the heap (allocate inside routine) */
-            if((buf = H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)) == NULL)
+            if((buf = (uint8_t *)H5HG_read(oloc.file, dxpl_id, &hobjid, NULL, NULL)) == NULL)
                 HGOTO_ERROR(H5E_REFERENCE, H5E_READERROR, FAIL, "Unable to read dataset region information")
 
             /* Get the object oid for the dataset */
@@ -881,17 +883,17 @@ H5R_get_name(H5F_t *f, hid_t lapl_id, hid_t dxpl_id, hid_t id, H5R_type_t ref_ty
     } /* end switch */
 
     /* Retrieve file ID for name search */
-    if((file_id = H5I_get_file_id(id)) < 0)
+    if((file_id = H5I_get_file_id(id, FALSE)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't retrieve file ID")
 
     /* Get name, length, etc. */
-    if((ret_value = H5G_get_refobj_name(file_id, lapl_id, dxpl_id, &oloc, name, size)) < 0)
+    if((ret_value = H5G_get_name_by_addr(file_id, lapl_id, dxpl_id, &oloc, name, size)) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't determine name")
 
 done:
     /* Close file ID used for search */
     if(file_id > 0)
-        if(H5I_dec_ref(file_id) < 0)
+        if(H5I_dec_ref(file_id, FALSE) < 0)
             HDONE_ERROR(H5E_REFERENCE, H5E_CANTCLOSEFILE, FAIL, "can't determine name")
 
     FUNC_LEAVE_NOAPI(ret_value)

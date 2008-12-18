@@ -16,8 +16,8 @@
 # HDF Utilities Test script
 
 
-TESTFILE1="$srcdir/../testfiles/h52giftst.h5"
-TESTFILE2="$srcdir/../testfiles/image1.gif"
+TESTFILE1="$srcdir/testfiles/h52giftst.h5"
+TESTFILE2="$srcdir/testfiles/image1.gif"
 
 # initialize errors variable
 errors=0

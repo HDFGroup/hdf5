@@ -40,7 +40,7 @@ typedef struct H5E_t H5E_t;
  */
 #define HCOMMON_ERROR(maj, min, str)  				              \
    HERROR(maj, min, str);						      \
-   (void)H5E_dump_api_stack((int)H5_IS_API(FUNC));
+   (void)H5E_dump_api_stack((hbool_t)H5_IS_API(FUNC));
 
 /*
  * HDONE_ERROR macro, used to facilitate error reporting between a
@@ -78,10 +78,12 @@ typedef struct H5E_t H5E_t;
 
 /* Library-private functions defined in H5E package */
 H5_DLL herr_t H5E_init(void);
-H5_DLL herr_t H5E_push_stack(H5E_t *estack, const char *file, const char *func, unsigned line,
-                            hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc);
+H5_DLL herr_t H5E_push_stack(H5E_t *estack, const char *file, const char *func,
+    unsigned line, hid_t cls_id, hid_t maj_id, hid_t min_id, const char *desc);
+H5_DLL herr_t H5E_printf_stack(H5E_t *estack, const char *file, const char *func,
+    unsigned line, hid_t cls_id, hid_t maj_id, hid_t min_id, const char *fmt, ...);
 H5_DLL herr_t H5E_clear_stack(H5E_t *estack);
-H5_DLL herr_t H5E_dump_api_stack(int is_api);
+H5_DLL herr_t H5E_dump_api_stack(hbool_t is_api);
 
 /*
  * Macros handling system error messages as described in C standard.

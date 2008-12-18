@@ -44,9 +44,6 @@
 #  undef H5HL_DEBUG
 #endif
 
-#define H5HL_MAGIC	"HEAP"		/*heap magic number		     */
-#define H5HL_SIZEOF_MAGIC 4
-
 #define H5HL_ALIGN(X)	(((X)+7)&(unsigned)(~0x07)) /*align on 8-byte boundary	*/
 
 #define H5HL_SIZEOF_FREE(F)						      \

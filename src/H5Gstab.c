@@ -484,8 +484,7 @@ done:
  */
 herr_t
 H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
-    hsize_t skip, hsize_t *last_lnk, hid_t gid,
-    H5G_link_iterate_t *lnk_op, void *op_data)
+    hsize_t skip, hsize_t *last_lnk, H5G_lib_iterate_t op, void *op_data)
 {
     H5HL_t              *heap = NULL;           /* Local heap for group */
     H5O_stab_t		stab;		        /* Info about symbol table */
@@ -496,7 +495,7 @@ H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
 
     /* Sanity check */
     HDassert(oloc);
-    HDassert(lnk_op && lnk_op->u.app_op);
+    HDassert(op);
 
     /* Get the B-tree info */
     if(NULL == H5O_msg_read(oloc, H5O_STAB_ID, &stab, dxpl_id))
@@ -512,15 +511,14 @@ H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
         H5G_bt_it_it_t	udata;                  /* User data to pass to B-tree callback */
 
         /* Build udata to pass through H5B_iterate() to H5G_node_iterate() */
-        udata.group_id = gid;
         udata.heap = heap;
         udata.skip = skip;
         udata.final_ent = last_lnk;
-        udata.lnk_op = lnk_op;
+        udata.op = op;
         udata.op_data = op_data;
 
         /* Iterate over the group members */
-        if((ret_value = H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_iterate, stab.btree_addr, &udata)) < 0)
+        if((ret_value = H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, H5G_node_iterate, &udata)) < 0)
             HERROR(H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
         /* Check for too high of a starting index (ex post facto :-) */
@@ -537,8 +535,7 @@ H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
         udata.ltable = &ltable;
 
         /* Iterate over the group members */
-        if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_build_table,
-                stab.btree_addr, &udata) < 0)
+        if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, H5G_node_build_table, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to build link table")
 
         /* Check for skipping out of bounds */
@@ -550,7 +547,7 @@ H5G_stab_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, H5_iter_order_t order,
             HGOTO_ERROR(H5E_SYM, H5E_CANTSORT, FAIL, "error sorting link messages")
 
         /* Iterate over links in table */
-        if((ret_value = H5G_link_iterate_table(&ltable, skip, last_lnk, gid, lnk_op, op_data)) < 0)
+        if((ret_value = H5G_link_iterate_table(&ltable, skip, last_lnk, op, op_data)) < 0)
             HERROR(H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
     } /* end else */
 
@@ -597,7 +594,7 @@ H5G_stab_count(H5O_loc_t *oloc, hsize_t *num_objs, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to determine local heap address")
 
     /* Iterate over the group members */
-    if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_sumup, stab.btree_addr, num_objs) < 0)
+    if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, H5G_node_sumup, num_objs) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed")
 
 done:
@@ -618,10 +615,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_stab_bh_size(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab, H5_ih_info_t *bh_info)
+H5G_stab_bh_size(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab,
+    H5_ih_info_t *bh_info)
 {
-    H5B_info_ud_t       bh_udata;               /* User-data for B-tree callbacks */
-    herr_t              ret_value = SUCCEED;
+    hsize_t     snode_size;             /* Symbol table node size */
+    H5B_info_t  bt_info;                /* B-tree node info */
+    herr_t      ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5G_stab_bh_size, FAIL)
 
@@ -630,13 +629,15 @@ H5G_stab_bh_size(H5F_t *f, hid_t dxpl_id, const H5O_stab_t *stab, H5_ih_info_t *
     HDassert(stab);
     HDassert(bh_info);
 
-    /* Set up user data for B-tree callback */
-    bh_udata.udata = NULL;
-    bh_udata.btree_size = &(bh_info->index_size);
+    /* Set up user data for B-tree iteration */
+    snode_size = 0;
 
     /* Get the B-tree & symbol table node size info */
-    if(H5B_iterate_size(f, dxpl_id, H5B_SNODE, H5G_node_iterate_size, stab->btree_addr, &bh_udata) < 0)
+    if(H5B_get_info(f, dxpl_id, H5B_SNODE, stab->btree_addr, &bt_info, H5G_node_iterate_size, &snode_size) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "iteration operator failed")
+
+    /* Add symbol table & B-tree node sizes to index info */
+    bh_info->index_size += snode_size + bt_info.size;
 
     /* Get the size of the local heap for the group */
     if(H5HL_heapsize(f, dxpl_id, stab->heap_addr, &(bh_info->heap_size)) < 0)
@@ -650,7 +651,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_stab_get_name_by_idx_cb
  *
- * Purpose:     Callback for B-tree iteration 'by index' info query to 
+ * Purpose:     Callback for B-tree iteration 'by index' info query to
  *              retrieve the name of a link
  *
  * Return:	Success:        Non-negative
@@ -676,7 +677,7 @@ H5G_stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
 
     /* Get name offset in heap */
     name_off = ent->name_off;
-    name = H5HL_offset_into(udata->common.f, udata->heap, name_off);
+    name = (const char *)H5HL_offset_into(udata->common.f, udata->heap, name_off);
     HDassert(name);
     udata->name = H5MM_strdup(name);
     HDassert(udata->name);
@@ -725,7 +726,7 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n,
         hsize_t nlinks = 0;           /* Number of links in group */
 
         /* Iterate over the symbol table nodes, to count the links */
-        if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_sumup, stab.btree_addr, &nlinks) < 0)
+        if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, H5G_node_sumup, &nlinks) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed")
 
         /* Map decreasing iteration order index to increasing iteration order index */
@@ -741,7 +742,7 @@ H5G_stab_get_name_by_idx(H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n,
     udata.name = NULL;
 
     /* Iterate over the group members */
-    if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_by_idx, stab.btree_addr, &udata) < 0)
+    if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, H5G_node_by_idx, &udata) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed")
 
     /* If we don't know the name now, we almost certainly went out of bounds */
@@ -809,7 +810,7 @@ done:
  *
  * Purpose:	Look up an object relative to a group, using symbol table
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -817,7 +818,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+htri_t
 H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     hid_t dxpl_id)
 {
@@ -825,7 +826,7 @@ H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     H5G_bt_lkp_t bt_udata;      /* Data to pass through B-tree	*/
     H5G_stab_fnd_ud_t udata;    /* 'User data' to give to callback */
     H5O_stab_t stab;		/* Symbol table message		*/
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    htri_t     ret_value;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_stab_lookup, FAIL)
 
@@ -855,7 +856,7 @@ H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk,
     bt_udata.op_data = &udata;
 
     /* Search the B-tree */
-    if(H5B_find(grp_oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, &bt_udata) < 0)
+    if((ret_value = H5B_find(grp_oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, &bt_udata)) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found")
 
 done:
@@ -870,7 +871,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_stab_lookup_by_idx_cb
  *
- * Purpose:     Callback for B-tree iteration 'by index' info query to 
+ * Purpose:     Callback for B-tree iteration 'by index' info query to
  *              retrieve the link
  *
  * Return:	Success:        Non-negative
@@ -895,7 +896,7 @@ H5G_stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
     HDassert(udata && udata->heap);
 
     /* Get a pointer to the link name */
-    name = H5HL_offset_into(udata->common.f, udata->heap, ent->name_off);
+    name = (const char *)H5HL_offset_into(udata->common.f, udata->heap, ent->name_off);
     HDassert(name);
 
     /* Convert the entry to a link */
@@ -949,7 +950,7 @@ H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order, hsize_t n,
         hsize_t nlinks = 0;           /* Number of links in group */
 
         /* Iterate over the symbol table nodes, to count the links */
-        if(H5B_iterate(grp_oloc->file, dxpl_id, H5B_SNODE, H5G_node_sumup, stab.btree_addr, &nlinks) < 0)
+        if(H5B_iterate(grp_oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, H5G_node_sumup, &nlinks) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "iteration operator failed")
 
         /* Map decreasing iteration order index to increasing iteration order index */
@@ -966,7 +967,7 @@ H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order, hsize_t n,
     udata.found = FALSE;
 
     /* Iterate over the group members */
-    if(H5B_iterate(grp_oloc->file, dxpl_id, H5B_SNODE, H5G_node_by_idx, stab.btree_addr, &udata) < 0)
+    if(H5B_iterate(grp_oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, H5G_node_by_idx, &udata) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "iteration operator failed")
 
     /* If we didn't find the link, we almost certainly went out of bounds */
@@ -986,7 +987,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5G_stab_get_type_by_idx_cb
  *
- * Purpose:     Callback for B-tree iteration 'by index' info query to 
+ * Purpose:     Callback for B-tree iteration 'by index' info query to
  *              retrieve the type of an object
  *
  * Return:	Success:        Non-negative
@@ -1078,7 +1079,7 @@ H5G_stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
     udata.type = H5G_UNKNOWN;
 
     /* Iterate over the group members */
-    if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, H5G_node_by_idx, stab.btree_addr, &udata) < 0)
+    if(H5B_iterate(oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr, H5G_node_by_idx, &udata) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "iteration operator failed")
 
     /* If we don't know the type now, we almost certainly went out of bounds */

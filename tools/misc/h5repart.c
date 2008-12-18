@@ -45,11 +45,6 @@
 #   include <sys/stat.h>
 #endif
 
-#ifdef _WIN32
-#   include <io.h>
-#	include <fcntl.h>
-#endif
-
 #ifndef FALSE
 #   define FALSE	0
 #endif
@@ -216,21 +211,12 @@ main (int argc, char *argv[])
     int		dst_is_family;		/*is dst name a family name?	*/
     int		dst_membno=0;		/*destination member number	*/
 
-#if defined(_WIN32) && ! defined (__MWERKS__)
-    __int64	left_overs=0;		/*amount of zeros left over	*/
-    __int64	src_offset=0;		/*offset in source member	*/
-    __int64	dst_offset=0;		/*offset in destination member	*/
-    __int64	src_size;		/*source logical member size	*/
-    __int64	src_act_size;		/*source actual member size	*/
-    __int64	dst_size=1 GB;		/*destination logical memb size	*/
-#else
     off_t	left_overs=0;		/*amount of zeros left over	*/
     off_t	src_offset=0;		/*offset in source member	*/
     off_t	dst_offset=0;		/*offset in destination member	*/
     off_t	src_size;		/*source logical member size	*/
     off_t	src_act_size;		/*source actual member size	*/
     off_t	dst_size=1 GB;		/*destination logical memb size	*/
-#endif
     hid_t       fapl;                   /*file access property list     */
     hid_t       file;
     hsize_t     hdsize;                 /*destination logical memb size */
@@ -320,7 +306,7 @@ main (int argc, char *argv[])
 	    need_write = FALSE;
 	} else if (src_offset<src_act_size) {
 	    n = (size_t)MIN ((off_t)n, src_act_size-src_offset);
-	    if ((nio=read (src, buf, n))<0) {
+	    if ((nio=HDread (src, buf, n))<0) {
 		perror ("read");
 		exit (1);
 	    } else if ((size_t)nio!=n) {
@@ -347,7 +333,7 @@ main (int argc, char *argv[])
 		perror ("HDlseek");
 		exit (1);
 	    }
-	    if ((nio=write (dst, buf, n))<0) {
+	    if ((nio=HDwrite (dst, buf, n))<0) {
 		perror ("write");
 		exit (1);
 	    } else if ((size_t)nio!=n) {
@@ -369,7 +355,7 @@ main (int argc, char *argv[])
 	 */
 	src_offset += n;
 	if (src_offset==src_act_size) {
-	    close (src);
+	    HDclose (src);
 	    if (!src_is_family) {
 		dst_offset += n;
 		break;
@@ -407,7 +393,7 @@ main (int argc, char *argv[])
 		    perror ("HDHDlseek");
 		    exit (1);
 		}
-		if (read (dst, buf, 1)<0) {
+		if (HDread (dst, buf, 1)<0) {
 		    perror ("read");
 		    exit (1);
 		}
@@ -415,12 +401,12 @@ main (int argc, char *argv[])
 		    perror ("HDlseek");
 		    exit (1);
 		}
-		if (write (dst, buf, 1)<0) {
+		if (HDwrite (dst, buf, 1)<0) {
 		    perror ("write");
 		    exit (1);
 		}
 	    }
-	    close (dst);
+	    HDclose (dst);
 	    sprintf (dst_name, dst_gen_name, ++dst_membno);
 	    if ((dst=HDopen (dst_name, O_RDWR|O_CREAT|O_TRUNC, 0666))<0) {
 		perror (dst_name);
@@ -442,7 +428,7 @@ main (int argc, char *argv[])
 	    perror ("HDlseek");
 	    exit (1);
 	}
-	if (read (dst, buf, 1)<0) {
+	if (HDread (dst, buf, 1)<0) {
 	    perror ("read");
 	    exit (1);
 	}
@@ -450,12 +436,12 @@ main (int argc, char *argv[])
 	    perror ("HDlseek");
 	    exit (1);
 	}
-	if (write (dst, buf, 1)<0) {
+	if (HDwrite (dst, buf, 1)<0) {
 	    perror ("write");
 	    exit (1);
 	}
     }
-    close (dst);
+    HDclose (dst);
 
     /* Modify family driver information saved in superblock through private property.
      * These private properties are for this tool only. */

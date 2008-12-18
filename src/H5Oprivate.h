@@ -91,6 +91,10 @@ typedef struct H5O_t H5O_t;
 #define H5O_BOGUS_MSG_FLAGS_NAME        "bogus msg flags"       /* Flags for 'bogus' message */
 #define H5O_BOGUS_MSG_FLAGS_SIZE        sizeof(uint8_t)
 #endif /* H5O_ENABLE_BOGUS */
+#ifdef H5O_ENABLE_BAD_MESG_COUNT
+#define H5O_BAD_MESG_COUNT_NAME         "bad message count"       /* Flag setting bad message count */
+#define H5O_BAD_MESG_COUNT_SIZE         sizeof(hbool_t)
+#endif /* H5O_ENABLE_BAD_MESG_COUNT */
 
 /* ========= Object Copy properties ============ */
 #define H5O_CPY_OPTION_NAME 		"copy object"           /* Copy options */
@@ -322,6 +326,10 @@ typedef struct H5O_efl_t {
  */
 #define H5O_LAYOUT_NDIMS	(H5S_MAX_RANK+1)
 
+/* Forward declaration of structs used below */
+struct H5D_layout_ops_t;                /* Defined in H5Dpkg.h               */
+struct H5D_chunk_ops_t;                 /* Defined in H5Dpkg.h               */
+
 typedef struct H5O_layout_contig_t {
     haddr_t	addr;			/* File address of data              */
     hsize_t     size;                   /* Size of data in bytes             */
@@ -330,9 +338,10 @@ typedef struct H5O_layout_contig_t {
 typedef struct H5O_layout_chunk_t {
     haddr_t	addr;			/* File address of B-tree            */
     unsigned	ndims;			/* Num dimensions in chunk           */
-    size_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
-    size_t      size;                   /* Size of chunk in bytes            */
+    uint32_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
+    uint32_t    size;                   /* Size of chunk in bytes            */
     H5RC_t     *btree_shared;           /* Ref-counted info for B-tree nodes */
+    const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked layout operations */
 } H5O_layout_chunk_t;
 
 typedef struct H5O_layout_compact_t {
@@ -344,6 +353,7 @@ typedef struct H5O_layout_compact_t {
 typedef struct H5O_layout_t {
     H5D_layout_t type;			/* Type of layout                    */
     unsigned version;                   /* Version of message                */
+    const struct H5D_layout_ops_t *ops; /* Pointer to data layout I/O operations */
     union {
         H5O_layout_contig_t contig;     /* Information for contiguous layout */
         H5O_layout_chunk_t chunk;       /* Information for chunked layout    */
@@ -536,38 +546,41 @@ H5_DLL herr_t H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint,
 H5_DLL herr_t H5O_open(H5O_loc_t *loc);
 H5_DLL herr_t H5O_close(H5O_loc_t *loc);
 H5_DLL int H5O_link(const H5O_loc_t *loc, int adjust, hid_t dxpl_id);
-H5_DLL struct H5O_t *H5O_protect(H5O_loc_t *loc, hid_t dxpl_id);
-H5_DLL herr_t H5O_unprotect(H5O_loc_t *loc, struct H5O_t *oh);
+H5_DLL H5O_t *H5O_protect(H5O_loc_t *loc, hid_t dxpl_id);
+H5_DLL herr_t H5O_unprotect(H5O_loc_t *loc, H5O_t *oh);
 H5_DLL herr_t H5O_touch(H5O_loc_t *loc, hbool_t force, hid_t dxpl_id);
-H5_DLL herr_t H5O_touch_oh(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh,
+H5_DLL herr_t H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     hbool_t force);
 #ifdef H5O_ENABLE_BOGUS
-H5_DLL herr_t H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, unsigned mesg_flags);
+H5_DLL herr_t H5O_bogus_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned mesg_flags);
 #endif /* H5O_ENABLE_BOGUS */
 H5_DLL herr_t H5O_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr);
 H5_DLL herr_t H5O_get_info(H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info,
     H5O_info_t *oinfo);
 H5_DLL herr_t H5O_obj_type(const H5O_loc_t *loc, H5O_type_t *obj_type, hid_t dxpl_id);
 H5_DLL herr_t H5O_get_create_plist(const H5O_loc_t *loc, hid_t dxpl_id, struct H5P_genplist_t *oc_plist);
-H5_DLL hid_t H5O_open_name(H5G_loc_t *loc, const char *name, hid_t lapl_id);
+H5_DLL hid_t H5O_open_name(H5G_loc_t *loc, const char *name, hid_t lapl_id, hbool_t app_ref);
 H5_DLL herr_t H5O_get_nlinks(const H5O_loc_t *loc, hid_t dxpl_id, hsize_t *nlinks);
 H5_DLL void *H5O_obj_create(H5F_t *f, H5O_type_t obj_type, void *crt_info, H5G_loc_t *obj_loc, hid_t dxpl_id);
 H5_DLL haddr_t H5O_get_oh_addr(const H5O_t *oh);
+H5_DLL herr_t H5O_get_rc_and_type(const H5O_loc_t *oloc, hid_t dxpl_id, unsigned *rc, H5O_type_t *otype);
 
 /* Object header message routines */
 H5_DLL herr_t H5O_msg_create(const H5O_loc_t *loc, unsigned type_id, unsigned mesg_flags,
     unsigned update_flags, void *mesg, hid_t dxpl_id);
-H5_DLL herr_t H5O_msg_append(H5F_t *f, hid_t dxpl_id, struct H5O_t *oh, unsigned type_id,
+H5_DLL herr_t H5O_msg_append_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     unsigned mesg_flags, unsigned update_flags, void *mesg);
-H5_DLL herr_t H5O_msg_write(const H5O_loc_t *loc, unsigned type_id, unsigned flags,
-    unsigned update_flags, void *mesg, hid_t dxpl_id);
+H5_DLL herr_t H5O_msg_write(const H5O_loc_t *loc, unsigned type_id,
+    unsigned mesg_flags, unsigned update_flags, void *mesg, hid_t dxpl_id);
+H5_DLL herr_t H5O_msg_write_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    unsigned type_id, unsigned mesg_flags, unsigned update_flags, void *mesg);
 H5_DLL void *H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
     hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_reset(unsigned type_id, void *native);
 H5_DLL void *H5O_msg_free(unsigned type_id, void *mesg);
 H5_DLL void *H5O_msg_copy(unsigned type_id, const void *mesg, void *dst);
 H5_DLL int H5O_msg_count(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
-H5_DLL htri_t H5O_msg_exists(H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
+H5_DLL htri_t H5O_msg_exists(const H5O_loc_t *loc, unsigned type_id, hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_remove(const H5O_loc_t *loc, unsigned type_id, int sequence,
     hbool_t adj_link, hid_t dxpl_id);
 H5_DLL herr_t H5O_msg_remove_op(const H5O_loc_t *loc, unsigned type_id, int sequence,
@@ -590,7 +603,7 @@ H5_DLL herr_t H5O_msg_get_crt_index(unsigned type_id, const void *mesg,
     H5O_msg_crt_idx_t *crt_idx);
 H5_DLL herr_t H5O_msg_encode(H5F_t *f, unsigned type_id, hbool_t disable_shared,
     unsigned char *buf, const void *obj);
-H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, 
+H5_DLL void* H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id,
     const unsigned char *buf);
 H5_DLL herr_t H5O_msg_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     unsigned type_id, void *mesg);

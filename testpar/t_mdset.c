@@ -368,7 +368,7 @@ void null_dataset(void)
      VRFY((ret>= 0),"set independent IO collectively succeeded");
     }
 
- 
+
     dataset = H5Dopen2(iof, dname, H5P_DEFAULT);
     VRFY((dataset >= 0), "H5Dopen2 succeeded");
 
@@ -456,10 +456,8 @@ void big_dataset(void)
     VRFY((ret >= 0), "H5Fclose succeeded");
 
     /* Check that file of the correct size was created */
-    file_size=h5_get_file_size(filename);
-#ifndef _WIN32
+    file_size = h5_get_file_size(filename, fapl);
     VRFY((file_size == 2147485696ULL), "File is correct size(~2GB)");
-#endif
 
     /*
      * Create >4GB HDF5 file
@@ -487,10 +485,8 @@ void big_dataset(void)
     VRFY((ret >= 0), "H5Fclose succeeded");
 
     /* Check that file of the correct size was created */
-    file_size=h5_get_file_size(filename);
-#ifndef _WIN32
+    file_size = h5_get_file_size(filename, fapl);
     VRFY((file_size == 4294969344ULL), "File is correct size(~4GB)");
-#endif
 
     /*
      * Create >8GB HDF5 file
@@ -518,10 +514,8 @@ void big_dataset(void)
     VRFY((ret >= 0), "H5Fclose succeeded");
 
     /* Check that file of the correct size was created */
-    file_size=h5_get_file_size(filename);
-#ifndef _WIN32
+    file_size = h5_get_file_size(filename, fapl);
     VRFY((file_size == 8589936640ULL), "File is correct size(~8GB)");
-#endif
 
     /* Close fapl */
     ret = H5Pclose(fapl);
@@ -1598,7 +1592,7 @@ void io_mode_confusion(void)
                        mpi_rank, fcn_name);
 
         status = H5Sselect_elements(filespace, H5S_SELECT_SET, N,
-                                   (const hsize_t **)&coord);
+                                   &coord);
         VRFY((status >= 0 ), "H5Sselect_elements() failed");
     } else { /* select nothing */
         if(verbose )

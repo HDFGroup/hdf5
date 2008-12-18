@@ -37,6 +37,7 @@ typedef struct {
     int    err_stat;  /* an error ocurred (1, error, 0, no error) */
     int    cmn_objs;  /* do we have comparable objects */
     int    not_cmp;   /* are the objects comparable */
+    int    contents;  /* equal contents */
 } diff_opt_t;
 
 
@@ -190,17 +191,34 @@ hsize_t diff_float(unsigned char *mem1,
                    int           *ph);
 
 hsize_t diff_double(unsigned char *mem1,
-                   unsigned char *mem2,
-                   hsize_t       nelmts,
-                   hsize_t       hyper_start,
-                   int           rank,
-                   hsize_t       *dims,
-                   hsize_t       *acc,
-                   hsize_t       *pos,
-                   diff_opt_t    *options,
-                   const char    *obj1,
-                   const char    *obj2,
-                   int           *ph);
+                    unsigned char *mem2,
+                    hsize_t       nelmts,
+                    hsize_t       hyper_start,
+                    int           rank,
+                    hsize_t       *dims,
+                    hsize_t       *acc,
+                    hsize_t       *pos,
+                    diff_opt_t    *options,
+                    const char    *obj1,
+                    const char    *obj2,
+                    int           *ph);
+
+#if H5_SIZEOF_LONG_DOUBLE !=0
+
+hsize_t diff_ldouble(unsigned char *mem1,
+                     unsigned char *mem2,
+                     hsize_t       nelmts,
+                     hsize_t       hyper_start,
+                     int           rank,
+                     hsize_t       *dims,
+                     hsize_t       *acc,
+                     hsize_t       *pos,
+                     diff_opt_t    *options,
+                     const char    *obj1,
+                     const char    *obj2,
+                     int           *ph);
+
+#endif
 
 hsize_t diff_schar(unsigned char *mem1,
                    unsigned char *mem2,

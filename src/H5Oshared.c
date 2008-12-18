@@ -107,8 +107,8 @@
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
-    const H5O_msg_class_t *type)
+H5O_shared_read(H5F_t *f, hid_t dxpl_id, unsigned *ioflags,
+    const H5O_shared_t *shared, const H5O_msg_class_t *type)
 {
     H5HF_t *fheap = NULL;
     H5WB_t *wb = NULL;          /* Wrapped buffer for attribute data */
@@ -151,7 +151,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't wrap buffer")
 
         /* Get a pointer to a buffer that's large enough for message */
-        if(NULL == (mesg_ptr = H5WB_actual(wb, mesg_size)))
+        if(NULL == (mesg_ptr = (uint8_t *)H5WB_actual(wb, mesg_size)))
             HGOTO_ERROR(H5E_OHDR, H5E_NOSPACE, NULL, "can't get actual buffer")
 
         /* Retrieve the message from the heap */
@@ -159,7 +159,7 @@ H5O_shared_read(H5F_t *f, hid_t dxpl_id, const H5O_shared_t *shared,
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "can't read message from fractal heap.")
 
         /* Decode the message */
-        if(NULL == (ret_value = (type->decode)(f, dxpl_id, 0, mesg_ptr)))
+        if(NULL == (ret_value = (type->decode)(f, dxpl_id, 0, ioflags, mesg_ptr)))
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "can't decode shared message.")
     } /* end if */
     else {
@@ -277,7 +277,8 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_shared_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *buf, const H5O_msg_class_t *type)
+H5O_shared_decode(H5F_t *f, hid_t dxpl_id, unsigned *ioflags,
+    const uint8_t *buf, const H5O_msg_class_t *type)
 {
     H5O_shared_t sh_mesg;       /* Shared message info */
     unsigned version;           /* Shared message version */
@@ -343,7 +344,7 @@ H5O_shared_decode(H5F_t *f, hid_t dxpl_id, const uint8_t *buf, const H5O_msg_cla
     sh_mesg.msg_type_id = type->id;
 
     /* Retrieve actual message, through decoded shared message info */
-    if(NULL == (ret_value = H5O_shared_read(f, dxpl_id, &sh_mesg, type)))
+    if(NULL == (ret_value = H5O_shared_read(f, dxpl_id, ioflags, &sh_mesg, type)))
         HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to retrieve native message")
 
 done:
@@ -489,7 +490,7 @@ H5O_shared_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
     HDassert(f);
     HDassert(sh_mesg);
 
-    /* 
+    /*
      * Committed datatypes increment the OH of the original message when they
      * are written (in H5O_shared_link) and decrement it here.
      * SOHMs in the heap behave differently; their refcount is incremented
@@ -555,7 +556,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_shared_copy_file(H5F_t UNUSED *file_src, H5F_t *file_dst, 
+H5O_shared_copy_file(H5F_t UNUSED *file_src, H5F_t *file_dst,
     const H5O_msg_class_t *mesg_type, const void *_native_src, void *_native_dst,
     hbool_t UNUSED *recompute_size, H5O_copy_t *cpy_info, void UNUSED *udata,
     hid_t dxpl_id)
@@ -614,7 +615,7 @@ done:
  * Purpose:     Delate a shared message and replace with a new one.
  *              The function is needed at cases such as coping a shared reg_ref attribute.
  *              When a shared reg_ref attribute is copied from one file to
- *              another, the values in file need to be replaced. The only way 
+ *              another, the values in file need to be replaced. The only way
  *              to complish that is to delete the old message and write the
  *              new message with the correct values.
  *

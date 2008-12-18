@@ -38,4 +38,8 @@ check_PROGRAMS=$(TEST_PROG)
 LDADD=$(LIBH5CPP_HL) $(LIBH5_HL) $(LIBH5CPP) $(LIBHDF5)
 
 ptableTest_SOURCES=ptableTest.cpp
+
+# Tell conclude.am that these are C++ tests.
+CXX_API=yes
+
 include $(top_srcdir)/config/conclude.am

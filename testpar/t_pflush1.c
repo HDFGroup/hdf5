@@ -51,12 +51,12 @@ static double	the_data[100][100];
  *-------------------------------------------------------------------------
  */
 hid_t create_file(char* name, hid_t fapl)
-{ 
+{
     hid_t	file, dcpl, space, dset, groups, grp, plist;
     hsize_t	ds_size[2] = {100, 100};
     hsize_t	ch_size[2] = {5, 5};
     hsize_t	i, j;
- 
+
 
 
     if((file=H5Fcreate(name, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) goto error;
@@ -70,8 +70,8 @@ hid_t create_file(char* name, hid_t fapl)
 
     plist = H5Pcreate(H5P_DATASET_XFER);
     H5Pset_dxpl_mpio(plist, H5FD_MPIO_COLLECTIVE);
-    
-    
+
+
     /* Write some data */
     for(i = 0; i < ds_size[0]; i++) {
 	/*
@@ -113,7 +113,7 @@ error:
  * Modifications:
  * 		Leon Arber
  * 		Sept. 26, 2006, expand test to check for failure if H5Fflush is not called.
- * 		
+ *
  *
  *-------------------------------------------------------------------------
  */
@@ -131,15 +131,15 @@ main(int argc, char* argv[])
 
     MPI_Init(&argc, &argv);
     MPI_Comm_size(comm, &mpi_size);
-    MPI_Comm_rank(comm, &mpi_rank);  
+    MPI_Comm_rank(comm, &mpi_rank);
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     H5Pset_fapl_mpio(fapl, comm, info);
 
-    if(mpi_rank == 0) 
+    if(mpi_rank == 0)
 	TESTING("H5Fflush (part1)");
     envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL) 
+    if(envval == NULL)
         envval = "nomatch";
     if(HDstrcmp(envval, "split")) {
 	/* Create the file */
@@ -153,7 +153,7 @@ main(int argc, char* argv[])
 	file2 = create_file(name, fapl);
 
 
-	if(mpi_rank == 0) 
+	if(mpi_rank == 0)
 	    PASSED();
 	fflush(stdout);
 	fflush(stderr);
@@ -163,7 +163,7 @@ main(int argc, char* argv[])
         SKIPPED();
         puts("    Test not compatible with current Virtual File Driver");
     }
- 
+
     /*
      * Some systems like Linux with mpich, if you just _exit without MPI_Finalize
      * called, it would terminate but left the launching process waiting forever.
@@ -174,7 +174,7 @@ main(int argc, char* argv[])
      * Note that MPIO VFD returns the address of the file-handle in the VFD struct
      * because MPI_File_close wants to modify the file-handle variable.
      */
-     
+
     /* close file1 */
     if(H5Fget_vfd_handle(file1, fapl, (void **)&mpifh_p) < 0){
 	printf("H5Fget_vfd_handle for file1 failed\n");

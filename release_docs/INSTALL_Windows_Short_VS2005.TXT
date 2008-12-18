@@ -14,6 +14,17 @@ Notes: This short instruction is written for users who want to quickly build
       
        For users who would like to build and test HDF5 package from the
        command line, please refer to INSATLL_Windows_From_Command_Line.txt.
+       
+       Notes:
+       
+         1. HDF5 1.8 can also be built using Visual Studio 2005 on Windows
+            Vista.  For details, please see Section X of INSTALL_Windows.txt.
+            
+         2. 64-bit builds are also supported in Visual STudio 2005.  For details
+            please see Section IX of INSTALL_Windows.txt.
+            
+         3. Fortran libraries can be built with Visual Studio 2005 and Intel
+            Fortran 9.1.  For details, see Section VI of INSTALL_Windows.txt.
 
 WARNINGS:
 
@@ -42,9 +53,9 @@ notes in INSTALL_Windows.txt before starting below procedures.
       c:\szip\include) to the included directories.                                                
                                                                          
       Find the box "Show directories for", choose "Library files", If you cannot 
-      find your Zlib and Szip library path (for example, c:\zlib123\lib, 
+      find your Zlib and Szip library path (for example, c:\zlib123\dll, 
       c:\szip\dll) from the directory list, add the library path 
-      (c:\zlib123\lib, c:\szip\dll) to the library directories.            
+      (c:\zlib123\dll, c:\szip\dll) to the library directories.            
 
 ========================================================================
           Building HDF5 C/C++ Libraries with Visual Studio 2005
@@ -149,19 +160,9 @@ hdf5check.bat has four options:
 Notes: Users who only build HDF5 C/C++ libraries ONLY have the first 
        two options.
 
-Invoke a command prompt window and run hdf5check with appropriate
-options.
-
-Test results are saved in two files:
-
-   c:\MyHDFstuff\hdf5\tests_results.txt   
-
-   c:\MyHDFstuff\hdf5\check_results.txt.
-
-In general, you only need to check tests_results.txt.  If all the
-tests passed, then you do not have to check check_results.txt.  
-If some tests failed, check check_results.txt can help you
-figure out what was wrong.
+Invoke a command prompt window and run hdf5check with appropriate option.
+Users are encouraged to pipe the test output into a file.  You should find
+no "*FAILED*" marks.
 
 If you want to test HDF5 libraries and tools one by one, please refer to
 Section II, step 2 in INSTALL_Windows.txt.

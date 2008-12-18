@@ -233,8 +233,8 @@ main(int argc, const char *argv[])
 
     /* Check for creating groups with new format version */
     if(params.latest) {
-        /* Set the "use the latest version of the format flag */
-        if(H5Pset_latest_format(fapl_id, TRUE) < 0) {
+        /* Set the "use the latest version of the format" bounds */
+        if(H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
             error_msg(progname, "Could not set property for using latest version of the format\n");
             leave(EXIT_FAILURE);
         } /* end if */
@@ -303,22 +303,22 @@ main(int argc, const char *argv[])
         error_msg(progname, "Could not close link creation property list\n");
         leave(EXIT_FAILURE);
     } /* end if */
-  
+
     /* Close file */
     if(H5Fclose(fid) < 0) {
         error_msg(progname, "Could not close output file '%s'??\n", params.fname);
         leave(EXIT_FAILURE);
     } /* end if */
-  
+
     /* Close file access property list */
     if(H5Pclose(fapl_id) < 0) {
         error_msg(progname, "Could not close file access property list\n");
         leave(EXIT_FAILURE);
     } /* end if */
-  
+
     /* Shut down h5tools lib */
     h5tools_close();
- 
+
     return 0;
 } /* end main() */
 

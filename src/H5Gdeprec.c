@@ -218,15 +218,15 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
         H5O_ginfo_t     ginfo;          /* Group info property */
 
         /* Get the default property list */
-        if(NULL == (gc_plist = H5I_object(H5P_GROUP_CREATE_DEFAULT)))
+        if(NULL == (gc_plist = (H5P_genplist_t *)H5I_object(H5P_GROUP_CREATE_DEFAULT)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
         /* Make a copy of the default property list */
-        if((tmp_gcpl = H5P_copy_plist(gc_plist)) < 0)
+        if((tmp_gcpl = H5P_copy_plist(gc_plist, FALSE)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to copy the creation property list")
 
         /* Get pointer to the copied property list */
-        if(NULL == (gc_plist = H5I_object(tmp_gcpl)))
+        if(NULL == (gc_plist = (H5P_genplist_t *)H5I_object(tmp_gcpl)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
         /* Get the group info property */
@@ -245,12 +245,12 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     if(NULL == (grp = H5G_create_named(&loc, name, H5P_LINK_CREATE_DEFAULT,
             tmp_gcpl, H5P_GROUP_ACCESS_DEFAULT, H5AC_dxpl_id)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to create group")
-    if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
+    if((ret_value = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
 done:
     if(tmp_gcpl > 0 && tmp_gcpl != H5P_GROUP_CREATE_DEFAULT)
-        if(H5I_dec_ref(tmp_gcpl) < 0)
+        if(H5I_dec_ref(tmp_gcpl, TRUE) < 0)
             HDONE_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to release property list")
 
     if(ret_value < 0)
@@ -299,7 +299,7 @@ H5Gopen1(hid_t loc_id, const char *name)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an atom for the group */
-    if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
+    if((ret_value = H5I_register(H5I_GROUP, grp, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
 done:
@@ -770,10 +770,10 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op,
 
     /* Build link operator info */
     lnk_op.op_type = H5G_LINK_OP_OLD;
-    lnk_op.u.old_op = op;
+    lnk_op.op_func.op_old = op;
 
     /* Call private function. */
-    if((ret_value = H5G_obj_iterate(loc_id, name, H5_INDEX_NAME, H5_ITER_INC, idx, &last_obj, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
+    if((ret_value = H5G_iterate(loc_id, name, H5_INDEX_NAME, H5_ITER_INC, idx, &last_obj, &lnk_op, op_data, H5P_DEFAULT, H5AC_ind_dxpl_id)) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_BADITER, FAIL, "group iteration failed")
 
     /* Set the index we stopped at */
@@ -1104,13 +1104,13 @@ H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
     if(H5G_loc(loc_id, &loc) < 0)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "not a location ID")
     if(H5O_obj_type(loc.oloc, &obj_type, H5AC_ind_dxpl_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get object type")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5G_UNKNOWN, "can't get object type")
     if(obj_type != H5O_TYPE_GROUP)
-        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "not a group")
+        HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "not a group")
 
     /* Call internal function*/
     if((ret_value = H5G_obj_get_type_by_idx(loc.oloc, idx, H5AC_ind_dxpl_id)) == H5G_UNKNOWN)
-	HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, FAIL, "can't get object type")
+	HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "can't get object type")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1136,6 +1136,7 @@ static H5G_obj_t
 H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
 {
     H5O_linfo_t	linfo;		/* Link info message */
+    htri_t linfo_exists;        /* Whether the link info message exists */
     H5G_obj_t ret_value;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_obj_get_type_by_idx, H5G_UNKNOWN)
@@ -1144,7 +1145,9 @@ H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
     HDassert(oloc);
 
     /* Attempt to get the link info for this group */
-    if(H5G_obj_get_linfo(oloc, &linfo, dxpl_id)) {
+    if((linfo_exists = H5G_obj_get_linfo(oloc, &linfo, dxpl_id)) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5G_UNKNOWN, "can't check for link info message")
+    if(linfo_exists) {
         if(H5F_addr_defined(linfo.fheap_addr)) {
             /* Get the object's name from the dense link storage */
             if((ret_value = H5G_dense_get_type_by_idx(oloc->file, dxpl_id, &linfo, idx)) < 0)
@@ -1157,9 +1160,6 @@ H5G_obj_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx, hid_t dxpl_id)
         } /* end else */
     } /* end if */
     else {
-        /* Clear error stack from not finding the link info message */
-        H5E_clear_stack(NULL);
-
         /* Get the object's type from the symbol table */
         if((ret_value = H5G_stab_get_type_by_idx(oloc, idx, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, H5G_UNKNOWN, "can't locate type")

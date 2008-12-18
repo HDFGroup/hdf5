@@ -58,7 +58,6 @@
      CHARACTER(LEN=100) :: name !name to put symbolic object
      CHARACTER(LEN=100) :: commentout !comment to the file
      INTEGER     ::   nmembers
-     INTEGER     :: obj_type
      INTEGER(HSIZE_T), DIMENSION(2) :: data_dims 
      !
      ! Create the file.
@@ -82,7 +81,6 @@
      !
      CALL h5gcreate_f(file_id, groupname2, group2_id, error)
      CALL check("h5gcreate_f",error,total_error)
-
      !
      !Create data space for the dataset. 
      !
@@ -135,7 +133,6 @@
      !
      CALL h5glink_f(file_id, H5G_LINK_SOFT_F, dsetname2, linkname4, error)   
      CALL check("h5glink_f",error,total_error)
-
      !
      !close group1
      !
@@ -165,8 +162,6 @@
          write(*,*)  "got nmembers ", nmembers, " is wrong"
          total_error = total_error +1
      end if
-
-
      !
      !Get the name of a symbolic name
      !

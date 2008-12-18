@@ -1478,7 +1478,7 @@ herr_t H5DSset_label(hid_t did,
   if(H5Aclose(aid) < 0)
    goto out;
   if(buf)
-   free(buf);
+   free((void *)buf);
  }
 
 /*-------------------------------------------------------------------------
@@ -1501,7 +1501,7 @@ herr_t H5DSset_label(hid_t did,
    goto out;
 
   /* read */
-  if(H5Aread(aid, tid, buf) < 0)
+  if(H5Aread(aid, tid, (void *)buf) < 0)
    goto out;
 
   /* store the label information in the required index */
@@ -1517,7 +1517,7 @@ herr_t H5DSset_label(hid_t did,
   if (H5Aclose(aid) < 0)
    goto out;
   if (buf)
-   free(buf);
+   free((void *)buf);
  }
 
  return SUCCEED;

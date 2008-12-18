@@ -126,10 +126,10 @@ H5_checksum_fletcher32(const void *_data, size_t _len)
      *  performed without numeric overflow)
      */
     while (len) {
-        unsigned tlen = len > 360 ? 360 : len;
+        size_t tlen = len > 360 ? 360 : len;
         len -= tlen;
         do {
-            sum1 += (((uint16_t)data[0]) << 8) | ((uint16_t)data[1]);
+            sum1 += (uint32_t)(((uint16_t)data[0]) << 8) | ((uint16_t)data[1]);
             data += 2;
             sum2 += sum1;
         } while (--tlen);
@@ -139,7 +139,7 @@ H5_checksum_fletcher32(const void *_data, size_t _len)
 
     /* Check for odd # of bytes */
     if(_len % 2) {
-        sum1 += ((uint16_t)*data) << 8;
+        sum1 += (uint32_t)(((uint16_t)*data) << 8);
         sum2 += sum1;
         sum1 = (sum1 & 0xffff) + (sum1 >> 16);
         sum2 = (sum2 & 0xffff) + (sum2 >> 16);
@@ -270,7 +270,7 @@ This was tested for:
   the output delta to a Gray code (a^(a>>1)) so a string of 1's (as
   is commonly produced by subtraction) look like a single 1-bit
   difference.
-* the base values were pseudorandom, all zero but one bit set, or 
+* the base values were pseudorandom, all zero but one bit set, or
   all zero plus a counter that starts at zero.
 
 Some k values for my "a-=c; a^=rot(c,k); c+=b;" arrangement that
@@ -280,7 +280,7 @@ satisfy this are
    14  9  3  7 17  3
 Well, "9 15 3 18 27 15" didn't quite get 32 bits diffing
 for "differ" defined as + with a one-bit base and a two-bit delta.  I
-used http://burtleburtle.net/bob/hash/avalanche.html to choose 
+used http://burtleburtle.net/bob/hash/avalanche.html to choose
 the operations, constants, and arrangements of the variables.
 
 This does not achieve avalanche.  There are input bits of (a,b,c)
@@ -320,7 +320,7 @@ produce values of c that look totally different.  This was tested for
   the output delta to a Gray code (a^(a>>1)) so a string of 1's (as
   is commonly produced by subtraction) look like a single 1-bit
   difference.
-* the base values were pseudorandom, all zero but one bit set, or 
+* the base values were pseudorandom, all zero but one bit set, or
   all zero plus a counter that starts at zero.
 
 These constants passed:
@@ -458,4 +458,37 @@ H5_checksum_metadata(const void *data, size_t len, uint32_t initval)
     /* (use Bob Jenkin's "lookup3" algorithm for all buffer sizes) */
     FUNC_LEAVE_NOAPI(H5_checksum_lookup3(data, len, initval))
 } /* end H5_checksum_metadata() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5_hash_string
+ *
+ * Purpose:	Provide a simple & fast routine for hashing strings
+ *
+ * Note:        This algorithm is the 'djb2' algorithm described on this page:
+ *              http://www.cse.yorku.ca/~oz/hash.html
+ *
+ * Return:	hash of input string (can't fail)
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, December 11, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+uint32_t
+H5_hash_string(const char *str)
+{
+    uint32_t hash = 5381;
+    int c;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5_hash_string)
+
+    /* Sanity check */
+    HDassert(str);
+
+    while((c = *str++))
+        hash = ((hash << 5) + hash) + (uint32_t)c; /* hash * 33 + c */
+
+    FUNC_LEAVE_NOAPI(hash)
+} /* end H5_hash_string() */
 

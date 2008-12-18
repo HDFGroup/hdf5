@@ -32,6 +32,10 @@
  * Note: If an application has already chosen a particular version for an
  *      API symbol, the individual API version macro takes priority.
  */
+#if defined(H5_USE_16_API_DEFAULT) && !defined(H5_USE_16_API)
+#define H5_USE_16_API 1
+#endif /* H5_USE_16_API_DEFAULT && !H5_USE_16_API */
+
 #ifdef H5_USE_16_API
 
 /*************/

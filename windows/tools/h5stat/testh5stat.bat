@@ -99,7 +99,7 @@ rem
         call :testing CREATED %stat% %params%
         copy /y %actual% %expect%
     ) else (
-        fc /w %expect% %actual% | find "FC: no diff" > nul
+        fc /w %expect% %actual% > nul
         if !errorlevel! equ 0 (
             call :testing PASSED %stat% %params%
         ) else (

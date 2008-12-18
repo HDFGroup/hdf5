@@ -29,6 +29,11 @@
 /* Public Macros */
 /*****************/
 
+/* Macros used to "unset" chunk cache configuration parameters */
+#define H5D_CHUNK_CACHE_NSLOTS_DEFAULT     ((size_t) -1)
+#define H5D_CHUNK_CACHE_NBYTES_DEFAULT      ((size_t) -1)
+#define H5D_CHUNK_CACHE_W0_DEFAULT          -1.
+
 /*******************/
 /* Public Typedefs */
 /*******************/
@@ -101,6 +106,7 @@ H5_DLL hid_t H5Dget_space(hid_t dset_id);
 H5_DLL herr_t H5Dget_space_status(hid_t dset_id, H5D_space_status_t *allocation);
 H5_DLL hid_t H5Dget_type(hid_t dset_id);
 H5_DLL hid_t H5Dget_create_plist(hid_t dset_id);
+H5_DLL hid_t H5Dget_access_plist(hid_t dset_id);
 H5_DLL hsize_t H5Dget_storage_size(hid_t dset_id);
 H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
 H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id,
@@ -113,11 +119,11 @@ H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t plist_id, voi
 H5_DLL herr_t H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size);
 H5_DLL herr_t H5Dfill(const void *fill, hid_t fill_type, void *buf,
         hid_t buf_type, hid_t space);
-H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t *size);
+H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[]);
 H5_DLL herr_t H5Ddebug(hid_t dset_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
- * 
+ *
  * Use of these symbols is deprecated.
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
@@ -132,7 +138,7 @@ H5_DLL herr_t H5Ddebug(hid_t dset_id);
 H5_DLL hid_t H5Dcreate1(hid_t file_id, const char *name, hid_t type_id,
     hid_t space_id, hid_t dcpl_id);
 H5_DLL hid_t H5Dopen1(hid_t file_id, const char *name);
-H5_DLL herr_t H5Dextend(hid_t dset_id, const hsize_t *size);
+H5_DLL herr_t H5Dextend(hid_t dset_id, const hsize_t size[]);
 
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 

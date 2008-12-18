@@ -7,9 +7,8 @@ GROUP "/" {
       DATATYPE  H5T_REFERENCE
       DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
       DATA {
-      (0): DATASET /Dataset2 {(2,2)-(7,7)}, DATASET /Dataset2 {(6,9), (2,2),
-      (1):  (8,4), (1,6), (2,8), (3,2), (0,4), (9,0), (7,1), (3,3)}, NULL,
-      (3): NULL
+         DATASET /Dataset2 {(2,2)-(7,7)}, DATASET /Dataset2 {(6,9), (2,2),
+          (8,4), (1,6), (2,8), (3,2), (0,4), (9,0), (7,1), (3,3)}, NULL, NULL
       }
    }
    DATASET "Dataset2" {

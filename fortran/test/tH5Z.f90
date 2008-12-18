@@ -22,7 +22,7 @@
      IMPLICIT NONE
      LOGICAL, INTENT(IN)  :: cleanup
      INTEGER, INTENT(OUT) :: total_error 
-     LOGICAL :: status, status1
+     LOGICAL :: status
      INTEGER(HID_T)    :: crtpr_id, xfer_id
      INTEGER           :: nfilters
      INTEGER           :: error

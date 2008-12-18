@@ -16,8 +16,9 @@ $! Makefile for VMS systems.
 $!
 $! Make HDF5 Fortran examples
 $!
-$! fcopt = "/float=ieee_float/define=H5_VMS"
-$ fff := fortran 'fcopt /module=[-.src]
+$ fcopt = "/float=ieee_float/define=H5_VMS"
+$ define zlib_dir sys$sysusers:[pourmale.zlib-1_2_3]
+$ fff := fortran 'fcopt /module=[-.-.include]
 $
 $ type sys$input
 	Compiling HDF5 Fortran examples
@@ -33,84 +34,84 @@ $ type sys$input
 
         Creating dsetexample 
 $ link       dsetexample,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating fileexample
 $ link       fileexample,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating rwdsetexample
 $ link       rwdsetexample,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating attrexample
 $ link       attrexample,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating groupexample
 $ link       groupexample,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating grpsexample
 $ link       grpsexample,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating grpdsetexample
 $ link       grpdsetexample,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating hyperslab
 $ link       hyperslab ,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating selectele
 $ link       selectele,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating grpit
 $ link       grpit,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating refobjexample
 $ link       refobjexample,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating refregexample
 $ link       refregexample,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating mountexample
 $ link       mountexample,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
 
         Creating compound
 $ link       compound,-
-             [-.src]hdf5_fortran.olb/lib,-
-             [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+             [-.-.lib]hdf5_fortran.olb/lib,-
+             [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ exit

@@ -33,10 +33,12 @@
 #include "H5Sprivate.h"		/* Dataspaces				*/
 
 
-static void  *H5O_fill_old_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void  *H5O_fill_old_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_fill_old_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_fill_old_size(const H5F_t *f, const void *_mesg);
-static void  *H5O_fill_new_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void  *H5O_fill_new_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_fill_new_encode(H5F_t *f, uint8_t *p, const void *_mesg);
 static size_t H5O_fill_new_size(const H5F_t *f, const void *_mesg);
 static void  *H5O_fill_copy(const void *_mesg, void *_dest);
@@ -181,7 +183,7 @@ H5FL_BLK_EXTERN(type_conv);
  */
 static void *
 H5O_fill_new_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_fill_t	*fill = NULL;
     void	*ret_value;
@@ -273,7 +275,7 @@ done:
     if(!ret_value && fill) {
         if(fill->buf)
             H5MM_xfree(fill->buf);
-	H5FL_FREE(H5O_fill_t, fill);
+	(void)H5FL_FREE(H5O_fill_t, fill);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -295,7 +297,7 @@ done:
  */
 static void *
 H5O_fill_old_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_fill_t *fill = NULL;		/* Decoded fill value message */
     void *ret_value;                    /* Return value */
@@ -333,7 +335,7 @@ done:
     if(!ret_value && fill) {
         if(fill->buf)
             H5MM_xfree(fill->buf);
-	H5FL_FREE(H5O_fill_t, fill);
+	(void)H5FL_FREE(H5O_fill_t, fill);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -505,7 +507,7 @@ H5O_fill_copy(const void *_src, void *_dst)
     /* Copy data type of fill value */
     if(src->type) {
         if(NULL == (dst->type = H5T_copy(src->type, H5T_COPY_TRANSIENT)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy fill value data type")
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "can't copy datatype")
     } /* end if */
     else
         dst->type = NULL;
@@ -532,37 +534,37 @@ H5O_fill_copy(const void *_src, void *_dst)
                 size_t bkg_size;            /* Size of background buffer */
 
                 /* Wrap copies of types to convert */
-                dst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->type, H5T_COPY_TRANSIENT));
+                dst_id = H5I_register(H5I_DATATYPE, H5T_copy(dst->type, H5T_COPY_TRANSIENT), FALSE);
                 if(dst_id < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy/register datatype")
-                src_id = H5I_register(H5I_DATATYPE, H5T_copy(src->type, H5T_COPY_ALL));
+                src_id = H5I_register(H5I_DATATYPE, H5T_copy(src->type, H5T_COPY_ALL), FALSE);
                 if(src_id < 0) {
-                    H5I_dec_ref(dst_id);
+                    H5I_dec_ref(dst_id, FALSE);
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy/register datatype")
                 } /* end if */
 
                 /* Allocate a background buffer */
                 bkg_size = MAX(H5T_get_size(dst->type), H5T_get_size(src->type));
                 if(H5T_path_bkg(tpath) && NULL == (bkg_buf = H5FL_BLK_CALLOC(type_conv, bkg_size))) {
-                    H5I_dec_ref(src_id);
-                    H5I_dec_ref(dst_id);
+                    H5I_dec_ref(src_id, FALSE);
+                    H5I_dec_ref(dst_id, FALSE);
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
                 } /* end if */
 
                 /* Convert fill value */
                 if(H5T_convert(tpath, src_id, dst_id, (size_t)1, (size_t)0, (size_t)0, dst->buf, bkg_buf, H5AC_ind_dxpl_id) < 0) {
-                    H5I_dec_ref(src_id);
-                    H5I_dec_ref(dst_id);
+                    H5I_dec_ref(src_id, FALSE);
+                    H5I_dec_ref(dst_id, FALSE);
                     if(bkg_buf)
-                        H5FL_BLK_FREE(type_conv, bkg_buf);
+                        (void)H5FL_BLK_FREE(type_conv, bkg_buf);
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, NULL, "datatype conversion failed")
                 } /* end if */
 
                 /* Release the background buffer */
-                H5I_dec_ref(src_id);
-                H5I_dec_ref(dst_id);
+                H5I_dec_ref(src_id, FALSE);
+                H5I_dec_ref(dst_id, FALSE);
                 if(bkg_buf)
-                    H5FL_BLK_FREE(type_conv, bkg_buf);
+                    (void)H5FL_BLK_FREE(type_conv, bkg_buf);
             } /* end if */
         } /* end if */
     } /* end if */
@@ -579,7 +581,7 @@ done:
 	if(dst->type)
             H5T_close(dst->type);
 	if(!_dst)
-            H5FL_FREE(H5O_fill_t, dst);
+            (void)H5FL_FREE(H5O_fill_t, dst);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -694,7 +696,7 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
             /* Copy the fill value datatype and get an ID for it */
             if(NULL == (fill_type = H5T_copy(fill->type, H5T_COPY_TRANSIENT)))
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy fill value datatype")
-            if((fill_type_id = H5I_register(H5I_DATATYPE, fill_type)) < 0) {
+            if((fill_type_id = H5I_register(H5I_DATATYPE, fill_type, FALSE)) < 0) {
                 H5T_close(fill_type);
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register fill value datatype")
             } /* end if */
@@ -724,7 +726,7 @@ H5O_fill_reset_dyn(H5O_fill_t *fill)
 
 done:
     if(fill_type_id > 0)
-        H5I_dec_ref(fill_type_id);
+        H5I_dec_ref(fill_type_id, FALSE);
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_fill_reset_dyn() */
 
@@ -781,7 +783,7 @@ H5O_fill_free(void *fill)
 
     HDassert(fill);
 
-    H5FL_FREE(H5O_fill_t, fill);
+    (void)H5FL_FREE(H5O_fill_t, fill);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_fill_free() */
@@ -936,8 +938,8 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed, hid_
 
     /* Don't bother doing anything if there will be no actual conversion */
     if(!H5T_path_noop(tpath)) {
-        if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill->type, H5T_COPY_ALL))) < 0 ||
-                (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(dset_type, H5T_COPY_ALL))) < 0)
+        if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill->type, H5T_COPY_ALL), FALSE)) < 0 ||
+                (dst_id = H5I_register(H5I_DATATYPE, H5T_copy(dset_type, H5T_COPY_ALL), FALSE)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy/register data type")
 
         /*
@@ -976,9 +978,9 @@ H5O_fill_convert(H5O_fill_t *fill, H5T_t *dset_type, hbool_t *fill_changed, hid_
 
 done:
     if(src_id >= 0)
-        H5I_dec_ref(src_id);
+        H5I_dec_ref(src_id, FALSE);
     if(dst_id >= 0)
-        H5I_dec_ref(dst_id);
+        H5I_dec_ref(dst_id, FALSE);
     if(buf != fill->buf)
         H5MM_xfree(buf);
     if(bkg)

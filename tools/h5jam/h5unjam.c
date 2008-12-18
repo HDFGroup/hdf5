@@ -112,13 +112,13 @@ parse_command_line(int argc, const char *argv[])
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
 	case 'o':
-	  output_file = strdup (opt_arg);
+	  output_file = HDstrdup (opt_arg);
 	  break;
 	case 'i':
-	  input_file = strdup (opt_arg);
+	  input_file = HDstrdup (opt_arg);
 	  break;
 	case 'u':
-	  ub_file = strdup (opt_arg);
+	  ub_file = HDstrdup (opt_arg);
 	  break;
 	case 'd':
 	  do_delete = TRUE;
@@ -239,7 +239,7 @@ main(int argc, const char *argv[])
 
     if (ub_file == NULL) {
 	/* write to sdtout */
-	ufid = dup(1);
+	ufid = HDdup(1);
     } else {
         ufid = HDopen(ub_file,O_WRONLY|O_CREAT|O_TRUNC, 0644 );
 
@@ -277,9 +277,9 @@ main(int argc, const char *argv[])
     copy_to_file( ifid, h5fid, (ssize_t) usize, (ssize_t)(fsize - (ssize_t)usize) );
 
 
-    close(ufid);
-    close(h5fid);
-    close(ifid);
+    HDclose(ufid);
+    HDclose(h5fid);
+    HDclose(ifid);
 
     return d_status;
 }

@@ -24,7 +24,7 @@ GROUP "/" {
       (2): "", NULL
       }
    }
-   DATATYPE "vl_string_type"       H5T_STRING {
+   DATATYPE "vl_string_type" H5T_STRING {
          STRSIZE H5T_VARIABLE;
          STRPAD H5T_STR_NULLPAD;
          CSET H5T_CSET_ASCII;

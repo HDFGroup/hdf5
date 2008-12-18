@@ -21,7 +21,6 @@
 namespace H5 {
 #endif
 	class Exception;
-	class ReferenceCounter;
 	class IdComponent;
 	class H5Object;
 	class PropList;

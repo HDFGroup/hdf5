@@ -267,7 +267,7 @@ Expected output for 'h5dump --xml tmany.h5'
       </hdf5:Group>
       <hdf5:Group Name="g1.2" OBJ-XID="xid_5968" H5Path="/g1/g1.2" Parents="xid_800" H5ParentPaths="/g1" >
          <hdf5:Dataset Name="link1" OBJ-XID="xid_2864-1" H5Path="/g1/g1.2/link1" Parents="xid_5968" H5ParentPaths="/g1/g1.2">
-            <hdf5:DatasetPtr OBJ-XID="xid_2864" H5Path="/g1/g1.2/link1"/>
+            <hdf5:DatasetPtr OBJ-XID="xid_2864" H5Path="/g1/g1.1/dset1"/>
          </hdf5:Dataset>
       </hdf5:Group>
    </hdf5:Group>
@@ -313,7 +313,7 @@ Expected output for 'h5dump --xml tmany.h5'
    </hdf5:Group>
    <hdf5:Group Name="g4" OBJ-XID="xid_10784" H5Path="/g4" Parents="xid_96" H5ParentPaths="/" >
       <hdf5:Dataset Name="dset2" OBJ-XID="xid_11488-2" H5Path="/g4/dset2" Parents="xid_10784" H5ParentPaths="/g4">
-         <hdf5:DatasetPtr OBJ-XID="xid_11488" H5Path="/g4/dset2"/>
+         <hdf5:DatasetPtr OBJ-XID="xid_11488" H5Path="/g3/link3"/>
       </hdf5:Dataset>
    </hdf5:Group>
    <hdf5:Group Name="g5" OBJ-XID="xid_8416" H5Path="/g5" Parents="xid_96" H5ParentPaths="/" >

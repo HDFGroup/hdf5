@@ -73,7 +73,7 @@ else
 endif
 
 SUBDIRS = src test $(TESTPARALLEL_DIR) tools . $(CXX_DIR) $(FORTRAN_DIR) \
-          $(HDF5_HL_DIR)
+          $(HDF5_HL_DIR) perform
 DIST_SUBDIRS = src test testpar tools . c++ fortran hl perform examples
 
 # Some files generated during configure that should be cleaned

@@ -239,7 +239,7 @@ sub create_init ($) {
         print HEADER " "x(0*$indent),"assert(${name}_g==(-1));\n";
         print HEADER " "x(0*$indent),"if((msg = H5E_create_msg(cls, H5E_MAJOR, \"${major{$name}}\"))==NULL)\n";
         print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, \"error message initialization failed\")\n";
-        print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, msg))<0)\n";
+        print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)\n";
         print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, \"can't register error message\")\n";
     }
 
@@ -255,7 +255,7 @@ sub create_init ($) {
             print HEADER " "x(0*$indent),"assert(${name}_g==(-1));\n";
             print HEADER " "x(0*$indent),"if((msg = H5E_create_msg(cls, H5E_MINOR, \"${minor{$name}}\"))==NULL)\n";
             print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, \"error message initialization failed\")\n";
-            print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, msg))<0)\n";
+            print HEADER " "x(0*$indent),"if((${name}_g = H5I_register(H5I_ERROR_MSG, msg, FALSE))<0)\n";
             print HEADER " "x(1*$indent),"HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, \"can't register error message\")\n";
         }
     }

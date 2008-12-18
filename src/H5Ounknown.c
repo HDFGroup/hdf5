@@ -82,7 +82,7 @@ H5O_unknown_free(void *mesg)
 
     HDassert(mesg);
 
-    H5FL_FREE(H5O_unknown_t, mesg);
+    (void)H5FL_FREE(H5O_unknown_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_unknown_free() */

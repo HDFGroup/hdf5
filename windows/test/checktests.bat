@@ -103,6 +103,7 @@ rem on it for sending parameters.  --SJW 9/6/07
     call :add_test mount%2 .\mount%2\%1
     call :add_test flush1%2 .\flush1%2\%1
     call :add_test flush2%2 .\flush2%2\%1
+    call :add_test app_ref%2 .\app_ref%2\%1
     call :add_test enum%2 .\enum%2\%1
     call :add_test set_extent%2 .\set_extent%2\%1
     rem Test commented because threadsafe is not built by default on Windows.
@@ -117,8 +118,11 @@ rem on it for sending parameters.  --SJW 9/6/07
     call :add_test dangle%2 .\dangle%2\%1
     call :add_test reserved%2 .\reserved%2\%1
     call :add_test cross_read%2 .\cross_read%2\%1
+    call :add_test freespace%2 .\freespace%2\%1
+    call :add_test mf%2 .\mf%2\%1
     call :add_test btree2%2 .\btree2%2\%1
     call :add_test fheap%2 .\fheap%2\%1
+    call :add_test earray%2 .\earray%2\%1
     
     
     rem Run the tests, passing in which version to run

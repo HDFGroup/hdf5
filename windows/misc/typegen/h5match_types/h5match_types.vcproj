@@ -19,10 +19,10 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\fortran\src"
+			OutputDirectory="..\..\..\..\fortran\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -58,7 +58,7 @@
 				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool
@@ -75,7 +75,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/H5match_types.pdb"
@@ -106,15 +106,15 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
-				CommandLine="$(TargetPath)"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5f90i_gen.h&quot; (cd &quot;$(TargetDir)..\..&quot; &amp;&amp; &quot;$(TargetPath)&quot;)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\..\..\fortran\src"
+			OutputDirectory="..\..\..\..\fortran\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -168,7 +168,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/H5match_types.pdb"
@@ -199,15 +199,15 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
-				CommandLine="$(TargetPath)"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5f90i_gen.h&quot; (cd &quot;$(TargetDir)..\..&quot; &amp;&amp; &quot;$(TargetPath)&quot;)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\fortran\src"
+			OutputDirectory="..\..\..\..\fortran\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -260,7 +260,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile=".\Release/H5match_types.pdb"
 				SubSystem="1"
@@ -290,15 +290,15 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
-				CommandLine="$(TargetPath)"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5f90i_gen.h&quot; (cd &quot;$(TargetDir)..\..&quot; &amp;&amp; &quot;$(TargetPath)&quot;)"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\..\..\fortran\src"
+			OutputDirectory="..\..\..\..\fortran\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -352,7 +352,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile=".\Release/H5match_types.pdb"
 				SubSystem="1"
@@ -382,7 +382,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5f90i_gen.h and H5fortran_types.f90"
-				CommandLine="$(TargetPath)"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5f90i_gen.h&quot; (cd &quot;$(TargetDir)..\..&quot; &amp;&amp; &quot;$(TargetPath)&quot;)"
 			/>
 		</Configuration>
 	</Configurations>

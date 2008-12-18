@@ -96,7 +96,6 @@ H5Z_class_t H5Z_NBIT[1] = {{
 #define H5Z_NBIT_ARRAY           2     /* Array datatype class */
 #define H5Z_NBIT_COMPOUND        3     /* Compound datatype class */
 #define H5Z_NBIT_NOOPTYPE        4     /* Other datatype class: nbit does no compression */
-#define H5Z_NBIT_USER_NPARMS     0     /* Number of parameters that users can set */
 #define H5Z_NBIT_MAX_NPARMS      4096  /* Max number of parameters for filter */
 #define H5Z_NBIT_ORDER_LE        0     /* Little endian for datatype byte order */
 #define H5Z_NBIT_ORDER_BE        1     /* Big endian for datatype byte order */
@@ -327,7 +326,7 @@ H5Z_calc_parms_compound(const H5T_t *type)
     /* For each member, calculate parameters */
     for(u = 0; u < (unsigned)nmembers; u++) {
         /* Get member datatype */
-        if(NULL == (dtype_member = H5T_get_member_type(type, u)))
+        if(NULL == (dtype_member = H5T_get_member_type(type, u, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad member datatype")
 
         /* Get member datatype's class */
@@ -440,7 +439,7 @@ H5Z_set_parms_atomic(const H5T_t *type, unsigned cd_values[])
     int dtype_offset;           /* Atomic datatype's offset (in bits) */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5Z_set_parms_atomic, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5Z_set_parms_atomic)
 
     /* Set datatype class code */
     cd_values[cd_values_index++] = H5Z_NBIT_ATOMIC;
@@ -638,7 +637,7 @@ H5Z_set_parms_compound(const H5T_t *type, unsigned cd_values[])
     /* For each member, set parameters */
     for(u = 0; u < (unsigned)nmembers; u++) {
         /* Get member datatype */
-        if(NULL == (dtype_member = H5T_get_member_type(type, u)))
+        if(NULL == (dtype_member = H5T_get_member_type(type, u, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "bad member datatype")
 
         /* Get member datatype's class */
@@ -800,6 +799,7 @@ H5Z_set_local_nbit(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     /* Get total number of elements in the chunk */
     if((npoints = H5S_GET_EXTENT_NPOINTS(ds)) < 0)
         HGOTO_ERROR(H5E_PLINE, H5E_CANTGET, FAIL, "unable to get number of points in the dataspace")
+    HDassert(npoints);
 
     /* Initialize index for cd_values array starting from the third entry */
     cd_values_index = 2;
@@ -1409,4 +1409,4 @@ static void H5Z_nbit_compress(unsigned char *data, unsigned d_nelmts, unsigned c
 
    *buffer_size = j + 1; /* sometimes is catually j, but to be safe */
 }
-#endif /* H5_HAVE_FILTER_NZIP */
+#endif /* H5_HAVE_FILTER_NBIT */

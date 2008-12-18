@@ -258,6 +258,8 @@ hid_t H5PTopen( hid_t loc_id,
     goto out;
   if( H5Sget_simple_extent_dims( space_id, dims, NULL) < 0)
     goto out;
+  if(H5Sclose(space_id) < 0)
+    goto out;
   table->size = dims[0];
 
   /* Get an ID for this table */
@@ -273,6 +275,7 @@ hid_t H5PTopen( hid_t loc_id,
 out:
   H5E_BEGIN_TRY
   H5Tclose(type_id);
+  H5Sclose(space_id);
   if(table)
   {
     H5Dclose(table->dset_id);

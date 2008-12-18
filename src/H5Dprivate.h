@@ -50,6 +50,11 @@
 #define H5D_CRT_EXT_FILE_LIST_NAME "efl"                /* External file list */
 #define H5D_CRT_DATA_PIPELINE_NAME "pline"              /* Data filter pipeline */
 
+/* ========  Dataset access property names ======== */
+#define H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME   "rdcc_nslots"   /* Size of raw data chunk cache(slots) */
+#define H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME   "rdcc_nbytes"   /* Size of raw data chunk cache(bytes) */
+#define H5D_ACS_PREEMPT_READ_CHUNKS_NAME    "rdcc_w0"       /* Preemption read chunks first */
+
 /* ======== Data transfer properties ======== */
 #define H5D_XFER_MAX_TEMP_BUF_NAME      "max_temp_buf"  /* Maximum temp buffer size */
 #define H5D_XFER_TCONV_BUF_NAME         "tconv_buf"     /* Type conversion buffer */
@@ -65,7 +70,6 @@
 #define H5D_XFER_HYPER_VECTOR_SIZE_NAME "vec_size"      /* Hyperslab vector size */
 #ifdef H5_HAVE_PARALLEL
 #define H5D_XFER_IO_XFER_MODE_NAME      "io_xfer_mode"  /* I/O transfer mode */
-#define H5D_XFER_IO_XFER_OPT_MODE_NAME  "io_xfer_opt_mode" /* I/O optimization transfer mode (using MPI-IO independent IO with file set view) */
 #define H5D_XFER_MPIO_COLLECTIVE_OPT_NAME "mpio_collective_opt" /* Optimization of MPI-IO transfer mode */
 #define H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME "mpio_chunk_opt_hard"
 #define H5D_XFER_MPIO_CHUNK_OPT_NUM_NAME "mpio_chunk_opt_num"
@@ -83,9 +87,13 @@
 #define H5D_XFER_COLL_CHUNK_LINK_NUM_FALSE_NAME "coll_chunk_link_false"
 #define H5D_XFER_COLL_CHUNK_MULTI_RATIO_COLL_NAME "coll_chunk_multi_coll"
 #define H5D_XFER_COLL_CHUNK_MULTI_RATIO_IND_NAME "coll_chunk_multi_ind"
+#define H5D_XFER_COLL_CHUNK_LINK_TO_MULTI "coll_chunk_link_mul"/* Internal transferring from link to multiple chunk */
+#define H5D_XFER_COLL_CHUNK_LINK_TO_MULTI_OPT "coll_chunk_link_mul_opt"/* Internal transferring from link opt to multiple chunk opt*/
+
 /* Definitions for all collective chunk instrumentation properties */
 #define H5D_XFER_COLL_CHUNK_SIZE        sizeof(unsigned)
 #define H5D_XFER_COLL_CHUNK_DEF         1
+#define H5D_XFER_COLL_CHUNK_FIX         0
 #endif /* H5_HAVE_INSTRUMENTED_LIBRARY */
 
 /* Default temporary buffer size */
@@ -107,23 +115,6 @@
 /* Typedef for dataset in memory (defined in H5Dpkg.h) */
 typedef struct H5D_t H5D_t;
 
-/* Typedef for dataset storage information */
-typedef struct {
-    hsize_t index;          /* "Index" of chunk in dataset (must be first for TBBT routines) */
-    hsize_t *offset;        /* Chunk's coordinates in elements */
-} H5D_chunk_storage_t;
-
-typedef struct {
-    haddr_t dset_addr;      /* Address of dataset in file */
-    hsize_t dset_size;      /* Total size of dataset in file */
-} H5D_contig_storage_t;
-
-typedef union H5D_storage_t {
-    H5O_efl_t   efl;            /* External file list information for dataset */
-    H5D_chunk_storage_t chunk;  /* Chunk information for dataset */
-    H5D_contig_storage_t contig; /* Contiguous information for dataset */
-} H5D_storage_t;
-
 /* Typedef for cached dataset transfer property list information */
 typedef struct H5D_dxpl_cache_t {
     size_t max_temp_buf;        /* Maximum temporary buffer size (H5D_XFER_MAX_TEMP_BUF_NAME) */
@@ -135,7 +126,7 @@ typedef struct H5D_dxpl_cache_t {
     size_t vec_size;            /* Size of hyperslab vector (H5D_XFER_HYPER_VECTOR_SIZE_NAME) */
 #ifdef H5_HAVE_PARALLEL
     H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request (H5D_XFER_IO_XFER_MODE_NAME) */
-    H5FD_mpio_collective_opt_t xfer_opt_mode; /* Parallel transfer with independent IO or collective IO with this mode */
+    H5FD_mpio_collective_opt_t coll_opt_mode; /* Parallel transfer with independent IO or collective IO with this mode */
 #endif /*H5_HAVE_PARALLEL*/
     H5Z_cb_t filter_cb;         /* Filter callback function (H5D_XFER_FILTER_CB_NAME) */
     H5Z_data_xform_t *data_xform_prop; /* Data transform prop (H5D_XFER_XFORM_NAME) */
@@ -157,14 +148,12 @@ typedef struct H5D_dcpl_cache_t {
 /******************************/
 
 H5_DLL herr_t H5D_init(void);
-H5_DLL H5D_t *H5D_open(const H5G_loc_t *loc, hid_t dxpl_id);
+H5_DLL H5D_t *H5D_open(const H5G_loc_t *loc, hid_t dapl_id, hid_t dxpl_id);
 H5_DLL herr_t H5D_close(H5D_t *dataset);
 H5_DLL H5O_loc_t *H5D_oloc(H5D_t *dataset);
 H5_DLL H5G_name_t *H5D_nameof(H5D_t *dataset);
 H5_DLL H5T_t *H5D_typeof(const H5D_t *dset);
 H5_DLL herr_t H5D_flush(const H5F_t *f, hid_t dxpl_id, unsigned flags);
-H5_DLL herr_t H5D_get_dxpl_cache(hid_t dxpl_id, H5D_dxpl_cache_t **cache);
-H5_DLL herr_t H5D_get_dxpl_cache_real(hid_t dxpl_id, H5D_dxpl_cache_t *cache);
 
 /* Functions that operate on vlen data */
 H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id,
@@ -174,10 +163,11 @@ H5_DLL herr_t H5D_vlen_reclaim(hid_t type_id, H5S_t *space, hid_t plist_id,
 H5_DLL herr_t H5D_contig_delete(H5F_t *f, hid_t dxpl_id,
     const H5O_layout_t *layout);
 
+/* Functions that operate on chunked storage */
+H5_DLL herr_t H5D_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout);
+
 /* Functions that operate on indexed storage */
-H5_DLL herr_t H5D_istore_delete(H5F_t *f, hid_t dxpl_id,
-    const H5O_layout_t *layout);
-H5_DLL herr_t H5D_istore_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
+H5_DLL herr_t H5D_btree_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE * stream,
 				int indent, int fwidth, unsigned ndims);
 
 #endif /* _H5Dprivate_H */

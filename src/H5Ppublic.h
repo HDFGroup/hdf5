@@ -245,11 +245,11 @@ H5_DLL herr_t H5Pget_family_offset(hid_t fapl_id, hsize_t *offset);
 H5_DLL herr_t H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type);
 H5_DLL herr_t H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type);
 H5_DLL herr_t H5Pset_cache(hid_t plist_id, int mdc_nelmts,
-       size_t rdcc_nelmts, size_t rdcc_nbytes,
+       size_t rdcc_nslots, size_t rdcc_nbytes,
        double rdcc_w0);
 H5_DLL herr_t H5Pget_cache(hid_t plist_id,
        int *mdc_nelmts, /* out */
-       size_t *rdcc_nelmts/*out*/,
+       size_t *rdcc_nslots/*out*/,
        size_t *rdcc_nbytes/*out*/, double *rdcc_w0);
 H5_DLL herr_t H5Pset_mdc_config(hid_t    plist_id,
        H5AC_cache_config_t * config_ptr);
@@ -265,13 +265,15 @@ H5_DLL herr_t H5Pset_sieve_buf_size(hid_t fapl_id, size_t size);
 H5_DLL herr_t H5Pget_sieve_buf_size(hid_t fapl_id, size_t *size/*out*/);
 H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
 H5_DLL herr_t H5Pget_small_data_block_size(hid_t fapl_id, hsize_t *size/*out*/);
-H5_DLL herr_t H5Pset_latest_format(hid_t plist_id, hbool_t latest);
-H5_DLL herr_t H5Pget_latest_format(hid_t plist_id, hbool_t *latest);
+H5_DLL herr_t H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low,
+    H5F_libver_t high);
+H5_DLL herr_t H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low,
+    H5F_libver_t *high);
 
 /* Dataset creation property list (DCPL) routines */
 H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
 H5_DLL H5D_layout_t H5Pget_layout(hid_t plist_id);
-H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[]);
+H5_DLL herr_t H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/]);
 H5_DLL int H5Pget_chunk(hid_t plist_id, int max_ndims, hsize_t dim[]/*out*/);
 H5_DLL herr_t H5Pset_external(hid_t plist_id, const char *name, off_t offset,
           hsize_t size);
@@ -316,6 +318,14 @@ H5_DLL herr_t H5Pget_alloc_time(hid_t plist_id, H5D_alloc_time_t
 H5_DLL herr_t H5Pset_fill_time(hid_t plist_id, H5D_fill_time_t fill_time);
 H5_DLL herr_t H5Pget_fill_time(hid_t plist_id, H5D_fill_time_t
 	*fill_time/*out*/);
+
+/* Dataset access property list (DAPL) routines */
+H5_DLL herr_t H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots,
+       size_t rdcc_nbytes, double rdcc_w0);
+H5_DLL herr_t H5Pget_chunk_cache(hid_t dapl_id,
+       size_t *rdcc_nslots/*out*/,
+       size_t *rdcc_nbytes/*out*/,
+       double *rdcc_w0/*out*/);
 
 /* Dataset xfer property list (DXPL) routines */
 H5_DLL herr_t H5Pset_data_transform(hid_t plist_id, const char* expression);
@@ -372,13 +382,15 @@ H5_DLL herr_t H5Pset_nlinks(hid_t plist_id, size_t nlinks);
 H5_DLL herr_t H5Pget_nlinks(hid_t plist_id, size_t *nlinks);
 H5_DLL herr_t H5Pset_elink_prefix(hid_t plist_id, const char *prefix);
 H5_DLL ssize_t H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size);
+H5_DLL hid_t H5Pget_elink_fapl(hid_t lapl_id);
+H5_DLL herr_t H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id);
 
 /* Object copy property list (OCPYPL) routines */
 H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned crt_intmd);
 H5_DLL herr_t H5Pget_copy_object(hid_t plist_id, unsigned *crt_intmd /*out*/);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
- * 
+ *
  * Use of these symbols is deprecated.
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS

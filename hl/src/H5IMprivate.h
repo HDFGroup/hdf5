@@ -26,7 +26,7 @@
 #define IMAGE_CLASS   "IMAGE"
 #define PALETTE_CLASS "PALETTE"
 #define IMAGE_VERSION "1.2"
-#define IMAGE8_RANK    3
+#define IMAGE8_RANK    2
 #define IMAGE24_RANK   3
 
 

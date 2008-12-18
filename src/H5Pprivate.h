@@ -57,9 +57,9 @@ H5_DLL herr_t H5P_init(void);
 
 /* Internal versions of API routines */
 H5_DLL herr_t H5P_close(void *_plist);
-H5_DLL hid_t H5P_create_id(H5P_genclass_t *pclass);
-H5_DLL hid_t H5P_copy_plist(H5P_genplist_t *old_plist);
-H5_DLL herr_t H5P_get(H5P_genplist_t *plist, const char *name, void *value);
+H5_DLL hid_t H5P_create_id(H5P_genclass_t *pclass, hbool_t app_ref);
+H5_DLL hid_t H5P_copy_plist(H5P_genplist_t *old_plist, hbool_t app_ref);
+H5_DLL herr_t H5P_get(const H5P_genplist_t *plist, const char *name, void *value);
 H5_DLL herr_t H5P_set(H5P_genplist_t *plist, const char *name, const void *value);
 H5_DLL herr_t H5P_insert(H5P_genplist_t *plist, const char *name, size_t size,
     void *value, H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
@@ -89,7 +89,7 @@ H5_DLL int H5P_fill_value_cmp(const void *value1, const void *value2,
 
 /* *SPECIAL* Don't make more of these! -QAK */
 H5_DLL htri_t H5P_isa_class(hid_t plist_id, hid_t pclass_id);
-H5_DLL void *H5P_object_verify(hid_t plist_id, hid_t pclass_id);
+H5_DLL H5P_genplist_t *H5P_object_verify(hid_t plist_id, hid_t pclass_id);
 
 /* Private functions to "peek" at properties of a certain type */
 H5_DLL unsigned H5P_peek_unsigned(H5P_genplist_t *plist, const char *name);

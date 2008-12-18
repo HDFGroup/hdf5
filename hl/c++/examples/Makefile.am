@@ -29,7 +29,7 @@ TEST_PROG=ptExampleFL ptExampleVL
 INSTALL_FILES=ptExampleFL.cpp ptExampleVL.cpp
 
 # Tell conclude.am that these are C++ tests.
-HDF_CXX=yes
+CXX_API=yes
 
 # Where to install examples
 EXAMPLEDIR=$(docdir)/hdf5/examples/hl/c++

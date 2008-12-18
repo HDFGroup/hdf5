@@ -52,16 +52,16 @@
 htri_t
 H5S_select_shape_same_test(hid_t sid1, hid_t sid2)
 {
-    H5S_t	*space1 = NULL;         /* Pointer to 1st dataspace */
-    H5S_t	*space2 = NULL;         /* Pointer to 2nd dataspace */
+    H5S_t	*space1;                /* Pointer to 1st dataspace */
+    H5S_t	*space2;                /* Pointer to 2nd dataspace */
     htri_t      ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_select_shape_same_test, FAIL)
 
     /* Get dataspace structures */
-    if(NULL == (space1 = H5I_object_verify(sid1, H5I_DATASPACE)))
+    if(NULL == (space1 = (H5S_t *)H5I_object_verify(sid1, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
-    if(NULL == (space2 = H5I_object_verify(sid2, H5I_DATASPACE)))
+    if(NULL == (space2 = (H5S_t *)H5I_object_verify(sid2, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     /* Check if the dataspace selections are the same shape */
@@ -94,13 +94,13 @@ done:
 htri_t
 H5S_get_rebuild_status_test(hid_t space_id)
 {
-    H5S_t *space = NULL;        /* Pointer to 1st dataspace */
+    H5S_t *space;               /* Pointer to 1st dataspace */
     htri_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_get_rebuild_status_test, FAIL)
 
      /* Get dataspace structures */
-    if(NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
     ret_value = space->select.sel_info.hslab->diminfo_valid;

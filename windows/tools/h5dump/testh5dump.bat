@@ -16,7 +16,7 @@ rem
 rem Tests for the h5dump tool
 rem
 rem    Created:  Scott Wegner, 8/23/07
-rem    Modified: Scott Wegner, 8/27/07
+rem    Modified: Scott Wegner, 5/12/08
 rem
 
 setlocal enabledelayedexpansion
@@ -70,9 +70,9 @@ rem
             set test_msg=!test_msg! %%~nxa
         ) )
     )
-    rem We need to replace PERCENT-ZERO here with "%0" for the tfamily test.
-    rem --SJW 8/24/07
-    set test_msg=!test_msg:PERCENT-ZERO=%%0!                                                                
+    rem We need to replace PERCENT here with "%" for tests that use a percent
+    rem sign.  --SJW 5/12/08
+    set test_msg=!test_msg:PERCENT=%%!                                                                
     echo.%test_msg:~0,69% %1
     
     exit /b
@@ -106,15 +106,15 @@ rem
     rem Run test.
     
     (
-        rem We need to replace PERCENT-ZERO here with "%0" for the tfamily test.
+        rem We need to replace PERCENT here with "%" for tests that use percents
         rem Also remove quotes here, because Linux 'echo' command strips them.
         rem --SJW 8/24/07
-        set params_echo=!params:PERCENT-ZERO=%%0!
+        set params_echo=!params:PERCENT=%%!
         echo.#############################
         echo.Expected output for 'h5dump !params_echo:"=!'
         echo.#############################
         pushd %CD%\..\testfiles
-        %dumper_bin% !params:PERCENT-ZERO=%%0!
+        %dumper_bin% !params:PERCENT=%%!
         popd
     ) > %actual% 2> %actual_err%
     type %actual_err% >> %actual%
@@ -124,7 +124,7 @@ rem
         call :testing CREATED %params%
         copy /y %actual% %expect% > nul
     ) else (
-        fc /w %expect% %actual% | find "FC: no diff" > nul
+        fc /w %expect% %actual% > nul
         if !errorlevel! equ 0 (
             call :testing PASSED %params%
         ) else (
@@ -166,7 +166,7 @@ rem use for the binary tests that expect a full path in -o
     rem Run test.
     (
         pushd %CD%\..\testfiles
-        %dumper_bin% !params:PERCENT-ZERO=%%0!
+        %dumper_bin% !params:PERCENT=%%!
         popd
     ) > %actual% 2> %actual_err%
     type %actual_err% >> %actual%
@@ -176,7 +176,7 @@ rem use for the binary tests that expect a full path in -o
         call :testing CREATED %params%
         copy /y %actual% %expect% > nul
     ) else (
-        fc /w %expect% %actual% | find "FC: no diff" > nul
+        fc /w %expect% %actual% > nul
         if !errorlevel! equ 0 (
             call :testing PASSED %params%
         ) else (
@@ -386,10 +386,10 @@ rem ############################################################################
 
     rem test the --filedriver flag
     call :tooltest tsplit_file.ddl --filedriver=split tsplit_file
-    rem On Windows, we pass "PERCENT-ZERO", and let other calls replace it with
-    rem the "%0".  We cannot pass "%0" directly because Windows interprets it as
+    rem On Windows, we pass "PERCENT", and let other calls replace it with
+    rem the "%".  We cannot pass "%" directly because Windows interprets it as
     rem the name of the script.  --SJW 8/24/07
-    call :tooltest tfamily.ddl --filedriver=family tfamilyPERCENT-ZERO5d.h5
+    call :tooltest tfamily.ddl --filedriver=family tfamilyPERCENT05d.h5
     call :tooltest tmulti.ddl --filedriver=multi tmulti
 
     rem test for files with group names which reach > 1024 bytes in size
@@ -405,8 +405,7 @@ rem ############################################################################
     call :tooltest tall-4s.ddl --dataset=/g1/g1.1/dset1.1.1 --start=1,1 --stride=2,3 --count=3,2 --block=1,1 tall.h5
     call :tooltest tall-5s.ddl -d "/g1/g1.1/dset1.1.2[0;2;10;]" tall.h5
     call :tooltest tdset-3s.ddl -d "/dset1[1,1;;;]" tdset.h5
-    rem block
-    rem call :tooltest tdset2-1s.ddl -d "/dset1[;3,2;4,4;1,4]" tdset2.h5
+
 
     rem test printing characters in ASCII instead of decimal
     call :tooltest tchar1.ddl -r tchar.h5
@@ -453,11 +452,18 @@ rem ############################################################################
     call :tooltest tindicesyes.ddl taindices.h5
     call :tooltest tindicesno.ddl -y taindices.h5
 
-    rem array indices with subsetting
-    call :tooltest tindicessub1.ddl -d 1d -s 3 -c 40 taindices.h5
-    call :tooltest tindicessub2.ddl -d 2d -s 1,3 -c 6,4 taindices.h5
-    call :tooltest tindicessub3.ddl -d 3d -s 0,1,3 -c 2,6,4 taindices.h5
-    call :tooltest tindicessub4.ddl -d 4d -s 0,0,1,3 -c 2,2,6,4 taindices.h5
+    rem ######### array indices with subsetting
+    rem 1D case
+    call :tooltest tindicessub1.ddl -d 1d -s 1 -S 10 -c 2 -k 3 taindices.h5
+
+    rem 2D case
+    call :tooltest tindicessub2.ddl -d 2d -s 1,2 -S 3,3 -c 3,2 -k 2,2 taindices.h5
+
+    rem 3D case
+    call :tooltest tindicessub3.ddl -d 3d -s 0,1,2 -S 1,3,3 -c 2,2,2 -k 1,2,2 taindices.h5
+
+    rem 4D case
+    call :tooltest tindicessub4.ddl -d 4d -s 0,0,1,2 -c 2,2,3,2 -S 1,1,3,3 -k 1,1,2,2 taindices.h5
 
 
     rem tests for filters
@@ -551,21 +557,26 @@ rem ############################################################################
     rem directory, and using it only gets in the way of the output formatting.
     rem --SJW 8/24/07
     call :tooltest1   tbin1.ddl -d integer -o out1.bin -b LE tbinary.h5
-    call :tooltest1   tbin2.ddl -d float -o out2.bin -b BE   tbinary.h5
 
-    rem the MEMORY test can be validated with h5import/h5diff
-    call :tooltest1   tbin3.ddl -d integer -o out3.bin -b MEMORY tbinary.h5
+    rem NATIVE default. the NATIVE test can be validated with h5import/h5diff
+    call :tooltest1   tbin1.ddl -d integer -o out1.bin -b MEMORY tbinary.h5
+    call :importtest out1.bin -c out3.h5import -o out1.h5
+    call :difftest tbinary.h5 out1.h5 /integer /integer
+    
+    call :tooltest1 tbin2.ddl -b BE -d float -o out2.bin tbinary.h5
+    
+    rem the NATIVE test can be validated with h5import/h5diff
+    call :tooltest1 tbin3.ddl -d integer -o out3.bin -b NATIVE tbinary.h5
     call :importtest out3.bin -c out3.h5import -o out3.h5
     call :difftest tbinary.h5 out3.h5 /integer /integer
 
-    call :tooltest1   tbin4.ddl -d double  -o out4.bin -b FILE   tbinary.h5
+    call :tooltest1   tbin4.ddl -d double  -b FILE -o out4.bin    tbinary.h5
        
     rem Clean up binary output files
     if not defined hdf5_nocleanup (
         for /l %%a in (1,1,4) do del /f %testdir%\out%%a.bin
         del /f %testdir%\out3.h5
     )
-    
 
     rem test for dataset region references 
     call :tooltest tdatareg.ddl tdatareg.h5
@@ -584,6 +595,19 @@ rem ############################################################################
     call :tooltest torderattr3.ddl -H --sort_by=creation_order --sort_order=ascending torderattr.h5
     call :tooltest torderattr4.ddl -H --sort_by=creation_order --sort_order=descending torderattr.h5
 
+    rem tests for floating point user defined printf format
+    rem Note: Make sure to use PERCENT rather than "%", because Windows needs
+    rem to handle it specially.  --SJW 5/12/08
+    call :tooltest tfpformat.ddl -m PERCENT.7f tfpformat.h5
+
+    rem tests for traversal of external links
+    call :tooltest textlinksrc.ddl textlinksrc.h5
+    call :tooltest textlinkfar.ddl textlinkfar.h5
+
+    rem tests for traversal of external links
+    call :tooltest textlinksrc.ddl textlinksrc.h5
+    call :tooltest textlinkfar.ddl textlinkfar.h5
+    
     
     
     if %nerrors% equ 0 (

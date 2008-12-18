@@ -31,7 +31,7 @@
 /* Macros */
 
 #define IS_H5FD_MPIO(f)	/* (H5F_t *f) */				    \
-    (H5FD_MPIO==H5F_get_driver_id(f))
+    (H5FD_MPIO==H5F_DRIVER_ID(f))
 
 #ifdef H5_HAVE_PARALLEL
 /*Turn on H5FDmpio_debug if H5F_DEBUG is on */

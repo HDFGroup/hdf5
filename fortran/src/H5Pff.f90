@@ -23,54 +23,36 @@
        INTERFACE h5pset_fill_value_f
          MODULE PROCEDURE h5pset_fill_value_integer
          MODULE PROCEDURE h5pset_fill_value_real
-! Comment if on Crays
-         MODULE PROCEDURE h5pset_fill_value_double
-! End comment if on Crays
          MODULE PROCEDURE h5pset_fill_value_char
        END INTERFACE
      
        INTERFACE h5pget_fill_value_f
          MODULE PROCEDURE h5pget_fill_value_integer
          MODULE PROCEDURE h5pget_fill_value_real
-! Comment if on Crays
-         MODULE PROCEDURE h5pget_fill_value_double
-! End comment if on Crays
          MODULE PROCEDURE h5pget_fill_value_char
        END INTERFACE
 
        INTERFACE h5pset_f
          MODULE PROCEDURE h5pset_integer
          MODULE PROCEDURE h5pset_real
-! Comment if on Crays
-         MODULE PROCEDURE h5pset_double
-! End comment if on Crays
          MODULE PROCEDURE h5pset_char
        END INTERFACE
      
        INTERFACE h5pget_f
          MODULE PROCEDURE h5pget_integer
          MODULE PROCEDURE h5pget_real
-! Comment if on Crays
-         MODULE PROCEDURE h5pget_double
-! End comment if on Crays
          MODULE PROCEDURE h5pget_char
        END INTERFACE
 
        INTERFACE h5pregister_f
          MODULE PROCEDURE h5pregister_integer
          MODULE PROCEDURE h5pregister_real
-! Comment if on Crays
-         MODULE PROCEDURE h5pregister_double
-! End comment if on Crays
          MODULE PROCEDURE h5pregister_char
        END INTERFACE
      
        INTERFACE h5pinsert_f
          MODULE PROCEDURE h5pinsert_integer
          MODULE PROCEDURE h5pinsert_real
-! Comment if on Crays
-         MODULE PROCEDURE h5pinsert_double
-! End comment if on Crays
          MODULE PROCEDURE h5pinsert_char
        END INTERFACE
        
@@ -113,13 +95,7 @@
 !
 ! Comment:		
 !----------------------------------------------------------------------
-          SUBROUTINE h5pcreate_f(class, prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pcreate_f
-!DEC$endif
-!
+          SUBROUTINE h5pcreate_f(class, prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: class      ! The type of the property list 
                                               ! to be created. Possible values
@@ -180,13 +156,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_preserve_f(prp_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_preserve_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_preserve_f(prp_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             LOGICAL, INTENT(IN) ::  flag ! TRUE/FALSE flag to set the dataset
@@ -241,13 +211,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_preserve_f(prp_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_preserve_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_preserve_f(prp_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             LOGICAL, INTENT(OUT) ::  flag ! TRUE/FALSE flag. Shows status of the dataset's
@@ -307,13 +271,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_class_f(prp_id, classtype, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_class_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_class_f(prp_id, classtype, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: classtype  ! The type of the property list 
@@ -371,13 +329,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pcopy_f(prp_id, new_prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pcopy_f
-!DEC$endif
-!
+          SUBROUTINE h5pcopy_f(prp_id, new_prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(OUT) :: new_prp_id 
@@ -428,13 +380,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pclose_f(prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pclose_f
-!DEC$endif
-!
+          SUBROUTINE h5pclose_f(prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             INTEGER, INTENT(OUT) :: hdferr        ! Error code
@@ -483,13 +429,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_chunk_f(prp_id, ndims, dims, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_chunk_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_chunk_f(prp_id, ndims, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: ndims    ! Number of chunk dimensions
@@ -544,13 +484,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_chunk_f(prp_id, ndims, dims, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_chunk_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_chunk_f(prp_id, ndims, dims, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: ndims    ! Number of chunk dimensions to
@@ -606,13 +540,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_deflate_f(prp_id, level, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_deflate_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_deflate_f(prp_id, level, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: level        ! Compression level 
@@ -666,13 +594,7 @@
 
 
           SUBROUTINE h5pset_fill_value_integer(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fill_value_integer
-!DEC$endif
-!
+                                               hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
@@ -701,13 +623,7 @@
 
 
           SUBROUTINE h5pget_fill_value_integer(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_fill_value_integer
-!DEC$endif
-!
+                                               hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
@@ -736,13 +652,7 @@
 
 
           SUBROUTINE h5pset_fill_value_real(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fill_value_real
-!DEC$endif
-!
+                                               hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
@@ -771,13 +681,7 @@
 
 
           SUBROUTINE h5pget_fill_value_real(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_fill_value_real
-!DEC$endif
-!
+                                               hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
@@ -805,83 +709,9 @@
           END SUBROUTINE h5pget_fill_value_real
 
 
-          SUBROUTINE h5pset_fill_value_double(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fill_value_double
-!DEC$endif
-!
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
-            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
-                                                  ! of fillvalue datatype 
-                                                  ! (in memory)
-            DOUBLE PRECISION, INTENT(IN) :: fillvalue   ! Fillvalue
-            INTEGER, INTENT(OUT) :: hdferr  ! Error code
-
-!            INTEGER, EXTERNAL :: h5pset_fill_value_double_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5pset_fill_value_double_c(prp_id, type_id, fillvalue)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_FILL_VALUE_DOUBLE_C'::h5pset_fill_value_double_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: prp_id
-              INTEGER(HID_T), INTENT(IN) :: type_id
-              DOUBLE PRECISION, INTENT(IN) :: fillvalue
-              END FUNCTION h5pset_fill_value_double_c
-            END INTERFACE
-
-            hdferr = h5pset_fill_value_double_c(prp_id, type_id, fillvalue)
-          END SUBROUTINE h5pset_fill_value_double
-
-
-          SUBROUTINE h5pget_fill_value_double(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_fill_value_double
-!DEC$endif
-!
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
-            INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
-                                                  ! of fillvalue datatype
-                                                  ! (in memory) 
-            DOUBLE PRECISION, INTENT(IN) :: fillvalue   ! Fillvalue
-            INTEGER, INTENT(OUT) :: hdferr  ! Error code
-
-!            INTEGER, EXTERNAL :: h5pget_fill_value_double_c
-!  MS FORTRAN needs explicit interface for C functions called here.
-!
-            INTERFACE
-              INTEGER FUNCTION h5pget_fill_value_double_c(prp_id, type_id, fillvalue)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_FILL_VALUE_DOUBLE_C'::h5pget_fill_value_double_c
-              !DEC$ ENDIF
-              INTEGER(HID_T), INTENT(IN) :: prp_id
-              INTEGER(HID_T), INTENT(IN) :: type_id
-              DOUBLE PRECISION :: fillvalue
-              END FUNCTION h5pget_fill_value_double_c
-            END INTERFACE
-
-            hdferr = h5pget_fill_value_double_c(prp_id, type_id, fillvalue)
-          END SUBROUTINE h5pget_fill_value_double
 
           SUBROUTINE h5pset_fill_value_char(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fill_value_char
-!DEC$endif
-!
+                                               hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
@@ -910,13 +740,7 @@
           END SUBROUTINE h5pset_fill_value_char
 
           SUBROUTINE h5pget_fill_value_char(prp_id, type_id, fillvalue, &
-                                               hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_fill_value_char
-!DEC$endif
-!
+                                               hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of 
@@ -975,13 +799,6 @@
 
           SUBROUTINE h5pget_version_f(prp_id, boot, freelist, &
                                     stab, shhdr, hdferr)
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_version_f
-!DEC$endif
-!
-
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, DIMENSION(:), INTENT(OUT) :: boot  !array to put boot
@@ -1040,13 +857,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
  
-          SUBROUTINE h5pset_userblock_f (prp_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_userblock_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_userblock_f (prp_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: size !Size of the user-block in bytes 
@@ -1095,13 +906,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_userblock_f(prp_id, block_size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_userblock_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_userblock_f(prp_id, block_size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(OUT) ::  block_size !Size of the 
@@ -1151,13 +956,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_sizes_f (prp_id, sizeof_addr, sizeof_size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_sizes_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_sizes_f (prp_id, sizeof_addr, sizeof_size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(SIZE_T), INTENT(IN) :: sizeof_addr !Size of an object 
@@ -1212,13 +1011,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_sizes_f(prp_id, sizeof_addr, sizeof_size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_sizes_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_sizes_f(prp_id, sizeof_addr, sizeof_size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: sizeof_addr !Size of an object
@@ -1273,13 +1066,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_sym_k_f (prp_id, ik, lk, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_sym_k_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_sym_k_f (prp_id, ik, lk, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: ik ! Symbol table tree rank 
@@ -1333,13 +1120,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_sym_k_f(prp_id, ik, lk, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_sym_k_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_sym_k_f(prp_id, ik, lk, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: ik !Symbol table tree rank
@@ -1390,13 +1171,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_istore_k_f (prp_id, ik, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_istore_k_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_istore_k_f (prp_id, ik, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: ik ! 1/2 rank of chunked storage B-tree
@@ -1446,13 +1221,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_istore_k_f(prp_id, ik, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_istore_k_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_istore_k_f(prp_id, ik, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: ik !1/2 rank of chunked storage B-tree
@@ -1501,13 +1270,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_driver_f(prp_id, driver, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_driver_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_driver_f(prp_id, driver, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HID_T), INTENT(OUT) :: driver !low-level file driver identifier
@@ -1554,13 +1317,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fapl_stdio_f (prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fapl_stdio_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_fapl_stdio_f (prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
@@ -1604,12 +1361,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-!          SUBROUTINE h5pget_stdio_f (prp_id, io, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_stdio_f
-!DEC$endif
+!          SUBROUTINE h5pget_stdio_f (prp_id, io, hdferr)
 !
 !            IMPLICIT NONE
 !            INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
@@ -1645,13 +1397,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fapl_sec2_f (prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fapl_sec2_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_fapl_sec2_f (prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
@@ -1732,13 +1478,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_alignment_f(prp_id, threshold,  alignment, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_alignment_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_alignment_f(prp_id, threshold,  alignment, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: threshold ! Threshold value
@@ -1790,13 +1530,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_alignment_f(prp_id, threshold,  alignment, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_alignment_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_alignment_f(prp_id, threshold,  alignment, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(OUT) :: threshold ! Threshold value
@@ -1848,13 +1582,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fapl_core_f(prp_id, increment, backing_store, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fapl_core_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_fapl_core_f(prp_id, increment, backing_store, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(SIZE_T), INTENT(IN) :: increment ! File block size in bytes.
@@ -1910,13 +1638,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_fapl_core_f(prp_id, increment, backing_store, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_fapl_core_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_fapl_core_f(prp_id, increment, backing_store, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: increment ! File block size in bytes.
@@ -1943,7 +1665,7 @@
 
             hdferr = h5pget_fapl_core_c(prp_id, increment, backing_store_flag)
             backing_store =.FALSE.
-            if (backing_store_flag .eq. 1) backing_store =.TRUE.
+            IF (backing_store_flag .EQ. 1) backing_store =.TRUE.
           END SUBROUTINE h5pget_fapl_core_f
 
 !----------------------------------------------------------------------
@@ -1973,13 +1695,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fapl_family_f(prp_id, memb_size, memb_plist , hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fapl_family_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: memb_size ! Logical size, in bytes,
@@ -2035,13 +1751,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_fapl_family_f(prp_id, memb_size, memb_plist , hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_fapl_family_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_fapl_family_f(prp_id, memb_size, memb_plist , hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(OUT) :: memb_size ! Logical size, in bytes,
@@ -2100,13 +1810,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_cache_f(prp_id, mdc_nelmts,rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_cache_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_cache_f(prp_id, mdc_nelmts,rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: mdc_nelmts  !Number of elements (objects)
@@ -2172,13 +1876,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_cache_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: mdc_nelmts  !Number of elements (objects)
@@ -2241,13 +1939,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fapl_split_f(prp_id, meta_ext, meta_plist, raw_ext, raw_plist, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fapl_split_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_fapl_split_f(prp_id, meta_ext, meta_plist, raw_ext, raw_plist, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: meta_ext  !Name of the extension for
@@ -2360,13 +2052,7 @@
 !----------------------------------------------------------------------
 
  
-          SUBROUTINE h5pset_gc_references_f (prp_id, gc_reference, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_gc_references_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_gc_references_f (prp_id, gc_reference, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: gc_reference !the flag for garbage collecting
@@ -2416,13 +2102,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_gc_references_f (prp_id, gc_reference, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_gc_references_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_gc_references_f (prp_id, gc_reference, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: gc_reference !the flag for garbage collecting
@@ -2476,13 +2156,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_layout_f (prp_id, layout, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_layout_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_layout_f (prp_id, layout, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: layout !Type of storage layout for raw data
@@ -2538,13 +2212,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_layout_f (prp_id, layout, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_layout_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_layout_f (prp_id, layout, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: layout !Type of storage layout for raw data
@@ -2599,13 +2267,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_filter_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: filter  !Filter to be added to the pipeline.
@@ -2662,13 +2324,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_nfilters_f (prp_id, nfilters, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_nfilters_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_nfilters_f (prp_id, nfilters, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: nfilters !the number of filters in the pipeline
@@ -2724,13 +2380,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, cd_values, namelen, name, filter_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_filter_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, cd_values, namelen, name, filter_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: filter_number  !Sequence number within the filter
@@ -2802,13 +2452,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_external_f(prp_id, name, offset,bytes, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_external_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_external_f(prp_id, name, offset,bytes, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             CHARACTER(LEN=*), INTENT(IN) :: name !Name of an external file
@@ -2869,13 +2513,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_external_count_f (prp_id, count, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_external_count_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_external_count_f (prp_id, count, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: count !number of external files for the 
@@ -2931,13 +2569,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_external_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             INTEGER, INTENT(IN) :: idx !External file index.
@@ -3001,13 +2633,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_btree_ratios_f(prp_id, left, middle, right, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_btree_ratios_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_btree_ratios_f(prp_id, left, middle, right, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             REAL, INTENT(IN) :: left !The B-tree split ratio for left-most nodes.
@@ -3064,13 +2690,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_btree_ratios_f(prp_id, left, middle, right, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_btree_ratios_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_btree_ratios_f(prp_id, left, middle, right, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
             REAL, INTENT(OUT) :: left !The B-tree split ratio for left-most nodes.
@@ -3128,13 +2748,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_fclose_degree_f(fapl_id, degree, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_fclose_degree_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_fclose_degree_f(fapl_id, degree, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: fapl_id ! File Access Property list identifier 
             INTEGER, INTENT(OUT) :: degree     ! Possible values
@@ -3191,13 +2805,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fclose_degree_f(fapl_id, degree, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fclose_degree_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_fclose_degree_f(fapl_id, degree, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: fapl_id ! File Access Property list identifier 
             INTEGER, INTENT(IN) :: degree     ! Possible values
@@ -3248,13 +2856,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pequal_f(plist1_id, plist2_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pequal_f
-!DEC$endif
-!
+          SUBROUTINE h5pequal_f(plist1_id, plist2_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist1_id ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: plist2_id ! Property list identifier 
@@ -3302,13 +2904,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_buffer_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_buffer_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_buffer_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! Data transfer property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: size  ! Buffer size in bytes; 
@@ -3353,13 +2949,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_buffer_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! Data transfer property list identifier 
             INTEGER(HSIZE_T), INTENT(OUT) :: size ! Buffer size in bytes; 
@@ -3409,13 +2999,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pfill_value_defined_f(plist_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pfill_value_defined_f
-!DEC$endif
-!
+          SUBROUTINE h5pfill_value_defined_f(plist_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id 
             INTEGER, INTENT(OUT) :: flag
@@ -3464,13 +3048,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_alloc_time_f(plist_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_alloc_time_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_alloc_time_f(plist_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id 
             INTEGER, INTENT(IN) :: flag
@@ -3519,13 +3097,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_alloc_time_f(plist_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_alloc_time_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_alloc_time_f(plist_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id 
             INTEGER, INTENT(OUT) :: flag
@@ -3572,13 +3144,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_fill_time_f(plist_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fill_time_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_fill_time_f(plist_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id 
             INTEGER, INTENT(IN) :: flag
@@ -3625,13 +3191,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_fill_time_f(plist_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_fill_time_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_fill_time_f(plist_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id 
             INTEGER, INTENT(OUT) :: flag
@@ -3674,13 +3234,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_meta_block_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_meta_block_size_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_meta_block_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: size  ! Block size in bytes; 
@@ -3723,13 +3277,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_meta_block_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_meta_block_size_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_meta_block_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
             INTEGER(HSIZE_T), INTENT(OUT) :: size  ! Block size in bytes; 
@@ -3772,13 +3320,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_sieve_buf_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_sieve_buf_size_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_sieve_buf_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
             INTEGER(SIZE_T), INTENT(IN) :: size  ! Buffer size in bytes; 
@@ -3821,13 +3363,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_sieve_buf_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_sieve_buf_size_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_sieve_buf_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: size   ! Buffer size in bytes 
@@ -3870,13 +3406,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_small_data_block_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_small_data_block_size_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_small_data_block_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: size    ! Small raw data block size
@@ -3919,13 +3449,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_small_data_block_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_small_data_block_size_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_small_data_block_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list identifier 
             INTEGER(HSIZE_T), INTENT(OUT) :: size    ! Small raw data block size
@@ -3968,13 +3492,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_hyper_vector_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_hyper_vector_size_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_hyper_vector_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset transfer property list identifier 
             INTEGER(SIZE_T), INTENT(IN) :: size     ! Vector size
@@ -4017,13 +3535,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_hyper_vector_size_f(plist_id, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_hyper_vector_size_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_hyper_vector_size_f(plist_id, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset transfer property list identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: size     ! Vector size
@@ -4067,13 +3579,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_integer(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_integer
-!DEC$endif
-!
+          SUBROUTINE h5pset_integer(prp_id, name, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -4123,13 +3629,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_real(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_real
-!DEC$endif
-!
+          SUBROUTINE h5pset_real(prp_id, name, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -4155,61 +3655,6 @@
         hdferr = h5pset_real_c(prp_id, name , name_len, value)
           END SUBROUTINE h5pset_real
 
-!----------------------------------------------------------------------
-! Name:		h5pset_double
-!
-! Purpose: 	Sets a property list value
-!
-! Inputs:  
-!		prp_id		- iproperty list identifier to modify
-!		name 		- name of property to modify
-!		value		- value to set property to
-! Outputs:  
-!		hdferr:		- error code		
-!				 	Success:  0
-!				 	Failure: -1   
-! Optional parameters:
-!				NONE
-!
-! Programmer:	Elena Pourmal
-!	        October 9, 2002	
-!
-! Modifications: 	
-!
-! Comment:		
-!----------------------------------------------------------------------
-
-          SUBROUTINE h5pset_double(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_double
-!DEC$endif
-!
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
-            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
-            DOUBLE PRECISION,   INTENT(IN) :: value ! Property value
-            INTEGER, INTENT(OUT) :: hdferr  ! Error code
-            INTEGER :: name_len
-
-            INTERFACE
-              INTEGER FUNCTION h5pset_double_c(prp_id, name, name_len, value)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_DOUBLE_C'::h5pset_double_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
-              INTEGER(HID_T), INTENT(IN) :: prp_id
-              CHARACTER(LEN=*), INTENT(IN) :: name
-              INTEGER, INTENT(IN)         :: name_len
-              DOUBLE PRECISION, INTENT(IN) :: value
-              END FUNCTION h5pset_double_c
-            END INTERFACE
-
-            name_len = LEN(name)
-        hdferr = h5pset_double_c(prp_id, name , name_len, value)
-          END SUBROUTINE h5pset_double
 
 !----------------------------------------------------------------------
 ! Name:		h5pset_char
@@ -4235,13 +3680,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pset_char(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_char
-!DEC$endif
-!
+          SUBROUTINE h5pset_char(prp_id, name, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -4295,13 +3734,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_integer(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_integer
-!DEC$endif
-!
+          SUBROUTINE h5pget_integer(prp_id, name, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -4351,13 +3784,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_real(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_real
-!DEC$endif
-!
+          SUBROUTINE h5pget_real(prp_id, name, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -4383,61 +3810,6 @@
             hdferr = h5pget_real_c(prp_id, name , name_len, value)
           END SUBROUTINE h5pget_real
 
-!----------------------------------------------------------------------
-! Name:		h5pget_double
-!
-! Purpose: 	Gets a property list value
-!
-! Inputs:  
-!		prp_id		- iproperty list identifier to modify
-!		name 		- name of property to modify
-! Outputs:  
-!		value		- value of property
-!		hdferr:		- error code		
-!				 	Success:  0
-!				 	Failure: -1   
-! Optional parameters:
-!				NONE
-!
-! Programmer:	Elena Pourmal
-!	        October 9, 2002	
-!
-! Modifications: 	
-!
-! Comment:		
-!----------------------------------------------------------------------
-
-          SUBROUTINE h5pget_double(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_double
-!DEC$endif
-!
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
-            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
-            DOUBLE PRECISION,   INTENT(OUT) :: value ! Property value
-            INTEGER, INTENT(OUT) :: hdferr  ! Error code
-            INTEGER :: name_len
-
-            INTERFACE
-              INTEGER FUNCTION h5pget_double_c(prp_id, name, name_len, value)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_DOUBLE_C'::h5pget_double_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
-              INTEGER(HID_T), INTENT(IN) :: prp_id
-              CHARACTER(LEN=*), INTENT(IN) :: name
-              INTEGER, INTENT(IN)         :: name_len
-              DOUBLE PRECISION, INTENT(OUT) :: value
-              END FUNCTION h5pget_double_c
-            END INTERFACE
-
-            name_len = LEN(name)
-            hdferr = h5pget_double_c(prp_id, name , name_len, value)
-          END SUBROUTINE h5pget_double
 
 !----------------------------------------------------------------------
 ! Name:		h5pget_char
@@ -4463,13 +3835,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_char(prp_id, name, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_char
-!DEC$endif
-!
+          SUBROUTINE h5pget_char(prp_id, name, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -4523,13 +3889,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pexist_f(prp_id, name, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pexist_f
-!DEC$endif
-!
+          SUBROUTINE h5pexist_f(prp_id, name, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
@@ -4583,13 +3943,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_size_f(prp_id, name, size, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_size_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_size_f(prp_id, name, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to query
@@ -4637,13 +3991,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_nprops_f(prp_id, nprops, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_nprops_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_nprops_f(prp_id, nprops, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier 
             INTEGER(SIZE_T), INTENT(OUT) :: nprops  ! iNumber of properties
@@ -4665,19 +4013,18 @@
 !----------------------------------------------------------------------
 ! Name:		h5pget_class_name_f 
 !
-! Purpose: 	Queries the ithe name of a class.
+! Purpose: 	Queries the name of a class.
 !
 ! Inputs:  
 !		prp_id		- property list identifier to query
 ! Outputs:  
 !		name 		- name of a class
-!		hdferr:		- error code		
-!                                       
-!				 	Success:  Actual lenght of the class name
-!                                                 If provided buffer "name" is 
-!                                                 smaller, than name will be 
-!                                                 truncated to fit into
-!                                                 provided user buffer
+!               size            - Actual length of the class name
+!                                 If provided buffer "name" is smaller,
+!                                 than name will be truncated to fit into
+!                                 provided user buffer
+!		hdferr:		- error code
+!				 	Success: 0
 !				 	Failure: -1   
 ! Optional parameters:
 !				NONE
@@ -4685,21 +4032,17 @@
 ! Programmer:	Elena Pourmal
 !	        October 9, 2002	
 !
-! Modifications: 	
+! Modifications: Returned the size of name as an argument	
 !
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_class_name_f(prp_id, name, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_class_name_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_class_name_f(prp_id, name, size, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
-            CHARACTER(LEN=*), INTENT(INOUT) :: name  ! Buffer to retireve class name
+            CHARACTER(LEN=*), INTENT(OUT) :: name  ! Buffer to retireve class name
+            
+            INTEGER, INTENT(OUT) :: size ! Actual length of the class name
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
             INTEGER :: name_len
 
@@ -4715,8 +4058,13 @@
               INTEGER, INTENT(IN)         :: name_len
               END FUNCTION h5pget_class_name_c
             END INTERFACE
+
             name_len = LEN(name)
-            hdferr = h5pget_class_name_c(prp_id, name , name_len)
+            size = h5pget_class_name_c(prp_id, name, name_len)
+
+            hdferr = 0
+            IF(size.LT.0) hdferr = -1
+
           END SUBROUTINE h5pget_class_name_f
 
 !----------------------------------------------------------------------
@@ -4743,13 +4091,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_class_parent_f(prp_id, parent_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_class_parent_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_class_parent_f(prp_id, parent_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier 
             INTEGER(HID_T), INTENT(OUT) :: parent_id ! Parent class property list 
@@ -4794,13 +4136,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pisa_class_f(plist, pclass, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pisa_class_f
-!DEC$endif
-!
+          SUBROUTINE h5pisa_class_f(plist, pclass, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist     ! Property list identifier 
             INTEGER(HID_T), INTENT(IN) :: pclass    ! Class identifier
@@ -4850,13 +4186,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pcopy_prop_f(dst_id, src_id, name, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pcopy_prop_f
-!DEC$endif
-!
+          SUBROUTINE h5pcopy_prop_f(dst_id, src_id, name, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: dst_id  ! Destination property list 
                                                   ! identifier 
@@ -4907,13 +4237,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5premove_f(plid, name, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5premove_f
-!DEC$endif
-!
+          SUBROUTINE h5premove_f(plid, name, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plid   ! property list identifier
             CHARACTER(LEN=*), INTENT(IN) :: name ! name of property to remove
@@ -4961,13 +4285,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5punregister_f(class, name, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5punregister_f
-!DEC$endif
-!
+          SUBROUTINE h5punregister_f(class, name, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: class  ! property list class identifier
             CHARACTER(LEN=*), INTENT(IN) :: name ! name of property to remove
@@ -5014,13 +4332,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pclose_class_f(class, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pclose_class_f
-!DEC$endif
-!
+          SUBROUTINE h5pclose_class_f(class, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: class  ! property list class identifier
             INTEGER, INTENT(OUT) :: hdferr  ! Error code
@@ -5070,13 +4382,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pcreate_class_f(parent, name, class, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pcreate_class_f
-!DEC$endif
-!
+          SUBROUTINE h5pcreate_class_f(parent, name, class, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: parent  ! parent property list class 
                                                   ! identifier
@@ -5131,13 +4437,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pregister_integer(class, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pregister_integer
-!DEC$endif
-!
+          SUBROUTINE h5pregister_integer(class, name, size, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
@@ -5192,13 +4492,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pregister_real(class, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pregister_real
-!DEC$endif
-!
+          SUBROUTINE h5pregister_real(class, name, size, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
@@ -5227,67 +4521,6 @@
           END SUBROUTINE h5pregister_real
 
 !----------------------------------------------------------------------
-! Name:		h5pregister_double
-!
-! Purpose: 	Registers a permanent property with a property list class.
-!
-! Inputs:  
-!		class		- property list class to register 
-!                                 permanent property within
-!		name 		- name of property to register
-!               size            - size of property in bytes
-!		value		- default value for property in newly 
-!                                 created property lists
-! Outputs:  
-!		hdferr:		- error code		
-!				 	Success:  0
-!				 	Failure: -1   
-! Optional parameters:
-!				NONE
-!
-! Programmer:	Elena Pourmal
-!	        October 10, 2002	
-!
-! Modifications: 	
-!
-! Comment:		
-!----------------------------------------------------------------------
-
-          SUBROUTINE h5pregister_double(class, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pregister_double
-!DEC$endif
-!
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
-            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
-            INTEGER(SIZE_T), INTENT(IN) :: size  ! size of the property value	
-            DOUBLE PRECISION,   INTENT(IN) :: value        ! Property value
-            INTEGER, INTENT(OUT) :: hdferr  ! Error code
-            INTEGER :: name_len
-
-            INTERFACE
-              INTEGER FUNCTION h5pregister_double_c(class, name, name_len, size, value)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PREGISTER_DOUBLE_C'::h5pregister_double_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
-              INTEGER(HID_T), INTENT(IN) :: class
-              CHARACTER(LEN=*), INTENT(IN) :: name
-              INTEGER, INTENT(IN)         :: name_len
-              INTEGER(SIZE_T), INTENT(IN) :: size 
-              DOUBLE PRECISION, INTENT(IN) :: value
-              END FUNCTION h5pregister_double_c
-            END INTERFACE
-
-            name_len = LEN(name)
-            hdferr = h5pregister_double_c(class, name , name_len, size, value)
-          END SUBROUTINE h5pregister_double
-
-!----------------------------------------------------------------------
 ! Name:		h5pregister_char
 !
 ! Purpose: 	Registers a permanent property with a property list class.
@@ -5314,13 +4547,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pregister_char(class, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pregister_char
-!DEC$endif
-!
+          SUBROUTINE h5pregister_char(class, name, size, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: class   ! Property list class identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to register
@@ -5378,13 +4605,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pinsert_integer(plist, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pinsert_integer
-!DEC$endif
-!
+          SUBROUTINE h5pinsert_integer(plist, name, size, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert 
@@ -5438,13 +4659,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pinsert_real(plist, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pinsert_real
-!DEC$endif
-!
+          SUBROUTINE h5pinsert_real(plist, name, size, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert 
@@ -5472,65 +4687,6 @@
             hdferr = h5pinsert_real_c(plist, name , name_len, size, value)
           END SUBROUTINE h5pinsert_real
 
-!----------------------------------------------------------------------
-! Name:		h5pinsert_double
-!
-! Purpose: 	Registers a temporary property with a property list class.
-!
-! Inputs:  
-!		plist		- property list identifier
-!                                 permanent property within
-!		name 		- name of property to insert
-!               size            - size of property in bytes
-!		value		- initial value for the property 
-! Outputs:  
-!		hdferr:		- error code		
-!				 	Success:  0
-!				 	Failure: -1   
-! Optional parameters:
-!				NONE
-!
-! Programmer:	Elena Pourmal
-!	        October 10, 2002	
-!
-! Modifications: 	
-!
-! Comment:		
-!----------------------------------------------------------------------
-
-          SUBROUTINE h5pinsert_double(plist, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pinsert_double
-!DEC$endif
-!
-            IMPLICIT NONE
-            INTEGER(HID_T), INTENT(IN) :: plist   ! Property list identifier 
-            CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to insert 
-            INTEGER(SIZE_T), INTENT(IN) :: size   ! Size of the property value	
-            DOUBLE PRECISION, INTENT(IN) :: value ! Property value
-            INTEGER, INTENT(OUT) :: hdferr        ! Error code
-            INTEGER :: name_len
-
-            INTERFACE
-              INTEGER FUNCTION h5pinsert_double_c(plist, name, name_len, size, value)
-              USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PINSERT_DOUBLE_C'::h5pinsert_double_c
-              !DEC$ ENDIF
-              !DEC$ATTRIBUTES reference :: name
-              INTEGER(HID_T), INTENT(IN) :: plist
-              CHARACTER(LEN=*), INTENT(IN) :: name
-              INTEGER, INTENT(IN)         :: name_len
-              INTEGER(SIZE_T), INTENT(IN) :: size 
-              DOUBLE PRECISION, INTENT(IN) :: value
-              END FUNCTION h5pinsert_double_c
-            END INTERFACE
-
-            name_len = LEN(name)
-            hdferr = h5pinsert_double_c(plist, name , name_len, size, value)
-          END SUBROUTINE h5pinsert_double
 
 !----------------------------------------------------------------------
 ! Name:		h5pinsert_char
@@ -5558,13 +4714,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pinsert_char(plist, name, size, value, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pinsert_char
-!DEC$endif
-!
+          SUBROUTINE h5pinsert_char(plist, name, size, value, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: plist      ! Property list identifier 
             CHARACTER(LEN=*), INTENT(IN) :: name     ! Name of property to insert 
@@ -5619,13 +4769,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_shuffle_f(prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_shuffle_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_shuffle_f(prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: hdferr       ! Error code
@@ -5672,13 +4816,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_edc_check_f(prp_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_edc_check_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_edc_check_f(prp_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: flag          ! Checksum filter flag
@@ -5724,13 +4862,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_edc_check_f(prp_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_edc_check_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_edc_check_f(prp_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset transfer property list identifier 
             INTEGER, INTENT(OUT) :: flag        ! Checksum filter flag
@@ -5781,13 +4913,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_fletcher32_f(prp_id, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fletcher32_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_fletcher32_f(prp_id, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(OUT) :: hdferr       ! Error code
@@ -5832,13 +4958,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_family_offset_f(prp_id, offset, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_family_offset_f
-!DEC$endif
-!
+          SUBROUTINE h5pset_family_offset_f(prp_id, offset, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER(HSIZE_T), INTENT(IN) :: offset ! Offset in bytes
@@ -5888,13 +5008,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_fapl_multi_l(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fapl_multi_l
-!DEC$endif
-!
+          SUBROUTINE h5pset_fapl_multi_l(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
             INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN) :: memb_map
@@ -5964,13 +5078,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pset_fapl_multi_s(prp_id, relax, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_fapl_multi_s
-!DEC$endif
-!
+          SUBROUTINE h5pset_fapl_multi_s(prp_id, relax, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
             LOGICAL, INTENT(IN) :: relax
@@ -6022,13 +5130,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr, maxlen_out) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_fapl_multi_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name, memb_addr, relax, hdferr, maxlen_out)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! File creation property list identifier 
             INTEGER, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT) :: memb_map
@@ -6102,12 +5204,6 @@
 
 
           SUBROUTINE h5pset_szip_f(prp_id, options_mask, pixels_per_block, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pset_szip_f
-!DEC$endif
-!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property 
                                                  ! list identifier 
@@ -6159,13 +5255,7 @@
 !----------------------------------------------------------------------
 
 
-          SUBROUTINE h5pall_filters_avail_f(prp_id, flag, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pall_filters_avail_f
-!DEC$endif
-!
+          SUBROUTINE h5pall_filters_avail_f(prp_id, flag, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property 
                                                  ! list identifier 
@@ -6222,13 +5312,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, cd_values, namelen, name, hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pget_filter_by_id_f
-!DEC$endif
-!
+          SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts, cd_values, namelen, name, hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
 
@@ -6296,13 +5380,7 @@
 ! Comment:		
 !----------------------------------------------------------------------
 
-          SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr) 
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5pmodify_filter_f
-!DEC$endif
-!
+          SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier 
             INTEGER, INTENT(IN) :: filter  !Filter to be modified
@@ -6358,12 +5436,6 @@
 !----------------------------------------------------------------------
 
           SUBROUTINE h5premove_filter_f(prp_id, filter, hdferr)
-!
-!This definition is needed for Windows DLLs
-!DEC$if defined(BUILD_HDF5_DLL)
-!DEC$attributes dllexport :: h5premove_filter_f
-!DEC$endif
-!
             IMPLICIT NONE
             INTEGER(HID_T), INTENT(IN) :: prp_id ! Dataset creation property list
                                                  ! identifier
@@ -6387,4 +5459,1581 @@
             hdferr = h5premove_filter_c(prp_id, filter)
           END SUBROUTINE h5premove_filter_f
 
-     END MODULE H5P
+!----------------------------------------------------------------------
+! Name:		H5Pget_attr_phase_change_f 
+!
+! Purpose: 	Retrieves attribute storage phase change thresholds 
+!
+! Inputs:  
+!		ocpl_id		- Object (dataset or group) creation property list identifier
+! Outputs:  
+!               max_compact     - Maximum number of attributes to be stored in compact storage
+!                                 (Default: 8)
+!               min_dense       - Minimum number of attributes to be stored in dense storage
+!                                 (Default: 6)
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		January, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pget_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: ocpl_id ! Object (dataset or group) creation property list identifier
+    INTEGER, INTENT(OUT) :: max_compact  ! Maximum number of attributes to be stored in compact storage
+                                         !(Default: 8)
+    INTEGER, INTENT(OUT) :: min_dense  ! Minimum number of attributes to be stored in dense storage
+                                       ! (Default: 6)
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pget_attr_phase_change_c(ocpl_id, max_compact, min_dense)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_ATTR_PHASE_CHANGE_C'::h5pget_attr_phase_change_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: ocpl_id
+         INTEGER, INTENT(OUT) :: max_compact
+         INTEGER, INTENT(OUT) :: min_dense
+ 
+       END FUNCTION h5pget_attr_phase_change_c
+    END INTERFACE
+    
+    hdferr = h5pget_attr_phase_change_c(ocpl_id, max_compact, min_dense)
+  END SUBROUTINE h5pget_attr_phase_change_f
+
+!----------------------------------------------------------------------
+! Name:		H5Pset_attr_creation_order_f 
+!
+! Purpose: 	Sets tracking and indexing of attribute creation order
+!
+! Inputs:  
+!		ocpl_id		- Object creation property list identifier
+!               crt_order_flags - Flags specifying whether to track and index attribute creation order
+! Outputs:
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		January, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_attr_creation_order_f(ocpl_id, crt_order_flags , hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: ocpl_id ! Object (dataset or group) creation property list identifier
+    INTEGER, INTENT(IN) :: crt_order_flags  ! Flags specifying whether to track and index attribute creation order
+
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION H5Pset_attr_creation_order_c(ocpl_id, crt_order_flags)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_ATTR_CREATION_ORDER_C'::h5pset_attr_creation_order_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: ocpl_id
+         INTEGER, INTENT(IN) :: crt_order_flags
+ 
+       END FUNCTION H5Pset_attr_creation_order_c
+    END INTERFACE
+    
+    hdferr = H5Pset_attr_creation_order_c(ocpl_id, crt_order_flags)
+  END SUBROUTINE h5pset_attr_creation_order_f
+  
+
+!----------------------------------------------------------------------
+! Name:		H5Pset_shared_mesg_nindexes_f 
+!
+! Purpose: 	Sets number of shared object header message indexes 
+!
+! Inputs:  
+!               plist_id - file creation property list
+!               nindexes - Number of shared object header message indexes to be available in files created with this property list
+! Outputs:
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		January, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_shared_mesg_nindexes_f( plist_id, nindexes, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: plist_id ! file creation property list
+    INTEGER, INTENT(IN) :: nindexes ! Number of shared object header message indexes 
+                                     !  available in files created WITH this property list
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_shared_mesg_nindexes_c(plist_id, nindexes)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_SHARED_MESG_NINDEXES_C'::h5pset_shared_mesg_nindexes_c
+         !DEC$ ENDIF
+         
+         INTEGER(HID_T), INTENT(IN) :: plist_id
+         INTEGER, INTENT(IN) :: nindexes
+         
+       END FUNCTION H5pset_shared_mesg_nindexes_c
+    END INTERFACE
+    
+    hdferr = h5pset_shared_mesg_nindexes_c(plist_id, nindexes) 
+
+  END SUBROUTINE h5pset_shared_mesg_nindexes_f
+  
+!----------------------------------------------------------------------
+! Name:		H5Pset_shared_mesg_index_f
+!
+! Purpose: 	Configures the specified shared object header message index
+!
+! Inputs:  
+!            fcpl_id - File creation property list identifier.
+!          index_num - Index being configured.
+!    mesg_type_flags - Types of messages that should be stored in this index.
+!      min_mesg_size - Minimum message size.
+!
+! Outputs:
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		January, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_shared_mesg_index_f(fcpl_id, index_num, mesg_type_flags, min_mesg_size, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: fcpl_id ! file creation property list
+    INTEGER, INTENT(IN) :: index_num ! Index being configured.
+    INTEGER, INTENT(IN) :: mesg_type_flags ! Types of messages that should be stored in this index.
+    INTEGER, INTENT(IN) :: min_mesg_size ! Minimum message size.
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_shared_mesg_index_c(fcpl_id, index_num, mesg_type_flags, min_mesg_size)
+
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_SHARED_MESG_INDEX_C'::h5pset_shared_mesg_index_c
+         !DEC$ ENDIF
+         
+         INTEGER(HID_T), INTENT(IN) :: fcpl_id 
+         INTEGER, INTENT(IN) :: index_num
+         INTEGER, INTENT(IN) :: mesg_type_flags
+         INTEGER, INTENT(IN) :: min_mesg_size
+         
+       END FUNCTION H5pset_shared_mesg_index_c
+    END INTERFACE
+    
+    hdferr = h5pset_shared_mesg_index_c(fcpl_id, index_num, mesg_type_flags, min_mesg_size) 
+
+  END SUBROUTINE h5pset_shared_mesg_index_f
+  
+!----------------------------------------------------------------------
+! Name:	      H5Pget_attr_creation_order_f
+!
+! Purpose:    Retrieves tracking and indexing settings for attribute creation order
+!
+! Inputs:
+!             ocpl_id - Object (group or dataset) creation property list identifier
+!
+! Outputs:
+!             crt_order_flags - Flags specifying whether to track and index attribute creation order
+!	      hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		February, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pget_attr_creation_order_f(ocpl_id, crt_order_flags, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: ocpl_id ! Object (group or dataset) creation property list identifier 
+    INTEGER, INTENT(OUT) :: crt_order_flags ! Flags specifying whether to track and index attribute creation order 
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pget_attr_creation_order_c(ocpl_id, crt_order_flags)
+
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_ATTR_CREATION_ORDER_C'::h5pget_attr_creation_order_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: ocpl_id
+         INTEGER, INTENT(OUT) :: crt_order_flags
+         
+       END FUNCTION H5pget_attr_creation_order_c
+    END INTERFACE
+
+    hdferr = h5pget_attr_creation_order_c(ocpl_id, crt_order_flags)
+
+  END SUBROUTINE h5pget_attr_creation_order_f
+
+!----------------------------------------------------------------------
+! Name:	      H5Pset_libver_bounds_f
+!
+! Purpose:    Sets bounds on library versions, and indirectly format versions, to be used when creating objects.
+!
+! Inputs:
+!             fapl_id - File access property list identifier
+!                 low - The earliest version of the library that will be used for writing objects.
+!                high - The latest version of the library that will be used for writing objects.
+!
+! Outputs:
+!	      hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		February 18, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_libver_bounds_f(fapl_id, low, high, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: fapl_id ! File access property list identifier
+    INTEGER, INTENT(IN) :: low ! The earliest version of the library that will be used for writing objects.
+                                        ! Currently, low must be one of two pre-defined values:
+                                        !            HDF_LIBVER_EARLIEST_F
+                                        !            HDF_LIBVER_LATEST_F
+    INTEGER, INTENT(IN) :: high ! The latest version of the library that will be used for writing objects.
+                                         ! Currently, low must set to the pre-defined value:
+                                         !            HDF_LIBVER_LATEST_F
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_libver_bounds_c(fapl_id, low, high)
+
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_LIBVER_BOUNDS_C'::h5pset_libver_bounds_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: fapl_id
+         INTEGER, INTENT(IN) :: low
+         INTEGER, INTENT(IN) :: high
+         
+       END FUNCTION H5pset_libver_bounds_c
+    END INTERFACE
+
+    hdferr = h5pset_libver_bounds_c(fapl_id, low, high)
+
+  END SUBROUTINE h5pset_libver_bounds_f
+
+!----------------------------------------------------------------------
+! Name:	      H5Pset_link_creation_order_f 
+!
+! Purpose:    Sets creation order tracking and indexing for links in a group.
+!
+! Inputs:
+!         gcpl_id  	  - Group creation property list identifier
+!         crt_order_flags - Creation order flag(s)
+!
+! Outputs:
+!	      hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		February 18, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_link_creation_order_f(gcpl_id, crt_order_flags, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: gcpl_id ! File access property list identifier
+    INTEGER, INTENT(IN) :: crt_order_flags ! Creation order flag(s)
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_link_creation_order_c(gcpl_id, crt_order_flags)
+
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_LINK_CREATION_ORDER_C'::h5pset_link_creation_order_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: gcpl_id
+         INTEGER, INTENT(IN) :: crt_order_flags
+         
+       END FUNCTION H5pset_link_creation_order_c
+    END INTERFACE
+
+    hdferr = h5pset_link_creation_order_c(gcpl_id, crt_order_flags)
+
+  END SUBROUTINE h5pset_link_creation_order_f
+
+!----------------------------------------------------------------------
+! Name:		H5Pget_link_phase_change_f
+!
+! Purpose: 	Queries the settings for conversion between compact and dense groups.
+!
+! Inputs:  
+!		gcpl_id  	- Group creation property list identifier
+! Outputs:  
+!               max_compact     - Maximum number of attributes to be stored in compact storage
+!               min_dense       - Minimum number of attributes to be stored in dense storage
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		February 20, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pget_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier
+    INTEGER, INTENT(OUT) :: max_compact  ! Maximum number of attributes to be stored in compact storage
+    INTEGER, INTENT(OUT) :: min_dense  ! Minimum number of attributes to be stored in dense storage
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pget_link_phase_change_c(gcpl_id, max_compact, min_dense)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_LINK_PHASE_CHANGE_C'::h5pget_link_phase_change_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: gcpl_id
+         INTEGER, INTENT(OUT) :: max_compact
+         INTEGER, INTENT(OUT) :: min_dense
+ 
+       END FUNCTION h5pget_link_phase_change_c
+    END INTERFACE
+
+    hdferr = h5pget_link_phase_change_c(gcpl_id, max_compact, min_dense)
+  END SUBROUTINE h5pget_link_phase_change_f
+
+!----------------------------------------------------------------------
+! Name:		H5Pget_obj_track_times_f 
+!
+! Purpose: 	Returns whether times are tracked for an object.
+!
+! Inputs:  
+!		plist_id	- property list id
+!               flag            - object timestamp setting
+!                                 .TRUE.,.FALSE.
+! Outputs:
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		February 22, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pget_obj_track_times_f(plist_id, flag, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property 
+                                         ! list identifier 
+    LOGICAL, INTENT(OUT) :: flag   ! Object timestamp setting
+    INTEGER, INTENT(OUT) :: hdferr ! Error code
+    INTEGER :: status
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pget_obj_track_times_c(plist_id, status) 
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_OBJ_TRACK_TIMES_C'::h5pget_obj_track_times_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: plist_id ! File creation property list identifier 
+         INTEGER, INTENT(OUT) :: status
+       END FUNCTION h5pget_obj_track_times_c
+    END INTERFACE
+    flag = .TRUE.
+    hdferr = h5pget_obj_track_times_c(plist_id, status) 
+    IF(status.EQ.0) flag = .FALSE.
+
+  END SUBROUTINE h5pget_obj_track_times_f
+
+!----------------------------------------------------------------------
+! Name:		H5Pset_obj_track_times_f 
+!
+! Purpose: 	Set whether the birth, access, modification & change times for
+!               an object are stored.
+! 
+!               Birth time is the time the object was created.  Access time is
+!               the last time that metadata or raw data was read from this
+!               object.  Modification time is the last time the data for
+!               this object was changed (either writing raw data to a dataset
+!               or inserting/modifying/deleting a link in a group).  Change
+!               time is the last time the metadata for this object was written
+!               (adding/modifying/deleting an attribute on an object, extending
+!               the size of a dataset, etc).
+! 
+!               If these times are not tracked, they will be reported as
+!               12:00 AM UDT, Jan. 1, 1970 (i.e. 0 seconds past the UNIX
+!               epoch) when queried.
+!
+! Inputs:  
+!		plist_id	- property list id
+!               flag            - object timestamp setting
+!                                 .TRUE.,.FALSE.
+! Outputs:
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		February 22, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_obj_track_times_f(plist_id, flag, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property 
+                                           ! list identifier 
+    LOGICAL, INTENT(IN) :: flag    ! Object timestamp setting
+    INTEGER, INTENT(OUT) :: hdferr ! Error code
+    INTEGER :: status
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_obj_track_times_c(plist_id, status) 
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_OBJ_TRACK_TIMES_C'::h5pset_obj_track_times_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: plist_id ! File creation property list identifier 
+         INTEGER, INTENT(IN) :: status
+       END FUNCTION h5pset_obj_track_times_c
+    END INTERFACE
+
+    status = 0
+    IF(flag) status = 1
+
+    hdferr = h5pset_obj_track_times_c(plist_id, status)
+
+  END SUBROUTINE h5pset_obj_track_times_f
+
+!----------------------------------------------------------------------
+! Name:		H5Pset_create_inter_group_f
+!
+! Purpose: 	Specifies in property list whether to create missing intermediate groups.
+!
+! Inputs:  
+!		lcpl_id            - Link creation property list identifier
+!               crt_intermed_group - crt_intermed_group specifying whether 
+!                                    to create intermediate groups upon the creation 
+!                                    of an object
+! Outputs:
+!		hdferr:		   - error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		February 22, 2008
+!
+! Modifications: 	
+!
+! Comment: The long subroutine name (>31) on older f90 compilers causes problems
+!          so had to shorten the name		
+!--------------------------------------------------------------------------------------
+
+  SUBROUTINE h5pset_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: lcpl_id ! Link creation property list identifier
+    INTEGER, INTENT(IN) :: crt_intermed_group  ! specifying whether to create intermediate groups 
+                                               ! upon the creation of an object
+    INTEGER, INTENT(OUT) :: hdferr ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_create_inter_group_c(lcpl_id, crt_intermed_group) 
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_CREATE_INTER_GROUP_C'::h5pset_create_inter_group_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: lcpl_id
+         INTEGER, INTENT(IN) :: crt_intermed_group
+       END FUNCTION h5pset_create_inter_group_c
+    END INTERFACE
+
+    hdferr = h5pset_create_inter_group_c(lcpl_id, crt_intermed_group)
+
+  END SUBROUTINE h5pset_create_inter_group_f
+
+!----------------------------------------------------------------------
+! Name:	      H5Pget_link_creation_order_f
+!
+! Purpose:    Queries whether link creation order is tracked and/or indexed in a group.
+!
+! Inputs:
+!             gcpl_id - Group creation property list identifier
+!
+! Outputs:
+!             crt_order_flags - Creation order flag(s)
+!	      hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 3, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pget_link_creation_order_f(gcpl_id, crt_order_flags, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: gcpl_id   ! Group creation property list identifier
+    INTEGER, INTENT(OUT) :: crt_order_flags ! Creation order flag(s)
+    INTEGER, INTENT(OUT) :: hdferr          ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pget_link_creation_order_c(gcpl_id, crt_order_flags)
+
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_LINK_CREATION_ORDER_C'::h5pget_link_creation_order_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: gcpl_id
+         INTEGER, INTENT(OUT) :: crt_order_flags
+         
+       END FUNCTION H5pget_link_creation_order_c
+    END INTERFACE
+
+    hdferr = h5pget_link_creation_order_c(gcpl_id, crt_order_flags)
+
+  END SUBROUTINE h5pget_link_creation_order_f
+
+!----------------------------------------------------------------------
+! Name:	      H5Pset_char_encoding 
+!
+! Purpose:    Sets the character encoding used to encode a string.
+!
+! Inputs:
+!             plist_id - Property list identifier
+!             encoding - Valid values for encoding are:
+!     	                    H5T_CSET_ASCII_F -> US ASCII
+!     	                    H5T_CSET_UTF8_F -> UTF-8 Unicode encoding
+!
+! Outputs:
+!	      hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 3, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_char_encoding_f(plist_id, encoding, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: plist_id ! Property list identifier
+    
+    INTEGER, INTENT(IN) :: encoding ! String encoding character set:
+!     	                                    H5T_CSET_ASCII_F -> US ASCII
+!     	                                    H5T_CSET_UTF8_F  -> UTF-8 Unicode encoding
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_char_encoding_c(plist_id, encoding)
+
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_CHAR_ENCODING_C'::h5pset_char_encoding_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: plist_id
+         INTEGER, INTENT(IN) :: encoding
+         
+       END FUNCTION H5pset_char_encoding_c
+    END INTERFACE
+
+    hdferr = h5pset_char_encoding_c(plist_id, encoding)
+
+  END SUBROUTINE h5pset_char_encoding_f
+
+!----------------------------------------------------------------------
+! Name:	      H5Pget_char_encoding 
+!
+! Purpose:    Retrieves the character encoding used to create a string
+!
+! Inputs:
+!             plist_id - Property list identifier
+!
+! Outputs:
+!             encoding - Valid values for encoding are:
+!     	                    H5T_CSET_ASCII_F -> US ASCII
+!     	                    H5T_CSET_UTF8_F -> UTF-8 Unicode encoding
+!	        hdferr - error code		
+!		            Success:  0
+!		            Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 3, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE  h5pget_char_encoding_f(plist_id, encoding, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: plist_id ! Property list identifier
+    
+    INTEGER, INTENT(OUT) :: encoding ! Valid values for encoding are:
+!     	                                            H5T_CSET_ASCII_F -> US ASCII
+!     	                                            H5T_CSET_UTF8_F  -> UTF-8 Unicode encoding
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pget_char_encoding_c(plist_id, encoding)
+
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_CHAR_ENCODING_C'::h5pget_char_encoding_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: plist_id
+         INTEGER, INTENT(OUT) :: encoding
+         
+       END FUNCTION H5pget_char_encoding_c
+    END INTERFACE
+
+    hdferr = h5pget_char_encoding_c(plist_id, encoding)
+
+  END SUBROUTINE h5pget_char_encoding_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_copy_object_f 
+!
+! Purpose: 	Sets properties to be used when an object is copied.
+!
+! Inputs: 
+!               ocp_plist_id - Object copy property list identifier
+!               copy_options - Copy option(s) to be set
+! Outputs:  
+!		hdferr	     - error code		
+!				 Success:  0
+!				 Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 3, 2008
+!
+! Modifications:
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_copy_object_f(ocp_plist_id, copy_options, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: ocp_plist_id ! Object copy property list identifier
+    INTEGER, INTENT(IN) :: copy_options ! Copy option(s) to be set, valid options are:
+                                        !   H5O_COPY_SHALLOW_HIERARCHY_F
+                                        !   H5O_COPY_EXPAND_SOFT_LINK_F 
+                                        !   H5O_COPY_EXPAND_EXT_LINK_F
+                                        !   H5O_COPY_EXPAND_REFERENCE_F
+                                        !   H5O_COPY_WITHOUT_ATTR_FLAG_F
+    INTEGER, INTENT(OUT) :: hdferr      ! Error code
+                                        ! 0 on success and -1 on failure
+
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_copy_object_c(ocp_plist_id, copy_options)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_COPY_OBJECT_C'::h5pset_copy_object_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: ocp_plist_id
+         INTEGER, INTENT(IN) :: copy_options
+       END FUNCTION h5pset_copy_object_c
+    END INTERFACE
+    hdferr = h5pset_copy_object_c(ocp_plist_id, copy_options) 
+  END SUBROUTINE h5pset_copy_object_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_copy_object_f 
+!
+! Purpose: 	Retrieves the properties to be used when an object is copied.
+!
+! Inputs: 
+!               ocp_plist_id - Object copy property list identifier
+! Outputs:  
+!               copy_options - Copy option(s) to be get
+!		hdferr	     - error code		
+!				 Success:  0
+!				 Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 3, 2008
+!
+! Modifications:
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pget_copy_object_f(ocp_plist_id, copy_options, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: ocp_plist_id ! Object copy property list identifier
+    INTEGER, INTENT(OUT) :: copy_options ! valid copy options returned are:
+                                         !   H5O_COPY_SHALLOW_HIERARCHY_F
+                                         !   H5O_COPY_EXPAND_SOFT_LINK_F 
+                                         !   H5O_COPY_EXPAND_EXT_LINK_F
+                                         !   H5O_COPY_EXPAND_REFERENCE_F
+                                         !   H5O_COPY_WITHOUT_ATTR_FLAG_F
+    INTEGER, INTENT(OUT) :: hdferr       ! Error code
+
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pget_copy_object_c(ocp_plist_id, copy_options)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_COPY_OBJECT_C'::h5pget_copy_object_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: ocp_plist_id
+         INTEGER, INTENT(OUT) :: copy_options
+       END FUNCTION h5pget_copy_object_c
+    END INTERFACE
+    hdferr = h5pget_copy_object_c(ocp_plist_id, copy_options) 
+  END SUBROUTINE h5pget_copy_object_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_data_transform_f 
+!
+! Purpose: 	Retrieves a data transform expression.
+!
+! Inputs: 
+!               plist_id - Identifier of the property list or class
+! Outputs:  
+!               expression - buffer to hold transform expression
+!		hdferr	   - error code
+!                                       Success:  Actual lenght of the expression
+!                                                 If provided buffer "expression" is 
+!                                                 smaller, than expression will be 
+!                                                 truncated to fit into
+!                                                 provided user buffer
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 19, 2008
+!
+! Modifications:
+!
+! Comment: Should hdferr return just 0 or 1 and add another arguement for the size?
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pget_data_transform_f(plist_id, expression, hdferr, size)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: plist_id ! Identifier of the property list or class
+    CHARACTER(LEN=*), INTENT(OUT) :: expression  ! Buffer to hold transform expression
+
+    INTEGER(SIZE_T), INTENT(OUT), OPTIONAL :: size ! registered size of the transform expression
+
+    INTEGER, INTENT(OUT) :: hdferr       ! Error code
+    INTEGER :: expression_len
+    INTEGER(SIZE_T) :: size_default
+    
+
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pget_data_transform_c(plist_id, expression, expression_len, size_default)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_DATA_TRANSFORM_C'::h5pget_data_transform_c
+         !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: expression
+         INTEGER(HID_T), INTENT(IN) :: plist_id 
+         CHARACTER(LEN=*), INTENT(OUT) :: expression 
+         INTEGER(SIZE_T) :: size_default
+         INTEGER :: expression_len
+       END FUNCTION h5pget_data_transform_c
+    END INTERFACE
+
+    size_default = 0
+    expression_len = LEN(expression)
+
+    hdferr = h5pget_data_transform_c(plist_id, expression, expression_len, size_default)
+
+    IF(present(size)) size = size_default
+
+  END SUBROUTINE h5pget_data_transform_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_data_transform_f 
+!
+! Purpose: 	Sets a data transform expression.
+!
+! Inputs: 
+!               plist_id - Identifier of the property list or class 
+!               expression - buffer to hold transform expression
+! Outputs: 
+!		hdferr	   - error code
+!                                       Success:  0
+!				 	Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 19, 2008
+!
+! Modifications:
+!
+! Comment: 
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_data_transform_f(plist_id, expression, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: plist_id ! Identifier of the property list or class
+    CHARACTER(LEN=*), INTENT(IN) :: expression  ! Buffer to hold transform expression
+    INTEGER, INTENT(OUT) :: hdferr       ! Error code
+    INTEGER :: expression_len
+
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_data_transform_c(plist_id, expression, expression_len)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_DATA_TRANSFORM_C'::h5pset_data_transform_c
+         !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: expression
+         INTEGER(HID_T), INTENT(IN) :: plist_id 
+         CHARACTER(LEN=*), INTENT(IN) :: expression
+         INTEGER :: expression_len
+       END FUNCTION h5pset_data_transform_c
+    END INTERFACE
+
+    expression_len = LEN(expression)
+    hdferr = h5pset_data_transform_c(plist_id, expression, expression_len)
+
+  END SUBROUTINE h5pset_data_transform_f
+
+!----------------------------------------------------------------------
+! Name:		H5Pget_local_heap_size_hint_f 
+!
+! Purpose: 	Queries the local heap size hint for original-style groups.
+!
+! Inputs: 
+!               gcpl_id - Group creation property list identifier
+! Outputs:
+!               size_hint - Hint for size of local heap
+!		hdferr	  - error code
+!                                    Success:  0
+!				     Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 21, 2008
+!
+! Modifications:
+!
+! Comment: 
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pget_local_heap_size_hint_f(gcpl_id, size_hint, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier
+    INTEGER(SIZE_T), INTENT(OUT) :: size_hint ! Hint for size of local heap
+    INTEGER, INTENT(OUT) :: hdferr       ! Error code
+
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pget_local_heap_size_hint_c(gcpl_id, size_hint)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_LOCAL_HEAP_SIZE_HINT_C'::h5pget_local_heap_size_hint_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: gcpl_id
+         INTEGER(SIZE_T), INTENT(OUT) :: size_hint
+       END FUNCTION H5Pget_local_heap_size_hint_c
+    END INTERFACE
+
+    hdferr = H5Pget_local_heap_size_hint_c(gcpl_id, size_hint)
+
+  END SUBROUTINE h5pget_local_heap_size_hint_f
+
+!----------------------------------------------------------------------
+! Name:		H5Pget_est_link_info_f 
+!
+! Purpose: 	Queries data required to estimate required local heap or object header size.
+!
+! Inputs: 
+!               gcpl_id - Group creation property list identifier
+! Outputs:  
+!       est_num_entries - Estimated number of links to be inserted into group
+!          est_name_len - Estimated average length of link names
+!		hdferr	- error code
+!                                Success:  0
+!				 Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 21, 2008
+!
+! Modifications:
+!
+! Comment: 
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pget_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier  
+    INTEGER, INTENT(OUT) :: est_num_entries ! Estimated number of links to be inserted into group
+    INTEGER, INTENT(OUT) :: est_name_len    ! Estimated average length of link names
+    INTEGER, INTENT(OUT) :: hdferr       ! Error code
+
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pget_est_link_info_c(gcpl_id, est_num_entries, est_name_len)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_EST_LINK_INFO_C'::h5pget_est_link_info_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: gcpl_id  
+         INTEGER, INTENT(OUT) :: est_num_entries
+         INTEGER, INTENT(OUT) :: est_name_len
+       END FUNCTION h5pget_est_link_info_c
+    END INTERFACE
+
+    hdferr = h5pget_est_link_info_c(gcpl_id, est_num_entries, est_name_len)
+
+  END SUBROUTINE h5pget_est_link_info_f
+
+!----------------------------------------------------------------------
+! Name:		H5Pset_local_heap_size_hint_f 
+!
+! Purpose: 	Sets the local heap size hint for original-style groups.
+!
+! Inputs: 
+!               gcpl_id - Group creation property list identifier
+!               size_hint - Hint for size of local heap
+! Outputs:
+!		hdferr	  - error code
+!                                    Success:  0
+!				     Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 21, 2008
+!
+! Modifications:
+!
+! Comment: 
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_local_heap_size_hint_f(gcpl_id, size_hint, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier
+    INTEGER(SIZE_T), INTENT(IN) :: size_hint ! Hint for size of local heap
+    INTEGER, INTENT(OUT) :: hdferr       ! Error code
+
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_local_heap_size_hint_c(gcpl_id, size_hint)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_LOCAL_HEAP_SIZE_HINT_C'::h5pset_local_heap_size_hint_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: gcpl_id
+         INTEGER(SIZE_T), INTENT(IN) :: size_hint
+       END FUNCTION h5pset_local_heap_size_hint_c
+    END INTERFACE
+
+    hdferr = H5Pset_local_heap_size_hint_c(gcpl_id, size_hint)
+
+  END SUBROUTINE h5pset_local_heap_size_hint_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_est_link_info_f 
+!
+! Purpose: 	Sets estimated number of links and length of link names in a group.
+!
+! Inputs: 
+!               gcpl_id - Group creation property list identifier  
+!       est_num_entries - Estimated number of links to be inserted into group
+!          est_name_len - Estimated average length of link names
+! Outputs:
+!		hdferr	- error code
+!                                Success:  0
+!				 Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 21, 2008
+!
+! Modifications:
+!
+! Comment: 
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_est_link_info_f(gcpl_id, est_num_entries, est_name_len, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier  
+    INTEGER, INTENT(IN) :: est_num_entries ! Estimated number of links to be inserted into group
+    INTEGER, INTENT(IN) :: est_name_len    ! Estimated average length of link names
+    INTEGER, INTENT(OUT) :: hdferr       ! Error code
+
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_est_link_info_c(gcpl_id, est_num_entries, est_name_len)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_EST_LINK_INFO_C'::h5pset_est_link_info_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: gcpl_id  
+         INTEGER, INTENT(IN) :: est_num_entries
+         INTEGER, INTENT(IN) :: est_name_len
+       END FUNCTION h5pset_est_link_info_c
+    END INTERFACE
+
+    hdferr = H5Pset_est_link_info_c(gcpl_id, est_num_entries, est_name_len)
+
+  END SUBROUTINE h5pset_est_link_info_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_link_phase_change_f
+!
+! Purpose: 	Sets the parameters for conversion between compact and dense groups.
+!
+! Inputs:  
+!		gcpl_id  	- Group creation property list identifier  
+!               max_compact     - Maximum number of attributes to be stored in compact storage
+!               min_dense       - Minimum number of attributes to be stored in dense storage
+! Outputs:
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 21, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_link_phase_change_f(gcpl_id, max_compact, min_dense, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: gcpl_id ! Group creation property list identifier
+    INTEGER, INTENT(IN) :: max_compact  ! Maximum number of attributes to be stored in compact storage
+    INTEGER, INTENT(IN) :: min_dense  ! Minimum number of attributes to be stored in dense storage
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_link_phase_change_c(gcpl_id, max_compact, min_dense)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_LINK_PHASE_CHANGE_C'::h5pset_link_phase_change_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: gcpl_id
+         INTEGER, INTENT(IN) :: max_compact
+         INTEGER, INTENT(IN) :: min_dense
+ 
+       END FUNCTION h5pset_link_phase_change_c
+    END INTERFACE
+
+    hdferr = h5pset_link_phase_change_c(gcpl_id, max_compact, min_dense)
+  END SUBROUTINE h5pset_link_phase_change_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_fapl_direct_f
+!
+! Purpose: 	Sets up use of the direct I/O driver.
+!
+! Inputs:  
+!    fapl_id 	- File access property list identifier
+!    alignment 	- Required memory alignment boundary
+!    block_size - File system block size
+!    cbuf_size 	- Copy buffer size
+! Outputs:
+!     hdferr:   - error code		
+!		    Success:  0
+!		    Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 21, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
+    IMPLICIT NONE  
+    INTEGER(HID_T), INTENT(IN) :: fapl_id ! File access property list identifier
+    INTEGER(SIZE_T), INTENT(IN) :: alignment 	  ! Required memory alignment boundary!
+    INTEGER(SIZE_T), INTENT(IN) :: block_size     ! File system block size
+    INTEGER(SIZE_T), INTENT(IN) :: cbuf_size 	  ! Copy buffer size
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_FAPL_DIRECT_C'::h5pset_fapl_direct_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: fapl_id 
+         INTEGER(SIZE_T), INTENT(IN) :: alignment
+         INTEGER(SIZE_T), INTENT(IN) :: block_size
+         INTEGER(SIZE_T), INTENT(IN) :: cbuf_size
+       END FUNCTION h5pset_fapl_direct_c
+    END INTERFACE
+
+    hdferr = H5Pset_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size)
+  END SUBROUTINE h5pset_fapl_direct_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_fapl_direct_f
+!
+! Purpose: 	Gets up use of the direct I/O driver.
+!
+! Inputs:  
+!    fapl_id 	- File access property list identifier
+! Outputs:
+!    alignment 	- Required memory alignment boundary
+!    block_size - File system block size
+!    cbuf_size 	- Copy buffer size
+!     hdferr:   - error code		
+!		    Success:  0
+!		    Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 21, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pget_fapl_direct_f(fapl_id, alignment, block_size, cbuf_size, hdferr)
+    IMPLICIT NONE  
+    INTEGER(HID_T), INTENT(IN) :: fapl_id ! File access property list identifier
+    INTEGER(SIZE_T), INTENT(OUT) :: alignment 	  ! Required memory alignment boundary!
+    INTEGER(SIZE_T), INTENT(OUT) :: block_size     ! File system block size
+    INTEGER(SIZE_T), INTENT(OUT) :: cbuf_size 	  ! Copy buffer size
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pget_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_FAPL_DIRECT_C'::h5pget_fapl_direct_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: fapl_id 
+         INTEGER(SIZE_T), INTENT(OUT) :: alignment
+         INTEGER(SIZE_T), INTENT(OUT) :: block_size
+         INTEGER(SIZE_T), INTENT(OUT) :: cbuf_size
+       END FUNCTION h5pget_fapl_direct_c
+    END INTERFACE
+
+    hdferr = H5Pget_fapl_direct_c(fapl_id, alignment, block_size, cbuf_size)
+  END SUBROUTINE h5pget_fapl_direct_f
+
+!----------------------------------------------------------------------
+! Name:		H5Pset_attr_phase_change_f 
+!
+! Purpose: 	Sets attribute storage phase change thresholds.
+!
+! Inputs:  
+!		ocpl_id		- Object (dataset or group) creation property list identifier
+! Outputs:  
+!               max_compact     - Maximum number of attributes to be stored in compact storage
+!                                 (Default: 8)
+!               min_dense       - Minimum number of attributes to be stored in dense storage
+!                                 (Default: 6)
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		January, 2008
+!
+! Modifications: 	
+!
+! Comment:		
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_attr_phase_change_f(ocpl_id, max_compact, min_dense, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: ocpl_id ! Object (dataset or group) creation property list identifier
+    INTEGER, INTENT(IN) :: max_compact  ! Maximum number of attributes to be stored in compact storage
+                                         !(Default: 8)
+    INTEGER, INTENT(IN) :: min_dense  ! Minimum number of attributes to be stored in dense storage
+                                       ! (Default: 6)
+    INTEGER, INTENT(OUT) :: hdferr   ! Error code
+!
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_attr_phase_change_c(ocpl_id, max_compact, min_dense)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_ATTR_PHASE_CHANGE_C'::h5pset_attr_phase_change_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: ocpl_id
+         INTEGER, INTENT(IN) :: max_compact
+         INTEGER, INTENT(IN) :: min_dense
+ 
+       END FUNCTION h5pset_attr_phase_change_c
+    END INTERFACE
+    
+    hdferr = h5pset_attr_phase_change_c(ocpl_id, max_compact, min_dense)
+
+
+  END SUBROUTINE h5pset_attr_phase_change_f
+
+!----------------------------------------------------------------------
+! Name:		H5Pset_nbit_f 
+!
+! Purpose: 	Sets up the use of the N-Bit filter.
+!
+! Inputs: 
+!               plist_id - Dataset creation property list identifier.
+! Outputs:
+!		hdferr	  - error code
+!                                    Success:  0
+!				     Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 21, 2008
+!
+! Modifications:
+!
+! Comment: 
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_nbit_f(plist_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property list identifier
+    INTEGER, INTENT(OUT) :: hdferr       ! Error code
+
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION H5Pset_nbit_c(plist_id)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_NBIT_C'::h5pset_nbit_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: plist_id
+       END FUNCTION H5Pset_nbit_c
+    END INTERFACE
+
+    hdferr = H5Pset_nbit_c(plist_id)
+
+  END SUBROUTINE h5pset_nbit_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_scaleoffset_f 
+!
+! Purpose: 	Sets up the use of the Scale-Offset filter.
+!
+! Inputs: 
+!               plist_id - Dataset creation property list identifier.
+!             scale_type - Flag indicating compression method.
+!           scale_factor - Parameter related to scale.
+! Outputs:
+!		hdferr	 - error code
+!                                   Success:  0
+!				    Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 21, 2008
+!
+! Modifications:
+!
+! Comment: 
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_scaleoffset_f(plist_id, scale_type, scale_factor, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property list identifier
+    INTEGER, INTENT(IN) :: scale_type                  ! Flag indicating compression method.
+    INTEGER, INTENT(IN) :: scale_factor                ! parameter related to scale.
+    INTEGER, INTENT(OUT) :: hdferr         ! Error code
+
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_scaleoffset_c(plist_id, scale_type, scale_factor)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_SCALEOFFSET_C'::h5pset_scaleoffset_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: plist_id
+         INTEGER, INTENT(IN) :: scale_type
+         INTEGER, INTENT(IN) :: scale_factor
+       END FUNCTION h5pset_scaleoffset_c
+    END INTERFACE
+
+    hdferr = H5Pset_scaleoffset_c(plist_id, scale_type, scale_factor)
+
+  END SUBROUTINE h5pset_scaleoffset_f
+
+!----------------------------------------------------------------------
+! Name:		h5pset_nlinks_f 
+!
+! Purpose: 	Sets maximum number of soft or user-defined link traversals.
+!
+! Inputs: 
+!            lapl_id - File access property list identifier
+!             nlinks - Maximum number of links to traverse
+!
+! Outputs:
+!		hdferr	 - error code
+!                                   Success:  0
+!				    Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 24, 2008
+!
+! Modifications:
+!
+! Comment: 
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pset_nlinks_f(lapl_id, nlinks, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: lapl_id ! File access property list identifier
+    INTEGER(SIZE_T), INTENT(IN) :: nlinks ! Maximum number of links to traverse
+    INTEGER, INTENT(OUT) :: hdferr        ! Error code
+    
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pset_nlinks_c(lapl_id, nlinks)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PSET_NLINKS_C'::h5pset_nlinks_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: lapl_id
+         INTEGER(SIZE_T), INTENT(IN) :: nlinks
+       END FUNCTION h5pset_nlinks_c
+    END INTERFACE
+    
+    hdferr = h5pset_nlinks_c(lapl_id, nlinks)
+    
+  END SUBROUTINE h5pset_nlinks_f
+
+!----------------------------------------------------------------------
+! Name:		h5pget_nlinks_f 
+!
+! Purpose:  Gets maximum number of soft or user-defined link traversals.
+!
+! Inputs: 
+!            lapl_id - File access property list identifier
+!             nlinks - Maximum number of links to traverse
+!
+! Outputs:
+!		hdferr	 - error code
+!                                   Success:  0
+!				    Failure: -1
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		March 24, 2008
+!
+! Modifications:
+!
+! Comment: 
+!----------------------------------------------------------------------
+
+  SUBROUTINE h5pget_nlinks_f(lapl_id, nlinks, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: lapl_id ! File access property list identifier
+    INTEGER(SIZE_T), INTENT(OUT) :: nlinks ! Maximum number of links to traverse
+    INTEGER, INTENT(OUT) :: hdferr        ! Error code
+    
+!  MS FORTRAN needs explicit interface for C functions called here.
+!
+    INTERFACE
+       INTEGER FUNCTION h5pget_nlinks_c(lapl_id, nlinks)
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_NLINKS_C'::h5pget_nlinks_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: lapl_id
+         INTEGER(SIZE_T), INTENT(OUT) :: nlinks
+       END FUNCTION h5pget_nlinks_c
+    END INTERFACE
+    
+    hdferr = h5pget_nlinks_c(lapl_id, nlinks)
+    
+  END SUBROUTINE h5pget_nlinks_f
+
+!----------------------------------------------------------------------
+! Name:		H5Pget_create_inter_group_f
+!
+! Purpose: 	Determines whether property is set to enable creating missing intermediate groups.
+!
+! Inputs:  
+!		lcpl_id            - Link creation property list identifier
+!               crt_intermed_group - Specifying whether to create intermediate groups upon 
+!                                    the creation of an object
+! Outputs:
+!		hdferr:		   - error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		April 4, 2008
+!
+! Modifications: 	
+!
+! Comment: The long subroutine name (>31) on older f90 compilers causes problems
+!          so had to shorten the name		
+!--------------------------------------------------------------------------------------
+
+  SUBROUTINE h5pget_create_inter_group_f(lcpl_id, crt_intermed_group, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: lcpl_id      ! Link creation property list identifier
+    INTEGER, INTENT(IN) :: crt_intermed_group  ! Flag specifying whether to create intermediate groups 
+                                               ! upon creation of an object
+    INTEGER, INTENT(OUT) :: hdferr ! Error code
+
+    INTERFACE
+       INTEGER FUNCTION h5pget_create_inter_group_c(lcpl_id, crt_intermed_group) 
+         USE H5GLOBAL
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5PGET_CREATE_INTER_GROUP_C'::h5pget_create_inter_group_c
+         !DEC$ ENDIF
+         INTEGER(HID_T), INTENT(IN) :: lcpl_id
+         INTEGER, INTENT(IN) :: crt_intermed_group
+       END FUNCTION h5pget_create_inter_group_c
+    END INTERFACE
+
+    hdferr = h5pget_create_inter_group_c(lcpl_id, crt_intermed_group)
+
+  END SUBROUTINE h5pget_create_inter_group_f
+
+
+END MODULE H5P
+

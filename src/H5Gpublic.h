@@ -61,6 +61,7 @@ typedef struct H5G_info_t {
     H5G_storage_type_t 	storage_type;	/* Type of storage for links in group */
     hsize_t 	nlinks;		        /* Number of links in group */
     int64_t     max_corder;             /* Current max. creation order value for group */
+    hbool_t     mounted;                /* Whether group has a file mounted on it */
 } H5G_info_t;
 
 /********************/
@@ -85,7 +86,7 @@ H5_DLL herr_t H5Gget_info_by_idx(hid_t loc_id, const char *group_name,
 H5_DLL herr_t H5Gclose(hid_t group_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
- * 
+ *
  * Use of these symbols is deprecated.
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS

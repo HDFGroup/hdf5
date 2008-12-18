@@ -101,7 +101,7 @@ rem on it for sending parameters.  --SJW 9/6/07
     call :add_test checktools.bat .\tools
     
     rem Only check C++/Fortran if they are set to build.
-    if defined build_cxx_conditional (
+    if defined build_cpp_conditional (
         call :add_test checkcpptests.bat .\c++\test
     )
     if defined build_fortran_conditional (

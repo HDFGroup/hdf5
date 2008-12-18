@@ -123,11 +123,11 @@ H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_
     /* Check args */
     if(buf == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid buffer")
-    if(NULL == (space = H5I_object_verify(space_id, H5I_DATASPACE)))
+    if(NULL == (space = (H5S_t *)H5I_object_verify(space_id, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a dataspace")
-    if(NULL == (fill_type = H5I_object_verify(fill_type_id, H5I_DATATYPE)))
+    if(NULL == (fill_type = (H5T_t *)H5I_object_verify(fill_type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
-    if(NULL == (buf_type = H5I_object_verify(buf_type_id, H5I_DATATYPE)))
+    if(NULL == (buf_type = (H5T_t *)H5I_object_verify(buf_type_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not a datatype")
 
     /* Fill the selection in the memory buffer */
@@ -165,7 +165,7 @@ done:
     If there's VL type of data, the address of the data is copied multiple
     times into the buffer, causing some trouble when the data is released.
     Instead, make multiple copies of fill value first, then do conversion
-    on each element so that each of them has a copy of the VL data. 
+    on each element so that each of them has a copy of the VL data.
 --------------------------------------------------------------------------*/
 herr_t
 H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
@@ -229,16 +229,16 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
 
         /* Construct source & destination datatype IDs, if we will need them */
         if(!H5T_path_noop(tpath)) {
-            if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill_type, H5T_COPY_ALL))) < 0)
+            if((src_id = H5I_register(H5I_DATATYPE, H5T_copy(fill_type, H5T_COPY_ALL), FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
 
-            if((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(buf_type, H5T_COPY_ALL))) < 0)
+            if((dst_id = H5I_register(H5I_DATATYPE, H5T_copy(buf_type, H5T_COPY_ALL), FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "unable to register types for conversion")
         } /* end if */
 
-        /* If there's VL type of data, make multiple copies of fill value first, 
-         * then do conversion on each element so that each of them has a copy 
-         * of the VL data. 
+        /* If there's VL type of data, make multiple copies of fill value first,
+         * then do conversion on each element so that each of them has a copy
+         * of the VL data.
          */
         if(TRUE == H5T_detect_class(fill_type, H5T_VLEN)) {
             H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
@@ -275,7 +275,7 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize memory selection information")
 
             /* Scatter the data into memory */
-            if(H5D_select_mscat(tmp_buf, space, &mem_iter, (size_t)nelmts, dxpl_cache, buf/*out*/) < 0) {
+            if(H5D_scatter_mem(tmp_buf, space, &mem_iter, (size_t)nelmts, dxpl_cache, buf/*out*/) < 0) {
                 H5S_SELECT_ITER_RELEASE(&mem_iter);
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "scatter failed")
             } /* end if */
@@ -320,10 +320,10 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "data type conversion failed")
 
                 /* Point at element buffer */
-                fill_buf = elem_ptr;
+                fill_buf = (const uint8_t *)elem_ptr;
             } /* end if */
             else
-                fill_buf = fill;
+                fill_buf = (const uint8_t *)fill;
 
             /* Fill the selection in the memory buffer */
             if(H5S_select_fill(fill_buf, dst_type_size, space, buf) < 0)
@@ -332,18 +332,18 @@ H5D_fill(const void *fill, const H5T_t *fill_type, void *buf,
     } /* end else */
 
 done:
-    if(src_id != (-1) && H5I_dec_ref(src_id) < 0)
+    if(src_id != (-1) && H5I_dec_ref(src_id, FALSE) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
-    if(dst_id != (-1) && H5I_dec_ref(dst_id) < 0)
+    if(dst_id != (-1) && H5I_dec_ref(dst_id, FALSE) < 0)
         HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(tmp_buf)
-        H5FL_BLK_FREE(type_conv, tmp_buf);
+        (void)H5FL_BLK_FREE(type_conv, tmp_buf);
     if(elem_wb && H5WB_unwrap(elem_wb) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
     if(bkg_elem_wb && H5WB_unwrap(bkg_elem_wb) < 0)
         HDONE_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "can't close wrapped buffer")
     if(bkg_buf)
-        H5FL_BLK_FREE(type_conv, bkg_buf);
+        (void)H5FL_BLK_FREE(type_conv, bkg_buf);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_fill() */
@@ -401,8 +401,8 @@ H5D_fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf,
         if(fb_info->has_vlen_fill_type) {
             /* Create temporary datatype for conversion operation */
             if(NULL == (fb_info->mem_type = H5T_copy(dset_type, H5T_COPY_REOPEN)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, FAIL, "unable to copy file datatype")
-            if((fb_info->mem_tid = H5I_register(H5I_DATATYPE, fb_info->mem_type)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "unable to copy file datatype")
+            if((fb_info->mem_tid = H5I_register(H5I_DATATYPE, fb_info->mem_type, FALSE)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
 
             /* Retrieve sizes of memory & file datatypes */
@@ -636,9 +636,9 @@ H5D_fill_release(H5D_fill_buf_info_t *fb_info)
             fb_info->fill_free_func(fb_info->fill_buf, fb_info->fill_free_info);
         else {
             if(fb_info->fill->buf)
-                H5FL_BLK_FREE(non_zero_fill, fb_info->fill_buf);
+                (void)H5FL_BLK_FREE(non_zero_fill, fb_info->fill_buf);
             else
-                H5FL_BLK_FREE(zero_fill, fb_info->fill_buf);
+                (void)H5FL_BLK_FREE(zero_fill, fb_info->fill_buf);
         } /* end else */
         fb_info->fill_buf = NULL;
     } /* end if */
@@ -673,11 +673,11 @@ H5D_fill_term(H5D_fill_buf_info_t *fb_info)
     /* Free other resources for vlen fill values */
     if(fb_info->has_vlen_fill_type) {
         if(fb_info->mem_tid > 0)
-            H5I_dec_ref(fb_info->mem_tid);
+            H5I_dec_ref(fb_info->mem_tid, FALSE);
         else if(fb_info->mem_type)
             H5T_close(fb_info->mem_type);
         if(fb_info->bkg_buf)
-            H5FL_BLK_FREE(type_conv, fb_info->bkg_buf);
+            (void)H5FL_BLK_FREE(type_conv, fb_info->bkg_buf);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

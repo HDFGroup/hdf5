@@ -19,10 +19,10 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\..\..\src"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -73,8 +73,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile=".\Release/h5tinit.pdb"
 				SubSystem="1"
@@ -104,15 +105,15 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5tinit.c"
-				CommandLine="$(TargetPath) &gt;$(TargetDir)H5tinit.c"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5tinit.c&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5tinit.c&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Release|x64"
-			OutputDirectory="..\..\..\..\src"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -164,8 +165,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				ProgramDatabaseFile=".\Release/h5tinit.pdb"
 				SubSystem="1"
@@ -195,15 +197,15 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5tinit.c"
-				CommandLine="$(TargetPath) &gt;$(TargetDir)H5tinit.c"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5tinit.c&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5tinit.c&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\..\..\src"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -238,7 +240,7 @@
 				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="4"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -253,9 +255,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.lib"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/h5tinit.pdb"
@@ -286,15 +288,15 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5tinit.c"
-				CommandLine="$(TargetPath) &gt;$(TargetDir)H5tinit.c"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5tinit.c&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5tinit.c&quot;"
 			/>
 		</Configuration>
 		<Configuration
 			Name="Debug|x64"
-			OutputDirectory="..\..\..\..\src"
+			OutputDirectory="..\..\..\..\src\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="1"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\..\..\proj\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -345,9 +347,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib WS2_32.lib"
+				AdditionalDependencies="WS2_32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
-				LinkIncremental="1"
+				LinkIncremental="0"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/h5tinit.pdb"
@@ -378,7 +380,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Generating H5tinit.c"
-				CommandLine="$(TargetPath) &gt;$(TargetDir)H5tinit.c"
+				CommandLine="if not exist &quot;$(TargetDir)..\..\H5tinit.c&quot; &quot;$(TargetPath)&quot; &gt; &quot;$(TargetDir)..\..\H5tinit.c&quot;"
 			/>
 		</Configuration>
 	</Configurations>

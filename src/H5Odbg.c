@@ -127,7 +127,7 @@ H5O_assert(const H5O_t *oh)
         /* Version specific checks */
         if(oh->version > H5O_VERSION_1) {
             /* Make certain that the magic number is correct for each chunk */
-            HDassert(!HDmemcmp(oh->chunk[u].image, (u == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC), H5O_SIZEOF_MAGIC));
+            HDassert(!HDmemcmp(oh->chunk[u].image, (u == 0 ? H5O_HDR_MAGIC : H5O_CHK_MAGIC), H5_SIZEOF_MAGIC));
 
             /* Check for valid gap size */
             HDassert(oh->chunk[u].gap < (size_t)H5O_SIZEOF_MSGHDR_OH(oh));
@@ -402,7 +402,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
     } /* end for */
 
     /* debug each message */
-    if(NULL == (sequence = H5MM_calloc(NELMTS(H5O_msg_class_g) * sizeof(unsigned))))
+    if(NULL == (sequence = (unsigned *)H5MM_calloc(NELMTS(H5O_msg_class_g) * sizeof(unsigned))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     for(i = 0, mesg_total = 0; i < oh->nmesgs; i++) {
         const H5O_msg_class_t  *debug_type;              /* Type of message to use for callbacks */
@@ -488,7 +488,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	/* decode the message */
 	debug_type = oh->mesg[i].type;
 	if(NULL == oh->mesg[i].native && debug_type->decode)
-            H5O_LOAD_NATIVE(f, dxpl_id, oh, &oh->mesg[i], FAIL)
+            H5O_LOAD_NATIVE(f, dxpl_id, H5O_DECODEIO_NOCHANGE, oh, &oh->mesg[i], FAIL)
 
 	/* print the message */
 	HDfprintf(stream, "%*s%-*s\n", indent + 3, "", MAX(0, fwidth - 3),
@@ -498,7 +498,7 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 	else
 	    HDfprintf(stream, "%*s<No info for this message>\n", indent + 6, "");
     } /* end for */
-    sequence = H5MM_xfree(sequence);
+    sequence = (unsigned *)H5MM_xfree(sequence);
 
     if(mesg_total != chunk_total)
 	HDfprintf(stream, "*** TOTAL SIZE DOES NOT MATCH ALLOCATED SIZE!\n");
@@ -536,7 +536,7 @@ H5O_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent, int f
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    if(NULL == (oh = H5AC_protect(f, dxpl_id, H5AC_OHDR, addr, NULL, NULL, H5AC_READ)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(f, dxpl_id, H5AC_OHDR, addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* debug */

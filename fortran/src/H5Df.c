@@ -31,9 +31,12 @@
  * Programmer:  Elena Pourmal
  *              Wednesday, August 4, 1999
  * Modifications:
+ *               - Added optional parameters introduced in version 1.8
+ *                 February, 2008
  *---------------------------------------------------------------------------*/
 int_f
-nh5dcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f *space_id, hid_t_f *crt_prp,  hid_t_f *dset_id)
+nh5dcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_t_f *space_id,
+	      hid_t_f *lcpl_id, hid_t_f *dcpl_id, hid_t_f *dapl_id, hid_t_f *dset_id)
 {
      char *c_name = NULL;
      hid_t c_dset_id;
@@ -48,7 +51,8 @@ nh5dcreate_c (hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *type_id, hid_
      /*
       * Call H5Dcreate2 function.
       */
-     if((c_dset_id = H5Dcreate2((hid_t)*loc_id, c_name, (hid_t)*type_id, (hid_t)*space_id, H5P_DEFAULT, (hid_t)*crt_prp, H5P_DEFAULT)) < 0)
+     if((c_dset_id = H5Dcreate2((hid_t)*loc_id, c_name, (hid_t)*type_id, (hid_t)*space_id,
+				(hid_t)*lcpl_id, (hid_t)*dcpl_id, (hid_t)*dapl_id)) < 0)
          goto DONE;
      *dset_id = (hid_t_f)c_dset_id;
 
@@ -66,14 +70,15 @@ DONE:
  * Inputs:      loc_id - file or group identifier
  *              name - name of the dataset
  *              namelen - name length
+ *              dapl_id	- Dataset access property list
  * Outputs:     dset_id - dataset identifier
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Wednesday, August 4, 1999
- * Modifications:
+ * Modifications: Added 1.8 parameter: dapl_id
  *---------------------------------------------------------------------------*/
 int_f
-nh5dopen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *dset_id)
+nh5dopen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *dapl_id, hid_t_f *dset_id)
 {
      char *c_name = NULL;
      hid_t c_dset_id;
@@ -88,7 +93,7 @@ nh5dopen_c(hid_t_f *loc_id, _fcd name, int_f *namelen, hid_t_f *dset_id)
      /*
       * Call H5Dopen2 function.
       */
-     if((c_dset_id = H5Dopen2((hid_t)*loc_id, c_name, H5P_DEFAULT)) < 0)
+     if((c_dset_id = H5Dopen2((hid_t)*loc_id, c_name, (hid_t)*dapl_id)) < 0)
          goto DONE;
 
      *dset_id = (hid_t_f)c_dset_id;
@@ -114,7 +119,7 @@ DONE:
  *              Tuesday, May 14, 2002
  * Modifications: This function is added to accomodate oveloaded h5dwrite_f
  *                with the dims argument being of INTEGER(HSIZE_T) type
- 
+
  *---------------------------------------------------------------------------*/
 int_f
 nh5dwritec_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, _fcd buf, hsize_t_f *dims)
@@ -252,7 +257,7 @@ nh5dwritec_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, h
  *                complains about wrong parameter types in h5dwrite_c function
  *                called by Fortran rouitnes
  *                                           October 10, 2006 EIP
- * 
+ *
  *---------------------------------------------------------------------------*/
 int_f
 nh5dwrite_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f UNUSED *dims)
@@ -783,7 +788,7 @@ nh5dreadc_7_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hi
  *                complains about wrong parameter types in h5dwrite_c function
  *                called by Fortran rouitnes
  *                                           October 10, 2006 EIP
- * 
+ *
  *---------------------------------------------------------------------------*/
 int_f
 nh5dread_c (hid_t_f *dset_id, hid_t_f *mem_type_id, hid_t_f *mem_space_id, hid_t_f *file_space_id, hid_t_f *xfer_prp, void *buf, hsize_t_f UNUSED *dims)
@@ -1257,18 +1262,21 @@ nh5dget_create_plist_c ( hid_t_f *dset_id , hid_t_f *plist_id)
 
 
 /*----------------------------------------------------------------------------
- * Name:        h5dextend_c
+ * Name:        h5dset_extent_c
  * Purpose:     Call H5Dset_extent to extend dataset with unlimited dimensions
  * Inputs:      dset_id - identifier of the dataset
  * Outputs:     dims - array with the dimension sizes
  * Returns:     0 on success, -1 on failure
  * Programmer:  Elena Pourmal
  *              Thursday, August 19, 1999
- * Modifications:
+ *
+ * Modifications: Changed name from the now obsolete h5dextend
+ *                to h5dset_extent in order to match new fortran interface.
+ *                -MSB- March 14, 2008
  *---------------------------------------------------------------------------*/
 
 int_f
-nh5dextend_c ( hid_t_f *dset_id , hsize_t_f *dims)
+nh5dset_extent_c ( hid_t_f *dset_id , hsize_t_f *dims)
 {
   hid_t c_space_id;
   hsize_t c_dims[H5S_MAX_RANK];
@@ -1279,7 +1287,10 @@ nh5dextend_c ( hid_t_f *dset_id , hsize_t_f *dims)
 
   if((c_space_id = H5Dget_space((hid_t)*dset_id)) < 0) return ret_value;
 
-  if((rank = H5Sget_simple_extent_ndims(c_space_id)) < 0) return ret_value;
+  rank = H5Sget_simple_extent_ndims(c_space_id);
+  H5Sclose(c_space_id);
+  if(rank < 0 ) return ret_value;
+
 
   /*
    * Reverse dimensions due to C-FORTRAN storage order.
@@ -1946,4 +1957,39 @@ nh5dget_space_status_c ( hid_t_f *dset_id, int_f *flag)
      ret_value = 0;
      return ret_value;
 }
+/*----------------------------------------------------------------------------
+ * Name:        h5dcreate_anon_c
+ * Purpose:     Call H5Dcreate_anon
+ * Inputs:
+ *		loc_id	   - Identifier of the file or group within which to create the dataset.
+ *		type_id	   - Identifier of the datatype to use when creating the dataset.
+ *		space_id   - Identifier of the dataspace to use when creating the dataset.
+ *              dcpl_id    - Dataset creation property list identifier.
+ *              dapl_id    - Dataset access property list identifier.
+ * Outputs:
+ *              dset_id - dataset identifier
+ *
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M.S. Breitenfeld
+ *              February, 2008
+ *---------------------------------------------------------------------------*/
+int_f
+nh5dcreate_anon_c (hid_t_f *loc_id, hid_t_f *type_id, hid_t_f *space_id,
+		   hid_t_f *dcpl_id, hid_t_f *dapl_id, hid_t_f *dset_id)
+{
+  int ret_value = -1;
+
+  /*
+   * Call H5Dcreate2 function.
+   */
+  if((*dset_id = (hid_t_f)H5Dcreate_anon((hid_t)*loc_id, (hid_t)*type_id, (hid_t)*space_id,
+					 (hid_t)*dcpl_id, (hid_t)*dapl_id)) < 0)
+    goto DONE;
+
+  ret_value = 0;
+
+ DONE:
+  return ret_value;
+}
+
 

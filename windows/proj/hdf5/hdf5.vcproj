@@ -22,7 +22,7 @@
 			OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			>
@@ -54,7 +54,7 @@
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="1"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -92,7 +92,7 @@
 			OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			>
@@ -125,7 +125,7 @@
 				BrowseInformation="1"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="1"
+				DebugInformationFormat="3"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -163,7 +163,7 @@
 			OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			>
@@ -234,7 +234,7 @@
 			OutputDirectory="..\..\..\proj\$(ProjectName)\$(ConfigurationName)"
 			IntermediateDirectory="$(OutDir)"
 			ConfigurationType="4"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\property_sheets\remove-posix-warnings.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			>
@@ -1173,6 +1173,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Dchunk.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Dcompact.c"
 				>
 				<FileConfiguration
@@ -1411,7 +1415,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\src\H5Distore.c"
+				RelativePath="..\..\..\src\H5Dbtree.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -1543,6 +1547,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Dscatgath.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Dselect.c"
@@ -1683,6 +1691,50 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5EA.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAcache.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAdbg.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAdblkpage.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAdblock.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAhdr.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAiblock.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAint.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAsblock.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAstat.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAtest.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Edeprec.c"
 				>
 				<FileConfiguration
@@ -1811,6 +1863,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Faccum.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5FD.c"
@@ -1995,6 +2051,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5FDint.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5FDlog.c"
@@ -2265,53 +2325,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\src\H5FDstdio.c"
+				RelativePath="..\..\..\src\H5FDspace.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						ObjectFile="..\..\..\proj\hdf5\Debug/"
-						ProgramDataBaseFileName="..\..\..\proj\hdf5\Debug/"
-						BrowseInformation="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="0"
-						PreprocessorDefinitions=""
-						ObjectFile="..\..\..\proj\hdf5\Debug/"
-						ProgramDataBaseFileName="..\..\..\proj\hdf5\Debug/"
-						BrowseInformation="1"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						Optimization="2"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\..\src\H5FDstream.c"
+				RelativePath="..\..\..\src\H5FDstdio.c"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -2441,6 +2459,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Fio.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5FL.c"
 				>
 				<FileConfiguration
@@ -2529,6 +2551,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5Fmpi.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5FO.c"
 				>
 				<FileConfiguration
@@ -2573,6 +2599,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Fquery.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5FS.c"
@@ -2785,6 +2815,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5FSstat.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5FStest.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Fsuper.c"
 				>
 				<FileConfiguration
@@ -2955,6 +2993,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Gcache.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Gcompact.c"
@@ -4275,6 +4317,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5HGcache.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5HGdbg.c"
 				>
 				<FileConfiguration
@@ -4365,6 +4411,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5HLcache.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5HLdbg.c"
@@ -4633,6 +4683,18 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5MFaggr.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5MFdbg.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5MFsection.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5MM.c"
@@ -6213,6 +6275,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5Pdapl.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Pdcpl.c"
@@ -9129,6 +9195,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\H5EApkg.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5EAprivate.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\H5Epkg.h"
 				>
 			</File>
@@ -9138,6 +9212,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\H5Epublic.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\H5FDpkg.h"
 				>
 			</File>
 			<File

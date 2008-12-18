@@ -43,9 +43,6 @@
 #  undef H5G_DEBUG
 #endif
 
-#define H5G_NODE_MAGIC  "SNOD"          /*symbol table node magic number     */
-#define H5G_NODE_SIZEOF_MAGIC 4         /*sizeof symbol node magic number    */
-
 /*
  * The disk size for a symbol table entry...
  */
@@ -101,6 +98,12 @@
                                                     H5G_CRT_GINFO_EST_NAME_LEN \
                                                 }
 
+/* If the module using this macro is allowed access to the private variables, access them directly */
+#ifdef H5G_PACKAGE
+#define H5G_MOUNTED(G)              ((G)->shared->mounted)
+#else /* H5G_PACKAGE */
+#define H5G_MOUNTED(G)              (H5G_mounted(G))
+#endif /* H5G_PACKAGE */
 
 /* Type of operation being performed for call to H5G_name_replace() */
 typedef enum {
@@ -158,10 +161,14 @@ H5_DLL herr_t H5G_close(H5G_t *grp);
 H5_DLL herr_t H5G_free_grp_name(H5G_t *grp);
 H5_DLL herr_t H5G_get_shared_count(H5G_t *grp);
 H5_DLL herr_t H5G_mount(H5G_t *grp);
+H5_DLL hbool_t H5G_mounted(H5G_t *grp);
 H5_DLL herr_t H5G_unmount(H5G_t *grp);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 H5_DLL H5G_obj_t H5G_map_obj_type(H5O_type_t obj_type);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
+H5_DLL herr_t H5G_visit(hid_t loc_id, const char *group_name,
+    H5_index_t idx_type, H5_iter_order_t order, H5L_iterate_t op, void *op_data,
+    hid_t lapl_id, hid_t dxpl_id);
 
 /*
  * These functions operate on symbol table nodes.
@@ -189,7 +196,7 @@ H5_DLL herr_t H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_dept
 H5_DLL herr_t H5G_name_free(H5G_name_t *name);
 H5_DLL ssize_t H5G_get_name(hid_t id, char *name/*out*/, size_t size,
     hid_t lapl_id, hid_t dxpl_id);
-H5_DLL ssize_t H5G_get_refobj_name(hid_t fid, hid_t lapl_id, hid_t dxpl_id,
+H5_DLL ssize_t H5G_get_name_by_addr(hid_t fid, hid_t lapl_id, hid_t dxpl_id,
     const struct H5O_loc_t *loc, char* name, size_t size);
 
 /*

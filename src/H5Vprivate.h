@@ -53,9 +53,7 @@ H5_DLL hsize_t H5V_hyper_stride(unsigned n, const hsize_t *size,
 				 const hsize_t *offset,
 				 hsize_t *stride);
 H5_DLL htri_t H5V_hyper_disjointp(unsigned n, const hsize_t *offset1,
-				   const size_t *size1,
-				   const hsize_t *offset2,
-				   const size_t *size2);
+    const uint32_t *size1, const hsize_t *offset2, const uint32_t *size2);
 H5_DLL htri_t H5V_hyper_eq(unsigned n, const hsize_t *offset1,
 			    const hsize_t *size1, const hsize_t *offset2,
 			    const hsize_t *size2);
@@ -88,7 +86,7 @@ H5_DLL hsize_t H5V_array_offset(unsigned n, const hsize_t *total_size,
 H5_DLL herr_t H5V_array_calc(hsize_t offset, unsigned n,
     const hsize_t *total_size, hsize_t *coords);
 H5_DLL herr_t H5V_chunk_index(unsigned ndims, const hsize_t *coord,
-    const size_t *chunk, const hsize_t *down_nchunks, hsize_t *chunk_idx);
+    const uint32_t *chunk, const hsize_t *down_nchunks, hsize_t *chunk_idx);
 H5_DLL ssize_t H5V_memcpyvv(void *_dst,
     size_t dst_max_nseq, size_t *dst_curr_seq, size_t dst_len_arr[], hsize_t dst_off_arr[],
     const void *_src,
@@ -304,7 +302,7 @@ H5V_vector_inc(int n, hsize_t *v1, const hsize_t *v2)
 }
 
 /* Lookup table for general log2(n) routine */
-static const char LogTable256[] =
+static const unsigned char LogTable256[] =
 {
     0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -358,15 +356,15 @@ H5V_log2_gen(uint64_t n)
 #endif /* H5_BAD_LOG2_CODE_GENERATED */
         if((ttt = (unsigned)(n >> 32)))
             if((tt = (unsigned)(n >> 48)))
-                r = (t = (unsigned)(n >> 56)) ? 56 + LogTable256[t] : 48 + LogTable256[tt & 0xFF];
+                r = (t = (unsigned)(n >> 56)) ? 56 + (unsigned)LogTable256[t] : 48 + (unsigned)LogTable256[tt & 0xFF];
             else
-                r = (t = (unsigned)(n >> 40)) ? 40 + LogTable256[t] : 32 + LogTable256[ttt & 0xFF];
+                r = (t = (unsigned)(n >> 40)) ? 40 + (unsigned)LogTable256[t] : 32 + (unsigned)LogTable256[ttt & 0xFF];
         else
             if((tt = (unsigned)(n >> 16)))
-                r = (t = (unsigned)(n >> 24)) ? 24 + LogTable256[t] : 16 + LogTable256[tt & 0xFF];
+                r = (t = (unsigned)(n >> 24)) ? 24 + (unsigned)LogTable256[t] : 16 + (unsigned)LogTable256[tt & 0xFF];
             else
                 /* Added 'uint8_t' cast to pacify PGCC compiler */
-                r = (t = (unsigned)(n >> 8)) ? 8 + LogTable256[t] : LogTable256[(uint8_t)n];
+                r = (t = (unsigned)(n >> 8)) ? 8 + (unsigned)LogTable256[t] : (unsigned)LogTable256[(uint8_t)n];
 #ifdef H5_BAD_LOG2_CODE_GENERATED
     } /* end else */
 #endif /* H5_BAD_LOG2_CODE_GENERATED  */
@@ -409,6 +407,86 @@ H5V_log2_of2(uint32_t n)
 #endif /* NDEBUG */
     return(MultiplyDeBruijnBitPosition[(n * (uint32_t)0x077CB531UL) >> 27]);
 } /* H5V_log2_of2() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5V_limit_enc_size
+ *
+ * Purpose:     Determine the # of bytes needed to encode values within a
+ *              range from 0 to a given limit
+ *
+ * Return:      Number of bytes needed
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, March 13, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5_inline unsigned UNUSED
+H5V_limit_enc_size(uint64_t limit)
+{
+    return (H5V_log2_gen(limit) / 8) + 1;
+} /* end H5V_limit_enc_size() */
+
+static const unsigned char H5V_bit_set_g[8] = {0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01};
+static const unsigned char H5V_bit_clear_g[8] = {0x7F, 0xBF, 0xDF, 0xEF, 0xF7, 0xFB, 0xFD, 0xFE};
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5V_bit_get
+ *
+ * Purpose:     Determine the value of the n'th bit in a buffer.
+ *
+ * Note:	No range checking on <offset> is performed!
+ *
+ * Note #2:	Bits are sequentially stored in the buffer, starting with bit
+ *              offset 0 in the first byte's high-bit position, proceeding down
+ *              to bit offset 7 in the first byte's low-bit position, then to
+ *              bit offset 8 in the second byte's high-bit position, etc.
+ *
+ * Return:      TRUE/FALSE
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, November 25, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5_inline hbool_t UNUSED
+H5V_bit_get(const unsigned char *buf, size_t offset)
+{
+    /* Test the appropriate bit in the buffer */
+    return (hbool_t)((buf[offset / 8] & (H5V_bit_set_g[offset % 8])) ? TRUE : FALSE);
+} /* end H5V_bit_get() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5V_bit_set
+ *
+ * Purpose:     Set/reset the n'th bit in a buffer.
+ *
+ * Note:	No range checking on <offset> is performed!
+ *
+ * Note #2:	Bits are sequentially stored in the buffer, starting with bit
+ *              offset 0 in the first byte's high-bit position, proceeding down
+ *              to bit offset 7 in the first byte's low-bit position, then to
+ *              bit offset 8 in the second byte's high-bit position, etc.
+ *
+ * Return:      None
+ *
+ * Programmer:  Quincey Koziol
+ *              Tuesday, November 25, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5_inline void UNUSED
+H5V_bit_set(unsigned char *buf, size_t offset, hbool_t val)
+{
+    /* Set/reset the appropriate bit in the buffer */
+    if(val)
+        buf[offset / 8] |= H5V_bit_set_g[offset % 8];
+    else
+        buf[offset / 8] &= H5V_bit_clear_g[offset % 8];
+} /* end H5V_bit_set() */
 
 #endif /* H5Vprivate_H */
 

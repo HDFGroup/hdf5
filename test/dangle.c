@@ -111,13 +111,13 @@ test_dangle_dataset(H5F_close_degree_t degree)
         if(H5Fclose(fid) < 0)
             TEST_ERROR;
 
+    if(h5_get_file_size(filename, fapl) < 0)
+        TEST_ERROR;
+
     if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
     if(H5close() < 0)
-        TEST_ERROR;
-
-    if(h5_get_file_size(filename) < 0)
         TEST_ERROR;
 
     /* Clean up temporary file */
@@ -202,13 +202,13 @@ test_dangle_group(H5F_close_degree_t degree)
         if(H5Fclose(fid) < 0)
             TEST_ERROR;
 
+    if(h5_get_file_size(filename, fapl) < 0)
+        TEST_ERROR;
+
     if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
     if(H5close() < 0)
-        TEST_ERROR;
-
-    if(h5_get_file_size(filename) < 0)
         TEST_ERROR;
 
     /* Clean up temporary file */
@@ -298,13 +298,13 @@ test_dangle_datatype1(H5F_close_degree_t degree)
         if(H5Fclose(fid) < 0)
             TEST_ERROR;
 
+    if(h5_get_file_size(filename, fapl) < 0)
+        TEST_ERROR;
+
     if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
     if(H5close() < 0)
-        TEST_ERROR;
-
-    if(h5_get_file_size(filename) < 0)
         TEST_ERROR;
 
     /* Clean up temporary file */
@@ -385,13 +385,13 @@ test_dangle_datatype2(H5F_close_degree_t degree)
         if(H5Fclose(fid) < 0)
             TEST_ERROR;
 
+    if(h5_get_file_size(filename, fapl) < 0)
+        TEST_ERROR;
+
     if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
     if(H5close() < 0)
-        TEST_ERROR;
-
-    if(h5_get_file_size(filename) < 0)
         TEST_ERROR;
 
     /* Clean up temporary file */
@@ -492,13 +492,13 @@ test_dangle_attribute(H5F_close_degree_t degree)
         if(H5Fclose(fid) < 0)
             TEST_ERROR;
 
+    if(h5_get_file_size(filename, fapl) < 0)
+        TEST_ERROR;
+
     if(H5Pclose(fapl) < 0)
         TEST_ERROR;
 
     if(H5close() < 0)
-        TEST_ERROR;
-
-    if(h5_get_file_size(filename) < 0)
         TEST_ERROR;
 
     /* Clean up temporary file */

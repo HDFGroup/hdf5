@@ -210,12 +210,23 @@ h5_cleanup(const char *base_name[], hid_t fapl)
 void
 h5_reset(void)
 {
-    char	filename[1024];
-
     HDfflush(stdout);
     HDfflush(stderr);
     H5close();
     H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
+
+/*
+ * I commented this chunk of code out because it's not clear what diagnostics
+ *      were being output and under what circumstances, and creating this file
+ *      is throwing off debugging some of the tests.  I can't see any _direct_
+ *      harm in keeping this section of code, but I can't see any _direct_
+ *      benefit right now either.  If we figure out under which circumstances
+ *      diagnostics are being output, we should enable this behavior based on
+ *      appropriate configure flags/macros.  QAK - 2007/12/20
+ */
+#ifdef OLD_WAY
+{
+    char	filename[1024];
 
     /*
      * Cause the library to emit some diagnostics early so they don't
@@ -230,6 +241,8 @@ h5_reset(void)
 	H5Fclose(file);
 	HDunlink(filename);
     } H5E_END_TRY;
+}
+#endif /* OLD_WAY */
 }
 
 
@@ -528,7 +541,7 @@ h5_fileaccess(void)
 	if (H5Pset_fapl_stdio(fapl)<0) return -1;
     } else if (!HDstrcmp(name, "core")) {
 	/* In-core temporary file with 1MB increment */
-	if (H5Pset_fapl_core(fapl, (size_t)1024*1024, TRUE)<0) return -1;
+	if (H5Pset_fapl_core(fapl, (size_t)1, TRUE)<0) return -1;
     } else if (!HDstrcmp(name, "split")) {
 	/* Split meta data and raw data each using default driver */
 	if (H5Pset_fapl_split(fapl,
@@ -549,13 +562,13 @@ h5_fileaccess(void)
 	HDmemset(memb_name, 0, sizeof memb_name);
 	HDmemset(memb_addr, 0, sizeof memb_addr);
 
-	assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
-	for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
+	HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
+	for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
 	    memb_fapl[mt] = H5P_DEFAULT;
 	    sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
 	    memb_name[mt] = sv[mt];
-	    memb_addr[mt] = MAX(mt-1,0)*(HADDR_MAX/10);
-	}
+	    memb_addr[mt] = (haddr_t)MAX(mt - 1, 0) * (HADDR_MAX / 10);
+	} /* end for */
 
 	if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name,
 			      memb_addr, FALSE)<0) {
@@ -584,9 +597,10 @@ h5_fileaccess(void)
 	 * and copy buffer size to the default values. */
 	if (H5Pset_fapl_direct(fapl, 1024, 4096, 8*4096)<0) return -1;
 #endif
-    } else if (!HDstrcmp(name, "latest")) {
+    } else if(!HDstrcmp(name, "latest")) {
 	/* use the latest format */
-	if (H5Pset_latest_format(fapl, TRUE)<0) return -1;
+	if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+            return -1;
     } else {
 	/* Unknown driver */
 	return -1;
@@ -653,12 +667,7 @@ h5_show_hostname(void)
 	    printf("thread 0.");
     }
 #elif defined(H5_HAVE_THREADSAFE)
-#ifdef _WIN32
-    printf("some thread: no way to know the thread number from pthread on windows.");
-#else
-    printf("thread %d.", (int)pthread_self());
-#endif
-
+    printf("thread %lu.", HDpthread_self_ulong());
 #else
     printf("thread 0.");
 #endif
@@ -838,20 +847,93 @@ h5_dump_info_object(MPI_Info info)
  * Programmer:	Quincey Koziol
  *              Saturday, March 22, 2003
  *
- * Modifications:
- * 	Albert Cheng, Oct 11, 2006
- *	Changed Failure return value to -1.
- *
  *-------------------------------------------------------------------------
  */
 h5_stat_size_t
-h5_get_file_size(const char *filename)
+h5_get_file_size(const char *filename, hid_t fapl)
 {
-    h5_stat_t	sb;
+    char temp[2048];    /* Temporary buffer for file names */
+    h5_stat_t	sb;     /* Structure for querying file info */
+	int j = 0;
 
-    /* Get the file's statistics */
-    if (HDstat(filename, &sb)==0)
-        return((h5_stat_size_t)sb.st_size);
+    if(fapl == H5P_DEFAULT) {
+        /* Get the file's statistics */
+        if(0 == HDstat(filename, &sb))
+            return((h5_stat_size_t)sb.st_size);
+    } /* end if */
+    else {
+        hid_t	driver;         /* VFD used for file */
+
+        /* Get the driver used when creating the file */
+        if((driver = H5Pget_driver(fapl)) < 0)
+            return(-1);
+
+        /* Check for simple cases */
+        if(driver == H5FD_SEC2 || driver == H5FD_STDIO || driver == H5FD_CORE ||
+#ifdef H5_HAVE_PARALLEL
+                driver == H5FD_MPIO || driver == H5FD_MPIPOSIX ||
+#endif /* H5_HAVE_PARALLEL */
+#ifdef H5_HAVE_WINDOWS
+                driver == H5FD_WINDOWS || 
+#endif /* H5_HAVE_WINDOWS */
+#ifdef H5_HAVE_DIRECT
+                driver == H5FD_DIRECT || 
+#endif /* H5_HAVE_DIRECT */
+                driver == H5FD_LOG) {
+            /* Get the file's statistics */
+            if(0 == HDstat(filename, &sb))
+                return((h5_stat_size_t)sb.st_size);
+        } /* end if */
+        else if(driver == H5FD_MULTI) {
+            H5FD_mem_t mt;
+            h5_stat_size_t tot_size = 0;
+
+            HDassert(HDstrlen(multi_letters) == H5FD_MEM_NTYPES);
+            for(mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t, mt)) {
+                /* Create the filename to query */
+                HDsnprintf(temp, sizeof temp, "%s-%c.h5", filename, multi_letters[mt]);
+
+                /* Check for existence of file */
+                if(0 == HDaccess(temp, F_OK)) {
+                    /* Get the file's statistics */
+                    if(0 != HDstat(temp, &sb))
+                        return(-1);
+
+                    /* Add to total size */
+                    tot_size += (h5_stat_size_t)sb.st_size;
+                } /* end if */
+            } /* end for */
+
+            /* Return total size */
+            return(tot_size);
+        } /* end if */
+        else if(driver == H5FD_FAMILY) {
+            h5_stat_size_t tot_size = 0;
+
+            /* Try all filenames possible, until we find one that's missing */
+            for(j = 0; /*void*/; j++) {
+                /* Create the filename to query */
+                HDsnprintf(temp, sizeof temp, filename, j);
+
+                /* Check for existence of file */
+                if(HDaccess(temp, F_OK) < 0)
+                    break;
+
+                /* Get the file's statistics */
+                if(0 != HDstat(temp, &sb))
+                    return(-1);
+
+                /* Add to total size */
+                tot_size += (h5_stat_size_t)sb.st_size;
+            } /* end for */
+
+            /* Return total size */
+            return(tot_size);
+        } /* end if */
+        else {
+            HDassert(0 && "Unknown VFD!");
+        } /* end else */
+    } /* end else */
 
     return(-1);
 } /* end get_file_size() */

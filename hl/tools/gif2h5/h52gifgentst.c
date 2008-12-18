@@ -45,7 +45,7 @@
  *-------------------------------------------------------------------------
  */
 
-int main(void) 
+int main(void)
 {
     hid_t         fid;
     int           i, j, n, space;
@@ -55,7 +55,7 @@ int main(void)
     hsize_t       width  = WIDTH;
     hsize_t       height = HEIGHT;
 
-    
+
     /* create a file  */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT))<0)
         return 1;
@@ -70,7 +70,7 @@ int main(void)
             n++;
             j=0;
         }
-        
+
     }
 
     /* make the image */
@@ -78,7 +78,7 @@ int main(void)
         return 1;
 
    /*-------------------------------------------------------------------------
-    * define a palette, blue to red tones 
+    * define a palette, blue to red tones
     *-------------------------------------------------------------------------
     */
     for ( i=0, n=0; i<PAL_ENTRIES*3; i+=3, n++)
@@ -87,18 +87,18 @@ int main(void)
         pal[i+1]=0;      /* green */
         pal[i+2]=255-n;  /* blue */
     }
-    
+
     /* make a palette */
     if (H5IMmake_palette( fid, PAL_NAME, pal_dims, pal )<0)
         return 1;
-    
+
     /* attach the palette to the image */
     if (H5IMlink_palette( fid, IMAGE1_NAME, PAL_NAME )<0)
         return 1;
-    
+
     if(H5Fclose(fid)<0)
         return 1;
-    
+
     return 0;
 }
 

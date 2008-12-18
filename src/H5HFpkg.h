@@ -35,27 +35,19 @@
 #include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5B2private.h"	/* v2 B-trees				*/
 #include "H5FLprivate.h"	/* Free Lists                           */
-#include "H5FSprivate.h"	/* File free space                      */
+#include "H5FSprivate.h"	/* Free space manager			*/
 #include "H5SLprivate.h"	/* Skip lists				*/
 
 /**************************/
 /* Package Private Macros */
 /**************************/
 
-/* Size of signature information (on disk) */
-#define H5HF_SIZEOF_MAGIC               4
-
-/* Fractal heap signatures */
-#define H5HF_HDR_MAGIC                  "FRHP"          /* Header */
-#define H5HF_IBLOCK_MAGIC               "FHIB"          /* Indirect block */
-#define H5HF_DBLOCK_MAGIC               "FHDB"          /* Direct block */
-
 /* Size of checksum information (on disk) */
 #define H5HF_SIZEOF_CHKSUM      4
 
 /* "Standard" size of prefix information for fractal heap metadata */
 #define H5HF_METADATA_PREFIX_SIZE(c) (                                        \
-    H5HF_SIZEOF_MAGIC   /* Signature */                                       \
+    H5_SIZEOF_MAGIC   /* Signature */                                         \
     + 1 /* Version */                                                         \
     + ((c) ? H5HF_SIZEOF_CHKSUM : 0) /* Metadata checksum */                  \
     )
@@ -411,7 +403,7 @@ typedef struct H5HF_direct_t {
     H5HF_indirect_t *parent;	/* Shared parent indirect block info          */
     unsigned    par_entry;      /* Entry in parent's table                    */
     size_t      size;           /* Size of direct block                       */
-    unsigned    blk_off_size;   /* Size of offsets in the block               */
+    hsize_t     file_size;      /* Size of direct block in file (only valid when block's space is being freed) */
     uint8_t     *blk;           /* Pointer to buffer containing block data    */
 
     /* Stored values */
@@ -601,7 +593,7 @@ H5_DLL herr_t H5HF_man_iblock_delete(H5HF_hdr_t *hdr, hid_t dxpl_id,
     haddr_t iblock_addr, unsigned iblock_nrows, H5HF_indirect_t *par_iblock,
     unsigned par_entry);
 H5_DLL herr_t H5HF_man_iblock_size(H5F_t *f, hid_t dxpl_id, H5HF_hdr_t *hdr,
-    haddr_t iblock_addr, unsigned nrows, hsize_t *heap_size/*out*/);
+    haddr_t iblock_addr, unsigned nrows, H5HF_indirect_t *par_iblock, unsigned par_entry, hsize_t *heap_size/*out*/);
 
 /* Direct block routines */
 H5_DLL herr_t H5HF_man_dblock_new(H5HF_hdr_t *fh, hid_t dxpl_id, size_t request,
@@ -692,7 +684,7 @@ H5_DLL herr_t H5HF_man_iter_offset(H5HF_hdr_t *hdr, H5HF_block_iter_t *biter,
 H5_DLL hbool_t H5HF_man_iter_ready(H5HF_block_iter_t *biter);
 
 /* Free space manipulation routines */
-H5_DLL herr_t H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id);
+H5_DLL herr_t H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id, hbool_t may_create);
 H5_DLL herr_t H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id,
     H5HF_free_section_t *node, unsigned flags);
 H5_DLL htri_t H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request,

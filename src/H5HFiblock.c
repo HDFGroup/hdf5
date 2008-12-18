@@ -125,7 +125,7 @@ H5HF_iblock_pin(H5HF_indirect_t *iblock)
 
         /* Sanity check */
         HDassert(par_iblock->child_iblocks);
-        HDassert(iblock->par_entry >= (iblock->hdr->man_dtable.max_direct_rows 
+        HDassert(iblock->par_entry >= (iblock->hdr->man_dtable.max_direct_rows
                 * iblock->hdr->man_dtable.cparam.width));
 
         /* Compute index in parent's child iblock pointer array */
@@ -179,7 +179,7 @@ H5HF_iblock_unpin(H5HF_indirect_t *iblock)
 
         /* Sanity check */
         HDassert(par_iblock->child_iblocks);
-        HDassert(iblock->par_entry >= (iblock->hdr->man_dtable.max_direct_rows 
+        HDassert(iblock->par_entry >= (iblock->hdr->man_dtable.max_direct_rows
                 * iblock->hdr->man_dtable.cparam.width));
 
         /* Compute index in parent's child iblock pointer array */
@@ -310,12 +310,8 @@ HDfprintf(stderr, "%s: Removing indirect block from cache, iblock->addr = %a\n",
                 iblock->par_entry = 0;
             } /* end if */
 
-            /* Release space for indirect block on disk */
-            if(H5MF_xfree(iblock->hdr->f, H5FD_MEM_FHEAP_IBLOCK, H5AC_dxpl_id, iblock->addr, (hsize_t)iblock->size) < 0)
-                HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block disk space")
-
             /* Evict the indirect block from the metadata cache */
-            if(H5AC_expunge_entry(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr) < 0)
+            if(H5AC_expunge_entry(iblock->hdr->f, H5AC_dxpl_id, H5AC_FHEAP_IBLOCK, iblock->addr, H5AC__FREE_FILE_SPACE_FLAG) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "unable to remove indirect block from cache")
         } /* end if */
     } /* end if */
@@ -805,7 +801,7 @@ HDfprintf(stderr, "%s: new_addr = %a\n", FUNC, new_addr);
                 HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "memory allocation failed for filtered direct entries")
         } /* end if */
         else
-            iblock->child_iblocks = H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
+            iblock->child_iblocks = (H5HF_indirect_ptr_t *)H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
     } /* end if */
 
     /* Mark indirect block as dirty */
@@ -1157,7 +1153,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
     HDassert(iblock_nrows > 0);
     HDassert(did_protect);
 
-    /* Check if we are allow to use existing pinned iblock pointer */
+    /* Check if we are allowed to use existing pinned iblock pointer */
     if(!must_protect) {
         /* Check for this block already being pinned */
         if(par_iblock) {
@@ -1165,7 +1161,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
 
             /* Sanity check */
             HDassert(par_iblock->child_iblocks);
-            HDassert(par_entry >= (hdr->man_dtable.max_direct_rows 
+            HDassert(par_entry >= (hdr->man_dtable.max_direct_rows
                     * hdr->man_dtable.cparam.width));
 
             /* Compute index in parent's child iblock pointer array */
@@ -1200,7 +1196,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
         par_info.entry = par_entry;
 
         /* Protect the indirect block */
-        if(NULL == (iblock = H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, &iblock_nrows, &par_info, rw)))
+        if(NULL == (iblock = (H5HF_indirect_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, iblock_addr, &iblock_nrows, &par_info, rw)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTPROTECT, NULL, "unable to protect fractal heap indirect block")
         *did_protect = TRUE;
     } /* end if */
@@ -1489,6 +1485,7 @@ H5HF_man_iblock_delete(H5HF_hdr_t *hdr, hid_t dxpl_id, haddr_t iblock_addr,
     H5HF_indirect_t *iblock;            /* Pointer to indirect block */
     unsigned row, col;                  /* Current row & column in indirect block */
     unsigned entry;                     /* Current entry in row */
+    unsigned cache_flags = H5AC__NO_FLAGS_SET;      /* Flags for unprotecting indirect block */
     hbool_t did_protect;                /* Whether we protected the indirect block or not */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1525,7 +1522,7 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
                 /* Are we in a direct or indirect block row */
                 if(row < hdr->man_dtable.max_direct_rows) {
                     hsize_t dblock_size;        /* Size of direct block on disk */
-                    
+
                     /* Check for I/O filters on this heap */
                     if(hdr->filter_len > 0)
                         dblock_size = iblock->filt_ents[entry].size;
@@ -1550,10 +1547,6 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
         } /* end for */
     } /* end row */
 
-    /* Release indirect block's disk space */
-    if(H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, iblock_addr, (hsize_t)iblock->size) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block")
-
 #ifndef NDEBUG
 {
     unsigned iblock_status = 0;         /* Indirect block's status in the metadata cache */
@@ -1567,12 +1560,14 @@ HDfprintf(stderr, "%s: iblock_addr = %a, iblock_nrows = %u\n", FUNC, iblock_addr
 }
 #endif /* NDEBUG */
 
-    /* Finished deleting indirect block in metadata cache */
-    if(H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG, did_protect) < 0)
-        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
-    iblock = NULL;
+    /* Indicate that the indirect block should be deleted & file space freed */
+    cache_flags |= H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 
 done:
+    /* Unprotect the indirect block, with appropriate flags */
+    if(iblock && H5HF_man_iblock_unprotect(iblock, dxpl_id, cache_flags, did_protect) < 0)
+        HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_iblock_delete() */
 
@@ -1591,7 +1586,7 @@ done:
  */
 herr_t
 H5HF_man_iblock_size(H5F_t *f, hid_t dxpl_id, H5HF_hdr_t *hdr, haddr_t iblock_addr,
-    unsigned nrows, hsize_t *heap_size)
+    unsigned nrows, H5HF_indirect_t *par_iblock, unsigned par_entry, hsize_t *heap_size)
 {
     H5HF_indirect_t     *iblock = NULL;         /* Pointer to indirect block */
     hbool_t             did_protect;            /* Whether we protected the indirect block or not */
@@ -1608,7 +1603,7 @@ H5HF_man_iblock_size(H5F_t *f, hid_t dxpl_id, H5HF_hdr_t *hdr, haddr_t iblock_ad
     HDassert(heap_size);
 
     /* Protect the indirect block */
-    if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock_addr, nrows, NULL, 0, FALSE, H5AC_READ, &did_protect)))
+    if(NULL == (iblock = H5HF_man_iblock_protect(hdr, dxpl_id, iblock_addr, nrows, par_iblock, par_entry, FALSE, H5AC_READ, &did_protect)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to load fractal heap indirect block")
 
     /* Accumulate size of this indirect block */
@@ -1624,13 +1619,14 @@ H5HF_man_iblock_size(H5F_t *f, hid_t dxpl_id, H5HF_hdr_t *hdr, haddr_t iblock_ad
         entry = hdr->man_dtable.max_direct_rows * hdr->man_dtable.cparam.width;
 	first_row_bits = H5V_log2_of2((uint32_t)hdr->man_dtable.cparam.start_block_size) +
 			    H5V_log2_of2(hdr->man_dtable.cparam.width);
-        num_indirect_rows = (H5V_log2_gen(hdr->man_dtable.row_block_size[u]) - first_row_bits) + 1;
+        num_indirect_rows =
+	    (H5V_log2_gen(hdr->man_dtable.row_block_size[hdr->man_dtable.max_direct_rows]) - first_row_bits) + 1;
         for(u = hdr->man_dtable.max_direct_rows; u < iblock->nrows; u++, num_indirect_rows++) {
             size_t      v;                      /* Local index variable */
 
 	    for(v = 0; v < hdr->man_dtable.cparam.width; v++, entry++)
 		if(H5F_addr_defined(iblock->ents[entry].addr))
-		    if(H5HF_man_iblock_size(f, dxpl_id, hdr, iblock->ents[entry].addr, num_indirect_rows, heap_size) < 0)
+		    if(H5HF_man_iblock_size(f, dxpl_id, hdr, iblock->ents[entry].addr, num_indirect_rows, iblock, entry, heap_size) < 0)
 			HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, FAIL, "unable to get fractal heap storage info for indirect block")
         } /* end for */
     } /* end if */
@@ -1639,6 +1635,7 @@ done:
     /* Release the indirect block */
     if(iblock && H5HF_man_iblock_unprotect(iblock, dxpl_id, H5AC__NO_FLAGS_SET, did_protect) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap indirect block")
+    iblock = NULL;
 
    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_man_iblock_size() */

@@ -48,7 +48,7 @@ H5_DLL hid_t   H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char 
 H5_DLL hid_t   H5Aopen(hid_t obj_id, const char *attr_name, hid_t aapl_id);
 H5_DLL hid_t   H5Aopen_by_name(hid_t loc_id, const char *obj_name,
     const char *attr_name, hid_t aapl_id, hid_t lapl_id);
-H5_DLL hid_t   H5Aopen_by_idx(hid_t loc_id, const char *obj_name, 
+H5_DLL hid_t   H5Aopen_by_idx(hid_t loc_id, const char *obj_name,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t n, hid_t aapl_id,
     hid_t lapl_id);
 H5_DLL herr_t  H5Awrite(hid_t attr_id, hid_t type_id, const void *buf);
@@ -86,7 +86,7 @@ H5_DLL htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name,
     const char *attr_name, hid_t lapl_id);
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
- * 
+ *
  * Use of these symbols is deprecated.
  */
 #ifndef H5_NO_DEPRECATED_SYMBOLS

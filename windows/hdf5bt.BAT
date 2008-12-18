@@ -16,13 +16,22 @@ rem access to either file, you may request a copy from help@hdfgroup.org.
 rem File Name: hdf5bt.bat
 rem This batch file is used to build and test HDF5 Libraries and Tools.
 rem This batch file takes the following options:
+rem .  /vs7              Build HDF5 using Visual Studio .NET 2003 
+rem .                    Note: Default is Visual Studio 2005
+rem .  /vs9              Build HDF5 using Visual Studio 2008
+rem .                    Note: Default is Visual Studio 2005
 rem .  /fort             Build and test HDF5 with Fortran libraries
 rem .  /useenv           Build HDF5 using compiler settings defined
 rem .                    in the environment, rather than the IDE.
+rem .   /ivf101             Build HDF5 Fortran using Intel Visual Fortran 10.1
+rem .                       Note: Default is Intel Visual Fortran 9.1
+rem .  /log               Log the build and test results in files defined by
+rem .                      environment variables HDF5BUILD_LOG and
+rem .                      HDF5CHECK_LOG
 rem .  /?                Help information
 rem By Xuan Bai
 rem Created: Aug. 16, 2004
-rem Last Updated: Scott Wegner, 10/1/07
+rem Last Updated: Scott Wegner, 7/2/08
 
 rem This batch file makes the following assumptions:
 rem    - The appropriate version of Visual Studio is installed and setup
@@ -33,6 +42,10 @@ rem    - szip and zlib DLLs are already placed in an accessible directory
 rem    - hdf5_ext_szip or hdf5_ext_zlib have been set accordingly
 rem    - if building with the /useenv option, szip and zlib paths have been added
 rem      to %include% and %libpath% as necessary.
+rem    - if using the /log option, hdf5build_log and hdf5_check log should be defined
+rem    - in the environment.
+rem    - The target platform architecture is specified in the environment
+rem      variable PROCESSOR_ARCHITECTURE
 
 rem By default, only C and C++ libraries are built and tested.
 
@@ -40,6 +53,7 @@ setlocal enabledelayedexpansion
 pushd %~dp0
 
 set nerrors=0
+if "%1"=="/?" goto help
 goto main
 
 rem Print a help message
@@ -49,7 +63,13 @@ rem Print a help message
     echo.
     echo Usage: %~nx0 [OPTION]
     echo.
+    echo.   /vs7              Build HDF5 using Visual Studio .NET 2003 
+    echo.                     Note: Default is Visual Studio 2005
+    echo.   /vs9              Build HDF5 using Visual Studio 2008
+    echo.                     Note: Default is Visual Studio 2005
     echo.   /fort             Build and test HDF5 with Fortran libraries
+    echo.   /ivf101           Build HDF5 Fortran using Intel Visual Fortran 10.1
+    echo.                     Note: Default is Intel Visual Fortran 9.1
     echo.   /useenv           Build HDF5 using compiler settings defined
     echo.                     in the environment, rather than the IDE.
     echo.   /?                Help information
@@ -61,14 +81,30 @@ rem Parse through the parameters sent to file, and set appropriate variables
 :parse_params
 
     for %%a in (%*) do (
-        if "%%a"=="/fort" (
+        if "%%a"=="/vs7" (
+            rem Use Visual Studio .NET to build
+            set hdf5_vnet=true
+    
+        ) else if "%%a"=="/vs9" (
+            rem Use Visual Studio 2008 to build
+            set hdf5_vs2008=true
+            
+        ) else if "%%a"=="/fort" (
             rem Enable Fortran
             set hdf5_enablefortran=true
+            
+        ) else if "%%a"=="/ivf101" (
+            rem Enable Fortran
+            set hdf5_ivf101=true
             
         ) else if "%%a"=="/useenv" (
             rem Pass /useenv flag to devenv
             set hdf5_useenv=true
             
+        ) else if "%%a"=="/log" (
+            rem Log our results to files defined in environment
+            set hdf5_logresults=true
+                        
         ) else if "%%a"=="/?" (
             rem Set errorlevel 1 and send to help
             call :help
@@ -93,13 +129,42 @@ rem Setup our environment
     set hdf5build_params=
     set hdf5check_params=enablecpp
     
+    if defined hdf5_vnet (
+        set hdf5build_params=%hdf5build_params% /vs7
+    )
+    
+    if defined hdf5_vs2008 (
+        set hdf5build_params=%hdf5build_params% /vs9
+    )
+
     if defined hdf5_enablefortran (
         set hdf5build_params=%hdf5build_params% /fort
         set hdf5check_params=enableall
     )
     
+    if defined hdf5_ivf101 (
+        set hdf5build_params=%hdf5build_params% /ivf101
+    )
+    
     if defined hdf5_useenv (
         set hdf5build_params=%hdf5build_params% /useenv
+    )
+    
+    rem Clear out our log files if they will be used
+    if defined hdf5_logresults (
+        if not defined hdf5build_log (
+            echo.Error: HDF5BUILD_LOG not defined in environment!
+            exit /b 1
+        ) else (
+            type nul > !hdf5build_log!
+        )
+        
+        if not defined hdf5check_log (
+            echo.Error: HDF5CHECK_LOG not defined in environment!
+            exit /b 1
+        ) else (
+            type nul > !hdf5check_log!
+        )
     )
     
     exit /b 0
@@ -108,15 +173,26 @@ rem Setup our environment
 rem Build HDF5 libraries and tools
 :build
 
-    call hdf5build.bat %hdf5build_params%
+    if defined hdf5_logresults (
+        echo.Calling hdf5bbuild.bat %hdf5build_params%
+        echo.Results logged in %hdf5build_log%
+        call hdf5build.bat %hdf5build_params% > !hdf5build_log! 2>&1
+    ) else (
+        call hdf5build.bat %hdf5build_params%
+    )
 
     exit /b
 
 
 rem Test our libraries and tools
 :test
-
-    call hdf5check %hdf5check_params%
+    if defined hdf5_logresults (
+        echo.Calling hdf5check.bat %hdf5check_params%
+        echo.Results logged in %hdf5check_log%
+        call hdf5check %hdf5check_params% > !hdf5check_log! 2>&1
+    ) else (
+        call hdf5check %hdf5check_params%
+    )
 
     exit /b
 
@@ -151,6 +227,10 @@ rem This is where the magic happens
     )
 
     call :setup
+    if %errorlevel% neq 0 (
+        echo.Error setting up hdf5bt environment!
+        goto error
+    )
 
     echo.*****************************************************************************
     echo.                        Build and Test HDF5 Library and Tools

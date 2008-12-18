@@ -46,7 +46,8 @@ typedef enum {
     H5SL_TYPE_STR,      /* Skip list keys are 'char *'s (ie. strings) */
     H5SL_TYPE_HSIZE,    /* Skip list keys are 'hsize_t's */
     H5SL_TYPE_UNSIGNED, /* Skip list keys are 'unsigned's */
-    H5SL_TYPE_SIZE      /* Skip list keys are 'size_t's */
+    H5SL_TYPE_SIZE,     /* Skip list keys are 'size_t's */
+    H5SL_TYPE_OBJ       /* Skip list keys are 'H5_obj_t's */
 } H5SL_type_t;
 
 /**********/
@@ -71,6 +72,8 @@ H5_DLL void *H5SL_search(H5SL_t *slist, const void *key);
 H5_DLL void *H5SL_less(H5SL_t *slist, const void *key);
 H5_DLL void *H5SL_greater(H5SL_t *slist, const void *key);
 H5_DLL H5SL_node_t *H5SL_find(H5SL_t *slist, const void *key);
+H5_DLL H5SL_node_t *H5SL_below(H5SL_t *slist, const void *key);
+H5_DLL H5SL_node_t *H5SL_above(H5SL_t *slist, const void *key);
 H5_DLL H5SL_node_t *H5SL_first(H5SL_t *slist);
 H5_DLL H5SL_node_t *H5SL_next(H5SL_node_t *slist_node);
 H5_DLL H5SL_node_t *H5SL_prev(H5SL_node_t *slist_node);

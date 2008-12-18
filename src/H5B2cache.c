@@ -30,12 +30,14 @@
 
 #define H5B2_PACKAGE		/*suppress error about including H5B2pkg  */
 
+
 /***********/
 /* Headers */
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5B2pkg.h"		/* v2 B-trees				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MFprivate.h"	/* File memory management		*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
 
 
@@ -80,6 +82,7 @@ static herr_t H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, ha
 static herr_t H5B2_cache_leaf_clear(H5F_t *f, H5B2_leaf_t *l, hbool_t destroy);
 static herr_t H5B2_cache_leaf_size(const H5F_t *f, const H5B2_leaf_t *l, size_t *size_ptr);
 
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -113,6 +116,7 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
     (H5AC_clear_func_t)H5B2_cache_leaf_clear,
     (H5AC_size_func_t)H5B2_cache_leaf_size,
 }};
+
 
 /*****************************/
 /* Library Private Variables */
@@ -177,7 +181,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     size = H5B2_HEADER_SIZE(f);
 
     /* Get a pointer to a buffer that's large enough for header */
-    if(NULL == (hdr = H5WB_actual(wb, size)))
+    if(NULL == (hdr = (uint8_t *)H5WB_actual(wb, size)))
         HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read header from disk */
@@ -188,9 +192,9 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
     p = hdr;
 
     /* Magic number */
-    if(HDmemcmp(p, H5B2_HDR_MAGIC, (size_t)H5B2_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5B2_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree header signature")
-    p += H5B2_SIZEOF_MAGIC;
+    p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5B2_HDR_VERSION)
@@ -198,7 +202,7 @@ H5B2_cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_type, vo
 
     /* B-tree type */
     if(*p++ != (uint8_t)type->id)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree type")
+	HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
 
     /* Node size (in bytes) */
     UINT32DECODE(p, node_size);
@@ -300,15 +304,15 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         size = H5B2_HEADER_SIZE(f);
 
         /* Get a pointer to a buffer that's large enough for header */
-        if(NULL == (hdr = H5WB_actual(wb, size)))
+        if(NULL == (hdr = (uint8_t *)H5WB_actual(wb, size)))
             HGOTO_ERROR(H5E_BTREE, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
         /* Get temporary pointer to serialized header */
         p = hdr;
 
         /* Magic number */
-        HDmemcpy(p, H5B2_HDR_MAGIC, (size_t)H5B2_SIZEOF_MAGIC);
-        p += H5B2_SIZEOF_MAGIC;
+        HDmemcpy(p, H5B2_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
 
         /* Version # */
         *p++ = H5B2_HDR_VERSION;
@@ -326,8 +330,10 @@ H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B
         UINT16ENCODE(p, shared->depth);
 
         /* Split & merge %s */
-        *p++ = shared->split_percent;
-        *p++ = shared->merge_percent;
+        H5_CHECK_OVERFLOW(shared->split_percent, /* From: */ unsigned, /* To: */ uint8_t);
+        *p++ = (uint8_t)shared->split_percent;
+        H5_CHECK_OVERFLOW(shared->merge_percent, /* From: */ unsigned, /* To: */ uint8_t);
+        *p++ = (uint8_t)shared->merge_percent;
 
         /* Root node pointer */
         H5F_addr_encode(f, &p, bt2->root.addr);
@@ -374,25 +380,38 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
-H5B2_cache_hdr_dest(H5F_t UNUSED *f, H5B2_t *bt2)
+H5B2_cache_hdr_dest(H5F_t *f, H5B2_t *bt2)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_hdr_dest)
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_hdr_dest)
 
     /*
      * Check arguments.
      */
     HDassert(bt2);
 
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!bt2->cache_info.free_file_space_on_destroy || H5F_addr_defined(bt2->cache_info.addr));
+
+    /* Check for freeing file space for B-tree header */
+    if(bt2->cache_info.free_file_space_on_destroy) {
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_BTREE, H5AC_dxpl_id, bt2->cache_info.addr, (hsize_t)H5B2_HEADER_SIZE(f)) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free v2 B-tree header")
+    } /* end if */
+
     /* Decrement reference count on shared B-tree info */
     if(bt2->shared)
         H5RC_DEC(bt2->shared);
 
     /* Free B-tree header info */
-    H5FL_FREE(H5B2_t, bt2);
+    (void)H5FL_FREE(H5B2_t, bt2);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_cache_hdr_dest() */
 
 
@@ -520,17 +539,17 @@ H5B2_cache_internal_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_uda
     p = shared->page;
 
     /* Magic number */
-    if(HDmemcmp(p, H5B2_INT_MAGIC, (size_t)H5B2_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC))
         HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree internal node signature")
-    p += H5B2_SIZEOF_MAGIC;
+    p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5B2_INT_VERSION)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree internal node version")
 
     /* B-tree type */
-    if (*p++ != (uint8_t)shared->type->id)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree type")
+    if(*p++ != (uint8_t)shared->type->id)
+	HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
 
     /* Allocate space for the native keys in memory */
     if((internal->int_native = (uint8_t *)H5FL_FAC_MALLOC(shared->node_info[udata->depth].nat_rec_fac)) == NULL)
@@ -639,8 +658,8 @@ H5B2_cache_internal_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr
         p = shared->page;
 
         /* Magic number */
-        HDmemcpy(p, H5B2_INT_MAGIC, (size_t)H5B2_SIZEOF_MAGIC);
-        p += H5B2_SIZEOF_MAGIC;
+        HDmemcpy(p, H5B2_INT_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
 
         /* Version # */
         *p++ = H5B2_INT_VERSION;
@@ -710,22 +729,33 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
-H5B2_cache_internal_dest(H5F_t UNUSED *f, H5B2_internal_t *internal)
+H5B2_cache_internal_dest(H5F_t *f, H5B2_internal_t *internal)
 {
     H5B2_shared_t *shared;      /* Shared B-tree information */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_internal_dest)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_internal_dest)
 
     /*
      * Check arguments.
      */
     HDassert(internal);
 
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!internal->cache_info.free_file_space_on_destroy || H5F_addr_defined(internal->cache_info.addr));
+
     /* Get the pointer to the shared B-tree info */
     shared = (H5B2_shared_t *)H5RC_GET_OBJ(internal->shared);
     HDassert(shared);
+
+    /* Check for freeing file space for B-tree internal node */
+    if(internal->cache_info.free_file_space_on_destroy) {
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_BTREE, H5AC_dxpl_id, internal->cache_info.addr, (hsize_t)shared->node_size) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free v2 B-tree internal node")
+    } /* end if */
 
     /* Release internal node's native key buffer */
     if(internal->int_native)
@@ -740,9 +770,10 @@ H5B2_cache_internal_dest(H5F_t UNUSED *f, H5B2_internal_t *internal)
         H5RC_DEC(internal->shared);
 
     /* Free B-tree internal node info */
-    H5FL_FREE(H5B2_internal_t, internal);
+    (void)H5FL_FREE(H5B2_internal_t, internal);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_cache_internal_dest() */
 
 
@@ -875,9 +906,9 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
     p = shared->page;
 
     /* Magic number */
-    if(HDmemcmp(p, H5B2_LEAF_MAGIC, (size_t)H5B2_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "wrong B-tree leaf node signature")
-    p += H5B2_SIZEOF_MAGIC;
+    p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5B2_LEAF_VERSION)
@@ -885,7 +916,7 @@ H5B2_cache_leaf_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_nrec, v
 
     /* B-tree type */
     if(*p++ != (uint8_t)shared->type->id)
-	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, NULL, "incorrect B-tree type")
+	HGOTO_ERROR(H5E_BTREE, H5E_BADTYPE, NULL, "incorrect B-tree type")
 
     /* Allocate space for the native keys in memory */
     if((leaf->leaf_native = (uint8_t *)H5FL_FAC_MALLOC(shared->node_info[0].nat_rec_fac)) == NULL)
@@ -975,8 +1006,8 @@ H5B2_cache_leaf_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5
         p = shared->page;
 
         /* magic number */
-        HDmemcpy(p, H5B2_LEAF_MAGIC, (size_t)H5B2_SIZEOF_MAGIC);
-        p += H5B2_SIZEOF_MAGIC;
+        HDmemcpy(p, H5B2_LEAF_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
 
         /* version # */
         *p++ = H5B2_LEAF_VERSION;
@@ -1033,22 +1064,33 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
-H5B2_cache_leaf_dest(H5F_t UNUSED *f, H5B2_leaf_t *leaf)
+H5B2_cache_leaf_dest(H5F_t *f, H5B2_leaf_t *leaf)
 {
     H5B2_shared_t *shared;      /* Shared B-tree information */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5B2_cache_leaf_dest)
+    FUNC_ENTER_NOAPI_NOINIT(H5B2_cache_leaf_dest)
 
     /*
      * Check arguments.
      */
     HDassert(leaf);
 
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!leaf->cache_info.free_file_space_on_destroy || H5F_addr_defined(leaf->cache_info.addr));
+
     /* Get the pointer to the shared B-tree info */
     shared = (H5B2_shared_t *)H5RC_GET_OBJ(leaf->shared);
     HDassert(shared);
+
+    /* Check for freeing file space for B-tree leaf node */
+    if(leaf->cache_info.free_file_space_on_destroy) {
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_BTREE, H5AC_dxpl_id, leaf->cache_info.addr, (hsize_t)shared->node_size) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_CANTFREE, FAIL, "unable to free v2 B-tree leaf node")
+    } /* end if */
 
     /* Release leaf's native key buffer */
     if(leaf->leaf_native)
@@ -1059,9 +1101,10 @@ H5B2_cache_leaf_dest(H5F_t UNUSED *f, H5B2_leaf_t *leaf)
         H5RC_DEC(leaf->shared);
 
     /* Free B-tree leaf node info */
-    H5FL_FREE(H5B2_leaf_t,leaf);
+    (void)H5FL_FREE(H5B2_leaf_t, leaf);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B2_cache_leaf_dest() */
 
 

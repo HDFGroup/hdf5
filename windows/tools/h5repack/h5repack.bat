@@ -42,13 +42,11 @@ set h5diff=..\h5diff%2\%1\h5diff%2
 rem The path of the h5diff tool binary
 set h5diff_bin=%CD%\%h5diff%
 
-rem The tool name
 set h5detectszip=testh5repack_detect_szip%2
-rem The path of the tool binary
 set h5detectszip_bin=%CD%\..\testfiles\%h5detectszip%\%1\%h5detectszip%
 
 
-set info_file=..\testfiles\info.h5repack
+set info_file=testfiles\h5repack.info
 
 set file0=h5repack_fill.h5
 set file1=h5repack_objs.h5
@@ -68,7 +66,6 @@ set file13=h5repack_soffset.h5
 set nerrors=0
 set verbose=yes
 
-if not exist ..\testfiles mkdir ..\testfiles
 
 goto main
 
@@ -117,7 +114,7 @@ rem was unavailable)
 rem Call the h5diff tool
 rem
 :difftest
-    %h5diff_bin% %* -q
+    %h5diff_bin% -q %*
     if %errorlevel% neq 0 (
         call :verify *FAILED* %*
         set /a nerrors=!nerrors!+1
@@ -133,7 +130,7 @@ rem
 :tooltest
 
     rem Run test.
-    set infile=%CD%\..\testfiles\%1
+    set infile=%CD%\testfiles\%1
     rem Linux uses a $path variable here, but it is unneccessary, and will
     rem corrupt our Windows PATH if we use it.  --SJW 8/28/07
     rem set path=%CD%
@@ -142,8 +139,46 @@ rem
     
     rem We define %params% here because Windows `shift` command doesn't affect
     rem the %* variable.  --SJW 8/28/07
-    set params=%*
-    set params=%params: *=%
+    if "%2"=="" (
+        set params=
+    ) else (
+        set params=%*
+        set params=!params:* =!
+    )
+    %h5repack_bin% %params% %infile% %outfile%
+    
+    if %errorlevel% neq 0 (
+        call :testing *FAILED* %*
+        set /a nerrors=!nerrors!+1
+    ) else (
+        call :testing PASSED %*
+        call :difftest %infile% %outfile%
+    )
+    del /f %outfile%
+    
+    exit /b
+    
+    
+rem Call h5repack with old syntax
+rem
+:tooltest0
+
+    rem Run test.
+    set infile=%CD%\testfiles\%1
+    rem Linux uses a $path variable here, but it is unneccessary, and will
+    rem corrupt our Windows PATH if we use it.  --SJW 8/28/07
+    rem set path=%CD%
+    rem set outfile=%path%\out.%1
+    set outfile=%CD%\out.%1
+    
+    rem We define %params% here because Windows `shift` command doesn't affect
+    rem the %* variable.  --SJW 8/28/07
+    if "%2"=="" (
+        set params=
+    ) else (
+        set params=%*
+        set params=!params:* =!
+    )
     %h5repack_bin% -i %infile% -o %outfile% %params%
     
     if %errorlevel% neq 0 (
@@ -308,7 +343,7 @@ rem
     )
       
     rem szip remove
-    set arg=%file7% -f dset_szip:NONE
+    set arg=%file7% --filter=dset_szip:NONE
     if not "%use_filter_szip_encoder%"=="yes" (
         call :skip %arg%
     ) else if not "%use_filter_szip%"=="yes" (
@@ -479,7 +514,7 @@ rem
     rem  layout options (these files have no filters)
     rem ########################################################
 
-    call :tooltest %file4% -l dset2:CHUNK=20x10
+    call :tooltest %file4% --layout=dset2:CHUNK=20x10
     call :tooltest %file4% -l CHUNK=20x10
     call :tooltest %file4% -l dset2:CONTI
     call :tooltest %file4% -l CONTI
@@ -510,10 +545,55 @@ rem
     call :tooltest %arg8%
     call :tooltest %arg9%
 
-    rem native option
+    rem Native option
     set arg=%file1% -n
     call :tooltest %arg%
 
+
+    rem latest file format with long switches. use FILE4=h5repack_layout.h5 (no filters)
+    set arg=%file4% --layout CHUNK=20x10 --filter GZIP=1 --minimum=10 --native --latest --compact=8 --indexed=6 --ssize=8[:dtype]
+    if not "%use_filter_deflate%"=="yes" (
+       call :skip %arg%
+    ) else (
+       call :tooltest %arg%
+    )
+
+    rem latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
+    set arg=%file4% -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[:dtype]
+    if not "%use_filter_deflate%"=="yes" (
+     call :skip %arg%
+    ) else (
+     call :tooltest %arg%
+    )
+    
+    rem several global filters
+
+    set arg=%file4% --filter GZIP=1 --filter SHUF
+    if not "%use_filter_deflate%"=="yes" (
+        call :skip %arg%
+    ) else if not "%use_filter_shuffle%"=="yes" (
+        call :skip %arg%
+    ) else (
+        call :tooltest %arg%
+    )
+
+    rem syntax of -i infile -o outfile
+    rem latest file format with short switches. use FILE4=h5repack_layout.h5 (no filters)
+    set arg=%file4% -l CHUNK=20x10 -f GZIP=1 -m 10 -n -L -c 8 -d 6 -s 8[:dtype]
+    if not "%use_filter_deflate%"=="yes" (
+        call :skip %arg%
+    ) else (
+        call :tooltest0 %arg%
+    )
+    
+    rem add a userblock to file
+    set arg=%file1% -u testfiles\ublock.bin -b 2048
+    call :tooltest %arg%
+    
+    rem add alignment
+    set arg=%file1% -t 1 -a 1
+    call :tooltest %arg%
+    
     
     if %nerrors% equ 0 (
         echo.All %h5repack% tests passed.

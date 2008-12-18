@@ -30,7 +30,7 @@
 
 /* 1-D dataset with fixed dimensions */
 #define SPACE1_RANK	1
-#define SPACE1_DIM1     4 
+#define SPACE1_DIM1     4
 
 /* 2-D dataset with fixed dimensions */
 #define SPACE2_RANK	2
@@ -42,7 +42,7 @@
 #define SPACE3_DIM1     128
 #define L1_INCM         16
 #define L2_INCM         8
-#define L3_INCM         3 
+#define L3_INCM         3
 
 /* 1-D dataset with fixed dimensions */
 #define SPACE4_RANK	1
@@ -1159,7 +1159,7 @@ test_vltypes_compound_vlen_vlen(void)
 **  test_vltypes_compound_vlstr(): Test VL datatype code.
 **      Tests VL datatypes of compound datatypes with VL string.
 **      Dataset is extensible chunked, and data is rewritten with
-**      shorter VL data. 
+**      shorter VL data.
 **
 ****************************************************************/
 static void
@@ -2387,7 +2387,7 @@ rewrite_shorter_vltypes_vlen_vlen_atomic(void)
 
 /****************************************************************
 **
-**  test_vltypes_fill_value(): Test fill value for VL data.  
+**  test_vltypes_fill_value(): Test fill value for VL data.
 **  One tests data space isn't allocated; another tests data
 **  space is allocated.
 **
@@ -2431,7 +2431,7 @@ test_vltypes_fill_value(void)
     hsize_t large_select_count[] = {SPACE4_DIM_LARGE / 2};       /* Count of large non-contiguous element selection */
     hsize_t select_block[] = {1};       /* Block size of non-contiguous element selection */
     hid_t dcpl_id, xfer_pid;
-    hid_t dset_id; 
+    hid_t dset_id;
     hsize_t small_dims[] = {SPACE4_DIM_SMALL};
     hsize_t large_dims[] = {SPACE4_DIM_LARGE};
     size_t dset_elmts;                  /* Number of elements in a particular dataset */

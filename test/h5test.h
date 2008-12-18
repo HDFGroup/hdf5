@@ -120,12 +120,12 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
 
 /*
  * The methods to compare the equality of floating-point values:
- *    1. XXX_ABS_EQUAL - check if the difference is smaller than the 
+ *    1. XXX_ABS_EQUAL - check if the difference is smaller than the
  *       Epsilon value.  The Epsilon values, FLT_EPSILON, DBL_EPSILON,
  *       and LDBL_EPSILON, are defined by compiler in float.h.
  *    2. XXX_REL_EQUAL - check if the relative difference is smaller than a
  *       predefined value M.  See if two values are relatively equal.
- *       It's the test's responsibility not to pass in the value 0, which 
+ *       It's the test's responsibility not to pass in the value 0, which
  *       may cause the equation to fail.
  */
 #define FLT_ABS_EQUAL(X,Y)	((float)fabs(X-Y)<FLT_EPSILON)
@@ -149,7 +149,7 @@ H5TEST_DLL void h5_no_hwconv(void);
 H5TEST_DLL const char *h5_rmprefix(const char *filename);
 H5TEST_DLL void h5_reset(void);
 H5TEST_DLL void h5_show_hostname(void);
-H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename);
+H5TEST_DLL h5_stat_size_t h5_get_file_size(const char *filename, hid_t fapl);
 H5TEST_DLL int print_func(const char *format, ...);
 
 /* Routines for operating on the list of tests (for the "all in one" tests) */

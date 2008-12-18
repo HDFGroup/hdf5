@@ -17,36 +17,37 @@
 # Configures, builds, and runs tests in-place; the output files will be placed
 # in a directory called gcov_logs.
 # Must be invoked from the root hdf5 directory.
-# This script has only been tested on heping.
+# This script has been tested on kagiso.
 
 CFLAGS="$CFLAGS -ftest-coverage -fprofile-arcs"
 export CFLAGS
-./configure --enable-debug=all
+LDFLAGS="$LDFLAGS -lgcov"
+export LDFLAGS
+CC=gcc
+export CC
+./configure
 make
 make check
 mkdir gcov_logs
 cd src
-for j in *.c
+for j in *.h *.c
+  do
+  ln -s ../$j .libs/$j
+  done 
+cd .libs
+for j in *.gcda
   do
   gcov -b $j >> gcov.log 2>&1
   done
 for j in *.gcov
+   do
+   mv $j ../../gcov_logs
+   done
+mv gcov.log ../../gcov_logs
+for j in *.c *.h
   do
-  mv $j ../gcov_logs
+  rm $j
   done
-mv gcov.log ../gcov_logs
-cd ..
-
-
-
-
-
-
-
-
-
-
-
-
+cd ../..
 
 

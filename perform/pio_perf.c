@@ -287,7 +287,7 @@ struct options {
     size_t blk_size;            /* Block size                           */
     unsigned interleaved;       /* Interleaved vs. contiguous blocks    */
     unsigned collective;        /* Collective vs. independent I/O       */
-    unsigned dim2d;             /* 1D vs. 2D                            */
+    unsigned dim2d;             /* 1D vs. 2D geometry                   */
     int print_times;       	/* print times as well as throughputs   */
     int print_raw;         	/* print raw data throughput info       */
     off_t h5_alignment;         /* alignment in HDF5 file               */
@@ -317,6 +317,8 @@ static int create_comm_world(int num_procs, int *doing_pio);
 static int destroy_comm_world(void);
 static void output_results(const struct options *options, const char *name,
                            minmax *table, int table_size, off_t data_size);
+static void output_times(const struct options *options, const char *name,
+                           minmax *table, int table_size);
 static void output_report(const char *fmt, ...);
 static void print_indent(register int indent);
 static void usage(const char *prog);
@@ -453,8 +455,8 @@ run_test_loop(struct options *opts)
             /* do something harsh */
         }
 
-	/* only processes doing PIO will run the tests */
-	if (doing_pio){
+    /* only processes doing PIO will run the tests */
+    if (doing_pio){
             output_report("Number of processors = %ld\n", parms.num_procs);
 
             /* multiply the xfer buffer size by 2 for each loop iteration */
@@ -462,33 +464,33 @@ run_test_loop(struct options *opts)
                     buf_size <= opts->max_xfer_size; buf_size <<= 1) {
                 parms.buf_size = buf_size;
 
-		if (parms.dim2d){
-		    parms.num_bytes = (off_t)pow((double)(opts->num_bpp*parms.num_procs),2);
-		    if (parms.interleaved)
-			output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MBs\n",
-				buf_size, opts->blk_size,
-				((double)parms.num_dsets * (double)parms.num_bytes)
-				/ ONE_MB);
-		    else
-			output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MBs\n",
-				opts->blk_size, buf_size,
-				((double)parms.num_dsets * (double)parms.num_bytes)
-				/ ONE_MB);
+        if (parms.dim2d){
+            parms.num_bytes = (off_t)pow((double)(opts->num_bpp*parms.num_procs),2);
+            if (parms.interleaved)
+            output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MBs\n",
+                buf_size, opts->blk_size,
+                ((double)parms.num_dsets * (double)parms.num_bytes)
+                / ONE_MB);
+            else
+            output_report("Transfer Buffer Size: %ldx%ld bytes, File size: %.2f MBs\n",
+                opts->blk_size, buf_size,
+                ((double)parms.num_dsets * (double)parms.num_bytes)
+                / ONE_MB);
 
-		    print_indent(1);
-		    output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2fx%.2f KBs\n",
-			    parms.num_files, parms.num_dsets, (double)(opts->num_bpp*parms.num_procs)/ONE_KB,
-			    (double)(opts->num_bpp*parms.num_procs)/ONE_KB);
-		}
-		else{
-		    parms.num_bytes = (off_t)opts->num_bpp*parms.num_procs;
-		    output_report("Transfer Buffer Size: %ld bytes, File size: %.2f MBs\n",
-			    buf_size,((double)parms.num_dsets * (double)parms.num_bytes) / ONE_MB);
+            print_indent(1);
+            output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2fx%.2f KBs\n",
+                parms.num_files, parms.num_dsets, (double)(opts->num_bpp*parms.num_procs)/ONE_KB,
+                (double)(opts->num_bpp*parms.num_procs)/ONE_KB);
+        }
+        else{
+            parms.num_bytes = (off_t)opts->num_bpp*parms.num_procs;
+            output_report("Transfer Buffer Size: %ld bytes, File size: %.2f MBs\n",
+                buf_size,((double)parms.num_dsets * (double)parms.num_bytes) / ONE_MB);
 
-		    print_indent(1);
-		    output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2f MBs\n",
-			    parms.num_files, parms.num_dsets, (double)(opts->num_bpp*parms.num_procs)/ONE_MB);
-		}
+            print_indent(1);
+            output_report("  # of files: %ld, # of datasets: %ld, dataset size: %.2f MBs\n",
+                parms.num_files, parms.num_dsets, (double)(opts->num_bpp*parms.num_procs)/ONE_MB);
+        }
 
                 if (opts->io_types & PIO_POSIX)
                     run_test(POSIXIO, parms, opts);
@@ -507,7 +509,7 @@ run_test_loop(struct options *opts)
             if (destroy_comm_world() != SUCCESS) {
                 /* do something harsh */
             }
-	}
+    }
     }
 }
 
@@ -533,10 +535,10 @@ run_test(iotype iot, parameters parms, struct options *opts)
     minmax         *read_mm_table=NULL;
     minmax         *read_gross_mm_table=NULL;
     minmax         *read_raw_mm_table=NULL;
-    minmax	   *read_open_mm_table=NULL;
-    minmax	   *read_close_mm_table=NULL;
-    minmax	   *write_open_mm_table=NULL;
-    minmax	   *write_close_mm_table=NULL;
+    minmax         *read_open_mm_table=NULL;
+    minmax         *read_close_mm_table=NULL;
+    minmax         *write_open_mm_table=NULL;
+    minmax         *write_close_mm_table=NULL;
     minmax          write_mpi_mm = {0.0, 0.0, 0.0, 0};
     minmax          write_mm = {0.0, 0.0, 0.0, 0};
     minmax          write_gross_mm = {0.0, 0.0, 0.0, 0};
@@ -545,12 +547,12 @@ run_test(iotype iot, parameters parms, struct options *opts)
     minmax          read_mm = {0.0, 0.0, 0.0, 0};
     minmax          read_gross_mm = {0.0, 0.0, 0.0, 0};
     minmax          read_raw_mm = {0.0, 0.0, 0.0, 0};
-    minmax	    read_open_mm = {0.0, 0.0, 0.0, 0};
-    minmax	    read_close_mm = {0.0, 0.0, 0.0, 0};
-    minmax	    write_open_mm = {0.0, 0.0, 0.0, 0};
-    minmax	    write_close_mm = {0.0, 0.0, 0.0, 0};
+    minmax          read_open_mm = {0.0, 0.0, 0.0, 0};
+    minmax          read_close_mm = {0.0, 0.0, 0.0, 0};
+    minmax          write_open_mm = {0.0, 0.0, 0.0, 0};
+    minmax          write_close_mm = {0.0, 0.0, 0.0, 0};
 
-    raw_size = (off_t)parms.num_dsets * (off_t)parms.num_bytes;
+    raw_size = parms.num_files * (off_t)parms.num_dsets * (off_t)parms.num_bytes;
     parms.io_type = iot;
     print_indent(2);
     output_report("IO API = ");
@@ -580,16 +582,14 @@ run_test(iotype iot, parameters parms, struct options *opts)
     write_raw_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
     write_open_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
     write_close_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-
     if (!parms.h5_write_only) {
-	read_mpi_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-	read_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-	read_gross_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-	read_raw_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-	read_open_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-	read_close_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
-
-   }
+        read_mpi_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_gross_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_raw_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_open_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+        read_close_mm_table = calloc((size_t)parms.num_iters , sizeof(minmax));
+    }
 
     /* Do IO iteration times, collecting statistics each time */
     for (i = 0; i < parms.num_iters; ++i) {
@@ -600,37 +600,37 @@ run_test(iotype iot, parameters parms, struct options *opts)
 
         /* gather all of the "mpi write" times */
         t = get_time(res.timers, HDF5_MPI_WRITE);
-	get_minmax(&write_mpi_mm, t);
+        get_minmax(&write_mpi_mm, t);
 
         write_mpi_mm_table[i] = write_mpi_mm;
 
         /* gather all of the "write" times */
         t = get_time(res.timers, HDF5_FINE_WRITE_FIXED_DIMS);
-	get_minmax(&write_mm, t);
+        get_minmax(&write_mm, t);
 
         write_mm_table[i] = write_mm;
 
         /* gather all of the "write" times from open to close */
         t = get_time(res.timers, HDF5_GROSS_WRITE_FIXED_DIMS);
-	get_minmax(&write_gross_mm, t);
+        get_minmax(&write_gross_mm, t);
 
         write_gross_mm_table[i] = write_gross_mm;
 
         /* gather all of the raw "write" times */
-	t = get_time(res.timers, HDF5_RAW_WRITE_FIXED_DIMS);
-	get_minmax(&write_raw_mm, t);
+        t = get_time(res.timers, HDF5_RAW_WRITE_FIXED_DIMS);
+        get_minmax(&write_raw_mm, t);
 
-	write_raw_mm_table[i] = write_raw_mm;
+        write_raw_mm_table[i] = write_raw_mm;
 
-	/* gather all of the file open times (time from open to first write) */
-	t = get_time(res.timers, HDF5_FILE_WRITE_OPEN);
-	get_minmax(&write_open_mm, t);
+        /* gather all of the file open times (time from open to first write) */
+        t = get_time(res.timers, HDF5_FILE_WRITE_OPEN);
+        get_minmax(&write_open_mm, t);
 
-	write_open_mm_table[i] = write_open_mm;
+        write_open_mm_table[i] = write_open_mm;
 
-	/* gather all of the file close times (time from last write to close) */
-	t = get_time(res.timers, HDF5_FILE_WRITE_CLOSE);
-	get_minmax(&write_close_mm, t);
+        /* gather all of the file close times (time from last write to close) */
+        t = get_time(res.timers, HDF5_FILE_WRITE_CLOSE);
+        get_minmax(&write_close_mm, t);
 
         write_close_mm_table[i] = write_close_mm;
 
@@ -659,21 +659,21 @@ run_test(iotype iot, parameters parms, struct options *opts)
 
             read_raw_mm_table[i] = read_raw_mm;
 
-	    /* gather all of the file open times (time from open to first read) */
-	    t = get_time(res.timers, HDF5_FILE_READ_OPEN);
-	    get_minmax(&read_open_mm, t);
+            /* gather all of the file open times (time from open to first read) */
+            t = get_time(res.timers, HDF5_FILE_READ_OPEN);
+            get_minmax(&read_open_mm, t);
 
-	    read_open_mm_table[i] = read_open_mm;
+            read_open_mm_table[i] = read_open_mm;
 
-	    /* gather all of the file close times (time from last read to close) */
-	    t = get_time(res.timers, HDF5_FILE_READ_CLOSE);
-	    get_minmax(&read_close_mm, t);
+            /* gather all of the file close times (time from last read to close) */
+            t = get_time(res.timers, HDF5_FILE_READ_CLOSE);
+            get_minmax(&read_close_mm, t);
 
-	    read_close_mm_table[i] = read_close_mm;
+            read_close_mm_table[i] = read_close_mm;
 
-        }
+         }
 
-        pio_time_destroy(res.timers);
+         pio_time_destroy(res.timers);
     }
 
     /*
@@ -723,23 +723,26 @@ run_test(iotype iot, parameters parms, struct options *opts)
 
     output_results(opts,"Write Open-Close",write_gross_mm_table,parms.num_iters,raw_size);
 
+    if (opts->print_times) {
+        output_times(opts,"Write File Open",write_open_mm_table,parms.num_iters);
+        output_times(opts,"Write File Close",write_close_mm_table,parms.num_iters);
+    }
+
     /* Print out time from open to first write */
     if (pio_debug_level >= 3) {
-	/* output all of the times for all iterations */
-	print_indent(3);
-	output_report("Write file open details:\n");
-	output_all_info(write_open_mm_table, parms.num_iters, 4);
+       /* output all of the times for all iterations */
+       print_indent(3);
+       output_report("Write file open details:\n");
+       output_all_info(write_open_mm_table, parms.num_iters, 4);
     }
 
     /* Print out time from last write to close */
     if (pio_debug_level >= 3) {
-	/* output all of the times for all iterations */
-	print_indent(3);
-	output_report("Write file close details:\n");
-	output_all_info(write_close_mm_table, parms.num_iters, 4);
+       /* output all of the times for all iterations */
+       print_indent(3);
+       output_report("Write file close details:\n");
+       output_all_info(write_close_mm_table, parms.num_iters, 4);
     }
-
-
 
     if (!parms.h5_write_only) {
         /* Read statistics	*/
@@ -785,25 +788,28 @@ run_test(iotype iot, parameters parms, struct options *opts)
             output_all_info(read_gross_mm_table, parms.num_iters, 4);
         }
 
-	output_results(opts, "Read Open-Close", read_gross_mm_table,
-		parms.num_iters, raw_size);
+        output_results(opts, "Read Open-Close", read_gross_mm_table,parms.num_iters, raw_size);
 
+        if (opts->print_times) {
+            output_times(opts,"Read File Open",read_open_mm_table,parms.num_iters);
+            output_times(opts,"Read File Close",read_close_mm_table,parms.num_iters);
+        }
 
-	/* Print out time from open to first read */
-	if (pio_debug_level >= 3) {
-	    /* output all of the times for all iterations */
-	    print_indent(3);
-	    output_report("Read file open details:\n");
-	    output_all_info(read_open_mm_table, parms.num_iters, 4);
-	}
+        /* Print out time from open to first read */
+        if (pio_debug_level >= 3) {
+            /* output all of the times for all iterations */
+            print_indent(3);
+            output_report("Read file open details:\n");
+            output_all_info(read_open_mm_table, parms.num_iters, 4);
+        }
 
-	/* Print out time from last read to close */
-	if (pio_debug_level >= 3) {
-	    /* output all of the times for all iterations */
-	    print_indent(3);
-	    output_report("Read file close details:\n");
-	    output_all_info(read_close_mm_table, parms.num_iters, 4);
-	}
+        /* Print out time from last read to close */
+        if (pio_debug_level >= 3) {
+            /* output all of the times for all iterations */
+            print_indent(3);
+            output_report("Read file close details:\n");
+            output_all_info(read_close_mm_table, parms.num_iters, 4);
+        }
 
     }
 
@@ -820,8 +826,8 @@ run_test(iotype iot, parameters parms, struct options *opts)
         free(read_mm_table);
         free(read_gross_mm_table);
         free(read_raw_mm_table);
-	free(read_open_mm_table);
-	free(read_close_mm_table);
+        free(read_open_mm_table);
+        free(read_close_mm_table);
     }
 
     return ret_value;
@@ -1028,6 +1034,30 @@ output_results(const struct options *opts, const char *name, minmax *table,
         output_report(" (%7.3f s)\n", total_mm.max);
     else
         output_report("\n");
+
+}
+
+static void
+output_times(const struct options *opts, const char *name, minmax *table,
+    int table_size)
+{
+    minmax          total_mm;
+
+    total_mm = accumulate_minmax_stuff(table, table_size);
+
+    print_indent(3);
+    output_report("%s (%d iteration(s)):\n", name,table_size);
+
+    /* Note: The maximum throughput uses the minimum amount of time & vice versa */
+
+    print_indent(4);
+        output_report("Minimum Accumulated Time using %d file(s): %7.5f s\n", opts->num_files,(total_mm.min));
+
+    print_indent(4);
+        output_report("Average Accumulated Time using %d file(s): %7.5f s\n", opts->num_files,(total_mm.sum / total_mm.num));
+
+    print_indent(4);
+        output_report("Maximum Accumulated Time using %d file(s): %7.5f s\n", opts->num_files,(total_mm.max));
 }
 
 /*
@@ -1126,58 +1156,58 @@ report_parameters(struct options *opts)
               opts->min_num_procs, opts->max_num_procs);
 
     if (opts->dim2d){
-	HDfprintf(output, "rank %d: Number of bytes per process per dataset=", rank);
-	recover_size_and_print((long_long)(opts->num_bpp * opts->num_bpp * opts->min_num_procs), ":");
-	recover_size_and_print((long_long)(opts->num_bpp * opts->num_bpp * opts->max_num_procs), "\n");
+    HDfprintf(output, "rank %d: Number of bytes per process per dataset=", rank);
+    recover_size_and_print((long_long)(opts->num_bpp * opts->num_bpp * opts->min_num_procs), ":");
+    recover_size_and_print((long_long)(opts->num_bpp * opts->num_bpp * opts->max_num_procs), "\n");
 
-	HDfprintf(output, "rank %d: Size of dataset(s)=", rank);
-	recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs), "x");
-	recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs), ":");
-	recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs), "x");
-	recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs), "\n");
+    HDfprintf(output, "rank %d: Size of dataset(s)=", rank);
+    recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs), "x");
+    recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs), ":");
+    recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs), "x");
+    recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs), "\n");
 
-	HDfprintf(output, "rank %d: File size=", rank);
-	recover_size_and_print((long_long)(pow(opts->num_bpp * opts->min_num_procs,2)
-		    * opts->num_dsets), ":");
-	recover_size_and_print((long_long)(pow(opts->num_bpp * opts->max_num_procs,2)
-		    * opts->num_dsets), "\n");
+    HDfprintf(output, "rank %d: File size=", rank);
+    recover_size_and_print((long_long)(pow(opts->num_bpp * opts->min_num_procs,2)
+            * opts->num_dsets), ":");
+    recover_size_and_print((long_long)(pow(opts->num_bpp * opts->max_num_procs,2)
+            * opts->num_dsets), "\n");
 
-	HDfprintf(output, "rank %d: Transfer buffer size=", rank);
-	if(opts->interleaved){
-	    recover_size_and_print((long_long)opts->min_xfer_size, "x");
-	    recover_size_and_print((long_long)opts->blk_size, ":");
-	    recover_size_and_print((long_long)opts->max_xfer_size, "x");
-	    recover_size_and_print((long_long)opts->blk_size, "\n");
-	}
-	else{
-	    recover_size_and_print((long_long)opts->blk_size, "x");
-	    recover_size_and_print((long_long)opts->min_xfer_size, ":");
-	    recover_size_and_print((long_long)opts->blk_size, "x");
-	    recover_size_and_print((long_long)opts->max_xfer_size, "\n");
-	}
-	HDfprintf(output, "rank %d: Block size=", rank);
-	recover_size_and_print((long_long)opts->blk_size, "x");
-	recover_size_and_print((long_long)opts->blk_size, "\n");
+    HDfprintf(output, "rank %d: Transfer buffer size=", rank);
+    if(opts->interleaved){
+        recover_size_and_print((long_long)opts->min_xfer_size, "x");
+        recover_size_and_print((long_long)opts->blk_size, ":");
+        recover_size_and_print((long_long)opts->max_xfer_size, "x");
+        recover_size_and_print((long_long)opts->blk_size, "\n");
     }
     else{
-	HDfprintf(output, "rank %d: Number of bytes per process per dataset=", rank);
-	recover_size_and_print((long_long)opts->num_bpp, "\n");
+        recover_size_and_print((long_long)opts->blk_size, "x");
+        recover_size_and_print((long_long)opts->min_xfer_size, ":");
+        recover_size_and_print((long_long)opts->blk_size, "x");
+        recover_size_and_print((long_long)opts->max_xfer_size, "\n");
+    }
+    HDfprintf(output, "rank %d: Block size=", rank);
+    recover_size_and_print((long_long)opts->blk_size, "x");
+    recover_size_and_print((long_long)opts->blk_size, "\n");
+    }
+    else{
+    HDfprintf(output, "rank %d: Number of bytes per process per dataset=", rank);
+    recover_size_and_print((long_long)opts->num_bpp, "\n");
 
-	HDfprintf(output, "rank %d: Size of dataset(s)=", rank);
-	recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs), ":");
-	recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs), "\n");
+    HDfprintf(output, "rank %d: Size of dataset(s)=", rank);
+    recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs), ":");
+    recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs), "\n");
 
-	HDfprintf(output, "rank %d: File size=", rank);
-	recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs
-		    * opts->num_dsets), ":");
-	recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs
-		    * opts->num_dsets), "\n");
+    HDfprintf(output, "rank %d: File size=", rank);
+    recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs
+            * opts->num_dsets), ":");
+    recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs
+            * opts->num_dsets), "\n");
 
-	HDfprintf(output, "rank %d: Transfer buffer size=", rank);
-	recover_size_and_print((long_long)opts->min_xfer_size, ":");
-	recover_size_and_print((long_long)opts->max_xfer_size, "\n");
-	HDfprintf(output, "rank %d: Block size=", rank);
-	recover_size_and_print((long_long)opts->blk_size, "\n");
+    HDfprintf(output, "rank %d: Transfer buffer size=", rank);
+    recover_size_and_print((long_long)opts->min_xfer_size, ":");
+    recover_size_and_print((long_long)opts->max_xfer_size, "\n");
+    HDfprintf(output, "rank %d: Block size=", rank);
+    recover_size_and_print((long_long)opts->blk_size, "\n");
     }
 
     HDfprintf(output, "rank %d: Block Pattern in Dataset=", rank);
@@ -1245,13 +1275,13 @@ parse_command_line(int argc, char *argv[])
     cl_opts->io_types =  0;    /* will set default after parsing options */
     cl_opts->num_dsets = 1;
     cl_opts->num_files = 1;
-    cl_opts->num_bpp = 256 * ONE_KB;
+    cl_opts->num_bpp = 0;
     cl_opts->num_iters = 1;
     cl_opts->max_num_procs = comm_world_nprocs_g;
     cl_opts->min_num_procs = 1;
-    cl_opts->max_xfer_size = 1 * ONE_MB;
-    cl_opts->min_xfer_size = 128 * ONE_KB;
-    cl_opts->blk_size = 128 * ONE_KB;   /* Default to writing 128K per block */
+    cl_opts->max_xfer_size = 0;
+    cl_opts->min_xfer_size = 0;
+    cl_opts->blk_size = 0;
     cl_opts->interleaved = 0;       /* Default to contiguous blocks in dataset */
     cl_opts->collective = 0;        /* Default to independent I/O access */
     cl_opts->dim2d = 0;             /* Default to 1D */
@@ -1361,10 +1391,10 @@ parse_command_line(int argc, char *argv[])
                             /* Turn on time printing */
                             cl_opts->print_times = TRUE;
                             break;
-			case 'v':
+            case 'v':
                             /* Turn on verify data correctness*/
-			    cl_opts->verify = TRUE;
-			    break;
+                cl_opts->verify = TRUE;
+                break;
                         default:
                             fprintf(stderr, "pio_perf: invalid --debug option %s\n", buf);
                             exit(EXIT_FAILURE);
@@ -1428,28 +1458,50 @@ parse_command_line(int argc, char *argv[])
         }
     }
 
+
+    if (cl_opts->num_bpp == 0){
+        if (cl_opts->dim2d == 0)
+            cl_opts->num_bpp = 256 * ONE_KB;
+        else
+            cl_opts->num_bpp = 8 * ONE_KB;
+    }
+
+    if (cl_opts->max_xfer_size == 0)
+        cl_opts->max_xfer_size = cl_opts->num_bpp;
+
+    if (cl_opts->min_xfer_size == 0)
+        cl_opts->min_xfer_size = (cl_opts->num_bpp)/2;
+
+    if (cl_opts->blk_size == 0)
+        cl_opts->blk_size = (cl_opts->num_bpp)/2;
+
+
     /* set default if none specified yet */
     if (!cl_opts->io_types)
-	cl_opts->io_types = PIO_HDF5 | PIO_MPI | PIO_POSIX; /* run all API */
+    cl_opts->io_types = PIO_HDF5 | PIO_MPI | PIO_POSIX; /* run all API */
 
     /* verify parameters sanity.  Adjust if needed. */
     /* cap xfer_size with bytes per process */
-    if (cl_opts->min_xfer_size > cl_opts->num_bpp)
-	cl_opts->min_xfer_size = cl_opts->num_bpp;
-    if (cl_opts->max_xfer_size > cl_opts->num_bpp)
-	cl_opts->max_xfer_size = cl_opts->num_bpp;
+    if (!cl_opts->dim2d) {
+        if (cl_opts->min_xfer_size > cl_opts->num_bpp)
+        cl_opts->min_xfer_size = cl_opts->num_bpp;
+        if (cl_opts->max_xfer_size > cl_opts->num_bpp)
+        cl_opts->max_xfer_size = cl_opts->num_bpp;
+    }
     if (cl_opts->min_xfer_size > cl_opts->max_xfer_size)
-	cl_opts->min_xfer_size = cl_opts->max_xfer_size;
+    cl_opts->min_xfer_size = cl_opts->max_xfer_size;
+    if (cl_opts->blk_size > cl_opts->num_bpp )
+        cl_opts->blk_size = cl_opts->num_bpp;
     /* check range of number of processes */
     if (cl_opts->min_num_procs <= 0)
-	cl_opts->min_num_procs = 1;
+    cl_opts->min_num_procs = 1;
     if (cl_opts->max_num_procs <= 0)
-	cl_opts->max_num_procs = 1;
+    cl_opts->max_num_procs = 1;
     if (cl_opts->min_num_procs > cl_opts->max_num_procs)
-	cl_opts->min_num_procs = cl_opts->max_num_procs;
+    cl_opts->min_num_procs = cl_opts->max_num_procs;
     /* check iteration */
     if (cl_opts->num_iters <= 0)
-	cl_opts->num_iters = 1;
+    cl_opts->num_iters = 1;
 
     return cl_opts;
 }
@@ -1530,20 +1582,24 @@ usage(const char *prog)
 #endif  /* 0 */
         printf("     -B S, --block-size=S        Block size within transfer buffer\n");
         printf("                                 (see below for description)\n");
-        printf("                                 [default:128K]\n");
-        printf("     -c, --chunk                 Create HDF5 datasets chunked [default: off]\n");
+        printf("                                 [default: half the number of bytes per process\n");
+        printf("                                           per dataset]\n");
+        printf("     -c, --chunk                 Create HDF5 datasets using chunked storage\n");
+        printf("                                 [default: contiguous storage]\n");
         printf("     -C, --collective            Use collective I/O for MPI and HDF5 APIs\n");
-        printf("                                 [default: off (i.e. independent I/O)]\n");
-        printf("     -d N, --num-dsets=N         Number of datasets per file [default:1]\n");
+        printf("                                 [default: independent I/O)\n");
+        printf("     -d N, --num-dsets=N         Number of datasets per file [default: 1]\n");
         printf("     -D DL, --debug=DL           Indicate the debugging level\n");
         printf("                                 [default: no debugging]\n");
         printf("     -e S, --num-bytes=S         Number of bytes per process per dataset\n");
-        printf("                                 [default: 256K]\n");
+        printf("                                 (see below for description)\n");
+        printf("                                 [default: 256K for 1D, 8K for 2D]\n");
         printf("     -F N, --num-files=N         Number of files [default: 1]\n");
-        printf("     -g, --geometry              Use 2D geometry [default: 1D]\n");
+        printf("     -g, --geometry              Use 2D geometry [default: 1D geometry]\n");
         printf("     -i N, --num-iterations=N    Number of iterations to perform [default: 1]\n");
-        printf("     -I, --interleaved           Interleaved block I/O (see below for example)\n");
-        printf("                                 [default: Contiguous block I/O]\n");
+        printf("     -I, --interleaved           Interleaved access pattern\n");
+        printf("                                 (see below for example)\n");
+        printf("                                 [default: Contiguous access pattern]\n");
         printf("     -m, --mpi-posix             Use MPI-posix driver for HDF5 I/O\n");
         printf("                                 [default: use MPI-I/O driver]\n");
         printf("     -o F, --output=F            Output raw data into file F [default: none]\n");
@@ -1553,8 +1609,13 @@ usage(const char *prog)
         printf("     -T S, --threshold=S         Threshold for alignment of objects in HDF5 file\n");
         printf("                                 [default: 1]\n");
         printf("     -w, --write-only            Perform write tests not the read tests\n");
-        printf("     -x S, --min-xfer-size=S     Minimum transfer buffer size [default: 128K]\n");
-        printf("     -X S, --max-xfer-size=S     Maximum transfer buffer size [default: 1M]\n");
+        printf("     -x S, --min-xfer-size=S     Minimum transfer buffer size\n");
+        printf("                                 (see below for description)\n");
+        printf("                                 [default: half the number of bytes per process\n");
+        printf("                                           per dataset]\n");
+        printf("     -X S, --max-xfer-size=S     Maximum transfer buffer size\n");
+        printf("                                 [default: the number of bytes per process per\n");
+        printf("                                           dataset]\n");
         printf("\n");
         printf("  F  - is a filename.\n");
         printf("  N  - is an integer >=0.\n");
@@ -1572,19 +1633,25 @@ usage(const char *prog)
         printf("\n");
         printf("      Example: --api=mpiio,phdf5\n");
         printf("\n");
+        printf("  Dataset size:\n");
+        printf("      Depending on the selected geometry, each test dataset is either a linear\n");
+        printf("      array of size bytes-per-process * num-processes, or a square array of size\n");
+        printf("      (bytes-per-process * num-processes) x (bytes-per-process * num-processes).\n");
+        printf("\n");
         printf("  Block size vs. Transfer buffer size:\n");
-        printf("      The transfer buffer size is the size of a buffer in memory, which is\n");
-        printf("      broken into 'block size' pieces and written to the file.  The pattern\n");
-        printf("      of the blocks in the file is described below in the 'Interleaved vs.\n");
-        printf("      Contiguous blocks' example.\n");
+        printf("      buffer-size controls the size of the memory buffer, which is broken into\n");
+        printf("      blocks and written to the file. Depending on the selected geometry, each\n");
+        printf("      block can be a linear array of size block-size or a square array of size\n");
+        printf("      block-size x block-size. The arrangement in which blocks are written is\n");
+        printf("      determined by the access pattern.\n");
         printf("\n");
-        printf("      If the collective I/O option is given, the blocks in each transfer buffer\n");
-        printf("      are written at once with an MPI derived type, for the MPI-I/O and PHDF5\n");
-        printf("      APIs.\n");
+        printf("      In 1D geometry, the transfer buffer is a linear array of size buffer-size.\n");
+        printf("      In 2D geometry, it is a rectangular array of size block-size x buffer-size\n");
+        printf("      or buffer-size x block-size if interleaved pattern is selected.\n");
         printf("\n");
-        printf("  Interleaved vs. Contiguous blocks:\n");
-        printf("      When contiguous blocks are written to a dataset, the dataset is divided\n");
-        printf("      into '# processes' regions and each process writes data to its own region.\n");
+        printf("  Interleaved and Contiguous patterns in 1D geometry:\n");
+        printf("      When contiguous access pattern is chosen, the dataset is evenly divided\n");
+        printf("      into num-processes regions and each process writes data to its own region.\n");
         printf("      When interleaved blocks are written to a dataset, space for the first\n");
         printf("      block of the first process is allocated in the dataset, then space is\n");
         printf("      allocated for the first block of the second process, etc. until space is\n");
@@ -1592,14 +1659,23 @@ usage(const char *prog)
         printf("      the second block of the first process, the second block of the second\n");
         printf("      process, etc.\n");
         printf("\n");
-        printf("      For example, with a 4 process run, 1MB bytes-per-process, 256KB transfer\n");
-        printf("        buffer size, and 64KB block size,\n");
-        printf("          16 contiguous blocks per process are written to the file like so:\n");
-        printf("              1111111111111111222222222222222233333333333333334444444444444444\n");
-        printf("          16 interleaved blocks per process are written to the file like so:\n");
-        printf("              1234123412341234123412341234123412341234123412341234123412341234\n");
-        printf("        If collective I/O is turned on, all of the four blocks per transfer\n");
-        printf("        buffer will be written in one collective I/O call.\n");
+        printf("      For example, with a 3 process run, 512KB bytes-per-process, 256KB transfer\n");
+        printf("        buffer size, and 64KB block size, each process must issue 2 transfer\n");
+        printf("        requests to complete access to the dataset.\n");
+        printf("          Contiguous blocks of the first transfer request are written like so:\n");
+        printf("              1111----2222----3333----\n");
+        printf("          Interleaved blocks of the first transfer request are written like so:\n");
+        printf("              123123123123------------\n");
+        printf("        The actual number of I/O operations involved in a transfer request\n");
+        printf("        depends on the access pattern and communication mode.\n");
+        printf("        When using independent I/O with interleaved pattern, each process\n");
+        printf("        performs 4 small non-contiguous I/O operations per transfer request.\n");
+        printf("        If collective I/O is turned on, the combined content of the buffers of\n");
+        printf("        the 3 processes will be written using one collective I/O operation\n");
+        printf("        per transfer request.\n");
+        printf("\n");
+        printf("      For information about access patterns in 2D geometry, please refer to the\n");
+        printf("      HDF5 Reference Manual.\n");
         printf("\n");
         printf("  DL - is a list of debugging flags. Valid values are:\n");
         printf("          1 - Minimal\n");

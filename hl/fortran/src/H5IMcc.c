@@ -63,7 +63,6 @@ herr_t H5IMmake_image_8bitf(hid_t loc_id,
  /* initialize the image dimensions */
  dims[0] = height;
  dims[1] = width;
- dims[2] = 1;
 
 /*-------------------------------------------------------------------------
  * create and write the dataset

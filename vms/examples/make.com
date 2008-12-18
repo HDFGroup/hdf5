@@ -17,8 +17,9 @@ $!
 $! Make HDF5 C examples
 $!
 $! ccopt = "/float=ieee_float/nowarnings/define=H5_VMS"
-$!
-$ ccc := cc 'ccopt /include=([-.src])
+$
+$ define zlib_dir sys$sysusers:[pourmale.zlib-1_2_3]
+$ ccc := cc 'ccopt /include=([-.-.include])
 $ type sys$input
  	Compiling  C examples
 $!
@@ -31,49 +32,49 @@ $
 $ type sys$input
        Creating h5_write 
 $ link     h5_write, -
-            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_read 
 $ link     h5_read, -
-            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_extend_write
 $ link     h5_extend_write, -
-            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_chunk_read 
 $ link     h5_chunk_read, -
-            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_compound 
 $ link     h5_compound, -
-            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_group 
 $ link     h5_group, -
-            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_select 
 $ link     h5_select, -
-            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_attribute 
 $ link     h5_attribute, -
-            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_mount 
 $ link     h5_mount, -
-            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_reference 
 $ link     h5_reference, -
-            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_ref2reg
 $ link     h5_ref2reg, -
-            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ type sys$input
        Creating h5_drivers
 $ link     h5_drivers, -
-            [-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
+            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $ exit

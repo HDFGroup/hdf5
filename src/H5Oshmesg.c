@@ -28,7 +28,8 @@
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5MMprivate.h"	/* Memory management			*/
 
-static void  *H5O_shmesg_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void  *H5O_shmesg_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_shmesg_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O_shmesg_copy(const void *_mesg, void *_dest);
 static size_t H5O_shmesg_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -76,7 +77,7 @@ const H5O_msg_class_t H5O_MSG_SHMESG[1] = {{
  */
 static void *
 H5O_shmesg_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_shmesg_table_t	*mesg;          /* Native message */
     void                *ret_value;     /* Return value */
@@ -87,7 +88,7 @@ H5O_shmesg_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
     HDassert(f);
     HDassert(p);
 
-    if(NULL == (mesg = H5MM_calloc(sizeof(H5O_shmesg_table_t))))
+    if(NULL == (mesg = (H5O_shmesg_table_t *)H5MM_calloc(sizeof(H5O_shmesg_table_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for shared message table message")
 
     /* Retrieve version, table address, and number of indexes */
@@ -162,7 +163,7 @@ H5O_shmesg_copy(const void *_mesg, void *_dest)
     /* Sanity check */
     HDassert(mesg);
 
-    if(!dest && NULL == (dest = H5MM_malloc(sizeof(H5O_shmesg_table_t))))
+    if(!dest && NULL == (dest = (H5O_shmesg_table_t *)H5MM_malloc(sizeof(H5O_shmesg_table_t))))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for shared message table message")
 
     /* All this message requires is a shallow copy */

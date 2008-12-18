@@ -42,9 +42,11 @@ static hssize_t H5S_all_serial_size(const H5S_t *space);
 static herr_t H5S_all_serialize(const H5S_t *space, uint8_t *buf);
 static herr_t H5S_all_deserialize(H5S_t *space, const uint8_t *buf);
 static herr_t H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+static herr_t H5S_all_offset(const H5S_t *space, hsize_t *off);
 static htri_t H5S_all_is_contiguous(const H5S_t *space);
 static htri_t H5S_all_is_single(const H5S_t *space);
 static htri_t H5S_all_is_regular(const H5S_t *space);
+static herr_t H5S_all_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S_all_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
 
 /* Selection iteration callbacks */
@@ -69,9 +71,11 @@ const H5S_select_class_t H5S_sel_all[1] = {{
     H5S_all_serialize,
     H5S_all_deserialize,
     H5S_all_bounds,
+    H5S_all_offset,
     H5S_all_is_contiguous,
     H5S_all_is_single,
     H5S_all_is_regular,
+    H5S_all_adjust_u,
     H5S_all_iter_init,
 }};
 
@@ -583,26 +587,61 @@ done:
 herr_t
 H5S_all_bounds(const H5S_t *space, hsize_t *start, hsize_t *end)
 {
-    int rank;                  /* Dataspace rank */
-    int i;                     /* index variable */
+    unsigned rank;                  /* Dataspace rank */
+    unsigned i;                     /* index variable */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5S_all_bounds);
+    FUNC_ENTER_NOAPI_NOFUNC(H5S_all_bounds)
 
-    assert(space);
-    assert(start);
-    assert(end);
+    HDassert(space);
+    HDassert(start);
+    HDassert(end);
 
     /* Get the dataspace extent rank */
-    rank=space->extent.rank;
+    rank = space->extent.rank;
 
     /* Just copy over the complete extent */
-    for(i=0; i<rank; i++) {
-        start[i]=0;
-        end[i]=space->extent.size[i]-1;
+    for(i = 0; i < rank; i++) {
+        start[i] = 0;
+        end[i] = space->extent.size[i] - 1;
     } /* end for */
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}   /* H5Sget_all_bounds() */
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}   /* H5S_all_bounds() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5S_all_offset
+ PURPOSE
+    Gets the linear offset of the first element for the selection.
+ USAGE
+    herr_t H5S_all_offset(space, offset)
+        const H5S_t *space;     IN: Dataspace pointer of selection to query
+        hsize_t *offset;        OUT: Linear offset of first element in selection
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Retrieves the linear offset (in "units" of elements) of the first element
+    selected within the dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Calling this function on a "none" selection returns fail.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_all_offset(const H5S_t *space, hsize_t *offset)
+{
+    FUNC_ENTER_NOAPI_NOFUNC(H5S_all_offset)
+
+    HDassert(space);
+    HDassert(offset);
+
+    /* 'All' selections always start at offset 0 */
+    *offset = 0;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}   /* H5S_all_offset() */
 
 
 /*--------------------------------------------------------------------------
@@ -696,6 +735,37 @@ H5S_all_is_regular(const H5S_t UNUSED *space)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_all_adjust_u
+ PURPOSE
+    Adjust an "all" selection by subtracting an offset
+ USAGE
+    herr_t H5S_all_adjust_u(space, offset)
+        H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
+        const hsize_t *offset; IN: Offset to subtract
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Moves selection by subtracting an offset from it.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_all_adjust_u(H5S_t UNUSED *space, const hsize_t UNUSED *offset)
+{
+    FUNC_ENTER_NOAPI_NOFUNC(H5S_all_adjust_u)
+
+    /* Check args */
+    HDassert(space);
+    HDassert(offset);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+}   /* H5S_all_adjust_u() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_select_all
  PURPOSE
     Specify the the entire extent is selected
@@ -755,23 +825,25 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Sselect_all (hid_t spaceid)
+herr_t
+H5Sselect_all(hid_t spaceid)
 {
-    H5S_t	*space = NULL;  /* Dataspace to modify selection of */
-    herr_t ret_value=SUCCEED;  /* return value */
+    H5S_t	*space;         /* Dataspace to modify selection of */
+    herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_API(H5Sselect_all, FAIL);
+    FUNC_ENTER_API(H5Sselect_all, FAIL)
+    H5TRACE1("e", "i", spaceid);
 
     /* Check args */
-    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Call internal routine to do the work */
     if((ret_value = H5S_select_all(space, TRUE)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Sselect_all() */
 
 

@@ -57,9 +57,9 @@
 /* Definitions for the initial metadata cache resize configuration */
 #define H5F_ACS_META_CACHE_INIT_CONFIG_SIZE	sizeof(H5AC_cache_config_t)
 #define H5F_ACS_META_CACHE_INIT_CONFIG_DEF	H5AC__DEFAULT_CACHE_CONFIG
-/* Definitions for size of raw data chunk cache(elements) */
-#define H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE       sizeof(size_t)
-#define H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF        521
+/* Definitions for size of raw data chunk cache(slots) */
+#define H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE       sizeof(size_t)
+#define H5F_ACS_DATA_CACHE_NUM_SLOTS_DEF        521
 /* Definition for size of raw data chunk cache(bytes) */
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE       sizeof(size_t)
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF        (1024*1024)
@@ -187,7 +187,7 @@ static herr_t
 H5P_facc_reg_prop(H5P_genclass_t *pclass)
 {
     H5AC_cache_config_t mdc_initCacheCfg = H5F_ACS_META_CACHE_INIT_CONFIG_DEF;  /* Default metadata cache settings */
-    size_t rdcc_nelmts = H5F_ACS_DATA_CACHE_ELMT_SIZE_DEF;      /* Default raw data chunk cache # of elements */
+    size_t rdcc_nslots = H5F_ACS_DATA_CACHE_NUM_SLOTS_DEF;      /* Default raw data chunk cache # of slots */
     size_t rdcc_nbytes = H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF;      /* Default raw data chunk cache # of bytes */
     double rdcc_w0 = H5F_ACS_PREEMPT_READ_CHUNKS_DEF;           /* Default raw data chunk cache dirty ratio */
     hsize_t threshold = H5F_ACS_ALIGN_THRHD_DEF;                /* Default allocation alignment threshold */
@@ -213,7 +213,7 @@ H5P_facc_reg_prop(H5P_genclass_t *pclass)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of raw data chunk cache (elements) */
-    if(H5P_register(pclass, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, H5F_ACS_DATA_CACHE_ELMT_SIZE_SIZE, &rdcc_nelmts, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if(H5P_register(pclass, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE, &rdcc_nslots, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of raw data chunk cache(bytes) */
@@ -312,7 +312,7 @@ H5P_facc_create(hid_t fapl_id, void UNUSED *copy_data)
     FUNC_ENTER_NOAPI_NOINIT(H5P_facc_create)
 
     /* Check argument */
-    if(NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Retrieve driver ID property */
@@ -362,7 +362,7 @@ H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void UNUSED *copy_data)
     FUNC_ENTER_NOAPI_NOINIT(H5P_facc_copy)
 
     /* Get driver ID from source property list */
-    if(NULL == (src_plist = H5I_object(src_fapl_id)))
+    if(NULL == (src_plist = (H5P_genplist_t *)H5I_object(src_fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
     if(H5P_get(src_plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
@@ -376,7 +376,7 @@ H5P_facc_copy(hid_t dst_fapl_id, hid_t src_fapl_id, void UNUSED *copy_data)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver info")
 
         /* Set the driver for the destination property list */
-        if(NULL == (dst_plist = H5I_object(dst_fapl_id)))
+        if(NULL == (dst_plist = (H5P_genplist_t *)H5I_object(dst_fapl_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "can't get property list")
         if(H5FD_fapl_open(dst_plist, driver_id, driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
@@ -413,7 +413,7 @@ H5P_facc_close(hid_t fapl_id, void UNUSED *close_data)
     FUNC_ENTER_NOAPI(H5P_facc_close, FAIL)
 
     /* Check argument */
-    if(NULL == (plist = H5I_object(fapl_id)))
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Get driver ID property */
@@ -577,17 +577,17 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
     void *driver_info;          /* VFL driver info */
     herr_t ret_value=SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5P_set_driver, FAIL);
+    FUNC_ENTER_NOAPI(H5P_set_driver, FAIL)
 
-    if (NULL==H5I_object_verify(new_driver_id, H5I_VFL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID");
+    if(NULL == H5I_object_verify(new_driver_id, H5I_VFL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID")
 
-    if( TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS) ) {
+    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
         /* Get the current driver information */
         if(H5P_get(plist, H5F_ACS_FILE_DRV_ID_NAME, &driver_id) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
         if(H5P_get(plist, H5F_ACS_FILE_DRV_INFO_NAME, &driver_info) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,"can't get driver info");
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL,"can't get driver info")
 
         /* Close the driver for the property list */
         if(H5FD_fapl_close(driver_id, driver_info)<0)
@@ -596,26 +596,26 @@ H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_drive
         /* Set the driver for the property list */
         if(H5FD_fapl_open(plist, new_driver_id, new_driver_info)<0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
-    } else if( TRUE == H5P_isa_class(plist->plist_id, H5P_DATASET_XFER) ) {
+    } else if(TRUE == H5P_isa_class(plist->plist_id, H5P_DATASET_XFER)) {
         /* Get the current driver information */
-        if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver ID");
-        if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &driver_info)<0)
-            HGOTO_ERROR (H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver info");
+        if(H5P_get(plist, H5D_XFER_VFL_ID_NAME, &driver_id) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver ID")
+        if(H5P_get(plist, H5D_XFER_VFL_INFO_NAME, &driver_info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve VFL driver info")
 
         /* Close the driver for the property list */
-        if(H5FD_dxpl_close(driver_id, driver_info)<0)
+        if(H5FD_dxpl_close(driver_id, driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't reset driver")
 
         /* Set the driver for the property list */
-        if(H5FD_dxpl_open(plist, new_driver_id, new_driver_info)<0)
+        if(H5FD_dxpl_open(plist, new_driver_id, new_driver_info) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver")
     } else {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access or data transfer property list")
     }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_set_driver() */
 
 
@@ -650,23 +650,23 @@ herr_t
 H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(H5Pset_driver, FAIL);
+    FUNC_ENTER_API(H5Pset_driver, FAIL)
     H5TRACE3("e", "ii*x", plist_id, new_driver_id, new_driver_info);
 
     /* Check arguments */
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
-    if (NULL==H5I_object_verify(new_driver_id, H5I_VFL))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID");
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+    if(NULL == H5I_object_verify(new_driver_id, H5I_VFL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID")
 
     /* Set the driver */
-    if(H5P_set_driver(plist,new_driver_id,new_driver_info)<0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info");
+    if(H5P_set_driver(plist, new_driver_id, new_driver_info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_driver() */
 
 
@@ -763,17 +763,17 @@ H5Pget_driver(hid_t plist_id)
     H5P_genplist_t *plist;      /* Property list pointer */
     hid_t	ret_value;      /* Return value */
 
-    FUNC_ENTER_API(H5Pget_driver, FAIL);
+    FUNC_ENTER_API(H5Pget_driver, FAIL)
     H5TRACE1("i", "i", plist_id);
 
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list");
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     ret_value = H5P_get_driver(plist);
 
 done:
-    FUNC_LEAVE_API(ret_value);
-}
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_driver() */
 
 
 /*-------------------------------------------------------------------------
@@ -859,14 +859,14 @@ H5Pget_driver_info(hid_t plist_id)
 
     FUNC_ENTER_API(H5Pget_driver_info, NULL);
 
-    if(NULL == (plist = H5I_object_verify(plist_id, H5I_GENPROP_LST)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list");
+    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
 
-    if((ret_value=H5P_get_driver_info(plist))==NULL)
-        HGOTO_ERROR(H5E_PLIST,H5E_CANTGET,NULL,"can't get driver info");
+    if(NULL == (ret_value = H5P_get_driver_info(plist)))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver info")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_driver_info() */
 
 
@@ -1213,13 +1213,13 @@ done:
  */
 herr_t
 H5Pset_cache(hid_t plist_id, int UNUSED mdc_nelmts,
-	     size_t rdcc_nelmts, size_t rdcc_nbytes, double rdcc_w0)
+	     size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pset_cache, FAIL);
-    H5TRACE5("e", "iIszzd", plist_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes,
+    H5TRACE5("e", "iIszzd", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes,
              rdcc_w0);
 
     /* Check arguments */
@@ -1231,8 +1231,8 @@ H5Pset_cache(hid_t plist_id, int UNUSED mdc_nelmts,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID");
 
     /* Set sizes */
-    if(H5P_set(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, &rdcc_nelmts) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache element size");
+    if(H5P_set(plist, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, &rdcc_nslots) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache number of slots");
     if(H5P_set(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc_nbytes) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache byte size");
     if(H5P_set(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &rdcc_w0) < 0)
@@ -1273,13 +1273,13 @@ done:
  */
 herr_t
 H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
-	     size_t *rdcc_nelmts, size_t *rdcc_nbytes, double *rdcc_w0)
+	     size_t *rdcc_nslots, size_t *rdcc_nbytes, double *rdcc_w0)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
     herr_t ret_value=SUCCEED;   /* return value */
 
     FUNC_ENTER_API(H5Pget_cache, FAIL);
-    H5TRACE5("e", "i*Is*z*z*d", plist_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes,
+    H5TRACE5("e", "i*Is*z*z*d", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes,
              rdcc_w0);
 
     /* Get the plist structure */
@@ -1292,9 +1292,9 @@ H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
     if (mdc_nelmts)
         *mdc_nelmts = 0;
 
-    if (rdcc_nelmts)
-        if(H5P_get(plist, H5F_ACS_DATA_CACHE_ELMT_SIZE_NAME, rdcc_nelmts) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache element size");
+    if (rdcc_nslots)
+        if(H5P_get(plist, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, rdcc_nslots) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache number of slots");
     if (rdcc_nbytes)
         if(H5P_get(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, rdcc_nbytes) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache byte size");
@@ -1876,76 +1876,163 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pset_latest_format
+ * Function:	H5Pset_libver_bounds
  *
- * Purpose:	Indicates that the library should always use the latest version
- *      of the file format when creating objects.  If this flag is not set,
- *      the library will always use the most backwardly compatibly format
- *      possible that can store the information about an object.
+ * Purpose:	Indicates which versions of the file format the library should
+ *      use when creating objects.  LOW is the earliest version of the HDF5
+ *      library that is guaranteed to be able to access the objects created
+ *      (the format of some objects in an HDF5 file may not have changed between
+ *      versions of the HDF5 library, possibly allowing earlier versions of the
+ *      HDF5 library to access those objects) and HIGH is the latest version
+ *      of the library required to access the objects created (later versions
+ *      of the HDF5 library will also be able to access those objects).
  *
- *	The default value is set to FALSE (creating backwardly compatible files)
+ *      LOW is used to require that objects use a more modern format and HIGH
+ *      is used to restrict objects from using a more modern format.
+ *
+ *      The special values of H5F_FORMAT_EARLIEST and H5F_FORMAT_LATEST can be
+ *      used in the following manner:  Setting LOW and HIGH to H5F_FORMAT_LATEST
+ *      will produce files whose objects use the latest version of the file
+ *      format available in the current HDF5 library for each object created.
+ *      Setting LOW and HIGH to H5F_FORMAT_EARLIEST will produce files that that
+ *      always require the use of the earliest version of the file format for
+ *      each object created. [NOTE!  LOW=HIGH=H5F_FORMAT_EARLIEST is not
+ *      implemented as of version 1.8.0 and setting LOW and HIGH to
+ *      H5F_FORMAT_EARLIEST will produce an error currently].
+ *
+ *      Currently, the only two valid combinations for this routine are:
+ *      LOW = H5F_FORMAT_EARLIEST and HIGH = H5F_FORMAT_LATEST (the default
+ *      setting, which creates objects with the ealiest version possible for
+ *      each object, but no upper limit on the version allowed to be created if
+ *      a newer version of an object's format is required to support a feature
+ *      requested with an HDF5 library API routine), and LOW = H5F_FORMAT_LATEST
+ *      and HIGH = H5F_FORMAT_LATEST (which is described above).
+ *
+ *      The LOW and HIGH values set with this routine at imposed with each
+ *      HDF5 library API call that creates objects in the file.  API calls that
+ *      would violate the LOW or HIGH format bound will fail.
+ *
+ *      Setting the LOW and HIGH values will not affect reading/writing existing
+ *      objects, only the creation of new objects.
+ *
+ * Note: Eventually we want to add more values to the H5F_libver_t
+ *      enumerated type that indicate library release values where the file
+ *      format was changed (like "H5F_FORMAT_1_2_0" for the file format changes
+ *      in the 1.2.x release branch and possily even "H5F_FORMAT_1_4_2" for
+ *      a change mid-way through the 1.4.x release branch, etc).
+ *
+ *      Adding more values will allow applications to make settings like the
+ *      following:
+ *          LOW = H5F_FORMAT_EARLIEST, HIGH = H5F_FORMAT_1_2_0 => Create objects
+ *              with the earliest possible format and don't allow any objects
+ *              to be created that require a library version greater than 1.2.x
+ *              (This is the "make certain that <application> linked with v1.2.x
+ *              of the library can read the file produced" use case)
+ *
+ *          LOW = H5F_FORMAT_1_4_2, HIGH = H5F_FORMAT_LATEST => create objects
+ *              with at least the version of their format that the 1.4.2 library
+ *              uses and allow any later version of the object's format
+ *              necessary to represent features used.
+ *              (This is the "make certain to take advantage of <new feature>
+ *              in the file format" use case (maybe <new feature> is smaller
+ *              or scales better than an ealier version, which would otherwise
+ *              be used))
+ *
+ *         LOW = H5F_FORMAT_1_2_0, HIGH = H5F_FORMAT_1_6_0 => creates objects
+ *              with at least the version of their format that the 1.2.x library
+ *              uses and don't allow any objects to be created that require a
+ *              library version greater than 1.6.x.
+ *              (Not certain of a particular use case for these settings,
+ *              although its probably just the logical combination of the
+ *              previous two; it just falls out as possible/logical (if it turns
+ *              out to be hard to implement in some way, we can always disallow
+ *              it))
+ *
+ * Note #2:     We talked about whether to include enum values for only library
+ *      versions where the format changed and decided it would be less confusing
+ *      for application developers if we include enum values for _all_ library
+ *      releases and then map down to the previous actual library release which
+ *      had a format change.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              Friday, September 9, 2006
+ *              Sunday, December 30, 2007
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_latest_format(hid_t plist_id, hbool_t latest)
+H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low,
+    H5F_libver_t high)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
+    hbool_t latest;             /* Whether to use the latest version or not */
     herr_t ret_value = SUCCEED;   /* return value */
 
-    FUNC_ENTER_API(H5Pset_latest_format, FAIL)
-    H5TRACE2("e", "ib", plist_id, latest);
+    FUNC_ENTER_API(H5Pset_libver_bounds, FAIL)
+    H5TRACE3("e", "iFvFv", plist_id, low, high);
+
+    /* Check args */
+    /* (Note that this is _really_ restricted right now, we'll want to loosen
+     *  this up more as we add features - QAK)
+     */
+    if(high != H5F_LIBVER_LATEST)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid high library version bound")
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
+    latest = (low == H5F_LIBVER_LATEST) ? TRUE : FALSE;
     if(H5P_set(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'latest format' flag")
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set library version bounds")
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_latest_format() */
+} /* end H5Pset_libver_bounds() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5Pget_latest_format
+ * Function:	H5Pget_libver_bounds
  *
- * Purpose:	Returns the current settings for the 'latest format' flag
+ * Purpose:	Returns the current settings for the library version format bounds
  *      from a file access property list.
  *
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              Friday, September 9, 2006
+ *              Thursday, January 3, 2008
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_latest_format(hid_t plist_id, hbool_t *latest/*out*/)
+H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low/*out*/,
+    H5F_libver_t *high/*out*/)
 {
     H5P_genplist_t *plist;      /* Property list pointer */
+    hbool_t latest;             /* Whether to use the latest version or not */
     herr_t ret_value = SUCCEED; /* return value */
 
-    FUNC_ENTER_API(H5Pget_latest_format, FAIL)
-    H5TRACE2("e", "ix", plist_id, latest);
+    FUNC_ENTER_API(H5Pget_libver_bounds, FAIL)
+    H5TRACE3("e", "ixx", plist_id, low, high);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get value */
-    if(latest)
-        if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, latest) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get 'latest format' flag")
+    if(H5P_get(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get library version bounds")
+
+    /* Check for setting values to return */
+    /* (Again, this is restricted now, we'll need to open it up later -QAK) */
+    if(low)
+        *low = latest ? H5F_LIBVER_LATEST : H5F_LIBVER_EARLIEST;
+    if(high)
+        *high = H5F_LIBVER_LATEST;
 
 done:
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pget_latest_format() */
+} /* end H5Pget_libver_bounds() */
 

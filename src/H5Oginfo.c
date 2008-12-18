@@ -33,7 +33,8 @@
 
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_ginfo_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void *H5O_ginfo_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_ginfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_ginfo_copy(const void *_mesg, void *_dest);
 static size_t H5O_ginfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -95,7 +96,7 @@ H5FL_DEFINE_STATIC(H5O_ginfo_t);
  */
 static void *
 H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_ginfo_t         *ginfo = NULL;  /* Pointer to group information message */
     unsigned char       flags;          /* Flags for encoding group info */
@@ -147,7 +148,7 @@ H5O_ginfo_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_fla
 done:
     if(ret_value == NULL)
         if(ginfo != NULL)
-            H5FL_FREE(H5O_ginfo_t, ginfo);
+            (void)H5FL_FREE(H5O_ginfo_t, ginfo);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_ginfo_decode() */
@@ -303,7 +304,7 @@ H5O_ginfo_free(void *mesg)
 
     HDassert(mesg);
 
-    H5FL_FREE(H5O_ginfo_t, mesg);
+    (void)H5FL_FREE(H5O_ginfo_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_ginfo_free() */

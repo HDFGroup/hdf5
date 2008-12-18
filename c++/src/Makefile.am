@@ -64,6 +64,6 @@ mostlyclean-local:
 	fi
 
 # Mark this directory as part of the C++ API
-HDF_CXX=yes
+CXX_API=yes
 
 include $(top_srcdir)/config/conclude.am

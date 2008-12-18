@@ -29,10 +29,10 @@
 #define DATASET_NAME	"DATASET_NAME"
 #define GROUP_NAME	"GROUP"
 #define ATTR_NAME	"ATTR"
-#define NUM_GRPS 	350
+#define NUM_GRPS 	35000
 #define NUM_ATTRS	100
 
-/* 
+/*
  * Generate 1.8 HDF5 file
  * with NUM_GRPS groups
  * with NUM_ATTRS attributes on the dataset
@@ -46,7 +46,7 @@ static void gen_file(void)
     char	attrname[30];
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
-    ret = H5Pset_latest_format(fapl, 1);
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
 
      /* Create dataset */
     file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);

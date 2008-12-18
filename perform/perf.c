@@ -77,8 +77,8 @@ int     opt_iter      = 1;
 int     opt_stripe    = -1;
 int     opt_correct   = 0;
 int     amode         = O_RDWR | O_CREAT;
-char    opt_file[256] = "/tmp/test.out\0";
-char    opt_pvfstab[256] = "notset\0";
+char    opt_file[256] = "perftest.out";
+char    opt_pvfstab[256] = "notset";
 int     opt_pvfstab_set = 0;
 
 /* function prototypes */
@@ -176,6 +176,8 @@ int main(int argc, char **argv)
 	VRFY((acc_tpl >= 0), "", H5FATAL);
 	ret = H5Pset_fapl_split(acc_tpl, meta_ext, mpio_pl, raw_ext, mpio_pl);
 	VRFY((ret >= 0), "H5Pset_fapl_split succeeded", H5FATAL);
+	ret = H5Pclose(mpio_pl);
+	VRFY((ret >= 0), "H5Pclose mpio_pl succeeded", H5FATAL);
     }else{
 	/* setup file access template */
 	acc_tpl = H5Pcreate (H5P_FILE_ACCESS);
@@ -314,6 +316,8 @@ int main(int argc, char **argv)
     VRFY((ret >= 0), "H5Dclose succeeded", H5FATAL);
     ret=H5Fclose(fid);
     VRFY((ret >= 0), "H5Fclose succeeded", H5FATAL);
+    ret=H5Pclose(acc_tpl);
+    VRFY((ret >= 0), "H5Pclose succeeded", H5FATAL);
 
 	/* compute the read and write times */
 	MPI_Allreduce(&read_tim, &max_read_tim, 1, MPI_DOUBLE, MPI_MAX,

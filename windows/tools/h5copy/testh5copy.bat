@@ -45,7 +45,7 @@ set /a nerrors=0
 set verbose=yes
 
 set srcfile=h5copytst.h5
-set indir=%CD%\..\testfiles
+set indir=%CD%\testfiles
 set outdir=%CD%\..\testfiles
 
 if not exist %outdir% mkdir %outdir%
@@ -148,7 +148,48 @@ rem $* everything else arguments for h5copy.
     )
     
     if %runh5diff% neq no (
-        call :h5difftest %inputfile% %outputfile%
+        call :h5difftest %inputfile% %outputfile% %7 %9
+    )
+    
+    exit /b
+    
+    
+:tooltest_fail
+    set runh5diff=yes
+    if "%1"=="-i" (
+        set inputfile=%2
+    ) else (
+        set runh5diff=no
+    )
+    if "%3"=="-o" (
+        set outputfile=%4
+    ) else (
+        set h5diff=no
+    )
+    
+    (
+        echo.#############################
+        echo. output for %h5copy%  %*
+        echo.#############################
+        %h5copy_bin% %*
+    ) > output.out
+    
+    if %errorlevel% neq 0 (
+        call :testing *FAILED* %h5copy% %*
+        echo.failed result is:
+        type output.out
+        set /a nerrors=!nerrors!+1
+    ) else (
+        call :testing PASSED %h5copy% %*
+        
+        rem Clean up output file
+        if not defined HDF5_NOCLEANUP (
+            del /f output.out
+        )
+    )
+    
+    if %runh5diff% neq no (
+        call :h5difftest_fail %inputfile% %outputfile% %7 %9
     )
     
     exit /b
@@ -157,8 +198,22 @@ rem $* everything else arguments for h5copy.
 rem Call the h5diff tool
 rem
 :h5difftest
-    %h5diff_bin% %* -q
+    %h5diff_bin% -q %*
     if %errorlevel% neq 0 (
+        call :verify *FAILED* %*
+        set /a nerrors=!nerrors!+1
+    ) else (
+        call :verify PASSED %*
+    )
+    
+    exit /b
+    
+    
+rem Call the h5diff tool with a call that is expected to fail
+rem
+:h5difftest_fail
+    %h5diff_bin% -q %*
+    if %errorlevel% neq 1 (
         call :verify *FAILED* %*
         set /a nerrors=!nerrors!+1
     ) else (
@@ -211,7 +266,7 @@ rem        rem Create the expect file if it doesn't yet exist
 rem        call :verify_h5ls CREATED %*
 rem        copy %actual% %expect%
 rem    ) else (
-    fc %expect_parsed% %actual_parsed% | find "FC: no diff" > nul
+    fc %expect_parsed% %actual_parsed% > nul
     if %errorlevel% equ 0 (
         call :verify_h5ls PASSED %*
     ) else (
@@ -268,17 +323,17 @@ rem <none>
     call :tooltest -i %testfile% -o %fileout% -v -s /grp_dsets/simple  -d /grp_dsets/simple_group
 
     echo.Test copying ^& renaming group
-    call :tooltest -i %testfile% -o %fileout% -v -s grp_dsets  -d grp_rename
+    call :tooltest_fail -i %testfile% -o %fileout% -v -s grp_dsets  -d grp_rename
 
     echo.Test copying 'full' group hierarchy into group in destination file
-    call :tooltest -i %testfile% -o %fileout% -v -s grp_dsets  -d /grp_rename/grp_dsets
+    call :tooltest_fail -i %testfile% -o %fileout% -v -s grp_dsets  -d /grp_rename/grp_dsets
 
     echo.Test copying objects into group hier. that doesn't exist yet in destination file
     call :tooltest -i %testfile% -o %fileout% -vp -s simple    -d /A/B1/simple
     call :tooltest -i %testfile% -o %fileout% -vp -s simple    -d /A/B2/simple2
     call :tooltest -i %testfile% -o %fileout% -vp -s /grp_dsets/simple    -d /C/D/simple
-    call :tooltest -i %testfile% -o %fileout% -vp -s /grp_dsets -d /E/F/grp_dsets
-    call :tooltest -i %testfile% -o %fileout% -vp -s /grp_nested -d /G/H/grp_nested
+    call :tooltest_fail -i %testfile% -o %fileout% -vp -s /grp_dsets -d /E/F/grp_dsets
+    call :tooltest_fail -i %testfile% -o %fileout% -vp -s /grp_nested -d /G/H/grp_nested
 
     rem Verify that the file created above is correct
     call :h5lstest %fileout%

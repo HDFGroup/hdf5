@@ -13,13 +13,13 @@ rem is linked from the top-level documents page.  It can also be found at
 rem http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have
 rem access to either file, you may request a copy from help@hdfgroup.org.
 rem
-rem Tests for the h5jam tool
+rem Tests for the h5jam/h5unjam tools
 rem
 rem    Created:  Scott Wegner, 8/27/07
 rem    Modified:
 rem
 
-rem We currently don't build DLL version os h5jam / h5unjam, but the test script
+rem We currently don't build DLL version of h5jam / h5unjam, but the test script
 rem is setup to handle it if we ever decide to.  --SJW 8/27/07
 
 setlocal enabledelayedexpansion
@@ -61,7 +61,7 @@ set getub_bin=%CD%\%getub%
 set nerrors=0
 set verbose=yes
 
-set testfiles=%CD%\..\testfiles
+set testfiles=%CD%\testfiles
 
 goto main
 
@@ -249,7 +249,7 @@ rem
     rem Compare to 'cmpfile', result is set in result1
     set tfile=tt1
     %getub_bin% -c %size% %hfile% > %tfile%
-    fc /w %cmpfile% %tfile% | find "FC: no diff" > nul
+    fc /w %cmpfile% %tfile% > nul
     if %errorlevel% neq 0 (
         fc /w %cmpfile% %file%
         set result1=1

@@ -18,7 +18,7 @@
  *              August 5, 2002
  *
  * Purpose:     Compact dataset I/O functions.  These routines are similar
- *              H5D_contig_* and H5D_istore_*.
+ *              H5D_contig_* and H5D_chunk_*.
  */
 
 /****************/
@@ -41,21 +41,54 @@
 #include "H5Oprivate.h"		/* Object headers		  	*/
 #include "H5Vprivate.h"		/* Vector and array functions		*/
 
+
 /****************/
 /* Local Macros */
 /****************/
+
 
 /******************/
 /* Local Typedefs */
 /******************/
 
+
 /********************/
 /* Local Prototypes */
 /********************/
 
+/* Layout operation callbacks */
+static herr_t H5D_compact_new(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
+    const H5P_genplist_t *dc_plist);
+static herr_t H5D_compact_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
+    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+    H5D_chunk_map_t *cm);
+static ssize_t H5D_compact_readvv(const H5D_io_info_t *io_info,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
+static ssize_t H5D_compact_writevv(const H5D_io_info_t *io_info,
+    size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[]);
+
+
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Compact storage layout I/O ops */
+const H5D_layout_ops_t H5D_LOPS_COMPACT[1] = {{
+    H5D_compact_new,
+    H5D_compact_io_init,
+    H5D_contig_read,
+    H5D_contig_write,
+#ifdef H5_HAVE_PARALLEL
+    NULL,
+    NULL,
+#endif /* H5_HAVE_PARALLEL */
+    H5D_compact_readvv,
+    H5D_compact_writevv,
+    NULL
+}};
+
 
 /*******************/
 /* Local Variables */
@@ -63,6 +96,7 @@
 
 /* Declare extern the free list to manage blocks of type conversion data */
 H5FL_BLK_EXTERN(type_conv);
+
 
 
 /*-------------------------------------------------------------------------
@@ -118,6 +152,79 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_compact_new
+ *
+ * Purpose:	Constructs new compact layout information for dataset
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, May 22, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+/* ARGSUSED */
+static herr_t
+H5D_compact_new(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset,
+    const H5P_genplist_t UNUSED *dc_plist)
+{
+    hssize_t tmp_size;          /* Temporary holder for raw data size */
+    hsize_t comp_data_size;     /* Size of compact data */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_compact_new)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(dset);
+    HDassert(dc_plist);
+
+    /*
+     * Compact dataset is stored in dataset object header message of
+     * layout.
+     */
+    tmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space) * H5T_get_size(dset->shared->type);
+    H5_ASSIGN_OVERFLOW(dset->shared->layout.u.compact.size, tmp_size, hssize_t, size_t);
+
+    /* Verify data size is smaller than maximum header message size
+     * (64KB) minus other layout message fields.
+     */
+    comp_data_size = H5O_MESG_MAX_SIZE - H5O_layout_meta_size(f, &(dset->shared->layout));
+    if(dset->shared->layout.u.compact.size > comp_data_size)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "compact dataset size is bigger than header message maximum size")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_compact_new() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_compact_io_init
+ *
+ * Purpose:	Performs initialization before any sort of I/O on the raw data
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, March 20, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_compact_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t UNUSED *type_info,
+    hsize_t UNUSED nelmts, const H5S_t UNUSED *file_space, const H5S_t UNUSED *mem_space,
+    H5D_chunk_map_t UNUSED *cm)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_compact_io_init)
+
+    io_info->store->compact.buf = io_info->dset->shared->layout.u.compact.buf;
+    io_info->store->compact.dirty = &io_info->dset->shared->layout.u.compact.dirty;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D_compact_io_init() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5D_compact_readvv
  *
  * Purpose:     Reads some data vectors from a dataset into a buffer.
@@ -135,20 +242,19 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
+static ssize_t
 H5D_compact_readvv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[],
-    haddr_t UNUSED addr, void UNUSED *pointer/*in*/, void *buf)
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[])
 {
-    ssize_t ret_value;          /* Return value */
+    ssize_t ret_value;                  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_compact_readvv, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_compact_readvv)
 
-    assert(io_info->dset);
+    HDassert(io_info);
 
     /* Use the vectorized memory copy routine to do actual work */
-    if((ret_value=H5V_memcpyvv(buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr,io_info->dset->shared->layout.u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr))<0)
+    if((ret_value = H5V_memcpyvv(io_info->u.rbuf, mem_max_nseq, mem_curr_seq, mem_size_arr, mem_offset_arr, io_info->store->compact.buf, dset_max_nseq, dset_curr_seq, dset_size_arr, dset_offset_arr)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
 
 done:
@@ -177,24 +283,23 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
+static ssize_t
 H5D_compact_writevv(const H5D_io_info_t *io_info,
     size_t dset_max_nseq, size_t *dset_curr_seq, size_t dset_size_arr[], hsize_t dset_offset_arr[],
-    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[],
-    haddr_t UNUSED addr, void UNUSED *pointer/*in*/, const void *buf)
+    size_t mem_max_nseq, size_t *mem_curr_seq, size_t mem_size_arr[], hsize_t mem_offset_arr[])
 {
-    ssize_t ret_value;          /* Return value */
+    ssize_t ret_value;                  /* Return value */
 
-    FUNC_ENTER_NOAPI(H5D_compact_writevv, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_compact_writevv)
 
-    assert(io_info->dset);
+    HDassert(io_info);
 
     /* Use the vectorized memory copy routine to do actual work */
-    if((ret_value=H5V_memcpyvv(io_info->dset->shared->layout.u.compact.buf,dset_max_nseq,dset_curr_seq,dset_size_arr,dset_offset_arr,buf,mem_max_nseq,mem_curr_seq,mem_size_arr,mem_offset_arr))<0)
+    if((ret_value = H5V_memcpyvv(io_info->store->compact.buf, dset_max_nseq, dset_curr_seq, dset_size_arr, dset_offset_arr, io_info->u.wbuf, mem_max_nseq, mem_curr_seq, mem_size_arr, mem_offset_arr)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "vectorized memcpy failed")
 
     /* Mark the compact dataset's buffer as dirty */
-    io_info->dset->shared->layout.u.compact.dirty = TRUE;
+    *io_info->store->compact.dirty = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -214,7 +319,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst, 
+H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     H5O_layout_t *layout_dst, H5T_t *dt_src, H5O_copy_t *cpy_info, hid_t dxpl_id)
 {
     hid_t       tid_src = -1;           /* Datatype ID for source datatype */
@@ -236,7 +341,7 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     HDassert(dt_src);
 
     /* Create datatype ID for src datatype, so it gets freed */
-    if((tid_src = H5I_register(H5I_DATATYPE, dt_src)) < 0)
+    if((tid_src = H5I_register(H5I_DATATYPE, dt_src, FALSE)) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register source file datatype")
 
     /* If there's a VLEN source datatype, do type conversion information */
@@ -255,7 +360,7 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
         /* create a memory copy of the variable-length datatype */
         if(NULL == (dt_mem = H5T_copy(dt_src, H5T_COPY_TRANSIENT)))
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
-        if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem)) < 0)
+        if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem, FALSE)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register memory datatype")
 
         /* create variable-length datatype at the destinaton file */
@@ -263,14 +368,14 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to copy")
         if(H5T_set_loc(dt_dst, f_dst, H5T_LOC_DISK) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "cannot mark datatype on disk")
-        if((tid_dst = H5I_register(H5I_DATATYPE, dt_dst)) < 0)
+        if((tid_dst = H5I_register(H5I_DATATYPE, dt_dst, FALSE)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register destination file datatype")
 
         /* Set up the conversion functions */
         if(NULL == (tpath_src_mem = H5T_path_find(dt_src, dt_mem, NULL, NULL, dxpl_id, FALSE)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between src and mem datatypes")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to convert between src and mem datatypes")
         if(NULL == (tpath_mem_dst = H5T_path_find(dt_mem, dt_dst, NULL, NULL, dxpl_id, FALSE)))
-            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to convert between mem and dst datatypes")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to convert between mem and dst datatypes")
 
         /* Determine largest datatype size */
         if(0 == (src_dt_size = H5T_get_size(dt_src)))
@@ -297,7 +402,7 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
         /* Atomize */
-        if((buf_sid = H5I_register(H5I_DATASPACE, buf_space)) < 0) {
+        if((buf_sid = H5I_register(H5I_DATASPACE, buf_space, FALSE)) < 0) {
             H5S_close(buf_space);
             HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace ID")
         } /* end if */
@@ -353,29 +458,28 @@ H5D_compact_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
             /* Type conversion not necessary */
             HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
     } /* end if */
-    else 
+    else
         /* Type conversion not necessary */
         HDmemcpy(layout_dst->u.compact.buf, layout_src->u.compact.buf, layout_src->u.compact.size);
 
 done:
-    if(buf_sid > 0)
-        if(H5I_dec_ref(buf_sid) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary dataspace ID")
+    if(buf_sid > 0 && H5I_dec_ref(buf_sid, FALSE) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "can't decrement temporary dataspace ID")
     if(tid_src > 0)
-        if(H5I_dec_ref(tid_src) < 0)
+        if(H5I_dec_ref(tid_src, FALSE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(tid_dst > 0)
-        if(H5I_dec_ref(tid_dst) < 0)
+        if(H5I_dec_ref(tid_dst, FALSE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(tid_mem > 0)
-        if(H5I_dec_ref(tid_mem) < 0)
+        if(H5I_dec_ref(tid_mem, FALSE) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "Can't decrement temporary datatype ID")
     if(buf)
-        H5FL_BLK_FREE(type_conv, buf);
+        (void)H5FL_BLK_FREE(type_conv, buf);
     if(reclaim_buf)
-        H5FL_BLK_FREE(type_conv, reclaim_buf);
+        (void)H5FL_BLK_FREE(type_conv, reclaim_buf);
     if(bkg)
-        H5FL_BLK_FREE(type_conv, bkg);
+        (void)H5FL_BLK_FREE(type_conv, bkg);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_compact_copy() */

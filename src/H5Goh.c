@@ -46,7 +46,8 @@
 /********************/
 
 static htri_t H5O_group_isa(H5O_t *loc);
-static hid_t H5O_group_open(const H5G_loc_t *obj_loc, hid_t dxpl_id);
+static hid_t H5O_group_open(const H5G_loc_t *obj_loc, hid_t lapl_id,
+    hid_t dxpl_id, hbool_t app_ref);
 static void *H5O_group_create(H5F_t *f, void *_crt_info, H5G_loc_t *obj_loc,
     hid_t dxpl_id);
 static H5O_loc_t *H5O_group_get_oloc(hid_t obj_id);
@@ -134,7 +135,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static hid_t
-H5O_group_open(const H5G_loc_t *obj_loc, hid_t dxpl_id)
+H5O_group_open(const H5G_loc_t *obj_loc, hid_t UNUSED lapl_id, hid_t dxpl_id, hbool_t app_ref)
 {
     H5G_t       *grp = NULL;            /* Group opened */
     hid_t	ret_value;              /* Return value */
@@ -148,7 +149,7 @@ H5O_group_open(const H5G_loc_t *obj_loc, hid_t dxpl_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
 
     /* Register an ID for the group */
-    if((ret_value = H5I_register(H5I_GROUP, grp)) < 0)
+    if((ret_value = H5I_register(H5I_GROUP, grp, app_ref)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
 
 done:
@@ -231,7 +232,7 @@ H5O_group_get_oloc(hid_t obj_id)
     FUNC_ENTER_NOAPI_NOINIT(H5O_group_get_oloc)
 
     /* Get the group */
-    if(NULL ==  (grp = H5I_object(obj_id)))
+    if(NULL ==  (grp = (H5G_t *)H5I_object(obj_id)))
         HGOTO_ERROR(H5E_OHDR, H5E_BADATOM, NULL, "couldn't get object from ID")
 
     /* Get the group's object header location */
@@ -271,7 +272,7 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
     HDassert(bh_info);
 
     /* Check for "new style" group info */
-    if(NULL == H5O_msg_read_real(f, dxpl_id, oh, H5O_LINFO_ID, &linfo)) { 
+    if(NULL == H5O_msg_read_real(f, dxpl_id, oh, H5O_LINFO_ID, &linfo)) {
         H5O_stab_t          stab;       	/* Info about symbol table */
 
         /* Must be "old style" group, clear error stack */
@@ -280,7 +281,7 @@ H5O_group_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
         /* Get symbol table message */
         if(NULL == H5O_msg_read_real(f, dxpl_id, oh, H5O_STAB_ID, &stab))
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't find LINFO nor STAB messages")
-	
+
         /* Get symbol table size info */
         if(H5G_stab_bh_size(f, dxpl_id, &stab, bh_info) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't retrieve symbol table size info")

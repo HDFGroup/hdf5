@@ -68,8 +68,8 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
 	for(j = 0; j < 5; j++) {
 
 	    /* Extend the dataset */
-	    offset[0] = i * NX;
-	    offset[1] = j * NY;
+	    offset[0] = (hsize_t)(i * NX);
+	    offset[1] = (hsize_t)(j * NY);
 	    size[0] = offset[0] + NX;
 	    size[1] = offset[1] + NY;
             if(size[0] > max_size[0] || size[1] > max_size[1]) {
@@ -96,8 +96,8 @@ write_data(const char *msg, hid_t file, const char *name, hid_t cparms, hid_t me
 	for(j = 0; j < 10; j++) {
 
 	    /* Select a hyperslab */
-	    offset[0] = i * (NX / 2);
-	    offset[1] = j * (NY / 2);
+	    offset[0] = (hsize_t)(i * (NX / 2));
+	    offset[1] = (hsize_t)(j * (NY / 2));
 	    if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, offset, NULL, half_dims, NULL) < 0) TEST_ERROR;
 
 	    /* Read */
@@ -164,8 +164,8 @@ write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, h
 	for(j = 0; j < 5; j++) {
 
 	    /* Extend the dataset */
-	    offset[0] = i * NX;
-	    offset[1] = j * NY;
+	    offset[0] = (hsize_t)(i * NX);
+	    offset[1] = (hsize_t)(j * NY);
 	    size[0] = offset[0] + NX;
 	    size[1] = offset[1] + NY;
 	    if(H5Dextend(dataset, size) < 0) TEST_ERROR;
@@ -186,8 +186,8 @@ write_data_deprec(const char *msg, hid_t file, const char *name, hid_t cparms, h
 	for(j = 0; j < 10; j++) {
 
 	    /* Select a hyperslab */
-	    offset[0] = i * (NX / 2);
-	    offset[1] = j * (NY / 2);
+	    offset[0] = (hsize_t)(i * (NX / 2));
+	    offset[1] = (hsize_t)(j * (NY / 2));
 	    if(H5Sselect_hyperslab(file_space, H5S_SELECT_SET, offset, NULL, half_dims, NULL) < 0) TEST_ERROR;
 
 	    /* Read */
@@ -251,57 +251,49 @@ main (void)
     static hsize_t		maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED};
     char			filename[1024];
     int				i, j;
-    const char *envval = NULL;
 
-    envval = HDgetenv("HDF5_DRIVER");
-    if(envval == NULL) 
-        envval = "nomatch";
-    if(HDstrcmp(envval, "split")) {
-	h5_reset();
-	fapl = h5_fileaccess();
+    h5_reset();
+    fapl = h5_fileaccess();
 
-	/* Initialize buffer and space */
-	for(i = 0; i < NX; i++)
-	    for(j = 0; j < NY; j++)
-		buf1[i][j] = i * NY + j;
+    /* Initialize buffer and space */
+    for(i = 0; i < NX; i++)
+        for(j = 0; j < NY; j++)
+            buf1[i][j] = i * NY + j;
 
-	if((mem_space = H5Screate_simple(2, dims, maxdims)) < 0) TEST_ERROR;
+    if((mem_space = H5Screate_simple(2, dims, maxdims)) < 0) TEST_ERROR;
 
-	/* Create the file */
-	h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
-	if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
+    /* Create the file */
+    h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR;
 
-	/* Create the dataset creation property list */
-	if((cparms = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
-	if(H5Pset_chunk(cparms, 2, chunk_dims) < 0) TEST_ERROR;
+    /* Create the dataset creation property list */
+    if((cparms = H5Pcreate(H5P_DATASET_CREATE)) < 0) TEST_ERROR;
+    if(H5Pset_chunk(cparms, 2, chunk_dims) < 0) TEST_ERROR;
 
-        /* Test with incremental allocation */
-	nerrors += write_data("extendible dataset with incr. allocation", file, "dataset1a", cparms, mem_space) < 0 ? 1 : 0;
+    /* Test with incremental allocation */
+    nerrors += write_data("extendible dataset with incr. allocation", file, "dataset1a", cparms, mem_space) < 0 ? 1 : 0;
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-	nerrors += write_data_deprec("extendible dataset with incr. allocation w/deprec. symbols", file, "dataset1b", cparms, mem_space) < 0 ? 1 : 0;
+    nerrors += write_data_deprec("extendible dataset with incr. allocation w/deprec. symbols", file, "dataset1b", cparms, mem_space) < 0 ? 1 : 0;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-        /* Test with early allocation */
-	if(H5Pset_alloc_time(cparms, H5D_ALLOC_TIME_EARLY) < 0) TEST_ERROR;
-	nerrors += write_data("extendible dataset with early allocation", file, "dataset2a", cparms, mem_space) < 0 ? 1 : 0;
+    /* Test with early allocation */
+    if(H5Pset_alloc_time(cparms, H5D_ALLOC_TIME_EARLY) < 0) TEST_ERROR;
+    nerrors += write_data("extendible dataset with early allocation", file, "dataset2a", cparms, mem_space) < 0 ? 1 : 0;
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-	nerrors += write_data_deprec("extendible dataset with early allocation w/deprec. symbols", file, "dataset2b", cparms, mem_space) < 0 ? 1 : 0;
+    nerrors += write_data_deprec("extendible dataset with early allocation w/deprec. symbols", file, "dataset2b", cparms, mem_space) < 0 ? 1 : 0;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-	if(H5Pclose(cparms) < 0) TEST_ERROR;
-	if(H5Sclose(mem_space) < 0) TEST_ERROR;
-	if(H5Fclose(file) < 0) TEST_ERROR;
+    if(H5Pclose(cparms) < 0) TEST_ERROR;
+    if(H5Sclose(mem_space) < 0) TEST_ERROR;
+    if(H5Fclose(file) < 0) TEST_ERROR;
 
-	if(nerrors) {
-	    printf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
-	    exit(1);
-	} /* end if */
-
-	printf("All extend tests passed.\n");
-	h5_cleanup(FILENAME, fapl);
+    if(nerrors) {
+        printf("***** %d FAILURE%s! *****\n", nerrors, (1 == nerrors) ? "" : "S");
+        exit(1);
     } /* end if */
-    else
-        puts("All extend tests skipped - Incompatible with current Virtual File Driver");
+
+    printf("All extend tests passed.\n");
+    h5_cleanup(FILENAME, fapl);
 
     return 0;
 

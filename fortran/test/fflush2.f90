@@ -50,21 +50,12 @@
      ! dataset identifier
      !
      INTEGER(HID_T) :: dset_id
- 
-     !
-     ! data space identifier
-     !
-     INTEGER(HID_T) :: dataspace
+
  
      !
      ! data type identifier
      !
      INTEGER(HID_T) :: dtype_id
-
-     ! 
-     !The dimensions for the dataset.
-     !
-     INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/NX,NY/)
 
      !
      !flag to check operation success 

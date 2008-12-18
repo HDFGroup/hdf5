@@ -15,7 +15,7 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:             H5ACproto.h
+ * Created:             H5ACpublic.h
  *                      Jul 10 1997
  *                      Robb Matzke <matzke@llnl.gov>
  *
@@ -57,7 +57,7 @@ extern "C" {
  * structure.
  *
  * Similarly, the open_trace_file, close_trace_file, and trace_file_name
- * fields do not appear in H5C_auto_size_ctl_t, as most trace file 
+ * fields do not appear in H5C_auto_size_ctl_t, as most trace file
  * issues are handled at the H5AC level.  The one exception is storage of
  * the pointer to the trace file, which is handled by H5C.
  *
@@ -82,7 +82,7 @@ extern "C" {
  *
  * 	The trace file is a debuging feature that allow the capture of
  * 	top level metadata cache requests for purposes of debugging and/or
- * 	optimization.  This field should normally be set to FALSE, as 
+ * 	optimization.  This field should normally be set to FALSE, as
  * 	trace file collection imposes considerable overhead.
  *
  * 	This field should only be set to TRUE when the trace_file_name
@@ -100,7 +100,7 @@ extern "C" {
  * trace_file_name: Full path of the trace file to be opened if the
  * 	open_trace_file field is TRUE.
  *
- * 	In the parallel case, an ascii representation of the mpi rank of 
+ * 	In the parallel case, an ascii representation of the mpi rank of
  * 	the process will be appended to the file name to yield a unique
  * 	trace file name for each process.
  *
@@ -108,12 +108,12 @@ extern "C" {
  * 	characters.
  *
  * evictions_enabled:  Boolean field used to either report the current
- * 	evictions enabled status of the cache, or to set the cache's 
+ * 	evictions enabled status of the cache, or to set the cache's
  *	evictions enabled status.
  *
- * 	In general, the metadata cache should always be allowed to 
- * 	evict entries.  However, in some cases it is advantageous to 
- * 	disable evictions briefly, and thereby postpone metadata 
+ * 	In general, the metadata cache should always be allowed to
+ * 	evict entries.  However, in some cases it is advantageous to
+ * 	disable evictions briefly, and thereby postpone metadata
  * 	writes.  However, this must be done with care, as the cache
  * 	can grow quickly.  If you do this, re-enable evictions as
  * 	soon as possible and monitor cache size.
@@ -179,7 +179,7 @@ extern "C" {
  *              at its maximum size, or if the cache is not already using
  *              all available space.
  *
- *      Note that you must set decr_mode to H5C_incr__off if you 
+ *      Note that you must set decr_mode to H5C_incr__off if you
  *      disable metadata cache entry evictions.
  *
  * lower_hr_threshold: Lower hit rate threshold.  If the increment mode
@@ -207,6 +207,61 @@ extern "C" {
  * max_increment: If enabled by the apply_max_increment field described
  *      above, this field contains the maximum number of bytes by which the
  *      cache size can be increased in a single re-size.
+ *
+ * flash_incr_mode:  Instance of the H5C_cache_flash_incr_mode enumerated
+ *      type whose value indicates whether and by which algorithm we should
+ *      make flash increases in the size of the cache to accomodate insertion
+ *      of large entries and large increases in the size of a single entry.
+ *
+ *      The addition of the flash increment mode was occasioned by performance
+ *      problems that appear when a local heap is increased to a size in excess
+ *      of the current cache size.  While the existing re-size code dealt with
+ *      this eventually, performance was very bad for the remainder of the
+ *      epoch.
+ *
+ *      At present, there are two possible values for the flash_incr_mode:
+ *
+ *      H5C_flash_incr__off:  Don't perform flash increases in the size of
+ *              the cache.
+ *
+ *      H5C_flash_incr__add_space:  Let x be either the size of a newly
+ *              newly inserted entry, or the number of bytes by which the
+ *              size of an existing entry has been increased.
+ *
+ *              If
+ *                      x > flash_threshold * current max cache size,
+ *
+ *              increase the current maximum cache size by x * flash_multiple
+ *              less any free space in the cache, and star a new epoch.  For
+ *              now at least, pay no attention to the maximum increment.
+ *
+ *      In both of the above cases, the flash increment pays no attention to
+ *      the maximum increment (at least in this first incarnation), but DOES
+ *      stay within max_size.
+ *
+ *      With a little thought, it should be obvious that the above flash
+ *      cache size increase algorithm is not sufficient for all circumstances --
+ *      for example, suppose the user round robins through
+ *      (1/flash_threshold) +1 groups, adding one data set to each on each
+ *      pass.  Then all will increase in size at about the same time, requiring
+ *      the max cache size to at least double to maintain acceptable
+ *      performance, however the above flash increment algorithm will not be
+ *      triggered.
+ *
+ *      Hopefully, the add space algorithms detailed above will be sufficient
+ *      for the performance problems encountered to date.  However, we should
+ *      expect to revisit the issue.
+ *
+ * flash_multiple: Double containing the multiple described above in the
+ *      H5C_flash_incr__add_space section of the discussion of the
+ *      flash_incr_mode section.  This field is ignored unless flash_incr_mode
+ *      is H5C_flash_incr__add_space.
+ *
+ * flash_threshold: Double containing the factor by which current max cache size
+ *      is multiplied to obtain the size threshold for the add_space flash
+ *      increment algorithm.  The field is ignored unless flash_incr_mode is
+ *      H5C_flash_incr__add_space.
+ *
  *
  *
  * Cache size decrease control fields:
@@ -239,7 +294,7 @@ extern "C" {
  *              over the last epoch exceeds the value provided in the
  *              upper_hr_threshold field.
  *
- *      Note that you must set decr_mode to H5C_decr__off if you 
+ *      Note that you must set decr_mode to H5C_decr__off if you
  *      disable metadata cache entry evictions.
  *
  * upper_hr_threshold: Upper hit rate threshold.  The use of this field
@@ -363,6 +418,10 @@ typedef struct H5AC_cache_config_t
 
     hbool_t                  apply_max_increment;
     size_t                   max_increment;
+
+    enum H5C_cache_flash_incr_mode      flash_incr_mode;
+    double                              flash_multiple;
+    double                              flash_threshold;
 
 
     /* size decrease control fields: */

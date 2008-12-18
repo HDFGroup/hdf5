@@ -33,7 +33,8 @@
 
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_layout_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void *H5O_layout_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_layout_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_layout_copy(const void *_mesg, void *_dest);
 static size_t H5O_layout_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -99,7 +100,7 @@ H5FL_DEFINE(H5O_layout_t);
  */
 static void *
 H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_layout_t           *mesg = NULL;
     unsigned               u;
@@ -136,10 +137,29 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
         p += 5;
 
         /* Address */
-        if(mesg->type == H5D_CONTIGUOUS)
+        if(mesg->type == H5D_CONTIGUOUS) {
             H5F_addr_decode(f, &p, &(mesg->u.contig.addr));
-        else if(mesg->type == H5D_CHUNKED)
+
+            /* Set the layout operations */
+            mesg->ops = H5D_LOPS_CONTIG;
+        } /* end if */
+        else if(mesg->type == H5D_CHUNKED) {
             H5F_addr_decode(f, &p, &(mesg->u.chunk.addr));
+
+            /* Set the layout operations */
+            mesg->ops = H5D_LOPS_CHUNK;
+
+            /* Set the chunk operations */
+            /* (Only "btree" indexing type currently supported */
+            mesg->u.chunk.ops = H5D_COPS_BTREE;
+        } /* end if */
+        else {
+            /* Sanity check */
+            HDassert(mesg->type == H5D_COMPACT);
+
+            /* Set the layout operations */
+            mesg->ops = H5D_LOPS_COMPACT;
+        } /* end else */
 
         /* Read the size */
         if(mesg->type != H5D_CHUNKED) {
@@ -185,11 +205,17 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
                     HDmemcpy(mesg->u.compact.buf, p, mesg->u.compact.size);
                     p += mesg->u.compact.size;
                 } /* end if */
+
+                /* Set the layout operations */
+                mesg->ops = H5D_LOPS_COMPACT;
                 break;
 
             case H5D_CONTIGUOUS:
                 H5F_addr_decode(f, &p, &(mesg->u.contig.addr));
                 H5F_DECODE_LENGTH(f, p, mesg->u.contig.size);
+
+                /* Set the layout operations */
+                mesg->ops = H5D_LOPS_CONTIG;
                 break;
 
             case H5D_CHUNKED:
@@ -208,6 +234,13 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
                 /* Compute chunk size */
                 for(u = 1, mesg->u.chunk.size = mesg->u.chunk.dim[0]; u < mesg->u.chunk.ndims; u++)
                     mesg->u.chunk.size *= mesg->u.chunk.dim[u];
+
+                /* Set the layout operations */
+                mesg->ops = H5D_LOPS_CHUNK;
+
+                /* Set the chunk operations */
+                /* (Only "btree" indexing type currently supported */
+                mesg->u.chunk.ops = H5D_COPS_BTREE;
                 break;
 
             default:
@@ -221,7 +254,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
 done:
     if(ret_value == NULL)
         if(mesg)
-            H5FL_FREE(H5O_layout_t, mesg);
+            (void)H5FL_FREE(H5O_layout_t, mesg);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_layout_decode() */
@@ -519,22 +552,22 @@ H5O_layout_reset (void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_free (void *_mesg)
+H5O_layout_free(void *_mesg)
 {
     H5O_layout_t     *mesg = (H5O_layout_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_layout_free);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_layout_free)
 
-    assert (mesg);
+    HDassert(mesg);
 
     /* Free the compact storage buffer */
-    if(mesg->type==H5D_COMPACT)
-        mesg->u.compact.buf=H5MM_xfree(mesg->u.compact.buf);
+    if(mesg->type == H5D_COMPACT)
+        mesg->u.compact.buf = H5MM_xfree(mesg->u.compact.buf);
 
-    H5FL_FREE(H5O_layout_t,mesg);
+    (void)H5FL_FREE(H5O_layout_t, mesg);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_layout_free() */
 
 
 /*-------------------------------------------------------------------------
@@ -576,8 +609,8 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
             break;
 
         case H5D_CHUNKED:       /* Chunked blocks on disk */
-            /* Free the file space for the raw data */
-            if(H5D_istore_delete(f, dxpl_id, mesg) < 0)
+            /* Free the file space for the index & chunk raw data */
+            if(H5D_chunk_delete(f, dxpl_id, mesg) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
             break;
 
@@ -670,7 +703,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
                 layout_dst->u.chunk.addr = HADDR_UNDEF;
 
                 /* create chunked layout */
-                if(H5D_istore_copy(file_src, layout_src, file_dst, layout_dst, udata->src_dtype, cpy_info, udata->src_pline, dxpl_id) < 0)
+                if(H5D_chunk_copy(file_src, layout_src, file_dst, layout_dst, udata->src_dtype, cpy_info, udata->src_pline, dxpl_id) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to copy chunked storage")
 
                 /* Freed by copy routine */
@@ -688,7 +721,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
 done:
     if(!ret_value)
 	if(layout_dst)
-	    H5FL_FREE(H5O_layout_t, layout_dst);
+	    (void)H5FL_FREE(H5O_layout_t, layout_dst);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_layout_copy_file() */
@@ -709,8 +742,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE * stream,
-		 int indent, int fwidth)
+H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
+    FILE * stream, int indent, int fwidth)
 {
     const H5O_layout_t     *mesg = (const H5O_layout_t *) _mesg;
     unsigned                    u;
@@ -758,5 +791,5 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg, FILE 
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED);
-}
+} /* end H5O_layout_debug() */
 

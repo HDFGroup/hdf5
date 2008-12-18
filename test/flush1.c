@@ -52,7 +52,7 @@ static double	the_data[100][100];
  */
 static hid_t
 create_file(char* name, hid_t fapl)
-{ 
+{
     hid_t	file, dcpl, space, dset, groups, grp;
     hsize_t	ds_size[2] = {100, 100};
     hsize_t	ch_size[2] = {5, 5};
@@ -110,7 +110,7 @@ error:
  */
 static hid_t
 extend_file(hid_t file)
-{ 
+{
     hid_t	dcpl, space, dset;
     hsize_t	ds_size[2] = {100, 100};
     hsize_t	ch_size[2] = {5, 5};
@@ -162,7 +162,7 @@ error:
  * 		Sept. 26, 2006, expand test to check for failure if H5Fflush is not called.
  * 		Oct. 4 2006, expand test to check for partial failure in case file is flushed, but then
  * 				new datasets are created after the flush.
- * 		
+ *
  *
  *-------------------------------------------------------------------------
  */
@@ -171,49 +171,38 @@ main(void)
 {
     hid_t file, fapl;
     char	name[1024];
-    const char  *envval = NULL;
 
     h5_reset();
     fapl = h5_fileaccess();
 
     TESTING("H5Fflush (part1)");
-    envval = HDgetenv("HDF5_DRIVER");
-    if (envval == NULL) 
-        envval = "nomatch";
-    if (HDstrcmp(envval, "split")) {
-	/* Create the file */
-	h5_fixname(FILENAME[0], fapl, name, sizeof name);
-	file = create_file(name, fapl);
-	/* Flush and exit without closing the library */
-	if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
 
-	/* Create the file */
-	h5_fixname(FILENAME[2], fapl, name, sizeof name);
-	file = create_file(name, fapl);
-	/* Flush and exit without closing the library */
-	if(H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
-	/* Add a bit to the file and don't flush the new part */
-	extend_file(file);
-	
-	/* Create the other file which will not be flushed */
-	h5_fixname(FILENAME[1], fapl, name, sizeof name);
-	file = create_file(name, fapl);
+    /* Create the file */
+    h5_fixname(FILENAME[0], fapl, name, sizeof name);
+    file = create_file(name, fapl);
+    /* Flush and exit without closing the library */
+    if (H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
+
+    /* Create the file */
+    h5_fixname(FILENAME[2], fapl, name, sizeof name);
+    file = create_file(name, fapl);
+    /* Flush and exit without closing the library */
+    if(H5Fflush(file, H5F_SCOPE_GLOBAL) < 0) goto error;
+    /* Add a bit to the file and don't flush the new part */
+    extend_file(file);
+
+    /* Create the other file which will not be flushed */
+    h5_fixname(FILENAME[1], fapl, name, sizeof name);
+    file = create_file(name, fapl);
 
 
-	PASSED();
-	fflush(stdout);
-	fflush(stderr);
-    }
-    else
-    {
-        SKIPPED();
-        puts("    Test not compatible with current Virtual File Driver");
-    }
+    PASSED();
+    fflush(stdout);
+    fflush(stderr);
 
     HD_exit(0);
 
-    error:
-        HD_exit(1);
-        return 1;
-
+error:
+    HD_exit(1);
+    return 1;
 }

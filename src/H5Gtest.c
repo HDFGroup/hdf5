@@ -102,7 +102,7 @@ H5G_is_empty_test(hid_t gid)
     FUNC_ENTER_NOAPI(H5G_is_empty_test, FAIL)
 
     /* Get group structure */
-    if(NULL == (grp = H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* "New format" checks */
@@ -133,7 +133,7 @@ H5G_is_empty_test(hid_t gid)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "both symbol table and link info messages found")
 
         /* Get the link info */
-        if(NULL == H5G_obj_get_linfo(&(grp->oloc), &linfo, H5AC_dxpl_id))
+        if(H5G_obj_get_linfo(&(grp->oloc), &linfo, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
         /* Check for 'dense' link storage file addresses being defined */
@@ -213,7 +213,7 @@ H5G_has_links_test(hid_t gid, unsigned *nmsgs)
     FUNC_ENTER_NOAPI(H5G_has_links_test, FAIL)
 
     /* Get group structure */
-    if(NULL == (grp = H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Check if the group has any link messages */
@@ -271,7 +271,7 @@ H5G_has_stab_test(hid_t gid)
     FUNC_ENTER_NOAPI(H5G_has_stab_test, FAIL)
 
     /* Get group structure */
-    if(NULL == (grp = H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Check if the group has a symbol table message */
@@ -321,7 +321,7 @@ H5G_is_new_dense_test(hid_t gid)
     FUNC_ENTER_NOAPI(H5G_is_new_dense_test, FAIL)
 
     /* Get group structure */
-    if(NULL == (grp = H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Check if the group has a symbol table message */
@@ -343,7 +343,7 @@ H5G_is_new_dense_test(hid_t gid)
         H5O_linfo_t linfo;		/* Link info message */
 
         /* Get the link info */
-        if(NULL == H5G_obj_get_linfo(&(grp->oloc), &linfo, H5AC_dxpl_id))
+        if(H5G_obj_get_linfo(&(grp->oloc), &linfo, H5AC_dxpl_id) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
         /* Check for 'dense' link storage file addresses being defined */
@@ -389,11 +389,11 @@ H5G_new_dense_info_test(hid_t gid, hsize_t *name_count, hsize_t *corder_count)
     FUNC_ENTER_NOAPI(H5G_new_dense_info_test, FAIL)
 
     /* Get group structure */
-    if(NULL == (grp = H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Get the link info */
-    if(NULL == H5G_obj_get_linfo(&(grp->oloc), &linfo, H5AC_dxpl_id))
+    if(H5G_obj_get_linfo(&(grp->oloc), &linfo, H5AC_dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "can't get link info")
 
     /* Check for 'dense' link storage file addresses being defined */
@@ -449,7 +449,7 @@ H5G_lheap_size_test(hid_t gid, size_t *lheap_size)
     FUNC_ENTER_NOAPI(H5G_lheap_size_test, FAIL)
 
     /* Get group structure */
-    if(NULL == (grp = H5I_object_verify(gid, H5I_GROUP)))
+    if(NULL == (grp = (H5G_t *)H5I_object_verify(gid, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
 
     /* Make certain the group has a symbol table message */

@@ -58,6 +58,9 @@
 /* Define to 1 if you have the `BSDgettimeofday' function. */
 #undef HAVE_BSDGETTIMEOFDAY
 
+/* Define if the compiler understand the __func__ keyword */
+#undef HAVE_C99_FUNC
+
 /* Define if the function stack tracing code is to be compiled in */
 #undef HAVE_CODESTACK
 
@@ -119,6 +122,9 @@
 /* Define to 1 if you have the `ftello' function. */
 #undef HAVE_FTELLO
 
+/* Define to 1 if you have the `ftruncate64' function. */
+#undef HAVE_FTRUNCATE64
+
 /* Define if the compiler understand the __FUNCTION__ keyword */
 #undef HAVE_FUNCTION
 
@@ -161,9 +167,6 @@
 
 /* Define to 1 if you have the <io.h> header file. */
 #undef HAVE_IO_H
-
-/* Define if it's safe to use `long long' for hsize_t and hssize_t */
-#undef HAVE_LARGE_HSIZET
 
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #undef HAVE_LIBDMALLOC
@@ -225,12 +228,6 @@
 /* Define if `MPI_Info_c2f' and `MPI_Info_f2c' exists */
 #undef HAVE_MPI_MULTI_LANG_Info
 
-/* Define to 1 if you have the <netinet/in.h> header file. */
-#undef HAVE_NETINET_IN_H
-
-/* Define to 1 if you have the <netinet/tcp.h> header file. */
-#undef HAVE_NETINET_TCP_H
-
 /* Define if we have parallel support */
 #undef HAVE_PARALLEL
 
@@ -261,9 +258,6 @@
 /* Define to 1 if you have the `snprintf' function. */
 #undef HAVE_SNPRINTF
 
-/* Define if `socklen_t' is defined */
-#undef HAVE_SOCKLEN_T
-
 /* Define to 1 if you have the `srandom' function. */
 #undef HAVE_SRANDOM
 
@@ -285,9 +279,6 @@
 /* Define to 1 if you have the `strdup' function. */
 #undef HAVE_STRDUP
 
-/* Define if the stream virtual file driver should be compiled */
-#undef HAVE_STREAM
-
 /* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
 
@@ -308,9 +299,6 @@
 
 /* Define to 1 if you have the `system' function. */
 #undef HAVE_SYSTEM
-
-/* Define to 1 if you have the <sys/filio.h> header file. */
-#undef HAVE_SYS_FILIO_H
 
 /* Define to 1 if you have the <sys/fpu.h> header file. */
 #undef HAVE_SYS_FPU_H
@@ -383,6 +371,9 @@
 /* Define to 1 if you have the `waitpid' function. */
 #undef HAVE_WAITPID
 
+/* Define if your system has window style path name. */
+#undef HAVE_WINDOW_PATH
+
 /* Define to 1 if you have the <winsock.h> header file. */
 #undef HAVE_WINSOCK_H
 
@@ -430,6 +421,10 @@
    values correctly. */
 #undef LLONG_TO_LDOUBLE_CORRECT
 
+/* Define to the sub-directory in which libtool stores uninstalled libraries.
+   */
+#undef LT_OBJDIR
+
 /* Define if the metadata trace file code is to be compiled in */
 #undef METADATA_TRACE_FILE
 
@@ -443,6 +438,9 @@
 
 /* Define if your system can handle special collective IO properly. */
 #undef MPI_SPECIAL_COLLECTIVE_IO_WORKS
+
+/* Define if we can violate pointer alignment restrictions */
+#undef NO_ALIGNMENT_RESTRICTIONS
 
 /* Define if deprecated public API symbols are disabled */
 #undef NO_DEPRECATED_SYMBOLS
@@ -585,6 +583,9 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
+/* Define if strict file format checks are enabled */
+#undef STRICT_FORMAT_CHECKS
+
 /* Define if your system supports pthread_attr_setscope(&attribute,
    PTHREAD_SCOPE_SYSTEM) call. */
 #undef SYSTEM_SCOPE_THREADS
@@ -608,7 +609,7 @@
 #undef ULONG_TO_FP_BOTTOM_BIT_ACCURATE
 
 /* Define using v1.6 public API symbols by default */
-#undef USE_16_API
+#undef USE_16_API_DEFAULT
 
 /* Define if a memory checking tool will be used on the library, to cause
    library to be very picky about memory operations and also disable the

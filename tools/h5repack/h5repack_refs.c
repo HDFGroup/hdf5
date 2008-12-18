@@ -31,7 +31,7 @@
 
 static const char* MapIdToName(hid_t refobj_id,trav_table_t *travt);
 static int copy_refs_attr(hid_t loc_in, hid_t loc_out, pack_opt_t *options,
-    trav_table_t *travt, hid_t fidout);
+                          trav_table_t *travt, hid_t fidout);
 
 /*-------------------------------------------------------------------------
  * Function: do_copy_refobjs
@@ -192,9 +192,14 @@ int do_copy_refobjs(hid_t fidin,
                                     if(H5Rcreate(&refbuf[u], fidout, refname, H5R_OBJECT, -1) < 0)
                                         goto error;
                                     if(options->verbose)
+                                    {
+                                        
+                                        
+                                        printf(FORMAT_OBJ,"dset",travt->objs[i].name );
                                         printf("object <%s> object reference created to <%s>\n",
                                             travt->objs[i].name,
                                             refname);
+                                    }
                                 } /*refname*/
                                 H5Oclose(refobj_id);
                             } /* u */
@@ -271,9 +276,15 @@ int do_copy_refobjs(hid_t fidin,
                                     if(H5Sclose(region_id) < 0)
                                         goto error;
                                     if(options->verbose)
+                                    {
+                                        
+                                        
+                                        
+                                        printf(FORMAT_OBJ,"dset",travt->objs[i].name );
                                         printf("object <%s> region reference created to <%s>\n",
                                             travt->objs[i].name,
                                             refname);
+                                    }
                                 } /*refname*/
                                 H5Oclose(refobj_id);
                             } /* u */

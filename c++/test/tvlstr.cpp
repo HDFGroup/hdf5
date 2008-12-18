@@ -68,22 +68,23 @@ void test_vlstr_free_custom(void *mem, void *info);
 ****************************************************************/
 void *test_vlstr_alloc_custom(size_t size, void *info)
 {
-    void *ret_value=NULL;   	// Pointer to return
-    int *mem_used=(int *)info;  // Get the pointer to the memory used
+    void *ret_value = NULL;   	// Pointer to return
+    size_t *mem_used = (size_t *)info;  // Get the pointer to the memory used
     size_t extra;           	// Extra space needed
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
      *  alignment correct - QAK
      */
-    
-    extra=MAX(sizeof(void *),sizeof(size_t));
 
-    if((ret_value=HDmalloc(extra+size))!=NULL) {
-        *(size_t *)ret_value=size;
-        *mem_used+=size;
+    extra = MAX(sizeof(void *),sizeof(size_t));
+
+    if((ret_value = HDmalloc(extra + size)) != NULL) {
+        *(size_t *)ret_value = size;
+        *mem_used += size;
     } // end if
-    ret_value=((unsigned char *)ret_value)+extra;
+    ret_value = ((unsigned char *)ret_value) + extra;
+
     return(ret_value);
 }
 
@@ -100,14 +101,14 @@ void *test_vlstr_alloc_custom(size_t size, void *info)
 void test_vlstr_free_custom(void *_mem, void *info)
 {
     unsigned char *mem;
-    int *mem_used=(int *)info;  // Get the pointer to the memory used
+    size_t *mem_used=(size_t *)info;  // Get the pointer to the memory used
     size_t extra;           	// Extra space needed
 
     /*
      *  This weird contortion is required on the DEC Alpha to keep the
      *  alignment correct - QAK
      */
-    
+
     extra=MAX(sizeof(void *),sizeof(size_t));
 
     if(_mem!=NULL) {
@@ -171,17 +172,17 @@ static void test_vlstrings_basic()
 	dataset2.close();
 	HDfree(wdata2);
 
-	// Change to the custom memory allocation routines for reading 
+	// Change to the custom memory allocation routines for reading
 	// VL string.
 	DSetMemXferPropList xfer;
-	int mem_used = 0;	// Memory used during allocation
+	size_t mem_used = 0;	// Memory used during allocation
 	xfer.setVlenMemManager(test_vlstr_alloc_custom, &mem_used, test_vlstr_free_custom, &mem_used);
 
 	// Make certain the correct amount of memory will be used.
 	hsize_t vlsize = dataset.getVlenBufSize(tid1, sid1);
 
 	// Count the actual number of bytes used by the strings.
-	int str_used;   // String data in memory
+	size_t str_used;   // String data in memory
 	hsize_t i;	// counting variable
 	for (i=0,str_used=0; i<SPACE1_DIM1; i++)
 	    str_used+=HDstrlen(wdata[i])+1;
@@ -197,14 +198,14 @@ static void test_vlstrings_basic()
 	verify_val(mem_used, str_used, "DataSet::read", __LINE__, __FILE__);
 
 	// Compare data read in.
-	for (i=0; i<SPACE1_DIM1; i++) {
-	    int wlen = HDstrlen(wdata[i]);
-	    int rlen = HDstrlen(rdata[i]);
+	for(i = 0; i < SPACE1_DIM1; i++) {
+	    size_t wlen = HDstrlen(wdata[i]);
+	    size_t rlen = HDstrlen(rdata[i]);
 	    if(wlen != rlen) {
-		TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i, wlen, (int)i, rlen);
+		TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%u, strlen(rdata[%d])=%u\n", (int)i, (unsigned)wlen, (int)i, (unsigned)rlen);
 		continue;
 	    } // end if
-	    if( HDstrcmp(wdata[i],rdata[i]) != 0 ) {
+	    if(HDstrcmp(wdata[i], rdata[i]) != 0) {
 		TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i], (int)i, rdata[i]);
 		continue;
 	    } // end if
@@ -238,7 +239,7 @@ static void test_vlstrings_basic()
 /*-------------------------------------------------------------------------
  * Function:	test_vlstrings_special
  *
- * Purpose:	Test VL string code for special string cases, nil and 
+ * Purpose:	Test VL string code for special string cases, nil and
  *		zero-sized.
  *
  * Return:	None
@@ -276,7 +277,7 @@ static void test_vlstrings_special()
 
 	// Check data read in.
 	hsize_t i;      	// counting variable
-	for (i=0; i<SPACE1_DIM1; i++)
+	for(i = 0; i < SPACE1_DIM1; i++)
 	    if(rdata[i] != NULL)
 		TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n",(int)i,rdata[i]);
 
@@ -285,14 +286,14 @@ static void test_vlstrings_special()
 	dataset.read(rdata, tid1);
 
 	// Compare data read in.
-	for (i=0; i<SPACE1_DIM1; i++) {
-	    int wlen = HDstrlen(wdata[i]);
-	    int rlen = HDstrlen(rdata[i]);
+	for(i = 0; i < SPACE1_DIM1; i++) {
+	    size_t wlen = HDstrlen(wdata[i]);
+	    size_t rlen = HDstrlen(rdata[i]);
 	    if(wlen != rlen) {
-		TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n", (int)i, wlen, (int)i, rlen);
+		TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%u, strlen(rdata[%d])=%u\n", (int)i, (unsigned)wlen, (int)i, (unsigned)rlen);
 		continue;
 	    } // end if
-	    if( HDstrcmp(wdata[i],rdata[i]) != 0 ) {
+	    if(HDstrcmp(wdata[i],rdata[i]) != 0) {
 		TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i], (int)i, rdata[i]);
 		continue;
 	    } // end if
@@ -304,11 +305,11 @@ static void test_vlstrings_special()
 	// Close Dataset.
 	dataset.close();
 
-	/* 
+	/*
 	 * Create another dataset to test nil strings.
 	 */
 
-	// Create the property list and set the fill value for the second 
+	// Create the property list and set the fill value for the second
 	// dataset.
 	DSetCreatPropList dcpl;
 	char *fill = NULL;	// Fill value
@@ -416,7 +417,7 @@ static void test_vlstring_type()
 	file1 = new H5File(FILENAME, H5F_ACC_RDWR);
 
 	// Open the variable-length string datatype just created
-	vlstr_type.setId((file1->openStrType(VLSTR_TYPE)).getId());
+	vlstr_type = file1->openStrType(VLSTR_TYPE);
 
 	// Verify character set and padding
 	cset = vlstr_type.getCset();
@@ -527,7 +528,6 @@ static void test_compact_vlstring()
  *-------------------------------------------------------------------------
  */
 // String for testing attributes
-static const char *string_att = "This is the string for the attribute";
 static char *string_att_write=NULL;
 
 // Info for a string attribute
@@ -594,7 +594,7 @@ static void test_write_vl_string_attribute()
 	// Open attribute ATTRSTR_NAME again.
 	gr_attr = root.openAttribute(ATTRSTR_NAME);
 
-	// The attribute string written is freed below, in the 
+	// The attribute string written is freed below, in the
 	// test_read_vl_string_attribute() test
 
 	// Close attribute and file
@@ -671,7 +671,7 @@ static void test_read_vl_string_attribute()
 } // test_read_vl_string_attribute
 
 /* Helper routine for test_vl_rewrite() */
-static void write_scalar_dset(H5File& file, DataType& type, DataSpace& space, 
+static void write_scalar_dset(H5File& file, DataType& type, DataSpace& space,
 				char *name, char *data)
 {
     DataSet dset;
@@ -689,7 +689,7 @@ static void write_scalar_dset(H5File& file, DataType& type, DataSpace& space,
 }
 
 /* Helper routine for test_vl_rewrite() */
-static void read_scalar_dset(H5File& file, DataType& type, DataSpace& space, 
+static void read_scalar_dset(H5File& file, DataType& type, DataSpace& space,
 				char *name, char *data)
 {
     char *data_read;

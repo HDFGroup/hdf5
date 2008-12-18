@@ -413,8 +413,10 @@ filter_bogus(unsigned int flags, size_t cd_nelmts,
 static herr_t
 test_compression(H5File& file)
 {
+#ifndef H5_HAVE_FILTER_DEFLATE
     const char		*not_supported;
     not_supported = "    Deflate compression is not enabled.";
+#endif /* H5_HAVE_FILTER_DEFLATE */
     int		points[100][200];
     int		check[100][200];
     hsize_t	i, j, n;
@@ -423,7 +425,7 @@ test_compression(H5File& file)
     for (i = n = 0; i < 100; i++)
     {
 	for (j = 0; j < 200; j++) {
-	    points[i][j] = n++;
+	    points[i][j] = (int)n++;
 	}
     }
     char* tconv_buf = new char [1000];
@@ -487,7 +489,7 @@ test_compression(H5File& file)
 	{
 	    for (j=0; j<size[1]; j++)
 	    {
-		points[i][j] = n++;
+		points[i][j] = (int)n++;
 	    }
 	}
 

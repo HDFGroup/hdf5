@@ -35,7 +35,8 @@
 
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_linfo_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void *H5O_linfo_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_linfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_linfo_copy(const void *_mesg, void *_dest);
 static size_t H5O_linfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -111,7 +112,7 @@ H5FL_DEFINE_STATIC(H5O_linfo_t);
  */
 static void *
 H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_linfo_t	*linfo = NULL;  /* Link info */
     unsigned char index_flags;  /* Flags for encoding link index info */
@@ -165,7 +166,7 @@ H5O_linfo_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
 done:
     if(ret_value == NULL)
         if(linfo != NULL)
-            H5FL_FREE(H5O_linfo_t, linfo);
+            (void)H5FL_FREE(H5O_linfo_t, linfo);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_linfo_decode() */
@@ -320,7 +321,7 @@ H5O_linfo_free(void *mesg)
 
     HDassert(mesg);
 
-    H5FL_FREE(H5O_linfo_t, mesg);
+    (void)H5FL_FREE(H5O_linfo_t, mesg);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O_linfo_free() */
@@ -390,7 +391,7 @@ H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
     HDassert(cpy_info);
 
     /* Copy the source message */
-    if(NULL == (linfo_dst = H5O_linfo_copy(linfo_src, NULL)))
+    if(NULL == (linfo_dst = (H5O_linfo_t *)H5O_linfo_copy(linfo_src, NULL)))
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "memory allocation failed")
 
     /* If we are performing a 'shallow hierarchy' copy, and the links in this
@@ -421,7 +422,7 @@ H5O_linfo_copy_file(H5F_t UNUSED *file_src, void *native_src, H5F_t *file_dst,
 done:
     if(!ret_value)
         if(linfo_dst)
-            H5FL_FREE(H5O_linfo_t, linfo_dst);
+            (void)H5FL_FREE(H5O_linfo_t, linfo_dst);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_linfo_copy_file() */
@@ -513,7 +514,6 @@ H5O_linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     /* Check for copying dense link storage */
     if(H5F_addr_defined(linfo_src->fheap_addr)) {
         H5O_linfo_postcopy_ud_t udata;          /* User data for iteration callback */
-        H5G_link_iterate_t lnk_op;              /* Link operator */
 
         /* Set up dense link iteration user data */
         udata.src_oloc = src_oloc;
@@ -522,12 +522,8 @@ H5O_linfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
         udata.dxpl_id = dxpl_id;
         udata.cpy_info = cpy_info;
 
-        /* Build iterator operator */
-        lnk_op.op_type = H5G_LINK_OP_LIB;
-        lnk_op.u.lib_op = H5O_linfo_post_copy_file_cb;
-
         /* Iterate over the links in the group, building a table of the link messages */
-        if(H5G_dense_iterate(src_oloc->file, dxpl_id, linfo_src, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, (hid_t)0, &lnk_op, &udata) < 0)
+        if(H5G_dense_iterate(src_oloc->file, dxpl_id, linfo_src, H5_INDEX_NAME, H5_ITER_NATIVE, (hsize_t)0, NULL, H5O_linfo_post_copy_file_cb, &udata) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTNEXT, FAIL, "error iterating over links")
     } /* end if */
 

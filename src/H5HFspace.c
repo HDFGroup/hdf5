@@ -44,6 +44,8 @@
 
 #define H5HF_FSPACE_SHRINK      80              /* Percent of "normal" size to shrink serialized free space size */
 #define H5HF_FSPACE_EXPAND      120             /* Percent of "normal" size to expand serialized free space size */
+#define H5HF_FSPACE_THRHD_DEF 	1             	/* Default: no alignment threshold */
+#define H5HF_FSPACE_ALIGN_DEF   1             	/* Default: no alignment */
 
 /******************/
 /* Local Typedefs */
@@ -91,10 +93,15 @@
  *		koziol@ncsa.uiuc.edu
  *		May  2 2006
  *
+ * Modifications:
+ *	Vailin Choi, July 29th, 2008
+ *	  Pass values of alignment and threshold to FS_create() and FS_open()
+ *	  for handling alignment.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id)
+H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id, hbool_t may_create)
 {
     const H5FS_section_class_t *classes[] = { /* Free space section classes implemented for fractal heap */
         H5HF_FSPACE_SECT_CLS_SINGLE,
@@ -114,23 +121,27 @@ H5HF_space_start(H5HF_hdr_t *hdr, hid_t dxpl_id)
     if(H5F_addr_defined(hdr->fs_addr)) {
         /* Open an existing free space structure for the heap */
         if(NULL == (hdr->fspace = H5FS_open(hdr->f, dxpl_id, hdr->fs_addr,
-                NELMTS(classes), classes, hdr)))
+                NELMTS(classes), classes, hdr, (hsize_t)H5HF_FSPACE_THRHD_DEF, (hsize_t)H5HF_FSPACE_ALIGN_DEF)))
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize free space info")
     } /* end if */
     else {
-        H5FS_create_t fs_create;        /* Free space creation parameters */
+        /* Check if we are allowed to create the free space manager */
+        if(may_create) {
+            H5FS_create_t fs_create;        /* Free space creation parameters */
 
-        /* Set the free space creation parameters */
-        fs_create.client = H5FS_CLIENT_FHEAP_ID;
-        fs_create.shrink_percent = H5HF_FSPACE_SHRINK;
-        fs_create.expand_percent = H5HF_FSPACE_EXPAND;
-        fs_create.max_sect_size = hdr->man_dtable.cparam.max_direct_size;
-        fs_create.max_sect_addr = hdr->man_dtable.cparam.max_index;
+            /* Set the free space creation parameters */
+            fs_create.client = H5FS_CLIENT_FHEAP_ID;
+            fs_create.shrink_percent = H5HF_FSPACE_SHRINK;
+            fs_create.expand_percent = H5HF_FSPACE_EXPAND;
+            fs_create.max_sect_size = hdr->man_dtable.cparam.max_direct_size;
+            fs_create.max_sect_addr = hdr->man_dtable.cparam.max_index;
 
-        /* Create the free space structure for the heap */
-        if(NULL == (hdr->fspace = H5FS_create(hdr->f, dxpl_id, &hdr->fs_addr,
-                &fs_create, NELMTS(classes), classes, hdr)))
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize free space info")
+            /* Create the free space structure for the heap */
+            if(NULL == (hdr->fspace = H5FS_create(hdr->f, dxpl_id, &hdr->fs_addr,
+                    &fs_create, NELMTS(classes), classes, hdr, (hsize_t)H5HF_FSPACE_THRHD_DEF, (hsize_t)H5HF_FSPACE_ALIGN_DEF)))
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize free space info")
+            HDassert(H5F_addr_defined(hdr->fs_addr));
+        } /* end if */
     } /* end else */
 
 done:
@@ -170,7 +181,7 @@ H5HF_space_add(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *node,
 
     /* Check if the free space for the heap has been initialized */
     if(!hdr->fspace)
-        if(H5HF_space_start(hdr, dxpl_id) < 0)
+        if(H5HF_space_start(hdr, dxpl_id, TRUE) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space")
 
     /* Construct user data */
@@ -204,7 +215,7 @@ done:
 htri_t
 H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request, H5HF_free_section_t **node)
 {
-    htri_t node_found;          /* Whether an existing free list node was found */
+    htri_t node_found = FALSE;  /* Whether an existing free list node was found */
     htri_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_space_find)
@@ -218,12 +229,13 @@ H5HF_space_find(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t request, H5HF_free_secti
 
     /* Check if the free space for the heap has been initialized */
     if(!hdr->fspace)
-        if(H5HF_space_start(hdr, dxpl_id) < 0)
+        if(H5HF_space_start(hdr, dxpl_id, FALSE) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space")
 
     /* Search for free space in the heap */
-    if((node_found = H5FS_sect_find(hdr->f, dxpl_id, hdr->fspace, request, (H5FS_section_info_t **)node)) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't locate free space in fractal heap")
+    if(hdr->fspace)
+        if((node_found = H5FS_sect_find(hdr->f, dxpl_id, hdr->fspace, request, (H5FS_section_info_t **)node)) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTALLOC, FAIL, "can't locate free space in fractal heap")
 
     /* Set return value */
     ret_value = node_found;
@@ -262,12 +274,16 @@ H5HF_space_size(H5HF_hdr_t *hdr, hid_t dxpl_id, hsize_t *fs_size)
 
     /* Check if the free space for the heap has been initialized */
     if(!hdr->fspace)
-        if(H5HF_space_start(hdr, dxpl_id) < 0)
+        if(H5HF_space_start(hdr, dxpl_id, FALSE) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't initialize heap free space")
 
     /* Get free space metadata size */
-    if(H5FS_size(hdr->f, hdr->fspace, fs_size) < 0)
-        HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't retrieve FS meta storage info")
+    if(hdr->fspace) {
+        if(H5FS_size(hdr->f, hdr->fspace, fs_size) < 0)
+            HGOTO_ERROR(H5E_FSPACE, H5E_CANTGET, FAIL, "can't retrieve FS meta storage info")
+    } /* end if */
+    else
+        *fs_size = 0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -343,7 +359,7 @@ H5HF_space_close(H5HF_hdr_t *hdr, hid_t dxpl_id)
         hsize_t nsects;         /* Number of sections for this heap */
 
         /* Retrieve the number of sections for this heap */
-        if(H5FS_get_sect_count(hdr->fspace, &nsects) < 0)
+        if(H5FS_sect_stats(hdr->fspace, NULL, &nsects) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTCOUNT, FAIL, "can't query free space section count")
 #ifdef QAK
 HDfprintf(stderr, "%s: nsects = %Hu\n", FUNC, nsects);

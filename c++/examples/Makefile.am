@@ -35,7 +35,7 @@ readdata.chkexe_: create.chkexe_
 chunks.chkexe_: extend_ds.chkexe_
 
 # Tell conclude.am that these are C++ tests.
-HDF_CXX=yes
+CXX_API=yes
 
 # Where to install examples
 EXAMPLEDIR=$(docdir)/hdf5/examples/c++

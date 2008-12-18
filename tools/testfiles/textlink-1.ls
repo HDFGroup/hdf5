@@ -1,5 +1,6 @@
 #############################
  output for 'h5ls -w80 -r textlink.h5'
 #############################
-/extlink1                -> file: filename    path: objname
-/extlink2                -> file: anotherfile    path: anotherobj
+/                        Group
+/extlink1                External Link {filename//objname}
+/extlink2                External Link {anotherfile//anotherobj}

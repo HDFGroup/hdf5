@@ -49,7 +49,7 @@ const char *FILENAME[] = {
     NULL
 };
 
-#define COMPAT_BASENAME "family_v1.6_"
+#define COMPAT_BASENAME "family_v16_"
 
 
 /*-------------------------------------------------------------------------
@@ -156,7 +156,7 @@ test_direct(void)
     size_t	fbsize;
     size_t	cbsize;
     int		*points, *check, *p1, *p2;
-    int		wdata2[DSET2_DIM] = {11,12,13,14}; 
+    int		wdata2[DSET2_DIM] = {11,12,13,14};
     int		rdata2[DSET2_DIM];
     int		i, j, n;
 #endif /*H5_HAVE_DIRECT*/
@@ -183,7 +183,7 @@ test_direct(void)
 
     if(H5Pset_alignment(fapl, (hsize_t)THRESHOLD, (hsize_t)FBSIZE) < 0)
 	TEST_ERROR;
-	
+
     H5E_BEGIN_TRY {
         file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     } H5E_END_TRY;
@@ -212,10 +212,11 @@ test_direct(void)
     if(H5Fget_filesize(file, &file_size) < 0)
         TEST_ERROR;
 
-    /* There is no garantee the size of metadata in file is constant.
-     * Just try to check if it's reasonable.  It's 2KB right now.
+    /* There is no guarantee of the number of metadata allocations, but it's
+     * 4 currently and the size of the file should be between 3 & 4 file buffer
+     * sizes..
      */
-    if(file_size<1*KB || file_size>4*KB)
+    if(file_size < (FBSIZE * 3) || file_size >= (FBSIZE * 4))
         TEST_ERROR;
 
     /* Allocate aligned memory for data set 1. For data set 1, everything is aligned including
@@ -351,7 +352,7 @@ error:
  *              Added test for H5Fget_filesize.
  *
  *              Raymond Lu, 2006-11-30
- *              Enabled the driver to read an existing file depending on 
+ *              Enabled the driver to read an existing file depending on
  *              the setting of the backing_store and file open flags.
  *-------------------------------------------------------------------------
  */
@@ -408,7 +409,7 @@ test_core(void)
         TEST_ERROR;
 
 
-    /* Open the file with backing store off for read and write.  
+    /* Open the file with backing store off for read and write.
      * Changes won't be saved in file. */
     if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, FALSE) < 0)
         TEST_ERROR;
@@ -468,7 +469,7 @@ test_core(void)
     if(H5Fclose(file) < 0)
         TEST_ERROR;
 
-    /* Open the file with backing store on for read and write.  
+    /* Open the file with backing store on for read and write.
      * Changes will be saved in file. */
     if(H5Pset_fapl_core(fapl, (size_t)CORE_INCREMENT, TRUE) < 0)
         TEST_ERROR;
@@ -787,7 +788,7 @@ error:
  *              The source file was created by the test/file_handle.c
  *              of the v1.6 library.  Then tools/misc/h5repart.c was
  *              used to concantenated.  The command was "h5repart -m 5k
- *              family_file%05d.h5 family_v1.6_%05d.h5".
+ *              family_file%05d.h5 family_v16_%05d.h5".
  *
  * Return:      Success:        0
  *              Failure:        -1
@@ -943,7 +944,7 @@ test_multi(void)
     sprintf(sv[H5FD_MEM_BTREE],  "%%s-%c.h5", 'b');
     memb_name[H5FD_MEM_BTREE] = sv[H5FD_MEM_BTREE];
     memb_addr[H5FD_MEM_BTREE] = HADDR_MAX/4;
- 
+
     sprintf(sv[H5FD_MEM_DRAW], "%%s-%c.h5", 'r');
     memb_name[H5FD_MEM_DRAW] = sv[H5FD_MEM_DRAW];
     memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;

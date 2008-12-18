@@ -85,7 +85,7 @@ parse_command_line (int argc, const char *argv[])
       switch ((char) opt)
 	{
 	case 'c':
-	  nbytes = strdup (opt_arg);
+	  nbytes = HDstrdup (opt_arg);
 	  break;
 	case '?':
 	default:
@@ -126,7 +126,7 @@ main (int argc, const char *argv[])
       usage (progname);
       exit (EXIT_FAILURE);
     }
-  filename = strdup (argv[opt_ind]);
+  filename = HDstrdup (argv[opt_ind]);
 
   size = 0;
   res = sscanf (nbytes, "%u", &size);
@@ -148,7 +148,7 @@ main (int argc, const char *argv[])
   buf = malloc ((unsigned)(size + 1));
   if (buf == NULL)
     {
-      close (fd);
+      HDclose (fd);
       exit (EXIT_FAILURE);
     }
 
@@ -158,7 +158,7 @@ main (int argc, const char *argv[])
     {
       if (buf)
 	free (buf);
-      close (fd);
+      HDclose (fd);
       exit (EXIT_FAILURE);
     }
 
@@ -166,6 +166,6 @@ main (int argc, const char *argv[])
 
   if (buf)
     free (buf);
-  close (fd);
+  HDclose (fd);
   return (EXIT_SUCCESS);
 }

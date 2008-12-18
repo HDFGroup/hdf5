@@ -76,7 +76,7 @@ int main(int argc, const char *argv[])
 
         g_Parallel = 0;
 
-        parse_input(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
+        parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
 
         nfound = h5diff(fname1, fname2, objname1, objname2, &options);
 
@@ -90,7 +90,7 @@ int main(int argc, const char *argv[])
     /* Have the manager process the command-line */
     if(nID == 0)
     {
-        parse_input(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
+        parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
 
         nfound = h5diff(fname1, fname2, objname1, objname2, &options);
 

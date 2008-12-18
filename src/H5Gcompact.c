@@ -145,7 +145,7 @@ H5G_compact_build_table(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t 
         H5O_mesg_operator_t op;             /* Message operator */
 
         /* Allocate the link table */
-        if((ltable->lnks = H5MM_malloc(sizeof(H5O_link_t) * ltable->nlinks)) == NULL)
+        if((ltable->lnks = (H5O_link_t *)H5MM_malloc(sizeof(H5O_link_t) * ltable->nlinks)) == NULL)
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
         /* Set up user data for iteration */
@@ -406,9 +406,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_compact_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo, 
+H5G_compact_iterate(const H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
     H5_index_t idx_type, H5_iter_order_t order, hsize_t skip, hsize_t *last_lnk,
-    hid_t gid, H5G_link_iterate_t *lnk_op, void *op_data)
+    H5G_lib_iterate_t op, void *op_data)
 {
     H5G_link_table_t    ltable = {0, NULL};     /* Link table */
     herr_t		ret_value;              /* Return value */
@@ -418,14 +418,14 @@ H5G_compact_iterate(H5O_loc_t *oloc, hid_t dxpl_id, const H5O_linfo_t *linfo,
     /* Sanity check */
     HDassert(oloc);
     HDassert(linfo);
-    HDassert(lnk_op && lnk_op->u.lib_op);
+    HDassert(op);
 
     /* Build table of all link messages */
     if(H5G_compact_build_table(oloc, dxpl_id, linfo, idx_type, order, &ltable) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "can't create link message table")
 
     /* Iterate over links in table */
-    if((ret_value = H5G_link_iterate_table(&ltable, skip, last_lnk, gid, lnk_op, op_data)) < 0)
+    if((ret_value = H5G_link_iterate_table(&ltable, skip, last_lnk, op, op_data)) < 0)
         HERROR(H5E_SYM, H5E_CANTNEXT, "iteration operator failed");
 
 done:
@@ -489,7 +489,7 @@ done:
  *
  * Purpose:	Look up an object relative to a group, using link messages.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
@@ -497,13 +497,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+htri_t
 H5G_compact_lookup(H5O_loc_t *oloc, const char *name, H5O_link_t *lnk,
     hid_t dxpl_id)
 {
     H5G_iter_lkp_t udata;               /* User data for iteration callback */
     H5O_mesg_operator_t op;             /* Message operator */
-    herr_t     ret_value = SUCCEED;     /* Return value */
+    htri_t     ret_value;               /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_compact_lookup, FAIL)
 
@@ -522,9 +522,8 @@ H5G_compact_lookup(H5O_loc_t *oloc, const char *name, H5O_link_t *lnk,
     if(H5O_msg_iterate(oloc, H5O_LINK_ID, &op, &udata, dxpl_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over link messages")
 
-    /* Check if we found the link we were looking for */
-    if(!udata.found)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "object not found")
+    /* Determine if we found the link we were looking for */
+    ret_value = udata.found;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

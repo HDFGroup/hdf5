@@ -43,9 +43,11 @@ static hssize_t H5S_none_serial_size(const H5S_t *space);
 static herr_t H5S_none_serialize(const H5S_t *space, uint8_t *buf);
 static herr_t H5S_none_deserialize(H5S_t *space, const uint8_t *buf);
 static herr_t H5S_none_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
+static herr_t H5S_none_offset(const H5S_t *space, hsize_t *off);
 static htri_t H5S_none_is_contiguous(const H5S_t *space);
 static htri_t H5S_none_is_single(const H5S_t *space);
 static htri_t H5S_none_is_regular(const H5S_t *space);
+static herr_t H5S_none_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t H5S_none_iter_init(H5S_sel_iter_t *iter, const H5S_t *space);
 
 /* Selection iteration callbacks */
@@ -70,9 +72,11 @@ const H5S_select_class_t H5S_sel_none[1] = {{
     H5S_none_serialize,
     H5S_none_deserialize,
     H5S_none_bounds,
+    H5S_none_offset,
     H5S_none_is_contiguous,
     H5S_none_is_single,
     H5S_none_is_regular,
+    H5S_none_adjust_u,
     H5S_none_iter_init,
 }};
 
@@ -284,12 +288,12 @@ H5S_none_iter_next(H5S_sel_iter_t UNUSED *iter, size_t UNUSED nelem)
 static herr_t
 H5S_none_iter_next_block(H5S_sel_iter_t UNUSED *iter)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_iter_next);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5S_none_iter_next)
 
     /* Check args */
-    assert (iter);
+    HDassert(iter);
 
-    FUNC_LEAVE_NOAPI(FAIL);
+    FUNC_LEAVE_NOAPI(FAIL)
 }   /* H5S_none_iter_next_block() */
 
 
@@ -563,11 +567,43 @@ H5S_none_bounds(const H5S_t UNUSED *space, hsize_t UNUSED *start, hsize_t UNUSED
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_none_offset
+ PURPOSE
+    Gets the linear offset of the first element for the selection.
+ USAGE
+    herr_t H5S_none_offset(space, offset)
+        const H5S_t *space;     IN: Dataspace pointer of selection to query
+        hsize_t *offset;        OUT: Linear offset of first element in selection
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Retrieves the linear offset (in "units" of elements) of the first element
+    selected within the dataspace.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    Calling this function on a "none" selection returns fail.
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_none_offset(const H5S_t *space, hsize_t *offset)
+{
+    FUNC_ENTER_NOAPI_NOFUNC(H5S_none_offset)
+
+    HDassert(space);
+    HDassert(offset);
+
+    FUNC_LEAVE_NOAPI(FAIL)
+}   /* H5S_none_offset() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_none_is_contiguous
  PURPOSE
     Check if a "none" selection is contiguous within the dataspace extent.
  USAGE
-    htri_t H5S_all_is_contiguous(space)
+    htri_t H5S_none_is_contiguous(space)
         H5S_t *space;           IN: Dataspace pointer to check
  RETURNS
     TRUE/FALSE/FAIL
@@ -652,6 +688,37 @@ H5S_none_is_regular(const H5S_t UNUSED *space)
 
 /*--------------------------------------------------------------------------
  NAME
+    H5S_none_adjust_u
+ PURPOSE
+    Adjust an "none" selection by subtracting an offset
+ USAGE
+    herr_t H5S_none_adjust_u(space, offset)
+        H5S_t *space;           IN/OUT: Pointer to dataspace to adjust
+        const hsize_t *offset; IN: Offset to subtract
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Moves selection by subtracting an offset from it.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5S_none_adjust_u(H5S_t UNUSED *space, const hsize_t UNUSED *offset)
+{
+    FUNC_ENTER_NOAPI_NOFUNC(H5S_none_adjust_u)
+
+    /* Check args */
+    HDassert(space);
+    HDassert(offset);
+
+    FUNC_LEAVE_NOAPI(FAIL)
+}   /* H5S_none_adjust_u() */
+
+
+/*--------------------------------------------------------------------------
+ NAME
     H5S_select_none
  PURPOSE
     Specify that nothing is selected in the extent
@@ -708,23 +775,25 @@ done:
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t H5Sselect_none (hid_t spaceid)
+herr_t
+H5Sselect_none(hid_t spaceid)
 {
-    H5S_t	*space = NULL;  /* Dataspace to modify selection of */
-    herr_t ret_value;  /* return value */
+    H5S_t *space;                       /* Dataspace to modify selection of */
+    herr_t ret_value = SUCCEED;         /* return value */
 
-    FUNC_ENTER_API(H5Sselect_none, FAIL);
+    FUNC_ENTER_API(H5Sselect_none, FAIL)
+    H5TRACE1("e", "i", spaceid);
 
     /* Check args */
-    if (NULL == (space=H5I_object_verify(spaceid, H5I_DATASPACE)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space");
+    if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data space")
 
     /* Change to "none" selection */
-    if((ret_value=H5S_select_none(space))<0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection");
+    if(H5S_select_none(space) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
 done:
-    FUNC_LEAVE_API(ret_value);
+    FUNC_LEAVE_API(ret_value)
 }   /* H5Sselect_none() */
 
 
@@ -734,7 +803,7 @@ done:
  PURPOSE
     Create a list of offsets & lengths for a selection
  USAGE
-    herr_t H5S_all_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
+    herr_t H5S_none_get_seq_list(space,flags,iter,maxseq,maxelem,nseq,nelem,off,len)
         H5S_t *space;           IN: Dataspace containing selection to use.
         unsigned flags;         IN: Flags for extra information about operation
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
@@ -783,4 +852,5 @@ H5S_none_get_seq_list(const H5S_t UNUSED *space, unsigned UNUSED flags, H5S_sel_
     *nelem=0;
 
     FUNC_LEAVE_NOAPI(SUCCEED);
-} /* end H5S_all_get_seq_list() */
+} /* end H5S_none_get_seq_list() */
+

@@ -934,9 +934,9 @@ test_iterate(void)
     fapl2 = H5Pcopy(fapl);
     CHECK(fapl2, FAIL, "H5Pcopy");
 
-    /* Set the "use the latest version of the format" flag for creating objects in the file */
-    ret = H5Pset_latest_format(fapl2, TRUE);
-    CHECK(ret, FAIL, "H5Pset_latest_format");
+    /* Set the "use the latest version of the format" bounds for creating objects in the file */
+    ret = H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
     /* These next tests use the same file */
     for(new_format = FALSE; new_format <= TRUE; new_format++) {

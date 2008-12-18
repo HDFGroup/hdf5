@@ -50,7 +50,7 @@ static double	the_data[100][100];
  */
 static int
 check_dset(hid_t file, const char* name)
-{ 
+{
     hid_t	space, dset;
     hsize_t	ds_size[2] = {100, 100};
     double	error;
@@ -122,7 +122,7 @@ check_file(char* filename, hid_t fapl, int flag)
 	if(H5Gclose(grp) < 0) goto error;
     } /* end for */
 
-    /* Check to see if that last added dataset in the third file is accessible 
+    /* Check to see if that last added dataset in the third file is accessible
      * (it shouldn't be...but it might.  Flag an error in case it is for now */
     if(flag && check_dset(file, "dset2")) goto error;
 
@@ -159,88 +159,74 @@ main(void)
 {
     hid_t fapl;
     H5E_auto2_t func;
-
     char	name[1024];
-    const char *envval = NULL;
 
     h5_reset();
     fapl = h5_fileaccess();
     TESTING("H5Fflush (part2 with flush)");
 
-    /* Don't run this test using the core or split file drivers */
-    envval = HDgetenv("HDF5_DRIVER");
-    if (envval == NULL)
-        envval = "nomatch";
-    if (HDstrcmp(envval, "core") && HDstrcmp(envval, "split")) {
-	/* Check the case where the file was flushed */
-	h5_fixname(FILENAME[0], fapl, name, sizeof name);
-	if(check_file(name, fapl, FALSE)) {
-	    H5_FAILED()
-	    goto error;
-	}
-	else
-	    PASSED();
-    
-	
-	/* Check the case where the file was not flushed.  This should give an error
-	 * so we turn off the error stack temporarily */
-	TESTING("H5Fflush (part2 without flush)");
-	H5Eget_auto2(H5E_DEFAULT,&func,NULL);
-	H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
-	h5_fixname(FILENAME[1], fapl, name, sizeof name);
-	if(check_file(name, fapl, FALSE))
-	    PASSED()
-	else
-	{
-#if defined _WIN32 && defined _HDF5USEDLL_
-	SKIPPED();
-	puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
-
-#else
+    /* Check the case where the file was flushed */
+    h5_fixname(FILENAME[0], fapl, name, sizeof name);
+    if(check_file(name, fapl, FALSE)) {
         H5_FAILED()
         goto error;
-#endif
-	}
-	H5Eset_auto2(H5E_DEFAULT, func, NULL);
-
-	/* Check the case where the file was flushed, but more data was added afterward.  This should give an error
-	 * so we turn off the error stack temporarily */
-	TESTING("H5Fflush (part2 with flush and later addition)");
-	H5Eget_auto2(H5E_DEFAULT,&func,NULL);
-	H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
-	h5_fixname(FILENAME[2], fapl, name, sizeof name);
-	if(check_file(name, fapl, TRUE))
-	    PASSED()
-	else
-	{
-#if defined _WIN32 && defined _HDF5USEDLL_
-	SKIPPED();
-	puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
-
-#else
-        H5_FAILED()
-        goto error;
-#endif
-
-	}
-	H5Eset_auto2(H5E_DEFAULT, func, NULL);
-
-	
-	h5_cleanup(FILENAME, fapl);
     }
     else
+        PASSED();
+
+
+    /* Check the case where the file was not flushed.  This should give an error
+     * so we turn off the error stack temporarily */
+    TESTING("H5Fflush (part2 without flush)");
+    H5Eget_auto2(H5E_DEFAULT,&func,NULL);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
+    h5_fixname(FILENAME[1], fapl, name, sizeof name);
+    if(check_file(name, fapl, FALSE))
+        PASSED()
+    else
     {
-        SKIPPED();
-        puts("    Test not compatible with current Virtual File Driver");
+#if defined _WIN32 && defined _HDF5USEDLL_
+    SKIPPED();
+    puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
+#elif defined H5_VMS
+    SKIPPED();
+#else
+    H5_FAILED()
+    goto error;
+#endif
     }
+    H5Eset_auto2(H5E_DEFAULT, func, NULL);
+
+    /* Check the case where the file was flushed, but more data was added afterward.  This should give an error
+     * so we turn off the error stack temporarily */
+    TESTING("H5Fflush (part2 with flush and later addition)");
+    H5Eget_auto2(H5E_DEFAULT,&func,NULL);
+    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
+    h5_fixname(FILENAME[2], fapl, name, sizeof name);
+    if(check_file(name, fapl, TRUE))
+        PASSED()
+    else
+    {
+#if defined _WIN32 && defined _HDF5USEDLL_
+    SKIPPED();
+    puts("   DLL will flush the file even when calling _exit, skip this test temporarily");
+#elif defined H5_VMS
+    SKIPPED();
+#else
+    H5_FAILED()
+    goto error;
+#endif
+
+    }
+    H5Eset_auto2(H5E_DEFAULT, func, NULL);
+
+    h5_cleanup(FILENAME, fapl);
+
     return 0;
 
-    error:
-        return 1;
+error:
+    return 1;
 }
-
-
-
 

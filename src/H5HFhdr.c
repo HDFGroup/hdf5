@@ -225,7 +225,7 @@ H5HF_hdr_finish_init_phase1(H5HF_hdr_t *hdr)
 
     /* Set the size of heap IDs */
     hdr->heap_len_size = MIN(hdr->man_dtable.max_dir_blk_off_size,
-            ((H5V_log2_gen((uint64_t)hdr->max_man_size) + 7) / 8));
+            H5V_limit_enc_size((uint64_t)hdr->max_man_size));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -415,7 +415,7 @@ H5HF_hdr_create(H5F_t *f, hid_t dxpl_id, const H5HF_create_t *cparam)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, HADDR_UNDEF, "can't finish phase #1 of header final initialization")
 
     /* Copy any I/O filter pipeline */
-    /* (This code is not in the "finish init phase" routines because those 
+    /* (This code is not in the "finish init phase" routines because those
      *  routines are also called from the cache 'load' callback, and the filter
      *  length is already set in that case (its stored in the header on disk))
      */
@@ -448,7 +448,7 @@ HDfprintf(stderr, "%s: hdr->filter_len = %u\n", FUNC, hdr->filter_len);
         hdr->heap_size = H5HF_HEADER_SIZE(hdr);
 
     /* Set the length of IDs in the heap */
-    /* (This code is not in the "finish init phase" routines because those 
+    /* (This code is not in the "finish init phase" routines because those
      *  routines are also called from the cache 'load' callback, and the ID
      *  length is already set in that case (its stored in the header on disk))
      */
@@ -1313,7 +1313,7 @@ HDfprintf(stderr, "%s: curr_entry = %u\n", FUNC, curr_entry);
 HDfprintf(stderr, "%s: tmp_entry = %d\n", FUNC, tmp_entry);
 #endif /* QAK */
         while(tmp_entry >= 0 &&
-                (H5F_addr_eq(iblock->ents[tmp_entry].addr, dblock_addr) || 
+                (H5F_addr_eq(iblock->ents[tmp_entry].addr, dblock_addr) ||
                     !H5F_addr_defined(iblock->ents[tmp_entry].addr)))
             tmp_entry--;
 #ifdef QAK
@@ -1505,6 +1505,7 @@ done:
 herr_t
 H5HF_hdr_delete(H5HF_hdr_t *hdr, hid_t dxpl_id)
 {
+    unsigned cache_flags = H5AC__NO_FLAGS_SET;      /* Flags for unprotecting heap header */
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(H5HF_hdr_delete, FAIL)
@@ -1585,18 +1586,12 @@ HDfprintf(stderr, "%s: hdr->huge_bt2_addr = %a\n", FUNC, hdr->huge_bt2_addr);
             HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap 'huge' objects and tracker")
     } /* end if */
 
-    /* Release header's disk space */
-    if(H5MF_xfree(hdr->f, H5FD_MEM_FHEAP_HDR, dxpl_id, hdr->heap_addr, (hsize_t)hdr->heap_size) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to release fractal heap header")
-
-    /* Finished deleting header */
-    if(H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__DIRTIED_FLAG|H5AC__DELETED_FLAG) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
-    hdr = NULL;
+    /* Indicate that the heap header should be deleted & file space freed */
+    cache_flags |= H5AC__DIRTIED_FLAG | H5AC__DELETED_FLAG | H5AC__FREE_FILE_SPACE_FLAG;
 
 done:
-    /* Unprotect the header, if an error occurred */
-    if(hdr && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, H5AC__NO_FLAGS_SET) < 0)
+    /* Unprotect the header with appropriate flags */
+    if(hdr && H5AC_unprotect(hdr->f, dxpl_id, H5AC_FHEAP_HDR, hdr->heap_addr, hdr, cache_flags) < 0)
         HDONE_ERROR(H5E_HEAP, H5E_CANTUNPROTECT, FAIL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)

@@ -22,8 +22,8 @@
 #ifndef H5FDmpi_H
 #define H5FDmpi_H
 
-/***** Macros for One linked collective IO case. *****/ 
-/* The default value to do one linked collective IO for all chunks. 
+/***** Macros for One linked collective IO case. *****/
+/* The default value to do one linked collective IO for all chunks.
    If the average number of chunks per process is greater than this value,
       the library will create an MPI derived datatype to link all chunks to do collective IO.
       The user can set this value through an API. */
@@ -42,14 +42,14 @@ typedef enum H5FD_mpio_xfer_t {
     H5FD_MPIO_COLLECTIVE
 } H5FD_mpio_xfer_t;
 
-/* Type of I/O for data transfer properties */
+/* Type of chunked dataset I/O */
 typedef enum H5FD_mpio_chunk_opt_t {
     H5FD_MPIO_CHUNK_DEFAULT = 0,
     H5FD_MPIO_CHUNK_ONE_IO,  		/*zero is the default*/
     H5FD_MPIO_CHUNK_MULTI_IO
 } H5FD_mpio_chunk_opt_t;
 
-/* Type of I/O for data transfer properties */
+/* Type of collective I/O */
 typedef enum H5FD_mpio_collective_opt_t {
     H5FD_MPIO_COLLECTIVE_IO = 0,
     H5FD_MPIO_INDIVIDUAL_IO  		/*zero is the default*/
@@ -120,3 +120,4 @@ H5_DLL MPI_Comm H5FD_mpi_get_comm(const H5FD_t *_file);
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* H5FDmpi_H */
+

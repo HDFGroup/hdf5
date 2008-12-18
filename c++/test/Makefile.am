@@ -35,14 +35,14 @@ TEST_PROG=dsets testhdf5
 check_PROGRAMS=$(TEST_PROG)
 
 # The tests depend on the hdf5 library, test library, and the c++ library
-LDADD=$(LIBH5CPP) $(LIBH5TEST) $(LIBHDF5)
+LDADD=$(LIBH5TEST) $(LIBH5CPP) $(LIBHDF5)
 
 dsets_SOURCES=dsets.cpp h5cpputil.cpp
 testhdf5_SOURCES=testhdf5.cpp tattr.cpp tcompound.cpp tfile.cpp tfilter.cpp \
 	th5s.cpp trefer.cpp ttypes.cpp tvlstr.cpp h5cpputil.cpp
 
 # Tell conclude.am that these are C++ tests.
-HDF_CXX=yes
+CXX_API=yes
 
 # Some C++ compilers/linkers (PGI?) create a directory named "ii_files" that
 # holds *.ii files, which are template entity instantiations.

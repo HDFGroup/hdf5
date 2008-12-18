@@ -30,6 +30,7 @@
 
 #define H5HF_PACKAGE		/*suppress error about including H5HFpkg  */
 
+
 /***********/
 /* Headers */
 /***********/
@@ -40,6 +41,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Vprivate.h"		/* Vectors and arrays 			*/
 #include "H5WBprivate.h"        /* Wrapped Buffers                      */
+
 
 /****************/
 /* Local Macros */
@@ -88,6 +90,7 @@ static H5HF_direct_t *H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t ad
 static herr_t H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5HF_direct_t *dblock, unsigned UNUSED * flags_ptr);
 static herr_t H5HF_cache_dblock_clear(H5F_t *f, H5HF_direct_t *dblock, hbool_t destroy);
 static herr_t H5HF_cache_dblock_size(const H5F_t *f, const H5HF_direct_t *dblock, size_t *size_ptr);
+
 
 /*********************/
 /* Package Variables */
@@ -291,7 +294,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
     size = H5HF_HEADER_SIZE(hdr);
 
     /* Get a pointer to a buffer that's large enough for serialized header */
-    if(NULL == (buf = H5WB_actual(wb, size)))
+    if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
         HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read header from disk */
@@ -302,9 +305,9 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
     p = buf;
 
     /* Magic number */
-    if(HDmemcmp(p, H5HF_HDR_MAGIC, (size_t)H5HF_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong fractal heap header signature")
-    p += H5HF_SIZEOF_MAGIC;
+    p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5HF_HDR_VERSION)
@@ -366,7 +369,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         hdr->heap_size = size + filter_info_size;
 
         /* Re-size current buffer */
-        if(NULL == (buf = H5WB_actual(wb, hdr->heap_size)))
+        if(NULL == (buf = (uint8_t *)H5WB_actual(wb, hdr->heap_size)))
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "can't get actual buffer")
 
         /* Read in I/O filter information */
@@ -395,7 +398,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         /* Release the space allocated for the I/O pipeline filters */
         H5O_msg_free(H5O_PLINE_ID, pline);
     } /* end if */
-    else 
+    else
         /* Set the heap header's size */
         hdr->heap_size = size;
 
@@ -490,15 +493,15 @@ HDfprintf(stderr, "%s: Flushing heap header, addr = %a, destroy = %u\n", FUNC, a
         size = hdr->heap_size;
 
         /* Get a pointer to a buffer that's large enough for serialized header */
-        if(NULL == (buf = H5WB_actual(wb, size)))
+        if(NULL == (buf = (uint8_t *)H5WB_actual(wb, size)))
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
         /* Get temporary pointer to serialized header */
         p = buf;
 
         /* Magic number */
-        HDmemcpy(p, H5HF_HDR_MAGIC, (size_t)H5HF_SIZEOF_MAGIC);
-        p += H5HF_SIZEOF_MAGIC;
+        HDmemcpy(p, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
 
         /* Version # */
         *p++ = H5HF_HDR_VERSION;
@@ -593,17 +596,29 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
-H5HF_cache_hdr_dest(H5F_t UNUSED *f, H5HF_hdr_t *hdr)
+H5HF_cache_hdr_dest(H5F_t *f, H5HF_hdr_t *hdr)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5HF_cache_hdr_dest)
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5HF_cache_hdr_dest)
 
     /*
      * Check arguments.
      */
     HDassert(hdr);
     HDassert(hdr->rc == 0);
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!hdr->cache_info.free_file_space_on_destroy || H5F_addr_defined(hdr->cache_info.addr));
+
+    /* Check for freeing file space for heap header */
+    if(hdr->cache_info.free_file_space_on_destroy) {
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_FHEAP_HDR, H5AC_dxpl_id, hdr->cache_info.addr, (hsize_t)hdr->heap_size) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap header")
+    } /* end if */
 
     /* Free the block size lookup table for the doubling table */
     H5HF_dtable_dest(&hdr->man_dtable);
@@ -613,9 +628,10 @@ H5HF_cache_hdr_dest(H5F_t UNUSED *f, H5HF_hdr_t *hdr)
         H5O_msg_reset(H5O_PLINE_ID, &(hdr->pline));
 
     /* Free the shared info itself */
-    H5FL_FREE(H5HF_hdr_t, hdr);
+    (void)H5FL_FREE(H5HF_hdr_t, hdr);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5HF_cache_hdr_dest() */
 
 
@@ -733,7 +749,6 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
     /* Allocate space for the fractal heap indirect block */
     if(NULL == (iblock = H5FL_CALLOC(H5HF_indirect_t)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-    HDmemset(&iblock->cache_info, 0, sizeof(H5AC_info_t));
 
     /* Get the pointer to the shared heap header */
     hdr = par_info->hdr;
@@ -760,7 +775,7 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
     iblock->size = H5HF_MAN_INDIRECT_SIZE(hdr, iblock);
 
     /* Get a pointer to a buffer that's large enough for serialized indirect block */
-    if(NULL == (buf = H5WB_actual(wb, iblock->size)))
+    if(NULL == (buf = (uint8_t *)H5WB_actual(wb, iblock->size)))
         HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, NULL, "can't get actual buffer")
 
     /* Read indirect block from disk */
@@ -771,9 +786,9 @@ HDfprintf(stderr, "%s: Load indirect block, addr = %a\n", FUNC, addr);
     p = buf;
 
     /* Magic number */
-    if(HDmemcmp(p, H5HF_IBLOCK_MAGIC, (size_t)H5HF_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong fractal heap indirect block signature")
-    p += H5HF_SIZEOF_MAGIC;
+    p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5HF_IBLOCK_VERSION)
@@ -963,15 +978,15 @@ HDfprintf(stderr, "%s: hdr->man_dtable.cparam.width = %u\n", FUNC, hdr->man_dtab
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't wrap buffer")
 
         /* Get a pointer to a buffer that's large enough for serialized indirect block */
-        if(NULL == (buf = H5WB_actual(wb, iblock->size)))
+        if(NULL == (buf = (uint8_t *)H5WB_actual(wb, iblock->size)))
             HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "can't get actual buffer")
 
         /* Get temporary pointer to buffer for serialized indirect block */
         p = buf;
 
         /* Magic number */
-        HDmemcpy(p, H5HF_IBLOCK_MAGIC, (size_t)H5HF_SIZEOF_MAGIC);
-        p += H5HF_SIZEOF_MAGIC;
+        HDmemcpy(p, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
 
         /* Version # */
         *p++ = H5HF_IBLOCK_VERSION;
@@ -1072,9 +1087,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
-H5HF_cache_iblock_dest(H5F_t UNUSED *f, H5HF_indirect_t *iblock)
+H5HF_cache_iblock_dest(H5F_t *f, H5HF_indirect_t *iblock)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1085,15 +1099,26 @@ H5HF_cache_iblock_dest(H5F_t UNUSED *f, H5HF_indirect_t *iblock)
      */
     HDassert(iblock);
     HDassert(iblock->rc == 0);
+    HDassert(iblock->hdr);
 #ifdef QAK
 HDfprintf(stderr, "%s: Destroying indirect block\n", FUNC);
 #endif /* QAK */
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!iblock->cache_info.free_file_space_on_destroy || H5F_addr_defined(iblock->cache_info.addr));
+
+    /* Check for freeing file space for indirect block */
+    if(iblock->cache_info.free_file_space_on_destroy) {
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_FHEAP_IBLOCK, H5AC_dxpl_id, iblock->cache_info.addr, (hsize_t)iblock->size) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block")
+    } /* end if */
 
     /* Set the shared heap header's file context for this operation */
     iblock->hdr->f = f;
 
     /* Decrement reference count on shared info */
-    HDassert(iblock->hdr);
     if(H5HF_hdr_decr(iblock->hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
     if(iblock->parent)
@@ -1109,7 +1134,7 @@ HDfprintf(stderr, "%s: Destroying indirect block\n", FUNC);
         H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
 
     /* Free fractal heap indirect block info */
-    H5FL_FREE(H5HF_indirect_t, iblock);
+    (void)H5FL_FREE(H5HF_indirect_t, iblock);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1235,7 +1260,7 @@ H5HF_cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_size,
 
     /* Set block's internal information */
     dblock->size = *size;
-    dblock->blk_off_size = H5HF_SIZEOF_OFFSET_LEN(dblock->size);
+    dblock->file_size = 0;
 
     /* Allocate block buffer */
 /* XXX: Change to using free-list factories */
@@ -1316,9 +1341,9 @@ HDfprintf(stderr, "%s: nbytes = %Zu, read_size = %Zu, read_buf = %p\n", FUNC, nb
     p = dblock->blk;
 
     /* Magic number */
-    if(HDmemcmp(p, H5HF_DBLOCK_MAGIC, (size_t)H5HF_SIZEOF_MAGIC))
+    if(HDmemcmp(p, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTLOAD, NULL, "wrong fractal heap direct block signature")
-    p += H5HF_SIZEOF_MAGIC;
+    p += H5_SIZEOF_MAGIC;
 
     /* Version */
     if(*p++ != H5HF_DBLOCK_VERSION)
@@ -1422,8 +1447,8 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
         p = dblock->blk;
 
         /* Magic number */
-        HDmemcpy(p, H5HF_DBLOCK_MAGIC, (size_t)H5HF_SIZEOF_MAGIC);
-        p += H5HF_SIZEOF_MAGIC;
+        HDmemcpy(p, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC);
+        p += H5_SIZEOF_MAGIC;
 
         /* Version # */
         *p++ = H5HF_DBLOCK_VERSION;
@@ -1623,9 +1648,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-/* ARGSUSED */
 herr_t
-H5HF_cache_dblock_dest(H5F_t UNUSED *f, H5HF_direct_t *dblock)
+H5HF_cache_dblock_dest(H5F_t *f, H5HF_direct_t *dblock)
 {
     herr_t      ret_value = SUCCEED;    /* Return value */
 
@@ -1638,6 +1662,20 @@ H5HF_cache_dblock_dest(H5F_t UNUSED *f, H5HF_direct_t *dblock)
 #ifdef QAK
 HDfprintf(stderr, "%s: Destroying direct block, dblock = %p\n", FUNC, dblock);
 #endif /* QAK */
+
+    /* If we're going to free the space on disk, the address must be valid */
+    HDassert(!dblock->cache_info.free_file_space_on_destroy || H5F_addr_defined(dblock->cache_info.addr));
+
+    /* Check for freeing file space for direct block */
+    if(dblock->cache_info.free_file_space_on_destroy) {
+        /* Sanity check */
+        HDassert(dblock->file_size > 0);
+
+        /* Release the space on disk */
+        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+        if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, H5AC_dxpl_id, dblock->cache_info.addr, dblock->file_size) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+    } /* end if */
 
     /* Set the shared heap header's file context for this operation */
     dblock->hdr->f = f;
@@ -1654,7 +1692,7 @@ HDfprintf(stderr, "%s: Destroying direct block, dblock = %p\n", FUNC, dblock);
     dblock->blk = H5FL_BLK_FREE(direct_block, dblock->blk);
 
     /* Free fractal heap direct block info */
-    H5FL_FREE(H5HF_direct_t, dblock);
+    (void)H5FL_FREE(H5HF_direct_t, dblock);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

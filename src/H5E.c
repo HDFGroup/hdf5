@@ -230,7 +230,7 @@ H5E_init_interface(void)
     HDsnprintf(lib_vers, sizeof(lib_vers), "%u.%u.%u%s", H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE, (HDstrlen(H5_VERS_SUBRELEASE) > 0 ? "-"H5_VERS_SUBRELEASE : ""));
     if(NULL == (cls = H5E_register_class(H5E_CLS_NAME, H5E_CLS_LIB_NAME, lib_vers)))
         HGOTO_ERROR(H5E_ERROR, H5E_CANTINIT, FAIL, "class initialization failed")
-    if((H5E_ERR_CLS_g = H5I_register(H5I_ERROR_CLASS, cls)) < 0)
+    if((H5E_ERR_CLS_g = H5I_register(H5I_ERROR_CLASS, cls, FALSE)) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error class")
 
     /* Include the automatically generated error code initialization */
@@ -275,11 +275,11 @@ H5E_term_interface(void)
         if(n > 0) {
             /* Clear any outstanding error stacks */
             if(nstk > 0)
-	        H5I_clear_type(H5I_ERROR_STACK, FALSE);
+	        H5I_clear_type(H5I_ERROR_STACK, FALSE, FALSE);
 
             /* Clear all the error classes */
 	    if(ncls > 0) {
-	        H5I_clear_type(H5I_ERROR_CLASS, FALSE);
+	        H5I_clear_type(H5I_ERROR_CLASS, FALSE, FALSE);
 
                 /* Reset the HDF5 error class, if its been closed */
                 if(H5I_nmembers(H5I_ERROR_CLASS) == 0)
@@ -288,7 +288,7 @@ H5E_term_interface(void)
 
             /* Clear all the error messages */
 	    if(nmsg > 0) {
-	        H5I_clear_type(H5I_ERROR_MSG, FALSE);
+	        H5I_clear_type(H5I_ERROR_MSG, FALSE, FALSE);
 
                 /* Reset the HDF5 error messages, if they've been closed */
                 if(H5I_nmembers(H5I_ERROR_MSG) == 0) {
@@ -390,7 +390,7 @@ H5Eregister_class(const char *cls_name, const char *lib_name, const char *versio
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTCREATE, FAIL, "can't create error class")
 
     /* Register the new error class to get an ID for it */
-    if((ret_value = H5I_register(H5I_ERROR_CLASS, cls)) < 0)
+    if((ret_value = H5I_register(H5I_ERROR_CLASS, cls, TRUE)) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error class")
 
 done:
@@ -471,7 +471,7 @@ H5Eunregister_class(hid_t class_id)
      * Decrement the counter on the dataset.  It will be freed if the count
      * reaches zero.
      */
-    if(H5I_dec_ref(class_id) < 0)
+    if(H5I_dec_ref(class_id, TRUE) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error class")
 
 done:
@@ -501,7 +501,7 @@ H5E_unregister_class(H5E_cls_t *cls)
 
     /* Iterate over all the messages and delete those in this error class */
     /* (Ignore return value, since callback isn't designed to return a particular object) */
-    (void)H5I_search(H5I_ERROR_MSG, H5E_close_msg_cb, cls);
+    (void)H5I_search(H5I_ERROR_MSG, H5E_close_msg_cb, cls, FALSE);
 
     /* Free error class structure */
     if(cls->cls_name)
@@ -510,7 +510,7 @@ H5E_unregister_class(H5E_cls_t *cls)
         H5MM_xfree((void*)cls->lib_name);
     if(cls->lib_vers)
         H5MM_xfree((void*)cls->lib_vers);
-    H5FL_FREE(H5E_cls_t, cls);
+    (void)H5FL_FREE(H5E_cls_t, cls);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E_unregister_class() */
@@ -539,7 +539,7 @@ H5Eget_class_name(hid_t class_id, char *name, size_t size)
     H5TRACE3("Zs", "i*sz", class_id, name, size);
 
     /* Get the error class */
-    if(NULL == (cls = H5I_object_verify(class_id, H5I_ERROR_CLASS)))
+    if(NULL == (cls = (H5E_cls_t *)H5I_object_verify(class_id, H5I_ERROR_CLASS)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error class ID")
 
     /* Retrieve the class name */
@@ -615,9 +615,12 @@ H5E_close_msg_cb(void *obj_ptr, hid_t obj_id, void *key)
     HDassert(err_msg);
 
     /* Close the message if it is in the class being closed */
-    if(err_msg->cls == cls)
-        if(H5I_dec_ref(obj_id) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message")
+    if(err_msg->cls == cls) {
+        if(H5E_close_msg(err_msg) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTCLOSEOBJ, FAIL, "unable to close error message")
+        if(NULL == H5I_remove(obj_id))
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTREMOVE, FAIL, "unable to remove error message")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -649,7 +652,7 @@ H5Eclose_msg(hid_t err_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an error class")
 
     /* Decrement the counter.  It will be freed if the count reaches zero. */
-    if(H5I_dec_ref(err_id) < 0)
+    if(H5I_dec_ref(err_id, TRUE) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error message")
 
 done:
@@ -681,7 +684,7 @@ H5E_close_msg(H5E_msg_t *err)
         H5MM_xfree((void*)err->msg);
     /* Don't free err->cls here */
 
-    H5FL_FREE(H5E_msg_t, err);
+    (void)H5FL_FREE(H5E_msg_t, err);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E_close_msg() */
@@ -716,7 +719,7 @@ H5Ecreate_msg(hid_t class_id, H5E_type_t msg_type, const char *msg_str)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "message is NULL")
 
     /* Get the error class */
-    if(NULL == (cls = H5I_object_verify(class_id, H5I_ERROR_CLASS)))
+    if(NULL == (cls = (H5E_cls_t *)H5I_object_verify(class_id, H5I_ERROR_CLASS)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error class ID")
 
     /* Create the new error message object */
@@ -724,7 +727,7 @@ H5Ecreate_msg(hid_t class_id, H5E_type_t msg_type, const char *msg_str)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTCREATE, FAIL, "can't create error message")
 
     /* Register the new error class to get an ID for it */
-    if((ret_value = H5I_register(H5I_ERROR_MSG, msg)) < 0)
+    if((ret_value = H5I_register(H5I_ERROR_MSG, msg, TRUE)) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't register error message")
 
 done:
@@ -797,7 +800,7 @@ H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg_str, size_t size)
     H5TRACE4("Zs", "i*Et*sz", msg_id, type, msg_str, size);
 
     /* Get the message object */
-    if(NULL == (msg = H5I_object_verify(msg_id, H5I_ERROR_MSG)))
+    if(NULL == (msg = (H5E_msg_t *)H5I_object_verify(msg_id, H5I_ERROR_MSG)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error message ID")
 
     /* Get the message's text */
@@ -838,7 +841,7 @@ H5Ecreate_stack(void)
     H5E_set_default_auto(stk);
 
     /* Register the stack */
-    if((ret_value = H5I_register(H5I_ERROR_STACK, stk)) < 0)
+    if((ret_value = H5I_register(H5I_ERROR_STACK, stk, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't create error stack")
 
 done:
@@ -874,7 +877,7 @@ H5Eget_current_stack(void)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTCREATE, FAIL, "can't create error stack")
 
     /* Register the stack */
-    if((ret_value = H5I_register(H5I_ERROR_STACK, stk)) < 0)
+    if((ret_value = H5I_register(H5I_ERROR_STACK, stk, TRUE)) < 0)
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTREGISTER, FAIL, "can't create error stack")
 
 done:
@@ -905,7 +908,7 @@ H5E_get_current_stack(void)
     FUNC_ENTER_NOAPI_NOINIT(H5E_get_current_stack)
 
     /* Get a pointer to the current error stack */
-    if(NULL == (current_stack = H5E_get_my_stack ())) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
+    if(NULL == (current_stack = H5E_get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in non-threaded case */
 	HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, NULL, "can't get current error stack")
 
     /* Allocate a new error stack */
@@ -922,13 +925,13 @@ H5E_get_current_stack(void)
         new_error = &(estack_copy->slot[u]);
 
         /* Increment the IDs to indicate that they are used in this stack */
-        if(H5I_inc_ref(current_error->cls_id) < 0)
+        if(H5I_inc_ref(current_error->cls_id, FALSE) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to increment ref count on error class")
         new_error->cls_id = current_error->cls_id;
-        if(H5I_inc_ref(current_error->maj_num) < 0)
+        if(H5I_inc_ref(current_error->maj_num, FALSE) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to increment ref count on error message")
         new_error->maj_num = current_error->maj_num;
-        if(H5I_inc_ref(current_error->min_num) < 0)
+        if(H5I_inc_ref(current_error->min_num, FALSE) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to increment ref count on error message")
         new_error->min_num = current_error->min_num;
         if(NULL == (new_error->func_name = H5MM_xstrdup(current_error->func_name)))
@@ -953,7 +956,7 @@ H5E_get_current_stack(void)
 done:
     if(ret_value == NULL)
         if(estack_copy)
-            H5FL_FREE(H5E_t, estack_copy);
+            (void)H5FL_FREE(H5E_t, estack_copy);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_get_current_stack() */
@@ -981,7 +984,7 @@ H5Eset_current_stack(hid_t err_stack)
     H5TRACE1("e", "i", err_stack);
 
     if(err_stack != H5E_DEFAULT) {
-        if(NULL == (estack = H5I_object_verify(err_stack, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
         /* Set the current error stack */
@@ -1035,14 +1038,14 @@ H5E_set_current_stack(H5E_t *estack)
         new_error = &(estack->slot[u]);
 
         /* Increment the IDs to indicate that they are used in this stack */
-        if(H5I_inc_ref(new_error->cls_id) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to decrement ref count on error class")
+        if(H5I_inc_ref(new_error->cls_id, FALSE) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error class")
         current_error->cls_id = new_error->cls_id;
-        if(H5I_inc_ref(new_error->maj_num) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to decrement ref count on error class")
+        if(H5I_inc_ref(new_error->maj_num, FALSE) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error class")
         current_error->maj_num = new_error->maj_num;
-        if(H5I_inc_ref(new_error->min_num) < 0)
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to decrement ref count on error class")
+        if(H5I_inc_ref(new_error->min_num, FALSE) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error class")
         current_error->min_num = new_error->min_num;
         if(NULL == (current_error->func_name = H5MM_xstrdup(new_error->func_name)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
@@ -1087,7 +1090,7 @@ H5Eclose_stack(hid_t stack_id)
          * Decrement the counter on the error stack.  It will be freed if the count
          * reaches zero.
          */
-        if(H5I_dec_ref(stack_id)<0)
+        if(H5I_dec_ref(stack_id, TRUE)<0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error stack")
     } /* end if */
 
@@ -1120,7 +1123,7 @@ H5E_close_stack(H5E_t *estack)
     H5E_clear_stack(estack);
 
     /* Free the stack structure */
-    H5FL_FREE(H5E_t, estack);
+    (void)H5FL_FREE(H5E_t, estack);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5E_close_stack() */
@@ -1158,7 +1161,7 @@ H5Eget_num(hid_t error_stack_id)
         H5E_clear_stack(NULL);
 
         /* Get the error stack to operate on */
-        if(NULL == (estack = H5I_object_verify(error_stack_id, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(error_stack_id, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
 
@@ -1226,7 +1229,7 @@ H5Epop(hid_t err_stack, size_t count)
         H5E_clear_stack(NULL);
 
         /* Get the error stack to operate on */
-        if(NULL == (estack = H5I_object_verify(err_stack, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
 
@@ -1289,17 +1292,22 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
         H5E_clear_stack(NULL);
 
         /* Get the error stack to operate on */
-        if(NULL == (estack = H5I_object_verify(err_stack, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
 
     /* Check for mis-matches in major & minor error classes */
-    if(NULL == (maj_ptr = H5I_object_verify(maj_id, H5I_ERROR_MSG)))
+    if(NULL == (maj_ptr = (H5E_msg_t *)H5I_object_verify(maj_id, H5I_ERROR_MSG)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error message ID")
-    if(NULL == (min_ptr = H5I_object_verify(min_id, H5I_ERROR_MSG)))
+    if(NULL == (min_ptr = (H5E_msg_t *)H5I_object_verify(min_id, H5I_ERROR_MSG)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error message ID")
     if(maj_ptr->cls != min_ptr->cls)
         HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "major and minor errors not from same error class")
+
+/* Note that the variable-argument parsing for the format is identical in
+ *      the H5E_printf_stack() routine - correct errors and make changes in both
+ *      places. -QAK
+ */
 
     /* Format the description */
     va_start(ap, fmt);
@@ -1387,7 +1395,7 @@ H5Eclear2(hid_t err_stack)
         /* Only clear the error stack if it's not the default stack */
         H5E_clear_stack(NULL);
 
-        if(NULL == (estack = H5I_object_verify(err_stack, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
 
@@ -1434,7 +1442,7 @@ H5Eprint2(hid_t err_stack, FILE *stream)
         /* Only clear the error stack if it's not the default stack */
         H5E_clear_stack(NULL);
 
-        if(NULL == (estack = H5I_object_verify(err_stack, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
 
@@ -1480,7 +1488,7 @@ H5Ewalk2(hid_t err_stack, H5E_direction_t direction, H5E_walk2_t stack_func, voi
         /* Only clear the error stack if it's not the default stack */
         H5E_clear_stack(NULL);
 
-        if(NULL == (estack = H5I_object_verify(err_stack, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(err_stack, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
 
@@ -1525,7 +1533,7 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
     else
-        if(NULL == (estack = H5I_object_verify(estack_id, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
     /* Get the automatic error reporting information */
@@ -1577,7 +1585,7 @@ H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
     else
-        if(NULL == (estack = H5I_object_verify(estack_id, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
     /* Set the automatic error reporting information */
@@ -1620,7 +1628,7 @@ H5Eauto_is_v2(hid_t estack_id, unsigned *is_stack)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
     else
-        if(NULL == (estack = H5I_object_verify(estack_id, H5I_ERROR_STACK)))
+        if(NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
 
     /* Check if the error stack reporting function is the "newer" stack type */

@@ -120,8 +120,8 @@ H5F_fake_free(H5F_t *f)
     if(f) {
         /* Destroy shared file struct */
         if(f->shared)
-            f->shared = H5FL_FREE(H5F_file_t, f->shared);
-        H5FL_FREE(H5F_t, f);
+            f->shared = (H5F_file_t *)H5FL_FREE(H5F_file_t, f->shared);
+        (void)H5FL_FREE(H5F_t, f);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(SUCCEED)

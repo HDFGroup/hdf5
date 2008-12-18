@@ -33,7 +33,8 @@
 
 
 /* PRIVATE PROTOTYPES */
-static void *H5O_name_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags, const uint8_t *p);
+static void *H5O_name_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+    unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_name_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void *H5O_name_copy(const void *_mesg, void *_dest);
 static size_t H5O_name_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -84,34 +85,34 @@ const H5O_msg_class_t H5O_MSG_NAME[1] = {{
  */
 static void *
 H5O_name_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    const uint8_t *p)
+    unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_name_t          *mesg;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_name_decode);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_name_decode)
 
     /* check args */
-    assert(f);
-    assert(p);
+    HDassert(f);
+    HDassert(p);
 
     /* decode */
-    if (NULL==(mesg = H5MM_calloc(sizeof(H5O_name_t))) ||
-            NULL==(mesg->s = H5MM_malloc (HDstrlen((const char*)p)+1)))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-    HDstrcpy(mesg->s, (const char*)p);
+    if(NULL == (mesg = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))) ||
+            NULL == (mesg->s = (char *)H5MM_malloc(HDstrlen((const char *)p) + 1)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+    HDstrcpy(mesg->s, (const char *)p);
 
     /* Set return value */
-    ret_value=mesg;
+    ret_value = mesg;
 
 done:
-    if(ret_value==NULL) {
+    if(NULL == ret_value) {
         if(mesg)
-            H5MM_xfree (mesg);
+            H5MM_xfree(mesg);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_name_decode() */
 
 
 /*-------------------------------------------------------------------------
@@ -173,24 +174,25 @@ H5O_name_copy(const void *_mesg, void *_dest)
     H5O_name_t             *dest = (H5O_name_t *) _dest;
     void                *ret_value;     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_name_copy);
+    FUNC_ENTER_NOAPI_NOINIT(H5O_name_copy)
 
     /* check args */
-    assert(mesg);
-    if (!dest && NULL==(dest = H5MM_calloc(sizeof(H5O_name_t))))
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    HDassert(mesg);
+
+    if(!dest && NULL == (dest = (H5O_name_t *)H5MM_calloc(sizeof(H5O_name_t))))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* copy */
     *dest = *mesg;
-    if((dest->s = H5MM_xstrdup(mesg->s))==NULL)
-	HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+    if(NULL == (dest->s = H5MM_xstrdup(mesg->s)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set return value */
-    ret_value=dest;
+    ret_value = dest;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_name_copy() */
 
 
 /*-------------------------------------------------------------------------
@@ -252,16 +254,16 @@ H5O_name_reset(void *_mesg)
 {
     H5O_name_t             *mesg = (H5O_name_t *) _mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_name_reset);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_name_reset)
 
     /* check args */
-    assert(mesg);
+    HDassert(mesg);
 
     /* reset */
-    mesg->s = H5MM_xfree(mesg->s);
+    mesg->s = (char *)H5MM_xfree(mesg->s);
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
-}
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5O_name_reset() */
 
 
 /*-------------------------------------------------------------------------

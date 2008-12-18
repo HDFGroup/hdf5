@@ -191,7 +191,7 @@
           memb_map(H5FD_MEM_OHDR_F)  = H5FD_MEM_OHDR_F
           memb_addr(H5FD_MEM_OHDR_F) = 0.4
 
-          memb_name = ''
+          memb_name = ' '
           memb_name(H5FD_MEM_SUPER_F) = '%s-s.h5'
           memb_name(H5FD_MEM_BTREE_F) = '%s-b.h5'
           memb_name(H5FD_MEM_DRAW_F)  = '%s-r.h5'
@@ -244,6 +244,12 @@
  
           CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error, access_prp = fapl)
               CALL check("h5fcreate_f", error, total_error)
+          if(error .ne. 0) then
+             write(*,*) "Cannot create file using multi-file driver... Exiting...."
+             total_error = 1
+             call h5pclose_f(fapl, error)
+             return
+          endif  
 
 
           ! 
@@ -366,13 +372,26 @@
           ! Close the file.
           !
           CALL h5fclose_f(file_id, error)
-              CALL check("h5fclose_f", error, total_error)
+          CALL check("h5fclose_f", error, total_error)
           CALL h5pclose_f(fapl, error)
-              CALL check("h5pclose_f", error, total_error)
+          CALL check("h5pclose_f", error, total_error)
           CALL h5pclose_f(fapl_1, error)
-              CALL check("h5pclose_f", error, total_error)
-          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
-              CALL check("h5_cleanup_f", error, total_error)
+          CALL check("h5pclose_f", error, total_error)
+          IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
+          
+          IF(cleanup) CALL h5_cleanup_f(filename//'.h5-b', H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
+          IF(cleanup) CALL h5_cleanup_f(filename//'.h5-g', H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
+          IF(cleanup) CALL h5_cleanup_f(filename//'.h5-l', H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
+          IF(cleanup) CALL h5_cleanup_f(filename//'.h5-o', H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
+          IF(cleanup) CALL h5_cleanup_f(filename//'.h5-r', H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
+          IF(cleanup) CALL h5_cleanup_f(filename//'.h5-s', H5P_DEFAULT_F, error)
+          CALL check("h5_cleanup_f", error, total_error)
      
           RETURN
         END SUBROUTINE multi_file_test
