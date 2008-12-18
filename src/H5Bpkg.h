@@ -32,11 +32,14 @@
 #include "H5Bprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5RCprivate.h"	/* Reference counted objects            */
 
 /**************************/
 /* Package Private Macros */
 /**************************/
+
+/* Get the native key at a given index */
+#define H5B_NKEY(b, shared, idx)  ((b)->native + (shared)->nkey[(idx)])
+
 
 /****************************/
 /* Package Private Typedefs */
@@ -75,6 +78,10 @@ H5FL_EXTERN(H5B_t);
 /* Package Private Prototypes */
 /******************************/
 H5_DLL herr_t H5B_dest(H5F_t *f, H5B_t *b);
+#ifdef H5B_DEBUG
+herr_t H5B_assert(H5F_t *f, hid_t dxpl_id, haddr_t addr, const H5B_class_t *type,
+			 void *udata);
+#endif
 
 #endif /*_H5Bpkg_H*/
 
