@@ -1139,8 +1139,8 @@ H5Z_filter_scaleoffset (unsigned flags, size_t cd_nelmts, const unsigned cd_valu
             HDmemcpy(outbuf+buf_offset, *buf, nbytes);
             *buf = outbuf;
             outbuf = NULL;
-            *buf_size = buf_offset+nbytes;
-            ret_value = *buf_size;
+            *buf_size = size_out;
+            ret_value = buf_offset+nbytes;
             goto done;
         }
 

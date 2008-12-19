@@ -333,7 +333,7 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
         *buf = outbuf;
         outbuf = NULL;
         *buf_size = nalloc;
-        ret_value = nalloc;
+        ret_value = size_out;
     }
     /* Output; compress */
     else {
@@ -359,7 +359,7 @@ H5Z_filter_szip (unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
         /* Set return values */
         *buf = outbuf;
         outbuf = NULL;
-        *buf_size = size_out+4;
+        *buf_size = nbytes+4;
         ret_value = size_out+4;
     }
 

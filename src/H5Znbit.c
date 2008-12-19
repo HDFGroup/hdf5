@@ -904,6 +904,9 @@ H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 
         /* decompress the buffer */
         H5Z_nbit_decompress(outbuf, d_nelmts, *buf, cd_values);
+
+	*buf_size = size_out;
+	ret_value = size_out;
     }
     /* output; compress */
     else {
@@ -917,6 +920,9 @@ H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
 
         /* compress the buffer, size_out will be changed */
         H5Z_nbit_compress(*buf, d_nelmts, outbuf, &size_out, cd_values);
+
+	*buf_size = nbytes;
+	ret_value = size_out;
     }
 
     /* free the input buffer */
@@ -925,8 +931,6 @@ H5Z_filter_nbit(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     /* set return values */
     *buf = outbuf;
     outbuf = NULL;
-    *buf_size = size_out;
-    ret_value = size_out;
 
 done:
     if(outbuf)
