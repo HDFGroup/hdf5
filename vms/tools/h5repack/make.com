@@ -16,8 +16,11 @@ $! Makefile for VMS systems.
 $!
 $! Make h5repack tool 
 $!
-$ ccopt = "/float=ieee_float"
-$
+$! The next two lines should be uncommented only when building by hand in the
+$! current directory. Use build.com in the vms directory to build
+$! the distribution. Make sure that location of the zlib library is correct.
+$! define zlib_dir sys$sysusers:[pourmal.zlib-1_2_3]
+$! ccopt = "/float=ieee_float/define=H5_VMS/include=zlib_dir"
 $ ccc := cc 'ccopt /include=([-.-.src], [-.lib], [-.-.test])
 $ type sys$input
        Creating h5repack ...
@@ -37,7 +40,6 @@ $ link/exe=h5repack.exe -
 $ type sys$input
        Finished  h5repack
 
-$
 $ type sys$input
        Creating h5repacktst ...
 $ link/exe=h5repacktst.exe -
@@ -47,7 +49,6 @@ $ link/exe=h5repacktst.exe -
            h5repack_verify, -
            [-.lib]libh5tools.olb/lib,[-.-.test]libh5test.olb/lib, -
            [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$
 $ type sys$input
        Finished  h5repacktst
 $!

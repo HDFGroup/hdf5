@@ -16,6 +16,10 @@ $! Makefile for VMS systems.
 $!
 $! Make HDF5 C++ library
 $!
+$! The next two lines should be uncommented only when building by hand in the
+$! current directory. Use build.com in the vms directory to build
+$! the distribution. Make sure that location of the zlib library is correct.
+$! define zlib_dir sys$sysusers:[pourmal.zlib-1_2_3]
 $! cxxopt = "/float=ieee_float/standard=strict_ansi/define=H5_VMS"
 $ ccc := cxx 'cxxopt /include=([-.-.src])
 $!

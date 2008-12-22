@@ -16,14 +16,14 @@ $! Makefile for VMS systems.
 $!
 $! Make h5dump tool 
 $!
-$ ccopt = "/float=ieee_float"
+$! The next two lines should be uncommented only when building by hand in the
+$! current directory. Use build.com in the vms directory to build
+$! the distribution. Make sure that location of the zlib library is correct.
+$! define zlib_dir sys$sysusers:[pourmal.zlib-1_2_3]
+$! ccopt = "/float=ieee_float/define=H5_VMS/include=zlib_dir"
 $
 $ ccc := cc 'ccopt /include=([-.-.src], [-.lib])
-$ 
-$
 $ cobj= "h5dump.c, h5dumpgentest.c "
-
-$                               
 $ ccc 'cobj 
 $ type sys$input
        Creating h5dumpgentest ...
@@ -31,8 +31,6 @@ $ link     h5dumpgentest, -
            [-.lib]libh5tools.olb/lib,[-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib 
 $ type sys$input
  	Finished  h5dumpgentest
-
-$
 $ type sys$input
        Creating h5dump ...
 $ link     h5dump, -

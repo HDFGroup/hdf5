@@ -16,7 +16,11 @@ $! Makefile for VMS systems.
 $!
 $! Make HDF5 Fortran library
 $!
-$! define zlib_dir sys$sysusers:[pourmale.zlib-1_2_3]
+$! The thre two lines should be uncommented only when building by hand in the
+$! current directory. Use build.com in the vms directory to build
+$! the distribution. Make sure that location of the zlib library is correct.
+$!
+$! define zlib_dir sys$sysusers:[pourmal.zlib-1_2_3]
 $! ccopt = "/float=ieee_float/define=H5_VMS/debug/nooptimize/include=zlib_dir"
 $! fcopt = "/float=ieee_float/define=H5_VMS/debug/nooptimize/include=zlib_dir"
 $ ccc := cc 'ccopt /include=[-.-.src]
@@ -54,13 +58,12 @@ $ ffiles= "H5_ff.f90, H5Aff.f90, H5Dff.f90, H5Eff.f90,"+-
           "H5Lff.f90, H5Off.f90,"+-
           "H5Fff.f90, H5Gff.f90, H5Iff.f90, H5Pff.f90, H5Rff.f90, H5Sff.f90,"+-
           "H5Tff.f90, H5Zff.f90, H5_DBLE_InterfaceInclude.f90, HDF5.f90"
-$ fobj="H5fortran_flags, H5f90global, "+-
+$ fobj="H5f90global, "+-
        "H5fortran_types, H5_ff, H5Aff, H5Dff, H5Eff,"+-
        "H5Fff, H5Gff, H5Iff, H5Lff, H5Off, H5Pff, H5Rff, H5Sff,"+-
        "H5Tff, H5Zff, H5_DBLE_InterfaceInclude, HDF5"
 $!
 $ ccc 'cobj 
-$ fff H5fortran_flags.f90
 $ fff H5fortran_types.f90
 $ fff H5f90global.f90
 $ 

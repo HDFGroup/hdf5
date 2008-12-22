@@ -15,10 +15,12 @@ $!#
 $! Makefile for VMS systems.
 $!
 $! Make HDF5 C examples
+$! Build examples after you install libraries and examples.
+$! install.com installs binaries under the HDF5 directory in the top
+$! source directory.
 $!
-$ ccopt = "/float=ieee_float/nowarnings/define=H5_VMS"
-$
-$ define zlib_dir sys$sysusers:[pourmale.zlib-1_2_3]
+$ define zlib_dir sys$sysusers:[pourmal.zlib-1_2_3]
+$ ccopt = "/float=ieee_float/nowarnings/define=H5_VMS/include=zlib_dir"
 $ ccc := cc 'ccopt /include=([-.-.include])
 $ type sys$input
  	Compiling  C examples
