@@ -209,13 +209,17 @@ hsize_t diff_array( void *_mem1,
     /* get the size. */
     size = H5Tget_size( m_type );
 
-    acc[rank-1]=1;
-    for(j=(rank-2); j>=0; j--)
+    if ( rank > 0 )
     {
-        acc[j]=acc[j+1]*dims[j+1];
+        
+        acc[rank-1]=1;
+        for(j=(rank-2); j>=0; j--)
+        {
+            acc[j]=acc[j+1]*dims[j+1];
+        }
+        for ( j = 0; j < rank; j++)
+            pos[j]=0;
     }
-    for ( j = 0; j < rank; j++)
-        pos[j]=0;
 
     if(H5Tis_variable_str(m_type))
     {
@@ -5572,6 +5576,10 @@ void print_pos( int        *ph,       /* print header */
             parallel_print(" ");
         }
         parallel_print("]" );
+    }
+    else
+    {
+     parallel_print("      ");
     }
 }
 
