@@ -1,4 +1,4 @@
-HDF5 version 1.8.2-post2 currently under development
+HDF5 version 1.8.2-post3 currently under development
 ==> release_docs/RELEASE.txt <==
   
   It is suggested that you do not use this option on these platforms

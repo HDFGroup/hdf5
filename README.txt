@@ -1,4 +1,4 @@
-HDF5 version 1.8.2-post2 currently under development
+HDF5 version 1.8.2-post3 currently under development
 ==> README.txt <==
 Messages sent to the list should be addressed to "<list>@hdfgroup.org".
 
