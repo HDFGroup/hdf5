@@ -1,5 +1,5 @@
 dataset: </refreg> and </refreg>
-Referenced dataset      10424            10424
+Referenced dataset      10696            10696
 ------------------------------------------------------------
 Region blocks
 block #0           (2,2)-(7,7)           (0,0)-(2,2)
