@@ -20,13 +20,6 @@
  * Purpose:     Tests the H5Dset_extent call
  */
 
-#if 0
-#define H5_SET_EXTENT_DEBUG4
-#endif
-
-
-
-
 #include "hdf5.h"
 #include "h5test.h"
 
@@ -70,14 +63,10 @@ static int test_rank3( hbool_t do_compress,
 static int test_external( void );
 static int test_layouts( H5D_layout_t layout );
 
-
-
-
 /*-------------------------------------------------------------------------
  * main
  *-------------------------------------------------------------------------
  */
-
 
 int main( void )
 {
@@ -102,8 +91,6 @@ int main( void )
     
     
 error:
-  
-    
     H5_FAILED();
     return 1;
 }
@@ -257,10 +244,6 @@ static int do_ranks( void )
     
     
 error:
-    
-   
-    
-    H5_FAILED();
     return -1;
 }
 
@@ -289,7 +272,6 @@ static int do_layouts( void )
     return 0;
     
 error:
-    H5_FAILED();
     return -1;
 }
 
