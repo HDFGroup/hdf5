@@ -3871,6 +3871,20 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
    /* Check args */
     assert(dset);
     assert(size);
+
+    /* Check if we are allowed to modify the space; only datasets with chunked and external storage are allowed to be modified */
+    if( H5D_COMPACT == dset->shared->layout.type )
+    {
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "dataset has compact storage")
+    }
+    if( H5D_CONTIGUOUS == dset->shared->layout.type  )
+    {             
+        if( 0 == dset->shared->efl.nused)
+        {
+            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "dataset has contiguous storage")
+        }
+            
+    }
     
     /*-------------------------------------------------------------------------
     * Get the data space
@@ -3929,7 +3943,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
         }
         
         /* Allocate space for the new parts of the dataset, if appropriate */
-        if(expand && dset->shared->alloc_time==H5D_ALLOC_TIME_EARLY)
+        if(expand && dset->shared->alloc_time==H5D_ALLOC_TIME_EARLY )
         {
             if(H5D_alloc_storage(dset->ent.file, dxpl_id, dset, H5D_ALLOC_EXTEND, TRUE, FALSE) < 0)
             {

@@ -2960,7 +2960,7 @@ H5D_istore_prune_by_extent(const H5D_io_info_t *io_info)
 	next = ent->next;
 
         for(u = 0; u < dset->shared->layout.u.chunk.ndims - 1; u++) {
-            if((hsize_t)ent->offset[u] > curr_dims[u]) {
+            if((hsize_t)ent->offset[u] >= curr_dims[u]) {
                 found = 1;
                 break;
             } /* end if */
@@ -3032,7 +3032,7 @@ H5D_istore_prune_extent(H5F_t *f, hid_t dxpl_id, const void *_lt_key, haddr_t UN
 
     /* Figure out what chunks are no longer in use for the specified extent and release them */
     for(u = 0; u < udata->common.mesg->u.chunk.ndims - 1; u++)
-	if((hsize_t)lt_key->offset[u] > udata->dims[u]) {
+	if((hsize_t)lt_key->offset[u] >= udata->dims[u]) {
             H5D_istore_ud0_t        bt_udata;
 
             HDmemset(&bt_udata, 0, sizeof bt_udata);

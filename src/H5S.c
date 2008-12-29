@@ -1870,11 +1870,13 @@ H5S_set_extent( H5S_t *space, const hsize_t *size )
     assert( size);
 
     /* Verify that the dimensions being changed are allowed to change */
-    for ( u = 0; u < space->extent.rank; u++ ) {
-        if ( space->extent.max && H5S_UNLIMITED != space->extent.max[u] &&
-                 space->extent.max[u]!=size[u] )
-             HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL,"dimension cannot be modified");
-        ret_value++;
+    for(u = 0; u < space->extent.rank; u++) {
+        if(space->extent.size[u] != size[u]) {
+            if(space->extent.max && H5S_UNLIMITED != space->extent.max[u] &&
+                     space->extent.max[u] < size[u])
+                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimension cannot be modified")
+            ret_value++;
+        } /* end if */
     } /* end for */
 
     /* Update */
