@@ -1869,7 +1869,7 @@ error:
  * test usage with external storage
  *-------------------------------------------------------------------------
  */
-static int test_external()
+static int test_external( void )
 {
 
     hid_t   fid;          
@@ -1879,7 +1879,6 @@ static int test_external()
     hsize_t dims_o[RANK2] = {DIM0,DIM1};    /* original dimensions */ 
     hsize_t dims_s[RANK2] = {DIMS0,DIMS1};  /* shrinking dimensions */ 
     hsize_t dims_e[RANK2] = {DIME0,DIM1};   /* extended dimensions, dimension 1 is the original */ 
-    hsize_t dims_c[RANK2] = {2,2};          /* chunk dimensions */ 
     hsize_t dims_r[RANK2];                  /* read dimensions */ 
     hsize_t maxdims[RANK2] = {DIME0,DIM1};  /* only the first dimension can be extendible */
     int     buf_o[DIM0][DIM1];              /* original buffer, for writing */  
@@ -2255,7 +2254,6 @@ static int test_layouts( H5D_layout_t layout )
     hsize_t dims_o[RANK2] = {DIM0,DIM1};    /* original dimensions */ 
     hsize_t dims_s[RANK2] = {DIMS0,DIMS1};  /* shrinking dimensions */ 
     hsize_t dims_e[RANK2] = {DIME0,DIME1};  /* extended dimensions */ 
-    hsize_t dims_c[RANK2] = {2,2};          /* chunk dimensions */ 
     hsize_t dims_r[RANK2];                  /* read dimensions */ 
     int     buf_o[DIM0][DIM1];
     int     buf_r[DIM0][DIM1];
