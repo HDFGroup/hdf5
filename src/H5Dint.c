@@ -2294,6 +2294,20 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
     if(0 == (H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR))
     HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
 
+    /* Check if we are allowed to modify the space; only datasets with chunked and external storage are allowed to be modified */
+    if( H5D_COMPACT == dset->shared->layout.type )
+    {
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "dataset has compact storage")
+    }
+    if( H5D_CONTIGUOUS == dset->shared->layout.type  )
+    {             
+        if( 0 == dset->shared->dcpl_cache.efl.nused)
+        {
+            HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "dataset has contiguous storage")
+        }
+            
+    }
+ 
     /* Check if the filters in the DCPL will need to encode, and if so, can they? */
     if(H5D_check_filters(dset) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't apply filters")
