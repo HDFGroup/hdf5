@@ -287,10 +287,10 @@ static int test_rank2( hbool_t do_compress,
                        H5D_fill_time_t fill_time)
 {
 
-    hid_t   fid;          
-    hid_t   did;
-    hid_t   sid;
-    hid_t   dcpl;
+    hid_t   fid=-1;          
+    hid_t   did=-1;
+    hid_t   sid=-1;
+    hid_t   dcpl=-1;
     hid_t   fcpl;
     hsize_t dims_o[RANK2] = {DIM0,DIM1};    /* original dimensions */ 
     hsize_t dims_s[RANK2] = {DIMS0,DIMS1};  /* shrinking dimensions */ 
@@ -838,10 +838,10 @@ static int test_rank1( hbool_t do_compress,
                        H5D_fill_time_t fill_time)
 {
 
-    hid_t   fid;          
-    hid_t   did;
-    hid_t   sid;
-    hid_t   dcpl;
+    hid_t   fid=-1;          
+    hid_t   did=-1;
+    hid_t   sid=-1;
+    hid_t   dcpl=-1;
     hid_t   fcpl;
     hsize_t dims_o[RANK1] = {DIM0};   /* original dimensions */ 
     hsize_t dims_s[RANK1] = {DIMS0};  /* shrinking dimensions */ 
@@ -1332,10 +1332,10 @@ static int test_rank3( hbool_t do_compress,
                        H5D_fill_time_t fill_time)
 {
 
-    hid_t   fid;          
-    hid_t   did;
-    hid_t   sid;
-    hid_t   dcpl;
+    hid_t   fid=-1;          
+    hid_t   did=-1;
+    hid_t   sid=-1;
+    hid_t   dcpl=-1;
     hid_t   fcpl;
     hsize_t dims_o[RANK3] = {DIM0,DIM1,DIM2};    /* original dimensions */ 
     hsize_t dims_s[RANK3] = {DIMS0,DIMS1,DIMS2}; /* shrinking dimensions */ 
@@ -1869,17 +1869,16 @@ error:
  * test usage with external storage
  *-------------------------------------------------------------------------
  */
-static int test_external()
+static int test_external( void )
 {
 
-    hid_t   fid;          
-    hid_t   did;
-    hid_t   sid;
-    hid_t   dcpl;
+    hid_t   fid=-1;       
+    hid_t   did=-1;
+    hid_t   sid=-1;
+    hid_t   dcpl=-1;
     hsize_t dims_o[RANK2] = {DIM0,DIM1};    /* original dimensions */ 
     hsize_t dims_s[RANK2] = {DIMS0,DIMS1};  /* shrinking dimensions */ 
     hsize_t dims_e[RANK2] = {DIME0,DIM1};   /* extended dimensions, dimension 1 is the original */ 
-    hsize_t dims_c[RANK2] = {2,2};          /* chunk dimensions */ 
     hsize_t dims_r[RANK2];                  /* read dimensions */ 
     hsize_t maxdims[RANK2] = {DIME0,DIM1};  /* only the first dimension can be extendible */
     int     buf_o[DIM0][DIM1];              /* original buffer, for writing */  
@@ -2248,14 +2247,13 @@ error:
 static int test_layouts( H5D_layout_t layout )
 {
 
-    hid_t   fid;          
-    hid_t   did;
-    hid_t   sid;
-    hid_t   dcpl;
+    hid_t   fid=-1;       
+    hid_t   did=-1;
+    hid_t   sid=-1;
+    hid_t   dcpl=-1;
     hsize_t dims_o[RANK2] = {DIM0,DIM1};    /* original dimensions */ 
     hsize_t dims_s[RANK2] = {DIMS0,DIMS1};  /* shrinking dimensions */ 
     hsize_t dims_e[RANK2] = {DIME0,DIME1};  /* extended dimensions */ 
-    hsize_t dims_c[RANK2] = {2,2};          /* chunk dimensions */ 
     hsize_t dims_r[RANK2];                  /* read dimensions */ 
     int     buf_o[DIM0][DIM1];
     int     buf_r[DIM0][DIM1];
