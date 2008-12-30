@@ -461,7 +461,7 @@ END SUBROUTINE h5fcreate_f
 <dt><strong>Fortran90 Interface:</strong> h5fflush_f
     <dd>
 	<pre>
-SUBROUTINE h5fflush_f(obj_id, new_file_id, hdferr)
+SUBROUTINE h5fflush_f(obj_id, scope, hdferr)
   IMPLICIT NONE 
   INTEGER(HID_T), INTENT(IN)  :: obj_id      ! Object identifier
   INTEGER, INTENT(IN)         :: scope       ! Flag with two possible values:
@@ -472,12 +472,6 @@ SUBROUTINE h5fflush_f(obj_id, new_file_id, hdferr)
 END SUBROUTINE h5fflush_f
 	</pre>		
 		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
 <!-- NEW PAGE -->
@@ -1529,7 +1523,7 @@ Describes HDF5 Release 1.6.8, November 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 30 November 2008");
+document.writeln("Last modified: 30 December 2008");
 -->
 </SCRIPT>
  
