@@ -1061,10 +1061,10 @@ installed with HDF5.
         array of values of one of the above types expressed 
         in the order of fastest-changing dimensions first.
         <p>
-        Floating point data in an ASCII input file must be
-        expressed in the fixed floating form (e.g., 323.56)
-        <code>h5import</code> is designed to accept scientific notation 
-        (e.g., 3.23E+02) in an ASCII, but that is not implemented in HDF5 release 1.6.  
+        Floating point data in an ASCII input file may be
+        expressed either in the fixed-point form (e.g., 323.56)
+        or in scientific notation (e.g., 3.23E+02) 
+        in an ASCII input file.
         <p>
         Each input file can be associated with options specifying
         the datatype and storage properties. 
@@ -1337,15 +1337,19 @@ installed with HDF5.
             </td></tr>
           <tr valign=top align=left><td>
           <code>&nbsp;&nbsp;&nbsp;&nbsp;TEXTFP</code>
-            </td><td>Input is floating point data in fixed notation (e.g., 325.34) 
+            </td><td>Input is floating point data in 
+                 either fixed-point notation (e.g., 325.34) 
+                 or scientific notation (e.g., 3.2534E+02)  
                  in an ASCII file.
             </td></tr>
+<!--
           <tr valign=top align=left><td>
           <code>&nbsp;&nbsp;&nbsp;&nbsp;TEXTFPE</code>
             </td><td>Input is floating point data in scientific notation (e.g., 3.2534E+02)  
                  in an ASCII file.<br>
                  (Not implemented in this release.)
             </td></tr>
+-->
           <tr valign=top align=left><td>
           <code>&nbsp;&nbsp;&nbsp;&nbsp;IN</code>
             </td><td>Input is signed integer data in a binary file.
@@ -1387,7 +1391,10 @@ installed with HDF5.
           <code>&nbsp;&nbsp;&nbsp;&nbsp;32</code><br>
           <code>&nbsp;&nbsp;&nbsp;&nbsp;64</code>
             </td><td>For floating point data:
-                  <code>TEXTFP</code>, <code>TEXTFPE</code>, 
+                  <code>TEXTFP</code>
+                  <!--
+                  , <code>TEXTFPE</code>, 
+                  -->
                   or <code>FP</code>.
                   (Default: <code> 32</code>)
           </td></tr>
@@ -1413,7 +1420,7 @@ installed with HDF5.
           <code>&nbsp;&nbsp;&nbsp;&nbsp;FP</code>
             </td><td>Output is floating point data.<br>
                  (Default if <code>INPUT-CLASS</code> is not specified or is 
-                 <code>FP</code>, <code>TEXTFP</code>, or <code>TEXTFPE</code>)
+                 <code>FP</code> or <code>TEXTFP</code>)
             </td></tr>
           <tr valign=top align=left><td>
           <code>&nbsp;&nbsp;&nbsp;&nbsp;STR</code>
@@ -3069,7 +3076,7 @@ Describes HDF5 Release 1.6.8, November 2008
 <!-- #EndLibraryItem -->&nbsp;<br>
 <SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 11 December 2008");
+document.writeln("Last modified: 30 December 2008");
 -->
 </SCRIPT>
 
