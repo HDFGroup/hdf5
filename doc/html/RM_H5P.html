@@ -3854,7 +3854,7 @@ END SUBROUTINE h5pget_filter_f
 		    <td valign="top"><em>H5Z_filter_t</em> <code>filter</code></td>
             <td valign="top">IN: Filter identifier.</td></tr>
         <tr>
-		    <td valign="top"><em>unsigned int</em> <code>flags</code></td>
+		    <td valign="top"><em>unsigned int *</em><code>flags</code></td>
             <td valign="top">OUT:  Bit vector specifying certain general properties
                 of the filter.</td></tr>
         <tr>
@@ -3868,7 +3868,7 @@ END SUBROUTINE h5pget_filter_f
             <td valign="top">IN/OUT: Length of filter name and 
 	        number of elements in <code>name[]</code>.</td></tr>
         <tr>
-		    <td valign="top"><em>char *</em><code>name[]</code></td>
+		    <td valign="top"><em>char</em> <code>name[]</code></td>
             <td valign="top">OUT: Name of filter.</td></tr>
     </table></ul>
   <dt><strong>Returns:</strong>
@@ -10765,7 +10765,7 @@ Describes HDF5 Release 1.6.8, November 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 4 December 2008");
+document.writeln("Last modified: 30 December 2008");
 -->
 </SCRIPT>
  
