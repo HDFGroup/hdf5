@@ -39,7 +39,6 @@ SUBROUTINE group_test(cleanup, total_error)
   ! /* Check for FAPL to USE */
   my_fapl = fapl2
 
-  
   ret_total_error = 0
   CALL mklinks(fapl2, ret_total_error)
   CALL write_test_status(ret_total_error, &
@@ -612,7 +611,6 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
 
      IF(cleanup) CALL h5_cleanup_f(prefix, H5P_DEFAULT_F, error)
      CALL check("h5_cleanup_f", error, total_error)
-
 
    END SUBROUTINE timestamps
 
