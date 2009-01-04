@@ -1,4 +1,4 @@
-HDF5 version 1.6.8-post1 released on Sun Dec 21 16:11:29 CST 2008
+HDF5 version 1.6.8-post2 released on Sun Jan  4 14:58:27 CST 2009
 ==> release_docs/RELEASE.txt <==
   the test/dtypes to report failure in the following test:
       Testing random sw long double -> double conversions

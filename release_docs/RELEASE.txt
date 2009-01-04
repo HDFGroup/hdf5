@@ -1,4 +1,4 @@
-HDF5 version 1.6.8-post2 currently under development
+HDF5 version 1.6.8-post3 currently under development
 ==> release_docs/RELEASE.txt <==
   the test/dtypes to report failure in the following test:
       Testing random sw long double -> double conversions
