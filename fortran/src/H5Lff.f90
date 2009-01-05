@@ -952,7 +952,7 @@ CONTAINS
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LGET_NAME_BY_IDX_C'::h5lget_name_by_idx_c
          !DEC$ ENDIF
-         !DEC$ATTRIBUTES reference :: group_name
+         !DEC$ATTRIBUTES reference :: group_name, name
          INTEGER(HID_T), INTENT(IN) :: loc_id 
          CHARACTER(LEN=*), INTENT(IN) :: group_name
          INTEGER(SIZE_T)  :: group_namelen
