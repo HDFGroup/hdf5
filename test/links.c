@@ -12332,15 +12332,19 @@ main(void)
         /* tests for external link */
         nerrors += external_link_env(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_prefix(my_fapl, new_format) < 0 ? 1 : 0;
+#ifndef H5_VMS
         nerrors += external_link_abs_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_rel_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_cwd(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_abstar(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_abstar_cur(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_link_reltar(my_fapl, new_format) < 0 ? 1 : 0;
+#endif
         nerrors += external_link_chdir(my_fapl, new_format) < 0 ? 1 : 0;
+#ifndef H5_VMS
         nerrors += external_set_elink_fapl1(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += external_set_elink_fapl2(my_fapl, new_format) < 0 ? 1 : 0;
+#endif
         nerrors += external_set_elink_fapl3(new_format) < 0 ? 1 : 0;
 
 #ifdef H5_HAVE_WINDOW_PATH
@@ -12359,6 +12363,7 @@ main(void)
             nerrors += ud_hard_links(fapl2) < 0 ? 1 : 0;     /* requires new format groups */
             nerrors += ud_link_reregister(fapl2) < 0 ? 1 : 0;        /* requires new format groups */
         } /* end if */
+#ifndef H5_VMS
         nerrors += ud_callbacks(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += ud_link_errors(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += lapl_udata(my_fapl, new_format) < 0 ? 1 : 0;
@@ -12371,6 +12376,7 @@ main(void)
         nerrors += obj_visit(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += obj_visit_by_name(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += obj_visit_stop(my_fapl, new_format) < 0 ? 1 : 0;
+#endif
 
         /* Keep this test last, it's testing files that are used above */
         /* do not do this for files used by external link tests */
