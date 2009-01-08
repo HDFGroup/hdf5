@@ -79,13 +79,16 @@ New Features
 
     Tools
     -----
-    - h5repack: Define a default chunk whose size is manageable. 
-      PVN - 2008/11/21
+    - h5repack: When user doesn't specify a chunk size, h5repack now defines a default 
+            chunk size as the same size of the size of the hyperslab used to read the chunks. 
+            The size of the hyperslabs are defined as the size of each dimension or a 
+            predefined constant, whatever is smaller. This assures that the chunk 
+            read fits in the chunk cache. PVN - 2008/11/21
 
     High-Level APIs:
     ------
-    - Table: In version 3.0 of Table, "NROWS" (used to store number of records)
-      was deprecated. PVN - 2008/11/24
+    - Table: In version 3.0 of Table, the writing of the "NROWS" attribute (used to store 
+            number of records)was deprecated. PVN - 2008/11/24
 
 
     F90 API
@@ -113,6 +116,9 @@ Bug Fixes since HDF5-1.8.2
       more heavily outdated and non-rewritable ones. MAM - 2008/12/15
     - Fixed a bug that could cause problems when "automatically" unmounting
       multiple files. NAF - 2008/11/17
+    - H5Dset_extent: when shrinking dimensions, some chunks were not deleted.  
+            PVN - 2009/01/8 
+
 
     Parallel Library
     ----------------
