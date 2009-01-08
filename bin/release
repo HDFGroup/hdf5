@@ -14,42 +14,10 @@
 # access to either file, you may request a copy from help@hdfgroup.org.
 #
 
-# Make a release of hdf5.  The command-line switches are:
+# Make a release of hdf5.
 #
-#  -d DIR	The name of the directory where the releas(es) should be
-#               placed.  By default, the directory is ./releases
-#
-#  --nocheck	Ignore errors in MANIFEST file.
-#          
-#  --private	Make a private release with today's date in version information.
-#          
-# The other command-line options are the names of the programs to use
-# for compressing the resulting tar archive (if none are given then
-# `tar md5' is assumed):
-#
-#   tar		-- use tar and don't do any compressing.
-#   compress	-- use compress and append `.Z' to the output name.
-#   gzip	-- use gzip with `-9' and append `.gz' to the output name.
-#   bzip2       -- use bzip2 with `-9' and append `.bz2' to the output name.
-#   md5         -- produce a md5 checksum in addition to the archive.
-#   doc         -- produce the latest doc tree in addition to the archive.
-#
-# Examples:
-#
-#   $ release
-#   releases/hdf5-1.0.38.tar
-#   releases/hdf5-1.0.38.tar.md5
-#
-#   $ release gzip
-#   releases/hdf5-1.0.38.tar.gz
-#
-#   $ release -d /tmp tar compress gzip bzip2 md5 doc
-#   /tmp/hdf5-1.0.38.tar
-#   /tmp/hdf5-1.0.38.tar.Z
-#   /tmp/hdf5-1.0.38.tar.gz
-#   /tmp/hdf5-1.0.38.tar.bz2
-#   /tmp/hdf5-1.0.38.tar.md5
-#   /tmp/hdf5-1.0.38_doc.tar
+# Programmer: Robb Matzke
+# Creation date: on or before 1998-01-29.
 #
 # Modifications
 #   Robb Matzke, 1999-07-16
@@ -59,6 +27,12 @@
 #   Albert Cheng, 1999-10-26
 #   Moved the MANIFEST checking to a separate command file so that
 #   it can be invoked individually.
+#
+#   Albert Cheng, 2004-08-14
+#   Added the --private option.
+#
+#   James Laird, 2005-09-07
+#   Added the md5 method.
 
 # Function definitions
 #
@@ -225,10 +199,11 @@ ln -s `pwd` $tmpdir/$HDF5_VERS || exit 1
 mv Makefile $tmpdir/Makefile.x 2>/dev/null #might fail
 cp -p Makefile.dist Makefile
 
-# Update README.txt and release_docs/RELEASE.txt with release information.
+# Update README.txt and release_docs/RELEASE.txt with release information in
+# line 1.
 for f in README.txt release_docs/RELEASE.txt; do
     echo "HDF5 version $VERS released on `date`" >$f.x
-    tail +2l $f >>$f.x
+    sed -e 1d $f >>$f.x
     mv $f.x $f
     # Make sure new files are of the right access mode
     chmod 644 $f

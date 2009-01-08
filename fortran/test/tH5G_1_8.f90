@@ -39,7 +39,6 @@ SUBROUTINE group_test(cleanup, total_error)
   ! /* Check for FAPL to USE */
   my_fapl = fapl2
 
-  
   ret_total_error = 0
   CALL mklinks(fapl2, ret_total_error)
   CALL write_test_status(ret_total_error, &
@@ -612,7 +611,6 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
 
      IF(cleanup) CALL h5_cleanup_f(prefix, H5P_DEFAULT_F, error)
      CALL check("h5_cleanup_f", error, total_error)
-
 
    END SUBROUTINE timestamps
 
@@ -1485,6 +1483,7 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
 
   INTEGER :: i
   INTEGER :: tmp1, tmp2
+  INTEGER(HID_T) :: crp_list
 
 !  WRITE(*,*) "link creation property lists (w/new group format)"
 
@@ -1541,9 +1540,11 @@ SUBROUTINE link_info_by_idx_check(group_id, linkname, n, &
   !/* Create a dataspace */
   CALL h5screate_simple_f(2, dims, space_id, error)
   CALL check("test_lcpl.h5screate_simple_f",error,total_error)
+  CALL h5pcreate_f(H5P_DATASET_CREATE_F, crp_list, error)
+  CALL h5pset_chunk_f(crp_list, 2, dims, error)
 
   ! /* Create a dataset using the default LCPL */
-  CALL h5dcreate_f(file_id, "/dataset", H5T_NATIVE_INTEGER, space_id, dset_id, error)
+  CALL h5dcreate_f(file_id, "/dataset", H5T_NATIVE_INTEGER, space_id, dset_id, error, crp_list)
   CALL check("test_lcpl.h5dcreate_f", error, total_error)
   CALL h5dclose_f(dset_id, error)
   CALL check("test_lcpl.h5dclose_f", error, total_error)
