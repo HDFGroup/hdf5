@@ -43,8 +43,6 @@
 
 /* ========  Dataset creation property names ======== */
 #define H5D_CRT_LAYOUT_NAME        "layout"             /* Storage layout */
-#define H5D_CRT_CHUNK_DIM_NAME     "chunk_ndims"        /* Chunk dimensionality */
-#define H5D_CRT_CHUNK_SIZE_NAME    "chunk_size"         /* Chunk size */
 #define H5D_CRT_FILL_VALUE_NAME    "fill_value"         /* Fill value */
 #define H5D_CRT_ALLOC_TIME_STATE_NAME "alloc_time_state" /* Space allocation time state */
 #define H5D_CRT_EXT_FILE_LIST_NAME "efl"                /* External file list */

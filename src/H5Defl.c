@@ -132,7 +132,6 @@ H5D_efl_new(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset,
      * Also, only the slowest varying dimension of a simple data space
      * can be extendible (currently only for external data storage).
      */
-    dset->shared->layout.u.contig.addr = HADDR_UNDEF;        /* Initialize to no address */
 
     /* Check for invalid dataset dimensions */
     if((ndims = H5S_get_simple_extent_dims(dset->shared->space, dim, max_dim)) < 0)
@@ -150,12 +149,12 @@ H5D_efl_new(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset,
     max_storage = H5O_efl_total_size(&dset->shared->dcpl_cache.efl);
     if(H5S_UNLIMITED == max_points) {
         if(H5O_EFL_UNLIMITED != max_storage)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unlimited data space but finite storage")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unlimited dataspace but finite storage")
     } /* end if */
     else if((max_points * dt_size) < max_points)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data space * type size overflowed")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "dataspace * type size overflowed")
     else if((max_points * dt_size) > max_storage)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "data space size exceeds external storage size")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "dataspace size exceeds external storage size")
 
     /* Compute the total size of dataset */
     tmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space) * dt_size;
@@ -261,12 +260,11 @@ H5D_efl_read(const H5O_efl_t *efl, haddr_t addr, size_t size, uint8_t *buf)
 #else /* NDEBUG */
 	to_read = MIN((size_t)(efl->slot[u].size-skip), size);
 #endif /* NDEBUG */
-	if ((n=HDread (fd, buf, to_read))<0) {
-	    HGOTO_ERROR (H5E_EFL, H5E_READERROR, FAIL, "read error in external raw data file")
-	} else if ((size_t)n<to_read) {
-	    HDmemset (buf+n, 0, to_read-n);
-	}
-	HDclose (fd);
+	if((n = HDread(fd, buf, to_read)) < 0)
+	    HGOTO_ERROR(H5E_EFL, H5E_READERROR, FAIL, "read error in external raw data file")
+	else if((size_t)n < to_read)
+	    HDmemset(buf + n, 0, to_read - (size_t)n);
+	HDclose(fd);
 	fd = -1;
 	size -= to_read;
 	buf += to_read;

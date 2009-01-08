@@ -171,8 +171,8 @@ H5D_init_interface(void)
     if(NULL == (def_dcpl = (H5P_genplist_t *)H5I_object(H5P_LST_DATASET_CREATE_g)))
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "can't get default dataset creation property list")
 
-    /* Get the default data storage method */
-    if(H5P_get(def_dcpl, H5D_CRT_LAYOUT_NAME, &H5D_def_dset.layout.type) < 0)
+    /* Get the default data storage layout */
+    if(H5P_get(def_dcpl, H5D_CRT_LAYOUT_NAME, &H5D_def_dset.layout) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve layout")
 
     /* Get the default dataset creation properties */
@@ -1063,7 +1063,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
 
     /* Check if the dataset has a non-default DCPL & get important values, if so */
     if(new_dset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
-        H5D_layout_t    *layout;        /* Dataset's layout information */
+        H5O_layout_t    *layout;        /* Dataset's layout information */
         H5O_pline_t     *pline;         /* Dataset's I/O pipeline information */
         H5O_fill_t      *fill;          /* Dataset's fill value info */
 
@@ -1083,10 +1083,10 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         pline = &new_dset->shared->dcpl_cache.pline;
         if(H5P_get(dc_plist, H5D_CRT_DATA_PIPELINE_NAME, pline) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve pipeline filter")
-        layout = &new_dset->shared->layout.type;
+        layout = &new_dset->shared->layout;
         if(H5P_get(dc_plist, H5D_CRT_LAYOUT_NAME, layout) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't retrieve layout")
-        if(pline->nused > 0 && H5D_CHUNKED != *layout)
+        if(pline->nused > 0 && H5D_CHUNKED != layout->type)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout")
         fill = &new_dset->shared->dcpl_cache.fill;
         if(H5P_get(dc_plist, H5D_CRT_FILL_VALUE_NAME, fill) < 0)
@@ -1097,7 +1097,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "invalid space allocation state")
 
         /* Don't allow compact datasets to allocate space later */
-        if(*layout == H5D_COMPACT && fill->alloc_time != H5D_ALLOC_TIME_EARLY)
+        if(layout->type == H5D_COMPACT && fill->alloc_time != H5D_ALLOC_TIME_EARLY)
             HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "compact dataset must have early space allocation")
 
         /* If MPI VFD is used, no filter support yet. */
@@ -1352,8 +1352,14 @@ H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
      */
     if(NULL == H5O_msg_read(&(dataset->oloc), H5O_LAYOUT_ID, &(dataset->shared->layout), dxpl_id))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read data layout message")
-    if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &dataset->shared->layout.type) < 0)
+    /* Adjust chunk dimensions to omit datatype size (in last dimension) for creation property */
+    if(H5D_CHUNKED == dataset->shared->layout.type)
+        dataset->shared->layout.u.chunk.ndims--;
+    if(H5P_set(plist, H5D_CRT_LAYOUT_NAME, &dataset->shared->layout) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set layout")
+    /* Adjust chunk dimensions back again (*sigh*) */
+    if(H5D_CHUNKED == dataset->shared->layout.type)
+        dataset->shared->layout.u.chunk.ndims++;
 
     /* Get the external file list message, which might not exist.  Space is
      * also undefined when space allocate time is H5D_ALLOC_TIME_LATE. */
@@ -1396,25 +1402,9 @@ H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
             break;
 
         case H5D_CHUNKED:
-            /*
-             * Chunked storage.  The creation plist's dimension is one less than
-             * the chunk dimension because the chunk includes a dimension for the
-             * individual bytes of the datatype.
-             */
-            {
-                unsigned     chunk_ndims;           /* Dimensionality of chunk */
-
-                chunk_ndims  = dataset->shared->layout.u.chunk.ndims - 1;
-
-                if(H5P_set(plist, H5D_CRT_CHUNK_DIM_NAME, &chunk_ndims) < 0)
-                     HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk dimensions")
-                if(H5P_set(plist, H5D_CRT_CHUNK_SIZE_NAME, dataset->shared->layout.u.chunk.dim) < 0)
-                     HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set chunk size")
-
-                /* Initialize the chunk cache for the dataset */
-                if(H5D_chunk_init(dataset->oloc.file, dapl_id, dxpl_id, dataset) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize chunk cache")
-            }
+            /* Initialize the chunk cache for the dataset */
+            if(H5D_chunk_init(dataset->oloc.file, dapl_id, dxpl_id, dataset) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize chunk cache")
             break;
 
         case H5D_COMPACT:
@@ -1464,7 +1454,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
 
         /* If "old" fill value size is 0 (undefined), map it to -1 */
         if(fill_prop->size == 0)
-            fill_prop->size = (size_t)-1;
+            fill_prop->size = (ssize_t)-1;
     } /* end if */
     alloc_time_state = 0;
     if((dataset->shared->layout.type == H5D_COMPACT && fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY)
@@ -1605,7 +1595,7 @@ H5D_close(H5D_t *dataset)
         * Release datatype, dataspace and creation property list -- there isn't
         * much we can do if one of these fails, so we just continue.
         */
-        free_failed = (H5I_dec_ref(dataset->shared->type_id, FALSE) < 0 || H5S_close(dataset->shared->space) < 0 ||
+        free_failed = (unsigned)(H5I_dec_ref(dataset->shared->type_id, FALSE) < 0 || H5S_close(dataset->shared->space) < 0 ||
                           H5I_dec_ref(dataset->shared->dcpl_id, FALSE) < 0);
 
         /* Remove the dataset from the list of opened objects in the file */

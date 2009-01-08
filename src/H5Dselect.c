@@ -160,7 +160,7 @@ H5D_select_io(const H5D_io_info_t *io_info, size_t elmt_size,
         } /* end else */
 
         /* Decrement number of elements left to process */
-        HDassert((tmp_file_len % elmt_size) == 0);
+        HDassert(((size_t)tmp_file_len % elmt_size) == 0);
     } /* end if */
     else {
         size_t mem_nelem;           /* Number of elements used in memory sequences */
@@ -218,8 +218,8 @@ H5D_select_io(const H5D_io_info_t *io_info, size_t elmt_size,
             } /* end else */
 
             /* Decrement number of elements left to process */
-            HDassert((tmp_file_len % elmt_size) == 0);
-            nelmts -= (tmp_file_len / elmt_size);
+            HDassert(((size_t)tmp_file_len % elmt_size) == 0);
+            nelmts -= ((size_t)tmp_file_len / elmt_size);
         } /* end while */
     } /* end else */
 
@@ -236,13 +236,13 @@ done:
 
     /* Release vector arrays, if allocated */
     if(file_len && file_len != _file_len)
-        H5FL_SEQ_FREE(size_t, file_len);
+        file_len = H5FL_SEQ_FREE(size_t, file_len);
     if(file_off && file_off != _file_off)
-        H5FL_SEQ_FREE(hsize_t, file_off);
+        file_off = H5FL_SEQ_FREE(hsize_t, file_off);
     if(mem_len && mem_len != _mem_len)
-        H5FL_SEQ_FREE(size_t, mem_len);
+        mem_len = H5FL_SEQ_FREE(size_t, mem_len);
     if(mem_off && mem_off != _mem_off)
-        H5FL_SEQ_FREE(hsize_t, mem_off);
+        mem_off = H5FL_SEQ_FREE(hsize_t, mem_off);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_select_io() */

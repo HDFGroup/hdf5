@@ -160,9 +160,9 @@ H5D_scatter_file(const H5D_io_info_t *_io_info,
 done:
     /* Release resources, if allocated */
     if(len && len != _len)
-        H5FL_SEQ_FREE(size_t, len);
+        len = H5FL_SEQ_FREE(size_t, len);
     if(off && off != _off)
-        H5FL_SEQ_FREE(hsize_t, off);
+        off = H5FL_SEQ_FREE(hsize_t, off);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_scatter_file() */
@@ -261,9 +261,9 @@ H5D_gather_file(const H5D_io_info_t *_io_info,
 done:
     /* Release resources, if allocated */
     if(len && len != _len)
-        H5FL_SEQ_FREE(size_t, len);
+        len = H5FL_SEQ_FREE(size_t, len);
     if(off && off != _off)
-        H5FL_SEQ_FREE(hsize_t, off);
+        off = H5FL_SEQ_FREE(hsize_t, off);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D_gather_file() */
@@ -346,9 +346,9 @@ H5D_scatter_mem (const void *_tscat_buf, const H5S_t *space,
 done:
     /* Release resources, if allocated */
     if(len && len != _len)
-        H5FL_SEQ_FREE(size_t, len);
+        len = H5FL_SEQ_FREE(size_t, len);
     if(off && off != _off)
-        H5FL_SEQ_FREE(hsize_t, off);
+        off = H5FL_SEQ_FREE(hsize_t, off);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5D_scatter_mem() */
@@ -433,9 +433,9 @@ H5D_gather_mem(const void *_buf, const H5S_t *space,
 done:
     /* Release resources, if allocated */
     if(len && len != _len)
-        H5FL_SEQ_FREE(size_t, len);
+        len = H5FL_SEQ_FREE(size_t, len);
     if(off && off != _off)
-        H5FL_SEQ_FREE(hsize_t, off);
+        off = H5FL_SEQ_FREE(hsize_t, off);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5D_gather_mem() */
@@ -826,9 +826,9 @@ H5D_compound_opt_read(size_t nelmts, const H5S_t *space,
 done:
     /* Release resources, if allocated */
     if(len && len != _len)
-        H5FL_SEQ_FREE(size_t, len);
+        len = H5FL_SEQ_FREE(size_t, len);
     if(off && off != _off)
-        H5FL_SEQ_FREE(hsize_t, off);
+        off = H5FL_SEQ_FREE(hsize_t, off);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_compound_opt_read() */

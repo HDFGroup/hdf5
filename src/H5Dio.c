@@ -550,7 +550,7 @@ H5D_write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space,
         if(H5T_detect_class(dataset->shared->type, H5T_VLEN))
             full_overwrite = FALSE;
         else
-            full_overwrite = (hsize_t)file_nelmts == nelmts ? TRUE : FALSE;
+            full_overwrite = (hbool_t)((hsize_t)file_nelmts == nelmts ? TRUE : FALSE);
 
  	/* Allocate storage */
         if(H5D_alloc_storage(dataset, dxpl_id, H5D_ALLOC_WRITE, full_overwrite) < 0)
@@ -780,8 +780,8 @@ H5D_typeinfo_init(const H5D_t *dset, const H5D_dxpl_cache_t *dxpl_cache,
             hbool_t default_buffer_info;    /* Whether the buffer information are the defaults */
 
             /* Detect if we have all default settings for buffers */
-            default_buffer_info = (H5D_TEMP_BUF_SIZE == dxpl_cache->max_temp_buf)
-                    && (NULL == dxpl_cache->tconv_buf) && (NULL == dxpl_cache->bkgr_buf);
+            default_buffer_info = (hbool_t)((H5D_TEMP_BUF_SIZE == dxpl_cache->max_temp_buf)
+                    && (NULL == dxpl_cache->tconv_buf) && (NULL == dxpl_cache->bkgr_buf));
 
             /* Check if we are using the default buffer info */
             if(default_buffer_info)

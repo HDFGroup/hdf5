@@ -275,11 +275,11 @@ H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flags)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
 
     /* Mask off previous attribute creation order flag settings */
-    ohdr_flags &= ~(H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED);
+    ohdr_flags &= (uint8_t)~(H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED);
 
     /* Update with new attribute creation order flags */
-    ohdr_flags |= (crt_order_flags & H5P_CRT_ORDER_TRACKED) ? H5O_HDR_ATTR_CRT_ORDER_TRACKED : 0;
-    ohdr_flags |= (crt_order_flags & H5P_CRT_ORDER_INDEXED) ? H5O_HDR_ATTR_CRT_ORDER_INDEXED : 0;
+    ohdr_flags |= (uint8_t)((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? H5O_HDR_ATTR_CRT_ORDER_TRACKED : 0);
+    ohdr_flags |= (uint8_t)((crt_order_flags & H5P_CRT_ORDER_INDEXED) ? H5O_HDR_ATTR_CRT_ORDER_INDEXED : 0);
 
     /* Set object header flags */
     if(H5P_set(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
@@ -382,10 +382,10 @@ H5Pset_obj_track_times(hid_t plist_id, hbool_t track_times)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
 
     /* Mask off previous time tracking flag settings */
-    ohdr_flags &= ~H5O_HDR_STORE_TIMES;
+    ohdr_flags &= (uint8_t)~H5O_HDR_STORE_TIMES;
 
     /* Update with new time tracking flag */
-    ohdr_flags |= track_times ? H5O_HDR_STORE_TIMES : 0;
+    ohdr_flags |= (uint8_t)(track_times ? H5O_HDR_STORE_TIMES : 0);
 
     /* Set object header flags */
     if(H5P_set(plist, H5O_CRT_OHDR_FLAGS_NAME, &ohdr_flags) < 0)
@@ -430,7 +430,7 @@ H5Pget_obj_track_times(hid_t plist_id, hbool_t *track_times)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object header flags")
 
         /* Set track times flag to return */
-        *track_times = (ohdr_flags & H5O_HDR_STORE_TIMES) ? TRUE : FALSE;
+        *track_times = (hbool_t)((ohdr_flags & H5O_HDR_STORE_TIMES) ? TRUE : FALSE);
     } /* end if */
 
 done:

@@ -72,12 +72,6 @@ const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
     H5O_layout_debug       	/*debug the message             */
 }};
 
-/* For forward and backward compatibility.  Version is 1 when space is
- * allocated; 2 when space is delayed for allocation; 3 is default now and
- * is revised to just store information needed for each storage type. */
-#define H5O_LAYOUT_VERSION_1	1
-#define H5O_LAYOUT_VERSION_2	2
-#define H5O_LAYOUT_VERSION_3	3
 
 /* Declare a free list to manage the H5O_layout_t struct */
 H5FL_DEFINE(H5O_layout_t);
@@ -334,7 +328,7 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
         case H5D_CHUNKED:
             /* Number of dimensions */
             HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-            *p++ = mesg->u.chunk.ndims;
+            *p++ = (uint8_t)mesg->u.chunk.ndims;
 
             /* B-tree address */
             H5F_addr_encode(f, &p, mesg->u.chunk.addr);
@@ -386,7 +380,7 @@ H5O_layout_copy(const void *_mesg, void *_dest)
     *dest = *mesg;
 
     /* Deep copy the buffer for compact datasets also */
-    if(mesg->type == H5D_COMPACT) {
+    if(mesg->type == H5D_COMPACT && mesg->u.compact.size > 0) {
         /* Allocate memory for the raw data */
         if(NULL == (dest->u.compact.buf = H5MM_malloc(dest->u.compact.size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate memory for compact dataset")

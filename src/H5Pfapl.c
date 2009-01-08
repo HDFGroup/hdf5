@@ -1984,7 +1984,7 @@ H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low,
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    latest = (low == H5F_LIBVER_LATEST) ? TRUE : FALSE;
+    latest = (hbool_t)((low == H5F_LIBVER_LATEST) ? TRUE : FALSE);
     if(H5P_set(plist, H5F_ACS_LATEST_FORMAT_NAME, &latest) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set library version bounds")
 

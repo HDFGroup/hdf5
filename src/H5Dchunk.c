@@ -263,7 +263,6 @@ H5D_chunk_new(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
     const H5T_t *type = dset->shared->type;     /* Convenience pointer to dataset's datatype */
     hsize_t max_dim[H5O_LAYOUT_NDIMS];          /* Maximum size of data in elements */
     uint64_t chunk_size;        /* Size of chunk in bytes */
-    unsigned chunk_ndims = 0;   /* Dimensionality of chunk */
     int ndims;                  /* Rank of dataspace */
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
@@ -275,40 +274,34 @@ H5D_chunk_new(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
     HDassert(dset);
     HDassert(dc_plist);
 
-    /* Retrieve rank of chunks from property list */
-    if(H5P_get(dc_plist, H5D_CRT_CHUNK_DIM_NAME, &chunk_ndims) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve chunk dimensions")
-
     /* Set up layout information */
     if((ndims = H5S_GET_EXTENT_NDIMS(dset->shared->space)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to get rank")
-    dset->shared->layout.u.chunk.ndims = (unsigned)ndims + 1;
+    if(dset->shared->layout.u.chunk.ndims != (unsigned)ndims)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "dimensionality of chunks doesn't match the dataspace")
+
+    /* Increment # of chunk dimensions, to account for datatype size as last element */
+    dset->shared->layout.u.chunk.ndims++;
     HDassert((unsigned)(dset->shared->layout.u.chunk.ndims) <= NELMTS(dset->shared->layout.u.chunk.dim));
+    HDassert(!H5F_addr_defined(dset->shared->layout.u.chunk.addr));
 
-    /* Initialize to no address */
-    dset->shared->layout.u.chunk.addr = HADDR_UNDEF;
-
-    /*
-     * Chunked storage allows any type of data space extension, so we
-     * don't even bother checking.
-     */
-    if(chunk_ndims != (unsigned)ndims)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "dimensionality of chunks doesn't match the data space")
+    /* Chunked storage is not compatible with external storage (currently) */
     if(dset->shared->dcpl_cache.efl.nused > 0)
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "external storage not supported with chunked layout")
 
-    /*
-     * The chunk size of a dimension with a fixed size cannot exceed
-     * the maximum dimension size
-     */
-    if(H5P_get(dc_plist, H5D_CRT_CHUNK_SIZE_NAME, dset->shared->layout.u.chunk.dim) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't retrieve chunk size")
+    /* Set the last dimension of the chunk size to the size of the datatype */
     dset->shared->layout.u.chunk.dim[dset->shared->layout.u.chunk.ndims - 1] = H5T_GET_SIZE(type);
 
-    /* Sanity check dimensions */
+    /* Get local copy of dataset dimensions (for sanity checking) */
     if(H5S_get_simple_extent_dims(dset->shared->space, NULL, max_dim) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to query maximum dimensions")
+
+    /* Sanity check dimensions */
     for(u = 0; u < dset->shared->layout.u.chunk.ndims - 1; u++)
+        /*
+         * The chunk size of a dimension with a fixed size cannot exceed
+         * the maximum dimension size
+         */
         if(max_dim[u] != H5S_UNLIMITED && max_dim[u] < dset->shared->layout.u.chunk.dim[u])
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "chunk size must be <= maximum dimension size for fixed-sized dimensions")
 
@@ -973,19 +966,19 @@ H5D_create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t
         end[curr_dim]+=fm->chunk_dim[curr_dim];
 
         /* Bring chunk location back into bounds, if necessary */
-        if(coords[curr_dim]>sel_end[curr_dim]) {
+        if(coords[curr_dim] > sel_end[curr_dim]) {
             do {
                 /* Reset current dimension's location to 0 */
-                coords[curr_dim]=start_coords[curr_dim]; /*lint !e771 The start_coords will always be initialized */
-                end[curr_dim]=(coords[curr_dim]+(hssize_t)fm->chunk_dim[curr_dim])-1;
+                coords[curr_dim] = start_coords[curr_dim]; /*lint !e771 The start_coords will always be initialized */
+                end[curr_dim] = (coords[curr_dim] + fm->chunk_dim[curr_dim]) - 1;
 
                 /* Decrement current dimension */
                 curr_dim--;
 
                 /* Increment chunk location in current dimension */
-                coords[curr_dim]+=fm->chunk_dim[curr_dim];
-                end[curr_dim]=(coords[curr_dim]+fm->chunk_dim[curr_dim])-1;
-            } while(coords[curr_dim]>sel_end[curr_dim]);
+                coords[curr_dim] += fm->chunk_dim[curr_dim];
+                end[curr_dim] = (coords[curr_dim] + fm->chunk_dim[curr_dim]) - 1;
+            } while(coords[curr_dim] > sel_end[curr_dim]);
 
             /* Re-Calculate the index of this chunk */
             if(H5V_chunk_index(fm->f_ndims, coords, fm->layout->u.chunk.dim, fm->down_chunks, &chunk_index) < 0)
@@ -3007,7 +3000,6 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
 
             /* Chunk wasn't in cache either, create it now */
             if(!chunk_exists) {
-                H5D_chunk_ud_t udata;	/* B-tree pass-through for creating chunk */
                 size_t	chunk_size;     /* Size of chunk in bytes, possibly filtered */
 
                 /* Check for VL datatype & non-default fill value */
@@ -3507,7 +3499,7 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dims)
     if(H5V_array_down(rank, chunks, down_chunks) < 0)
         HGOTO_ERROR(H5E_IO, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
 
-    /* Create a data space for a chunk & set the extent */
+    /* Create a dataspace for a chunk & set the extent */
     if(NULL == (chunk_space = H5S_create_simple(rank, chunk_dims, NULL)))
 	HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, FAIL, "can't create simple dataspace")
 
@@ -4360,7 +4352,7 @@ H5D_chunk_dest(H5F_t *f, hid_t dxpl_id, H5D_t *dset)
 
     /* Release cache structures */
     if(rdcc->slot)
-        H5FL_SEQ_FREE(H5D_rdcc_ent_ptr_t, rdcc->slot);
+        rdcc->slot = H5FL_SEQ_FREE(H5D_rdcc_ent_ptr_t, rdcc->slot);
     HDmemset(rdcc, 0, sizeof(H5D_rdcc_t));
 
     /* Compose chunked index info struct */
