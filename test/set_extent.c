@@ -30,6 +30,13 @@
  *-------------------------------------------------------------------------
  */
 
+
+#define FILE_NAME1 "set_extent1.h5"
+#define FILE_NAME2 "set_extent2.h5"
+#define FILE_NAME3 "set_extent3.h5"
+#define FILE_NAME4 "set_extent4.h5"
+#define FILE_NAME5 "set_extent5.h5"
+
 #define RANK1 1
 #define RANK2 2
 #define RANK3 3
@@ -275,6 +282,538 @@ error:
     return -1;
 }
 
+/*-------------------------------------------------------------------------
+ * test usage with a 1D rank
+ *-------------------------------------------------------------------------
+ */
+
+static int test_rank1( hbool_t do_compress, 
+                       hbool_t do_fill_value, 
+                       hbool_t set_istore_k,
+                       H5D_fill_time_t fill_time)
+{
+
+    hid_t   fid=-1;          
+    hid_t   did=-1;
+    hid_t   sid=-1;
+    hid_t   dcpl=-1;
+    hid_t   fcpl;
+    hsize_t dims_o[RANK1] = {DIM0};   /* original dimensions */ 
+    hsize_t dims_s[RANK1] = {DIMS0};  /* shrinking dimensions */ 
+    hsize_t dims_e[RANK1] = {DIME0};  /* extended dimensions */ 
+    hsize_t dims_c[RANK1] = {2};      /* chunk dimensions */ 
+    hsize_t dims_r[RANK1];            /* read dimensions */ 
+    hsize_t maxdims[RANK1] = {H5S_UNLIMITED};
+    int     buf_o[DIM0];
+    int     buf_s[DIMS0];
+    int     buf_e[DIME0];
+    int     buf_r[DIM0];
+    int     i;
+    int     fillvalue = 1; 
+    int     comp_value; 
+       
+    if ( do_fill_value )
+    {
+        comp_value = fillvalue;
+    }
+    else
+    {
+        comp_value = 0;
+    }
+
+        
+    for( i = 0; i < DIM0; i++ )
+    {
+        
+        buf_o[i] = 2;
+    }
+
+    /* create a file creation property list */
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) 
+    {
+        goto error;
+    }
+    
+    if  ( set_istore_k )
+    {
+        /* set non-default indexed storage B-tree internal 'K' value */
+        if (H5Pset_istore_k(fcpl,ISTORE_IK) < 0) 
+        {
+            goto error;
+        }
+        
+    }
+    /* create a new file */
+    if ((fid = H5Fcreate(FILE_NAME1, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0) 
+    {
+        goto error;
+    }
+
+    /* close property list */
+    if(H5Pclose(fcpl) < 0) 
+    {
+        goto error;
+    }
+    
+    /* create the data space with unlimited dimensions. */
+    if ((sid = H5Screate_simple(RANK1, dims_o, maxdims)) < 0) 
+    {
+        goto error;
+    }
+    
+    /* modify dataset creation properties, i.e. enable chunking. */
+    if ((dcpl = H5Pcreate (H5P_DATASET_CREATE)) < 0)
+    {
+        goto error;
+    }
+    if (H5Pset_chunk(dcpl, RANK1, dims_c) < 0)
+    {
+        goto error;
+    }
+    if ( do_fill_value )
+    {
+        if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillvalue) < 0)
+        {
+            goto error;
+        }
+
+        if(H5Pset_fill_time(dcpl, fill_time) < 0) 
+        {
+            goto error;
+        }
+    }
+    else
+    {
+        
+        if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) 
+        {
+            goto error;
+        }
+        
+    }
+    if (do_compress)
+    {
+        if(H5Pset_deflate(dcpl, 9) < 0) 
+        {
+            goto error;
+        }
+    }
+    
+    /*-------------------------------------------------------------------------
+    * create, write dataset
+    *-------------------------------------------------------------------------
+    */
+    
+    /* create a dataset */
+    if ((did = H5Dcreate2(fid , "dset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
+    {
+        goto error;
+    }
+    
+    /* write */
+    if (H5Dwrite(did , H5T_NATIVE_INT, sid, H5S_ALL, H5P_DEFAULT, buf_o) < 0) 
+    {
+        goto error;
+    }
+    
+    
+#if defined (H5_SET_EXTENT_DEBUG)
+    printf("\n");
+    for (i = 0; i < (int)dims_o[0]; i++ )
+    {
+        
+        printf("%d ", buf_o[i]);
+        
+    }
+    printf("\n");
+#endif  
+
+
+    
+    if (H5Sclose(sid) < 0)
+    {
+        goto error;
+    }
+    
+    /*-------------------------------------------------------------------------
+    * set new dimensions for the array; expand it
+    *-------------------------------------------------------------------------
+    */
+    
+    /* set new dimensions for the array. */
+    if (H5Dset_extent(did , dims_e) < 0)
+    {
+        goto error;
+    }
+    
+    /* get the space */
+    if ((sid = H5Dget_space(did)) < 0)
+    {
+        goto error;
+    }
+    
+    /* get dimensions */
+    if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0) 
+    {
+        goto error;
+    }
+    
+    if (H5Sclose(sid) < 0)
+    {
+        goto error;
+    }
+    
+    
+    /* check dimensions */
+    for( i = 0; i < RANK1; i++ )
+    {
+        if (dims_r[i] != dims_e[i]) 
+            goto error;
+    }
+    
+    /* read */
+    if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_e) < 0) 
+        goto error;
+
+   
+    
+#if defined (H5_SET_EXTENT_DEBUG)
+    printf("\n");
+    for (i = 0; i < (int)dims_r[0]; i++ )
+    {
+        
+        printf("%d ", buf_e[i]);
+        
+    }
+    printf("\n");
+#endif  
+
+    
+    
+    
+    /* compare the read array with the expanded array */
+    for (i = 0; i < (int)dims_r[0]; i++ )
+    {
+        
+        if ( i >= DIM0  ) 
+        {
+            if(buf_e[i] != comp_value) 
+            {
+                printf("buf_e[%d] = %d\n", i, buf_e[i]);
+                printf("value = %d\n", comp_value);
+                goto error;
+            } 
+        } 
+        else 
+        {
+            if(buf_e[i] != buf_o[i]) 
+                goto error;
+        }
+    }
+    
+    
+  
+    
+    /*-------------------------------------------------------------------------
+    * shrink 
+    *
+    *-------------------------------------------------------------------------
+    */
+    
+    /* set new dimensions for the array. */
+    if (H5Dset_extent(did , dims_s) < 0)
+    {
+        goto error;
+    }
+    
+    /* get the space */
+    if ((sid = H5Dget_space(did)) < 0)
+    {
+        goto error;
+    }
+    
+    /* get dimensions */
+    if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0) 
+    {
+        goto error;
+    }
+    
+    if (H5Sclose(sid) < 0)
+    {
+        goto error;
+    }
+    
+    /* check dimensions */
+    for( i = 0; i < RANK1; i++ )
+    {
+        if (dims_r[i] != dims_s[i]) 
+            goto error;
+    }
+
+
+
+    /* for this case we close and reopen file */
+    if ( set_istore_k )
+    {
+        
+        if (H5Dclose(did) < 0) 
+        {
+            goto error;
+        }
+        if (H5Fclose(fid) < 0)
+        {
+            goto error;
+        }
+
+        if ((fid = H5Fopen( FILE_NAME1, H5F_ACC_RDWR, H5P_DEFAULT ))<0) 
+        {
+            goto error;
+        }
+        
+        if ((did = H5Dopen2( fid , "dset1", H5P_DEFAULT ))<0) 
+        {
+            goto error;
+        }
+        
+        
+        
+    }
+    
+    
+    /*-------------------------------------------------------------------------
+    * read
+    *-------------------------------------------------------------------------
+    */
+    
+    /* read */
+    if (H5Dread( did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_s ) < 0) 
+    {
+        goto error;
+    }
+    
+#if defined (H5_SET_EXTENT_DEBUG)
+    printf("\n");
+    for (i = 0; i < (int)dims_r[0]; i++ )
+    {
+        
+        printf("%d ", buf_s[i]);
+    }
+    printf("\n");
+
+#endif  
+
+
+    
+    
+    /* compare the read array with the shrinked array */
+    for( i = 0; i < (int)dims_r[0]; i++ )
+    {
+        
+        if (  buf_s[i] != buf_o[i] ) 
+        {
+            printf("buf_s[%d] = %d\n", i, buf_s[i]);
+            printf("buf_o[%d] = %d\n", i, buf_o[i]);
+            goto error;
+        } 
+    }
+    
+    
+    /*-------------------------------------------------------------------------
+    * expand it back to original size
+    *-------------------------------------------------------------------------
+    */
+    
+    /* set new dimensions for the array */
+    if (H5Dset_extent(did, dims_o) < 0)
+    {
+        goto error;
+    }
+    
+    /* get the space */
+    if ((sid = H5Dget_space(did)) < 0) 
+    {
+        goto error;
+    }
+    
+    /* get dimensions. */
+    if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0)
+    {
+        goto error;
+    }
+
+    if (H5Sclose(sid) < 0)
+    {
+        goto error;
+    }
+    
+    
+    /* check dimensions */
+    for( i = 0; i < RANK1; i++ )
+    {
+        if (dims_r[i] != dims_o[i]) 
+            goto error;
+    }
+    
+       
+    /* read */
+    if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_r) < 0) 
+        goto error;
+    
+#if defined (H5_SET_EXTENT_DEBUG)
+    printf("\n");
+    for (i = 0; i < (int)dims_r[0]; i++ )
+    {
+        
+        printf("%d ", buf_r[i]);
+        
+    }
+    printf("\n");
+#endif  
+
+
+    
+    /* compare the read array with the original array */
+    for (i = 0; i < (int)dims_r[0]; i++ )
+    {
+        
+        if (i >= DIMS0 ) 
+        {
+            if(buf_r[i] != comp_value) 
+            {
+                printf("buf_r[%d] = %d\n", i, buf_r[i] );
+                printf("value = %d\n", comp_value);
+                goto error;
+            } 
+        } 
+        else 
+        {
+            if(buf_r[i] != buf_o[i]) 
+                goto error;
+        }
+    }
+    
+
+    /*-------------------------------------------------------------------------
+    * shrink to 0
+    *
+    *-------------------------------------------------------------------------
+    */
+
+    dims_s[0] = 0;
+    
+    /* set new dimensions for the array. */
+    if (H5Dset_extent(did , dims_s) < 0)
+    {
+        goto error;
+    }
+    
+    /* get the space */
+    if ((sid = H5Dget_space(did)) < 0)
+    {
+        goto error;
+    }
+    
+    /* get dimensions */
+    if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0) 
+    {
+        goto error;
+    }
+    
+    if (H5Sclose(sid) < 0)
+    {
+        goto error;
+    }
+    
+    /* check dimensions */
+    for( i = 0; i < RANK1; i++ )
+    {
+        if (dims_r[i] != dims_s[i]) 
+            goto error;
+    }    
+    
+    /*-------------------------------------------------------------------------
+    * close dataset
+    *-------------------------------------------------------------------------
+    */
+    
+    if (H5Dclose(did) < 0) 
+    {
+        goto error;
+    }
+   
+    
+   
+    
+    
+     /*-------------------------------------------------------------------------
+    * test a dataset with non initialized chunks
+    *-------------------------------------------------------------------------
+    */
+    
+      
+    if ((sid = H5Screate_simple(RANK1, dims_o, maxdims)) < 0) 
+    {
+        goto error;
+    }
+    if ((did = H5Dcreate2(fid , "dset3", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
+    {
+        goto error;
+    }
+    /* set new dimensions for the array */
+    dims_o[ 0 ] = 0;
+    if (H5Dset_extent( did , dims_o ) < 0) 
+    {
+        goto error;
+    }
+
+
+
+    if (H5Dclose(did) < 0) 
+    {
+        goto error;
+    }
+    if (H5Sclose(sid) < 0)
+    {
+        goto error;
+    }
+
+    
+    
+    
+    /*-------------------------------------------------------------------------
+    * close property list
+    *-------------------------------------------------------------------------
+    */
+    
+    
+    if (H5Pclose(dcpl) < 0) 
+    {
+        goto error;
+    }
+
+    if (H5Fclose( fid ) < 0)
+    {
+        goto error;
+    }
+
+
+    return 0;
+    
+    
+    
+error:
+    
+    H5E_BEGIN_TRY 
+    {
+        H5Dclose( did );
+        H5Sclose( sid );
+        H5Pclose( dcpl  );
+        H5Pclose( fcpl  );
+        H5Fclose( fid );
+    } H5E_END_TRY;
+    return -1;
+    
+}
 
 /*-------------------------------------------------------------------------
  * test usage with a 2D rank
@@ -340,7 +879,7 @@ static int test_rank2( hbool_t do_compress,
         
     }
     /* create a new file */
-    if ((fid = H5Fcreate("set_extent1.h5", H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0) 
+    if ((fid = H5Fcreate(FILE_NAME2, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0) 
     {
         goto error;
     }
@@ -598,7 +1137,7 @@ static int test_rank2( hbool_t do_compress,
             goto error;
         }
 
-        if ((fid = H5Fopen( "set_extent1.h5", H5F_ACC_RDWR, H5P_DEFAULT ))<0) 
+        if ((fid = H5Fopen( FILE_NAME2, H5F_ACC_RDWR, H5P_DEFAULT ))<0) 
         {
             goto error;
         }
@@ -683,6 +1222,11 @@ static int test_rank2( hbool_t do_compress,
     {
         goto error;
     }
+
+    if (H5Sclose(sid) < 0)
+    {
+        goto error;
+    }
     
     /* check dimensions */
     for( i = 0; i < RANK2; i++ )
@@ -736,10 +1280,49 @@ static int test_rank2( hbool_t do_compress,
             }
         }
     }
+
+    /*-------------------------------------------------------------------------
+    * shrink to 0
+    *
+    *-------------------------------------------------------------------------
+    */
+
+    dims_s[0] = 0;
+    dims_s[1] = 0;
+    
+    /* set new dimensions for the array. */
+    if (H5Dset_extent(did , dims_s) < 0)
+    {
+        goto error;
+    }
+    
+    /* get the space */
+    if ((sid = H5Dget_space(did)) < 0)
+    {
+        goto error;
+    }
+    
+    /* get dimensions */
+    if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0) 
+    {
+        goto error;
+    }
+    
+    if (H5Sclose(sid) < 0)
+    {
+        goto error;
+    }
+    
+    /* check dimensions */
+    for( i = 0; i < RANK2; i++ )
+    {
+        if (dims_r[i] != dims_s[i]) 
+            goto error;
+    }    
     
     
     /*-------------------------------------------------------------------------
-    * close dataset and space
+    * close dataset 
     *-------------------------------------------------------------------------
     */
     
@@ -747,14 +1330,7 @@ static int test_rank2( hbool_t do_compress,
     {
         goto error;
     }
-    if (H5Sclose(sid) < 0)
-    {
-        goto error;
-    }
-    
-    
-   
-    
+       
     
      /*-------------------------------------------------------------------------
     * test a dataset with non initialized chunks
@@ -827,498 +1403,7 @@ error:
     
 }
 
-/*-------------------------------------------------------------------------
- * test usage with a 1D rank
- *-------------------------------------------------------------------------
- */
 
-static int test_rank1( hbool_t do_compress, 
-                       hbool_t do_fill_value, 
-                       hbool_t set_istore_k,
-                       H5D_fill_time_t fill_time)
-{
-
-    hid_t   fid=-1;          
-    hid_t   did=-1;
-    hid_t   sid=-1;
-    hid_t   dcpl=-1;
-    hid_t   fcpl;
-    hsize_t dims_o[RANK1] = {DIM0};   /* original dimensions */ 
-    hsize_t dims_s[RANK1] = {DIMS0};  /* shrinking dimensions */ 
-    hsize_t dims_e[RANK1] = {DIME0};  /* extended dimensions */ 
-    hsize_t dims_c[RANK1] = {2};      /* chunk dimensions */ 
-    hsize_t dims_r[RANK1];            /* read dimensions */ 
-    hsize_t maxdims[RANK1] = {H5S_UNLIMITED};
-    int     buf_o[DIM0];
-    int     buf_s[DIMS0];
-    int     buf_e[DIME0];
-    int     buf_r[DIM0];
-    int     i;
-    int     fillvalue = 1; 
-    int     comp_value; 
-       
-    if ( do_fill_value )
-    {
-        comp_value = fillvalue;
-    }
-    else
-    {
-        comp_value = 0;
-    }
-
-        
-    for( i = 0; i < DIM0; i++ )
-    {
-        
-        buf_o[i] = 2;
-    }
-
-    /* create a file creation property list */
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) 
-    {
-        goto error;
-    }
-    
-    if  ( set_istore_k )
-    {
-        /* set non-default indexed storage B-tree internal 'K' value */
-        if (H5Pset_istore_k(fcpl,ISTORE_IK) < 0) 
-        {
-            goto error;
-        }
-        
-    }
-    /* create a new file */
-    if ((fid = H5Fcreate("set_extent1.h5", H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0) 
-    {
-        goto error;
-    }
-
-    /* close property list */
-    if(H5Pclose(fcpl) < 0) 
-    {
-        goto error;
-    }
-    
-    /* create the data space with unlimited dimensions. */
-    if ((sid = H5Screate_simple(RANK1, dims_o, maxdims)) < 0) 
-    {
-        goto error;
-    }
-    
-    /* modify dataset creation properties, i.e. enable chunking. */
-    if ((dcpl = H5Pcreate (H5P_DATASET_CREATE)) < 0)
-    {
-        goto error;
-    }
-    if (H5Pset_chunk(dcpl, RANK1, dims_c) < 0)
-    {
-        goto error;
-    }
-    if ( do_fill_value )
-    {
-        if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillvalue) < 0)
-        {
-            goto error;
-        }
-
-        if(H5Pset_fill_time(dcpl, fill_time) < 0) 
-        {
-            goto error;
-        }
-    }
-    else
-    {
-        
-        if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) 
-        {
-            goto error;
-        }
-        
-    }
-    if (do_compress)
-    {
-        if(H5Pset_deflate(dcpl, 9) < 0) 
-        {
-            goto error;
-        }
-    }
-    
-    /*-------------------------------------------------------------------------
-    * create, write dataset
-    *-------------------------------------------------------------------------
-    */
-    
-    /* create a dataset */
-    if ((did = H5Dcreate2(fid , "dset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
-    {
-        goto error;
-    }
-    
-    /* write */
-    if (H5Dwrite(did , H5T_NATIVE_INT, sid, H5S_ALL, H5P_DEFAULT, buf_o) < 0) 
-    {
-        goto error;
-    }
-    
-    
-#if defined (H5_SET_EXTENT_DEBUG)
-    printf("\n");
-    for (i = 0; i < (int)dims_o[0]; i++ )
-    {
-        
-        printf("%d ", buf_o[i]);
-        
-    }
-    printf("\n");
-#endif  
-
-
-    
-    if (H5Sclose(sid) < 0)
-    {
-        goto error;
-    }
-    
-    /*-------------------------------------------------------------------------
-    * set new dimensions for the array; expand it
-    *-------------------------------------------------------------------------
-    */
-    
-    /* set new dimensions for the array. */
-    if (H5Dset_extent(did , dims_e) < 0)
-    {
-        goto error;
-    }
-    
-    /* get the space */
-    if ((sid = H5Dget_space(did)) < 0)
-    {
-        goto error;
-    }
-    
-    /* get dimensions */
-    if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0) 
-    {
-        goto error;
-    }
-    
-    if (H5Sclose(sid) < 0)
-    {
-        goto error;
-    }
-    
-    
-    /* check dimensions */
-    for( i = 0; i < RANK1; i++ )
-    {
-        if (dims_r[i] != dims_e[i]) 
-            goto error;
-    }
-    
-    /* read */
-    if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_e) < 0) 
-        goto error;
-
-   
-    
-#if defined (H5_SET_EXTENT_DEBUG)
-    printf("\n");
-    for (i = 0; i < (int)dims_r[0]; i++ )
-    {
-        
-        printf("%d ", buf_e[i]);
-        
-    }
-    printf("\n");
-#endif  
-
-    
-    
-    
-    /* compare the read array with the expanded array */
-    for (i = 0; i < (int)dims_r[0]; i++ )
-    {
-        
-        if ( i >= DIM0  ) 
-        {
-            if(buf_e[i] != comp_value) 
-            {
-                printf("buf_e[%d] = %d\n", i, buf_e[i]);
-                printf("value = %d\n", comp_value);
-                goto error;
-            } 
-        } 
-        else 
-        {
-            if(buf_e[i] != buf_o[i]) 
-                goto error;
-        }
-    }
-    
-    
-  
-    
-    /*-------------------------------------------------------------------------
-    * shrink 
-    *
-    *-------------------------------------------------------------------------
-    */
-    
-    /* set new dimensions for the array. */
-    if (H5Dset_extent(did , dims_s) < 0)
-    {
-        goto error;
-    }
-    
-    /* get the space */
-    if ((sid = H5Dget_space(did)) < 0)
-    {
-        goto error;
-    }
-    
-    /* get dimensions */
-    if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0) 
-    {
-        goto error;
-    }
-    
-    if (H5Sclose(sid) < 0)
-    {
-        goto error;
-    }
-    
-    /* check dimensions */
-    for( i = 0; i < RANK1; i++ )
-    {
-        if (dims_r[i] != dims_s[i]) 
-            goto error;
-    }
-
-
-
-    /* for this case we close and reopen file */
-    if ( set_istore_k )
-    {
-        
-        if (H5Dclose(did) < 0) 
-        {
-            goto error;
-        }
-        if (H5Fclose(fid) < 0)
-        {
-            goto error;
-        }
-
-        if ((fid = H5Fopen( "set_extent1.h5", H5F_ACC_RDWR, H5P_DEFAULT ))<0) 
-        {
-            goto error;
-        }
-        
-        if ((did = H5Dopen2( fid , "dset1", H5P_DEFAULT ))<0) 
-        {
-            goto error;
-        }
-        
-        
-        
-    }
-    
-    
-    /*-------------------------------------------------------------------------
-    * read
-    *-------------------------------------------------------------------------
-    */
-    
-    /* read */
-    if (H5Dread( did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_s ) < 0) 
-    {
-        goto error;
-    }
-    
-#if defined (H5_SET_EXTENT_DEBUG)
-    printf("\n");
-    for (i = 0; i < (int)dims_r[0]; i++ )
-    {
-        
-        printf("%d ", buf_s[i]);
-    }
-    printf("\n");
-
-#endif  
-
-
-    
-    
-    /* compare the read array with the shrinked array */
-    for( i = 0; i < (int)dims_r[0]; i++ )
-    {
-        
-        if (  buf_s[i] != buf_o[i] ) 
-        {
-            printf("buf_s[%d] = %d\n", i, buf_s[i]);
-            printf("buf_o[%d] = %d\n", i, buf_o[i]);
-            goto error;
-        } 
-    }
-    
-    
-    /*-------------------------------------------------------------------------
-    * expand it back to original size
-    *-------------------------------------------------------------------------
-    */
-    
-    /* set new dimensions for the array */
-    if (H5Dset_extent(did, dims_o) < 0)
-    {
-        goto error;
-    }
-    
-    /* get the space */
-    if ((sid = H5Dget_space(did)) < 0) 
-    {
-        goto error;
-    }
-    
-    /* get dimensions. */
-    if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0)
-    {
-        goto error;
-    }
-    
-    /* check dimensions */
-    for( i = 0; i < RANK1; i++ )
-    {
-        if (dims_r[i] != dims_o[i]) 
-            goto error;
-    }
-    
-       
-    /* read */
-    if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_r) < 0) 
-        goto error;
-    
-#if defined (H5_SET_EXTENT_DEBUG)
-    printf("\n");
-    for (i = 0; i < (int)dims_r[0]; i++ )
-    {
-        
-        printf("%d ", buf_r[i]);
-        
-    }
-    printf("\n");
-#endif  
-
-
-    
-    /* compare the read array with the original array */
-    for (i = 0; i < (int)dims_r[0]; i++ )
-    {
-        
-        if (i >= DIMS0 ) 
-        {
-            if(buf_r[i] != comp_value) 
-            {
-                printf("buf_r[%d] = %d\n", i, buf_r[i] );
-                printf("value = %d\n", comp_value);
-                goto error;
-            } 
-        } 
-        else 
-        {
-            if(buf_r[i] != buf_o[i]) 
-                goto error;
-        }
-    }
-    
-    
-    /*-------------------------------------------------------------------------
-    * close dataset and space
-    *-------------------------------------------------------------------------
-    */
-    
-    if (H5Dclose(did) < 0) 
-    {
-        goto error;
-    }
-    if (H5Sclose(sid) < 0)
-    {
-        goto error;
-    }
-    
-    
-   
-    
-    
-     /*-------------------------------------------------------------------------
-    * test a dataset with non initialized chunks
-    *-------------------------------------------------------------------------
-    */
-    
-      
-    if ((sid = H5Screate_simple(RANK1, dims_o, maxdims)) < 0) 
-    {
-        goto error;
-    }
-    if ((did = H5Dcreate2(fid , "dset3", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
-    {
-        goto error;
-    }
-    /* set new dimensions for the array */
-    dims_o[ 0 ] = 0;
-    if (H5Dset_extent( did , dims_o ) < 0) 
-    {
-        goto error;
-    }
-
-
-
-    if (H5Dclose(did) < 0) 
-    {
-        goto error;
-    }
-    if (H5Sclose(sid) < 0)
-    {
-        goto error;
-    }
-
-    
-    
-    
-    /*-------------------------------------------------------------------------
-    * close property list
-    *-------------------------------------------------------------------------
-    */
-    
-    
-    if (H5Pclose(dcpl) < 0) 
-    {
-        goto error;
-    }
-
-    if (H5Fclose( fid ) < 0)
-    {
-        goto error;
-    }
-
-
-    return 0;
-    
-    
-    
-error:
-    
-    H5E_BEGIN_TRY 
-    {
-        H5Dclose( did );
-        H5Sclose( sid );
-        H5Pclose( dcpl  );
-        H5Pclose( fcpl  );
-        H5Fclose( fid );
-    } H5E_END_TRY;
-    return -1;
-    
-}
 
 
 /*-------------------------------------------------------------------------
@@ -1388,7 +1473,7 @@ static int test_rank3( hbool_t do_compress,
         
     }
     /* create a new file */
-    if ((fid = H5Fcreate("set_extent1.h5", H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0) 
+    if ((fid = H5Fcreate(FILE_NAME3, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0) 
     {
         goto error;
     }
@@ -1628,7 +1713,7 @@ static int test_rank3( hbool_t do_compress,
             goto error;
         }
 
-        if ((fid = H5Fopen( "set_extent1.h5", H5F_ACC_RDWR, H5P_DEFAULT ))<0) 
+        if ((fid = H5Fopen( FILE_NAME3, H5F_ACC_RDWR, H5P_DEFAULT ))<0) 
         {
             goto error;
         }
@@ -1715,6 +1800,11 @@ static int test_rank3( hbool_t do_compress,
     {
         goto error;
     }
+
+    if (H5Sclose(sid) < 0)
+    {
+        goto error;
+    }
     
     /* check dimensions */
     for( i = 0; i < RANK3; i++ )
@@ -1773,9 +1863,51 @@ static int test_rank3( hbool_t do_compress,
         }
     }
     
+
+    /*-------------------------------------------------------------------------
+    * shrink to 0
+    *
+    *-------------------------------------------------------------------------
+    */
+
+    dims_s[0] = 0;
+    dims_s[1] = 0;
+    dims_s[2] = 0;
+    
+    /* set new dimensions for the array. */
+    if (H5Dset_extent(did , dims_s) < 0)
+    {
+        goto error;
+    }
+    
+    /* get the space */
+    if ((sid = H5Dget_space(did)) < 0)
+    {
+        goto error;
+    }
+    
+    /* get dimensions */
+    if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0) 
+    {
+        goto error;
+    }
+    
+    if (H5Sclose(sid) < 0)
+    {
+        goto error;
+    }
+    
+    /* check dimensions */
+    for( i = 0; i < RANK3; i++ )
+    {
+        if (dims_r[i] != dims_s[i]) 
+            goto error;
+    }    
+    
+    
     
     /*-------------------------------------------------------------------------
-    * close dataset and space
+    * close dataset 
     *-------------------------------------------------------------------------
     */
     
@@ -1783,16 +1915,9 @@ static int test_rank3( hbool_t do_compress,
     {
         goto error;
     }
-    if (H5Sclose(sid) < 0)
-    {
-        goto error;
-    }
+       
     
-    
-   
-    
-    
-     /*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * test a dataset with non initialized chunks
     *-------------------------------------------------------------------------
     */
@@ -1908,7 +2033,7 @@ static int test_external( void )
     TESTING("external file use");
   
     /* create a new file */
-    if ((fid = H5Fcreate("set_extent2.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if ((fid = H5Fcreate(FILE_NAME4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
     {
         goto error;
     }
@@ -2269,7 +2394,7 @@ static int test_layouts( H5D_layout_t layout )
 
   
     /* create a new file */
-    if ((fid = H5Fcreate("set_extent3.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if ((fid = H5Fcreate(FILE_NAME5, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
     {
         goto error;
     }
