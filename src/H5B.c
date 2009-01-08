@@ -1897,7 +1897,7 @@ done:
     if(NULL == ret_value) {
         if(new_node) {
 	    (void)H5FL_BLK_FREE(native_block, new_node->native);
-	    H5FL_SEQ_FREE(haddr_t, new_node->child);
+	    new_node->child = H5FL_SEQ_FREE(haddr_t, new_node->child);
 	    (void)H5FL_FREE(H5B_t, new_node);
         } /* end if */
     } /* end if */

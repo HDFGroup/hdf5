@@ -2700,7 +2700,7 @@ H5L_exists_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5L_exists_cb)
 
     /* Check if the name in this group resolved to a valid link */
-    *udata = (lnk != NULL);
+    *udata = (hbool_t)(lnk != NULL);
 
     /* Indicate that this callback didn't take ownership of the group *
      * location for the object */
@@ -2725,8 +2725,8 @@ H5L_exists_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
 static htri_t
 H5L_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
 {
-    hbool_t exists = FALSE;             /* Whether the link exists in the group */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    hbool_t exists = FALSE;     /* Whether the link exists in the group */
+    htri_t ret_value;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5L_exists)
 
@@ -2735,7 +2735,7 @@ H5L_exists(const H5G_loc_t *loc, const char *name, hid_t lapl_id, hid_t dxpl_id)
         HGOTO_ERROR(H5E_SYM, H5E_EXISTS, FAIL, "path doesn't exist")
 
     /* Set return value */
-    ret_value = exists;
+    ret_value = (htri_t)exists;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

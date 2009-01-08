@@ -394,8 +394,12 @@ H5D_fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf,
 
     /* Fill the buffer with the user's fill value */
     if(fill->buf) {
+        htri_t has_vlen_type;   /* Whether the datatype has a VL component */
+
         /* Detect whether the datatype has a VL component */
-        fb_info->has_vlen_fill_type = H5T_detect_class(dset_type, H5T_VLEN);
+        if((has_vlen_type = H5T_detect_class(dset_type, H5T_VLEN)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "unable to detect vlen datatypes?")
+        fb_info->has_vlen_fill_type = (hbool_t)has_vlen_type;
 
         /* If necessary, convert fill value datatypes (which copies VL components, etc.) */
         if(fb_info->has_vlen_fill_type) {
@@ -466,7 +470,8 @@ H5D_fill_init(H5D_fill_buf_info_t *fb_info, void *caller_fill_buf,
         } /* end if */
         else {
             /* If fill value is not library default, use it to set the element size */
-            fb_info->max_elmt_size = fb_info->file_elmt_size = fb_info->mem_elmt_size = fill->size;
+            HDassert(fill->size >= 0);
+            fb_info->max_elmt_size = fb_info->file_elmt_size = fb_info->mem_elmt_size = (size_t)fill->size;
 
             /* Compute the number of elements that fit within a buffer to write */
             if(total_nelmts > 0)

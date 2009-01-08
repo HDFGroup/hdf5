@@ -339,7 +339,7 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
 	for(u = 0; u < parent->shared->mtab.nmounts; u++) {
 	    if(parent->shared->mtab.child[u].file->shared == child->shared) {
                 /* Found the correct index */
-                child_idx = u;
+                child_idx = (int)u;
                 break;
 	    } /* end if */
 	} /* end for */
@@ -368,7 +368,7 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
 	    HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "not a mount point")
 
         /* Found the correct index, set the info about the child */
-        child_idx = md;
+        child_idx = (int)md;
         H5G_loc_free(&mp_loc);
         mp_loc_setup = FALSE;
         mp_loc.oloc = mnt_oloc;
@@ -397,8 +397,8 @@ H5F_unmount(H5G_loc_t *loc, const char *name, hid_t dxpl_id)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name")
 
     /* Eliminate the mount point from the table */
-    HDmemmove(parent->shared->mtab.child + child_idx, parent->shared->mtab.child + child_idx + 1,
-            (parent->shared->mtab.nmounts - child_idx - 1) * sizeof(parent->shared->mtab.child[0]));
+    HDmemmove(parent->shared->mtab.child + (unsigned)child_idx, (parent->shared->mtab.child + (unsigned)child_idx) + 1,
+            ((parent->shared->mtab.nmounts - (unsigned)child_idx) - 1) * sizeof(parent->shared->mtab.child[0]));
     parent->shared->mtab.nmounts -= 1;
     parent->nmounts -= 1;
 
