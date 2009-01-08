@@ -130,6 +130,32 @@ H5F_get_extpath(const H5F_t *f)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5F_get_name
+ *
+ * Purpose:	Retrieve the name of a file.
+ *
+ * Return:	Success:	The name of the file.
+ *
+ * 		Failure:	? (should not happen)
+ *
+ * Programmer:	Neil Fortner
+ *		December 15 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+H5F_get_name(const H5F_t *f)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_name)
+
+    HDassert(f);
+
+    FUNC_LEAVE_NOAPI(f->name)
+} /* end H5F_get_name() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5F_get_fcpl
  *
  * Purpose:	Retrieve the value of a file's FCPL.

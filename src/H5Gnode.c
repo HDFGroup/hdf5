@@ -39,6 +39,7 @@
 #include "H5HLprivate.h"	/* Local Heaps				*/
 #include "H5MFprivate.h"	/* File memory management		*/
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Ppublic.h"		/* Property Lists                       */
 
 /* Private typedefs */
 

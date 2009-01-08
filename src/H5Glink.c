@@ -41,6 +41,7 @@
 #include "H5Iprivate.h"         /* IDs                                  */
 #include "H5Lprivate.h"		/* Links                                */
 #include "H5MMprivate.h"	/* Memory management			*/
+#include "H5Ppublic.h"		/* Property Lists                       */
 
 
 /****************/

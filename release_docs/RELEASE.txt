@@ -61,12 +61,18 @@ New Features
 
     Library
     -------
+    - Added H5Pset_elink_cb and H5Pget_elink_cb functions to support a
+      user-defined callback function for external link traversal.
+      NAF - 2009/01/08
+    - Added H5Pset_elink_acc_flags and H5Pget_elink_acc_flags functions to
+      allow the user to specify the file access flags used to open the target
+      file of an external link. NAF - 2009/01/08
     - Added H5Pset_chunk_cache() and H5Pget_chunk_cache() functions to allow
       individual rdcc configuration for each dataset.  Added
       H5Dget_access_plist() function to retrieve a dataset access property
-      list form a dataset.  NAF - 2008/11/12
+      list from a dataset. NAF - 2008/11/12
     - Added H5Iis_valid() function to check if an id is valid without
-      producing an error message.  NAF - 2008/11/5
+      producing an error message. NAF - 2008/11/5
 
     Parallel Library
     ----------------
@@ -106,7 +112,7 @@ Bug Fixes since HDF5-1.8.2
       were previously failing on compilation, and removed some of the 
       more heavily outdated and non-rewritable ones. MAM - 2008/12/15
     - Fixed a bug that could cause problems when "automatically" unmounting
-      multiple files.  NAF - 2008/11/17
+      multiple files. NAF - 2008/11/17
 
     Parallel Library
     ----------------

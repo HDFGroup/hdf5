@@ -62,6 +62,14 @@
 #define H5L_ACS_ELINK_FAPL_COPY        	H5P_lacc_elink_fapl_copy
 #define H5L_ACS_ELINK_FAPL_CLOSE       	H5P_lacc_elink_fapl_close
 
+/* Definitions for file access flags for external link traversal */
+#define H5L_ACS_ELINK_FLAGS_SIZE        sizeof(unsigned)
+#define H5L_ACS_ELINK_FLAGS_DEF         H5F_ACC_DEFAULT
+
+/* Definitions for callback function for external link traversal */
+#define H5L_ACS_ELINK_CB_SIZE           sizeof(H5L_elink_cb_t)
+#define H5L_ACS_ELINK_CB_DEF            {NULL,NULL}
+
 /******************/
 /* Local Typedefs */
 /******************/
@@ -142,6 +150,9 @@ H5P_lacc_reg_prop(H5P_genclass_t *pclass)
     size_t nlinks = H5L_ACS_NLINKS_DEF; 	   /* Default number of soft links to traverse */
     char *elink_prefix = H5L_ACS_ELINK_PREFIX_DEF; /* Default external link prefix string */
     hid_t def_fapl_id = H5L_ACS_ELINK_FAPL_DEF;    /* Default fapl for external link access */
+    unsigned elink_flags = H5L_ACS_ELINK_FLAGS_DEF; /* Default file access flags for external link traversal */
+    H5L_elink_cb_t elink_cb = H5L_ACS_ELINK_CB_DEF; /* Default external link traversal callback */
+
     herr_t ret_value = SUCCEED;         	   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5P_lacc_reg_prop)
@@ -158,6 +169,16 @@ H5P_lacc_reg_prop(H5P_genclass_t *pclass)
 
     /* Register fapl for link access */
     if(H5P_register(pclass, H5L_ACS_ELINK_FAPL_NAME, H5L_ACS_ELINK_FAPL_SIZE, &def_fapl_id, NULL, NULL, NULL, H5L_ACS_ELINK_FAPL_DEL, H5L_ACS_ELINK_FAPL_COPY, NULL, H5L_ACS_ELINK_FAPL_CLOSE) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register property for external link file access flags */
+    if(H5P_register(pclass, H5L_ACS_ELINK_FLAGS_NAME, H5L_ACS_ELINK_FLAGS_SIZE,
+             &elink_flags, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register property for external link file traversal callback */
+    if(H5P_register(pclass, H5L_ACS_ELINK_CB_NAME, H5L_ACS_ELINK_CB_SIZE,
+             &elink_cb, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -633,4 +654,164 @@ H5Pget_elink_fapl(hid_t lapl_id)
 done:
     FUNC_LEAVE_API(ret_value);
 } /* end H5Pget_elink_fapl() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_elink_acc_flags
+ *
+ * Purpose:     Sets the file access flags to be used when traversing an
+ *              external link.  This should be either H5F_ACC_RDONLY or
+ *              H5F_ACC_RDWR, or H5F_ACC_DEFAULT to unset the value.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, December 9, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_elink_acc_flags(hid_t lapl_id, unsigned flags)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(H5Pset_elink_acc_flags, FAIL)
+
+    /* Check that flags are valid */
+    if((flags != H5F_ACC_RDWR) && (flags != H5F_ACC_RDONLY) && (flags != H5F_ACC_DEFAULT))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set flags */
+    if(H5P_set(plist, H5L_ACS_ELINK_FLAGS_NAME, &flags) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set access flags")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_elink_acc_flags() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_elink_acc_flags
+ *
+ * Purpose:     Gets the file access flags to be used when traversing an
+ *              external link.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, December 9, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_elink_acc_flags(hid_t lapl_id, unsigned *flags)
+{
+    H5P_genplist_t *plist;              /* Property list pointer */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(H5Pget_elink_acc_flags, FAIL)
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get flags */
+    if (flags)
+        if(H5P_get(plist, H5L_ACS_ELINK_FLAGS_NAME, flags)<0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, 0, "can't get access flags")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_elink_acc_flags() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_elink_cb
+ *
+ * Purpose:     Sets the file access flags to be used when traversing an
+ *              external link.  This should be either H5F_ACC_RDONLY or
+ *              H5F_ACC_RDWR.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, December 15, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data)
+{
+    H5P_genplist_t  *plist;                 /* Property list pointer */
+    H5L_elink_cb_t  cb_info;                /* Callback info struct */
+    herr_t          ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Pset_elink_cb, FAIL)
+
+    /* Check if the callback function is NULL and the user data is non-NULL.
+     * This is almost certainly an error as the user data will not be used. */
+    if(!func && op_data)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback is NULL while user data is not")
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Populate the callback info struct */
+    cb_info.func = func;
+    cb_info.user_data = op_data;
+
+    /* Set callback info */
+    if(H5P_set(plist, H5L_ACS_ELINK_CB_NAME, &cb_info) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set callback info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_elink_acc_flags() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_elink_cb
+ *
+ * Purpose:     Gets the file access flags to be used when traversing an
+ *              external link.
+ *
+ * Return:  Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, December 15, 2008
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func, void **op_data)
+{
+    H5P_genplist_t  *plist;                 /* Property list pointer */
+    H5L_elink_cb_t  cb_info;                /* Callback info struct */
+    herr_t          ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_API(H5Pget_elink_cb, FAIL)
+
+    /* Get the plist structure */
+    if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get callback_info */
+    if(H5P_get(plist, H5L_ACS_ELINK_CB_NAME, &cb_info)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get callback info")
+
+    if(func)
+        *func = cb_info.func;
+
+    if(op_data)
+        *op_data = cb_info.user_data;
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_elink_cb() */
 

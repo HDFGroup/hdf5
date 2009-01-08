@@ -50,6 +50,10 @@
 #define H5F_ACC_DEBUG	(H5CHECK 0x0008u)	/*print debug info	     */
 #define H5F_ACC_CREAT	(H5CHECK 0x0010u)	/*create non-existing files  */
 
+/* Value passed to H5Pset_elink_acc_flags to cause flags to be taken from the
+ * parent file. */
+#define H5F_ACC_DEFAULT (H5CHECK 0xffffu)	/*ignore setting on lapl     */
+
 /* Flags for H5Fget_obj_count() & H5Fget_obj_ids() calls */
 #define H5F_OBJ_FILE	(0x0001u)       /* File objects */
 #define H5F_OBJ_DATASET	(0x0002u)       /* Dataset objects */
