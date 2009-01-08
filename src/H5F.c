@@ -394,7 +394,7 @@ H5Fget_obj_count(hid_t file_id, unsigned types)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not an object type")
 
     /* H5F_get_obj_count doesn't fail */
-    ret_value = H5F_get_obj_count(f, types, TRUE);
+    ret_value = (ssize_t)H5F_get_obj_count(f, types, TRUE);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -468,7 +468,7 @@ H5Fget_obj_ids(hid_t file_id, unsigned types, size_t max_objs, hid_t *oid_list)
     HDassert(oid_list);
  
     /* H5F_get_objects doesn't fail */
-    ret_value = H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE);
+    ret_value = (ssize_t)H5F_get_obj_ids(f, types, max_objs, oid_list, TRUE);
 
 done:
     FUNC_LEAVE_API(ret_value)

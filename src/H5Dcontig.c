@@ -392,7 +392,6 @@ H5D_contig_new(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset
      * Also, only the slowest varying dimension of a simple data space
      * can be extendible (currently only for external data storage).
      */
-    dset->shared->layout.u.contig.addr = HADDR_UNDEF;        /* Initialize to no address */
 
     /* Check for invalid dataset dimensions */
     if((ndims = H5S_get_simple_extent_dims(dset->shared->space, dim, max_dim)) < 0)

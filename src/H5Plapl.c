@@ -254,19 +254,17 @@ done:
  *---------------------------------------------------------------------------
  */
 /* ARGSUSED */
-herr_t
+static herr_t
 H5P_lacc_elink_fapl_close(const char UNUSED *name, size_t UNUSED size, void *value)
 {
     hid_t		l_fapl_id;
     herr_t     		ret_value = SUCCEED;
 
-int	ref_count;
-    FUNC_ENTER_NOAPI(H5P_lacc_elink_fapl_close, FAIL)
+    FUNC_ENTER_NOAPI_NOINIT(H5P_lacc_elink_fapl_close)
 
     HDassert(value);
 
     l_fapl_id = (*(const hid_t *)value);
-
     if((l_fapl_id > H5P_DEFAULT) && (H5I_dec_ref(l_fapl_id, FALSE) < 0))
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom for file access property list")
 
@@ -558,7 +556,7 @@ done:
 herr_t
 H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id)
 {
-    H5P_genplist_t 	*plist, *l_fapl_plist, *fapl_plist;	/* Property list pointer */
+    H5P_genplist_t 	*plist, *fapl_plist;	/* Property list pointer */
     hid_t		l_fapl_id, new_fapl_id;
     herr_t 		ret_value = SUCCEED;         		/* Return value */
 
@@ -577,7 +575,7 @@ H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id)
     if((l_fapl_id > H5P_DEFAULT) && (H5I_dec_ref(l_fapl_id, FALSE) < 0))
 	HGOTO_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom for file access property list")
 
-    if (NULL==(fapl_plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if(NULL == (fapl_plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list");
 
     /* Make a copy of the property list for FAPL_ID */

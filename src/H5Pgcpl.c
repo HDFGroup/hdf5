@@ -257,8 +257,8 @@ H5Pset_link_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dens
         ginfo.store_link_phase_change = TRUE;
     else
         ginfo.store_link_phase_change = FALSE;
-    ginfo.max_compact = max_compact;
-    ginfo.min_dense = min_dense;
+    ginfo.max_compact = (uint16_t)max_compact;
+    ginfo.min_dense = (uint16_t)min_dense;
 
     /* Set group info */
     if(H5P_set(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
@@ -361,8 +361,8 @@ H5Pset_est_link_info(hid_t plist_id, unsigned est_num_entries, unsigned est_name
         ginfo.store_est_entry_info = TRUE;
     else
         ginfo.store_est_entry_info = FALSE;
-    ginfo.est_num_entries = est_num_entries;
-    ginfo.est_name_len = est_name_len;
+    ginfo.est_num_entries = (uint16_t)est_num_entries;
+    ginfo.est_name_len = (uint16_t)est_name_len;
 
     /* Set group info */
     if(H5P_set(plist, H5G_CRT_GROUP_INFO_NAME, &ginfo) < 0)
@@ -451,8 +451,8 @@ H5Pset_link_creation_order(hid_t plist_id, unsigned crt_order_flags)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get link info")
 
     /* Update fields */
-    linfo.track_corder = (crt_order_flags & H5P_CRT_ORDER_TRACKED) ? TRUE : FALSE;
-    linfo.index_corder = (crt_order_flags & H5P_CRT_ORDER_INDEXED) ? TRUE : FALSE;
+    linfo.track_corder = (hbool_t)((crt_order_flags & H5P_CRT_ORDER_TRACKED) ? TRUE : FALSE);
+    linfo.index_corder = (hbool_t)((crt_order_flags & H5P_CRT_ORDER_INDEXED) ? TRUE : FALSE);
 
     /* Set link info */
     if(H5P_set(plist, H5G_CRT_LINK_INFO_NAME, &linfo) < 0)

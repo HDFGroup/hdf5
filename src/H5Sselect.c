@@ -301,7 +301,7 @@ H5Sget_select_npoints(hid_t spaceid)
     if(NULL == (space = (H5S_t *)H5I_object_verify(spaceid, H5I_DATASPACE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataspace")
 
-    ret_value = H5S_GET_SELECT_NPOINTS(space);
+    ret_value = (hssize_t)H5S_GET_SELECT_NPOINTS(space);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -331,12 +331,12 @@ done:
 hssize_t
 H5S_get_select_npoints(const H5S_t *space)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5S_get_select_npoints);
+    FUNC_ENTER_NOAPI_NOFUNC(H5S_get_select_npoints)
 
     /* Check args */
-    assert(space);
+    HDassert(space);
 
-    FUNC_LEAVE_NOAPI(space->select.num_elem);
+    FUNC_LEAVE_NOAPI((hssize_t)space->select.num_elem)
 }   /* H5S_get_select_npoints() */
 
 
@@ -1174,7 +1174,7 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
     iter_init = TRUE;	/* Selection iteration info has been initialized */
 
     /* Get the number of elements in selection */
-    if((nelmts = H5S_GET_SELECT_NPOINTS(space)) < 0)
+    if((nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(space)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
 
     /* Get the rank of the dataspace */
@@ -1199,21 +1199,21 @@ H5S_select_iterate(void *buf, hid_t type_id, const H5S_t *space, H5D_operator_t 
         /* Loop, while sequences left to process */
         for(curr_seq=0; curr_seq<nseq && user_ret==0; curr_seq++) {
             /* Get the current offset */
-            curr_off=off[curr_seq];
+            curr_off = off[curr_seq];
 
             /* Get the number of bytes in sequence */
-            curr_len=len[curr_seq];
+            curr_len = len[curr_seq];
 
             /* Loop, while bytes left in sequence */
-            while(curr_len>0 && user_ret==0) {
+            while(curr_len > 0 && user_ret == 0) {
                 /* Compute the coordinate from the offset */
-                for(i=ndims, tmp_off=curr_off; i>=0; i--) {
-                    coords[i]=tmp_off%space_size[i];
-                    tmp_off/=space_size[i];
+                for(i = (int)ndims, tmp_off = curr_off; i >= 0; i--) {
+                    coords[i] = tmp_off % space_size[i];
+                    tmp_off /= space_size[i];
                 } /* end for */
 
                 /* Get the location within the user's buffer */
-                loc=(unsigned char *)buf+curr_off;
+                loc = (unsigned char *)buf + curr_off;
 
                 /* Call user's callback routine */
                 user_ret=(*op)(loc,type_id,ndims,coords,operator_data);
@@ -1540,7 +1540,7 @@ H5S_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *_b
     iter_init = 1;	/* Selection iteration info has been initialized */
 
     /* Get the number of elements in selection */
-    if((nelmts = H5S_GET_SELECT_NPOINTS(space)) < 0)
+    if((nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(space)) < 0)
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
 
     /* Compute the number of bytes to process */

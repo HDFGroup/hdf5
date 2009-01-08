@@ -322,9 +322,23 @@ typedef struct H5O_efl_t {
 
 /*
  * Data Layout Message.
- * (Data structure in memory)
+ * (Data structure in file)
  */
 #define H5O_LAYOUT_NDIMS	(H5S_MAX_RANK+1)
+
+/* Initial version of the layout information.  Used when space is allocated */
+#define H5O_LAYOUT_VERSION_1	1
+
+/* This version added support for delaying allocation */
+#define H5O_LAYOUT_VERSION_2	2
+
+/* This version is revised to store just the information needed for each
+ *      storage type, and to straighten out problems with contiguous layout's
+ *      sizes (was encoding them as 4-byte values when they were really n-byte
+ *      values (where n usually is 8)).
+ */
+#define H5O_LAYOUT_VERSION_3	3
+
 
 /* Forward declaration of structs used below */
 struct H5D_layout_ops_t;                /* Defined in H5Dpkg.h               */

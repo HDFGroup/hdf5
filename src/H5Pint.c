@@ -735,7 +735,7 @@ H5P_copy_plist(H5P_genplist_t *old_plist, hbool_t app_ref)
      * initialize each with default value & make property 'copy' callback.
      */
     tclass=old_plist->pclass;
-    has_parent_class=(tclass!=NULL && tclass->parent!=NULL && tclass->parent->nprops>0);
+    has_parent_class = (hbool_t)(tclass != NULL && tclass->parent != NULL && tclass->parent->nprops > 0);
     while(tclass!=NULL) {
         if(tclass->nprops>0) {
             /* Walk through the properties in the old class */
@@ -4106,7 +4106,7 @@ H5P_close(void *_plist)
      * initialize each with default value & make property 'remove' callback.
      */
     tclass=plist->pclass;
-    has_parent_class=(tclass!=NULL && tclass->parent!=NULL && tclass->parent->nprops>0);
+    has_parent_class = (hbool_t)(tclass != NULL && tclass->parent != NULL && tclass->parent->nprops > 0);
     while(tclass!=NULL) {
         if(tclass->nprops>0) {
             /* Walk through the properties in the class */

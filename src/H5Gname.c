@@ -1147,10 +1147,8 @@ H5G_get_name_by_addr(hid_t file, hid_t lapl_id, hid_t dxpl_id, const H5O_loc_t *
 
     /* Check for finding the object */
     if(found_obj) {
-        size_t full_path_len = HDstrlen(udata.path) + 1;        /* Length of path + 1 (for "/") */
-
         /* Set the length of the full path */
-        ret_value = full_path_len;
+        ret_value = (ssize_t)(HDstrlen(udata.path) + 1);        /* Length of path + 1 (for "/") */
 
         /* If there's a buffer provided, copy into it, up to the limit of its size */
         if(name) {
