@@ -236,7 +236,7 @@
 #define H5_HAVE_RANDOM 1
 
 /* Define to 1 if you have the `rand_r' function. */
-#define H5_HAVE_RAND_R 1
+/* #define H5_HAVE_RAND_R 1 */
 
 /* Define to 1 if you have the <setjmp.h> header file. */
 #define H5_HAVE_SETJMP_H 1
