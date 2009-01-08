@@ -197,6 +197,9 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     const char  *obj_name;              /* Name external link's object */
     size_t      fname_len;              /* Length of external link file name */
     unsigned    intent;                 /* File access permissions */
+    H5L_elink_cb_t cb_info;             /* Callback info struct */
+    const char  *parent_file_name = NULL; /* Parent file name */
+    const char  *parent_group_name = NULL; /* Parent group name */
     hid_t       fapl_id = -1;           /* File access property list for external link's file */
     hid_t       ext_obj = -1;           /* ID for external link's object */
     hid_t       ret_value;              /* Return value */
@@ -237,15 +240,68 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     if(H5G_loc(cur_group, &loc) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get object location")
 
-    /* get the file access mode flags for the parent file */
-    intent = H5F_INTENT(loc.oloc->file);
+    /* get the access flags set for lapl_id if any */
+    if(H5P_get(plist, H5L_ACS_ELINK_FLAGS_NAME, &intent) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get elink file access flags")
 
-    if ((fapl_id == H5P_DEFAULT) && ((fapl_id = H5F_get_access_plist(loc.oloc->file, FALSE)) < 0))
+    /* get the file access mode flags for the parent file, if they were not set
+     * on lapl_id */
+    if(intent == H5F_ACC_DEFAULT)
+        intent = H5F_INTENT(loc.oloc->file);
+
+    if((fapl_id == H5P_DEFAULT) && ((fapl_id = H5F_get_access_plist(loc.oloc->file, FALSE)) < 0))
 	HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get parent's file access property list")
 
-    /* Set file close degree for new file to "weak" */
+    /* Get callback_info */
+    if(H5P_get(plist, H5L_ACS_ELINK_CB_NAME, &cb_info)<0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get elink callback info")
+
+    /* Get file access property list */
     if(NULL == (fa_plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
 	HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Make callback if it exists */
+    if(cb_info.func) {
+        /* Get parent file name */
+        parent_file_name = H5F_NAME(loc.oloc->file);
+
+        /* Get parent group name */
+        if(loc.path->user_path_r != NULL && loc.path->obj_hidden == 0)
+            /* Use user_path_r if possible */
+            parent_group_name = H5RS_get_str(loc.path->user_path_r);
+        else {
+            /* Otherwise use H5G_get_name */
+            ssize_t group_name_len; /* Length of parent group name */
+
+            /* Get length of parent group name */
+            if((group_name_len = H5G_get_name(cur_group, NULL, (size_t) 0, lapl_id, H5AC_ind_dxpl_id)) < 0)
+                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to retrieve length of group name")
+
+            /* account for null terminator */
+            group_name_len++;
+
+            /* Copy parent group name */
+            if(NULL == (tempname = (char *) H5MM_malloc((size_t) group_name_len)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+            if(H5G_get_name(cur_group, tempname, (size_t) group_name_len, lapl_id, H5AC_ind_dxpl_id) < 0)
+                HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to retrieve group name")
+            parent_group_name = tempname;
+        } /* end else */
+
+        /* Make callback */
+        if((cb_info.func)(parent_file_name, parent_group_name, file_name, obj_name,
+                &intent, fapl_id, cb_info.user_data) < 0)
+            HGOTO_ERROR(H5E_LINK, H5E_CALLBACK, FAIL, "traversal operator failed")
+
+        /* Free tempname */
+        tempname = (char *)H5MM_xfree(tempname);
+
+        /* Check access flags */
+        if((intent & H5F_ACC_TRUNC) || (intent & H5F_ACC_EXCL))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
+    } /* end if */
+
+    /* Set file close degree for new file to "weak" */
     if(H5P_set(fa_plist, H5F_ACS_CLOSE_DEGREE_NAME, &fc_degree) < 0)
 	HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
 
@@ -277,7 +333,8 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
     /* try searching from paths set in the environment variable */
     if ((ext_file == NULL) && (env_prefix=HDgetenv("HDF5_EXT_PREFIX"))) {
 
-        tmp_env_prefix = H5MM_strdup(env_prefix);
+        if ((tmp_env_prefix = H5MM_strdup(env_prefix)) == NULL)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 	pp = tmp_env_prefix;
 
         while ((tmp_env_prefix) && (*tmp_env_prefix)) {
@@ -290,14 +347,13 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
                 ext_file = H5F_open(full_name, ((intent & H5F_ACC_RDWR) ? H5F_ACC_RDWR : H5F_ACC_RDONLY),
                             H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id);
                 if (full_name)
-                    H5MM_xfree(full_name);
+                    H5MM_free(full_name);
                 if (ext_file != NULL)
                     break;
                 H5E_clear_stack(NULL);
             }
         } /* end while */
-        if (pp)
-            H5MM_xfree(pp);
+        pp = (char *)H5MM_xfree(pp);
     }
 
     /* try searching from property list */
@@ -311,7 +367,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
                         H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)) == NULL)
                 H5E_clear_stack(NULL);
             if (full_name)
-                H5MM_xfree(full_name);
+                H5MM_free(full_name);
         }
     }
 
@@ -323,7 +379,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
                     H5P_FILE_CREATE_DEFAULT, fapl_id, H5AC_dxpl_id)) == NULL)
             H5E_clear_stack(NULL);
         if (full_name)
-            H5MM_xfree(full_name);
+            H5MM_free(full_name);
     }
 
     /* try the relative file_name stored in tempname */
@@ -333,8 +389,7 @@ H5L_extern_traverse(const char UNUSED *link_name, hid_t cur_group,
             HGOTO_ERROR(H5E_LINK, H5E_CANTOPENFILE, FAIL, "unable to open external file")
     }
 
-    if (tempname)
-        H5MM_xfree(tempname);
+    tempname = (char *)H5MM_xfree(tempname);
 
     /* Increment the number of open objects, to hold the file open */
     H5F_incr_nopen_objs(ext_file);
@@ -367,9 +422,14 @@ done:
     if(ext_file && H5F_try_close(ext_file) < 0)
         HDONE_ERROR(H5E_LINK, H5E_CANTCLOSEFILE, FAIL, "problem closing external file")
 
-    /* Close object if it's open and something failed */
-    if(ret_value < 0 && ext_obj >= 0 && H5I_dec_ref(ext_obj, FALSE) < 0)
-        HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom for external object")
+    if(ret_value < 0) {
+        H5MM_xfree(tempname);
+        H5MM_xfree(pp);
+
+        /* Close object if it's open and something failed */
+        if(ext_obj >= 0 && H5I_dec_ref(ext_obj, FALSE) < 0)
+            HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, FAIL, "unable to close atom for external object")
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5L_extern_traverse() */

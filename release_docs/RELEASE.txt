@@ -51,12 +51,18 @@ New Features
 
     Library:
     --------
+    - Added H5Pset_elink_cb and H5Pget_elink_cb functions to support a
+      user-defined callback function for external link traversal.
+      (NAF - 2009/01/08)
+    - Added H5Pset_elink_acc_flags and H5Pget_elink_acc_flags functions to
+      allow the user to specify the file access flags used to open the target
+      file of an external link. (NAF - 2009/01/08)
     - Added H5Pset_chunk_cache() and H5Pget_chunk_cache() functions to allow
-        individual rdcc configuration for each dataset.  Added
-        H5Dget_access_plist() function to retrieve a dataset access property
-        list form a dataset. (NAF - 2008/11/12)
+      individual rdcc configuration for each dataset.  Added
+      H5Dget_access_plist() function to retrieve a dataset access property
+      list from a dataset. (NAF - 2008/11/12)
     - Added H5Iis_valid() function to check if an id is valid without producing
-        an error message. (NAF - 2008/11/5)
+      an error message. (NAF - 2008/11/5)
     - Added two new public routines: H5Pget_elink_fapl() and
       H5Pset_elink_fapl(). (see bug #1247) (VC - 2008/10/13)
     - Improved free space tracking in file to be faster. (QAK - 2008/10/06)
