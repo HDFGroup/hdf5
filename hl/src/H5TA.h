@@ -22,7 +22,9 @@
 
 #include "H5LT.h"
 
-#define HLTB_MAX_FIELD_LEN 255
+#define TABLE_CLASS         "TABLE"
+#define TABLE_VERSION       "3.0"
+#define HLTB_MAX_FIELD_LEN  255
 
 #if !defined(MAX)
 #define MAX(X,Y) ((X)>(Y)?(X):(Y))
@@ -237,6 +239,35 @@ H5_HLDLL herr_t H5TBAget_fill( hid_t loc_id,
                       const char *dset_name,
                       hid_t dset_id,
                       unsigned char *dst_buf );
+
+/*-------------------------------------------------------------------------
+ *
+ * Private write function used by H5TB and H5PT
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5TB_common_append_records( hid_t dataset_id,
+                                  hid_t mem_type_id,
+                                  size_t nrecords,
+                                  hsize_t orig_table_size,
+                                  const void * data);
+
+/*-------------------------------------------------------------------------
+ *
+ * Private read function used by H5TB and H5PT
+ *
+ *-------------------------------------------------------------------------
+ */
+
+
+herr_t H5TB_common_read_records( hid_t dataset_id,
+                                hid_t mem_type_id,
+                                hsize_t start,
+                                size_t nrecords,
+                                hsize_t table_size,
+                                void *data);
+
 
 #ifdef __cplusplus
 }
