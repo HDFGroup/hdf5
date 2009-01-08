@@ -3200,7 +3200,8 @@ H5D_istore_initialize_by_extent(H5D_io_info_t *io_info)
  * chunk cache.
  */
     for(u = 0; u < layout->u.chunk.ndims; u++) {
-	idx_max[u] = (size[u] - 1) / layout->u.chunk.dim[u] + 1;
+	if (size[u]) idx_max[u] = (size[u] - 1) / layout->u.chunk.dim[u] + 1;
+    else idx_max[u] = 0;
 	idx_cur[u] = 0;
     } /* end for */
 
