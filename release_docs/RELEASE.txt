@@ -57,8 +57,11 @@ New Features
     ------
     - h5dump: binary output defaults to NATIVE with -b optionally accepting
       the form of binary output (NATIVE, FILE, BE, LE). PVN - 2008/11/14
-    - h5repack: Define a default chunk whose size is manageable. 
-      PVN - 2008/11/21
+    - h5repack: When user doesn't specify a chunk size, h5repack now defines a default 
+            chunk size as the same size of the size of the hyperslab used to read the chunks. 
+            The size of the hyperslabs are defined as the size of each dimension or a 
+            predefined constant, whatever is smaller. This assures that the chunk 
+            read fits in the chunk cache. PVN - 2008/11/21
 
 
     
@@ -78,6 +81,9 @@ Bug Fixes since HDF5-1.6.8 Release
 
     Library
     -------
+    - H5Dset_extent: when shrinking dimensions, some chunks were not deleted. 
+            Shrinking to a zero size dimension caused an assertion in the library.
+            (PVN - 2009/01/8)
 
     Configuration
     -------------
