@@ -116,6 +116,8 @@ const char *FILENAME[] = {
 #define LE_FILENAME "le_extlink1.h5"
 #define BE_FILENAME "be_extlink1.h5"
 
+#define ELINK_CB_FAM_SIZE (hsize_t) 100
+
 #define H5L_DIM1 100
 #define H5L_DIM2 100
 
@@ -4077,10 +4079,13 @@ external_set_elink_acc_flags(hid_t fapl, hbool_t new_format)
  *
  *-------------------------------------------------------------------------
  */
+ /* User data structure for callback function */
 typedef struct {
-    const char  *parent_file;
-    const char  *target_file;
-    hid_t       fapl;
+    const char  *parent_file;   /* Expected parent file name */
+    const char  *target_file;   /* Expected target file name */
+    hid_t       base_fapl;      /* Base fapl for family driver */
+    hsize_t     fam_size;       /* Size of family files */
+    int         code;           /* Code to control the actions taken by the callback */
 } set_elink_cb_t;
 
 /* Callback function */
@@ -4093,13 +4098,6 @@ external_set_elink_cb_cb(const char *parent_file, const char *parent_group,
     hid_t           driver;
     const void      *driver_info;
 
-    /* Codes to cause an invalid condition (and verify that an error is issued */
-    if (op_data->fapl == -1) return FAIL;
-    if (op_data->fapl == -2) {
-        *flags = H5F_ACC_DEFAULT;
-        return 0;
-    } /* end if */
-
     /* Verify file and object names are correct */
     if (HDstrcmp(parent_file, op_data->parent_file)) return FAIL;
     if (HDstrcmp(parent_group, "/group1")) return FAIL;
@@ -4109,10 +4107,14 @@ external_set_elink_cb_cb(const char *parent_file, const char *parent_group,
     /* Set flags to be read-write */
     *flags = (*flags & ~H5F_ACC_RDONLY) | H5F_ACC_RDWR;
 
-    /* Copy driver info from op_data->fapl to fapl */
-    driver = H5Pget_driver(op_data->fapl);
-    driver_info = H5Pget_driver_info(op_data->fapl);
-    if (H5Pset_driver(fapl, driver, driver_info) < 0) return FAIL;
+    /* Set family file driver on fapl */
+    if (H5Pset_fapl_family(fapl, op_data->fam_size, op_data->base_fapl) < 0) return FAIL;
+
+    /* Codes to cause an invalid condition (and verify that an error is issued */
+    if (op_data->code == 1)
+        return FAIL;
+    if (op_data->code == 2)
+        *flags = H5F_ACC_DEFAULT;
 
     return 0;
 }
@@ -4136,7 +4138,7 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
 
     /* Create family fapl */
     if ((fam_fapl = H5Pcopy(fapl)) < 0) TEST_ERROR
-    if (H5Pset_fapl_family(fam_fapl, (hsize_t) 100, fapl) < 0) TEST_ERROR
+    if (H5Pset_fapl_family(fam_fapl, ELINK_CB_FAM_SIZE, fapl) < 0) TEST_ERROR
 
     /* Create parent and target files, group, and external link */
     h5_fixname(FILENAME[40], fapl, filename1, sizeof filename1);
@@ -4154,7 +4156,9 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     /* Build user data for callback */
     op_data.parent_file = filename1;
     op_data.target_file = filename2;
-    op_data.fapl = fam_fapl;
+    op_data.base_fapl = fapl;
+    op_data.fam_size = ELINK_CB_FAM_SIZE;
+    op_data.code = 0;
 
     /* Create new gapl, and set elink callback */
     if ((gapl = H5Pcreate(H5P_GROUP_ACCESS)) < 0) TEST_ERROR
@@ -4186,7 +4190,7 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     if (H5Pclose(fam_fapl) < 0) TEST_ERROR
 
     /* Modify the user data structure to cause the callback to fail next time */
-    op_data.fapl = -1;
+    op_data.code = 1;
 
     /* Attempt to reopen group2 (should fail) */
     H5E_BEGIN_TRY {
@@ -4195,7 +4199,7 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     if (group != FAIL) TEST_ERROR
 
     /* Modify the user data structure to cause the callback to return invalid flags */
-    op_data.fapl = -2;
+    op_data.code = 2;
 
     /* Attempt to reopen group2 (should fail) */
     H5E_BEGIN_TRY {
