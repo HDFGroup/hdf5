@@ -1133,7 +1133,7 @@ variable_size(H5F_t * f, void * thing, size_t * size_ptr)
 /*-------------------------------------------------------------------------
  * Function:	add_flush_op
  *
- * Purpose:	Do noting if pass is FALSE on entry.
+ * Purpose:	Do nothing if pass is FALSE on entry.
  *
  *              Otherwise, add the specified flush operation to the
  *              target instance of test_entry_t.
@@ -1199,7 +1199,7 @@ add_flush_op(int target_type,
 /*-------------------------------------------------------------------------
  * Function:	create_pinned_entry_dependency
  *
- * Purpose:	Do noting if pass is FALSE on entry.
+ * Purpose:	Do nothing if pass is FALSE on entry.
  *
  *              Otherwise, set up a pinned entry dependency so we can
  *              test the pinned entry modifications to the flush routine.
@@ -2339,7 +2339,9 @@ flush_cache(H5C_t * cache_ptr,
             hbool_t dump_stats,
             hbool_t dump_detailed_stats)
 {
+    const char * fcn_name = "flush_cache()";
     herr_t result = 0;
+    hbool_t verbose = TRUE;
 
     HDassert(cache_ptr);
 
@@ -2369,6 +2371,26 @@ flush_cache(H5C_t * cache_ptr,
         pass = FALSE;
         failure_mssg = "error in H5C_flush_cache().";
     }
+    else if ( ( destroy_entries ) &&
+	      ( ( cache_ptr->index_len != 0 ) ||
+	        ( cache_ptr->index_size != 0 ) ||
+	        ( cache_ptr->clean_index_size != 0 ) ||
+	        ( cache_ptr->dirty_index_size != 0 ) ) ) {
+
+	if ( verbose ) {
+            HDfprintf(stdout, 
+		      "%s: unexpected il/is/cis/dis = %lld/%lld/%lld/%lld.\n",
+		      fcn_name,
+		      (long long)(cache_ptr->index_len),
+		      (long long)(cache_ptr->index_size),
+		      (long long)(cache_ptr->clean_index_size),
+		      (long long)(cache_ptr->dirty_index_size));
+	}
+        pass = FALSE;
+        failure_mssg = 
+	   "non zero index len/sizes after H5C_flush_cache() with invalidate.";
+    }
+
 
     return;
 
@@ -3229,12 +3251,13 @@ unprotect_entry_with_size_change(H5C_t * cache_ptr,
                                  unsigned int flags,
 		                 size_t new_size)
 {
-    /* const char * fcn_name = "unprotect_entry_with_size_change()"; */
+    const char * fcn_name = "unprotect_entry_with_size_change()";
     herr_t result;
     hbool_t dirty_flag_set;
     hbool_t pin_flag_set;
     hbool_t unpin_flag_set;
     hbool_t size_changed_flag_set;
+    hbool_t verbose = FALSE;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
 
@@ -3285,6 +3308,40 @@ unprotect_entry_with_size_change(H5C_t * cache_ptr,
              ( entry_ptr->size != entry_ptr->header.size ) ||
              ( entry_ptr->addr != entry_ptr->header.addr ) ) {
 
+	    if ( verbose ) {
+
+	        if ( result < 0 ) {
+                    HDfprintf(stdout, "%s: H5C_unprotect() failed.\n", fcn_name);
+		    H5Eprint(H5E_DEFAULT, stdout);
+		}
+
+	        if ( entry_ptr->header.is_protected )  {
+                    HDfprintf(stdout, "%s: entry still protected?!?.\n", 
+			      fcn_name);
+		}
+
+	        if ( entry_ptr->header.type != &(types[type]) )  {
+                    HDfprintf(stdout, 
+			      "%s: entry has bad type after unprotect.\n", 
+			      fcn_name);
+		}
+
+	        if ( entry_ptr->size != entry_ptr->header.size )  {
+                    HDfprintf(stdout, 
+			   "%s: bad entry size after unprotect. e/a = %d/%d\n", 
+			   fcn_name,
+			   (int)(entry_ptr->size),
+			   (int)(entry_ptr->header.size));
+		}
+
+	        if ( entry_ptr->addr != entry_ptr->header.addr )  {
+                    HDfprintf(stdout, 
+		     "%s: bad entry addr after unprotect. e/a = 0x%llx/0x%llx\n",
+		     fcn_name,
+		     (long long)(entry_ptr->addr),
+		     (long long)(entry_ptr->header.addr));
+		}
+	    }
             pass = FALSE;
             failure_mssg = "error in H5C_unprotect().";
 

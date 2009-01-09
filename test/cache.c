@@ -23,6 +23,12 @@
 #include "H5Iprivate.h"
 #include "H5ACprivate.h"
 #include "cache_common.h"
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <math.h>
+
 
 /* private function declarations: */
 
@@ -2987,6 +2993,7 @@ static void
 check_flush_cache(void)
 {
     const char * fcn_name = "check_flush_cache";
+    hbool_t      show_progress = FALSE;
     H5C_t *      cache_ptr = NULL;
 
     TESTING("H5C_flush_cache() functionality");
@@ -3000,6 +3007,11 @@ check_flush_cache(void)
 
     if ( pass ) {
 
+	if ( show_progress ) {
+
+	    HDfprintf(stdout, "%s: reseting entries.\n", fcn_name);
+	}
+
         reset_entries();
 
         cache_ptr = setup_cache((size_t)(2 * 1024 * 1024),
@@ -3012,6 +3024,12 @@ check_flush_cache(void)
 
     if ( pass ) {
 
+	if ( show_progress ) {
+
+	    HDfprintf(stdout, "%s: calling check_flush_cache__empty_cache().\n", 
+		      fcn_name);
+	}
+
         check_flush_cache__empty_cache(cache_ptr);
     }
 
@@ -3021,20 +3039,44 @@ check_flush_cache(void)
 
     if ( pass ) {
 
+	if ( show_progress ) {
+
+	    HDfprintf(stdout, "%s: calling check_flush_cache__single_entry().\n",
+		      fcn_name);
+	}
+
         check_flush_cache__single_entry(cache_ptr);
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+
+	    HDfprintf(stdout, "%s: calling check_flush_cache__multi_entry().\n",
+		      fcn_name);
+	}
 
         check_flush_cache__multi_entry(cache_ptr);
     }
 
     if ( pass ) {
 
+	if ( show_progress ) {
+
+	    HDfprintf(stdout, "%s: calling check_flush_cache__flush_ops().\n",
+		      fcn_name);
+	}
+
 	check_flush_cache__flush_ops(cache_ptr);
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+
+	    HDfprintf(stdout, "%s: calling takedown_cache().\n",
+		      fcn_name);
+	}
 
         takedown_cache(cache_ptr, FALSE, FALSE);
     }
@@ -9211,9 +9253,12 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
 				 int check_size,
 				 struct fo_flush_entry_check check[])
 {
-    /* const char *   fcn_name = "check_flush_cache__flush_op_test"; */
+    const char *   fcn_name = "check_flush_cache__flush_op_test";
     static char    msg[128];
+    hbool_t	   show_progress = FALSE;
+    hbool_t	   verbose = FALSE;
     herr_t	   result;
+    int		   target_test = -1;
     int            i;
     int            j;
     test_entry_t * base_addr;
@@ -9223,6 +9268,17 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
     HDfprintf(stdout, "check_flush_cache__flush_op_test: test %d\n",
 	      test_num);
 #endif
+
+    if ( ( target_test > 0 ) && ( test_num != target_test ) ) {
+
+	show_progress = FALSE;
+    }
+
+    if ( show_progress ) {
+
+	HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(1).\n", 
+	          fcn_name, test_num, (int)pass);
+    }
 
     if ( cache_ptr == NULL ) {
 
@@ -9251,6 +9307,12 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
         failure_mssg = msg;
     }
 
+    if ( show_progress ) {
+
+	HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(2).\n", 
+	          fcn_name, test_num, (int)pass);
+    }
+
     i = 0;
     while ( ( pass ) && ( i < spec_size ) )
     {
@@ -9271,6 +9333,12 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
             failure_mssg = msg;
         }
         i++;
+    }
+
+    if ( show_progress ) {
+
+	HDfprintf(stdout, "%s:%d:%d: running sanity checks on entry(3).\n", 
+	          fcn_name, test_num, (int)pass);
     }
 
     i = 0;
@@ -9310,17 +9378,53 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
         i++;
     }
 
+    if ( show_progress ) {
+
+	HDfprintf(stdout, "%s:%d:%d: Setting up the test.\n", 
+	          fcn_name, test_num, (int)pass);
+    }
+
     i = 0;
     while ( ( pass ) && ( i < spec_size ) )
     {
         if ( spec[i].insert_flag ) {
+
+	    if ( show_progress ) {
+
+	        HDfprintf(stdout, 
+			  "%s:%d: Inserting entry(%d,%d) with flags 0x%x.\n",
+			  fcn_name, test_num,
+			  (int)(spec[i].entry_type),
+			  (int)(spec[i].entry_index),
+			  (unsigned)spec[i].flags);
+	    }
 
             insert_entry(cache_ptr, spec[i].entry_type, spec[i].entry_index,
                          TRUE, spec[i].flags);
 
         } else {
 
+	    if ( show_progress ) {
+
+	        HDfprintf(stdout, 
+			  "%s:%d: Protecting entry(%d,%d).\n",
+			  fcn_name, test_num,
+			  (int)(spec[i].entry_type),
+			  (int)(spec[i].entry_index));
+	    }
+
             protect_entry(cache_ptr, spec[i].entry_type, spec[i].entry_index);
+
+	    if ( show_progress ) {
+
+	        HDfprintf(stdout, 
+		    "%s:%d: Unprotecting entry(%d,%d) with flags 0x%x ns = %d.\n",
+		    fcn_name, test_num,
+		    (int)(spec[i].entry_type),
+		    (int)(spec[i].entry_index),
+		    (unsigned)spec[i].flags,
+		    (int)(spec[i].new_size));
+	    }
 
             unprotect_entry_with_size_change(cache_ptr, spec[i].entry_type,
 			                     spec[i].entry_index,
@@ -9363,6 +9467,12 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
         }
     }
 
+    if ( show_progress ) {
+
+	HDfprintf(stdout, "%s:%d:%d: Running the test.\n", 
+		  fcn_name, test_num, (int)pass);
+    }
+
     if ( pass ) {
 
         result = H5C_flush_cache(NULL, -1, -1, cache_ptr, flush_flags);
@@ -9377,6 +9487,11 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
         }
     }
 
+    if ( show_progress ) {
+
+	HDfprintf(stdout, "%s:%d:%d: Checking test results(1).\n", 
+		  fcn_name, test_num, (int)pass);
+    }
 
     i = 0;
     while ( ( pass ) && ( i < spec_size ) )
@@ -9413,6 +9528,12 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
             failure_mssg = msg;
         }
         i++;
+    }
+
+    if ( show_progress ) {
+
+	HDfprintf(stdout, "%s:%d:%d: Checking test results(2).\n", 
+		  fcn_name, test_num, (int)pass);
     }
 
     if ( pass ) {
@@ -9533,6 +9654,12 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
         }
     }
 
+    if ( show_progress ) {
+
+	HDfprintf(stdout, "%s:%d:%d: Checking test results(3).\n", 
+		  fcn_name, test_num, (int)pass);
+    }
+
     if ( pass ) {
 
         if ( ( ( (flush_flags & H5C__FLUSH_INVALIDATE_FLAG) == 0 )
@@ -9561,6 +9688,13 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
     }
 
     /* clean up the cache to prep for the next test */
+
+    if ( show_progress ) {
+
+	HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(1).\n", 
+		  fcn_name, test_num, (int)pass);
+    }
+
     if ( pass ) {
 
         result = H5C_flush_cache(NULL, -1, -1, cache_ptr,
@@ -9575,15 +9709,33 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
             failure_mssg = msg;
         }
         else if ( ( cache_ptr->index_len != 0 ) ||
-                  ( cache_ptr->index_size != 0 ) ) {
+                  ( cache_ptr->index_size != 0 ) ||
+		  ( cache_ptr->clean_index_size != 0 ) ||
+		  ( cache_ptr->dirty_index_size != 0 ) ) {
 
             pass = FALSE;
+
+	    if ( verbose ) {
+
+	        HDfprintf(stdout, "%s:%d: il/is/cis/dis = %lld/%lld/%lld/%lld.\n",
+			  fcn_name, test_num,
+			  (long long)(cache_ptr->index_len),
+			  (long long)(cache_ptr->index_size),
+			  (long long)(cache_ptr->clean_index_size),
+			  (long long)(cache_ptr->dirty_index_size));
+	    }
             HDsnprintf(msg, (size_t)128,
-            "Unexpected cache len/size after cleanup in flush op test #%d.",
+            "Unexpected cache len/size/cs/ds after cleanup in flush op test #%d.",
             test_num);
             failure_mssg = msg;
 
         }
+    }
+
+    if ( show_progress ) {
+
+	HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(2).\n", 
+		  fcn_name, test_num, (int)pass);
     }
 
     i = 0;
@@ -9602,6 +9754,12 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
         i++;
     }
 
+    if ( show_progress ) {
+
+	HDfprintf(stdout, "%s:%d:%d: Cleaning up after test(3).\n", 
+		  fcn_name, test_num, (int)pass);
+    }
+
     i = 0;
     while ( ( pass ) && ( i < check_size ) )
     {
@@ -9616,6 +9774,11 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
         entry_ptr->destroyed = FALSE;
 
         i++;
+    }
+
+    if ( show_progress ) {
+
+	HDfprintf(stdout, "%s:%d:%d: Done.\n", fcn_name, test_num, (int)pass);
     }
 
     return;
@@ -9716,30 +9879,34 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
       { LARGE_ENTRY_TYPE,	13,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE }
     };
 
-    if ( cache_ptr == NULL ) {
+    if ( pass ) {
 
-        pass = FALSE;
-        failure_mssg = "cache_ptr NULL on entry to flush ops test.";
-    }
-    else if ( ( cache_ptr->index_len != 0 ) ||
-              ( cache_ptr->index_size != 0 ) ) {
+         if ( cache_ptr == NULL ) {
 
-        pass = FALSE;
-        failure_mssg = "cache not empty at start of flush ops eviction test.";
-    }
-    else if ( ( cache_ptr->max_cache_size != (2 * 1024 * 1024 ) ) ||
-              ( cache_ptr->min_clean_size != (1 * 1024 * 1024 ) ) ) {
+            pass = FALSE;
+            failure_mssg = "cache_ptr NULL on entry to flush ops test.";
+        }
+        else if ( ( cache_ptr->index_len != 0 ) ||
+                  ( cache_ptr->index_size != 0 ) ) {
 
-	pass = FALSE;
-	failure_mssg = "unexpected cache config at start of flush op eviction test.";
+            pass = FALSE;
+            failure_mssg = "cache not empty at start of flush ops eviction test.";
+        }
+        else if ( ( cache_ptr->max_cache_size != (2 * 1024 * 1024 ) ) ||
+                  ( cache_ptr->min_clean_size != (1 * 1024 * 1024 ) ) ) {
 
-    } else {
+	    pass = FALSE;
+	    failure_mssg = 
+	        "unexpected cache config at start of flush op eviction test.";
 
-        /* set min clean size to zero for this test as it simplifies
-	 * computing the expected cache size after each operation.
-	 */
+        } else {
 
-        cache_ptr->min_clean_size = 0;
+            /* set min clean size to zero for this test as it simplifies
+	     * computing the expected cache size after each operation.
+	     */
+
+            cache_ptr->min_clean_size = 0;
+        }
     }
 
     if ( pass ) {
@@ -10793,7 +10960,8 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 static void
 check_flush_cache__single_entry(H5C_t * cache_ptr)
 {
-    /* const char * fcn_name = "check_flush_cache__single_entry"; */
+    const char * fcn_name = "check_flush_cache__single_entry";
+    hbool_t show_progress = FALSE;
 
     if ( cache_ptr == NULL ) {
 
@@ -10808,6 +10976,10 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 1);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -10824,9 +10996,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 2);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -10843,9 +11023,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 3);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -10862,9 +11050,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 4);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -10881,9 +11077,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 5);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -10900,9 +11104,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 6);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -10919,9 +11131,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 7);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -10938,9 +11158,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 8);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -10957,9 +11185,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 9);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -10977,9 +11213,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 10);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -10997,9 +11241,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 11);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11017,9 +11269,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 12);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11037,9 +11297,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 13);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11057,9 +11325,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 14);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11077,9 +11353,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 15);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11098,9 +11382,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 16);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11119,9 +11411,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 17);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11138,9 +11438,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 18);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11157,9 +11465,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 19);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11176,9 +11492,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 20);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11195,9 +11519,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 21);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11214,9 +11546,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 22);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11233,9 +11573,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 23);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11252,9 +11600,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 24);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11271,9 +11627,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 25);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11291,9 +11655,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 26);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11311,9 +11683,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 27);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11331,9 +11711,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 28);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11351,9 +11739,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 29);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11371,9 +11767,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 30);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11391,9 +11795,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 31);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11412,9 +11824,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 32);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11433,9 +11853,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 33);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11452,9 +11880,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 34);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11471,9 +11907,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 35);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11490,9 +11934,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 36);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11509,9 +11961,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 37);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11528,9 +11988,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 38);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11547,9 +12015,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 39);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11566,9 +12042,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 40);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11585,9 +12069,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 41);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11605,9 +12097,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 42);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11625,9 +12125,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 43);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11645,9 +12153,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 44);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11665,9 +12181,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 45);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11685,9 +12209,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 46);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11705,9 +12237,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 47);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11726,9 +12266,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 48);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11747,9 +12295,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 49);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11766,9 +12322,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 50);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11785,9 +12349,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 51);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11804,9 +12376,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 52);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11823,9 +12403,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 53);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11842,9 +12430,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 54);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11861,9 +12457,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 55);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11880,9 +12484,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 56);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11899,9 +12511,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 57);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11919,9 +12539,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 58);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11939,9 +12567,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 59);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11959,9 +12595,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 60);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11979,9 +12623,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ FALSE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 61);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -11999,9 +12651,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 62);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -12019,9 +12679,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ TRUE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 63);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -12040,9 +12708,17 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
     if ( pass ) {
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: running test %d.\n", fcn_name, 64);
+        }
 
         check_flush_cache__single_entry_test
         (
@@ -12061,6 +12737,10 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
             /* expected_flushed     */ FALSE,
             /* expected_destroyed   */ TRUE
         );
+
+	if ( show_progress ) {
+	    HDfprintf(stdout, "%s: pass = %d.\n", fcn_name, (int)pass);
+        }
     }
 
 
@@ -12409,6 +13089,11 @@ check_flush_cache__single_entry(H5C_t * cache_ptr)
 	i = 0;
 	while ( ( pass ) && ( i < 256 ) )
 	{
+
+	    if ( show_progress ) {
+	        HDfprintf(stdout, "%s: running pinned test %d.\n", fcn_name, i);
+            }
+
 	    check_flush_cache__pinned_single_entry_test
 	    (
                 /* cache_ptr             */ cache_ptr,
@@ -15967,7 +16652,7 @@ static void
 check_duplicate_insert_err(void)
 {
     const char * fcn_name = "check_duplicate_insert_err";
-    herr_t result;
+    herr_t result = -1;
     H5C_t * cache_ptr = NULL;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -28154,6 +28839,878 @@ check_auto_cache_resize_aux_fcns(void)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	check_metadata_blizzard_absence()
+ *
+ * Purpose:	Test to verify that a 'metadata blizzard' can not occur
+ *              upon insertion into the cache.
+ *
+ *              A 'metadata blizzard' in this context occurs when the cache
+ *              gets completely filled with all dirty entries. Upon needing
+ *              to make space in the cache, the cache then has no clean 
+ *              entries ready to evict, and must clean every dirty entry
+ *              in the cache first, due to the second chance replacement
+ *              policy. (i.e. after cleaning an entry, it is bumped to the
+ *              top of the LRU to make a second pass before eviction).
+ *              The massive amount of sequential writes to disk while 
+ *              flushing the entire cache is what constitutes a 'metadata 
+ *              blizzard'.
+ *
+ * Return:	void
+ *
+ * Programmer:	Mike McGreevy
+ *              <mamcgree@hdfgroup.org>
+ *              12/16/08
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+check_metadata_blizzard_absence(hbool_t fill_via_insertion)
+{
+    const char * fcn_name = "check_metadata_blizzard_absence";
+    int entry_type = HUGE_ENTRY_TYPE;
+    size_t entry_size = HUGE_ENTRY_SIZE; /* 16 KB */
+    H5C_t * cache_ptr = NULL;
+    hbool_t show_progress = FALSE;
+    int32_t checkpoint = 0;   
+    int32_t entry_idx = 0;
+    int32_t i;
+
+    /* Expected loaded status of entries depends on how they get into 
+     * the cache. Insertions = not loaded, protect/unprotect = loaded.
+     */
+    hbool_t loaded = !(fill_via_insertion);
+
+    /* Set up the expected array. This is used to maintain a table of the
+     * expected status of every entry used in this test.
+     */
+    struct expected_entry_status expected[150] =
+    {
+      /* entry		entry			in	at main                                                       */
+      /* type:		index:	size:		cache:	addr:	dirty:	prot:	pinned:	loaded: clrd:	flshd:	dest: */
+      { entry_type,	0,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	1,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	2,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	3,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	4,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	5,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	6,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	7,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	8,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	9,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	10,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	11,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	12,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	13,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	14,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	15,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	16,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	17,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	18,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	19,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	20,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	21,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	22,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	23,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	24,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	25,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	26,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	27,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	28,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	29,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	30,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	31,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	32,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	33,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	34,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	35,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	36,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	37,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	38,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	39,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	40,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	41,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	42,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	43,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	44,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	45,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	46,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	47,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	48,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	49,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	50,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	51,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	52,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	53,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	54,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	55,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	56,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	57,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	58,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	59,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	60,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	61,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	62,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	63,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	64,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	65,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	66,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	67,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	68,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	69,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	70,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	71,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	72,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	73,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	74,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	75,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	76,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	77,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	78,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	79,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	80,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	81,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	82,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	83,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	84,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	85,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	86,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	87,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	88,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	89,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	90,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	91,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	92,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	93,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	94,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	95,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	96,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	97,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	98,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	99,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	100,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	101,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	102,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	103,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	104,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	105,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	106,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	107,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	108,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	109,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	110,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	111,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	112,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	113,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	114,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	115,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	116,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	117,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	118,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	119,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	120,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	121,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	122,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	123,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	124,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	125,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	126,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	127,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	128,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	129,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	130,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	131,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	132,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	133,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	134,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	135,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	136,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	137,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	138,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	139,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	140,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	141,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	142,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	143,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	144,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	145,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	146,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	147,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	148,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE },
+      { entry_type,	149,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE }
+    };
+
+    pass = TRUE;
+
+    if (fill_via_insertion) {
+
+        TESTING("to ensure metadata blizzard absence when inserting");
+
+    } else {
+
+        TESTING("to ensure metadata blizzard absence on protect/unprotect");
+    }
+
+    if ( show_progress) /* 0 */
+         HDfprintf(stdout, "\n%s: check point %d -- pass %d\n", 
+                   fcn_name, checkpoint++, pass);
+
+    if ( pass ) {
+    
+        /* Set up the cache.
+         *
+         * The max_cache_size should have room for 50 entries. 
+         * The min_clean_size is half of that, or 25 entries.   
+         */
+        cache_ptr = setup_cache((size_t)(50 * entry_size), /* max_cache_size */
+                                (size_t)(25 * entry_size)); /* min_clean_size */
+ 
+        if ( cache_ptr == NULL) {
+
+            pass = FALSE;
+            failure_mssg = "bad return from cache intialization.\n";
+         }
+    }        
+
+    if ( show_progress) /* 1 */
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+                   fcn_name, checkpoint++, pass);
+
+    /* ========================================================================
+     * ========================================================================
+     *  Phase 1:
+     * 
+     *    Inserting dirty entries into an empty cache, until the cache 
+     *    violates the min_clean_size requirement. The expected result is
+     *    that none of the inserted entries during this phase will get
+     *    flushed or evicted.
+     * 
+     *    This verifies that while maintaining min_clean_size, we don't go
+     *    overboard and flush entries that we don't need to flush.
+     *  
+     * ========================================================================
+     * ========================================================================
+     */
+
+    if ( pass ) {
+
+        /* Insert 26 entries (indexes 0 through 25) into the cache.  
+         *
+         * Note that we are inserting 26 entries, and not 25, because the cache 
+         * will only try to adhere to the min_clean_size if it's currently 
+         * being violated. Thus, on insertion of the 26th entry, since the 
+         * min_clean_size will not be violated, it will accept the insertion 
+         * without having to make clean space. 
+         */
+
+        for (entry_idx = 0; entry_idx < 26; entry_idx++) {
+
+            if (fill_via_insertion) {
+                insert_entry(cache_ptr,           /* H5C_t * cache_ptr */
+                             entry_type,          /* int32_t type */
+                             entry_idx,            /* int32_t idx */
+                             TRUE,                /* hbool_t dirty */
+                             H5C__NO_FLAGS_SET);  /* unsigned int flags */
+
+            } else {
+                protect_entry(cache_ptr,   /* H5C_t * cache_ptr */
+                              entry_type,  /* int32_t type */
+                              entry_idx);   /* int32-t idx */
+
+                unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                                entry_type,         /* int32_t type */
+                                entry_idx,           /* int32_t idx */
+                                TRUE,               /* int321_t dirty */
+                                H5C__NO_FLAGS_SET); /* unsigned int flags */
+            }
+
+            /* Change expected values, and verify the status of the entries 
+             * after each insertion 
+             */
+            expected[entry_idx].in_cache = TRUE;
+            expected[entry_idx].is_dirty = TRUE;
+            expected[entry_idx].loaded = loaded;
+
+            verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
+                                entry_idx, /* int tag */
+                                150,       /* int num_entries */
+                                expected); /* struct expected_entry_staus[] */
+        }
+    }
+
+    if ( show_progress) /* 2 */
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+                   fcn_name, checkpoint++, pass);
+
+    /* ========================================================================
+     * ========================================================================
+     *  Phase 2:
+     * 
+     *    Inserting entries into a cache that violates the min_clean_size,
+     *    until the cache is full. The expected result is that each insertion
+     *    will result in the flushing of a dirty entry in the cache.    
+     *
+     *    This verifies that we maintain the min_clean_size. By doing so, we
+     *    prevent building the situation in which a 'metadata blizzard' would
+     *    occur (i.e., the cache being completely filled with dirty entries).
+     *  
+     * ========================================================================
+     * ========================================================================
+     */
+   
+    if ( pass ) {
+
+        /* Insert the 27th entry (index = 26) into the cache.
+         * 
+         * This should cause the cache to flush its least recently used entry 
+         * before the insertion because it doesn't satisfy the min_clean_size
+         * constraint.
+         */
+        if (fill_via_insertion) {
+            insert_entry(cache_ptr,           /* H5C_t * cache_ptr */
+                         entry_type,          /* int32_t type */
+                         entry_idx++,          /* int32_t idx */
+                         TRUE,                /* hbool_t dirty */
+                         H5C__NO_FLAGS_SET);  /* unsigned int flags */
+        } else {
+            protect_entry(cache_ptr,   /* H5C_t * cache_ptr */
+                          entry_type,  /* int32_t type */
+                          entry_idx);   /* int32-t idx */
+
+            unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                            entry_type,         /* int32_t type */
+                            entry_idx++,           /* int32_t idx */
+                            TRUE,               /* int321_t dirty */
+                            H5C__NO_FLAGS_SET); /* unsigned int flags */
+        }
+
+        /* Verify the status of the entries.
+         * 
+         * Expected status is that there are 27 entries in the cache, and
+         * entry number 0 has been cleaned.
+         * 
+         * Changes from last entry verification:
+         *   - entry w/ index 0 has now been flushed and is now clean.
+         *   - entry w/ index 26 is now in the cache and dirty.
+         */
+          
+        /* entry w/ index 0 has now been flushed and is now clean. */
+	expected[0].flushed   = TRUE;
+	expected[0].is_dirty  = FALSE;
+
+        /* entry w/ index 26 is now in the cache and dirty. */
+	expected[26].in_cache = TRUE;
+	expected[26].is_dirty = TRUE;
+	expected[26].loaded   = loaded;
+
+        /* verify the status */
+        verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
+                            26,        /* int tag */
+                            150,       /* int num_entries */
+                            expected); /* expected */
+    }
+
+    if ( show_progress) /* 3 */
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+                   fcn_name, checkpoint++, pass);
+
+    if ( pass ) {
+
+        /* Insert the 28th entry (index = 27) into the cache.
+         *
+         * This should, once again, cause the cache to flush its least
+         * recently used entry before the insertion as it again does not
+         * satisfy the min_clean_size constraint.
+         */
+        if (fill_via_insertion) {
+            insert_entry(cache_ptr,           /* H5C_t * cache_ptr */
+                         entry_type,          /* int32_t type */
+                         entry_idx++,          /* int32_t idx */
+                         TRUE,                /* hbool_t dirty */
+                         H5C__NO_FLAGS_SET);  /* unsigned int flags */
+        } else {
+            protect_entry(cache_ptr,   /* H5C_t * cache_ptr */
+                          entry_type,  /* int32_t type */
+                          entry_idx);   /* int32-t idx */
+
+            unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                            entry_type,         /* int32_t type */
+                            entry_idx++,        /* int32_t idx */
+                            TRUE,               /* int321_t dirty */
+                            H5C__NO_FLAGS_SET); /* unsigned int flags */
+        }
+
+        /* Verify the status of the entries.
+         * 
+         * Expected status is that there are 28 entries in the cache, and
+         * entry numbers 0 and 1 have been cleaned.
+         * 
+         * Changes from last entry verification:
+         *   - entry w/ index 1 has now been flushed and is now clean.
+         *   - entry w/ index 27 is now in the cache and dirty.
+         */
+
+        /* entry w/ index 1 has now been flushed and is now clean. */
+	expected[1].flushed   = TRUE;
+	expected[1].is_dirty  = FALSE;
+
+        /* entry w/ index 27 is now in the cache and dirty. */
+	expected[27].in_cache = TRUE;
+	expected[27].is_dirty = TRUE;
+	expected[27].loaded   = loaded;
+
+        /* verify the status */
+        verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
+                            27,        /* int tag */
+                            150,       /* int num_entries */
+                            expected); /* expected */
+    }
+
+    if ( show_progress) /* 4 */
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+                   fcn_name, checkpoint++, pass);
+
+    if ( pass ) {
+
+        /* Fill out the rest of the cache with entries */
+        /* Verify expected status of entries after each insertion */
+        for (entry_idx = entry_idx; entry_idx < 50; entry_idx++) {
+
+            if (fill_via_insertion) {
+                insert_entry(cache_ptr,           /* H5C_t * cache_ptr */
+                             entry_type,          /* int32_t type */
+                             entry_idx,            /* int32_t idx */
+                             TRUE,                /* hbool_t dirty */
+                             H5C__NO_FLAGS_SET);  /* unsigned int flags */
+            } else {
+                protect_entry(cache_ptr,   /* H5C_t * cache_ptr */
+                              entry_type,  /* int32_t type */
+                              entry_idx);   /* int32-t idx */
+
+                unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                                entry_type,         /* int32_t type */
+                                entry_idx,           /* int32_t idx */
+                                TRUE,               /* int321_t dirty */
+                                H5C__NO_FLAGS_SET); /* unsigned int flags */
+            }
+
+            /* Expected staus is that after each insertion, the entry
+             * inserted 26 insertions ago has been flushed, and the 
+             * entry currently getting inserted is now in the cache and
+             * dirty.
+             */
+            expected[entry_idx - 26].flushed = TRUE;
+            expected[entry_idx - 26].is_dirty = FALSE;
+
+	    expected[entry_idx].in_cache = TRUE;
+    	    expected[entry_idx].is_dirty = TRUE;
+	    expected[entry_idx].loaded   = loaded;
+    
+            /* verify the status */
+            verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
+                                entry_idx, /* int tag */
+                                150,       /* int num_entries */
+                                expected); /* expected */
+        }
+
+        /* Verify that the cache is now full */
+        if ( cache_ptr->cache_full != TRUE ) {
+
+            pass = FALSE;
+            failure_mssg = "cache not completely filled.\n";
+        }
+    }
+
+    if ( show_progress) /* 5 */
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+                   fcn_name, checkpoint++, pass);
+
+    /* ========================================================================
+     * ========================================================================
+     *  Phase 3:
+     * 
+     *    Inserting entries into a cache that is completely full. Insertions 
+     *    of new entries will force evictions of old entries, but since the
+     *    min_clean_size has been maintained, doing so will not result in 
+     *    the entire cache getting flushed in order to evict a single entry,
+     *    as a clean entry will be available to flush reasonably close to
+     *    the bottom of the LRU.
+     * 
+     *    This verifies that with a maintained min_clean_size, a metadata
+     *    blizzard does not occur on insertion.
+     * 
+     * ========================================================================
+     * ========================================================================
+     */
+
+    if ( pass ) {
+
+        /* Insert the 51st entry (index = 50) into the cache.
+         * 
+         * The cache is full prior to the insertion, so it will
+         * have to evict in order to make room for the new entry.
+         */
+        if (fill_via_insertion) {
+            insert_entry(cache_ptr,           /* H5C_t * cache_ptr */
+                         entry_type,          /* int32_t type */
+                         entry_idx++,          /* int32_t idx */
+                         TRUE,                /* hbool_t dirty */
+                         H5C__NO_FLAGS_SET);  /* unsigned int flags */
+        } else {
+            protect_entry(cache_ptr,   /* H5C_t * cache_ptr */
+                          entry_type,  /* int32_t type */
+                          entry_idx);   /* int32-t idx */
+
+            unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                            entry_type,         /* int32_t type */
+                            entry_idx++,        /* int32_t idx */
+                            TRUE,               /* int321_t dirty */
+                            H5C__NO_FLAGS_SET); /* unsigned int flags */
+        }
+
+        /* Verify the status of the entries.
+         * 
+         * Changes from last entry verification:
+         *   - entry w/ index 0 has been evicted.
+         *   - entries w/ indices 24,25 have now been flushed and are clean.
+         *   - entry w/ index 50 is now in the cache and dirty.
+         */
+    
+        /* entry w/ index 0 has been evicted. */
+	expected[0].in_cache  = FALSE;
+	expected[0].destroyed = TRUE;
+
+        /* entries w/ indices 24,25 have now been flushed and are clean. */
+	expected[24].flushed  = TRUE;
+	expected[24].is_dirty = FALSE;
+	expected[25].flushed  = TRUE;
+	expected[25].is_dirty = FALSE;
+
+        /* entry w/ index 50 is now in the cache and dirty */
+	expected[50].in_cache = TRUE;
+	expected[50].is_dirty = TRUE;
+	expected[50].loaded   = loaded;
+
+        /* verify the status */
+        verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
+                            50,        /* int tag */
+                            150,       /* int num_entries */
+                            expected); /* expected */
+    }
+
+    if ( show_progress) /* 6 */
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+                   fcn_name, checkpoint++, pass);
+
+
+    if ( pass ) {
+
+        /* Insert 49 more entries (indices 51-99) into the cache.
+         * 
+         * The cache will be flushing an entry on each insertion, and 
+         * evicting an entry on each insertion. 
+         *
+         * After each insertion, verify the expected status of the
+         * entries in the cache.
+         */
+        for (entry_idx = entry_idx; entry_idx < 100; entry_idx++) {
+
+            if (fill_via_insertion) {
+                insert_entry(cache_ptr,           /* H5C_t * cache_ptr */
+                             entry_type,          /* int32_t type */
+                             entry_idx,          /* int32_t idx */
+                             TRUE,                /* hbool_t dirty */
+                             H5C__NO_FLAGS_SET);  /* unsigned int flags */
+            } else {
+                protect_entry(cache_ptr,   /* H5C_t * cache_ptr */
+                              entry_type,  /* int32_t type */
+                              entry_idx);   /* int32-t idx */
+    
+                unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                                entry_type,         /* int32_t type */
+                                entry_idx,        /* int32_t idx */
+                                TRUE,               /* int321_t dirty */
+                                H5C__NO_FLAGS_SET); /* unsigned int flags */
+            }
+
+            /* This past inserted entry is now in the cache and dirty */
+	    expected[entry_idx].in_cache = TRUE;
+    	    expected[entry_idx].is_dirty = TRUE;
+	    expected[entry_idx].loaded   = loaded;
+
+            /* The entry inserted 50 insertions ago has been evicted */
+	    expected[entry_idx - 50].in_cache  = FALSE;
+	    expected[entry_idx - 50].destroyed = TRUE;
+
+            /* If the newly inserted entry is among the first 24 
+             * insertions in this loop, then the insertion will
+             * have resulted in a flush of the entry inserted
+             * 25 insertions ago. */
+            if (entry_idx < 75) {
+                
+                expected[entry_idx - 25].flushed = TRUE;
+                expected[entry_idx - 25].is_dirty = FALSE;
+            }
+            /* If the newly inserted entry is among the last
+             * 25 insertions in this loop, then the insertion will
+             * have resulted in a flush of the entry inserted 26
+             * insertions ago. This switch is because there was two 
+             * consecutive clean entries in the cache (due to 51/49
+             * dirty/clean ratio when full), so instead of 
+             * flush-then-evict, it switches to evict-then-flush. */
+            else {
+
+                expected[entry_idx - 26].flushed = TRUE;
+                expected[entry_idx - 26].is_dirty = FALSE;
+            }
+
+            /* Verify this expected status */
+            verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
+                                entry_idx, /* int tag */
+                                150,       /* int num_entries */
+                                expected); /* expected */
+        }
+    }
+
+    if ( show_progress) /* 7 */
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+                   fcn_name, checkpoint++, pass);
+
+    /* ========================================================================
+     * ========================================================================
+     *  Phase 4:
+     * 
+     *    Flushing the entire cache, and then inserting entries into a cache
+     *    that is completely full, but all clean.
+     *
+     *    Phases 1 and 2 are then repeated. Rather than inserting dirty entries
+     *    into an empty cache, we're inserting into a full cache that's all
+     *    clean, thus an eviction occurs before each insertion.
+     *
+     *    When the cache finally hits the point of violating the 
+     *    min_clean_size, the bottom half of the LRU will be filled with
+     *    clean entries and the top half will be filled with recently inserted
+     *    dirty entries. We'll then verify that an insertion will only evict
+     *    one entry and flush one entry, and no more.
+     *    
+     * ========================================================================
+     * ========================================================================
+     */
+
+    if ( pass ) {
+    
+        /* Flush the cache.
+         *
+         * We're doing this so we can repeat the above insertions, but
+         * starting from a cache filled with clean entries as opposed
+         * to an empty cache.
+         */
+
+        flush_cache(cache_ptr, /* H5C_t * cache_ptr */
+                    FALSE,     /* hbool_t destory_entries */
+                    FALSE,     /* hbool_t dump_stats */
+                    FALSE);    /* hbool_t dump_detailed_stats */
+    
+        /* Verify that the cache is clean */
+        verify_clean();
+
+        /* Verify the status of the entries.
+         * 
+         * Changes from last entry verification:
+         *   - entries w/ indices 74-99 have been flushed.
+         */
+
+        /* entries w/ indices 74-99 have been flushed. */
+        for (i = 74; i < 100; i++) {
+
+            expected[i].flushed = TRUE;
+            expected[i].is_dirty = FALSE;
+        }
+        verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
+                            0,         /* int tag */
+                            150,       /* int num_entries */
+                            expected); /* expected */
+    }
+
+    if ( show_progress) /* 8 */
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+                   fcn_name, checkpoint++, pass);
+
+    if ( pass ) {
+
+        /* Insert 26 entries (indexes 100 through 125) into the cache.
+         *
+         * The cache will evict 26 entries since it's currently full with
+         * all clean entries. None of the entries we're inserting now
+         * will get cleaned, however.
+         */
+
+        for (entry_idx = 100; entry_idx < 126; entry_idx++) {
+
+            if (fill_via_insertion) {
+                insert_entry(cache_ptr,           /* H5C_t * cache_ptr */
+                             entry_type,          /* int32_t type */
+                             entry_idx,            /* int32_t idx */
+                             TRUE,                /* hbool_t dirty */
+                             H5C__NO_FLAGS_SET);  /* unsigned int flags */
+
+            } else {
+                protect_entry(cache_ptr,   /* H5C_t * cache_ptr */
+                              entry_type,  /* int32_t type */
+                              entry_idx);   /* int32-t idx */
+
+                unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                                entry_type,         /* int32_t type */
+                                entry_idx,           /* int32_t idx */
+                                TRUE,               /* int321_t dirty */
+                                H5C__NO_FLAGS_SET); /* unsigned int flags */
+            }
+
+            /* This past inserted entry is now in the cache and dirty */
+	    expected[entry_idx].in_cache = TRUE;
+    	    expected[entry_idx].is_dirty = TRUE;
+	    expected[entry_idx].loaded   = loaded;
+
+            /* The entry with ID minus 50 will have been evicted */
+	    expected[entry_idx - 50].in_cache  = FALSE;
+	    expected[entry_idx - 50].destroyed = TRUE;
+
+            /* verify the status */
+            verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
+                                entry_idx, /* int tag */
+                                150,       /* int num_entries */
+                                expected); /* struct expected_entry_staus[] */
+        }
+    }
+
+    if ( show_progress) /* 9 */
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+                   fcn_name, checkpoint++, pass);
+
+    if ( pass ) {
+
+        /* Insert the 127th entry (index = 126) into the cache. */
+        if (fill_via_insertion) {
+            insert_entry(cache_ptr,           /* H5C_t * cache_ptr */
+                         entry_type,          /* int32_t type */
+                         entry_idx++,          /* int32_t idx */
+                         TRUE,                /* hbool_t dirty */
+                         H5C__NO_FLAGS_SET);  /* unsigned int flags */
+        } else {
+            protect_entry(cache_ptr,   /* H5C_t * cache_ptr */
+                          entry_type,  /* int32_t type */
+                          entry_idx);   /* int32-t idx */
+
+            unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                            entry_type,         /* int32_t type */
+                            entry_idx++,           /* int32_t idx */
+                            TRUE,               /* int321_t dirty */
+                            H5C__NO_FLAGS_SET); /* unsigned int flags */
+        }
+
+        /* Verify the status of the entries.
+         * 
+         * Changes from last entry verification:
+         *   - entry w/ index 76 is evicted.
+         *   - entry w/ index 100 is cleaned.
+         *   - entry w/ index 126 is now in the cache and dirty.
+         */
+
+        /* entry w/ index 76 has been evicted. */
+	expected[76].in_cache  = FALSE;
+	expected[76].destroyed = TRUE;
+          
+        /* entry w/ index 100 has now been flushed and is now clean. */
+	expected[100].flushed   = TRUE;
+	expected[100].is_dirty  = FALSE;
+
+        /* entry w/ index 26 is now in the cache and dirty. */
+	expected[126].in_cache = TRUE;
+	expected[126].is_dirty = TRUE;
+	expected[126].loaded   = loaded;
+
+        /* verify the status */
+        verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
+                            126,        /* int tag */
+                            150,       /* int num_entries */
+                            expected); /* expected */
+    }
+
+    if ( show_progress) /* 10 */
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+                   fcn_name, checkpoint++, pass);
+
+    if ( pass ) {
+
+        /* Insert entries w/ indices 127 through 149 into the cache */
+        for (entry_idx = 127; entry_idx < 150; entry_idx++) {
+
+            if (fill_via_insertion) {
+                insert_entry(cache_ptr,           /* H5C_t * cache_ptr */
+                             entry_type,          /* int32_t type */
+                             entry_idx,            /* int32_t idx */
+                             TRUE,                /* hbool_t dirty */
+                             H5C__NO_FLAGS_SET);  /* unsigned int flags */
+
+            } else {
+                protect_entry(cache_ptr,   /* H5C_t * cache_ptr */
+                              entry_type,  /* int32_t type */
+                              entry_idx);   /* int32-t idx */
+
+                unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                                entry_type,         /* int32_t type */
+                                entry_idx,           /* int32_t idx */
+                                TRUE,               /* int321_t dirty */
+                                H5C__NO_FLAGS_SET); /* unsigned int flags */
+            }
+
+            /* This past inserted entry is now in the cache and dirty */
+	    expected[entry_idx].in_cache = TRUE;
+    	    expected[entry_idx].is_dirty = TRUE;
+	    expected[entry_idx].loaded   = loaded;
+
+            /* The entry with ID minus 50 will have been evicted */
+	    expected[entry_idx - 50].in_cache  = FALSE;
+	    expected[entry_idx - 50].destroyed = TRUE;
+
+            /* The entry with ID minus 26 will now be clean */
+            expected[entry_idx - 26].flushed = TRUE;
+            expected[entry_idx - 26].is_dirty = FALSE;
+
+            /* verify the status */
+            verify_entry_status(cache_ptr, /* H5C_t * cache_ptr */
+                                entry_idx, /* int tag */
+                                150,       /* int num_entries */
+                                expected); /* struct expected_entry_staus[] */
+        }
+
+    }
+
+    if ( show_progress) /* 11 */
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+                   fcn_name, checkpoint++, pass);
+
+    if ( pass ) {
+        
+        /* We're done with testing. We can take down the cache. */
+        takedown_cache(cache_ptr, FALSE, FALSE);
+        reset_entries();
+    }
+
+    if ( show_progress) /* 12 */
+         HDfprintf(stdout, "%s: check point %d -- pass %d\n", 
+                   fcn_name, checkpoint++, pass);
+
+    if ( pass ) { PASSED(); } else { H5_FAILED(); }
+
+    return;
+
+} /* check_metadata_blizzard_absence() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Run tests on the cache code contained in H5C.c
@@ -28231,7 +29788,7 @@ main(void)
     check_auto_cache_resize_epoch_markers();
     check_auto_cache_resize_input_errs();
     check_auto_cache_resize_aux_fcns();
-
+    check_metadata_blizzard_absence(TRUE);   
+    check_metadata_blizzard_absence(FALSE);  
     return(0);
-
-} /* main() */
+}

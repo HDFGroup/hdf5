@@ -202,6 +202,8 @@ Bug Fixes since HDF5-1.8.0 release
             ID correctly.  (QAK - 2008/03/11)
       - H5Dset_extent: when shrinking dimensions, some chunks were not deleted.  
             (PVN - 2009/01/8)
+      - Added code to maintain a min_clean_fraction in the metadata cache when
+            in serial mode. (MAM - 2009/01/9)
 
 
 
