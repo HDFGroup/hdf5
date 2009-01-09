@@ -73,6 +73,8 @@ New Features
       list from a dataset. NAF - 2008/11/12
     - Added H5Iis_valid() function to check if an id is valid without
       producing an error message. NAF - 2008/11/5
+    - Added code to maintain a min_clean_fraction in the metadata cache when
+      in serial mode. MAM - 2009/01/9
 
     Parallel Library
     ----------------

@@ -203,6 +203,38 @@
  *              index_size by two should yield a conservative estimate
  *              of the cache's memory footprint.
  *
+ * clean_index_size: Number of bytes of clean entries currently stored in
+ * 		the hash table.  Note that the index_size field (above)
+ *		is also the sum of the sizes of all entries in the cache.
+ *		Thus we should have the invarient that clean_index_size +
+ *		dirty_index_size == index_size.  
+ *
+ *		WARNING:
+ *
+ *		1) The clean_index_size field is not maintained by the 
+ *		   index macros, as the hash table doesn't care whether 
+ *		   the entry is clean or dirty.  Instead the field is
+ *		   maintained in the H5C__UPDATE_RP macros.
+ *
+ *		2) The value of the clean_index_size must not be mistaken
+ *		   for the current clean size of the cache.  Rather, the 
+ *		   clean size of the cache is the current value of 
+ *		   clean_index_size plus the amount of empty space (if any)
+ *                 in the cache.
+ *
+ * dirty_index_size: Number of bytes of dirty entries currently stored in
+ * 		the hash table.  Note that the index_size field (above)
+ *		is also the sum of the sizes of all entries in the cache.
+ *		Thus we should have the invarient that clean_index_size +
+ *		dirty_index_size == index_size.  
+ *
+ *		WARNING:
+ *
+ *		1) The dirty_index_size field is not maintained by the 
+ *		   index macros, as the hash table doesn't care whether 
+ *		   the entry is clean or dirty.  Instead the field is
+ *		   maintained in the H5C__UPDATE_RP macros.
+ *
  * index:	Array of pointer to H5C_cache_entry_t of size
  *		H5C__HASH_TABLE_LEN.  At present, this value is a power
  *		of two, not the usual prime number.
@@ -722,6 +754,12 @@
  * max_index_size:  Largest value attained by the index_size field in the
  *              current epoch.
  *
+ * max_clean_index_size: Largest value attained by the clean_index_size field
+ * 		in the current epoch.
+ *
+ * max_dirty_index_size: Largest value attained by the dirty_index_size field
+ * 		in the current epoch.
+ *
  * max_slist_len:  Largest value attained by the slist_len field in the
  *              current epoch.
  *
@@ -740,6 +778,23 @@
  * max_pel_size: Largest value attained by the pel_size field in the
  *              current epoch.
  *
+ * calls_to_msic: Total number of calls to H5C_make_space_in_cache
+ *
+ * total_entries_skipped_in_msic: Number of clean entries skipped while
+ *              enforcing the min_clean_fraction in H5C_make_space_in_cache().
+ *
+ * total_entries_scanned_in_msic: Number of clean entries skipped while
+ *              enforcing the min_clean_fraction in H5C_make_space_in_cache().
+ *
+ * max_entries_skipped_in_msic: Maximum number of clean entries skipped
+ *              in any one call to H5C_make_space_in_cache().
+ *
+ * max_entries_scanned_in_msic: Maximum number of entries scanned over
+ *              in any one call to H5C_make_space_in_cache().
+ *
+ * entries_scanned_to_make_space: Number of entries scanned only when looking
+ *              for entries to evict in order to make space in cache.
+
  * The remaining stats are collected only when both H5C_COLLECT_CACHE_STATS
  * and H5C_COLLECT_CACHE_ENTRY_STATS are true.
  *
@@ -830,6 +885,8 @@ struct H5C_t
 
     int32_t                     index_len;
     size_t                      index_size;
+    size_t 			clean_index_size;
+    size_t			dirty_index_size;
     H5C_cache_entry_t *		(index[H5C__HASH_TABLE_LEN]);
 
 
@@ -923,6 +980,8 @@ struct H5C_t
 
     int32_t                     max_index_len;
     size_t                      max_index_size;
+    size_t                      max_clean_index_size;
+    size_t                      max_dirty_index_size;
 
     int32_t                     max_slist_len;
     size_t                      max_slist_size;
@@ -932,6 +991,13 @@ struct H5C_t
 
     int32_t                     max_pel_len;
     size_t                      max_pel_size;
+
+    int64_t                     calls_to_msic;
+    int64_t                     total_entries_skipped_in_msic;
+    int64_t                     total_entries_scanned_in_msic;
+    int32_t                     max_entries_skipped_in_msic;
+    int32_t                     max_entries_scanned_in_msic;
+    int64_t                     entries_scanned_to_make_space;
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
 
