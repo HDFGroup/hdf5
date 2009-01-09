@@ -4095,8 +4095,6 @@ external_set_elink_cb_cb(const char *parent_file, const char *parent_group,
     hid_t fapl, void *_op_data)
 {
     set_elink_cb_t  *op_data = (set_elink_cb_t *)_op_data;
-    hid_t           driver;
-    const void      *driver_info;
 
     /* Verify file and object names are correct */
     if (HDstrcmp(parent_file, op_data->parent_file)) return FAIL;
