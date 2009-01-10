@@ -4134,9 +4134,17 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     else
         TESTING("H5Pset/get_elink_cb()")
 
+    /* Build user data for callback */
+    op_data.parent_file = filename1;
+    op_data.target_file = filename2;
+    /* Core file driver has issues when used as the member file driver for a family file */
+    op_data.base_fapl = H5Pget_driver(fapl) == H5FD_CORE ? H5P_DEFAULT : fapl;
+    op_data.fam_size = ELINK_CB_FAM_SIZE;
+    op_data.code = 0;
+
     /* Create family fapl */
     if ((fam_fapl = H5Pcopy(fapl)) < 0) TEST_ERROR
-    if (H5Pset_fapl_family(fam_fapl, ELINK_CB_FAM_SIZE, fapl) < 0) TEST_ERROR
+    if (H5Pset_fapl_family(fam_fapl, op_data.fam_size, op_data.base_fapl) < 0) TEST_ERROR
 
     /* Create parent and target files, group, and external link */
     h5_fixname(FILENAME[40], fapl, filename1, sizeof filename1);
@@ -4150,13 +4158,6 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     if (H5Fclose(file1) < 0) TEST_ERROR
     if (H5Fclose(file2) < 0) TEST_ERROR
     if (H5Gclose(group) < 0) TEST_ERROR
-
-    /* Build user data for callback */
-    op_data.parent_file = filename1;
-    op_data.target_file = filename2;
-    op_data.base_fapl = fapl;
-    op_data.fam_size = ELINK_CB_FAM_SIZE;
-    op_data.code = 0;
 
     /* Create new gapl, and set elink callback */
     if ((gapl = H5Pcreate(H5P_GROUP_ACCESS)) < 0) TEST_ERROR
