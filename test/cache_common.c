@@ -2341,7 +2341,7 @@ flush_cache(H5C_t * cache_ptr,
 {
     const char * fcn_name = "flush_cache()";
     herr_t result = 0;
-    hbool_t verbose = TRUE;
+    hbool_t verbose = FALSE;
 
     HDassert(cache_ptr);
 
@@ -3312,7 +3312,6 @@ unprotect_entry_with_size_change(H5C_t * cache_ptr,
 
 	        if ( result < 0 ) {
                     HDfprintf(stdout, "%s: H5C_unprotect() failed.\n", fcn_name);
-		    H5Eprint(H5E_DEFAULT, stdout);
 		}
 
 	        if ( entry_ptr->header.is_protected )  {
