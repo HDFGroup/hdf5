@@ -1781,6 +1781,7 @@
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5SDECODE_C'::h5sdecode_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: buf
          CHARACTER(LEN=*), INTENT(IN) :: buf
          INTEGER(HID_T), INTENT(OUT) :: obj_id  ! Object ID
        END FUNCTION h5sdecode_c
@@ -1829,6 +1830,7 @@
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5SENCODE_C'::h5sencode_c
          !DEC$ ENDIF
+         !DEC$ATTRIBUTES reference :: buf
          INTEGER(HID_T), INTENT(IN) :: obj_id
          CHARACTER(LEN=*), INTENT(OUT) :: buf
          INTEGER(SIZE_T), INTENT(INOUT) :: nalloc
