@@ -51,7 +51,7 @@ $ link fflush2,h5test_fortran.olb/lib,-
              [-.-.test]libh5test.olb/lib, - 
              [-.src]hdf5_fortran.olb/lib,-
              [-.-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$ link/debug/exec=fortranlib_test.exe -
+$ link/exec=fortranlib_test.exe -
   fortranlib_test.obj, tH5F.obj, tH5D.obj, -
   tH5R.obj, tH5S.obj, tH5T.obj, tH5VL.obj, tH5Z.obj, tH5Sselect.obj, -
   tH5P.obj, tH5A.obj, tH5I.obj, tH5G.obj, tH5E.obj,-
