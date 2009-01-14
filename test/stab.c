@@ -856,7 +856,6 @@ no_compact(hid_t fapl2)
     /* Verify that file is correct size */
     if(file_size != empty_size) TEST_ERROR
 
-
     PASSED();
     return 0;
 
@@ -1153,4 +1152,3 @@ error:
     puts("*** TESTS FAILED ***");
     return 1;
 }
-
