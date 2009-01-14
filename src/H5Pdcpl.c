@@ -48,9 +48,23 @@
 /****************/
 
 /* Define default layout information */
-#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, { .compact = {(hbool_t)FALSE, (size_t)0, NULL}}}
-#define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, { .contig = {HADDR_UNDEF, (hsize_t)0}}}
-#define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, { .chunk = {HADDR_UNDEF, (unsigned)1, {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, (uint32_t)0, NULL, NULL}}}
+#define H5D_DEF_LAYOUT_COMPACT_INIT  {(hbool_t)FALSE, (size_t)0, NULL}
+#define H5D_DEF_LAYOUT_CONTIG_INIT   {HADDR_UNDEF, (hsize_t)0}
+#define H5D_DEF_LAYOUT_CHUNK_INIT    {HADDR_UNDEF, (unsigned)1, {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, (uint32_t)0, NULL, NULL}
+#ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
+#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, { .compact = H5D_DEF_LAYOUT_COMPACT_INIT }}
+#define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, { .contig = H5D_DEF_LAYOUT_CONTIG_INIT }}
+#define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, { .chunk = H5D_DEF_LAYOUT_CHUNK_INIT }}
+#else /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
+/* Note that the compact & chunked layout initialization values are using the
+ *      contiguous layout initialization in the union, because the contiguous
+ *      layout is first in the union.  These values are overridden in the
+ *      H5P_init_def_layout() routine. -QAK
+ */
+#define H5D_DEF_LAYOUT_COMPACT  {H5D_COMPACT, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CONTIG_INIT}}
+#define H5D_DEF_LAYOUT_CONTIG   {H5D_CONTIGUOUS, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CONTIG_INIT}}
+#define H5D_DEF_LAYOUT_CHUNK    {H5D_CHUNKED, H5O_LAYOUT_VERSION_3, NULL, {H5D_DEF_LAYOUT_CONTIG_INIT}}
+#endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
 /* ========  Dataset creation properties ======== */
 /* Definitions for storage layout property */
@@ -91,6 +105,9 @@
 
 /* General routines */
 static herr_t H5P_set_layout(H5P_genplist_t *plist, const H5O_layout_t *layout);
+#ifndef H5_HAVE_C99_DESIGNATED_INITIALIZER
+static herr_t H5P_init_def_layout(void);
+#endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
 /* Property class callbacks */
 static herr_t H5P_dcrt_reg_prop(H5P_genclass_t *pclass);
@@ -131,9 +148,16 @@ const H5P_libclass_t H5P_CLS_DCRT[1] = {{
 H5FL_BLK_EXTERN(type_conv);
 
 /* Defaults for each type of layout */
+#ifdef H5_HAVE_C99_DESIGNATED_INITIALIZER
 static const H5O_layout_t H5D_def_layout_compact_g = H5D_DEF_LAYOUT_COMPACT;
 static const H5O_layout_t H5D_def_layout_contig_g = H5D_DEF_LAYOUT_CONTIG;
 static const H5O_layout_t H5D_def_layout_chunk_g = H5D_DEF_LAYOUT_CHUNK;
+#else /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
+static H5O_layout_t H5D_def_layout_compact_g = H5D_DEF_LAYOUT_COMPACT;
+static H5O_layout_t H5D_def_layout_contig_g = H5D_DEF_LAYOUT_CONTIG;
+static H5O_layout_t H5D_def_layout_chunk_g = H5D_DEF_LAYOUT_CHUNK;
+static hbool_t H5P_dcrt_def_layout_init_g = FALSE;
+#endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
 
 
@@ -377,7 +401,6 @@ H5P_dcrt_layout_cmp(const void *_layout1, const void *_layout2, size_t UNUSED si
 {
     const H5O_layout_t *layout1 = (const H5O_layout_t *)_layout1,     /* Create local aliases for values */
         *layout2 = (const H5O_layout_t *)_layout2;
-    int cmp_value;              /* Value from comparison */
     herr_t ret_value = 0;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_dcrt_layout_cmp)
@@ -661,10 +684,8 @@ done:
  *
  * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:        Quincey Koziol
- *            Tuesday, November 23, 2004
- *
- * Modifications:
+ * Programmer:	Quincey Koziol
+ *              Tuesday, November 23, 2004
  *
  *-------------------------------------------------------------------------
  */
@@ -719,6 +740,40 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_set_layout() */
 
+#ifndef H5_HAVE_C99_DESIGNATED_INITIALIZER
+
+/*-------------------------------------------------------------------------
+ * Function:  H5P_init_def_layout
+ *
+ * Purpose:   Set the default layout information for the various types of
+ *              dataset layouts
+ *
+ * Return:    Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, January 13, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5P_init_def_layout(void)
+{
+    const H5O_layout_compact_t def_compact = H5D_DEF_LAYOUT_COMPACT_INIT;
+    const H5O_layout_chunk_t def_chunk = H5D_DEF_LAYOUT_CHUNK_INIT;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5P_init_def_layout)
+
+    /* Initialize the default layout info for non-contigous layouts */
+    H5D_def_layout_compact_g.u.compact = def_compact;
+    H5D_def_layout_chunk_g.u.chunk = def_chunk;
+
+    /* Note that we've initialized the default values */
+    H5P_dcrt_def_layout_init_g = TRUE;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5P_init_def_layout() */
+#endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
+
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_layout
@@ -756,6 +811,15 @@ H5Pset_layout(hid_t plist_id, H5D_layout_t layout_type)
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_CREATE)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+#ifndef H5_HAVE_C99_DESIGNATED_INITIALIZER
+    /* If the compiler doesn't support C99 designated initializers, check if
+     *  the default layout structs have been initialized yet or not.  *ick* -QAK
+     */
+    if(!H5P_dcrt_def_layout_init_g)
+        if(H5P_init_def_layout() < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't initialize default layout info")
+#endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
     /* Get pointer to correct default layout */
     switch(layout_type) {
@@ -874,6 +938,15 @@ H5Pset_chunk(hid_t plist_id, int ndims, const hsize_t dim[/*ndims*/])
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "chunk dimensionality is too large")
     if(!dim)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no chunk dimensions specified")
+
+#ifndef H5_HAVE_C99_DESIGNATED_INITIALIZER
+    /* If the compiler doesn't support C99 designated initializers, check if
+     *  the default layout structs have been initialized yet or not.  *ick* -QAK
+     */
+    if(!H5P_dcrt_def_layout_init_g)
+        if(H5P_init_def_layout() < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "can't initialize default layout info")
+#endif /* H5_HAVE_C99_DESIGNATED_INITIALIZER */
 
     /* Verify & initialize property's chunk dims */
     HDmemcpy(&chunk_layout, &H5D_def_layout_chunk_g, sizeof(H5D_def_layout_chunk_g));

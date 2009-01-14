@@ -324,7 +324,7 @@ H5O_link_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const void 
     /* Store the link name's length */
     switch(link_flags & H5O_LINK_NAME_SIZE) {
         case 0:     /* 1 byte size */
-            *p++ = len;
+            *p++ = (uint8_t)len;
             break;
 
         case 1:     /* 2 byte size */
