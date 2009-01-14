@@ -597,9 +597,12 @@ HDremove_all(const char *fname)
  *
  * Programmer:	Vailin Choi
  *		April 2, 2008
- *	Modifications: 2nd Oct, 2008; Vailin Choi
+ * Modifications: 2nd Oct, 2008; Vailin Choi
  *		Remove compiler warning for "if condition"
- *
+ * 
+ *              Raymond Lu
+ *              14 Jan. 2009
+ *              Add support for OpenVMS pathname  
  *-------------------------------------------------------------------------
  */
 #define MAX_PATH_LEN     1024
@@ -620,6 +623,8 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
     /*
      * Unix: name[0] is a "/"
      * Windows: name[0-2] is "<drive letter>:\" or "<drive-letter>:/"
+     * OpenVMS: <disk name>$<partition>:[path]<file name>
+     *     i.g. SYS$SYSUSERS:[LU.HDF5.SRC]H5system.c
      */
     if (CHECK_ABSOLUTE(name)) {
         if ((full_path=H5MM_strdup(name)) == NULL)
@@ -634,6 +639,7 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
 	 * Windows: name[0-1] is "<drive-letter>:"
 	 * 	Get current working directory on the drive specified in NAME
 	 * Unix: does not apply
+         * OpenVMS: does not apply
 	 */
         if (CHECK_ABS_DRIVE(name)) {
             drive = name[0] - 'A' + 1;
@@ -643,12 +649,13 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
 	 * Windows: name[0] is a '/' or '\'
 	 *	Get current drive
 	 * Unix: does not apply
+         * OpenVMS: does not apply
 	 */
         } else if (CHECK_ABS_PATH(name) && ((drive=HDgetdrive()) != 0)) {
             sprintf(cwdpath, "%c:%c", (drive+'A'-1), name[0]);
             retcwd = cwdpath;
             HDstrcpy(new_name, &name[1]);
-        } else /* totally relative for both Unix and Windows: get current working directory  */
+        } else /* totally relative for Unix, Windows, and OpenVMS: get current working directory  */
             retcwd = HDgetcwd(cwdpath, MAX_PATH_LEN);
 
         if (retcwd != NULL) {
@@ -659,9 +666,24 @@ H5_build_extpath(const char *name, char **extpath/*out*/)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
             HDstrcpy(full_path, cwdpath);
+#ifdef H5_VMS
+            /* If the file name contains relative path, cut off the beginning bracket.  Also cut off the
+             * ending bracket of CWDPATH to combine the full path name. i.g.
+             *     cwdpath = SYS$SYSUSERS:[LU.HDF5.TEST]
+             *     new_name = [.tmp]extlinks.h5
+             *     full_path = SYS$SYSUSERS:[LU.HDF5.TEST.tmp]extlinks.h5
+             */
+            if(new_name[0] == '[') {
+                char *tmp = new_name;
+                full_path[cwdlen-1] = '\0';
+                HDstrcat(full_path, ++tmp);
+            } else
+                HDstrcat(full_path, new_name);
+#else
             if (!CHECK_DELIMITER(cwdpath[cwdlen-1]))
                 HDstrcat(full_path, DIR_SEPS);
             HDstrcat(full_path, new_name);
+#endif
         }
     }
 

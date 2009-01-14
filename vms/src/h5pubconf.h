@@ -349,6 +349,9 @@
 /* Define to 1 if you have the `waitpid' function. */
 /*#undefine H5_HAVE_WAITPID */
 
+/* Define if your system has OpenVMS path name. This macro is added by hand. */
+#define H5_HAVE_VMS_PATH 1
+
 /* Define to 1 if you have the <winsock.h> header file. */
 /* #undef H5_HAVE_WINSOCK_H */
 

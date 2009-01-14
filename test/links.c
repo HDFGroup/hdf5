@@ -35,6 +35,7 @@
 /* File for external link test.  Created with gen_udlinks.c */
 #define LINKED_FILE  "be_extlink2.h5"
 
+#ifdef H5_VMS
 const char *FILENAME[] = {
     "links0",
     "links1",
@@ -48,10 +49,56 @@ const char *FILENAME[] = {
     "links6",  /* 9 */
     "links7",  /* 10 */
     "links8",  /* 11 */
-    "extlinks0",  	/* 12: main files */
-    "tmp/extlinks0",  	/* 13: */
-    "extlinks1",  	/* 14: target files */
-    "tmp/extlinks1",  	/* 15: */
+    "extlinks0",	/* 12: main files */
+    "[.tmp]extlinks0",	/* 13: */
+    "extlinks1",	/* 14: target files */
+    "[.tmp]extlinks1",	/* 15: */
+    "extlinks2",	/* 16: */
+    "[.tmp]extlinks2",	/* 17: */
+    "extlinks3",	/* 18: */
+    "[.tmp]extlinks3",	/* 19: */
+    "extlinks4",	/* 20: */
+    "[.tmp]extlinks4",	/* 21: */
+    "extlinks5",	/* 22: */
+    "[.tmp]extlinks6",	/* 23: */
+    "extlinks7",	/* 24: */
+    "[.tmp]extlinks7",	/* 25: */
+    "[.tmp]extlinks8",	/* 26: */
+    "extlinks9",	/* 27: */
+    "[.tmp]extlinks9",	/* 28: */
+    "extlinks10",	/* 29: */ /* TESTS for windows */
+    "[.tmp]extlinks10",	/* 30: */
+    "[.tmp]extlinks11",	/* 31: */
+    "[.tmp]extlinks12",	/* 32: */
+    "extlinks13",	/* 33: */
+    "[.tmp]extlinks13",	/* 34: */
+    "[.tmp]extlinks14",	/* 35: */
+    "[.tmp]extlinks15",	/* 36: */
+    "extlinks16A",	/* 37: */ /* TESTS for H5P_set_elink_fapl */
+    "extlinks16B",	/* 38: */
+    "extlinks17",	/* 39: */
+    NULL
+};
+
+#define TMPDIR          "[.tmp]"
+#else
+const char *FILENAME[] = {
+    "links0",
+    "links1",
+    "links2",
+    "links3",
+    "links4a", /* 4 */
+    "links4b", /* 5 */
+    "links4c", /* 6 */
+    "links4d", /* 7 */
+    "links5",  /* 8 */
+    "links6",  /* 9 */
+    "links7",  /* 10 */
+    "links8",  /* 11 */
+    "extlinks0",	/* 12: main files */
+    "tmp/extlinks0",	/* 13: */
+    "extlinks1",	/* 14: target files */
+    "tmp/extlinks1",	/* 15: */
     "extlinks2",	/* 16: */
     "tmp/extlinks2",	/* 17: */
     "extlinks3",	/* 18: */
@@ -83,7 +130,9 @@ const char *FILENAME[] = {
     NULL
 };
 
-#define TMPDIR		"tmp"
+#define TMPDIR          "tmp"
+#endif
+
 #define FAMILY_SIZE	1024
 #define CORE_INCREMENT  1024
 #define NUM400		400
@@ -2825,6 +2874,37 @@ external_link_prefix(hid_t fapl, hbool_t new_format)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    fix_ext_filename
+ *
+ * Purpose:     Internal function to append path to file name.  It handles
+ *              path name of Unix, Windows, and OpenVMS.
+ *
+ * Return:      void
+ *
+ * Programmer:  Raymond Lu
+ *              14 Jan. 2009
+ *-------------------------------------------------------------------------
+ */
+static void 
+fix_ext_filename(char *path_name, char *cwd, const char *file_name)
+{
+    HDstrcpy(path_name, cwd);
+
+#ifdef H5_VMS
+    if(file_name[0] == '[') {
+        char *tmp = file_name;
+        path_name[strlen(cwd)-1] = '\0';
+        HDstrcat(path_name, ++tmp);
+    } else
+        HDstrcat(path_name, file_name);
+#else
+    HDstrcat(path_name, "/");
+    HDstrcat(path_name, file_name);
+#endif
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:    external_link_abs_mainpath: test 3
  *
  * Purpose:     1. target link: "extlinks3"
@@ -2871,10 +2951,9 @@ external_link_abs_mainpath(hid_t fapl, hbool_t new_format)
      * set up name for main file:
      *	Linux: "/CWD/tmp/extlinks0"
      *  Window: "<cur drive>:/CWD/tmp/extlinks0"
+     *  OpenVMS: "<cur disk>$<partition>:[CWD.tmp]extlinks0"
      */
-    HDstrcpy(tmpname, cwdpath);
-    HDstrcat(tmpname, "/");
-    HDstrcat(tmpname, FILENAME[13]);
+    fix_ext_filename(tmpname, cwdpath, FILENAME[13]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
 
     /* Create the target file */
@@ -3052,9 +3131,7 @@ external_link_cwd(hid_t fapl, hbool_t new_format)
      *	 Linux: "/CWD/tmp/extlinks0"
      *   Windows: "<cur drive>:/CWD/tmp/extlinks0"
      */
-    HDstrcpy(tmpname, cwdpath);
-    HDstrcat(tmpname, "/");
-    HDstrcat(tmpname, FILENAME[13]);
+    fix_ext_filename(tmpname, cwdpath, FILENAME[13]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
 
     /* Create the target file */
@@ -3147,9 +3224,7 @@ external_link_abstar(hid_t fapl, hbool_t new_format)
      *   Linux: "/CWD/tmp/extlinks6"
      *	 Windows: "<cur drive>:/CWD/tmp/extlinks6"
      */
-    HDstrcpy(tmpname, cwdpath);
-    HDstrcat(tmpname, "/");
-    HDstrcat(tmpname, FILENAME[23]);
+    fix_ext_filename(tmpname, cwdpath, FILENAME[23]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
     /* set up name for target file: "tmp/extlinks6" */
@@ -3246,9 +3321,7 @@ external_link_abstar_cur(hid_t fapl, hbool_t new_format)
       *   Linux: "/CWD/tmp/extlinks7"
       *	  Windows: "<cur drive>:/CWD/tmp/extlinks7"
       */
-    HDstrcpy(tmpname, cwdpath);
-    HDstrcat(tmpname, "/");
-    HDstrcat(tmpname, FILENAME[25]);
+    fix_ext_filename(tmpname, cwdpath, FILENAME[25]);
     h5_fixname(tmpname, fapl, filename2, sizeof filename2);
 
     /* Create the target file */
@@ -3539,9 +3612,7 @@ external_set_elink_fapl1(hid_t fapl, hbool_t new_format)
      *	 Linux: "/CWD/tmp/extlinks0"
      *   Windows: "<cur drive>:/CWD/tmp/extlinks0"
      */
-    HDstrcpy(tmpname, cwdpath);
-    HDstrcat(tmpname, "/");
-    HDstrcat(tmpname, FILENAME[13]);
+    fix_ext_filename(tmpname, cwdpath, FILENAME[13]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
 
     /* create "family" fapl */
@@ -3741,9 +3812,7 @@ external_set_elink_fapl2(hid_t fapl, hbool_t new_format)
      *	 Linux: "/CWD/tmp/extlinks0"
      *   Windows: "<cur drive>:/CWD/tmp/extlinks0"
      */
-    HDstrcpy(tmpname, cwdpath);
-    HDstrcat(tmpname, "/");
-    HDstrcat(tmpname, FILENAME[13]);
+    fix_ext_filename(tmpname, cwdpath, FILENAME[13]);
     h5_fixname(tmpname, fapl, filename1, sizeof filename1);
 
     /* create fapl for the target file to be a "core" file */
@@ -12645,6 +12714,7 @@ main(void)
             nerrors += ud_hard_links(fapl2) < 0 ? 1 : 0;     /* requires new format groups */
             nerrors += ud_link_reregister(fapl2) < 0 ? 1 : 0;        /* requires new format groups */
         } /* end if */
+
         nerrors += ud_callbacks(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += ud_link_errors(my_fapl, new_format) < 0 ? 1 : 0;
         nerrors += lapl_udata(my_fapl, new_format) < 0 ? 1 : 0;
