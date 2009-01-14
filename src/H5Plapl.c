@@ -677,6 +677,7 @@ H5Pset_elink_acc_flags(hid_t lapl_id, unsigned flags)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Pset_elink_acc_flags, FAIL)
+    H5TRACE2("e", "iIu", lapl_id, flags);
 
     /* Check that flags are valid */
     if((flags != H5F_ACC_RDWR) && (flags != H5F_ACC_RDONLY) && (flags != H5F_ACC_DEFAULT))
@@ -715,6 +716,7 @@ H5Pget_elink_acc_flags(hid_t lapl_id, unsigned *flags)
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(H5Pget_elink_acc_flags, FAIL)
+    H5TRACE2("e", "i*Iu", lapl_id, flags);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
@@ -752,6 +754,7 @@ H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data)
     herr_t          ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Pset_elink_cb, FAIL)
+    H5TRACE3("e", "ix*x", lapl_id, func, op_data);
 
     /* Check if the callback function is NULL and the user data is non-NULL.
      * This is almost certainly an error as the user data will not be used. */
@@ -796,6 +799,7 @@ H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func, void **op_data)
     herr_t          ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_API(H5Pget_elink_cb, FAIL)
+    H5TRACE3("e", "i*x**x", lapl_id, func, op_data);
 
     /* Get the plist structure */
     if(NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))

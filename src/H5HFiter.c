@@ -183,7 +183,8 @@ HDfprintf(stderr, "%s: offset = %Hu\n", FUNC, offset);
         curr_offset = offset - hdr->man_dtable.row_block_off[row];
 
         /* Compute column */
-        col = curr_offset / hdr->man_dtable.row_block_size[row];
+        H5_CHECK_OVERFLOW((curr_offset / hdr->man_dtable.row_block_size[row]), hsize_t, unsigned);
+        col = (unsigned)(curr_offset / hdr->man_dtable.row_block_size[row]);
 #ifdef QAK
 HDfprintf(stderr, "%s: row = %u, col = %u\n", FUNC, row, col);
 HDfprintf(stderr, "%s: offset = %Hu\n", FUNC, offset);
