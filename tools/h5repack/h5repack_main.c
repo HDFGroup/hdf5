@@ -169,7 +169,7 @@ static void usage(const char *prog)
  
  printf("\n");
 
- printf("  M - is an integer greater than 1, size of dataset in bytes \n");
+ printf("  M - is an integer greater than 1, size of dataset in bytes (default is 1024) \n");
  printf("  E - is a filename.\n");
  printf("  U - is a filename.\n");
  printf("  T - is an integer\n");
