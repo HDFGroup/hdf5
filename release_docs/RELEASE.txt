@@ -51,12 +51,18 @@ New Features
 
     Library:
     --------
+    - Added H5Pset_elink_cb and H5Pget_elink_cb functions to support a
+      user-defined callback function for external link traversal.
+      (NAF - 2009/01/08)
+    - Added H5Pset_elink_acc_flags and H5Pget_elink_acc_flags functions to
+      allow the user to specify the file access flags used to open the target
+      file of an external link. (NAF - 2009/01/08)
     - Added H5Pset_chunk_cache() and H5Pget_chunk_cache() functions to allow
-        individual rdcc configuration for each dataset.  Added
-        H5Dget_access_plist() function to retrieve a dataset access property
-        list form a dataset. (NAF - 2008/11/12)
+      individual rdcc configuration for each dataset.  Added
+      H5Dget_access_plist() function to retrieve a dataset access property
+      list from a dataset. (NAF - 2008/11/12)
     - Added H5Iis_valid() function to check if an id is valid without producing
-        an error message. (NAF - 2008/11/5)
+      an error message. (NAF - 2008/11/5)
     - Added two new public routines: H5Pget_elink_fapl() and
       H5Pset_elink_fapl(). (see bug #1247) (VC - 2008/10/13)
     - Improved free space tracking in file to be faster. (QAK - 2008/10/06)
@@ -111,7 +117,11 @@ New Features
             Error return code was changed to 2 from -1. (PVN - 2008/10/30)
      - h5import: TEXTFPE (scientific format) was deprecated. Use TEXTFP 
             instead (PVN - 2008/10/30)
-     - h5repack: Define a default chunk whose size is manageable. (PVN - 2008/11/21)
+     - h5repack: When user doesn't specify a chunk size, h5repack now defines a default 
+            chunk size as the same size of the size of the hyperslab used to read the chunks. 
+            The size of the hyperslabs are defined as the size of each dimension or a 
+            predefined constant, whatever is smaller. This assures that the chunk 
+            read fits in the chunk cache. (PVN - 2008/11/21)
 
 
 
@@ -190,6 +200,11 @@ Bug Fixes since HDF5-1.8.0 release
             (QAK - 2008/03/13)
       - Fixed bug in H5Aget_num_attrs() routine to handle invalid location
             ID correctly.  (QAK - 2008/03/11)
+      - H5Dset_extent: when shrinking dimensions, some chunks were not deleted.  
+            (PVN - 2009/01/8)
+      - Added code to maintain a min_clean_fraction in the metadata cache when
+            in serial mode. (MAM - 2009/01/9)
+
 
 
     Configuration

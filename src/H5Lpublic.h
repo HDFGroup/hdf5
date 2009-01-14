@@ -29,7 +29,6 @@
 /* Public headers needed by this file */
 #include "H5public.h"		/* Generic Functions			*/
 #include "H5Ipublic.h"		/* IDs			  		*/
-#include "H5Ppublic.h"		/* Property lists                       */
 #include "H5Tpublic.h"		/* Datatypes				*/
 
 /*****************/
@@ -129,6 +128,12 @@ typedef struct {
 
 /* Prototype for H5Literate/H5Literate_by_name() operator */
 typedef herr_t (*H5L_iterate_t)(hid_t group, const char *name, const H5L_info_t *info,
+    void *op_data);
+
+/* Callback for external link traversal */
+typedef herr_t (*H5L_elink_traverse_t)(const char *parent_file_name,
+    const char *parent_group_name, const char *child_file_name,
+    const char *child_object_name, unsigned *acc_flags, hid_t fapl_id,
     void *op_data);
 
 

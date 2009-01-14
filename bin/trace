@@ -106,6 +106,7 @@ $Source = "";
 	       "H5G_info_t"                 => "x",
 	       "H5I_free_t"                 => "x",
                "H5L_class_t"                => "x",
+               "H5L_elink_traverse_t"       => "x",
                "H5L_iterate_t"              => "x",
                "H5MM_allocate_t"            => "x",
                "H5MM_free_t"                => "x",

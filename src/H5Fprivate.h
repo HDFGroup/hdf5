@@ -259,6 +259,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_GC_REF(F)           ((F)->shared->gc_ref)
 #define H5F_USE_LATEST_FORMAT(F) ((F)->shared->latest_format)
 #define H5F_EXTPATH(F)          ((F)->extpath)
+#define H5F_NAME(F)             ((F)->name)
 #define H5F_GET_FC_DEGREE(F)    ((F)->shared->fc_degree)
 #define H5F_STORE_MSG_CRT_IDX(F)    ((F)->shared->store_msg_crt_idx)
 #define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags & (FL))
@@ -280,6 +281,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_GC_REF(F)           (H5F_gc_ref(F))
 #define H5F_USE_LATEST_FORMAT(F) (H5F_use_latest_format(F))
 #define H5F_EXTPATH(F)          (H5F_get_extpath(F))
+#define H5F_NAME(F)             (H5F_get_name(F))
 #define H5F_GET_FC_DEGREE(F)    (H5F_get_fc_degree(F))
 #define H5F_STORE_MSG_CRT_IDX(F) (H5F_store_msg_crt_idx(F))
 #define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
@@ -466,6 +468,7 @@ H5_DLL unsigned H5F_decr_nopen_objs(H5F_t *f);
 H5_DLL unsigned H5F_get_intent(const H5F_t *f);
 H5_DLL hid_t H5F_get_access_plist(H5F_t *f, hbool_t app_ref);
 H5_DLL char *H5F_get_extpath(const H5F_t *f);
+H5_DLL char *H5F_get_name(const H5F_t *f);
 H5_DLL hid_t H5F_get_id(H5F_t *file, hbool_t app_ref);
 H5_DLL size_t H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref);
 H5_DLL size_t H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *obj_id_list, hbool_t app_ref);

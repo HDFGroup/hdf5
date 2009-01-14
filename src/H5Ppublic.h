@@ -29,6 +29,7 @@
 #include "H5Fpublic.h"
 #include "H5FDpublic.h"
 #include "H5Ipublic.h"
+#include "H5Lpublic.h"
 #include "H5MMpublic.h"
 #include "H5Tpublic.h"
 #include "H5Zpublic.h"
@@ -45,9 +46,6 @@
 #else   /* _H5private_H */
 #define H5OPEN
 #endif  /* _H5private_H */
-
-/* Default value for all property list classes */
-#define H5P_DEFAULT     0
 
 /*
  * The library's property list classes
@@ -384,6 +382,10 @@ H5_DLL herr_t H5Pset_elink_prefix(hid_t plist_id, const char *prefix);
 H5_DLL ssize_t H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size);
 H5_DLL hid_t H5Pget_elink_fapl(hid_t lapl_id);
 H5_DLL herr_t H5Pset_elink_fapl(hid_t lapl_id, hid_t fapl_id);
+H5_DLL herr_t H5Pset_elink_acc_flags(hid_t lapl_id, unsigned flags);
+H5_DLL herr_t H5Pget_elink_acc_flags(hid_t lapl_id, unsigned *flags);
+H5_DLL herr_t H5Pset_elink_cb(hid_t lapl_id, H5L_elink_traverse_t func, void *op_data);
+H5_DLL herr_t H5Pget_elink_cb(hid_t lapl_id, H5L_elink_traverse_t *func, void **op_data);
 
 /* Object copy property list (OCPYPL) routines */
 H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned crt_intmd);

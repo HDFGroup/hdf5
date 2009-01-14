@@ -584,6 +584,14 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 	    ((cache_ptr)->size_increases[(entry_ptr)->type->id])++;            \
             if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )       \
                 (cache_ptr)->max_index_size = (cache_ptr)->index_size;         \
+            if ( (cache_ptr)->clean_index_size >                               \
+			    (cache_ptr)->max_clean_index_size )                \
+                (cache_ptr)->max_clean_index_size =                            \
+			    (cache_ptr)->clean_index_size;                     \
+            if ( (cache_ptr)->dirty_index_size >                               \
+			    (cache_ptr)->max_dirty_index_size )                \
+                (cache_ptr)->max_dirty_index_size =                            \
+		            (cache_ptr)->dirty_index_size;                     \
             if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )       \
                 (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;         \
             if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )             \
@@ -680,6 +688,14 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 	    (cache_ptr)->max_index_len = (cache_ptr)->index_len;         \
         if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )     \
 	    (cache_ptr)->max_index_size = (cache_ptr)->index_size;       \
+        if ( (cache_ptr)->clean_index_size >                             \
+		    (cache_ptr)->max_clean_index_size )                  \
+            (cache_ptr)->max_clean_index_size =                          \
+		    (cache_ptr)->clean_index_size;                       \
+        if ( (cache_ptr)->dirty_index_size >                             \
+		    (cache_ptr)->max_dirty_index_size )                  \
+            (cache_ptr)->max_dirty_index_size =                          \
+	            (cache_ptr)->dirty_index_size;                       \
         if ( (cache_ptr)->slist_len > (cache_ptr)->max_slist_len )       \
 	    (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;         \
         if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )     \
@@ -709,6 +725,14 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
             (cache_ptr)->max_index_len = (cache_ptr)->index_len;             \
         if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )         \
             (cache_ptr)->max_index_size = (cache_ptr)->index_size;           \
+        if ( (cache_ptr)->clean_index_size >                                 \
+		    (cache_ptr)->max_clean_index_size )                      \
+            (cache_ptr)->max_clean_index_size =                              \
+		    (cache_ptr)->clean_index_size;                           \
+        if ( (cache_ptr)->dirty_index_size >                                 \
+		    (cache_ptr)->max_dirty_index_size )                      \
+            (cache_ptr)->max_dirty_index_size =                              \
+	            (cache_ptr)->dirty_index_size;                           \
         if ( (cache_ptr)->pl_len > (cache_ptr)->max_pl_len )                 \
             (cache_ptr)->max_pl_len = (cache_ptr)->pl_len;                   \
         if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )               \
@@ -761,6 +785,14 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 	    (cache_ptr)->max_index_len = (cache_ptr)->index_len;         \
         if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )     \
 	    (cache_ptr)->max_index_size = (cache_ptr)->index_size;       \
+        if ( (cache_ptr)->clean_index_size >                             \
+		    (cache_ptr)->max_clean_index_size )                  \
+            (cache_ptr)->max_clean_index_size =                          \
+		    (cache_ptr)->clean_index_size;                       \
+        if ( (cache_ptr)->dirty_index_size >                             \
+		    (cache_ptr)->max_dirty_index_size )                  \
+            (cache_ptr)->max_dirty_index_size =                          \
+	            (cache_ptr)->dirty_index_size;                       \
         if ( (cache_ptr)->slist_len > (cache_ptr)->max_slist_len )       \
 	    (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;         \
         if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )     \
@@ -784,6 +816,14 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
         if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )           \
             (cache_ptr)->max_index_len = (cache_ptr)->index_len;             \
         if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )         \
+        if ( (cache_ptr)->clean_index_size >                                 \
+		    (cache_ptr)->max_clean_index_size )                      \
+            (cache_ptr)->max_clean_index_size =                              \
+		    (cache_ptr)->clean_index_size;                           \
+        if ( (cache_ptr)->dirty_index_size >                                 \
+		    (cache_ptr)->max_dirty_index_size )                      \
+            (cache_ptr)->max_dirty_index_size =                              \
+	            (cache_ptr)->dirty_index_size;                           \
             (cache_ptr)->max_index_size = (cache_ptr)->index_size;           \
         if ( (cache_ptr)->pl_len > (cache_ptr)->max_pl_len )                 \
             (cache_ptr)->max_pl_len = (cache_ptr)->pl_len;                   \
@@ -830,6 +870,14 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
  * When modifying these macros, remember to modify the similar macros
  * in tst/cache.c
  *
+ * Changes:
+ *
+ *   - Updated existing index macros and sanity check macros to maintain
+ *     the clean_index_size and dirty_index_size fields of H5C_t.  Also
+ *     added macros to allow us to track entry cleans and dirties.
+ *
+ *     						JRM -- 11/5/08
+ *
  ***********************************************************************/
 
 /* H5C__HASH_TABLE_LEN is defined in H5Cpkg.h.  It mut be a power of two. */
@@ -849,7 +897,11 @@ if ( ( (cache_ptr) == NULL ) ||                               \
      ( (entry_ptr)->ht_prev != NULL ) ||                      \
      ( (entry_ptr)->size <= 0 ) ||                            \
      ( (k = H5C__HASH_FCN((entry_ptr)->addr)) < 0 ) ||        \
-     ( k >= H5C__HASH_TABLE_LEN ) ) {                         \
+     ( k >= H5C__HASH_TABLE_LEN ) ||                          \
+     ( (cache_ptr)->index_size !=                             \
+       ((cache_ptr)->clean_index_size +                       \
+	(cache_ptr)->dirty_index_size) ) ) {                  \
+    HDassert(0); /* JRM */                                                         \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,              \
                "Pre HT insert SC failed")                     \
 }
@@ -871,13 +923,19 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
        ( (entry_ptr)->ht_prev == NULL ) ) ||                            \
      ( ( ((cache_ptr)->index)[(H5C__HASH_FCN((entry_ptr)->addr))] ==    \
          (entry_ptr) ) &&                                               \
-       ( (entry_ptr)->ht_prev != NULL ) ) ) {                           \
+       ( (entry_ptr)->ht_prev != NULL ) ) ||                            \
+     ( (cache_ptr)->index_size !=                                       \
+       ((cache_ptr)->clean_index_size +                                 \
+	(cache_ptr)->dirty_index_size) ) ) {                            \
+    HDassert(0); /* JRM */ \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Pre HT remove SC failed") \
 }
 
 #define H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)                    \
 if ( ( (cache_ptr) == NULL ) ||                                             \
      ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                          \
+     ( (cache_ptr)->index_size !=                                           \
+       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ) || \
      ( ! H5F_addr_defined(Addr) ) ||                                        \
      ( H5C__HASH_FCN(Addr) < 0 ) ||                                         \
      ( H5C__HASH_FCN(Addr) >= H5C__HASH_TABLE_LEN ) ) {                     \
@@ -890,6 +948,8 @@ if ( ( (cache_ptr) == NULL ) ||                                             \
      ( (cache_ptr)->index_len < 1 ) ||                                      \
      ( (entry_ptr) == NULL ) ||                                             \
      ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                     \
+     ( (cache_ptr)->index_size !=                                           \
+       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ) || \
      ( H5F_addr_ne((entry_ptr)->addr, (Addr)) ) ||                          \
      ( (entry_ptr)->size <= 0 ) ||                                          \
      ( ((cache_ptr)->index)[k] == NULL ) ||                                 \
@@ -913,7 +973,8 @@ if ( ( (cache_ptr) == NULL ) ||                                        \
                 "Post HT shift to front SC failed")                    \
 }
 
-#define H5C__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size) \
+#define H5C__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size, \
+		                         entry_ptr, was_clean)          \
 if ( ( (cache_ptr) == NULL ) ||                                         \
      ( (cache_ptr)->index_len <= 0 ) ||                                 \
      ( (cache_ptr)->index_size <= 0 ) ||                                \
@@ -921,21 +982,77 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
      ( (old_size) > (cache_ptr)->index_size ) ||                        \
      ( (new_size) <= 0 ) ||                                             \
      ( ( (cache_ptr)->index_len == 1 ) &&                               \
-       ( (cache_ptr)->index_size != (old_size) ) ) ) {                  \
+       ( (cache_ptr)->index_size != (old_size) ) ) ||                   \
+     ( (entry_ptr) == NULL ) ) {                                        \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                            \
                 "Pre HT entry size change SC failed")                   \
+}                                                                       \
+HDassert( (cache_ptr)->index_size ==                                    \
+	  ((cache_ptr)->clean_index_size +                              \
+           (cache_ptr)->dirty_index_size) );                            \
+HDassert( (entry_ptr) != NULL );                                        \
+HDassert( ( ( was_clean ) &&                                            \
+	    ( (cache_ptr)->clean_index_size >= (old_size) ) ) ||        \
+	  ( ( ! (was_clean) ) &&                                        \
+	    ( (cache_ptr)->dirty_index_size >= (old_size) ) ) );
+
+#define H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size,  \
+		                          entry_ptr)                      \
+if ( ( (cache_ptr) == NULL ) ||                                           \
+     ( (cache_ptr)->index_len <= 0 ) ||                                   \
+     ( (cache_ptr)->index_size <= 0 ) ||                                  \
+     ( (new_size) > (cache_ptr)->index_size ) ||                          \
+     ( ( (cache_ptr)->index_len == 1 ) &&                                 \
+       ( (cache_ptr)->index_size != (new_size) ) ) ) {                    \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                              \
+                "Post HT entry size change SC failed")                    \
+}                                                                         \
+HDassert( (cache_ptr)->index_size ==                                      \
+	  ((cache_ptr)->clean_index_size +                                \
+           (cache_ptr)->dirty_index_size) );                              \
+HDassert( ( ( (entry_ptr)->is_dirty ) &&                                  \
+	    ( (cache_ptr)->dirty_index_size >= (new_size) ) ) ||          \
+	  ( ( ! ((entry_ptr)->is_dirty)  ) &&                             \
+	    ( (cache_ptr)->clean_index_size >= (new_size) ) ) );
+
+#define H5C__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr)       \
+{                                                                         \
+    HDassert( (cache_ptr) != NULL );                                      \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
+    HDassert( (cache_ptr)->index_len > 0 );                               \
+    HDassert( (entry_ptr) != NULL );                                      \
+    HDassert( (entry_ptr)->is_dirty == FALSE );                           \
+    HDassert( (cache_ptr)->index_size >= (entry_ptr)->size );             \
+    HDassert( (cache_ptr)->dirty_index_size >= (entry_ptr)->size );       \
+    HDassert( (cache_ptr)->index_size ==                                  \
+       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ); \
+}
+/* JRM */
+#define H5C__PRE_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr)       \
+{                                                                         \
+    HDassert( (cache_ptr) != NULL );                                      \
+    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
+    HDassert( (cache_ptr)->index_len > 0 );                               \
+    HDassert( (entry_ptr) != NULL );                                      \
+    HDassert( (entry_ptr)->is_dirty == TRUE );                            \
+    HDassert( (cache_ptr)->index_size >= (entry_ptr)->size );             \
+    HDassert( (cache_ptr)->clean_index_size >= (entry_ptr)->size );       \
+    HDassert( (cache_ptr)->index_size ==                                  \
+       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ); \
 }
 
-#define H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size) \
-if ( ( (cache_ptr) == NULL ) ||                                          \
-     ( (cache_ptr)->index_len <= 0 ) ||                                  \
-     ( (cache_ptr)->index_size <= 0 ) ||                                 \
-     ( (new_size) > (cache_ptr)->index_size ) ||                         \
-     ( ( (cache_ptr)->index_len == 1 ) &&                                \
-       ( (cache_ptr)->index_size != (new_size) ) ) ) {                   \
-    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                             \
-                "Post HT entry size change SC failed")                   \
+#define H5C__POST_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr)      \
+{                                                                         \
+    HDassert( (cache_ptr)->index_size ==                                  \
+       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ); \
 }
+
+#define H5C__POST_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr)      \
+{                                                                         \
+    HDassert( (cache_ptr)->index_size ==                                  \
+       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ); \
+}
+
 
 #else /* H5C_DO_SANITY_CHECKS */
 
@@ -944,8 +1061,14 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
 #define H5C__PRE_HT_SEARCH_SC(cache_ptr, Addr, fail_val)
 #define H5C__POST_SUC_HT_SEARCH_SC(cache_ptr, entry_ptr, Addr, k, fail_val)
 #define H5C__POST_HT_SHIFT_TO_FRONT(cache_ptr, entry_ptr, k, fail_val)
-#define H5C__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size)
-#define H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size)
+#define H5C__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr)
+#define H5C__PRE_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr)
+#define H5C__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size, \
+		                         entry_ptr, was_clean)
+#define H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size, \
+		                          entry_ptr)
+#define H5C__POST_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr)
+#define H5C__POST_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr)
 
 #endif /* H5C_DO_SANITY_CHECKS */
 
@@ -967,6 +1090,11 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     }                                                        \
     (cache_ptr)->index_len++;                                \
     (cache_ptr)->index_size += (entry_ptr)->size;            \
+    if ( (entry_ptr)->is_dirty ) {                           \
+        (cache_ptr)->dirty_index_size += (entry_ptr)->size;  \
+    } else {                                                 \
+	(cache_ptr)->clean_index_size += (entry_ptr)->size;  \
+    }                                                        \
     H5C__UPDATE_STATS_FOR_HT_INSERTION(cache_ptr)            \
 }
 
@@ -991,6 +1119,11 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     (entry_ptr)->ht_prev = NULL;                              \
     (cache_ptr)->index_len--;                                 \
     (cache_ptr)->index_size -= (entry_ptr)->size;             \
+    if ( (entry_ptr)->is_dirty ) {                            \
+        (cache_ptr)->dirty_index_size -= (entry_ptr)->size;   \
+    } else {                                                  \
+	(cache_ptr)->clean_index_size -= (entry_ptr)->size;   \
+    }                                                         \
     H5C__UPDATE_STATS_FOR_HT_DELETION(cache_ptr)              \
 }
 
@@ -1059,12 +1192,40 @@ if ( ( (cache_ptr) == NULL ) ||                                          \
     }                                                                       \
 }
 
-#define H5C__UPDATE_INDEX_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size) \
-{                                                                        \
-    H5C__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size)      \
-    (cache_ptr)->index_size -= old_size;                                 \
-    (cache_ptr)->index_size += new_size;                                 \
-    H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size)     \
+#define H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN(cache_ptr, entry_ptr)   \
+{                                                                 \
+    H5C__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr);  \
+    (cache_ptr)->dirty_index_size -= (entry_ptr)->size;           \
+    (cache_ptr)->clean_index_size += (entry_ptr)->size;           \
+    H5C__POST_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr); \
+}
+
+#define H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr)   \
+{                                                                 \
+    H5C__PRE_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr);  \
+    (cache_ptr)->clean_index_size -= (entry_ptr)->size;           \
+    (cache_ptr)->dirty_index_size += (entry_ptr)->size;           \
+    H5C__POST_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr); \
+}
+
+#define H5C__UPDATE_INDEX_FOR_SIZE_CHANGE(cache_ptr, old_size, new_size,        \
+		                          entry_ptr, was_clean)                 \
+{                                                                               \
+    H5C__PRE_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size,             \
+		                     entry_ptr, was_clean)                      \
+    (cache_ptr)->index_size -= (old_size);                                      \
+    (cache_ptr)->index_size += (new_size);                                      \
+    if ( was_clean ) {                                                          \
+        (cache_ptr)->clean_index_size -= (old_size);                            \
+    } else {                                                                    \
+	(cache_ptr)->dirty_index_size -= (old_size);                            \
+    }                                                                           \
+    if ( (entry_ptr)->is_dirty ) {                                              \
+        (cache_ptr)->dirty_index_size += (new_size);                            \
+    } else {                                                                    \
+	(cache_ptr)->clean_index_size += (new_size);                            \
+    }                                                                           \
+    H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size, entry_ptr) \
 }
 
 
@@ -2847,6 +3008,10 @@ done:
  *		Added initialization for the new flash cache size increase
  *		related fields of H5C_t.
  *
+ *		JRM -- 11/5/08
+ *              Added initialization for the new clean_index_size and
+ *              dirty_index_size fields of H5C_t. 
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2922,6 +3087,8 @@ H5C_create(size_t		      max_cache_size,
 
     cache_ptr->index_len			= 0;
     cache_ptr->index_size			= (size_t)0;
+    cache_ptr->clean_index_size			= (size_t)0;
+    cache_ptr->dirty_index_size			= (size_t)0;
 
     cache_ptr->slist_len			= 0;
     cache_ptr->slist_size			= (size_t)0;
@@ -4624,6 +4791,29 @@ done:
  *		Added initialization for the new free_file_space_on_destroy
  *		field.
  *
+ *		JRM -- 11/13/08
+ *		Moved test to see if we already have an entry with the 
+ *		specified address in the cache.  This was necessary as 
+ *		we used to modify some fields in the entry to be inserted
+ *		priort to this test, which got the cache confused if the
+ *		insertion failed because the entry was already present.
+ *
+ *		Also revised the function to call H5C_make_space_in_cache()
+ *		if the min_clean_size is not met at present, not just if 
+ *		there is insufficient space in the cache for the new 
+ *		entry.
+ *
+ *              The purpose of this modification is to avoid "metadata
+ *              blizzards" in the write only case.  In such instances, 
+ *              the cache was allowed to fill with dirty metadata.  When
+ *              we finally needed to evict an entry to make space, we had
+ *              to flush out a whole cache full of metadata -- which has
+ *              interesting performance effects.  We hope to avoid (or 
+ *              perhaps more accurately hide) this effect by maintaining 
+ *              the min_clean_size, which should force us to start flushing
+ *              entries long before we actually have to evict something 
+ *              to make space.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -4644,6 +4834,7 @@ H5C_insert_entry(H5F_t * 	     f,
     hbool_t		insert_pinned;
     hbool_t             set_flush_marker;
     hbool_t		write_permitted = TRUE;
+    size_t		empty_space;
     H5C_cache_entry_t *	entry_ptr;
     H5C_cache_entry_t *	test_entry_ptr;
 
@@ -4677,11 +4868,38 @@ H5C_insert_entry(H5F_t * 	     f,
     insert_pinned    = ( (flags & H5C__PIN_ENTRY_FLAG) != 0 );
 
     entry_ptr = (H5C_cache_entry_t *)thing;
+
+    /* verify that the new entry isn't already in the hash table -- scream
+     * and die if it is.
+     */
+
+    H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
+
+    if ( test_entry_ptr != NULL ) {
+
+        if ( test_entry_ptr == entry_ptr ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
+                        "entry already in cache.")
+
+        } else {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
+                        "duplicate entry in cache.")
+        }
+    }
+
 #ifndef NDEBUG
     entry_ptr->magic = H5C__H5C_CACHE_ENTRY_T_MAGIC;
 #endif /* NDEBUG */
     entry_ptr->addr = addr;
     entry_ptr->type = type;
+
+    entry_ptr->is_protected = FALSE;
+    entry_ptr->is_read_only = FALSE;
+    entry_ptr->ro_ref_count = 0;
+
+    entry_ptr->is_pinned = insert_pinned;
 
     /* newly inserted entries are assumed to be dirty */
     entry_ptr->is_dirty = TRUE;
@@ -4730,13 +4948,35 @@ H5C_insert_entry(H5F_t * 	     f,
         }
     }
 
-    if ( ( cache_ptr->evictions_enabled ) &&
-         ( (cache_ptr->index_size + entry_ptr->size) >
-	    cache_ptr->max_cache_size ) ) {
+    if ( cache_ptr->index_size >= cache_ptr->max_cache_size ) {
+
+       empty_space = 0;
+
+    } else {
+
+       empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
+
+    }
+
+    if ( ( cache_ptr->evictions_enabled ) 
+	 &&
+         ( ( (cache_ptr->index_size + entry_ptr->size) >
+	     cache_ptr->max_cache_size 
+	   ) 
+	   ||
+	   (
+	     ( ( empty_space + cache_ptr->clean_index_size ) <
+	       cache_ptr->min_clean_size )
+	   ) 
+	 ) 
+       ) {
 
         size_t space_needed;
 
-        cache_ptr->cache_full = TRUE;
+	if ( empty_space <= entry_ptr->size ) {
+
+            cache_ptr->cache_full = TRUE;
+	}
 
         if ( cache_ptr->check_write_permitted != NULL ) {
 
@@ -4802,38 +5042,6 @@ H5C_insert_entry(H5F_t * 	     f,
                         "H5C_make_space_in_cache failed.")
         }
     }
-
-    /* verify that the new entry isn't already in the hash table -- scream
-     * and die if it is.
-     */
-
-    H5C__SEARCH_INDEX(cache_ptr, addr, test_entry_ptr, FAIL)
-
-    if ( test_entry_ptr != NULL ) {
-
-        if ( test_entry_ptr == entry_ptr ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
-                        "entry already in cache.")
-
-        } else {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
-                        "duplicate entry in cache.")
-        }
-    }
-
-    /* we don't initialize the protected field until here as it is
-     * possible that the entry is already in the cache, and already
-     * protected.  If it is, we don't want to make things worse by
-     * marking it unprotected.
-     */
-
-    entry_ptr->is_protected = FALSE;
-    entry_ptr->is_read_only = FALSE;
-    entry_ptr->ro_ref_count = 0;
-
-    entry_ptr->is_pinned = insert_pinned;
 
     H5C__INSERT_IN_INDEX(cache_ptr, entry_ptr, FAIL)
 
@@ -5209,6 +5417,19 @@ done:
  * 		appropriate.
  * 						JRM -- 1/11/08
  *
+ *
+ *              Added code to update the clean_index_size and
+ *              dirty_index_size fields of H5C_t in cases where the
+ *              the entry was clean on protect, was marked dirty in 
+ *              this call, and did not change its size.  Do this via
+ *              a call to H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY().
+ *
+ *              If the size changed, this case is already dealt with by
+ *              by the pre-existing call to
+ *              H5C__UPDATE_INDEX_FOR_SIZE_CHANGE().
+ *
+ * 						JRM -- 11/5/08
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5219,6 +5440,7 @@ H5C_mark_pinned_entry_dirty(H5C_t * cache_ptr,
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
     herr_t		result;
+    hbool_t		was_clean;
     size_t		size_increase;
     H5C_cache_entry_t *	entry_ptr;
 
@@ -5242,6 +5464,9 @@ H5C_mark_pinned_entry_dirty(H5C_t * cache_ptr,
             HGOTO_ERROR(H5E_CACHE, H5E_CANTMARKDIRTY, FAIL, \
                         "Entry is protected??")
     }
+
+    /* make note of whether the entry was dirty to begin with */
+    was_clean = ! ( entry_ptr->is_dirty );
 
     /* mark the entry as dirty if it isn't already */
     entry_ptr->is_dirty = TRUE;
@@ -5278,8 +5503,8 @@ H5C_mark_pinned_entry_dirty(H5C_t * cache_ptr,
                                         (entry_ptr->size), (new_size));
 
         /* update the hash table */
-	H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
-                                          (new_size));
+	H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size), \
+                                          (new_size), (entry_ptr), (was_clean));
 
         /* if the entry is in the skip list, update that too */
         if ( entry_ptr->in_slist ) {
@@ -5294,6 +5519,10 @@ H5C_mark_pinned_entry_dirty(H5C_t * cache_ptr,
 
 	/* finally, update the entry size proper */
 	entry_ptr->size = new_size;
+
+    } else if ( ( was_clean ) && ( entry_ptr->is_dirty ) ) {
+
+        H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr)
     }
 
     if ( ! (entry_ptr->in_slist) ) {
@@ -5341,6 +5570,12 @@ done:
  * 		it once we deal with the problem of entries being protected
  * 		read only, and then dirtied.
  *
+ * 		JRM -- 11/5/08
+ * 		Added call to H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY() to 
+ * 		update the new clean_index_size and dirty_index_size
+ * 		fields of H5C_t in the case that the entry was clean 
+ * 		prior to this call, and is pinned and not protected.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5348,6 +5583,7 @@ H5C_mark_pinned_or_protected_entry_dirty(H5C_t * cache_ptr,
                                          void *  thing)
 {
     herr_t              ret_value = SUCCEED;    /* Return value */
+    hbool_t		was_pinned_unprotected_and_clean;
     H5C_cache_entry_t *	entry_ptr;
 
     FUNC_ENTER_NOAPI(H5C_mark_pinned_or_protected_entry_dirty, FAIL)
@@ -5367,9 +5603,15 @@ H5C_mark_pinned_or_protected_entry_dirty(H5C_t * cache_ptr,
 
     } else if ( entry_ptr->is_pinned ) {
 
+	was_pinned_unprotected_and_clean = ! ( entry_ptr->is_dirty );
+
         /* mark the entry as dirty if it isn't already */
         entry_ptr->is_dirty = TRUE;
 
+	if ( was_pinned_unprotected_and_clean ) {
+	
+	    H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr);
+	}
 
         if ( ! (entry_ptr->in_slist) ) {
 
@@ -5428,6 +5670,11 @@ done:
  *
  *              Note that in this case H5C_flush_single_entry() will handle
  *              all these details for us.
+ *
+ *              JRM -- 11/5/08
+ *              On review this function looks like no change is needed to
+ *              support the new clean_index_size and dirty_index_size 
+ *              fields of H5C_t.
  *
  *-------------------------------------------------------------------------
  */
@@ -5591,7 +5838,7 @@ done:
  * Function:    H5C_resize_pinned_entry
  *
  * Purpose:	Resize a pinned entry.  The target entry MUST be
- * 		be pinned, and MUST not be unprotected.
+ * 		be pinned, and MUST be unprotected.
  *
  * 		Resizing an entry dirties it, so if the entry is not
  * 		already dirty, the function places the entry on the
@@ -5608,6 +5855,19 @@ done:
  * 		appropriate.
  * 						JRM -- 1/11/08
  *
+ *              Added code to update the clean_index_size and
+ *              dirty_index_size fields of H5C_t in cases where the
+ *              the entry was clean prior to this call, was marked dirty,
+ *              and did not change its size.  Do this via a call to 
+ *              H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY().
+ *
+ *              If the size changed, this case is already dealt with by
+ *              by the pre-existing call to
+ *              H5C__UPDATE_INDEX_FOR_SIZE_CHANGE().
+ *
+ *                                              JRM -- 11/5/08
+ *
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -5618,6 +5878,7 @@ H5C_resize_pinned_entry(H5C_t * cache_ptr,
     /* const char *	fcn_name = "H5C_resize_pinned_entry()"; */
     herr_t              ret_value = SUCCEED;    /* Return value */
     herr_t		result;
+    hbool_t		was_clean;
     H5C_cache_entry_t *	entry_ptr;
     size_t 		size_increase;
 
@@ -5646,6 +5907,9 @@ H5C_resize_pinned_entry(H5C_t * cache_ptr,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTRESIZE, FAIL, \
                     "Entry is protected??")
     }
+
+    /* make note of whether the entry was clean to begin with */
+    was_clean = ! ( entry_ptr->is_dirty );
 
     /* resizing dirties entries -- mark the entry as dirty if it
      * isn't already
@@ -5685,7 +5949,7 @@ H5C_resize_pinned_entry(H5C_t * cache_ptr,
 
         /* update the hash table */
 	H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
-                                          (new_size));
+                                          (new_size), (entry_ptr), (was_clean));
 
         /* if the entry is in the skip list, update that too */
         if ( entry_ptr->in_slist ) {
@@ -5700,7 +5964,12 @@ H5C_resize_pinned_entry(H5C_t * cache_ptr,
 
 	/* finally, update the entry size proper */
 	entry_ptr->size = new_size;
+
+    } else if ( was_clean ) {
+
+	H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr)
     }
+
 
     if ( ! (entry_ptr->in_slist) ) {
 
@@ -5872,6 +6141,22 @@ done:
  * 		Added to do a flash cache size increase if appropriate
  * 		when a large entry is loaded.
  *
+ * 		JRM -- 11/13/08
+ * 		Modified function to call H5C_make_space_in_cache() when
+ * 		the min_clean_size is violated, not just when there isn't
+ * 		enough space for and entry that has just been loaded.
+ *
+ *              The purpose of this modification is to avoid "metadata
+ *              blizzards" in the write only case.  In such instances, 
+ *              the cache was allowed to fill with dirty metadata.  When
+ *              we finally needed to evict an entry to make space, we had
+ *              to flush out a whole cache full of metadata -- which has
+ *              interesting performance effects.  We hope to avoid (or 
+ *              perhaps more accurately hide) this effect by maintaining 
+ *              the min_clean_size, which should force us to start flushing
+ *              entries long before we actually have to evict something 
+ *              to make space.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -5893,6 +6178,7 @@ H5C_protect(H5F_t *	        f,
     hbool_t		read_only = FALSE;
     hbool_t		write_permitted;
     herr_t		result;
+    size_t		empty_space;
     void *		thing;
     H5C_cache_entry_t *	entry_ptr;
     void *		ret_value;      /* Return value */
@@ -5960,16 +6246,41 @@ H5C_protect(H5F_t *	        f,
             }
         }
 
-        /* try to free up some space if necessary and if evictions are
-	 * permitted
+        if ( cache_ptr->index_size >= cache_ptr->max_cache_size ) {
+
+           empty_space = 0;
+
+        } else {
+
+           empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
+
+        }
+
+	/* try to free up if necceary and if evictions are permitted.  Note
+	 * that if evictions are enabled, we will call H5C_make_space_in_cache()
+	 * regardless if the min_free_space requirement is not met.
 	 */
-        if ( ( cache_ptr->evictions_enabled ) &&
-	     ( (cache_ptr->index_size + entry_ptr->size) >
-	       cache_ptr->max_cache_size ) ) {
+
+        if ( ( cache_ptr->evictions_enabled ) 
+	     &&
+             ( ( (cache_ptr->index_size + entry_ptr->size) >
+	         cache_ptr->max_cache_size 
+	       ) 
+	       ||
+	       (
+	         ( ( empty_space + cache_ptr->clean_index_size ) <
+	           cache_ptr->min_clean_size )
+	       ) 
+	     ) 
+           ) {
 
             size_t space_needed;
 
-            cache_ptr->cache_full = TRUE;
+	    if ( empty_space <= entry_ptr->size ) {
+
+                cache_ptr->cache_full = TRUE;
+	    
+	    }
 
             if ( cache_ptr->check_write_permitted != NULL ) {
 
@@ -6160,10 +6471,31 @@ H5C_protect(H5F_t *	        f,
             /* check to see if the cache is now oversized due to the cache
              * size reduction.  If it is, try to evict enough entries to
              * bring the cache size down to the current maximum cache size.
+	     *
+	     * Also, if the min_clean_size requirement is not met, we
+	     * should also call H5C_make_space_in_cache() to bring us
+	     * into complience.
              */
-            if ( cache_ptr->index_size > cache_ptr->max_cache_size ) {
 
-                cache_ptr->cache_full = TRUE;
+            if ( cache_ptr->index_size >= cache_ptr->max_cache_size ) {
+
+               empty_space = 0;
+
+            } else {
+
+               empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
+
+            }
+
+            if ( ( cache_ptr->index_size > cache_ptr->max_cache_size )
+	         ||
+	         ( ( empty_space + cache_ptr->clean_index_size ) <
+	           cache_ptr->min_clean_size) ) {
+
+		if ( cache_ptr->index_size > cache_ptr->max_cache_size ) {
+
+                    cache_ptr->cache_full = TRUE;
+		}
 
                 result = H5C_make_space_in_cache(f, primary_dxpl_id,
                                                  secondary_dxpl_id, cache_ptr,
@@ -6761,6 +7093,15 @@ done:
  *		Added code supporting the new write_protects,
  *		read_protects, and max_read_protects fields.
  *
+ *		JRM -- 11/13/08
+ *		Added code displaying the max_clean_index_size and 
+ *		max_dirty_index_size.
+ *
+ *              MAM -- 01/06/09
+ *              Added code displaying the calls_to_msic,
+ *              total_entries_skipped_in_msic, total_entries_scanned_in_msic, 
+ *              and max_entries_skipped_in_msic fields.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -6808,6 +7149,8 @@ H5C_stats(H5C_t * cache_ptr,
     double      hit_rate;
     double	average_successful_search_depth = 0.0;
     double	average_failed_search_depth = 0.0;
+    double      average_entries_skipped_per_calls_to_msic = 0.0;
+    double      average_entries_scanned_per_calls_to_msic = 0.0;
 #endif /* H5C_COLLECT_CACHE_STATS */
 
     FUNC_ENTER_NOAPI(H5C_stats, FAIL)
@@ -6927,6 +7270,14 @@ H5C_stats(H5C_t * cache_ptr,
               (long)(cache_ptr->max_index_len));
 
     HDfprintf(stdout,
+             "%s  current (max) clean/dirty idx size = %ld (%ld) / %ld (%ld)\n",
+              cache_ptr->prefix,
+              (long)(cache_ptr->clean_index_size),
+              (long)(cache_ptr->max_clean_index_size),
+              (long)(cache_ptr->dirty_index_size),
+              (long)(cache_ptr->max_dirty_index_size));
+
+    HDfprintf(stdout,
              "%s  current (max) slist size / length  = %ld (%ld) / %ld (%ld)\n",
               cache_ptr->prefix,
               (long)(cache_ptr->slist_size),
@@ -7023,6 +7374,41 @@ H5C_stats(H5C_t * cache_ptr,
               cache_ptr->prefix,
               (long)total_pinned_flushes,
               (long)total_pinned_clears);
+
+    HDfprintf(stdout, "%s  MSIC: (make space in cache) calls  = %lld\n",
+              cache_ptr->prefix,
+              (long long)(cache_ptr->calls_to_msic));
+
+    if (cache_ptr->calls_to_msic > 0) {
+        average_entries_skipped_per_calls_to_msic = 
+            (((double)(cache_ptr->total_entries_skipped_in_msic)) / 
+            ((double)(cache_ptr->calls_to_msic)));
+    }
+
+    HDfprintf(stdout, "%s  MSIC: Average/max entries skipped  = %lf / %ld\n",
+              cache_ptr->prefix,
+              (float)average_entries_skipped_per_calls_to_msic,
+              (long)(cache_ptr->max_entries_skipped_in_msic));
+
+    if (cache_ptr->calls_to_msic > 0) {
+        average_entries_scanned_per_calls_to_msic = 
+            (((double)(cache_ptr->total_entries_scanned_in_msic)) / 
+            ((double)(cache_ptr->calls_to_msic)));
+    }
+
+    HDfprintf(stdout, "%s  MSIC: Average/max entries scanned  = %lf / %ld\n",
+              cache_ptr->prefix,
+              (float)average_entries_scanned_per_calls_to_msic,
+              (long)(cache_ptr->max_entries_scanned_in_msic));
+
+    HDfprintf(stdout, "%s  MSIC: Scanned to make space(evict) = %lld\n",
+              cache_ptr->prefix,
+              (long long)(cache_ptr->entries_scanned_to_make_space));
+
+    HDfprintf(stdout, "%s  MSIC: Scanned to satisfy min_clean = %lld\n",
+              cache_ptr->prefix,
+              (long long)(cache_ptr->total_entries_scanned_in_msic - 
+                            cache_ptr->entries_scanned_to_make_space));
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
 
@@ -7192,6 +7578,15 @@ done:
  *		Added initialization for the new write_protects,
  *		read_protects, and max_read_protects fields.
  *
+ *		JRM 11/13/08
+ *		Added initialization for the new max_clean_index_size and
+ *		max_dirty_index_size fields.
+ *
+ *              MAM -- 01/06/09
+ *              Added code to initalize the calls_to_msic,
+ *              total_entries_skipped_in_msic, total_entries_scanned_in_msic,
+ *              and max_entries_skipped_in_msic fields.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -7249,6 +7644,8 @@ H5C_stats__reset(H5C_t UNUSED * cache_ptr)
 
     cache_ptr->max_index_len			= 0;
     cache_ptr->max_index_size			= (size_t)0;
+    cache_ptr->max_clean_index_size		= (size_t)0;
+    cache_ptr->max_dirty_index_size		= (size_t)0;
 
     cache_ptr->max_slist_len			= 0;
     cache_ptr->max_slist_size			= (size_t)0;
@@ -7258,6 +7655,13 @@ H5C_stats__reset(H5C_t UNUSED * cache_ptr)
 
     cache_ptr->max_pel_len			= 0;
     cache_ptr->max_pel_size			= (size_t)0;
+
+    cache_ptr->calls_to_msic                    = 0;
+    cache_ptr->total_entries_skipped_in_msic    = 0;
+    cache_ptr->total_entries_scanned_in_msic    = 0;
+    cache_ptr->max_entries_skipped_in_msic      = 0;
+    cache_ptr->max_entries_scanned_in_msic      = 0;
+    cache_ptr->entries_scanned_to_make_space    = 0;
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
 
@@ -7437,6 +7841,17 @@ done:
  *		Separated "destroy entry" concept from "remove entry from
  *              cache" concept, by adding the 'take_ownership' flag.
  *
+ *              JRM -- 11/5/08
+ *              Added code to update the clean_index_size and 
+ *              dirty_index_size fields of H5C_t in cases where the 
+ *              the entry was clean on protect, was marked dirty on 
+ *              unprotect, and did not change its size.  Do this via 
+ *              a call to H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY().
+ *
+ *              If the size changed, this case is already dealt with by
+ *              by the pre-existing call to 
+ *              H5C__UPDATE_INDEX_FOR_SIZE_CHANGE().
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -7459,6 +7874,7 @@ H5C_unprotect(H5F_t *		  f,
     hbool_t		unpin_entry;
     hbool_t		free_file_space;
     hbool_t		take_ownership;
+    hbool_t 		was_clean;
 #ifdef H5_HAVE_PARALLEL
     hbool_t		clear_entry = FALSE;
 #endif /* H5_HAVE_PARALLEL */
@@ -7510,6 +7926,7 @@ H5C_unprotect(H5F_t *		  f,
      * the entry.
      */
     dirtied |= entry_ptr->dirtied;
+    was_clean = ! ( entry_ptr->is_dirty );
 
 #if H5C_DO_EXTREME_SANITY_CHECKS
         if ( H5C_validate_lru_list(cache_ptr) < 0 ) {
@@ -7646,8 +8063,9 @@ H5C_unprotect(H5F_t *		  f,
                                             (entry_ptr->size), (new_size));
 
             /* update the hash table */
-	    H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size),\
-                                              (new_size));
+	    H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), (entry_ptr->size), \
+                                              (new_size), (entry_ptr), \
+					      (was_clean));
 
             /* if the entry is in the skip list, update that too */
             if ( entry_ptr->in_slist ) {
@@ -7663,7 +8081,11 @@ H5C_unprotect(H5F_t *		  f,
 
 	    /* finally, update the entry size proper */
 	    entry_ptr->size = new_size;
-        }
+
+        } else if ( ( was_clean ) && ( entry_ptr->is_dirty ) ) {
+	
+	    H5C__UPDATE_INDEX_FOR_ENTRY_DIRTY(cache_ptr, entry_ptr)
+	}
 
         /* Pin or unpin the entry as requested. */
         if ( pin_entry ) {
@@ -9929,6 +10351,8 @@ H5C_flush_invalidate_cache(H5F_t *  f,
 
 	    done = TRUE;
             HDassert( cache_ptr->index_size == 0 );
+            HDassert( cache_ptr->clean_index_size == 0 );
+            HDassert( cache_ptr->dirty_index_size == 0 );
 	    HDassert( cache_ptr->slist_len == 0 );
 	    HDassert( cache_ptr->slist_size == 0 );
 	    HDassert( cache_ptr->pel_len == 0 );
@@ -10052,6 +10476,11 @@ done:
  *		Separated "destroy entry" concept from "remove entry from
  *              cache" concept, by adding the 'take_ownership' flag and
  *              the "destroy_entry" variable.
+ *
+ *              JRM -- 11/5/08
+ *              Added call to H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN() to 
+ *              maintain the new clean_index_size and clean_index_size 
+ *              fields of H5C_t.
  *
  *-------------------------------------------------------------------------
  */
@@ -10413,6 +10842,7 @@ H5C_flush_single_entry(H5F_t *		   f,
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
                             "unable to flush entry")
             }
+
 #ifdef H5_HAVE_PARALLEL
             if ( flush_flags != H5C_CALLBACK__NO_FLAGS_SET ) {
 
@@ -10455,6 +10885,12 @@ H5C_flush_single_entry(H5F_t *		   f,
         if ( ( ! destroy ) && ( entry_ptr->in_slist ) ) {
 
             H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr)
+
+        }
+
+	if ( ( ! destroy ) && ( was_dirty ) ) {
+
+            H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN(cache_ptr, entry_ptr);
         }
 
         if ( ! destroy ) { /* i.e. if the entry still exists */
@@ -10489,10 +10925,18 @@ H5C_flush_single_entry(H5F_t *		   f,
 
                     HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE );
 
-                    /* update the hash table for the size change*/
+                    /* update the hash table for the size change 
+		     * We pass TRUE as the was_clean parameter, as we 
+		     * have already updated the clean and dirty index
+		     * size fields for the fact that the entry has
+		     * been flushed. (See above call to 
+		     * H5C__UPDATE_INDEX_FOR_ENTRY_CLEAN()).
+		     */
 	            H5C__UPDATE_INDEX_FOR_SIZE_CHANGE((cache_ptr), \
 				                      (entry_ptr->size),\
-                                                      (new_size));
+                                                      (new_size), \
+						      (entry_ptr), \
+						      (TRUE));
 
 		    /* The entry can't be protected since we just flushed it.
 		     * Thus we must update the replacement policy data
@@ -10769,6 +11213,27 @@ done:
  *              but one can argue that I should just scream and die if I
  *              ever detect the condidtion.
  *
+ *              JRM -- 11/13/08
+ *              Modified function to always observe the min_clean_size 
+ *              whether we are maintaining the clean and dirt LRU lists
+ *              or not.  To do this, we had to add the new clean_index_size
+ *              and dirty_index_size fields to H5C_t, and supporting code
+ *              as needed throughout the cache.
+ *
+ *              The purpose of this modification is to avoid "metadata
+ *              blizzards" in the write only case.  In such instances, 
+ *              the cache was allowed to fill with dirty metadata.  When
+ *              we finally needed to evict an entry to make space, we had
+ *              to flush out a whole cache full of metadata -- which has
+ *              interesting performance effects.  We hope to avoid (or 
+ *              perhaps more accurately hide) this effect by maintaining 
+ *              the min_clean_size, which should force us to start flushing
+ *              entries long before we actually have to evict something 
+ *              to make space.
+ *
+ *              MAM -- 01/06/09
+ *              Added code to maintain clean_entries_skipped and total_entries
+ *              scanned statistics.
  *-------------------------------------------------------------------------
  */
 
@@ -10783,13 +11248,15 @@ H5C_make_space_in_cache(H5F_t *	f,
 {
     herr_t		ret_value = SUCCEED;      /* Return value */
     herr_t		result;
+#if H5C_COLLECT_CACHE_STATS
+    int32_t             clean_entries_skipped = 0;
+    int32_t             total_entries_scanned = 0;
+#endif /* H5C_COLLECT_CACHE_STATS */
     int32_t		entries_examined = 0;
     int32_t		initial_list_len;
-#if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
     size_t		empty_space;
-#endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
     hbool_t             prev_is_dirty = FALSE;
-    hbool_t             entry_is_epoch_maker = FALSE;
+    hbool_t             didnt_flush_entry = FALSE;
     H5C_cache_entry_t *	entry_ptr;
     H5C_cache_entry_t *	next_ptr;
     H5C_cache_entry_t *	prev_ptr;
@@ -10800,16 +11267,36 @@ H5C_make_space_in_cache(H5F_t *	f,
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( first_flush_ptr != NULL );
     HDassert( ( *first_flush_ptr == TRUE ) || ( *first_flush_ptr == FALSE ) );
+    HDassert( cache_ptr->index_size == 
+	      (cache_ptr->clean_index_size + cache_ptr->dirty_index_size) );
 
     if ( write_permitted ) {
 
         initial_list_len = cache_ptr->LRU_list_len;
+
         entry_ptr = cache_ptr->LRU_tail_ptr;
 
-        while ( ( (cache_ptr->index_size + space_needed)
-                  >
-                  cache_ptr->max_cache_size
-                )
+	if ( cache_ptr->index_size >= cache_ptr->max_cache_size ) {
+
+	   empty_space = 0;
+
+	} else {
+
+	   empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
+
+	}
+
+        while ( ( ( (cache_ptr->index_size + space_needed)
+                    >
+                    cache_ptr->max_cache_size
+                  )
+		  ||
+		  (
+		    ( empty_space + cache_ptr->clean_index_size )
+		    <
+		    ( cache_ptr->min_clean_size )
+                  )
+		)
                 &&
                 ( entries_examined <= (2 * initial_list_len) )
                 &&
@@ -10830,10 +11317,18 @@ H5C_make_space_in_cache(H5F_t *	f,
 
             if ( (entry_ptr->type)->id != H5C__EPOCH_MARKER_TYPE ) {
 
-                entry_is_epoch_maker = FALSE;
+                didnt_flush_entry = FALSE;
 
                 if ( entry_ptr->is_dirty ) {
 
+#if H5C_COLLECT_CACHE_STATS
+                    if ( (cache_ptr->index_size + space_needed)
+                           >
+                          cache_ptr->max_cache_size ) {
+
+                        cache_ptr->entries_scanned_to_make_space++;
+                    }
+#endif /* H5C_COLLECT_CACHE_STATS */
                     result = H5C_flush_single_entry(f,
                                                     primary_dxpl_id,
                                                     secondary_dxpl_id,
@@ -10843,7 +11338,12 @@ H5C_make_space_in_cache(H5F_t *	f,
                                                     H5C__NO_FLAGS_SET,
                                                     first_flush_ptr,
                                                     FALSE);
-                } else {
+                } else if ( (cache_ptr->index_size + space_needed)  
+                              >
+                             cache_ptr->max_cache_size ) {
+#if H5C_COLLECT_CACHE_STATS
+                    cache_ptr->entries_scanned_to_make_space++;
+#endif /* H5C_COLLECT_CACHE_STATS */
 
                     result = H5C_flush_single_entry(f,
                                                     primary_dxpl_id,
@@ -10854,13 +11354,31 @@ H5C_make_space_in_cache(H5F_t *	f,
                                                     H5C__FLUSH_INVALIDATE_FLAG,
                                                     first_flush_ptr,
                                                     TRUE);
+                } else {
+
+                    /* We have enough space so don't flush clean entry. 
+                     * Set result to SUCCEED to avoid triggering the error 
+                     * code below.
+                     */
+#if H5C_COLLECT_CACHE_STATS
+                    clean_entries_skipped++;   
+#endif /* H5C_COLLECT_CACHE_STATS */
+                    didnt_flush_entry = TRUE;
+                    result = SUCCEED;
+
                 }
+
+#if H5C_COLLECT_CACHE_STATS
+                total_entries_scanned++;
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+
             } else {
 
                 /* Skip epoch markers.  Set result to SUCCEED to avoid
                  * triggering the error code below.
                  */
-                entry_is_epoch_maker = TRUE;
+                didnt_flush_entry = TRUE;
                 result = SUCCEED;
             }
 
@@ -10882,7 +11400,7 @@ H5C_make_space_in_cache(H5F_t *	f,
 
                 }
 #endif /* NDEBUG */
-		if ( entry_is_epoch_maker ) {
+		if ( didnt_flush_entry ) {
 
 		    entry_ptr = prev_ptr;
 
@@ -10913,121 +11431,52 @@ H5C_make_space_in_cache(H5F_t *	f,
 
             entries_examined++;
 
+	    if ( cache_ptr->index_size >= cache_ptr->max_cache_size ) {
+
+	       empty_space = 0;
+
+	    } else {
+
+	       empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
+
+	    }
+    
+	    HDassert( cache_ptr->index_size == 
+	              (cache_ptr->clean_index_size + 
+		       cache_ptr->dirty_index_size) );
+
 	}
+
+#if H5C_COLLECT_CACHE_STATS
+        cache_ptr->calls_to_msic++;
+
+
+        cache_ptr->total_entries_skipped_in_msic += clean_entries_skipped;
+        cache_ptr->total_entries_scanned_in_msic += total_entries_scanned;
+
+        if ( clean_entries_skipped > cache_ptr->max_entries_skipped_in_msic ) {
+
+            cache_ptr->max_entries_skipped_in_msic = clean_entries_skipped;
+        }
+
+        if ( total_entries_scanned > cache_ptr->max_entries_scanned_in_msic ) {
+
+            cache_ptr->max_entries_scanned_in_msic = total_entries_scanned;
+        }
+#endif /* H5C_COLLECT_CACHE_STATS */
+
+	HDassert( ( entries_examined > (2 * initial_list_len) ) ||
+		  ( (cache_ptr->pl_size + cache_ptr->min_clean_size) >
+		    cache_ptr->max_cache_size ) ||
+		  ( ( cache_ptr->clean_index_size + empty_space )
+		    >= cache_ptr->min_clean_size ) );
 
 #if H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
-	entries_examined = 0;
-        initial_list_len = cache_ptr->dLRU_list_len;
-        entry_ptr = cache_ptr->dLRU_tail_ptr;
-
-        if ( cache_ptr->index_size < cache_ptr->max_cache_size ) {
-
-            empty_space = cache_ptr->max_cache_size - cache_ptr->index_size;
-
-        } else {
-
-           empty_space = 0;
-        }
-
-        while ( ( (cache_ptr->cLRU_list_size + empty_space)
-                  < cache_ptr->min_clean_size ) &&
-                ( entries_examined <= initial_list_len ) &&
-                ( entry_ptr != NULL )
-              )
-        {
-            HDassert( ! (entry_ptr->is_protected) );
-            HDassert( ! (entry_ptr->is_read_only) );
-            HDassert( (entry_ptr->ro_ref_count) == 0 );
-            HDassert( entry_ptr->is_dirty );
-            HDassert( entry_ptr->in_slist );
-
-            prev_ptr = entry_ptr->aux_prev;
-
-	    next_ptr = entry_ptr->aux_next;
-
-            if ( prev_ptr != NULL ) {
-
-                HDassert( prev_ptr->is_dirty );
-            }
-
-            result = H5C_flush_single_entry(f,
-                                            primary_dxpl_id,
-                                            secondary_dxpl_id,
-                                            cache_ptr,
-                                            entry_ptr->type,
-                                            entry_ptr->addr,
-                                            H5C__NO_FLAGS_SET,
-                                            first_flush_ptr,
-                                            FALSE);
-
-            if ( result < 0 ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, \
-                            "unable to flush entry")
-            }
-
-            if ( prev_ptr != NULL ) {
-#ifndef NDEBUG
-                if (prev_ptr->magic != H5C__H5C_CACHE_ENTRY_T_MAGIC) {
-
-                    /* something horrible has happened to *prev_ptr --
-                     * scream and die.
-                     */
-
-                    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                                "*prev_ptr corrupt 2")
-
-                } else
-#endif /* #ifndef NDEBUG */
-		if ( ( ! ( prev_ptr->is_dirty ) )
-                     ||
-                     ( prev_ptr->aux_next != next_ptr )
-                     ||
-                     ( prev_ptr->is_protected )
-                     ||
-                     ( prev_ptr->is_pinned ) ) {
-
-                    /* something has happened to the dirty LRU -- start over
-                     * from the tail.
-                     */
-
-#if 0 /* This debuging code may be useful in the future -- keep it for now. */
-                    if ( ! ( prev_ptr->is_dirty ) ) {
-                        HDfprintf(stdout, "%s: ! prev_ptr->is_dirty\n",
-                                  fcn_name);
-                    }
-                    if ( prev_ptr->aux_next != next_ptr ) {
-                        HDfprintf(stdout, "%s: prev_ptr->next != next_ptr\n",
-                                  fcn_name);
-                    }
-                    if ( prev_ptr->is_protected ) {
-                        HDfprintf(stdout, "%s: prev_ptr->is_protected\n",
-                                  fcn_name);
-                    }
-                    if ( prev_ptr->is_pinned ) {
-                        HDfprintf(stdout, "%s:prev_ptr->is_pinned\n",
-                                  fcn_name);
-                    }
-
-                    HDfprintf(stdout, "%s: re-starting scan of dirty list\n",
-                              fcn_name);
-#endif /* JRM */
-                    entry_ptr = cache_ptr->dLRU_tail_ptr;
-
-                } else {
-
-                    entry_ptr = prev_ptr;
-
-                }
-            } else {
-
-                entry_ptr = NULL;
-
-            }
-
-            entries_examined++;
-        }
+        HDassert( ( entries_examined > (2 * initial_list_len) ) ||
+		  ( cache_ptr->cLRU_list_size <= cache_ptr->clean_index_size ) );
+        HDassert( ( entries_examined > (2 * initial_list_len) ) ||
+		  ( cache_ptr->dLRU_list_size <= cache_ptr->dirty_index_size ) );
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 

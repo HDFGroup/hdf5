@@ -264,6 +264,9 @@ typedef signed long_long	hssize_t;
 #   error "nothing appropriate for uint64_t"
 #endif
 
+/* Default value for all property list classes */
+#define H5P_DEFAULT     0
+
 /* Common iteration orders */
 typedef enum {
     H5_ITER_UNKNOWN = -1,       /* Unknown order */
