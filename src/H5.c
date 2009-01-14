@@ -600,6 +600,8 @@ done:
     "The HDF5 header files used to compile this application do not match\n" \
     "the version used by the HDF5 library to which this application is linked.\n" \
     "Data corruption or segmentation faults may occur if the application continues.\n" \
+    "This can happen when an application was compiled by one version of HDF5 but\n" \
+    "linked with a different version of static or shared HDF5 library.\n" \
     "You should recompile the application or check your shared library related\n" \
     "settings such as 'LD_LIBRARY_PATH'.\n"
 
