@@ -631,8 +631,13 @@ H5T_is_packed(const H5T_t *dt)
         dt = dt->shared->parent;
 
     /* If this is a compound datatype, check if it is packed */
-    if(dt->shared->type == H5T_COMPOUND)
-        ret_value = (htri_t)dt->shared->u.compnd.packed;
+    if(dt->shared->type == H5T_COMPOUND) {
+        H5T_compnd_t *compnd = &(dt->shared->u.compnd); /* Convenience pointer to compound info */
+        ret_value = (htri_t)(compnd->packed
+                && compnd->memb[compnd->nmembs - 1].offset
+                + compnd->memb[compnd->nmembs - 1].size
+                == dt->shared->size);
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_packed() */

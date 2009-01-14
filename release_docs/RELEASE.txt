@@ -113,6 +113,8 @@ Bug Fixes since HDF5-1.8.2
 
     Library
     -------
+    - Fixed a bug where H5Tpack wouldn't remove trailing space from an otherwise
+      packed compound type. NAF - 2009/01/14
     - Fixed up some old v2 btree assertions that get run in debug mode that
       were previously failing on compilation, and removed some of the 
       more heavily outdated and non-rewritable ones. MAM - 2008/12/15
