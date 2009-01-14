@@ -1515,7 +1515,8 @@ dataset_list2(hid_t dset, const char UNUSED *name)
     int         ndims;          /* dimensionality */
     int         n, max_len;     /* max extern file name length */
     double      utilization;    /* percent utilization of storage */
-    int   i;
+    H5T_class_t tclass;         /* datatype class identifier */
+    int         i;
 
     if(verbose_g > 0) {
         dcpl = H5Dget_create_plist(dset);
@@ -1539,14 +1540,35 @@ dataset_list2(hid_t dset, const char UNUSED *name)
         /* Print total raw storage size */
         total = H5Sget_simple_extent_npoints(space) * H5Tget_size(type);
         used = H5Dget_storage_size(dset);
+        tclass = H5Tget_class(type);
         printf("    %-10s ", "Storage:");
-        printf("%lu logical byte%s, %lu allocated byte%s",
-               (unsigned long)total, 1==total?"":"s",
-               (unsigned long)used, 1==used?"":"s");
-        if (used>0) {
-            utilization = (total*100.0)/used;
-            printf(", %1.2f%% utilization", utilization);
+        switch (tclass)
+        {
+            
+        case H5T_VLEN:
+            printf("information not available");
+            break;
+
+        case H5T_REFERENCE:
+            if ( H5Tequal(type, H5T_STD_REF_DSETREG))
+            {
+                printf("information not available");
+            }
+            break;
+            
+        default:
+            printf("%lu logical byte%s, %lu allocated byte%s",
+                (unsigned long)total, 1==total?"":"s",
+                (unsigned long)used, 1==used?"":"s");
+            if (used>0) 
+            {
+                utilization = (total*100.0)/used;
+                printf(", %1.2f%% utilization", utilization);
+            }
+            
         }
+        
+       
         putchar('\n');
 
         /* Print information about external strorage */

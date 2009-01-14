@@ -1312,6 +1312,9 @@
 ./tools/testfiles/tslink-1.ls
 ./tools/testfiles/tstr-1.ls
 ./tools/testfiles/tattr2.ls
+./tools/testfiles/tdatareg.ls
+./tools/testfiles/tvldtypes2.ls
+
 
 #additional test input and output for h5dump XML
 ./tools/testfiles/tall.h5.xml
