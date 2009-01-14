@@ -38,6 +38,7 @@ typedef struct {
     int    cmn_objs;  /* do we have comparable objects */
     int    not_cmp;   /* are the objects comparable */
     int    contents;  /* equal contents */
+    int    do_nans;   /* consider Nans while diffing floats */
 } diff_opt_t;
 
 
