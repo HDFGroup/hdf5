@@ -142,10 +142,10 @@ static hsize_t diff_region(hid_t obj1_id, hid_t obj2_id,hid_t region1_id, hid_t 
 static hbool_t all_zero(const void *_mem, size_t size);
 static hsize_t character_compare(unsigned char *mem1,unsigned char *mem2,hsize_t i,unsigned u,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
 static hsize_t character_compare_opt(unsigned char *mem1,unsigned char *mem2,hsize_t i,int rank,hsize_t *dims,hsize_t *acc,hsize_t *pos,diff_opt_t *options,const char *obj1,const char *obj2,int *ph);
-static hbool_t equal_float(float value, float expected);
-static hbool_t equal_double(double value, double expected);
+static hbool_t equal_float(float value, float expected, diff_opt_t *options);
+static hbool_t equal_double(double value, double expected, diff_opt_t *options);
 #if H5_SIZEOF_LONG_DOUBLE !=0
-static hbool_t equal_ldouble(long double value, long double expected);
+static hbool_t equal_ldouble(long double value, long double expected, diff_opt_t *options);
 #endif
 static int print_data(diff_opt_t *options);
 static void print_pos(int *ph,int pp,hsize_t curr_pos,hsize_t *acc,hsize_t *pos,int rank,hsize_t *dims,const char *obj1,const char *obj2 );
@@ -1780,8 +1780,8 @@ hsize_t diff_datum(void       *_mem1,
         {
             float temp1_float;
             float temp2_float;
-            int   isnan1;
-            int   isnan2;
+            int   isnan1=0;
+            int   isnan2=0;
 
             assert(type_size==sizeof(float));
 
@@ -1802,8 +1802,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
-                isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
+                    isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+                }
                 
                 if ( !isnan1 && !isnan2)
                 {             
@@ -1832,8 +1835,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
-                isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
+                    isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+                }
                 
                 if ( !isnan1 && !isnan2)
                 {   
@@ -1882,8 +1888,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
-                isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
+                    isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+                }
                 
                 if ( !isnan1 && !isnan2)
                 {   
@@ -1925,7 +1934,7 @@ hsize_t diff_datum(void       *_mem1,
             * no -d and -p
             *-------------------------------------------------------------------------
             */
-            else if (equal_float(temp1_float,temp2_float)==FALSE)
+            else if (equal_float(temp1_float,temp2_float,options)==FALSE)
             {
                 
                 if ( print_data(options) )
@@ -1947,8 +1956,8 @@ hsize_t diff_datum(void       *_mem1,
         {
             double temp1_double;
             double temp2_double;
-            int    isnan1;
-            int    isnan2;
+            int    isnan1=0;
+            int    isnan2=0;
 
 
             assert(type_size==sizeof(double));
@@ -1968,10 +1977,12 @@ hsize_t diff_datum(void       *_mem1,
                /*-------------------------------------------------------------------------
                 * detect NaNs
                 *-------------------------------------------------------------------------
-                */
-                isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
-                isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
-                
+                */ 
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
+                    isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+                }
                 if ( !isnan1 && !isnan2)
                 {           
                     
@@ -2000,8 +2011,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
-                isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
+                    isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+                }
                 
                 if ( !isnan1 && !isnan2)
                 {           
@@ -2050,8 +2064,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
-                isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
+                    isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+                }
                 
                 if ( !isnan1 && !isnan2)
                 {           
@@ -2094,7 +2111,7 @@ hsize_t diff_datum(void       *_mem1,
             * no -d and -p 
             *-------------------------------------------------------------------------
             */
-            else if (equal_double(temp1_double,temp2_double)==FALSE)
+            else if (equal_double(temp1_double,temp2_double,options)==FALSE)
             {
                 if ( print_data(options) )
                 {
@@ -2119,8 +2136,8 @@ hsize_t diff_datum(void       *_mem1,
         {
             long double temp1_double;
             long double temp2_double;
-            int    isnan1;
-            int    isnan2;
+            int    isnan1=0;
+            int    isnan2=0;
 
 
             assert(type_size==sizeof(long  double));
@@ -2141,8 +2158,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
-                isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
+                    isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+                }
                 
                 if ( !isnan1 && !isnan2)
                 {           
@@ -2172,8 +2192,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
-                isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
+                    isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+                }
                 
                 if ( !isnan1 && !isnan2)
                 {           
@@ -2222,8 +2245,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
-                isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
+                    isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+                }
                 
                 if ( !isnan1 && !isnan2)
                 {           
@@ -2266,7 +2292,7 @@ hsize_t diff_datum(void       *_mem1,
             * no -d and -p 
             *-------------------------------------------------------------------------
             */
-            else if (equal_ldouble(temp1_double,temp2_double)==FALSE)
+            else if (equal_ldouble(temp1_double,temp2_double,options)==FALSE)
             {
                 if ( print_data(options) )
                 {
@@ -2762,8 +2788,8 @@ hsize_t diff_float(unsigned char *mem1,
     hsize_t     i;
     double      per;
     int         both_zero;
-    int         isnan1;
-    int         isnan2;
+    int         isnan1=0;
+    int         isnan2=0;
     
 
  /*-------------------------------------------------------------------------
@@ -2782,8 +2808,11 @@ hsize_t diff_float(unsigned char *mem1,
             * detect NaNs
             *-------------------------------------------------------------------------
             */
-            isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
-            isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+            if ( options->do_nans )
+            {
+                isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
+                isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+            }
 
             if ( !isnan1 && !isnan2)
             {             
@@ -2820,8 +2849,11 @@ hsize_t diff_float(unsigned char *mem1,
             * detect NaNs
             *-------------------------------------------------------------------------
             */
-            isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
-            isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+            if ( options->do_nans )
+            {
+                isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
+                isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+            }
             
             if ( !isnan1 && !isnan2)
             {        
@@ -2879,8 +2911,11 @@ hsize_t diff_float(unsigned char *mem1,
             * detect NaNs
             *-------------------------------------------------------------------------
             */
-            isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
-            isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+            if ( options->do_nans )
+            {
+                isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
+                isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+            }
             
             if ( !isnan1 && !isnan2)
             {        
@@ -2936,7 +2971,7 @@ hsize_t diff_float(unsigned char *mem1,
             memcpy(&temp2_float, mem2, sizeof(float));
 
             
-            if (equal_float(temp1_float,temp2_float)==FALSE)
+            if (equal_float(temp1_float,temp2_float,options)==FALSE)
             {
                 if ( print_data(options) )
                 {
@@ -2991,8 +3026,8 @@ hsize_t diff_double(unsigned char *mem1,
     hsize_t     i;
     double      per;
     int         both_zero;
-    int         isnan1;
-    int         isnan2;
+    int         isnan1=0;
+    int         isnan2=0;
     
 
  /*-------------------------------------------------------------------------
@@ -3011,8 +3046,11 @@ hsize_t diff_double(unsigned char *mem1,
             * detect NaNs
             *-------------------------------------------------------------------------
             */
-            isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
-            isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+            if ( options->do_nans )
+            {
+                isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
+                isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+            }
 
             if ( !isnan1 && !isnan2)
             {             
@@ -3049,8 +3087,11 @@ hsize_t diff_double(unsigned char *mem1,
             * detect NaNs
             *-------------------------------------------------------------------------
             */
-            isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
-            isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+            if ( options->do_nans )
+            {
+                isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
+                isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+            }
             
             if ( !isnan1 && !isnan2)
             {        
@@ -3108,8 +3149,11 @@ hsize_t diff_double(unsigned char *mem1,
             * detect NaNs
             *-------------------------------------------------------------------------
             */
-            isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
-            isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+            if ( options->do_nans )
+            {
+                isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
+                isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+            }
             
             if ( !isnan1 && !isnan2)
             {        
@@ -3164,7 +3208,7 @@ hsize_t diff_double(unsigned char *mem1,
             memcpy(&temp1_double, mem1, sizeof(double));
             memcpy(&temp2_double, mem2, sizeof(double));
             
-            if (equal_double(temp1_double,temp2_double)==FALSE)
+            if (equal_double(temp1_double,temp2_double,options)==FALSE)
             {
                 if ( print_data(options) )
                 {
@@ -3221,8 +3265,8 @@ hsize_t diff_ldouble(unsigned char *mem1,
     hsize_t     i;
     double      per;
     int         both_zero;
-    int         isnan1;
-    int         isnan2;
+    int         isnan1=0;
+    int         isnan2=0;
     
 
  /*-------------------------------------------------------------------------
@@ -3241,8 +3285,11 @@ hsize_t diff_ldouble(unsigned char *mem1,
             * detect NaNs
             *-------------------------------------------------------------------------
             */
-            isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
-            isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+            if ( options->do_nans )
+            {
+                isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
+                isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+            }
 
             if ( !isnan1 && !isnan2)
             {             
@@ -3279,8 +3326,11 @@ hsize_t diff_ldouble(unsigned char *mem1,
             * detect NaNs
             *-------------------------------------------------------------------------
             */
-            isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
-            isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+            if ( options->do_nans )
+            {
+                isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
+                isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+            }
             
             if ( !isnan1 && !isnan2)
             {        
@@ -3338,8 +3388,11 @@ hsize_t diff_ldouble(unsigned char *mem1,
             * detect NaNs
             *-------------------------------------------------------------------------
             */
-            isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
-            isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+            if ( options->do_nans )
+            {
+                isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
+                isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+            }
             
             if ( !isnan1 && !isnan2)
             {        
@@ -3394,7 +3447,7 @@ hsize_t diff_ldouble(unsigned char *mem1,
             memcpy(&temp1_double, mem1, sizeof(long double));
             memcpy(&temp2_double, mem2, sizeof(long double));
             
-            if (equal_double(temp1_double,temp2_double)==FALSE)
+            if (equal_double(temp1_double,temp2_double,options)==FALSE)
             {
                 if ( print_data(options) )
                 {
@@ -5167,42 +5220,46 @@ hsize_t diff_ullong(unsigned char *mem1,
  *-------------------------------------------------------------------------
  */
 static 
-hbool_t equal_double(double value, double expected)                               
+hbool_t equal_double(double value, double expected, diff_opt_t *options)                               
 {
     int both_zero;
     int is_zero;
 
-
-/*-------------------------------------------------------------------------
- * detect NaNs
- *-------------------------------------------------------------------------
- */
-    int isnan1 = my_isnan(FLT_DOUBLE,&value);
-    int isnan2 = my_isnan(FLT_DOUBLE,&expected);
-
-   /*-------------------------------------------------------------------------
-    * we consider NaN == NaN to be true 
-    *-------------------------------------------------------------------------
-    */
-    if ( isnan1 && isnan2 )
+    if ( options->do_nans )
     {
-        return TRUE;
+        
+        
+        /*-------------------------------------------------------------------------
+        * detect NaNs
+        *-------------------------------------------------------------------------
+        */
+        int isnan1 = my_isnan(FLT_DOUBLE,&value);
+        int isnan2 = my_isnan(FLT_DOUBLE,&expected);
+        
+        /*-------------------------------------------------------------------------
+        * we consider NaN == NaN to be true 
+        *-------------------------------------------------------------------------
+        */
+        if ( isnan1 && isnan2 )
+        {
+            return TRUE;
+        }
+        
+        /*-------------------------------------------------------------------------
+        * one is a NaN, do not compare but assume difference
+        *-------------------------------------------------------------------------
+        */
+        if ( (isnan1 && !isnan2) || ( !isnan1 && isnan2 ) )
+        {
+            return FALSE;
+        }
+        
+        /*-------------------------------------------------------------------------
+        * both are not NaNs, compare
+        *-------------------------------------------------------------------------
+        */
+        
     }
-
-   /*-------------------------------------------------------------------------
-    * one is a NaN, do not compare but assume difference
-    *-------------------------------------------------------------------------
-    */
-    if ( (isnan1 && !isnan2) || ( !isnan1 && isnan2 ) )
-    {
-        return FALSE;
-    }
-
-   /*-------------------------------------------------------------------------
-    * both are not NaNs, compare
-    *-------------------------------------------------------------------------
-    */
-
 
     BOTH_ZERO(value,expected)
     if (both_zero)
@@ -5210,7 +5267,7 @@ hbool_t equal_double(double value, double expected)
 
     IS_ZERO(expected)
     if (is_zero)
-        return(equal_double(expected,value));
+        return(equal_double(expected,value,options));
 
     if ( ABS( (value-expected) / expected) < H5DIFF_DBL_EPSILON)
         return TRUE;
@@ -5231,41 +5288,46 @@ hbool_t equal_double(double value, double expected)
 #if H5_SIZEOF_LONG_DOUBLE !=0
 
 static 
-hbool_t equal_ldouble(long double value, long double expected)                               
+hbool_t equal_ldouble(long double value, long double expected, diff_opt_t *options)                               
 {
     int both_zero;
     int is_zero;
 
-
-/*-------------------------------------------------------------------------
- * detect NaNs
- *-------------------------------------------------------------------------
- */
-    int isnan1 = my_isnan(FLT_LDOUBLE,&value);
-    int isnan2 = my_isnan(FLT_LDOUBLE,&expected);
-
-   /*-------------------------------------------------------------------------
-    * we consider NaN == NaN to be true 
-    *-------------------------------------------------------------------------
-    */
-    if ( isnan1 && isnan2 )
+    if ( options->do_nans )
     {
-        return TRUE;
+        
+        
+        /*-------------------------------------------------------------------------
+        * detect NaNs
+        *-------------------------------------------------------------------------
+        */
+        int isnan1 = my_isnan(FLT_LDOUBLE,&value);
+        int isnan2 = my_isnan(FLT_LDOUBLE,&expected);
+        
+        /*-------------------------------------------------------------------------
+        * we consider NaN == NaN to be true 
+        *-------------------------------------------------------------------------
+        */
+        if ( isnan1 && isnan2 )
+        {
+            return TRUE;
+        }
+        
+        /*-------------------------------------------------------------------------
+        * one is a NaN, do not compare but assume difference
+        *-------------------------------------------------------------------------
+        */
+        if ( (isnan1 && !isnan2) || ( !isnan1 && isnan2 ) )
+        {
+            return FALSE;
+        }
+        
+        /*-------------------------------------------------------------------------
+        * both are not NaNs, compare
+        *-------------------------------------------------------------------------
+        */
+        
     }
-
-   /*-------------------------------------------------------------------------
-    * one is a NaN, do not compare but assume difference
-    *-------------------------------------------------------------------------
-    */
-    if ( (isnan1 && !isnan2) || ( !isnan1 && isnan2 ) )
-    {
-        return FALSE;
-    }
-
-   /*-------------------------------------------------------------------------
-    * both are not NaNs, compare
-    *-------------------------------------------------------------------------
-    */
 
 
     BOTH_ZERO(value,expected)
@@ -5274,7 +5336,7 @@ hbool_t equal_ldouble(long double value, long double expected)
 
     IS_ZERO(expected)
     if (is_zero)
-        return(equal_ldouble(expected,value));
+        return(equal_ldouble(expected,value,options));
 
     if ( ABS( (value-expected) / expected) < H5DIFF_DBL_EPSILON)
         return TRUE;
@@ -5303,42 +5365,48 @@ hbool_t equal_ldouble(long double value, long double expected)
  *-------------------------------------------------------------------------
  */
 static 
-hbool_t equal_float(float value, float expected)                               
+hbool_t equal_float(float value, float expected, diff_opt_t *options)                               
 {
     int both_zero;
     int is_zero;
-
-
-/*-------------------------------------------------------------------------
- * detect NaNs
- *-------------------------------------------------------------------------
- */
-    int isnan1 = my_isnan(FLT_FLOAT,&value);
-    int isnan2 = my_isnan(FLT_FLOAT,&expected);
-
-   /*-------------------------------------------------------------------------
-    * we consider NaN == NaN to be true 
-    *-------------------------------------------------------------------------
-    */
-    if ( isnan1 && isnan2 )
+      
+    
+    if ( options->do_nans )
     {
-        return TRUE;
+        
+        
+        /*-------------------------------------------------------------------------
+        * detect NaNs
+        *-------------------------------------------------------------------------
+        */
+        int isnan1 = my_isnan(FLT_FLOAT,&value);
+        int isnan2 = my_isnan(FLT_FLOAT,&expected);
+        
+        /*-------------------------------------------------------------------------
+        * we consider NaN == NaN to be true 
+        *-------------------------------------------------------------------------
+        */
+        if ( isnan1 && isnan2 )
+        {
+            return TRUE;
+        }
+        
+        /*-------------------------------------------------------------------------
+        * one is a NaN, do not compare but assume difference
+        *-------------------------------------------------------------------------
+        */
+        if ( (isnan1 && !isnan2) || ( !isnan1 && isnan2 ) )
+        {
+            return FALSE;
+        }
+        
+        /*-------------------------------------------------------------------------
+        * both are not NaNs, compare
+        *-------------------------------------------------------------------------
+        */
+        
+        
     }
-
-   /*-------------------------------------------------------------------------
-    * one is a NaN, do not compare but assume difference
-    *-------------------------------------------------------------------------
-    */
-    if ( (isnan1 && !isnan2) || ( !isnan1 && isnan2 ) )
-    {
-        return FALSE;
-    }
-
-   /*-------------------------------------------------------------------------
-    * both are not NaNs, compare
-    *-------------------------------------------------------------------------
-    */
-
     
     BOTH_ZERO(value,expected)
     if (both_zero)
@@ -5346,7 +5414,7 @@ hbool_t equal_float(float value, float expected)
 
     IS_ZERO(expected)
     if (is_zero)
-        return(equal_float(expected,value));
+        return(equal_float(expected,value,options));
 
     if ( ABS( (value-expected) / expected) < H5DIFF_FLT_EPSILON)
         return TRUE;

@@ -35,7 +35,7 @@ const char  *progname = "h5diff";
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVrvqn:d:p:";
+static const char *s_opts = "hVrvqn:d:p:N";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -45,6 +45,7 @@ static struct long_options l_opts[] = {
     { "count", require_arg, 'n' },
     { "delta", require_arg, 'd' },
     { "relative", require_arg, 'p' },
+    { "nan", no_arg, 'N' },
     { NULL, 0, '\0' }
 };
 
@@ -147,6 +148,9 @@ void parse_command_line(int argc,
 
     /* assume equal contents initially */
     options->contents = 1;
+
+     /* NaNs are handled by default */
+    options->do_nans = 1;
     
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) 
@@ -208,6 +212,13 @@ void parse_command_line(int argc,
             options->count = atol( opt_arg );
             
             break;
+
+            
+        case 'N':
+            options->do_nans = 0;
+            break;
+
+
         }
     }
     
@@ -406,6 +417,8 @@ void usage(void)
  printf("   -n C, --count=C         Print differences up to C number\n");
  printf("   -d D, --delta=D         Print difference when greater than limit D\n");
  printf("   -p R, --relative=R      Print difference when greater than relative limit R\n");
+ printf("   -N, --nan               Avoid NaNs detection\n");
+
  
 
  printf("\n");

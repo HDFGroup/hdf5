@@ -13,6 +13,7 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
    -n C, --count=C         Print differences up to C number
    -d D, --delta=D         Print difference when greater than limit D
    -p R, --relative=R      Print difference when greater than relative limit R
+   -N, --nan               Avoid NaNs detection
 
   C - is a positive integer
   D - is a positive number. Compare criteria is |a - b| > D
