@@ -174,7 +174,8 @@ HDfprintf(stderr, "%s: sec_node->u.single.par_entry = %u\n", FUNC, sec_node->u.s
     /* Insert object into block */
 
     /* Get the offset of the object within the block */
-    blk_off = sec_node->sect_info.addr - dblock->block_off;
+    H5_CHECK_OVERFLOW((sec_node->sect_info.addr - dblock->block_off), hsize_t, size_t);
+    blk_off = (size_t)(sec_node->sect_info.addr - dblock->block_off);
 #ifdef QAK
 HDfprintf(stderr, "%s: blk_off = %Zu\n", FUNC, blk_off);
 HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
@@ -328,7 +329,8 @@ HDfprintf(stderr, "%s: entry address = %a\n", FUNC, iblock->ents[entry].addr);
 
         /* Set direct block info */
         dblock_addr =  iblock->ents[entry].addr;
-        dblock_size =  hdr->man_dtable.row_block_size[entry / hdr->man_dtable.cparam.width];
+        H5_CHECK_OVERFLOW((hdr->man_dtable.row_block_size[entry / hdr->man_dtable.cparam.width]), hsize_t, size_t);
+        dblock_size =  (size_t)hdr->man_dtable.row_block_size[entry / hdr->man_dtable.cparam.width];
 
         /* Check for offset of invalid direct block */
         if(!H5F_addr_defined(dblock_addr)) {
@@ -582,7 +584,8 @@ HDfprintf(stderr, "%s: entry address = %a\n", FUNC, iblock->ents[dblock_entry].a
             HGOTO_ERROR(H5E_HEAP, H5E_BADRANGE, FAIL, "fractal heap ID not in allocated direct block")
 
         /* Set direct block info */
-        dblock_size =  hdr->man_dtable.row_block_size[dblock_entry / hdr->man_dtable.cparam.width];
+        H5_CHECK_OVERFLOW((hdr->man_dtable.row_block_size[dblock_entry / hdr->man_dtable.cparam.width]), hsize_t, size_t);
+        dblock_size =  (size_t)(hdr->man_dtable.row_block_size[dblock_entry / hdr->man_dtable.cparam.width]);
 
         /* Compute the direct block's offset in the heap's address space */
         /* (based on parent indirect block's block offset) */

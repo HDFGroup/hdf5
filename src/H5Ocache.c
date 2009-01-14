@@ -706,7 +706,7 @@ H5O_assert(oh);
             switch(oh->flags & H5O_HDR_CHUNK0_SIZE) {
                 case 0:     /* 1 byte size */
                     HDassert(chunk0_size < 256);
-                    *p++ = chunk0_size;
+                    *p++ = (uint8_t)chunk0_size;
                     break;
 
                 case 1:     /* 2 byte size */

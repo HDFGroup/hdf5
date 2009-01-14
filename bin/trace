@@ -104,6 +104,7 @@ $Source = "";
                "H5FD_stream_fapl_t"         => "x",
                "H5G_iterate_t"              => "x",
 	       "H5G_info_t"                 => "x",
+	       "H5I_free_t"                 => "x",
                "H5L_class_t"                => "x",
                "H5L_iterate_t"              => "x",
                "H5MM_allocate_t"            => "x",

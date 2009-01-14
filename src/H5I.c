@@ -233,6 +233,7 @@ H5Iregister_type(size_t hash_size, unsigned reserved, H5I_free_t free_func)
     H5I_type_t ret_value;       /* Return value */
 
     FUNC_ENTER_API(H5Iregister_type, H5I_BADID)
+    H5TRACE3("It", "zIux", hash_size, reserved, free_func);
 
     /* Call H5I_register_type with a value of 0 to get a new type */
     ret_value = H5I_register_type((H5I_type_t)0, hash_size, reserved, free_func);

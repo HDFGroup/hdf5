@@ -339,6 +339,13 @@ typedef struct H5O_efl_t {
  */
 #define H5O_LAYOUT_VERSION_3	3
 
+/* This version adds different types of indices to chunked datasets */
+#define H5O_LAYOUT_VERSION_4	4
+
+/* The latest version of the format.  Look through the 'encode'
+ *      and 'size' callbacks for places to change when updating this. */
+#define H5O_LAYOUT_VERSION_LATEST H5O_LAYOUT_VERSION_4
+
 
 /* Forward declaration of structs used below */
 struct H5D_layout_ops_t;                /* Defined in H5Dpkg.h               */
