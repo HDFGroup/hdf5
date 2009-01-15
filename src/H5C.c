@@ -541,6 +541,11 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
  * 	Updated H5C__UPDATE_STATS_FOR_PROTECT() to keep stats on
  * 	read and write protects.
  *
+ *      MAM -- 1/15/09
+ *      Created H5C__UPDATE_MAX_INDEX_SIZE_STATS to contain
+ *      common code within macros that update the maximum
+ *      index, clean_index, and dirty_index statistics fields.
+ *
  ***********************************************************************/
 
 #define H5C__UPDATE_CACHE_HIT_RATE_STATS(cache_ptr, hit) \
@@ -550,6 +555,18 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
         }                                                \
 
 #if H5C_COLLECT_CACHE_STATS
+
+#define H5C__UPDATE_MAX_INDEX_SIZE_STATS(cache_ptr)                        \
+        if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )       \
+            (cache_ptr)->max_index_size = (cache_ptr)->index_size;         \
+        if ( (cache_ptr)->clean_index_size >                               \
+                (cache_ptr)->max_clean_index_size )                        \
+            (cache_ptr)->max_clean_index_size =                            \
+                (cache_ptr)->clean_index_size;                             \
+        if ( (cache_ptr)->dirty_index_size >                               \
+                (cache_ptr)->max_dirty_index_size )                        \
+            (cache_ptr)->max_dirty_index_size =                            \
+                (cache_ptr)->dirty_index_size;                             
 
 #define H5C__UPDATE_STATS_FOR_DIRTY_PIN(cache_ptr, entry_ptr) \
 	(((cache_ptr)->dirty_pins)[(entry_ptr)->type->id])++;
@@ -582,16 +599,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 	}                                                                      \
 	if ( (entry_ptr)->size < (new_size) ) {                                \
 	    ((cache_ptr)->size_increases[(entry_ptr)->type->id])++;            \
-            if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )       \
-                (cache_ptr)->max_index_size = (cache_ptr)->index_size;         \
-            if ( (cache_ptr)->clean_index_size >                               \
-			    (cache_ptr)->max_clean_index_size )                \
-                (cache_ptr)->max_clean_index_size =                            \
-			    (cache_ptr)->clean_index_size;                     \
-            if ( (cache_ptr)->dirty_index_size >                               \
-			    (cache_ptr)->max_dirty_index_size )                \
-                (cache_ptr)->max_dirty_index_size =                            \
-		            (cache_ptr)->dirty_index_size;                     \
+            H5C__UPDATE_MAX_INDEX_SIZE_STATS(cache_ptr)                        \
             if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )       \
                 (cache_ptr)->max_slist_size = (cache_ptr)->slist_size;         \
             if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )             \
@@ -686,16 +694,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 	}                                                                \
         if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )       \
 	    (cache_ptr)->max_index_len = (cache_ptr)->index_len;         \
-        if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )     \
-	    (cache_ptr)->max_index_size = (cache_ptr)->index_size;       \
-        if ( (cache_ptr)->clean_index_size >                             \
-		    (cache_ptr)->max_clean_index_size )                  \
-            (cache_ptr)->max_clean_index_size =                          \
-		    (cache_ptr)->clean_index_size;                       \
-        if ( (cache_ptr)->dirty_index_size >                             \
-		    (cache_ptr)->max_dirty_index_size )                  \
-            (cache_ptr)->max_dirty_index_size =                          \
-	            (cache_ptr)->dirty_index_size;                       \
+        H5C__UPDATE_MAX_INDEX_SIZE_STATS(cache_ptr)                      \
         if ( (cache_ptr)->slist_len > (cache_ptr)->max_slist_len )       \
 	    (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;         \
         if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )     \
@@ -723,16 +722,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 	}                                                                    \
         if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )           \
             (cache_ptr)->max_index_len = (cache_ptr)->index_len;             \
-        if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )         \
-            (cache_ptr)->max_index_size = (cache_ptr)->index_size;           \
-        if ( (cache_ptr)->clean_index_size >                                 \
-		    (cache_ptr)->max_clean_index_size )                      \
-            (cache_ptr)->max_clean_index_size =                              \
-		    (cache_ptr)->clean_index_size;                           \
-        if ( (cache_ptr)->dirty_index_size >                                 \
-		    (cache_ptr)->max_dirty_index_size )                      \
-            (cache_ptr)->max_dirty_index_size =                              \
-	            (cache_ptr)->dirty_index_size;                           \
+        H5C__UPDATE_MAX_INDEX_SIZE_STATS(cache_ptr)                          \
         if ( (cache_ptr)->pl_len > (cache_ptr)->max_pl_len )                 \
             (cache_ptr)->max_pl_len = (cache_ptr)->pl_len;                   \
         if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )               \
@@ -783,16 +773,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 	}                                                                \
         if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )       \
 	    (cache_ptr)->max_index_len = (cache_ptr)->index_len;         \
-        if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )     \
-	    (cache_ptr)->max_index_size = (cache_ptr)->index_size;       \
-        if ( (cache_ptr)->clean_index_size >                             \
-		    (cache_ptr)->max_clean_index_size )                  \
-            (cache_ptr)->max_clean_index_size =                          \
-		    (cache_ptr)->clean_index_size;                       \
-        if ( (cache_ptr)->dirty_index_size >                             \
-		    (cache_ptr)->max_dirty_index_size )                  \
-            (cache_ptr)->max_dirty_index_size =                          \
-	            (cache_ptr)->dirty_index_size;                       \
+        H5C__UPDATE_MAX_INDEX_SIZE_STATS(cache_ptr)                      \
         if ( (cache_ptr)->slist_len > (cache_ptr)->max_slist_len )       \
 	    (cache_ptr)->max_slist_len = (cache_ptr)->slist_len;         \
         if ( (cache_ptr)->slist_size > (cache_ptr)->max_slist_size )     \
@@ -815,16 +796,7 @@ if ( ( (entry_ptr) == NULL ) ||                                                \
 	}                                                                    \
         if ( (cache_ptr)->index_len > (cache_ptr)->max_index_len )           \
             (cache_ptr)->max_index_len = (cache_ptr)->index_len;             \
-        if ( (cache_ptr)->index_size > (cache_ptr)->max_index_size )         \
-        if ( (cache_ptr)->clean_index_size >                                 \
-		    (cache_ptr)->max_clean_index_size )                      \
-            (cache_ptr)->max_clean_index_size =                              \
-		    (cache_ptr)->clean_index_size;                           \
-        if ( (cache_ptr)->dirty_index_size >                                 \
-		    (cache_ptr)->max_dirty_index_size )                      \
-            (cache_ptr)->max_dirty_index_size =                              \
-	            (cache_ptr)->dirty_index_size;                           \
-            (cache_ptr)->max_index_size = (cache_ptr)->index_size;           \
+        H5C__UPDATE_MAX_INDEX_SIZE_STATS(cache_ptr)                          \
         if ( (cache_ptr)->pl_len > (cache_ptr)->max_pl_len )                 \
             (cache_ptr)->max_pl_len = (cache_ptr)->pl_len;                   \
         if ( (cache_ptr)->pl_size > (cache_ptr)->max_pl_size )               \
@@ -901,7 +873,6 @@ if ( ( (cache_ptr) == NULL ) ||                               \
      ( (cache_ptr)->index_size !=                             \
        ((cache_ptr)->clean_index_size +                       \
 	(cache_ptr)->dirty_index_size) ) ) {                  \
-    HDassert(0); /* JRM */                                                         \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, fail_val,              \
                "Pre HT insert SC failed")                     \
 }
@@ -927,7 +898,6 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
      ( (cache_ptr)->index_size !=                                       \
        ((cache_ptr)->clean_index_size +                                 \
 	(cache_ptr)->dirty_index_size) ) ) {                            \
-    HDassert(0); /* JRM */ \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Pre HT remove SC failed") \
 }
 
@@ -983,18 +953,18 @@ if ( ( (cache_ptr) == NULL ) ||                                         \
      ( (new_size) <= 0 ) ||                                             \
      ( ( (cache_ptr)->index_len == 1 ) &&                               \
        ( (cache_ptr)->index_size != (old_size) ) ) ||                   \
+     ( (cache_ptr)->index_size !=                                       \
+       ((cache_ptr)->clean_index_size +                                 \
+        (cache_ptr)->dirty_index_size) ) ||                             \
+     ( (entry_ptr == NULL) ) ||                                         \
+     ( ( !( was_clean ) ||                                              \
+	    ( (cache_ptr)->clean_index_size < (old_size) ) ) &&         \
+	  ( ( (was_clean) ) ||                                          \
+	    ( (cache_ptr)->dirty_index_size < (old_size) ) ) )          \
      ( (entry_ptr) == NULL ) ) {                                        \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                            \
                 "Pre HT entry size change SC failed")                   \
-}                                                                       \
-HDassert( (cache_ptr)->index_size ==                                    \
-	  ((cache_ptr)->clean_index_size +                              \
-           (cache_ptr)->dirty_index_size) );                            \
-HDassert( (entry_ptr) != NULL );                                        \
-HDassert( ( ( was_clean ) &&                                            \
-	    ( (cache_ptr)->clean_index_size >= (old_size) ) ) ||        \
-	  ( ( ! (was_clean) ) &&                                        \
-	    ( (cache_ptr)->dirty_index_size >= (old_size) ) ) );
+}                                                                       
 
 #define H5C__POST_HT_ENTRY_SIZE_CHANGE_SC(cache_ptr, old_size, new_size,  \
 		                          entry_ptr)                      \
@@ -1002,57 +972,62 @@ if ( ( (cache_ptr) == NULL ) ||                                           \
      ( (cache_ptr)->index_len <= 0 ) ||                                   \
      ( (cache_ptr)->index_size <= 0 ) ||                                  \
      ( (new_size) > (cache_ptr)->index_size ) ||                          \
+     ( (cache_ptr)->index_size !=                                         \
+	  ((cache_ptr)->clean_index_size +                                \
+           (cache_ptr)->dirty_index_size) ) ||                            \
+     ( ( !((entry_ptr)->is_dirty ) ||                                     \
+	    ( (cache_ptr)->dirty_index_size < (new_size) ) ) &&           \
+	  ( ( ((entry_ptr)->is_dirty)  ) ||                               \
+	    ( (cache_ptr)->clean_index_size < (new_size) ) ) )            \
      ( ( (cache_ptr)->index_len == 1 ) &&                                 \
        ( (cache_ptr)->index_size != (new_size) ) ) ) {                    \
     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                              \
                 "Post HT entry size change SC failed")                    \
-}                                                                         \
-HDassert( (cache_ptr)->index_size ==                                      \
-	  ((cache_ptr)->clean_index_size +                                \
-           (cache_ptr)->dirty_index_size) );                              \
-HDassert( ( ( (entry_ptr)->is_dirty ) &&                                  \
-	    ( (cache_ptr)->dirty_index_size >= (new_size) ) ) ||          \
-	  ( ( ! ((entry_ptr)->is_dirty)  ) &&                             \
-	    ( (cache_ptr)->clean_index_size >= (new_size) ) ) );
+}                                                                         
 
-#define H5C__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr)       \
-{                                                                         \
-    HDassert( (cache_ptr) != NULL );                                      \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
-    HDassert( (cache_ptr)->index_len > 0 );                               \
-    HDassert( (entry_ptr) != NULL );                                      \
-    HDassert( (entry_ptr)->is_dirty == FALSE );                           \
-    HDassert( (cache_ptr)->index_size >= (entry_ptr)->size );             \
-    HDassert( (cache_ptr)->dirty_index_size >= (entry_ptr)->size );       \
-    HDassert( (cache_ptr)->index_size ==                                  \
-       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ); \
-}
-/* JRM */
-#define H5C__PRE_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr)       \
-{                                                                         \
-    HDassert( (cache_ptr) != NULL );                                      \
-    HDassert( (cache_ptr)->magic == H5C__H5C_T_MAGIC );                   \
-    HDassert( (cache_ptr)->index_len > 0 );                               \
-    HDassert( (entry_ptr) != NULL );                                      \
-    HDassert( (entry_ptr)->is_dirty == TRUE );                            \
-    HDassert( (cache_ptr)->index_size >= (entry_ptr)->size );             \
-    HDassert( (cache_ptr)->clean_index_size >= (entry_ptr)->size );       \
-    HDassert( (cache_ptr)->index_size ==                                  \
-       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ); \
+#define H5C__PRE_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr)           \
+if (                                                                          \
+    ( (cache_ptr) == NULL ) ||                                                \
+    ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                             \
+    ( (cache_ptr)->index_len <= 0 ) ||                                        \
+    ( (entry_ptr) == NULL ) ||                                                \
+    ( (entry_ptr)->is_dirty != FALSE ) ||                                     \
+    ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                        \
+    ( (cache_ptr)->dirty_index_size < (entry_ptr)->size ) ||                  \
+    ( (cache_ptr)->index_size !=                                              \
+       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ) ) {  \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                                  \
+                "Pre HT update for entry clean SC failed")                    \
 }
 
-#define H5C__POST_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr)      \
-{                                                                         \
-    HDassert( (cache_ptr)->index_size ==                                  \
-       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ); \
+#define H5C__PRE_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr)           \
+if (                                                                          \
+    ( (cache_ptr) == NULL ) ||                                                \
+    ( (cache_ptr)->magic != H5C__H5C_T_MAGIC ) ||                             \
+    ( (cache_ptr)->index_len <= 0 ) ||                                        \
+    ( (entry_ptr) == NULL ) ||                                                \
+    ( (entry_ptr)->is_dirty != TRUE ) ||                                      \
+    ( (cache_ptr)->index_size < (entry_ptr)->size ) ||                        \
+    ( (cache_ptr)->clean_index_size < (entry_ptr)->size ) ||                  \
+    ( (cache_ptr)->index_size !=                                              \
+       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ) ) {  \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                                  \
+                "Pre HT update for entry dirty SC failed")                    \
 }
 
-#define H5C__POST_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr)      \
-{                                                                         \
-    HDassert( (cache_ptr)->index_size ==                                  \
-       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ); \
+#define H5C__POST_HT_UPDATE_FOR_ENTRY_CLEAN_SC(cache_ptr, entry_ptr)        \
+if ( (cache_ptr)->index_size !=                                             \
+       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ) {  \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                                \
+                "Post HT update for entry clean SC failed")                 \
 }
 
+#define H5C__POST_HT_UPDATE_FOR_ENTRY_DIRTY_SC(cache_ptr, entry_ptr)        \
+if ( (cache_ptr)->index_size !=                                             \
+       ((cache_ptr)->clean_index_size + (cache_ptr)->dirty_index_size) ) {  \
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL,                                \
+                "Post HT update for entry dirty SC failed")                 \
+}
 
 #else /* H5C_DO_SANITY_CHECKS */
 
