@@ -77,6 +77,10 @@ const char *FILENAME[] = {
     "extlinks16A",	/* 37: */ /* TESTS for H5P_set_elink_fapl */
     "extlinks16B",	/* 38: */
     "extlinks17",	/* 39: */
+    "extlinks18A",	/* 40: */
+    "extlinks18B",	/* 41: */
+    "extlinks19A",	/* 42: */
+    "extlinks19B",	/* 43: */
     NULL
 };
 
