@@ -59,6 +59,13 @@
 /* Define to 1 if you have the `BSDgettimeofday' function. */
 /* #undef H5_HAVE_BSDGETTIMEOFDAY */
 
+/* Define if the compiler understands C99 designated initialization of structs
+   and unions */
+#define H5_HAVE_C99_DESIGNATED_INITIALIZER 1
+
+/* Define if the compiler understands the __func__ keyword */
+#define H5_HAVE_C99_FUNC 1
+
 /* Define if the function stack tracing code is to be compiled in */
 /* #undef H5_HAVE_CODESTACK */
 
