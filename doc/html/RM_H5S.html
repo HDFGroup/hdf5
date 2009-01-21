@@ -1387,7 +1387,8 @@ SUBROUTINE h5sselect_elements_f(space_id, operator, rank, num_elements,
   INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
   INTEGER, INTENT(IN) :: operator         ! Flag, valid values are:
                                           !    H5S_SELECT_SET_F 
-                                          !    H5S_SELECT_OR_F 
+                                          !    H5S_SELECT_APPEND_F 
+                                          !    H5S_SELECT_PREPEND_F 
   INTEGER, INTENT(IN) :: rank             ! Number of dataspace 
                                           ! dimensions</pre>
 <!-- NEW PAGE -->
@@ -1395,9 +1396,12 @@ SUBROUTINE h5sselect_elements_f(space_id, operator, rank, num_elements,
                                           ! Number of elements to be 
                                           ! selected
   INTEGER(HSIZE_T), DIMENSION(*,*), INTENT(IN) :: coord 
-                                          ! Array with the coordinates
-                                          ! of the selected elements:
-                                          ! coord(num_elements, rank)
+                                          ! A 1-based array containing the 
+                                          ! coordinates of the selected 
+                                          ! elements
+                                          ! NOTE: Reversed dimension declaration
+                                          ! compared to the C specification
+                                          ! of coord(num_elements, rank)
   INTEGER, INTENT(OUT) :: hdferr          ! Error code
                                           ! 0 on success and -1 on failure
 END SUBROUTINE h5sselect_elements_f
@@ -1964,7 +1968,7 @@ Describes HDF5 Release 1.6.8, November 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 1 December 2008");
+document.writeln("Last modified: 21 January 2009");
 -->
 </SCRIPT> 
 
