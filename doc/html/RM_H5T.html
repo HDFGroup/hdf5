@@ -1102,12 +1102,12 @@ END SUBROUTINE h5tenum_insert_f
 <dt><strong>Fortran90 Interface:</strong> h5tenum_nameof_f
     <dd>
 	<pre>
-SUBROUTINE h5tenum_nameof_f(type_id,  name, namelen, value, hdferr) 
+SUBROUTINE h5tenum_nameof_f(type_id, value, namelen, name, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
-  CHARACTER(LEN=*), INTENT(OUT) :: name  ! Name of the  enumeration datatype
+  INTEGER, INTENT(IN) :: value           ! Value of the enumeration datatype
   INTEGER(SIZE_T), INTENT(IN) :: namelen ! Length of the name
-  INTEGER, INTENT(IN) :: value           ! Value of the  enumeration datatype
+  CHARACTER(LEN=*), INTENT(OUT) :: name  ! Name of the enumeration datatype
   INTEGER, INTENT(OUT) :: hdferr         ! Error code
 END SUBROUTINE h5tenum_nameof_f
 	</pre>		
@@ -4280,9 +4280,10 @@ Describes HDF5 Release 1.6.8, November 2008
 
 <!-- #EndLibraryItem --><SCRIPT LANGUAGE="JAVASCRIPT">
 <!--
-document.writeln("Last modified: 16 October 2008");
+document.writeln("Last modified: 21 January 2009");
 -->
 </SCRIPT>
  
+
 </body>
 </html>
