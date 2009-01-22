@@ -23,11 +23,6 @@
 #include "H5Iprivate.h"
 #include "H5ACprivate.h"
 #include "cache_common.h"
-#include <sys/types.h>
-#include <time.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <math.h>
 
 
 /* private function declarations: */
