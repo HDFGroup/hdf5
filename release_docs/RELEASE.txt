@@ -10,8 +10,8 @@ tested and known problems in HDF5-1.9.x.
 For more details check the HISTORY*.txt files in the HDF5 source.
 
 
-Links to HDF5 1.9.x source code can be found on THG's development 
-FTP server at the following location:
+Links to HDF5 1.9.x source code can be found on The HDF Group's 
+development FTP server at the following location:
      ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots
 User documentation for the snapshot can be accessed directly at this location: 
      http://www.hdfgroup.uiuc.edu/HDF5/doc_dev_snapshot/H5_dev/

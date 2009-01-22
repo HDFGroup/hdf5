@@ -21,7 +21,7 @@
 # Disabling Dependency Tracking
 # ---------------------
 #
-# The Cray X1 machines that THG tests on seem to have trouble doing
+# The Cray X1 machines that The HDF Group tests on seem to have trouble doing
 # dependency tracking (probably because they use Cray's C++ compiler,
 # which autoconf may not recognize).  Until this is fixed by autoconf
 # or a user complains, disable dependency tracking on Crays.
