@@ -525,7 +525,7 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
  *      Deref in h5tools_str_sprint() instead so recursive types are
  *      handled correctly.
  *
- *      Pedro Vicente Nunes, THG, 2005-10-19
+ *      Pedro Vicente Nunes, The HDF Group, 2005-10-19
  *        pass to the prefix in h5tools_simple_prefix the total position
  *        instead of the current stripmine position i; this is necessary
  *        to print the array indices

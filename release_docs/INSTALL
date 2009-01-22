@@ -75,8 +75,8 @@ CONTENTS
         rather any bug fixes will be rolled into the next snapshot).
         Furthermore, the snapshots have only been tested on a few
         machines and may not test correctly for parallel applications.
-        Snapshots, in a limited number of formats, can be found on THG's 
-        development FTP server:
+        Snapshots, in a limited number of formats, can be found on The
+        HDF Group's development FTP server:
 
             ftp://ftp.hdfgroup.uiuc.edu/pub/outgoing/hdf5/snapshots 
 
