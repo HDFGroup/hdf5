@@ -328,6 +328,25 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
         write_dset(gid1,1,dims1,"fp18",H5T_NATIVE_DOUBLE,data18);
         
     }
+
+    /* not comparable objects */
+    {
+        double       data2[6] = {0,0,0,0,0,0};
+        int          data3[6] = {0,0,0,0,0,0};
+        int          data4[3][2] = {{0,0},{0,0},{0,0}};
+        hsize_t      dims3[2] = { 2,2 };
+        int          data5[2][2] = {{0,0},{0,0}};
+        unsigned int data6[3][2] = {{0,0},{0,0},{0,0}};
+
+        write_dset(gid3,1,dims1,"dset1",H5T_NATIVE_DOUBLE,NULL);
+        write_dset(gid3,1,dims1,"dset2",H5T_NATIVE_DOUBLE,data2);
+        write_dset(gid3,1,dims1,"dset3",H5T_NATIVE_INT,data3);
+        write_dset(gid3,2,dims2,"dset4",H5T_NATIVE_INT,data4);
+        write_dset(gid3,2,dims3,"dset5",H5T_NATIVE_INT,data5);
+        write_dset(gid3,2,dims2,"dset6",H5T_NATIVE_UINT,data6);
+        
+        
+    }
     
     
     /*-------------------------------------------------------------------------

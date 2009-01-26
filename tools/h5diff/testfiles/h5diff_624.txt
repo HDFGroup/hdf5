@@ -10,6 +10,7 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
    -r, --report            Report mode. Print differences
    -v, --verbose           Verbose mode. Print differences, list of objects
    -q, --quiet             Quiet mode. Do not do output
+   -c, --compare           List objects that are not comparable
    -N, --nan               Avoid NaNs detection
    -n C, --count=C         Print differences up to C number
    -d D, --delta=D         Print difference when greater than limit D
