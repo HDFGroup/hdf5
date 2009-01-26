@@ -150,11 +150,6 @@ hsize_t diff_attr(hid_t loc1_id,
             options)!=1)
         {
 
-            if (options->m_verbose)
-                printf("Comparison not possible for attribute <%s>\n",
-                name1);
-
-            options->not_cmp=1;
 
             if (H5Tclose(ftype1_id)<0)
                 goto error;

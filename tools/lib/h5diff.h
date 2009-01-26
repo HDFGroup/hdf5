@@ -35,10 +35,11 @@ typedef struct {
     int    n;         /* count, compare up to count */
     hsize_t count;    /* count value */
     int    err_stat;  /* an error ocurred (1, error, 0, no error) */
-    int    cmn_objs;  /* do we have comparable objects */
+    int    cmn_objs;  /* do we have common objects */
     int    not_cmp;   /* are the objects comparable */
     int    contents;  /* equal contents */
     int    do_nans;   /* consider Nans while diffing floats */
+    int    m_list_not_cmp;   /* list not comparable messages */
 } diff_opt_t;
 
 

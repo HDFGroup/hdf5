@@ -578,6 +578,25 @@ TESTING $H5DIFF -v  $SRCFILE1 $SRCFILE1  g1/fp1 g1/fp2
 TOOLTEST h5diff_102.txt -v $FILE1 $FILE1 g1/fp1 g1/fp2 
 
 
+# not comparable -c flag
+TESTING $H5DIFF $SRCFILE2 $SRCFILE2 g2/dset1  g2/dset2
+TOOLTEST h5diff_200.txt $FILE2 $FILE2 g2/dset1  g2/dset2 
+
+TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset1  g2/dset2
+TOOLTEST h5diff_201.txt -c $FILE2 $FILE2 g2/dset1  g2/dset2 
+
+TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset2  g2/dset3
+TOOLTEST h5diff_202.txt -c $FILE2 $FILE2 g2/dset2  g2/dset3
+
+TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset3  g2/dset4
+TOOLTEST h5diff_203.txt -c $FILE2 $FILE2 g2/dset3  g2/dset4
+
+TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset4  g2/dset5
+TOOLTEST h5diff_204.txt -c $FILE2 $FILE2 g2/dset4  g2/dset5
+
+TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset5  g2/dset6
+TOOLTEST h5diff_205.txt -c $FILE2 $FILE2 g2/dset5  g2/dset6
+
 
 # ##############################################################################
 # # END
