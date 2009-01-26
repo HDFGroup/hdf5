@@ -2973,8 +2973,10 @@ H5T_create(H5T_class_t type, size_t size)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
             dt->shared->type = type;
 
-            if(type==H5T_COMPOUND)
+            if(type==H5T_COMPOUND) {
                 dt->shared->u.compnd.packed=TRUE;       /* Start out packed */
+                dt->shared->u.compnd.sorted=H5T_SORT_VALUE; /* Start out sorted by value */
+            } /* end if */
             else if(type==H5T_OPAQUE)
                 /* Initialize the tag in case it's not set later.  A null tag will
                  * cause problems for later operations. */
@@ -3173,13 +3175,16 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
              * name and type fields of each new member with copied values.
              * That is, H5T_copy() is a deep copy.
              */
-            new_dt->shared->u.compnd.memb = H5MM_malloc(new_dt->shared->u.compnd.nalloc *
-                                sizeof(H5T_cmemb_t));
-            if (NULL==new_dt->shared->u.compnd.memb)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+            /* Only malloc if space has been allocated for members - NAF */
+            if(new_dt->shared->u.compnd.nalloc > 0) {
+                new_dt->shared->u.compnd.memb = H5MM_malloc(new_dt->shared->u.compnd.nalloc *
+                                    sizeof(H5T_cmemb_t));
+                if (NULL==new_dt->shared->u.compnd.memb)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-            HDmemcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
-                 new_dt->shared->u.compnd.nmembs * sizeof(H5T_cmemb_t));
+                HDmemcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
+                    new_dt->shared->u.compnd.nmembs * sizeof(H5T_cmemb_t));
+            } /* end if */
 
             for(i = 0; i < new_dt->shared->u.compnd.nmembs; i++) {
                 unsigned	j;
