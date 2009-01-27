@@ -149,81 +149,81 @@ void print_type(hid_t type)
   return;
  case H5T_INTEGER:
   if (H5Tequal(type, H5T_STD_I8BE)) {
-   printf("H5T_STD_I8BE");
+   parallel_print("H5T_STD_I8BE");
   } else if (H5Tequal(type, H5T_STD_I8LE)) {
-   printf("H5T_STD_I8LE");
+   parallel_print("H5T_STD_I8LE");
   } else if (H5Tequal(type, H5T_STD_I16BE)) {
-   printf("H5T_STD_I16BE");
+   parallel_print("H5T_STD_I16BE");
   } else if (H5Tequal(type, H5T_STD_I16LE)) {
-   printf("H5T_STD_I16LE");
+   parallel_print("H5T_STD_I16LE");
   } else if (H5Tequal(type, H5T_STD_I32BE)) {
-   printf("H5T_STD_I32BE");
+   parallel_print("H5T_STD_I32BE");
   } else if (H5Tequal(type, H5T_STD_I32LE)) {
-   printf("H5T_STD_I32LE");
+   parallel_print("H5T_STD_I32LE");
   } else if (H5Tequal(type, H5T_STD_I64BE)) {
-   printf("H5T_STD_I64BE");
+   parallel_print("H5T_STD_I64BE");
   } else if (H5Tequal(type, H5T_STD_I64LE)) {
-   printf("H5T_STD_I64LE");
+   parallel_print("H5T_STD_I64LE");
   } else if (H5Tequal(type, H5T_STD_U8BE)) {
-   printf("H5T_STD_U8BE");
+   parallel_print("H5T_STD_U8BE");
   } else if (H5Tequal(type, H5T_STD_U8LE)) {
-   printf("H5T_STD_U8LE");
+   parallel_print("H5T_STD_U8LE");
   } else if (H5Tequal(type, H5T_STD_U16BE)) {
-   printf("H5T_STD_U16BE");
+   parallel_print("H5T_STD_U16BE");
   } else if (H5Tequal(type, H5T_STD_U16LE)) {
-   printf("H5T_STD_U16LE");
+   parallel_print("H5T_STD_U16LE");
   } else if (H5Tequal(type, H5T_STD_U32BE)) {
-   printf("H5T_STD_U32BE");
+   parallel_print("H5T_STD_U32BE");
   } else if (H5Tequal(type, H5T_STD_U32LE)) {
-   printf("H5T_STD_U32LE");
+   parallel_print("H5T_STD_U32LE");
   } else if (H5Tequal(type, H5T_STD_U64BE)) {
-   printf("H5T_STD_U64BE");
+   parallel_print("H5T_STD_U64BE");
   } else if (H5Tequal(type, H5T_STD_U64LE)) {
-   printf("H5T_STD_U64LE");
+   parallel_print("H5T_STD_U64LE");
   } else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
-   printf("H5T_NATIVE_SCHAR");
+   parallel_print("H5T_NATIVE_SCHAR");
   } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
-   printf("H5T_NATIVE_UCHAR");
+   parallel_print("H5T_NATIVE_UCHAR");
   } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
-   printf("H5T_NATIVE_SHORT");
+   parallel_print("H5T_NATIVE_SHORT");
   } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
-   printf("H5T_NATIVE_USHORT");
+   parallel_print("H5T_NATIVE_USHORT");
   } else if (H5Tequal(type, H5T_NATIVE_INT)) {
-   printf("H5T_NATIVE_INT");
+   parallel_print("H5T_NATIVE_INT");
   } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
-   printf("H5T_NATIVE_UINT");
+   parallel_print("H5T_NATIVE_UINT");
   } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
-   printf("H5T_NATIVE_LONG");
+   parallel_print("H5T_NATIVE_LONG");
   } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
-   printf("H5T_NATIVE_ULONG");
+   parallel_print("H5T_NATIVE_ULONG");
   } else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
-   printf("H5T_NATIVE_LLONG");
+   parallel_print("H5T_NATIVE_LLONG");
   } else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
-   printf("H5T_NATIVE_ULLONG");
+   parallel_print("H5T_NATIVE_ULLONG");
   } else {
-   printf("undefined integer");
+   parallel_print("undefined integer");
   }
   break;
 
  case H5T_FLOAT:
   if (H5Tequal(type, H5T_IEEE_F32BE)) {
-   printf("H5T_IEEE_F32BE");
+   parallel_print("H5T_IEEE_F32BE");
   } else if (H5Tequal(type, H5T_IEEE_F32LE)) {
-   printf("H5T_IEEE_F32LE");
+   parallel_print("H5T_IEEE_F32LE");
   } else if (H5Tequal(type, H5T_IEEE_F64BE)) {
-   printf("H5T_IEEE_F64BE");
+   parallel_print("H5T_IEEE_F64BE");
   } else if (H5Tequal(type, H5T_IEEE_F64LE)) {
-   printf("H5T_IEEE_F64LE");
+   parallel_print("H5T_IEEE_F64LE");
   } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
-   printf("H5T_NATIVE_FLOAT");
+   parallel_print("H5T_NATIVE_FLOAT");
   } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
-   printf("H5T_NATIVE_DOUBLE");
+   parallel_print("H5T_NATIVE_DOUBLE");
 #if H5_SIZEOF_LONG_DOUBLE !=0
   } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
-   printf("H5T_NATIVE_LDOUBLE");
+   parallel_print("H5T_NATIVE_LDOUBLE");
 #endif
   } else {
-   printf("undefined float");
+   parallel_print("undefined float");
   }
   break;
 
