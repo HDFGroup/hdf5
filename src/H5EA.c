@@ -906,7 +906,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     } /* end if */
 
     /* Release the extensible array wrapper */
-    (void)H5FL_FREE(H5EA_t, ea);
+    ea = H5FL_FREE(H5EA_t, ea);
 
 CATCH
 

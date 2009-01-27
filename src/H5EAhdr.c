@@ -140,6 +140,10 @@ H5EA__hdr_alloc(H5F_t *f, const H5EA_class_t *cls))
     /* Set the class of the array */
     hdr->cparam.cls = cls;
 
+    /* Create the callback context */
+    if(NULL == (hdr->cb_ctx = (*cls->crt_context)(f)))
+	H5E_THROW(H5E_CANTCREATE, "unable to create extensible array client callback context")
+
     /* Set the return value */
     ret_value = hdr;
 
@@ -686,6 +690,11 @@ H5EA__hdr_dest(H5EA_hdr_t *hdr))
     HDassert(hdr);
     HDassert(hdr->rc == 0);
 
+    /* Destroy the callback context */
+    if((*hdr->cparam.cls->dst_context)(hdr->cb_ctx) < 0)
+	H5E_THROW(H5E_CANTRELEASE, "unable to destroy extensible array client callback context")
+    hdr->cb_ctx = NULL;
+
     /* Check for data block element buffer factory info to free */
     if(hdr->elmt_fac.fac) {
         unsigned u;         /* Local index variable */
@@ -712,7 +721,7 @@ H5EA__hdr_dest(H5EA_hdr_t *hdr))
         hdr->sblk_info = (H5EA_sblk_info_t *)H5FL_SEQ_FREE(H5EA_sblk_info_t, hdr->sblk_info);
 
     /* Free the shared info itself */
-    (void)H5FL_FREE(H5EA_hdr_t, hdr);
+    hdr = H5FL_FREE(H5EA_hdr_t, hdr);
 
 CATCH
 

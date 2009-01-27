@@ -464,7 +464,7 @@ typedef struct H5EA_hdr_t {
     /* Information for H5AC cache functions, _must_ be first field in structure */
     H5AC_info_t cache_info;
 
-    /* Extensible array configuration/creation parameters (stored) */
+    /* Extensible array configuration/creation parameters (stored in header) */
     H5EA_create_t cparam;               /* Creation parameters for extensible array */
 
     /* Index block information (stored in header) */
@@ -496,6 +496,9 @@ typedef struct H5EA_hdr_t {
 
     /* Data block information (not stored) */
     size_t dblk_page_nelmts;            /* # of elements per data block page */
+
+    /* Client information (not stored) */
+    void *cb_ctx;                       /* Callback context */
 } H5EA_hdr_t;
 
 /* The extensible array index block information */
