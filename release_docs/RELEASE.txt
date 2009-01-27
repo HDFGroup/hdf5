@@ -113,6 +113,8 @@ Bug Fixes since HDF5-1.8.2
 
     Library
     -------
+    - Changed H5Tset_order to properly reject H5T_ORDER_NONE for most datatypes.
+      NAF - 2009/01/27
     - Fixed a bug where H5Tpack wouldn't remove trailing space from an otherwise
       packed compound type. NAF - 2009/01/14
     - Fixed up some old v2 btree assertions that get run in debug mode that
