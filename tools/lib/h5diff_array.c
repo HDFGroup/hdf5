@@ -1825,8 +1825,8 @@ hsize_t diff_datum(void       *_mem1,
         {
             float temp1_float;
             float temp2_float;
-            int   isnan1;
-            int   isnan2;
+            int   isnan1=0;
+            int   isnan2=0;
 
             assert(type_size==sizeof(float));
 
@@ -1847,8 +1847,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
-                isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
+                    isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+                }
 
                 if ( !isnan1 && !isnan2)
                 {
@@ -1877,8 +1880,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
-                isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
+                    isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+                }
 
                 if ( !isnan1 && !isnan2)
                 {
@@ -1927,8 +1933,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
-                isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
+                    isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+                }
 
                 if ( !isnan1 && !isnan2)
                 {
@@ -1992,8 +2001,8 @@ hsize_t diff_datum(void       *_mem1,
         {
             double temp1_double;
             double temp2_double;
-            int    isnan1;
-            int    isnan2;
+            int    isnan1=0;
+            int    isnan2=0;
 
 
             assert(type_size==sizeof(double));
@@ -2014,8 +2023,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
-                isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
+                    isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+                }
 
                 if ( !isnan1 && !isnan2)
                 {
@@ -2045,8 +2057,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
-                isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
+                    isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+                }
 
                 if ( !isnan1 && !isnan2)
                 {
@@ -2095,8 +2110,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
-                isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_DOUBLE,&temp1_double);
+                    isnan2 = my_isnan(FLT_DOUBLE,&temp2_double);
+                }
 
                 if ( !isnan1 && !isnan2)
                 {
@@ -2163,8 +2181,8 @@ hsize_t diff_datum(void       *_mem1,
         {
             long double temp1_double;
             long double temp2_double;
-            int         isnan1;
-            int          isnan2;
+            int         isnan1=0;
+            int         isnan2=0;
 
 
             assert(type_size==sizeof(long double));
@@ -2185,8 +2203,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
-                isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
+                    isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+                }
 
                 if ( !isnan1 && !isnan2)
                 {
@@ -2216,8 +2237,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
-                isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
+                    isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+                }
 
                 if ( !isnan1 && !isnan2)
                 {
@@ -2266,8 +2290,11 @@ hsize_t diff_datum(void       *_mem1,
                 * detect NaNs
                 *-------------------------------------------------------------------------
                 */
-                isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
-                isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+                if ( options->do_nans )
+                {
+                    isnan1 = my_isnan(FLT_LDOUBLE,&temp1_double);
+                    isnan2 = my_isnan(FLT_LDOUBLE,&temp2_double);
+                }
 
                 if ( !isnan1 && !isnan2)
                 {
@@ -2755,8 +2782,8 @@ hsize_t diff_float(unsigned char *mem1,
     hsize_t     i;
     double      per;
     int         both_zero;
-    int         isnan1;
-    int         isnan2;
+    int         isnan1=0;
+    int         isnan2=0;
 
 
  /*-------------------------------------------------------------------------
@@ -2775,8 +2802,11 @@ hsize_t diff_float(unsigned char *mem1,
             * detect NaNs
             *-------------------------------------------------------------------------
             */
-            isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
-            isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+            if ( options->do_nans )
+            {
+                isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
+                isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+            }
 
             if ( !isnan1 && !isnan2)
             {
@@ -2813,8 +2843,11 @@ hsize_t diff_float(unsigned char *mem1,
             * detect NaNs
             *-------------------------------------------------------------------------
             */
-            isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
-            isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+            if ( options->do_nans )
+            {
+                isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
+                isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+            }
 
             if ( !isnan1 && !isnan2)
             {
@@ -2872,8 +2905,11 @@ hsize_t diff_float(unsigned char *mem1,
             * detect NaNs
             *-------------------------------------------------------------------------
             */
-            isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
-            isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+            if ( options->do_nans )
+            {
+                isnan1 = my_isnan(FLT_FLOAT,&temp1_float);
+                isnan2 = my_isnan(FLT_FLOAT,&temp2_float);
+            }
 
             if ( !isnan1 && !isnan2)
             {

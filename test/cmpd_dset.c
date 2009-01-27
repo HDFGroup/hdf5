@@ -23,6 +23,7 @@
 
 #define H5T_PACKAGE
 #include "H5Tpkg.h"		/*to turn off hardware conversions*/
+#include "H5Iprivate.h"
 
 #include "h5test.h"
 
@@ -120,6 +121,7 @@ typedef struct {
 
 #define NX	100u
 #define NY	2000u
+#define PACK_NMEMBS     100
 
 
 /*-------------------------------------------------------------------------
@@ -600,7 +602,7 @@ test_compound (char *filename, hid_t fapl)
     if ((s8_m_sid = H5Screate_simple (2, h_size, NULL)) < 0) goto error;
 
     /* Read the dataset */
-    s8 = calloc ((size_t)(h_size[0]*h_size[1]), sizeof(s1_t));
+    s8 = (s1_t *) calloc ((size_t)(h_size[0]*h_size[1]), sizeof(s1_t));
     assert (s8);
     if (H5Dread (dataset, s1_tid, s8_m_sid, s8_f_sid, H5P_DEFAULT, s8) < 0) {
 	goto error;
@@ -767,7 +769,7 @@ test_compound (char *filename, hid_t fapl)
     f_offset[1] = NY/3;
     h_size[0] = 2*NX/3 - f_offset[0];
     h_size[1] = 2*NY/3 - f_offset[1];
-    s11 = malloc ((size_t)h_size[0]*(size_t)h_size[1]*sizeof(s4_t));
+    s11 = (s4_t *) malloc ((size_t)h_size[0]*(size_t)h_size[1]*sizeof(s4_t));
     assert (s11);
 
     /* Initialize */
@@ -1717,6 +1719,248 @@ error:
     return 1;
 }
 
+/* Error macro that outputs the state of the randomly generated variables so the
+ * failure can be reproduced */
+#define PACK_OOO_ERROR                                                         \
+{                                                                              \
+    int _i;                                                                    \
+    H5_FAILED(); AT();                                                         \
+    printf("    Insertion order =");                                           \
+    for(_i=0; _i<PACK_NMEMBS; _i++)                                            \
+        printf(" %d", order[_i]);                                              \
+    printf("\n    Inner compound order = %d, location = %d\n", sub_cmpd_order, order[sub_cmpd_order]); \
+    fflush(stdout);                                                            \
+    goto error;                                                                \
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_pack_ooo
+ *
+ * Purpose:	Test inserting fields into a compound out of offset order.
+ *              Verifies that the compound 
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	1
+ *
+ * Programmer:	Neil Fortner
+ *              Thursday, 22 January 2009
+ *
+ * Modifications:
+ *-------------------------------------------------------------------------
+ */
+static int
+test_pack_ooo(void)
+{
+    hid_t       cmpd, sub_cmpd;     /* Datatype IDs */
+    H5T_t       *dt;                /* Datatype pointer */
+    unsigned    order[PACK_NMEMBS]; /* Order of insertion */
+    unsigned    free_order[PACK_NMEMBS]; /* Index of remaining free slots in order */
+    unsigned    num_free;           /* Number of free slots in order */
+    unsigned    sub_cmpd_order;     /* Order to insert the inner compound */
+    char        name[6];            /* Member name */
+    unsigned    i, j;               /* Indices */
+
+    HDsrand((unsigned) time(NULL));
+
+    /* Initialize "free_order" array to indicate that all slots in order are
+     * free */
+    for(i=0; i<PACK_NMEMBS; i++)
+        free_order[i] = i;
+
+    /* Create "order" array */
+    for(i=0; i<PACK_NMEMBS; i++) {
+        /* Generate index into free_order array */
+        num_free = PACK_NMEMBS - i;
+        j = HDrand() % num_free;
+
+        /* Update order array at the randomly generated (but guaranteed to be
+         * free) location */
+        order[free_order[j]] = i;
+
+        /* Reshape free_order to remove j (which is no longer free) */
+        if(j < (num_free - 1))
+            HDmemmove(&free_order[j], &free_order[j+1], (num_free - j - 1) * sizeof(free_order[0]));
+    } /* end for */
+
+    /* Generate order to insert inner compound type */
+    sub_cmpd_order = HDrand() % PACK_NMEMBS;
+
+    TESTING("random member insertion with empty compound subtype");
+
+    /* Create inner compound type.  It will be empty for the first run */
+    if((sub_cmpd = H5Tcreate(H5T_COMPOUND, 4)) < 0) PACK_OOO_ERROR
+
+    /* Create main compound type, with extra space at the end */
+    if((cmpd = H5Tcreate(H5T_COMPOUND, (4 * PACK_NMEMBS) + 1)) < 0) PACK_OOO_ERROR
+
+    /* Insert the compound members in the random order previously generated */
+    for(i=0; i<PACK_NMEMBS; i++) {
+        sprintf(name, "%05d", i);
+        if(i == sub_cmpd_order) {
+            if(H5Tinsert(cmpd, name, 4 * order[i], sub_cmpd) < 0) PACK_OOO_ERROR
+        } else
+            if(H5Tinsert(cmpd, name, 4 * order[i], H5T_STD_I32BE) < 0) PACK_OOO_ERROR
+    } /* end for */
+
+    /* Verify that the compound is not packed */
+    if(NULL == (dt = (H5T_t *) H5I_object_verify(cmpd, H5I_DATATYPE))) PACK_OOO_ERROR
+    if(dt->shared->u.compnd.packed) PACK_OOO_ERROR
+
+    /* Close the main compound */
+    if(H5Tclose(cmpd) < 0) PACK_OOO_ERROR
+
+    PASSED();
+
+    TESTING("random member insertion with full compound subtype");
+
+    /* Complete the inner compound type */
+    if(H5Tinsert(sub_cmpd, "int", 0, H5T_STD_I32LE) < 0) PACK_OOO_ERROR
+
+    /* Recreate main compound type */
+    if((cmpd = H5Tcreate(H5T_COMPOUND, (4 * PACK_NMEMBS) + 1)) < 0) PACK_OOO_ERROR
+
+    /* Insert the compound members in the random order previously generated */
+    for(i=0; i<PACK_NMEMBS; i++) {
+        sprintf(name, "%05d", i);
+        if(i == sub_cmpd_order) {
+            if(H5Tinsert(cmpd, name, 4 * order[i], sub_cmpd) < 0) PACK_OOO_ERROR
+        } else
+            if(H5Tinsert(cmpd, name, 4 * order[i], H5T_STD_I32BE) < 0) PACK_OOO_ERROR
+    } /* end for */
+
+    /* Verify that the compound is packed */
+    if(NULL == (dt = (H5T_t *) H5I_object_verify(cmpd, H5I_DATATYPE))) PACK_OOO_ERROR
+    if(!dt->shared->u.compnd.packed) PACK_OOO_ERROR
+
+    /* Close */
+    if(H5Tclose(cmpd) < 0) PACK_OOO_ERROR
+    if(H5Tclose(sub_cmpd) < 0) PACK_OOO_ERROR
+
+    PASSED();
+
+    /* Change to reverse ordering, insert compound last */
+    for(i=0; i<PACK_NMEMBS; i++)
+        order[i] = PACK_NMEMBS - i - 1;
+    sub_cmpd_order = PACK_NMEMBS - 1;
+
+    TESTING("reverse member insertion with empty compound subtype");
+
+    /* Create inner compound type.  It will be empty for the first run */
+    if((sub_cmpd = H5Tcreate(H5T_COMPOUND, 4)) < 0) TEST_ERROR
+
+    /* Create main compound type, with extra space at the end */
+    if((cmpd = H5Tcreate(H5T_COMPOUND, (4 * PACK_NMEMBS) + 1)) < 0) TEST_ERROR
+
+    /* Insert the compound members in the reverse order previously generated */
+    for(i=0; i<PACK_NMEMBS; i++) {
+        sprintf(name, "%05d", i);
+        if(i == sub_cmpd_order) {
+            if(H5Tinsert(cmpd, name, 4 * order[i], sub_cmpd) < 0) TEST_ERROR
+        } else
+            if(H5Tinsert(cmpd, name, 4 * order[i], H5T_STD_I32BE) < 0) TEST_ERROR
+    } /* end for */
+
+    /* Verify that the compound is not packed */
+    if(NULL == (dt = (H5T_t *) H5I_object_verify(cmpd, H5I_DATATYPE))) TEST_ERROR
+    if(dt->shared->u.compnd.packed) TEST_ERROR
+
+    /* Close the main compound */
+    if(H5Tclose(cmpd) < 0) TEST_ERROR
+
+    PASSED();
+
+    TESTING("reverse member insertion with full compound subtype");
+
+    /* Complete the inner compound type */
+    if(H5Tinsert(sub_cmpd, "int", 0, H5T_STD_I32LE) < 0) TEST_ERROR
+
+    /* Recreate main compound type */
+    if((cmpd = H5Tcreate(H5T_COMPOUND, (4 * PACK_NMEMBS) + 1)) < 0) TEST_ERROR
+
+    /* Insert the compound members in the reverse order previously generated */
+    for(i=0; i<PACK_NMEMBS; i++) {
+        sprintf(name, "%05d", i);
+        if(i == sub_cmpd_order) {
+            if(H5Tinsert(cmpd, name, 4 * order[i], sub_cmpd) < 0) TEST_ERROR
+        } else
+            if(H5Tinsert(cmpd, name, 4 * order[i], H5T_STD_I32BE) < 0) TEST_ERROR
+    } /* end for */
+
+    /* Verify that the compound is packed */
+    if(NULL == (dt = (H5T_t *) H5I_object_verify(cmpd, H5I_DATATYPE))) TEST_ERROR
+    if(!dt->shared->u.compnd.packed) TEST_ERROR
+
+    /* Close */
+    if(H5Tclose(cmpd) < 0) TEST_ERROR
+    if(H5Tclose(sub_cmpd) < 0) TEST_ERROR
+
+    PASSED();
+
+    /* Change to forward ordering, insert compound first */
+    sub_cmpd_order = 0;
+
+    TESTING("forward member insertion with empty compound subtype");
+
+    /* Create inner compound type.  It will be empty for the first run */
+    if((sub_cmpd = H5Tcreate(H5T_COMPOUND, 4)) < 0) TEST_ERROR
+
+    /* Create main compound type, with extra space at the end */
+    if((cmpd = H5Tcreate(H5T_COMPOUND, (4 * PACK_NMEMBS) + 1)) < 0) TEST_ERROR
+
+    /* Insert the compound members in forward order */
+    for(i=0; i<PACK_NMEMBS; i++) {
+        sprintf(name, "%05d", i);
+        if(i == sub_cmpd_order) {
+            if(H5Tinsert(cmpd, name, 4 * i, sub_cmpd) < 0) TEST_ERROR
+        } else
+            if(H5Tinsert(cmpd, name, 4 * i, H5T_STD_I32BE) < 0) TEST_ERROR
+    } /* end for */
+
+    /* Verify that the compound is not packed */
+    if(NULL == (dt = (H5T_t *) H5I_object_verify(cmpd, H5I_DATATYPE))) TEST_ERROR
+    if(dt->shared->u.compnd.packed) TEST_ERROR
+
+    /* Close the main compound */
+    if(H5Tclose(cmpd) < 0) TEST_ERROR
+
+    PASSED();
+
+    TESTING("forward member insertion with full compound subtype");
+
+    /* Complete the inner compound type */
+    if(H5Tinsert(sub_cmpd, "int", 0, H5T_STD_I32LE) < 0) TEST_ERROR
+
+    /* Recreate main compound type */
+    if((cmpd = H5Tcreate(H5T_COMPOUND, (4 * PACK_NMEMBS) + 1)) < 0) TEST_ERROR
+
+    /* Insert the compound members in forward order */
+    for(i=0; i<PACK_NMEMBS; i++) {
+        sprintf(name, "%05d", i);
+        if(i == sub_cmpd_order) {
+            if(H5Tinsert(cmpd, name, 4 * i, sub_cmpd) < 0) TEST_ERROR
+        } else
+            if(H5Tinsert(cmpd, name, 4 * i, H5T_STD_I32BE) < 0) TEST_ERROR
+    } /* end for */
+
+    /* Verify that the compound is packed */
+    if(NULL == (dt = (H5T_t *) H5I_object_verify(cmpd, H5I_DATATYPE))) TEST_ERROR
+    if(!dt->shared->u.compnd.packed) TEST_ERROR
+
+    /* Close */
+    if(H5Tclose(cmpd) < 0) TEST_ERROR
+    if(H5Tclose(sub_cmpd) < 0) TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    puts("*** DATASET TESTS FAILED ***");
+    return 1;
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -1767,6 +2011,9 @@ main (int argc, char *argv[])
     puts("Testing the optimization of when the dest type is a subset of the source:");
     h5_fixname(FILENAME[2], fapl_id, fname, sizeof(fname));
     nerrors += test_hdf5_dst_subset(fname, fapl_id);
+
+    puts("Testing that compound types can be packed out of order:");
+    nerrors += test_pack_ooo();
 
     if (nerrors) {
         printf("***** %u FAILURE%s! *****\n",

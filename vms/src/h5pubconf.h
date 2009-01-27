@@ -1,4 +1,3 @@
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
  * Copyright by the Board of Trustees of the University of Illinois.         *
@@ -99,6 +98,13 @@
 
 /* Define to 1 if you have the `fseek64' function. */
 /* #undef H5_HAVE_FSEEK64 */
+
+/* Define if the compiler understands C99 designated initialization of structs
+   and unions */
+#define H5_HAVE_C99_DESIGNATED_INITIALIZER 1
+
+/* Define if the compiler understands the __func__ keyword */
+#define H5_HAVE_C99_FUNC 1
 
 /* Define if the function stack tracing code is to be compiled in */
 /*#define H5_HAVE_CODESTACK 1*/
@@ -349,6 +355,9 @@
 /* Define to 1 if you have the `waitpid' function. */
 /*#undefine H5_HAVE_WAITPID */
 
+/* Define if your system has OpenVMS path name. This macro is added by hand. */
+#define H5_HAVE_VMS_PATH 1
+
 /* Define to 1 if you have the <winsock.h> header file. */
 /* #undef H5_HAVE_WINSOCK_H */
 
@@ -391,13 +400,13 @@
 #define H5_PACKAGE_NAME "HDF5"
 
 /* Define to the full name and version of this package. */
-#define H5_PACKAGE_STRING "HDF5 1.9.27"
+#define H5_PACKAGE_STRING "HDF5 1.9.29"
 
 /* Define to the one symbol short name of this package. */
 #define H5_PACKAGE_TARNAME "hdf5"
 
 /* Define to the version of this package. */
-#define H5_PACKAGE_VERSION "1.9.27"
+#define H5_PACKAGE_VERSION "1.9.29"
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #define H5_PRINTF_LL_WIDTH "ll"
@@ -551,7 +560,7 @@
 #define H5_ULLONG_TO_LDOUBLE_PRECISION 1
 
 /* Version number of package */
-#define H5_VERSION "1.9.27"
+#define H5_VERSION "1.9.29"
 
 /* Define if vsnprintf() returns the correct value for formatted strings that
    don't fit into size allowed */

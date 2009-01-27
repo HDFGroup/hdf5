@@ -45,6 +45,11 @@
 /******************/
 /* Local Typedefs */
 /******************/
+/* "Key" (+ user data) for bsearch callback */
+typedef struct{
+    size_t              offset;     /* Offset of member to be added */
+    const H5T_cmemb_t   *max_under; /* Member with maximum offset seen that is not above "offset" */
+} H5T_insert_compar_t;
 
 
 /********************/
@@ -416,6 +421,48 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5T_insert_compar
+ *
+ * Purpose:	Callback function for bsearch called from H5T_insert.
+ *              Reports whether obj has a lower of higher offset than
+ *              that stored in key.  Also keeps track of the highest
+ *              offset seen that is not higher than that in key.
+ *
+ * Return:	-1 if key < obj
+ *              0 if key == obj
+ *              1 if key > obj
+ *
+ * Programmer:	Neil Fortner
+ *		Wednesday, January  7, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5T_insert_compar(const void *_key, const void *_obj)
+{
+    H5T_insert_compar_t *key = *(H5T_insert_compar_t * const *)_key;    /* User data */
+    const H5T_cmemb_t   *memb = (const H5T_cmemb_t *)_obj;              /* Compound member being examined */
+    int                 ret_value;                                      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5T_insert_compar)
+
+    if(key->offset > memb->offset) {
+        if(key->max_under == NULL || memb->offset > key->max_under->offset)
+            key->max_under = memb;
+        ret_value = 1;
+    } /* end if */
+    else if(key->offset < memb->offset)
+        ret_value = -1;
+    else
+        ret_value = 0;  /* Should not happen */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_insert_compar() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5T_insert
  *
  * Purpose:	Adds a new MEMBER to the compound datatype PARENT.  The new
@@ -435,6 +482,8 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 {
     unsigned	idx;                        /* Index of member to insert */
     size_t	total_size;
+    H5T_insert_compar_t key;                /* Key for bsearch compare function */
+    H5T_insert_compar_t *keyptr = &key;     /* Pointer to key */
     unsigned	i;                          /* Local index variable */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
@@ -451,19 +500,38 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
 	if(!HDstrcmp(parent->shared->u.compnd.memb[i].name, name))
 	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member name is not unique")
 
-    /* Does the new member overlap any existing member ? */
     total_size = member->shared->size;
-    for(i = 0; i < parent->shared->u.compnd.nmembs; i++)
-	if((offset <= parent->shared->u.compnd.memb[i].offset &&
-                 (offset + total_size) > parent->shared->u.compnd.memb[i].offset) ||
-                (parent->shared->u.compnd.memb[i].offset <= offset &&
-                 (parent->shared->u.compnd.memb[i].offset +
-                 parent->shared->u.compnd.memb[i].size) > offset))
-	    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member overlaps with another member")
 
     /* Does the new member overlap the end of the compound type? */
     if((offset + total_size) > parent->shared->size)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member extends past end of compound type")
+
+    if(parent->shared->u.compnd.sorted != H5T_SORT_VALUE)
+        if(H5T_sort_value(parent, NULL) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_CANTCOMPARE, FAIL, "value sort failed")
+
+    /* Find the position to insert the new member */
+    if(parent->shared->u.compnd.nmembs == 0)
+        idx = 0;
+    else {
+        /* Key value (including user data) for compar callback */
+        key.offset = offset;
+        key.max_under = NULL;
+
+        /* Do a binary search on the offsets of the (now sorted) members.  We do
+         * not expect to find an exact match (if we do it is an error), rely on
+         * the user data in the key to keep track of the closest member below
+         * the new member. */
+        if(NULL != HDbsearch(&keyptr, parent->shared->u.compnd.memb, parent->shared->u.compnd.nmembs,
+                sizeof(parent->shared->u.compnd.memb[0]), H5T_insert_compar))
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member overlaps with another member")
+        idx = (key.max_under == NULL) ? 0 : (unsigned) (key.max_under - parent->shared->u.compnd.memb + 1);
+    } /* end else */
+
+    /* Does the new member overlap any existing member ? */
+    if((idx < parent->shared->u.compnd.nmembs && (offset + total_size) > parent->shared->u.compnd.memb[idx].offset) ||
+            (idx && (parent->shared->u.compnd.memb[idx-1].offset + parent->shared->u.compnd.memb[idx-1].size) > offset))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "member overlaps with another member")
 
     /* Increase member array if necessary */
     if(parent->shared->u.compnd.nmembs >= parent->shared->u.compnd.nalloc) {
@@ -476,38 +544,68 @@ H5T_insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member)
         parent->shared->u.compnd.memb = x;
     } /* end if */
 
-    /* Add member to end of member array */
-    idx = parent->shared->u.compnd.nmembs;
-    parent->shared->u.compnd.memb[idx].name = H5MM_xstrdup(name);
-    parent->shared->u.compnd.memb[idx].offset = offset;
-    parent->shared->u.compnd.memb[idx].size = total_size;
-    parent->shared->u.compnd.memb[idx].type = H5T_copy(member, H5T_COPY_ALL);
-
-    parent->shared->u.compnd.sorted = H5T_SORT_NONE;
-    parent->shared->u.compnd.nmembs++;
-
-    /* Determine if the compound datatype stayed packed */
+    /* Determine if the compound datatype stays packed */
     if(parent->shared->u.compnd.packed) {
         /* Check if the member type is packed */
-        if(H5T_is_packed(parent->shared->u.compnd.memb[idx].type) > 0) {
+        if(H5T_is_packed(member) > 0) {
             if(idx == 0) {
                 /* If the is the first member, the datatype is not packed
                  * if the first member isn't at offset 0
                  */
-                if(parent->shared->u.compnd.memb[idx].offset > 0)
+                if(offset > 0)
                     parent->shared->u.compnd.packed = FALSE;
             } /* end if */
             else {
                 /* If the is not the first member, the datatype is not
                  * packed if the new member isn't adjoining the previous member
                  */
-                if(parent->shared->u.compnd.memb[idx].offset != (parent->shared->u.compnd.memb[idx - 1].offset + parent->shared->u.compnd.memb[idx - 1].size))
+                if(offset != (parent->shared->u.compnd.memb[idx - 1].offset + parent->shared->u.compnd.memb[idx - 1].size))
                     parent->shared->u.compnd.packed = FALSE;
             } /* end else */
         } /* end if */
         else
             parent->shared->u.compnd.packed = FALSE;
     } /* end if */
+    else
+        /* Check if inserting this member causes the parent to become packed */
+        /* First check if it completely closes a gap */
+        /* No need to check if it's being appended to the end */
+        if(idx != parent->shared->u.compnd.nmembs
+                && (offset + total_size) == parent->shared->u.compnd.memb[idx].offset
+                && (idx == 0 ? offset == 0  : (parent->shared->u.compnd.memb[idx-1].offset
+                + parent->shared->u.compnd.memb[idx-1].size) == offset)
+                && H5T_is_packed(member) > 0) {
+
+            /* Start out packed */
+            parent->shared->u.compnd.packed = TRUE;
+
+            /* Check if the entire type is now packed */
+            if((idx != 0 && parent->shared->u.compnd.memb[0].offset != 0)
+                    || !H5T_is_packed(parent->shared->u.compnd.memb[0].type))
+                parent->shared->u.compnd.packed = FALSE;
+            else
+                for(i = 1; i < parent->shared->u.compnd.nmembs; i++)
+                    if((i != idx && parent->shared->u.compnd.memb[i].offset
+                            != (parent->shared->u.compnd.memb[i - 1].offset
+                            + parent->shared->u.compnd.memb[i - 1].size))
+                            || !H5T_is_packed(parent->shared->u.compnd.memb[i].type)) {
+                        parent->shared->u.compnd.packed = FALSE;
+                        break;
+                    } /* end if */
+        } /* end if */
+
+    /* Reshape the memb array to accomodate the new member */
+    if(idx != parent->shared->u.compnd.nmembs)
+        HDmemmove(&parent->shared->u.compnd.memb[idx+1], &parent->shared->u.compnd.memb[idx],
+                (parent->shared->u.compnd.nmembs - idx) * sizeof(parent->shared->u.compnd.memb[0]));
+
+    /* Add member to member array */
+    parent->shared->u.compnd.memb[idx].name = H5MM_xstrdup(name);
+    parent->shared->u.compnd.memb[idx].offset = offset;
+    parent->shared->u.compnd.memb[idx].size = total_size;
+    parent->shared->u.compnd.memb[idx].type = H5T_copy(member, H5T_COPY_ALL);
+
+    parent->shared->u.compnd.nmembs++;
 
     /* Set the "force conversion" flag if the field's datatype indicates */
     if(member->shared->force_conv == TRUE)
@@ -631,8 +729,13 @@ H5T_is_packed(const H5T_t *dt)
         dt = dt->shared->parent;
 
     /* If this is a compound datatype, check if it is packed */
-    if(dt->shared->type == H5T_COMPOUND)
-        ret_value = (htri_t)dt->shared->u.compnd.packed;
+    if(dt->shared->type == H5T_COMPOUND) {
+        H5T_compnd_t *compnd = &(dt->shared->u.compnd); /* Convenience pointer to compound info */
+        ret_value = (htri_t)(compnd->packed && compnd->nmembs > 0
+                && compnd->memb[compnd->nmembs - 1].offset
+                + compnd->memb[compnd->nmembs - 1].size
+                == dt->shared->size);
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_packed() */

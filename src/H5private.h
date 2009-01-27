@@ -1375,8 +1375,7 @@ extern char *strdup(const char *s);
     #define HDpthread_self_ulong()    ((unsigned long)pthread_self())
 #endif /* HDpthread_self_ulong */
 
-
-#ifdef H5_HAVE_WINDOW_PATH
+#if defined(H5_HAVE_WINDOW_PATH)
 
 /* directory delimiter for Windows: slash and backslash are acceptable on Windows */
 #define	DIR_SLASH_SEPC 		'/'
@@ -1396,6 +1395,18 @@ extern char *strdup(const char *s);
     else                                                \
         (ptr = slash);                                  \
 }
+
+#elif defined(H5_HAVE_VMS_PATH)
+
+/* OpenVMS pathname: <disk name>$<partition>:[path]<file name>
+ *     i.g. SYS$SYSUSERS:[LU.HDF5.SRC]H5system.c */
+#define		DIR_SEPC	'.'
+#define		DIR_SEPS	"."
+#define         CHECK_DELIMITER(SS)             (SS == DIR_SEPC)
+#define         CHECK_ABSOLUTE(NAME)            (strrchr(NAME, ':') && strrchr(NAME, '['))
+#define 	CHECK_ABS_DRIVE(NAME)           (0)
+#define 	CHECK_ABS_PATH(NAME)    	(0)
+#define         GET_LAST_DELIMITER(NAME, ptr)   ptr = strrchr(NAME, ']');
 
 #else
 

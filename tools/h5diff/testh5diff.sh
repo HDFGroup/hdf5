@@ -65,6 +65,7 @@ DIFF='diff -c'
 nerrors=0
 verbose=yes
 pmode=			    # default to run h5diff tests
+mydomainname=`domainname 2>/dev/null`
 
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
@@ -561,8 +562,13 @@ TESTING $H5DIFF -v  $SRCFILE2 $SRCFILE2
 TOOLTEST h5diff_90.txt -v $FILE2 $FILE2
 
 # 10. read by hyperslab, print indexes
-TESTING $H5DIFF -v $SRCFILE9 $SRCFILE10
-TOOLTEST h5diff_100.txt -v $FILE9 $FILE10 
+if test -n "$pmode" -a "$mydomainname" = hdfgroup.uiuc.edu; then
+    # skip this test which sometimes hangs in some THG machines
+    SKIP -v $SRCFILE9 $SRCFILE10
+else
+    TESTING $H5DIFF -v $SRCFILE9 $SRCFILE10
+    TOOLTEST h5diff_100.txt -v $FILE9 $FILE10 
+fi
 
 # 11. floating point comparison
 TESTING $H5DIFF -v  $SRCFILE1 $SRCFILE1 g1/d1  g1/d2 
