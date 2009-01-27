@@ -776,6 +776,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
             print_dimensions(rank2,dims2);
             parallel_print(", max dimensions ");
             print_dimensions(rank2,maxdim2);
+            parallel_print("\n");
         }
 
         can_compare = 0;
@@ -820,6 +821,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
                 print_dimensions(rank2,dims2);
                 parallel_print(", max dimensions ");
                 print_dimensions(rank2,maxdim2);
+                parallel_print("\n");
             }
         }
         
