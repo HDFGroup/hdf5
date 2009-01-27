@@ -507,8 +507,11 @@ H5_DLL herr_t H5F_block_write(const H5F_t *f, H5FD_mem_t type, haddr_t addr,
 
 /* Address-related functions */
 H5_DLL void H5F_addr_encode(const H5F_t *, uint8_t** /*in,out*/, haddr_t);
+H5_DLL void H5F_addr_encode_len(size_t addr_len, uint8_t** /*in,out*/, haddr_t);
 H5_DLL void H5F_addr_decode(const H5F_t *, const uint8_t** /*in,out*/,
-			     haddr_t* /*out*/);
+    haddr_t* /*out*/);
+H5_DLL void H5F_addr_decode_len(size_t addr_len, const uint8_t** /*in,out*/,
+    haddr_t* /*out*/);
 
 /* File access property list callbacks */
 H5_DLL herr_t H5P_facc_close(hid_t dxpl_id, void *close_data);
