@@ -1537,23 +1537,27 @@ nh5pget_nfilters_c (hid_t_f *prp_id, int_f* nfilters)
  * Programmer:  Xiangyang Su
  *              Friday, February 25, 2000
  * Modifications:
+ *              Since cd_nelmts has IN/OUT attributes, fixed the input and
+ *              returned value of cd_nelmnts to satisfy this specification.
+ *              MSB January 27, 2009
  *---------------------------------------------------------------------------*/
 int_f
 nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* cd_nelmts, int_f* cd_values, size_t_f *namelen, _fcd name, int_f* filter_id)
 {
     unsigned int  c_flags;
     size_t c_cd_nelmts;
-    size_t c_cd_nelmts_in = (size_t)*cd_nelmts;
     H5Z_filter_t c_filter;
     unsigned int *c_cd_values = NULL;
     char *c_name = NULL;
     unsigned i;
     int ret_value = -1;
 
+    c_cd_nelmts = (size_t)*cd_nelmts;
+
     if(NULL == (c_name = (char *)malloc((size_t)*namelen + 1)))
         goto DONE;
 
-    if(NULL == (c_cd_values = (unsigned int *)malloc(sizeof(unsigned int) * c_cd_nelmts_in)))
+    if(NULL == (c_cd_values = (unsigned int *)malloc(sizeof(unsigned int) * c_cd_nelmts)))
         goto DONE;
 
     /*
@@ -1567,7 +1571,7 @@ nh5pget_filter_c(hid_t_f *prp_id, int_f* filter_number, int_f* flags, size_t_f* 
     *flags = (int_f)c_flags;
     HD5packFstring(c_name, _fcdtocp(name), strlen(c_name));
 
-    for(i = 0; i < c_cd_nelmts_in; i++)
+    for(i = 0; i < c_cd_nelmts; i++)
          cd_values[i] = (int_f)c_cd_values[i];
 
     ret_value = 0;
@@ -1694,13 +1698,17 @@ nh5pget_external_c(hid_t_f *prp_id, int_f *idx, size_t_f* name_size, _fcd name, 
       */
      c_prp_id = (hid_t)*prp_id;
      c_idx = (unsigned)*idx;
-     status = H5Pget_external(c_prp_id, c_idx, c_namelen, c_name, &c_offset, &size );
+     status = H5Pget_external(c_prp_id, c_idx, c_namelen+1, c_name, &c_offset, &size );
 
      if (status < 0) goto DONE;
 
      *offset = (int_f)c_offset;
      *bytes = (hsize_t_f)size;
-     HD5packFstring(c_name, _fcdtocp(name), strlen(c_name));
+     /* Note: if the size of the fortran buffer is larger then the returned string
+      *       from the function then we need to give HD5packFstring the fortran buffer size so 
+      *       that it fills the remaining unused characters with blanks. MSB
+      */
+     HD5packFstring(c_name, _fcdtocp(name), c_namelen+1);
      ret_value = 0;
 
 DONE:
