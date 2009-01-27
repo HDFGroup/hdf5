@@ -5644,6 +5644,172 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_set_order
+ *
+ * Purpose:     Tests H5Tset_order/H5Tget_order.  Verifies that
+ *              H5T_ORDER_NONE cannot be set.
+ *
+ * Return:      Success:        0
+ *
+ *              Failure:        number of errors
+ *
+ * Programmer:  Neil Fortner
+ *              January 23, 2009
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_set_order(void)
+{
+    hid_t       dtype;              /* Datatype ID */
+    H5T_order_t order;              /* Byte order */
+    hsize_t     dims[2] = {3, 4};   /* Array dimenstions */
+    herr_t      ret;                /* Generic return value */
+
+    TESTING("H5Tset/get_order");
+
+    /* Integer */
+    if ((dtype = H5Tcopy(H5T_STD_I32BE)) < 0) TEST_ERROR
+    if (H5T_ORDER_BE != H5Tget_order(dtype)) TEST_ERROR;
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(dtype, H5T_ORDER_NONE);
+    H5E_END_TRY
+    if (ret >= 0) TEST_ERROR
+    if (H5Tset_order(dtype, H5T_ORDER_LE) < 0) TEST_ERROR
+    if (H5T_ORDER_LE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tclose(dtype) < 0) TEST_ERROR
+
+    /* Float */
+    if ((dtype = H5Tcopy(H5T_IEEE_F64LE)) < 0) TEST_ERROR
+    if (H5T_ORDER_LE != H5Tget_order(dtype)) TEST_ERROR;
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(dtype, H5T_ORDER_NONE);
+    H5E_END_TRY
+    if (ret >= 0) TEST_ERROR
+    if (H5Tset_order(dtype, H5T_ORDER_BE) < 0) TEST_ERROR
+    if (H5T_ORDER_BE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tclose(dtype) < 0) TEST_ERROR
+
+    /* Time */
+    if ((dtype = H5Tcopy(H5T_UNIX_D64BE)) < 0) TEST_ERROR
+    if (H5T_ORDER_BE != H5Tget_order(dtype)) TEST_ERROR;
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(dtype, H5T_ORDER_NONE);
+    H5E_END_TRY
+    if (ret >= 0) TEST_ERROR
+    if (H5Tset_order(dtype, H5T_ORDER_LE) < 0) TEST_ERROR
+    if (H5T_ORDER_LE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tclose(dtype) < 0) TEST_ERROR
+
+    /* Fixed length string */
+    if ((dtype = H5Tcopy(H5T_C_S1)) < 0) TEST_ERROR
+    if (H5Tset_size(dtype, 5) < 0) TEST_ERROR
+    if (H5T_ORDER_NONE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tset_order(dtype, H5T_ORDER_NONE) < 0) TEST_ERROR;
+    if (H5T_ORDER_NONE != H5Tget_order(dtype)) TEST_ERROR;
+
+    /* Variable length string */
+    if (H5Tset_size(dtype, H5T_VARIABLE) < 0) TEST_ERROR
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(dtype, H5T_ORDER_NONE);
+    H5E_END_TRY
+    if (ret >= 0) TEST_ERROR
+    if (H5Tset_order(dtype, H5T_ORDER_BE) < 0) TEST_ERROR
+    if (H5T_ORDER_BE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tclose(dtype) < 0) TEST_ERROR
+
+    /* Bitfield */
+    if ((dtype = H5Tcopy(H5T_STD_B16LE)) < 0) TEST_ERROR
+    if (H5T_ORDER_LE != H5Tget_order(dtype)) TEST_ERROR;
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(dtype, H5T_ORDER_NONE);
+    H5E_END_TRY
+    if (ret >= 0) TEST_ERROR
+    if (H5Tset_order(dtype, H5T_ORDER_BE) < 0) TEST_ERROR
+    if (H5T_ORDER_BE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tclose(dtype) < 0) TEST_ERROR
+
+    /* Opaque - functions should fail */
+    if ((dtype = H5Tcreate(H5T_OPAQUE, 96)) < 0) TEST_ERROR
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(dtype, H5T_ORDER_LE);
+        order = H5Tget_order(dtype);
+    H5E_END_TRY
+    if (ret >= 0) TEST_ERROR
+    if (order >= 0) TEST_ERROR
+    if (H5Tclose(dtype) < 0) TEST_ERROR
+
+    /* Compound - functions should fail */
+    if ((dtype = H5Tcreate(H5T_COMPOUND, 48)) < 0) TEST_ERROR
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(dtype, H5T_ORDER_LE);
+        order = H5Tget_order(dtype);
+    H5E_END_TRY
+    if (ret >= 0) TEST_ERROR
+    if (order >= 0) TEST_ERROR
+    if (H5Tclose(dtype) < 0) TEST_ERROR
+
+    /* Object reference */
+    if ((dtype = H5Tcopy(H5T_STD_REF_OBJ)) < 0) TEST_ERROR
+    if (H5T_ORDER_NONE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tset_order(dtype, H5T_ORDER_NONE) < 0) TEST_ERROR;
+    if (H5T_ORDER_NONE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tclose(dtype) < 0) TEST_ERROR
+
+    /* Region reference */
+    if ((dtype = H5Tcopy(H5T_STD_REF_DSETREG)) < 0) TEST_ERROR
+    if (H5T_ORDER_NONE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tset_order(dtype, H5T_ORDER_NONE) < 0) TEST_ERROR;
+    if (H5T_ORDER_NONE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tclose(dtype) < 0) TEST_ERROR
+
+    /* Enum */
+    if ((dtype = H5Tenum_create(H5T_STD_I16BE)) < 0) TEST_ERROR
+    if (H5T_ORDER_BE != H5Tget_order(dtype)) TEST_ERROR;
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(dtype, H5T_ORDER_NONE);
+    H5E_END_TRY
+    if (ret >= 0) TEST_ERROR
+    if (H5Tset_order(dtype, H5T_ORDER_LE) < 0) TEST_ERROR
+    if (H5T_ORDER_LE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tclose(dtype) < 0) TEST_ERROR
+
+    /* Vlen */
+    if ((dtype = H5Tvlen_create(H5T_STD_U64LE)) < 0) TEST_ERROR
+    if (H5T_ORDER_LE != H5Tget_order(dtype)) TEST_ERROR;
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(dtype, H5T_ORDER_NONE);
+    H5E_END_TRY
+    if (ret >= 0) TEST_ERROR
+    if (H5Tset_order(dtype, H5T_ORDER_BE) < 0) TEST_ERROR
+    if (H5T_ORDER_BE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tclose(dtype) < 0) TEST_ERROR
+
+    /* Array */
+    if ((dtype = H5Tarray_create2(H5T_IEEE_F64BE, 2, dims)) < 0) TEST_ERROR
+    if (H5T_ORDER_BE != H5Tget_order(dtype)) TEST_ERROR;
+    H5E_BEGIN_TRY
+        ret = H5Tset_order(dtype, H5T_ORDER_NONE);
+    H5E_END_TRY
+    if (ret >= 0) TEST_ERROR
+    if (H5Tset_order(dtype, H5T_ORDER_LE) < 0) TEST_ERROR
+    if (H5T_ORDER_LE != H5Tget_order(dtype)) TEST_ERROR;
+    if (H5Tclose(dtype) < 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+        H5Tclose (dtype);
+    H5E_END_TRY;
+    return 1;
+} /* end test_set_order() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_deprec
  *
  * Purpose:	Tests deprecated API routines for datatypes.
@@ -5846,6 +6012,7 @@ main(void)
     nerrors += test_conv_bitfield();
     nerrors += test_bitfield_funcs();
     nerrors += test_opaque();
+    nerrors += test_set_order();
 
     if(nerrors) {
         printf("***** %lu FAILURE%s! *****\n",

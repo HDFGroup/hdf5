@@ -158,6 +158,8 @@ H5Tset_order(hid_t type_id, H5T_order_t order)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "operation not allowed after members are defined")
     while (dt->shared->parent)
         dt = dt->shared->parent; /*defer to parent*/
+    if (order == H5T_ORDER_NONE && !(H5T_REFERENCE == dt->shared->type || H5T_IS_FIXED_STRING(dt->shared)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "illegal byte order")
     if (!H5T_IS_ATOMIC(dt->shared))
 	HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified datatype")
 
