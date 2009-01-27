@@ -349,13 +349,20 @@ typedef struct H5O_layout_contig_t {
     hsize_t     size;                   /* Size of data in bytes             */
 } H5O_layout_contig_t;
 
-typedef struct H5O_layout_chunk_t {
+typedef struct H5O_layout_chunk_btree_t {
     haddr_t	addr;			/* File address of B-tree            */
+    H5RC_t     *shared;			/* Ref-counted shared info for B-tree nodes */
+} H5O_layout_chunk_btree_t;
+
+typedef struct H5O_layout_chunk_t {
+    H5D_chunk_index_t idx_type;		/* Type of chunk index               */
     unsigned	ndims;			/* Num dimensions in chunk           */
     uint32_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
     uint32_t    size;                   /* Size of chunk in bytes            */
-    H5RC_t     *btree_shared;           /* Ref-counted info for B-tree nodes */
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked layout operations */
+    union {
+        H5O_layout_chunk_btree_t btree; /* Information for v1 B-tree index   */
+    } u;
 } H5O_layout_chunk_t;
 
 typedef struct H5O_layout_compact_t {

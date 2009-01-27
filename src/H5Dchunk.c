@@ -192,9 +192,10 @@ static herr_t H5D_chunk_mem_cb(void *elem, hid_t type_id, unsigned ndims,
 /* Package Variables */
 /*********************/
 
-/* Compact storage layout I/O ops */
+/* Chunked storage layout I/O ops */
 const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
     H5D_chunk_new,
+    H5D_chunk_is_space_alloc,
     H5D_chunk_io_init,
     H5D_chunk_read,
     H5D_chunk_write,
@@ -214,6 +215,7 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
 
 /* "null" storage layout I/O ops */
 const H5D_layout_ops_t H5D_LOPS_NULL[1] = {{
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -283,7 +285,6 @@ H5D_chunk_new(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
     /* Increment # of chunk dimensions, to account for datatype size as last element */
     dset->shared->layout.u.chunk.ndims++;
     HDassert((unsigned)(dset->shared->layout.u.chunk.ndims) <= NELMTS(dset->shared->layout.u.chunk.dim));
-    HDassert(!H5F_addr_defined(dset->shared->layout.u.chunk.addr));
 
     /* Chunked storage is not compatible with external storage (currently) */
     if(dset->shared->dcpl_cache.efl.nused > 0)
@@ -325,6 +326,35 @@ H5D_chunk_new(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_chunk_new() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_chunk_is_space_alloc
+ *
+ * Purpose:	Query if space is allocated for layout
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, January 15, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5D_chunk_is_space_alloc(const H5O_layout_t *layout)
+{
+    hbool_t ret_value;                  /* Return value */
+
+    FUNC_ENTER_NOAPI_NOFUNC(H5D_chunk_is_space_alloc)
+
+    /* Sanity checks */
+    HDassert(layout);
+
+    /* Query index layer */
+    ret_value = (layout->u.chunk.ops->is_space_alloc)(layout);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_chunk_is_space_alloc() */
 
 
 /*-------------------------------------------------------------------------
@@ -1795,6 +1825,38 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_chunk_idx_reset
+ *
+ * Purpose:	Reset index information
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, January 15, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_chunk_idx_reset(H5O_layout_t *layout)
+{
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_chunk_idx_reset, FAIL)
+
+    /* Sanity checks */
+    HDassert(layout);
+    HDassert(layout->u.chunk.ops);
+
+    /* Reset index structures */
+    if((layout->u.chunk.ops->reset)(layout) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset chunk index info")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_chunk_idx_reset() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_chunk_cinfo_cache_reset
  *
  * Purpose:	Reset the cached chunk info
@@ -2879,7 +2941,6 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
     HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-    HDassert(H5F_addr_defined(layout->u.chunk.addr));
     HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
 
     /* Retrieve the dataset dimensions */
@@ -3451,7 +3512,6 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dims)
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
     HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-    HDassert(H5F_addr_defined(layout->u.chunk.addr));
     HDassert(dxpl_cache);
 
     /* Fill the DXPL cache values for later use */
@@ -3670,12 +3730,9 @@ H5D_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout)
     idx_info.dxpl_id = dxpl_id;
     idx_info.layout = layout;
 
-    /* Check if the index has been created in the file */
-    if(H5F_addr_defined(layout->u.chunk.addr)) {
-        /* Delete the chunked storage information in the file */
-        if((layout->u.chunk.ops->delete)(&idx_info) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete chunk index")
-    } /* end if */
+    /* Delete the chunked storage information in the file */
+    if((layout->u.chunk.ops->delete)(&idx_info) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete chunk index")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4010,7 +4067,6 @@ H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     /* Call the index-specific "copy setup" routine */
     if((layout_src->u.chunk.ops->copy_setup)(&idx_info_src, &idx_info_dst) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up index-specific chunk copying information")
-    HDassert(H5F_addr_defined(layout_dst->u.chunk.addr));
     copy_setup_done = TRUE;
 
     /* Create datatype ID for src datatype */
@@ -4273,7 +4329,6 @@ H5D_chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 herr_t
 H5D_chunk_dump_index(H5D_t *dset, hid_t dxpl_id, FILE *stream)
 {
-    H5D_chunk_it_ud4_t	udata;          /* User data for callback */
     herr_t ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_chunk_dump_index, FAIL)
@@ -4283,20 +4338,22 @@ H5D_chunk_dump_index(H5D_t *dset, hid_t dxpl_id, FILE *stream)
 
     /* Only display info if stream is defined */
     if(stream) {
-        H5D_chk_idx_info_t idx_info;        /* Chunked index info */
-
-        /* Display address of index */
-        HDfprintf(stream, "    Address: %a\n", dset->shared->layout.u.chunk.addr);
-
-        /* Set up user data for callback */
-        udata.stream = stream;
-        udata.header_displayed = FALSE;
-        udata.ndims = dset->shared->layout.u.chunk.ndims;
+        H5D_chk_idx_info_t idx_info;    /* Chunked index info */
+        H5D_chunk_it_ud4_t udata;       /* User data for callback */
 
         /* Compose chunked index info struct */
         idx_info.f = dset->oloc.file;
         idx_info.dxpl_id = dxpl_id;
         idx_info.layout = &dset->shared->layout;
+
+        /* Display info for index */
+        if((dset->shared->layout.u.chunk.ops->dump)(&idx_info, stream) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unable to dump chunk index info")
+
+        /* Set up user data for callback */
+        udata.stream = stream;
+        udata.header_displayed = FALSE;
+        udata.ndims = dset->shared->layout.u.chunk.ndims;
 
         /* Iterate over index and dump chunk info */
         if((dset->shared->layout.u.chunk.ops->iterate)(&idx_info, H5D_chunk_dump_index_cb, &udata) < 0)
