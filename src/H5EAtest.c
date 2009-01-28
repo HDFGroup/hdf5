@@ -39,6 +39,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
 #include "H5EApkg.h"		/* Extensible Arrays			*/
+#include "H5FLprivate.h"	/* Free Lists                           */
 #include "H5Vprivate.h"         /* Vector functions			*/
 
 
@@ -46,11 +47,17 @@
 /* Local Macros */
 /****************/
 
+/* Sanity checking value for callback contexts */
+#define H5EA__TEST_BOGUS_VAL    42
 
 /******************/
 /* Local Typedefs */
 /******************/
 
+/* Callback context */
+typedef struct H5EA__test_ctx_t {
+    uint32_t    bogus;          /* Placeholder field to verify that context is working */
+} H5EA__test_ctx_t;
 
 /********************/
 /* Package Typedefs */
@@ -62,9 +69,13 @@
 /********************/
 
 /* Extensible array class callbacks */
+static void *H5EA__test_crt_context(const H5F_t *f);
+static herr_t H5EA__test_dst_context(void *ctx);
 static herr_t H5EA__test_fill(void *nat_blk, size_t nelmts);
-static herr_t H5EA__test_encode(void *raw, const void *elmt, size_t nelmts);
-static herr_t H5EA__test_decode(const void *raw, void *elmt, size_t nelmts);
+static herr_t H5EA__test_encode(void *raw, const void *elmt, size_t nelmts,
+    void *ctx);
+static herr_t H5EA__test_decode(const void *raw, void *elmt, size_t nelmts,
+    void *ctx);
 static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth,
     hsize_t idx, const void *elmt);
 
@@ -77,6 +88,8 @@ static herr_t H5EA__test_debug(FILE *stream, int indent, int fwidth,
 const H5EA_class_t H5EA_CLS_TEST[1]={{
     H5EA_CLS_TEST_ID,           /* Type of Extensible array */
     sizeof(uint64_t),           /* Size of native element */
+    H5EA__test_crt_context,     /* Create context */
+    H5EA__test_dst_context,     /* Destroy context */
     H5EA__test_fill,            /* Fill block of missing elements callback */
     H5EA__test_encode,          /* Element encoding callback */
     H5EA__test_decode,          /* Element decoding callback */
@@ -93,6 +106,76 @@ const H5EA_class_t H5EA_CLS_TEST[1]={{
 /* Local Variables */
 /*******************/
 
+/* Declare a free list to manage the H5EA__test_ctx_t struct */
+H5FL_DEFINE_STATIC(H5EA__test_ctx_t);
+
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__test_crt_context
+ *
+ * Purpose:	Create context for callbacks
+ *
+ * Return:	Success:	non-NULL
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, January 27, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+void *, NULL, NULL,
+H5EA__test_crt_context(const H5F_t UNUSED *f))
+
+    /* Local variables */
+    H5EA__test_ctx_t *ctx;              /* Context for callbacks */
+
+    /* Sanity checks */
+    HDassert(f);
+
+    /* Allocate new context structure */
+    if(NULL == (ctx = H5FL_MALLOC(H5EA__test_ctx_t)))
+	H5E_THROW(H5E_CANTALLOC, "can't allocate extensible array client callback context")
+
+    /* Initialize the context */
+    ctx->bogus = H5EA__TEST_BOGUS_VAL;
+
+    /* Set return value */
+    ret_value = ctx;
+
+CATCH
+
+END_FUNC(STATIC)  /* end H5EA__test_crt_context() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__test_dst_context
+ *
+ * Purpose:	Destroy context for callbacks
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, January 27, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, NOERR,
+herr_t, SUCCEED, -,
+H5EA__test_dst_context(void *_ctx))
+
+    /* Local variables */
+    H5EA__test_ctx_t *ctx = (H5EA__test_ctx_t *)_ctx;   /* Callback context to destroy */
+
+    /* Sanity checks */
+    HDassert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
+
+    /* Release context structure */
+    ctx = H5FL_FREE(H5EA__test_ctx_t, ctx);
+
+END_FUNC(STATIC)  /* end H5EA__test_dst_context() */
 
 
 /*-------------------------------------------------------------------------
@@ -139,15 +222,17 @@ END_FUNC(STATIC)  /* end H5EA__test_fill() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__test_encode(void *raw, const void *_elmt, size_t nelmts))
+H5EA__test_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx))
 
     /* Local variables */
+    H5EA__test_ctx_t *ctx = (H5EA__test_ctx_t *)_ctx;   /* Callback context to destroy */
     const uint64_t *elmt = (const uint64_t *)_elmt;     /* Convenience pointer to native elements */
 
     /* Sanity checks */
     HDassert(raw);
     HDassert(elmt);
     HDassert(nelmts);
+    HDassert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Encode native elements into raw elements */
     while(nelmts) {
@@ -180,9 +265,10 @@ END_FUNC(STATIC)  /* end H5EA__test_encode() */
  */
 BEGIN_FUNC(STATIC, NOERR,
 herr_t, SUCCEED, -,
-H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts))
+H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx))
 
     /* Local variables */
+    H5EA__test_ctx_t *ctx = (H5EA__test_ctx_t *)_ctx;   /* Callback context to destroy */
     uint64_t *elmt = (uint64_t *)_elmt;     /* Convenience pointer to native elements */
     const uint8_t *raw = (const uint8_t *)_raw; /* Convenience pointer to raw elements */
 
@@ -190,6 +276,7 @@ H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts))
     HDassert(raw);
     HDassert(elmt);
     HDassert(nelmts);
+    HDassert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
 
     /* Decode raw elements into native elements */
     while(nelmts) {

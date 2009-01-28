@@ -62,9 +62,11 @@ typedef struct H5EA_class_t {
     size_t nat_elmt_size;       /* Size of native (memory) element */
 
     /* Extensible array client callback methods */
+    void *(*crt_context)(const H5F_t *f);       /* Create context for other callbacks */
+    herr_t (*dst_context)(void *ctx);           /* Destroy context */
     herr_t (*fill)(void *nat_blk, size_t nelmts);    /* Fill array of elements with encoded form of "missing element" value */
-    herr_t (*encode)(void *raw, const void *elmt, size_t nelmts);   /* Encode elements from native form to disk storage form */
-    herr_t (*decode)(const void *raw, void *elmt, size_t nelmts);   /* Decode elements from disk storage form to native form */
+    herr_t (*encode)(void *raw, const void *elmt, size_t nelmts, void *ctx);   /* Encode elements from native form to disk storage form */
+    herr_t (*decode)(const void *raw, void *elmt, size_t nelmts, void *ctx);   /* Decode elements from disk storage form to native form */
     herr_t (*debug)(FILE *stream, int indent, int fwidth, hsize_t idx, const void *elmt); /* Print an element for debugging */
 } H5EA_class_t;
 

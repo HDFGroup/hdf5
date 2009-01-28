@@ -846,10 +846,12 @@ hsize_t diff_compare(hid_t file1_id,
     /* objects are not the same type */
     if (info1->paths[i].type != info2->paths[j].type)
     {
-        if (options->m_verbose)
-            parallel_print("Comparison not possible: <%s> is of type %s and <%s> is of type %s\n",
+        if (options->m_verbose||options->m_list_not_cmp)
+        {
+            parallel_print("<%s> is of type %s and <%s> is of type %s\n",
             obj1_name, get_type(info1->paths[i].type), obj2_name,
             get_type(info2->paths[j].type));
+        }
         options->not_cmp=1;
         return 0;
     }

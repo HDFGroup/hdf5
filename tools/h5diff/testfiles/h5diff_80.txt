@@ -873,3 +873,4 @@ point #4              (2,8)              (1,7)
 --------------------------------
 Some objects are not comparable
 --------------------------------
+Use -c for a list of objects.

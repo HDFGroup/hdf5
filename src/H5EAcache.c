@@ -596,7 +596,7 @@ H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     /* Decode elements in index block */
     if(hdr->cparam.idx_blk_elmts > 0) {
         /* Convert from raw elements on disk into native elements in memory */
-        if((hdr->cparam.cls->decode)(p, iblock->elmts, (size_t)hdr->cparam.idx_blk_elmts) < 0)
+        if((hdr->cparam.cls->decode)(p, iblock->elmts, (size_t)hdr->cparam.idx_blk_elmts, hdr->cb_ctx) < 0)
             H5E_THROW(H5E_CANTDECODE, "can't decode extensible array index elements")
         p += (hdr->cparam.idx_blk_elmts * hdr->cparam.raw_elmt_size);
     } /* end if */
@@ -720,7 +720,7 @@ H5EA__cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         /* Encode elements in index block */
         if(iblock->hdr->cparam.idx_blk_elmts > 0) {
             /* Convert from native elements in memory into raw elements on disk */
-            if((iblock->hdr->cparam.cls->encode)(p, iblock->elmts, (size_t)iblock->hdr->cparam.idx_blk_elmts) < 0)
+            if((iblock->hdr->cparam.cls->encode)(p, iblock->elmts, (size_t)iblock->hdr->cparam.idx_blk_elmts, iblock->hdr->cb_ctx) < 0)
                 H5E_THROW(H5E_CANTENCODE, "can't encode extensible array index elements")
             p += (iblock->hdr->cparam.idx_blk_elmts * iblock->hdr->cparam.raw_elmt_size);
         } /* end if */
@@ -1326,7 +1326,7 @@ H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     if(!dblock->npages) {
         /* Decode elements in data block */
         /* Convert from raw elements on disk into native elements in memory */
-        if((hdr->cparam.cls->decode)(p, dblock->elmts, *nelmts) < 0)
+        if((hdr->cparam.cls->decode)(p, dblock->elmts, *nelmts, hdr->cb_ctx) < 0)
             H5E_THROW(H5E_CANTDECODE, "can't decode extensible array data elements")
         p += (*nelmts * hdr->cparam.raw_elmt_size);
     } /* end if */
@@ -1440,7 +1440,7 @@ H5EA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
             /* Encode elements in data block */
 
             /* Convert from native elements in memory into raw elements on disk */
-            if((dblock->hdr->cparam.cls->encode)(p, dblock->elmts, dblock->nelmts) < 0)
+            if((dblock->hdr->cparam.cls->encode)(p, dblock->elmts, dblock->nelmts, dblock->hdr->cb_ctx) < 0)
                 H5E_THROW(H5E_CANTENCODE, "can't encode extensible array data elements")
             p += (dblock->nelmts * dblock->hdr->cparam.raw_elmt_size);
         } /* end if */
@@ -1655,7 +1655,7 @@ HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 
     /* Decode elements in data block page */
     /* Convert from raw elements on disk into native elements in memory */
-    if((hdr->cparam.cls->decode)(p, dblk_page->elmts, hdr->dblk_page_nelmts) < 0)
+    if((hdr->cparam.cls->decode)(p, dblk_page->elmts, hdr->dblk_page_nelmts, hdr->cb_ctx) < 0)
         H5E_THROW(H5E_CANTDECODE, "can't decode extensible array data elements")
     p += (hdr->dblk_page_nelmts * hdr->cparam.raw_elmt_size);
 
@@ -1750,7 +1750,7 @@ H5EA__cache_dblk_page_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t ad
         /* Encode elements in data block page */
 
         /* Convert from native elements in memory into raw elements on disk */
-        if((dblk_page->hdr->cparam.cls->encode)(p, dblk_page->elmts, dblk_page->hdr->dblk_page_nelmts) < 0)
+        if((dblk_page->hdr->cparam.cls->encode)(p, dblk_page->elmts, dblk_page->hdr->dblk_page_nelmts, dblk_page->hdr->cb_ctx) < 0)
             H5E_THROW(H5E_CANTENCODE, "can't encode extensible array data elements")
         p += (dblk_page->hdr->dblk_page_nelmts * dblk_page->hdr->cparam.raw_elmt_size);
 
