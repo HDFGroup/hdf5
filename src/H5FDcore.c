@@ -137,7 +137,7 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD_FLMAP_SINGLE 				/*fl_map		*/
 };
 
-
+
 /*--------------------------------------------------------------------------
 NAME
    H5FD_core_init_interface -- Initialize interface-specific information
@@ -159,7 +159,7 @@ H5FD_core_init_interface(void)
     FUNC_LEAVE_NOAPI(H5FD_core_init())
 } /* H5FD_core_init_interface() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_init
  *
@@ -194,7 +194,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*---------------------------------------------------------------------------
  * Function:	H5FD_core_term
  *
@@ -220,7 +220,7 @@ H5FD_core_term(void)
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5FD_core_term() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_fapl_core
  *
@@ -267,7 +267,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5Pget_fapl_core
  *
@@ -317,7 +317,7 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_fapl_get
  *
@@ -356,7 +356,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_open
  *
@@ -471,7 +471,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_close
  *
@@ -512,7 +512,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_cmp
  *
@@ -561,7 +561,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_query
  *
@@ -597,7 +597,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_query() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_get_eoa
  *
@@ -635,7 +635,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_set_eoa
  *
@@ -674,7 +674,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_set_eoa() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_get_eof
  *
@@ -711,7 +711,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5FD_core_get_handle
  *
@@ -744,7 +744,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_read
  *
@@ -812,7 +812,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_write
  *
@@ -884,7 +884,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_write() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_flush
  *
@@ -940,7 +940,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	H5FD_core_truncate
  *

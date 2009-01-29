@@ -143,7 +143,7 @@ h5_stat_size_t empty_size_g;
 
 /* Local prototypes */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	init_cparam
  *
@@ -175,7 +175,7 @@ init_cparam(H5EA_create_t *cparam)
     return(0);
 } /* init_cparam() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	init_tparam
  *
@@ -225,7 +225,7 @@ init_tparam(earray_test_param_t *tparam, const H5EA_create_t *cparam)
     return(0);
 } /* init_tparam() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	finish_tparam
  *
@@ -249,7 +249,7 @@ finish_tparam(earray_test_param_t *tparam)
     return(0);
 } /* finish_tparam() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	create_file
  *
@@ -281,7 +281,7 @@ error:
     return(-1);
 } /* create_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	check_stats
  *
@@ -329,7 +329,7 @@ error:
     return(-1);
 } /* check_stats() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	reopen_file
  *
@@ -386,7 +386,7 @@ error:
     return(-1);
 } /* reopen_file() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	create_array
  *
@@ -432,7 +432,7 @@ error:
     return(-1);
 } /* create_array() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	verify_cparam
  *
@@ -467,7 +467,7 @@ error:
     return(-1);
 } /* verify_cparam() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	finish
  *
@@ -521,7 +521,7 @@ error:
     return(-1);
 } /* finish() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	test_create
  *
@@ -743,7 +743,7 @@ error:
     return 1;
 } /* end test_create() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	test_reopen
  *
@@ -813,7 +813,7 @@ error:
     return 1;
 } /* test_reopen() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	test_open_twice
  *
@@ -920,7 +920,7 @@ error:
     return 1;
 } /* test_open_twice() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	test_delete_open
  *
@@ -1044,7 +1044,7 @@ typedef struct eiter_fw_t {
     unsigned base_sblk_idx;       /* Starting index for actual superblocks */
 } eiter_fw_t;
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_fw_init
  *
@@ -1076,7 +1076,7 @@ eiter_fw_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUS
     return(eiter);
 } /* end eiter_fw_init() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_fw_next
  *
@@ -1105,7 +1105,7 @@ eiter_fw_next(void *_eiter)
     return(ret_val);
 } /* end eiter_fw_next() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_fw_max
  *
@@ -1201,7 +1201,7 @@ HDfprintf(stderr, "state->nsuper_blks = %Hu\n", state->nsuper_blks);
     return(0);
 } /* end eiter_fw_state() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_fw_term
  *
@@ -1246,7 +1246,7 @@ typedef struct eiter_rv_t {
     hsize_t idx_blk_nsblks;             /* Number of superblocks directly pointed to in the index block */
 } eiter_rv_t;
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_rv_init
  *
@@ -1290,7 +1290,7 @@ eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam,
     return(eiter);
 } /* end eiter_rv_init() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_rv_next
  *
@@ -1319,7 +1319,7 @@ eiter_rv_next(void *_eiter)
     return(ret_val);
 } /* end eiter_rv_next() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_rv_max
  *
@@ -1345,7 +1345,7 @@ eiter_rv_max(const void *_eiter)
     return((hssize_t)eiter->max);
 } /* end eiter_rv_max() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_rv_state
  *
@@ -1440,7 +1440,7 @@ HDfprintf(stderr, "eiter->idx_blk_nsblks = %Hu, state->nsuper_blks = %Hu\n", eit
     return(0);
 } /* end eiter_rv_state() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_rv_term
  *
@@ -1482,7 +1482,7 @@ typedef struct eiter_rnd_t {
     hsize_t *idx;               /* Array of shuffled indices */
 } eiter_rnd_t;
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_rnd_init
  *
@@ -1534,7 +1534,7 @@ eiter_rnd_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNU
     return(eiter);
 } /* end eiter_rnd_init() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_rnd_next
  *
@@ -1568,7 +1568,7 @@ eiter_rnd_next(void *_eiter)
     return(ret_val);
 } /* end eiter_rnd_next() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_rnd_max
  *
@@ -1594,7 +1594,7 @@ eiter_rnd_max(const void *_eiter)
     return((hssize_t)eiter->max);
 } /* end eiter_rnd_max() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_rnd_term
  *
@@ -1635,7 +1635,7 @@ static const earray_iter_t ea_iter_rnd = {
     eiter_rnd_term              /* Iterator term */
 };
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_rnd2_init
  *
@@ -1719,7 +1719,7 @@ typedef struct eiter_cyc_t {
     hsize_t cyc;                /* Cycle of elements to choose from */
 } eiter_cyc_t;
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_cyc_init
  *
@@ -1753,7 +1753,7 @@ eiter_cyc_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNU
     return(eiter);
 } /* end eiter_cyc_init() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_cyc_next
  *
@@ -1789,7 +1789,7 @@ eiter_cyc_next(void *_eiter)
     return(ret_val);
 } /* end eiter_cyc_next() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_cyc_max
  *
@@ -1815,7 +1815,7 @@ eiter_cyc_max(const void *_eiter)
     return((hssize_t)eiter->max);
 } /* end eiter_cyc_max() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_cyc_term
  *
@@ -1852,7 +1852,7 @@ static const earray_iter_t ea_iter_cyc = {
     eiter_cyc_term              /* Iterator term */
 };
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	test_set_elmts
  *
@@ -2029,7 +2029,7 @@ error:
     return 1;
 } /* test_set_elmts() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	test_skip_elmts
  *
@@ -2182,7 +2182,7 @@ error:
     return 1;
 } /* test_skip_elmts() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	main
  *
