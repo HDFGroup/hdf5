@@ -880,11 +880,20 @@ HDfprintf(stderr, "%s: oh->cache_info.free_file_space_on_destroy = %t\n", FUNC, 
     /* destroy messages */
     if(oh->mesg) {
         for(u = 0; u < oh->nmesgs; u++) {
-            /* Verify that message is clean */
-            HDassert(oh->mesg[u].dirty == 0);
+            /* Verify that message is clean, unless it could have been marked
+             * dirty by decoding */
+#ifndef NDEBUG
+            if(oh->ndecode_dirtied && oh->mesg[u].dirty)
+                oh->ndecode_dirtied--;
+            else
+                HDassert(oh->mesg[u].dirty == 0);
+#endif /* NDEBUG */
 
             H5O_msg_free_mesg(&oh->mesg[u]);
         } /* end for */
+
+        /* Make sure we accounted for all the messages dirtied by decoding */
+        HDassert(!oh->ndecode_dirtied);
 
         oh->mesg = (H5O_mesg_t *)H5FL_SEQ_FREE(H5O_mesg_t, oh->mesg);
     } /* end if */
@@ -928,6 +937,11 @@ H5O_clear(H5F_t *f, H5O_t *oh, hbool_t destroy)
     /* Mark messages as clean */
     for(u = 0; u < oh->nmesgs; u++)
         oh->mesg[u].dirty = FALSE;
+
+#ifndef NDEBUG
+        /* Reset the number of messages dirtied by decoding */
+        oh->ndecode_dirtied = 0;
+#endif /* NDEBUG */
 
     /* Mark whole header as clean */
     oh->cache_info.is_dirty = FALSE;
