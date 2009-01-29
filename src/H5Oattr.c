@@ -641,257 +641,20 @@ H5O_attr_copy_file(H5F_t UNUSED *file_src, const H5O_msg_class_t UNUSED *mesg_ty
     void *native_src, H5F_t *file_dst, hbool_t *recompute_size,
     H5O_copy_t *cpy_info, void UNUSED *udata, hid_t dxpl_id)
 {
-    H5A_t        *attr_src = (H5A_t *)native_src;
-    H5A_t        *attr_dst = NULL;
-
-    /* for dataype conversion */
-    hid_t       tid_src = -1;           /* Datatype ID for source datatype */
-    hid_t       tid_dst = -1;           /* Datatype ID for destination datatype */
-    hid_t       tid_mem = -1;           /* Datatype ID for memory datatype */
-    void       *buf = NULL;             /* Buffer for copying data */
-    void       *reclaim_buf = NULL;     /* Buffer for reclaiming data */
-    hid_t       buf_sid = -1;           /* ID for buffer dataspace */
-
     void        *ret_value;             /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_copy_file)
 
     /* check args */
-    HDassert(attr_src);
+    HDassert(native_src);
     HDassert(file_dst);
     HDassert(cpy_info);
     HDassert(!cpy_info->copy_without_attr);
 
-    /* Allocate space for the destination message */
-    if(NULL == (attr_dst = H5FL_CALLOC(H5A_t)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-    /* Copy the top level of the attribute */
-    *attr_dst = *attr_src;
-
-    if(NULL == (attr_dst->shared = H5FL_CALLOC(H5A_shared_t)))
-        HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared attr structure")
-
-    /* Don't have an opened group location for copy */
-    H5O_loc_reset(&(attr_dst->shared->oloc));
-    H5G_name_reset(&(attr_dst->path));
-    attr_dst->obj_opened = FALSE;
-
-    /* Reference count for the header message in the cache */
-    attr_dst->shared->nrefs = 1;
-
-    /* Copy attribute's name */
-    attr_dst->shared->name = H5MM_strdup(attr_src->shared->name);
-    HDassert(attr_dst->shared->name);
-
-    /* Copy attribute's datatype */
-    /* (Start destination datatype as transient, even if source is named) */
-    if(NULL == (attr_dst->shared->dt = H5T_copy(attr_src->shared->dt, H5T_COPY_ALL)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "cannot copy datatype")
-
-    /* Set the location of the destination datatype */
-    if(H5T_set_loc(attr_dst->shared->dt, file_dst, H5T_LOC_DISK) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "cannot mark datatype on disk")
-
-    /* Check for named datatype being copied */
-    if(H5T_committed(attr_src->shared->dt)) {
-        H5O_loc_t         *src_oloc;           /* Pointer to source datatype's object location */
-        H5O_loc_t         *dst_oloc;           /* Pointer to dest. datatype's object location */
-
-        /* Get group entries for source & destination */
-        src_oloc = H5T_oloc(attr_src->shared->dt);
-        HDassert(src_oloc);
-        dst_oloc = H5T_oloc(attr_dst->shared->dt);
-        HDassert(dst_oloc);
-
-        /* Reset object location for new object */
-        H5O_loc_reset(dst_oloc);
-        dst_oloc->file = file_dst;
-
-        /* Copy the shared object from source to destination */
-        if(H5O_copy_header_map(src_oloc, dst_oloc, dxpl_id, cpy_info, FALSE) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, "unable to copy object")
-
-        /* Update shared message info from named datatype info */
-        H5T_update_shared(attr_dst->shared->dt);
-    } /* end if */
-    else {
-        /* If the datatype is not named, it may have been shared in the
-         * source file's heap.  Un-share it for now. We'll try to shared
-         * it in the destination file below.
-         */
-        if(H5O_msg_reset_share(H5O_DTYPE_ID, attr_dst->shared->dt) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset datatype sharing")
-    } /* end else */
-
-    /* Copy the dataspace for the attribute */
-    attr_dst->shared->ds = H5S_copy(attr_src->shared->ds, FALSE, FALSE);
-    HDassert(attr_dst->shared->ds);
-
-    /* Reset the dataspace's sharing in the source file before trying to share
-     * it in the destination.
-     */
-    if(H5O_msg_reset_share(H5O_SDSPACE_ID, attr_dst->shared->ds) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to reset dataspace sharing")
-
-
-    /* Try to share both the datatype and dataset.  This does nothing if the
-     * datatype is committed or sharing is disabled.
-     */
-    if(H5SM_try_share(file_dst, dxpl_id, NULL, H5O_DTYPE_ID, attr_dst->shared->dt, NULL) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "can't share attribute datatype")
-    if(H5SM_try_share(file_dst, dxpl_id, NULL, H5O_SDSPACE_ID, attr_dst->shared->ds, NULL) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "can't share attribute dataspace")
-
-    /* Compute the sizes of the datatype and dataspace. This is their raw
-     * size unless they're shared.
-     */
-    attr_dst->shared->dt_size = H5O_msg_raw_size(file_dst, H5O_DTYPE_ID, FALSE, attr_dst->shared->dt);
-    HDassert(attr_dst->shared->dt_size > 0);
-    attr_dst->shared->ds_size = H5O_msg_raw_size(file_dst, H5O_SDSPACE_ID, FALSE, attr_dst->shared->ds);
-    HDassert(attr_dst->shared->ds_size > 0);
-
-    /* Check whether to recompute the size of the attribute */
-    /* (happens when the datatype or dataspace changes sharing status) */
-    if(attr_dst->shared->dt_size != attr_src->shared->dt_size || attr_dst->shared->ds_size != attr_src->shared->ds_size)
-        *recompute_size = TRUE;
-
-    /* Compute the size of the data */
-    H5_ASSIGN_OVERFLOW(attr_dst->shared->data_size, H5S_GET_EXTENT_NPOINTS(attr_dst->shared->ds) * H5T_get_size(attr_dst->shared->dt), hsize_t, size_t);
-
-    /* Copy (& convert) the data, if necessary */
-    if(attr_src->shared->data) {
-        if(NULL == (attr_dst->shared->data = H5FL_BLK_MALLOC(attr_buf, attr_dst->shared->data_size)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-
-        /* Check if we need to convert data */
-        if(H5T_detect_class(attr_src->shared->dt, H5T_VLEN) > 0) {
-            H5T_path_t  *tpath_src_mem, *tpath_mem_dst;   /* Datatype conversion paths */
-            H5T_t *dt_mem;              /* Memory datatype */
-            size_t src_dt_size;         /* Source datatype size */
-            size_t tmp_dt_size;         /* Temp. datatype size */
-            size_t max_dt_size;         /* Max atatype size */
-            H5S_t *buf_space;           /* Dataspace describing buffer */
-            hsize_t buf_dim;            /* Dimension for buffer */
-            size_t nelmts;              /* Number of elements in buffer */
-            size_t buf_size;            /* Size of copy buffer */
-
-            /* Create datatype ID for src datatype */
-            if((tid_src = H5I_register(H5I_DATATYPE, attr_src->shared->dt, FALSE)) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register source file datatype")
-
-            /* create a memory copy of the variable-length datatype */
-            if(NULL == (dt_mem = H5T_copy(attr_src->shared->dt, H5T_COPY_TRANSIENT)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to copy")
-            if((tid_mem = H5I_register(H5I_DATATYPE, dt_mem, FALSE)) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register memory datatype")
-
-            /* create variable-length datatype at the destinaton file */
-            if((tid_dst = H5I_register(H5I_DATATYPE, attr_dst->shared->dt, FALSE)) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, NULL, "unable to register destination file datatype")
-
-            /* Set up the conversion functions */
-            if(NULL == (tpath_src_mem = H5T_path_find(attr_src->shared->dt, dt_mem, NULL, NULL, dxpl_id, FALSE)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to convert between src and mem datatypes")
-            if(NULL == (tpath_mem_dst = H5T_path_find(dt_mem, attr_dst->shared->dt, NULL, NULL, dxpl_id, FALSE)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to convert between mem and dst datatypes")
-
-            /* Determine largest datatype size */
-            if(0 == (src_dt_size = H5T_get_size(attr_src->shared->dt)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to determine datatype size")
-            if(0 == (tmp_dt_size = H5T_get_size(dt_mem)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to determine datatype size")
-            max_dt_size = MAX(src_dt_size, tmp_dt_size);
-            if(0 == (tmp_dt_size = H5T_get_size(attr_dst->shared->dt)))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to determine datatype size")
-            max_dt_size = MAX(max_dt_size, tmp_dt_size);
-
-            /* Set number of whole elements that fit in buffer */
-            if(0 == (nelmts = attr_src->shared->data_size / src_dt_size))
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "element size too large")
-
-            /* Set up number of bytes to copy, and initial buffer size */
-            buf_size = nelmts * max_dt_size;
-
-            /* Create dataspace for number of elements in buffer */
-            buf_dim = nelmts;
-
-            /* Create the space and set the initial extent */
-            if(NULL == (buf_space = H5S_create_simple((unsigned)1, &buf_dim, NULL)))
-                HGOTO_ERROR(H5E_DATASPACE, H5E_CANTCREATE, NULL, "can't create simple dataspace")
-
-            /* Atomize */
-            if((buf_sid = H5I_register(H5I_DATASPACE, buf_space, FALSE)) < 0) {
-                H5S_close(buf_space);
-                HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, NULL, "unable to register dataspace ID")
-            } /* end if */
-
-            /* Allocate memory for recclaim buf */
-            if(NULL == (reclaim_buf = H5FL_BLK_MALLOC(attr_buf, buf_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation NULLed for raw data chunk")
-
-            /* Allocate memory for copying the chunk */
-            if(NULL == (buf = H5FL_BLK_MALLOC(attr_buf, buf_size)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation NULLed for raw data chunk")
-
-            HDmemcpy(buf, attr_src->shared->data, attr_src->shared->data_size);
-
-            /* Convert from source file to memory */
-            if(H5T_convert(tpath_src_mem, tid_src, tid_mem, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "datatype conversion NULLed")
-
-            HDmemcpy(reclaim_buf, buf, buf_size);
-
-            /* Convert from memory to destination file */
-            if(H5T_convert(tpath_mem_dst, tid_mem, tid_dst, nelmts, (size_t)0, (size_t)0, buf, NULL, dxpl_id) < 0)
-                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "datatype conversion NULLed")
-
-            HDmemcpy(attr_dst->shared->data, buf, attr_dst->shared->data_size);
-
-            if(H5D_vlen_reclaim(tid_mem, buf_space, H5P_DATASET_XFER_DEFAULT, reclaim_buf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_BADITER, NULL, "unable to reclaim variable-length data")
-        }  /* end if */
-        else {
-            HDassert(attr_dst->shared->data_size == attr_src->shared->data_size);
-            HDmemcpy(attr_dst->shared->data, attr_src->shared->data, attr_src->shared->data_size);
-        } /* end else */
-    } /* end if(attr_src->shared->data) */
-
-    /* Recompute the version to encode the destination attribute */
-    if(H5A_set_version(file_dst, attr_dst) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, NULL, "unable to update attribute version")
-
-    /* Indicate that the fill values aren't to be written out */
-    attr_dst->shared->initialized = TRUE;
-
-    /* Set return value */
-    ret_value = attr_dst;
+    if ( NULL == (ret_value=H5A_attr_copy_file((H5A_t *)native_src, file_dst, recompute_size, cpy_info,  dxpl_id)))
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy attribute")
 
 done:
-    if(buf_sid > 0)
-        if(H5I_dec_ref(buf_sid, FALSE) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary dataspace ID")
-    if(tid_src > 0)
-        /* Don't decrement ID, we want to keep underlying datatype */
-        if(H5I_remove(tid_src) == NULL)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
-    if(tid_dst > 0)
-        /* Don't decrement ID, we want to keep underlying datatype */
-        if(H5I_remove(tid_dst) == NULL)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
-    if(tid_mem > 0)
-        /* Decrement the memory datatype ID, it's transient */
-        if(H5I_dec_ref(tid_mem, FALSE) < 0)
-            HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "Can't decrement temporary datatype ID")
-    if(buf)
-        buf = H5FL_BLK_FREE(attr_buf, buf);
-    if(reclaim_buf)
-        reclaim_buf = H5FL_BLK_FREE(attr_buf, reclaim_buf);
-
-    /* Release destination attribute information on failure */
-    if(!ret_value && attr_dst && H5A_close(attr_dst) < 0)
-        HDONE_ERROR(H5E_ATTR, H5E_CANTFREE, NULL, "can't close attribute")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_attr_copy_file() */
 
@@ -916,48 +679,14 @@ static herr_t
 H5O_attr_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     H5O_loc_t *dst_oloc, void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
-    const H5A_t  *attr_src = (const H5A_t *)mesg_src;
-    H5A_t  *attr_dst = (H5A_t *)mesg_dst;
-    H5F_t  *file_src = src_oloc->file;
-    H5F_t  *file_dst = dst_oloc->file;
     herr_t ret_value = SUCCEED;   /* Return value */
 
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_post_copy_file)
 
-    /* check args */
-    HDassert(attr_src);
-    HDassert(file_src);
-    HDassert(attr_dst);
-    HDassert(file_dst);
-
-    /* Only need to fix reference attribute with real data being copied to
-     *  another file.
-     */
-    if((NULL != attr_src->shared->data) &&
-            (H5T_get_class(attr_src->shared->dt, FALSE) == H5T_REFERENCE) &&
-            (file_src != file_dst)) {
-
-        /* copy object pointed by reference. The current implementation does not
-         *  deal with nested reference such as reference in a compound structure
-         */
-
-        /* Check for expanding references */
-        if(cpy_info->expand_ref) {
-            size_t ref_count;
-
-            /* Determine # of reference elements to copy */
-            ref_count = attr_dst->shared->data_size / H5T_get_size(attr_dst->shared->dt);
-
-            /* Copy objects referenced in source buffer to destination file and set destination elements */
-            if(H5O_copy_expand_ref(file_src, attr_src->shared->data, dxpl_id,
-                    file_dst, attr_dst->shared->data, ref_count, H5T_get_ref_type(attr_src->shared->dt), cpy_info) < 0)
-                HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "unable to copy reference attribute")
-        } /* end if */
-        else
-            /* Reset value to zero */
-            HDmemset(attr_dst->shared->data, 0, attr_dst->shared->data_size);
-    } /* end if */
+    if ( H5A_attr_post_copy_file(src_oloc, (const H5A_t *)mesg_src,
+         dst_oloc, (H5A_t *)mesg_dst, dxpl_id, cpy_info) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "can't copy attribute")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
