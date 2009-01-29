@@ -484,8 +484,7 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
     HDassert(type_id < NELMTS(H5O_msg_class_g));
 
     /* Get the object header */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL,
-        (H5F_get_intent(loc->file) & H5F_ACC_RDWR) ? H5AC_WRITE : H5AC_READ)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header")
 
     /* Call the "real" read routine */
@@ -1231,8 +1230,7 @@ H5O_msg_iterate(const H5O_loc_t *loc, unsigned type_id,
     HDassert(op);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL,
-        (H5F_get_intent(loc->file) & H5F_ACC_RDWR) ? H5AC_WRITE : H5AC_READ)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Call the "real" iterate routine */
@@ -2228,6 +2226,12 @@ H5O_flush_msgs(H5F_t *f, H5O_t *oh)
     /* Sanity check for the correct # of messages in object header */
     if(oh->nmesgs != u)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "corrupt object header - too few messages")
+
+#ifndef NDEBUG
+        /* Reset the number of messages dirtied by decoding, as they have all
+         * been flushed */
+        oh->ndecode_dirtied = 0;
+#endif /* NDEBUG */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

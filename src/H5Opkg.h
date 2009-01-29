@@ -171,6 +171,13 @@
 #define H5O_DECODEIO_NOCHANGE           0x01u   /* IN: do not modify values */
 #define H5O_DECODEIO_DIRTY              0x02u   /* OUT: message has been changed */
 
+/* Macro to incremend ndecode_dirtied (only if we are debugging) */
+#ifndef NDEBUG
+#define INCR_NDECODE_DIRTIED(OH) (OH)->ndecode_dirtied++;
+#else /* NDEBUG */
+#define INCR_NDECODE_DIRTIED(OH) ;
+#endif /* NDEBUG */
+
 /* Load native information for a message, if it's not already present */
 /* (Only works for messages with decode callback) */
 #define H5O_LOAD_NATIVE(F, DXPL, IOF, OH, MSG, ERR)                           \
@@ -183,11 +190,12 @@
         if(NULL == ((MSG)->native = (msg_type->decode)((F), (DXPL), (MSG)->flags, &ioflags, (MSG)->raw))) \
             HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, ERR, "unable to decode message") \
                                                                               \
-        /* Mark the object header dirty if the message was changed by decoding */ \
+        /* Mark the message dirty if it was changed by decoding */            \
         if((ioflags & H5O_DECODEIO_DIRTY) && (H5F_get_intent((F)) & H5F_ACC_RDWR)) { \
             (MSG)->dirty = TRUE;                                              \
-            if(H5AC_mark_pinned_or_protected_entry_dirty((F), (OH)) < 0)      \
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, ERR, "unable to mark object header as dirty") \
+            /* Increment the count of messages dirtied by decoding, but */    \
+            /* only ifndef NDEBUG */                                          \
+            INCR_NDECODE_DIRTIED(OH)                                          \
         }                                                                     \
                                                                               \
         /* Set the message's "shared info", if it's shareable */	      \
@@ -264,6 +272,9 @@ struct H5O_t {
                                          *      versions of the library)
                                          */
 #endif /* H5O_ENABLE_BAD_MESG_COUNT */
+#ifndef NDEBUG
+    size_t      ndecode_dirtied;        /* Number of messages dirtied by decoding */
+#endif /* NDEBUG */
 
     /* Object information (stored) */
     hbool_t     has_refcount_msg;       /* Whether the object has a ref. count message */

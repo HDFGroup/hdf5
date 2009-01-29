@@ -113,6 +113,8 @@ Bug Fixes since HDF5-1.8.2
 
     Library
     -------
+    - Fixed a bug that could cause problems when copying an object with a shared
+      message in its own object header. NAF - 2009/01/29
     - Changed H5Tset_order to properly reject H5T_ORDER_NONE for most datatypes.
       NAF - 2009/01/27
     - Fixed a bug where H5Tpack wouldn't remove trailing space from an otherwise
