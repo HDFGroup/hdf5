@@ -197,7 +197,7 @@ hsize_t h5diff(const char *fname1,
 
     if(options->m_quiet && (options->m_verbose || options->m_report))
     {
-        printf("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
+        parallel_print("Error: -q (quiet mode) cannot be added to verbose or report modes\n");
         options->err_stat=1;
         return 0;
     } /* end if */
@@ -213,7 +213,7 @@ hsize_t h5diff(const char *fname1,
         /* open the files */
         if((file1_id = H5Fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
         {
-            printf("h5diff: <%s>: unable to open file\n", fname1);
+            parallel_print("h5diff: <%s>: unable to open file\n", fname1);
             options->err_stat = 1;
 
 #ifdef H5_HAVE_PARALLEL
@@ -225,7 +225,7 @@ hsize_t h5diff(const char *fname1,
         } /* end if */
         if((file2_id = H5Fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
         {
-            printf("h5diff: <%s>: unable to open file\n", fname2);
+            parallel_print("h5diff: <%s>: unable to open file\n", fname2);
             options->err_stat = 1;
 
 #ifdef H5_HAVE_PARALLEL
@@ -250,7 +250,7 @@ hsize_t h5diff(const char *fname1,
     *-------------------------------------------------------------------------
     */
     if(h5trav_getinfo(file1_id, info1) < 0 || h5trav_getinfo(file2_id, info2) < 0) {
-        printf("Error: Could not get file contents\n");
+        parallel_print("Error: Could not get file contents\n");
         options->err_stat = 1;
 #ifdef H5_HAVE_PARALLEL
         if(g_Parallel)
@@ -431,17 +431,17 @@ hsize_t diff_match(hid_t file1_id,
     */
     if(options->m_verbose)
     {
-        printf("\n");
-        printf("file1     file2\n");
-        printf("---------------------------------------\n");
+        parallel_print("\n");
+        parallel_print("file1     file2\n");
+        parallel_print("---------------------------------------\n");
         for(i = 0; i < table->nobjs; i++) {
             char c1, c2;
 
             c1 = (table->objs[i].flags[0]) ? 'x' : ' ';
             c2 = (table->objs[i].flags[1]) ? 'x' : ' ';
-            printf("%5c %6c    %-15s\n", c1, c2, table->objs[i].name);
+            parallel_print("%5c %6c    %-15s\n", c1, c2, table->objs[i].name);
         } /* end for */
-        printf ("\n");
+        parallel_print ("\n");
     } /* end if */
 
 
@@ -1143,7 +1143,7 @@ hsize_t diff(hid_t file1_id,
 
         default:
             if(options->m_verbose)
-                printf("Comparison not supported: <%s> and <%s> are of type %s\n",
+                parallel_print("Comparison not supported: <%s> and <%s> are of type %s\n",
                     path1, path2, get_type(type) );
             options->not_cmp = 1;
             break;

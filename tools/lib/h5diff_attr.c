@@ -185,7 +185,7 @@ hsize_t diff_attr(hid_t loc1_id,
         buf1=(void *) HDmalloc((unsigned)(nelmts1*msize1));
         buf2=(void *) HDmalloc((unsigned)(nelmts1*msize2));
         if ( buf1==NULL || buf2==NULL){
-            printf( "cannot read into memory\n" );
+            parallel_print( "cannot read into memory\n" );
             goto error;
         }
         if (H5Aread(attr1_id,mtype1_id,buf1)<0)

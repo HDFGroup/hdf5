@@ -55,12 +55,12 @@ hsize_t diff_dataset( hid_t file1_id,
         /* Open the datasets */
         if((did1 = H5Dopen2(file1_id, obj1_name, H5P_DEFAULT)) < 0) 
         {
-            printf("Cannot open dataset <%s>\n", obj1_name);
+            parallel_print("Cannot open dataset <%s>\n", obj1_name);
             goto error;
         }
         if((did2 = H5Dopen2(file2_id, obj2_name, H5P_DEFAULT)) < 0) 
         {
-            printf("Cannot open dataset <%s>\n", obj2_name);
+            parallel_print("Cannot open dataset <%s>\n", obj2_name);
             goto error;
         }
         /* enable error reporting */
@@ -880,33 +880,33 @@ void print_sizes( const char *obj1,
     m_size1 = H5Tget_size( m_tid1 );
     m_size2 = H5Tget_size( m_tid2 );
     
-    printf("\n");
-    printf("------------------\n");
-    printf("sizeof(char)   %u\n", sizeof(char) );
-    printf("sizeof(short)  %u\n", sizeof(short) );
-    printf("sizeof(int)    %u\n", sizeof(int) );
-    printf("sizeof(long)   %u\n", sizeof(long) );
-    printf("<%s> ------------------\n", obj1);
-    printf("type on file   ");
+    parallel_print("\n");
+    parallel_print("------------------\n");
+    parallel_print("sizeof(char)   %u\n", sizeof(char) );
+    parallel_print("sizeof(short)  %u\n", sizeof(short) );
+    parallel_print("sizeof(int)    %u\n", sizeof(int) );
+    parallel_print("sizeof(long)   %u\n", sizeof(long) );
+    parallel_print("<%s> ------------------\n", obj1);
+    parallel_print("type on file   ");
     print_type(f_tid1);
-    printf("\n");
-    printf("size on file   %u\n", f_size1 );
+    parallel_print("\n");
+    parallel_print("size on file   %u\n", f_size1 );
     
-    printf("type on memory ");
+    parallel_print("type on memory ");
     print_type(m_tid1);
-    printf("\n");
-    printf("size on memory %u\n", m_size1 );
+    parallel_print("\n");
+    parallel_print("size on memory %u\n", m_size1 );
     
-    printf("<%s> ------------------\n", obj2);
-    printf("type on file   ");
+    parallel_print("<%s> ------------------\n", obj2);
+    parallel_print("type on file   ");
     print_type(f_tid2);
-    printf("\n");
-    printf("size on file   %u\n", f_size2 );
+    parallel_print("\n");
+    parallel_print("size on file   %u\n", f_size2 );
     
-    printf("type on memory ");
+    parallel_print("type on memory ");
     print_type(m_tid2);
-    printf("\n");
-    printf("size on memory %u\n", m_size2 );
-    printf("\n");
+    parallel_print("\n");
+    parallel_print("size on memory %u\n", m_size2 );
+    parallel_print("\n");
 }
 #endif /* H5DIFF_DEBUG */
