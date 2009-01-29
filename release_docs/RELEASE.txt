@@ -61,6 +61,7 @@ New Features
 
     Library
     -------
+    - Added support for dense attributes to H5Ocopy. (XCao/NAF - 2009/01/29)
     - Added H5Pset_elink_cb and H5Pget_elink_cb functions to support a
       user-defined callback function for external link traversal.
       NAF - 2009/01/08

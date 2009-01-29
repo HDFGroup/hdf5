@@ -48,6 +48,9 @@ static herr_t H5O_ainfo_pre_copy_file(H5F_t *file_src, const void *mesg_src,
 static void *H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src,
     H5F_t *file_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata,
     hid_t dxpl_id);
+static herr_t H5O_ainfo_post_copy_file(const H5O_loc_t *src_oloc,
+    const void *mesg_src, H5O_loc_t *dst_oloc, void *mesg_dst, hid_t dxpl_id,
+    H5O_copy_t *cpy_info);
 static herr_t H5O_ainfo_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg,
 			     FILE * stream, int indent, int fwidth);
 
@@ -69,7 +72,7 @@ const H5O_msg_class_t H5O_MSG_AINFO[1] = {{
     NULL,		    	/*can share method		*/
     H5O_ainfo_pre_copy_file,	/* pre copy native value to file */
     H5O_ainfo_copy_file,	/* copy native value to file    */
-    NULL,			/* post copy native value to file */
+    H5O_ainfo_post_copy_file,   /* post copy native value to file */
     NULL,			/* get creation index		*/
     NULL,			/* set creation index		*/
     H5O_ainfo_debug          	/*debug the message             */
@@ -393,15 +396,14 @@ H5O_ainfo_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
  * Return:      Success:        Ptr to _DEST
  *              Failure:        NULL
  *
- * Programmer:  Quincey Koziol
- *              March 9, 2007
+ * Programmer:  Peter Cao 
+ *              July 18, 2007
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_ainfo_copy_file(H5F_t UNUSED *file_src, void *mesg_src,
-    H5F_t UNUSED *file_dst, hbool_t UNUSED *recompute_size,
-    H5O_copy_t UNUSED *cpy_info, void UNUSED *udata, hid_t UNUSED dxpl_id)
+H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, 
+    hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id)
 {
     H5O_ainfo_t *ainfo_src = (H5O_ainfo_t *)mesg_src;
     H5O_ainfo_t *ainfo_dst = NULL;
@@ -416,16 +418,22 @@ H5O_ainfo_copy_file(H5F_t UNUSED *file_src, void *mesg_src,
     HDassert(cpy_info);
     HDassert(!cpy_info->copy_without_attr);
 
-/* XXX: Bail out for now, if the source object has densely stored attributes */
-    if(H5F_addr_defined(ainfo_src->fheap_addr))
-        HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, NULL, "densely stored attributes not supported yet")
-
     /* Allocate space for the destination message */
     if(NULL == (ainfo_dst = H5FL_MALLOC(H5O_ainfo_t)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Copy the top level of the information */
     *ainfo_dst = *ainfo_src;
+
+    if(H5F_addr_defined(ainfo_src->fheap_addr)) {
+        /* copy dense attribute */
+
+        if(H5A_dense_create(file_dst, dxpl_id, ainfo_dst) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
+
+        if ( (H5A_dense_copy_file_all(file_src, ainfo_src, file_dst, ainfo_dst, recompute_size, cpy_info, dxpl_id)) <0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "unable to create dense storage for attributes")
+    }
 
     /* Set return value */
     ret_value = ainfo_dst;
@@ -437,6 +445,44 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5O_ainfo_copy_file() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_ainfo_post_copy_file
+ *
+ * Purpose:     Finish copying a message from between files.
+ *              We have to copy the values of a reference attribute in the
+ *              post copy because H5O_post_copy_file() fails at the case that
+ *              an object may have a reference attribute that points to the
+ *              object itself.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Peter Cao
+ *              July 25, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5O_ainfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
+    H5O_loc_t *dst_oloc, void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
+{
+    H5O_ainfo_t *ainfo_src = (const H5O_ainfo_t *)mesg_src;
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_ainfo_post_copy_file)
+
+    HDassert(ainfo_src);
+
+    if(H5F_addr_defined(ainfo_src->fheap_addr)) {
+        if ( H5A_dense_post_copy_file_all(src_oloc, ainfo_src, dst_oloc, 
+            (H5O_ainfo_t *)mesg_dst, dxpl_id, cpy_info) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "can't copy attribute")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_ainfo_post_copy_file() */
 
 
 /*-------------------------------------------------------------------------
