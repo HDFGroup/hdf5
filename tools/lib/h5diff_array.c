@@ -5398,7 +5398,6 @@ my_isnan(dtype_t type, void *val)
         double x;
         HDmemcpy(&x, val, sizeof(double));
         retval = (x!=x);
-        //printf("x=%g retval =%d\n", x,retval);
 
 #if H5_SIZEOF_LONG_DOUBLE!=H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE!=0
     }
