@@ -37,9 +37,12 @@
 /***********/
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Apkg.h"		/* Attributes	  			*/
+#include "H5Dprivate.h"		/* Datasets				*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
+#include "H5SMprivate.h"	/* Shared Object Header Messages	*/
 
 
 /****************/
@@ -68,12 +71,12 @@ typedef struct {
 
 /* Data exchange structure to use when copying an attribute from _SRC to _DST */
 typedef struct {
-    H5O_ainfo_t *ainfo;         /* dense information    */  
+    const H5O_ainfo_t *ainfo;   /* dense information    */
     H5F_t *file;                /* file                 */
     hbool_t *recompute_size;    /* Flag to indicate if size changed */
     H5O_copy_t *cpy_info;       /* Information on copying options   */
     hid_t dxpl_id;              /* DXPL for operation               */
-    H5O_loc_t *oloc_src;
+    const H5O_loc_t *oloc_src;
     H5O_loc_t *oloc_dst;
 } H5A_dense_file_cp_ud_t;
 
@@ -792,7 +795,7 @@ H5A_set_version(const H5F_t *f, H5A_t *attr)
  *-------------------------------------------------------------------------
  */
 H5A_t *
-H5A_attr_copy_file(H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_size,
+H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_size,
     H5O_copy_t *cpy_info, hid_t dxpl_id)
 {
     H5A_t        *attr_dst = NULL;
@@ -1067,7 +1070,7 @@ done:
  */
 herr_t
 H5A_attr_post_copy_file(const H5O_loc_t *src_oloc, const H5A_t UNUSED *attr_src,
-    H5O_loc_t *dst_oloc, H5A_t *attr_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
+    H5O_loc_t *dst_oloc, const H5A_t *attr_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
     H5F_t  *file_src = src_oloc->file;
     H5F_t  *file_dst = dst_oloc->file;
@@ -1157,7 +1160,7 @@ H5A_dense_copy_file_cb(const H5A_t *attr_src, void *_udata)
 done:
     if (attr_dst) {
         (void)H5A_free(attr_dst);
-        H5FL_FREE(H5A_t, attr_dst);
+        (void)H5FL_FREE(H5A_t, attr_dst);
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1180,7 +1183,7 @@ done:
  */
 herr_t 
 H5A_dense_copy_file_all(H5F_t *file_src, H5O_ainfo_t *ainfo_src, H5F_t *file_dst,
-    H5O_ainfo_t *ainfo_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, hid_t dxpl_id)
+    const H5O_ainfo_t *ainfo_dst, hbool_t *recompute_size, H5O_copy_t *cpy_info, hid_t dxpl_id)
 {
     H5A_dense_file_cp_ud_t udata;       /* User data for iteration callback */
     H5A_attr_iter_op_t attr_op;    /* Attribute operator */
@@ -1207,7 +1210,7 @@ H5A_dense_copy_file_all(H5F_t *file_src, H5O_ainfo_t *ainfo_src, H5F_t *file_dst
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5A_dense_copy_file_all */
 
 
 /*-------------------------------------------------------------------------
@@ -1228,7 +1231,6 @@ static herr_t
 H5A_dense_post_copy_file_cb(const H5A_t *attr_dst, void *_udata)
 {
     H5A_dense_file_cp_ud_t *udata = (H5A_dense_file_cp_ud_t *)_udata;
-    H5A_t *attr_src = NULL;
     herr_t ret_value = H5_ITER_CONT;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5A_dense_post_copy_file_cb)
@@ -1299,5 +1301,4 @@ H5A_dense_post_copy_file_all(const H5O_loc_t *src_oloc, const H5O_ainfo_t *ainfo
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
-
 
