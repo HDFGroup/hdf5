@@ -44,9 +44,9 @@ $!
 $! Set up compilation flags here
 $! Do not remove define=H5_VMS and standard=strict_ansi qualifiers.
 $!
-$ ccopt == "/float=ieee_float/define=H5_VMS/debug/nooptimize/include=zlib_dir"
-$ fcopt == "/float=ieee_float/define=H5_VMS/debug/nooptimize/include=zlib_dir"
-$ cxxopt == "/float=ieee_float/define=H5_VMS/debug/nooptimize/"+-
+$ ccopt == "/float=ieee_float/define=(_LARGEFILE,H5_VMS)/debug/nooptimize/include=zlib_dir"
+$ fcopt == "/float=ieee_float/define=(_LARGEFILE,H5_VMS)/debug/nooptimize/include=zlib_dir"
+$ cxxopt == "/float=ieee_float/define=(_LARGEFILE,H5_VMS)/debug/nooptimize/"+-
             "standard=strict_ansi/include=zlib_dir"
 $!
 $!
