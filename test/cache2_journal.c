@@ -5227,15 +5227,97 @@ mdj_smoke_check_02(void)
  * Purpose:	Verify that the example code for using the metadata 
  * 		journaling works as expected
  *
+ * 		This example demonstrates enabling journaling at file 
+ * 		creation time, and enabling journaling on an open file.  It 
+ * 		also demonstrates disabling journaling both manualy during a
+ * 		computation and automatically at file close.  Finally,
+ * 		it demonstrates the use of H5Fflush() to keep the journal
+ * 		file from becoming too long.
+ *
+ * 		We begin by creating an hdf5 file with journaling enabled.
+ *
+ * 		The inital calls to TESTING(), SKIPPED(), h5_fixname(),
+ * 		HDremove(), the initialization of pass2, and the like are all 
+ * 		part of the HDF5 test framework, and may be largely ignored.
+ * 		In your application, the only point here is that you will
+ * 		have to set up the paths to your data file and journal 
+ * 		file.  Further, the journal file must not exist before
+ *              the hdf5 file is opened, as hdf5 will refuse to overwrite
+ *              a journal file.
+ *
+ *              With these preliminaries dealt with, we allocate a 
+ *              file access property list (FAPL).  Journaling uses some 
+ *              recent extensions to the superblock, so the first step
+ *              is to set the library version to latest via a call to 
+ *              H5Pset_libver_bounds().
+ *
+ *              Next, we must set up the journaling property.  We could 
+ *              do this in several ways, but in this example we will do 
+ *              this by using H5Pget_jnl_config() to get the default 
+ *              journaling configuration, modifing it, and then using 
+ *		H5Pset_jnl_config() to replace the default with our 
+ *		configuration.  See the comments in the code for the 
+ *		particulars -- note that we must set the version field of
+ *		the H5AC2_jnl_config_t before we call H5Pget_jnl_config().
+ *
+ *		After setting up the FAPL, we create the file as usual.
+ *		Journaling will be enabled with configuration as specified.
+ *
+ *		With file created and journaling running we then go off 
+ *		and do what we want -- in this example we set up a selection
+ *		of chunked data sets.  Note that these data sets (and our 
+ *		access pattern) are chosen to maximize the amount of dirty
+ *		metadata generated.  In your application, you will want to 
+ *		do just the opposite if possible.
+ *
+ *		After the data sets are created, we then shut down journaling
+ *		and then re-enable it via the H5Fget_jnl_config() and 
+ *		H5Fset_jnl_config() calls.  Note that when we re-enable 
+ *		journaling via the H5Fset_jnl_config() call, we don't need
+ *		to set all the fields in the H5AC2_jnl_config_t, since we 
+ *		are re-using the configuration we obtained via the 
+ *		H5Fget_jnl_config() call.  If we had opened the file without
+ *		journaling, and then wanted to enable journaling, we would 
+ *		have had to set up the fields of the H5AC2_jnl_config_t in 
+ *		much the same way we did earlier in the example.  We would 
+ *		also have had to create the file initially with the latest 
+ *		format (using H5Pset_libver_bounds()).
+ *
+ *		Having re-enabled journaling, we then proceed to write to 
+ *		our data sets.  Again, please not that our write strategy
+ *		(round robin and small chunks) is designed to maximize
+ *		dirty metadata generation and load on the metadata cache.
+ *		In your application, you should try to do just the opposite
+ *		if possible.  
+ *
+ *		However, since we are maximizing dirty metadata generation,
+ *		the journal file will grow quickly.  This can be a problem,
+ *		so from time to time we force truncation of the journal file
+ *		via a call to H5Fflush().  This call flushes the hdf5 file,
+ *		and then truncates the journal file, as the contents of the
+ *		journal becomes irrelvant after the metadata journal is 
+ *		flushed.
+ *
+ * 		After writing data to our data sets, we then to a number of 
+ * 		reads.  We could turn off journaling here, as we are not 
+ * 		modifying the file.  But since we are not generating any 
+ * 		dirty metadata, we aren't generating any journal entries
+ * 		either -- so it really doesn't matter.
+ *
+ * 		Finally, we close the hdf5 file.  Since journaling is enabled,
+ * 		the call to H5Fclose() will flush the journal, flush the 
+ * 		metadata cache, truncate the journal, mark the file as not 
+ * 		having journaling in progress, and then delete the journal 
+ * 		file as part of the close.
+ *
  * Return:	void
  *
  * Programmer:	John Mainzer
- *              4/14/04
+ *              12/14/08
  *
  * Modifications:
  *
- * 		JRM -- 7/12/06
- * 		Added progress reporting code.
+ * 		None.
  *
  *-------------------------------------------------------------------------
  */

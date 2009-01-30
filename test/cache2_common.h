@@ -33,7 +33,7 @@
 
 #define NO_CHANGE       	-1
 
-#define USE_CORE_DRIVER 	FALSE
+#define USE_CORE_DRIVER 	TRUE
 
 /* with apologies for the abuse of terminology... */
 
@@ -592,6 +592,8 @@ extern hbool_t write_permitted2;
 extern hbool_t pass2; /* set to false on error */
 extern hbool_t skip_long_tests2;
 extern hbool_t run_full_test2;
+extern hbool_t try_core_file_driver;
+extern hbool_t core_file_driver_failed;
 extern const char *failure_mssg2;
 extern int express_test2;
 extern int failures2;
@@ -808,6 +810,8 @@ void execute_flush_op2(H5F_t * file_ptr,
 		      struct test_entry_t * entry_ptr,
                       struct flush_op * op_ptr,
 		      unsigned * flags_ptr);
+
+hbool_t recommend_core_file_driver(void);
 
 void reset_entries2(void);
 

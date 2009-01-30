@@ -1201,6 +1201,32 @@ case "$host" in
     dnl many problems with including them.
     AC_CHECK_HEADERS([sys/sysinfo.h sys/proc.h])
     ;;
+  *linux*)
+    dnl The <sys/sysinfo.h> header file and the sysinfo() library call 
+    dnl are needed on linux boxes to determine whether the system has 
+    dnl sufficient physical RAM to permit running some of the metadata 
+    dnl cache tests with the core file driver.  Thus we test for the 
+    dnl <sys/sysinfo.h> header despite the problems mentioned above.
+    dnl						JRM -- 1/15/09
+    AC_CHECK_HEADERS([sys/sysinfo.h])
+    AC_CHECK_FUNCS([sysinfo])
+    ;;
+  *freebsd*)
+    dnl On freebsd, to determine the amount of physical memory on the host 
+    dnl machine, we need the <sys/types.h> and <sys/sysctl.h> header files,
+    dnl  and the sysctl() function.  
+    dnl 					JRM -- 1/15/09
+    AC_CHECK_HEADERS([sys/types.h])
+    AC_CHECK_HEADERS([sys/sysctl.h])
+    AC_CHECK_FUNCS([sysctl])
+    ;;
+  *apple-darwin*)
+    dnl MacOS X is basically BSD, so run the same checks as above.
+    dnl 					JRM -- 1/27/09
+    AC_CHECK_HEADERS([sys/types.h])
+    AC_CHECK_HEADERS([sys/sysctl.h])
+    AC_CHECK_FUNCS([sysctl])
+    ;;
   mips*-sgi*-irix*)
     dnl The <sys/fpu.h> is needed on the SGI machines to turn off
     dnl denormalized floating-point values going to zero.  We do *not*

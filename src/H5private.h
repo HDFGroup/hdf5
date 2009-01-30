@@ -1980,5 +1980,11 @@ H5_DLL uint32_t H5_hash_string(const char *str);
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, uint8_t *buf,
     uint8_t *marker, size_t buf_offset, size_t buf_size);
 
+/* function to obtain data about the host system */
+/* Note that these function don't always work -- on failure they return 0 */
+H5_DLL unsigned long long H5_get_free_ram(void);
+H5_DLL unsigned long long H5_get_free_swap(void);
+H5_DLL unsigned long long H5_get_physical_ram(void);
+
 #endif /* _H5private_H */
 

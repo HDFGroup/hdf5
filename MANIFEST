@@ -141,6 +141,7 @@
 ./examples/h5_ref2reg.c
 ./examples/h5_shared_mesg.c
 ./examples/ph5example.c
+./examples/mdj_api_example.c
 ./examples/testh5cc.sh.in
 
 

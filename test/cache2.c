@@ -164,6 +164,8 @@ smoke_check_1(void)
     int mile_stone = 1;
     H5F_t * file_ptr = NULL;
 
+    core_file_driver_failed = FALSE;
+
     TESTING("smoke check #1 -- all clean, ins, dest, ren, 4/2 MB cache");
 
     switch ( express_test2 )
@@ -335,6 +337,13 @@ smoke_check_1(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* smoke_check_1() */
@@ -377,6 +386,8 @@ smoke_check_2(void)
     H5F_t * file_ptr = NULL;
 
     TESTING("smoke check #2 -- ~1/2 dirty, ins, dest, ren, 4/2 MB cache");
+
+    core_file_driver_failed = FALSE;
 
     switch ( express_test2 )
     {
@@ -547,6 +558,13 @@ smoke_check_2(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* smoke_check_2() */
@@ -588,6 +606,8 @@ smoke_check_3(void)
     H5F_t * file_ptr = NULL;
 
     TESTING("smoke check #3 -- all clean, ins, dest, ren, 2/1 KB cache");
+
+    core_file_driver_failed = FALSE;
 
     switch ( express_test2 )
     {
@@ -758,6 +778,13 @@ smoke_check_3(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* smoke_check_3() */
@@ -801,6 +828,8 @@ smoke_check_4(void)
 
     TESTING("smoke check #4 -- ~1/2 dirty, ins, dest, ren, 2/1 KB cache");
 
+    core_file_driver_failed = FALSE;
+
     switch ( express_test2 )
     {
 	case 0:
@@ -841,21 +870,21 @@ smoke_check_4(void)
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
-    row_major_scan_forward2(/* file_ptr              */ file_ptr,
+    row_major_scan_forward2(/* file_ptr               */ file_ptr,
 		            /* max_index              */ max_index,
-                           /* lag                    */ lag,
-                           /* verbose                */ FALSE,
-                           /* reset_stats            */ TRUE,
-                           /* display_stats          */ display_stats,
-                           /* display_detailed_stats */ TRUE,
-                           /* do_inserts             */ TRUE,
-                           /* dirty_inserts          */ dirty_inserts,
-                           /* do_renames             */ TRUE,
-                           /* rename_to_main_addr    */ FALSE,
-                           /* do_destroys            */ TRUE,
-			   /* do_mult_ro_protects    */ TRUE,
-                           /* dirty_destroys         */ dirty_destroys,
-                           /* dirty_unprotects       */ dirty_unprotects);
+                            /* lag                    */ lag,
+                            /* verbose                */ FALSE,
+                            /* reset_stats            */ TRUE,
+                            /* display_stats          */ display_stats,
+                            /* display_detailed_stats */ TRUE,
+                            /* do_inserts             */ TRUE,
+                            /* dirty_inserts          */ dirty_inserts,
+                            /* do_renames             */ TRUE,
+                            /* rename_to_main_addr    */ FALSE,
+                            /* do_destroys            */ TRUE,
+			    /* do_mult_ro_protects    */ TRUE,
+                            /* dirty_destroys         */ dirty_destroys,
+                            /* dirty_unprotects       */ dirty_unprotects);
 
     if ( show_progress ) /* 4 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
@@ -968,6 +997,13 @@ smoke_check_4(void)
 
         HDfprintf(stdout, "%s(): failure_mssg2 = \"%s\".\n",
                   fcn_name, failure_mssg2);
+    } 
+
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
     }
 
     return !pass2;
@@ -1060,6 +1096,8 @@ smoke_check_5(void)
 
     TESTING("smoke check #5 -- all clean, ins, prot, unprot, AR cache 1");
 
+    core_file_driver_failed = FALSE;
+
     switch ( express_test2 )
     {
 	case 0:
@@ -1215,6 +1253,13 @@ smoke_check_5(void)
 
         HDfprintf(stdout, "%s(): failure_mssg2 = \"%s\".\n",
                   fcn_name, failure_mssg2);
+    }
+
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
     }
 
     return !pass2;
@@ -1307,6 +1352,8 @@ smoke_check_6(void)
 
     TESTING("smoke check #6 -- ~1/2 dirty, ins, prot, unprot, AR cache 1");
 
+    core_file_driver_failed = FALSE;
+
     pass2 = TRUE;
 
     switch ( express_test2 )
@@ -1462,6 +1509,13 @@ smoke_check_6(void)
 
         HDfprintf(stdout, "%s(): failure_mssg2 = \"%s\".\n",
                   fcn_name, failure_mssg2);
+    }
+
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
     }
 
     return !pass2;
@@ -1555,6 +1609,8 @@ smoke_check_7(void)
 
     TESTING("smoke check #7 -- all clean, ins, prot, unprot, AR cache 2");
 
+    core_file_driver_failed = FALSE;
+
     switch ( express_test2 )
     {
 	case 0:
@@ -1712,6 +1768,13 @@ smoke_check_7(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* smoke_check_7() */
@@ -1802,6 +1865,8 @@ smoke_check_8(void)
     };
 
     TESTING("smoke check #8 -- ~1/2 dirty, ins, prot, unprot, AR cache 2");
+
+    core_file_driver_failed = FALSE;
 
     switch ( express_test2 )
     {
@@ -1960,6 +2025,13 @@ smoke_check_8(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* smoke_check_8() */
@@ -2005,6 +2077,8 @@ smoke_check_9(void)
     H5F_t * file_ptr = NULL;
 
     TESTING("smoke check #9 -- all clean, ins, dest, ren, 4/2 MB, corked");
+
+    core_file_driver_failed = FALSE;
 
     switch ( express_test2 )
     {
@@ -2285,6 +2359,13 @@ smoke_check_9(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* smoke_check_9() */
@@ -2330,6 +2411,8 @@ smoke_check_10(void)
     H5F_t * file_ptr = NULL;
 
     TESTING("smoke check #10 -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked");
+
+    core_file_driver_failed = FALSE;
 
     switch ( express_test2 )
     {
@@ -2605,6 +2688,13 @@ smoke_check_10(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* smoke_check_10() */
@@ -2646,6 +2736,8 @@ write_permitted_check(void)
 #endif /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
     TESTING("write permitted check -- 1/0 MB cache");
+
+    core_file_driver_failed = FALSE;
 
 #if H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS
 
@@ -2815,6 +2907,13 @@ write_permitted_check(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
 #else /* H5C2_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
     SKIPPED();
@@ -2872,6 +2971,8 @@ check_insert_entry(void)
 
 
     TESTING("H5C2_insert_entry() functionality");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -3206,6 +3307,13 @@ check_insert_entry(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_insert_entry() */
@@ -3236,6 +3344,8 @@ check_flush_cache(void)
     H5F_t *     file_ptr = NULL;
 
     TESTING("H5C2_flush_cache() functionality");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -3319,6 +3429,13 @@ check_flush_cache(void)
 
         HDfprintf(stdout, "%s(): failure_mssg2 = \"%s\".\n",
                   fcn_name, failure_mssg2);
+    }
+
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
     }
 
     return !pass2;
@@ -13409,6 +13526,8 @@ check_get_entry_status(void)
 
     TESTING("H5C2_get_entry_status() functionality");
 
+    core_file_driver_failed = FALSE;
+
     pass2 = TRUE;
 
     if ( pass2 ) {
@@ -13571,6 +13690,13 @@ check_get_entry_status(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_get_entry_status() */
@@ -13610,6 +13736,8 @@ check_expunge_entry(void)
     test_entry_t * entry_ptr;
 
     TESTING("H5C2_expunge_entry() functionality");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -13893,6 +14021,13 @@ check_expunge_entry(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_expunge_entry() */
@@ -13926,6 +14061,10 @@ check_multiple_read_protect(void)
     test_entry_t * entry_ptr;
 
     TESTING("multiple read only protects on a single entry");
+
+    core_file_driver_failed = FALSE;
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -14316,6 +14455,13 @@ check_multiple_read_protect(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_multiple_read_protect() */
@@ -14374,6 +14520,8 @@ check_rename_entry(void)
 
     TESTING("H5C2_rename_entry() functionality");
 
+    core_file_driver_failed = FALSE;
+
     pass2 = TRUE;
 
     /* allocate a cache, load entries into it, and then rename
@@ -14427,6 +14575,13 @@ check_rename_entry(void)
 
         HDfprintf(stdout, "%s(): failure_mssg2 = \"%s\".\n",
                   fcn_name, failure_mssg2);
+    }
+
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
     }
 
     return !pass2;
@@ -14613,6 +14768,8 @@ check_pin_protected_entry(void)
 
     TESTING("H5C2_pin_protected_entry() functionality");
 
+    core_file_driver_failed = FALSE;
+
     pass2 = TRUE;
 
     /* Create a cache, protect an entry, and then use H5C2_pin_protected_entry()
@@ -14671,6 +14828,13 @@ check_pin_protected_entry(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_pin_protected_entry() */
@@ -14712,6 +14876,8 @@ check_resize_entry(void)
     test_entry_t * entry_ptr;
 
     TESTING("entry resize functionality");
+
+    core_file_driver_failed = FALSE;
 
     /* Setup a cache and verify that it is empty.
      *
@@ -15623,6 +15789,13 @@ check_resize_entry(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_resize_entry() */
@@ -15665,6 +15838,8 @@ check_evictions_enabled(void)
     test_entry_t * entry_ptr;
 
     TESTING("evictions enabled/disabled functionality");
+
+    core_file_driver_failed = FALSE;
 
     /* Setup a cache and verify that it is empty.
      *
@@ -16328,6 +16503,13 @@ check_evictions_enabled(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_evictions_enabled() */
@@ -16356,6 +16538,8 @@ check_flush_protected_err(void)
     H5F_t * file_ptr = NULL;
 
     TESTING("flush cache with protected entry error");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -16406,6 +16590,13 @@ check_flush_protected_err(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_flush_protected_err() */
@@ -16440,6 +16631,8 @@ check_destroy_pinned_err(void)
     H5F_t * file_ptr = NULL;
 
     TESTING("destroy cache with permanently pinned entry error");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -16500,6 +16693,13 @@ check_destroy_pinned_err(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_destroy_pinned_err() */
@@ -16528,6 +16728,8 @@ check_destroy_protected_err(void)
     H5F_t * file_ptr = NULL;
 
     TESTING("destroy cache with protected entry error");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -16587,6 +16789,13 @@ check_destroy_protected_err(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_destroy_protected_err() */
@@ -16618,6 +16827,8 @@ check_duplicate_insert_err(void)
     test_entry_t * entry_ptr;
 
     TESTING("duplicate entry insertion error");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -16667,6 +16878,13 @@ check_duplicate_insert_err(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_duplicate_insert_err() */
@@ -16700,6 +16918,8 @@ check_rename_err(void)
     test_entry_t * entry_1_0_ptr;
 
     TESTING("rename to existing entry errors");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -16762,6 +16982,13 @@ check_rename_err(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_rename_err() */
@@ -16794,6 +17021,8 @@ check_double_pin_err(void)
     test_entry_t * entry_ptr;
 
     TESTING("pin a pinned entry error");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -16851,6 +17080,13 @@ check_double_pin_err(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_double_pin_err() */
@@ -16883,6 +17119,8 @@ check_double_unpin_err(void)
     test_entry_t * entry_ptr;
 
     TESTING("unpin an unpinned entry error");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -16951,6 +17189,13 @@ check_double_unpin_err(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_double_unpin_err() */
@@ -16983,6 +17228,8 @@ check_pin_entry_errs(void)
     test_entry_t * entry_ptr;
 
     TESTING("pin entry related errors");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -17062,6 +17309,13 @@ check_pin_entry_errs(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_pin_entry_errs() */
@@ -17097,6 +17351,8 @@ check_double_protect_err(void)
     H5C2_cache_entry_t * cache_entry_ptr;
 
     TESTING("protect a protected entry error");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -17149,6 +17405,13 @@ check_double_protect_err(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_double_protect_err() */
@@ -17187,6 +17450,8 @@ check_double_unprotect_err(void)
     test_entry_t * entry_ptr;
 
     TESTING("unprotect an unprotected entry error");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -17237,6 +17502,13 @@ check_double_unprotect_err(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_double_unprotect_err() */
@@ -17278,6 +17550,8 @@ check_mark_entry_dirty_errs(void)
     test_entry_t * entry_ptr;
 
     TESTING("mark entry dirty related errors");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -17366,6 +17640,13 @@ check_mark_entry_dirty_errs(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_mark_entry_dirty_errs() */
@@ -17398,6 +17679,8 @@ check_expunge_entry_errs(void)
     test_entry_t * entry_ptr;
 
     TESTING("expunge entry related errors");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -17490,6 +17773,13 @@ check_expunge_entry_errs(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_expunge_entry_errs() */
@@ -17522,6 +17812,8 @@ check_resize_entry_errs(void)
     test_entry_t * entry_ptr;
 
     TESTING("resize entry related errors");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -17597,6 +17889,13 @@ check_resize_entry_errs(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_resize_entry_errs() */
@@ -17629,6 +17928,8 @@ check_unprotect_ro_dirty_err(void)
     test_entry_t * entry_ptr;
 
     TESTING("unprotect a read only entry dirty error");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -17729,6 +18030,13 @@ check_unprotect_ro_dirty_err(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_unprotect_ro_dirty_err() */
@@ -17761,6 +18069,8 @@ check_protect_ro_rw_err(void)
     void * thing_ptr = NULL;
 
     TESTING("protect a read only entry rw error");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -17813,6 +18123,13 @@ check_protect_ro_rw_err(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_protect_ro_rw_err() */
@@ -17846,6 +18163,8 @@ check_check_evictions_enabled_err(void)
     H5C2_t * cache_ptr = NULL;
 
     TESTING("get/set evictions enabled errors");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -17952,6 +18271,13 @@ check_check_evictions_enabled_err(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_evictions_enabled_err() */
@@ -18052,6 +18378,8 @@ check_auto_cache_resize(void)
     };
 
     TESTING("automatic cache resizing");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -22288,6 +22616,13 @@ check_auto_cache_resize(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_auto_cache_resize() */
@@ -22370,6 +22705,8 @@ check_auto_cache_resize_disable(void)
     };
 
     TESTING("automatic cache resize disable");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -25043,6 +25380,13 @@ check_auto_cache_resize_disable(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_auto_cache_resize_disable() */
@@ -25122,6 +25466,8 @@ check_auto_cache_resize_epoch_markers(void)
     };
 
     TESTING("automatic cache resize epoch marker management");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -25753,6 +26099,13 @@ check_auto_cache_resize_epoch_markers(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_auto_cache_resize_epoch_markers() */
@@ -25864,6 +26217,8 @@ check_auto_cache_resize_input_errs(void)
     H5C2_auto_size_ctl_t test_auto_size_ctl;
 
     TESTING("automatic cache resize input errors");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -28226,6 +28581,13 @@ check_auto_cache_resize_input_errs(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_auto_cache_resize_input_errs() */
@@ -28316,6 +28678,8 @@ check_auto_cache_resize_aux_fcns(void)
 
 
     TESTING("automatic cache resize auxilary functions");
+
+    core_file_driver_failed = FALSE;
 
     pass2 = TRUE;
 
@@ -28810,6 +29174,13 @@ check_auto_cache_resize_aux_fcns(void)
                   fcn_name, failure_mssg2);
     }
 
+    if ( core_file_driver_failed ) {
+
+	HDfprintf(stdout, 
+		  "%s(): Unable to open test file with core file driver.\n",
+		  fcn_name);
+    }
+
     return !pass2;
 
 } /* check_auto_cache_resize_aux_fcns() */
@@ -28835,7 +29206,15 @@ check_auto_cache_resize_aux_fcns(void)
 int
 main(void)
 {
+    hbool_t core_file_forced = FALSE;
+    hbool_t regular_file_forced = FALSE;
+    hbool_t core_file_driver_recommended = FALSE;
+    const char  *envval = NULL;
     unsigned nerrs = 0;
+
+    core_file_driver_recommended = recommend_core_file_driver();
+
+    try_core_file_driver = core_file_driver_recommended;
 
     H5open();
 
@@ -28850,12 +29229,52 @@ main(void)
 	skip_long_tests2 = FALSE;
     }
 
-    printf("===================================\n");
+    envval = HDgetenv("HDF5_DRIVER");
+
+    if ( envval != NULL ) {
+
+        if ( HDstrcmp(envval, "core") == 0 ) {
+   
+            core_file_forced = TRUE;
+	    try_core_file_driver = TRUE;
+
+	} else {
+
+	    regular_file_forced = TRUE;
+	    try_core_file_driver = FALSE;
+
+	}
+    }
+
+    printf("=========================================\n");
     printf("Internal cache tests\n");
     printf("        express_test = %d\n", express_test2);
     printf("        skip_long_tests = %d\n", (int)skip_long_tests2);
-    printf("        use_core_driver = %d\n", USE_CORE_DRIVER);
-    printf("===================================\n");
+    printf("        regular_file_forced = %d\n", (int)regular_file_forced);
+    printf("        core_file_forced = %d\n", (int)core_file_forced);
+    printf("        core_file_driver_recommended = %d\n", 
+		    (int)core_file_driver_recommended);
+    printf("        try_core_file_driver = %d\n", (int)try_core_file_driver);
+    printf("=========================================\n");
+
+    if ( try_core_file_driver ) {
+
+	printf("\n");
+        printf("All the longer cache tests will attempt to use the core file\n");
+	printf("driver in an attempt to avoid disk I/O and thereby run the\n");
+	printf("tests faster.  If a test is unable to to do so, it will\n"); 
+	printf("attempt to run the test using a regular file, and will note\n");
+	printf("this fact at test completion.\n");
+	printf("\n");
+	printf("Shorter tests never attempt to use the core file driver\n");
+	printf("as the overhead exceeds the gain\n");
+	printf("\n");
+	printf("In general, running the longer cache tests with the core\n");
+	printf("file driver should speed up the tests significantly.\n");
+	printf("However, if the available physical ram is less than 2 GB,\n"); 
+	printf("it may slow the tests down instead.\n");
+	printf("\n");
+    }
 
 #if 1
     nerrs += smoke_check_1();
@@ -28872,6 +29291,12 @@ main(void)
 #if 1
     nerrs += write_permitted_check();
 #endif
+    /* for shorter tests, the overhead of using the core file driver doesn't
+     * seem to allow us to realize any significant time saveings.  Thus 
+     * set try_core_file_driver to FALSE for the remaining tests.
+     */
+    try_core_file_driver = FALSE;
+
     nerrs += check_insert_entry();
     nerrs += check_flush_cache();
     nerrs += check_get_entry_status();

@@ -29,9 +29,12 @@ fi
 # Add "_XOPEN_SOURCE" define to cpp flags, to quiet warnings
 #       from /usr/include/sys/cdefs.h
 # (Unless we are using g++ as a C compiler)
-if test "X-g++" != "X-$CC"; then
-    H5_CPPFLAGS="$H5_CPPFLAGS -D_XOPEN_SOURCE=600" 
-fi
+#
+# JRM -- comment this out as it seems to be keeping me from using sysctl()
+#
+#if test "X-g++" != "X-$CC"; then
+#    H5_CPPFLAGS="$H5_CPPFLAGS -D_XOPEN_SOURCE=600" 
+#fi
 
 # Figure out C compiler flags
 . $srcdir/config/gnu-flags

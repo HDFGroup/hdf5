@@ -20,12 +20,15 @@
  *		implemented in H5C2.c
  */
 
+#include "H5private.h"
+
 #include "h5test.h"
 #include "H5Iprivate.h"
 #include "H5ACprivate.h"
 #include "H5MFprivate.h"
 #include "H5MMprivate.h"
 #include "cache2_common.h"
+
 
 /* global variable declarations: */
 
@@ -35,9 +38,17 @@ const char *FILENAME[] = {
 	NULL
 };
 
+hid_t saved_fapl_id = H5P_DEFAULT; /* store the fapl id here between 
+				    * cache setup and takedown.  Note 
+				    * that if saved_fapl_id == H5P_DEFAULT,
+				    * we assume that there is no fapl to 
+				    * close.
+				    */
+
 hid_t saved_fid = -1; /* store the file id here between cache setup 
 		       * and takedown.
 		       */
+
 H5C2_t * saved_cache2 = NULL; /* store the pointer to the instance of 
  			       * of H5C2_t created by H5Fcreate() 
 			       * here between test cache setup and 
@@ -48,6 +59,8 @@ hbool_t write_permitted2 = TRUE;
 hbool_t pass2 = TRUE; /* set to false on error */
 hbool_t skip_long_tests2 = TRUE;
 hbool_t run_full_test2 = TRUE;
+hbool_t try_core_file_driver = TRUE;
+hbool_t core_file_driver_failed = FALSE;
 const char *failure_mssg2 = NULL;
 int failures2 = 0;
 int express_test2 = 0;
@@ -1943,6 +1956,82 @@ entry_in_cache2(H5C2_t * cache_ptr,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	recommend_core_file_driver
+ *
+ * Purpose:	Using the core file driver for test files allows us to avoid
+ * 		disk I/O, and thust offers the potential of speeding up 
+ * 		tests.  However, if the target system has insufficient 
+ * 		physical memory to accomodate the test file, using the 
+ * 		core file driver will actually slow the test down, as the 
+ * 		target system will page fault continuously.
+ *
+ * 		The purpose of this function is to determine whether it 
+ * 		makes sense to use the core file driver on this particular
+ * 		system.
+ *
+ * 		To do this, we need to determine a number of facts about
+ * 		the host system -- most particularly how much physical 
+ * 		RAM it has.  This information is not always available.
+ * 		If it is not, we assume the worst and report that using
+ * 		the core file driver would be ill advised.
+ *
+ * Return:	TRUE 	If use of the core file driver seems a good idea.
+ *
+ *              FALSE   If available data on the host system suggests that 
+ *              	user of the core file driver is ill advised, or 
+ *              	if no information is available upon which to base
+ *              	a suggestion.
+ *
+ * Programmer:	John Mainzer
+ *              1/13/09
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+hbool_t
+recommend_core_file_driver(void)
+{
+    const char * fcn_name = "recommend_core_file_driver()";
+    hbool_t core_file_driver_recomended = FALSE;
+    hbool_t verbose = FALSE;
+    unsigned long long free_ram = 0;
+    unsigned long long free_swap = 0;
+    unsigned long long physical_ram = 0;
+
+    free_ram = H5_get_free_ram();
+    free_swap = H5_get_free_swap();
+    physical_ram = H5_get_physical_ram();
+
+    if ( ( physical_ram > ((((unsigned long long)MAX_ADDR) / 5) * 9) ) ||
+         ( ( physical_ram > ((((unsigned long long)MAX_ADDR) / 2) * 3) ) &&
+           ( ( ((unsigned long long)MAX_ADDR) < free_ram ) ||
+             ( ((unsigned long long)MAX_ADDR) < free_swap ) ) ) ) {
+
+	core_file_driver_recomended = TRUE;
+    }
+
+    if ( verbose ) {
+
+        HDfprintf(stdout, "%s: physical_ram = %lld\n", 
+                  fcn_name, (long long)physical_ram);
+        HDfprintf(stdout, "%s: free_ram = %lld\n", 
+                  fcn_name, (long long)free_ram);
+        HDfprintf(stdout, "%s: free_swap = %lld\n", 
+                  fcn_name, (long long)free_swap);
+        HDfprintf(stdout, "%s: MAX_ADDR = %lld\n", 
+                  fcn_name, (long long)MAX_ADDR);
+	HDfprintf(stdout, "%s: core_file_driver_recomended = %d\n", 
+		  fcn_name, (int)core_file_driver_recomended);
+    }
+
+    return(core_file_driver_recomended);
+
+} /* recommend_core_file_driver() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	reset_entries2
  *
  * Purpose:	reset the contents of the entries arrays to know values.
@@ -2710,28 +2799,45 @@ setup_cache2(size_t max_cache_size,
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
-#if USE_CORE_DRIVER
-    if ( pass2 ) {
+    if ( ( pass2 ) && ( try_core_file_driver ) ) {
 
 	if ( (fapl_id = H5Pcreate(H5P_FILE_ACCESS)) == FAIL ) {
 
 	    pass2 = FALSE;
 	    failure_mssg2 = "H5Pcreate(H5P_FILE_ACCESS) failed.\n";
         }
-	else if ( H5Pset_fapl_core(fapl_id, 64 * 1024 * 1024, FALSE) < 0 ) {
+	else if ( H5Pset_fapl_core(fapl_id, MAX_ADDR, FALSE) < 0 ) {
 
+	    H5Pclose(fapl_id);
+	    fapl_id = H5P_DEFAULT;
 	    pass2 = FALSE;
 	    failure_mssg2 = "H5P_set_fapl_core() failed.\n";
         }
+	else if ( (fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id))
+	          < 0 ) {
+
+	    core_file_driver_failed = TRUE;
+        
+            if ( verbose ) {
+                HDfprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", fcn_name);
+            }
+
+        } else {
+	
+	    saved_fapl_id = fapl_id;
+	}
     }
-#endif /* USE_CORE_DRIVER */
 
     if ( show_progress ) /* 3 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
-    if ( pass2 ) {
-
+    /* if we either aren't using the core file driver, or a create 
+     * with the core file driver failed, try again with a regular file.
+     * If this fails, we are cooked.
+     */
+    if ( ( pass2 ) && ( fid < 0 ) ) {
+    
         fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
 
 	saved_fid = fid;
@@ -2744,8 +2850,20 @@ setup_cache2(size_t max_cache_size,
             if ( verbose ) {
                 HDfprintf(stdout, "%s: H5Fcreate() failed.\n", fcn_name);
             }
+        }
+    }
 
-        } else if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
+    if ( show_progress ) /* 4 */
+        HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
+                  fcn_name, mile_stone++, (int)pass2);
+
+    if ( pass2 ) {
+
+	HDassert( fid >= 0 );
+
+	saved_fid = fid;
+
+        if ( H5Fflush(fid, H5F_SCOPE_GLOBAL) < 0 ) {
 
             pass2 = FALSE;
             failure_mssg2 = "H5Fflush() failed.";
@@ -2770,7 +2888,7 @@ setup_cache2(size_t max_cache_size,
         }
     }
 
-    if ( show_progress ) /* 4 */
+    if ( show_progress ) /* 5 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
@@ -2822,7 +2940,7 @@ setup_cache2(size_t max_cache_size,
         file_ptr->shared->cache2 = cache_ptr;
     }
 
-    if ( show_progress ) /* 5 */
+    if ( show_progress ) /* 6 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
@@ -2848,7 +2966,7 @@ setup_cache2(size_t max_cache_size,
 	}
     }
 
-    if ( show_progress ) /* 6 */
+    if ( show_progress ) /* 7 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
@@ -2882,7 +3000,7 @@ setup_cache2(size_t max_cache_size,
         }
     }
 
-    if ( show_progress ) /* 7 */
+    if ( show_progress ) /* 8 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
@@ -2892,7 +3010,7 @@ setup_cache2(size_t max_cache_size,
         ret_val = file_ptr;
     }
 
-    if ( show_progress ) /* 8 */
+    if ( show_progress ) /* 9 */
         HDfprintf(stdout, "%s() - %0d -- pass2 = %d\n",
                   fcn_name, mile_stone++, (int)pass2);
 
@@ -2946,6 +3064,12 @@ takedown_cache2(H5F_t * file_ptr,
 	}
     }
 
+    if ( saved_fapl_id != H5P_DEFAULT ) {
+
+        H5Pclose(saved_fapl_id);
+	saved_fapl_id = H5P_DEFAULT;
+    }
+
     if ( saved_fid != -1 ) {
 
 	if ( H5Fclose(saved_fid) < 0  ) {
@@ -2958,21 +3082,23 @@ takedown_cache2(H5F_t * file_ptr,
 	    saved_fid = -1;
 
         }
-#if ( USE_CORE_DRIVER == FALSE )
-        if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
-            == NULL ) {
 
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed.\n";
-        }
+	if ( ( ! try_core_file_driver ) || ( core_file_driver_failed ) ) {
 
-        if ( HDremove(filename) < 0 ) {
+            if ( h5_fixname(FILENAME[0], H5P_DEFAULT, filename, sizeof(filename))
+                 == NULL ) {
 
-            pass2 = FALSE;
-	    failure_mssg2 = "couldn't delete test file.";
+                pass2 = FALSE;
+                failure_mssg2 = "h5_fixname() failed.\n";
+            }
 
+            if ( HDremove(filename) < 0 ) {
+
+                pass2 = FALSE;
+	        failure_mssg2 = "couldn't delete test file.";
+
+	    }
 	}
-#endif /* USE_CORE_CRIVER */
     }
 
     return;
@@ -3492,7 +3618,7 @@ rename_entry2(H5C2_t * cache_ptr,
               int32_t idx,
               hbool_t main_addr)
 {
-    const char *   fcn_name = "rename_entry2()";
+    /* const char *   fcn_name = "rename_entry2()"; */
     herr_t         result;
     hbool_t	   done = TRUE; /* will set to FALSE if we have work to do */
     haddr_t        old_addr = HADDR_UNDEF;
@@ -5855,7 +5981,7 @@ check_and_validate_cache_hit_rate(hid_t file_id,
             pass2 = FALSE;
             failure_mssg2 = "H5Fget_mdc_hit_rate() failed.";
 
-        } else if ( hit_rate != expected_hit_rate ) {
+        } else if ( ! DBL_REL_EQUAL(hit_rate, expected_hit_rate, 0.00001) ) {
 
             pass2 = FALSE;
             failure_mssg2 = "unexpected hit rate (1).";
