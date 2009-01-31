@@ -178,10 +178,11 @@ END_FUNC(PKG)   /* end H5EA__iblock_alloc() */
  */
 BEGIN_FUNC(PKG, ERR,
 haddr_t, HADDR_UNDEF, HADDR_UNDEF,
-H5EA__iblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id))
+H5EA__iblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty))
 
     /* Local variables */
-    H5EA_iblock_t *iblock = NULL;      /* Extensible array index block */
+    H5EA_iblock_t *iblock = NULL;       /* Extensible array index block */
+    haddr_t iblock_addr;                /* Extensible array index block address */
 
 #ifdef QAK
 HDfprintf(stderr, "%s: Called\n", FUNC);
@@ -189,6 +190,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Sanity check */
     HDassert(hdr);
+    HDassert(hdr_dirty);
 
     /* Allocate the index block */
     if(NULL == (iblock = H5EA__iblock_alloc(hdr)))
@@ -201,8 +203,9 @@ HDfprintf(stderr, "%s: iblock->size = %Zu\n", FUNC, iblock->size);
 #endif /* QAK */
 
     /* Allocate space for the index block on disk */
-    if(HADDR_UNDEF == (iblock->addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_IBLOCK, dxpl_id, (hsize_t)iblock->size)))
+    if(HADDR_UNDEF == (iblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_IBLOCK, dxpl_id, (hsize_t)iblock->size)))
 	H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array index block")
+    iblock->addr = iblock_addr;
 
     /* Clear any elements in index block to fill value */
     if(hdr->cparam.idx_blk_elmts > 0) {
@@ -228,11 +231,23 @@ HDfprintf(stderr, "%s: iblock->size = %Zu\n", FUNC, iblock->size);
     } /* end if */
 
     /* Cache the new extensible array index block */
-    if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_IBLOCK, iblock->addr, iblock, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_IBLOCK, iblock_addr, iblock, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array index block to cache")
 
+    /* Update extensible array index block statistics */
+    HDassert(0 == hdr->stats.nindex_blks);
+    HDassert(0 == hdr->stats.index_blk_size);
+    hdr->stats.nindex_blks = 1;
+    hdr->stats.index_blk_size = iblock->size;
+
+    /* Increment count of elements "realized" */
+    hdr->stats.nelmts += hdr->cparam.idx_blk_elmts;
+
+    /* Mark the header dirty (for updating statistics) */
+    *hdr_dirty = TRUE;
+
     /* Set address of index block to return */
-    ret_value = iblock->addr;
+    ret_value = iblock_addr;
 
 CATCH
     if(!H5F_addr_defined(ret_value))

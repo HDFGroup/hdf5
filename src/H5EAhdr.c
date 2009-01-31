@@ -235,8 +235,8 @@ HDfprintf(stderr, "%s: hdr->sblk_info[%Zu] = {%Zu, %Zu, %Hu, %Hu}\n", FUNC, u, h
         start_dblk += (hsize_t)hdr->sblk_info[u].ndblks;
     } /* end for */
 
-    /* Set size of header on disk */
-    hdr->size = H5EA_HEADER_SIZE(hdr);
+    /* Set size of header on disk (locally and in statistics) */
+    hdr->stats.hdr_size = hdr->size = H5EA_HEADER_SIZE(hdr);
 
 CATCH
 

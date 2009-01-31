@@ -190,11 +190,13 @@ END_FUNC(PKG)   /* end H5EA__sblock_alloc() */
  */
 BEGIN_FUNC(PKG, ERR,
 haddr_t, HADDR_UNDEF, HADDR_UNDEF,
-H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, unsigned sblk_idx))
+H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty,
+    unsigned sblk_idx))
 
     /* Local variables */
-    H5EA_sblock_t *sblock = NULL;      /* Extensible array super block */
-    haddr_t tmp_addr = HADDR_UNDEF;         /* Address value to fill data block addresses with */
+    H5EA_sblock_t *sblock = NULL;       /* Extensible array super block */
+    haddr_t sblock_addr;                /* Extensible array super block address */
+    haddr_t tmp_addr = HADDR_UNDEF;     /* Address value to fill data block addresses with */
 
 #ifdef QAK
 HDfprintf(stderr, "%s: Called\n", FUNC);
@@ -202,6 +204,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Sanity check */
     HDassert(hdr);
+    HDassert(hdr_dirty);
 
     /* Allocate the super block */
     if(NULL == (sblock = H5EA__sblock_alloc(hdr, sblk_idx)))
@@ -220,18 +223,26 @@ HDfprintf(stderr, "%s: sblock->block_off = %Hu\n", FUNC, sblock->block_off);
 #endif /* QAK */
 
     /* Allocate space for the super block on disk */
-    if(HADDR_UNDEF == (sblock->addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_SBLOCK, dxpl_id, (hsize_t)sblock->size)))
+    if(HADDR_UNDEF == (sblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_SBLOCK, dxpl_id, (hsize_t)sblock->size)))
 	H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array super block")
+    sblock->addr = sblock_addr;
 
     /* Reset data block addresses to "undefined" address value */
     H5V_array_fill(sblock->dblk_addrs, &tmp_addr, sizeof(haddr_t), sblock->ndblks);
 
     /* Cache the new extensible array super block */
-    if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_SBLOCK, sblock->addr, sblock, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_SBLOCK, sblock_addr, sblock, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array super block to cache")
 
+    /* Update extensible array super block statistics */
+    hdr->stats.nsuper_blks++;
+    hdr->stats.super_blk_size += sblock->size;
+
+    /* Mark the header dirty (for updating statistics) */
+    *hdr_dirty = TRUE;
+
     /* Set address of super block to return */
-    ret_value = sblock->addr;
+    ret_value = sblock_addr;
 
 CATCH
     if(!H5F_addr_defined(ret_value))
