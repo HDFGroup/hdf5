@@ -17,7 +17,7 @@ $!
 $! This file builds C, Frtran, C++ HDF5 librraies and runs the tests
 $! Specify location of the top HDF5 source directory
 $
-$ hdf5top == "sys$sysusers:[pourmale.hdf5]"
+$ hdf5top == "sys$sysusers:[pourmal.hdf5]"
 $ len = F$LENGTH(hdf5top)
 $ tmp = F$EXTRACT(0, len-1, hdf5top)
 $ hdf5vms     = tmp + ".VMS]"

@@ -36,8 +36,8 @@ $ copy [.tools.testfiles]*.ddl  [-.tools.testfiles]
 $!
 $! Define location of ZLIB library. If you do not have it on your system, download
 $! source code from http://www.zlib.net/, build and install on your system
-$ define zlib_dir sys$sysusers:[pourmale.zlib-1_2_3]
-$! define zlib_dir sys$sysusers:[pourmale.zlib-1_2_3-ieee]
+$ define zlib_dir sys$sysusers:[pourmal.zlib-1_2_3]
+$! define zlib_dir sys$sysusers:[pourmal.zlib-1_2_3-ieee]
 $!
 $! Set up compilation flags here
 $! Do not remove define=H5_VMS and standard=strict_ansi qualifiers.

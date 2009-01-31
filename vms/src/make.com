@@ -11,7 +11,12 @@ $! Makefile for VMS systems.
 $!
 $! Make HDF5 library
 $!
-$! ccopt = "/float=ieee_float/define=H5_VMS"
+$! The next two lines should be uncommented only when building by hand in the
+$! current directory. Use build.com in the vms directory to build
+$! the distribution. Make sure that location of the zlib library is correct.
+$!
+$! define zlib_dir sys$sysusers:[pourmal.zlib-1_2_3]
+$! ccopt = "/float=ieee_float/define=(_LARGEFILE,H5_VMS)/include=zlib_dir"
 $ ccc := cc 'ccopt 
 $ ccc h5detect.c
 $ link h5detect
