@@ -361,6 +361,14 @@ typedef struct H5O_layout_chunk_btree_t {
     H5RC_t     *shared;			/* Ref-counted shared info for B-tree nodes */
 } H5O_layout_chunk_btree_t;
 
+/* Forward declaration of structs used below */
+struct H5EA_t;                          /* Defined in H5EAprivate.h          */
+
+typedef struct H5O_layout_chunk_earray_t {
+    haddr_t	addr;			/* File address of extensible array  */
+    struct H5EA_t *ea;                  /* Pointer to extensible array struct */
+} H5O_layout_chunk_earray_t;
+
 typedef struct H5O_layout_chunk_t {
     H5D_chunk_index_t idx_type;		/* Type of chunk index               */
     unsigned	ndims;			/* Num dimensions in chunk           */
@@ -369,6 +377,7 @@ typedef struct H5O_layout_chunk_t {
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked layout operations */
     union {
         H5O_layout_chunk_btree_t btree; /* Information for v1 B-tree index   */
+        H5O_layout_chunk_earray_t earray; /* Information for extensible array index */
     } u;
 } H5O_layout_chunk_t;
 
@@ -566,6 +575,7 @@ typedef struct {
 
 /* Forward declarations for prototype arguments */
 struct H5P_genplist_t;
+struct H5S_t;
 
 /* Object header routines */
 H5_DLL herr_t H5O_init(void);
@@ -656,6 +666,8 @@ H5_DLL herr_t H5O_loc_free(H5O_loc_t *loc);
 
 /* Layout operators */
 H5_DLL size_t H5O_layout_meta_size(const H5F_t *f, const void *_mesg);
+H5_DLL herr_t H5O_layout_set_latest_version(H5O_layout_t *layout,
+    const struct H5S_t *space);
 
 /* EFL operators */
 H5_DLL hsize_t H5O_efl_total_size(H5O_efl_t *efl);

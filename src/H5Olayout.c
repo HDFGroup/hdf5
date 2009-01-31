@@ -30,6 +30,7 @@
 #include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5Pprivate.h"		/* Property lists			*/
+#include "H5Sprivate.h"		/* Dataspaces				*/
 
 
 /* PRIVATE PROTOTYPES */
@@ -111,7 +112,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     mesg->version = *p++;
-    if(mesg->version < H5O_LAYOUT_VERSION_1 || mesg->version > H5O_LAYOUT_VERSION_3)
+    if(mesg->version < H5O_LAYOUT_VERSION_1 || mesg->version > H5O_LAYOUT_VERSION_4)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "bad version number for layout message")
 
     if(mesg->version < H5O_LAYOUT_VERSION_3) {
@@ -213,26 +214,68 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
                 break;
 
             case H5D_CHUNKED:
-                /* Dimensionality */
-                mesg->u.chunk.ndims = *p++;
-                if(mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
-                    HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "dimensionality is too large")
+                if(mesg->version < H5O_LAYOUT_VERSION_4) {
+                    /* Dimensionality */
+                    mesg->u.chunk.ndims = *p++;
+                    if(mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "dimensionality is too large")
 
-                /* B-tree address */
-                H5F_addr_decode(f, &p, &(mesg->u.chunk.u.btree.addr));
+                    /* B-tree address */
+                    H5F_addr_decode(f, &p, &(mesg->u.chunk.u.btree.addr));
 
-                /* Chunk dimensions */
-                for(u = 0; u < mesg->u.chunk.ndims; u++)
-                    UINT32DECODE(p, mesg->u.chunk.dim[u]);
+                    /* Chunk dimensions */
+                    for(u = 0; u < mesg->u.chunk.ndims; u++)
+                        UINT32DECODE(p, mesg->u.chunk.dim[u]);
 
-                /* Compute chunk size */
-                for(u = 1, mesg->u.chunk.size = mesg->u.chunk.dim[0]; u < mesg->u.chunk.ndims; u++)
-                    mesg->u.chunk.size *= mesg->u.chunk.dim[u];
+                    /* Compute chunk size */
+                    for(u = 1, mesg->u.chunk.size = mesg->u.chunk.dim[0]; u < mesg->u.chunk.ndims; u++)
+                        mesg->u.chunk.size *= mesg->u.chunk.dim[u];
 
-                /* Set the chunk operations */
-                /* (Only "btree" indexing type supported with v3 of message format) */
-                mesg->u.chunk.idx_type = H5D_CHUNK_BTREE;
-                mesg->u.chunk.ops = H5D_COPS_BTREE;
+                    /* Set the chunk operations */
+                    /* (Only "btree" indexing type supported with v3 of message format) */
+                    mesg->u.chunk.idx_type = H5D_CHUNK_BTREE;
+                    mesg->u.chunk.ops = H5D_COPS_BTREE;
+                } /* end if */
+                else {
+                    /* Dimensionality */
+                    mesg->u.chunk.ndims = *p++;
+                    if(mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "dimensionality is too large")
+
+                    /* Chunk dimensions */
+                    for(u = 0; u < mesg->u.chunk.ndims; u++)
+                        UINT32DECODE(p, mesg->u.chunk.dim[u]);
+
+                    /* Compute chunk size */
+                    for(u = 1, mesg->u.chunk.size = mesg->u.chunk.dim[0]; u < mesg->u.chunk.ndims; u++)
+                        mesg->u.chunk.size *= mesg->u.chunk.dim[u];
+
+                    /* Chunk index type */
+                    mesg->u.chunk.idx_type = *p++;
+                    if(mesg->u.chunk.idx_type > H5D_CHUNK_EARRAY)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown chunk index type")
+
+                    switch(mesg->u.chunk.idx_type) {
+                        case H5D_CHUNK_BTREE:
+                            /* B-tree address */
+                            H5F_addr_decode(f, &p, &(mesg->u.chunk.u.btree.addr));
+
+                            /* Set the chunk operations */
+                            mesg->u.chunk.ops = H5D_COPS_BTREE;
+                            break;
+
+                        case H5D_CHUNK_EARRAY:
+                            /* Extensible array address */
+                            H5F_addr_decode(f, &p, &(mesg->u.chunk.u.earray.addr));
+
+                            /* Set the chunk operations */
+                            mesg->u.chunk.ops = H5D_COPS_EARRAY;
+                            break;
+
+                        default:
+                            HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "Invalid chunk index type")
+                    } /* end switch */
+                } /* end else */
 
                 /* Set the layout operations */
                 mesg->ops = H5D_LOPS_CHUNK;
@@ -327,16 +370,45 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
             break;
 
         case H5D_CHUNKED:
-            /* Number of dimensions */
-            HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-            *p++ = (uint8_t)mesg->u.chunk.ndims;
+            if(mesg->version < H5O_LAYOUT_VERSION_4) {
+                /* Number of dimensions */
+                HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                *p++ = (uint8_t)mesg->u.chunk.ndims;
 
-            /* B-tree address */
-            H5F_addr_encode(f, &p, mesg->u.chunk.u.btree.addr);
+                /* B-tree address */
+                H5F_addr_encode(f, &p, mesg->u.chunk.u.btree.addr);
 
-            /* Dimension sizes */
-            for(u = 0; u < mesg->u.chunk.ndims; u++)
-                UINT32ENCODE(p, mesg->u.chunk.dim[u]);
+                /* Dimension sizes */
+                for(u = 0; u < mesg->u.chunk.ndims; u++)
+                    UINT32ENCODE(p, mesg->u.chunk.dim[u]);
+            } /* end if */
+            else {
+                /* Number of dimensions */
+                HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                *p++ = (uint8_t)mesg->u.chunk.ndims;
+
+                /* Dimension sizes */
+                for(u = 0; u < mesg->u.chunk.ndims; u++)
+                    UINT32ENCODE(p, mesg->u.chunk.dim[u]);
+
+                /* Chunk index type */
+                *p++ = (uint8_t)mesg->u.chunk.idx_type;
+
+                switch(mesg->u.chunk.idx_type) {
+                    case H5D_CHUNK_BTREE:
+                        /* B-tree address */
+                        H5F_addr_encode(f, &p, mesg->u.chunk.u.btree.addr);
+                        break;
+
+                    case H5D_CHUNK_EARRAY:
+                        /* Extensible array address */
+                        H5F_addr_encode(f, &p, mesg->u.chunk.u.earray.addr);
+                        break;
+
+                    default:
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, FAIL, "Invalid chunk index type")
+                } /* end switch */
+            } /* end else */
             break;
 
         default:
@@ -709,6 +781,13 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
                               "B-tree address:", mesg->u.chunk.u.btree.addr);
                     break;
 
+                case H5D_CHUNK_EARRAY:
+                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                              "Index Type:", "Extensible Array");
+                    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+                              "Extensible Array address:", mesg->u.chunk.u.earray.addr);
+                    break;
+
                 default:
                     HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth,
                               "Index Type:", "Unknown", (unsigned)mesg->u.chunk.idx_type);
@@ -792,8 +871,29 @@ H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
             /* Dimension sizes */
             ret_value += mesg->u.chunk.ndims * 4;
 
-            /* B-tree address */
-            ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
+            if(mesg->version < H5O_LAYOUT_VERSION_4) {
+                /* B-tree address */
+                ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
+            } /* end if */
+            else {
+                /* Type of chunk index */
+                ret_value++;
+
+                switch(mesg->u.chunk.idx_type) {
+                    case H5D_CHUNK_BTREE:
+                        /* B-tree address */
+                        ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
+                        break;
+
+                    case H5D_CHUNK_EARRAY:
+                        /* Extensible Array address */
+                        ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
+                        break;
+
+                    default:
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid chunk index type")
+                } /* end switch */
+            } /* end else */
             break;
 
         default:
@@ -803,4 +903,67 @@ H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_layout_meta_size() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5O_layout_set_latest_version
+ *
+ * Purpose:     Set the encoding for a layout to the latest version.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, January 15, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5O_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
+{
+    int sndims;                         /* Rank of dataspace */
+    unsigned ndims;                     /* Rank of dataspace */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5O_layout_set_latest_version, FAIL)
+
+    /* Sanity check */
+    HDassert(layout);
+
+    /* Set encoding of layout to latest version */
+    layout->version = H5O_LAYOUT_VERSION_LATEST;
+
+    /* Query the dimensionality of the dataspace */
+    if((sndims = H5S_GET_EXTENT_NDIMS(space)) < 0)
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "invalid dataspace rank")
+    ndims = (unsigned)sndims;
+
+    /* Avoid scalar/null dataspace */
+    if(ndims > 0) {
+        hsize_t max_dims[H5O_LAYOUT_NDIMS];     /* Current dimension sizes */
+        unsigned unlim_count;           /* Count of unlimited max. dimensions */
+        unsigned u;                     /* Local index variable */
+
+        /* Query the dataspace's dimensions */
+        if(H5S_get_simple_extent_dims(space, NULL, max_dims) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get dataspace max. dimensions")
+
+        /* Spin through the max. dimensions, looking for unlimited dimensions */
+        unlim_count = 0;
+        for(u = 0; u < ndims; u++)
+            if(max_dims[u] == H5S_UNLIMITED)
+                unlim_count++;
+
+        /* If we have only 1 unlimited dimension, we can use extensible array index */
+        if(1 == unlim_count) {
+            /* Check for rank == 1 (>1 unsupported currently) */
+            if(1 == ndims) {
+                /* Set the chunk index type */
+                layout->u.chunk.idx_type = H5D_CHUNK_EARRAY;
+            } /* end if */
+        } /* end if */
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5O_layout_set_latest_version() */
 

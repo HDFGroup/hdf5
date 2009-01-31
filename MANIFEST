@@ -475,6 +475,7 @@
 ./src/H5Dcontig.c
 ./src/H5Ddbg.c
 ./src/H5Ddeprec.c
+./src/H5Dearray.c
 ./src/H5Defl.c
 ./src/H5Dfill.c
 ./src/H5Dint.c

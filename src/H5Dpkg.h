@@ -277,7 +277,7 @@ typedef herr_t (*H5D_chunk_delete_func_t)(const H5D_chk_idx_info_t *idx_info);
 typedef herr_t (*H5D_chunk_copy_setup_func_t)(const H5D_chk_idx_info_t *idx_info_src,
     const H5D_chk_idx_info_t *idx_info_dst);
 typedef herr_t (*H5D_chunk_copy_shutdown_func_t)(H5O_layout_t *layout_src,
-    H5O_layout_t *layout_dst);
+    H5O_layout_t *layout_dst, hid_t dxpl_id);
 typedef herr_t (*H5D_chunk_size_func_t)(const H5D_chk_idx_info_t *idx_info,
     hsize_t *idx_size);
 typedef herr_t (*H5D_chunk_reset_func_t)(H5O_layout_t *layout);
@@ -506,6 +506,7 @@ H5_DLLVAR const H5D_layout_ops_t H5D_LOPS_CHUNK[1];
 
 /* Chunked layout operations */
 H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_BTREE[1];
+H5_DLLVAR const H5D_chunk_ops_t H5D_COPS_EARRAY[1];
 
 
 /******************************/

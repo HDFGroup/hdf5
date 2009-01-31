@@ -16,29 +16,10 @@
 /* Programmer: 	Robb Matzke <matzke@llnl.gov>
  *	       	Wednesday, October  8, 1997
  *
- * Purpose:	v1 B-tree indexed (chunked) I/O functions.  The logical
- *		multi-dimensional data space is regularly partitioned into
- *		same-sized "chunks", the first of which is aligned with the
- *		logical origin.  The chunks are given a multi-dimensional
- *		index which is used as a lookup key in a B-tree that maps
- *		chunk index to disk address.  Each chunk can be compressed
- *		independently and the chunks may move around in the file as
- *		their storage requirements change.
+ * Purpose:	v1 B-tree indexed (chunked) I/O functions.  The chunks are
+ *              given a multi-dimensional index which is used as a lookup key
+ *              in a B-tree that maps chunk index to disk address.
  *
- * Cache:	Disk I/O is performed in units of chunks and H5MF_alloc()
- *		contains code to optionally align chunks on disk block
- *		boundaries for performance.
- *
- *		The chunk cache is an extendible hash indexed by a function
- *		of storage B-tree address and chunk N-dimensional offset
- *		within the dataset.  Collisions are not resolved -- one of
- *		the two chunks competing for the hash slot must be preempted
- *		from the cache.  All entries in the hash also participate in
- *		a doubly-linked list and entries are penalized by moving them
- *		toward the front of the list.  When a new chunk is about to
- *		be added to the cache the heap is pruned by preempting
- *		entries near the front of the list to make room for the new
- *		entry which is added to the end of the list.
  */
 
 /****************/
@@ -169,7 +150,7 @@ static herr_t H5D_btree_idx_delete(const H5D_chk_idx_info_t *idx_info);
 static herr_t H5D_btree_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     const H5D_chk_idx_info_t *idx_info_dst);
 static herr_t H5D_btree_idx_copy_shutdown(H5O_layout_t *layout_src,
-    H5O_layout_t *layout_dst);
+    H5O_layout_t *layout_dst, hid_t dxpl_id);
 static herr_t H5D_btree_idx_size(const H5D_chk_idx_info_t *idx_info,
     hsize_t *size);
 static herr_t H5D_btree_idx_reset(H5O_layout_t *layout);
@@ -1079,7 +1060,7 @@ H5D_btree_idx_iterate_cb(H5F_t UNUSED *f, hid_t UNUSED dxpl_id,
 /*-------------------------------------------------------------------------
  * Function:	H5D_btree_idx_iterate
  *
- * Purpose:	Iterate over the chunks in the B-tree index, making a callback
+ * Purpose:	Iterate over the chunks in an index, making a callback
  *              for each one.
  *
  * Return:	Non-negative on success/Negative on failure
@@ -1122,7 +1103,7 @@ H5D_btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 /*-------------------------------------------------------------------------
  * Function:	H5D_btree_idx_remove
  *
- * Purpose:	Remove chunk from v1 B-tree index.
+ * Purpose:	Remove chunk from index.
  *
  * Return:	Non-negative on success/Negative on failure
  *
@@ -1158,7 +1139,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5D_btree_idx_delete
  *
- * Purpose:	Delete v1 B-tree index and raw data storage for entire dataset
+ * Purpose:	Delete index and raw data storage for entire dataset
  *              (i.e. all chunks)
  *
  * Return:	Success:	Non-negative
@@ -1268,7 +1249,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_btree_idx_copy_shutdown(H5O_layout_t *layout_src, H5O_layout_t *layout_dst)
+H5D_btree_idx_copy_shutdown(H5O_layout_t *layout_src, H5O_layout_t *layout_dst,
+    hid_t UNUSED dxpl_id)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -1291,7 +1273,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D_btree_idx_size
  *
- * Purpose:     Retrieve the amount of B-tree storage for chunked dataset
+ * Purpose:     Retrieve the amount of index storage for chunked dataset
  *
  * Return:      Success:        Non-negative
  *              Failure:        negative
@@ -1301,10 +1283,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5D_btree_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
 {
-    H5D_btree_ud0_t udata;             /* User-data for loading btree nodes */
+    H5D_btree_ud0_t udata;              /* User-data for loading B-tree nodes */
     H5B_info_t bt_info;                 /* B-tree info */
     hbool_t shared_init = FALSE;        /* Whether shared B-tree info is initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1322,7 +1304,7 @@ H5D_btree_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "can't create wrapper for shared B-tree info")
     shared_init = TRUE;
 
-    /* Initialize btree node user-data */
+    /* Initialize B-tree node user-data */
     HDmemset(&udata, 0, sizeof udata);
     udata.mesg = idx_info->layout;
 

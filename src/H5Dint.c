@@ -720,8 +720,19 @@ H5D_set_io_ops(H5D_t *dataset)
             dataset->shared->layout.ops = H5D_LOPS_CHUNK;
 
             /* Set the chunk operations */
-            /* (Only "B-tree" indexing type currently supported */
-            dataset->shared->layout.u.chunk.ops = H5D_COPS_BTREE;
+            switch(dataset->shared->layout.u.chunk.idx_type) {
+                case H5D_CHUNK_BTREE:
+                    dataset->shared->layout.u.chunk.ops = H5D_COPS_BTREE;
+                    break;
+
+                case H5D_CHUNK_EARRAY:
+                    dataset->shared->layout.u.chunk.ops = H5D_COPS_EARRAY;
+                    break;
+
+                default:
+                    HDassert(0 && "Unknown chunk index method!");
+                    HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unknown chunk index method")
+            } /* end switch */
             break;
 
         case H5D_COMPACT:
@@ -1121,6 +1132,10 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         /* Set the latest version for the fill value message */
         if(H5O_fill_set_latest_version(&new_dset->shared->dcpl_cache.fill) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of fill value")
+
+        /* Set the latest version for the layout message */
+        if(H5O_layout_set_latest_version(&new_dset->shared->layout, new_dset->shared->space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, NULL, "can't set latest version of layout")
     } /* end if */
 
     /* Check if this dataset is going into a parallel file and set space allocation time */
@@ -2300,11 +2315,11 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 
     /* Check if we are shrinking or expanding any of the dimensions */
     if((rank = H5S_get_simple_extent_dims(space, curr_dims, NULL)) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
 
     /* Modify the size of the data space */
     if((changed = H5S_set_extent(space, size)) < 0)
-    HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to modify size of data space")
 
     /* Don't bother updating things, unless they've changed */
     if(changed) {
