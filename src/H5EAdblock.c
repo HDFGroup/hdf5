@@ -160,10 +160,12 @@ END_FUNC(PKG)   /* end H5EA__dblock_alloc() */
  */
 BEGIN_FUNC(PKG, ERR,
 haddr_t, HADDR_UNDEF, HADDR_UNDEF,
-H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hsize_t dblk_off, size_t nelmts))
+H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty,
+    hsize_t dblk_off, size_t nelmts))
 
     /* Local variables */
-    H5EA_dblock_t *dblock = NULL;      /* Extensible array data block */
+    H5EA_dblock_t *dblock = NULL;       /* Extensible array data block */
+    haddr_t dblock_addr;                /* Extensible array data block address */
 
 #ifdef QAK
 HDfprintf(stderr, "%s: Called, hdr->dblk_page_nelmts = %Zu, nelmts = %Zu\n", FUNC, hdr->dblk_page_nelmts, nelmts);
@@ -171,6 +173,7 @@ HDfprintf(stderr, "%s: Called, hdr->dblk_page_nelmts = %Zu, nelmts = %Zu\n", FUN
 
     /* Sanity check */
     HDassert(hdr);
+    HDassert(hdr_dirty);
     HDassert(nelmts > 0);
 
     /* Allocate the data block */
@@ -190,8 +193,9 @@ HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
 #endif /* QAK */
 
     /* Allocate space for the data block on disk */
-    if(HADDR_UNDEF == (dblock->addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
+    if(HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
 	H5E_THROW(H5E_CANTALLOC, "file allocation failed for extensible array data block")
+    dblock->addr = dblock_addr;
 
     /* Don't initialize elements if paged */
     if(!dblock->npages)
@@ -200,11 +204,21 @@ HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
             H5E_THROW(H5E_CANTSET, "can't set extensible array data block elements to class's fill value")
 
     /* Cache the new extensible array data block */
-    if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblock->addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array data block to cache")
 
+    /* Update extensible array data block statistics */
+    hdr->stats.ndata_blks++;
+    hdr->stats.data_blk_size += dblock->size;
+
+    /* Increment count of elements "realized" */
+    hdr->stats.nelmts += nelmts;
+
+    /* Mark the header dirty (for updating statistics) */
+    *hdr_dirty = TRUE;
+
     /* Set address of data block to return */
-    ret_value = dblock->addr;
+    ret_value = dblock_addr;
 
 CATCH
     if(!H5F_addr_defined(ret_value))

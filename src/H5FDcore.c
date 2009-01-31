@@ -378,6 +378,9 @@ done:
  *              Raymond Lu, 2006-11-30
  *              Enabled the driver to read an existing file depending on
  *              the setting of the backing_store and file open flags.
+ *
+ *              Allen Byrne, 2008-1-23
+ *              changed if of fapl_id to assert
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
@@ -401,11 +404,10 @@ H5FD_core_open(const char *name, unsigned flags, hid_t fapl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, NULL, "bogus maxaddr")
     if(ADDR_OVERFLOW(maxaddr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "maxaddr overflow")
-    if(H5P_DEFAULT != fapl_id) {
-        if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-        fa = (H5FD_core_fapl_t *)H5P_get_driver_info(plist);
-    } /* end if */
+    assert(H5P_DEFAULT != fapl_id);
+	if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+		HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
+	fa = (H5FD_core_fapl_t *)H5P_get_driver_info(plist);
 
     /* Build the open flags */
     o_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;

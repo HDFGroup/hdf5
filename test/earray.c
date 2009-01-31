@@ -45,6 +45,8 @@
 #define MAX_DBLOCK_PAGE_NELMTS_BITS     10              /* i.e. 1024 elements per data block page */
 
 /* Convenience macros for computing earray state */
+#define EA_HDR_SIZE             72                      /* (hard-coded, current size) */
+#define EA_IBLOCK_SIZE          298                     /* (hard-coded, current size) */
 #define EA_NELMTS(cparam, tparam, idx, sblk_idx)                \
         (hsize_t)(cparam->idx_blk_elmts +                       \
                 tparam->sblk_info[sblk_idx].start_idx +         \
@@ -97,9 +99,14 @@ typedef enum {
 
 /* Extensible array state information */
 typedef struct earray_state_t {
-    hsize_t max_idx_set;        /* Highest element index stored (+1 - i.e. if element 0 has been set, this value with be '1', if no elements have been stored, this value will be '0') */
+    hsize_t hdr_size;           /* Size of header */
+    hsize_t nindex_blks;        /* # of index blocks */
+    hsize_t index_blk_size;     /* Size of index blocks */
     hsize_t nsuper_blks;        /* # of super blocks */
+    hsize_t super_blk_size;     /* Size of super blocks */
     hsize_t ndata_blks;         /* # of data blocks */
+    hsize_t data_blk_size;      /* Size of data blocks */
+    hsize_t max_idx_set;        /* Highest element index stored (+1 - i.e. if element 0 has been set, this value with be '1', if no elements have been stored, this value will be '0') */
     hsize_t nelmts;             /* # of elements "realized" */
 } earray_state_t;
 
@@ -111,7 +118,7 @@ typedef struct earray_iter_t {
     void *(*init)(const H5EA_create_t *cparam, const earray_test_param_t *tparam,
         hsize_t cnt);           /* Initialize/allocate iterator private info */
     hssize_t (*next)(void *info);       /* Get the next element to test */
-    hssize_t (*max)(const void *info);  /* Get the max. element set */
+    hssize_t (*max_elem)(const void *info);  /* Get the max. element set */
     int (*state)(void *_eiter, const H5EA_create_t *cparam,
             const earray_test_param_t *tparam, earray_state_t *state, hsize_t idx);  /* Get the state of the extensible array */
     herr_t (*term)(void *info); /* Shutdown/free iterator private info */
@@ -313,14 +320,44 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
         HDfprintf(stdout, "earray_stats.nelmts = %Hu, state->nelmts = %Hu\n", earray_stats.nelmts, state->nelmts);
         TEST_ERROR
     } /* end if */
+    if(earray_stats.hdr_size != state->hdr_size) {
+        HDfprintf(stdout, "earray_stats.hdr_size = %Hu, state->hdr_size = %Hu\n", earray_stats.hdr_size, state->hdr_size);
+        TEST_ERROR
+    } /* end if */
+    if(earray_stats.nindex_blks != state->nindex_blks) {
+        HDfprintf(stdout, "earray_stats.nindex_blks = %Hu, state->nindex_blks = %Hu\n", earray_stats.nindex_blks, state->nindex_blks);
+        TEST_ERROR
+    } /* end if */
+    if(earray_stats.index_blk_size != state->index_blk_size) {
+        HDfprintf(stdout, "earray_stats.index_blk_size = %Hu, state->index_blk_size = %Hu\n", earray_stats.index_blk_size, state->index_blk_size);
+        TEST_ERROR
+    } /* end if */
     if(earray_stats.ndata_blks != state->ndata_blks) {
         HDfprintf(stdout, "earray_stats.ndata_blks = %Hu, state->ndata_blks = %Hu\n", earray_stats.ndata_blks, state->ndata_blks);
         TEST_ERROR
     } /* end if */
+/* Don't compare this currently, it's very hard to compute */
+#ifdef NOT_YET
+    if(earray_stats.data_blk_size != state->data_blk_size) {
+        HDfprintf(stdout, "earray_stats.data_blk_size = %Hu, state->data_blk_size = %Hu\n", earray_stats.data_blk_size, state->data_blk_size);
+        TEST_ERROR
+    } /* end if */
+#endif /* NOT_YET */
     if(earray_stats.nsuper_blks != state->nsuper_blks) {
         HDfprintf(stdout, "earray_stats.nsuper_blks = %Hu, state->nsuper_blks = %Hu\n", earray_stats.nsuper_blks, state->nsuper_blks);
         TEST_ERROR
     } /* end if */
+/* Don't compare this currently, it's very hard to compute */
+#ifdef NOT_YET
+    if(earray_stats.super_blk_size != state->super_blk_size) {
+        HDfprintf(stdout, "earray_stats.super_blk_size = %Hu, state->super_blk_size = %Hu\n", earray_stats.super_blk_size, state->super_blk_size);
+        TEST_ERROR
+    } /* end if */
+#endif /* NOT_YET */
+#ifdef QAK
+HDfprintf(stderr, "nelmts = %Hu, total EA size = %Hu\n", earray_stats.nelmts,
+        (earray_stats.hdr_size + earray_stats.index_blk_size + earray_stats.super_blk_size + earray_stats.data_blk_size));
+#endif /* QAK */
 
     /* All tests passed */
     return(0);
@@ -422,6 +459,7 @@ create_array(H5F_t *f, hid_t dxpl, const H5EA_create_t *cparam,
     if(!H5F_addr_defined(*ea_addr))
         TEST_ERROR
     HDmemset(&state, 0, sizeof(state));
+    state.hdr_size = EA_HDR_SIZE;
     if(check_stats(*ea, &state))
         TEST_ERROR
 
@@ -1059,7 +1097,7 @@ typedef struct eiter_fw_t {
  *-------------------------------------------------------------------------
  */
 static void *
-eiter_fw_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam, 
+eiter_fw_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam,
     hsize_t UNUSED cnt)
 {
     eiter_fw_t *eiter;          /* Forward element iteration object */
@@ -1131,7 +1169,7 @@ eiter_fw_max(const void *_eiter)
     return((hssize_t)(eiter->idx - 1));
 } /* end eiter_fw_max() */
 
-
+
 /*-------------------------------------------------------------------------
  * Function:	eiter_fw_state
  *
@@ -1158,10 +1196,14 @@ eiter_fw_state(void *_eiter, const H5EA_create_t *cparam,
     HDassert(state);
 
     /* Compute the state of the extensible array */
+    state->hdr_size = EA_HDR_SIZE;
+    state->nindex_blks = 1;
+    state->index_blk_size = 298;
     state->max_idx_set = idx + 1;
     if(idx < cparam->idx_blk_elmts) {
         state->nelmts = (hsize_t)cparam->idx_blk_elmts;
         state->nsuper_blks = state->ndata_blks = (hsize_t)0;
+        state->super_blk_size = state->data_blk_size = (hsize_t)0;
     } /* end if */
     else {
         unsigned sblk_idx;      /* Which superblock does this index fall in? */
@@ -1261,7 +1303,7 @@ typedef struct eiter_rv_t {
  *-------------------------------------------------------------------------
  */
 static void *
-eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam, 
+eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam,
     hsize_t cnt)
 {
     eiter_rv_t *eiter;          /* Reverse element iteration object */
@@ -1372,6 +1414,9 @@ eiter_rv_state(void *_eiter, const H5EA_create_t *cparam,
     HDassert(state);
 
     /* Compute the state of the extensible array */
+    state->hdr_size = EA_HDR_SIZE;
+    state->nindex_blks = 1;
+    state->index_blk_size = 298;
     state->max_idx_set = eiter->max + 1;
     if(eiter->max < cparam->idx_blk_elmts) {
         state->nelmts = (hsize_t)cparam->idx_blk_elmts;
@@ -1497,7 +1542,7 @@ typedef struct eiter_rnd_t {
  *-------------------------------------------------------------------------
  */
 static void *
-eiter_rnd_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam, 
+eiter_rnd_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam,
     hsize_t cnt)
 {
     eiter_rnd_t *eiter;         /* Random element iteration object */
@@ -1650,7 +1695,7 @@ static const earray_iter_t ea_iter_rnd = {
  *-------------------------------------------------------------------------
  */
 static void *
-eiter_rnd2_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam, 
+eiter_rnd2_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam,
     hsize_t cnt)
 {
     eiter_rnd_t *eiter;        /* Random element iteration object */
@@ -1734,7 +1779,7 @@ typedef struct eiter_cyc_t {
  *-------------------------------------------------------------------------
  */
 static void *
-eiter_cyc_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam, 
+eiter_cyc_init(const H5EA_create_t UNUSED *cparam, const earray_test_param_t UNUSED *tparam,
     hsize_t cnt)
 {
     eiter_cyc_t *eiter;         /* Cyclic element iteration object */
@@ -1915,6 +1960,7 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
 
     /* Verify array state */
     HDmemset(&state, 0, sizeof(state));
+    state.hdr_size = EA_HDR_SIZE;
     if(check_stats(ea, &state))
         TEST_ERROR
 
@@ -1974,7 +2020,7 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
             FAIL_STACK_ERROR
 
         /* Get the max. array index */
-        if((smax = tparam->eiter->max(eiter_info)) < 0)
+        if((smax = tparam->eiter->max_elem(eiter_info)) < 0)
             TEST_ERROR
         max = (hsize_t)smax;
 
@@ -2088,6 +2134,7 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
 
     /* Verify array state */
     HDmemset(&state, 0, sizeof(state));
+    state.hdr_size = EA_HDR_SIZE;
     if(check_stats(ea, &state))
         TEST_ERROR
 
@@ -2117,6 +2164,9 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
 
     /* Set array state */
     HDmemset(&state, 0, sizeof(state));
+    state.hdr_size = EA_HDR_SIZE;
+    state.nindex_blks = 1;
+    state.index_blk_size = EA_IBLOCK_SIZE;
     state.max_idx_set = idx + 1;
     if(1 == skip_elmts) {
         state.nelmts = (hsize_t)cparam->idx_blk_elmts;
@@ -2328,14 +2378,14 @@ main(void)
             for(sblk = 0; sblk < 9; sblk++) {
                 for(dblk = 0; dblk < tparam.sblk_info[sblk].ndblks; dblk ++) {
                     /* Test first element in data block */
-                    nelmts = (hsize_t)(1 + cparam.idx_blk_elmts + 
+                    nelmts = (hsize_t)(1 + cparam.idx_blk_elmts +
                         tparam.sblk_info[sblk].start_idx +
                         (tparam.sblk_info[sblk].dblk_nelmts * dblk));
                     sprintf(test_str, "setting first element of array's data block #%llu", (unsigned long_long)ndblks);
                     nerrors += test_set_elmts(fapl, &cparam, &tparam, nelmts, test_str);
 
                     /* Test all elements in data block */
-                    nelmts = (hsize_t)(cparam.idx_blk_elmts + 
+                    nelmts = (hsize_t)(cparam.idx_blk_elmts +
                         tparam.sblk_info[sblk].start_idx +
                         (tparam.sblk_info[sblk].dblk_nelmts * (dblk + 1)));
                     sprintf(test_str, "setting all elements of array's data block #%llu", (unsigned long_long)ndblks);

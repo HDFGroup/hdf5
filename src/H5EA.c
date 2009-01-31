@@ -355,15 +355,9 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
 HDfprintf(stderr, "%s: Index block address not defined!\n", FUNC, idx);
 #endif /* QAK */
         /* Create the index block */
-        hdr->idx_blk_addr = H5EA__iblock_create(hdr, dxpl_id);
+        hdr->idx_blk_addr = H5EA__iblock_create(hdr, dxpl_id, &hdr_dirty);
         if(!H5F_addr_defined(hdr->idx_blk_addr))
             H5E_THROW(H5E_CANTCREATE, "unable to create index block")
-
-        /* Increment count of elements "realized" */
-        hdr->stats.nelmts += hdr->cparam.idx_blk_elmts;
-
-        /* Mark the header dirty */
-        hdr_dirty = TRUE;
     } /* end if */
 #ifdef QAK
 HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
@@ -415,18 +409,13 @@ HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_i
 
                 /* Create data block */
                 dblk_off = hdr->sblk_info[sblk_idx].start_idx + (dblk_idx * hdr->sblk_info[sblk_idx].dblk_nelmts);
-                dblk_addr = H5EA__dblock_create(hdr, dxpl_id, dblk_off, hdr->sblk_info[sblk_idx].dblk_nelmts);
+                dblk_addr = H5EA__dblock_create(hdr, dxpl_id, &hdr_dirty, dblk_off, hdr->sblk_info[sblk_idx].dblk_nelmts);
                 if(!H5F_addr_defined(dblk_addr))
                     H5E_THROW(H5E_CANTCREATE, "unable to create extensible array data block")
 
                 /* Set data block address in index block */
                 iblock->dblk_addrs[dblk_idx] = dblk_addr;
                 iblock_cache_flags |= H5AC__DIRTIED_FLAG;
-
-                /* Increment count of elements "realized" and actual data blocks created */
-                hdr->stats.ndata_blks++;
-                hdr->stats.nelmts += hdr->sblk_info[sblk_idx].dblk_nelmts;
-                hdr_dirty = TRUE;
             } /* end if */
 
             /* Protect data block */
@@ -452,7 +441,7 @@ HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_i
                 haddr_t sblk_addr;        /* Address of data block created */
 
                 /* Create super block */
-                sblk_addr = H5EA__sblock_create(hdr, dxpl_id, sblk_idx);
+                sblk_addr = H5EA__sblock_create(hdr, dxpl_id, &hdr_dirty, sblk_idx);
 #ifdef QAK
 HDfprintf(stderr, "%s: New super block address is: %a\n", FUNC, sblk_addr);
 #endif /* QAK */
@@ -462,10 +451,6 @@ HDfprintf(stderr, "%s: New super block address is: %a\n", FUNC, sblk_addr);
                 /* Set super block address in index block */
                 iblock->sblk_addrs[sblk_off] = sblk_addr;
                 iblock_cache_flags |= H5AC__DIRTIED_FLAG;
-
-                /* Increment count of actual super blocks created */
-                hdr->stats.nsuper_blks++;
-                hdr_dirty = TRUE;
             } /* end if */
 
             /* Protect super block */
@@ -486,18 +471,13 @@ HDfprintf(stderr, "%s: dblk_idx = %u, sblock->ndblks = %Zu\n", FUNC, dblk_idx, s
 
                 /* Create data block */
                 dblk_off = hdr->sblk_info[sblk_idx].start_idx + (dblk_idx * hdr->sblk_info[sblk_idx].dblk_nelmts);
-                dblk_addr = H5EA__dblock_create(hdr, dxpl_id, dblk_off, sblock->dblk_nelmts);
+                dblk_addr = H5EA__dblock_create(hdr, dxpl_id, &hdr_dirty, dblk_off, sblock->dblk_nelmts);
                 if(!H5F_addr_defined(dblk_addr))
                     H5E_THROW(H5E_CANTCREATE, "unable to create extensible array data block")
 
                 /* Set data block address in index block */
                 sblock->dblk_addrs[dblk_idx] = dblk_addr;
                 sblock_cache_flags |= H5AC__DIRTIED_FLAG;
-
-                /* Increment count of elements "realized" and actual data blocks created */
-                hdr->stats.ndata_blks++;
-                hdr->stats.nelmts += hdr->sblk_info[sblk_idx].dblk_nelmts;
-                hdr_dirty = TRUE;
             } /* end if */
 
 #ifdef QAK
@@ -832,7 +812,7 @@ CATCH
     if(dblk_page && H5EA__dblk_page_unprotect(dblk_page, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array data block page")
 
-END_FUNC(PRIV)  /* end H5EA_set() */
+END_FUNC(PRIV)  /* end H5EA_get() */
 
 
 /*-------------------------------------------------------------------------

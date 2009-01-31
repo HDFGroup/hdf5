@@ -36,6 +36,8 @@
 #define FILE_NAME3 "set_extent3.h5"
 #define FILE_NAME4 "set_extent4.h5"
 #define FILE_NAME5 "set_extent5.h5"
+#define EXT_FILE_NAME1 "ext1.bin"
+#define EXT_FILE_NAME2 "ext2.bin"
 
 #define RANK1 1
 #define RANK2 2
@@ -94,8 +96,16 @@ int main( void )
     
         
     puts("All set_extent tests passed.");
+
+    HDremove(FILE_NAME1);
+    HDremove(FILE_NAME2);
+    HDremove(FILE_NAME3);
+    HDremove(FILE_NAME4);
+    HDremove(FILE_NAME5);
+    HDremove(EXT_FILE_NAME1);
+    HDremove(EXT_FILE_NAME2);
+
     return 0;
-    
     
 error:
     H5_FAILED();
@@ -2044,12 +2054,12 @@ static int test_external( void )
         goto error;
     }
     
-    if(H5Pset_external(dcpl, "ext1.bin", (off_t)0, size) < 0)
+    if(H5Pset_external(dcpl, EXT_FILE_NAME1, (off_t)0, size) < 0)
     {
         goto error;
     }
 
-    if(H5Pset_external(dcpl, "ext2.bin", (off_t)0, size) < 0)
+    if(H5Pset_external(dcpl, EXT_FILE_NAME2, (off_t)0, size) < 0)
     {
         goto error;
     }
@@ -2616,7 +2626,4 @@ error:
     return -1;
     
 }
-
-
- 
 
