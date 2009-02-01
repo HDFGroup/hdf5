@@ -2321,9 +2321,9 @@ H5O_get_info(H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info, H5O_info_t *o
         oinfo->btime = 0;
 
         /* Might be information for modification time */
-        if(NULL == H5O_msg_read_real(oloc->file, dxpl_id, oh, H5O_MTIME_ID, &oinfo->ctime)) {
+        if(NULL == H5O_msg_read_oh(oloc->file, dxpl_id, oh, H5O_MTIME_ID, &oinfo->ctime)) {
             H5E_clear_stack(NULL);
-            if(NULL == H5O_msg_read_real(oloc->file, dxpl_id, oh, H5O_MTIME_NEW_ID, &oinfo->ctime)) {
+            if(NULL == H5O_msg_read_oh(oloc->file, dxpl_id, oh, H5O_MTIME_NEW_ID, &oinfo->ctime)) {
                 H5E_clear_stack(NULL);
                 oinfo->ctime = 0;
             } /* end if */
