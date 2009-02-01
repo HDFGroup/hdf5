@@ -488,7 +488,7 @@ H5O_msg_read(const H5O_loc_t *loc, unsigned type_id, void *mesg,
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header")
 
     /* Call the "real" read routine */
-    if(NULL == (ret_value = H5O_msg_read_real(loc->file, dxpl_id, oh, type_id, mesg)))
+    if(NULL == (ret_value = H5O_msg_read_oh(loc->file, dxpl_id, oh, type_id, mesg)))
 	HGOTO_ERROR(H5E_OHDR, H5E_READERROR, NULL, "unable to load object header")
 
 done:
@@ -500,7 +500,7 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_msg_read_real
+ * Function:	H5O_msg_read_oh
  *
  * Purpose:	Reads a message from an object header and returns a pointer
  *		to it.	The caller will usually supply the memory through
@@ -523,14 +523,14 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5O_msg_read_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
+H5O_msg_read_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
     void *mesg)
 {
     const H5O_msg_class_t *type;        /* Actual H5O class type for the ID */
     unsigned       idx;                 /* Message's index in object header */
     void           *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_read_real)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_msg_read_oh)
 
     /* check args */
     HDassert(f);
@@ -562,7 +562,7 @@ H5O_msg_read_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned type_id,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_msg_read_real() */
+} /* end H5O_msg_read_oh() */
 
 
 /*-------------------------------------------------------------------------
