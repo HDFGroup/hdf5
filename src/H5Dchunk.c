@@ -2526,11 +2526,6 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
         else {
             H5D_fill_value_t	fill_status;
 
-#ifdef OLD_WAY
-            /* Clear the error stack from not finding the chunk on disk */
-            H5E_clear_stack(NULL);
-#endif /* OLD_WAY */
-
             /* Chunk size on disk isn't [likely] the same size as the final chunk
              * size in memory, so allocate memory big enough. */
             if(NULL == (chunk = H5D_chunk_alloc(chunk_size, pline)))
