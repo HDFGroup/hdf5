@@ -300,7 +300,7 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
     HDassert(p);
 
     /* Message version */
-    *p++ = (uint8_t)mesg->version;
+    *p++ = (uint8_t)H5O_LAYOUT_VERSION_3;
 
     /* Layout class */
     *p++ = mesg->type;
