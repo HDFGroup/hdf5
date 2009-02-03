@@ -1501,6 +1501,7 @@
 ./tools/h5repack/testfiles/h5repack_attr.h5
 ./tools/h5repack/testfiles/h5repack_hlink.h5
 ./tools/h5repack/testfiles/h5repack_layout.h5
+./tools/h5repack/testfiles/h5repack_layouto.h5
 ./tools/h5repack/testfiles/h5repack_early.h5
 ./tools/h5repack/testfiles/h5repack_szip.h5
 ./tools/h5repack/testfiles/h5repack_deflate.h5

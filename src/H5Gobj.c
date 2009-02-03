@@ -1066,9 +1066,6 @@ H5G_obj_remove_by_idx(H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r,
         } /* end else */
     } /* end if */
     else {
-        /* Clear error stack from not finding the link info message */
-        H5E_clear_stack(NULL);
-
         /* Can only perform name lookups on groups with symbol tables */
         if(idx_type != H5_INDEX_NAME)
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
