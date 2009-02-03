@@ -61,6 +61,8 @@ set file10=h5repack_fletcher.h5
 set file11=h5repack_filters.h5
 set file12=h5repack_nbit.h5
 set file13=h5repack_soffset.h5
+rem A file with an older version of the layout message (copy of test/tlayouto.h5)
+set file14=h5repack_layouto.h5
 
 
 set nerrors=0
@@ -593,6 +595,10 @@ rem
     rem add alignment
     set arg=%file1% -t 1 -a 1
     call :tooltest %arg%
+
+    rem Check repacking file with old version of layout message (should get upgraded
+    rem       to new version and be readable, etc.)
+    call :tooltest %file14%
     
     
     if %nerrors% equ 0 (
