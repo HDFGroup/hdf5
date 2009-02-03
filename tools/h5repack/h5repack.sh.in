@@ -51,6 +51,8 @@ FILE10=h5repack_fletcher.h5
 FILE11=h5repack_filters.h5
 FILE12=h5repack_nbit.h5
 FILE13=h5repack_soffset.h5
+FILE14=h5repack_layouto.h5      # A file with an older version of the layout message
+                                # (copy of test/tlayouto.h5)
 
 
 nerrors=0
@@ -498,6 +500,9 @@ TOOLTEST $arg
 arg="$FILE1 -t 1 -a 1 "
 TOOLTEST $arg
 
+# Check repacking file with old version of layout message (should get upgraded
+#       to new version and be readable, etc.)
+TOOLTEST $FILE14
 
 if test $nerrors -eq 0 ; then
    echo "All $H5REPACK tests passed."
