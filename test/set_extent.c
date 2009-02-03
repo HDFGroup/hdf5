@@ -36,6 +36,9 @@
 #define FILE_NAME3 "set_extent3.h5"
 #define FILE_NAME4 "set_extent4.h5"
 #define FILE_NAME5 "set_extent5.h5"
+#define EXT_FILE_NAME1 "ext1.bin"
+#define EXT_FILE_NAME2 "ext2.bin"
+
 
 #define RANK1 1
 #define RANK2 2
@@ -51,24 +54,27 @@
 #define DIME2 7
 #define ISTORE_IK  64
 
-static int do_ranks( void );
-static int do_layouts( void );
+static int do_ranks( hid_t fapl );
+static int do_layouts( hid_t fapl );
 
 static int test_rank1( hbool_t do_compress, 
                        hbool_t do_fill_value, 
                        hbool_t set_istore_k,
-                       H5D_fill_time_t fill_time);
+                       H5D_fill_time_t fill_time,
+                       hid_t fapl);
 static int test_rank2( hbool_t do_compress, 
                        hbool_t do_fill_value, 
                        hbool_t set_istore_k,
-                       H5D_fill_time_t fill_time);
+                       H5D_fill_time_t fill_time,
+                       hid_t fapl);
 static int test_rank3( hbool_t do_compress, 
                        hbool_t do_fill_value, 
                        hbool_t set_istore_k,
-                       H5D_fill_time_t fill_time);
+                       H5D_fill_time_t fill_time,
+                       hid_t fapl);
 
-static int test_external( void );
-static int test_layouts( H5D_layout_t layout );
+static int test_external( hid_t fapl );
+static int test_layouts( H5D_layout_t layout, hid_t fapl );
 
 /*-------------------------------------------------------------------------
  * main
@@ -77,29 +83,36 @@ static int test_layouts( H5D_layout_t layout );
 
 int main( void )
 {
-    if ( do_ranks() < 0 )
+
+    hid_t fapl;         /* file access property list */
+    int	  nerrors = 0;
+
+    h5_reset();
+    fapl = h5_fileaccess();
+
+    nerrors += do_ranks( fapl ) < 0 ? 1 : 0;
+    nerrors += test_external( fapl ) < 0 ? 1 : 0;
+    nerrors += do_layouts( fapl ) < 0 ? 1 : 0;
+   
+    HDremove(FILE_NAME1);
+    HDremove(FILE_NAME2);
+    HDremove(FILE_NAME3);
+    HDremove(FILE_NAME4);
+    HDremove(FILE_NAME5);
+    HDremove(EXT_FILE_NAME1);
+    HDremove(EXT_FILE_NAME2);
+
+    if(nerrors) 
     {
-        goto error;
-    } 
-    
-    if ( test_external() < 0 )
-    {
-        goto error;
-    } 
-    
-    if ( do_layouts() < 0 )
-    {
-        goto error;
-    }  
-    
-        
-    puts("All set_extent tests passed.");
+        printf("***** %d H5Dset_extent TEST%s FAILED! *****\n",
+            nerrors, 1 == nerrors ? "" : "S");
+        exit(1);
+    }
+
+    puts("All H5Dset_extent tests passed.");
+
     return 0;
-    
-    
-error:
-    H5_FAILED();
-    return 1;
+
 }
 
 
@@ -108,7 +121,7 @@ error:
 * test with several ranks
 *-------------------------------------------------------------------------
 */
-static int do_ranks( void )
+static int do_ranks( hid_t fapl )
 {
 
     hbool_t do_compress = 0;
@@ -120,27 +133,27 @@ static int do_ranks( void )
 
     do_fillvalue = 1;
 
-    if (test_rank1( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC ) < 0)
+    if (test_rank1( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC, fapl ) < 0)
     {
         goto error;
     } 
-    if (test_rank1( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_IFSET ) < 0)
+    if (test_rank1( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_IFSET, fapl ) < 0)
     {
         goto error;
     } 
-    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC ) < 0)
+    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC, fapl ) < 0)
     {
         goto error;
     } 
-    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_IFSET ) < 0)
+    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_IFSET, fapl ) < 0)
     {
         goto error;
     } 
-    if (test_rank3( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC ) < 0)
+    if (test_rank3( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC, fapl ) < 0)
     {
         goto error;
     } 
-    if (test_rank3( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_IFSET ) < 0)
+    if (test_rank3( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_IFSET, fapl ) < 0)
     {
         goto error;
     } 
@@ -154,15 +167,15 @@ static int do_ranks( void )
 
     do_fillvalue = 0;
 
-    if (test_rank1( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ERROR  ) < 0)
+    if (test_rank1( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ERROR, fapl  ) < 0)
     {
         goto error;
     }
-    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ERROR  ) < 0)
+    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ERROR, fapl  ) < 0)
     {
         goto error;
     }
-    if (test_rank3( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ERROR  ) < 0)
+    if (test_rank3( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ERROR, fapl  ) < 0)
     {
         goto error;
     }
@@ -178,27 +191,27 @@ static int do_ranks( void )
     do_compress = 1;
     do_fillvalue = 1;
 
-    if (test_rank1( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC ) < 0)
+    if (test_rank1( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC, fapl ) < 0)
     {
         goto error;
     }
-    if (test_rank1( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_IFSET ) < 0)
+    if (test_rank1( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_IFSET, fapl ) < 0)
     {
         goto error;
     }
-    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC ) < 0)
+    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC, fapl ) < 0)
     {
         goto error;
     }
-    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_IFSET ) < 0)
+    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_IFSET, fapl ) < 0)
     {
         goto error;
     }
-    if (test_rank3( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC ) < 0)
+    if (test_rank3( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC, fapl ) < 0)
     {
         goto error;
     }
-    if (test_rank3( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_IFSET ) < 0)
+    if (test_rank3( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_IFSET, fapl ) < 0)
     {
         goto error;
     }
@@ -215,15 +228,15 @@ static int do_ranks( void )
 
     do_fillvalue = 0;
 
-    if (test_rank1( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ERROR ) < 0)
+    if (test_rank1( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ERROR, fapl ) < 0)
     {
         goto error;
     }
-    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ERROR ) < 0)
+    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ERROR, fapl ) < 0)
     {
         goto error;
     }
-    if (test_rank3( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ERROR ) < 0)
+    if (test_rank3( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ERROR, fapl ) < 0)
     {
         goto error;
     }
@@ -238,7 +251,7 @@ static int do_ranks( void )
     do_fillvalue = 1;
     set_istore_k = 1;
 
-    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC ) < 0)
+    if (test_rank2( do_compress, do_fillvalue, set_istore_k, H5D_FILL_TIME_ALLOC, fapl ) < 0)
     {
         goto error;
     }
@@ -259,17 +272,17 @@ error:
 * test with different storage layouts
 *-------------------------------------------------------------------------
 */
-static int do_layouts( void )
+static int do_layouts( hid_t fapl )
 {
     
     TESTING("storage layout use");
  
-    if (test_layouts( H5D_COMPACT ) < 0)
+    if (test_layouts( H5D_COMPACT, fapl ) < 0)
     {
         goto error;
     } 
     
-    if (test_layouts( H5D_CONTIGUOUS ) < 0)
+    if (test_layouts( H5D_CONTIGUOUS, fapl ) < 0)
     {
         goto error;
     } 
@@ -290,7 +303,8 @@ error:
 static int test_rank1( hbool_t do_compress, 
                        hbool_t do_fill_value, 
                        hbool_t set_istore_k,
-                       H5D_fill_time_t fill_time)
+                       H5D_fill_time_t fill_time,
+                       hid_t fapl)
 {
 
     hid_t   fid=-1;          
@@ -344,7 +358,7 @@ static int test_rank1( hbool_t do_compress,
         
     }
     /* create a new file */
-    if ((fid = H5Fcreate(FILE_NAME1, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0) 
+    if ((fid = H5Fcreate(FILE_NAME1, H5F_ACC_TRUNC, fcpl, fapl)) < 0) 
     {
         goto error;
     }
@@ -823,7 +837,8 @@ error:
 static int test_rank2( hbool_t do_compress, 
                        hbool_t do_fill_value, 
                        hbool_t set_istore_k,
-                       H5D_fill_time_t fill_time)
+                       H5D_fill_time_t fill_time,
+                       hid_t fapl)
 {
 
     hid_t   fid=-1;          
@@ -879,7 +894,7 @@ static int test_rank2( hbool_t do_compress,
         
     }
     /* create a new file */
-    if ((fid = H5Fcreate(FILE_NAME2, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0) 
+    if ((fid = H5Fcreate(FILE_NAME2, H5F_ACC_TRUNC, fcpl, fapl)) < 0) 
     {
         goto error;
     }
@@ -1414,7 +1429,8 @@ error:
 static int test_rank3( hbool_t do_compress, 
                        hbool_t do_fill_value, 
                        hbool_t set_istore_k,
-                       H5D_fill_time_t fill_time)
+                       H5D_fill_time_t fill_time,
+                       hid_t fapl)
 {
 
     hid_t   fid=-1;          
@@ -1473,7 +1489,7 @@ static int test_rank3( hbool_t do_compress,
         
     }
     /* create a new file */
-    if ((fid = H5Fcreate(FILE_NAME3, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT)) < 0) 
+    if ((fid = H5Fcreate(FILE_NAME3, H5F_ACC_TRUNC, fcpl, fapl)) < 0) 
     {
         goto error;
     }
@@ -1994,7 +2010,7 @@ error:
  * test usage with external storage
  *-------------------------------------------------------------------------
  */
-static int test_external( void )
+static int test_external( hid_t fapl  )
 {
 
     hid_t   fid=-1;       
@@ -2033,7 +2049,7 @@ static int test_external( void )
     TESTING("external file use");
   
     /* create a new file */
-    if ((fid = H5Fcreate(FILE_NAME4, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if ((fid = H5Fcreate(FILE_NAME4, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) 
     {
         goto error;
     }
@@ -2044,12 +2060,12 @@ static int test_external( void )
         goto error;
     }
     
-    if(H5Pset_external(dcpl, "ext1.bin", (off_t)0, size) < 0)
+    if(H5Pset_external(dcpl, EXT_FILE_NAME1, (off_t)0, size) < 0)
     {
         goto error;
     }
 
-    if(H5Pset_external(dcpl, "ext2.bin", (off_t)0, size) < 0)
+    if(H5Pset_external(dcpl, EXT_FILE_NAME2, (off_t)0, size) < 0)
     {
         goto error;
     }
@@ -2369,7 +2385,7 @@ error:
  * test usage with layouts compact and contiguous
  *-------------------------------------------------------------------------
  */
-static int test_layouts( H5D_layout_t layout )
+static int test_layouts( H5D_layout_t layout, hid_t fapl  )
 {
 
     hid_t   fid=-1;       
@@ -2394,7 +2410,7 @@ static int test_layouts( H5D_layout_t layout )
 
   
     /* create a new file */
-    if ((fid = H5Fcreate(FILE_NAME5, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) 
+    if ((fid = H5Fcreate(FILE_NAME5, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) 
     {
         goto error;
     }
