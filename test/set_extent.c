@@ -122,7 +122,7 @@ int main( void )
     /* Close 2nd FAPL */
     if(H5Pclose(fapl2) < 0) TEST_ERROR
 
-    h5_cleanup(FILENAME, fapl);
+    /*h5_cleanup(FILENAME, fapl);*/
    
     HDremove(EXT_FILE_NAME1);
     HDremove(EXT_FILE_NAME2);
@@ -605,7 +605,7 @@ static int test_rank1( hbool_t do_compress,
             goto error;
         }
 
-        if ((fid = H5Fopen( filename, H5F_ACC_RDWR, H5P_DEFAULT ))<0) 
+        if ((fid = H5Fopen( filename, H5F_ACC_RDWR, fapl ))<0) 
         {
             goto error;
         }
@@ -928,11 +928,7 @@ static int test_rank2( hbool_t do_compress,
         goto error;
     }
 
-    /* close property list */
-    if(H5Pclose(fcpl) < 0) 
-    {
-        goto error;
-    }
+   
     
     /* create the data space with unlimited dimensions. */
     if ((sid = H5Screate_simple(RANK2, dims_o, maxdims)) < 0) 
@@ -1181,7 +1177,7 @@ static int test_rank2( hbool_t do_compress,
             goto error;
         }
 
-        if ((fid = H5Fopen( filename, H5F_ACC_RDWR, H5P_DEFAULT ))<0) 
+        if ((fid = H5Fopen( filename, H5F_ACC_RDWR, fapl ))<0) 
         {
             goto error;
         }
@@ -1419,6 +1415,12 @@ static int test_rank2( hbool_t do_compress,
     
     
     if (H5Pclose(dcpl) < 0) 
+    {
+        goto error;
+    }
+
+    /* close file creation property list */
+    if(H5Pclose(fcpl) < 0) 
     {
         goto error;
     }
@@ -1760,7 +1762,7 @@ static int test_rank3( hbool_t do_compress,
             goto error;
         }
 
-        if ((fid = H5Fopen( filename, H5F_ACC_RDWR, H5P_DEFAULT ))<0) 
+        if ((fid = H5Fopen( filename, H5F_ACC_RDWR, fapl ))<0) 
         {
             goto error;
         }
