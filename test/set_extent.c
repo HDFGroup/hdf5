@@ -583,7 +583,7 @@ static int test_rank1( hbool_t do_compress,
             goto error;
         }
 
-        if ((fid = H5Fopen( filename, H5F_ACC_RDWR, H5P_DEFAULT ))<0) 
+        if ((fid = H5Fopen( filename, H5F_ACC_RDWR, fapl ))<0) 
         {
             goto error;
         }
@@ -1158,7 +1158,7 @@ static int test_rank2( hbool_t do_compress,
             goto error;
         }
 
-        if ((fid = H5Fopen( filename, H5F_ACC_RDWR, H5P_DEFAULT ))<0) 
+        if ((fid = H5Fopen( filename, H5F_ACC_RDWR, fapl ))<0) 
         {
             goto error;
         }
@@ -1737,7 +1737,7 @@ static int test_rank3( hbool_t do_compress,
             goto error;
         }
 
-        if ((fid = H5Fopen( filename, H5F_ACC_RDWR, H5P_DEFAULT ))<0) 
+        if ((fid = H5Fopen( filename, H5F_ACC_RDWR, fapl ))<0) 
         {
             goto error;
         }
