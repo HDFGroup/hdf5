@@ -82,16 +82,41 @@ static int test_layouts( H5D_layout_t layout, hid_t fapl );
 
 int main( void )
 {
-
-    hid_t fapl;         /* file access property list */
+    hid_t fapl;                 /* file access property list */
+    hid_t fapl2;                /* file access property list w/latest format set */
+    hbool_t new_format;         /* Whether to use the latest file format */
     int	  nerrors = 0;
 
     h5_reset();
     fapl = h5_fileaccess();
 
-    nerrors += do_ranks( fapl ) < 0 ? 1 : 0;
-    nerrors += test_external( fapl ) < 0 ? 1 : 0;
-    nerrors += do_layouts( fapl ) < 0 ? 1 : 0;
+    /* Copy the file access property list */
+    if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
+
+    /* Set the "use the latest version of the format" bounds for creating objects in the file */
+    if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
+
+    /* Test with old & new format groups */
+    for(new_format = FALSE; new_format <= TRUE; new_format++) {
+        hid_t my_fapl;
+
+        /* Set the FAPL for the type of format */
+        if(new_format) {
+            puts("\nTesting with new file format:");
+            my_fapl = fapl2;
+        } /* end if */
+        else {
+            puts("Testing with old file format:");
+            my_fapl = fapl;
+        } /* end else */
+
+        nerrors += do_ranks( my_fapl ) < 0 ? 1 : 0;
+        nerrors += test_external( my_fapl ) < 0 ? 1 : 0;
+        nerrors += do_layouts( my_fapl ) < 0 ? 1 : 0;
+    } /* end for */
+
+    /* Close 2nd FAPL */
+    if(H5Pclose(fapl2) < 0) TEST_ERROR
    
     HDremove(FILE_NAME1);
     HDremove(FILE_NAME2);
@@ -101,19 +126,18 @@ int main( void )
     HDremove(EXT_FILE_NAME1);
     HDremove(EXT_FILE_NAME2);
 
-    if(nerrors) 
-    {
-        printf("***** %d H5Dset_extent TEST%s FAILED! *****\n",
-            nerrors, 1 == nerrors ? "" : "S");
-        exit(1);
-    }
-
+    if(nerrors)
+        goto error;
     puts("All H5Dset_extent tests passed.");
 
     return 0;
 
+error:
+    nerrors = MAX(1, nerrors);
+    printf("***** %d H5Dset_extent TEST%s FAILED! *****\n",
+            nerrors, 1 == nerrors ? "" : "S");
+    return 1;
 }
-
 
 
 /*-------------------------------------------------------------------------
@@ -2049,25 +2073,17 @@ static int test_external( hid_t fapl )
   
     /* create a new file */
     if ((fid = H5Fcreate(FILE_NAME4, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) 
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
   
     /* modify dataset creation properties */
     if ((dcpl = H5Pcreate (H5P_DATASET_CREATE)) < 0)
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
     
     if(H5Pset_external(dcpl, EXT_FILE_NAME1, (off_t)0, size) < 0)
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
 
     if(H5Pset_external(dcpl, EXT_FILE_NAME2, (off_t)0, size) < 0)
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
     
     {
         
@@ -2076,7 +2092,8 @@ static int test_external( hid_t fapl )
         hsize_t	file_size;		/*sizeof external file segment	*/
         
         if(H5Pget_external(dcpl, 0, sizeof(name), name, &file_offset,
-            &file_size) < 0) goto error;
+                &file_size) < 0)
+            FAIL_STACK_ERROR
         
     }
 
@@ -2098,21 +2115,13 @@ static int test_external( hid_t fapl )
 
     /* create the data space with unlimited dimensions. */
     if ((sid = H5Screate_simple(RANK2, dims_o, maxdims)) < 0) 
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
     if ((did = H5Dcreate2(fid , "dset1", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) 
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
     if (H5Dwrite(did , H5T_NATIVE_INT, sid, H5S_ALL, H5P_DEFAULT, buf_o) < 0) 
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
     if (H5Sclose(sid) < 0)
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
 
 
     /*-------------------------------------------------------------------------
@@ -2122,7 +2131,7 @@ static int test_external( hid_t fapl )
 
      /* read */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_ro) < 0) 
-        goto error;
+        FAIL_STACK_ERROR
     
 #if defined (H5_SET_EXTENT_DEBUG)
     printf("\n");
@@ -2160,38 +2169,30 @@ static int test_external( hid_t fapl )
 
     /* set new dimensions for the array. */
     if (H5Dset_extent(did , dims_e) < 0)
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
 
      /* get the space */
     if ((sid = H5Dget_space(did)) < 0)
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
     
     /* get dimensions */
     if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0) 
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
     
     if (H5Sclose(sid) < 0)
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
     
     
     /* check dimensions */
     for( i = 0; i < RANK2; i++ )
     {
         if (dims_r[i] != dims_e[i]) 
-            goto error;
+            TEST_ERROR
     }
     
     /* read */
     if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_e) < 0) 
-        goto error;
+        FAIL_STACK_ERROR
 
    
     
@@ -2221,13 +2222,13 @@ static int test_external( hid_t fapl )
                 {
                     printf("buf_e[%d][%d] = %d\n", i, j, buf_e[i][j]);
                     printf("value = %d\n", comp_value);
-                    goto error;
+                    TEST_ERROR
                 } 
             } 
             else 
             {
                 if(buf_e[i][j] != buf_o[i][j]) 
-                    goto error;
+                    TEST_ERROR
             }
         }
     }
@@ -2247,32 +2248,24 @@ static int test_external( hid_t fapl )
     
     /* set new dimensions for the array. */
     if (H5Dset_extent(did , dims_s) < 0)
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
     
     /* get the space */
     if ((sid = H5Dget_space(did)) < 0)
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
     
     /* get dimensions */
     if (H5Sget_simple_extent_dims(sid, dims_r, NULL) < 0) 
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
     
     if (H5Sclose(sid) < 0)
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
     
     /* check dimensions */
     for( i = 0; i < RANK2; i++ )
     {
         if (dims_r[i] != dims_s[i]) 
-            goto error;
+            TEST_ERROR
     }
 
 
@@ -2285,9 +2278,7 @@ static int test_external( hid_t fapl )
     
     /* read */
     if (H5Dread( did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf_s ) < 0) 
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
     
 #if defined (H5_SET_EXTENT_DEBUG)
     printf("\n");
@@ -2313,7 +2304,7 @@ static int test_external( hid_t fapl )
             {
                 printf("buf_s[%d][%d] = %d\n", i, j, buf_s[i][j]);
                 printf("buf_o[%d][%d] = %d\n", i, j, buf_o[i][j]);
-                goto error;
+                TEST_ERROR
             } 
         }
     }
@@ -2336,7 +2327,7 @@ static int test_external( hid_t fapl )
         /* set new dimensions for the array. */
         if (H5Dset_extent(did , dims_e) == SUCCEED)
         {
-            goto error;
+            TEST_ERROR
         }
         
     } H5E_END_TRY;
@@ -2350,21 +2341,17 @@ static int test_external( hid_t fapl )
     
     
     if (H5Pclose(dcpl) < 0) 
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
+
+    if (H5Dclose( did ) < 0)
+        FAIL_STACK_ERROR
 
     if (H5Fclose( fid ) < 0)
-    {
-        goto error;
-    }
+        FAIL_STACK_ERROR
 
     PASSED();
 
-
     return 0;
-    
-    
     
 error:
     
@@ -2376,7 +2363,6 @@ error:
         H5Fclose( fid );
     } H5E_END_TRY;
     return -1;
-    
 }
 
 
