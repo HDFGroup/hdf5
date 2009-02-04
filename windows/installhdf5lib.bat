@@ -78,14 +78,17 @@ rem Install C Libraries and Tools
     rem bin
     call :safe_copy hl\tools\gifconv\gif2h5\debug\gif2h5.exe hdf5lib\debug\bin
     call :safe_copy hl\tools\gifconv\h52gif\debug\h52gif.exe hdf5lib\debug\bin
+    call :safe_copy tools\h5copy\debug\h5copy.exe hdf5lib\debug\bin
     call :safe_copy tools\h5debug\debug\h5debug.exe hdf5lib\debug\bin
     call :safe_copy tools\h5diff\debug\h5diff.exe hdf5lib\debug\bin
     call :safe_copy tools\h5dump\debug\h5dump.exe hdf5lib\debug\bin
     call :safe_copy tools\h5import\debug\h5import.exe hdf5lib\debug\bin
     call :safe_copy tools\h5jam\debug\h5jam.exe hdf5lib\debug\bin
     call :safe_copy tools\h5ls\debug\h5ls.exe hdf5lib\debug\bin
+    call :safe_copy tools\h5mkgrp\debug\h5mkgrp.exe hdf5lib\debug\bin
     call :safe_copy tools\h5repack\debug\h5repack.exe hdf5lib\debug\bin
     call :safe_copy tools\h5repart\debug\h5repart.exe hdf5lib\debug\bin
+    call :safe_copy tools\h5stat\debug\h5stat.exe hdf5lib\debug\bin
     call :safe_copy tools\h5unjam\debug\h5unjam.exe hdf5lib\debug\bin
     rem bindll
     call :safe_copy hl\tools\gifconvdll\h52gifdll\debug\h52gifdll.exe hdf5lib\debug\bindll
@@ -110,14 +113,17 @@ rem Install C Libraries and Tools
     rem bin
     call :safe_copy hl\tools\gifconv\gif2h5\release\gif2h5.exe hdf5lib\release\bin
     call :safe_copy hl\tools\gifconv\h52gif\release\h52gif.exe hdf5lib\release\bin
+    call :safe_copy tools\h5copy\release\h5copy.exe hdf5lib\release\bin
     call :safe_copy tools\h5debug\release\h5debug.exe hdf5lib\release\bin
     call :safe_copy tools\h5diff\release\h5diff.exe hdf5lib\release\bin
     call :safe_copy tools\h5dump\release\h5dump.exe hdf5lib\release\bin
     call :safe_copy tools\h5import\release\h5import.exe hdf5lib\release\bin
     call :safe_copy tools\h5jam\release\h5jam.exe hdf5lib\release\bin
     call :safe_copy tools\h5ls\release\h5ls.exe hdf5lib\release\bin
+    call :safe_copy tools\h5mkgrp\release\h5mkgrp.exe hdf5lib\release\bin
     call :safe_copy tools\h5repack\release\h5repack.exe hdf5lib\release\bin
     call :safe_copy tools\h5repart\release\h5repart.exe hdf5lib\release\bin
+    call :safe_copy tools\h5stat\release\h5stat.exe hdf5lib\release\bin
     call :safe_copy tools\h5unjam\release\h5unjam.exe hdf5lib\release\bin
     rem bindll
     call :safe_copy hl\tools\gifconvdll\h52gifdll\release\h52gifdll.exe hdf5lib\release\bindll
