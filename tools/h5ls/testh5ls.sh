@@ -155,10 +155,10 @@ TOOLTEST tattr2.ls -w80 -v -S tattr2.h5
 TOOLTEST nosuchfile.ls nosuchfile.h5
 
 # test for variable length data types in verbose mode 
-TOOLTEST tvldtypes2.ls 0 -v tvldtypes1.h5
+TOOLTEST tvldtypes2.ls -v tvldtypes1.h5
 
 # test for dataset region references data types in verbose mode 
-TOOLTEST tdatareg.ls 0 -v tdatareg.h5
+TOOLTEST tdatareg.ls -v tdatareg.h5
 
 if test $nerrors -eq 0 ; then
 	echo "All h5ls tests passed."
