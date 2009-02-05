@@ -68,7 +68,8 @@ static htri_t H5O_alloc_extend_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     unsigned chunkno, size_t size, unsigned * msg_idx);
 static unsigned H5O_alloc_new_chunk(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
     size_t size);
-static htri_t H5O_move_msgs_forward(H5O_t *oh);
+static htri_t H5O_move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u, hid_t dxpl_id);
+static htri_t H5O_move_msgs_forward(H5F_t *f, H5O_t *oh, hid_t dxpl_id);
 static htri_t H5O_merge_null(H5F_t *f, H5O_t *oh, hid_t dxpl_id);
 static htri_t H5O_remove_empty_chunks(H5F_t *f, H5O_t *oh, hid_t dxpl_id);
 static herr_t H5O_alloc_shrink_chunk(H5F_t *f, H5O_t *oh, hid_t dxpl_id, unsigned chunkno);
@@ -1091,6 +1092,118 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5O_move_cont
+ *
+ * Purpose:     Check and move message(s) forward into a continuation message
+ *
+ * Return:      Success:        non-negative (TRUE/FALSE)
+ *              Failure:        negative
+ *
+ * Programmer:  Vailin Choi
+ *		Feb. 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static htri_t
+H5O_move_cont(H5F_t *f, H5O_t *oh, unsigned cont_u, hid_t dxpl_id)
+{
+    unsigned 	v;		/* local index variable */
+    H5O_mesg_t 	*cont_msg;	/* pointer to the continuation message */
+    H5O_mesg_t 	*nonnull_msg;	/* pointer to the current message to operate on */
+    H5O_mesg_t 	*null_msg;	/* pointer to the current message to operate on */
+    size_t     	total_size=0;	/* total size of nonnull messages in the chunk pointed to by cont message */
+    size_t     	move_size=0;	/* size of the message to be moved */
+    uint8_t    	*move_start, *move_end;	/* pointers to area of messages to move */
+    size_t  	gap_size;		/* size of gap produced */
+    unsigned   	deleted_chunkno;       	/* Chunk # to delete */
+    htri_t 	ret_value = FALSE;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5O_move_cont)
+
+    /* Check arguments. */
+    HDassert(f);
+    HDassert(oh);
+ 
+    cont_msg = &oh->mesg[cont_u];
+    H5O_LOAD_NATIVE(f, dxpl_id, 0, oh, cont_msg, FAIL)
+    deleted_chunkno = ((H5O_cont_t *)(cont_msg->native))->chunkno;
+
+    /* proceed further only if continuation message is pointing to the last chunk */
+    if(deleted_chunkno != (oh->nchunks - 1))
+	HGOTO_DONE(FALSE)
+
+    /* find size of all nonnull messages in the chunk pointed to by the continuation message */
+    for(v = 0, nonnull_msg = &oh->mesg[0]; v < oh->nmesgs; v++, nonnull_msg++)
+	if(nonnull_msg->chunkno == deleted_chunkno && nonnull_msg->type->id != H5O_NULL_ID) {
+	    HDassert(nonnull_msg->type->id != H5O_CONT_ID);
+	    total_size += nonnull_msg->raw_size + H5O_SIZEOF_MSGHDR_OH(oh);
+	}
+
+    /* check if messages can fit into the continuation message */
+    if(total_size && total_size <= (cont_msg->raw_size + H5O_SIZEOF_MSGHDR_OH(oh))) {
+
+	/* convert continuation message into a null message */
+	if(H5O_release_mesg(f, dxpl_id, oh, cont_msg, TRUE) < 0)
+	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "unable to convert into null message")
+
+	move_start = cont_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh);
+	move_end = cont_msg->raw + cont_msg->raw_size;
+
+	/* move message(s) forward into continuation message */
+	for(v = 0, nonnull_msg = &oh->mesg[0]; v < oh->nmesgs; v++, nonnull_msg++)
+	    if(nonnull_msg->chunkno == deleted_chunkno && nonnull_msg->type->id != H5O_NULL_ID) {
+		move_size = nonnull_msg->raw_size + H5O_SIZEOF_MSGHDR_OH(oh);
+		HDmemcpy(move_start, nonnull_msg->raw - H5O_SIZEOF_MSGHDR_OH(oh), move_size);
+		nonnull_msg->raw = move_start + H5O_SIZEOF_MSGHDR_OH(oh);
+		nonnull_msg->chunkno = cont_msg->chunkno;
+		nonnull_msg->dirty = TRUE;
+		move_start += move_size;
+	    }
+
+	HDassert(move_start <= move_end);
+
+	/* check if there is space remaining in the continuation message */
+	/* the remaining space can be gap or a null message */
+	gap_size = move_end - move_start;
+	if(gap_size >= (size_t)H5O_SIZEOF_MSGHDR_OH(oh)) {
+	    cont_msg->raw_size = gap_size - H5O_SIZEOF_MSGHDR_OH(oh);
+	    cont_msg->raw = move_start + H5O_SIZEOF_MSGHDR_OH(oh);
+	    cont_msg->dirty = TRUE;
+	} else {
+	    if(gap_size && (H5O_add_gap(oh, cont_msg->chunkno, cont_u, move_start, gap_size) < 0))
+		HGOTO_ERROR(H5E_OHDR, H5E_CANTINSERT, FAIL, "can't insert gap in chunk")
+	    /* Release any information/memory for continuation message */
+	    H5O_msg_free_mesg(cont_msg);
+	    if(cont_u < (oh->nmesgs - 1))
+		HDmemmove(&oh->mesg[cont_u], &oh->mesg[cont_u + 1], ((oh->nmesgs - 1) - cont_u) * sizeof(H5O_mesg_t));
+	    oh->nmesgs--;
+	}
+
+	/* remove all null messages in deleted chunk from list of messages */
+	/*	 Note: unsigned v wrapping around at the end */
+	for (v = oh->nmesgs - 1, null_msg = &oh->mesg[v]; v < oh->nmesgs; v--, null_msg--)
+	    if(null_msg->type->id == H5O_NULL_ID && null_msg->chunkno == deleted_chunkno) {
+
+                /* Release any information/memory for message */
+                H5O_msg_free_mesg(null_msg);
+
+		if(v < (oh->nmesgs - 1))
+		    HDmemmove(&oh->mesg[v], &oh->mesg[v + 1], ((oh->nmesgs - 1) - v) * sizeof(H5O_mesg_t));
+		oh->nmesgs--;
+	    } /* end if */
+
+	(void)H5FL_BLK_FREE(chunk_image, oh->chunk[deleted_chunkno].image);
+
+	oh->nchunks--;
+	ret_value = TRUE;
+    }  /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5O_move_cont() */
+
+
+/*-------------------------------------------------------------------------
  *
  * Function:    H5O_move_msgs_forward
  *
@@ -1101,11 +1214,14 @@ done:
  * Programmer:	Quincey Koziol
  *		koziol@ncsa.uiuc.edu
  *		Oct 17 2005
+ * Modifications:
+ *   Feb. 2009: Vailin Choi
+ *      Add changes to move messages forward into "continuation" message
  *
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O_move_msgs_forward(H5O_t *oh)
+H5O_move_msgs_forward(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
 {
     hbool_t packed_msg;                 /* Flag to indicate that messages were packed */
     hbool_t did_packing = FALSE;        /* Whether any messages were packed */
@@ -1182,7 +1298,17 @@ H5O_move_msgs_forward(H5O_t *oh)
             } /* end if */
             else {
                 H5O_mesg_t *null_msg;       /* Pointer to current message to operate on */
-                unsigned	v;              /* Local index variable */
+                unsigned   v;              /* Local index variable */
+		htri_t	   status;
+
+                if(H5O_CONT_ID == curr_msg->type->id) {
+		    if((status = H5O_move_cont(f, oh, u, dxpl_id)) < 0)
+			HGOTO_ERROR(H5E_OHDR, H5E_CANTDELETE, FAIL, "Error in moving messages into cont message")
+		    else if(status > 0) { /* message(s) got moved into "continuation" message */
+                        packed_msg = TRUE;
+			break;
+		    }
+		}
 
                 /* Loop over messages again, looking for large enough null message in earlier chunk */
                 for(v = 0, null_msg = &oh->mesg[0]; v < oh->nmesgs; v++, null_msg++) {
@@ -1583,6 +1709,11 @@ done:
  *		koziol@ncsa.uiuc.edu
  *		Oct  4 2005
  *
+ * Modifications:
+ *   Feb. 2009: Vailin Choi
+ *      Add 2 more parameters to H5O_move_msgs_forward() for moving
+ *	messages forward into "continuation" message
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1603,7 +1734,7 @@ H5O_condense_header(H5F_t *f, H5O_t *oh, hid_t dxpl_id)
         rescan_header = FALSE;
 
         /* Scan for messages that can be moved earlier in chunks */
-        result = H5O_move_msgs_forward(oh);
+        result = H5O_move_msgs_forward(f, oh, dxpl_id);
         if(result < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTPACK, FAIL, "can't move header messages forward")
         if(result > 0)
