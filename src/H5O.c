@@ -1652,11 +1652,11 @@ H5O_touch_oh(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hbool_t force)
                     HGOTO_DONE(SUCCEED);        /*nothing to do*/
 
                 /* Allocate space for the modification time message */
-                if((idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, &mesg_flags, &now)) == UFAIL)
+                if(UFAIL == (idx = H5O_msg_alloc(f, dxpl_id, oh, H5O_MSG_MTIME_NEW, &mesg_flags, &now)))
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to allocate space for modification time message")
 
                 /* Set the message's flags if appropriate */
-                oh->mesg[idx].flags = mesg_flags;
+                oh->mesg[idx].flags = (uint8_t)mesg_flags;
             } /* end if */
 
             /* Allocate 'native' space, if necessary */
@@ -1892,8 +1892,8 @@ done:
  *
  * Purpose:	Retrieves the type of object pointed to by `loc'.
  *
- * Return:	Success:	An object type defined in H5Gpublic.h
- *		Failure:	H5G_UNKNOWN
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
  *
  * Programmer:	Robb Matzke
  *              Wednesday, November  4, 1998
@@ -1929,8 +1929,8 @@ done:
  *
  * Purpose:	Returns the type of object pointed to by `oh'.
  *
- * Return:	Success:	An object type defined in H5Opublic.h
- *		Failure:	H5G_UNKNOWN
+ * Return:	Success:	Non-negative
+ *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
  *              Monday, November 21, 2005
@@ -2311,6 +2311,8 @@ H5O_get_info(H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info, H5O_info_t *o
         oinfo->btime = oh->btime;
     } /* end if */
     else {
+        htri_t	exists;                 /* Flag if header message of interest exists */
+
         /* No information for access & modification fields */
         /* (we stopped updating the "modification time" header message for
          *      raw data changes, so the "modification time" header message
@@ -2321,13 +2323,25 @@ H5O_get_info(H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info, H5O_info_t *o
         oinfo->btime = 0;
 
         /* Might be information for modification time */
-        if(NULL == H5O_msg_read_oh(oloc->file, dxpl_id, oh, H5O_MTIME_ID, &oinfo->ctime)) {
-            H5E_clear_stack(NULL);
-            if(NULL == H5O_msg_read_oh(oloc->file, dxpl_id, oh, H5O_MTIME_NEW_ID, &oinfo->ctime)) {
-                H5E_clear_stack(NULL);
-                oinfo->ctime = 0;
-            } /* end if */
+        if((exists = H5O_msg_exists_oh(oh, H5O_MTIME_ID)) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "unable to check for MTIME message")
+        if(exists > 0) {
+            /* Get "old style" modification time info */
+            if(NULL == H5O_msg_read_oh(oloc->file, dxpl_id, oh, H5O_MTIME_ID, &oinfo->ctime))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read MTIME message")
         } /* end if */
+        else {
+            /* Check for "new style" modification time info */
+            if((exists = H5O_msg_exists_oh(oh, H5O_MTIME_NEW_ID)) < 0)
+                HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "unable to check for MTIME_NEW message")
+            if(exists > 0) {
+                /* Get "new style" modification time info */
+                if(NULL == H5O_msg_read_oh(oloc->file, dxpl_id, oh, H5O_MTIME_NEW_ID, &oinfo->ctime))
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't read MTIME_NEW message")
+            } /* end if */
+            else
+                oinfo->ctime = 0;
+        } /* end else */
     } /* end else */
 
     /* Set the version for the object header */
