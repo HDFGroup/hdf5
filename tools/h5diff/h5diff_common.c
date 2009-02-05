@@ -372,7 +372,7 @@ void usage(void)
 
  printf(" The compare criteria is:\n");
  printf("   1) datasets: numerical array differences 2) groups: name string difference\n");
- printf("   3) datatypes: the return value of H5Tequal 2) links: name string difference\n");
+ printf("   3) datatypes: the return value of H5Tequal 4) links: name string difference\n");
  printf("   of the linked value\n");
 
  printf("\n");
