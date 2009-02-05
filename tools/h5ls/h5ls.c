@@ -298,95 +298,95 @@ display_string(FILE *stream, const char *s, hbool_t escape_spaces)
 static hbool_t
 display_native_type(hid_t type, int UNUSED ind)
 {
-    if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
+    if (H5Tequal(type, H5T_NATIVE_SCHAR)==1) {
  printf("native signed char");
-    } else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UCHAR)==1) {
  printf("native unsigned char");
-    } else if (H5Tequal(type, H5T_NATIVE_INT)) {
+    } else if (H5Tequal(type, H5T_NATIVE_INT)==1) {
  printf("native int");
-    } else if (H5Tequal(type, H5T_NATIVE_UINT)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UINT)==1) {
  printf("native unsigned int");
-    } else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
+    } else if (H5Tequal(type, H5T_NATIVE_SHORT)==1) {
  printf("native short");
-    } else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
+    } else if (H5Tequal(type, H5T_NATIVE_USHORT)==1) {
  printf("native unsigned short");
-    } else if (H5Tequal(type, H5T_NATIVE_LONG)) {
+    } else if (H5Tequal(type, H5T_NATIVE_LONG)==1) {
  printf("native long");
-    } else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
+    } else if (H5Tequal(type, H5T_NATIVE_ULONG)==1) {
  printf("native unsigned long");
-    } else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
+    } else if (H5Tequal(type, H5T_NATIVE_LLONG)==1) {
  printf("native long long");
-    } else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
+    } else if (H5Tequal(type, H5T_NATIVE_ULLONG)==1) {
  printf("native unsigned long long");
-    } else if (H5Tequal(type, H5T_NATIVE_FLOAT)) {
+    } else if (H5Tequal(type, H5T_NATIVE_FLOAT)==1) {
  printf("native float");
-    } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)) {
+    } else if (H5Tequal(type, H5T_NATIVE_DOUBLE)==1) {
  printf("native double");
-    } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) {
+    } else if (H5Tequal(type, H5T_NATIVE_LDOUBLE)==1) {
  printf("native long double");
-    } else if (H5Tequal(type, H5T_NATIVE_INT8)) {
+    } else if (H5Tequal(type, H5T_NATIVE_INT8)==1) {
  printf("native int8_t");
-    } else if (H5Tequal(type, H5T_NATIVE_UINT8)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UINT8)==1) {
  printf("native uint8_t");
-    } else if (H5Tequal(type, H5T_NATIVE_INT16)) {
+    } else if (H5Tequal(type, H5T_NATIVE_INT16)==1) {
  printf("native int16_t");
-    } else if (H5Tequal(type, H5T_NATIVE_UINT16)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UINT16)==1) {
  printf("native uint16_t");
-    } else if (H5Tequal(type, H5T_NATIVE_INT32)) {
+    } else if (H5Tequal(type, H5T_NATIVE_INT32)==1) {
  printf("native int32_t");
-    } else if (H5Tequal(type, H5T_NATIVE_UINT32)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UINT32)==1) {
  printf("native uint32_t");
-    } else if (H5Tequal(type, H5T_NATIVE_INT64)) {
+    } else if (H5Tequal(type, H5T_NATIVE_INT64)==1) {
  printf("native int64_t");
-    } else if (H5Tequal(type, H5T_NATIVE_UINT64)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UINT64)==1) {
  printf("native uint64_t");
-    } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST8)) {
+    } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST8)==1) {
  printf("native int_least8_t");
-    } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST8)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST8)==1) {
  printf("native uint_least8_t");
-    } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST16)) {
+    } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST16)==1) {
  printf("native int_least16_t");
-    } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST16)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST16)==1) {
  printf("native uint_least16_t");
-    } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST32)) {
+    } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST32)==1) {
  printf("native int_least32_t");
-    } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST32)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST32)==1) {
  printf("native uint_least32_t");
-    } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST64)) {
+    } else if (H5Tequal(type, H5T_NATIVE_INT_LEAST64)==1) {
  printf("native int_least64_t");
-    } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST64)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_LEAST64)==1) {
  printf("native uint_least64_t");
-    } else if (H5Tequal(type, H5T_NATIVE_INT_FAST8)) {
+    } else if (H5Tequal(type, H5T_NATIVE_INT_FAST8)==1) {
  printf("native int_fast8_t");
-    } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST8)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST8)==1) {
  printf("native uint_fast8_t");
-    } else if (H5Tequal(type, H5T_NATIVE_INT_FAST16)) {
+    } else if (H5Tequal(type, H5T_NATIVE_INT_FAST16)==1) {
  printf("native int_fast16_t");
-    } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST16)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST16)==1) {
  printf("native uint_fast16_t");
-    } else if (H5Tequal(type, H5T_NATIVE_INT_FAST32)) {
+    } else if (H5Tequal(type, H5T_NATIVE_INT_FAST32)==1) {
  printf("native int_fast32_t");
-    } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST32)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST32)==1) {
  printf("native uint_fast32_t");
-    } else if (H5Tequal(type, H5T_NATIVE_INT_FAST64)) {
+    } else if (H5Tequal(type, H5T_NATIVE_INT_FAST64)==1) {
  printf("native int_fast64_t");
-    } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST64)) {
+    } else if (H5Tequal(type, H5T_NATIVE_UINT_FAST64)==1) {
  printf("native uint_fast64_t");
-    } else if (H5Tequal(type, H5T_NATIVE_B8)) {
+    } else if (H5Tequal(type, H5T_NATIVE_B8)==1) {
  printf("native 8-bit field");
-    } else if (H5Tequal(type, H5T_NATIVE_B16)) {
+    } else if (H5Tequal(type, H5T_NATIVE_B16)==1) {
  printf("native 16-bit field");
-    } else if (H5Tequal(type, H5T_NATIVE_B32)) {
+    } else if (H5Tequal(type, H5T_NATIVE_B32)==1) {
  printf("native 32-bit field");
-    } else if (H5Tequal(type, H5T_NATIVE_B64)) {
+    } else if (H5Tequal(type, H5T_NATIVE_B64)==1) {
  printf("native 64-bit field");
-    } else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
+    } else if (H5Tequal(type, H5T_NATIVE_HSIZE)==1) {
  printf("native hsize_t");
-    } else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
+    } else if (H5Tequal(type, H5T_NATIVE_HSSIZE)==1) {
  printf("native hssize_t");
-    } else if (H5Tequal(type, H5T_NATIVE_HERR)) {
+    } else if (H5Tequal(type, H5T_NATIVE_HERR)==1) {
  printf("native herr_t");
-    } else if (H5Tequal(type, H5T_NATIVE_HBOOL)) {
+    } else if (H5Tequal(type, H5T_NATIVE_HBOOL)==1) {
  printf("native hbool_t");
     } else {
  return FALSE;
@@ -414,13 +414,13 @@ display_native_type(hid_t type, int UNUSED ind)
 static hbool_t
 display_ieee_type(hid_t type, int UNUSED ind)
 {
-    if (H5Tequal(type, H5T_IEEE_F32BE)) {
+    if (H5Tequal(type, H5T_IEEE_F32BE)==1) {
  printf("IEEE 32-bit big-endian float");
-    } else if (H5Tequal(type, H5T_IEEE_F32LE)) {
+    } else if (H5Tequal(type, H5T_IEEE_F32LE)==1) {
  printf("IEEE 32-bit little-endian float");
-    } else if (H5Tequal(type, H5T_IEEE_F64BE)) {
+    } else if (H5Tequal(type, H5T_IEEE_F64BE)==1) {
  printf("IEEE 64-bit big-endian float");
-    } else if (H5Tequal(type, H5T_IEEE_F64LE)) {
+    } else if (H5Tequal(type, H5T_IEEE_F64LE)==1) {
  printf("IEEE 64-bit little-endian float");
     } else {
  return FALSE;
@@ -959,9 +959,9 @@ display_reference_type(hid_t type, int UNUSED ind)
 {
     if (H5T_REFERENCE!=H5Tget_class(type)) return FALSE;
 
-    if (H5Tequal(type, H5T_STD_REF_OBJ)) {
+    if (H5Tequal(type, H5T_STD_REF_OBJ)==1) {
  printf("object reference");
-    } else if (H5Tequal(type, H5T_STD_REF_DSETREG)) {
+    } else if (H5Tequal(type, H5T_STD_REF_DSETREG)==1) {
  printf("dataset region reference");
     } else {
  printf("%lu-byte unknown reference",
