@@ -62,6 +62,8 @@ set /a nerrors=0
 set verbose=yes
 rem default to run h5diff tests
 set pmode=
+rem following not needed for windows see #10 ADB 1/22/2009
+rem mydomainname=`domainname 2>/dev/null`
 
 if not exist .\testfiles mkdir .\testfiles
 
@@ -482,8 +484,16 @@ rem ############################################################################
     call :tooltest h5diff_90.txt -v %file2% %file2%
 
     rem 10. read by hyperslab, print indexes
+    rem ##############################################################################
+    rem   Not tested on windows as this has not been a problem - ADB 1/22/2009
+    rem    if test -n "$pmode" -a "$mydomainname" = hdfgroup.uiuc.edu; then
+    rem    # skip this test which sometimes hangs in some THG machines
+    rem    SKIP -v $SRCFILE9 $SRCFILE10
+    rem    else
+    rem ##############################################################################
     call :testing %h5diff% -v %srcfile9% %srcfile10%
     call :tooltest h5diff_100.txt -v %file9% %file10%
+    rem    fi
 
     rem 11. floating point comparison
     rem Not tested on Windows due to difference in formatting of scientific 
@@ -496,6 +506,27 @@ rem ############################################################################
     rem call :tooltest h5diff_102.txt -v %file1% %file1% g1/fp1 g1/fp2
     call :results -SKIP-
 
+    rem   New option added #1368(E1)  - ADB 2/5/2009
+	rem not compable -c flag
+	call :testing %h5diff% %srcfile2% %srcfile2% g2/dset1  g2/dset2
+    call :tooltest h5diff_200.txt %file2% %file2% g2/dset1  g2/dset2 
+
+	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset1  g2/dset2
+    call :tooltest h5diff_201.txt -c %file2% %file2% g2/dset1  g2/dset2 
+
+	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset2  g2/dset3
+    call :tooltest h5diff_202.txt -c %file2% %file2% g2/dset2  g2/dset3
+
+	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset3  g2/dset4
+    call :tooltest h5diff_203.txt -c %file2% %file2% g2/dset3  g2/dset4
+
+	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset4  g2/dset5
+    call :tooltest h5diff_204.txt -c %file2% %file2% g2/dset4  g2/dset5
+
+	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset5  g2/dset6
+    call :tooltest h5diff_205.txt -c %file2% %file2% g2/dset5  g2/dset6
+	
+	
     rem ##############################################################################
     rem # END
     rem ##############################################################################
