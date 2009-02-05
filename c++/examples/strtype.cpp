@@ -114,9 +114,7 @@ int main()
       cout << endl;
 
       /* Free memory for rdata */
-      for(i=0; i<SPACE1_DIM1; i++) {
-          free(rdata[i]);
-      }
+      dataset.vlenReclaim(rdata, dtype, sid1);
    } // end of try block
 
    // catch failure caused by the H5File operations
