@@ -32,7 +32,7 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
 
  The compare criteria is:
    1) datasets: numerical array differences 2) groups: name string difference
-   3) datatypes: the return value of H5Tequal 2) links: name string difference
+   3) datatypes: the return value of H5Tequal 4) links: name string difference
    of the linked value
 
  Return exit code:
