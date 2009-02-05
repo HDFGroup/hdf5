@@ -16,7 +16,7 @@ rem
 rem Tests for the h5diff tool
 rem
 rem    Created:  Scott Wegner, 8/22/07
-rem    Modified: Scott Wegner, 10/06/08
+rem    Modified: Scott Wegner, 11/19/07
 rem
 
 setlocal enabledelayedexpansion
@@ -40,17 +40,17 @@ set srcfile9=h5diff_hyper1.h5
 set srcfile10=h5diff_hyper2.h5
 set srcfile11=h5diff_empty.h5
 
-set file1=%indir%\%srcfile1%
-set file2=%indir%\%srcfile2%
-set file3=%indir%\%srcfile3%
-set file4=%indir%\%srcfile4%
-set file5=%indir%\%srcfile5%
-set file6=%indir%\%srcfile6%
-set file7=%indir%\%srcfile7%
-set file8=%indir%\%srcfile8%
-set file9=%indir%\%srcfile9%
-set file10=%indir%\%srcfile10%
-set file11=%indir%\%srcfile11%
+set file1=%indir%\h5diff_basic1.h5
+set file2=%indir%\h5diff_basic2.h5
+set file3=%indir%\h5diff_types.h5
+set file4=%indir%\h5diff_dtypes.h5
+set file5=%indir%\h5diff_attr1.h5
+set file6=%indir%\h5diff_attr2.h5
+set file7=%indir%\h5diff_dset1.h5
+set file8=%indir%\h5diff_dset2.h5
+set file9=%indir%\h5diff_hyper1.h5
+set file10=%indir%\h5diff_hyper2.h5
+set file11=%indir%\h5diff_empty.h5
 
 
 rem The tool name
@@ -62,6 +62,8 @@ set /a nerrors=0
 set verbose=yes
 rem default to run h5diff tests
 set pmode=
+rem following not needed for windows see #10 ADB 1/22/2009
+rem mydomainname=`domainname 2>/dev/null`
 
 if not exist .\testfiles mkdir .\testfiles
 
@@ -74,17 +76,30 @@ goto main
 
 rem Print a line-line message left justified in a field of 70 characters
 rem beginning with the word "Testing".
+rem On Windows, simply set up the test_msg variable, so it can be printed later
+rem with the :results function.  This is because Windows doesn't support
+rem printing without a linefeed.  --SJW 6/20/08
 rem
 :testing
-    set spaces=                                                               
-    set test_msg=Testing %* %spaces%
-    
-    rem This will echo test_msg with the right padding, and no EOL character
-    set /p="%test_msg:~0,69%"<nul
+    set test_msg=Testing
+    for %%a in (%*) do (
+            set test_msg=!test_msg! %%~nxa
+    )
+    set test_msg=%test_msg%                                                                
+    set test_msg=%test_msg:~0,69%
     
     exit /b
 
 
+rem Print the testing results.  Simply echo the contents of test_msg (set up
+rem above), along with the passed parameter, generall PASSED, FAILED, or -SKIP-
+:results
+    echo.%test_msg% %*
+    
+    exit /b
+    
+    
+    
 rem Function STDOUT_FILTER isn't technically needed on Windows, because this
 rem script will never run on platforms that require it.  However, include empty
 rem interface for consistency.  --SJW 8/22/07
@@ -133,12 +148,12 @@ rem
     rem Run test.
     (
         rem echo.#############################
-        rem Remove quotes here, because Linux 'echo' command strips them
+        rem rem Remove quotes here, because Linux 'echo' command strips them
         rem echo.Expected output for 'h5diff %params:"=%'
         rem echo.#############################
-        rem pushd ..\testfiles
+        pushd testfiles
         %h5diff_bin% %params%
-        rem popd
+        popd
     ) > %actual% 2> %actual_err%
     rem save actual and actual_err in case they are needed later.
     copy /y %actual% %actual_sav% > nul
@@ -149,14 +164,14 @@ rem
     
     if not exist %expect% (
         rem Create the expect file if it doesn't yet exist.
-        echo. CREATED
+        call :results CREATED
         copy /y %actual% %expect% > nul
     ) else (
         fc /w %expect% %actual% > nul
         if !errorlevel! equ 0 (
-            echo. PASSED
+            call :results PASSED
         ) else (
-            echo.*FAILED*
+            call :results *FAILED*
             echo.    Expected result ^(%expect%^) differs from actual result ^(%actual%^)
             set /a nerrors=!nerrors!+1
             if "yes"=="%verbose%" fc /w %actual% %expect%
@@ -173,19 +188,18 @@ rem
     
 rem Print a "SKIP" message
 :skip
-    call :testing %h5diff% %*
-    echo. -SKIP-
+    call :testing -SKIP- %h5diff% %*
     
     exit /b
     
     
 :main
 rem ############################################################################
-rem The tests 
-rem To avoid the printing of the complete full path of the test file, that hides
-rem all the other parameters for long paths, the printing of the command line 
-rem is done first in
-rem call :testing with the name only of the test file $TOOL, not its full path $TESTFILE
+rem  The tests 
+rem  To avoid the printing of the complete full path of the test file, that hides
+rem  all the other parameters for long paths, the printing of the command line 
+rem  is done first in
+rem  TESTING with the name only of the test file $TOOL, not its full path $TESTFILErem ############################################################################
 rem ############################################################################
 
 rem ############################################################################
@@ -237,7 +251,6 @@ rem ############################################################################
     call :testing %h5diff% -q %srcfile1% %srcfile2%
     call :tooltest h5diff_18.txt -q %file1% %file2% 
     
-
     rem ##############################################################################
     rem # not comparable types
     rem ##############################################################################
@@ -333,9 +346,11 @@ rem ############################################################################
     call :testing %h5diff% %srcfile1%
     call :tooltest h5diff_600.txt %file1% 
 
+
     rem ##############################################################################
     rem # -d 
     rem ##############################################################################
+
 
     rem 6.3: negative value
     call :testing %h5diff%  -d -4 %srcfile1% %srcfile2%  g1/dset3 g1/dset4
@@ -375,6 +390,7 @@ rem ############################################################################
     rem ##############################################################################
 
 
+
     rem 6.12: negative value
     call :testing %h5diff% -p -4 %srcfile1% %srcfile2%  g1/dset3 g1/dset4
     call :tooltest h5diff_612.txt -p -4 %file1% %file2% g1/dset3 g1/dset4
@@ -412,6 +428,7 @@ rem ############################################################################
     rem ##############################################################################
     rem # -n
     rem ##############################################################################
+
 
 
     rem 6.21: negative value
@@ -467,20 +484,49 @@ rem ############################################################################
     call :tooltest h5diff_90.txt -v %file2% %file2%
 
     rem 10. read by hyperslab, print indexes
+    rem ##############################################################################
+    rem   Not tested on windows as this has not been a problem - ADB 1/22/2009
+    rem    if test -n "$pmode" -a "$mydomainname" = hdfgroup.uiuc.edu; then
+    rem    # skip this test which sometimes hangs in some THG machines
+    rem    SKIP -v $SRCFILE9 $SRCFILE10
+    rem    else
+    rem ##############################################################################
     call :testing %h5diff% -v %srcfile9% %srcfile10%
     call :tooltest h5diff_100.txt -v %file9% %file10%
+    rem    fi
 
     rem 11. floating point comparison
     rem Not tested on Windows due to difference in formatting of scientific 
     rem notation  --SJW 8/23/07
-    call :skip -v  %srcfile1% %srcfile1% g1/d1  g1/d2 
-    rem call :testing %h5diff% -v  %srcfile1% %srcfile1% g1/d1  g1/d2 
+    call :testing h5diff_101.txt -v %srcfile1% %srcfile1% g1/d1  g1/d2
     rem call :tooltest h5diff_101.txt -v %file1% %file1% g1/d1  g1/d2
-    
-    call :skip -v  %srcfile1% %srcfile1%  g1/fp1 g1/fp2 
-    rem call :testing %h5diff% -v  %srcfile1% %srcfile1%  g1/fp1 g1/fp2 
-    rem call :tooltest h5diff_102.txt -v %file1% %file1% g1/fp1 g1/fp2
+    call :results -SKIP-
 
+    call :testing %h5diff% -v  %srcfile1% %srcfile1%  g1/fp1 g1/fp2
+    rem call :tooltest h5diff_102.txt -v %file1% %file1% g1/fp1 g1/fp2
+    call :results -SKIP-
+
+    rem   New option added #1368(E1)  - ADB 2/5/2009
+	rem not compable -c flag
+	call :testing %h5diff% %srcfile2% %srcfile2% g2/dset1  g2/dset2
+    call :tooltest h5diff_200.txt %file2% %file2% g2/dset1  g2/dset2 
+
+	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset1  g2/dset2
+    call :tooltest h5diff_201.txt -c %file2% %file2% g2/dset1  g2/dset2 
+
+	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset2  g2/dset3
+    call :tooltest h5diff_202.txt -c %file2% %file2% g2/dset2  g2/dset3
+
+	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset3  g2/dset4
+    call :tooltest h5diff_203.txt -c %file2% %file2% g2/dset3  g2/dset4
+
+	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset4  g2/dset5
+    call :tooltest h5diff_204.txt -c %file2% %file2% g2/dset4  g2/dset5
+
+	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset5  g2/dset6
+    call :tooltest h5diff_205.txt -c %file2% %file2% g2/dset5  g2/dset6
+	
+	
     rem ##############################################################################
     rem # END
     rem ##############################################################################
