@@ -122,7 +122,7 @@ int main( void )
     /* Close 2nd FAPL */
     if(H5Pclose(fapl2) < 0) TEST_ERROR
 
-    /*h5_cleanup(FILENAME, fapl);*/
+    h5_cleanup(FILENAME, fapl);
    
     HDremove(EXT_FILE_NAME1);
     HDremove(EXT_FILE_NAME2);
