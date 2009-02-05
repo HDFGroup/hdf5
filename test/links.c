@@ -7587,7 +7587,7 @@ linkinfo(hid_t fapl, hbool_t new_format)
     	H5Fclose (fid);
     } H5E_END_TRY;
     return -1;
-} /* end ud_hard_links() */
+} /* end linkinfo() */
 
 
 /*-------------------------------------------------------------------------
