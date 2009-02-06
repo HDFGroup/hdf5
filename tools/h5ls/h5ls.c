@@ -952,9 +952,9 @@ display_reference_type(hid_t type, int UNUSED ind)
 {
     if (H5T_REFERENCE!=H5Tget_class(type)) return FALSE;
 
-    if (H5Tequal(type, H5T_STD_REF_OBJ)) {
+    if (H5Tequal(type, H5T_STD_REF_OBJ)==TRUE) {
         printf("object reference");
-    } else if (H5Tequal(type, H5T_STD_REF_DSETREG)) {
+    } else if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
         printf("dataset region reference");
     } else {
         printf("%lu-byte unknown reference",
