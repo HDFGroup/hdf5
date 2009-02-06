@@ -5766,7 +5766,7 @@ test_filters_endianess(hid_t fapl)
     HDstrcat(data_file, "test_filters_le.hdf5");
 
     /* open */
-    if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
+    if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* read */
     if(auxread_fdata(fid,"dset") < 0) TEST_ERROR
@@ -5788,7 +5788,7 @@ test_filters_endianess(hid_t fapl)
     HDstrcat(data_file, "test_filters_be.hdf5");
 
     /* open */
-    if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
+    if((fid = H5Fopen(data_file, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* read */
     if(auxread_fdata(fid,"dset") < 0) TEST_ERROR
