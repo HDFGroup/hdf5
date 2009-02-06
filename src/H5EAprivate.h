@@ -48,7 +48,8 @@
 
 /* Extensible array class IDs */
 typedef enum H5EA_cls_id_t {
-    H5EA_CLS_CHUNK_ID = 0,      /* Extensible array is for indexing dataset chunks */
+    H5EA_CLS_CHUNK_ID = 0,      /* Extensible array is for indexing dataset chunks w/o filters */
+    H5EA_CLS_FILT_CHUNK_ID,     /* Extensible array is for indexing dataset chunks w/filters */
 
     /* (keep these last) */
     H5EA_CLS_TEST_ID,	        /* Extensible array is for testing (do not use for actual data) */

@@ -373,12 +373,26 @@ H5O_dset_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
 
     /* Get the layout message from the object header */
     if(NULL == H5O_msg_read_oh(f, dxpl_id, oh, H5O_LAYOUT_ID, &layout))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find LAYOUT message")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find layout message")
 
     /* Check for chunked dataset storage */
-    if(layout.type == H5D_CHUNKED && H5D_chunk_is_space_alloc(&layout))
-        if(H5D_chunk_bh_info(f, dxpl_id, &layout, &(bh_info->index_size)) < 0)
+    if(layout.type == H5D_CHUNKED && H5D_chunk_is_space_alloc(&layout)) {
+        H5O_pline_t pline;              /* I/O pipeline message */
+        htri_t	exists;                 /* Flag if header message of interest exists */
+
+        /* Check for I/O pipeline message */
+        if((exists = H5O_msg_exists_oh(oh, H5O_PLINE_ID)) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to read object header")
+        else if(exists) {
+            if(NULL == H5O_msg_read_oh(f, dxpl_id, oh, H5O_PLINE_ID, &pline))
+                HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't find I/O pipeline message")
+        } /* end else if */
+        else
+            HDmemset(&pline, 0, sizeof(pline));
+
+        if(H5D_chunk_bh_info(f, dxpl_id, &layout, &pline, &(bh_info->index_size)) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't determine chunked dataset btree info")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

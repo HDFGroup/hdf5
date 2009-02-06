@@ -215,6 +215,7 @@ typedef struct H5D_io_info_t {
 typedef struct H5D_chk_idx_info_t {
     H5F_t *f;                   /* File pointer for operation */
     hid_t dxpl_id;              /* DXPL ID for operation */
+    const H5O_pline_t *pline;   /* I/O pipeline info */
     H5O_layout_t *layout;       /* Layout info for chunks */
 } H5D_chk_idx_info_t;
 
@@ -597,7 +598,7 @@ H5_DLL herr_t H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src,
     H5F_t *f_dst, H5O_layout_t *layout_dst, H5T_t *src_dtype,
     H5O_copy_t *cpy_info, H5O_pline_t *pline, hid_t dxpl_id);
 H5_DLL herr_t H5D_chunk_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
-    hsize_t *btree_size);
+    const H5O_pline_t *pline, hsize_t *btree_size);
 H5_DLL herr_t H5D_chunk_dump_index(H5D_t *dset, hid_t dxpl_id, FILE *stream);
 H5_DLL herr_t H5D_chunk_dest(H5F_t *f, hid_t dxpl_id, H5D_t *dset);
 #ifdef H5D_CHUNK_DEBUG
@@ -668,6 +669,7 @@ H5_DLL htri_t H5D_mpio_opt_possible(const H5D_io_info_t *io_info,
 #ifdef H5D_TESTING
 H5_DLL herr_t H5D_layout_version_test(hid_t did, unsigned *version);
 H5_DLL herr_t H5D_layout_contig_size_test(hid_t did, hsize_t *size);
+H5_DLL herr_t H5D_layout_idx_type_test(hid_t did, H5D_chunk_index_t *idx_type);
 #endif /* H5D_TESTING */
 
 #endif /*_H5Dpkg_H*/

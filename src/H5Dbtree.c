@@ -851,6 +851,7 @@ H5D_btree_idx_init(const H5D_chk_idx_info_t *idx_info)
     /* Check args */
     HDassert(idx_info);
     HDassert(idx_info->f);
+    HDassert(idx_info->pline);
     HDassert(idx_info->layout);
 
     /* Allocate the shared structure */
@@ -891,6 +892,7 @@ H5D_btree_idx_create(const H5D_chk_idx_info_t *idx_info)
     /* Check args */
     HDassert(idx_info);
     HDassert(idx_info->f);
+    HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(!H5F_addr_defined(idx_info->layout->u.chunk.u.btree.addr));
 
@@ -957,6 +959,7 @@ H5D_btree_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
 
     HDassert(idx_info);
     HDassert(idx_info->f);
+    HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.btree.addr));
     HDassert(udata);
@@ -996,6 +999,7 @@ H5D_btree_idx_get_addr(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata
 
     HDassert(idx_info);
     HDassert(idx_info->f);
+    HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(idx_info->layout->u.chunk.ndims > 0);
     HDassert(udata);
@@ -1081,6 +1085,7 @@ H5D_btree_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 
     HDassert(idx_info);
     HDassert(idx_info->f);
+    HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.btree.addr));
     HDassert(chunk_cb);
@@ -1121,6 +1126,7 @@ H5D_btree_idx_remove(const H5D_chk_idx_info_t *idx_info, H5D_chunk_common_ud_t *
 
     HDassert(idx_info);
     HDassert(idx_info->f);
+    HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.btree.addr));
     HDassert(udata);
@@ -1160,6 +1166,7 @@ H5D_btree_idx_delete(const H5D_chk_idx_info_t *idx_info)
     /* Sanity checks */
     HDassert(idx_info);
     HDassert(idx_info->f);
+    HDassert(idx_info->pline);
     HDassert(idx_info->layout);
 
     /* Check if the index data structure has been allocated */
@@ -1214,9 +1221,11 @@ H5D_btree_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
 
     HDassert(idx_info_src);
     HDassert(idx_info_src->f);
+    HDassert(idx_info_src->pline);
     HDassert(idx_info_src->layout);
     HDassert(idx_info_dst);
     HDassert(idx_info_dst->f);
+    HDassert(idx_info_dst->pline);
     HDassert(idx_info_dst->layout);
     HDassert(!H5F_addr_defined(idx_info_dst->layout->u.chunk.u.btree.addr));
 
@@ -1296,6 +1305,7 @@ H5D_btree_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
     /* Check args */
     HDassert(idx_info);
     HDassert(idx_info->f);
+    HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(index_size);
 
@@ -1373,6 +1383,7 @@ H5D_btree_idx_dump(const H5D_chk_idx_info_t *idx_info, FILE *stream)
 
     HDassert(idx_info);
     HDassert(idx_info->f);
+    HDassert(idx_info->pline);
     HDassert(idx_info->layout);
     HDassert(stream);
 
@@ -1403,6 +1414,7 @@ H5D_btree_idx_dest(const H5D_chk_idx_info_t *idx_info)
 
     HDassert(idx_info);
     HDassert(idx_info->f);
+    HDassert(idx_info->pline);
     HDassert(idx_info->layout);
 
     /* Free the raw B-tree node buffer */
