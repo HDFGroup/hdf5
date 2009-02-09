@@ -15,7 +15,7 @@ $!#
 $!
 $ !
 $ ! This command file tests h5repack utility. The command file has to
-$ ! run in the [hdf5-top.tools.testfiles] directory.
+$ ! run in the [hdf5-top.tools.h5repack.testfiles] directory.
 $ !
 $ !
 $ type sys$input
@@ -29,10 +29,11 @@ $ !
 $! set message/notext/nofacility/noidentification/noseverity
 $ current_dir = F$DIRECTRY()
 $ len = F$LENGTH(current_dir)
-$ temp = F$EXTRACT(0, len-10, current_dir)
-$ h5diff_dir = temp + "H5DIFF]"
+$ temp = F$EXTRACT(0, len-11, current_dir)
+$ temp1 = F$EXTRACT(0, len-19, current_dir)
+$ h5diff_dir = temp1 + "H5DIFF]"
 $ h5diff :== $sys$disk:'h5diff_dir'h5diff.exe
-$ h5repack_dir = temp + "H5REPACK]"
+$ h5repack_dir = temp + "]"
 $ h5repack :== $sys$disk:'h5repack_dir'h5repack.exe
 $ !
 $ !
