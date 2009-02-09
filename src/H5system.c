@@ -711,8 +711,7 @@ done:
 unsigned long long
 H5_get_free_ram(void)
 {
-    const char * fcn_name = "H5_get_free_ram()";
-    hbool_t verbose = FALSE;
+    /* const char * fcn_name = "H5_get_free_ram()"; */
     unsigned long long free_ram = 0;
     
 #ifdef H5_HAVE_SYS_SYSINFO_H /* LINUX */
@@ -722,25 +721,9 @@ H5_get_free_ram(void)
 
         if ( sysinfo(&info) != 0 ) {
 
-            if ( verbose ) {
+	    /* sysinfo() failed for some reason -- do nothing */
 
-                HDfprintf(stdout, "%s: sysinfo() failed with errno = %d (%s)\n",
-                      fcn_name, errno, strerror(errno));
-
-            }
         } else {
-
-            if ( verbose ) {
-
-                HDfprintf(stdout, "%s: mem_unit = %u\n", 
-                          fcn_name, info.mem_unit);
-                HDfprintf(stdout, "%s: RAM: total = %lu, free = %lu\n",
-                          fcn_name, info.totalram, info.freeram);
-                HDfprintf(stdout, "%s: RAM: shared = %lu, buffer = %lu\n",
-                          fcn_name, info.sharedram, info.bufferram);
-                HDfprintf(stdout, "%s: SWAP: total = %lu, free = %lu\n",
-                          fcn_name, info.totalswap, info.freeswap);
-            }
 
             free_ram = ((unsigned long long)(info.freeram)) *
                            ((unsigned long long)(info.mem_unit));
@@ -748,12 +731,6 @@ H5_get_free_ram(void)
     }
 #endif /* H5_HAVE_SYSINFO -- LINUX */
 #endif /* H5_HAVE_SYS_SYSINFO_H -- LINUX */
-
-    if ( verbose ) {
-
-        HDfprintf(stdout, "%s: free ram = %lld.\n", 
-                  fcn_name, (long long)free_ram);
-    }
 
     return(free_ram);
 
@@ -780,8 +757,7 @@ H5_get_free_ram(void)
 unsigned long long
 H5_get_free_swap(void)
 {
-    const char * fcn_name = "H5_get_free_swap()";
-    hbool_t verbose = FALSE;
+    /* const char * fcn_name = "H5_get_free_swap()"; */
     unsigned long long free_swap = 0;
     
 #ifdef H5_HAVE_SYS_SYSINFO_H /* LINUX */
@@ -791,25 +767,9 @@ H5_get_free_swap(void)
 
         if ( sysinfo(&info) != 0 ) {
 
-            if ( verbose ) {
+	    /* sysinfo() failed for some reason -- do nothing */
 
-                HDfprintf(stdout, "%s: sysinfo() failed with errno = %d (%s)\n",
-                      fcn_name, errno, strerror(errno));
-
-            }
         } else {
-
-            if ( verbose ) {
-
-                HDfprintf(stdout, "%s: mem_unit = %u\n", 
-                          fcn_name, info.mem_unit);
-                HDfprintf(stdout, "%s: RAM: total = %lu, free = %lu\n",
-                          fcn_name, info.totalram, info.freeram);
-                HDfprintf(stdout, "%s: RAM: shared = %lu, buffer = %lu\n",
-                          fcn_name, info.sharedram, info.bufferram);
-                HDfprintf(stdout, "%s: SWAP: total = %lu, free = %lu\n",
-                          fcn_name, info.totalswap, info.freeswap);
-            }
 
             free_swap = ((unsigned long long)(info.freeswap)) *
                            ((unsigned long long)(info.mem_unit));
@@ -817,12 +777,6 @@ H5_get_free_swap(void)
     }
 #endif /* H5_HAVE_SYSINFO -- LINUX */
 #endif /* H5_HAVE_SYS_SYSINFO_H -- LINUX */
-
-    if ( verbose ) {
-
-        HDfprintf(stdout, "%s: free swap = %lld.\n", 
-                  fcn_name, (long long)free_swap);
-    }
 
     return(free_swap);
 
@@ -849,8 +803,7 @@ H5_get_free_swap(void)
 unsigned long long
 H5_get_physical_ram(void)
 {
-    const char * fcn_name = "H5_get_physical_ram()";
-    hbool_t verbose = FALSE;
+    /* const char * fcn_name = "H5_get_physical_ram()"; */
     unsigned long long physical_ram = 0;
     
 #ifdef H5_HAVE_SYS_SYSINFO_H /* LINUX */
@@ -860,25 +813,9 @@ H5_get_physical_ram(void)
 
         if ( sysinfo(&info) != 0 ) {
 
-            if ( verbose ) {
+	    /* sysinfo() failed for some reason -- do nothing */
 
-                HDfprintf(stdout, "%s: sysinfo() failed with errno = %d (%s)\n",
-                      fcn_name, errno, strerror(errno));
-
-            }
         } else {
-
-            if ( verbose ) {
-
-                HDfprintf(stdout, "%s: mem_unit = %u\n", 
-                          fcn_name, info.mem_unit);
-                HDfprintf(stdout, "%s: RAM: total = %lu, free = %lu\n",
-                          fcn_name, info.totalram, info.freeram);
-                HDfprintf(stdout, "%s: RAM: shared = %lu, buffer = %lu\n",
-                          fcn_name, info.sharedram, info.bufferram);
-                HDfprintf(stdout, "%s: SWAP: total = %lu, free = %lu\n",
-                          fcn_name, info.totalswap, info.freeswap);
-            }
 
             physical_ram = ((unsigned long long)(info.totalram)) *
                            ((unsigned long long)(info.mem_unit));
@@ -898,84 +835,48 @@ H5_get_physical_ram(void)
 
         if ( sysctl(pm_mib, 2, NULL, &len, NULL, (size_t)0)  == -1 ) {
 
-            if ( verbose ) {
-
-                HDfprintf(stdout, "%s: sysctl(1) failed with errno = %d (%s)\n",
-                          fcn_name, errno, strerror(errno));
-            }
+	    /* sysctl() failed for some reason -- do nothing */
 
         } else {
-
-            if ( verbose ) {
-
-                HDfprintf(stdout, "%s: len = %d.\n", fcn_name, (int)len);
-
-            }
 
             if ( len == sizeof(l_physical_mem) ) {
 
                 if ( sysctl(pm_mib, 2, &l_physical_mem, &len, NULL, (size_t)0)  
                      == -1 ) {
 
-                    if ( verbose ) {
+	            /* sysctl() failed for some reason -- do nothing */
 
-                        HDfprintf(stdout, 
-                                  "%s: sysctl(2) failed with errno = %d (%s)\n",
-                                  fcn_name, errno, strerror(errno));
-
-                    }
                 } else {
 
-                    if ( verbose ) {
-
-                        HDfprintf(stdout, "%s: l_physical memory = %ld\n",
-                                  fcn_name, l_physical_mem);
-                    }
-
                     physical_ram = (unsigned long long)l_physical_mem;
+
                 }
             } else if ( len == sizeof(ll_physical_mem) ) {
 
                 if ( sysctl(pm_mib, 2, &ll_physical_mem, &len, NULL, (size_t)0)  
                      == -1 ) {
 
-                    if ( verbose ) {
+	            /* sysctl() failed for some reason -- do nothing */
 
-                        HDfprintf(stdout, 
-                                  "%s: sysctl(3) failed with errno = %d (%s)\n",
-                                  fcn_name, errno, strerror(errno));
-
-                    }
                 } else {
-
-                    if ( verbose ) {
-
-                        HDfprintf(stdout, "%s: ll_physical memory = %lld\n",
-                                  fcn_name, ll_physical_mem);
-                    }
 
                     physical_ram = (unsigned long long)ll_physical_mem;
                 }
 
             } else {
 
-                if ( verbose ) {
-                
-                    HDfprintf(stdout, "%s: unexpected len.\n", fcn_name);
-                }
+		/* the initial call to sysctl() returned an unexpected size 
+		 * for the field in which to return the number of bytes of 
+                 * physical memory.  We don't know how to handle this, so 
+                 * just do nothing.
+                 */
+
             }
         }
     }
 #endif /* H5_HAVE_SYSCTL -- BSD */
 #endif /* H5_HAVE_SYS_SYSCTL_H -- BSD */
 #endif /* H5_HAVE_SYS_TYPES_H -- BSD */
-
-    if ( verbose ) {
-
-        HDfprintf(stdout, "%s: physical ram = %lld.\n", 
-                  fcn_name, (long long)physical_ram);
-    }
-
 
     return(physical_ram);
 
