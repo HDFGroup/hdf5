@@ -893,7 +893,7 @@ project, you may choose one of the following two methods.
     3. Choose the build configuration you would like to modify in the drop 
        down menu labeled "Configuration:"
 
-    4. Choose the "C/C++" tab, anc select "General".
+    4. Choose the "C/C++" tab, and select "General".
 
     5. In a text-area labeled with "Additional Include Directories:", add 
        HDF5, Zlib, and Szip header files directories.  For example:
