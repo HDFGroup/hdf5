@@ -15,15 +15,15 @@ $!#
 $!
 $ !
 $ ! This command file tests h5copy utility. The command file has to
-$ ! run in the [hdf5-top.tools.testfiles] directory.
+$ ! run in the [hdf5-top.tools.h5copy.testfiles] directory.
 $ !
 $ !
 $ ! Define h5copy symbols
 $ !
 $ current_dir = F$DIRECTRY()
 $ len = F$LENGTH(current_dir)
-$ temp = F$EXTRACT(0, len-10, current_dir)
-$ h5copy_dir = temp + "H5COPY]"
+$ temp = F$EXTRACT(0, len-11, current_dir)
+$ h5copy_dir = temp + "]"
 $ h5copy :== $sys$disk:'h5copy_dir'h5copy.exe
 $ !
 $ !
@@ -32,10 +32,44 @@ $ !
 $
 
 $ !# copy files 
-$ CALL TOOLTEST "test1.h5/array test1_out.h5/array"
-$ CALL TOOLTEST "test1.h5/integer test1_out.h5/integer_copy"
-$ CALL TOOLTEST "test1.h5/g1 test1_out.h5/g1"
+$ write sys$output "Test copying various forms of datasets"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -v -s simple -d simple"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -v -s chunk      -d chunk"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -v -s compact    -d compact"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -v -s compound   -d compound"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -v -s compressed -d compressed"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -v -s named_vl   -d named_vl"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -v -s nested_vl  -d nested_vl"
 $ !
+$ write sys$output " "
+$ write sys$output "Test copying dataset within group in source file to root of destination"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -v -s grp_dsets/simple  -d simple_top"
+$ write sys$output " "
+$ write sys$output "Test copying & renaming dataset"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -v -s compound   -d rename"
+$!
+$ write sys$output " "
+$ write sys$output "Test copying empty, 'full' & 'nested' groups"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -v -s grp_empty  -d grp_empty"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -v -s grp_dsets  -d grp_dsets"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -v -s grp_nested -d grp_nested"
+$!
+$ write sys$output " "
+$ write sys$output "Test copying dataset within group in source file to group in destination"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -v -s /grp_dsets/simple  -d /grp_dsets/simple_group"
+$! write sys$output  "Test copying & renaming group"
+$! CALL TOOLTEST_FAIL "-i h5copytst.h5 -o out.h5 -v -s grp_dsets  -d grp_rename
+$! write sys$output  "Test copying full group hierarchy into group in destination file"
+$! CALL TOOLTEST_FAIL "-i h5copytst.h5 -o out.h5 -v -s grp_dsets  -d /grp_rename/grp_dsets"
+$!
+$ write sys$output " "
+$ write sys$output "Test copying objects into group hier. that doesn't exist yet in destination file"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -vp -s simple -d /A/B1/simple"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -vp -s simple -d /A/B2/simple2"
+$ CALL TOOLTEST "-i h5copytst.h5 -o out.h5 -vp -s /grp_dsets/simple -d /C/D/simple"
+$!CALL TOOLTEST_FAIL "-i h5copytst.h5 -o out.h5 -vp -s /grp_dsets -d /E/F/grp_dsets"
+$!CALL TOOLTEST_FAIL "-i h5copytst.h5 -o out.h5 -vp -s /grp_nested -d /G/H/grp_nested"
+
 $ !
 $TOOLTEST: SUBROUTINE
 

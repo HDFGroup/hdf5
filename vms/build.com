@@ -27,7 +27,8 @@ $ hdf5cxxtest = tmp  + ".C__.TEST]"
 $ hdf5toolstest = tmp  + ".TOOLS.TESTFILES]"
 $ hdf5toolstest_h5diff = tmp  + ".TOOLS.H5DIFF.TESTFILES]"
 $ hdf5toolstest_h5repack = tmp  + ".TOOLS.H5REPACK.TESTFILES]"
-$ h5importtest  = tmp  + ".TOOLS.H5IMPORT.TESTFILES]"
+$ hdf5toolstest_h5copy = tmp  + ".TOOLS.H5COPY.TESTFILES]"
+$ hdf5toolstest_h5import  = tmp  + ".TOOLS.H5IMPORT.TESTFILES]"
 $ set def 'hdf5vms'
 $@make
 $ set def 'hdf5ctest'
@@ -41,15 +42,21 @@ $ copy [-.h5dump]check_h5dump.com     check_h5dump.com
 $ copy [-.h5ls]check_h5ls.com         check_h5ls.com
 $@check_h5dump.com
 $@check_h5ls.com
+$!
 $ set def 'hdf5toolstest_h5diff'
 $ copy [-]check_h5diff.com     check_h5diff.com
 $@check_h5diff.com
+$!
 $ set def 'hdf5toolstest_h5repack'
 $ copy [-]check_h5repack.com check_h5repack.com
 $@check_h5repack.com
 $!
-$ set def 'h5importtest'
-$ copy [.-]check_h5import.com check_h5import.com
+$ set def 'hdf5toolstest_h5copy'
+$ copy [-]check_h5copy.com check_h5copy.com
+$@check_h5copy.com
+$!
+$ set def 'hdf5toolstest_h5import'
+$ copy [-]check_h5import.com check_h5import.com
 $@check_h5import.com
 $
 $ exit
