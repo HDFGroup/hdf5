@@ -1,0 +1,59 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eset_auto" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-SetAuto">H5Eset_auto</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Eset_auto</code>(<em>H5E_auto_t</em> <code>func</code>,
+        <em>void *</em><code>client_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Turns automatic error printing on or off.
+<dt><strong>Description:</strong>
+    <dd><code>H5Eset_auto</code> turns on or off automatic printing of 
+        errors.  When turned on (non-null <code>func</code> pointer), 
+        any API function which returns an error indication will 
+        first call <code>func</code>, passing it <code>client_data</code>
+        as an argument.
+        <p>
+        When the library is first initialized the auto printing function 
+	  is set to <code>H5Eprint</code> (cast appropriately) and
+	  <code>client_data</code> is the standard error stream pointer,
+	  <code>stderr</code>.
+        <p>
+        Automatic stack traversal is always in the 
+        <code>H5E_WALK_DOWNWARD</code> direction. 
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5E_auto_t</em> <code>func</code></td>
+            <td valign="top">IN: Function to be called upon an error condition.</td></tr>
+        <tr>
+		    <td valign="top"><em>void&nbsp;*</em><code>client_data&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Data passed to the error function.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5eset_auto_f
+    <dd>
+	<pre>
+SUBROUTINE h5eset_auto_f(printflag, hdferr)
+  INTEGER, INTENT(IN) :: printflag  !flag to turn automatic error
+                                    !printing on or off
+                                    !possible values are:
+                                    !printon (1)
+                                    !printoff(0)
+  INTEGER, INTENT(OUT) :: hdferr    ! Error code
+
+END SUBROUTINE h5eset_auto_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

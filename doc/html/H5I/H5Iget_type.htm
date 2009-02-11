@@ -1,0 +1,76 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iget_type" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-GetType">H5Iget_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5I_type_t</em> <code>H5Iget_type</code>(<em>hid_t</em> <code>obj_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the type of an object.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iget_type</code> retrieves the type of the object
+        identified by <code>obj_id</code>.
+        <p>
+        Valid types returned by the function are 
+        <table>
+        <tr><td width=200><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_FILE</code>
+           </td><td>File</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_GROUP</code>
+           </td><td>Group</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_DATATYPE</code>
+           </td><td>Datatype</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_DATASPACE</code>
+           </td><td>Dataspace</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_DATASET</code>
+           </td><td>Dataset</td></tr>
+        <tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_ATTR</code>
+           </td><td>Attribute</td></tr>
+        </table>
+        If no valid type can be determined or the identifier 
+        submitted is invalid, the function returns
+        <table>
+        <tr><td width=200><code>&nbsp;&nbsp;&nbsp;&nbsp;H5I_BADID</code>
+           </td><td>Invalid identifier</td></tr>
+        </table>
+        <p>
+        This function is of particular value in determining the 
+        type of object closing function (<code>H5Dclose</code>, 
+        <code>H5Gclose</code>, etc.) to call after a call to 
+        <code>H5Rdereference</code>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Object identifier whose type is to be determined.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the object type if successful;
+        otherwise <code>H5I_BADID</code>.
+<dt><strong>Fortran90 Interface:</strong> h5iget_type_f
+    <dd>
+	<pre>
+SUBROUTINE h5iget_type_f(obj_id, type, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
+  INTEGER, INTENT(OUT) :: type          !type of an object. 
+                                        !possible values are:
+                                        !H5I_FILE_F
+                                        !H5I_GROUP_F
+                                        !H5I_DATATYPE_F
+                                        !H5I_DATASPACE_F
+                                        !H5I_DATASET_F
+                                        !H5I_ATTR_F
+                                        !H5I_BADID_F
+  INTEGER, INTENT(OUT) :: hdferr        ! E rror code
+                                        ! 0 on success, and -1 on failure
+END SUBROUTINE h5iget_type_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,51 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Adelete" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Delete">H5Adelete</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Adelete</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Deletes an attribute from a location.
+<dt><strong>Description:</strong>
+    <dd><code>H5Adelete</code> removes the attribute specified by its  
+        name, <code>name</code>, from a dataset, group, or named datatype. 
+        This function should not be used when attribute identifiers are 
+        open on <code>loc_id</code> as it may cause the internal indexes 
+        of the attributes to change and future writes to the open 
+        attributes to produce incorrect results. 
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: Identifier of the dataset, group, or named datatype 
+                to have the attribute deleted from.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Name of the attribute to delete.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5adelete_f
+    <dd>
+	<pre>
+SUBROUTINE h5adelete_f(obj_id, name, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code:
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5adelete_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

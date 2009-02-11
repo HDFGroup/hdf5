@@ -1,0 +1,66 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tset_pad" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetPad">H5Tset_pad</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tset_pad</code>(<em>hid_t </em><code>type_id</code>,
+        <em>H5T_pad_t</em> <code>lsb</code>,
+        <em>H5T_pad_t</em> <code>msb</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the least and most-significant bits padding types.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_pad</code> sets the least and most-significant bits padding types.
+        <dl> <ul>
+            <dt>H5T_PAD_ZERO (<code>0</code>)
+               <dd>Set background to zeros.
+            <dt>H5T_PAD_ONE (<code>1</code>)
+               <dd>Set background to ones.
+            <dt>H5T_PAD_BACKGROUND (<code>2</code>)
+               <dd>Leave background alone.
+        </ul> </dl>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_pad_t</em>&nbsp;<code>lsb&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Padding type for least-significant bits.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_pad_t</em> <code>msb</code></td>
+            <td valign="top">Padding type for most-significant bits.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tset_pad_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_pad_f(type_id, lsbpad, msbpad, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(IN) :: lsbpad         ! Padding type of the 
+                                        ! least significant bit
+  INTEGER, INTENT(IN) :: msbpad         ! Padding type of the 
+                                        ! most significant bit
+                                        ! Possible values of padding 
+                                        ! type are:
+                                        !    H5T_PAD_ZERO_F = 0
+                                        !    H5T_PAD_ONE_F = 1
+                                        !    H5T_PAD_BACKGROUND_F = 2
+                                        !    H5T_PAD_ERROR_F = -1
+                                        !    H5T_PAD_NPAD_F = 3
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tset_pad_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

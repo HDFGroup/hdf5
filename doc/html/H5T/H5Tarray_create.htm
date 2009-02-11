@@ -1,0 +1,87 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tarray_create" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-ArrayCreate">H5Tarray_create</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tarray_create</code>(
+                       <em>hid_t</em> <code>base</code>,
+                       <em>int</em> <code>rank</code>,
+                       <em>const hsize_t</em> <code>dims[/*rank*/]</code>,
+                       <em>const int</em> <code>perm[/*rank*/]</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates an array datatype object.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tarray_create</code> creates a new array datatype object.
+         <p>
+         <code>base</code> is the datatype of every element of the array, 
+         i.e., of the number at each position in the array.
+         <p>
+         <code>rank</code> is the number of dimensions and the 
+         size of each dimension is specified in the array <code>dims</code>.
+         The value of <code>rank</code> is currently limited to
+         <code>H5S_MAX_RANK</code> and must be greater than <code>0</code> 
+         (zero).
+         All dimension sizes specified in <code>dims</code> must be greater
+         than <code>0</code> (zero).
+         <p>
+         The array <code>perm</code> is designed to contain the dimension 
+         permutation, i.e. C versus FORTRAN array order.  
+         &nbsp;
+         <b><i>(The parameter </i><code>perm</code><i> is currently unused and is not yet implemented.)</i></b>
+         
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>base</code></td>
+            <td valign="top">IN: Datatype identifier for the array base datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>rank</code></td>
+            <td valign="top">IN: Rank of the array.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;hsize_t</em>&nbsp;<code>dims[/*rank*/]&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Size of each array dimension.</td></tr>
+        <tr>
+		    <td valign="top"><em>const int</em> <code>perm[/*rank*/]</code></td>
+            <td valign="top">IN: Dimension permutation.  
+                &nbsp;
+                <b><i>(Currently not implemented.)</i></b></td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tarray_create_f
+    <dd>
+	<pre>
+SUBROUTINE h5tarray_create_f(base_id, rank, dims, type_id, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: base_id   ! Identifier of array base datatype
+  INTEGER, INTENT(IN)        ::  rank     ! Rank of the array
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: dims 
+                                          ! Sizes of each array dimension
+  INTEGER(HID_T), INTENT(OUT) :: type_id  ! Identifier of the array datatype
+  INTEGER, INTENT(OUT)        :: hdferr   ! Error code
+END SUBROUTINE h5tarray_create_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

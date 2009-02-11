@@ -1,0 +1,49 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h52gif" -->
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong> <a name="Tools-H52GIF">h52gif</a>
+<dt><strong>Syntax:</strong>
+    <dd><code>h52gif</code>
+        <em>h5_file</em> <em>gif_file</em>
+        <code>-i</code> <em>h5_image</em>
+        <code>[-p</code> <em>h5_palette</em><code>]</code>
+<dt><strong>Purpose:</strong>
+    <dd>Converts an HDF5 file to a GIF file.
+<dt><strong>Description:</strong>
+    <dd><code>h52gif</code> accepts as input the HDF5 file <em>h5_file</em>
+        and the names of images and associated palettes within that file 
+        as input and produces the GIF file <em>gif_file</em>, 
+        containing those images, as output.
+        <p>
+        <code>h52gif</code> expects <em>at least</em> 
+        one <em>h5_image</em>. 
+        You may repeat 
+        <br>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <code>-i</code> <em>h5_image</em>
+                <code>[-p</code> <em>h5_palette</em><code>]</code>
+        <br>
+        up to 50 times, for a maximum of 50 images.
+        
+<dt><strong>Options and Parameters:</strong>
+    <dl>
+        <dt><em>h5_file</em>
+            <dd>The name of the input HDF5 file
+        <dt><em>gif_file</em>
+            <dd>The name of the output GIF file
+        <dt><code>-i</code> <em>h5_image</em>
+            <dd>Image option, specifying the name of an HDF5 image or 
+                dataset containing an image to be converted
+        <dt><code>-p</code> <em>h5_palette</em>
+            <dd>Palette option, specifying the name of an HDF5 dataset 
+                containing a palette to be used in an image conversion
+    </dl>
+<!--
+<dt><strong>Current Status:</strong>
+    <dd>
+<dt><strong>See Also:</strong>
+    <dd>
+-->
+</dl>
+

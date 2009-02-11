@@ -1,0 +1,56 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tunregister" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Unregister">H5Tunregister</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tunregister</code>(<em>H5T_conv_t</em> <code>func</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Removes a conversion function from all conversion paths.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tunregister</code> removes a conversion function from all conversion paths.
+        <P>
+        The conversion function pointer type declaration is described in 
+        <a href="#Datatype-Register">H5Tregister</a>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5T_conv_t</em>&nbsp;<code>func&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Function to remove from conversion paths.</td>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.3</td>
+          <td valign="top">
+			The following change occurred in the 
+			<code>H5Tconv_t</code> function:<br>
+                        &nbsp;&nbsp;
+			<code>nelmts</code> parameter type changed to 
+			<em>size_t</em>.</td></tr>
+    </table></ul>
+</dl>
+

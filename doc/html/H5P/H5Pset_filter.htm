@@ -1,0 +1,161 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_filter" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFilter">H5Pset_filter</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_filter</code>(<em>hid_t</em> <code>plist</code>,
+        <em>H5Z_filter_t</em> <code>filter</code>,
+        <em>unsigned int</em> <code>flags</code>,
+        <em>size_t</em> <code>cd_nelmts</code>,
+        <em>const unsigned int</em> <code>cd_values[]</code>
+    )
+  <p>
+  <dt><strong>Purpose:</strong>
+    <dd>Adds a filter to the filter pipeline.
+  <p>
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_filter</code> adds the specified 
+        <code>filter</code> and corresponding properties to the 
+        end of an output filter pipeline.
+        If <code>plist</code> is a dataset creation property list, 
+        the filter is added to the permanent filter pipeline; 
+        if <code>plist</code> is a dataset transfer property list, 
+        the filter is added to the transient filter pipeline.
+        <p>
+        The array <code>cd_values</code> contains
+        <code>cd_nelmts</code> integers which are auxiliary data 
+        for the filter.  The integer values will be stored in the 
+        dataset object header as part of the filter information.
+        <p>
+        The <code>flags</code> argument is a  bit vector with 
+        the following fields specifying certain general properties 
+        of the filter:  
+        <center>
+        <table align=center width="75%">
+          <tr valign=top>
+            <td valign=top><code>H5Z_FLAG_OPTIONAL</code>&nbsp;&nbsp;</td>
+            <td valign=top>If this bit is set then the filter is 
+              optional.  If the filter fails (see below) during an
+              <code>H5Dwrite</code> operation then the filter is
+              just excluded from the pipeline for the chunk for which
+              it failed; the filter will not participate in the
+              pipeline during an <code>H5Dread</code> of the chunk.
+              This is commonly used for compression filters: if the
+              filter result would be larger than the input, then
+              the compression filter returns failure and the
+              uncompressed data is stored in the file.  If this bit is
+              clear and a filter fails, then <code>H5Dwrite</code> 
+              or <code>H5Dread</code> also fails.
+	      <p>
+	      This flag should not be set for the Fletcher32 checksum 
+	      filter as it will bypass the checksum filter without 
+	      reporting checksum errors to an application.</td>
+          </tr>
+        </table>
+        </center>
+	<p>
+	The <code>filter</code> parameter specifies the filter to be set.  
+	Valid filter identifiers are as follows:
+
+        <center>
+        <table width=75%>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_DEFLATE</code> 
+            </td><td>
+            Data compression filter, employing the gzip algorithm 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_SHUFFLE</code> 
+            </td><td>
+            Data shuffling filter 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_FLETCHER32&nbsp;&nbsp;</code> 
+            </td><td>
+            Error detection filter, employing the Fletcher32 checksum algorithm 
+        </td></tr>	
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_SZIP</code> 
+            </td><td>
+            Data compression filter, employing the SZIP algorithm 
+        </td></tr>
+	</table>
+	</center>
+	<p>
+	Also see <a href="#Property-SetEdcCheck">H5Pset_edc_check</a> and
+	<a href="#Property-SetFilterCallback">H5Pset_filter_callback</a>.
+	
+<!-- NEW PAGE -->
+  <p>
+  <dt><strong>Notes:</strong>
+    <dd>This function currently supports only the permanent filter
+        pipeline; <code>plist</code> must be a dataset creation 
+        property list.
+	<p>
+	If multiple filters are set for a property list, they will be 
+	applied to each chunk in the order in which they were set.
+  <p>
+  <dt><strong>See Also:</strong>
+    <dd>For a discussion of optional versus required filter behavior, see 
+        &ldquo;<a href="#Property-FilterBehavior">Filter Behavior in 
+        HDF5</a>.&rdquo;
+  <p>
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5Z_filter_t</em> <code>filter</code></td>
+            <td valign="top">IN: Filter identifier for the filter  
+                             to be added to the pipeline.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned int</em> <code>flags</code></td>
+            <td valign="top">IN:  Bit vector specifying certain general properties
+                of the filter.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>cd_nelmts</code></td>
+            <td valign="top">IN: Number of elements in <code>cd_values</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;unsigned&nbsp;int</em>&nbsp;<code>cd_values[]&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Auxiliary data for the filter.</td></tr>
+    </table></ul>
+  <p>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <p>
+  <dt><strong>Fortran90 Interface:</strong> h5pset_filter_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_filter_f(prp_id, filter, flags, cd_nelmts, cd_values,  hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER, INTENT(IN) :: filter         ! Filter to be added to the pipeline
+  INTEGER, INTENT(IN) :: flags          ! Bit vector specifying certain 
+                                        ! general properties of the filter
+  INTEGER(SIZE_T), INTENT(IN) :: cd_nelmts        
+                                        ! Number of elements in cd_values
+  INTEGER, DIMENSION(*), INTENT(IN) :: cd_values  
+                                        ! Auxiliary data for the filter
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_filter_f
+	</pre>		
+		
+  <p>
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

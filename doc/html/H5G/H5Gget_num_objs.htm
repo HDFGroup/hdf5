@@ -1,0 +1,57 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gget_num_objs" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Group-GetNumObjs">H5Gget_num_objs</a>
+<dt><strong>Signature:</strong>
+  <dd><em>herr_t</em> <code>H5Gget_num_objs</code>(<em>hid_t</em> <code>loc_id</code>,
+      <em>hsize_t* </em> <code>num_obj</code>)
+<dt><strong>Purpose:</strong>
+  <dd>Returns number of objects in the group specified by its identifier
+<dt><strong>Description:</strong>
+  <dd><code>H5Gget_num_objs</code> returns number of objects in a group.
+      Group is specified by its identifier <code>loc_id</code>. 
+      If a file identifier is passed in, then the number of objects in the 
+      root group is returned.
+<dt><strong>Parameters:</strong>
+  <ul><table>
+    <tr>
+	  <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+      <td valign="top">IN: Identifier of the group or the file</td></tr>
+    <tr>
+	  <td valign="top"><em>hsize_t&nbsp;*</em><code>num_obj&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+      <td valign="top">OUT: Number of objects in the group.</td></tr>
+  </table></ul>
+<dt><strong>Returns:</strong>
+  <dd>Returns positive value if successful;
+      otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+
+

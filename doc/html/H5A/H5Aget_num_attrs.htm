@@ -1,0 +1,43 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aget_num_attrs" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-NumAttrs">H5Aget_num_attrs</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Aget_num_attrs</code>(<em>hid_t</em> <code>loc_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Determines the number of attributes attached to an object.
+<dt><strong>Description:</strong>
+    <dd><code>H5Aget_num_attrs</code> returns the number of attributes 
+        attached to the object specified by its identifier, 
+        <code>loc_id</code>.  
+        The object can be a group, dataset, or named datatype.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>loc_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of a group, dataset, or named datatype.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the number of attributes if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5aget_num_attrs_f
+    <dd>
+	<pre>
+SUBROUTINE h5aget_num_attrs_f(obj_id, attr_num, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: obj_id  ! Object identifier 
+  INTEGER, INTENT(OUT) :: attr_num      ! Number of attributes of the object
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code:
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5aget_num_attrs_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

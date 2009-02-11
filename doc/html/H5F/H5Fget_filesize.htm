@@ -1,0 +1,73 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_filesize" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetFilesize">H5Fget_filesize</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Fget_filesize</code>(<em>hid_t</em> <code>file_id</code>,
+                        <em>hsize_t *</em><code>size</code>
+        )
+<dt><strong>Purpose:</strong>
+        <dd>Returns the size of an HDF5 file.
+<dt><strong>Description:</strong>
+    <dd><code>H5Fget_filesize</code> returns the size
+        of the HDF5 file specified by <code>file_id</code>.
+        <p>
+        The returned size is that of the entire file, 
+        as opposed to only the HDF5 portion of the file.
+        I.e., <code>size</code> includes the user block, if any, 
+        the HDF5 portion of the file, and
+        any data that may have been appended 
+        beyond the data written through the HDF5 Library.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>file_id</code>
+            <dd>IN: Identifier of a currently-open HDF5 file
+        <dt><em>hsize_t *</em><code>size</code>
+            <dd>OUT: Size of the file, in bytes.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5fget_freespace_f
+    <dd>
+	<pre>
+SUBROUTINE h5fget_filesize_f(file_id, size, hdferr)
+
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: file_id    ! file identifier
+  INTEGER(HSIZE_T), INTENT(OUT) :: size    ! Size of the file 
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code: 0 on success,
+                                           ! -1 if fail
+END SUBROUTINE h5fget_filesize_f 
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td>
+		  <td valign="top" align="left">
+		    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+		  <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.3</td>
+          <td valign="top">
+		    Function introduced in this release.</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top">
+		    Fortran subroutine introduced in this 
+			release.</td></tr>
+    </table></ul>
+</dl>
+
+

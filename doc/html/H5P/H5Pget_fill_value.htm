@@ -1,0 +1,78 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_fill_value" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFillValue">H5Pget_fill_value</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_fill_value</code>(<em>hid_t</em> <code>plist_id</code>,
+        <em>hid_t</em> <code>type_id</code>,
+        <em>void *</em><code>value</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves a dataset fill value.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_fill_value</code> returns the dataset
+        fill value defined in the dataset creation property list
+        <code>plist_id</code>.
+        <p>
+	The fill value is returned through the <code>value</code>
+        pointer and will be converted to the datatype specified 
+        by <code>type_id</code>.  
+        This datatype may differ from the 
+        fill value datatype in the property list, 
+	but the HDF5 library must be able to convert between the 
+	two datatypes.  
+        <p>
+        If the fill value is undefined, 
+	i.e., set to <code>NULL</code> in the property list,
+	<code>H5Pget_fill_value</code> will return an error.  
+	<code>H5Pfill_value_defined</code> should be used to 
+	check for this condition before 
+	<code>H5Pget_fill_value</code> is called.
+        <p>
+        Memory must be allocated by the calling application.  
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pget_fill_value</code> is designed to coordinate  
+	with the dataset storage allocation time and 
+	fill value write time properties, which can be retrieved 
+	with the functions <code>H5Pget_alloc_time</code> 
+	and <code>H5Pget_fill_time</code>, respectively.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code>,</td>
+            <td valign="top">IN: Datatype identifier for the value passed 
+	        via <code>value</code>.</td></tr>
+        <tr><td valign="top"><em>void *</em><code>value</code></td>
+            <td valign="top">OUT: Pointer to buffer to contain the returned fill value.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fill_value_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fill_value_f(prp_id, type_id, fillvalue, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of fill
+                                        ! value datatype (in memory) 
+  TYPE(VOID), INTENT(IN) :: fillvalue   ! Fillvalue
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+ 
+END SUBROUTINE h5pget_fill_value_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

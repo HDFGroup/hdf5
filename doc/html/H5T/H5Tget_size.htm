@@ -1,0 +1,41 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_size" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetSize">H5Tget_size</a>
+<dt><strong>Signature:</strong>
+    <dd><em>size_t </em><code>H5Tget_size</code>(<em>hid_t </em><code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the size of a datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_size</code> returns the size of a datatype in bytes.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the size of the datatype in bytes if successful;
+        otherwise 0.
+<dt><strong>Fortran90 Interface:</strong> h5tget_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_size_f(type_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER(SIZE_T), INTENT(OUT) :: size  ! Datatype size
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5tget_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

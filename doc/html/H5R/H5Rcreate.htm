@@ -1,0 +1,105 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Rcreate" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Reference-Create">H5Rcreate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Rcreate</code>(<em>void *</em><code>ref</code>,
+        <em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>H5R_type_t</em> <code>ref_type</code>,
+        <em>hid_t</em> <code>space_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates a reference.
+<dt><strong>Description:</strong>
+    <dd><code>H5Rcreate</code> creates the reference, <code>ref</code>,
+        of the type specified in <code>ref_type</code>, pointing to 
+        the object <code>name</code> located at <code>loc_id</code>.
+        <p>
+        The HDF5 library maps the <em>void</em> type specified above 
+        for <code>ref</code> to the type specified in <code>ref_type</code>,
+        which will be one of those appearing in the first column of
+        the following table.  
+        The second column of the table lists the HDF5 constant associated 
+        with each reference type.
+        <dir>
+        <table border=0>
+        <tr><td><em>hdset_reg_ref_t</em>&nbsp;&nbsp;</td>
+            <td><code>H5R_DATASET_REGION</code>&nbsp;&nbsp;</td>
+            <td>Dataset region reference</td></tr>
+        <tr><td><em>hobj_ref_t</em></td>
+            <td><code>H5R_OBJECT</code></td>
+            <td>Object reference</td></tr>
+        </table>
+        </dir>
+        <p>
+        The parameters <code>loc_id</code> and <code>name</code> are 
+        used to locate the object.
+        <p>
+        The parameter <code>space_id</code> identifies the dataset region 
+        that a dataset region reference points to.
+        This parameter is used only with dataset region references
+        and should be set to <code>-1</code> if the reference is an
+        object reference, <code>H5R_OBJECT</code>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>void *</em><code>ref</code></td>
+            <td valign="top">OUT: Reference created by the function 
+                call.</td></tr>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: Location identifier used to locate the 
+                 object being pointed to.</td></tr>
+        <tr>
+            <td valign="top"><em>const char *</em><code>name</code></td>
+            <td valign="top">IN: Name of object at location 
+                <code>loc_id</code>.</td></tr>
+        <tr>
+            <td valign="top"><em>H5R_type_t</em>&nbsp;<code>ref_type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Type of reference.</td></tr>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+            <td valign="top">IN: Dataspace identifier with selection. 
+                Used only for dataset region references; 
+                pass as <code>-1</code> if reference is an object reference,
+                i.e., of type <code>H5R_OBJECT</code>.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5rcreate_f
+
+    <p><strong>To create an object reference</strong> 
+    <dd>
+	<pre>
+SUBROUTINE h5rcreate_f(loc_id, name, ref, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id     ! Location identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name     ! Name of the object at location 
+                                           ! specified by loc_id identifier 
+  TYPE(hobj_ref_t_f), INTENT(OUT) :: ref   ! Object reference 
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code 
+
+END SUBROUTINE h5rcreate_f
+	</pre></dt>
+
+<!-- NEW PAGE -->	
+<dt><strong>To create a region reference</strong>	
+	<dd>
+	<pre>
+SUBROUTINE h5rcreate_f(loc_id, name, space_id, ref, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id        ! Location identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name        ! Name of the dataset at location 
+                                              ! specified by loc_id identifier 
+  INTEGER(HID_T), INTENT(IN) :: space_id      ! Dataset's dataspace identifier 
+  TYPE(hdset_reg_ref_t_f), INTENT(OUT) :: ref ! Dataset region reference 
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code 
+
+END SUBROUTINE h5rcreate_f
+	</pre>
+
+</dl>
+

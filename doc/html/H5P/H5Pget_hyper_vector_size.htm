@@ -1,0 +1,67 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_hyper_vector_size" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetHyperVectorSize">H5Pget_hyper_vector_size</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_hyper_vector_size</code>(<em>hid_t</em> <code>dxpl_id</code>,
+        <em>size_t *</em><code>vector_size</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves number of I/O vectors to be read/written in hyperslab I/O.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_hyper_vector_size</code> retrieves the number of  
+	I/O vectors to be accumulated in memory before being issued  
+	to the lower levels of the HDF5 library for reading or writing the 
+	actual data.
+        <p>
+	The number of I/O vectors set in the dataset transfer property list 
+	<code>dxpl_id</code> is returned in <code>vector_size</code>.
+	Unless the default value is in use, <code>vector_size</code>
+	was previously set with a call to 
+	<a href="#Property-SetHyperVectorSize">H5Pset_hyper_vector_size</a>.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dxpl_id</code></td>
+            <td valign="top">IN: Dataset transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t&nbsp;*</em><code>vector_size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Number of I/O vectors to accumulate in memory for I/O operations.</td></tr> 
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_hyper_vector_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_hyper_vector_size_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset transfer property list 
+                                         ! identifier
+  INTEGER(SIZE_T), INTENT(OUT) :: size   ! Vector size 
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_hyper_vector_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

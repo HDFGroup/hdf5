@@ -1,0 +1,60 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_gc_references" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetGCReferences">H5Pset_gc_references</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_gc_reference</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned</em> <code>gc_ref</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets garbage collecting references flag.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_gc_references</code> sets the flag for 
+        garbage collecting references for the file.  
+        <p>
+        Dataset region references and other reference types use space 
+        in an HDF5 file's global heap.  If garbage collection is on 
+        and the user passes in an uninitialized value in a reference structure, 
+        the heap might get corrupted.  When garbage collection is off, however,
+        and the user re-uses a reference, the previous heap block will be 
+        orphaned and not returned to the free heap space.  
+        <p>
+        When garbage collection is on, the user must initialize the 
+        reference structures to 0 or risk heap corruption.
+        <p>
+        The default value for garbage collecting references is off.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em>&nbsp;<code>gc_ref&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Flag setting reference garbage collection to 
+                on (<code>1</code>) or off (<code>0</code>).</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_gc_references_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_gc_references_f (prp_id, gc_reference, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(IN) :: gc_reference  ! Flag for garbage collecting
+                                       ! references for the file
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_gc_references_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

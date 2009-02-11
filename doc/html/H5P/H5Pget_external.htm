@@ -1,0 +1,95 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_external" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetExternal">H5Pget_external</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_external</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned</em> <code>idx</code>,
+        <em>size_t</em> <code>name_size</code>,
+        <em>char</em> <code>*name</code>,
+        <em>off_t</em> <code>*offset</code>,
+        <em>hsize_t</em> <code>*size</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns information about an external file.  
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_external</code> returns information about an external 
+        file.  The external file is specified by its index, <code>idx</code>,
+        which is a number from zero to N-1, where N is the value 
+        returned by <code>H5Pget_external_count</code>.  
+        At most <code>name_size</code> characters are copied into the 
+        <code>name</code> array.  If the external file name is
+        longer than <code>name_size</code> with the null terminator, the
+        return value is not null terminated (similar to <code>strncpy()</code>).
+        <p>
+        If <code>name_size</code> is zero or <code>name</code> is the 
+        null pointer, the external file name is not returned.  
+        If <code>offset</code> or <code>size</code> are null pointers 
+        then the corresponding information is not returned.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of a dataset creation property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>idx</code></td>
+            <td valign="top">IN: External file index.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em>&nbsp;<code>name_size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Maximum length of <code>name</code> array.</td></tr>
+        <tr>
+		    <td valign="top"><em>char</em> <code>*name</code></td>
+            <td valign="top">OUT: Name of the external file.</td></tr>
+        <tr>
+		    <td valign="top"><em>off_t</em> <code>*offset</code></td>
+            <td valign="top">OUT: Pointer to a location to return an offset value.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> <code>*size</code></td>
+            <td valign="top">OUT: Pointer to a location to return the size of the 
+                external file data.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_external_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id   ! Property list identifier
+  INTEGER, INTENT(IN) :: idx             ! External file index.
+  INTEGER, INTENT(IN) :: name_size       ! Maximum length of name array
+  CHARACTER(LEN=*), INTENT(OUT) :: name  ! Name of an external file
+  INTEGER, INTENT(OUT) :: offset         ! Offset, in bytes, from the 
+                                         ! beginning of the file to the 
+                                         ! location in the file where
+                                         ! the data starts.
+  INTEGER(HSIZE_T), INTENT(OUT) :: bytes ! Number of bytes reserved in 
+                                         ! the file for the data
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_external_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>C</strong></td></tr>
+        <tr>
+          <td valign="top">1.6.4</td>
+          <td valign="top">
+            <code>idx</code> parameter type changed to 
+            <em>unsigned</em>.</td></tr>
+    </table></ul>
+</dl>
+

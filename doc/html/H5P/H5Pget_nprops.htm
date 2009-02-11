@@ -1,0 +1,57 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_nprops" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetNProps">H5Pget_nprops</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Pget_nprops</code>(
+               <em>hid_t</em> <code>id</code>,
+               <em>size_t *</em><code>nprops</code>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Queries number of properties in property list or class.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_nprops</code> retrieves the number of properties in a 
+    property list or class.  
+    If a property class identifier is given, the number of registered  
+    properties in the class is returned in <code>nprops</code>.  
+    If a property list identifier is given, the current number of 
+    properties in the list is returned in <code>nprops</code>.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>id</code></td>
+        <td>IN: Identifier of property object to query</td></tr>
+    <tr>
+        <td><em>size_t&nbsp;*</em><code>nprops&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td>OUT: Number of properties in object</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <dt><strong>Fortran90 Interface:</strong> h5pget_nprops_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_nprops_f(prp_id, nprops, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier 
+  INTEGER(SIZE_T), INTENT(OUT) :: nprops  ! Number of properties
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_nprops_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,85 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_small_data_block_size" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetSmallData">H5Pset_small_data_block_size</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_small_data_block_size</code>(<em>hid_t</em> <code>fapl_id</code>,
+        <em>hsize_t</em> <code>size</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the size of a contiguous block reserved for small data.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_small_data_block_size</code> reserves blocks of 
+        <code>size</code> bytes for the contiguous storage of the raw data 
+        portion of <em>small</em> datasets.
+        The HDF5 library then writes the raw data from small datasets
+        to this reserved space, thus reducing unnecessary discontinuities
+        within blocks of meta data and improving IO performance.
+        <p>
+        A small data block is actually allocated the first time a 
+        qualifying small dataset is written to the file.  
+        Space for the raw data portion of this small dataset is suballocated
+        within the small data block.  
+        The raw data from each subsequent small dataset is also written to
+        the small data block until it is filled; additional small data blocks
+        are allocated as required.
+        <p>
+        The HDF5 library employs an algorithm that determines whether 
+        IO performance is likely to benefit from the use of this mechanism
+        with each dataset as storage space is allocated in the file.
+        A larger <code>size</code> will result in this mechanism being 
+        employed with larger datasets.  
+        <p>
+        The small data block size is set as an allocation property in the 
+        file access property list identified by <code>fapl_id</code>.
+        <p>
+        Setting <code>size</code> to zero (<code>0</code>) disables the
+        small data block mechanism.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> <code>size</code></td>
+            <td valign="top">IN: Maximum size, in bytes, of the small data block.
+                <br>
+                The default size is <code>2048</code>.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_small_data_block_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_small_data_block_size_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! File access
+                                         ! property list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: size   ! Small raw data block size
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_small_data_block_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.4</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

@@ -1,0 +1,82 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_filter_callback" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFilterCallback">H5Pset_filter_callback</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_filter_callback</code>(<em>hid_t</em> <code>plist</code>,
+                         <em>H5Z_filter_func_t</em> <code>func</code>,
+                         <em>void *</em><code>op_data</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Sets user-defined filter callback function.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_filter_callback</code> sets the user-defined 
+        filter callback function <code>func</code> in the 
+	dataset transfer property list <code>plist</code>.
+	<p>
+	The parameter <code>op_data</code> is a pointer to user-defined
+	input data for the callback function and will be passed through 
+	to the callback function.
+	<p>
+	The callback function <code>func</code> defines the actions 
+	an application is to take when a filter fails.  
+	The function prototype is as follows:
+	<dir>
+	<code>typedef</code> <em>H5Z_cb_return_t</em> (<code>H5Z_filter_func_t</code>)
+	                (<em>H5Z_filter_t</em> <code>filter</code>,
+                         <em>void *</em><code>buf</code>,
+                         <em>size_t</em> <code>buf_size</code>,
+                         <em>void *</em><code>op_data</code>)
+	</dir>
+	<p>
+	where <code>filter</code> indicates which filter has failed,
+	<code>buf</code> and <code>buf_size</code> are used to pass in 
+	the failed data,
+	and <code>op_data</code> is the required input data for this 
+	callback function.
+	<p>
+	Valid callback function return values are 
+	<code>H5Z_CB_FAIL</code> and <code>H5Z_CB_CONT</code>.  
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Dataset transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5Z_filter_func_t</em>&nbsp;<code>func&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: User-defined filter callback function.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em><code>op_data</code></td>
+            <td valign="top">IN: User-defined input data for the callback function.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

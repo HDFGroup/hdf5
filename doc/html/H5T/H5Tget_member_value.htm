@@ -1,0 +1,68 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_member_value" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetMemberValue">H5Tget_member_value</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tget_member_value</code>(<em>hid_t</em> <code>type</code>
+        <em>unsigned</em> <code>memb_no</code>,
+        <em>void</em> *<code>value</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the value of an enumeration datatype member.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_member_value</code> returns the value of 
+        the enumeration datatype member <code>memb_no</code>.
+        <p>
+        The member value is returned in a user-supplied buffer 
+        pointed to by <code>value</code>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type</code></td>
+            <td valign="top">IN: Datatype identifier for the enumeration datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>memb_no</code>,</td>
+            <td valign="top">IN: Number of the enumeration datatype member.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em>&nbsp;*<code>value&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to a buffer for output of the 
+                value of the enumeration datatype member.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tget_member_value_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_member_value_f(type_id,  member_no, value, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(IN) :: member_no      ! Number of the enumeration 
+                                        ! datatype member
+  INTEGER, INTENT(OUT) :: value         ! Value of the enumeration datatype
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_member_value_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.4</td>
+          <td valign="top">
+		    <code>membno</code> parameter type changed to 
+			<em>unsigned</em>.</td></tr>
+    </table></ul>
+</dl>
+

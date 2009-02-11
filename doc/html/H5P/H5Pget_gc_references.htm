@@ -1,0 +1,53 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_gc_references" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetGCReferences">H5Pget_gc_references</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_gc_references</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned</em> *<code>gc_ref</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns garbage collecting references setting.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_gc_references</code> returns the current setting 
+        for the garbage collection references property from 
+        the specified file access property list.  
+        The garbage collection references property is set 
+        by <a href="#Property-SetGCReferences">H5Pset_gc_references</a>.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em>&nbsp;<code>gc_ref&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Flag returning the state of reference garbage collection.
+                A returned value of <code>1</code> indicates that 
+                garbage collection is on while 
+                <code>0</code> indicates that garbage collection is off.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_gc_references_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_gc_references_f (prp_id, gc_reference, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(OUT) :: gc_reference ! The flag for garbage collecting
+                                       ! references for the file
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_gc_references_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

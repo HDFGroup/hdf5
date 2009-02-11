@@ -1,0 +1,144 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5repack" -->
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong>  <a name="Tools-Repack">h5repack</a>  &nbsp;&nbsp;&nbsp;
+<dt><strong>Syntax:</strong>
+    <dd><code>h5repack </code> 
+        <code>[-h]</code> 
+        <code>[-v]</code> 
+        <code>[-m</code> <em>number</em><code>]</code> 
+        <code>[-n]</code> 
+        <code>[-f '</code><em>filter</em><code>']</code> 
+        <code>[-l '</code><em>layout</em><code>']</code> 
+        <code>[-e</code> <em>file</em><code>]</code> 
+        <em>in_file</em>
+        <em>out_file</em> 
+<dt><strong>Purpose:</strong>
+    <dd>Copies an HDF5 file to a new file with or without compression/chunking.
+<dt><strong>Description:</strong>
+    <dd><code>h5repack</code> is a command line tool that 
+      applies HDF5 filters to an input file <em>in_file</em>, 
+      saving the output in a new output file, <em>out_file</em>.
+
+      <p></p>
+<dt><strong>Options and Parameters:</strong>
+    <dl>
+        <dt><code>-h</code>
+            <dd>Help message
+        <dt><code>-v</code>
+            <dd>Verbose output mode
+        <dt><code>-m</code> <em>number</em>
+            <dd>Do not apply the filter to objects which size in bytes is
+              smaller than number. If no size is specified a minimum of 1024
+              bytes is assumed.
+        <dt><code>-n</code>
+            <dd>Use native HDF5 datatypes when repacking. 
+                <br>
+                (Default behavior is to use original file datatypes.)
+                <br>
+                <em>Note that this is a change in default behavior; 
+                    prior to Release 1.6.6, <code>h5repack</code> generated
+                    files only with native datatypes.</em>
+        <dt><code>-f</code> <em>filter</em>
+            <dd>Filter type
+                <p>
+                <em>filter</em> is a string with the following format:
+                <dir>
+                &lt;list of objects&gt; : &lt;name of filter&gt; 
+                    = &lt;filter parameters&gt;
+                <p>
+                &lt;list of objects&gt; is a comma separated list of object 
+                names meaning apply compression only to those objects. 
+                If no object names are specified, the filter is applied to 
+                all objects.
+                <p>
+                &lt;name of filter&gt; can be one of the following:
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>GZIP</code>, to apply the HDF5 GZIP filter 
+                    (GZIP compression)
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>SZIP</code>, to apply the HDF5 SZIP filter 
+                    (SZIP compression)
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>SHUF</code>, to apply the HDF5 shuffle filter
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>FLET</code>, to apply the HDF5 checksum filter
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>NONE</code>, to remove the filter
+                <p>
+                &lt;filter parameters&gt; conveys optional compression 
+                    information:
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>SHUF</code> (no parameter)
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>FLET</code> (no parameter)
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>GZIP=</code>&lt;deflation level&gt; from 1-9
+<!-- NEW PAGE -->
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>SZIP=</code>&lt;pixels per block,coding&gt; 
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    Pixels per block is a even number in the range 2-32.
+                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    Coding method is <code>EC</code> or <code>NN</code>.
+                </dir>
+        <dt><code>-l</code> <em>layout</em>
+            <dd>Layout type
+                <p>
+                <em>layout</em> is a string with the following format:<br>
+                <dir>
+                &lt;list of objects&gt; : &lt;layout type&gt;=&lt;layout parameters&gt
+                <p>
+                &lt;list of objects&gt; is a comma separated list of object 
+                names, meaning that layout information is supplied for those 
+                objects.  If no object names are specified, the layout 
+                is applied to all objects.
+                <p>
+                &lt;layout type&gt; can be one of the following:
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>CHUNK</code>, to apply chunking layout
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>COMPA</code>, to apply compact layout
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code>CONTI</code>, to apply continuous layout
+                <p>
+                &lt;layout parameters&gt; is present only in the 
+                <code>CHUNK</code> case and specifies the chunk size of 
+                each dimension in the  following format with no intervening 
+                spaces:
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                    <code><em>dim_1</em> &times; <em>dim_2</em> &times; ... 
+                    <em>dim_n</em></code>
+                </dd>
+                </dir>
+        <dt><code>-e</code> <em>file</em>
+            <dd>File containing the -f and -l options 
+                (only filter and layout flags)
+        <dt><em>in_file</em>
+            <dd>Input HDF5 file
+        <dt><em>out_file</em>
+            <dd>Output HDF5 file
+    </dl>
+    <p></p>
+<dt><strong>Examples:</strong>
+    <dd>
+    <ol>
+        <li><code>h5repack -f GZIP=1 -v file1 file2 </code>
+            <br>
+            Applies GZIP compression to all objects in <code>file1</code> 
+            and saves the output in <code>file2</code>.
+            Prints verbose output.
+            <br>&nbsp;
+        <li><code>h5repack -f dset1:SZIP=8,NN file1 file2 </code>
+            <br>
+            Applies SZIP compression only to object <code>dset1</code>.
+            <br>&nbsp;
+        <li><code>h5repack -l dset1,dset2:CHUNK=20x10 file1 file2</code>
+            <br>
+            Applies chunked layout to objects <code>dset1</code> 
+            and <code>dset2</code>.
+            <br>
+</dl>
+
+

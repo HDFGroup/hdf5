@@ -1,0 +1,87 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Ewalk" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-Walk">H5Ewalk</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Ewalk</code>(<em>H5E_direction_t</em> <code>direction</code>,
+        <em>H5E_walk_t</em> <code>func</code>,
+        <em>void *</em> <code>client_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Walks the error stack for the current thread, calling a specified
+        function.
+<dt><strong>Description:</strong>
+    <dd><code>H5Ewalk</code> walks the error stack for the current thread 
+        and calls the specified function for each error along the way.
+        <p>
+        <code>direction</code> determines whether the stack is walked 
+        from the inside out or the outside in.  
+        A value of <code>H5E_WALK_UPWARD</code> means begin with the
+        most specific error and end at the API; 
+        a value of <code>H5E_WALK_DOWNWARD</code> means to start at the 
+        API and end at the inner-most function where the error was first 
+        detected.
+        <p>
+        <code>func</code> will be called for each error in the error stack. 
+        Its arguments will include an index number (beginning at zero 
+        regardless of stack traversal direction), an error stack entry, 
+        and the <code>client_data</code> pointer passed to 
+        <code>H5E_print</code>.
+        The <code>H5E_walk_t</code> prototype is as follows:
+        <dir>
+        <p>
+        <code>typedef</code> <em>herr_t</em> <code>(*H5E_walk_t)(</code><em>int</em> <code>n,</code> 
+            <em>H5E_error_t *</em><code>err_desc,</code> 
+            <em>void *</em><code>client_data)</code>
+        <p>
+        where the parameters have the following meanings:
+            <dl>
+            <dt><em>int</em> <code>n</code>
+                <dd>Indexed position of the error in the stack.
+            <dt><em>H5E_error_t *</em><code>err_desc</code>
+                <dd>Pointer to a data structure describing the error.
+                    <em>(This structure is currently described only in the
+                        source code file </em><code>hdf5/src/H5Epublic.h</code><em>.  
+                        That file also contains the definitive list of major 
+                        and minor error codes.  That information will 
+                        eventually be presented as an appendix to this 
+                        <cite>Reference Manual</cite>.)</em>
+            <dt><em>void *</em><code>client_data</code>
+                <dd>Pointer to client data in the format expected by 
+                    the user-defined function.
+            </dl>
+        </dir>
+        <p>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5E_direction_t</em>&nbsp;<code>direction&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Direction in which the error stack is to be walked.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5E_walk_t</em> <code>func</code></td>
+            <td valign="top">IN: Function to be called for each error encountered.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em> <code>client_data</code></td>
+            <td valign="top">IN: Data to be passed with <code>func</code>.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

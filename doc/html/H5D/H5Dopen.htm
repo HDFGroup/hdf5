@@ -1,0 +1,49 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dopen" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-Open">H5Dopen</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Dopen</code>(<em>hid_t </em><code>loc_id</code>,
+        <em>const char *</em><code>name</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Opens an existing dataset.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dopen</code> opens an existing dataset for access in the file
+        or group specified in <code>loc_id</code>.  <code>name</code> is
+        a dataset name and is used to identify the dataset in the file.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: Identifier of the file or group 
+                within which the dataset to be accessed will be found.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: The name of the dataset to access.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a dataset identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5dopen_f
+    <dd>
+	<pre>
+SUBROUTINE h5dopen_f(loc_id, name, dset_id, hdferr) 
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset 
+  INTEGER(HID_T), INTENT(OUT) :: dset_id ! Dataset identifier
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5dopen_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

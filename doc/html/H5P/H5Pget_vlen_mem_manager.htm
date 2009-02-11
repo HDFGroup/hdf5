@@ -1,0 +1,64 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_vlen_mem_manager" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetVLMemManager">H5Pget_vlen_mem_manager</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_vlen_mem_manager</code>(<em>hid_t</em> <code>plist</code>,
+        <em>H5MM_allocate_t</em> *<code>alloc</code>,
+        <em>void</em> **<code>alloc_info</code>,
+        <em>H5MM_free_t</em> *<code>free</code>,
+        <em>void</em> **<code>free_info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Gets the memory manager for variable-length datatype allocation in 
+        <code>H5Dread</code> and <code>H5Dvlen_reclaim</code>.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_vlen_mem_manager</code> is the companion function to
+        <code>H5Pset_vlen_mem_manager</code>, returning the parameters
+        set by that function.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier for the dataset transfer property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5MM_allocate_t</em>&nbsp;<code>alloc&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: User's allocate routine, or &nbsp; <code> NULL</code> 
+                for system &nbsp; <code> malloc</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> *<code>alloc_info</code></td>
+            <td valign="top">OUT: Extra parameter for user's allocation routine.  
+                <br>
+                Contents are ignored if preceding parameter is &nbsp; 
+                <code> NULL</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5MM_free_t</em> <code>free</code></td>
+            <td valign="top">OUT: User's free routine, or &nbsp; <code> NULL</code> for 
+                system <code>free</code>.</td></tr> 
+        <tr>
+		    <td valign="top"><em>void</em> *<code>free_info</code></td>
+            <td valign="top">OUT: Extra parameter for user's free routine.  
+                <br>
+                Contents are ignored if preceding parameter is &nbsp; 
+                <code> NULL</code>.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

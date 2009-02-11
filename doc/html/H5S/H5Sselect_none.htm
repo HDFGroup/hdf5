@@ -1,0 +1,41 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Sselect_none" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectNone">H5Sselect_none</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Sselect_none</code>(<em>hid_t</em> <code>space_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Resets the selection region to include no elements.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sselect_none</code> resets the selection region 
+    for the dataspace <code>space_id</code> to include no elements.     
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: The identifier for the dataspace in which the 
+                selection is being reset.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5sselect_none_f
+    <dd>
+	<pre>
+SUBROUTINE h5sselect_none_f(space_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5sselect_none_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,98 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tset_offset" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetOffset">H5Tset_offset</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tset_offset</code>(<em>hid_t </em><code>type_id</code>,
+        <em>size_t</em> <code>offset</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the bit offset of the first significant bit.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_offset</code> sets the bit offset of the first significant bit.  The
+        significant bits of an atomic datum can be offset from the beginning of
+        the memory for that datum by an amount of padding. The `offset'
+        property specifies the number of bits of padding that appear to the
+        "right of" the value.  That is, if we have a 32-bit datum with 16-bits
+        of precision having the value 0x1122 then it will be laid out in
+        memory as (from small byte address toward larger byte addresses):
+        <br>
+        <br>
+
+      <table border align=center cellpadding=4 width="80%">
+        <tr align=center>
+          <th width="20%">Byte Position</th>
+          <th width="20%">Big-Endian Offset=0</th>
+          <th width="20%">Big-Endian Offset=16</th>
+          <th width="20%">Little-Endian Offset=0</th>
+          <th width="20%">Little-Endian Offset=16</th>
+        </tr>  
+        <tr align=center>
+          <td>0:</td>
+          <td>[ pad]</td>
+          <td>[0x11]</td>
+          <td>[0x22]</td>
+          <td>[ pad]</td>
+        </tr>
+        <tr align=center>
+          <td>1:</td>
+          <td>[ pad]</td>
+          <td>[0x22]</td>
+          <td>[0x11]</td>
+          <td>[ pad]</td>
+        </tr>
+        <tr align=center>
+          <td>2:</td>
+          <td>[0x11]</td>
+          <td>[ pad]</td>
+          <td>[ pad]</td>
+          <td>[0x22]</td>
+        </tr>
+        <tr align=center>
+          <td>3:</td>
+          <td>[0x22]</td>
+          <td>[ pad]</td>
+          <td>[ pad]</td>
+          <td>[0x11]</td>
+        </tr>
+      </table>
+
+<P>If the offset is incremented then the total size is
+incremented also if necessary to prevent significant bits of
+the value from hanging over the edge of the datatype.
+
+<P>The offset of an H5T_STRING cannot be set to anything but
+zero.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>offset</code></td>
+            <td valign="top">Offset of first significant bit.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tset_offset_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_offset_f(type_id, offset, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(IN) :: offset         ! Datatype bit offset of 
+                                        ! the first significant bit
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tset_offset_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

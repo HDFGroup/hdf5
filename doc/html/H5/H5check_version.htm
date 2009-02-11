@@ -1,0 +1,125 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5check_version" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-VersCheck">H5check_version</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5check_version</code>(<em>unsigned</em> <code>majnum</code>,
+            <em>unsigned</em> <code>minnum</code>,
+            <em>unsigned</em> <code>relnum</code>
+        )
+<dt><strong>Purpose:</strong>
+    <dd>Verifies that library versions are consistent.
+<dt><strong>Description:</strong>
+    <dd><code>H5check_version</code> verifies that the arguments provided 
+        with the function call match the version numbers compiled into 
+        the library.  
+        <p>
+        <code>H5check_version</code> serves two slightly differing purposes.
+        <p>
+        First, the function is intended to be called by the user to verify 
+        that the version of the header files compiled into an application 
+        matches the version of the HDF5 library being used.  
+        One may look at the <code>H5check</code> definition in the file 
+        <code>H5public.h</code> as an example.
+        <p>
+        Due to the risks of data corruption or segmentation faults, 
+        <code>H5check_version</code> causes the application to abort if the
+        version numbers do not match.
+	The abort is achieved by means of a call to the
+        standard C function <code>abort()</code>.
+        <p>
+        Note that <code>H5check_version</code> verifies only the 
+        major and minor version numbers and the release number; 
+        it does not verify the sub-release value as that should be 
+        an empty string for any official release.
+	This means that any two incompatible library versions must
+	have different {major,minor,release} numbers. (Notice the
+	reverse is not necessarily true.)
+        <p>
+        Secondarily, <code>H5check_version</code> verifies that the 
+        library version identifiers <code>H5_VERS_MAJOR</code>, 
+        <code>H5_VERS_MINOR</code>, <code>H5_VERS_RELEASE</code>, 
+        <code>H5_VERS_SUBRELEASE</code>, and <code>H5_VERS_INFO</code> 
+        are consistent.
+        This is designed to catch source code inconsistencies, 
+        but does not generate the fatal error as in the first stage
+	because this inconsistency does not cause errors in the data files.
+        If this check reveals inconsistencies, the library issues a warning
+        but the function does not fail.
+<!--
+        <p>
+<strong><em>Alternate to preceding paragraph / More to the point?</em></strong>
+<br>
+        If the function passes the above test and does not generate 
+        an <code>abort()</code> call, the function's second purpose 
+        comes into play. 
+        <code>H5check_version</code> then procedes to verify
+        that the additional library version identifiers 
+        <code>H5_VERS_SUBRELEASE</code>, and <code>H5_VERS_INFO</code> 
+        are consistent.
+        This is designed to catch source code inconsistencies, 
+        but does not generate the fatal error 
+        that is generated under the first function.
+        <p>
+        The version and release numbers passed as 
+        <code>H5check_version</code> parameters have the 
+        following relationsips to each other:  
+        <dir>
+            An official HDF5 release is labelled as 
+            <br>
+            HDF5 Release &lt;<code>majnum</code>&gt;<strong>.</strong>&lt;<code>minnum</code>&gt;<strong>.</strong>&lt;<code>relnum</code>&gt;
+        </dir>  
+        For example, in the version of the library known as HDF5 Release 1.4.2,
+        the 1 is the major version number, <code>majnum</code>;
+        the 1 is the minor version number, <code>minnum</code>; and
+        the 1 is the release number, <code>relnum</code>.
+-->
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>unsigned </em><code>majnum</code></td>
+            <td valign="top">IN: The major version of the library.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;</em><code>minnum&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: The minor version of the library.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned </em><code>relnum</code></td>
+            <td valign="top">IN: The release number of the library.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Upon failure, this function causes the application to abort.
+<dt><strong>Fortran90 Interface:</strong> h5check_version_f
+    <dd>
+	<pre>
+SUBROUTINE h5check_version_f(hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(IN)  :: majnum      ! The major version of the library
+  INTEGER, INTENT(IN)  :: minnum      ! The minor version of the library
+  INTEGER, INTENT(IN)  :: relnum      ! The release number 
+  INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+END SUBROUTINE h5check_version_f
+	</pre>
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.5</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

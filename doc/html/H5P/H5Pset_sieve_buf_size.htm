@@ -1,0 +1,77 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_sieve_buf_size" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetSieveBufSize">H5Pset_sieve_buf_size</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_sieve_buf_size</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>hsize_t</em> <code>size</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the maximum size of the data sieve buffer.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_sieve_buf_size</code> sets <code>size</code>, 
+        the maximum size in bytes of the data sieve buffer, which is 
+        used by file drivers that are capable of using data sieving.
+        <p>
+        The data sieve buffer is used when performing I/O on datasets 
+        in the file.  Using a buffer which is large enough to hold 
+        several pieces of the dataset being read in for 
+        hyperslab selections boosts performance by quite a bit. 
+        <p>
+        The default value is set to 64KB, indicating that file I/O for 
+        raw data reads and writes will occur in at least 64KB blocks.  
+        Setting the value to 0 with this API function will turn off the 
+        data sieving, even if the VFL driver attempts to use that strategy. 
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> <code>size</code></td>
+            <td valign="top">IN: Maximum size, in bytes, of data sieve buffer.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_sieve_buf_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_sieve_buf_size_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list 
+                                         ! identifier
+  INTEGER(SIZE_T), INTENT(IN) :: size    ! Sieve buffer size 
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_sieve_buf_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    The <code>size</code> parameter has 
+			changed from type <em>hsize_t</em> to 
+			<em>size_t</em>.</td></tr>
+		<tr>
+		  <td valign="top">1.4.0</td>
+		  <td valign="top">Function introduced in this release.</td>
+		</tr>
+    </table></ul>
+</dl>
+

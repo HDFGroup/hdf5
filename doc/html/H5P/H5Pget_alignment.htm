@@ -1,0 +1,54 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_alignment" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetAlignment">H5Pget_alignment</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_alignment</code>(<em>hid_t</em> <code>plist</code>,
+        <em>hsize_t</em> <code>*threshold</code>,
+        <em>hsize_t</em> <code>*alignment</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves the current settings for alignment properties from a
+        file access property list.  
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_alignment</code> retrieves the current settings for 
+        alignment properties from a file access property list. 
+        The <code>threshold</code> and/or <code>alignment</code> pointers 
+        may be null pointers (NULL). 
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of a file access property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em>&nbsp;<code>*threshold&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to location of return threshold value.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> <code>*alignment</code></td>
+            <td valign="top">OUT: Pointer to location of return alignment value.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_alignment_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_alignment_f(prp_id, threshold,  alignment, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id        ! Property list identifier
+  INTEGER(HSIZE_T), INTENT(OUT) :: threshold  ! Threshold value
+  INTEGER(HSIZE_T), INTENT(OUT) :: alignment  ! Alignment value
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code
+                                              ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_alignment_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

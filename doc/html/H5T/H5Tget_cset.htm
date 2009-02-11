@@ -1,0 +1,52 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_cset" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetCset">H5Tget_cset</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5T_cset_t </em><code>H5Tget_cset</code>(<em>hid_t </em><code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the character set type of a string datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_cset</code> retrieves the character set type 
+        of a string datatype.  Valid character set types are:
+        <table>
+            <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </td><td><code>H5T_CSET_ASCII</code> &nbsp; 
+            </td><td>(<code>0</code>)
+            </td><td>&nbsp;&nbsp;&nbsp;&nbsp;
+            </td><td>Character set is US ASCII.
+            </td></tr>
+        </table>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a valid character set type if successful;
+        otherwise <code>H5T_CSET_ERROR</code> (-1).
+<dt><strong>Fortran90 Interface:</strong> h5tget_cset_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_cset_f(type_id, cset, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: cset          ! Character set type of a string 
+                                        ! datatype 
+                                        ! Possible values of padding type are:
+                                        !    H5T_CSET_ASCII_F = 0
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_cset_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,84 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_cache" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetCache">H5Pget_cache</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_cache</code>(<em>hid_t</em> <code>plist_id</code>,
+        <em>int</em> <code>*mdc_nelmts</code>,
+        <em>size_t</em> <code>*rdcc_nelmts</code>,
+        <em>size_t</em> <code>*rdcc_nbytes</code>,
+        <em>double</em> <code>*rdcc_w0</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Queries the meta data cache and raw data chunk cache parameters.  
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_cache</code> retrieves the maximum possible 
+        number of elements in the meta
+        data cache and raw data chunk cache, the maximum possible number of 
+        bytes in the raw data chunk cache, and the preemption policy value.
+        <p>
+        Any (or all) arguments may be null pointers, in which case the 
+        corresponding datum is not returned.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Identifier of the file access property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>*mdc_nelmts</code></td>
+            <td valign="top">IN/OUT: Number of elements (objects) in the meta data cache.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>*rdcc_nelmts</code></td>
+            <td valign="top">IN/OUT: Number of elements (objects) in the raw data chunk cache.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em>&nbsp;<code>*rdcc_nbytes&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN/OUT: Total size of the raw data chunk cache, in bytes.</td></tr>
+        <tr>
+		    <td valign="top"><em>double</em> <code>*rdcc_w0</code></td>
+            <td valign="top">IN/OUT: Preemption policy.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_cache_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_cache_f(prp_id, mdc_nelmts, rdcc_nelmts, rdcc_nbytes,
+                          rdcc_w0, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id         ! Property list identifier
+  INTEGER, INTENT(OUT) :: mdc_nelmts           ! Number of elements (objects)
+                                               ! in the meta data cache
+  INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nelmts  ! Number of elements (objects)
+                                               ! in the meta data cache
+  INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes  ! Total size of the raw data
+                                               ! chunk cache, in bytes
+  REAL, INTENT(OUT) :: rdcc_w0                 ! Preemption policy
+  INTEGER, INTENT(OUT) :: hdferr               ! Error code
+                                               ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_cache_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>C</strong></td></tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top">
+            The <code>rdcc_nbytes</code> and <code>rdcc_nelmts</code> 
+            parameters changed from 
+            type <em>int</em> to <em>size_t</em>.</td></tr>
+    </table></ul>
+</dl>
+

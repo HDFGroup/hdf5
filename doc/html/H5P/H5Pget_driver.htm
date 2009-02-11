@@ -1,0 +1,74 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_driver" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetDriver">H5Pget_driver</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Pget_driver</code>(
+                     <em>hid_t</em> <code>plist_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns low-lever driver identifier.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_driver</code> returns the identifier of the 
+        low-level file driver associated with the file access property list 
+        or data transfer property list <code>plist_id</code>.
+        <p>
+        Valid driver identifiers with the standard HDF5 library distribution
+        include the following:
+        <pre>
+           H5FD_CORE
+           H5FD_FAMILY
+           H5FD_LOG
+           H5FD_MPIO
+           H5FD_MULTI
+           H5FD_SEC2
+           H5FD_STDIO  <!--
+           H5FD_STREAM --></pre>
+        If a user defines and registers custom drivers or 
+        if additional drivers are defined in an HDF5 distribution, 
+        this list will be longer.
+        <p>
+        The returned driver identifier is only valid as long as the 
+        file driver remains registered.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access or data transfer property list identifier.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a valid low-level driver identifier if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_driver_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_driver_f(prp_id, driver, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(OUT) :: driver       ! Low-level file driver identifier
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_driver_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

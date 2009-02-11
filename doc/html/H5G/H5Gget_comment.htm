@@ -1,0 +1,78 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gget_comment" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-GetComment">H5Gget_comment</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Gget_comment</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>size_t</em> <code>bufsize</code>,
+        <em>char *</em><code>comment</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves comment for specified object.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Gget_comment</code> retrieves the comment for the the
+        object specified by <code>loc_id</code> and <code>name</code>.  
+        The comment is returned in the buffer <code>comment</code>.
+        <p>
+        At most <code>bufsize</code> characters, including a null 
+        terminator, are returned in <code>comment</code>.  
+        The returned value is not null terminated 
+        if the comment is longer than the supplied buffer.  
+        <p>
+        If an object does not have a comment, the empty string 
+        is returned.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+      <tr>
+        <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: Identifier of the file, group, dataset, or 
+            named datatype.</td></tr>
+      <tr>
+        <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Name of the object in <code>loc_id</code> whose 
+            comment is to be retrieved.
+            <br>
+            <code>name</code> can be '.' (dot) if <code>loc_id</code> 
+            fully specifies the object for which the associated comment 
+            is to be retrieved.
+            <br>
+            <code>name</code> is ignored if <code>loc_id</code> 
+            is a dataset or named datatype.
+            </td></tr>
+      <tr>
+        <td valign="top"><em>size_t</em> <code>bufsize</code></td>
+        <td valign="top">IN: Anticipated required size of the  
+            <code>comment</code> buffer.</td></tr>
+      <tr>
+        <td valign="top"><em>char *</em><code>comment</code></td>
+        <td valign="top">OUT: The comment.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns the number of characters in the comment, 
+        counting the null terminator, if successful; the value 
+        returned may be larger than <code>bufsize</code>.
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5gget_comment_f
+    <dd>
+    <pre>
+SUBROUTINE h5gget_comment_f(loc_id, name, size, buffer, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id         ! File, group, dataset, or
+                                               ! named datatype identifier  
+  CHARACTER(LEN=*), INTENT(IN) :: name         ! Name of the object link 
+  CHARACTER(LEN=size), INTENT(OUT) :: buffer   ! Buffer to hold the comment
+  INTEGER, INTENT(OUT) :: hdferr               ! Error code 
+                                               ! 0 on success and -1 on failure
+END SUBROUTINE h5gget_comment_f
+    </pre>
+
+    <!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

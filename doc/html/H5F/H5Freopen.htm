@@ -1,0 +1,57 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Freopen" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-Reopen">H5Freopen</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Freopen</code>(<em>hid_t</em> <code>file_id</code>
+        )
+<dt><strong>Purpose:</strong>
+        <dd>Returns a new identifier for a previously-opened HDF5 file.
+<dt><strong>Description:</strong>
+        <dd><code>H5Freopen</code> returns a new file identifier for an
+            already-open HDF5 file, as specified by <code>file_id</code>.  
+            Both identifiers share caches and other information.  
+            The only difference between the identifiers is that the 
+            new identifier is not mounted anywhere and no files are 
+            mounted on it.
+            <p>
+            Note that there is no circumstance under which 
+            <code>H5Freopen</code> can actually open a closed file; 
+            the file  must already be open and have an active 
+            <code>file_id</code>.  E.g., one cannot close a file with 
+            <code> H5Fclose&nbsp;(file_id) </code> then use 
+            <code> H5Freopen&nbsp;(file_id) </code> to reopen it.
+            <p>
+            The new file identifier should be closed by calling
+            <code>H5Fclose</code> when it is no longer needed.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of a file for which an additional identifier 
+                is required.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a new file identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5freopen_f
+    <dd>
+	<pre>
+SUBROUTINE h5freopen_f(file_id, new_file_id, hdferr)
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)  :: file_id     ! File identifier 
+  INTEGER(HID_T), INTENT(OUT) :: new_file_id ! New file identifier 
+  INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5freopen_f 
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

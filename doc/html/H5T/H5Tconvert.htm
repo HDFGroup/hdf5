@@ -1,0 +1,92 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tconvert" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Convert">H5Tconvert</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tconvert</code>(<em>hid_t</em> <code>src_id</code>,
+        <em>hid_t</em> <code>dst_id</code>,
+        <em>size_t</em> <code>nelmts</code>,
+        <em>void *</em><code>buf</code>,
+        <em>void *</em><code>background</code>,
+        <em>hid_t</em> <code>plist_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Converts data from between specified datatypes.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tconvert</code> converts <code>nelmts</code> elements 
+        from the type specified by the <code>src_id</code> identifier 
+        to type <code>dst_id</code>.  
+        The source elements are packed in <code>buf</code> and on return 
+        the destination will be packed in <code>buf</code>.  
+        That is, the conversion is performed in place.  
+        The optional background buffer is an array of <code>nelmts</code> 
+        values of destination type which are merged with the converted 
+        values to fill in cracks (for instance, <code>background</code> 
+        might be an array of structs with the <code>a</code> and 
+        <code>b</code> fields already initialized and the conversion  
+        of <code>buf</code> supplies the <code>c</code> and <code>d</code> 
+        field values).
+        <p>
+        The parameter <code>plist_id</code> contains the dataset transfer 
+        property list identifier which is passed to the conversion functions.  
+        As of Release 1.2, this parameter is only used to pass along the 
+        variable-length datatype custom allocation information.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>src_id</code></td>
+            <td valign="top">Identifier for the source datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dst_id</code></td>
+            <td valign="top">Identifier for the destination datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>nelmts</code></td>
+            <td valign="top">Size of array <code>buf</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em><code>buf</code></td>
+            <td valign="top">Array containing pre- and post-conversion values.</td></tr>
+        <tr>
+		    <td valign="top"><em>void&nbsp;*</em><code>background&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Optional background buffer.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">Dataset transfer property list identifier.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.3</td>
+          <td valign="top">
+			<code>nelmts</code> parameter type changed to 
+			<em>size_t</em>.</td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+			<code>nelmts</code> parameter type changed to 
+			<em>hsize_t</em>.</td></tr>
+    </table></ul>
+</dl>
+

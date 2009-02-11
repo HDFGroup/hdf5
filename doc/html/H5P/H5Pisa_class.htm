@@ -1,0 +1,56 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pisa_class" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-IsAClass">H5Pisa_class</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>htri_t</em> <code>H5Pisa_class</code>(
+                  <em>hid_t</em> <code>plist</code>,
+                  <em>hid_t</em> <code>pclass</code>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Determines whether a property list is a member of a class.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pisa_class</code> checks to determine whether a property list 
+    is a member of the specified class.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>plist</code></td>
+        <td>IN: Identifier of the property list</td></tr>
+    <tr>
+        <td><code>hid_t</code>&nbsp;<em>pclass&nbsp;&nbsp;&nbsp;&nbsp;</em></td>
+        <td>IN: Identifier of the property class</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: TRUE (positive) if equal; FALSE (zero) if unequal
+    <dd>Failure: a negative value
+
+  <dt><strong>Fortran90 Interface:</strong> h5pisa_class_f
+    <dd>
+	<pre>
+SUBROUTINE h5pisa_class_f(plist, pclass, flag, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist     ! Property list identifier 
+  INTEGER(HID_T), INTENT(IN) :: pclass    ! Class identifier
+  LOGICAL, INTENT(OUT) :: flag            ! Logical flag
+                                          !    .TRUE. if a member
+                                          !    .FALSE. otherwise
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5pisa_class_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

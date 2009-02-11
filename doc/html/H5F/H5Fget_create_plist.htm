@@ -1,0 +1,55 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_create_plist" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetCreatePlist">H5Fget_create_plist</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Fget_create_plist</code>(<em>hid_t</em> <code>file_id</code>
+        )
+<dt><strong>Purpose:</strong>
+        <dd>Returns a file creation property list identifier.
+<dt><strong>Description:</strong>
+        <dd><code>H5Fget_create_plist</code> returns a file creation 
+            property list identifier identifying the creation properties 
+            used to create this file.  This function is useful for 
+            duplicating properties when creating another file.
+            <p>
+            See "File Creation Properties" in 
+            <a href="RM_H5P.html">H5P: Property List Interface</a> 
+            in this reference manual and 
+            "File Creation Properties" 
+            in <a href="Files.html"><cite>Files</cite></a> in the 
+            <cite>HDF5 User's Guide</cite> for 
+            additional information and related functions.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <dt>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the file to get creation property list of</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a file creation property list identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5fget_create_plist_f
+    <dd>
+	<pre>
+SUBROUTINE h5fget_create_plist_f(file_id, fcpl_id, hdferr)
+
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)   :: file_id ! File identifier
+  INTEGER(HID_T), INTENT(OUT)  :: fcpl_id ! File creation property list 
+                                          ! identifier
+  INTEGER, INTENT(OUT)         :: hdferr  ! Error code 
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5fget_create_plist_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+

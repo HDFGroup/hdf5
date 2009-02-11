@@ -1,0 +1,78 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5ls" -->
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong> <a name="Tools-Ls">h5ls</a>
+<dt><strong>Syntax:</strong>
+    <dd><code>h5ls
+        [</code><em>OPTIONS</em><code>]</code><em>
+        file</em><code> 
+        [</code><em>OBJECTS...</em><code>]</code>
+<dt><strong>Purpose:</strong>
+    <dd>Prints information about a file or dataset.
+<dt><strong>Description:</strong>
+    <dd><code>h5ls</code> prints selected information about file objects 
+        in the specified format.
+<dt><strong>Options and Parameters:</strong>
+    <dl>
+        <dt><code>-h</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>-?</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--help</code>
+            <dd>Print a usage message and exit.
+        <dt><code>-a</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--address</code>
+            <dd>Print addresses for raw data.
+        <dt><code>-d</code> &nbsp;&nbsp;or&nbsp;&nbsp; <code>--data</code>
+            <dd>Print the values of datasets.
+        <dt><code>-e</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--errors</code>
+            <dd>Show all HDF5 error reporting.
+        <dt><code>-f</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--full</code>
+            <dd>Print full path names instead of base names.
+        <dt><code>-g</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--group</code>
+            <dd>Show information about a group, not its contents.
+        <dt><code>-l</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--label</code>
+            <dd>Label members of compound datasets.
+        <dt><code>-r</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--recursive</code>
+            <dd>List all groups recursively, avoiding cycles.
+        <dt><code>-s</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--string</code>
+            <dd>Print 1-bytes integer datasets as ASCII.
+        <dt><code>-S</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--simple</code>
+            <dd>Use a machine-readable output format.
+        <dt><code>-w</code><em>N</em> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--width=</code><em>N</em>
+            <dd>Set the number of columns of output.
+        <dt><code>-v</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--verbose</code>
+            <dd>Generate more verbose output.
+        <dt><code>-V</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--version</code>
+            <dd>Print version number and exit.
+        <dt><code>-x</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--hexdump</code>
+            <dd>Show raw data in hexadecimal format.
+        <dt><em>file</em>
+            <dd>The file name may include a printf(3C) integer format 
+                such as <code>%%05d</code> to open a file family.
+        <dt><em>objects</em>
+            <dd>Each object consists of an HDF5 file name optionally
+                followed by a slash and an object name within the file
+                (if no object is specified within the file then the
+                contents of the root group are displayed). The file name
+                may include a <code>printf(3C)</code> integer format such
+                as "%05d" to open a file family.
+    </dl>
+<!--
+<dt><strong>Current Status:</strong>
+    <dd>
+<dt><strong>See Also:</strong>
+    <dd>
+-->
+</dl>
+

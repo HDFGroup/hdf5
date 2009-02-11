@@ -1,0 +1,62 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tset_inpad" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetInpad">H5Tset_inpad</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tset_inpad</code>(<em>hid_t </em><code>type_id</code>,
+        <em>H5T_pad_t</em> <code>inpad</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Fills unused internal floating point bits.
+<dt><strong>Description:</strong>
+    <dd>If any internal bits of a floating point type are unused
+        (that is, those significant bits which are not part of the
+        sign, exponent, or mantissa), then <code>H5Tset_inpad</code> will be filled
+        according to the value of the padding value property <code>inpad</code>.
+        Valid padding types are:
+        <ul> <dl>
+            <dt>H5T_PAD_ZERO (<code>0</code>)
+               <dd>Set background to zeros.
+            <dt>H5T_PAD_ONE (<code>1</code>)
+               <dd>Set background to ones.
+            <dt>H5T_PAD_BACKGROUND (<code>2</code>)
+               <dd>Leave background alone.
+        </dl> </ul>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to modify.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_pad_t</em>&nbsp;<code>pad&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Padding type.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tset_inpad_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_inpad_f(type_id, padtype, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id 
+                                  ! Datatype identifier 
+  INTEGER, INTENT(IN) :: padtype  ! Padding type for unused bits 
+                                  ! in floating-point datatypes.
+                                  ! Possible values of padding type are:
+                                  !    H5T_PAD_ZERO_F = 0
+                                  !    H5T_PAD_ONE_F = 1
+                                  !    H5T_PAD_BACKGROUND_F = 2
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+END SUBROUTINE h5tset_inpad_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

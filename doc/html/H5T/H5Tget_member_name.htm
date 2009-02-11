@@ -1,0 +1,75 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_member_name" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetMemberName">H5Tget_member_name</a>
+<dt><strong>Signature:</strong>
+    <dd><em>char *</em> <code>H5Tget_member_name</code>(<em>hid_t </em><code>type_id</code>,
+        <em>unsigned</em> <code>field_idx</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the name of a compound or enumeration datatype member.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_member_name</code> retrieves the name of a field 
+        of a compound datatype or an element of an enumeration datatype.  
+        <p>
+        The index of the target field or element is specified in
+        <code>field_idx</code>.
+        Compound datatype fields and enumeration datatype elements 
+        are stored in no particular order
+        with index values of 0 through <em>N</em>-1, where <em>N</em> 
+        is the value returned by <code>H5Tget_nmembers</code>.  
+        <p>
+        A buffer to receive the name of the field is 
+        allocated with <code>malloc()</code> and the caller is responsible 
+        for freeing the memory used.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>field_idx</code></td>
+            <td valign="top">Zero-based index of the field or element whose name
+                is to be retrieved.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a valid pointer to a string allocated with 
+        <code>malloc()</code> if successful; 
+        otherwise returns NULL.
+<dt><strong>Fortran90 Interface:</strong> h5tget_member_name_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_member_name_f(type_id,index, member_name,  namelen, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id        ! Datatype identifier 
+  INTEGER, INTENT(IN) :: index                 ! Field index (0-based) of 
+                                               ! the field name to retrieve 
+  CHARACTER(LEN=*), INTENT(OUT) :: member_name ! Name of a field of
+                                               ! a compound datatype 
+  INTEGER, INTENT(OUT) :: namelen              ! Length of the name 
+  INTEGER, INTENT(OUT) :: hdferr               ! Error code
+END SUBROUTINE h5tget_member_name_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.4</td>
+          <td valign="top">
+		    <code>membno</code> parameter type changed to 
+			<em>unsigned</em>.</td></tr>
+    </table></ul>
+</dl>
+

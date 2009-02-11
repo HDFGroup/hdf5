@@ -1,0 +1,141 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Giterate" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-Iterate">H5Giterate</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Giterate</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char</em> <code>*name</code>,
+        <em>int</em> <code>*idx</code>,
+        <em>H5G_iterate_t</em> <code>operator</code>,
+        <em>void</em> <code>*operator_data</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Iterates an operation over the entries of a group.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Giterate</code> iterates over the members of 
+        <code>name</code> in the file or group specified with 
+        <code>loc_id</code>.  
+        For each object in the group, the <code>operator_data</code> 
+        and some additional information, specified below, are
+        passed to the <code>operator</code> function.  
+        The iteration begins with the <code>idx</code> object in the 
+        group and the next element to be processed by the operator is 
+        returned in <code>idx</code>.  If <code>idx</code>
+        is NULL, then the iterator starts at the first group member; 
+        since no stopping point is returned in this case, the iterator 
+        cannot be restarted if one of the calls to its operator returns 
+        non-zero.  
+        <p>
+        The prototype for <code>H5G_iterate_t</code> is:
+        <table>
+		    <tr>
+			  <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+			  <td valign="top"><code>typedef</code> <em>herr_t </em>(*<code>H5G_iterate_t</code>)
+			                   (<em>hid_t</em> <code>group_id</code>, <em>const char *</em>
+							   <code>member_name</code>, <em>void *</em><code>operator_data</code>);</td></tr>
+        </table>
+				
+        <p>The operation receives the group identifier for the group being 
+        iterated over, <code>group_id</code>, the name of the current 
+        object within the group, <code>member_name</code>, and the 
+        pointer to the operator data passed in to <code>H5Giterate</code>, 
+        <code>operator_data</code>.  
+        <p>
+        The return values from an operator are:
+        <ul>
+            <li>Zero causes the iterator to continue, returning 
+                zero when all group members have been processed.
+            <li>Positive causes the iterator to immediately return that positive
+                value, indicating short-circuit success.  The iterator can be
+                restarted at the next group member.
+            <li>Negative causes the iterator to immediately return that value,
+                indicating failure.  The iterator can be restarted at the next
+                group member.
+        </ul>
+        <p>
+        <code>H5Giterate</code> assumes that the membership of the group 
+        identified by <code>name</code> remains unchanged through the 
+        iteration.  If the membership changes during the iteration, 
+        the function's behavior is undefined.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: File or group identifier.</td></tr>
+      <tr>
+	    <td valign="top"><em>const char</em> <code>*name</code></td>
+        <td valign="top">IN: Group over which the iteration is performed.</td></tr>
+      <tr>
+	    <td valign="top"><em>int</em> <code>*idx</code></td>
+        <td valign="top">IN/OUT: Location at which to begin the iteration.</td></tr>
+      <tr>
+	    <td valign="top"><em>H5G_iterate_t</em>&nbsp;<code>operator&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Operation to be performed on an object at each step of 
+            the iteration.</td></tr>
+      <tr>
+	    <td valign="top"><em>void</em> <code>*operator_data</code></td>
+        <td valign="top">IN/OUT: Data associated with the operation.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns the return value of the last operator if it was non-zero, 
+        or zero if all group members were processed.
+        Otherwise returns a negative value.
+<!-- NEW PAGE -->
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>There is no direct FORTRAN couterpart for the C function 
+        <code>H5Giterate</code>.  
+        Instead, that functionality is provided by two FORTRAN functions:
+        
+    <center>
+    <table width=80%>
+      <tr valign=top align=left>
+        <td>
+          <code>h5gn_members_f</code>
+        </td>
+		<td>&nbsp;&nbsp;</td>
+		<td>
+          <strong>Purpose:</strong>
+          Returns the number of group members.
+        </tr>
+		<tr valign=top align=left>
+            <td>
+            <code>h5gget_obj_info_idx_f</code>
+            </td><td>&nbsp;&nbsp;</td><td>
+            <strong>Purpose:</strong>
+            Returns name and type of the group member identified by its index.
+          </td>
+		</tr>
+    </table>
+    </center>
+				
+		<pre>
+SUBROUTINE h5gn_members_f(loc_id, name, nmembers, hdferr)           
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id        ! File or group identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name        ! Name of the group 
+  INTEGER, INTENT(OUT) :: nmembers            ! Number of members in the group
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code 
+                                              ! 0 on success and -1 on failure
+END SUBROUTINE h5gn_members_f
+		</pre>
+		
+		<pre>
+SUBROUTINE h5gget_obj_info_idx_f(loc_id, name, idx, &amp; 
+                                 obj_name, obj_type, hdferr)           
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id        ! File or group identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name        ! Name of the group 
+  INTEGER, INTENT(IN) :: idx                  ! Index of member object 
+  CHARACTER(LEN=*), INTENT(OUT) :: obj_name   ! Name of the object 
+  INTEGER, INTENT(OUT) :: obj_type            ! Object type : 
+                                              !     H5G_LINK_F 
+                                              !     H5G_GROUP_F 
+                                              !     H5G_DATASET_F 
+                                              !     H5G_TYPE_F 
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code 
+                                              ! 0 on success and -1 on failure
+END SUBROUTINE h5gget_obj_info_idx_f
+		</pre>
+</dl>
+

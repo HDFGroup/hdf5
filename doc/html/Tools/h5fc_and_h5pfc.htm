@@ -1,0 +1,98 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5fc and h5pfc" -->
+<hr>
+<dl>
+<dt><strong>Tool Names:</strong> <a name="Tools-H5FC">h5fc and h5pfc</a>
+<dt><strong>Syntax:</strong>
+    <dd><code>h5fc
+        [</code><em>OPTIONS</em><code> ]</code> <em>compile_line</em>
+    <dd><code>h5pfc
+        [</code><em>OPTIONS</em><code> ]</code> <em>compile_line</em>
+<dt><strong>Purpose:</strong>
+    <dd>Helper scripts to compile HDF5 Fortran90 applications.
+<dt><strong>Description:</strong>
+    <dd><code>h5fc</code> and <code>h5pfc</code> can be used in much the 
+        same way <code>mpif90</code> by MPICH is used to compile 
+        an HDF5 program. 
+        These tools take care of specifying on the command line
+        the locations of the HDF5 header files and libraries.
+        <code>h5fc</code> is for use in serial computing environments;
+        <code>h5pfc</code> is for parallel environments.
+        <p>
+        <code>h5fc</code> and <code>h5pfc</code> subsume all other 
+        compiler scripts in that if you have used a set of scripts to compile 
+        the HDF5 Fortran library, then <code>h5fc</code> and <code>h5pfc</code> 
+        also use those scripts. For example, when
+        compiling an MPICH program, you use the <code>mpif90</code>
+        script. If you have built HDF5 using MPICH, then <code>h5fc</code>
+        uses the MPICH program for compilation.
+        <p>
+        Some programs use HDF5 in only a few modules. It is not necessary
+        to use <code>h5fc</code> and <code>h5pfc</code> to compile those 
+        modules which do not use HDF5. 
+        In fact, since <code>h5fc</code> and <code>h5pfc</code> are only 
+        convenience scripts, you can still compile HDF5 Fortran modules in 
+        the normal manner, though you will have to specify the 
+        HDF5 libraries and include paths yourself.
+        Use the <code>-show</code> option to see the details.
+        <p>
+        An example of how to use <code>h5fc</code> to compile the program
+        <code>hdf_prog</code>, which consists of the modules
+        <code>prog1.f90</code> and <code>prog2.f90</code> 
+        and uses the HDF5 Fortran library, would be as follows.
+        <code>h5pfc</code> is used in an identical manner.
+        <pre>
+        # h5fc -c prog1.f90
+        # h5fc -c prog2.f90
+        # h5fc -o hdf_prog prog1.o prog2.o </pre>
+<dt><strong>Options and Parameters:</strong>
+    <dd>
+    <dl>
+        <dt><code>-help</code>
+            <dd>Print a help message.
+        <dt><code>-echo</code>
+            <dd>Show all the shell commands executed.
+        <dt><code>-prefix=DIR</code>
+            <dd>Use the directory <code>DIR</code> to find HDF5 
+                <code>lib/</code> and <code>include/</code> subdirectories. 
+                <br>
+                Default: prefix specified when configuring HDF5.
+        <dt><code>-show</code>
+            <dd>Show the commands without executing them.
+        <dt><em>compile_line</em>
+            <dd>The normal compile line options for your compiler. 
+                <code>h5fc</code> and <code>h5pfc</code> use the 
+                same compiler you used to compile HDF5; 
+                check your compiler's manual for more information 
+                on which options are needed.
+    </dl>
+<dt><strong>Environment Variables:</strong>
+    <dd>When set, these environment variables override some of the built-in
+        <code>h5fc</code> and <code>h5pfc</code> defaults.
+        <dl>
+          <dt><code>HDF5_FC</code>
+            <dd>Use a different Fortran90 compiler.
+          <dt><code>HDF5_FLINKER</code>
+            <dd>Use a different linker.
+        </dl>
+<!-- NEW PAGE -->
+<dt><strong>History:</strong>
+    	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>Command Line Tool</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Tool introduced in this release.</td></tr>
+    </table></ul>
+<!--
+<dt><strong>Current Status:</strong>
+    <dd>
+<dt><strong>See Also:</strong>
+    <dd>
+ -->
+</dl>
+

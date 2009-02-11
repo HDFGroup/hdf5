@@ -1,0 +1,60 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5dont_atexit" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-DontAtExit">H5dont_atexit</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5dont_atexit</code>(<em>void</em>)
+<dt><strong>Purpose:</strong>
+    <dd>Instructs library not to install <code>atexit</code> cleanup routine.
+<dt><strong>Description:</strong>
+    <dd><code>H5dont_atexit</code> indicates to the library that an 
+        <code>atexit()</code> cleanup routine should not be installed.  
+        The major purpose for this is in situations where the 
+        library is dynamically linked into an application and is 
+        un-linked from the application before <code>exit()</code> gets 
+        called.  In those situations, a routine installed with 
+        <code>atexit()</code> would jump to a routine which was 
+        no longer in memory, causing errors.
+        <p>
+        In order to be effective, this routine <em>must</em> be called 
+        before any other HDF function calls, and must be called each 
+        time the library is loaded/linked into the application 
+        (the first time and after it's been un-loaded).
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt>None.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5dont_atexit_f
+    <dd>
+	<pre>
+SUBROUTINE h5dont_atexit_f(hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+END SUBROUTINE h5dont_atexit_f
+	</pre>
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.5</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

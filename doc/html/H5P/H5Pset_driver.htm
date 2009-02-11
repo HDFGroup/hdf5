@@ -1,0 +1,50 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_driver" -->
+
+<!--      ********** MOVED TO TechNotes/VFLfunc.html **********
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetDriver">H5Pset_driver</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_driver</code>(
+                     <em>hid_t</em> <code>plist_id</code>,
+                     <em>hid_t</em> <code>driver_id</code>,
+                     <em>const void *</em> <code>driver_info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the file driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_driver</code> sets the file driver, 
+        <code>driver_id</code>, for a file access or data transfer 
+        property list, <code>plist_id</code>, and supplies an 
+        optional struct containing the driver-specific properties, 
+        <code>driver_info</code>.
+        <p>
+        <font color=red><b><i>Need <code>driver_info</code> struct definition.</i></b></font>
+        <p>
+        The driver properties will be copied into the property list 
+        and the reference count on the driver will be incremented, 
+        allowing the caller to close the driver identifier but still use 
+        the property list.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>IN: File access or data transfer property list identifier.
+        <dt><em>hid_t</em> <code>driver_id</code>
+            <dd>IN: Driver identifier.
+        <dt><em>const void *</em> <code>driver_info</code>
+            <dd>IN: Optional struct containing driver properties.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+</dl>
+
+-->
+

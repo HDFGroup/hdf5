@@ -1,0 +1,49 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dget_type" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-GetType">H5Dget_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Dget_type</code>(<em>hid_t </em><code>dataset_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns an identifier for a copy of the datatype for a dataset.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dget_type</code> returns an identifier for a copy of the 
+        datatype for a dataset.  
+        <p>
+        The datatype should be released with the <code>H5Tclose</code> function.
+        <p>
+        If a dataset has a named datatype, then an identifier to the 
+        opened datatype is returned.  
+        Otherwise, the returned datatype is read-only.  
+        If atomization of the datatype fails, then the datatype is closed.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dataset_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a datatype identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5dget_type_f
+    <dd>
+	<pre>
+SUBROUTINE h5dget_type_f(dataset_id, datatype_id, hdferr) 
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN) :: dataset_id    ! Dataset identifier
+  INTEGER(HID_T), INTENT(OUT) :: datatype_id  ! Datatype identifier
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code 
+                                              ! 0 on success and -1 on failure
+END SUBROUTINE h5dget_type_f 
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

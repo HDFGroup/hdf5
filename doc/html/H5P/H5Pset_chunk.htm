@@ -1,0 +1,73 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_chunk" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetChunk">H5Pset_chunk</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pset_chunk</code>(<em>hid_t</em> <code>plist</code>,
+            <em>int</em> <code>ndims</code>,
+            <em>const hsize_t *</em> <code>dim</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the size of the chunks used to store a chunked layout dataset.  
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_chunk</code> sets the size of the chunks used to 
+        store a chunked layout dataset.  This function is only valid 
+        for dataset creation property lists.  
+        <p>
+        The <code>ndims</code> parameter currently must be the same size 
+        as the rank of the dataset.  
+        <p>
+        The values of the <code>dim</code> 
+        array define the size of the chunks to store the dataset's raw data.
+        The unit of measure for <code>dim</code> values is 
+        <em>dataset elements</em>.
+        <p>
+        As a side-effect of this function, the layout of the dataset is 
+        changed to <code>H5D_CHUNKED</code>, if it is not already so set.
+        (See <a href="#Property-SetLayout"><code>H5Pset_layout</code></a>.)
+        <p>
+        <em>Note regarding fixed-size datasets:</em><br>
+        Chunk size cannot exceed the size of a fixed-size dataset.
+        For example, a dataset consisting of a 5x4 fixed-size array cannot be 
+        defined with 10x10 chunks.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+          <td valign="top"><em>hid_t</em> <code>plist</code></td>
+          <td valign="top">IN: Dataset creation property list
+              identifier.</td></tr>
+        <tr>
+          <td valign="top"><em>int</em> <code>ndims</code></td>
+          <td valign="top">IN: The number of dimensions of each chunk.</td></tr>
+        <tr>
+          <td valign="top"><em>const&nbsp;hsize_t&nbsp;*</em>&nbsp;<code>dim&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: An array defining the size, in dataset elements, 
+              of each chunk.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_chunk_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_chunk_f(prp_id, ndims, dims, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  INTEGER, INTENT(IN) :: ndims          ! Number of chunk dimensions
+  INTEGER(HSIZE_T), DIMENSION(ndims), INTENT(IN) :: dims    
+                                        ! Array containing sizes of
+                                        ! chunk dimensions
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_chunk_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,61 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pequal" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong>  <a name="Property-Equal">H5Pequal</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>htri_t</em> <code>H5Pequal</code>(
+                  <em></em>hid_t</em> <em>id1</em>,
+                  <em>hid_t</em> <em>id2</em>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Compares two property lists or classes for equality.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pequal</code> compares two property lists or classes 
+    to determine whether they are equal to one another.  
+	
+    <p>
+    Either both <code>id1</code> and <code>id2</code> must be
+    property lists or both must be classes; comparing a list to a 
+    class is an error.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em>&nbsp;<code>id1&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td>IN: First property object to be compared</td></tr>
+    <tr>
+        <td><em>hid_t</em> <code>id2</code></td>
+        <td>IN: Second property object to be compared</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: TRUE (positive) if equal; FALSE (zero) if unequal
+    <dd>Failure: a negative value
+
+  <dt><strong>Fortran90 Interface:</strong> h5pequal_f
+    <dd>
+	<pre>
+SUBROUTINE h5pequal_f(plist1_id, plist2_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist1_id ! Property list identifier
+  INTEGER(HID_T), INTENT(IN) :: plist2_id ! Property list identifier
+  LOGICAL, INTENET(OUT)      :: flag      ! Flag
+                                          !    .TRUE. if lists are equal 
+                                          !    .FALSE. otherwise 
+  INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5pequal_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

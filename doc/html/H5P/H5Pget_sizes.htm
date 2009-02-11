@@ -1,0 +1,54 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_sizes" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetSizes">H5Pget_sizes</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pget_sizes</code>(<em>hid_t</em> <code>plist</code>,
+            <em>size_t *</em> <code>sizeof_addr</code>,
+            <em>size_t *</em> <code>sizeof_size</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves the size of the offsets and lengths used in an HDF5 file.  
+  <dt><strong>Description:</strong>
+        <dd><code>H5Pget_sizes</code> retrieves the size of the offsets 
+            and lengths used in an HDF5 file.  
+            This function is only valid for file creation property lists.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of property list to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t&nbsp;*</em>&nbsp;<code>size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to location to return offset size in bytes.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em> <code>size</code></td>
+            <td valign="top">OUT: Pointer to location to return length size in bytes.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_sizes_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_sizes_f(prp_id, sizeof_addr, sizeof_size, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER(SIZE_T), DIMENSION(:), INTENT(OUT) :: sizeof_addr
+                                        ! Size of an object address in bytes
+  INTEGER(SIZE_T), DIMENSION(:), INTENT(OUT) :: sizeof_size 
+                                        ! Size of an object in bytes
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_sizes_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,71 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dextend" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-Extend">H5Dextend</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Dextend</code>(<em>hid_t </em><code>dataset_id</code>,
+        <em>const hsize_t *</em> <code>size</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Extends a dataset. 
+<dt><strong>Description:</strong>
+    <dd><code>H5Dextend</code> verifies that the dataset is at least of size
+        <code>size</code>, extending it if necessary.  
+        The dimensionality of <code>size</code> is the same as that of
+        the dataspace of the dataset being changed.
+	<p>
+        This function can be applied to the following datasets:
+        <ul>
+          <li>Any dataset with unlimited dimensions
+          <li>A dataset with fixed dimensions if the current dimension sizes
+          are less than the maximum sizes set with <code>maxdims</code> (see 
+          <a href="RM_H5S.html#Dataspace-CreateSimple">
+          <code>H5Screate_simple</code></a>)
+        </ul>
+	<p>
+	Space on disk is immediately allocated for the new dataset extent 
+        if the dataset&rsquo;s space allocation time is set to 
+	<code>H5D_ALLOC_TIME_EARLY</code>.
+	Fill values will be written to the dataset if the dataset&rsquo;s 
+        fill time is set to <code>H5D_FILL_TIME_IFSET</code> &nbsp;or&nbsp; 
+	<code>H5D_FILL_TIME_ALLOC</code>.
+	(See <a href="RM_H5P.html#Property-SetFillTime">
+        <code>H5Pset_fill_time</code></a>
+	and <a href="RM_H5P.html#Property-SetAllocTime">
+        <code>H5Pset_alloc_time</code></a>.)
+
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>dataset_id</code></td>
+            <td valign="top">IN: Identifier of the dataset.</td></tr>
+        <tr>
+            <td valign="top"><em>const&nbsp;hsize_t&nbsp;*</em>&nbsp;<code>size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Array containing the new magnitude of each dimension.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5dextend_f
+    <dd>
+	<pre>
+SUBROUTINE h5dextend_f(dataset_id, size, hdferr) 
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN) :: dataset_id   ! Dataset identifier
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN)  :: size
+                                             ! Array containing 
+                                             ! dimensions' sizes 
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code 
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5dextend_f 
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

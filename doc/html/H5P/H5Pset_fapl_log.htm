@@ -1,0 +1,301 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_fapl_log" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplLog">H5Pset_fapl_log</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_log</code>(
+                        <em>hid_t</em> <code>fapl_id</code>,
+                        <em>const char *</em><code>logfile</code>,
+                        <em>unsigned int</em> <code>flags</code>,
+                        <em>size_t</em> <code>buf_size</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets up the use of the logging driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_log</code> modifies the 
+        file access property list to use the logging driver 
+        <code>H5FD_LOG</code>.
+        <p>
+        <code>logfile</code> is the name of the file in which the 
+        logging entries are to be recorded.
+        <p>
+	The actions to be logged are specified in the parameter <code>flags</code> 
+	using the pre-defined constants described in the following table.
+	Multiple flags can be set through the use of an logical OR contained 
+	in parentheses.  For example, logging read and write locations would 
+	be specified as <code>(H5FD_LOG_LOC_READ|H5FD_LOG_LOC_WRITE)</code>.
+        <!--The <code>flags</code> parameter contains a 2-byte hexadecimal value 
+	which is computed from the following elements:-->
+        <center>
+        <table width=100%>
+        <tr valign=top align=left><td>
+            <hr>
+            <b>Flag</b>
+            <!--</td><td width="20%">
+            <hr>
+            <b>Hex value</b>-->
+            </td><td>
+            <hr>
+            <b>Description</b>
+        </td></tr>
+	
+        <tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_LOC_READ</code> 
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td rowspan="3">
+            <hr>
+            Track the location and length of every read, write, or seek operation. 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_LOC_WRITE&nbsp;&nbsp;</code> 
+            <!--</td><td>
+            <code>0x0002&nbsp;&nbsp;</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_LOC_SEEK</code> 
+            <!--</td><td>
+            <code>0x0004</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_LOC_IO</code> 
+            <!--</td><td>
+            <code>0x0007</code>-->
+            </td><td>
+            Track all I/O locations and lengths.  
+	    The logical equivalent of the following:
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>&nbsp;</code> 
+            </td><td>
+            <code>(H5FD_LOG_LOC_READ | H5FD_LOG_LOC_WRITE | H5FD_LOG_LOC_SEEK)</code>
+        </td></tr>
+	
+        <tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_FILE_READ</code> 
+            <!--</td><td>
+            <code>0x0008</code>-->
+            </td><td rowspan="2">
+            <hr>
+            Track the number of times each byte is read or written. 
+        </td></tr>
+	<tr valign=top align=left><td>
+            <code>H5FD_LOG_FILE_WRITE&nbsp;&nbsp;</code> 
+            <!--</td><td>
+            <code>0x0010</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_FILE_IO</code> 
+            <!--</td><td>
+            <code>0x0018</code>-->
+            </td><td>
+            Track the number of times each byte is read and written.
+	    The logical equivalent of the following:
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>&nbsp;</code> 
+            </td><td>
+            <code>(H5FD_LOG_FILE_READ | H5FD_LOG_FILE_WRITE)</code>
+        </td></tr>
+	
+	<tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_FLAVOR</code> 
+            <!--</td><td>
+            <code>0x0020</code>-->
+            </td><td>
+            <hr>
+            Track the type, or flavor, of information stored at each byte. 
+        </td></tr>	
+	
+	<tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_NUM_READ</code> 
+            <!--</td><td>
+            <code>0x0040</code>-->
+            </td><td rowspan="3">
+            <hr>
+            Track the total number of read, write, or seek operations that occur. 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_NUM_WRITE</code> 
+            <!--</td><td>
+            <code>0x0080</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_NUM_SEEK</code> 
+            <!--</td><td>
+            <code>0x0100</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_NUM_IO</code> 
+            <!--</td><td>
+            <code>0x01C0</code>-->
+            </td><td>
+            Track the total number of all types of I/O operations.
+	    The logical equivalent of the following:
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>&nbsp;</code> 
+            </td><td>
+            <code>(H5FD_LOG_NUM_READ | H5FD_LOG_NUM_WRITE | H5FD_LOG_NUM_SEEK)</code>
+        </td></tr>
+	
+<!-- NEW PAGE -->
+	<tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_TIME_OPEN</code> 
+            <!--</td><td>
+            <code>0x0200</code>-->
+            </td><td rowspan="5">
+            <hr>
+            Track the time spent in open, read, write, seek, or close operations. 
+	    <dir>
+	    <span class="termEmphasis"><i>
+	    Not implemented in this release: open and read
+	    <br> 
+	    Partially implemented: write and seek
+	    <br> 
+	    Fully implemented: close</i></span>
+	    </dir>
+        </td></tr>
+        <tr valign=top align=left><td>
+	    <code>H5FD_LOG_TIME_READ</code> 
+            <!--</td><td>
+            <code>0x0400</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_TIME_WRITE</code> 
+            <!--</td><td>
+            <code>0x0800</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_TIME_SEEK</code> 
+            <!--</td><td>
+            <code>0x1000</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_TIME_CLOSE</code> 
+            <!--</td><td>
+            <code>0x2000</code>-->
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5FD_LOG_TIME_IO</code> 
+            <!--</td><td>
+            <code>0x3E00</code>-->
+            </td><td>
+	    Track the time spent in each of the above operations.
+	    The logical equivalent of the following:
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>&nbsp;</code> 
+            </td><td>
+            <code>(H5FD_LOG_TIME_OPEN | H5FD_LOG_TIME_READ | H5FD_LOG_TIME_WRITE 
+	                              | H5FD_LOG_TIME_SEEK | H5FD_LOG_TIME_CLOSE)</code>
+        </td></tr>
+
+        <tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_ALLOC</code> 
+            <!--</td><td>
+            <code>0x4000</code>-->
+            </td><td>
+            <hr>
+            Track the allocation of space in the file.
+        </td></tr>
+
+        <tr valign=top align=left><td>
+            <hr>
+            <code>H5FD_LOG_ALL</code> 
+            <!--</td><td>
+            <code>0xFFFF -- all possible
+	      <br>0x8FFF -- all current at r1.6</code>-->
+            </td><td>
+            <hr>
+            Track everything.
+	    The logical equivalent of the following:
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>&nbsp;</code> 
+            </td><td>
+            <code>(H5FD_LOG_ALLOC | H5FD_LOG_TIME_IO | H5FD_LOG_NUM_IO | H5FD_LOG_FLAVOR 
+	                          |H5FD_LOG_FILE_IO | H5FD_LOG_LOC_IO)</code>
+        </td></tr>
+	
+        <tr valign=top align=left><td>
+            <hr>
+            </td><td>
+            <hr>
+        </td></tr>
+	
+        </table>
+        </center>
+
+	<p>
+	The logging driver can track the number of times 
+	each byte in the file is read from or written to 
+	(using <code>H5FD_LOG_FILE_READ</code> and <code>H5FD_LOG_FILE_WRITE</code>)
+	and what kind of data is at that location 
+	(e.g., meta data, raw data; using <code>H5FD_LOG_FLAVOR</code>).  
+	This information is tracked in a buffer of size <code>buf_size</code>,
+	which must be at least the size in bytes of the file to be logged.
+ 
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>char *</em><code>logfile</code></td>
+            <td valign="top">IN: Name of the log file.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;int</em>&nbsp;<code>flags&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Flags specifying the types of logging activity.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>buf_size</code></td>
+            <td valign="top">IN: The size of the logging buffer.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns non-negative if successful.
+        Otherwise returns negative.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    The <code>verbosity</code> parameter 
+			has been removed.<br>
+			Two new parameters have been added: 
+			<code>flags</code> of type <em>unsigned</em> 
+			and <code>buf_size</code> of type 
+			<em>size_t</em>.
+			</td></tr>
+		<tr>
+		  <td valign="top">1.4.0</td>
+		  <td valign="top">Function introduced in this release.</td>
+		</tr>
+    </table></ul>
+</dl>
+

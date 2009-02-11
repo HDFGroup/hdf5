@@ -1,0 +1,48 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_strpad" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetStrpad">H5Tget_strpad</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5T_str_t </em><code>H5Tget_strpad</code>(<em>hid_t </em><code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the storage mechanism for a string datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_strpad</code> retrieves the storage mechanism
+        for a string datatype, as defined in 
+        <a href="#Datatype-SetStrpad"><code>H5Tset_strpad</code></a>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a valid string storage mechanism if successful;
+        otherwise <code>H5T_STR_ERROR</code> (-1).
+<dt><strong>Fortran90 Interface:</strong> h5tget_strpad_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_strpad_f(type_id, strpad, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id    
+                                  ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: strpad  ! String padding method for a string datatype 
+                                  ! Possible values of padding type are:
+                                  !    Pad with zeros (as C does): 
+                                  !        H5T_STR_NULLPAD_F(0) 
+                                  !    Pad with spaces (as FORTRAN does): 
+                                  !        H5T_STR_SPACEPAD_F(1)
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+END SUBROUTINE h5tget_strpad_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

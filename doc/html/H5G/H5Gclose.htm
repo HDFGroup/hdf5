@@ -1,0 +1,43 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gclose" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-Close">H5Gclose</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Gclose</code>(<em>hid_t </em><code>group_id</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Closes the specified group.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Gclose</code> releases resources used by a group which was
+        opened by <code>H5Gcreate</code> or <code>H5Gopen</code>. 
+        After closing a group, the <code>group_id</code> cannot be used again.  
+        <p>
+        Failure to release a group with this call will result in resource leaks.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+      <tr>
+	      <td valign="top"><em>hid_t</em>&nbsp;<code>group_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Group identifier to release.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5gclose_f
+    <dd>
+	<pre>
+SUBROUTINE h5gclose_f( gr_id, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: gr_id     ! Group identifier
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code 
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5gclose_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

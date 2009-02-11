@@ -1,0 +1,81 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pcopy_prop" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-CopyProp">H5Pcopy_prop</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pcopy_prop</code>(
+                  <em>hid_t</em> <code>dst_id</code>,
+                  <em>hid_t</em> <code>src_id</code>,
+                  <em>const char *</em><code>name</code>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Copies a property from one list or class to another.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pcopy_prop</code> copies a property from one property 
+    list or class to another.
+    
+    <p>
+    If a property is copied from one class to another, all the property 
+    information will be first deleted from the destination class and 
+    then the property information will be copied from the source class 
+    into the destination class.  
+	
+    <p>
+    If a property is copied from one list to another, the property 
+    will be first deleted from the destination list (generating a call 
+    to the <code>close</code> callback for the property, if one exists)  
+    and then the property is copied from the source list to the 
+    destination list (generating a call to the <code>copy</code> 
+    callback for the property, if one exists).
+	
+    <p>
+    If the property does not exist in the class or list, this call is 
+    equivalent to calling <code>H5Pregister</code> or <code>H5Pinsert</code> 
+    (for a class or list, as appropriate) and the <code>create</code> 
+    callback will be called in the case of the property being 
+    copied into a list (if such a callback exists for the property).
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>dst_id</code></td>
+        <td>IN: Identifier of the destination property list or 
+	        class</td></tr>
+    <tr>
+        <td><em>hid_t</em> <code>src_id</code></td>
+        <td>IN: Identifier of the source property list or class</td></tr>
+    <tr>
+        <td><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td>IN: Name of the property to copy</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <dt><strong>Fortran90 Interface:</strong> h5pcopy_prop_f
+    <dd>
+	<pre>
+SUBROUTINE h5pcopy_prop_f(dst_id, src_id, name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: dst_id  ! Destination property list 
+                                        ! identifier 
+  INTEGER(HID_T), INTENT(IN) :: src_id  ! Source property list identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Property name
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pcopy_prop_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

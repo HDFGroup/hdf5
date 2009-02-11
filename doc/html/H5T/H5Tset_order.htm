@@ -1,0 +1,58 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tset_order" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetOrder">H5Tset_order</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tset_order</code>(<em>hid_t </em><code>type_id</code>,
+        <em>H5T_order_t</em><code>order</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the byte ordering of an atomic datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_order</code> sets the byte ordering of an atomic datatype.
+        Byte orderings currently supported are:
+        <ul> <dl>
+            <dt>H5T_ORDER_LE (<code>0</code>)
+                <dd> Little-endian byte ordering (default).
+            <dt>H5T_ORDER_BE (<code>1</code>)
+                <dd> Big-endian byte ordering.
+            <dt>H5T_ORDER_VAX (<code>2</code>)
+                <dd>VAX mixed byte ordering (not currently supported).
+        </dl> </ul>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_order_t</em>&nbsp;<code>order&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Byte ordering constant.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tset_order_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_order_f(type_id, order, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id   ! Datatype identifier 
+  INTEGER, INTENT(IN) :: order            ! Datatype byte order 
+                                          ! Possible values are:
+                                          !    H5T_ORDER_LE_F 
+                                          !    H5T_ORDER_BE_F 
+                                          !    H5T_ORDER_VAX_F  
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5tset_order_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

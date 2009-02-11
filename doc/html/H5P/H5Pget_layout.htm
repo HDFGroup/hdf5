@@ -1,0 +1,65 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_layout" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetLayout">H5Pget_layout</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>H5D_layout_t</em> <code>H5Pget_layout</code>(<em>hid_t</em> <code>plist</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Returns the layout of the raw data for a dataset.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_layout</code> returns the layout of the raw data for 
+        a dataset.  This function is only valid for dataset creation 
+        property lists.  
+        <p>
+        Note that a compact storage layout may affect writing data to
+        the dataset with parallel applications.  See note in
+	<a href="RM_H5D.html#Dataset-Write">H5Dwrite</a>
+        documentation for details.
+	
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier for property list to query.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns the layout type (a non-negative value)  
+        of a dataset creation property list if successful.  
+	Valid return values are:
+            <ul> <dl>
+                <dt>H5D_COMPACT 
+                    <dd>Raw data is stored in the object header in the file.
+                <dt>H5D_CONTIGUOUS
+                    <dd>Raw data is stored separately from the object header in 
+                        one contiguous chunk in the file.
+                <dt>H5D_CHUNKED
+                    <dd>Raw data is stored separately from the object header in 
+                        chunks in separate locations in the file.
+            </dl> </ul>	
+	<p>
+        Otherwise, returns a negative value indicating failure.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_layout_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_layout_f (prp_id, layout, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(OUT) :: layout       ! Type of storage layout for raw data
+                                       ! possible values are:
+                                       !    H5D_COMPACT_F
+                                       !    H5D_CONTIGUOUS_F
+                                       !    H5D_CHUNKED_F
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_layout_f 
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

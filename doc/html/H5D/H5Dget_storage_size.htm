@@ -1,0 +1,59 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dget_storage_size" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-GetStorageSize">H5Dget_storage_size</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hsize_t </em><code>H5Dget_storage_size</code>(<em>hid_t </em><code>dataset_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the amount of storage required for a dataset.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dget_storage_size</code> returns the amount of storage 
+        that is required for the specified dataset, <code>dataset_id</code>. 
+        For chunked datasets, this is the number of allocated chunks times 
+        the chunk size.        
+        The return value may be zero if no data has been stored.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dataset_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the amount of storage space allocated for the dataset, 
+        not counting meta data; 
+        otherwise returns 0 (zero).
+<dt><strong>Fortran90 Interface:</strong> h5dget_storage_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5dget_storage_size_f(dset_id, size, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: dset_id  ! Dataset identifier  
+  INTEGER(HSIZE_T), INTENT(OUT)  :: size ! Amount of storage required 
+                                         ! for dataset
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code  
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5dget_storage_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.5</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

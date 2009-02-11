@@ -1,0 +1,41 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eget_minor" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-GetMinor">H5Eget_minor</a>
+<dt><strong>Signature:</strong>
+    <dd><em>const char *</em> <code>H5Eget_minor</code>(<em>H5E_minor_t</em> <code>n</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Returns a character string describing an error specified by a 
+        minor error number.
+<dt><strong>Description:</strong>
+    <dd>Given a minor error number, <code>H5Eget_minor</code> returns a 
+        constant character string that describes the error.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5E_minor_t</em>&nbsp;<code>n&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Minor error number.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd> Returns a character string describing the error if successful.
+         Otherwise returns "Invalid minor error number."
+<dt><strong>Fortran90 Interface:</strong> h5eget_minor_f
+    <dd>
+	<pre>
+SUBROUTINE h5eget_minor_f(error_no, name, hdferr)
+  INTEGER, INTENT(IN) :: error_no         !Major error number
+  CHARACTER(LEN=*), INTENT(OUT) :: name   ! File name
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+
+END SUBROUTINE h5eget_minor_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

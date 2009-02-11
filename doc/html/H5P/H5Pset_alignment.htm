@@ -1,0 +1,68 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_alignment" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetAlignment">H5Pset_alignment</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_alignment</code>(<em>hid_t</em> <code>plist</code>,
+        <em>hsize_t</em> <code>threshold</code>,
+        <em>hsize_t</em> <code>alignment</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets alignment properties of a file access property list.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_alignment</code> sets the alignment properties 
+        of a file access property list
+        so that any file object greater than or equal in size to 
+        <code>threshold</code> bytes will be aligned on an address 
+        which is a multiple of <code>alignment</code>.  The addresses
+        are relative to the end of the user block; the alignment is
+        calculated by subtracting the user block size from the
+        absolute file address and then adjusting the address to be a
+        multiple of <code>alignment</code>.
+        <p>
+        Default values for <code>threshold</code> and 
+        <code>alignment</code> are one, implying
+        no alignment.  Generally the default values will result in
+        the best performance for single-process access to the file.
+        For MPI-IO and other parallel systems, choose an alignment
+        which is a multiple of the disk block size.   
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier for a file access property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em>&nbsp;<code>threshold&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Threshold value.  
+                Note that setting the threshold value to 0 (zero) has 
+                the effect of a special case, forcing everything 
+                to be aligned.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> <code>alignment</code></td>
+            <td valign="top">IN: Alignment value.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_alignment_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_alignment_f(prp_id, threshold,  alignment, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id       ! Property list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: threshold  ! Threshold value
+  INTEGER(HSIZE_T), INTENT(IN) :: alignment  ! Alignment value
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_alignment_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

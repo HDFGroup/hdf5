@@ -1,0 +1,91 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_fapl_family" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplFamily">H5Pset_fapl_family</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_family</code> (
+                        <em>hid_t</em> <code>fapl_id</code>,
+                        <em> hsize_t</em> <code>memb_size</code>,
+                        <em>hid_t</em> <code>memb_fapl_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the file access property list to use the family driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_family</code> sets the file access property list 
+        identifier, <code>fapl_id</code>, to use the family driver.
+        <p>
+        <code>memb_size</code> is the size in bytes of each file member.  Because 
+        this size is not saved in the file, it is used both for creating a new 
+        file, for re-opening and for extending an existing file.
+        <p>
+        When re-opening an existing family file, if there is only one member file,
+        the library allows this <code>memb_size</code> to be bigger than or equal to
+        the size of existing member file; if there are more than one member file, 
+        the library sets the <code>memb_size</code> to be equal to the size of first 
+        existing member file internally.  In either case, no <code>memb_size</code> 
+        smaller than the size of existing member file is allowed.  If this happens, 
+        the library will adjust the <code>memb_size</code> to the first existing 
+        member file size internally instead of returning error.
+        <p>
+        For example, if the total file size is 1MB and the only existing member 
+        file size is 1MB, <code>memb_size</code> can be bigger than or equal to 
+        1MB.  If the first member file size is 0.6MB and the second one is 0.4MB,
+        the library will set <code>memb_size</code> to 0.6MB internally no matter
+        what value the user passes in.
+        <p>
+        <code>memb_fapl_id</code> is the identifier of the 
+        file access property list to be used for each family member. 
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em> hsize_t</em> <code>memb_size</code></td>
+            <td valign="top">IN: Size in bytes of each file member.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>memb_fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of file access property list for each 
+                    family member.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_family_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_family_f(prp_id, imemb_size, memb_plist, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)   :: prp_id    ! Property list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: memb_size ! Logical size, in bytes,
+                                            ! of each family member
+  INTEGER(HID_T), INTENT(IN) :: memb_plist  ! Identifier of the file 
+                                            ! access property list to be
+                                            ! used for each family member
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fapl_family_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+
+

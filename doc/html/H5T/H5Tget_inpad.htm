@@ -1,0 +1,55 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_inpad" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetInpad">H5Tget_inpad</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5T_pad_t </em><code>H5Tget_inpad</code>(<em>hid_t </em><code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the internal padding type for unused bits in floating-point datatypes.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_inpad</code> retrieves the internal padding type for 
+        unused bits in floating-point datatypes.
+        Valid padding types are:
+        <ul> <dl>
+            <dt>H5T_PAD_ZERO (<code>0</code>)
+               <dd>Set background to zeros.
+            <dt>H5T_PAD_ONE (<code>1</code>)
+               <dd>Set background to ones.
+            <dt>H5T_PAD_BACKGROUND (<code>2</code>)
+               <dd>Leave background alone.
+        </dl> </ul>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a valid padding type if successful;
+        otherwise <code>H5T_PAD_ERROR</code> (-1).
+<dt><strong>Fortran90 Interface:</strong> h5tget_inpad_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_inpad_f(type_id, padtype, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: padtype       ! Padding type for unused bits 
+                                        ! in floating-point datatypes
+                                        ! Possible values of padding type are:
+                                        !     H5T_PAD_ZERO_F = 0
+                                        !     H5T_PAD_ONE_F = 1
+                                        !     H5T_PAD_BACKGROUND_F = 2
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_inpad_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

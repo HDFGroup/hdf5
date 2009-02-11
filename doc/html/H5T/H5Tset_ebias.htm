@@ -1,0 +1,46 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tset_ebias" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetEbias">H5Tset_ebias</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tset_ebias</code>(<em>hid_t </em><code>type_id</code>,
+        <em>size_t</em> <code>ebias</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the exponent bias of a floating-point type.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_ebias</code> sets the exponent bias of a floating-point type.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>ebias</code></td>
+            <td valign="top">Exponent bias value.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tset_ebias_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_ebias_f(type_id, ebias, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(IN) :: ebias          ! Datatype exponent bias 
+                                        ! of a floating-point type, 
+                                        ! which cannot be 0
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tset_ebias_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

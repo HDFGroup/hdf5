@@ -1,0 +1,64 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5redeploy" -->
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong> <a name="Tools-Redeploy">h5redeploy</a>
+<dt><strong>Syntax:</strong>
+    <dd><code>h5redeploy </code>
+        [<code>help </code> | <code>-help</code>] 
+    <dd><code>h5redeploy </code>
+        [<code>-echo</code>] 
+        [<code>-force</code>] 
+        [<code>-prefix=</code><em>dir</em>]
+        [<code>-tool=</code><em>tool</em>]
+        [<code>-show</code>]
+<dt><strong>Purpose:</strong>
+    <dd>Updates HDF5 compiler tools after an HDF5 software installation
+        in a new location.
+<dt><strong>Description:</strong>
+    <dd><code>h5redeploy</code> updates the HDF5 compiler tools after 
+        the HDF5 software has been installed in a new location.
+
+<dt><strong>Options and Parameters:</strong>
+    <dl>
+        <dt><code>help</code>, <code>-help</code>
+            <dd>Prints a help message.
+        <dt><code>-echo</code>
+            <dd>Shows all the shell commands executed.
+        <dt><code>-force</code>
+            <dd>Performs the requested action without offering any prompt 
+	        requesting confirmation.
+        <dt><code>-prefix=</code><em>dir</em>
+            <dd>Specifies a new directory in which to find the 
+	        HDF5 subdirectories <code>lib/</code> and 
+		<code>include/</code>.<br> 
+		(Default: current working directory)
+        <dt><code>-tool=</code><em>tool</em>
+            <dd>Specifies  the tool to update. 
+	        <em>tool</em> must be in the current directory
+                 and must be writable.<br>
+		(Default: <code>h5cc</code>)
+        <dt><code>-show</code>
+            <dd>Shows all of the shell commands to be executed 
+	        without actually executing them.
+    </dl>
+<dt><strong>History:</strong>
+    	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>Command Line Tool</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Tool introduced in this release.</td></tr>
+    </table></ul>
+<!--
+<dt><strong>Current Status:</strong>
+    <dd>
+<dt><strong>See Also:</strong>
+    <dd>
+-->
+</dl>
+

@@ -1,0 +1,81 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Awrite" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Write">H5Awrite</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Awrite</code>(<em>hid_t</em> <code>attr_id</code>,
+        <em>hid_t</em> <code>mem_type_id</code>,
+        <em>const void *</em><code>buf</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Writes data to an attribute.
+<dt><strong>Description:</strong>
+    <dd><code>H5Awrite</code> writes an attribute, specified with 
+        <code>attr_id</code>.  The attribute's memory datatype 
+        is specified with <code>mem_type_id</code>.  The entire 
+        attribute is written from <code>buf</code> to the file. 
+        <p>
+        Datatype conversion takes place at the time of a read or write
+        and is automatic.  See the
+        <a href="Datatypes.html#Datatypes-DataConversion">Data Conversion</a> 
+        section of <cite>The Data Type Interface (H5T)</cite> in the 
+        <cite>HDF5 User's Guide</cite> for a discussion of 
+        data conversion, including the range of conversions currently 
+        supported by the HDF5 libraries.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>attr_id</code></td>
+            <td valign="top">IN: Identifier of an attribute to write.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>mem_type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the attribute datatype (in memory).</td></tr>
+        <tr>
+		    <td valign="top"><em>const void *</em><code>buf</code></td>
+            <td valign="top">IN: Data to be written.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5awrite_f
+    <dd>
+	<pre>
+SUBROUTINE h5awrite_f(attr_id, memtype_id,  buf, dims, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: attr_id    ! Attribute identifier 
+  INTEGER(HID_T), INTENT(IN) :: memtype_id ! Attribute datatype 
+                                           ! identifier  (in memory)
+  TYPE, INTENT(IN) :: buf                  ! Data buffer; may be a scalar or 
+                                           ! an array
+  DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims 
+                                           ! Array to hold corresponding 
+                                           ! dimension sizes of data buffer buf;
+                                           ! dim(k) has value of the k-th 
+                                           ! dimension of buffer buf;
+                                           ! values are ignored if buf is 
+                                           ! a scalar
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code:
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5awrite_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>Fortran90</strong></td></tr>
+        <tr>
+          <td valign="top">1.4.2</td>
+          <td valign="top">
+            The <code>dims</code> parameter was added in this release.</td></tr>
+    </table></ul>
+</dl>

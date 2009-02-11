@@ -1,0 +1,63 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_size" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetSize">H5Pget_size</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Pget_size</code>(
+               <em>hid_t</em> <code>id</code>,
+               <em>const char *</em><code>name</code>,
+               <em>size_t *</em><code>size</code>
+		)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Queries the size of a property value in bytes.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_size</code> retrieves the size of a 
+    property's value in bytes.  This function operates on both 
+    property lists and property classes
+	
+    <p>
+    Zero-sized properties are allowed and return <code>0</code>.  
+	
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>id</code></td>
+        <td>IN: Identifier of property object to query</td></tr>
+    <tr>
+        <td><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td>IN: Name of property to query</td></tr>
+    <tr>
+        <td><em>size_t *</em><code>size</code></td>
+        <td>OUT: Size of property in bytes</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <dt><strong>Fortran90 Interface:</strong> h5pget_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_size_f(prp_id, name, size, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to query
+  INTEGER(SIZE_T), INTENT(OUT) :: size  ! Size in bytes
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,80 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Sget_select_hyper_blocklist" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectHyperBlockList">H5Sget_select_hyper_blocklist</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Sget_select_hyper_blocklist</code>(<em>hid_t </em><code>space_id</code>,
+        <em>hsize_t </em><code>startblock</code>,
+        <em>hsize_t </em><code>numblocks</code>,
+        <em>hsize_t *</em><code>buf</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Gets the list of hyperslab blocks currently selected.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sget_select_hyper_blocklist</code> returns a list of 
+        the hyperslab blocks currently selected.  Starting with the 
+        <code>startblock</code>-th block in the list of blocks,
+        <code>numblocks</code> blocks are put into the user's buffer.
+        If the user's buffer fills up before <code>numblocks</code>
+        blocks are inserted, the buffer will contain only as many 
+        blocks as fit.
+        <p>
+        The block coordinates have the same dimensionality (rank) 
+        as the dataspace they are located within.  The list of blocks 
+        is formatted as follows: 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            &lt;"start" coordinate&gt;, immediately followed by 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            &lt;"opposite" corner coordinate&gt;, followed by 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            the next "start" and "opposite" coordinates, 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            etc. 
+            <br>
+        until all of the selected blocks have been listed.
+        <p>
+        No guarantee is implied as the order in which blocks are listed.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+          <td valign="top">IN: Dataspace identifier of selection to query.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t&nbsp;</em><code>startblock&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Hyperslab block to start with.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t </em><code>numblocks</code></td>
+          <td valign="top">IN: Number of hyperslab blocks to get.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t *</em><code>buf</code></td>
+          <td valign="top">OUT: List of hyperslab blocks selected.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5sget_select_hyper_blocklist_f
+    <dd>
+	<pre>
+SUBROUTINE h5sget_select_hyper_blocklist_f(space_id, startblock, num_blocks,
+                                           buf, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)   :: space_id   ! Dataspace identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: startblock ! Hyperslab block to start with
+  INTEGER, INTENT(OUT) :: num_blocks         ! Number of hyperslab blocks to 
+                                             ! get in the current hyperslab 
+                                             ! selection
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: buf
+                                             ! List of hyperslab blocks selected
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code
+END SUBROUTINE h5sget_select_hyper_blocklist_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

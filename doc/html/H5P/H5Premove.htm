@@ -1,0 +1,66 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Premove" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Remove">H5Premove</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Premove</code>(
+                  <em>hid_t</em> <code>plid</code>;
+                  <em>const char *</em><code>name</code>
+		)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Removes a property from a property list.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Premove</code> removes a property from a property list.  
+	
+    <p>
+    Both properties which were in existence when the property list 
+    was created (i.e. properties registered with <code>H5Pregister</code>) 
+    and properties added to the list after it was created (i.e. added 
+    with <code>H5Pinsert</code>) may be removed from a property list.  
+    Properties do not need to be removed from a property list before the 
+    list itself is closed; they will be released automatically when 
+    <code>H5Pclose</code> is called.
+	
+    <p>
+    If a <code>close</code> callback exists for the removed property, 
+    it will be called before the property is released.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>plid</code></td>
+        <td>IN: Identifier of the property list to modify</td></tr>
+    <tr>
+        <td><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td>IN: Name of property to remove</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <dt><strong>Fortran90 Interface:</strong> h5premove_f
+    <dd>
+	<pre>
+SUBROUTINE h5premove_f(plid, name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plid   ! Property list identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name ! Name of property to remove
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5premove_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+

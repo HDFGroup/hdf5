@@ -1,0 +1,125 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tregister" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Register">H5Tregister</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tregister</code>(<em>H5T_pers_t</em> <code>pers</code>, 
+        <em>const char *</em> <code>name</code>, 
+        <em>hid_t </em><code>src_id</code>,
+        <em>hid_t</em> <code>dst_id</code>,
+        <em>H5T_conv_t</em> <code>func</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Registers a conversion function.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tregister</code> registers a hard or soft conversion function 
+        for a datatype conversion path.  
+        <p>
+        The parameter <code>pers</code> indicates whether a conversion function 
+        is <em>hard</em> (<code>H5T_PERS_HARD</code>) 
+        or <em>soft</em> (<code>H5T_PERS_SOFT</code>).
+        <p>
+        A conversion path can have only one hard function.
+        When <code>pers</code> is <code>H5T_PERS_HARD</code>, 
+        <code>func</code> replaces any previous hard function.
+        If  <code>pers</code> is <code>H5T_PERS_HARD</code> and 
+        <code>func</code> is the null pointer, then any hard function 
+        registered for this path is removed.  
+        <p>
+        When <code>pers</code> is <code>H5T_PERS_SOFT</code>, 
+        <code>H5Tregister</code> 
+        adds the function to the end of the master soft list and replaces 
+        the soft function in all applicable existing conversion paths. 
+        Soft functions are used when determining which conversion function 
+        is appropriate for this path.  
+        <p>
+        The <code>name</code> is used only for debugging and should be a 
+        short identifier for the function.  
+        <p>
+        The path is specified by the source and destination datatypes 
+        <code>src_id</code> and <code>dst_id</code>.  
+        For soft conversion functions, only the class of these types is important.
+        <p>
+        The type of the conversion function pointer is declared as:
+        <dir>
+<pre><code>typedef</code> <em>herr_t </em>(<code>*H5T_conv_t</code>) (<em>hid_t </em><code>src_id</code>, 
+                              <em>hid_t </em><code>dst_id</code>, 
+                              <em>H5T_cdata_t *</em><code>cdata</code>,
+                              <em>size_t </em><code>nelmts</code>, 
+                              <em>size_t </em><code>buf_stride</code>, 
+                              <em>size_t </em><code>bkg_stride</code>, 
+                              <em>void *</em><code>buf</code>, 
+                              <em>void *</em><code>bkg</code>,
+                              <em>hid_t </em><code>dset_xfer_plist</code>)</pre>
+        </dir>
+        <p>
+        The <code>H5T_cdata_t</code> struct is declared as:
+        <dir>
+<pre><code>typedef</code> <em>struct </em><code>*H5T_cdata_t</code> (<em>H5T_cmd_t </em><code>command</code>, 
+                             <em>H5T_bkg_t </em><code>need_bkg</code>, 
+                             <em>hbool_t *</em><code>recalc</code>,
+                             <em>void *</em><code>priv</code>)</pre>
+        </dir>
+        <p>
+        The <code>H5T_conv_t</code> parameters and 
+        the elements of the <code>H5T_cdata_t</code> struct
+        are described more fully in the 
+        &ldquo;<a href="Datatypes.html#Datatypes-DataConversion" 
+        target="WinUG">Data Conversion</a>&rdquo; 
+        section of&nbsp; &ldquo;The Datatype Interface (H5T)&rdquo; 
+        in the <cite>HDF5 User's Guide</cite>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5T_pers_t</em> <code>pers</code></td>
+            <td valign="top"><code>H5T_PERS_HARD</code> for hard conversion functions;
+                <code>H5T_PERS_SOFT</code> for soft conversion functions.</td></tr>
+        <tr>
+		    <td valign="top"><em>const char *</em> <code>name</code></td>
+            <td valign="top">Name displayed in diagnostic output.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>src_id</code></td>
+            <td valign="top">Identifier of source datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dst_id</code></td>
+            <td valign="top">Identifier of destination datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_conv_t</em>&nbsp;<code>func&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Function to convert between source and destination datatypes.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.3</td>
+          <td valign="top">
+			The following change occurred in the 
+			<code>H5Tconv_t</code> function:<br>
+                        &nbsp;&nbsp;
+			<code>nelmts</code> parameter type changed to 
+			<em>size_t</em>.</td></tr>
+    </table></ul>
+</dl>
+

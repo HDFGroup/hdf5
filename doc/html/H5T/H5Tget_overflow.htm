@@ -1,0 +1,41 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_overflow" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetOverflow">H5Tget_overflow</a>
+<dt><strong>Signature:</strong>
+
+
+H5Tget_overflow ()
+    <dd><em>H5T_overflow_t</em> <code>H5Tget_overflow</code>(<code>void</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Returns a pointer to the current global overflow function.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_overflow</code> returns a pointer 
+        to the current global overflow function.
+        This is an application-defined function that is called whenever a 
+        datatype conversion causes an overflow. 
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt>None.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a pointer to an application-defined function if successful.
+        Otherwise returns NULL; this can happen if no overflow handling
+        function is registered.  
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

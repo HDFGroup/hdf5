@@ -1,0 +1,79 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tset_strpad" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetStrpad">H5Tset_strpad</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tset_strpad</code>(<em>hid_t </em><code>type_id</code>,
+        <em>H5T_str_t</em> <code>strpad</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Defines the storage mechanism for character strings.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_strpad</code> defines the storage mechanism for the string.
+        <p>
+        The method used to store character strings differs with the 
+        programming language: 
+        <ul>
+            <li>C usually null terminates strings while 
+            <li>Fortran left-justifies and space-pads strings.
+        </ul>
+        Valid string padding values, as passed in the parameter 
+        <code>strpad</code>, are as follows:
+        <ul> <dl>
+            <dt>H5T_STR_NULLTERM (<code>0</code>)
+               <dd>Null terminate (as C does)
+            <dt>H5T_STR_NULLPAD (<code>1</code>)
+               <dd>Pad with zeros 
+            <dt>H5T_STR_SPACEPAD (<code>2</code>)
+               <dd>Pad with spaces (as FORTRAN does)
+        </dl> </ul>
+        <p>
+        When converting from a longer string to a shorter string,
+        the behavior is as follows.
+        If the short string is <code>H5T_STR_NULLPAD</code> or 
+        <code>H5T_STR_SPACEPAD</code>, then the string is simply truncated. 
+        If the short string is <code>H5T_STR_NULLTERM</code>, it is
+        truncated and a null terminator is appended.  
+        <p>
+        When converting from a shorter string to a longer string,
+        the long string is padded on the end by appending nulls or spaces.
+
+
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to modify.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_str_t</em>&nbsp;<code>strpad&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">String padding type.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tset_strpad_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_strpad_f(type_id, strpad, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id 
+                                 ! Datatype identifier 
+  INTEGER, INTENT(IN) :: strpad  ! String padding method for a string datatype 
+                                 ! Possible values of padding type are:
+                                 !    Pad with zeros (as C does): 
+                                 !       H5T_STR_NULLPAD_F(0)
+                                 !    Pad with spaces (as FORTRAN does): 
+                                 !       H5T_STR_SPACEPAD_F(1)
+  INTEGER, INTENT(OUT) :: hdferr ! Error code
+END SUBROUTINE h5tset_strpad_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

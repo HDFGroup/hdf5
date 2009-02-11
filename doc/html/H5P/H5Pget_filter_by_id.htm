@@ -1,0 +1,119 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_filter_by_id" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFilterById">H5Pget_filter_by_id</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_filter_by_id</code>(
+            <em>hid_t</em> <code>plist_id</code>,
+            <em>H5Z_filter_t</em> <code>filter</code>,
+            <em>unsigned int *</em><code>flags</code>,
+            <em>size_t *</em><code>cd_nelmts</code>,
+            <em>unsigned int</em> <code>cd_values[]</code>,
+            <em>size_t</em> <code>namelen</code>,
+            <em>char </em><code>name[]</code>
+            )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns information about the specified filter.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_filter_by_id</code> returns information about the
+        filter specified in <code>filter</code>, a filter identifier. 
+	<p>
+	<code>plist_id</code> must identify a dataset creation property list
+	and <code>filter</code> will be in a permanent filter pipeline.
+	<p>
+	The <code>filter</code> and <code>flags</code> parameters are used 
+	in the same manner as described in the discussion of
+	<a href="#Property-SetFilter"><code>H5Pset_filter</code></a>.
+	<p>
+	Aside from the fact that they are used for output, the 
+	parameters <code>cd_nelmts</code> and <code>cd_values[]</code> are 
+        used in the same manner as described in the discussion 
+	of <a href="#Property-SetFilter"><code>H5Pset_filter</code></a>.
+	On input, the <code>cd_nelmts</code> parameter indicates the 
+	number of entries in the <code>cd_values[]</code> array
+	allocated by the calling program; on exit it contains the
+        number of values defined by the filter.
+ 	<p>
+	On input, the <code>name_len</code> parameter indicates the 
+	number of characters allocated for the filter name 
+	by the calling program in the array <code>name[]</code>.
+	On exit it contains the length in characters of name of the filter.
+	On exit <code>name[]</code> contains the name of the filter
+        with one character of the name in each element of the array.
+	<p>
+        If the filter specified in <code>filter</code> is not
+        set for the property list, an error will be returned
+	and <code>H5Pget_filter_by_id</code> will fail.
+ <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5Z_filter_t</em> <code>filter</code></td>
+            <td valign="top">IN: Filter identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned int *</em><code>flags</code></td>
+            <td valign="top">OUT:  Bit vector specifying certain general properties
+                of the filter.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>cd_nelmts</code></td>
+            <td valign="top">IN/OUT: Number of elements in <code>cd_values</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;unsigned&nbsp;int</em>&nbsp;<code>cd_values[]&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Auxiliary data for the filter.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>namelen</code></td>
+            <td valign="top">IN/OUT: Length of filter name and 
+	        number of elements in <code>name[]</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>char</em> <code>name[]</code></td>
+            <td valign="top">OUT: Name of filter.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+<!-- NEW PAGE -->
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_filter_by_id_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_filter_by_id_f(prp_id, filter_id, flags, cd_nelmts,
+                                 cd_values, namelen, name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier
+  INTEGER, INTENT(IN)        :: filter_id   ! Filter identifier
+  INTEGER(SIZE_T), INTENT(INOUT)     :: cd_nelmts  
+                                            ! Number of elements in cd_values
+  INTEGER, DIMENSION(*), INTENT(OUT) :: cd_values  
+                                            ! Auxiliary data for the filter
+  INTEGER, INTENT(OUT)          :: flags    ! Bit vector specifying certain 
+                                            ! general properties of the filter
+  INTEGER(SIZE_T), INTENT(IN)   :: namelen  ! Anticipated number of characters 
+                                            ! in name
+  CHARACTER(LEN=*), INTENT(OUT) :: name     ! Name of the filter
+  INTEGER, INTENT(OUT)          :: hdferr   ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_filter_by_id_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

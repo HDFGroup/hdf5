@@ -1,0 +1,76 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_vfd_handle" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetVfdHandle">H5Fget_vfd_handle</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Fget_vfd_handle</code>(<em>hid_t</em> <code>file_id</code>,
+                <em>hid_t</em> <code>fapl_id</code>,
+                <em>void **</em><code>file_handle</code>
+                )
+<dt><strong>Purpose:</strong>
+    <dd>Returns pointer to the file handle from the virtual file driver.
+<dt><strong>Description:</strong>
+    <dd>Given the file identifier <code>file_id</code> and 
+    the file access property list <code>fapl_id</code>, 
+    <code>H5Fget_vfd_handle</code> returns a pointer to the file handle 
+    from the low-level file driver currently being used by the 
+    HDF5 library for file I/O.
+<dt><strong>Notes:</strong>
+    <dd>Users are not supposed to modify any file through this file handle.
+    <p>
+    This file handle is dynamic and is valid only while the file remains
+    open; it will be invalid if the file is closed and reopened or 
+    opened during a subsequent session.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>file_id</code></td>
+            <td valign="top">IN: Identifier of the file to be queried.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list  identifier.
+	        For most drivers, the value will be <code>H5P_DEFAULT</code>. 
+		    For the <code>FAMILY</code> or <code>MULTI</code> drivers,
+		    this value should be defined through the property list
+		    functions: 
+		    <code>H5Pset_family_offset</code> for the <code>FAMILY</code> 
+		    driver and <code>H5Pset_multi_type</code> for the 
+		    <code>MULTI</code> driver.</td></tr>
+        <tr>
+            <td valign="top"><em>void&nbsp;**</em><code>file_handle&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to the file handle being used by 
+	        the low-level virtual file driver.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

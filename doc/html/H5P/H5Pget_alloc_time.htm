@@ -1,0 +1,96 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_alloc_time" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetAllocTime">H5Pget_alloc_time</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pget_alloc_time</code>(<em>hid_t</em> <code>plist_id</code>,
+            <em>H5D_alloc_time_t *</em><code>alloc_time</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves the timing for storage space allocation.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_alloc_time</code> retrieves the timing for allocating 
+        storage space for a dataset's raw data.  
+	This property is set in the dataset creation property list 
+	<code>plist_id</code>.
+        <p>
+	The timing setting is returned in <code>alloc_time</code> as one of the 
+	following values:
+	<table border=0 >
+           <tr valign="top"><td rowspan="4">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	     <code>H5D_ALLOC_TIME_DEFAULT</code>&nbsp;&nbsp; 
+             </td><td>
+	     Uses the default allocation time, based on the dataset storage method.<br>
+	     See the <code>alloc_time</code> description in 
+	     <a href="#Property-SetAllocTime">H5Pset_alloc_time</a> for 
+	     default allocation times for various storage methods.
+	   </td></tr><tr valign="top"><td>
+             <code>H5D_ALLOC_TIME_EARLY</code>
+             </td><td>
+             All space is allocated when the dataset is created.
+	   </td></tr><tr valign="top"><td>
+	     <code>H5D_ALLOC_TIME_INCR</code>&nbsp;&nbsp; 
+             </td><td>
+	     Space is allocated incrementally as data is written to the dataset.
+	   </td></tr><tr valign="top"><td>
+             <code>H5D_ALLOC_TIME_LATE</code>
+             </td><td>
+             All space is allocated when data is first written to the dataset.
+ 	</td></tr></table>
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pget_alloc_time</code> is designed to work in concert  
+        with the dataset fill value and fill value write time properties, 
+	set with the functions 
+	<code>H5Pget_fill_value</code> and <code>H5Pget_fill_time</code>.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5D_alloc_time_t&nbsp;*</em><code>alloc_time&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: When to allocate dataset storage space.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_alloc_time_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_alloc_time_f(plist_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id   ! Dataset creation
+                                           ! property list identifier
+  INTEGER(HSIZE_T), INTENT(OUT) :: flag    ! Allocation time flag
+                                           ! Possible values are:
+                                           !    H5D_ALLOC_TIME_ERROR_F
+                                           !    H5D_ALLOC_TIME_DEFAULT_F
+                                           !    H5D_ALLOC_TIME_EARLY_F
+                                           !    H5D_ALLOC_TIME_LATE_F
+                                           !    H5D_ALLOC_TIME_INCR_F
+  INTEGER, INTENT(OUT)       :: hdferr     ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_alloc_time_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

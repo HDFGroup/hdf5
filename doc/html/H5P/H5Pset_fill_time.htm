@@ -1,0 +1,91 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_fill_time" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFillTime">H5Pset_fill_time</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pset_fill_time</code>(<em>hid_t</em> <code>plist_id</code>,
+            <em>H5D_fill_time_t</em> <code>fill_time</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the time when fill values are written to a dataset.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fill_time</code> sets up the timing for writing fill values 
+        to a dataset.  
+	This property is set in the dataset creation property list <code>plist_id</code>.
+        <p>
+	Timing is specified in <code>fill_time</code> with one of the following values:
+	<table border=0 >
+           <tr valign="top"><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	     <code>H5D_FILL_TIME_IFSET</code>&nbsp;&nbsp; 
+             </td><td>
+	     Write fill values to the dataset when storage space is allocated 
+	     only if there is a user-defined fill value, i.e., one set with 
+	     <a href="#Property-SetFillValue">H5Pset_fill_value</a>.
+	     &nbsp;&nbsp;(Default)
+	   </td></tr><tr valign="top"><td>&nbsp;</td><td>
+	     <code>H5D_FILL_TIME_ALLOC</code>
+             </td><td>
+	     Write fill values to the dataset when storage space is allocated.
+	   </td></tr><tr valign="top"><td>&nbsp;</td><td>
+             <code>H5D_FILL_TIME_NEVER</code>
+             </td><td>
+             Never write fill values to the dataset.
+ 	</td></tr></table>
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pset_fill_time</code> is designed for coordination 
+        with the dataset fill value and 
+	dataset storage allocation time properties, set with the functions 
+	<code>H5Pset_fill_value</code> and <code>H5Pset_alloc_time</code>.
+	<p>
+	See <a href="RM_H5D.html#Dataset-Create">H5Dcreate</a> for 
+	further cross-references.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5D_fill_time_t</em>&nbsp;<code>fill_time&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: When to write fill values to a dataset.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fill_time_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fill_time_f(plist_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! Dataset creation property
+                                         ! list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: flag   ! File time flag
+                                         ! Possible values are:
+                                         !    H5D_FILL_TIME_ERROR_F
+                                         !    H5D_FILL_TIME_ALLOC_F
+                                         !    H5D_FILL_TIME_NEVER_F
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fill_time_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

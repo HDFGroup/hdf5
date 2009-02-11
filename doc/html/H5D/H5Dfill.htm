@@ -1,0 +1,95 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dfill" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-Fill">H5Dfill</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Dfill</code>(
+        <em>const void *</em><code>fill</code>,
+        <em>hid_t </em><code>fill_type_id</code>,
+        <em>void *</em><code>buf</code>,
+        <em>hid_t </em><code>buf_type_id</code>,
+        <em>hid_t </em><code>space_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Fills dataspace elements with a fill value in a memory buffer.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dfill</code> explicitly fills 
+        the dataspace selection in memory, <code>space_id</code>, 
+        with the fill value specified in <code>fill</code>.
+        If <code>fill</code> is <code>NULL</code>, 
+        a fill value of <code>0</code> (zero) is used.
+        <p>
+	<code>fill_type_id</code> specifies the datatype 
+	of the fill value.<br>
+	<code>buf</code> specifies the buffer in which 
+	the dataspace elements will be written.<br>
+	<code>buf_type_id</code> specifies the datatype of 
+	those data elements.
+	<p>
+        Note that if the fill value datatype differs 
+        from the memory buffer datatype, the fill value 
+        will be converted to the memory buffer datatype 
+        before filling the selection.
+<dt><strong>Note:</strong>
+    <dd>Applications sometimes write data only to portions of 
+	an allocated dataset.  It is often useful in such cases 
+	to fill the unused space with a known 
+	<span class="termEmphasis">fill value</span>.  
+	See <a href="RM_H5P.html#Property-SetFillValue">H5Pset_fill_value</a>
+	for further discussion.  
+	Other related functions include
+	<a href="RM_H5P.html#Property-GetFillValue">H5Pget_fill_value</a>,
+	<a href="RM_H5P.html#Property-FillValueDefined">H5Pfill_value_defined</a>,
+	<a href="RM_H5P.html#Property-SetFillTime">H5Pset_fill_time</a>,
+	<a href="RM_H5P.html#Property-GetFillTime">H5Pget_fill_time</a>,
+	and
+	<a href="#Dataset-Create">H5Dcreate</a>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>const void *</em><code>fill</code></td>
+            <td valign="top">IN: Pointer to the fill value to be used.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t&nbsp;</em><code>fill_type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN:  Fill value datatype identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em><code>buf</code></td>
+            <td valign="top">IN/OUT: Pointer to the memory buffer containing the 
+                selection to be filled.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t </em><code>buf_type_id</code></td>
+            <td valign="top">IN: Datatype of dataspace elements to be filled.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t </em><code>space_id</code></td>
+            <td valign="top">IN: Dataspace describing memory buffer and 
+                    containing the selection to be filled.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5dfill_f
+    <dd>
+	<pre>
+SUBROUTINE h5dfill_f(fill_value, space_id, buf, hdferr)
+  IMPLICIT NONE
+  TYPE, INTENET(IN) :: fill_value        ! Fill value; may be have one of the
+                                         ! following types:
+                                         ! INTEGER, REAL, DOUBLE PRECISION, 
+                                         ! CHARACTER
+  INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier 
+  TYPE, DIMENSION(*) :: buf              ! Memory buffer to fill in; must have
+                                         ! the same datatype as fill value
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code  
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5dfill_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

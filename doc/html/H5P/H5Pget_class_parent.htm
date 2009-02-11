@@ -1,0 +1,50 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_class_parent" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetClassParent">H5Pget_class_parent</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Pget_class_parent</code>(
+                  <em>hid_t</em> <code>pcid</code>
+	)
+	
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves the parent class of a property class.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_class_parent</code> retrieves an identifier for the 
+	parent class of a property class.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em>&nbsp;<code>pcid&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td>IN: Identifier of the property class to query</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a valid parent class object identifier
+    <dd>Failure: a negative value
+
+  <dt><strong>Fortran90 Interface:</strong> h5pget_class_parent_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_class_parent_f(prp_id, parent_id, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier 
+  INTEGER(HID_T), INTENT(OUT) :: parent_id ! Parent class property list 
+                                           ! identifier
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_class_parent_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

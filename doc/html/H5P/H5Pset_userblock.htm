@@ -1,0 +1,48 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_userblock" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetUserblock">H5Pset_userblock</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pset_userblock</code>(<em>hid_t</em> <code>plist</code>,
+            <em>hsize_t</em> <code>size</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets user block size.
+  <dt><strong>Description:</strong>
+        <dd><code>H5Pset_userblock</code> sets the user block size of a 
+            file creation property list.  
+            The default user block size is 0; it may be set to any 
+            power of 2 equal to 512 or greater (512, 1024, 2048, etc.).
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of property list to modify.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em>&nbsp;<code>size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Size of the user-block in bytes.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_userblock_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_userblock_f (prp_id, size, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: size  ! Size of the user-block in bytes
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_userblock_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

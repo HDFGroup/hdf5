@@ -1,0 +1,483 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5perf" -->
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong> <a name="Tools-Perf">h5perf</a>
+<dt><strong>Syntax:</strong>
+    <dd><code>h5perf </code>[<code>-h </code>|<code> --help</code>]
+    <dd><code>h5perf </code>[<em>options</em>]
+
+    <p>
+<dt><strong>Purpose:</strong>
+    <dd>Tests Parallel HDF5 performance.
+    <p>
+<dt><strong>Description:</strong>
+    <dd><code>h5perf</code> is a tool for testing the performance
+        of the Parallel HDF5 Library.
+        The tool can perform testing with 1-dimensional and 2-dimensional 
+        buffers and datasets.
+        For details regarding data organization and access, see 
+        &ldquo;<a href="http://hdfgroup.org/HDF5/doc_resource/h5perf_parallel/h5perf_parallel.pdf">h5perf,
+        a Parallel File System Benchmarking Tool</a>.&rdquo;
+        <p>
+        The following environment variables have the following 
+        effects on <code>h5perf</code> behavior:
+        <table border=0>
+          <tr align="left" valign="top"><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+            <code>HDF5_NOCLEANUP</code></td><td>
+            If set, <code>h5perf</code> does not remove data files. 
+            <br>
+            (<i>Default:</i> Data files are removed.)
+            </td></tr>
+          <tr align="left" valign="top"><td>&nbsp;</td><td>
+            <code>HDF5_MPI_INFO</code></td><td>
+            Must be set to a string containing a list of semi-colon separated 
+            <code>key=value</code> pairs for the MPI <code>INFO</code> object.
+            <br>
+            Example:</td></tr>
+          <tr align="left" valign="top"><td>&nbsp;</td><td>
+            <code>HDF5_PARAPREFIX&nbsp;&nbsp;</code></td><td>
+            Sets the prefix for parallel output data files.</td></tr>
+        </table>
+
+    <p>
+<dt><strong>Options and Parameters:</strong>    
+
+    <ul>
+      <table width="100%">
+        <tr>
+          <td valign="top" colspan="2">These terms are used as follows in  this section:</td></tr>
+        <tr>
+          <td valign="top"><em>file&nbsp;&nbsp;</em></td>
+          <td valign="top">A filename</td></tr>
+        <tr>
+          <td valign="top"><em>size</em></td>
+          <td valign="top">A size specifier, expressed as an integer 
+              greater than or equal to 0 (zero) followed by a size indicator:
+              <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                <code>K </code> for kilobytes (1024 bytes)
+              <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                <code>M </code> for megabytes (1048576 bytes)
+              <br>&nbsp;&nbsp;&nbsp;&nbsp;
+                <code>G </code> for gigabytes (1073741824 bytes)
+              <br>
+              Example: <code>37M</code> specifies 37 megabytes or 
+              38797312 bytes.</td></tr>
+        <tr>
+          <td valign="top"><em>N</em></td>
+          <td valign="top">An integer greater than or equal 
+              to 0 (zero)</td></tr>
+      </table><br>
+
+      <table width="100%">
+        <tr> 
+          <td valign="top" colspan="2"><code>-h</code>, <code>--help</code></td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top">Prints a usage message and exits.</td>
+        </tr>
+        <tr> 
+          <td colspan="2" valign="top"><code>-a</code> <em>size</em>, 
+              <code>--align=</code><em>size</em></td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top">Specifies the alignment of objects in the HDF5 file.
+            <br>
+            (<i>Default:</i> <code>1</code>)</td>
+        </tr>
+        <tr> 
+          <td colspan="2" valign="top"><code>-A</code> <em>api_list</em>, 
+              <code>--api=</code><em>api_list</em></td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top">Specifies which APIs to test. <em>api_list</em> 
+            is a comma-separated list with the following valid values: 
+            <table border="0">
+              <tr align="left" valign="top"> 
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td><code>phdf5&nbsp;&nbsp;</code></td>
+                <td>Parallel HDF5</td>
+              </tr>
+              <tr align="left" valign="top"> 
+                <td>&nbsp;</td>
+                <td><code>mpiio</code></td>
+                <td>MPI-I/O</td>
+              </tr>
+              <tr align="left" valign="top"> 
+                <td>&nbsp;</td>
+                <td><code>posix</code></td>
+                <td>POSIX</td>
+              </tr>
+            </table>
+            (<i>Default:</i> All APIs)<br> <br>
+            Example, <code>--api=mpiio,phdf5</code> specifies that the MPI I/O 
+            and Parallel HDF5 APIs are to be monitored.</td>
+        </tr>
+<!-- NEW PAGE -->
+        <tr> 
+          <td valign="top" colspan="2"><code>-B</code> <em>size</em>, 
+            <code>--block-size=</code><em>size</em></td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top">Controls the block size within the transfer buffer. 
+            <br>
+            (<i>Default:</i> Half the number of bytes per process per dataset)
+            <p>
+            Block size versus transfer buffer size: 
+            <br>
+            The <em>transfer buffer size</em> is the size of a buffer 
+            in memory. The data in that buffer is broken 
+            into <em>block size</em> pieces and written to the file.
+            <p>
+            Transfer buffer size is discussed below with the 
+            <code>-x</copde> (or <code>--min-xfer-size</code>) 
+            and <code>-X</code> (or <code>--max-xfer-size</code>) options.
+            <p>
+            The pattern in which the blocks are written to the file is 
+            described in the discussion of the <code>-I</code> 
+            (or <code>--interleaved</code>) option.<br></td>
+        </tr>
+        <tr> 
+          <td colspan="2" valign="top"><code>-c</code>, 
+              <code>--chunk</code></td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top">Creates HDF5 datasets in chunked layout. 
+            <br>
+            (<i>Default:</i> Off)</td>
+        </tr>
+        <tr> 
+          <td valign="top" colspan="2"><code>-C</code>, 
+              <code>--collective</code></td>
+        </tr>
+        <tr> 
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top">Use collective I/O for the MPI I/O and 
+            Parallel HDF5 APIs.
+            <br>
+            (<i>Default:</i> Off, i.e., independent I/O)
+            <p>
+            If this option is set and the MPI-I/O and PHDF5 APIs are in use, 
+            all the blocks of every process will be written at once 
+            with an MPI derived type.<br></td>
+        </tr>
+        <tr> 
+          <td colspan="2" valign="top"><code>-d</code> <em>N</em>, 
+              <code>--num-dsets</code><em>N</em></td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top">Sets the number of datasets per file. 
+              <br>
+              (<i>Default:</i> <code>1</code>)</td>
+        </tr>
+        <tr> 
+          <td valign="top" colspan="2"><code>-D</code> <em>debug_flags</em>, 
+            <code>--debug=</code><em>debug_flags</em></td>
+        </tr>
+        <tr> 
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top">Sets the debugging level. <em>debug_flags</em> 
+            is a comma-separated list of debugging flags with the following 
+            valid values: 
+            <table border="0">
+              <tr align="left" valign="top"> 
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td> <code>1&nbsp;&nbsp;</code></td>
+                <td>Minimal debugging</td>
+              </tr>
+              <tr align="left" valign="top"> 
+                <td>&nbsp;</td>
+                <td> <code>2</code></td>
+                <td>Moderate debugging (&ldquo;not quite everything&rdquo;)</td>
+              </tr>
+              <tr align="left" valign="top"> 
+                <td>&nbsp;</td>
+                <td> <code>3</code></td>
+                <td>Extensive debugging (&ldquo;everything&rdquo;)</td>
+              </tr>
+              <tr align="left" valign="top"> 
+                <td>&nbsp;</td>
+                <td> <code>4</code></td>
+                <td>All possible debugging (&ldquo;the kitchen sink&rdquo;)</td>
+              </tr>
+              <tr align="left" valign="top"> 
+                <td>&nbsp;</td>
+                <td> <code>r</code></td>
+                <td>Raw data I/O throughput information</td>
+              </tr>
+              <tr align="left" valign="top"> 
+                <td>&nbsp;</td>
+                <td> <code>t</code></td>
+                <td>Times, in additions to throughputs</td>
+              </tr>
+              <tr align="left" valign="top"> 
+                <td>&nbsp;</td>
+                <td> <code>v</code></td>
+                <td>Verify data correctness</td>
+              </tr>
+            </table>
+            (<i>Default:</i> No debugging)
+            <p>
+            Example: <code>--debug=2,r,t</code> specifies to run a moderate 
+            level of debugging while collecting raw data I/O throughput 
+            information and verifying the correctness of the data.
+            <p>
+            Throughput values are computed by dividing the total amount of 
+            transferred data (excluding metadata) over the time spent 
+            by the slowest process. 
+            Several time counters are defined to measure the data transfer 
+            time and the total elapsed time; the latter includes the time 
+            spent during file open and close operations.  
+            A number of iterations can be specified with the 
+            option <code>-i</code> (or <code>--num-iterations</code>) 
+            to create the desired population of measurements from which 
+            maximum, minimum, and average values can be obtained. 
+            The timing scheme is the following:
+
+            <pre>
+    for each iteration
+        initialize elapsed time counter
+        initialize data transfer time counter
+        for each file
+            start and accumulate elapsed time counter
+                file open
+                start and accumulate data transfer time counter
+                    access entire file
+                stop data transfer time counter
+                file close
+            stop elapsed time counter
+        end file
+        save elapsed time counter
+        save data transfer time counter
+    end iteration
+            </pre>
+
+            <p>
+            The reported write throughput is based on the accumulated data 
+            transfer time, while the write open-close throughput uses the 
+            accumulated elapsed time.</td>
+        </tr>
+        <tr> 
+          <td colspan="2" valign="top"><code>-e</code> <em>size</em>, 
+              <code>--num-bytes=</code><em>size</em></td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top">Specifies the number of bytes per process per 
+            dataset. 
+            <br>
+            (<i>Default:</i> <code>256K</code> for 1D, 
+            <code>8K</code> for 2D)
+            <p>
+            Depending on the selected geometry, each test dataset 
+            can be a linear array of size 
+            <em>bytes-per-process * num-processes</em> 
+            or a square array of size 
+            <em>(bytes-per-process * num-processes)</em> &times; 
+            <em>(bytes-per-process * num-processes)</em>. 
+            The number of processes is set by the 
+            <code>-p</code> (or <code>--min-num-processes</code>) and 
+            <code>-P</code> (or <code>--max-num-processes</code>) options.</td>
+        </tr>
+        <tr> 
+          <td colspan="2" valign="top"><code>-F</code> <em>N</em>, 
+            <code>--num-files=</code><em>N</em></td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top">Specifies the number of files. 
+            <br>
+            (<i>Default:</i> <code>1</code>)</td>
+        </tr>
+        <tr> 
+          <td colspan="2" valign="top"><code>-g</code>,
+            <code>--geometry</code></td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top">Selects 2D geometry for testing.
+            <br>
+            (<i>Default:</i> Off, i.e., 1D geometry)</td>
+        </tr>
+      </table>
+
+<!-- NEW PAGE -->
+      <table width="100%">
+        <tr> 
+          <td colspan="2" valign="top"><code>-i</code> <em>N</em>, 
+            <code>--num-iterations=</code><em>N</em></td>
+        </tr>
+        <tr>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top">Sets the number of iterations to perform. 
+            <br>
+            (<i>Default:</i> <code>1</code>)</td>
+        </tr>
+        <tr> 
+          <td valign="top" colspan="2"><code>-I</code>, 
+            <code>--interleaved</code></td>
+        </tr>
+        <tr> 
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top">Sets interleaved block I/O.
+            <br>
+            (<i>Default:</i> Contiguous block I/O)
+            <p>
+            Interleaved and contiguous patterns in 1D geometry:
+            <br>
+            When a contiguous access pattern is chosen, the dataset is 
+            evenly divided into <em>num-processes</em> regions and 
+            each process writes data to its assigned region. 
+            When interleaved blocks are written to a dataset, 
+            space for the first block of the first process is allocated 
+            in the dataset, then space is allocated for the first block 
+            of the second process, etc.,
+            until space is allocated for the first block of each process, 
+            then space is allocated for the second block of the first process, 
+            the second block of the second process, etc. 
+            <p>
+            For example, with a three process run, 512KB bytes-per-process, 
+            256KB transfer buffer size, and 64KB block size, 
+            each process must issue two transfer requests 
+            to complete access to the dataset.
+            <p>
+            Contiguous blocks of the first transfer request are written 
+            as follows:
+            <br><code>&nbsp;&nbsp;&nbsp;&nbsp;1111----2222----3333----</code>
+            <p>
+            Interleaved blocks of the first transfer request are written 
+            as follows:
+            <br><code>&nbsp;&nbsp;&nbsp;&nbsp;123123123123------------</code>
+            <p>
+            The actual number of I/O operations involved in a 
+            transfer request depends on the access pattern and 
+            communication mode. 
+            When using independent I/O with an interleaved access pattern, 
+            each process performs four small non-contiguous I/O operations 
+            per transfer request. If collective I/O is turned on, 
+            the combined content of the buffers of the three processes 
+            will be written using one collective I/O operation 
+            per transfer request.
+            <p>
+            For details regarding the impact of performance and 
+            access patterns in 2D, see 
+            &ldquo;<a href="http://hdfgroup.org/HDF5/doc_resource/h5perf_parallel/h5perf_parallel.pdf">h5perf,
+            a Parallel File System Benchmarking Tool</a>.&rdquo;
+</td>
+        </tr>
+      </table>
+      <table width="100%">
+        <tr> 
+          <td valign="top"><code>-m</code>, <code>--mpi-posix</code></td>
+          <td valign="top">Sets use of MPI-posix driver for HDF5 I/O. 
+            <br>
+            (<i>Default:</i> MPI-I/O driver)</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>-n</code>, <code>--no-fill</code></td>
+          <td valign="top">Specifies to not write fill values to HDF5 datasets. 
+		    This option is supported only in HDF5 Release v1.6 or later.
+            <br>
+            (<i>Default:</i> Off, i.e., write fill values)</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>-o</code> <em>file</em>, 
+            <code> --output=</code><em>file</em></td>
+          <td valign="top">Sets the output file for raw data to <em>file</em>. 
+            <br>
+            (<i>Default:</i> None)</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>-p</code> <em>N</em>, 
+            <code>--min-num-processes=</code><em>N</em></td>
+          <td valign="top">Sets the minimum number of processes to be used. 
+            <br>
+            (<i>Default:</i> <code>1</code>)</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>-P</code> <em>N</em>, 
+            <code>--max-num-processes=</code><em>N</em><br>
+            <code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>
+          </td>
+          <td valign="top">Sets the maximum number of processes to be used.
+            <br>
+            (<i>Default:</i> All <code>MPI_COMM_WORLD</code> processes)</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>-T</code> <em>size</em>, 
+            <code>--threshold=</code><em>size</em></td>
+          <td valign="top">Sets the threshold for alignment of objects in the 
+            HDF5 file. 
+            <br>
+            (<i>Default:</i> <code>1</code>)</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>-w</code>, <code>--write-only</code></td>
+          <td valign="top">Performs only write tests, not read tests. 
+            <br>
+            (<i>Default:</i> Read and write tests)</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>-x</code> <em>size</em>, 
+            <code>--min-xfer-size=</code><em>size</em></td>
+          <td valign="top">Sets the minimum transfer buffer size. 
+            <br>
+            (<i>Default:</i> Half the number of bytes per processor 
+            per dataset)
+            <p>
+            This option and the <code>-X</code>&nbsp;<em>size</em> option
+            (or <code>--max-xfer-size=</code><em>size</em>)
+            control <em>transfer-buffer-size</em>, the size of 
+            the transfer buffer in memory.
+            In 1D geometry, the transfer buffer is a linear array 
+            of size <em>transfer-buffer-size</em>. 
+            In 2D geometry, the transfer buffer is a rectangular array of size 
+            <em>block-size</em> &times; <em>transfer-buffer-size</em>, or 
+            <em>transfer-buffer-size</em> &times; <em>block-size</em> 
+            if the interleaved access pattern is selected.</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>-X</code> <em>size</em>, 
+            <code>--max-xfer-size=</code><em>size</em></td>
+          <td valign="top">Sets the maximum transfer buffer size. 
+            <br>
+            (<i>Default:</i> The number of bytes per processor 
+            per dataset)</td>
+        </tr>
+      </table>
+    </ul>
+    <p>
+<dt><strong>History:</strong>
+      <ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>Change</strong></td></tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top">
+            Tool introduced in this release.</td></tr>
+        <tr>
+          <td valign="top">1.6.8&nbsp;and&nbsp;1.8.0</td>
+          <td valign="top">
+            Option <code>-g</code>, <code>--geometry</code> introduced 
+            in this release.</td></tr>
+    </table></ul>
+<!--
+    <p>
+<dt><strong>Current Status:</strong>
+    <dd>
+    <p>
+<dt><strong>See Also:</strong>
+    <dd>
+-->
+</dl>
+
+

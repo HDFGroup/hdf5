@@ -1,0 +1,58 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tset_sign" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetSign">H5Tset_sign</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tset_sign</code>(<em>hid_t </em><code>type_id</code>,
+        <em>H5T_sign_t</em> <code>sign</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the sign property for an integer type.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_sign</code> sets the sign property for an integer type.
+        <dl> 
+          <dt>H5T_SGN_NONE (<code>0</code>)
+            <dd>Unsigned integer type.
+          <dt>H5T_SGN_2 (<code>1</code>)
+            <dd>Two's complement signed integer type.
+         </dl>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+		<tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_sign_t</em>&nbsp;<code>sign&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Sign type.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tset_sign_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_sign_f(type_id, sign, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  
+                                  ! Datatype identifier 
+  INTEGER, INTENT(IN) :: sign     ! Sign type for an integer type 
+                                  ! Possible values are:
+                                  !    Unsigned integer type 
+                                  !       H5T_SGN_NONE_F = 0
+                                  !    Two's complement signed integer type
+                                  !       H5T_SGN_2_F = 1
+                                  !    or error value 
+                                  !       H5T_SGN_ERROR_F=-1 
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+END SUBROUTINE h5tset_sign_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

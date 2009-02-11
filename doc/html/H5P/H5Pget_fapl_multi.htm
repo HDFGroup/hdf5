@@ -1,0 +1,91 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_fapl_multi" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFaplMulti">H5Pget_fapl_multi</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_fapl_multi</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>const H5FD_mem_t *</em><code>memb_map</code>,
+                     <em>const hid_t *</em><code>memb_fapl</code>,
+                     <em>const char **</em><code>memb_name</code>,
+                     <em>const haddr_t *</em><code>memb_addr</code>,
+                     <em>hbool_t *</em><code>relax</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns information about the multi-file access property list.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_fapl_multi</code> returns information about the 
+        multi-file access property list.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list 
+                identifier.</td></tr>
+        <tr>
+            <td valign="top"><em>const&nbsp;H5FD_mem_t&nbsp;*</em><code>memb_map&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Maps memory usage types to other 
+                memory usage types.</td></tr>
+        <tr>
+            <td valign="top"><em>const hid_t *</em><code>memb_fapl</code></td>
+            <td valign="top">OUT: Property list for each memory usage 
+                 type.</td></tr>
+        <tr>
+            <td valign="top"><em>const char **</em><code>memb_name</code></td>
+            <td valign="top">OUT: Name generator for names of member 
+                 files.</td></tr>
+        <tr>
+            <td valign="top"><em>const haddr_t *</em><code>memb_addr</code></td>
+            <td valign="top">OUT: The offsets within the virtual address space, 
+                from 0 (zero) to <code>HADDR_MAX</code>, 
+                at which each type of data storage begins.</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t *</em><code>relax</code></td>
+            <td valign="top">OUT: Allows read-only access to incomplete 
+                file sets when <code>TRUE</code>.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_multi_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name,
+                               memb_addr, relax, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T),INTENT(IN)   :: prp_id    ! Property list identifier
+
+  INTEGER,DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(OUT)          :: memb_map
+  INTEGER(HID_T),DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(OUT)   :: memb_fapl
+  CHARACTER(LEN=*),DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(OUT) :: memb_name
+  REAL, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(OUT)           :: memb_addr
+               ! Numbers in the interval [0,1) (e.g. 0.0 0.1 0.5 0.2 0.3 0.4)
+               ! real address in the file will be calculated as X*HADDR_MAX 
+
+  LOGICAL, INTENT(OUT) :: relax
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_fapl_multi_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

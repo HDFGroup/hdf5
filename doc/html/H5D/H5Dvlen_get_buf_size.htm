@@ -1,0 +1,90 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dvlen_get_buf_size" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-VLGetBuf">H5Dvlen_get_buf_size</a>
+<dt><strong>Signature:</strong>   
+    <dd><em>herr_t </em><code>H5Dvlen_get_buf_size</code>(<em>hid_t </em><code>dataset_id</code>,
+    <em>hid_t</em> <code>type_id</code>,
+    <em>hid_t</em> <code>space_id</code>,
+    <em>hsize_t</em> *<code>size</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Determines the number of bytes required to store VL data.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dvlen_get_buf_size</code> determines the number of bytes 
+        required to store the VL data from the dataset, using the 
+        <code>space_id</code> for the selection in the dataset on 
+        disk and the <code>type_id</code> for the memory representation 
+        of the VL data in memory.  
+        <p>
+        <code>*size</code> is returned with the number of bytes 
+        required to store the VL data in memory.          
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dataset_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">IN: Datatype identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+            <td valign="top">IN: Dataspace identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> *<code>size</code></td>
+            <td valign="top">OUT: The size in bytes of the memory 
+			                 buffer required to store the VL data.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5dvlen_get_max_len_f
+    <dd>There is no direct FORTRAN couterpart for the C function 
+        <code>H5Dvlen_get_buf_size</code>;  
+        corresponding functionality is provided by the FORTRAN function
+        <code>h5dvlen_get_max_len_f</code></a>.
+        <br>
+    <pre>
+SUBROUTINE h5dvlen_get_max_len_f(dset_id, size, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier  
+  INTEGER(HID_T), INTENT(IN) :: type_id     ! Datatype identifier  
+  INTEGER(HID_T), INTENT(IN) :: space_id    ! Dataspace identifier  
+            
+  INTEGER(SIZE_T), INTENT(OUT)  :: elem_len ! Maximum length of the element
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code  
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5dvlen_get_max_len_f
+	</pre>
+	
+        <!--
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td>
+		  <td valign="top" align="left">
+		    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+		  <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.5</td>
+          <td valign="top">&nbsp;</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top">Function introduced 
+		    in this release.</td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top">&nbsp;</td></tr>
+    </table></ul>
+</dl>
+

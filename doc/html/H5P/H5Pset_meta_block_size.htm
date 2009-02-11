@@ -1,0 +1,78 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_meta_block_size" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetMetaBlockSize">H5Pset_meta_block_size</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_meta_block_size</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>hsize_t</em> <code>size</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the minimum metadata block size.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_meta_block_size</code> sets the 
+        minimum size, in bytes, of metadata block allocations when 
+        <code>H5FD_FEAT_AGGREGATE_METADATA</code> is set by a VFL driver.
+        <p>
+        Each <i>raw</i> metadata block is initially allocated to be of the 
+        given size.  Specific metadata objects (e.g., object headers, 
+        local heaps, B-trees) are then sub-allocated from this block.
+        <p>
+        The default setting is 2048 bytes, meaning that the library 
+        will attempt to aggregate metadata in at least 2K blocks in the file.
+        Setting the value to <code>0</code> (zero) with this function 
+        will turn off metadata aggregation, even if the VFL driver attempts 
+        to use the metadata aggregation strategy.               
+        <p>
+        Metadata aggregation reduces the number of small data objects 
+        in the file that would otherwise be required for metadata.  
+        The aggregated block of metadata is usually written in a 
+        single write action and always in a contiguous block, 
+        potentially significantly improving library and application 
+        performance.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em> <code>size</code></td>
+            <td valign="top">IN: Minimum size, in bytes, of metadata block allocations.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_meta_block_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_meta_block_size_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id ! File access property list 
+                                         ! identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: size   ! Metadata block size
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_meta_block_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

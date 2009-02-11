@@ -1,0 +1,58 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_nfilters" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetNFilters">H5Pget_nfilters</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Pget_nfilters</code>(<em>hid_t</em> <code>plist</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Returns the number of filters in the pipeline.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_nfilters</code> returns the number of filters 
+        defined in the filter pipeline associated with the property list 
+        <code>plist</code>.
+        <p>
+        In each pipeline, the filters are numbered from
+        0 through <em>N</em>-1, where <em>N</em> is the value returned
+        by this function. During output to the file, the filters are 
+        applied in increasing order; during input from the file, they
+        are applied in decreasing order.
+        <p>
+        <code>H5Pget_nfilters</code> returns the number of filters 
+        in the pipeline, including zero (<code>0</code>) if there 
+        are none.
+  <dt><strong>Note:</strong>
+    <dd>This function currently supports only the permanent filter
+        pipeline; <code>plist_id</code> must be a dataset creation 
+        property list.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Property list identifier.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns the number of filters in the pipeline if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_nfilters_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_nfilters_f(prp_id, nfilters, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id   ! Dataset creation property 
+                                         ! list identifier 
+  INTEGER, INTENT(OUT) :: nfilters       ! The number of filters in 
+                                         ! the pipeline
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_nfilters_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

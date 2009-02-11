@@ -1,0 +1,61 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tcreate" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Create">H5Tcreate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Tcreate</code>(<em>H5T_class_t </em><code>class</code>,
+        <em>size_t</em><code>size</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates a new datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tcreate</code> creates a new datatype of the specified 
+        class with the specified number of bytes.  
+        <p>
+        The following datatype classes are supported with this function:
+        <ul>
+            <li><code>H5T_COMPOUND</code> 
+            <li><code>H5T_OPAQUE</code> 
+            <li><code>H5T_ENUM</code> 
+        </ul>
+        <p>
+        Use <code>H5Tcopy</code> to create integer or floating-point datatypes. 
+        <p>
+        The datatype identifier returned from this function should be 
+        released with <code>H5Tclose</code> or resource leaks will result.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5T_class_t</em>&nbsp;<code>class&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Class of datatype to create.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>size</code></td>
+            <td valign="top">The number of bytes in the datatype to create.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns datatype identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tcreate_f
+    <dd>
+	<pre>
+SUBROUTINE h5tcreate_f(class, size, type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(IN) :: class             ! Datatype class can be one of
+                                           !    H5T_COMPOUND_F (6)
+                                           !    H5T_ENUM_F     (8)
+                                           !    H5T_OPAQUE_F   (9)
+  INTEGER(SIZE_T), INTENT(IN) :: size      ! Size of the datatype
+  INTEGER(HID_T), INTENT(OUT) :: type_id   ! Datatype identifier
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+END SUBROUTINE h5tcreate_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

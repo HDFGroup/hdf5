@@ -1,0 +1,102 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_fclose_degree" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFcloseDegree">H5Pset_fclose_degree</a> 
+  <dt><strong>Signature:</strong> 
+  <dd><em>herr_t</em> <code>H5Pset_fclose_degree</code>(<em>hid_t</em> <code>fapl_id</code>, 
+    <em>H5F_close_degree_t</em> <code>fc_degree</code>) 
+  <dt><strong>Purpose:</strong> 
+  <dd>Sets the file close degree. 
+  <dt><strong>Description:</strong> 
+  <dd><code>H5Pset_fclose_degree</code> sets the file close degree property <code>fc_degree</code> 
+    in the file access property list <code>fapl_id</code>.  
+    <p> The value of <code>fc_degree</code> determines how aggressively <code>H5Fclose</code> 
+      deals with objects within a file that remain open when <code>H5Fclose</code> 
+      is called to close that file.  <code>fc_degree</code> can have any one of 
+      four valid values: 
+    <div align="center"> 
+      <table width="75%" border="1" cellpadding="3">
+        <tr> 
+          <th valign="top">Degree name</th>
+          <th valign="top"><code>H5Fclose</code> behavior with no open object 
+            in file</th>
+          <th valign="top"><code>H5Fclose</code> behavior with open object(s) 
+            in file</th>
+        </tr>
+        <tr> 
+          <td valign="top"><code>H5F_CLOSE_WEAK</code></td>
+          <td valign="top">Actual file is closed.</td>
+          <td valign="top">Access to file identifier is terminated; actual file 
+            close is delayed until all objects in file are closed</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>H5F_CLOSE_SEMI</code></td>
+          <td valign="top">Actual file is closed.</td>
+          <td valign="top">Function returns FAILURE</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>H5F_CLOSE_STRONG</code></td>
+          <td valign="top">Actual file is closed.</td>
+          <td valign="top">All open objects remaining in the file are closed then 
+            file is closed</td>
+        </tr>
+        <tr> 
+          <td valign="top"><code>H5F_CLOSE_DEFAULT</code></td>
+          <td colspan="2" valign="top">The VFL driver chooses the behavior.  Currently, 
+            all VFL drivers set this value to <code>H5F_CLOSE_WEAK</code>, except 
+            for the MPI-I/O driver, which sets it to <code>H5F_CLOSE_SEMI</code>. 
+          </td>
+        </tr>
+      </table>
+    </div>
+  <dt><strong>Parameters:</strong> 
+    <ul><table>
+      <tr>
+	      <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+          <td valign="top">IN: File access property list identifier.</td></tr>
+      <tr>
+	      <td valign="top"><em>H5F_close_degree_t</em>&nbsp;<code>fc_degree&nbsp;&nbsp;&nbsp;&nbsp;</code></td> 
+          <td valign="top">IN: Pointer to a location containing the file close degree property, 
+        the value of <code>fc_degree</code>.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong> 
+  <dd>Returns a non-negative value if successful. Otherwise returns a negative 
+    value. 
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fclose_degree_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fclose_degree_f(fapl_id, degree, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: fapl_id  ! File access property list identifier
+  INTEGER, INTENT(IN) :: degree          ! Info about file close behavior 
+                                         ! Possible values:
+                                         !    H5F_CLOSE_DEFAULT_F
+                                         !    H5F_CLOSE_WEAK_F
+                                         !    H5F_CLOSE_SEMI_F
+                                         !    H5F_CLOSE_STRONG_F
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fclose_degree_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

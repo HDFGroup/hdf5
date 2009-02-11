@@ -1,0 +1,88 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5jam and h5unjam" -->
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong> <a name="Tools-Jam">h5jam and h5unjam</a>
+<dt><strong>Syntax:</strong>
+<dd><code>h5jam -u user_block -i in_file.h5 [-o out_file.h5] [--clobber]</code></dd>
+<dd><code>h5jam -h</code></dd>
+<dd>&nbsp;</dd>
+<dd><code>h5unjam -i in_file.h5 </code><code>[-u user_block | --delete] [</code><code>-o out_file.h5]</code></dd>
+<dd><code>h5unjam -h</code></dd>
+
+<dt><strong>Purpose:</strong>
+    <dd>Add user block to front of an HDF5 file, to create a new concatenated 
+        file.</dd>
+    <dd>Split user block and HDF5 file into two files, user block data and 
+        HDF5 data.</dd>
+ <dt><strong>Description:</strong>
+    <dd><code>h5jam</code>&nbsp; concatenates a <code>user_block</code> 
+       file and an HDF5 file to create an HDF5 file with a user block. 
+       The user block can be either binary or text. 
+       The output file is padded so that the HDF5 header begins on 
+       byte 512, 1024, etc.. (See the HDF5 File Format.)
+
+    <p>If <code>out_file.h5</code> is given, a new file is created with the <code>user_block</code> followed by the contents of<code> in_file.h5. </code>In this case,<code><big> </big>infile.h5 </code>is unchanged.
+      <p>
+If <code>out_file.h5</code> is not specified, the&nbsp;<code>user_block</code> is added to<code> in_file.h5</code>. &nbsp;</dd>
+    <p>
+    If in_file.h5 already has a user block, the contents of <code>user_block</code> will be added to the end of the existing user block, and the file shifted to the next boundary. If <code>-clobber</code> is set, any existing user block will be overwritten.  
+
+
+<p><code>h5unjam</code><code></code> splits an HDF5 file, writing the
+user block to a file or stdout and the HDF5 file to an HDF5 file with a header at byte
+0 (i.e., with no user block). 
+  <p>If <code>out_file.h5</code> is given, a new file is created with the<code></code><code> in_file.h5 </code>without <code></code>the user block.<code> </code>In this case,<code><big> </big>infile.h5 </code>is unchanged.
+<p> If <code>out_file.h5</code> is not specified, the&nbsp;<code>user_block</code> is removed and <code>in_file.h5</code> is rewritten, starting at byte 0.
+      <p>
+If <code>user_block</code> is set,the user block will be written to <code>user_block</code>.&nbsp; If <code>user_block</code> is not set, the user block (if any)<code></code> will be written to stdout. If <code>-delete</code> is selected, the user block will not be not written.</dd>
+
+<dt><strong>Example Usage</strong></dt>
+<dd>Create new file, <code>newfile.h5</code>,&nbsp; with the text in file <code>mytext.txt</code> as the user block for the HDF5 file <code>file.h5</code>.
+  <pre>&nbsp;&nbsp;&nbsp;&nbsp;h5jam -u mytext.txt -i file.h5 -o newfile.h5</pre>
+  
+Add text in file <code>mytext.txt</code> to front of HDF5 dataset, <code>file.h5</code><code></code>.
+  <pre>&nbsp;&nbsp;&nbsp;&nbsp;h5jam -u mytext.txt -i file.h5 </pre>
+  
+Overwrite the user block (if any) in <code>file.h5</code> with the contents of <code>mytext.txt</code>.
+  <pre>&nbsp;&nbsp;&nbsp;&nbsp;h5jam -u mytext.txt -i file.h5 --clobber</pre>
+  
+<!-- NEW PAGE -->
+For an HDF5 file, <code>with_ub.h5</code>,&nbsp; with a user block, extract the user block to <code>user_block.txt</code> and the HDF5 file to <code>wo_ub.h5</code>.
+  <pre>&nbsp;&nbsp;&nbsp;&nbsp;h5unjam -i with_ub.h5 -u user_block.txt -o wo_ub.h5</pre>
+
+
+<dt><strong></strong></dt><dt><strong>Return Value</strong></dt>
+<dd><code>h5jam</code> returns the size of the output file, or -1 if an error occurs.
+  <p>
+  <code>h5unjam</code> returns the size of the output file, or -1 if an error occurs.
+
+<dt><strong>Caveats</strong></dt><dt><strong></strong> </dt>
+<dd>This tool copies all the data (sequentially) in the file(s) to new offsets. 
+For a large file, this copy will take a long time.
+  <p>The most efficient way to create a user block is to create the file
+with a user block (see <code>H5Pset_user_block</code>), and write
+the user block data into that space from a program.
+  <p>The user block is completely opaque to the HDF5 library and to the h5jam
+and h5unjam tools. &nbsp;The user block is simply read or written as a string
+of bytes, which could be text or any kind of binary data. &nbsp;It is up
+to the user to know what the contents of the user block means and how to
+process it.
+<p>
+When the user block is extracted, all the data is written to the output, including any padding or unwritten data.
+<p>
+This tool moves the HDF5 file through byte copies, i.e., it does not read or interpret the HDF5 objects.<br>
+
+
+
+
+
+
+
+
+
+
+
+
+</dl>
+

@@ -1,0 +1,59 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tset_cset" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetCset">H5Tset_cset</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tset_cset</code>(<em>hid_t </em><code>type_id</code>,
+        <em>H5T_cset_t</em> <code>cset</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Sets character set to be used.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_cset</code> sets the character set to be used.
+        <p>
+        HDF5 is able to distinguish between character sets of different
+        nationalities and to convert between them to the extent possible.
+        Valid character set types are:
+        <table>
+            <tr><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </td><td><code>H5T_CSET_ASCII</code> &nbsp; 
+            </td><td>(<code>0</code>)
+            </td><td>&nbsp;&nbsp;&nbsp;&nbsp;
+            </td><td>Character set is US ASCII.
+            </td></tr>
+        </table>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to modify.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_cset_t</em>&nbsp;<code>cset&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Character set type.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tset_cset_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_cset_f(type_id, cset, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id 
+                                  ! Datatype identifier 
+  INTEGER, INTENT(IN) :: cset     ! Character set type of a string datatype  
+                                  ! Possible values of padding type are:
+                                  !    H5T_CSET_ASCII_F = 0
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+END SUBROUTINE h5tset_cset_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,80 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Get">H5Pget</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget</code>(
+                  <em>hid_t</em> <code>plid</code>,
+                  <em>const char *</em><code>name</code>,
+                  <em>void *</em><code>value</code>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Queries the value of a property.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget</code> retrieves a copy of the value for a property  
+    in a property list.  If there is a <code>get</code> callback routine 
+    registered for this property, the copy of the value of the property 
+    will first be passed to that routine and any changes to the copy of 
+    the value will be used when returning the property value from this 
+    routine.   
+    
+    <p>
+    This routine may be called for zero-sized properties with the 
+    <code>value</code> set to NULL.  The <code>get</code> routine 
+    will be called with a NULL value if the callback exists.
+     
+    <p>
+    The property name must exist or this routine will fail.  
+   
+    <p>
+    If the <code>get</code> callback routine returns an error,
+    <code>value</code> will not be modified.   
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>plid</ecodem></td>
+        <td>IN: Identifier of the property list to query</td></tr>
+    <tr>
+        <td><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td>IN: Name of property to query</td></tr>
+    <tr>
+        <td><em>void *</em><code>value</code></td>
+        <td>OUT: Pointer to a location to which to copy the value of 
+	         of the property</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <dt><strong>Fortran90 Interface:</strong> h5pget_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_f(plid, name, value, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plid    ! Property list identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to get
+  TYPE,  INTENT(OUT) :: value           ! Property value
+                                        ! Supported types are:
+                                        !    INTEGER
+                                        !    REAL
+                                        !    DOUBLE PRECISION
+                                        !    CHARACTER(LEN=*)
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,180 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Diterate" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-Iterate">H5Diterate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Diterate</code>(
+        <em>void *</em><code>buf</code>,
+        <em>hid_t </em><code>type_id</code>,
+        <em>hid_t </em><code>space_id</code>,
+        <em>H5D_operator_t </em><code>operator</code>,
+        <em>void *</em><code>operator_data</code>
+    )
+<p>
+<dt><strong>Purpose:</strong>
+    <dd>Iterates over all selected elements in a dataspace.
+<p>
+<dt><strong>Description:</strong>
+    <dd><code>H5Diterate</code> iterates over all the data elements in the 
+        memory buffer <code>buf</code>, executing the callback function
+        <code>operator</code> once for each such data element.
+        <p>
+
+        <!-- ABILITY TO MODIFY THE DATASPACE, AS REQUIRED BY 
+             THE FOLLOWING PARAGRAPH, HAS NOT BEEN IMPLEMENTED.
+        The selection in the dataspace is modified so that any elements 
+        already iterated over are removed from the selection if the 
+        iteration is interrupted (by the <code>H5D_operator_t</code> 
+        function returning non-zero) before the iteration is complete;
+        the iteration may then be re-started by the user where it left off.  
+        <p>
+        -->
+
+        The protoype of the callback function <code>operator</code> 
+        is as follows 
+        (as defined in the source code file <code>H5Lpublic.h</code>):
+        <dir>
+          <code>
+          <em>herr_t</em> (*H5D_operator_t)(<em>void</em> elem, 
+              <em>hid_t</em> type_id, 
+              <em>unsigned</em> ndim, 
+              <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                  &nbsp;&nbsp;&nbsp;&nbsp;
+              <em>const hsize_t *</em>point, 
+              <em>void *</em>operator_data)
+              </code>
+        </dir>
+        <p>
+        The parameters of this callback function have the following
+        values or meanings: 
+        <table>
+            <tr valign=top><td><code>&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+                <td><code><em>void *</em>elem</code></td>
+                <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                <td>IN/OUT: Pointer to the memory buffer containing
+                    the current data element</td>
+                </tr>
+            <tr valign=top><td>&nbsp;</td>
+                <td><code><em>hid_t</em> type_id</code></td>
+                <td>&nbsp;</td>
+                <td>IN: Datatype identifier for the elements stored in 
+                    <code>elem</code></td>
+                </tr>
+            <tr valign=top><td>&nbsp;</td>
+                <td><code><em>unsigned</em> ndim</code></td>
+                <td>&nbsp;</td>
+                <td>IN: Number of dimensions for the <code>point</code> 
+                    array</td>
+                </tr>
+            <tr valign=top><td>&nbsp;</td>
+                <td><code><em>const hsize_t *</em>point</code></td>
+                <td>&nbsp;</td>
+                <td>IN: Array containing the location of the element 
+                    within the original dataspace</td>
+                </tr>
+            <tr valign=top><td>&nbsp;</td>
+                <td><code><em>void *</em>operator_data</code></td>
+                <td>&nbsp;</td>
+                <td>IN/OUT: Pointer to any user-defined data associated with 
+                    the operation</td>
+                </tr>
+        </table>
+
+        <p>
+        The possible return values from the callback function,
+        and the effect of each, are as follows:
+        <ul>
+            <li>Zero causes the iterator to continue, 
+                returning zero when all data elements have been processed.
+            <li>A positive value causes the iterator to immediately 
+                return that positive value, indicating short-circuit success.  
+                <!--
+                The iterator can be restarted at the next data element.
+                -->
+            <li>A negative value causes the iterator to immediately 
+                return that value, indicating failure.  
+                <!--
+                The iterator can be restarted at the next data element.
+                -->
+        </ul>
+
+        <p>
+        The <code>H5Diterate</code> <code>operator_data</code> parameter 
+        is a user-defined pointer to the data required to process 
+        dataset elements in the course of the iteration.
+        If <code>operator</code> needs to pass data back to the application,
+        such data can be returned in this same buffer.
+        This pointer is passed back to each step of the iteration in the 
+        <code>operator</code> callback function&rsquo;s 
+        <code>operator_data</code> parameter.
+
+        <p>
+        Unlike other HDF5 iterators, this iteration operation cannot
+        be restarted at the point of exit;  
+        a second <code>H5Diterate</code> call will always restart 
+        at the beginning.
+  
+<p>
+<!-- NEW PAGE -->
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>void *</em><code>buf</code></td>
+            <td valign="top">IN/OUT: Pointer to the buffer in memory containing
+                the elements to iterate over</td></tr>
+        <tr>
+            <td valign="top"><em>hid_t </em><code>type_id</code></td>
+            <td valign="top">IN:  Datatype identifier for the elements stored
+                in <code>buf</code></td></tr>
+        <tr>
+            <td valign="top"><em>hid_t </em><code>space_id</code></td>
+            <td valign="top">IN: Dataspace identifier for <code>buf</code>  
+                </td></tr>
+        <tr>
+            <td valign="top"><em>H5D_operator_t&nbsp;</em><code>operator&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Function pointer to the routine to be called 
+                for each element in <code>buf</code> iterated over</td></tr>
+        <tr>
+            <td valign="top"><em>void *</em><code>operator_data</code></td>
+            <td valign="top">IN/OUT: Pointer to any user-defined data associated
+                with the operation</td></tr>
+    </table></ul>
+<p>
+<dt><strong>Returns:</strong>
+    <dd>Returns the return value of the last operator if it was non-zero,
+        or zero if all elements have been processed.
+        Otherwise returns a negative value.
+<p>
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--__ *** FORTRAN90 INTERFACE  **********************************  -->
+<!--__ When the Fortran90 interface is complete, replace this       -->
+<!--__ section with the Fortran90 subroutine description.           -->
+<!--__                                                              -->
+<!--__ See the file h5fortran_f_template.html for a template and    -->
+<!--__ instructions.                                                -->
+<!--__ ***********************************************************  -->
+<p>
+<dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>C</strong></td></tr>
+        <tr>
+          <td valign="top">1.6.4</td>
+          <td valign="top">
+            The following changes occured in the 
+            <code>H5D_operator_t</code> function in this release:<br>
+            &nbsp;&nbsp;
+            <code>ndim</code> parameter type was changed to 
+            <em>unsigned</em><br>
+            &nbsp;&nbsp;
+            <code>point</code> parameter type was changed to
+            <em>const hsize_t</em></td></tr>
+    </table></ul>
+</dl>
+

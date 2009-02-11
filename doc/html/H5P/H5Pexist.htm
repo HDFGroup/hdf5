@@ -1,0 +1,58 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pexist" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Exist">H5Pexist</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>htri_t</em> <code>H5Pexist</code>(
+                  <em>hid_t</em> <code>id</code>,
+                  <em>const char *</em><code>name</code>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Queries whether a property name exists in a property list 
+    or class.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pexist</code> determines  whether a property exists 
+    within a property list or class.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>id</code></td>
+        <td>IN: Identifier for the property to query</td></tr>
+    <tr>
+        <td><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td>IN: Name of property to check for</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a positive value if the property exists in the 
+        property object; zero if the property does not exist
+    <dd>Failure: a negative value
+
+  <dt><strong>Fortran90 Interface:</strong> h5pexist_f
+    <dd>
+	<pre>
+SUBROUTINE h5pexist_f(prp_id, name, flag, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to modify
+  LOGICAL, INTENT(OUT) :: flag          ! Logical flag
+                                        !    .TRUE. if exists 
+                                        !    .FALSE. otherwise
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pexist_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

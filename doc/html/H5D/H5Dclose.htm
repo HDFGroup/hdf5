@@ -1,0 +1,43 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dclose" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-Close">H5Dclose</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Dclose</code>(<em>hid_t </em><code>dataset_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Closes the specified dataset.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dclose</code> ends access to a dataset specified by 
+        <code>dataset_id</code> and releases resources used by it.
+        Further use of the dataset identifier is illegal in calls to 
+        the dataset API.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dataset_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset to close access to.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5dclose_f
+    <dd>
+	<pre>
+SUBROUTINE h5dclose_f(dset_id, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: dset_id ! Dataset identifier  
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code  
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5dclose_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

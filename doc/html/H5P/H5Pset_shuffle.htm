@@ -1,0 +1,76 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_shuffle" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetShuffle">H5Pset_shuffle</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_shuffle</code>(<em>hid_t</em> <code>plist_id</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Sets up use of the shuffle filter.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_shuffle</code> sets the shuffle filter,
+        <code>H5Z_FILTER_SHUFFLE</code>,
+        in the dataset creation property list <code>plist_id</code>.  
+	<p>
+	The shuffle filter <span class=termEmphasis>de-interlaces</span> 
+        a block of data by reordering the bytes.  
+	All the bytes from one consistent byte position of 
+        each data element are placed together in one block;
+	all bytes from a second consistent byte position of 
+        each data element are placed together a second block; etc.
+	For example, given three data elements of a 4-byte datatype 
+	stored as <code>012301230123</code>, 
+        shuffling will re-order data as <code>000111222333</code>.
+        This can be a valuable step in an effective compression
+	algorithm because the bytes in each byte position are often 
+	closely related to each other and putting them together 
+        can increase the compression ratio.
+	<p>
+        As implied above, the primary value of the shuffle filter 
+        lies in its coordinated use with a compression filter; 
+        it does not provide data compression when used alone. 
+        When the shuffle filter is applied to a dataset 
+        immediately prior to the use of a compression filter, 
+        the compression ratio achieved is often superior to that
+        achieved by the use of a compression filter without 
+        the shuffle filter.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_shuffle_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_shuffle_f(prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier 
+  INTEGER, INTENT(OUT)       :: hdferr      ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_shuffle_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

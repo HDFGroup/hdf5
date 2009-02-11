@@ -1,0 +1,64 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tdetect_class" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-DetectClass">H5Tdetect_class</a>
+<dt><strong>Signature:</strong>
+    <dd><em>htri_t </em><code>H5Tdetect_class</code>(<em>hid_t</em> <code>dtype_id</code>,
+        <em>H5T_class_t</em><code>dtype_class</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Determines whether a datatype contains any datatypes of the 
+        given datatype class.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tdetect_class</code> determines whether the datatype 
+        specified in <code>dtype_id</code> contains any datatypes of the 
+        datatype class specified in <code>dtype_class</code>.
+        <p>
+        This function is useful primarily in recursively examining 
+        all the fields and/or base types 
+        of compound, array, and variable-length datatypes.
+        <p>
+        Valid class identifiers are as defined in 
+	<a href="#Datatype-GetClass"><code>H5Tget_class</code></a>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dtype_id</code></td>
+            <td valign="top">Datatype identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_class_t</em>&nbsp;<code>dtype_class&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Datatype class.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns <code>TRUE</code> or <code>FALSE</code> if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

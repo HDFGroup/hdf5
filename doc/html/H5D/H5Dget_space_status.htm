@@ -1,0 +1,82 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dget_space_status" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-GetSpaceStatus">H5Dget_space_status</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Dget_space_status</code>(<em>hid_t </em><code>dset_id</code>,
+                        <em>H5D_space_status_t *</em><code>status</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Determines whether space has been allocated for a dataset.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dget_space_status</code> determines whether space has been 
+        allocated for the dataset <code>dset_id</code>.
+	<p>
+        Space allocation status is returned in <code>status</code>,
+        which will have one of the following values:
+        <center>
+	<table border="0">
+          <tr valign="top"><td rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+            <code>H5D_SPACE_STATUS_NOT_ALLOCATED</code>
+	    </td><td>
+            Space has not been allocated for this dataset.
+          </td></tr><tr valign="top"><td>
+            <code>H5D_SPACE_STATUS_ALLOCATED</code>
+	    </td><td>
+            Space has been allocated for this dataset.
+          </td></tr><tr valign="top"><td>
+            <code>H5D_SPACE_STATUS_PART_ALLOCATED</code>&nbsp;&nbsp;
+	    </td><td>
+            Space has been partially allocated for this dataset.  
+	    (Used only for datasets with chunked storage.)
+          </td></tr>
+        </table>
+	</center>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dset_id</code></td>
+            <td valign="top">IN: Identifier of the dataset to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5D_space_status_t&nbsp;*</em><code>status&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Space allocation status.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5dget_space_status_f
+    <dd>
+	<pre>
+SUBROUTINE h5dget_space_status_f(dset_id, flag, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: dset_id  ! Dataset identifier 
+  INTEGER, INTENET(OUT)      :: flag     ! Status flag ; possible values:
+                                         ! H5D_SPACE_STS_ERROR_F
+                                         ! H5D_SPACE_STS_NOT_ALLOCATED_F
+                                         ! H5D_SPACE_STS_PART_ALLOCATED_F
+                                         ! H5D_SPACE_STS_ALLOCATED_F
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code  
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5dget_space_status_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

@@ -1,0 +1,122 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h4toh5" -->
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong> <a name="Tools-H4toh5">h4toh5</a>
+<dt><strong>Syntax:</strong>
+    <dd><code>h4toh5 -h</code><br>
+        <code>h4toh5 </code><em>
+            h4file
+            h5file</em><br>
+        <code>h4toh5 </code><em>
+            h4file</em><br>
+        <!--  currently no -m option
+        <code>h4toh5 -m </code><em>
+            h4file1
+            h4file2
+            h4file3</em> ...
+        -->
+<dt><strong>Purpose:</strong>
+    <dd>Converts an HDF4 file to an HDF5 file.
+<dt><strong>Description:</strong>
+    <dd><code>h4toh5</code> is a file conversion utility that reads 
+        an HDF4 file, <em>h4file</em> (<code>input.hdf</code> for example),
+        and writes an HDF5 file, <em>h5file</em> (<code>output.h5</code>
+        for example), containing the same data.
+        <p>
+        If no output file <em>h5file</em> is specified, 
+        <code>h4toh5</code> uses the input filename to designate
+        the output file, replacing the extension <code>.hdf</code>
+        with <code>.h5</code>.
+        For example, if the input file <code>scheme3.hdf</code> is 
+        specified with no output filename, <code>h4toh5</code> will 
+        name the output file <code>scheme3.h5</code>.
+        <p>
+        <!--  currently no -m option
+        The <code>-m</code> option allows multiple HDF5 file 
+        arguments.  Each file name is treated the same as the 
+        single file name case above.
+        <p>
+        -->
+        The <code>-h</code> option causes a syntax summary 
+        similar to the following to be displayed:
+        <pre>              h4toh5 inputfile.hdf outputfile.h5
+              h4toh5 inputfile.hdf                    <!--  currently no -m option
+              h4toh5 -m inputfile1.hdf inputfile2.hdf ...  --> </pre>
+        <p>
+        Each object in the HDF4 file is converted to an equivalent 
+        HDF5 object, according to the mapping described in
+        <a href="ADGuide/H4toH5Mapping.pdf" target=ExternalWinA>
+        <cite>Mapping HDF4 Objects to HDF5 Objects</cite></a>.
+        <p>
+        In this initial version, <code>h4toh5</code> converts the following 
+        HDF4 objects:
+        <center>
+        <table width=75% border=0>
+          <tr><th width=40% valign=top align=left>
+            HDF4 Object
+            </td><th width=60% valign=top align=left>
+            Resulting HDF5 Object
+          </td></tr>
+          <tr><td width=40% valign=top align=left>
+            SDS
+            </td><td width=60% valign=top align=left>
+            Dataset
+          </td></tr>
+          <tr><td width=40% valign=top align=left>
+            GR, RI8, and RI24 image
+            </td><td width=60% valign=top align=left>
+            Dataset 
+          </td></tr>
+          <tr><td width=40% valign=top align=left>
+            Vdata
+            </td><td width=60% valign=top align=left>
+            Dataset
+          </td></tr>
+          <tr><td width=40% valign=top align=left>
+            Vgroup
+            </td><td width=60% valign=top align=left>
+            Group
+          </td></tr>
+          <tr><td width=40% valign=top align=left>
+            Annotation
+            </td><td width=60% valign=top align=left>
+            Attribute
+          </td></tr>
+          <tr><td width=40% valign=top align=left>
+            Palette
+            </td><td width=60% valign=top align=left>
+            Dataset
+          </td></tr>
+        </table>
+        </center>
+<dt><strong>Note:</strong>
+    <dl>The <code>h4toh5</code> and <code>h5toh4</code> utilities 
+        are no longer part of the HDF5 product;  
+	they are distributed separately through the page
+	<a href="http://www.hdfgroup.org/h4toh5/">
+	Converting between HDF (4.x) and HDF5</a>.
+	</p>
+    </dl>
+<dt><strong>Options and Parameters:</strong>
+    <dl>
+        <dt><code>-h</code>
+            <dd>Displays a syntax summary.
+        <!--  currently no -m option
+        <dt><code>-m</code>
+            <dd>Converts multiple HDF4 files to multiple HDF5 files.
+        -->
+        <dt><em>h4file</em>
+            <dd>The HDF4 file to be converted.
+        <dt><em>h5file</em>
+            <dd>The HDF5 file to be created.
+    </dl>
+<!--
+<dt><strong>Current Status:</strong>
+    <dd>
+<dt><strong>See Also:</strong>
+    <dd>
+-->
+</dl>
+
+

@@ -1,0 +1,47 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_userblock" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetUserblock">H5Pget_userblock</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pget_userblock</code>(<em>hid_t</em> <code>plist</code>,
+            <em>hsize_t *</em> <code>size</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves the size of a user block.
+  <dt><strong>Description:</strong>
+        <dd><code>H5Pget_userblock</code> retrieves the size of a user block 
+            in a file creation property list.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier for property list to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t&nbsp;*</em>&nbsp;<code>size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to location to return user-block size.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_userblock_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_userblock_f(prp_id, block_size, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id   ! Property list identifier
+  INTEGER(HSIZE_T), DIMENSION(:), INTENT(OUT) ::  block_size 
+                                         ! Size of the user-block in bytes
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_userblock_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

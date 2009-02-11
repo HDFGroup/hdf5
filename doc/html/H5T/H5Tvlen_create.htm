@@ -1,0 +1,67 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tvlen_create" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-VLCreate">H5Tvlen_create</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Tvlen_create</code>(<em>hid_t </em><code>base_type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates a new variable-length datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tvlen_create</code> creates a new variable-length (VL) datatype.
+        <p>
+        The base datatype will be the datatype that the sequence is composed of,
+        characters for character strings, vertex coordinates for polygon lists, etc.
+        The base type specified for the VL datatype can be of any HDF5 datatype,
+        including another VL datatype, a compound datatype or an atomic datatype.
+        <p>
+        When necessary, use <code>H5Tget_super</code> to determine the base type 
+        of the VL datatype.
+        <p>
+        The datatype identifier returned from this function should be 
+        released with <code>H5Tclose</code> or resource leaks will result.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>base_type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Base type of datatype to create.</td></tr>
+    </table></ul>
+<dt><strong>See Also:</strong>
+    <dd><a href="RM_H5D.html#Dataset-GetVLBuf">H5Dget_vlen_buf_size</a>
+    <dd><a href="RM_H5D.html#Dataset-VLReclaim">H5Dvlen_reclaim</a>
+<dt><strong>Returns:</strong>
+    <dd>Returns datatype identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tvlen_create_f
+    <dd>
+	<pre>
+SUBROUTINE h5tvlen_create_f(type_id, vltype_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id    ! Datatype identifier of base type 
+                                           ! Base type can only be atomic 
+  INTEGER(HID_T), INTENT(OUT) :: vltype_id ! VL datatype identifier 
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+END SUBROUTINE h5tvlen_create_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+		<tr>
+		  <td valign="top">1.4.5</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

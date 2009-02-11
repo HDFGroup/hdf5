@@ -1,0 +1,42 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tlock" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Lock">H5Tlock</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tlock</code>(<em>hid_t </em><code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Locks a datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tlock</code> locks the datatype specified by the 
+        <code>type_id</code> identifier, making it read-only and 
+        non-destructible.  This is normally done by the library for 
+        predefined datatypes so the application does not 
+        inadvertently change or delete a predefined type.  
+        Once a datatype is locked it can never be unlocked.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to lock.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

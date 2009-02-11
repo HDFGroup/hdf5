@@ -1,0 +1,62 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_small_data_block_size" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetSmallData">H5Pget_small_data_block_size</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_small_data_block_size</code>(<em>hid_t</em> <code>fapl_id</code>,
+        <em>hsize_t *</em><code>size</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves the current small data block size setting.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_small_data_block_size</code> retrieves the 
+        current setting for the size of the small data block.
+        <p>
+        If the returned value is zero (<code>0</code>), the small data 
+        block mechanism has been disabled for the file.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t *</em><code>size</code></td>
+            <td valign="top">OUT: Maximum size, in bytes, of the small data block.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_small_data_block_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_small_data_block_size_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plist_id  ! File access property list 
+                                          ! identifier
+  INTEGER(HSIZE_T), INTENT(OUT) :: size   ! Small raw data block size
+  INTEGER, INTENT(OUT)       :: hdferr    ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_small_data_block_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.4</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

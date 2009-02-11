@@ -1,0 +1,127 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fopen" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-Open">H5Fopen</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Fopen</code>(<em>const char *</em><code>name</code>,
+            <em>unsigned</em> <code>flags</code>,
+            <em>hid_t</em> <code>access_id</code>
+        )
+<dt><strong>Purpose:</strong>
+        <dd>Opens an existing file.
+<dt><strong>Description:</strong>
+        <dd><code>H5Fopen</code> opens an existing file and is the primary 
+            function for accessing existing HDF5 files.  
+            <p>
+            Note that <code>H5Fopen</code> does not create a file 
+            if it does not already exist.  
+            See <a href="#File-Create"><code>H5Fcreate</code></a>.
+            <p>
+            The parameter <code>access_id</code> is a file access property
+            list identifier or <code>H5P_DEFAULT</code> if the 
+            default I/O access parameters are to be used  
+            <p>
+            The <code>flags</code> argument determines whether writing 
+            to an existing file will be allowed.  
+            The file is opened with read and write permission if 
+            <code>flags</code> is set to <code>H5F_ACC_RDWR</code>.  
+            All flags may be combined with the bit-wise OR operator (`|') 
+            to change the behavior of the file open call.  
+            More complex behaviors of file access are controlled 
+            through the file-access property list.
+            <p>
+            The return value is a file identifier for the open file;
+            this file identifier should be closed by calling 
+            <code>H5Fclose</code> when it is no longer needed. 
+            <p>
+
+            <b>Special case -- Multiple opens:</b>
+            <br>
+            A file can often be opened with a new <code>H5Fopen</code> 
+            call without closing an already-open identifier established 
+            in a previous <code>H5Fopen</code> or <code>H5Fcreate</code> 
+            call.  Each such <code>H5Fopen</code> call will return a 
+            unique identifier and the file can be accessed through any 
+            of these identifiers as long as the identifier remains valid.
+            In such multiply-opened cases, all the open calls should 
+            use the same <code>flags</code> argument. 
+            <p>
+            In some cases, such as files on a local Unix file system, 
+            the HDF5 library can detect that a file is multiply opened and 
+            will maintain coherent access among the file identifiers.
+            <p>
+            But in many other cases, such as parallel file systems or
+            networked file systems, it is not always possible to detect 
+            multiple opens of the same physical file.  
+            In such cases, HDF5 will treat the file identifiers 
+            as though they are accessing different files and
+            will be unable to maintain coherent access.
+            Errors are likely to result in these cases.
+            While unlikely, the HDF5 library may not be able to detect,
+            and thus report, such errors.
+            <p>
+            It is generally recommended that applications avoid 
+            multiple opens of the same file.
+
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Name of the file to access.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>flags</code></td>
+            <td valign="top">IN: File access flags.  Allowable values are:
+                <ul><dl>
+                    <dt><code>H5F_ACC_RDWR</code>
+                        <dd>Allow read and write access to file.
+                    <dt><code>H5F_ACC_RDONLY</code>
+                        <dd>Allow read-only access to file.
+                </dl>
+                <li><code>H5F_ACC_RDWR</code> and <code>H5F_ACC_RDONLY</code> 
+                are mutually exclusive; use exactly one.
+<!-- NEW PAGE -->
+                <li>An additional flag, <code>H5F_ACC_DEBUG</code>, prints 
+                debug information.  This flag is used only by HDF5 library 
+                developers; it is neither tested nor supported
+                for use in applications.
+                </ul></td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>access_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier for the file access properties list.
+                If parallel file access is desired, this is a collective
+                call according to the communicator stored in the
+                <code>access_id</code>. 
+                Use <code>H5P_DEFAULT</code> for default file access properties.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a file identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5fopen_f
+    <dd>
+	<pre>
+SUBROUTINE h5fopen_f(name, access_flags, file_id, hdferr, &  
+                     access_prp)
+  IMPLICIT NONE 
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
+  INTEGER, INTENT(IN) :: access_flag     ! File access flags  
+                                         ! Possible values are:
+                                         !     H5F_ACC_RDWR_F   
+                                         !     H5F_ACC_RDONLY_F    
+  INTEGER(HID_T), INTENT(OUT) :: file_id ! File identifier 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp  
+                                         ! File access property list 
+                                         ! identifier  
+END SUBROUTINE h5fopen_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,57 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tcommit" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Commit">H5Tcommit</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em><code>H5Tcommit</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em> <code>name</code>,
+        <em>hid_t</em> <code>type</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Commits a transient datatype to a file, creating a new named datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tcommit</code> commits a transient datatype 
+        (not immutable) to a file, turned it into a named datatype.  
+        The <code>loc_id</code> is either a file or group identifier  
+        which, when combined with <code>name</code>, refers to a new 
+        named datatype.
+        <p>
+        As is the case for any object in a group, 
+        the length of the name of a named datatype is not limited.  
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+          <td valign="top">IN: A file or group identifier.</td></tr>
+        <tr>
+		  <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: A datatype name.</td></tr>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>type</code></td>
+          <td valign="top">IN: A datatype identifier.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tcommit_f
+    <dd>
+	<pre>
+SUBROUTINE h5tcommit_f(loc_id, name, type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id  ! File or group identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Datatype name within file or group
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5tcommit_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

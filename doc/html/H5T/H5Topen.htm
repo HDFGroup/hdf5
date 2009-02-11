@@ -1,0 +1,52 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Topen" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Open">H5Topen</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em><code>H5Topen</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em> <code>name</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Opens a named datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Topen</code> opens a named datatype at the location
+        specified by <code>loc_id</code> and returns an identifier 
+        for the datatype.  <code>loc_id</code> is either a file or 
+        group identifier.  The identifier should eventually be closed 
+        by calling <code>H5Tclose</code> to release resources.    
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: A file or group identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: A datatype name, defined within the file 
+			  or group identified by <code>loc_id</code>.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a named datatype identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5topen_f
+    <dd>
+	<pre>
+SUBROUTINE h5topen_f(loc_id, name, type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id    ! File or group identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name    ! Datatype name within file or
+                                          ! group
+  INTEGER(HID_T), INTENT(out) :: type_id  ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5topen_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

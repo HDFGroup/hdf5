@@ -1,0 +1,51 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5repart" -->
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong> <a name="Tools-Repart">h5repart</a>
+<dt><strong>Syntax:</strong>
+    <dd><code>h5repart
+        [-v] 
+        [-V] 
+        [-[b|m]</code><em>N</em><code>[g|m|k]]</code>
+        <em>source_file
+        dest_file</em>
+<dt><strong>Purpose:</strong>
+    <dd>Repartitions a file or family of files.
+<dt><strong>Description:</strong>
+    <dd><code>h5repart</code> splits a single file into a family of 
+        files, joins a family of files into a single file, or copies 
+        one family of files to another while changing the size of the 
+        family members.  <code>h5repart</code> can also be used to 
+        copy a single file to a single file with holes.
+        <p>
+        Sizes associated with the <code>-b</code> and <code>-m</code> 
+        options may be suffixed with <code>g</code> for gigabytes, 
+        <code>m</code> for megabytes, or <code>k</code> for kilobytes.
+        <p>
+        File family names include an integer <code>printf</code> 
+        format such as <code>%d</code>.
+
+<dt><strong>Options and Parameters:</strong>
+    <dl>
+        <dt><code>-v</code>
+            <dd>Produce verbose output.
+        <dt><code>-V</code>
+            <dd>Print a version number and exit.
+        <dt><code>-b</code><em>N</em>
+            <dd>The I/O block size, defaults to 1kB
+        <dt><code>-m</code><em>N</em>
+            <dd>The destination member size or 1GB
+        <dt><em>source_file</em>
+            <dd>The name of the source file
+        <dt><em>dest_file</em>
+            <dd>The name of the destination files
+    </dl>
+<!--
+<dt><strong>Current Status:</strong>
+    <dd>
+<dt><strong>See Also:</strong>
+    <dd>
+-->
+</dl>
+

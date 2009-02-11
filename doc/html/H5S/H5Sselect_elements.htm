@@ -1,0 +1,139 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Sselect_elements" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectElements">H5Sselect_elements</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Sselect_elements</code>(<em>hid_t </em><code>space_id</code>,
+        <em>H5S_seloper_t</em> <code>op</code>,
+        <em>size_t</em> <code>num_elements</code>,
+        <em>const hsize_t *</em><code>coord</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Selects array elements to be included in the selection for a dataspace.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sselect_elements</code> selects array elements to be 
+        included in the selection for the <code>space_id</code> dataspace. 
+        <p>
+        The number of elements selected is set in the 
+        <code>num_elements</code> parameter.  
+        <p>
+        The <code>coord</code> array is a two-dimensional array of size
+        <code>num_elements</code> by <code><i>dataspace_rank</i></code> 
+        containing a list of of zero-based values specifying the 
+        coordinates in the dataset of the selected elements.  
+        The order of the element coordinates in the 
+        <code>coord</code> array specifies the order in which  
+        the array elements are iterated through when I/O is performed.  
+        Duplicate coordinate locations are not checked for.
+        <p>
+        The selection operator <code>op</code> determines how the 
+        new selection is to be combined with the previously existing
+        selection for the dataspace.  
+        The following operators are supported:
+        <center>
+        <table width=90% border=0>
+          <tr><td valign=top>
+            <code>H5S_SELECT_SET</code>
+            </td><td valign=top>
+            Replaces the existing selection with the parameters from 
+            this call.
+            Overlapping blocks are not supported with this operator.
+<!--      </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_OR</code>
+            </td><td valign=top>
+-->         Adds the new selection to the existing selection.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_APPEND</code>
+            </td><td valign=top>
+            Adds the new selection following the last element of the 
+            existing selection.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_PREPEND&nbsp;&nbsp;</code>
+            </td><td valign=top>
+            Adds the new selection preceding the first element of the 
+            existing selection.
+          </td></tr>
+        </table>
+        </center>
+<!--    When operator <code>H5S_SELECT_OR</code> 
+        is used to combine a new selection with an existing selection,
+        the selection ordering is reset to C array ordering.
+-->
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+          <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+          <td valign="top">Identifier of the dataspace.</td></tr>
+        <tr>
+          <td valign="top"><em>H5S_seloper_t</em> <code>op</code></td>
+          <td valign="top">Operator specifying how the new selection is to be 
+              combined with the existing selection for the dataspace.</td></tr>
+        <tr>
+          <td valign="top"><em>size_t</em>&nbsp;<code>num_elements&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Number of elements to be selected.</td></tr>
+        <tr>
+          <td valign="top"><em>const hsize_t *</em><code>coord</code></td>
+          <td valign="top">A 2-dimensional array of 0-based values specifying 
+              the coordinates of the elements being selected.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful; 
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5sselect_elements_f
+    <dd>
+	<pre>
+SUBROUTINE h5sselect_elements_f(space_id, operator, rank, num_elements,
+                                coord, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
+  INTEGER, INTENT(IN) :: operator         ! Flag, valid values are:
+                                          !    H5S_SELECT_SET_F 
+                                          !    H5S_SELECT_APPEND_F 
+                                          !    H5S_SELECT_PREPEND_F 
+  INTEGER, INTENT(IN) :: rank             ! Number of dataspace 
+                                          ! dimensions</pre>
+<!-- NEW PAGE -->
+<pre>  INTEGER(SIZE_T), INTENT(IN) :: num_elements     
+                                          ! Number of elements to be 
+                                          ! selected
+  INTEGER(HSIZE_T), DIMENSION(*,*), INTENT(IN) :: coord 
+                                          ! A 1-based array containing the 
+                                          ! coordinates of the selected 
+                                          ! elements
+                                          ! NOTE: Reversed dimension declaration
+                                          ! compared to the C specification
+                                          ! of coord(num_elements, rank)
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5sselect_elements_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td>
+		  <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+		  <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.4</td>
+          <td valign="top">
+		    <code>coord</code> parameter type changed to 
+			<em>const hsize_t</em>.</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top">
+		    <code>coord</code> parameter type changed to 
+			<code>INTEGER(HSIZE_T)</code>.</td></tr>
+    </table></ul>
+</dl>
+

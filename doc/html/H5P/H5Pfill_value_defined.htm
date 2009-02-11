@@ -1,0 +1,77 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pfill_value_defined" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-FillValueDefined">H5Pfill_value_defined</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pfill_value_defined</code>(<em>hid_t</em> <code>plist_id</code>,
+            <em>H5D_fill_value_t *</em><code>status</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Determines whether fill value is defined.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pfill_value_defined</code> determines whether a fill value 
+        is defined in the dataset creation property list <code>plist_id</code>.
+        <p>
+	Valid values returned in <code>status</code> are as follows:
+	<table border=0 width="80%">
+           <tr valign="top"><td rowspan="3">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	     <code>H5D_FILL_VALUE_UNDEFINED</code> 
+             </td><td>
+	     Fill value is undefined.
+	   </td></tr><tr valign="top"><td>
+             <code>H5D_FILL_VALUE_DEFAULT</code>
+             </td><td>
+             Fill value is the library default.
+	   </td></tr><tr valign="top"><td>
+             <code>H5D_FILL_VALUE_USER_DEFINED</code>&nbsp;&nbsp;
+             </td><td>
+             Fill value is defined by the application. 
+ 	</td></tr></table>
+  <dt><strong>Note:</strong>
+    <dd><code>H5Pfill_value_defined</code> is designed for use in  
+	concert with the dataset fill value properties functions 
+	<code>H5Pget_fill_value</code> and <code>H5Pget_fill_time</code>.
+	<p>
+	See <a href="RM_H5D.html#Dataset-Create">H5Dcreate</a> for 
+	further cross-references.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5D_fill_value_t&nbsp;*</em><code>status&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Status of fill value in property list.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

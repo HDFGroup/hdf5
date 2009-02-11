@@ -1,0 +1,114 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_native_type" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetNativeType">H5Tget_native_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tget_native_type</code>(<em>hid_t</em> <code>type_id</code>,
+        <em>H5T_direction_t</em> <code>direction</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the native datatype of a specified datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_native_type</code> returns the equivalent native datatype  
+        for the datatype specified in <code>type_id</code>.  
+        <p>
+        <code>H5Tget_native_type</code> is a high-level function designed
+	primarily to facilitate use of the <code>H5Dread</code> function,
+	for which users otherwise must undertake a multi-step process to 
+	determine the native datatype of a dataset prior to reading it 
+	into memory.     
+        It can be used not only to determine 
+        the native datatype for atomic datatypes, 
+        but also to determine the native datatypes of the individual components 
+        of a compound datatype, an enumerated datatype, an array datatype, or 
+        a variable-length datatype.
+        For example, if <code>dtype_id</code> is a compound datatype,
+        the returned datatype identifier will be for 
+        a similar compound datatype with
+        each element converted to the corresponding native datatype.
+        <p>
+	<code>H5Tget_native_type</code> selects the matching native datatype 
+	from the following list:
+        <pre>        H5T_NATIVE_CHAR         
+        H5T_NATIVE_SHORT        
+        H5T_NATIVE_INT          
+        H5T_NATIVE_LONG         
+        H5T_NATIVE_LLONG        
+
+        H5T_NATIVE_UCHAR
+        H5T_NATIVE_USHORT
+        H5T_NATIVE_UINT
+        H5T_NATIVE_ULONG
+        H5T_NATIVE_ULLONG
+
+        H5T_NATIVE_FLOAT
+        H5T_NATIVE_DOUBLE
+        H5T_NATIVE_LDOUBLE</pre>
+        <p>
+        The <code>direction</code> parameter indicates the order 
+	in which the library searches for a native datatype match.
+	Valid values for <code>direction</code> are as follows:
+	<table border=0>
+	<tr valign=top><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+	    <code>H5T_DIR_ASCEND</code></td><td>
+	    Searches the above list in ascending size of the datatype,<br>
+	    i.e., from top to bottom.  (Default)
+	    </td></tr>
+	<tr valign=top><td>&nbsp;</td><td>
+	    <code>H5T_DIR_DESCEND</code>&nbsp;&nbsp;</td><td>
+	    Searches the above list in descending size of the datatype,<br>
+	    i.e., from bottom to top.
+	    </td></tr>
+	</table>
+        <p>
+	<code>H5Tget_native_type</code> is designed primarily for
+	use with integer and floating point datatypes.
+	String, time, bitfield, opaque, and reference datatypes are returned
+	as a copy of <code>type_id</code>.
+        <p>
+        The identifier returned by <code>H5Tget_native_type</code> 
+        should eventually be closed by calling <code>H5Tclose</code> 
+        to release resources.    
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Datatype identifier for the dataset datatype.</td></tr>
+        <tr>
+            <td valign="top"><em>H5T_direction_t</em>&nbsp;<code>direction&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Direction of search.</td></tr>
+    </table></ul>
+<!-- NEW PAGE -->
+<dt><strong>Returns:</strong>
+    <dd>Returns the native datatype identifier for the  
+        specified dataset datatype if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

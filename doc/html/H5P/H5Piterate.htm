@@ -1,0 +1,118 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Piterate" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Iterate">H5Piterate</a>
+
+  <dt><strong>Purpose:</strong>
+    <dd>Iterates over properties in a property class or list.
+
+  <dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Piterate</code>(
+               <em>hid_t</em> <code>id</code>,
+               <em>int *</em> <code>idx</code>,
+               <em>H5P_iterate_t</em> <code>iter_func</code>,
+               <em>void *</em> <code>iter_data</code>
+	)
+
+  <dt><strong>Description:</strong>
+    <p><code>H5Piterate</code> iterates over the properties in the 
+    property object specified in <code>id</code>, which may be either a
+    property list or a property class, performing a specified 
+    operation on each property in turn.  
+	
+    <p>
+    For each property in the object, <code>iter_func</code> and
+    the additional information specified below are passed to the
+    <code>H5P_iterate_t</code> operator function.  
+
+    <p>
+    The iteration begins with the <code>idx</code>-th property in 
+    the object; the next element to be processed by the operator 
+    is returned in <code>idx</code>.
+    If <code>idx</code> is NULL, the iterator starts at the first 
+    property; since no stopping point is returned in this case, 
+    the iterator cannot be restarted if one of the calls to its 
+    operator returns non-zero.
+    </p>
+
+    The prototype for the <code>H5P_iterate_t</code> operator is
+    as follows:
+        <ul> <dl>
+            <dt><em>typedef herr_t</em> (*<code>H5P_iterate_t</code>)(
+                                  <em>hid_t</em> <code>id</code>, 
+                                  <em>const char *</em><code>name</code>, 
+                                  <em>void *</em><code>iter_data</code>
+	        )
+        </dl> </ul>
+    The operation receives the property list or class identifier for 
+    the object being iterated over, <code>id</code>,
+    the name of the current property within the object, <code>name</code>, 
+    and the pointer to the operator data passed in to
+    <code>H5Piterate</code>, <code>iter_data</code>.
+    </p>
+
+    The valid return values from an operator are as follows:
+        <ul><table>
+        <tr>
+            <td valign=top>Zero</td>
+            <td>Causes the iterator to continue, returning zero when all
+                properties have been processed</td></tr>
+        <tr>
+            <td valign=top>Positive</td>
+            <td>Causes the iterator to immediately return that positive 
+                value, indicating short-circuit success.  The iterator can 
+                be restarted at the index of the next property</td></tr>
+        <tr>
+            <td valign=top>Negative</td>
+            <td>Causes the iterator to immediately return that value,
+                indicating failure.  The iterator can be restarted at the 
+                index of the next property</td></tr>
+        </table></ul>
+
+    <P>
+    <code>H5Piterate</code> assumes that the properties in the object 
+    identified by <code>id</code> remain unchanged through the iteration.  
+    If the membership changes during the iteration, the function's behavior 
+    is undefined.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>id</code></td>
+        <td>IN: Identifier of property object to iterate over</td></tr>
+    <tr>
+        <td><em>int *</em> <code>idx</code></td>
+        <td>IN/OUT: Index of the property to begin with</td></tr>
+    <tr>
+        <td><em>H5P_iterate_t</em>&nbsp;<code>iter_func&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td>IN: Function pointer to function to be called with each 
+                property iterated over</td></tr>
+    <tr>
+        <td><em>void *</em> <code>iter_data</code></td>
+        <td>IN/OUT: Pointer to iteration data from user</td></tr>
+    </table></ul>
+
+<dt><strong>Returns:</strong>
+    <dd>Success: the return value of the last call to
+            <code>iter_func</code> if it was non-zero;
+            zero if all properties have been processed
+    <dd>Failure: a negative value
+    </table></ul>
+
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

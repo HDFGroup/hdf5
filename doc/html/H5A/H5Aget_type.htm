@@ -1,0 +1,49 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aget_type" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-GetType">H5Aget_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Aget_type</code>(<em>hid_t</em> <code>attr_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Gets an attribute datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Aget_type</code> retrieves a copy of the datatype 
+        for an attribute.  
+        <p>
+        The datatype is reopened if it is a named type before returning
+        it to the application.  The datatypes returned by this function
+        are always read-only.  If an error occurs when atomizing the 
+        return datatype, then the datatype is closed.
+        <p>
+        The datatype identifier returned from this function must be 
+        released with <code>H5Tclose</code> or resource leaks will develop.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>attr_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of an attribute.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a datatype identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5aget_type_f
+    <dd>
+	<pre>
+SUBROUTINE h5aget_type_f(attr_id, type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
+  INTEGER(HID_T), INTENT(OUT) :: type_id ! Attribute datatype identifier
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code:
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5aget_type_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

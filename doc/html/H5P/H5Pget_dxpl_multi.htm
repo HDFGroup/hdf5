@@ -1,0 +1,57 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_dxpl_multi" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetDxplMulti">H5Pget_dxpl_multi</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_dxpl_multi</code>(
+                     <em>hid_t</em> <code>dxpl_id</code>,
+                     <em>const hid_t *</em><code>memb_dxpl</code>
+    )
+<br>
+<br>
+  <dt><strong>Purpose:</strong>
+    <dd>Returns multi-file data transfer property list information.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_dxpl_multi</code> returns the data transfer property list
+        information for the multi-file driver.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dxpl_id</code>,</td>
+            <td valign="top">IN: Data transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;hid_t&nbsp;*</em><code>memb_dxpl&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Array of data access property lists.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

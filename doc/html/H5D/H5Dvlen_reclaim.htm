@@ -1,0 +1,64 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dvlen_reclaim" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-VLReclaim">H5Dvlen_reclaim</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Dvlen_reclaim</code>(<em>hid_t </em><code>type_id</code>,
+    <em>hid_t</em> <code>space_id</code>,
+    <em>hid_t</em> <code>plist_id</code>,
+    <em>void</em> *<code>buf</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Reclaims VL datatype memory buffers.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dvlen_reclaim</code> reclaims memory buffers created to 
+        store VL datatypes.
+        <p>
+        The <code>type_id</code> must be the datatype stored in the buffer.
+        The <code>space_id</code> describes the selection for the memory buffer 
+        to free the VL datatypes within.  
+        The <code>plist_id</code> is the dataset transfer property list which 
+        was used for the I/O transfer to create the buffer.
+        And <code>buf</code> is the pointer to the buffer to be reclaimed.
+        <p>
+        The VL structures (<code>hvl_t</code>) in the user's buffer are 
+        modified to zero out the VL information after the memory has been reclaimed.
+        <p>
+        If nested VL datatypes were used to create the buffer, 
+        this routine frees them <em>from the bottom up</em>, releasing all 
+        the memory without creating memory leaks.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">IN: Identifier of the datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataspace.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Identifier of the property list used to create the buffer.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> *<code>buf</code></td>
+            <td valign="top">IN: Pointer to the buffer to be reclaimed.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

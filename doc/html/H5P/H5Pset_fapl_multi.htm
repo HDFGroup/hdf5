@@ -1,0 +1,192 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_fapl_multi" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplMulti">H5Pset_fapl_multi</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_multi</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>const H5FD_mem_t *</em><code>memb_map</code>,
+                     <em>const hid_t *</em><code>memb_fapl</code>,
+                     <em>const char * const *</em><code>memb_name</code>,
+                     <em>const haddr_t *</em><code>memb_addr</code>,
+                     <em>hbool_t</em> <code>relax</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets up use of the multi-file driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_multi</code> sets the file access property list 
+        <code>fapl_id</code> to use the multi-file driver. 
+        <p>
+        The multi-file driver enables different types of HDF5 data and 
+        metadata to be written to separate files.  These files are viewed 
+        by the HDF5 library and the application as a single virtual HDF5 file
+        with a single HDF5 file address space.
+        The types of data that can be broken out into separate files include 
+        raw data, the superblock, B-tree data, global heap data, 
+        local heap data, and object headers.
+        At the programmer's discretion, two or more types of data can be 
+        written to the same file while other types of data are written to 
+        separate files.
+        <p>
+        The array <code>memb_map</code> maps memory usage types to other
+        memory usage types and is the mechanism that allows the caller 
+        to specify how many files are created. 
+        The array contains <code>H5FD_MEM_NTYPES</code> entries, 
+        which are either the value <code>H5FD_MEM_DEFAULT</code>
+        or a memory usage type.
+        The number of unique values determines the number of files 
+        that are opened.  
+        <p>
+        The array <code>memb_fapl</code> contains a property list
+        for each memory usage type that will be associated with a file. 
+        <p>
+        The array <code>memb_name</code> should be a name generator 
+        (a printf-style format with a %s which will be replaced with the
+        name passed to <code>H5FDopen</code>, usually from 
+        <code>H5Fcreate</code> or <code>H5Fopen</code>).
+        <p>
+        The array <code>memb_addr</code> specifies the offsets within the 
+        virtual address space, from <code>0</code> (zero) to 
+        <code>HADDR_MAX</code>, at which each type of data storage begins.
+        <p>
+        If <code>relax</code> is set to <code>TRUE</code> (or <code>1</code>),
+        then opening an existing file for read-only access will not fail 
+        if some file members are missing.  
+        This allows a file to be accessed in a limited sense if just the
+        meta data is available.
+        <p>
+        Default values for each of the optional arguments are as follows:
+        <dir>
+        <dl>
+          <dt><code>memb_map</code>
+            <dd>The default member map contains the value
+              <code>H5FD_MEM_DEFAULT</code> for each element.
+          <dt><code>memb_fapl</code>
+            <dd>The default value is <code>H5P_DEFAULT</code> for each element.
+          <dt><code>memb_name</code>
+            <dd>The default string is &nbsp; <code>%s-<i>X</i>.h5</code> &nbsp;
+              where &nbsp; <code><i>X</i></code> &nbsp; is one of the 
+              following letters:
+              <dir>
+                  <code>s</code> &nbsp;&nbsp; for <code>H5FD_MEM_SUPER</code>
+                  <br>
+                  <code>b</code> &nbsp;&nbsp; for <code>H5FD_MEM_BTREE</code>
+                  <br>
+                  <code>r</code> &nbsp;&nbsp; for <code>H5FD_MEM_DRAW</code>
+                  <br>
+                  <code>g</code> &nbsp;&nbsp; for <code>H5FD_MEM_GHEAP</code>
+                  <br>
+                  <code>l</code> &nbsp;&nbsp; for <code>H5FD_MEM_LHEAP</code>
+                  <br>
+                  <code>o</code> &nbsp;&nbsp; for <code>H5FD_MEM_OHDR</code>
+              </dir></dd></dt>
+<!-- NEW PAGE -->
+          <dt><code>memb_addr</code>
+            <dd>The default value is <code>HADDR_UNDEF</code> for each element.
+        </dl>
+        </dir>
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;H5FD_mem_t&nbsp;*</em><code>memb_map&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Maps memory usage types to other memory usage types.</td></tr>
+        <tr>
+		    <td valign="top"><em>const hid_t *</em><code>memb_fapl</code></td>
+            <td valign="top">IN: Property list for each memory usage type.</td></tr>
+        <tr>
+		    <td valign="top"><em>const char * const *</em><code>memb_name</code></td>
+            <td valign="top">IN: Name generator for names of member files.</td></tr>
+        <tr>
+		    <td valign="top"><em>const haddr_t *</em><code>memb_addr</code></td>
+            <td valign="top">IN: The offsets within the virtual address space, 
+                from <code>0</code> (zero) to <code>HADDR_MAX</code>, 
+                at which each type of data storage begins.</td></tr>
+        <tr>
+		    <td valign="top"><em>hbool_t</em> <code>relax</code></td>
+            <td valign="top">IN: Allows read-only access to incomplete file sets 
+                when <code>TRUE</code>.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Example:</strong>
+    <dd>The following code sample sets up a multi-file access property list 
+        that partitions data into meta and raw files, each being 
+        one-half of the address:
+        <pre>
+                  H5FD_mem_t mt, memb_map[H5FD_MEM_NTYPES];
+                  hid_t memb_fapl[H5FD_MEM_NTYPES];
+                  const char *memb[H5FD_MEM_NTYPES];
+                  haddr_t memb_addr[H5FD_MEM_NTYPES];
+ 
+                  // The mapping...
+                  for (mt=0; mt&lt;H5FD_MEM_NTYPES; mt++) {
+                     memb_map[mt] = H5FD_MEM_SUPER;
+                  }
+                  memb_map[H5FD_MEM_DRAW] = H5FD_MEM_DRAW;
+ 
+                  // Member information
+                  memb_fapl[H5FD_MEM_SUPER] = H5P_DEFAULT;
+                  memb_name[H5FD_MEM_SUPER] = "%s.meta";
+                  memb_addr[H5FD_MEM_SUPER] = 0;
+ 
+                  memb_fapl[H5FD_MEM_DRAW] = H5P_DEFAULT;
+                  memb_name[H5FD_MEM_DRAW] = "%s.raw";
+                  memb_addr[H5FD_MEM_DRAW] = HADDR_MAX/2;
+ 
+                  hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+                  H5Pset_fapl_multi(fapl, memb_map, memb_fapl,
+                                  memb_name, memb_addr, TRUE);
+        </pre>
+  
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_multi_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_multi_f(prp_id, memb_map, memb_fapl, memb_name,
+                               memb_addr, relax, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T),INTENT(IN)  :: prp_id     ! Property list identifier
+
+  INTEGER,DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(IN)          :: memb_map
+  INTEGER(HID_T),DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(IN)   :: memb_fapl
+  CHARACTER(LEN=*),DIMENSION(0:H5FD_MEM_NTYPES_F-1),INTENT(IN) :: memb_name
+  REAL, DIMENSION(0:H5FD_MEM_NTYPES_F-1), INTENT(IN)           :: memb_addr
+              ! Numbers in the interval [0,1) (e.g. 0.0 0.1 0.5 0.2 0.3 0.4)
+              ! real address in the file will be calculated as X*HADDR_MAX</pre>
+<!-- NEW PAGE -->
+<pre>
+  LOGICAL, INTENT(IN)  :: relax
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fapl_multi_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.3</td>
+          <td valign="top">
+			<code>memb_name</code> parameter type changed to 
+			<em>const char* const*</em>.</td></tr>
+		<tr>
+		  <td valign="top">1.4.0</td>
+		  <td valign="top">Function introduced in this release.</td>
+		</tr>
+    </table></ul>
+</dl>
+

@@ -1,0 +1,49 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tset_overflow" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetOverflow">H5Tset_overflow</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tset_overflow</code>(<em>H5T_overflow_t</em> <code>func</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Sets the overflow handler to a specified function. 
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_overflow</code> sets the overflow handler 
+        to be the function specified by <code>func</code>.
+        <code>func</code> will be called for all datatype conversions that 
+        result in an overflow.  
+        <p>
+        See the definition of <code>H5T_overflow_t</code> in 
+        <code>H5Tpublic.h</code> for documentation  
+        of arguments and return values.  
+        The prototype for <code>H5T_overflow_t</code> is as follows:<br>
+              <code>herr_t (*H5T_overflow_t)(hid_t src_id, hid_t dst_id,
+                                 void *src_buf, void *dst_buf);
+              </code>
+        <p>
+        The NULL pointer may be passed to remove the overflow handler.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5T_overflow_t</em>&nbsp;<code>func&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Overflow function.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

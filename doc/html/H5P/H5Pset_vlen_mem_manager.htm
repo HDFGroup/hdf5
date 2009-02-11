@@ -1,0 +1,99 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_vlen_mem_manager" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetVLMemManager">H5Pset_vlen_mem_manager</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_vlen_mem_manager</code>(<em>hid_t</em> <code>plist</code>,
+        <em>H5MM_allocate_t</em> <code>alloc</code>,
+        <em>void</em> *<code>alloc_info</code>,
+        <em>H5MM_free_t</em> <code>free</code>,
+        <em>void</em> *<code>free_info</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the memory manager for variable-length datatype allocation in 
+        <code>H5Dread</code> and <code>H5Dvlen_reclaim</code>.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_vlen_mem_manager</code> sets the memory manager for 
+        variable-length datatype allocation in <code>H5Dread</code> 
+        and free in <code>H5Dvlen_reclaim</code>.
+        <p>
+        The <code>alloc</code> and <code>free</code> parameters 
+        identify the memory management routines to be used.
+        If the user has defined custom memory management routines,
+        <code>alloc</code> and/or <code>free</code> should be set to make 
+        those routine calls (i.e., the name of the routine is used as 
+        the value of the parameter);  
+        if the user prefers to use the system's <code> malloc</code>
+        and/or <code>free</code>, the <code>alloc</code> and 
+        <code>free</code> parameters, respectively, should be set to 
+        <code> NULL</code>
+        <p>
+        The prototypes for these user-defined functions would appear as follows:
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            <em>typedef void</em> *(*<code>H5MM_allocate_t</code>)(<em>size_t</em> <code>size</code>, 
+                <em>void</em> *<code>alloc_info</code>) ;
+           
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            <em>typedef void</em> (*<code>H5MM_free_t</code>)(<em>void</em> *<code>mem</code>, 
+                <em>void</em> *<code>free_info</code>) ;
+        <br>
+        The <code>alloc_info</code> and <code>free_info</code> parameters 
+        can be used to pass along any required information to 
+        the user's memory management routines.
+        <p>
+        In summary, if the user has defined custom memory management 
+        routines, the name(s) of the routines are passed in the 
+        <code>alloc</code> and <code>free</code> parameters and the 
+        custom routines' parameters are passed in the 
+        <code>alloc_info</code> and <code>free_info</code> parameters.
+        If the user wishes to use the system <code> malloc</code> and 
+        <code>free</code> functions, the <code>alloc</code> and/or 
+        <code>free</code> parameters are set to <code> NULL</code> 
+        and the  <code>alloc_info</code> and <code>free_info</code> 
+        parameters are ignored.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier for the dataset transfer property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5MM_allocate_t</em>&nbsp;<code>alloc&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: User's allocate routine, or &nbsp; <code> NULL</code> 
+                for system &nbsp; <code> malloc</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> *<code>alloc_info</code></td>
+            <td valign="top">IN: Extra parameter for user's allocation routine.  
+                <br>
+                Contents are ignored if preceding parameter is &nbsp; 
+                <code> NULL</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5MM_free_t</em> <code>free</code></td>
+            <td valign="top">IN: User's free routine, or &nbsp; <code> NULL</code> 
+                for system <code>free</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> *<code>free_info</code></td>
+            <td valign="top">IN: Extra parameter for user's free routine.  
+                <br>
+                Contents are ignored if preceding parameter is &nbsp; 
+                <code> NULL</code>.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,58 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tenum_valueof" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-EnumValueOf">H5Tenum_valueof</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tenum_valueof</code>(
+        <em>hid_t</em> <code>type</code>,
+        <em>char</em> *<code>name</code>,
+        <em>void</em> *<code>value</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the value corresponding to a specified member of an enumeration datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tenum_valueof</code> finds the value that
+        corresponds to the specified <code>name</code>
+        of the enumeration datatype <code>type</code>. 
+        <p>
+        The <code>value</code> argument should be at least
+        as large as the value of <code>H5Tget_size(type)</code>
+        in order to hold the result.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>type</code></td>
+            <td valign="top">IN: Enumeration datatype identifier.</td></tr>
+        <tr>
+            <td valign="top"><em>const&nbsp;char</em>&nbsp;*<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Symbol name of the enumeration 
+                datatype.</td></tr>
+        <tr>
+            <td valign="top"><em>void</em> *<code>value</code></td>
+            <td valign="top">OUT: Buffer for output of the value 
+                of the enumeration datatype.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tenum_valueof_f
+    <dd>
+	<pre>
+SUBROUTINE h5tenum_valueof_f(type_id,  name, value, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of the enumeration datatype
+  INTEGER, INTENT(OUT) :: value         ! Value of the enumeration datatype
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tenum_valueof_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

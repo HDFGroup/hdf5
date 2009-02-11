@@ -1,0 +1,70 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_buffer" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetBuffer">H5Pget_buffer</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>hsize_t</em> <code>H5Pget_buffer</code>(<em>hid_t</em> <code>plist</code>,
+        <em>void</em> <code>**tconv</code>,
+        <em>void</em> <code>**bkg</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Reads buffer settings.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_buffer</code> reads values previously set 
+        with H5Pset_buffer.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier for the dataset transfer property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em>&nbsp;<code>**tconv&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Address of the pointer to application-allocated 
+                type conversion buffer.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> <code>**bkg</code></td>
+            <td valign="top">OUT: Address of the pointer to application-allocated 
+                background buffer.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns buffer size, in bytes, if successful;
+        otherwise 0 on failure.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_buffer_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_buffer_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)    :: plist_id ! Dataset transfer 
+                                            ! property list identifier
+  INTEGER(HSIZE_T), INTENT(OUT) :: size     ! Conversion buffer size
+  INTEGER, INTENT(OUT)          :: hdferr   ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_buffer_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>C</strong></td></tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top">
+            The return type changed from 
+            <em>hsize_t</em> to <em>size_t</em>.</td></tr>
+        <tr>
+          <td valign="top">1.4.0</td>
+          <td valign="top">
+            The return type changed to <em>hsize_t</em>.</td></tr>
+    </table></ul>
+</dl>
+

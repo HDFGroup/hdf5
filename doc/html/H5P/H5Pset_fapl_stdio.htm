@@ -1,0 +1,53 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_fapl_stdio" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplStdio">H5Pset_fapl_stdio</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_stdio</code>(
+                     <em>hid_t</em> <code>fapl_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the standard I/O driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_stdio</code> modifies the file access property list 
+        to use the standard I/O driver, <code>H5FD_STDIO</code>.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_stdio_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_stdio_f(prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)    :: prp_id  ! Property list identifier
+  INTEGER, INTENT(OUT)          :: hdferr  ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fapl_stdio_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>

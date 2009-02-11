@@ -1,0 +1,56 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tset_size" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetSize">H5Tset_size</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tset_size</code>(<em>hid_t </em><code>type_id</code>,
+        <em>size_t</em><code>size</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the total size for an atomic datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_size</code> sets the total size in bytes, 
+        <code>size</code>, for a datatype.  If the datatype is atomic and size
+         is decreased so that the significant bits of the datatype extend beyond
+         the edge of the new size, then the `offset' property is decreased
+         toward zero.  If the `offset' becomes zero and the significant
+         bits of the datatype still hang over the edge of the new size, then
+         the number of significant bits is decreased.
+         The size set for a string should include space for the null-terminator
+         character, otherwise it will not be stored on (or retrieved from) disk.
+         Adjusting the size of a string automatically sets the precision
+         to 8*<code>size</code>.  A compound datatype may increase in size, 
+         but may not shrink.  All datatypes must have a positive size.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to change size.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>size</code></td>
+            <td valign="top">Size in bytes to modify datatype.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tset_size_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_size_f(type_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  INTEGER(SIZE_T), INTENT(IN) :: size    ! Datatype size
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5tset_size_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

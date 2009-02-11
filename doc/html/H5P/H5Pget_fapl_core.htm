@@ -1,0 +1,82 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_fapl_core" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFaplCore">H5Pget_fapl_core</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_fapl_core</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>size_t</em> *<code>increment</code>,
+                     <em>hbool_t</em> *<code>backing_store</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Queries core file driver properties.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_fapl_core</code> queries the <code>H5FD_CORE</code> 
+    driver properties as set by <code>H5Pset_fapl_core</code>.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> *<code>increment</code></td>
+            <td valign="top">OUT: Size, in bytes, of memory increments.</td></tr>
+        <tr>
+		    <td valign="top"><em>hbool_t</em>&nbsp;*<code>backing_store&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Boolean flag indicating whether to write the file
+                contents to disk when the file is closed.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_core_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fapl_core_f(prp_id, increment, backing_store, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)  :: prp_id     ! Property list identifier
+  INTEGER(SIZE_T), INTENT(OUT) :: increment ! File block size in bytes
+  LOGICAL, INTENT(OUT) :: backing_store     ! Flag to indicate that entire
+                                            ! file contents are flushed to 
+                                            ! a file with the same name as 
+                                            ! this core file
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_fapl_core_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>C</strong></td>
+          <td valign="top" align="left">
+            &nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>Fortran90</strong></td></tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">
+            The <code>backing_store</code> parameter type
+            changed from <em>INTEGER</em> to <em>LOGICAL</em> 
+            to better match the C API</td></tr>
+        <tr>
+          <td valign="top">1.4.0</td>
+          <td valign="top">Function introduced in this release.</td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">&nbsp;</td>
+        </tr>
+    </table></ul>
+</dl>
+

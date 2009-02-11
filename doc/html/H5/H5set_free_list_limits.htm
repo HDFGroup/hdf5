@@ -1,0 +1,97 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5set_free_list_limits" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-SetFreeListLimits">H5set_free_list_limits</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5set_free_list_limits</code>(<em>int</em> <code>reg_global_lim</code>, 
+                        <em>int</em> <code>reg_list_lim</code>, 
+			<em>int</em> <code>arr_global_lim</code>,
+                        <em>int</em> <code>arr_list_lim</code>, 
+			<em>int</em> <code>blk_global_lim</code>, 
+			<em>int</em> <code>blk_list_lim</code>
+                        )
+<dt><strong>Purpose:</strong>
+    <dd>Sets  free-list size limits.
+<dt><strong>Description:</strong>
+    <dd><code>H5set_free_list_limits</code> sets size limits 
+        on all types of free lists.
+	The HDF5 library uses free lists internally to manage memory.
+	There are three types of free lists:
+	<ul><li><span class=termDef>Regular</span> 
+	        free lists manage a single data structure.
+	    <li><span class=termDef>Array</span> 
+	        free lists manage arrays of a data structure.
+	    <li><span class=termDef>Block</span> 
+	        free lists manage blocks of bytes.
+	</ul> 
+	<em>Alternate phrasing?</em>:
+	<ul><li><span class=termDef>Regular</span> 
+	        free lists manage data structures containing atomic data.
+	    <li><span class=termDef>Array</span> 
+	        free lists manage data structures containing array data.
+	    <li><span class=termDef>Block</span> 
+	        free lists manage blocks of bytes.
+	</ul> 
+	<p>
+	These are global limits, but each limit applies only to 
+        free lists of the specified type. 
+        Therefore, if an application sets a 1Mb limit on each of 
+        the global lists, up to 3Mb of total storage might be 
+	allocated, 1Mb for each of the regular, array, and 
+	block type lists.
+	<p>
+        Using a value of <code>-1</code> for a limit means that 
+	no limit is set for the specified type of free list.  
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>int</em>&nbsp;<code>reg_global_lim&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+	        <td valign="top">IN: The limit on all regular free list memory used</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>reg_list_lim</code></td>
+	        <td valign="top">IN: The limit on memory used in each regular free list</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>arr_global_lim</code></td>
+	        <td valign="top">IN: The limit on all array free list memory used</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>arr_list_lim</code></td>
+	        <td valign="top">IN: The limit on memory used in each array free list</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>blk_global_lim</code></td>
+	        <td valign="top">IN: The limit on all block free list memory used</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>blk_list_lim</code></td>
+	        <td valign="top">IN: The limit on memory used in each block free list</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

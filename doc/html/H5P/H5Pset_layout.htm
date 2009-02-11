@@ -1,0 +1,71 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_layout" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetLayout">H5Pset_layout</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pset_layout</code>(<em>hid_t</em> <code>plist</code>,
+            <em>H5D_layout_t</em> <code>layout</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the type of storage used to store the raw data for a dataset.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_layout</code> sets the type of storage used to store the 
+        raw data for a dataset.  
+        This function is only valid for dataset creation property lists.
+        <p>
+	Valid values for <code>layout</code> are:
+            <ul><dl>
+                <dt>H5D_COMPACT  
+                    <dd>Store raw data in the dataset object header in file.
+                        This should only be used for very small amounts of raw
+                        data.  
+			The current limit is approximately 64K (HDF5 Release 1.6).
+                <dt>H5D_CONTIGUOUS
+                    <dd>Store raw data separately from the object header in one
+                        large chunk in the file.
+                <dt>H5D_CHUNKED
+                    <dd>Store raw data separately from the object header as 
+                        chunks of data in separate locations in the file.
+            </dl></ul>
+        <p>
+        Note that a compact storage layout may affect writing data to
+        the dataset with parallel applications.  See note in
+	<a href="RM_H5D.html#Dataset-Write">H5Dwrite</a>
+        documentation for details.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of property list to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5D_layout_t</em>&nbsp;<code>layout&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Type of storage layout for raw data.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_layout_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_layout_f (prp_id, layout, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(IN) :: layout        ! Type of storage layout for raw data
+                                       ! Possible values are:
+                                       !    H5D_COMPACT_F
+                                       !    H5D_CONTIGUOUS_F
+                                       !    H5D_CHUNKED_F
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_layout_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

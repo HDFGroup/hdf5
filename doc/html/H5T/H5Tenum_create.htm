@@ -1,0 +1,44 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tenum_create" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-EnumCreate">H5Tenum_create</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tenum_create</code>(<em>hid_t</em> <code>parent_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates a new enumeration datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tenum_create</code> creates a new enumeration datatype 
+        based on the specified base datatype, <code>parent_id</code>, 
+        which must be an integer type.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>parent_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Datatype identifier for the base datatype.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the datatype identifier for the new enumeration datatype if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tenum_create_f
+    <dd>
+	<pre>
+SUBROUTINE h5tenum_create_f(parent_id, new_type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: parent_id     ! Datatype identifier for
+                                              ! the  base datatype
+  INTEGER(HID_T), INTENT(OUT) :: new_type_id  ! Datatype identifier for the
+                                              ! new enumeration datatype    
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code
+END SUBROUTINE h5tenum_create_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

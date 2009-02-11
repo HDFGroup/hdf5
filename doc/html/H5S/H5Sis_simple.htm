@@ -1,0 +1,45 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Sis_simple" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-IsSimple">H5Sis_simple</a>
+<dt><strong>Signature:</strong>
+    <dd><em>htri_t </em><code>H5Sis_simple</code>(<em>hid_t </em><code>space_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Determines whether a dataspace is a simple dataspace.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sis_simple</code> determines whether a dataspace is 
+        a simple dataspace.  [Currently, all dataspace objects are simple
+        dataspaces, complex dataspace support will be added in the future]
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Identifier of the dataspace to query</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>When successful, returns a positive value, for <code>TRUE</code>,
+        or <code>0</code> (zero), for <code>FALSE</code>.
+        Otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5sis_simple_f
+    <dd>
+	<pre>
+SUBROUTINE h5sis_simple_f(space_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: space_id    ! Dataspace identifier 
+  LOGICAL, INTENT(OUT) :: flag              ! Flag, indicates if dataspace
+                                            ! is simple or not: 
+                                            ! TRUE or FALSE  
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code
+                                            ! 0 on success and -1 on failure 
+END SUBROUTINE h5sis_simple_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

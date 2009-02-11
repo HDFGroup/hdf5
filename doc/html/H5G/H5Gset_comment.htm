@@ -1,0 +1,73 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gset_comment" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-SetComment">H5Gset_comment</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Gset_comment</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>const char *</em><code>comment</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets comment for specified object.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Gset_comment</code> sets the comment for the 
+        object specified by <code>loc_id</code> and <code>name</code> 
+        to <code>comment</code>.
+        Any previously existing comment is overwritten.
+        <p>
+        If <code>comment</code> is the empty string or a 
+        null pointer, the comment message is removed from the object. 
+        <p>
+        Comments should be relatively short, null-terminated, 
+        ASCII strings.
+        <p>
+        Comments can be attached to any object that has an object header, 
+        e.g., datasets, groups, named datatypes, and dataspaces, but 
+        not symbolic links.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: Identifier of the file, group, dataset, 
+            or named datatype.</td></tr>
+      <tr>
+	    <td valign="top"><em>const char *</em><code>name</code></td>
+        <td valign="top">IN: Name of the object whose comment is to be 
+            set or reset.
+            <br>
+            <code>name</code> can be '.' (dot) if <code>loc_id</code> 
+            fully specifies the object for which the comment is to be set.
+            <br>
+            <code>name</code> is ignored if <code>loc_id</code> 
+            is a dataset or named datatype.
+	    </td></tr>
+      <tr>
+	    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>comment&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: The new comment.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5gset_comment_f
+    <dd>
+	<pre>
+SUBROUTINE h5gset_comment_f(loc_id, name, comment, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id      ! File, group, dataset, or 
+                                            ! named datatype identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name      ! Name of object 
+  CHARACTER(LEN=*), INTENT(IN) :: comment   ! Comment for the object 
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code 
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5gset_comment_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

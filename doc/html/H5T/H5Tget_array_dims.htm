@@ -1,0 +1,67 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_array_dims" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetArrayDims">H5Tget_array_dims</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Tget_array_dims</code>(
+                       <em>hid_t</em> <code>adtype_id</code>,
+                       <em>hsize_t </em><code>dims[]</code>,
+                       <em>int </em><code>perm[]</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves sizes of array dimensions and dimension permutations.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_array_dims</code> returns the sizes of the dimensions
+        and the dimension permutations of the specified array datatype object.
+        <p>
+        The sizes of the dimensions are returned in the array <code>dims</code>.
+        The dimension permutations, i.e., C versus FORTRAN array order,
+        are returned in the array <code>perm</code>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>adtype_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Datatype identifier of array object.</td></tr>
+        <tr>
+            <td valign="top"><em>hsize_t </em><code>dims[]</code></td>
+            <td valign="top">OUT: Sizes of array dimensions.</td></tr>
+        <tr>
+            <td valign="top"><em>int </em><code>perm[]</code></td>
+            <td valign="top">OUT: Dimension permutations.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the non-negative number of dimensions of the array type if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tget_array_dims_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_array_dims_f(type_id, dims, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id      ! Identifier of the array datatype
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) ::  dims 
+                                             ! Buffer to store array datatype
+  INTEGER, INTENT(OUT)  :: hdferr            ! Error code
+END SUBROUTINE h5tget_array_dims_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

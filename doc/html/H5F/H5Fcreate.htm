@@ -1,0 +1,141 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fcreate" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-Create">H5Fcreate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Fcreate</code>(<em>const char *</em><code>name</code>,
+            <em>unsigned</em> <code>flags</code>,
+            <em>hid_t</em> <code>create_id</code>,
+            <em>hid_t</em> <code>access_id</code>
+        )
+<dt><strong>Purpose:</strong>
+        <dd>Creates HDF5 files.
+<dt><strong>Description:</strong>
+        <dd><code>H5Fcreate</code> is the primary function for creating 
+            HDF5 files . 
+            <p>
+            The <code>flags</code> parameter determines whether an 
+            existing file will be overwritten.  All newly created files 
+            are opened for both reading and writing.  All flags may be 
+            combined with the bit-wise OR operator (`|') to change 
+            the behavior of the <code>H5Fcreate</code> call.
+            <p>
+            The more complex behaviors of file creation and access
+            are controlled through the file-creation and file-access
+            property lists.  The value of <code>H5P_DEFAULT</code> for 
+            a property list value indicates that the library should use
+            the default values for the appropriate property list.
+            <p>
+            The return value is a file identifier for the newly-created file;
+            this file identifier should be closed by calling 
+            <code>H5Fclose</code> when it is no longer needed. 
+            <p>
+
+            <b>Special case -- File creation in the case of an 
+            already-open file:</b>
+            <br>
+            If a file being created is already opened, by either a 
+            previous <code>H5Fopen</code> or <code>H5Fcreate</code> call, 
+            the HDF5 library may or may not detect that the open file and 
+            the new file are the same physical file. 
+            (See <a href="#File-Open"><code>H5Fopen</code></a> regarding 
+            the limitations in detecting the re-opening of an already-open 
+            file.) 
+            <p>
+            If the library detects that the file is already opened, 
+            <code>H5Fcreate</code> will return a failure, regardless 
+            of the use of <code>H5F_ACC_TRUNC</code>.
+            <p>
+            If the library does not detect that the file is already opened 
+            and <code>H5F_ACC_TRUNC</code> is not used, 
+            <code>H5Fcreate</code> will return a failure because the file 
+            already exists.  Note that this is correct behavior.
+            <p>
+            But if the library does not detect that the file is already 
+            opened and <code>H5F_ACC_TRUNC</code> is used, 
+            <code>H5Fcreate</code> will truncate the existing file
+            and return a valid file identifier.
+            Such a truncation of a currently-opened file will almost 
+            certainly result in errors. 
+            While unlikely, the HDF5 library may not be able to detect,
+            and thus report, such errors.
+            <p>
+            Applications should avoid calling <code>H5Fcreate</code> 
+            with an already opened file.
+
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Name of the file to access.</td></tr>
+        <tr>
+		    <td valign="top"><em>uintn</em> <code>flags</code></td>
+            <td valign="top">IN: File access flags.  Allowable values are:
+                <ul><dl>
+                    <dt><code>H5F_ACC_TRUNC</code>
+                        <dd>Truncate file, if it already exists,  
+                            erasing all data previously stored in the file.
+                    <dt><code>H5F_ACC_EXCL</code>
+                        <dd>Fail if file already exists.
+                </dl></ul>
+                <li><code>H5F_ACC_TRUNC</code> and <code>H5F_ACC_EXCL</code> 
+                are mutually exclusive; use exactly one.
+                <li>An additional flag, <code>H5F_ACC_DEBUG</code>, prints 
+                debug information.  This flag is used only by HDF5 library 
+                developers; <i>it is neither tested nor supported</i> 
+                for use in applications.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>create_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File creation property list identifier, used when modifying
+                default file meta-data.
+                Use <code>H5P_DEFAULT</code> for default file creation properties.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>access_id</code></td>
+            <td valign="top">IN: File access property list identifier.
+                If parallel file access is desired, this is a collective
+                call according to the communicator stored in the
+                <code>access_id</code>. 
+                Use <code>H5P_DEFAULT</code> for default file access properties.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a file identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5fcreate_f
+    <dd>
+	<pre>
+SUBROUTINE h5fcreate_f(name, access_flags, file_id, hdferr, &  
+                       creation_prp, access_prp)
+  IMPLICIT NONE 
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
+  INTEGER, INTENT(IN) :: access_flag     ! File access flags 
+                                         ! Possible values are:
+                                         !     H5F_ACC_RDWR_F   
+                                         !     H5F_ACC_RDONLY_F   
+                                         !     H5F_ACC_TRUNC_F  
+                                         !     H5F_ACC_EXCL_F    
+                                         !     H5F_ACC_DEBUG_F   
+  INTEGER(HID_T), INTENT(OUT) :: file_id ! File identifier 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp 
+                                         ! File creation propertly 
+                                         ! list identifier, if not 
+                                         ! specified its value is
+                                         ! H5P_DEFAULT_F  
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp  
+                                         ! File access property list 
+                                         ! identifier, if not 
+                                         ! specified its value is
+                                         ! H5P_DEFAULT_F  
+END SUBROUTINE h5fcreate_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

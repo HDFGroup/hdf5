@@ -1,0 +1,81 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pcreate" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Create">H5Pcreate</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Pcreate</code>(<em>hid_t</em> <code>cls_id</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Creates a new property as an instance of a property list class.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pcreate</code> creates a new property as an instance of some
+        property list class.  The new property list is initialized
+        with default values for the specified class. The classes are:
+      <dl>
+        <dt><code>H5P_FILE_CREATE</code>
+	    <dd>Properties for file creation.  
+              See <a href="Files.html">Files</a>
+              in the <cite>HDF User's Guide</cite>
+	        for details about the file creation properties.
+        <dt><code>H5P_FILE_ACCESS</code>
+	    <dd>Properties for file access. 
+              See <a href="Files.html">Files</a>
+              in the <cite>HDF User's Guide</cite>
+	        for details about the file creation properties.
+        <dt><code>H5P_DATASET_CREATE</code>
+	    <dd>Properties for dataset creation.  
+              See <a href="Datasets.html">Datasets</a> 
+              in the <cite>HDF User's Guide</cite>
+	        for details about dataset creation properties.
+        <dt><code>H5P_DATASET_XFER</code>
+	    <dd>Properties for raw data transfer.  
+              See <a href="Datasets.html">Datasets</a> 
+              in the <cite>HDF User's Guide</cite>
+              for details about raw data transfer properties.
+        <dt><code>H5P_MOUNT</code>
+	    <dd>Properties for file mounting.  
+              With this parameter, <code>H5Pcreate</code> 
+              creates and returns a new mount property list
+              initialized with default values.
+      </dl>
+      <p>
+      This property list must eventually be closed with 
+      <code>H5Pclose</code>;  
+      otherwise, errors are likely to occur.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em>&nbsp;<code>cls_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: The class of the property list to create.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a property list identifier (<code>plist</code>) if successful; 
+        otherwise Fail (-1).
+  <dt><strong>Fortran90 Interface:</strong> h5pcreate_f
+    <dd>
+	<pre>
+SUBROUTINE h5pcreate_f(classtype, prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(IN) :: classtype       ! The type of the property list 
+                                         ! to be created 
+                                         ! Possible values are: 
+                                         !    H5P_FILE_CREATE_F 
+                                         !    H5P_FILE_ACCESS_F
+                                         !    H5P_DATASET_CREATE_F
+                                         !    H5P_DATASET_XFER_F 
+                                         !    H5P_MOUNT_F 
+  INTEGER(HID_T), INTENT(OUT) :: prp_id  ! Property list identifier 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pcreate_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

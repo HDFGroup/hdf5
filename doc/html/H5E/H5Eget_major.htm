@@ -1,0 +1,41 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eget_major" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-GetMajor">H5Eget_major</a>
+<dt><strong>Signature:</strong>
+    <dd><em>const char *</em> <code>H5Eget_major</code>(<em>H5E_major_t</em> <code>n</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Returns a character string describing an error specified by a 
+        major error number.
+<dt><strong>Description:</strong>
+    <dd>Given a major error number, <code>H5Eget_major</code> returns a 
+        constant character string that describes the error.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5E_major_t</em>&nbsp;<code>n&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Major error number.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd> Returns a character string describing the error if successful.
+         Otherwise returns "Invalid major error number."
+<dt><strong>Fortran90 Interface:</strong> h5eget_major_f
+    <dd>
+	<pre>
+SUBROUTINE h5eget_major_f(error_no, name, hdferr)
+  INTEGER, INTENT(IN) :: error_no         !Major error number
+  CHARACTER(LEN=*), INTENT(OUT) :: name   ! File name
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+
+END SUBROUTINE h5eget_major_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

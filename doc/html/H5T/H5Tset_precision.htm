@@ -1,0 +1,55 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tset_precision" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetPrecision">H5Tset_precision</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tset_precision</code>(<em>hid_t </em><code>type_id</code>,
+        <em>size_t</em><code>precision</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the precision of an atomic datatype.  
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_precision</code> sets the precision of an atomic datatype.  
+        The precision is the number of significant bits which, unless padding 
+        is present, is 8 times larger than the value returned by 
+        <code>H5Tget_size</code>.
+        <P>If the precision is increased then the offset is decreased and then
+            the size is increased to insure that significant bits do not "hang
+            over" the edge of the datatype.
+        <P>Changing the precision of an H5T_STRING automatically changes the
+            size as well.  The precision must be a multiple of 8.
+        <P>When decreasing the precision of a floating point type, set the
+            locations and sizes of the sign, mantissa, and exponent fields
+            first.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em>&nbsp;<code>precision&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Number of bits of precision for datatype.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tset_precision_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_precision_f(type_id, precision, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(IN) :: precision      ! Datatype precision
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tset_precision_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

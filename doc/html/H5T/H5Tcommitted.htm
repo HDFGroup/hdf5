@@ -1,0 +1,46 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tcommitted" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Committed">H5Tcommitted</a>
+<dt><strong>Signature:</strong>
+    <dd><em>htri_t</em><code>H5Tcommitted</code>(<em>hid_t</em> <code>type</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Determines whether a datatype is a named type or a transient type.  
+<dt><strong>Description:</strong>
+    <dd><code>H5Tcommitted</code> queries a type to determine whether 
+        the type specified by the <code>type</code> identifier 
+        is a named type or a transient type.  If this function returns 
+        a positive value, then the type is named (that is, it has been 
+        committed, perhaps by some other application).  Datasets which
+        return committed datatypes with <code>H5Dget_type()</code> are 
+        able to share the datatype with other datasets in the same file.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Datatype identifier.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>When successful, returns a positive value, for <code>TRUE</code>, 
+        if the datatype has been committed, or <code>0</code> (zero), 
+        for <code>FALSE</code>, if the datatype has not been committed.
+        Otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tcommitted_f
+    <dd>
+	<pre>
+SUBROUTINE h5tcommitted_f(type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tcommitted_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

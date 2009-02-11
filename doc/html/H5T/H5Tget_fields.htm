@@ -1,0 +1,67 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_fields" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetFields">H5Tget_fields</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tget_fields</code>(<em>hid_t </em><code>type_id</code>,
+        <em>size_t *</em><code>spos</code>,
+        <em>size_t *</em><code>epos</code>,
+        <em>size_t *</em><code>esize</code>,
+        <em>size_t *</em><code>mpos</code>,
+        <em>size_t *</em><code>msize</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves floating point datatype bit field information.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_fields</code> retrieves information about the locations of the various
+        bit fields of a floating point datatype.  The field positions are bit
+        positions in the significant region of the datatype.  Bits are
+        numbered with the least significant bit number zero.
+        Any (or even all) of the arguments can be null pointers.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of datatype to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em><code>spos</code></td>
+            <td valign="top">OUT: Pointer to location to return floating-point sign bit.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em><code>epos</code></td>
+            <td valign="top">OUT: Pointer to location to return exponent bit-position.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em><code>esize</code></td>
+            <td valign="top">OUT: Pointer to location to return size of exponent in bits.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em><code>mpos</code></td>
+            <td valign="top">OUT: Pointer to location to return mantissa bit-position.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em><code>msize</code></td>
+            <td valign="top">OUT: Pointer to location to return size of mantissa in bits.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tget_fields_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_fields_f(type_id, epos, esize, mpos, msize, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: epos          ! Exponent bit-position 
+  INTEGER, INTENT(OUT) :: esize         ! Size of exponent in bits
+  INTEGER, INTENT(OUT) :: mpos          ! Mantissa bit-position 
+  INTEGER, INTENT(OUT) :: msize         ! Size of mantissa in bits
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_fields_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

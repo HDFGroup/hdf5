@@ -1,0 +1,66 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tset_tag" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetTag">H5Tset_tag</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tset_tag</code>(<em>hid_t</em> <code>type_id</code>
+        <em>const char</em> *<code>tag</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Tags an opaque datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_tag</code> tags an opaque datatype <code>type_id</code>
+        with a descriptive ASCII identifier,<code> tag</code>.
+        <p>     
+        <code>tag</code> is intended to provide a concise description;
+        the maximum size is hard-coded in the HDF5 Library as 256 bytes 
+        (<code>H5T_OPAQUE_TAG_MAX</code>).
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">IN: Datatype identifier for the opaque datatype to be tagged.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char</em>&nbsp;*<code>tag&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Descriptive ASCII string with which the 
+                opaque datatype is to be tagged.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tset_tag_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_tag_f(type_id, tag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: tag   ! Unique ASCII string with which the
+                                        ! opaque datatype is to be tagged 
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tset_tag_f
+	</pre>
+	
+<dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.5</td>
+          <td valign="top">
+		    The <code>H5T_OPAQUE_TAG_MAX</code> macro constant, 
+			specifying the maximum size of an opaque datatype tag, 
+			was added in <code>H5Tpublic.h</code>.</td></tr>
+    </table></ul>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

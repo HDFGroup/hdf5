@@ -1,0 +1,76 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fclose" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-Close">H5Fclose</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Fclose</code>(<em>hid_t</em> <code>file_id</code>
+        )
+<dt><strong>Purpose:</strong>
+        <dd>Terminates access to an HDF5 file.  
+<dt><strong>Description:</strong>
+        <dd><code>H5Fclose</code> terminates access to an HDF5 file
+            by flushing all data to storage and terminating access
+            to the file through <code>file_id</code>.  
+            <p>
+            If this is the last file identifier open for the file 
+            and no other access identifier is open (e.g., a dataset 
+            identifier, group identifier, or shared datatype identifier),
+            the file will be fully closed and access will end.
+            <p>
+            <strong>Delayed close:</strong> 
+            <br>
+            Note the following deviation from the above-described behavior.
+            If <code>H5Fclose</code> is called for a file but one or more 
+            objects within the file remain open, those objects will remain 
+            accessible until they are individually closed.  
+            Thus, if the dataset <code>data_sample</code> is open when 
+            <code>H5Fclose</code> is called for the file containing it, 
+            <code>data_sample</code> will remain open and accessible 
+            (including writable) until it is explicitely closed.  
+            The file will be automatically closed once all objects in the
+            file have been closed.
+            <p>
+            Be warned, hoever, that there are circumstances where it is 
+            not possible to delay closing a file.  
+            For example, an MPI-IO file close is a collective call; all of
+            the processes that opened the file must close it collectively.
+            The file cannot be closed at some time in the future by each 
+            process in an independent fashion.
+            Another example is that an application using an AFS token-based 
+            file access privilage may destroy its AFS token after 
+            <code>H5Fclose</code> has returned successfully.  
+            This would make any future access to the file, or any object 
+            within it, illegal. 
+            <p>
+            In such situations, applications must close all open objects 
+            in a file before calling <code>H5Fclose</code>.  
+            It is generally recommended to do so in all cases.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of a file to terminate access to.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5fclose_f
+    <dd>
+	<pre>
+SUBROUTINE h5fclose_f(file_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5fclose_f 
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

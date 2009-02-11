@@ -1,0 +1,408 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5dump" -->
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong> <a name="Tools-Dump">h5dump</a>
+<dt><strong>Syntax:</strong>
+    <dd><code>h5dump
+        [</code><em>OPTIONS</em><code>]</code> <em>file</em>
+<dt><strong>Purpose:</strong>
+    <dd>Displays HDF5 file contents.
+<dt><strong>Description:</strong>
+    <dd><code>h5dump</code> enables the user to examine 
+        the contents of an HDF5 file and dump those contents, in human
+        readable form, to an ASCII file.
+        <p>
+        <code>h5dump</code> dumps HDF5 file content to standard output.
+        It can display the contents of the entire HDF5 file or
+        selected objects, which can be groups, datasets, a subset of a 
+        dataset, links, attributes, or datatypes. 
+        </p>
+        <p>
+        The <code>--header</code> option displays object header
+        information only.
+        </p>
+        <p>
+        Names are the absolute names of the objects. <code>h5dump</code>
+        displays objects in the order same as the command order. If a
+        name does not start with a slash, <code>h5dump</code> begins
+        searching for the specified object starting at the root group.
+        </p>
+        <p>
+        If an object is hard linked with multiple names,
+        <code>h5dump</code> displays the content of the object in the
+        first occurrence. Only the link information is displayed in later
+        occurrences.
+        </p>
+        <p>
+        <code>h5dump</code> assigns a name for any unnamed datatype in
+        the form of
+        <code>#</code><em>oid1</em><code>:</code><em>oid2</em>, where
+        <em>oid1</em> and <em>oid2</em> are the object identifiers
+        assigned by the library. The unnamed types are displayed within
+        the root group.
+        </p>
+        <p>
+        Datatypes are displayed with standard type names. For example,
+        if a dataset is created with <code>H5T_NATIVE_INT</code> type
+        and the standard type name for integer on that machine is
+        <code>H5T_STD_I32BE</code>, <code>h5dump</code> displays
+        <code>H5T_STD_I32BE</code> as the type of the dataset.
+        </p>
+        <p>
+        <code>h5dump</code> can also dump a subset of a dataset.
+        This feature operates in much the same way as hyperslabs in HDF5;
+        the parameters specified on the command line are passed to the 
+        function <a href="RM_H5S.html#Dataspace-SelectHyperslab">
+        <code>H5Sselect_hyperslab</code></a> and the resulting selection 
+        is displayed.
+        </p>
+        <p>
+        The <code>h5dump</code> output is described in detail in the 
+        <a href="ddl.html"><cite>DDL for HDF5</cite></a>, the 
+        <cite>Data Description Language</cite> document. 
+        </p>
+        <p>
+        <em>Note</em>: It is not permissible to specify multiple
+        attributes, datasets, datatypes, groups, or soft links with one
+        flag. For example, one may not issue the command
+          <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <font size=-1>WRONG:</font> &nbsp;
+            <code>h5dump -a /attr1 /attr2 foo.h5</code>
+          </br>
+        to display both <code>/attr1</code> and <code>/attr2</code>.
+        One must issue the following command:
+          <br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <font size=-1>CORRECT:</font> &nbsp;
+            <code>h5dump -a /attr1 -a /attr2 foo.h5</code>
+          </br>
+        </p>
+        <p>
+        It's possible to select the file driver with which to open the
+        HDF5 file by using the --filedriver (-f) command-line option.
+        Acceptable values for the --filedriver option are: "sec2",
+        "family", "split", "multi", and "stream". If the file driver flag
+        isn't specified, then the file will be opened with each driver in
+        turn and in the order specified above until one driver succeeds
+        in opening the file.
+        </p>
+	<p>
+	One byte integer type data is displayed in decimal by default. When
+	displayed in ASCII, a non-printable code is displayed in 3 octal
+	digits preceeded by a back-slash unless there is a C language escape
+	sequence for it.  For example, CR and LF are printed as \r and \n.
+	Though the NUL code is represented as \0 in C, it is printed as
+	\000 to avoid ambiguity as illustrated in the following 1 byte
+	char data (since this is not a string, embedded NUL is possible).
+	<pre>
+	141 142 143 000 060 061 062 012
+	  a   b   c  \0   0   1   2  \n </pre>
+	h5dump prints them as "abc\000012\n".  But if h5dump prints NUL as \0,
+	the output is "abc\0012\n" which is ambiguous.
+        </p>
+
+<dt><strong>XML Output:</strong>
+    <dd>With the <code>--xml</code> option, <code>h5dump</code> generates
+        XML output.  This output contains a complete description of the file, 
+        marked up in XML.  The XML conforms to the HDF5 Document Type 
+        Definition (DTD) available at
+        <a href="http://www.hdfgroup.org/DTDs/HDF5-File.dtd">
+        <code>http://www.hdfgroup.org/DTDs/HDF5-File.dtd</code></a>.
+        <p>
+        The XML output is suitable for use with other tools, including the 
+        <a href="http://www.hdfgroup.org/hdf-java-html" 
+        target="ToolsExt">HDF5 Java Tools</a>.
+
+<dt><strong>Options and Parameters:</strong>
+    <dl>
+        <dt><code>-h</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--help</code></dt>
+            <dd>Print a usage message and exit.</dd>
+        <dt><code>-n</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--contents</code></dt>
+            <dd>Print a list of the file contents and exit.</dd>
+        <dt><code>-B</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--bootblock</code></dt>
+            <dd>Print the contents of the boot block.</dd>
+        <dt><code>-H</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--header</code></dt>
+            <dd>Print the header only; no data is displayed.</dd>
+        <dt><code>-A</code> 
+            <dd>Print the header and value of attributes; 
+	        data of datasets is not displayed.</dd>
+        <dt><code>-i</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--object-ids</code></dt>
+            <dd>Print the object ids.</dd>
+        <dt><code>-r</code> &nbsp;&nbsp;or&nbsp;&nbsp;
+              <code>--string</code></dt>
+            <dd>Print 1-bytes integer datasets as ASCII.</dd>
+        <dt><code>-e</code></dt>
+            <dd>Escape non-printing characters.</dd>
+        <dt><code>-V</code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--version</code></dt>
+            <dd>Print version number and exit.</dd>
+        <dt><code>-a <em>P</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--attribute=<em>P</em></code></dt>
+            <dd>Print the specified attribute.</dd>
+        <dt><code>-d <em>P</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--dataset=<em>P</em></code></dt>
+            <dd>Print the specified dataset.</dd>
+        <dt><code>-y</code></dt>
+            <dd>Do not print array indices with data.</dd>
+        <dt><code>-p</code> &nbsp;&nbsp;or&nbsp;&nbsp;
+              <code>--properties</code></dt>
+            <dd>Print dataset filters, storage layout, and fill value.</dd>
+        <dt><code>-f <em>D</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--filedriver=<em>D</em></code></dt>
+            <dd>Specify which driver to open the file with.</dd>
+        <dt><code>-g <em>P</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--group=<em>P</em></code></dt>
+            <dd>Print the specified group and all members.</dd>
+        <dt><code>-l <em>P</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--soft-link=<em>P</em></code></dt>
+            <dd>Print the value(s) of the specified soft link.</dd>
+        <dt><code>-o <em>F</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--output=<em>F</em></code></dt>
+            <dd>Output raw data into file F.</dd>
+        <dt><code>-t <em>P</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--datatype=<em>P</em></code></dt>
+            <dd>Print the specified named datatype.</dd>
+        <dt><code>-w <em>N</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--width=<em>N</em></code></dt>
+            <dd>Set the number of columns of output.</dd>
+        <dt><code>-b <em>B</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--binary=<em>B</em></code></dt>
+            <dd>Output dataset to a binary file 
+            using the datatype specified by <code><em>B</em></code>.
+            <br>    
+            <code><em>B</em></code> must have one of the following values: 
+                <br>    
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <code>LE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>
+                    Little-endian 
+                <br>    
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <code>BE &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code>
+                    Big-endian 
+                <br>    
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <code>MEMORY &nbsp;&nbsp;</code>
+                    Memory datatype 
+                <br>    
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <code>FILE &nbsp;&nbsp;&nbsp;&nbsp;</code>
+                    File datatype 
+            <br>    
+            Recommended usage is with the <code>-d</code> and <code>-o</code>
+            options.
+            </dd>
+        <dt><code>-x <em></em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--xml</code></dt>
+            <dd>Output XML using XML schema (default) instead of DDL.</dd>
+        <dt><code>-u <em></em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--use-dtd</code></dt>
+            <dd>Output XML using XML DTD instead of DDL.</dd>
+        <dt><code>-D <em>U</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--xml-dtd=<em>U</em></code></dt>
+            <dd>In XML output, refer to the DTD or schema at <em>U</em> 
+                instead of the default schema/DTD.</dd>
+        <dt><code>-X <em>S</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--xml-dns=<em>S</em></code></dt>
+            <dd>In XML output, (XML Schema) use qualified names in the XML:<br>
+	        &nbsp;&nbsp; &nbsp;&nbsp;
+		":": no namespace, default: "hdf5:"</dd>
+        <dt><code>--</code></dt>
+            <dd>Indicates that the following argument is not an option.
+                E.g., to dump a file called `-f', use h5dump -- -f.
+                <br>
+                <i>(This option is necessary only when the name of the file to 
+                be examined starts with a dash (<code>-</code>), which could 
+                confuse the tool&rsquo;s command-line parser.)</i>
+        <dt><em>file</em></dt>
+            <dd>The file to be examined.</dd>
+
+        <dt>&nbsp;
+        <dt>The next four options enable subsetting, which is 
+            accomplished by selecting a hyperslab from a dataset.
+            These options mirror the techniques used by an HDF5 
+            application when performing hyperslab selection.
+            The <code>start</code> and <code>count</code> parameters
+            are mandatory if subsetting is to be performed; 
+            the <code>stride</code> and <code>block</code> parameters
+            are optional and will default to <code>1</code> (one).
+        <dt><code>-s <em>L</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--start=<em>L</em></code></dt>
+            <dd>Offset of start of subsetting selection.  
+                <br>
+                Default: the beginning of the dataset.</dd>
+        <dt><code>-S <em>L</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--stride=<em>L</em></code></dt>
+            <dd>Hyperslab stride.
+                <br>
+                Default: 1 in all dimensions.</dd>
+        <dt><code>-c <em>L</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--count=<em>L</em></code></dt>
+            <dd>Number of blocks to include in the selection.</dd>
+        <dt><code>-k <em>L</em></code> &nbsp;&nbsp;or&nbsp;&nbsp; 
+              <code>--block=<em>L</em></code></dt>
+            <dd>Size of block in hyperslab.
+                <br>
+                Default: 1 in all dimensions.</dd>
+
+        <dt>&nbsp;
+        <dt>Subsetting parameters can also be expressed in a convenient
+            compact form, as follows:
+              <br>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <code>--dataset="/foo/mydataset[START;STRIDE;COUNT;BLOCK]"</code>
+              <br>
+            All of the semicolons (<code>;</code>) are required, even when 
+            a parameter value is not specified.  
+            When not specified, default parameter values are used.
+
+        <dt>&nbsp;
+        <dt>The option parameters listed above are defined as follows:
+            <dd><em>D</em> -- which file driver to use in opening the
+                file. Acceptable values are "sec2", "family", "split",
+                "multi", and "stream". Without the file driver flag the
+                file will be opened with each driver in turn and in the
+                order specified above until one driver succeeds in
+                opening the file.</dd>
+            <dd><em>P</em> -- The full path from the root group to 
+                the object</dd>
+            <dd><em>F</em> -- A filename</dd>
+            <dd><em>N</em> -- An integer greater than 1</dd>
+            <dd><em>L</em> -- A list of integers, the number of which is 
+                equal to the number of dimensions in the dataspace being 
+                queried</dd>
+            <dd><em>U</em> -- A URI (as defined in 
+                [<a href="http://www.ietf.org/rfc/rfc2396.txt">IETF RFC 2396</a>], 
+                updated by 
+                [<a href="http://www.ietf.org/rfc/rfc2732.txt">IETF RFC 2732</a>]) 
+                that refers to the DTD to be used to validate the XML</dd>
+    </dl>
+    <p>
+
+<dt><strong>Examples:</strong>
+    <ol>
+       <li>Dump the group <code>/GroupFoo/GroupBar</code> in the file
+          <code>quux.h5</code>:
+          <blockquote>
+             <code>h5dump -g /GroupFoo/GroupBar quux.h5</code>
+          </blockquote>
+       <li>Dump the dataset <code>Fnord</code>, which is in the group
+          <code>/GroupFoo/GroupBar</code> in the file <code>quux.h5</code>:
+          <blockquote>
+             <code>h5dump -d /GroupFoo/GroupBar/Fnord quux.h5</code>
+          </blockquote>
+       <li>Dump the attribute <code>metadata</code> of the dataset
+          <code>Fnord</code>, which is in group
+          <code>/GroupFoo/GroupBar</code> in the file <code>quux.h5</code>:
+          <blockquote>
+             <code>h5dump -a /GroupFoo/GroupBar/Fnord/metadata quux.h5</code>
+          </blockquote>
+       <li>Dump the attribute <code>metadata</code> which is an
+          attribute of the root group in the file <code>quux.h5</code>:
+          <blockquote>
+              <code>h5dump -a /metadata quux.h5</code>
+          </blockquote>
+       <li>Produce an XML listing of the file <code>bobo.h5</code>,
+          saving the listing in the file <code>bobo.h5.xml</code>:
+          <blockquote>
+              <code>h5dump --xml bobo.h5 > bobo.h5.xml</code>
+          </blockquote>
+       <li>Dump a subset of the dataset <code>/GroupFoo/databar/</code> 
+           in the file <code>quux.h5</code>
+          <blockquote>
+              <code>h5dump -d /GroupFoo/databar --start="1,1" --stride="2,3" 
+                           <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                           --count="3,19" --block="1,1" quux.h5</code>
+          </blockquote>
+       <li>The same example, using the short form to specify the 
+           subsetting parameters:
+          <blockquote>
+              <code>h5dump -d "/GroupFoo/databar[1,1;2,3;3,19;1,1]" quux.h5</code>
+          </blockquote>
+       <li>Dump a binary copy of the dataset <code>/GroupD/FreshData/</code>
+           in the file <code>quux.h5</code>, with data written in little-endian
+           form, to the output file <code>FreshDataD.bin</code>:<br>
+              <code>&nbsp;&nbsp;&nbsp;&nbsp;
+                    h5dump -d "/GroupD/FreshData" -b LE -o "FreshDataD.bin" 
+                    quux.h5</code>
+        <br>&nbsp;
+    </ol>
+<dt><strong>Current Status:</strong>
+    <dd>The current version of <code>h5dump</code> displays the
+        following information:
+        <ul>
+          <li>Group
+            <ul>
+               <li>group attribute (see Attribute)
+               <li>group member
+            </ul>
+          <li>Dataset
+            <ul>
+               <li>dataset attribute (see Attribute)
+               <li>dataset type (see Datatype)
+               <li>dataset space (see Dataspace)
+               <li>dataset data
+            </ul>
+          <li>Attribute
+            <ul>
+               <li>attribute type (see Datatype)
+               <li>attribute space (see Dataspace)
+               <li>attribute data
+            </ul>
+          <li>Datatype
+            <ul>
+               <li>integer type
+                   <br>
+                   - H5T_STD_I8BE, H5T_STD_I8LE, H5T_STD_I16BE, ...
+               <li>floating point type
+                   <br>
+                   - H5T_IEEE_F32BE, H5T_IEEE_F32LE, H5T_IEEE_F64BE, ...
+               <li>string type
+               <li>compound type 
+                   <br>
+                   - named, unnamed and transient compound type
+                   <br>
+                   - integer, floating or string type member
+               <li>opaque types
+               <li>reference type
+                   <br>
+                   - object references 
+                   <br>
+                   - data regions
+               <li>enum type
+               <li>variable-length datatypes
+                   <br>
+                   - atomic types only
+                   <br>
+                   - scalar or single dimensional array of variable-length
+                         types supported
+            </ul>
+          <li>Dataspace 
+            <ul>
+               <li>scalar and simple space
+            </ul>
+          <li>Soft link
+          <li>Hard link
+          <li>Loop detection
+        </ul>
+     
+<dt><strong>See Also:</strong>
+    <ul>
+    <li>HDF5 Data Description Language syntax at
+        <a href="ddl.html"><cite>DDL for HDF5</cite></a>
+
+    <li>HDF5 XML Schema at
+        <a href="http://www.hdfgroup.org/DTDs/HDF5-File.xsd">http://www.hdfgroup.org/DTDs/HDF5-File.xsd</a>
+
+    <li>HDF5 XML information at
+        <a href="http://www.hdfgroup.org/HDF5/XML">http://www.hdfgroup.org/HDF5/XML/</a>
+    </ul>
+
+</dl>
+

@@ -1,0 +1,46 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_tag" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetTag">H5Tget_tag</a>
+<dt><strong>Signature:</strong>
+    <dd><em>char</em> *<code>H5Tget_tag</code>(<em>hid_t</em> <code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Gets the tag associated with an opaque datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_tag</code> returns the tag associated with 
+        the opaque datatype <code>type_id</code>.
+        <P>
+        The tag is returned via a pointer to an 
+        allocated string, which the caller must free.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Datatype identifier for the opaque datatype.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a pointer to an allocated string if successful;
+        otherwise returns <code>NULL</code>.
+<dt><strong>Fortran90 Interface:</strong> h5tget_tag_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_tag_f(type_id, tag,taglen, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  CHARACTER(LEN=*), INTENT(OUT) :: tag   ! Unique ASCII string with which the
+                                         ! opaque datatype is to be tagged
+  INTEGER, INTENT(OUT) :: taglen         ! Length of tag 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tget_tag_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

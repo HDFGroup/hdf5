@@ -1,0 +1,47 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Sselect_valid" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectValid">H5Sselect_valid</a>
+<dt><strong>Signature:</strong>
+    <dd><em>htri_t</em> <code>H5Sselect_valid</code>(<em>hid_t</em> <code>space_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Verifies that the selection is within the extent of the dataspace.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sselect_valid</code> verifies that the selection 
+    for the dataspace <code>space_id</code> is within the extent
+    of the dataspace if the current offset for the dataspace is used.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">The identifier for the dataspace being queried.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a positive value, for <code>TRUE</code>, 
+        if the selection is contained within the extent 
+        or <code>0</code> (zero), for <code>FALSE</code>, if it is not.
+        Returns a negative value on error conditions 
+        such as the selection or extent not being defined.
+<dt><strong>Fortran90 Interface:</strong> h5sselect_valid_f
+    <dd>
+	<pre>
+SUBROUTINE h5sselect_valid_f(space_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
+  LOGICAL, INTENT(OUT) :: flag            ! TRUE if the selection is
+                                          ! contained within the extent,
+                                          ! FALSE otherwise. 
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5sselect_valid_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

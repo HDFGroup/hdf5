@@ -1,0 +1,196 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Sselect_hyperslab" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectHyperslab">H5Sselect_hyperslab</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Sselect_hyperslab</code>(<em>hid_t</em> <code>space_id</code>,
+        <em>H5S_seloper_t</em> <code>op</code>,
+        <em>const hsize_t *</em><code>start</code>,
+        <em>const hsize_t *</em><code>stride</code>,
+        <em>const hsize_t *</em><code>count</code>,
+        <em>const hsize_t *</em><code>block</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Selects a hyperslab region to add to the current selected region.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sselect_hyperslab</code> selects a hyperslab region 
+        to add to the current selected region for the dataspace 
+        specified by <code>space_id</code>.  
+        <p>
+        The <code>start</code>, <code>stride</code>, <code>count</code>,
+        and <code>block</code> arrays must be the same size as the rank 
+        of the dataspace.  For example, if the dataspace is 4-dimensional,
+        each of these parameters must be a 1-dimensional array of size 
+        <code>4</code>.
+        <p>
+        The selection operator <code>op</code> determines how the new 
+        selection is to be combined with the already existing selection 
+        for the dataspace.  
+        The following operators are supported:
+        <center>
+        <table width=90% border=0>
+          <tr><td valign=top>
+            <code>H5S_SELECT_SET</code>
+            </td><td valign=top>
+            Replaces the existing selection with the parameters from this call.  
+            Overlapping blocks are not supported with this operator.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_OR</code>
+            </td><td valign=top>
+            Adds the new selection to the existing selection.
+	    &nbsp;&nbsp;
+	    (Binary OR)
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_AND</code>
+            </td><td valign=top>
+            Retains only the overlapping portions of the new selection and 
+	    the existing selection.
+	    &nbsp;&nbsp;
+	    (Binary AND)
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_XOR</code>
+            </td><td valign=top>
+            Retains only the elements that are members of the new selection or 
+	    the existing selection, excluding elements that are members of 
+	    both selections.
+	    &nbsp;&nbsp;
+	    (Binary exclusive-OR, XOR)
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_NOTB&nbsp;&nbsp;</code>
+            </td><td valign=top>
+            Retains only elements of the existing selection that are not in 
+	    the new selection.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SELECT_NOTA</code>
+            </td><td valign=top>
+            Retains only elements of the new selection that are not in 
+	    the existing selection.
+          </td></tr>
+        </table>
+        </center>
+   
+        <p>
+        The <code>start</code> array specifies the offset of the 
+        starting element of the specified hyperslab.
+        <p>
+        The <code>stride</code> array chooses array locations 
+        from the dataspace with each value in the <code>stride</code> 
+        array determining how many elements to move in each dimension.  
+        Setting a value in the <code>stride</code> array to <code>1</code> 
+        moves to
+        each element in that dimension of the dataspace; setting a value 
+	of <code>2</code> in allocation in the <code>stride</code> array 
+	moves to every other element in that dimension of the dataspace.  
+	In other words, the <code>stride</code> determines the
+        number of elements to move from the <code>start</code> location 
+        in each dimension.
+        Stride values of <code>0</code> are not allowed.  
+	If the <code>stride</code> parameter is <code>NULL</code>,
+        a contiguous hyperslab is selected (as if each value in the 
+        <code>stride</code> array were set to <code>1</code>).  
+        <p>
+        The <code>count</code> array determines how many blocks to
+        select from the dataspace, in each dimension.
+        <p>  
+        The <code>block</code> array determines
+        the size of the element block selected from the dataspace.  
+        If the <code>block</code> parameter is set to <code>NULL</code>, 
+        the block size defaults to a single element in each dimension 
+        (as if each value in the <code>block</code> array were set to 
+        <code>1</code>).  
+        <p>
+        For example, consider a 2-dimensional dataspace with
+        hyperslab selection settings as follows: 
+        the <code>start</code> offset is specified as [1,1],
+        <code>stride</code> is [4,4], 
+	<code>count</code> is [3,7], and 
+        <code>block</code> is [2,2].
+	In C, these settings will specify a hyperslab consisting of
+        21 2x2 blocks of array elements starting with location (1,1) 
+        with the selected blocks at locations 
+	(1,1), (5,1), (9,1), (1,5), (5,5), etc.;
+	in Fortran, they will specify a hyperslab consisting of
+        21 2x2 blocks of array elements starting with location (2,2) 
+        with the selected blocks at locations 
+	(2,2), (6,2), (10,2), (2,6), (6,6), etc.
+        <p>
+        Regions selected with this function call default to C order 
+        iteration when I/O is performed.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+          <td valign="top">IN: Identifier of dataspace selection to modify</td></tr>
+        <tr>
+		  <td valign="top"><em>H5S_seloper_t</em> <code>op</code></td>
+          <td valign="top">IN: Operation to perform on current selection.</td></tr>
+        <tr>
+		  <td valign="top"><em>const hsize_t *</em><code>start</code></td>
+          <td valign="top">IN: Offset of start of hyperslab</td></tr>
+        <tr>
+		  <td valign="top"><em>const hsize_t *</em><code>count</code></td>
+          <td valign="top">IN: Number of blocks included in hyperslab.</td></tr>
+        <tr>
+		  <td valign="top"><em>const&nbsp;hsize_t&nbsp;*</em><code>stride&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Hyperslab stride.</td></tr>
+        <tr>
+		  <td valign="top"><em>const hsize_t *</em><code>block</code></td>
+          <td valign="top">IN: Size of block in hyperslab.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5sselect_hyperslab_f
+    <dd>
+	<pre>
+SUBROUTINE h5sselect_hyperslab_f(space_id, operator, start, count,
+                                 hdferr, stride, block) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: space_id  ! Dataspace identifier 
+  INTEGER, INTENT(IN) :: op               ! Flag, valid values are:
+                                          !    H5S_SELECT_SET_F
+                                          !    H5S_SELECT_OR_F
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: start
+                                          ! Starting coordinates of hyperslab 
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count 
+                                          ! Number of blocks to select 
+                                          ! from dataspace 
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+  INTEGER(HSIZE_T), DIMENSION(*), OPTIONAL, INTENT(IN) :: stride
+                                          ! Array of how many elements to 
+                                          ! move in each direction
+  INTEGER(HSIZE_T), DIMENSION(*), OPTIONAL, INTENT(IN) :: block 
+                                          ! Size of the element block 
+END SUBROUTINE h5sselect_hyperslab_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td>
+		  <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+		  <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.4</td>
+          <td valign="top">
+		    <code>start[]</code> parameter type changed to 
+			<em>const hsize_t</em>.</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top">
+		    <code>start</code> parameter type changed to 
+			<code>INTEGER(HSIZE_T)</code>.</td></tr>
+    </table></ul>
+</dl>
+

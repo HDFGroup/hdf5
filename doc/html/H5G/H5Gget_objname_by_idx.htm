@@ -1,0 +1,87 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gget_objname_by_idx" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Group-GetObjNameByIdx">H5Gget_objname_by_idx</a>
+<dt><strong>Signature:</strong>
+  <dd><em>ssize_t</em> <code>H5Gget_objname_by_idx</code>(<em>hid_t</em> <code>loc_id</code>, 
+                      <em>hsize_t</em> <code>idx</code>, 
+                      <em>char *</em><code>name</code>, 
+                      <em>size_t</em> <code>size</code> )
+<dt><strong>Purpose:</strong>
+  <dd>Returns a name of an object specified by an index.
+<dt><strong>Description:</strong>
+  <dd><code>H5Gget_objname_by_idx</code> returns a name of the object 
+      specified by the index <code>idx</code> in the group <code>loc_id</code>.
+      <p>
+      The group is specified by a group identifier <code>loc_id</code>. 
+      If preferred, a file identifier may be passed in <code>loc_id</code>; 
+      that file's root group will be assumed. 
+      <p>
+      <code>idx</code> is the transient index used to iterate through 
+      the objects in the group.
+      The value of <code>idx</code> is any nonnegative number less than 
+      the total number of objects in the group, which is returned by the
+      function <code>H5Gget_num_objs</code>. 
+      Note that this is a transient index; an object may have a 
+      different index each time a group is opened.
+      <p>
+      The object name is returned in the user-specified buffer <code>name</code>.
+      <p>
+      If the size of the provided buffer <code>name</code> is 
+      less or equal the actual object name length, 
+      the object name is truncated to <code>max_size - 1</code> characters.
+      <p>
+      Note that if the size of the object's name is unkown, a 
+      preliminary call to <code>H5Gget_objname_by_idx</code> with <code>name</code>
+      set to NULL will return the length of the object's name.
+      A second call to <code>H5Gget_objname_by_idx</code> 
+      can then be used to retrieve the actual name.
+<dt><strong>Parameters:</strong>
+  <ul><table>
+    <tr>
+	    <td valign="top"><em>hid_t</em>&nbsp;<code>loc_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Group or file identifier.</td></tr>
+    <tr>
+	    <td valign="top"><em>hsize_t</em> <code>idx</code></td>
+        <td valign="top">IN: Transient index identifying object.</td></tr>
+    <tr>
+	    <td valign="top"><em>char *</em><code>name</code></td>
+        <td valign="top">IN/OUT: Pointer to user-provided buffer the object name.</td></tr>
+    <tr>
+	    <td valign="top"><em>size_t</em> <code>size</code></td>
+        <td valign="top">IN: Name length.</td></tr>
+  </table></ul>
+<dt><strong>Returns:</strong>
+  <dd>Returns the size of the object name if successful, 
+      or <code>0</code> if no name is associated with the group identifier.
+      Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

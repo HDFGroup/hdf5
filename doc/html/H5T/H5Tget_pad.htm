@@ -1,0 +1,69 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_pad" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetPad">H5Tget_pad</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tget_pad</code>(<em>hid_t </em><code>type_id</code>,
+        <em>H5T_pad_t *</em> <code>lsb</code>,
+        <em>H5T_pad_t *</em> <code>msb</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the padding type of the least and most-significant bit padding.  
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_pad</code> retrieves the padding type of the least and most-significant
+        bit padding.  Valid types are:
+        <ul> <dl>
+            <dt>H5T_PAD_ZERO (<code>0</code>)
+               <dd>Set background to zeros.
+            <dt>H5T_PAD_ONE (<code>1</code>)
+               <dd>Set background to ones.
+            <dt>H5T_PAD_BACKGROUND (<code>2</code>)
+               <dd>Leave background alone.
+        </dl> </ul>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">IN: Identifier of datatype to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_pad_t&nbsp;*</em>&nbsp;<code>lsb&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to location to return least-significant 
+                bit padding type.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_pad_t *</em> <code>msb</code></td>
+            <td valign="top">OUT: Pointer to location to return most-significant 
+                bit padding type.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tget_pad_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_pad_f(type_id, lsbpad, msbpad, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: lsbpad        ! Padding type of the  
+                                        ! least significant bit
+  INTEGER, INTENT(OUT) :: msbpad        ! Padding type of the 
+                                        ! most significant bit
+                                        ! Possible values of 
+                                        ! padding type are:
+                                        !    H5T_PAD_ZERO_F = 0
+                                        !    H5T_PAD_ONE_F = 1
+                                        !    H5T_PAD_BACKGROUND_F = 2
+                                        !    H5T_PAD_ERROR_F = -1
+                                        !    H5T_PAD_NPAD_F = 3
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_pad_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

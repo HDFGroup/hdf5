@@ -1,0 +1,63 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tset_norm" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-SetNorm">H5Tset_norm</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Tset_norm</code>(<em>hid_t </em><code>type_id</code>,
+        <em>H5T_norm_t</em> <code>norm</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the mantissa normalization of a floating-point datatype.  
+<dt><strong>Description:</strong>
+    <dd><code>H5Tset_norm</code> sets the mantissa normalization of 
+        a floating-point datatype.  Valid normalization types are:
+        <ul> <dl>
+            <dt>H5T_NORM_IMPLIED (<code>0</code>)
+                <dd>MSB of mantissa is not stored, always 1
+            <dt>H5T_NORM_MSBSET (<code>1</code>)
+                <dd>MSB of mantissa is always 1
+            <dt>H5T_NORM_NONE (<code>2</code>)
+                <dd>Mantissa is not normalized
+        </dl> </ul>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to set.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_norm_t</em>&nbsp;<code>norm&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Mantissa normalization type.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tset_norm_f
+    <dd>
+	<pre>
+SUBROUTINE h5tset_norm_f(type_id, norm, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  
+                                  ! Datatype identifier 
+  INTEGER, INTENT(IN) :: norm     ! Mantissa normalization of a 
+                                  ! floating-point datatype
+                                  ! Valid normalization types are:
+                                  !    H5T_NORM_IMPLIED_F(0)
+                                  !       MSB of mantissa is not stored,
+                                  !       always 1 
+                                  !    H5T_NORM_MSBSET_F(1) 
+                                  !       MSB of mantissa is always 1 
+                                  !    H5T_NORM_NONE_F(2)
+                                  !       Mantissa is not normalized
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+END SUBROUTINE h5tset_norm_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

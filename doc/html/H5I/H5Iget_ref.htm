@@ -1,0 +1,71 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iget_ref" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-GetRef">H5Iget_ref</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Iget_ref</code>(<em>hid_t</em> <code>obj_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the reference count for an object.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iget_ref</code> retrieves the reference count of the object
+        identified by <code>obj_id</code>.
+
+        <p>
+        The reference count for an object ID is attached to the information
+        about an object in memory and has no relation to the number of links to
+        an object on disk.
+
+        <p>
+        This function can also be used to check if an object ID is still valid.
+        A non-negative return value from this function indicates that the ID
+        is still valid.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Object identifier whose reference count will be retrieved.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative current reference count of the object ID
+        if successful; otherwise a negative value is returned.
+<dt><strong>Fortran90 Interface:</strong> h5iget_ref_f
+    <dd>
+	<pre>
+SUBROUTINE h5iget_ref_f(obj_id, ref_count, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
+  INTEGER, INTENT(OUT) :: ref_count     !Reference count of object ID
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success, and -1 on failure
+END SUBROUTINE h5iget_ref_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td>
+		  <td valign="top" align="left">
+		    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+		  <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.2</td>
+          <td valign="top">
+		    Function introduced in this release.</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top">
+		    Fortran subroutine introduced in this 
+			release.</td></tr>
+    </table></ul>
+</dl>
+

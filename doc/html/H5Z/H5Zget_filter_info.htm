@@ -1,0 +1,142 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Zget_filter_info" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Compression-GetFilterInfo">H5Zget_filter_info</a>
+<dt><strong>Signature:</strong> 
+    <dd><em>herr_t</em> 
+        <code>H5Zget_filter_info</code>(
+        <em>H5Z_filter_t</em> <code>filter</code>, 
+        <em>unsigned int *</em><code>filter_config_flags</code>
+        )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves information about a filter.
+<dt><strong>Description:</strong>
+    <dd>
+      <code>H5Zget_filter_info</code> retrieves information about a filter.  
+      At present, this means that the function retrieves a 
+      filter's configuration flags, indicating whether the filter is  
+      configured to decode data, to encode data, neither, or both.
+      <p>
+      If <code>filter_config_flags</code> is not set to <small>NULL</small>
+      prior to the function call, the returned parameter contains a 
+      bit field specifying the available filter configuration. 
+      The configuration flag values can then be determined through
+      a series of bitwise <small>AND</small> operations, as described below. 
+      <p>
+      Valid filter configuration flags include the following:
+      <table>
+        <tr valign="top"><td><code>&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td><code>H5Z_FILTER_CONFIG_ENCODE_ENABLED</code>&nbsp;</td>
+          <td>Encoding is enabled for this filter.
+              <br>
+              In Fortran, <code>H5Z_FILTER_ENCODE_ENABLED_F</code>.
+        </td></tr>
+        <tr valign="top"><td>&nbsp;</td>
+          <td><code>H5Z_FILTER_CONFIG_DECODE_ENABLED</code>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td>Decoding is enabled for this filter.
+              <br>
+              In Fortran, <code>H5Z_FILTER_DECODE_ENABLED_F</code>.
+        </td></tr>
+        <tr><td>&nbsp;</td>
+          <td colspan="2" align="right"><small>(These flags 
+          are defined for C in the HDF5 Library source code file 
+          <code>H5Zpublic.h</code>.)</small>
+        </td></tr>
+       </table>
+      A bitwise <small>AND</small> of the returned 
+      <code>filter_config_flags</code> and a valid 
+      filter configuration flag will reveal whether
+      the related configuration option is available.
+      For example, if the value of 
+      <br>
+      <code>&nbsp;&nbsp;&nbsp;&nbsp;
+            H5Z_FILTER_CONFIG_ENCODE_ENABLED 
+            &amp; 
+            filter_config_flags</code>
+      <br>
+      is true, i.e., greater than <code>0</code> (zero), 
+      the queried filter is configured to encode data;  
+      if the value is <code>FALSE</code>, 
+      i.e., equal to <code>0</code> (zero), 
+      the filter is not so configured.
+      <p>
+      If a filter is not encode-enabled, the corresponding
+      <code>H5Pset_*</code> function will return an error if the
+      filter is added to a dataset creation property list (which is
+      required if the filter is to be used to encode that dataset).
+      For example, if the <code>H5Z_FILTER_CONFIG_ENCODE_ENABLED</code>
+      flag is not returned for the SZIP filter,
+      <code>H5Z_FILTER_SZIP</code>, a call to <code>H5Pset_szip</code>
+      will fail.
+      <p>
+      If a filter is not decode-enabled, the application will not be
+      able to read an existing file encoded with that filter.
+      <p>
+      This function should be called, and the returned
+      <code>filter_config_flags</code> analyzed, before calling
+      any other function, such as <code>H5Pset_szip</code>,
+      that might require a particular filter configuration.
+
+<dt><strong>Parameters:</strong>
+    <dl>
+      <dt><em>H5Z_filter_t</em> <code>filter</code>
+        <dd>IN: Identifier of the filter to query.
+            See the introduction to this section of the reference manual
+            for a list of valid filter identifiers.
+      <dt><em>unsigned int *</em><code>filter_config_flags</code>
+        <dd>OUT: A bit field encoding the returned filter information
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value on success,
+        a negative value on failure.
+
+<!-- NEW PAGE -->
+<dt><strong>Fortran90 Interface:</strong> 
+    <dd>
+    <pre>
+SUBROUTINE h5zget_filter_info_f(filter, config_flags, hdferr)
+
+  IMPLICIT NONE
+  INTEGER, INTENT(IN)  :: filter        ! Filter, may be one of the
+                                        ! following:
+                                        !     H5Z_FILTER_DEFLATE_F
+                                        !     H5Z_FILTER_SHUFFLE_F
+                                        !     H5Z_FILTER_FLETCHER32_F
+                                        !     H5Z_FILTER_SZIP_F
+  INTEGER, INTENT(OUT) :: config_flags  ! Bit field indicating whether
+                                        ! a filter's encoder and/or
+                                        ! decoder are available
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+
+END SUBROUTINE h5zfilter_avail_f
+    </pre>
+        <!--<dt><strong>Non-C API(s):</strong>
+        <dd>
+
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td>
+		  <td valign="top" align="left">
+		    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+		  <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.3</td>
+          <td valign="top">
+		    Function introduced in this release.</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top">
+		    Fortran subroutine introduced in this 
+			release.</td></tr>
+    </table></ul>
+</dl>
+
+

@@ -1,0 +1,83 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_hyper_cache" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetHyperCache">H5Pset_hyper_cache</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_hyper_cache</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned</em> <code>cache</code>,
+        <em>unsigned</em> <code>limit</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Indicates whether to cache hyperslab blocks during I/O.
+  <dt><strong>Description:</strong>
+    <dd>[<strong>NOTE:</strong>
+        <span class="1_4_compat">
+	This function is deprecated in HDF5 Release 1.6 
+	and will eventually be removed from the HDF5 distribution.
+        It is provided in this release only to enable backward compatibility
+        with HDF5 Releases 1.4.<i>x</i> 
+	and is enabled only if the HDF5 library is configured 
+	with the flag <code>H5_WANT_H5_V1_4_COMPAT</code>;
+        the function is not enabled in the binaries distributed by NCSA.
+        </span>]
+        <p>
+        Given a dataset transfer property list, <code>H5Pset_hyper_cache</code> 
+        indicates whether to cache hyperslab blocks during I/O, 
+        a process which can significantly increase I/O speeds.  
+        <p>
+        When working with hyperslab selections, it is possible to 
+        significantly speed up I/O operations by retrieving an 
+        entire hyperslab from the file in one operation and 
+        caching it in memory.  
+        The <code>cache</code> parameter specifies whether to turn 
+        caching on for hyperslab I/O operations.
+        If <code>cache</code> is set to <code>1</code>, 
+        caching is turned on; 
+        if set to <code>0</code>, caching is turned off.
+        <p>
+        The parameter <code>limit</code> sets the maximum size of the 
+        hyperslab block to cache.  If a block is smaller than that limit, 
+        it may still not be cached if no memory is available. 
+        Setting <code>limit</code> to <code>0</code> (zero) indicates 
+        no limitation on the size of block to attempt to cache.
+        <p>
+        The default is to cache blocks with no limit on block size 
+        for serial I/O and to not cache blocks for parallel I/O.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Dataset transfer property list identifier.
+        <dt><em>unsigned</em> <code>cache</code>
+            <dd>IN: A flag indicating whether caching is to be 
+                set to on (<code>1</code>) or off (<code>0</code>).
+        <dt><em>unsigned</em> <code>limit</code>
+            <dd>IN: Maximum size of the hyperslab block to cache. 
+                <code>0</code> (zero) indicates no limit.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_hyper_cache_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_hyper_cache_f(prp_id, cache, limit, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(IN) :: cache         !
+  INTEGER, INTENT(IN) :: limit         ! Maximum size of the hyperslab 
+                                       ! block to cache 
+                                       ! 0 (zero) indicates no limit
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_hyper_cache_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

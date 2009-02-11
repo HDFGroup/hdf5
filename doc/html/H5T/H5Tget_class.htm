@@ -1,0 +1,71 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_class" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetClass">H5Tget_class</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5T_class_t </em><code>H5Tget_class</code>(<em>hid_t </em><code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the datatype class identifier.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_class</code> returns the datatype class identifier.
+        <p>
+        Valid class identifiers, as defined in <code>H5Tpublic.h</code>, are:
+        <ul><li><code>H5T_INTEGER</code>
+            <li><code>H5T_FLOAT</code>
+            <li><code>H5T_TIME</code>
+            <li><code>H5T_STRING</code>
+            <li><code>H5T_BITFIELD</code>
+            <li><code>H5T_OPAQUE</code>
+            <li><code>H5T_COMPOUND</code>
+            <li><code>H5T_REFERENCE</code>
+            <li><code>H5T_ENUM</code>
+            <li><code>H5T_VLEN</code>
+            <li><code>H5T_ARRAY</code>
+        </ul>
+        <p>
+        Note that the library returns <code>H5T_STRING</code> for 
+        both fixed-length and variable-length strings.
+        <p>
+        Note that the time datatype class, <code>H5T_TIME</code>, 
+        is not fully supported in the current version of the HDF5 Library.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns datatype class identifier if successful;
+        otherwise <code>H5T_NO_CLASS</code> (-1).
+<dt><strong>Fortran90 Interface:</strong> h5tget_class_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_class_f(type_id, class, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: class          ! Datatype class, possible values are:
+                                         !    H5T_NO_CLASS_F 
+                                         !    H5T_INTEGER_F 
+                                         !    H5T_FLOAT_F
+                                         !    H5T_TIME_F
+                                         !    H5T_STRING_F
+                                         !    H5T_BITFIELD_F
+                                         !    H5T_OPAQUE_F
+                                         !    H5T_COMPOUND_F
+                                         !    H5T_REFERENCE_F
+                                         !    H5T_ENUM_F
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5tget_class_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

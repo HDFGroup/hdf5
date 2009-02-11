@@ -1,0 +1,83 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Sget_select_type" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-GetSelectType">H5Sget_select_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5S_sel_type</em> <code>H5Sget_select_type</code>(<em>hid_t</em> <code>space_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Determines the type of the dataspace selection.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sget_select_type</code> retrieves the  
+        type of selection currently defined for the dataspace 
+	<code>space_id</code>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Dataspace identifier.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the dataspace selection type, a value of       
+        the  enumerated datatype <code>H5S_sel_type</code>, 
+	if successful.
+	Valid return values are as follows:
+        <center>
+        <table width=90% border=0>
+          <tr><td valign=top>
+            <code>H5S_SEL_NONE</code>
+            </td><td valign=top>
+            No selection is defined.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SEL_POINTS</code>
+            </td><td valign=top>
+            A sequence of points is selected.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SEL_HYPERSLABS</code>
+            </td><td valign=top>
+            A hyperslab or compound hyperslab is selected.
+          </td></tr><tr><td valign=top>
+            <code>H5S_SEL_ALL</code>
+            </td><td valign=top>
+            The entire dataset is selected.
+          </td></tr>
+        </table>
+        </center>
+        Otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5sget_select_type_f
+    <dd>
+	<pre>
+SUBROUTINE h5sget_select_type_f(space_id, type, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier
+  INTEGER, INTENT(OUT) :: type           ! Selection type
+                                         ! Valid values are:
+                                         !    H5S_SEL_ERROR_F 
+                                         !    H5S_SEL_NONE_F 
+                                         !    H5S_SEL_POINTS_F 
+                                         !    H5S_SEL_HYPERSLABS_F 
+                                         !    H5S_SEL_ALL_F 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5sget_select_type_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

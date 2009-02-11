@@ -1,0 +1,50 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_access_plist" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetAccessPlist">H5Fget_access_plist</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Fget_access_plist</code>(<em>hid_t</em> <code>file_id</code>)
+<dt><strong>Purpose:</strong>
+        <dd>Returns a file access property list identifier.
+<dt><strong>Description:</strong>
+        <dd><code>H5Fget_access_plist</code> returns the 
+            file access property list identifier of the specified file.
+            <p>
+            See "File Access Properties" in 
+            <a href="RM_H5P.html">H5P: Property List Interface</a> 
+            in this reference manual and 
+            "File Access Property Lists" 
+            in <a href="Files.html"><cite>Files</cite></a> in the 
+            <cite>HDF5 User's Guide</cite> for 
+            additional information and related functions.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of file to get access property list of</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a file access property list identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5fget_access_plist_f
+    <dd>
+	<pre>
+SUBROUTINE h5fget_access_plist_f(file_id, fcpl_id, hdferr)
+
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)   :: file_id ! File identifier
+  INTEGER(HID_T), INTENT(OUT)  :: fapl_id ! File access property list identifier
+  INTEGER, INTENT(OUT)         :: hdferr  ! Error code 
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5fget_access_plist_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

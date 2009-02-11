@@ -1,0 +1,118 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gget_objtype_by_idx" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Group-GetObjTypeByIdx">H5Gget_objtype_by_idx</a>
+<dt><strong>Signature:</strong>
+  <dd><em>int</em> <code>H5Gget_objtype_by_idx</code>(<em>hid_t</em> <code>loc_id</code>, 
+                      <em>hsize_t</em> <code>idx</code> )
+<dt><strong>Purpose:</strong>
+  <dd>Returns the type of an object specified by an index.
+<dt><strong>Description:</strong>
+  <dd><code>H5Gget_objtype_by_idx</code> returns the type of the object 
+      specified by the index <code>idx</code> in the group <code>loc_id</code>.
+      <p>
+      The group is specified by a group identifier <code>loc_id</code>. 
+      If preferred, a file identifier may be passed in <code>loc_id</code>; 
+      that file's root group will be assumed. 
+      <p>
+      <code>idx</code> is the transient index used to iterate through 
+      the objects in the group.
+      This parameter is described in more detail in the discussion of 
+      <a href="#Group-GetObjNameByIdx"><code>H5Gget_objname_by_idx</code></a>.
+      <p>
+      The object type is returned as the function return value:
+        <table>	
+        <tr valign=top align=left><td>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            </td><td>
+            <code>H5G_LINK</code> 
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td>
+            <code>0</code>
+            </td><td>
+            Object is a symbolic link. 
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;
+            
+            </td><td>
+            <code>H5G_GROUP</code> 
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td>
+            <code>1</code>
+            </td><td>
+            Object is a group. 
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;
+            
+            </td><td>
+            <code>H5G_DATASET</code>  &nbsp;&nbsp;
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td>
+            <code>2</code> &nbsp;&nbsp;
+            </td><td>
+            Object is a dataset. 
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;
+            
+            </td><td>
+            <code>H5G_TYPE</code> 
+            <!--</td><td>
+            <code>0x0001</code>-->
+            </td><td>
+            <code>3</code>
+            </td><td>
+            Object is a named datatype. 
+        </td></tr>
+	</table>
+
+<dt><strong>Parameters:</strong>
+  <ul><table>
+    <tr>
+	    <td valign="top"><em>hid_t</em>&nbsp;<code>loc_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Group or file identifier.</td></tr>
+    <tr>
+	    <td valign="top"><em>hsize_t</em> <code>idx</code></td>
+        <td valign="top">IN: Transient index identifying object.</td></tr>
+  </table></ul>
+<dt><strong>Returns:</strong>
+  <dd>Returns the type of the object if successful.
+      Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    The function return type changed from 
+			<em>int</em> to the enumerated type 
+			<em>H5G_obj_t</em>.</td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

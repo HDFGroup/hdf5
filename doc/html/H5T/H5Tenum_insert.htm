@@ -1,0 +1,60 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tenum_insert" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-EnumInsert">H5Tenum_insert</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tenum_insert</code>(<em>hid_t</em> <code>type</code>,
+        <em>const char</em> *<code>name</code>,
+        <em>void</em> *<code>value</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Inserts a new enumeration datatype member.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tenum_insert</code> inserts a 
+        new enumeration datatype member into an enumeration datatype. 
+        <p>
+        <code>type</code> is the enumeration datatype, 
+        <code>name</code> is the name of the new member, and 
+        <code>value</code> points to the value of the new member.
+        <p>
+        <code>name</code> and <code>value</code> must both 
+        be unique within <code>type</code>. 
+        <p>
+        <code>value</code> points to data which is of the 
+        datatype defined when the enumeration datatype was created.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type</code></td>
+            <td valign="top">IN: Datatype identifier for the enumeration datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char</em>&nbsp;*<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Name of the new member.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> *<code>value</code></td>
+            <td valign="top">IN: Pointer to the value of the new member.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tenum_insert_f
+    <dd>
+	<pre>
+SUBROUTINE h5tenum_insert_f(type_id,  name, value, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of the new member
+  INTEGER, INTENT(IN) :: value          ! Value of the new member
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tenum_insert_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

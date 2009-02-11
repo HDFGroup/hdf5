@@ -1,0 +1,75 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_family_offset" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFamilyOffset">H5Pset_family_offset</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_family_offset</code> (
+                        <em>hid_t</em> <code>fapl_id</code>,
+                        <em>hsize_t</em> <code>offset</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets offset property for low-level access to a file in a family  of files.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_family_offset</code> sets the offset property in the 
+        file access property list <code>fapl_id</code> so that the user application 
+	can retrieve a file handle for low-level access to a particular member 
+	of a family of files.  The file handle is retrieved with a separate call 
+	to <a href="RM_H5F.html#File-GetVfdHandle"><code>H5Fget_vfd_handle</code></a>
+	(or, in special circumstances, to <code>H5FDget_vfd_handle</code>; 
+	see <cite>Virtual File Layer</cite> and <cite>List of VFL Functions</cite>
+	in <a href="TechNotes.html"><cite>HDF5 Technical Notes</cite></a>).
+	<p>
+	The value of <code>offset</code> is an offset in bytes from the 
+	beginning of the HDF5 file, identifying a user-determined location 
+	within the HDF5 file.  The file handle the user application is seeking 
+	is for the specific member-file in the associated family of files 
+	to which this offset is mapped. 
+	<p>
+	Use of this function is only appropriate for an HDF5 file written as a 
+	family of files with the <code>FAMILY</code> file driver.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em>&nbsp;<code>offset&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Offset in bytes within the HDF5 file.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_family_offset_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_family_offset_f(prp_id, offset, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)   :: prp_id   ! Property list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: offset   ! Offset in bytes
+  INTEGER, INTENT(OUT)         :: hdferr   ! Error code
+                                           ! 0 on success and -1 on failure
+ 
+END SUBROUTINE h5pset_family_offset_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

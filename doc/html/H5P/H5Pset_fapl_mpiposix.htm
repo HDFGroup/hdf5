@@ -1,0 +1,115 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_fapl_mpiposix" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplMpiPosix">H5Pset_fapl_mpiposix</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_mpiposix</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>MPI_Comm</em> <code>comm</code>,
+                     <em>hbool_t</em> <code>use_gpfs_hints</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Stores MPI IO communicator information to a file access property list.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_mpiposix</code> stores the user-supplied 
+        MPI IO parameter <code>comm</code>, for communicator, 
+        in the file access property list <code>fapl_id</code>. 
+        That property list can then be used to create and/or open the file.  
+        <p>
+        <code>H5Pset_fapl_mpiposix</code> is available only in the 
+        parallel HDF5 library and is not a collective function.
+        <p>
+        <code>comm</code> is the MPI communicator to be used for 
+        file open, as defined in <code>MPI_FILE_OPEN</code> of MPI-2. 
+        This function does not create a duplicated communicator. 
+        Modifications to <code>comm</code> after this function call 
+        returns may have an undetermined effect on the 
+        file access property list. 
+        Users should not modify the communicator while it is defined 
+        in a property list.
+        <p>
+        <code>use_gpfs_hints</code> specifies whether to attempt to use
+        GPFS hints when accessing this file.
+        A value of <code>TRUE</code> (or <code>1</code>) indicates that
+        the hints should be used, if possible.
+        A value of <code>FALSE</code> (or <code>0</code>) indicates that
+        the hints should not be used.
+        <p>
+        Available GPFS hints are known to the HFD5 Library 
+        and are not user configurable.
+        They may be used <i>only</i> with GPFS file systems
+        and may improve file access for some applications; 
+        the user of a GPFS system is encouraged to experiment 
+        by running an application with and without this parameter set.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+            <td valign="top"><em>MPI_Comm</em>&nbsp;<code>comm</code></td>
+            <td valign="top">IN: MPI-2 communicator.</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t</em> <code>use_gpfs_hints&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Use of GPFS hints.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_mpiposix_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER, INTENT(IN) :: comm           ! MPI communicator to be used 
+                                        ! for file open as defined in 
+                                        ! MPI_FILE_OPEN of MPI-2
+  LOGICAL, INTENT(IN) :: use_gpfs
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5pset_fapl_mpiposix_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>C</strong></td>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>Fortran90</strong></td></tr>
+        <tr>
+          <td valign="top">1.6.1</td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">
+            Fortran subroutine introduced in this release.
+          </td></tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top">
+            <code>use_gpfs_hints</code> parameter added.</td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">&nbsp;</td>
+        </tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top">
+            Function introduced in this release.
+        	</td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">&nbsp;</td>
+        </tr>
+    </table></ul>
+</dl>
+
+

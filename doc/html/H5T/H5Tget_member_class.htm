@@ -1,0 +1,63 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_member_class" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetMemberClass">H5Tget_member_class</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5T_class_t</em> <code>H5Tget_member_class</code>(
+                       <em>hid_t</em> <code>cdtype_id</code>,
+                       <em>unsigned </em><code>member_no</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns datatype class of compound datatype member.
+<dt><strong>Description:</strong>
+    <dd>Given a compound datatype, <code>cdtype_id</code>, the function 
+        <code>H5Tget_member_class</code> returns the datatype class of 
+        the compound datatype member specified by <code>member_no</code>.
+        <p>
+        Valid class identifiers are as defined in 
+	<a href="#Datatype-GetClass"><code>H5Tget_class</code></a>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>cdtype_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Datatype identifier of compound object.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>member_no</code></td>
+            <td valign="top">IN: Compound object member number.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the datatype class, a non-negative value, if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tget_member_class_f
+    <dd>
+        <pre>
+SUBROUTINE h5tget_member_class_f(type_id, member_no, class, hdferr) 
+  INTEGER(HID_T), INTENT(IN) :: type_id       ! Datatype identifier 
+  INTEGER, INTENT(IN) :: member_no            ! Member number
+  INTEGER, INTENT(OUT) :: class               ! Member class
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code
+END SUBROUTINE h5tget_member_class_f
+        </pre>		
+        <!--
+        <dt><strong>Non-C API(s):</strong>
+        <dd>
+ 
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.4</td>
+          <td valign="top">
+		    <code>membno</code> parameter type changed to 
+			<em>unsigned</em>.</td></tr>
+    </table></ul>
+</dl>
+

@@ -1,0 +1,51 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tfind" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Find">H5Tfind</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5T_conv_t</em> <code>H5Tfind</code>(<em>hid_t</em> <code>src_id</code>,
+        <em>hid_t</em> <code>dst_id</code>,
+        <em>H5T_cdata_t **</em><code>pcdata</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Finds a conversion function.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tfind</code> finds a conversion function that can 
+        handle a conversion from type <code>src_id</code> to type 
+        <code>dst_id</code>.
+        The <code>pcdata</code> argument is a pointer to a pointer 
+        to type conversion data which was created and initialized 
+        by the soft type conversion function of this path when the 
+        conversion function was installed on the path.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>src_id</code></td>
+            <td valign="top">IN: Identifier for the source datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dst_id</code></td>
+            <td valign="top">IN: Identifier for the destination datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5T_cdata_t&nbsp;**</em><code>pcdata&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to type conversion data.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a pointer to a suitable conversion function if successful.
+        Otherwise returns NULL.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

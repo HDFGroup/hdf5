@@ -1,0 +1,105 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iget_name" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-GetName">H5Iget_name</a>
+<dt><strong>Signature:</strong>
+    <dd><em>ssize_t</em> <code>H5Iget_name</code>(
+                     <em>hid_t</em> <code>obj_id</code>,
+		     <em>char *</em><code>name</code>,
+		     <em>size_t</em> <code>size</code>
+                     )
+<dt><strong>Purpose:</strong> </dt>
+    <dd>Retrieves a name of an object based on the object identifier.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iget_name</code> retrieves a name for the object identified 
+        by <code>obj_id</code>.
+        <p>
+        Up to <code>size</code> characters of the name are returned in 
+        <code>name</code>; additional characters, if any, are not returned
+        to the user application.
+        <p>
+        If the length of the name, which determines the required 
+        value of <code>size</code>, is unknown, a preliminary  
+        <code>H5Iget_name</code> call can be made.  
+        The return value of this call will be the size in bytes of the 
+        object name.  
+        That value, plus 1 for a <small>NULL</small> terminator, 
+        is then assigned to <code>size</code> 
+        for a second <code>H5Iget_name</code> call, 
+        which will retrieve the actual name.
+        <p>
+        If the object identified by <code>obj_id</code> is an attribute,
+        as determined via 
+        <a href="#Identify-GetType"><code>H5Iget_type</code></a>,
+        <code>H5Iget_name</code> retrieves the name of the object 
+        to which that attribute is attached. 
+        To retrieve the name of the attribute itself, use
+        <a href="RM_H5A.html#Annot-GetName"><code>H5Aget_name</code></a>.
+        <p>
+        If there is no name associated with the object identifier
+        or if the name is <code>NULL</code>, <code>H5Iget_name</code>
+        returns <code>0</code> (zero).
+        <p>
+        <code>H5Iget_name</code> cannot be used with an object identifier
+        returned by <code>H5Rdereference</code>;  
+        the function will not be able to determine a valid object name.
+        <p>
+        Note that an object in an HDF5 file may have multiple names,
+        varying according to the path through the HDF5 group 
+        hierarchy used to reach that object.
+<dt><strong>Parameters:</strong> 
+    <ul><table>
+      <tr>
+        <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Identifier of the object.  
+            This identifier can refer to a group, dataset, 
+            or named datatype.</td></tr>
+      <tr>
+        <td valign="top"><em>char *</em><code>name</code></td> 
+        <td valign="top">OUT: A name associated with the identifier.</td></tr>
+      <tr>
+        <td valign="top"><em>size_t</em> <code>size</code></td> 
+        <td valign="top">IN: The size of the <code>name</code> buffer;
+            must be the size of the name in bytes 
+            plus 1 for a <small>NULL</small> terminator.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong> 
+    <dd>Returns the length of the name if successful, returning <code>0</code> 
+        (zero) if no name is associated with the identifier.
+        Otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5iget_name_f
+    <dd>
+	<pre>
+SUBROUTINE h5iget_name_f(obj_id, buf, buf_size, name_size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)    :: obj_id     ! Object identifier 
+  CHARACTER(LEN=*), INTENT(OUT) :: buf        ! Buffer to hold object name 
+  INTEGER(SIZE_T), INTENT(IN)   :: buf_size   ! Buffer size
+  INTEGER(SIZE_T), INTENT(OUT)  :: name_size  ! Name size
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code
+                                              ! 0 on success, and -1 on failure
+END SUBROUTINE h5iget_name_f
+	</pre>		
+		
+        <!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<!-- NEW PAGE -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>C</strong></td></tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top">
+            Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

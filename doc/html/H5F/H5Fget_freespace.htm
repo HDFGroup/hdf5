@@ -1,0 +1,61 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_freespace" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetFreeSpace">H5Fget_freespace</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hssize_t </em><code>H5Fget_freespace</code>(<em>hid_t</em> <code>file_id</code>)
+<dt><strong>Purpose:</strong>
+        <dd>Returns the amount of free space in a file.
+<dt><strong>Description:</strong>
+    <dd>Given the identifier of an open file, <code>file_id</code>, 
+	<code>H5Fget_freespace</code> returns the amount of space that is
+        unused by any objects in the file.
+        <p>
+        Currently, the HDF5 library only tracks free space in a file from a
+        file open or create until that file is closed, so this routine will
+        only report the free space that has been created during that
+        interval.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of a currently-open HDF5 file</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the amount of free space in the file if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5fget_freespace_f
+    <dd>
+	<pre>
+SUBROUTINE h5fget_freespace_f(file_id, free_space, hdferr)
+
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)  :: file_id       ! File identifier
+  INTEGER(HSSIZE_T), INTENT(OUT) :: free_space ! Amount of free space in file
+  INTEGER, INTENT(OUT)        :: hdferr        ! Error code 
+                                               ! 0 on success and -1 on failure
+END SUBROUTINE h5fget_freespace_f 
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.1</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+
+

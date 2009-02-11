@@ -1,0 +1,90 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Acreate" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Create">H5Acreate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Acreate</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>hid_t</em> <code>type_id</code>,
+        <em>hid_t</em> <code>space_id</code>,
+        <em>hid_t</em> <code>create_plist</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates a dataset as an attribute of another group, dataset, 
+        or named datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Acreate</code> creates the attribute <code>name</code>
+        attached to the object specified with <code>loc_id</code>.  
+        <code>loc_id</code> can be a group, dataset, or named datatype 
+        identifier.
+        <p>
+        The attribute name specified in <code>name</code> must be unique. 
+        Attempting to create an attribute with the same name as an already 
+        existing attribute will fail, leaving the pre-existing attribute 
+        in place.  To overwrite an existing attribute with a new attribute 
+        of the same name, first call <code>H5Adelete</code> then recreate 
+        the attribute with <code>H5Acreate</code>.
+        <p>
+        The datatype and dataspace identifiers of the attribute, 
+        <code>type_id</code> and <code>space_id</code>, respectively, 
+        are created with the H5T and H5S interfaces, respectively.  
+        <p>
+        Currently only simple dataspaces are allowed for attribute dataspaces.
+        <p>
+        The attribute creation property list, <code>create_plist</code>, 
+        is currently unused;
+        it may be used in the future for optional attribute properties.  
+        At this time, <code>H5P_DEFAULT</code> is the only accepted value.
+        </p>
+        The attribute identifier returned from this function must be released 
+        with <code>H5Aclose</code> or resource leaks will develop.  
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: Object (dataset, group, or named datatype) to be attached to.</td></tr>
+        <tr>
+		    <td valign="top"><em>const char *</em><code>name</code></td>
+            <td valign="top">IN: Name of attribute to create.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">IN: Identifier of datatype for attribute.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+            <td valign="top">IN: Identifier of dataspace for attribute.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>create_plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of creation property list. (Currently unused;
+                    the only accepted value is <code>H5P_DEFAULT</code>.)</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns an attribute identifier if successful;
+        otherwise returns a negative value.
+			
+		<!--<dt><strong>Non-C API(s):</strong>        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+		
+<dt><strong>Fortran90 Interface:</strong> h5acreate_f
+    <dd>
+	<pre>
+SUBROUTINE h5acreate_f(obj_id, name, type_id, space_id, attr_id, &amp; 
+                       hdferr, creation_prp) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: obj_id    ! Object identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name    ! Attribute name
+  INTEGER(HID_T), INTENT(IN) :: type_id   ! Attribute datatype identifier 
+  INTEGER(HID_T), INTENT(IN) :: space_id  ! Attribute dataspace identifier
+  INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier 
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code:
+                                          ! 0 on success and -1 on failure
+										  
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp
+                                          ! Attribute creation property 
+                                          ! list identifier 
+END SUBROUTINE h5acreate_f
+	</pre>
+</dl>
+

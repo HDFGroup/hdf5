@@ -1,0 +1,86 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_sym_k" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetSymK">H5Pset_sym_k</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pset_sym_k</code>(<em>hid_t</em> <code>plist</code>,
+            <em>unsigned</em> <code>ik</code>,
+            <em>unsigned</em> <code>lk</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the size of parameters used to control the symbol table nodes.
+  <dt><strong>Description:</strong>
+        <dd><code>H5Pset_sym_k</code> sets the size of parameters used to 
+            control the symbol table nodes.  This function is only valid 
+            for file creation property lists.  Passing in a value of 0 for 
+            one of the parameters retains the current value. 
+            <p>
+            <code>ik</code> is one half the rank of a tree that stores a symbol
+            table for a group.  Internal nodes of the symbol table are on
+            average 75% full.  That is, the average rank of the tree is
+            1.5 times the value of <code>ik</code>.
+            <p>
+            <code>lk</code> is one half of the number of symbols that can 
+            be stored in a symbol table node.  A symbol table node is the 
+            leaf of a symbol table tree which is used to store a group.  
+            When symbols are inserted randomly into a group, the group's
+            symbol table nodes are 75% full on average.  That is, they
+            contain 1.5 times the number of symbols specified by 
+            <code>lk</code>.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File creation property list 
+                identifier.</td></tr>
+        <tr>
+            <td valign="top"><em>unsigned</em> <code>ik</code></td>
+            <td valign="top">IN: Symbol table tree rank.</td></tr>
+        <tr>
+            <td valign="top"><em>unsigned</em> <code>lk</code></td>
+            <td valign="top">IN: Symbol table node size.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_sym_k_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_sym_k_f (prp_id, ik, lk, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(IN) :: ik            ! Symbol table tree rank
+  INTEGER, INTENT(IN) :: lk            ! Symbol table node size
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_sym_k_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.4</td>
+          <td valign="top">
+		    <code>ik</code> parameter type changed to 
+			<em>unsigned</em>.</td></tr>
+		<tr>
+		  <td valign="top">1.6.0</td>
+		  <td valign="top">
+		    The <code>ik</code> parameter has 
+			changed from type <em>int</em> to 
+			<em>unsigned</em>.</td></tr>
+    </table></ul>
+</dl>
+

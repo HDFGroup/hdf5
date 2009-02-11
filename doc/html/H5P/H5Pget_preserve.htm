@@ -1,0 +1,57 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_preserve" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetPreserve">H5Pget_preserve</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Pget_preserve</code>(<em>hid_t</em> <code>plist</code>)
+  <dt><strong>Purpose:</strong>
+    <dd>Checks status of the dataset transfer property list.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_preserve</code> checks the status of the 
+        dataset transfer property list.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier for the dataset transfer property list.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns TRUE or FALSE if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_preserve_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_preserve_f(prp_id, flag, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id   ! Dataset transfer property 
+                                         ! list identifier 
+  LOGICAL, INTENT(OUT)       :: flag     ! Status of for the dataset 
+                                         ! transfer property list 
+  INTEGER, INTENT(OUT)       :: hdferr   ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_preserve_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    The <code>flag</code> parameter was changed from 
+			<em>INTEGER</em> to <em>LOGICAL</em> to better 
+			match the C API.</td></tr>
+    </table></ul>
+</dl>
+

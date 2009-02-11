@@ -1,0 +1,60 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5garbage_collect" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-GarbageCollect">H5garbage_collect</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5garbage_collect</code>(<em>void</em>)
+<dt><strong>Purpose:</strong>
+    <dd>Garbage collects on all free-lists of all types.
+<dt><strong>Description:</strong>
+    <dd><code>H5garbage_collect</code> walks through all the garbage 
+        collection routines of the library, freeing any unused memory. 
+        <p>
+        It is not required that <code>H5garbage_collect</code> be called 
+        at any particular time; it is only necessary in certain situations 
+        where the application has performed actions that cause the library 
+        to allocate many objects.  The application should call
+        <code>H5garbage_collect</code> if it eventually releases those 
+        objects and wants to reduce the memory used by the library from
+        the peak usage required.  
+        <p>
+        The library automatically garbage collects all the free lists 
+        when the application ends.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt>None.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5garbage_collect_f
+    <dd>
+	<pre>
+SUBROUTINE h5garbage_collect_f(hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+END SUBROUTINE h5garbage_collect_f
+	</pre>
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.5</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

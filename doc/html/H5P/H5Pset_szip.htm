@@ -1,0 +1,390 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_szip" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetSzip">H5Pset_szip</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_szip</code>(<em>hid_t</em> <code>plist</code>,
+                <em>unsigned int</em> <code>options_mask</code>,
+                <em>unsigned int</em> <code>pixels_per_block</code>)
+        <p>
+  <dt><strong>Purpose:</strong>
+    <dd>Sets up use of the SZIP compression filter.
+        <p>
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_szip</code> sets an SZIP compression filter, 
+        <code>H5Z_FILTER_SZIP</code>, for a dataset. 
+        SZIP is a compression method designed for use with scientific data.
+	<p>
+        Before proceeding, be aware that there are factors that affect
+        your rights and ability to use SZIP compression.
+        See the documents at
+	<a href="http://www.hdfgroup.org/doc_resource/SZIP/index.html" 
+        target="External">SZIP Compression in HDF5</a>
+	for <em>important information regarding terms of use and 
+	the SZIP copyright notice</em>,
+	for further discussion of SZIP compression in HDF5, 
+	and for a list of SZIP-related references.
+
+	<p>
+        In the text below, the term <em>pixel</em> refers to
+        an HDF5 data element. 
+        This terminology derives from SZIP compression's use with image data, 
+        where pixel referred to an image pixel.
+	<p>
+	The SZIP <code>bits_per_pixel</code> value (see <b>Notes</b>, below) 
+	is automatically set, based on the HDF5 datatype.
+	SZIP can be used with atomic datatypes that may have size 
+        of 8, 16, 32, or 64 bits.
+        Specifically, a dataset with a datatype that is 
+            8-, 16-, 32-, or 64-bit 
+	    signed or unsigned integer; 
+            char; or
+            32- or 64-bit float
+        can be compressed with SZIP.  
+	See <b>Notes</b>, below, for further discussion of the
+	the SZIP <code>bits_per_pixel</code> setting.
+	
+	<p>
+        SZIP compression cannot be applied to 
+            compound datatypes, 
+            array datatypes, 
+            variable-length datatypes, 
+	    enumerations, or 
+            any other user-defined datatypes.
+        If an SZIP filter is set in a dataset creation property list used 
+        to create a dataset containing a non-allowed datatype, the call
+        to <a href="RM_H5D.html#Dataset-Create"><code>H5Dcreate</code></a>
+        will fail; 
+        the conflict can be detected only when the property list is used.
+        
+
+	<p>
+	SZIP options are passed in an options mask, <code>options_mask</code>,
+	as follows.
+        <center>
+        <table>
+        <tr valign=top align=left><td>
+            <hr>
+            <b>Option</b>
+            </td><td>
+            <hr>
+            <b>Description</b>
+            <br>
+            <font size=-1>(Mutually exclusive; select one.)</font>
+        </td></tr>
+        <tr valign=top align=left><td>
+            <hr>
+	    <code>H5_SZIP_EC_OPTION_MASK&nbsp;&nbsp;</code> 
+            </td><td>
+            <hr>
+            Selects entropy coding method. 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5_SZIP_NN_OPTION_MASK</code> 
+            </td><td>
+            Selects nearest neighbor coding method. 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <hr>
+            </td><td>
+            <hr>
+        </td></tr>
+	</table>
+	</center>
+	The following guidelines can be used in determining 
+        which option to select:
+	<ul>
+	  <li>The entropy coding method, the EC option specified by
+	      <code>H5_SZIP_EC_OPTION_MASK</code>, is best suited for 
+              data that has been processed.
+	      The EC method works best for small numbers.
+	  <li>The nearest neighbor coding method, the NN option 
+              specified by <code>H5_SZIP_NN_OPTION_MASK</code>,
+              preprocesses the data then applies the EC method as above.
+	</ul>
+        Other factors may affect results, but the above criteria 
+        provide a good starting point for optimizing data compression.
+
+	<p>
+        SZIP compresses data block by block, with a user-tunable block size.  
+	This block size is passed in the parameter 
+        <code>pixels_per_block</code> and must be even and not greater than 32, 
+        with typical values being <code>8</code>, <code>10</code>, 
+        <code>16</code>, or <code>32</code>.
+        This parameter affects compression ratio;
+	the more pixel values vary, the smaller this number should be to
+        achieve better performance.
+	<p>
+        In HDF5, compression can be applied only to chunked datasets.
+        If <code>pixels_per_block</code> is bigger than the total 
+        number of elements in a dataset chunk, 
+        <code>H5Pset_szip</code> will succeed but the subsequent call to 
+        <a href="RM_H5D.html#Dataset-Create"><code>H5Dcreate</code></a>
+        will fail; the conflict can be detected only when the property list 
+        is used.
+	<p>
+        To achieve optimal performance for SZIP compression, 
+        it is recommended that a chunk's fastest-changing dimension 
+        be equal to <em>N</em> times <code>pixels_per_block</code>
+        where <em>N</em> is the maximum number of blocks per scan line
+        allowed by the SZIP library.
+        In the current version of SZIP, <em>N</em> is set to 128.
+        <p>
+        SZIP compression is an optional HDF5 filter.
+        See the note below for information regarding its designed behavior, 
+        particularly under circumstances where SZIP is not available 
+        to an application.
+        <p>
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Dataset creation property list 
+                identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned int</em> <code>options_mask</code></td>
+            <td valign="top">IN: A bit-mask conveying the desired SZIP options.
+                Valid values are <code>H5_SZIP_EC_OPTION_MASK</code>
+                and <code>H5_SZIP_NN_OPTION_MASK</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;int</em>&nbsp;<code>pixels_per_block&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: The number of pixels or data elements in each data block.</td></tr>
+    </table></ul>
+        <p>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+        <p>
+<!--
+  <dt><strong>Notes on Filter Behavior in HDF5:</strong>
+    <dd>SZIP is an optional filter in HDF5 and can therefore be set for 
+        HDF5 datasets even though it is not available at the moment.  
+        SZIP compression can then be applied to those datasets when the file 
+        containing the dataset is moved to a system on which is available.
+        <p>
+        Consider a situation where one is creating files that will normally 
+        be used only on systems where SZIP compression (encoding and decoding) 
+        is routinely available.
+        One can create those files on system A, which lacks SZIP, 
+        create chunked datasets in the files with SZIP defined in the 
+        dataset creation property list, and even write data to those datasets.
+        The dataset object header will indicate that the SZIP filter has
+        been associated with this dataset.
+        But since system A does not have SZIP, dataset chunks will
+        be written without SZIP compression.
+        <p>
+        HDF5 has a mechanism for determining whether chunks are actually 
+        written with filters specified in the object header, so until the file 
+        is moved from system A, system A will be able to read the data.
+        Once the file is moved to system B, where SZIP encoding is available,
+        HDF5 will use SZIP to compress any data written in these datasets. 
+        Dataset chunks that have been written on system B will then be 
+        unreadable on system A; chunks that have not been re-written since 
+        being written on system A will remain readable on system A.
+        <p>
+        The following table summarizes this behavior.
+        <div align=center>
+        <table border=0 width=80%>
+          <tr align=left valign=top> 
+            <td width=20%>&nbsp;</td>
+            <td width=25%><b>SZIP<br>not available</b>
+            <td width=25%><b>SZIP available<br>with encode</b>
+            <td width=25%><b>SZIP available<br>decode only</b>
+          </tr><tr align=left valign=top>
+            <td><b><code>H5Pset_szip</code>&nbsp;&nbsp;&nbsp;</b></td>
+            <td>Will succeed.<br>&nbsp;</td>
+            <td>Will succeed.</td>
+            <td>Will succeed.</td>
+          </tr><tr align=left valign=top>
+            <td><b><code>H5Dwrite</code><br>with SZIP set</b></td>
+            <td>Will succeed;<br>data will not be compressed.</td>
+            <td>Will succeed;<br>data will be compressed.</td>
+            <td>Will succeed;<br>data will not be compressed.</td>
+          </tr><tr align=left valign=top>
+            <td><b><code>H5Dread</code><br>with SZIP set</b></td>
+            <td>Will succeed if data has not actually been compressed.</td>
+            <td>Will succeed.</td>
+            <td>Will succeed.</td>
+          </tr>
+        </table>
+        </div>
+        <p>
+        The above principles apply generally in the use of 
+        HDF5 optional filters insofar as HDF5 does as much as possible
+        to complete an operation when a optional filter is unavailable.
+        <p>
+-->
+  <dt><strong>Notes for Users Familiar with SZIP in Other Contexts:</strong>
+    <dd>The following notes are of interest primarily to those who have 
+        used SZIP compression outside of the HDF5 context.
+	<p>
+	In non-HDF5 applications, SZIP typically requires that the 
+        user application supply additional parameters:
+        <ul>
+          <li><code>pixels_in_object</code>, 
+              the number of pixels in the object to be compressed 
+          <li><code>bits_per_pixel</code>, 
+              the number of bits per pixel
+          <li><code>pixels_per_scanline</code>, 
+              the number of pixels per scan line  
+        </ul>
+        <p>
+        These values need not be independently supplied in the HDF5 
+        environment as they are derived from the datatype and dataspace, 
+        which are already known.
+        In particular, HDF5 sets 
+        <code>pixels_in_object</code> to the number of elements in a chunk 
+        and <code>bits_per_pixel</code> to the size of the element or 
+        pixel datatype.  
+        The following algorithm is used to set 
+        <code>pixels_per_scanline</code>:
+        <ul>
+          <li>If the size of a chunk's fastest-changing dimension, 
+              <em>size</em>, is greater than 4K, 
+              set <code>pixels_per_scanline</code> to 
+              128 times <code>pixels_per_block</code>.
+          <li>If <em>size</em> is less than 4K 
+              but greater than <code>pixels_per_block</code>, 
+              set <code>pixels_per_scanline</code> to the minimum of
+              <em>size</em> and 128 times <code>pixels_per_block</code>.
+          <li>If <em>size</em> is less than <code>pixels_per_block</code> 
+              but greater than the number elements in the chunk, 
+              set <code>pixels_per_scanline</code> to the minimum of 
+              the number elements in the chunk and 
+              128 times <code>pixels_per_block</code>.
+        </ul>
+
+<!-- NEW PAGE -->	
+	<p>
+	The HDF5 datatype may have precision that is less than the 
+	full size of the data element, e.g., an 11-bit integer can be
+	defined using 
+	<a href="RM_H5T.html#Datatype-SetPrecision"><code>H5Tset_precision</code></a>.
+	To a certain extent, SZIP can take advantage of the 
+	precision of the datatype to improve compression:
+	<ul><li>
+	If the HDF5 datatype size is 24-bit or less and
+	the offset of the bits in the HDF5 datatype is zero
+	(see <a href="RM_H5T.html#Datatype-SetOffset"><code>H5Tset_offset</code></a>  
+	or <a href="RM_H5T.html#Datatype-GetOffset"><code>H5Tget_offset</code></a>), 
+	the data is the in lowest N bits of the data element. 
+	In this case, the SZIP <code>bits_per_pixel</code> 
+	is set to the precision 
+	of the HDF5 datatype.
+	<li>
+	If the offset is not zero, the SZIP <code>bits_per_pixel</code> 
+	will be set to the number of bits in the full size of the data 
+	element.
+	<li>
+	If the HDF5 datatype precision is 25-bit to 32-bit, 
+	the SZIP <code>bits_per_pixel</code> will be set to 32.
+	<li>
+	If the HDF5 datatype precision is 33-bit to 64-bit, 
+	the SZIP <code>bits_per_pixel</code> will be set to 64.
+	</ul>
+
+	<p>
+	HDF5 always modifies the options mask provided by the user
+        to set up usage of <code>RAW_OPTION_MASK</code>, 
+        <code>ALLOW_K13_OPTION_MASK</code>, and one of
+        <code>LSB_OPTION_MASK</code> or <code>MSB_OPTION_MASK</code>, 
+        depending on endianness of the datatype.
+        <p>
+  <dt><strong>Fortran90 Interface:</strong> h5pset_szip_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_szip_f(prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id     
+                                   ! Dataset creation property list identifier 
+  INTEGER, INTENT(IN) :: options_mask      
+                                   ! A bit-mask conveying the desired
+                                   ! SZIP options
+                                   ! Current valid values in Fortran are:
+                                   !    H5_SZIP_EC_OM_F
+                                   !    H5_SZIP_NN_OM_F
+  INTEGER, INTENT(IN) :: pixels_per_block  
+                                   ! The number of pixels or data elements 
+                                   ! in each data block
+  INTEGER, INTENT(OUT)  :: hdferr  ! Error code
+                                   ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_szip_f
+	</pre>		
+		
+        <!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+		
+        <p>
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+
+<!--
+    <p>
+  <dt><strong>References:</strong>
+    (This material will appear in a separate file in the final release documents.)
+    <ul>
+    <li>J. Venbrux, P.S. Yeh, G. Zweigle, J. Vesel, 
+        "A VLSI Chip Solution for Lossless Medical Imagery Compression,"
+        <cite>SPIE conference on Medical Imaging 1994</cite>. 
+        Vol. 2164, pp. 561-572, February 13-14, 1994, 
+        Newport Beach, California.
+
+    <li>J. Venbrux, J. Gambles, D. Wiseman, G. Zweigle, W.H. Miller, P.S. Yeh, 
+        "A VLSI Chip Set Development for Lossless Data Compression,"
+        <cite>AIAA Computing in Aerospace 9 Conference</cite>. 
+        October 1993, San Diego, California.
+
+    <li>J. Venbrux, G. Zweigle, J. Gambles, D.Wiseman, W. Miller, P. Yeh,
+        "An Adaptive, Lossless Data Compression Algorithm and VLSI 
+        Implementations,"
+        <cite>NASA Symposium on VLSI Design</cite>. 
+        Pp 1.2.1-1.2.16, November 1993.
+
+    <li>J. Venbrux, P.S. Yeh, and M. N. Liu,
+        "A VLSI Chip Set for High Speed Lossless Data Compression,"
+        <cite>IEEE Transactions on Circuits and Systems for Video 
+        Technology</cite>.
+        Pp. 381-391, December 1992.
+
+    <li>CCSDS 120.0-G-1. 
+        <cite>Lossless Data Compression</cite>. 
+        Green Book. Issue 1, May 1997.
+        This Report presents a summary of the key operational concepts and 
+        rationale underlying the requirements for the CCSDS Recommendation, 
+        Lossless Data Compression. Supporting performance information along 
+        with illustrations are also included. This Report also provides a 
+        broad tutorial overview of the CCSDS Lossless Data Compression 
+        algorithm and is aimed at helping first-time readers
+        to understand the Recommendation.
+        <br>
+        Appears In: CCSDS Publications TGannett 02/04/2003 387K Services 
+        Check Out View
+
+    <li>CCSDS 121.0-B-1. 
+        <cite>Lossless Data Compression</cite>. 
+        Blue Book. Issue 1, May 1997.
+        This Recommendation defines a source-coding data-compression 
+        algorithm and specifies how data compressed using the algorithm 
+        are inserted into source packets for retrieval and decoding.  
+        <br>
+        Appears In: CCSDS Publications
+
+    </ul>
+-->
+</dl>
+

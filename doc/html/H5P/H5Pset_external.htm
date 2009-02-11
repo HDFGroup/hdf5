@@ -1,0 +1,88 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_external" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetExternal">H5Pset_external</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_external</code>(<em>hid_t</em> <code>plist</code>,
+        <em>const char</em> <code>*name</code>,
+        <em>off_t</em> <code>offset</code>,
+        <em>hsize_t</em> <code>size</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Adds an external file to the list of external files.
+  <dt><strong>Description:</strong>
+    <dd>The first call to <code>H5Pset_external</code> sets the 
+        <i>external storage</i> property in the property list,
+        thus designating that the dataset will be stored in 
+        one or more non-HDF5 file(s) external to the HDF5 file.
+        This call also adds the file <code>name</code> as the 
+        first file in the list of external files.
+        Subsequent calls to the function add the named file as
+        the next file in the list.
+        <p>
+        If a dataset is split across multiple files, then the files
+        should be defined in order. The total size of the dataset is
+        the sum of the <code>size</code> arguments for all the external files.
+        If the total size is larger than the size of a dataset then the
+        dataset can be extended (provided the data space also allows
+        the extending).
+        <p>
+        The <code>size</code> argument specifies the number of bytes reserved 
+        for data in the external file.
+        If  <code>size</code> is set to <code>H5F_UNLIMITED</code>, the 
+        external file can be of unlimited size and no more files can be added 
+        to the external files list.
+        <p>
+        All of the external files for a given dataset must be 
+        specified with <code>H5Pset_external</code> 
+        <i>before</i> <code>H5Dcreate</code> is called to create 
+        the dataset. 
+        If one these files does not exist on the system when 
+        <code>H5Dwrite</code> is called to write data to it, 
+        the library will create the file.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of a dataset creation property list.</td></tr>
+        <tr>
+            <td valign="top"><em>const&nbsp;char</em>&nbsp;<code>*name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Name of an external file.</td></tr>
+        <tr>
+            <td valign="top"><em>off_t</em> <code>offset</code></td>
+            <td valign="top">IN: Offset, in bytes, from the beginning of the file
+                to the location in the file where the data starts.</td></tr>
+        <tr>
+            <td valign="top"><em>hsize_t</em> <code>size</code></td>
+            <td valign="top">IN: Number of bytes reserved in the file for the data.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_external_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_external_f(prp_id, name, offset,bytes, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of an external file
+  INTEGER, INTENT(IN) :: offset         ! Offset, in bytes, from the 
+                                        ! beginning of the file to the 
+                                        ! location in the file where 
+                                        ! the data starts
+  INTEGER(HSIZE_T), INTENT(IN) :: bytes ! Number of bytes reserved in 
+                                        ! the file for the data
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_external_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

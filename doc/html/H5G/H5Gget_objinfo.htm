@@ -1,0 +1,191 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gget_objinfo" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-GetObjinfo">H5Gget_objinfo</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Gget_objinfo</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>hbool_t</em> <code>follow_link</code>,
+        <em>H5G_stat_t *</em><code>statbuf</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns information about an object.  
+  <dt><strong>Description:</strong>
+    <dd><code>H5Gget_objinfo</code> returns information about the 
+        specified object through the <code>statbuf</code> argument. 
+        <p>
+        A file or group identifier, <code>loc_id</code>, 
+        and an object name, <code>name</code>, relative to <code>loc_id</code>,
+        are commonly used to specify the object.  
+        However, if the object identifier is already known to the application,
+        an alternative approach is to use that identifier, 
+        <code>obj_id</code>, in place of <code>loc_id</code>, 
+        and a dot (<code>.</code>) in place of <code>name</code>.  
+        Thus, the alternative versions of the first portion of an 
+        <code>H5Gget_objinfo</code> call would be as follows:
+        <br>
+        <code>
+        &nbsp;&nbsp;&nbsp;&nbsp;H5Gget_objinfo (loc_id name&nbsp;&nbsp;...)
+        <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;H5Gget_objinfo (obj_id .&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...)
+        </code>
+        <p>
+        If the object is a symbolic link and <code>follow_link</code> is
+        zero (<code>0</code>), 
+        then the information returned describes the link itself;
+        otherwise the link is followed and the information returned 
+        describes the object to which the link points.  
+        If <code>follow_link</code> is non-zero but the final symbolic link 
+        is dangling (does not point to anything), then an error is returned.  
+        The <code>statbuf</code> fields are undefined for an error.  
+        The existence of an object can be tested by calling this function 
+        with a null <code>statbuf</code>.
+        <p>
+        <code>H5Gget_objinfo</code> fills in the following data structure
+        (defined in H5Gpublic.h):
+        <pre>
+                  typedef struct H5G_stat_t {
+                      unsigned long fileno[2];
+                      unsigned long objno[2];
+                      unsigned nlink;
+                      H5G_obj_t type;
+                      time_t mtime; 
+                      size_t linklen;
+                      H5O_stat_t ohdr;
+                  } H5G_stat_t
+        </pre>
+
+        where H5O_stat_t (defined in H5Opublic.h) is:
+
+        <pre>
+                  typedef struct H5O_stat_t {
+                      hsize_t size;
+                      hsize_t free;
+                      unsigned nmesgs;
+                      unsigned nchunks;
+                  } H5O_stat_t
+        </pre>
+        The <code>fileno</code> and <code>objno</code> fields contain 
+        four values which uniquely identify an object among those 
+        HDF5 files which are open: if all four values are the same 
+        between two objects, then the two objects are the same 
+        (provided both files are still open).  
+        <ul>
+        <li>Note that if a file is closed and re-opened, the
+        value in <code>fileno</code> will change.
+        <li>If a VFL driver either does not or cannot detect that 
+        two <code>H5Fopen</code> calls referencing the same file 
+        actually open the same file, each will get a different 
+        <code>fileno</code>.
+        </ul>
+        <p>
+        The <code>nlink</code> field is the number of hard links to  
+        the object or zero when information is being returned about a 
+        symbolic link (symbolic links do not have hard links but 
+        all other objects always have at least one).  
+        <p>
+        The <code>type</code> field contains the type of the object, 
+        one of 
+		<code>H5G_GROUP</code>, 
+		<code>H5G_DATASET</code>,
+        	<code>H5G_LINK</code>, or
+        	<code>H5G_TYPE</code>.  
+        <p>
+        The <code>mtime</code> field contains the modification time.
+        <p>
+        If information is being returned about a symbolic link then 
+        <code>linklen</code> will be the length of the link value 
+        (the name of the pointed-to object with the null terminator);
+        otherwise <code>linklen</code> will be zero.  
+        <p>
+        The fields in the <code>H5O_stat_t</code> struct contain information
+        about the object header for the object queried:
+        <div align=center>
+        <table width=80%>
+          <tr><td align=left valign=top>
+            <code>size</code>
+          </td><td align=left valign=top>
+            The total size of all the object header information in
+            the file (for all chunks).
+          </td></tr><tr><td align=left valign=top>
+            <code>free</code>
+          </td><td align=left valign=top>
+            The size of unused space in the object header.
+          </td></tr><tr><td align=left valign=top>
+            <code>nmesgs</code>
+          </td><td align=left valign=top>
+            The number of object header messages.
+          </td></tr><tr><td align=left valign=top>
+            <code>nchunks&nbsp;&nbsp;</code>
+          </td><td align=left valign=top>
+            The number of chunks the object header is broken up into.
+          </td></tr>
+        </table>
+        </div>
+
+        <p>
+        Other fields may be added to this structure in the future.
+  <dt><strong>Note:</strong>
+    <dd>Some systems will be able to record the time accurately but
+        unable to retrieve the correct time; such systems (e.g., Irix64) 
+        will report an <code>mtime</code> value of 0 (zero).
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+      <tr>
+        <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: File or group identifier.
+            <br>
+            <i>Alternative:</i> An object identifier, 
+            <code>obj_id</code>.</td></tr>
+      <tr>
+        <td valign="top"><em>const char</em> <code>*name</code></td>
+        <td valign="top">IN: Name of the object for which status is being 
+            sought.
+            <br>
+            <i>Alternative:</i> If the preceding parameter is the 
+            object&rsquo;s direct identifier, i.e., the <code>obj_id</code>, 
+            this parameter should be a dot (<code>.</code>).</td></tr>
+	  <tr>
+        <td valign="top"><em>hbool_t</em> <code>follow_link</code></td>
+        <td valign="top">IN: Link flag.</td></tr>
+      <tr>
+        <td valign="top"><em>H5G_stat_t</em>&nbsp;<code>*statbuf&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">OUT: Buffer in which to return information about 
+            the object.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd> Returns a non-negative value if successful, with the fields of 
+         <code>statbuf</code> (if non-null) initialized.
+         Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+        <!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>C</strong></td></tr>
+        <tr>
+          <td valign="top">1.6.1</td>
+          <td valign="top">
+            Two new fields were added to the 
+            <code>H5G_stat_t</code> struct in this release.</td></tr>
+    </table></ul>
+</dl>
+
+

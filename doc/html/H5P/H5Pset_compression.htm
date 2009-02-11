@@ -1,0 +1,64 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_compression" -->
+
+<!--
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetCompression">H5Pset_compression</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_compression</code>(<em>hid_t</em> <code>plist</code>,
+        <em>H5Z_method_t</em> <code>method</code>,
+        <em>unsigned int</em> <code>flags</code>,
+        <em>size_t</em> <code>cd_size</code>,
+        <em>const void</em> <code>*client_data</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets compression method.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_compression</code> sets the compression method 
+        in a dataset creation property list.  This is a catch-all 
+        function for defining compression methods
+	and is intended to be called from a wrapper such as
+	<code>H5Pset_deflate</code>. The dataset creation property
+	list <em>plist</em> is adjusted to use the specified
+	compression method.  The <em>flags</em> is an 8-bit vector
+	which is stored in the file as part of the compression message
+	and passed to the compress and uncompress functions.  The
+	<em>client_data</em> is a byte array of length
+	<em>cd_size</em> which is copied to the file and passed to the
+	compress and uncompress methods.
+        <p>
+        The FLAGS, CD_SIZE, and CLIENT_DATA are copied to the
+        property list and eventually to the file and passed to the
+        compression functions.
+        <p>
+        See <a href="Datasets.html"><cite>The Dataset Interface (H5D)</cite></a> 
+        in the <cite>HDF5 User's Guide</cite> for further information 
+        regarding data compression.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Identifier for the dataset creation property list.
+        <dt><em>H5Z_method_t</em> <code>method</code>
+            <dd>IN: Compression method, an integer from 16 to 225.
+        <dt><em>unsigned int</em> <code>flags</code>
+            <dd>IN: Compression flags.
+        <dt><em>size_t</em> <code>cd_size</code>
+            <dd>IN: Size of the byte array <code>client_data</code>.
+        <dt><em>const void</em> <code>*client_data</code>
+            <dd>IN: Client data byte array passed to the compression method.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+</dl>
+
+-->
+
+

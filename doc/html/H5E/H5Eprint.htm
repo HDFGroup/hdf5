@@ -1,0 +1,46 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eprint" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-Print">H5Eprint</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Eprint</code>(<em>FILE *</em> <code>stream</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Prints the error stack in a default manner.  
+<dt><strong>Description:</strong>
+    <dd><code>H5Eprint</code> prints the error stack on the specified 
+        stream, <code>stream</code>.  
+        Even if the error stack is empty, a one-line message will be printed:
+        <br>&nbsp;&nbsp;&nbsp;&nbsp;
+	  <code>HDF5-DIAG: Error detected in thread 0.</code>
+        <p>
+        <code>H5Eprint</code> is a convenience function for 
+        <code>H5Ewalk</code> with a function that prints error messages.  
+        Users are encouraged to write their own more specific error handlers.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>FILE&nbsp;*</em>&nbsp;<code>stream&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File pointer, or stderr if NULL.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5eprint_f
+    <dd>
+	<pre>
+SUBROUTINE h5eprint_f(hdferr, name)
+  CHARACTER(LEN=*), OPTIONAL, INTENT(IN) :: name ! File name
+  INTEGER, INTENT(OUT) :: hdferr                 ! Error code
+
+END SUBROUTINE h5eprint_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

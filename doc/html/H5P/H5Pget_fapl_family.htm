@@ -1,0 +1,70 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_fapl_family" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFaplFamily">H5Pget_fapl_family</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_fapl_family</code> (
+                        <em>hid_t</em> <code>fapl_id</code>,
+                        <em>hsize_t *</em><code>memb_size</code>,
+                        <em>hid_t *</em><code>memb_fapl_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns file access property list information.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_fapl_family</code> returns file access property list 
+        for use with the family driver.
+        This information is returned through the output parameters.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em> hsize_t *</em><code>memb_size</code></td>
+            <td valign="top">OUT: Size in bytes of each file member.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t&nbsp;*</em><code>memb_fapl_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Identifier of file access property list for each 
+                    family member.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_family_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fapl_family_f(prp_id, imemb_size, memb_plist, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)    :: prp_id    ! Property list identifier
+  INTEGER(HSIZE_T), INTENT(OUT) :: memb_size ! Logical size, in bytes,
+                                             ! of each family member
+  INTEGER(HID_T), INTENT(OUT) :: memb_plist  ! Identifier of the file 
+                                             ! access property list to be
+                                             ! used for each family member
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_fapl_family_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+
+

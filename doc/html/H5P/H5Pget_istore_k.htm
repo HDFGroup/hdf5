@@ -1,0 +1,63 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_istore_k" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetIstoreK">H5Pget_istore_k</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pget_istore_k</code>(<em>hid_t</em> <code>plist</code>,
+            <em>unsigned *</em> <code>ik</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Queries the 1/2 rank of an indexed storage B-tree.  
+  <dt><strong>Description:</strong>
+        <dd><code>H5Pget_istore_k</code> queries the 1/2 rank of 
+            an indexed storage B-tree.  
+            The argument <code>ik</code> may be the null pointer (NULL).  
+            This function is only valid for file creation property lists.
+            <p>
+            See <a href="#Property-SetIstoreK">H5Pset_istore_k</a> for details.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of property list to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned *</em> <code>ik</code></td>
+            <td valign="top">OUT: Pointer to location to return the chunked storage B-tree 1/2 rank.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_istore_k_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_istore_k_f(prp_id, ik, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(OUT) :: ik           ! 1/2 rank of chunked storage B-tree
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_istore_k_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.4</td>
+          <td valign="top">
+		    <code>ik</code> parameter type changed to 
+			<em>unsigned</em>.</td></tr>
+    </table></ul>
+</dl>
+

@@ -1,0 +1,94 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_buffer" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetBuffer">H5Pset_buffer</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_buffer</code>(<em>hid_t</em> <code>plist</code>,
+        <em>hsize_t</em> <code>size</code>,
+        <em>void</em> <code>*tconv</code>,
+        <em>void</em> <code>*bkg</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets type conversion and background buffers.
+  <dt><strong>Description:</strong>
+    <dd> Given a dataset transfer property list, <code>H5Pset_buffer</code> 
+         sets the maximum size
+         for the type conversion buffer and background buffer and
+         optionally supplies pointers to application-allocated buffers.
+         If the buffer size is smaller than the entire amount of data
+         being transferred between the application and the file, and a type
+         conversion buffer or background buffer is required, then
+         strip mining will be used.  
+         <p>
+         Note that there are minimum size requirements for the buffer.
+         Strip mining can only break the data up along the first dimension,
+         so the buffer must be large enough to accommodate a complete slice 
+         that encompasses all of the remaining dimensions.  
+         For example, when strip mining a 100x200x300 hyperslab 
+         of a simple data space, the buffer must be large enough to 
+         hold 1x200x300 data elements.  
+         When strip mining a 100x200x300x150 hyperslab of a simple data space, 
+         the buffer must be large enough to hold 1x200x300x150 data elements.  
+         <p>
+         If <code>tconv</code> and/or <code>bkg</code> are null pointers,
+         then buffers will be allocated and freed during the data transfer.  
+         <p>
+         The default value for the maximum buffer is 1 Mb.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier for the dataset transfer property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>hsize_t</em>&nbsp;<code>size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Size, in bytes, of the type conversion and background buffers.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> <code>tconv</code></td>
+            <td valign="top">IN: Pointer to application-allocated type conversion buffer.</td></tr>
+        <tr>
+		    <td valign="top"><em>void</em> <code>bkg</code></td>
+            <td valign="top">IN: Pointer to application-allocated background buffer.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_buffer_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_buffer_f(plist_id, size, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)   :: plist_id ! Dataset transfer property 
+                                           ! list identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: size     ! Conversion buffer size
+  INTEGER, INTENT(OUT)         :: hdferr   ! Error code
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_buffer_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+		  <td valign="top">The <code>size</code> 
+		    parameter has changed from type 
+			<em>hsize_t</em> to <em>size_t</em>.</td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+		  <td valign="top">The <code>size</code> 
+		    parameter has changed to type 
+			<em>hsize_t</em>.</td></tr>
+    </table></ul>
+</dl>
+

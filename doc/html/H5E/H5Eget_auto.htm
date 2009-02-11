@@ -1,0 +1,47 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Eget_auto" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Error-GetAuto">H5Eget_auto</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Eget_auto</code>(<em>H5E_auto_t *</em> <code>func</code>,
+        <em>void **</em><code>client_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the current settings for the automatic error stack
+        traversal function and its data.  
+<dt><strong>Description:</strong>
+    <dd><code>H5Eget_auto</code> returns the current settings for the 
+        automatic error stack traversal function, <code>func</code>, 
+        and its data, <code>client_data</code>.  Either (or both) 
+        arguments may be null in which case the value is not returned.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>H5E_auto_t *</em> <code>func</code></td>
+            <td valign="top">OUT: Current setting for the function to be called upon an 
+                error condition.</td></tr>
+        <tr>
+		    <td valign="top"><em>void&nbsp;**</em><code>client_data&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Current setting for the data passed to the error function.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+	
+<!--
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

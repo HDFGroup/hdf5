@@ -1,0 +1,43 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_nmembers" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetNmembers">H5Tget_nmembers</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int </em><code>H5Tget_nmembers</code>(<em>hid_t </em><code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the number of elements in a compound or enumeration datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_nmembers</code> retrieves 
+        the number of fields in a compound datatype or 
+        the number of members of an enumeration datatype.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the number of elements if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tget_nmembers_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_nmembers_f(type_id, num_members, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: num_members   ! Number of fields in a 
+                                        ! compound datatype 
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_nmembers_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,59 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Punregister" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Unregister">H5Punregister</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Punregister</code>(
+                  <em>H5P_class_t</em> <code>class</code>,
+                  <em>const char *</em><code>name</code>
+        )
+	
+  <dt><strong>Purpose:</strong>
+    <dd>Removes a property from a property list class.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Punregister</code> removes a property from a 
+    property list class. 
+    
+    <p>
+    Future property lists created of that class will not contain 
+    this property;  
+    existing property lists containing this property are not affected.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>H5P_class_t</em>&nbsp;<code>class&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td>IN: Property list class from which to remove 
+	        permanent property</td></tr>
+    <tr>
+        <td><em>const char *</em><code>name</code></td>
+        <td>IN: Name of property to remove</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+  <dt><strong>Fortran90 Interface:</strong> h5punregister_f
+    <dd>
+	<pre>
+SUBROUTINE h5punregister_f(class, name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: class  ! Property list class identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name ! Name of property to remove
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5punregister_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+

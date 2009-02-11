@@ -1,0 +1,93 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_fill_value" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFillValue">H5Pset_fill_value</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fill_value</code>(<em>hid_t</em> <code>plist_id</code>,
+        <em>hid_t</em> <code>type_id</code>,
+        <em>const void *</em><code>value</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the fill value for a dataset.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fill_value</code> sets the fill value for
+        a dataset in the dataset creation property list.  
+        <p>
+        <code>value</code> is interpreted as being of datatype 
+        <code>type_id</code>.  This datatype may differ from that of 
+        the dataset, but the HDF5 library must be able to convert 
+        <code>value</code> to the dataset datatype when the dataset 
+        is created. 
+	<p>
+	The default fill value is <code>0</code> (zero), which is
+	interpreted according to the actual dataset datatype.
+	<p>
+	Setting <code>value</code> to <code>NULL</code> indicates
+	that the fill value is to be undefined. 
+  <dt><strong>Notes:</strong>
+    <dd> Applications sometimes write data only to portions of 
+	an allocated dataset.  It is often useful in such cases 
+	to fill the unused space with a known 
+	<span class="termEmphasis">fill value</span>.  
+	This function allows the user application to set that fill value;
+	the functions
+	<a href="RM_H5D.html#Dataset-Fill">H5Dfill</a> and
+	<a href="RM_H5P.html#Property-SetFillTime">H5Pset_fill_time</a>,
+	respectively, provide the ability  
+	to apply the fill value on demand or 
+	to set up its automatic application.
+	<p>
+	A fill value should be defined so that it is appropriate for 
+	the application.  While the HDF5 default fill value is 
+	<code>0</code> (zero), it is often appropriate to use another value.
+        It might be useful, for example, to use a value that is 
+	known to be impossible for the application to legitimately generate.
+	<p>
+        <code>H5Pset_fill_value</code> is designed to work in  
+	concert with <code>H5Pset_alloc_time</code> and 
+	<code>H5Pset_fill_time</code>.
+	<code>H5Pset_alloc_time</code> and <code>H5Pset_fill_time</code> 
+	govern the timing of dataset storage allocation and fill value 
+	write operations and can be important in tuning application 
+	performance.
+	<p>
+	See <a href="RM_H5D.html#Dataset-Create">H5Dcreate</a> for 
+	further cross-references.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Dataset creation property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code>,</td>
+            <td valign="top">IN: Datatype of <code>value</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;void&nbsp;*</em><code>value&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Pointer to buffer containing value to use as fill value.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fill_value_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fill_value_f(prp_id, type_id, fillvalue, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier of fill
+                                        ! value datatype (in memory)
+  TYPE(VOID), INTENT(IN) :: fillvalue   ! Fillvalue
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fill_value_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

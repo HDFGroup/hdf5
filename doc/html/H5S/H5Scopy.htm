@@ -1,0 +1,44 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Scopy" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-Copy">H5Scopy</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Scopy</code>(<em>hid_t </em><code>space_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates an exact copy of a dataspace.
+<dt><strong>Description:</strong>
+    <dd><code>H5Scopy</code> creates a new dataspace which is an exact
+        copy of the dataspace identified by <code>space_id</code>.
+        The dataspace identifier returned from this function should be 
+        released with <code>H5Sclose</code> or resource leaks will occur.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Identifier of dataspace to copy.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a dataspace identifier if successful; 
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5scopy_f
+    <dd>
+	<pre>
+SUBROUTINE h5scopy_f(space_id, new_space_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: space_id      ! Dataspace identifier 
+  INTEGER(HID_T), INTENT(OUT) :: new_space_id ! Identifier of dataspace copy 
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code
+                                              ! 0 on success and -1 on failure
+END SUBROUTINE h5scopy_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

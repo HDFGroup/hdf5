@@ -1,0 +1,70 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gunlink" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-Unlink">H5Gunlink</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Gunlink</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Removes the link to an object from a group. 
+  <dt><strong>Description:</strong>
+    <dd><code>H5Gunlink</code> removes the object specified by 
+        <code>name</code> from the group graph and decrements the 
+        link count for the object to which <code>name</code> points.
+        This action eliminates any association between <code>name</code>
+        and the object to which <code>name</code> pointed.
+        <p>
+        Object headers keep track of how many hard links refer to an object;
+        when the link count reaches zero, the object can be removed  
+        from the file.  Objects which are open are not removed until all  
+        identifiers to the object are closed.
+        <p>
+        If the link count reaches zero, all file space associated with 
+        the object will be released, i.e., identified in memory as freespace.
+        If the any object identifier is open for the object, the space
+        will not be released until after the object identifier is closed.
+        <p>
+        Note that space identified as freespace is available for re-use 
+        only as long as the file remains open; once a file has been 
+        closed, the HDF5 library loses track of freespace.  See
+        &ldquo;<a href="Performance.html#Freespace">Freespace Management</a>&rdquo;
+        in the <cite>HDF5 User's Guide</cite> for further details.
+  <dt><strong>Warning:</strong>
+    <dd>Exercise care in unlinking groups as it is possible to render data in 
+        a file inaccessible with <code>H5Gunlink</code>.  
+        See <a href="Groups.html#H5GUnlinkToCorrupt">The Group Interface</a> 
+        in the <cite>HDF5 User's Guide</cite>.
+  <dt><strong>Parameters:</strong>
+    <ul><table>      
+	  <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: Identifier of the file or group containing the object.</td></tr>
+      <tr>
+	    <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Name of the object to unlink.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5gunlink_f
+    <dd>
+	<pre>
+SUBROUTINE h5gunlink_f(loc_id, name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the object to unlink 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5gunlink_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

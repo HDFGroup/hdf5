@@ -1,0 +1,43 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_external_count" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetExternalCount">H5Pget_external_count</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Pget_external_count</code>(<em>hid_t</em> <code>plist</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns the number of external files for a dataset.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_external_count</code> returns the number of external files 
+        for the specified dataset.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of a dataset creation property list.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns the number of external files if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_external_count_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_external_count_f (prp_id, count, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id ! Property list identifier
+  INTEGER, INTENT(OUT) :: count        ! Number of external files for 
+                                       ! the specified dataset
+  INTEGER, INTENT(OUT) :: hdferr       ! Error code
+                                       ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_external_count_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

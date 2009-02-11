@@ -1,0 +1,69 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tenum_nameof" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-EnumNameOf">H5Tenum_nameof</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tenum_nameof</code>(
+        <em>hid_t</em> <code>type</code>,
+        <em>void</em> *<code>value</code>,
+        <em>char</em> *<code>name</code>,
+        <em>size_t</em> <code>size</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the symbol name corresponding to a specified 
+        member of an enumeration datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tenum_nameof</code> finds the symbol name that 
+        corresponds to the specified <code>value</code>
+        of the enumeration datatype <code>type</code>. 
+        <p>
+        At most <code>size</code> characters of the symbol 
+        name are copied into the <code>name</code> buffer. 
+        If the entire symbol name and null terminator 
+        do not fit in the <code>name</code> buffer, then as 
+        many characters as possible are copied 
+        (not null terminated) and the function fails.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>type</code></td>
+            <td valign="top">IN: Enumeration datatype identifier.</td></tr>
+        <tr>
+            <td valign="top"><em>void</em>&nbsp;*<code>value&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Value of the enumeration datatype.</td></tr>
+        <tr>
+            <td valign="top"><em>char</em> *<code>name</code></td>
+            <td valign="top">OUT: Buffer for output of the symbol name.</td></tr>
+        <tr>
+            <td valign="top"><em>size_t</em> <code>size</code></td>
+            <td valign="top">IN: Anticipated size of the symbol name, 
+                in bytes (characters).</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value 
+        and, if <code>size</code> allows it, 
+        the first character of <code>name</code> is 
+        set to <code>NULL</code>.
+<dt><strong>Fortran90 Interface:</strong> h5tenum_nameof_f
+    <dd>
+	<pre>
+SUBROUTINE h5tenum_nameof_f(type_id, value, namelen, name, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  INTEGER, INTENT(IN) :: value           ! Value of the enumeration datatype
+  INTEGER(SIZE_T), INTENT(IN) :: namelen ! Length of the name
+  CHARACTER(LEN=*), INTENT(OUT) :: name  ! Name of the enumeration datatype
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tenum_nameof_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

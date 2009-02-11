@@ -1,0 +1,78 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Sget_select_elem_pointlist" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectElemPointList">H5Sget_select_elem_pointlist</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Sget_select_elem_pointlist</code>(<em>hid_t </em><code>space_id</code>,
+        <em>hsize_t </em><code>startpoint</code>,
+        <em>hsize_t </em><code>numpoints</code>,
+        <em>hsize_t *</em><code>buf</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Gets the list of element points currently selected.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sget_select_elem_pointlist</code> returns the list of 
+        element points in the current dataspace selection.  Starting with 
+        the <code>startpoint</code>-th point in the list of points,
+        <code>numpoints</code> points are put into the user's buffer.
+        If the user's buffer fills up before <code>numpoints</code>
+        points are inserted, the buffer will contain only as many 
+        points as fit.
+        <p>
+        The element point coordinates have the same dimensionality (rank) 
+        as the dataspace they are located within.  The list of element points 
+        is formatted as follows: 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            &lt;coordinate&gt;, followed by 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            the next coordinate, 
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+            etc. 
+            <br>
+        until all of the selected element points have been listed.
+        <p>
+        The points are returned in the order they will be iterated through
+        when the selection is read/written from/to disk.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+          <td valign="top">IN: Dataspace identifier of selection to query.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t&nbsp;</em><code>startpoint&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Element point to start with.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t </em><code>numpoints</code></td>
+          <td valign="top">IN: Number of element points to get.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t *</em><code>buf</code></td>
+          <td valign="top">OUT: List of element points selected.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5sget_select_elem_pointlist_f
+    <dd>
+	<pre>
+SUBROUTINE h5sget_select_elem_pointlist_f(space_id, startpoint, num_points,
+                                          buf, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)   :: space_id   ! Dataspace identifier
+  INTEGER(HSIZE_T), INTENT(IN) :: startpoint ! Element point to start with
+  INTEGER, INTENT(OUT) :: num_points         ! Number of points to get in 
+                                             ! the current element selection
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: buf
+                                             ! List of points selected 
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code
+END SUBROUTINE h5sget_select_elem_pointlist_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

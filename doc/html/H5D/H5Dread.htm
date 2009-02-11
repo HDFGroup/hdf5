@@ -1,0 +1,283 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dread" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-Read">H5Dread</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Dread</code>(<em>hid_t </em><code>dataset_id</code>,
+        <em>hid_t</em> <code>mem_type_id</code>,
+        <em>hid_t</em> <code>mem_space_id</code>,
+        <em>hid_t</em> <code>file_space_id</code>,
+        <em>hid_t</em> <code>xfer_plist_id</code>,
+        <em>void *</em> <code>buf</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Reads raw data from a dataset into a buffer.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dread</code> reads a (partial) dataset, specified by its
+        identifier <code>dataset_id</code>, from the 
+        file into an application memory buffer <code>buf</code>.
+        Data transfer properties are defined by the argument 
+        <code>xfer_plist_id</code>.
+        The memory datatype of the (partial) dataset is identified by 
+        the identifier <code>mem_type_id</code>.
+        The part of the dataset to read is defined by 
+        <code>mem_space_id</code> and <code>file_space_id</code>.
+        <p>
+        <code>file_space_id</code> is used to specify only the selection within
+        the file dataset's dataspace.  Any dataspace specified in <code>file_space_id</code>
+        is ignored by the library and the dataset's dataspace is always used.
+        <code>file_space_id</code> can be the constant <code>H5S_ALL</code>. 
+        which indicates that the entire file dataspace, as defined by the
+        current dimensions of the dataset, is to be selected.
+        <p>
+        <code>mem_space_id</code> is used to specify both the memory dataspace
+        and the selection within that dataspace.
+        <code>mem_space_id</code> can be the constant <code>H5S_ALL</code>,
+        in which case the file dataspace is used for the memory dataspace and
+        the selection defined with <code>file_space_id</code> is used for the
+        selection within that dataspace.
+        <p>
+	If raw data storage space has not been allocated for the dataset 
+	and a fill value has been defined, the returned buffer <code>buf</code> 
+	is filled with the fill value. 
+        <p>
+        The behavior of the library for the various combinations of valid
+        dataspace identifiers and H5S_ALL for the <code>mem_space_id</code> and the
+        <code>file_space_id</code> parameters is described below:
+
+        <br><br>
+        <table border=0>
+        <tr>
+        <th>
+        <code>mem_space_id&nbsp;&nbsp;</code>
+        </th>
+        <th>
+        <code>file_space_id&nbsp;&nbsp;</code>
+        </th>
+        <th>
+        Behavior
+        </th>
+        </tr>
+	
+        <tr valign="top">
+        <td>
+        valid dataspace identifier
+        </td>
+        <td>
+        valid dataspace identifier
+        </td>
+        <td>
+        <code>mem_space_id</code> specifies the memory dataspace and the
+        selection within it.
+        <code>file_space_id</code> specifies the selection within the file
+        dataset's dataspace.
+        </td>
+        </tr>
+
+        <tr valign="top">
+        <td>
+        <code>H5S_ALL</code>
+        </td>
+        <td>
+        valid dataspace identifier
+        </td>
+        <td>
+        The file dataset's dataspace is used for the memory dataspace and the
+        selection specified with <code>file_space_id</code> specifies the
+        selection within it.
+        The combination of the file dataset's dataspace and the selection from 
+	<code>file_space_id</code> is used for memory also.
+        </td>
+        </tr>
+
+        <tr valign="top">
+        <td>
+        valid dataspace identifier
+        </td>
+        <td>
+        <code>H5S_ALL</code>
+        </td>
+        <td>
+        <code>mem_space_id</code> specifies the memory dataspace and the
+        selection within it.
+        The selection within the file dataset's dataspace is set to the "all"
+        selection.
+        </td>
+        </tr>
+
+        <tr valign="top">
+        <td>
+        <code>H5S_ALL</code>
+        </td>
+        <td>
+        <code>H5S_ALL</code>
+        </td>
+        <td>
+        The file dataset's dataspace is used for the memory dataspace and the
+        selection within the memory dataspace is set to the "all" selection.
+        The selection within the file dataset's dataspace is set to the "all"
+        selection.
+        </td>
+        </tr>
+
+        </table>
+
+        <p>
+        Setting an <code>H5S_ALL</code> selection indicates that the entire dataspace, as
+        defined by the current dimensions of a dataspace, will be selected.
+        The number of elements selected in the memory dataspace must match the
+        number of elements selected in the file dataspace.
+        <p>
+        <code>xfer_plist_id</code> can be the constant <code>H5P_DEFAULT</code>.
+        in which case the default data transfer properties are used.           
+        <p>
+	Data is automatically converted from the file datatype 
+        and dataspace to the memory datatype and dataspace
+	at the time of the read.  See the
+        <a href="Datatypes.html#Datatypes-DataConversion">Data Conversion</a> 
+        section of <cite>The Data Type Interface (H5T)</cite> in the 
+        <cite>HDF5 User's Guide</cite> for a discussion of 
+        data conversion, including the range of conversions currently 
+        supported by the HDF5 libraries.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dataset_id</code></td>
+            <td valign="top">IN: Identifier of the dataset read from.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>mem_type_id</code></td>
+            <td valign="top">IN: Identifier of the memory datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>mem_space_id</code></td>
+            <td valign="top">IN: Identifier of the memory dataspace.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset's dataspace in the file.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>xfer_plist_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of a transfer property list 
+                for this I/O operation.</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em> <code>buf</code></td>
+            <td valign="top">OUT: Buffer to receive data read from file.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5dread_f, h5dread_vl_f
+    <dd>There is no direct FORTRAN couterpart for the C function 
+        <code>H5Dread</code>.  
+        Instead, that functionality is provided by two FORTRAN functions:
+        
+    <center>
+    <table width=80%>
+      <tr valign=top align=left>
+            <td>
+              <code>h5dread_f</code>
+            </td>
+            <td>&nbsp;&nbsp;</td><td>
+              <strong>Purpose:</strong>
+              Reads data other than variable-length data. 
+            </td>
+        </tr>
+        <tr valign=top align=left>
+            <td>
+              <code>h5dread_vl_f</code>
+            </td><td>&nbsp;&nbsp;</td><td>
+              <strong>Purpose:</strong>
+              Reads variable-length data. 
+            </td>
+        </tr>
+    </table>
+    </center>
+				
+	<pre>
+SUBROUTINE h5dread_f(dset_id, mem_type_id, buf, dims, hdferr, &amp; 
+                     mem_space_id, file_space_id, xfer_prp)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
+  INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+  TYPE, INTENT(INOUT) :: buf                ! Data buffer; may be a scalar 
+                                            ! or an array
+  DIMENSION(*), INTEGER(HSIZE_T), INTENT(IN)  :: dims 
+                                            ! Array to hold corresponding 
+                                            ! dimension sizes of data 
+                                            ! buffer buf 
+                                            ! dim(k) has value of the k-th 
+                                            ! dimension of buffer buf
+                                            ! Values are ignored if buf is 
+                                            ! a scalar
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code 
+                                            ! 0 on success and -1 on failure
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+                                            ! Memory dataspace identfier 
+                                            ! Default value is H5S_ALL_F 
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
+                                            ! File dataspace identfier 
+                                            ! Default value is H5S_ALL_F
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+                                            ! Transfer property list identifier
+                                            ! Default value is H5P_DEFAULT_F 
+END SUBROUTINE h5dread_f
+	</pre>
+
+	<pre>
+
+SUBROUTINE h5dread_vl_f(dset_id, mem_type_id, buf, dims, len, hdferr, &amp; 
+                     mem_space_id, file_space_id, xfer_prp)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
+  INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
+  TYPE, INTENT(INOUT), & DIMENSION(dims(1),dims(2)) :: buf
+                                            ! Data buffer; may be a scalar 
+                                            ! or an array
+                                            ! TYPE must be one of the following
+                                            !     INTEGER
+                                            !     REAL
+                                            !     CHARACTER
+  INTEGER(HSIZE_T), INTENT(IN), DIMENSION(2)  :: dims 
+                                            ! Array to hold corresponding 
+                                            ! dimension sizes of data 
+                                            ! buffer buf 
+                                            ! dim(k) has value of the k-th 
+                                            ! dimension of buffer buf
+                                            ! Values are ignored if buf is 
+                                            ! a scalar
+  INTEGER(SIZE_T), INTENT(INOUT), DIMENSION(*)  :: len 
+                                            ! Array to store length of
+                                            ! each element
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code 
+                                            ! 0 on success and -1 on failure
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id 
+                                            ! Memory dataspace identfier 
+                                            ! Default value is H5S_ALL_F 
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id 
+                                            ! File dataspace identfier 
+                                            ! Default value is H5S_ALL_F
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp 
+                                            ! Transfer property list identifier
+                                            ! Default value is H5P_DEFAULT_F
+END SUBROUTINE h5dread_vl_f
+        </pre>
+
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>Fortran90</strong></td></tr>
+        <tr>
+          <td valign="top">1.4.2</td>
+          <td valign="top">
+            The <code>dims</code> parameter was added in this release.</td></tr>
+    </table></ul>
+</dl>
+

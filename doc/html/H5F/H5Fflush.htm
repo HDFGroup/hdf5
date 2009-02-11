@@ -1,0 +1,66 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fflush" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-Flush">H5Fflush</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Fflush</code>(<em>hid_t </em><code>object_id</code>,
+        <em>H5F_scope_t</em> <code>scope</code>
+        )
+<dt><strong>Purpose:</strong>
+        <dd>Flushes all buffers associated with a file to disk.
+<dt><strong>Description:</strong>
+        <dd><code>H5Fflush</code> causes all buffers associated with a
+        file to be immediately flushed to disk without removing the
+        data from the cache.  
+        <p>
+        <code>object_id</code> can be any object associated with the file, 
+        including the file itself, a dataset, a group, an attribute, or 
+        a named data type.
+        <p>
+        <code>scope</code> specifies whether the scope of the flushing 
+        action is global or local.  Valid values are
+        <center>
+        <table border=0>
+        <tr><td align=left valign=top><code>H5F_SCOPE_GLOBAL</code></td>
+            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td align=left valign=top>Flushes the entire virtual file.</td></tr>
+        <tr><td align=left valign=top><code>H5F_SCOPE_LOCAL</code></td>
+            <td></td>
+            <td align=left valign=top>Flushes only the specified file.</td></tr>
+        </table>
+        </center>       
+<dt><strong>Note:</strong>
+        <dd>HDF5 does not possess full control over buffering.
+        <code>H5Fflush</code> flushes the internal HDF5 buffers then 
+        asks the operating system (the OS) to flush the system buffers for the 
+        open files.  After that, the OS is responsible for ensuring that
+        the data is actually flushed to disk.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t </em><code>object_id</code></td>
+            <td valign="top">IN: Identifier of object used to identify the file.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5F_scope_t</em>&nbsp;<code>scope&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Specifies the scope of the flushing action.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5fflush_f
+    <dd>
+	<pre>
+SUBROUTINE h5fflush_f(obj_id, scope, hdferr)
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)  :: obj_id      ! Object identifier
+  INTEGER, INTENT(IN)         :: scope       ! Flag with two possible values:
+                                             !     H5F_SCOPE_GLOBAL_F  
+                                             !     H5F_SCOPE_LOCAL_F  
+  INTEGER, INTENT(OUT)        :: hdferr      ! Error code 
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5fflush_f
+	</pre>		
+		
+</dl>
+

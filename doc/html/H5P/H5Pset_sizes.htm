@@ -1,0 +1,60 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_sizes" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetSizes">H5Pset_sizes</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pset_sizes</code>(<em>hid_t</em> <code>plist</code>,
+            <em>size_t</em> <code>sizeof_addr</code>,
+            <em>size_t</em> <code>sizeof_size</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the byte size of the offsets and lengths used to address objects 
+        in an HDF5 file.  
+  <dt><strong>Description:</strong>
+        <dd><code>H5Pset_sizes</code> sets the byte size of the offsets 
+            and lengths used to address objects in an HDF5 file.  
+            This function is only valid for file creation property lists.  
+            Passing in a value of 0 for one of the <code>sizeof_...</code> 
+            parameters retains the current value.  
+            The default value for both values is the same as 
+            <code>sizeof(hsize_t)</code> in the library (normally 8 bytes).  
+            Valid values currently are 2, 4, 8 and 16.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of property list to modify.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em>&nbsp;<code>sizeof_addr&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Size of an object offset in bytes.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>sizeof_size</code></td>
+            <td valign="top">IN: Size of an object length in bytes.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_sizes_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_sizes_f (prp_id, sizeof_addr, sizeof_size, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id       ! Property list identifier
+  INTEGER(SIZE_T), INTENT(IN) :: sizeof_addr ! Size of an object offset 
+                                             ! in bytes
+  INTEGER(SIZE_T), INTENT(IN) :: sizeof_size ! Size of an object length 
+                                             ! in bytes
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_sizes_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

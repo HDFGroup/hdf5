@@ -1,0 +1,79 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iget_file_id" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-GetFileId">H5Iget_file_id</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Iget_file_id</code>(<em>hid_t</em> <code>obj_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves an identifier for the file containing the specified object.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iget_file_id</code> returns the identifier of the file 
+        associated with the object referenced by <code>obj_id</code>.  
+        <p>
+        <code>obj_id</code> can be a file, group, dataset, named datatype, 
+        or attribute identifier.
+        <p>
+        Note that the HDF5 Library permits an application to close a file
+        while objects within the file remain open.
+        If the file containing the object <code>obj_id</code> 
+        is still open, <code>H5Iget_file_id</code> will retrieve the 
+        existing file identifier.
+        If there is no existing file identifier for the file, 
+        i.e., the file has been closed, 
+        <code>H5Iget_file_id</code> will reopen the file and 
+        return a new file identifier.
+        In either case, the file identifier must eventually be released 
+        using <code>H5Fclose</code>.  
+<dt><strong>Parameters:</strong>
+    <ul>
+    <table>
+      <tr>
+        <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Identifier of the object whose associated 
+            file identifier will be returned.</td>
+      </tr>
+    </table>
+    </ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a file identifier on success, negative on failure.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>
+    <pre>
+SUBROUTINE h5iget_file_id_f(obj_id, file_id, hdferr) 
+
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN)  :: obj_id     ! Object identifier 
+  INTEGER(HID_T), INTENT(OUT) :: file_id    ! File identifier
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code
+
+END SUBROUTINE h5iget_file_id_f
+    </pre>
+
+<!--<dt><strong>Non-C API(s):</strong>
+    <dd>
+        <img src="Graphics/Java.gif">
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td>
+		  <td valign="top" align="left">
+		    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+		  <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.3</td>
+          <td valign="top">
+		    Function introduced in this release.</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top">
+		    Fortran subroutine introduced in this 
+			release.</td></tr>
+    </table></ul>
+</dl>
+

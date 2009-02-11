@@ -1,0 +1,94 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Iinc_ref" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Identify-IncRef">H5Iinc_ref</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Iinc_ref</code>(<em>hid_t</em> <code>obj_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Increments the reference count for an object.
+<dt><strong>Description:</strong>
+    <dd><code>H5Iinc_ref</code> increments the reference count of the object
+        identified by <code>obj_id</code>.
+
+        <p>
+        The reference count for an object ID is attached to the information
+        about an object in memory and has no relation to the number of links to
+        an object on disk.
+
+        <p>
+        The reference count for a newly created object will be 1.
+        Reference counts for objects may be explicitly modified with this
+        function or with <code>H5Idec_ref</code>.
+        When an object ID's reference count reaches zero, the object will be
+        closed.
+        Calling an object ID's 'close' function decrements the reference count
+        for the ID which normally closes the object, but
+        if the reference count for the ID has been incremented with this
+        function, the object will only be closed when the reference count
+        reaches zero with further calls to <code>H5Idec_ref</code> or the
+        object ID's 'close' function.
+
+        <p>
+        If the object ID was created by a collective parallel call (such as
+        <code>H5Dcreate</code>, <code>H5Gopen</code>, etc.), the reference
+        count should be modified by all the processes which have copies of
+        the ID.  Generally this means that group, dataset, attribute, file
+        and named datatype IDs should be modified by all the processes and
+        that all other types of IDs are safe to modify by individual processes.
+
+        <p>
+        This function is of particular value when an application is maintaining
+        multiple copies of an object ID.  The object ID can be incremented when
+        a copy is made.  Each copy of the ID can then be safely closed or
+        decremented and the HDF5 object will be closed when the reference count
+        for that that object drops to zero.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>obj_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Object identifier whose reference count will be modified.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative reference count of the object ID after
+        incrementing it if successful; otherwise a negative value is returned.
+<dt><strong>Fortran90 Interface:</strong> h5iinc_ref_f
+    <dd>
+	<pre>
+SUBROUTINE h5iinc_ref_f(obj_id, ref_count, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: obj_id  !Object identifier 
+  INTEGER, INTENT(OUT) :: ref_count     !Reference count of object ID
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success, and -1 on failure
+END SUBROUTINE h5iinc_ref_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td>
+		  <td valign="top" align="left">
+		    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+		  <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.2</td>
+          <td valign="top">
+		    Function introduced in this release.</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top">
+		    Fortran subroutine introduced in this 
+			release.</td></tr>
+    </table></ul>
+</dl>
+

@@ -1,0 +1,89 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5c++" -->
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong> <a name="Tools-H5C++">h5c++</a>
+<dt><strong>Syntax:</strong>
+    <dd><code>h5c++
+        [</code><em>OPTIONS</em><code>]</code> <em>&lt;compile line&gt;</em>
+<dt><strong>Purpose:</strong>
+    <dd>Helper script to compile HDF5 C++ applications.
+<dt><strong>Description:</strong>
+    <dd><p>
+        <code>h5c++</code> can be used in much the same way 
+        <code>mpiCC</code> by MPICH is used to compile an HDF5 program. 
+        It takes care of specifying where the
+        HDF5 header files and libraries are on the command line.
+        <p>
+        <code>h5c++</code> subsumes all other compiler scripts in that
+        if you've used one set of compiler scripts to compile the 
+	HDF5 C++ library, then <code>h5c++</code> uses those same scripts. 
+	For example, when compiling an MPICH program, 
+        you use the <code>mpiCC</code> script. 
+        <p>
+        Some programs use HDF5 in only a few modules. It isn't necessary
+        to use <code>h5c++</code> to compile those modules which don't use
+        HDF5. In fact, since <code>h5c++</code> is only a convenience
+        script, you are still able to compile HDF5 C++ modules in the 
+        normal way. In that case, you will have to specify the HDF5 libraries
+        and include paths yourself.
+        Use the <code>-show</code> option to see the details.
+        <p>
+        An example of how to use <code>h5c++</code> to compile the program
+        <code>hdf_prog</code>, which consists of modules
+        <code>prog1.cpp</code> and <code>prog2.cpp</code> 
+        and uses the HDF5 C++ library, would be as follows:
+        <pre>
+        # h5c++ -c prog1.cpp
+        # h5c++ -c prog2.cpp
+        # h5c++ -o hdf_prog prog1.o prog2.o</pre>
+<dt><strong>Options and Parameters:</strong>
+    <dd>
+    <dl>
+        <dt><code>-help</code>
+            <dd>Prints a help message.
+        <dt><code>-echo</code>
+            <dd>Show all the shell commands executed.
+        <dt><code>-prefix=DIR</code>
+            <dd>Use the directory <code>DIR</code> to find HDF5 
+                <code>lib/</code> and <code>include/</code> subdirectories 
+                <br>
+                Default: prefix specified when configuring HDF5.
+        <dt><code>-show</code>
+            <dd>Show the commands without executing them.
+        <dt><em>&lt;compile line&gt;</em>
+            <dd>The normal compile line options for your compiler. 
+                <code>h5c++</code> uses the same compiler you used 
+                to compile HDF5. Check your compiler's manual for 
+                more information on which options are needed.
+    </dl>
+<dt><strong>Environment Variables:</strong>
+    <dd>When set, these environment variables override some of the built-in
+        defaults of <code>h5c++</code>.
+        <dl>
+          <dt><code>HDF5_CXX</code>
+            <dd>Use a different C++ compiler.
+          <dt><code>HDF5_CXXLINKER</code>
+            <dd>Use a different linker.
+        </dl>
+<dt><strong>History:</strong>
+    	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>Command Line Tool</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Tool introduced in this release.</td></tr>
+    </table></ul>
+<!--
+<dt><strong>Current Status:</strong>
+    <dd>
+<dt><strong>See Also:</strong>
+    <dd>
+ -->
+</dl>
+
+

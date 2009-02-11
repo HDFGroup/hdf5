@@ -1,0 +1,89 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pmodify_filter" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-ModifyFilter">H5Pmodify_filter</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pmodify_filter</code>(<em>hid_t</em> <code>plist</code>,
+        <em>H5Z_filter_t</em> <code>filter</code>,
+        <em>unsigned int</em> <code>flags</code>,
+        <em>size_t</em> <code>cd_nelmts</code>,
+        <em>const unsigned int</em> <code>cd_values[]</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Modifies a filter in the filter pipeline.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pmodify_filter</code> modifies the specified 
+        <code>filter</code> in the filter pipeline.
+        <code>plist</code> must be a dataset creation property list 
+        and the modified filter will be in a permanent filter pipeline.
+	<p>
+	The <code>filter</code>, <code>flags</code> 
+        <code>cd_nelmts[]</code>, and <code>cd_values</code> parameters 
+	are used in the same manner and accept the same values as described 
+	in the discussion of <a href="#Property-SetFilter">H5Pset_filter</a>.	
+  <dt><strong>Note:</strong>
+    <dd>This function currently supports only the permanent filter
+        pipeline; <code>plist_id</code> must be a dataset creation 
+        property list.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5Z_filter_t</em> <code>filter</code></td>
+            <td valign="top">IN: Filter to be modified.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned int</em> <code>flags</code></td>
+            <td valign="top">IN:  Bit vector specifying certain general properties
+                of the filter.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>cd_nelmts</code></td>
+            <td valign="top">IN: Number of elements in <code>cd_values</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;unsigned&nbsp;int</em>&nbsp;<code>cd_values[]&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Auxiliary data for the filter.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+
+    <dt><strong>Fortran90 Interface:</strong> h5pmodify_filter_f
+    <dd>
+	<pre>
+SUBROUTINE h5pmodify_filter_f(prp_id, filter, flags, cd_nelmts, &amp; 
+                              cd_values, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id      ! Property list identifier
+  INTEGER, INTENT(IN)        :: filter      ! Filter to be modified
+  INTEGER, INTENT(IN)        :: flags       ! Bit vector specifying certain 
+                                            ! general properties of the filter
+  INTEGER(SIZE_T), INTENT(IN) :: cd_nelmts  ! Number of elements in cd_values
+  INTEGER, DIMENSION(*), INTENT(IN) :: cd_values  
+                                            ! Auxiliary data for the filter
+  INTEGER, INTENT(OUT)       :: hdferr      ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pmodify_filter_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

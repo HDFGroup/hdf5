@@ -1,0 +1,90 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_fapl_mpiposix" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFaplMpiPosix">H5Pget_fapl_mpiposix</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pget_fapl_mpiposix</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>MPI_Comm *</em><code>comm</code>,
+                     <em>hbool_t *</em><code>use_gpfs_hints</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd> Returns MPI communicator information.
+  <dt><strong>Description:</strong>
+    <dd>If the file access property list is set to the <code>H5FD_MPIO</code> 
+        driver, <code>H5Pget_fapl_mpiposix</code> returns 
+        the MPI communicator through the <code>comm</code> 
+        pointer, if those values are non-null.
+        <p>
+        <code>comm</code> is not copied, so it is valid only 
+        until the file access property list is either modified or closed.
+        <p>
+        <code>use_gpfs_hints</code> specifies whether to attempt to use
+        GPFS hints when accessing this file.
+        A value of <code>TRUE</code> (or <code>1</code>) indicates that
+        the hints are being used, where possible.
+        A value of <code>FALSE</code> (or <code>0</code>) indicates that
+        the hints are not being used.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+            <td valign="top"><em>MPI_Comm&nbsp;*</em><code>comm</code></td>
+            <td valign="top">OUT: MPI-2 communicator.</td></tr>
+        <tr>
+            <td valign="top"><em>hbool_t *</em><code>use_gpfs_hints&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Use of GPFS hints.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_mpiposix_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER, INTENT(OUT) :: comm          ! Buffer to return communicator
+  LOGICAL, INTENT(OUT) :: use_gpfs
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5pget_fapl_mpiposix_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>C</strong></td>
+          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>Fortran90</strong></td></tr>
+        <tr>
+          <td valign="top">1.6.1</td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">
+        	Fortran subroutine introduced in this release.</td></tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top"><code>use_gpfs_hints</code> parameter added.</td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">&nbsp;</td></tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top">Function introduced in this release.<br></td>
+          <td valign="top">&nbsp;</td>
+          <td valign="top">&nbsp;</td></tr>
+    </table></ul>
+</dl>
+

@@ -1,0 +1,84 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Sget_select_bounds" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectBounds">H5Sget_select_bounds</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Sget_select_bounds</code>(<em>hid_t </em><code>space_id</code>,
+        <em>hsize_t *</em><code>start</code>,
+        <em>hsize_t *</em><code>end</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Gets the bounding box containing the current selection.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sget_select_bounds</code> retrieves the coordinates of 
+        the bounding box containing the current selection and places
+        them into user-supplied buffers.  
+        <p>
+        The <code>start</code> and <code>end</code> buffers must be large
+        enough to hold the dataspace rank number of coordinates.  
+        <p>
+        The bounding box exactly contains the selection.  
+        I.e., if a 2-dimensional element selection is currently
+        defined as containing the points (4,5), (6,8), and (10,7), 
+        then the bounding box will be (4, 5), (10, 8).  
+        <p>
+        The bounding box calculation includes the current offset of the
+        selection within the dataspace extent.
+        <p>
+        Calling this function on a <code>none</code> selection will 
+        return <code>FAIL</code>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Identifier of dataspace to query.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t *</em><code>start</code></td>
+          <td valign="top">OUT: Starting coordinates of the bounding box.</td></tr>
+        <tr>
+		  <td valign="top"><em>hsize_t *</em><code>end</code></td>
+          <td valign="top">OUT: Ending coordinates of the bounding box, 
+                i.e., the coordinates of the diagonally opposite corner.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>
+	<pre>
+SUBROUTINE  h5sget_select_bounds_f(space_id, start, end, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: space_id 
+                                   ! Dataspace identifier 
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: start
+                                   ! Starting coordinates of the bounding box 
+  INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: end
+                                   ! Ending coordinates of the bounding box,
+                                   ! i.e., the coordinates of the diagonally 
+                                   ! opposite corner 
+  INTEGER, INTENT(OUT) :: hdferr   ! Error code
+END SUBROUTINE h5sget_select_bounds_f
+	</pre>
+
+<!--<dt><strong>Non-C API(s):</strong>
+    <dd>
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    The <code>start</code> and <code>end</code> 
+			parameters have changed from type <em>hsize_t *</em> 
+			to <em>hssize_t *</em>.</td></tr>
+    </table></ul>
+</dl>
+

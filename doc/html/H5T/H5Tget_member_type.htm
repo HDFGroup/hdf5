@@ -1,0 +1,62 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_member_type" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetMemberType">H5Tget_member_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tget_member_type</code>(<em>hid_t </em><code>type_id</code>,
+        <em>unsigned</em> <code>field_idx</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the datatype of the specified member.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_member_type</code> returns the datatype of the specified member.  The caller
+        should invoke H5Tclose() to release resources associated with the type.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned</em> <code>field_idx</code></td>
+            <td valign="top">Field index (0-based) of the field type to retrieve.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the identifier of a copy of the datatype of the field
+        if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tget_member_type_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_member_type_f(type_id,  field_idx, datatype, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id   ! Datatype identifier 
+  INTEGER, INTENT(IN) :: field_idx        ! Field index (0-based) of the 
+                                          ! field type to retrieve
+  INTEGER(HID_T), INTENT(OUT) :: datatype ! Identifier of a copy of 
+                                          ! the datatype of the field 
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+END SUBROUTINE h5tget_member_type_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.4</td>
+          <td valign="top">
+		    <code>membno</code> parameter type changed to 
+			<em>unsigned</em>.</td></tr>
+    </table></ul>
+</dl>
+

@@ -1,0 +1,100 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_name" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetName">H5Fget_name</a>
+<dt><strong>Signature:</strong>
+    <dd><em>ssize_t</em> <code>H5Fget_name</code>(<em>hid_t</em> <code>obj_id</code>,
+                     <em>char *</em><code>name</code>,
+                     <em>size_t</em> <code>size</code>
+        )
+
+<dt><strong>Purpose:</strong>
+        <dd>Retrieves name of file to which object belongs.
+<dt><strong>Description:</strong>
+        <dd><code>H5Fget_name</code> retrieves the name of the file 
+	    to which the object <code>obj_id</code> belongs.
+	    The object can be a group, dataset, attribute, or 
+	    named datatype.
+            <p> 
+	    Up to <code>size</code> characters of the filename 
+	    are returned in <code>name</code>; 
+	    additional characters, if any, are not returned to 
+	    the user application. 
+            <p>
+	    If the length of the name, 
+	    which determines the required value of <code>size</code>, 
+	    is unknown, a preliminary <code>H5Fget_name</code> call 
+	    can be made by setting <code>name</code> to NULL. 
+	    The return value of this call will be the size of the filename;
+	    that value plus one (1) can then be assigned to <code>size</code> 
+	    for a second <code>H5Fget_name</code> call, 
+	    which will retrieve the actual name. 
+            (The value passed in with the parameter <code>size</code> must be 
+            one greater than size in bytes of the actual name in order to
+            accommodate the null terminator; if <code>size</code> is set to
+            the exact size of the name, the last byte passed back will 
+            contain the null terminator and the last character will be 
+            missing from the name passed back to the calling application.)
+            <p>
+            If an error occurs, the buffer pointed to by 
+	    <code>name</code> is unchanged and 
+	    the function returns a negative value.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>obj_id</code>
+            <dd>IN: Identifier of the object for which the 
+	        associated filename is sought.
+	        The object can be a group, dataset, attribute, or 
+	        named datatype.
+        <dt><em>char *</em><code>name</code>
+            <dd>OUT: Buffer to contain the returned filename.
+        <dt><em>size_t</em> <code>size</code>
+            <dd>IN: Size, in bytes, of the <code>name</code> buffer.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns the length of the filename if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5fget_name_f
+    <dd>
+	<pre>
+SUBROUTINE h5fget_name_f(obj_id, buf, size, hdferr)
+
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: obj_id     ! Object identifier 
+  CHARACTER(LEN=*), INTENT(INOUT) :: buf   ! Buffer to hold filename
+  INTEGER(SIZE_T), INTENT(OUT) :: size     ! Size of the filename
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code: 0 on success,
+                                           ! -1 if fail
+END SUBROUTINE h5fget_name_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td>
+		  <td valign="top" align="left">
+		    &nbsp;&nbsp;&nbsp;&nbsp;</td>
+		  <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.3</td>
+          <td valign="top">
+		    Function introduced in this release.</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top">
+		    Fortran subroutine introduced in this 
+			release.</td></tr>
+    </table></ul>
+</dl>
+
+

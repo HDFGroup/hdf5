@@ -1,0 +1,64 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tinsert" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Insert">H5Tinsert</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tinsert</code>(<em>hid_t </em><code>type_id</code>,
+        <em>const char *</em> <code>name</code>,
+        <em>size_t</em> <code>offset</code>,
+        <em>hid_t</em> <code>field_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Adds a new member to a compound datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tinsert</code> adds another member to the compound datatype
+        <code>type_id</code>.  The new member has a <code>name</code> which
+        must be unique within the compound datatype. 
+        The <code>offset</code> argument defines the start of the member 
+        in an instance of the compound datatype, and <code>field_id</code> 
+        is the datatype identifier of the new member.
+        <P>
+        Note: Members of a compound datatype do not have to be atomic datatypes; 
+        a compound datatype can have a member which is a compound datatype.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of compound datatype to modify.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Name of the field to insert.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>offset</code></td>
+            <td valign="top">Offset in memory structure of the field to insert.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>field_id</code></td>
+            <td valign="top">Datatype identifier of the field to insert.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tinsert_f
+    <dd>
+	<pre>
+SUBROUTINE h5tinsert_f(type_id,  name, offset, field_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the field to insert
+  INTEGER(SIZE_T), INTENT(IN) :: offset  ! Offset in memory structure 
+                                         ! of the field to insert
+  INTEGER(HID_T), INTENT(IN) :: field_id ! Datatype identifier of the 
+                                         ! new member
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tinsert_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

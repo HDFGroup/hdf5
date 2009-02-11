@@ -1,0 +1,57 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aget_name" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-GetName">H5Aget_name</a>
+<dt><strong>Signature:</strong>
+    <dd><em>ssize_t</em> <code>H5Aget_name</code>(<em>hid_t</em> <code>attr_id</code>,
+        <em>size_t</em> <code>buf_size</code>,
+        <em>char *</em><code>buf</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Gets an attribute name.
+<dt><strong>Description:</strong>
+    <dd><code>H5Aget_name</code> retrieves the name of an attribute 
+        specified by the identifier, <code>attr_id</code>.
+        Up to <code>buf_size</code> characters are stored in 
+        <code>buf</code> followed by a <code>\0</code> string
+        terminator.  If the name of the attribute is longer than 
+        <code>(buf_size -1)</code>, the string terminator is stored in the
+        last position of the buffer to properly terminate the string.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>attr_id</code></td>
+            <td valign="top">IN: Identifier of the attribute.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em>&nbsp;<code>buf_size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: The size of the buffer to store the name in.</td></tr>
+        <tr>
+		    <td valign="top"><em>char *</em><code>buf</code></td>
+            <td valign="top">OUT: Buffer to store name in.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the length of the attribute's name, which may be
+        longer than <code>buf_size</code>, if successful.
+        Otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5aget_name_f
+    <dd>
+	<pre>
+SUBROUTINE h5aget_name_f(attr_id, size, buf, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: attr_id  ! Attribute identifier 
+  INTEGER, INTENT(IN) :: size            ! Buffer size 
+  CHARACTER(LEN=*), INTENT(OUT) :: buf   ! Buffer to hold attribute name
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code: name length  
+                                         ! on success and -1 on failure
+END SUBROUTINE h5aget_name_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

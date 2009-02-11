@@ -1,0 +1,101 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_multi_type" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetMultiType">H5Pset_multi_type</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_multi_type</code> (
+                        <em>hid_t</em> <code>fapl_id</code>,
+                        <em>H5FD_mem_t</em> <code>type</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets type of data property for <code>MULTI</code> driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_multi_type</code> sets the type of data property in the 
+        file access property list <code>fapl_id</code>.
+	This enables a user application to specify the type of data the
+        application wishes to access so that the application 
+	can retrieve a file handle for low-level access to the particular member 
+	of a set of <code>MULTI</code> files in which that type of data is stored.  
+	The file handle is retrieved with a separate call 
+	to <a href="RM_H5F.html#File-GetVfdHandle"><code>H5Fget_vfd_handle</code></a>
+	(or, in special circumstances, to <code>H5FDget_vfd_handle</code>; 
+	see <cite>Virtual File Layer</cite> and <cite>List of VFL Functions</cite>
+	in <a href="TechNotes.html"><cite>HDF5 Technical Notes</cite></a>).
+	<p>
+	The type of data specified in <code>type</code> may be one of the following:
+        <table border=0>
+        <tr valign=top align=left><td>&nbsp;</td><td>
+            <code>H5FD_MEM_SUPER</code>
+            </td><td>
+            Super block data
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+            <code>H5FD_MEM_BTREE</code>&nbsp;&nbsp;&nbsp;&nbsp;
+            </td><td>
+            B-tree data
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;</td><td>
+            <code>H5FD_MEM_DRAW</code>
+            </td><td>
+            Dataset raw data 
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;</td><td>
+            <code>H5FD_MEM_GHEAP</code>
+            </td><td>
+            Global heap data
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;</td><td>
+            <code>H5FD_MEM_LHEAP</code>
+            </td><td>
+            Local heap data
+        </td></tr>
+        <tr valign=top align=left><td>&nbsp;</td><td>
+            <code>H5FD_MEM_OHDR</code>
+            </td><td>
+            Object header data
+        </td></tr>
+	</table>
+	<p>
+	Use of this function is appropriate only for an HDF5 file written 
+	as a set of files with the <code>MULTI</code> file driver.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+            <td valign="top"><em>H5FD_mem_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Type of data.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

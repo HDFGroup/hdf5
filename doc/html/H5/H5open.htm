@@ -1,0 +1,52 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5open" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-Open">H5open</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5open</code>(<em>void</em>)
+<dt><strong>Purpose:</strong>
+    <dd>Initializes the HDF5 library.
+<dt><strong>Description:</strong>
+    <dd><code>H5open</code> initialize the library.  
+        <p>
+        When the HDF5 Library is employed in a C application,
+        this function is normally called automatically, but if you 
+        find that an HDF5 library function is failing inexplicably, 
+        try calling this function first.
+        If you wish to elimnate this possibility, it is safe to 
+        routinely call <code>H5open</code> before an application 
+        starts working with the library as there are no damaging 
+        side-effects in calling it more than once.
+        <p>
+        When the HDF5 Library is employed in a Fortran90 application,
+        <code>h5open_f</code> initializes global variables 
+        (e.g. predefined types) and performs other tasks required to
+        initialize the library.
+        <code>h5open_f</code> and <code>h5close_f</code> are therefore
+        required calls in Fortran90 applications.
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt>None.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5open_f
+    <dd>
+	<pre>
+SUBROUTINE h5open_f(hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+END SUBROUTINE h5open_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

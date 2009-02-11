@@ -1,0 +1,84 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_version" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetVersion">H5Pget_version</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pget_version</code>(<em>hid_t</em> <code>plist</code>,
+            <em>unsigned *</em> <code>super</code>,
+            <em>unsigned *</em> <code>freelist</code>,
+            <em>unsigned *</em> <code>stab</code>,
+            <em>unsigned *</em> <code>shhdr</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves the version information of various objects for 
+        a file creation property list.  
+  <dt><strong>Description:</strong>
+        <dd><code>H5Pget_version</code> retrieves the version information of various objects
+            for a file creation property list.  Any pointer parameters which are
+            passed as NULL are not queried.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of the file creation property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned *</em> <code>super</code></td>
+            <td valign="top">OUT: Pointer to location to return super block version number.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;*</em>&nbsp;<code>freelist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to location to return global freelist version number.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned *</em> <code>stab</code></td>
+            <td valign="top">OUT: Pointer to location to return symbol table version number.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned *</em> <code>shhdr</code></td>
+            <td valign="top">OUT: Pointer to location to return shared object header version number.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_version_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_version_f(prp_id, boot, freelist, &amp; 
+                            stab, shhdr, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id         ! Property list identifier
+  INTEGER, DIMENSION(:), INTENT(OUT) :: boot   ! Array to put boot block 
+                                               ! version number
+  INTEGER, DIMENSION(:), INTENT(OUT) :: freelist  
+                                               ! Array to put global
+                                               ! freelist version number
+  INTEGER, DIMENSION(:), INTENT(OUT) :: stab   ! Array to put symbol table
+                                               ! version number
+  INTEGER, DIMENSION(:), INTENT(OUT) :: shhdr  ! Array to put shared object 
+                                               ! header version number
+  INTEGER, INTENT(OUT) :: hdferr               ! Error code
+                                               ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_version_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.4</td>
+          <td valign="top">
+		    <code>boot</code>, <code>freelist</code>, 
+			<code>stab</code>, <code>shhdr</code> 
+			parameter types changed to 
+			<em>unsigned</em>.</td></tr>
+    </table></ul>
+</dl>
+

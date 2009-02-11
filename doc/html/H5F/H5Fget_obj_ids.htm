@@ -1,0 +1,100 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_obj_ids" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetObjIDs">H5Fget_obj_ids</a>
+<dt><strong>Signature:</strong>
+    <dd><em>ssize_t </em><code>H5Fget_obj_ids</code>(
+            <em>hid_t</em> <code>file_id</code>,
+            <em>unsigned int</em> <code>types</code>,
+            <em>size_t</em> <code>max_objs</code>,
+            <em>hid_t *</em><code>obj_id_list</code>
+            )
+<dt><strong>Purpose:</strong>
+    <dd>Returns a list of open object identifiers.
+<dt><strong>Description:</strong>
+    <dd>Given the file identifier <code>file_id</code> and 
+        the type of objects to be identified, <code>types</code>,
+        <code>H5Fget_obj_ids</code> returns the list of identifiers 
+        for all open HDF5 objects fitting the specified criteria. 
+        <p>
+        To retrieve identifiers for open objects in all HDF5 application 
+        files that are currently open, pass the value 
+        <code>H5F_OBJ_ALL</code> in <code>file_id</code>.
+        <p>
+        The types of object identifiers to be retrieved are specified 
+	in <code>types</code> using the codes listed for the same 
+	parameter in <a href="#File-GetObjCount"><code>H5Fget_obj_count</code></a>
+        <p>
+        To retrieve identifiers for all open objects, pass a negative value
+        for the <code>max_objs</code>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>file_id</code></td>
+            <td valign="top">IN: Identifier of a currently-open HDF5 file or 
+	        <code>H5F_OBJ_ALL</code> for all currently-open HDF5 files.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned int</em> <code>types</code></td>
+            <td valign="top">IN: Type of object for which identifiers are to be returned.</td></tr> 
+        <tr>
+            <td valign="top"><em>size_t</em> <code>max_objs</code></td>
+            <td valign="top">IN: Maximum number of object identifiers to place into 
+			<code>obj_id_list</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t&nbsp;*</em><code>obj_id_list&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Pointer to the returned list of open object identifiers.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns number of objects placed into <code>obj_id_list</code> if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5fget_obj_ids_f
+    <dd>
+	<pre>
+SUBROUTINE h5fget_obj_ids_f(file_id, obj_type, max_objs, obj_ids, hdferr)
+
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)   :: file_id  ! File identifier
+  INTEGER,        INTENT(IN)   :: obj_type ! Object types, possible values are:
+                                           !     H5F_OBJ_FILE_F
+                                           !     H5F_OBJ_GROUP_F
+                                           !     H5F_OBJ_DATASET_F
+                                           !     H5F_OBJ_DATATYPE_F
+                                           !     H5F_OBJ_ALL_F
+  INTEGER, INTENT(IN)          :: max_objs ! Maximum number of object 
+                                           ! identifiers to retrieve
+  INTEGER(HID_T), DIMENSION(*), INTENT(OUT) :: obj_ids
+                                           ! Array of requested object 
+                                           ! identifiers
+  INTEGER, INTENT(OUT)        :: hdferr    ! Error code 
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5fget_obj_ids_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+              <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+              <strong>Change</strong></td></tr>
+        <tr>
+          <td valign="top">1.6.0</td>
+          <td valign="top">
+              C function introduced in this release.</td></tr>
+        <tr>
+          <td valign="top">1.6.8</td>
+          <td valign="top">
+              C function return type changed to <code><em>ssize_t</em></code>
+              <br>&nbsp;&nbsp;&nbsp;&nbsp;
+              and <code>max_objs</code> parameter datatype changed to 
+              <code><em>size_t</em></code>.</td></tr>
+    </table></ul>
+</dl>
+

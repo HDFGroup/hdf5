@@ -1,0 +1,43 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Sget_select_hyper_nblocks" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectHyperNBlocks">H5Sget_select_hyper_nblocks</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hssize_t </em><code>H5Sget_select_hyper_nblocks</code>(<em>hid_t </em><code>space_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Get number of hyperslab blocks.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sget_select_hyper_nblocks</code> returns the 
+        number of hyperslab blocks in the current dataspace selection.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Identifier of dataspace to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the number of hyperslab blocks in 
+        the current dataspace selection if successful.
+        Otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5sget_select_hyper_nblocks_f
+    <dd>
+	<pre>
+SUBROUTINE h5sget_select_hyper_nblocks_f(space_id, num_blocks, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier
+  INTEGER, INTENT(OUT) :: num_blocks     ! Number of hyperslab blocks in 
+                                         ! the current hyperslab selection
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5sget_select_hyper_nblocks_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

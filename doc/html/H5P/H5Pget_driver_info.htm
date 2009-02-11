@@ -1,0 +1,50 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_driver_info" -->
+
+<!--      ********** MOVED TO TechNotes/VFLfunc.html **********
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetDriverInfo">H5Pget_driver_info</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>void *</em><code>H5Pget_driver_info</code>(
+                     <em>hid_t</em> <code>plist_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns a pointer to file driver information.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_driver_info</code> returns a pointer to 
+        file driver-specific information for the low-level driver 
+        associated with the file access or data transfer property list
+        <code>plist_id</code>.
+
+        <p>
+        <font color=red><b><i>Need more on "a pointer" or on what 
+        is "pointed to."  Might this be the <code>driver_info</code> 
+        struct definition in <code>H5Pset_driver</code>?</i></b></font>
+        
+        <p>
+        If  no driver-specific properties have been registered, 
+        <code>H5Pget_driver_info</code> returns <code>NULL</code>. 
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist_id</code>
+            <dd>IN: File access or data transfer property list identifier.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a pointer to the struct containing 
+        low-level driver information. 
+        Otherwise returns <code>NULL</code>.
+        <p>
+        <code>NULL</code> is also returned if no driver-specific properties
+        have been registered.  
+        No error is pushed on the stack in this case.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx_f" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+</dl>
+
+-->
+

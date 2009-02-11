@@ -1,0 +1,55 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_sign" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetSign">H5Tget_sign</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5T_sign_t </em><code>H5Tget_sign</code>(<em>hid_t </em><code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the sign type for an integer type.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_sign</code> retrieves the sign type for an integer type.
+        Valid types are:
+        <ul> <dl>
+            <dt>H5T_SGN_NONE (<code>0</code>)
+               <dd>Unsigned integer type.
+            <dt>H5T_SGN_2 (<code>1</code>)
+               <dd>Two's complement signed integer type.
+        </dl> </ul>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a valid sign type if successful;
+        otherwise <code>H5T_SGN_ERROR</code> (-1).
+<dt><strong>Fortran90 Interface:</strong> h5tget_sign_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_sign_f(type_id, sign, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: sign           ! Sign type for an integer type
+                                         ! Possible values are:
+                                         !    Unsigned integer type 
+                                         !        H5T_SGN_NONE_F = 0
+                                         !    Two's complement signed 
+                                         !        integer type
+                                         !        H5T_SGN_2_F = 1
+                                         !    or error value
+                                         !         H5T_SGN_ERROR_F = -1 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tget_sign_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,43 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pclose" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Close">H5Pclose</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t </em><code>H5Pclose</code>(<em>hid_t</em> <code>plist</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Terminates access to a property list.
+  <dt><strong>Description:</strong>
+        <dd><code>H5Pclose</code> terminates access to a property list.  
+            All property lists should be closed when the application is 
+            finished accessing them. 
+            This frees resources used by the property list.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the property list to terminate access to.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pclose_f
+    <dd>
+	<pre>
+SUBROUTINE h5pclose_f(prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pclose_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

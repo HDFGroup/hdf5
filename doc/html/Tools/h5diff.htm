@@ -1,0 +1,136 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5diff" -->
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong> <a name="Tools-Diff">h5diff</a>  &nbsp;&nbsp;&nbsp;
+<dt><strong>Syntax:</strong>
+    <dd><code>h5diff </code> <em>file1</em> <em>file2</em> 
+                    [<em>OPTIONS</em>]
+		    [<em>object1</em> [<em>object2</em> ] ]       
+<dt><strong>Purpose:</strong>
+    <dd>Compares two HDF5 files and reports the differences.
+<dt><strong>Description:</strong>
+    <dd><code>h5diff</code> is a command line tool that compares 
+        two HDF5 files, <em>file1</em> and <em>file2</em>, and 
+	reports the differences between them. 
+	<p>
+	Optionally, <code>h5diff</code> will compare two objects 
+	within these files.
+	If only one object, <em>object1</em>, is specified, 
+	<code>h5diff</code> will compare 
+	<em>object1</em> in <em>file1</em>
+	with <em>object1</em> in <em>file2</em>.
+	In two objects, <em>object1</em> and <em>object2</em>, 
+	are specified, <code>h5diff</code> will compare 
+	<em>object1</em> in <em>file1</em>
+	with <em>object2</em> in <em>file2</em>.
+	These objects must be HDF5 datasets.
+    <dd>
+	<p>
+	<em>object1</em> and <em>object2</em> must be expressed
+	as absolute paths from the respective file's root group.
+    <dd>
+	<p>
+ <code>h5diff</code>  has the following four modes of output:<br>
+    Normal mode: print the number of differences found and where they occurred<br>
+    Report mode (-r): print the above plus the differences<br>
+    Verbose mode (-v): print the above plus a list of objects and warnings<br>
+    Quiet mode (-q): do not print output (h5diff always returns an exit code of
+    1 when differences are found).
+    <dd>
+	<p>
+	Additional information, with several sample cases, 
+	can be found in the document 
+	<a href="http://www.hdfgroup.org/HDF5/h5diff/h5diff_design.html">
+	<cite>H5diff Examples</cite></a>.
+
+
+        <p>
+        <b><code>h5diff</code> and NaNs:</b>
+        <br>
+        <code>h5diff</code> detects when a value in a dataset is a NaN 
+        (a "not a number" value), but does not differentiate among various 
+        types of NaNs.
+        Thus, when one NaN is compared with another NaN, <code>h5diff</code> 
+        treats them as equal; when a NaN is compared with a valid number,
+        <code>h5diff</code> treats them as not equal.
+
+
+<dt><strong>Options and Parameters:</strong>
+    <dl>
+        <dt><em>file1</em>
+        <dt><em>file2</em>
+            <dd>The HDF5 files to be compared.
+        <dt><code>-h</code>
+            <dd>help message.
+        <dt><code>-r</code>
+            <dd>Report mode. Print the differences.<dt><code>-v</code>
+            <dd>Verbose mode. Print the differences, list of objects, warnings.<dt><code>-q</code>
+            <dd>Quiet mode. Do not print output.
+        <dt><code>-n</code> <em>count</em>
+            <dd>Print difference up to <em>count</em> differences, 
+	        then stop.
+                <em>count</em> must be a positive integer.
+        <dt><code>-d</code> <em>delta</em>
+            <dd>Print only differences that are greater than the 
+	        limit <em>delta</em>.
+                <em>delta</em> must be a positive number.
+                The comparison criterion is whether the 
+		absolute value of the difference of 
+		two corresponding values is greater than 
+		<em>delta</em> 
+		<br>(e.g., <code> |a&ndash;b|&nbsp;&gt;&nbsp;<em>delta</em></code>,
+		where <code>a</code> is a value in <em>file1</em> and
+		<code>b</code> is a value in <em>file2</em>).
+        <dt><code>-p</code> <em>relative</em>
+            <dd>Print only differences that are greater than a 
+	        relative error.
+                <em>relative</em> must be a positive number.
+                The comparison criterion is whether the 
+                absolute value of the difference <code>1</code>
+		and the ratio of two corresponding values
+		is greater than <em>relative</em>
+		(e.g., <code>|1&ndash;(b/a)|&nbsp;&gt;&nbsp;<em>relative</em></code>
+		where <code>a</code> is a value in <em>file1</em> and
+		<code>b</code> is a value in <em>file2</em>).
+        <dt><em>object1</em>
+        <dt><em>object2</em>
+            <dd>Specific object(s) within the files to be compared.
+    </dl>
+<!-- NEW PAGE -->
+<dt><strong>Examples:</strong>
+    <dd>The following <code>h5diff</code> call compares
+        the object <code>/a/b</code> in <code>file1</code> 
+        with the object <code>/a/c</code> in <code>file2</code>:<br>
+        <code>&nbsp;&nbsp;&nbsp;&nbsp;h5diff file1 file2 /a/b /a/c</code>
+    <dd>This <code>h5diff</code> call compares
+        the object <code>/a/b</code> in <code>file1</code> 
+        with the same object in <code>file2</code>:<br>
+        <code>&nbsp;&nbsp;&nbsp;&nbsp;h5diff file1 file2 /a/b</code>
+    <dd>And this <code>h5diff</code> call compares
+        all objects in both files:<br>
+        <code>&nbsp;&nbsp;&nbsp;&nbsp;h5diff file1 file2</code>
+      &nbsp;<br>
+      file1 and file2 can be the same file. Use:<br>
+        <code>&nbsp;&nbsp;&nbsp;&nbsp;h5diff </code><code> file1 file1 /g1/dset1 /g1/dset2</code>&nbsp;<br>
+      to compare <code>/g1/dset1</code>&nbsp; and <code>/g1/dset2</code> in the same file<!--
+<dt><strong>Current Status:</strong>
+    <dd>
+<dt><strong>See Also:</strong>
+    <dd>
+-->
+<dt><strong>History:</strong>
+    	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>Command Line Tool</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Tool introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+
+

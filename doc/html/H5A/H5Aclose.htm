@@ -1,0 +1,43 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aclose" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Close">H5Aclose</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Aclose</code>(<em>hid_t</em> <code>attr_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Closes the specified attribute.
+<dt><strong>Description:</strong>
+    <dd><code>H5Aclose</code> terminates access to the attribute 
+        specified by <code>attr_id</code> by releasing the identifier.
+        <p>
+        Further use of a released attribute identifier is illegal; 
+        a function using such an identifier will fail.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+	        <tr>
+			<td valign="top"><em>hid_t</em> <code>attr_id</code></td>
+            <td>IN: Attribute to release access to.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5aclose_f
+    <dd>
+	<pre>
+SUBROUTINE h5aclose_f(attr_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(OUT) :: attr_id  ! Attribute identifier 
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code:
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5aclose_f	
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

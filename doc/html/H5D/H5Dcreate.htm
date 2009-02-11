@@ -1,0 +1,155 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dcreate" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-Create">H5Dcreate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Dcreate</code>(<em>hid_t </em><code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>hid_t</em> <code>type_id</code>,
+        <em>hid_t</em> <code>space_id</code>,
+        <em>hid_t</em> <code>create_plist_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Creates a dataset at the specified location.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dcreate</code> creates a data set with a name, 
+        <code>name</code>, in the file or in the group specified by 
+        the identifier <code>loc_id</code>.
+        The dataset has the datatype and dataspace identified by
+        <code>type_id</code> and <code>space_id</code>, respectively.
+        The specified datatype and dataspace are the datatype and
+        dataspace of the dataset as it will exist in the file,
+        which may be different than in application memory.
+        Dataset creation properties are specified by the argument
+        <code>create_plist_id</code>.
+        <p>
+        Dataset names within a group are unique:
+        <code>H5Dcreate</code> will return an error if a dataset with
+        the name specified in <code>name</code> already exists at the
+        location specified in <code>loc_id</code>.
+        <p>
+        As is the case for any object in a group, 
+        the length of a dataset name is not limited.  
+        <p>
+        <code>create_plist_id</code> is a <code>H5P_DATASET_CREATE</code>
+        property list created with <code>H5Pcreate</code> and
+        initialized with the various functions described above.
+	<p>
+	<code>H5Dcreate</code> returns an error if the dataset's datatype 
+	includes a variable-length (VL) datatype and the fill value 
+	is undefined, i.e., set to <code>NULL</code> in the 
+	dataset creation property list. 
+	Such a VL datatype may be directly included,  
+	indirectly included as part of a compound or array datatype, or 
+	indirectly included as part of a nested compound or array datatype.
+	<p>
+        <code>H5Dcreate</code> returns a dataset identifier for success
+        or a negative value for failure. 
+	The dataset identifier should eventually be closed by 
+        calling <code>H5Dclose</code> to release resources it uses.
+	<p>
+	<strong>Fill values and space allocation:</strong><br>
+	The HDF5 library provides flexible means 
+	of specifying a fill value, 
+	of specifying when space will be allocated for a dataset, and
+	of specifying when fill values will be written to a dataset.
+	For further information on these topics, see the document 
+        <a href="http://hdfgroup.org/HDF5/doc_resource/H5Fill_Values.html">
+	<cite>Fill Value and Dataset Storage Allocation Issues in HDF5</cite></a> 
+	and the descriptions of the following HDF5 functions in this 
+	<cite>HDF5 Reference Manual</cite>:
+	<table width=80% border="0">
+	<tr valign="top" align="left"><td width=10%>&nbsp;
+	  </td><td width=45%>
+            <a href="#Dataset-Fill"><code>H5Dfill</code></a><br>
+            <a href="RM_H5P.html#Property-SetFillValue"><code>H5Pset_fill_value</code></a><br>
+            <a href="RM_H5P.html#Property-GetFillValue"><code>H5Pget_fill_value</code></a><br>
+            <a href="RM_H5P.html#Property-FillValueDefined"><code>H5Pfill_value_defined</code></a>
+	  </td><td width=45%>
+            <a href="RM_H5P.html#Property-SetFillTime"><code>H5Pset_fill_time</code></a><br>
+            <a href="RM_H5P.html#Property-GetFillTime"><code>H5Pget_fill_time</code></a><br>
+            <a href="RM_H5P.html#Property-SetAllocTime"><code>H5Pset_alloc_time</code></a><br>
+            <a href="RM_H5P.html#Property-GetAllocTime"><code>H5Pget_alloc_time</code></a>
+	  </td></tr>
+	</table>
+	This information is also included in the 
+	&ldquo;HDF5 Datasets&rdquo; chapter of 
+	the new <cite>HDF5 User's Guide</cite>, 
+	which is being prepared for release.
+<dt><strong>Note:</strong>
+    <dd><code>H5Dcreate</code> can fail if there has been an error
+        in setting up an element of the dataset creation property list.
+        In such cases, each item in the property list must be examined
+        to ensure that the setup satisfies to all required conditions.
+        This problem is most likely to occur with the use of filters.
+        <p>
+<!-- NEW PAGE -->
+        For example, <code>H5Dcreate</code> will fail without a meaningful
+        explanation if 
+        <ul>
+          <li>SZIP compression is being used on the dataset and 
+          <li>the SZIP parameter <code>pixels_per_block</code> 
+              is set to an inappropriate value.
+        </ul>
+        <p>
+        In such a case, one would refer to the description of 
+        <a href="RM_H5P.html#Property-SetSzip"><code>H5Pset_szip</code></a>,
+        looking for any conditions or requirements that might affect the
+        local computing environment.
+        <!--
+        <p>
+        Other known similar problems can occur with . . .
+        --> 
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: Identifier of the file or group 
+                within which to create the dataset.</td></tr>
+        <tr>
+		    <td valign="top"><em>const char *</em> <code>name</code></td>
+            <td valign="top">IN: The name of the dataset to create.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">IN: Identifier of the datatype to use 
+                when creating the dataset.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+            <td valign="top">IN: Identifier of the dataspace to use 
+                when creating the dataset.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>create_plist_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the set creation property list.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a dataset identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5dcreate_f
+    <dd>
+	<pre>
+SUBROUTINE h5dcreate_f(loc_id, name, type_id, space_id, dset_id, & 
+                       hdferr, creation_prp) 
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the dataset 
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier
+  INTEGER(HID_T), INTENT(OUT) :: dset_id ! Dataset identifier
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+  INTEGER(HID_T), OPTIONAL, INTENT(IN) :: creation_prp
+                                         ! Dataset creation propertly 
+                                         ! list identifier , default
+                                         ! value is H5P_DEFAULT_F (6) 
+END SUBROUTINE h5dcreate_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

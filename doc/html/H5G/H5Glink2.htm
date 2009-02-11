@@ -1,0 +1,83 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Glink2" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-Link2">H5Glink2</a> 
+  <dt><strong>Signature:</strong>
+    
+  <dd><em>herr_t</em> <code>H5Glink2</code>(
+    <em>hid_t</em> <code>curr_loc_id</code>, <em>const char *</em><code>current_name</code>,
+    <em>H5G_link_t</em> <code>link_type</code>, 
+	<em>hid_t</em> <code>new_loc_id</code>, <em>const char *</em><code>new_name</code> ) 
+  <dt><strong>Purpose:</strong>
+    <dd>Creates a link of the specified type from <code>new_name</code> 
+        to <code>current_name</code>.
+  <dt><strong>Description:</strong>
+    
+  <dd><code>H5Glink2</code> creates a new name for an object that has some current 
+    name, possibly one of many names it currently has. 
+    <p> 
+	  If <code>link_type</code> is <code>H5G_LINK_HARD</code>, then <code>current_name</code> 
+      must specify the name of an existing object. 
+	  In this case, <code>current_name</code> and <code>new_name</code> are interpreted 
+	  relative to <code>curr_loc_id</code> and <code>new_loc_id</code>, respectively, 
+      which are either file or group identifiers.
+    <p>
+        If <code>link_type</code> is <code>H5G_LINK_SOFT</code>, then 
+        <code>current_name</code> can be anything and is interpreted at 
+        lookup time relative to the group which contains the final 
+        component of <code>new_name</code>.  For instance, if
+        <code>current_name</code> is <code>./foo</code>,  
+        <code>new_name</code> is <code>./x/y/bar</code>, and a request
+        is made for <code>./x/y/bar</code>, then the actual object looked 
+        up is <code>./x/y/./foo</code>.                            
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+	  <tr>
+	    <td valign="top"><em>hid_t</em> <code>curr_loc_id</code></td>
+        <td valign="top">IN: The file or group identifier for the original object.</td></tr>
+	  <tr>
+        <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>current_name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Name of the existing object if link is a hard link.
+            Can be anything for the soft link.</td></tr>
+	  <tr>
+        <td valign="top"><em>H5G_link_t</em> <code>link_type</code></td>
+        <td valign="top">IN: Link type.
+            Possible values are <code>H5G_LINK_HARD</code> and 
+            <code>H5G_LINK_SOFT</code>.</td></tr>
+	  <tr>
+        <td valign="top"><em>hid_t</em> <code>new_loc_id</code></td>
+        <td valign="top">IN: The file or group identifier for the new link.</td></tr> 
+        <td valign="top"><em>const char *</em> <code>new_name</code></td>
+        <td valign="top">IN: New name for the object.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5glink2_f
+    <dd>
+	<pre>
+SUBROUTINE h5glink2_f(cur_loc_id, cur_name, link_type, new_loc_id, new_name, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: cur_loc_id ! File or group location identifier
+  CHARACTER(LEN=*), INTENT(IN) :: cur_name ! Name of the existing object
+                                           ! is relative to cur_loc_id 
+                                           ! Can be anything for the soft link
+  INTEGER, INTENT(IN) :: link_type         ! Link type, possible values are:
+                                           !     H5G_LINK_HARD_F
+                                           !     H5G_LINK_SOFT_F
+  INTEGER(HID_T), INTENT(IN) :: new_loc_id ! New location identifier
+  CHARACTER(LEN=*), INTENT(IN) :: new_name ! New object name 
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+
+END SUBROUTINE h5glink2_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

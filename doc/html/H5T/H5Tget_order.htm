@@ -1,0 +1,56 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_order" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetOrder">H5Tget_order</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5T_order_t </em><code>H5Tget_order</code>(<em>hid_t </em><code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the byte order of an atomic datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_order</code> returns the byte order of an 
+        atomic datatype.
+        <p>
+        Possible return values are:
+        <ul><dl>
+            <dt><code>H5T_ORDER_LE</code> (<code>0</code>)
+                <dd>Little endian byte ordering (default).
+            <dt><code>H5T_ORDER_BE</code> (<code>1</code>)
+                <dd>Big endian byte ordering.
+            <dt><code>H5T_ORDER_VAX</code> (<code>2</code>)
+                <dd>VAX mixed byte ordering (not currently supported).
+        </dl></ul>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a byte order constant if successful;
+        otherwise <code>H5T_ORDER_ERROR</code> (-1).
+<dt><strong>Fortran90 Interface:</strong> h5tget_order_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_order_f(type_id, order, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: order         ! Datatype byte order 
+                                        ! Possible values are:
+                                        !    H5T_ORDER_LE_F 
+                                        !    H5T_ORDER_BE_F 
+                                        !    H5T_ORDER_VAX_F  
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5tget_order_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

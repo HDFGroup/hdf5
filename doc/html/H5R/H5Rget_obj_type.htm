@@ -1,0 +1,147 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Rget_obj_type" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Reference-GetObjType">H5Rget_obj_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5G_obj_t</em> <code>H5Rget_obj_type</code>(
+    <em>hid_t</em> <code>loc_id</code>,
+    <em>H5R_type_t</em> <code>ref_type</code>,
+    <em>void *</em><code>ref</code>
+    )
+<p>
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the type of object that an object reference points to.
+<p>
+<dt><strong>Description:</strong>
+    <dd>Given an object reference, <code>ref</code>, 
+        <code>H5Rget_obj_type</code> 
+        returns the type of the referenced object.
+        <p>
+        A <i>reference type</i> is the type of reference, either 
+        an object reference or a dataset region reference.
+        An <i>object reference</i> points to an HDF5 object while
+        a <i>dataset region reference</i> points to a defined region within
+        a dataset.
+        <p>
+        The <i>referenced object</i> is the object the reference points to.
+        The <i>referenced object type</i>, 
+        or the type of the referenced object,
+        is the type of the object that the reference points to.
+        <p>
+        The location identifier, <code>loc_id</code>, is the identifier 
+        for either the dataset containing the object reference or 
+        the group containing that dataset.  
+        <p>
+        Valid reference types, to pass in as <code>ref_type</code>, 
+        include the following:
+        <table border="0">
+            <tr align=left valign=top><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+                <code>H5R_OBJECT</code></td><td>
+                Object reference
+            </td></tr>
+            <tr align=left valign=top><td>&nbsp;</td><td>
+                <code>H5R_DATASET_REGION&nbsp;&nbsp;</code></td><td>
+                Dataset region reference
+            </td></tr>
+        </table>
+        <p>
+        If the application does not already know the object reference type,
+        that can be determined with three preliminary calls:
+        <ul>
+            <li>Call <code>H5Dget_type</code> on the dataset 
+                containing the reference to get a datatype identifier 
+                for the dataset&rsquo;s datatype.
+            <li>Using that datatype identifier, 
+                <code>H5Tget_class</code> returns a datatype class.
+            <li>If the datatype class is <code>H5T_REFERENCE</code>,  
+                <code>H5Tequal</code> can then be used to determine whether 
+                the reference&rsquo;s datatype is 
+                <code>H5T_STD_REF_OBJ</code> or 
+                <code>H5T_STD_REF_DSETREG</code>:
+            <ul>
+                <li>If the datatype is <code>H5T_STD_REF_OBJ</code>, 
+                    the reference object type is <code>H5R_OBJECT</code>. 
+                <li>If the datatype is <code>H5T_STD_REF_DSETREG</code>,
+                  the reference object type is 
+                    <code>H5R_DATASET_REGION</code>.
+            </ul>
+        </ul>
+        <p>
+        When the function completes successfully, it returns one of 
+        the following valid object type values
+        (defined in <code>H5Gpublic.h</code>):
+        <table border="0">
+            <tr align=left valign=top><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+                <code>H5G_LINK</code></td><td>
+                Object is a symbolic link.
+            </td></tr>
+            <tr align=left valign=top><td>&nbsp;</td><td>
+                <code>H5G_GROUP</code></td><td>
+                Object is a group.
+            </td></tr>
+            <tr align=left valign=top><td>&nbsp;</td><td>
+                <code>H5G_DATASET&nbsp;&nbsp;</code></td><td>
+                Object is a dataset.
+            </td></tr>
+            <tr align=left valign=top><td>&nbsp;</td><td>
+                <code>H5G_TYPE</code></td><td>
+                Object is a named datatype.
+            </td></tr>
+        </table>
+<p>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: The dataset containing the reference object 
+                or the group containing that dataset.</td></tr>
+        <tr>
+            <td valign="top"><em>H5R_type_t</em>&nbsp;<code>ref_type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Type of reference to query.</td></tr>
+        <tr>
+            <td valign="top"><em>void *</em><code>ref</code></td>
+            <td valign="top">IN: Reference to query.</td></tr>
+    </table></ul>
+<p>
+<!-- NEW PAGE -->
+<dt><strong>Returns:</strong>
+    <dd>Returns a valid object type if successful;
+        otherwise returns <code>H5G_UNKNOWN</code>.
+<p>
+<dt><strong>Fortran90 Interface:</strong> h5rget_object_type_f
+    <dd>
+        <pre>
+SUBROUTINE h5rget_object_type_f(dset_id, ref, obj_type, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: dset_id   ! Dataset identifier 
+  TYPE(hobj_ref_t_f), INTENT(IN) :: ref   ! Object reference 
+  INTEGER, INTENT(OUT) :: obj_type        ! Object type  
+                                          !     H5G_UNKNOWN_F (-1)
+                                          !     H5G_LINK_F      0
+                                          !     H5G_GROUP_F     1
+                                          !     H5G_DATASET_F   2
+                                          !     H5G_TYPE_F      3
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code  
+                                          ! 0 on success and -1 on failure
+
+END SUBROUTINE h5rget_object_type_f
+        </pre>
+
+<p>
+<dt><strong>History:</strong>
+    <dd><table width="90%">
+        <tr>
+            <td valign="top" align="left" width="10%">
+                <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td valign="top" align="left">
+                <strong>C</strong></td></tr>
+        <tr>
+            <td valign="top">1.6.0</td>
+            <td valign="top">
+                Function introduced in this release.</td></tr>
+                </td></tr>
+    </table>
+</dl>
+
+

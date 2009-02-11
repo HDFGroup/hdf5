@@ -1,0 +1,70 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_btree_ratios" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetBTreeRatios">H5Pset_btree_ratios</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_btree_ratios</code>(<em>hid_t</em> <code>plist</code>,
+        <em>double</em> <code>left</code>,
+        <em>double</em> <code>middle</code>,
+        <em>double</em> <code>right</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets B-tree split ratios for a dataset transfer property list.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_btree_ratios</code> sets the B-tree split ratios 
+        for a dataset transfer property list. The split ratios determine 
+        what percent of children go in the first node when a node splits.  
+        <p>
+        The ratio <code>left</code> is used when the splitting node is 
+        the left-most node at its level in the tree; 
+        the ratio <code>right</code> is used when the splitting node is 
+        the right-most node at its level; 
+        and the ratio <code>middle</code> is used for all other cases.  
+        <p>
+        A node which is the only node at its level in the tree uses 
+        the ratio <code>right</code> when it splits.  
+        <p>
+        All ratios are real numbers between 0 and 1, inclusive. 
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: The dataset transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>double</em> <code>left</code></td>
+            <td valign="top">IN: The B-tree split ratio for left-most nodes.</td></tr>
+        <tr>
+		    <td valign="top"><em>double</em> <code>right</code></td>
+            <td valign="top">IN: The B-tree split ratio for right-most nodes and lone nodes.</td></tr>
+        <tr>
+		    <td valign="top"><em>double</em>&nbsp;<code>middle&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: The B-tree split ratio for all other nodes.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_btree_ratios_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_btree_ratios_f(prp_id, left, middle, right, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id   
+                                  ! Property list identifier
+  REAL, INTENT(IN) :: left        ! The B-tree split ratio for left-most nodes
+  REAL, INTENT(IN) :: middle      ! The B-tree split ratio for all other nodes
+  REAL, INTENT(IN) :: right       ! The B-tree split ratio for right-most
+                                  ! nodes and lone nodes.
+  INTEGER, INTENT(OUT) :: hdferr  ! Error code
+                                  ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_btree_ratios_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

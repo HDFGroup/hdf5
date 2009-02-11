@@ -1,0 +1,109 @@
+
+<!-- HEADER RIGHT "H5Pset_fapl_stream" -->
+<!--
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplStream">H5Pset_fapl_stream</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_stream</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>H5FD_stream_fapl_t *</em><code>fapl</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets up the use of the streaming I/O driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_stream</code> sets up the use of the 
+        streaming I/O driver.
+        <p>
+        <code>fapl_id</code> is the identifier for the 
+        file access property list currently in use.
+        <p>
+        <code>fapl</code> is the file access property list.
+        <p>
+        The <code>H5FD_stream_fapl_t</code> struct contains the following 
+        elements:
+        <dir>
+            <table border=0>
+              <tr align=left>
+                <td><em>size_t</em></td>
+                <td><code>increment</code></td></tr>
+              <tr align=left>
+                <td><em><font size=-1>H5FD_STREAM_SOCKET_TYPE</font></em></td>
+                <td><code>socket</code></td></tr>
+              <tr align=left>
+                <td><em>hbool_t</em></td>
+                <td><code>do_socket_io</code></td></tr>
+              <tr align=left>
+                <td><em>unsigned int</em></td>
+                <td><code>backlog</code></td></tr>
+              <tr align=left>
+                <td><em><font size=-1>H5FD</font>_stream_broadcast_t</em></td>
+                <td><code>broadcast_fn</code></td></tr>
+              <tr align=left>
+                <td><em>void *</em></td>
+                <td><code>broadcast_arg</code></td></tr>
+            </table>
+            <ul>
+            <li><code>increment</code> specifies how much memory to allocate
+              each time additional memory is required.  
+            <li><code>socket</code> is an external socket descriptor;
+              if a valid socket argument is provided, that socket will be used.
+            <li><code>do_socket_io</code> is a boolean value specifying whether
+              to perform I/O on <code>socket</code>.
+            <li><code>backlog</code> is the argument for the 
+              <code>listen</code> call.
+            <li><code>broadcast_fn</code> is the broadcast callback function.
+            <li><code>broadcast_arg</code> is the user argument to 
+              the broadcast callback function.
+            </ul>
+        </dir>
+        <p>
+        <code>H5Pset_fapl_stream</code> and <code>H5Pget_fapl_stream</code> 
+        are not intended for use in a parallel environment.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5FD_stream_fapl_t&nbsp;*</em><code>fapl&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: The streaming I/O file access property list.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+-->
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<!--
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+        <tr>
+		  <td valign="top">1.6.7 and 1.8.0</td>
+          <td valign="top">
+		    Function removed in these releases.</td></tr>
+    </table></ul>
+</dl>
+-->
+

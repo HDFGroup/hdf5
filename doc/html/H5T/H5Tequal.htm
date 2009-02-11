@@ -1,0 +1,49 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tequal" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Equal">H5Tequal</a>
+<dt><strong>Signature:</strong>
+    <dd><em>htri_t </em><code>H5Tequal</code>(<em>hid_t </em><code>type_id1</code>,
+        <em>hid_t</em><code>type_id2</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Determines whether two datatype identifiers refer to the same datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tequal</code> determines whether two datatype identifiers 
+        refer to the same datatype.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id1&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to compare.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id2</code></td>
+            <td valign="top">Identifier of datatype to compare.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>When successful, returns a positive value, for <code>TRUE</code>, 
+        if the datatype identifiers refer to the same datatype, 
+        or <code>0</code> (zero), for <code>FALSE</code>.
+        Otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tequal_f
+    <dd>
+	<pre>
+SUBROUTINE h5tequal_f(type1_id, type2_id, flag, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type1_id ! Datatype identifier 
+  INTEGER(HID_T), INTENT(IN) :: type2_id ! Datatype identifier 
+  LOGICAL, INTENT(OUT) :: flag           ! TRUE/FALSE flag to indicate 
+                                         ! if two datatypes are equal
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tequal_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

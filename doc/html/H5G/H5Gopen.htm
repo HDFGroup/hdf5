@@ -1,0 +1,54 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gopen" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-Open">H5Gopen</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Gopen</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Opens an existing group for modification and returns a group 
+        identifier for that group.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Gopen</code> opens an existing group with the specified 
+        name at the specified location, <code>loc_id</code>.
+        <p>
+        The location is identified by a file or group identifier
+        <p>
+        <code>H5Gopen</code> returns a group identifier for the group
+        that was opened.  This group identifier should be released by 
+        calling <code>H5Gclose</code> when it is no longer needed.  
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: File or group identifier within which group is to be open.</td></tr>
+      <tr>
+	    <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Name of group to open.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a valid group identifier if successful; 
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5gopen_f
+    <dd>
+	<pre>
+SUBROUTINE h5gopen_f(loc_id, name, gr_id, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the group to open 
+  INTEGER(HID_T), INTENT(OUT) :: gr_id   ! Group identifier
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5gopen_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

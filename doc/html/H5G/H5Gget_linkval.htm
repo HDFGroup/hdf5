@@ -1,0 +1,74 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gget_linkval" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-GetLinkval">H5Gget_linkval</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Gget_linkval</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char *</em><code>name</code>,
+        <em>size_t</em> <code>size</code>,
+        <em>char *</em><code>value</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns the name of the object that the symbolic link points to.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Gget_linkval</code> returns <code>size</code> 
+        characters of the name of the object that the symbolic link <code>name</code> points to.
+        <p>
+        The parameter <code>loc_id</code> is a file or group identifier.
+        <p>
+        The parameter <code>name</code> must be a symbolic link pointing to
+        the desired object and must be defined relative to <code>loc_id</code>.
+        <p>
+        If <code>size</code> is smaller than the size of the returned object name, then 
+        the name stored in the buffer <code>value</code> will not be null terminated. 
+        <p> 
+        This function fails if <code>name</code> is not a symbolic link.  
+        The presence of a symbolic link can be tested by passing zero for  
+        <code>size</code> and NULL for <code>value</code>.  
+        <p>
+        This function should be used only after <code>H5Gget_objinfo</code> has been called
+        to verify that <code>name</code> is a symbolic link.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: Identifier of the file or group.</td></tr>
+      <tr>
+	    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Symbolic link to the object whose name is to be returned.</td></tr>
+      <tr>
+	    <td valign="top"><em>size_t</em> <code>size</code></td>
+        <td valign="top">IN: Maximum number of characters of <code>value</code> 
+            to be returned.</td></tr>
+      <tr>
+	    <td valign="top"><em>char *</em><code>value</code></td>
+        <td valign="top">OUT: A buffer to hold the name of the object being sought.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value, with the link value in <code>value</code>, 
+        if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5gget_linkval_f
+    <dd>
+	<pre>
+SUBROUTINE h5gget_linkval_f(loc_id, name, size, buffer, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id         ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name         ! Name of the symbolic link 
+  CHARACTER(LEN=size), INTENT(OUT) :: buffer   ! Buffer to hold a
+                                               ! name of the object 
+                                               ! symbolic link points to
+  INTEGER, INTENT(OUT) :: hdferr               ! Error code 
+                                               ! 0 on success and -1 on failure
+END SUBROUTINE h5gget_linkval_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

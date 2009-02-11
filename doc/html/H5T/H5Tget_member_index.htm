@@ -1,0 +1,75 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_member_index" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetMemberIndex">H5Tget_member_index</a>
+<dt><strong>Signature:</strong>
+    <dd><em>int</em> <code>H5Tget_member_index</code>(<em>hid_t </em><code>type_id</code>,
+        <em>const char *</em> <code>field_name</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Retrieves the index of a compound or enumeration datatype member.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_member_index</code> retrieves the index of a field 
+        of a compound datatype or an element of an enumeration datatype.  
+        <p>
+        The name of the target field or element is specified in
+        <code>field_name</code>.
+        <p>
+        Fields are stored in no particular order 
+        with index values of 0 through <em>N</em>-1, where <em>N</em> is 
+        the value returned by <code>H5Tget_nmembers</code>.  
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>type_id</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em>&nbsp;<code>field_name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Name of the field or member whose index is to be retrieved.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a valid field or member index if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tget_member_index_f
+    <dd>
+        <pre>
+SUBROUTINE h5tget_member_index_f(type_id, name, index, hdferr) 
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Member name
+  INTEGER, INTENT(OUT) :: index          ! Member index
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tget_member_index_f
+	</pre>		
+        <!--
+        <dt><strong>Non-C API(s):</strong>
+        <dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td>
+		  <td valign="top" align="left">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+		  <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+		<tr>
+		  <td valign="top">1.4.5</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top" align="left">
+		    Function introduced in this release.</td></tr>
+		<tr>
+		  <td valign="top">1.4.4</td>
+          <td valign="top">
+		    Function introduced in this release.</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top">&nbsp;</td></tr>
+    </table></ul>
+</dl>
+

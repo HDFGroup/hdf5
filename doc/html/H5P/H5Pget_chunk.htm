@@ -1,0 +1,59 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_chunk" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetChunk">H5Pget_chunk</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>int </em><code>H5Pget_chunk</code>(<em>hid_t</em> <code>plist</code>,
+            <em>int</em> <code>max_ndims</code>,
+            <em>hsize_t *</em> <code>dims</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves the size of chunks for the raw data of a chunked layout dataset.  
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_chunk</code> retrieves the size of chunks for the 
+            raw data of a chunked layout dataset.  
+            This function is only valid for dataset creation property lists. 
+            At most, <code>max_ndims</code> elements of <code>dims</code> 
+            will be initialized.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Identifier of property list to query.</td></tr>
+        <tr>
+            <td valign="top"><em>int</em>&nbsp;<code>max_ndims&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Size of the <code>dims</code> array.</td></tr>
+        <tr>
+            <td valign="top"><em>hsize_t *</em> <code>dims</code></td>
+            <td valign="top">OUT: Array to store the chunk dimensions.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns chunk dimensionality if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_chunk_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_chunk_f(prp_id, ndims, dims, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier 
+  INTEGER, INTENT(IN) :: ndims          ! Number of chunk dimensions 
+                                        ! to return
+  INTEGER(HSIZE_T), DIMENSION(ndims), INTENT(OUT) :: dims    
+                                        ! Array containing sizes of
+                                        ! chunk dimensions
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! chunk rank on success 
+                                        ! and -1 on failure
+END SUBROUTINE h5pget_chunk_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

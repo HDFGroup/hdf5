@@ -1,0 +1,43 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_super" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetSuper">H5Tget_super</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t</em> <code>H5Tget_super</code>(<em>hid_t</em> <code>type</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the base datatype from which a datatype is derived.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_super</code> returns the base datatype from which the 
+        datatype <code>type</code> is derived.  
+        <P>
+        In the case of an enumeration type, the return value is an integer type.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Datatype identifier for the derived datatype.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the datatype identifier for the base datatype if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tget_super_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_super_f(type_id, base_type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id  ! Datatype identifier 
+  INTEGER(HID_T), INTENT(OUT) :: type_id ! Base datatype identifier 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5tget_super_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

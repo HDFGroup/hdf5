@@ -1,0 +1,59 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tis_variable_str" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-IsVariableString">H5Tis_variable_str</a>
+<dt><strong>Signature:</strong>
+    <dd><em>htri_t </em><code>H5Tis_variable_str</code>(<em>hid_t </em><code>dtype_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Determines whether datatype is a variable-length string.  
+<dt><strong>Description:</strong>
+    <dd><code>H5Tis_variable_str</code> determines whether the datatype 
+        identified in <code>dtype_id</code> is a variable-length string.
+        <p>
+        This function can be used to distinguish between 
+        fixed and variable-length string datatypes.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dtype_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Datatype identifier.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns <code>TRUE</code> or <code>FALSE</code> if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tis_variable_str_f
+    <dd>
+	<pre>
+SUBROUTINE h5tis_variable_str_f(type_id, status, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id   ! Datatype identifier 
+  LOGICAL, INTENT(OUT)       :: status    ! Logical flag:
+                                          !    .TRUE. if datatype is a 
+                                          !         variable string
+                                          !    .FALSE. otherwise 
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+END SUBROUTINE h5tis_variable_str_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

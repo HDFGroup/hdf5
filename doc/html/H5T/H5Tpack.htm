@@ -1,0 +1,40 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tpack" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-Pack">H5Tpack</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Tpack</code>(<em>hid_t </em><code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Recursively removes padding from within a compound datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tpack</code> recursively removes padding from within a compound
+        datatype to make it more efficient (space-wise) to store that data.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to modify.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5tpack_f
+    <dd>
+	<pre>
+SUBROUTINE h5tpack_f(type_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tpack_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

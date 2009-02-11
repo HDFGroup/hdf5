@@ -1,0 +1,50 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Sget_simple_extent_type" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-ExtentType">H5Sget_simple_extent_type</a>
+<dt><strong>Signature:</strong>
+    <dd><em>H5S_class_t</em> <code>H5Sget_simple_extent_type</code>(<em>hid_t</em> <code>space_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Determine the current class of a dataspace.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sget_simple_extent_type</code> queries a dataspace to determine the 
+        current class of a dataspace.  
+        <p>
+        The function returns a class name, one of the following: 
+            <code>H5S_SCALAR</code>, 
+            <code>H5S_SIMPLE</code>, or 
+            <code>H5S_NONE</code>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">Dataspace identifier.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a dataspace class name if successful; 
+        otherwise H5S_NO_CLASS (-1).
+<dt><strong>Fortran90 Interface:</strong> h5sget_simple_extent_type_f
+    <dd>
+	<pre>
+SUBROUTINE h5sget_simple_extent_type_f(space_id, classtype, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier 
+  INTEGER, INTENT(OUT) :: classtype      ! Class type 
+                                         ! Possible values are: 
+                                         !    H5S_NO_CLASS_F 
+                                         !    H5S_SCALAR_F 
+                                         !    H5S_SIMPLE_F 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5sget_simple_extent_type_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

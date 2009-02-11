@@ -1,0 +1,115 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "h5toh4" -->
+<hr>
+<dl>
+<dt><strong>Tool Name:</strong> <a name="Tools-H5toh4">h5toh4</a>
+<dt><strong>Syntax:</strong>
+    <dd><code>h5toh4 -h</code><br>
+        <code>h5toh4 </code><em>
+            h5file
+            h4file</em><br>
+        <code>h5toh4 </code><em>
+            h5file</em><br>
+        <code>h5toh4 -m </code><em>
+            h5file1
+            h5file2
+            h5file3</em> ...
+<dt><strong>Purpose:</strong>
+    <dd>Converts an HDF5 file into an HDF4 file.
+<dt><strong>Description:</strong>
+    <dd><code>h5toh4</code> is an HDF5 utility which reads 
+        an HDF5 file, <em>h5file</em>, and converts all 
+        supported objects and pathways to produce an HDF4 file, 
+        <em>h4file</em>.  If <em>h4file</em> already exists, 
+        it will be replaced.
+        <p>
+        If only one file name is given, the name must end in 
+        <code>.h5</code> and is assumed to represent the 
+        HDF5 input file.  <code>h5toh4</code> replaces the 
+        <code>.h5</code> suffix with <code>.hdf</code> to form 
+        the name of the resulting HDF4 file and proceeds as above.  
+        If a file with the name of the intended HDF4 file already 
+        exists, <code>h5toh4</code> exits with an error without 
+        changing the contents of any file.
+        <p>
+        The <code>-m</code> option allows multiple HDF5 file 
+        arguments.  Each file name is treated the same as the 
+        single file name case above.
+        <p>
+        The <code>-h</code> option causes the following
+        syntax summary to be displayed:
+        <pre>              h5toh4 file.h5 file.hdf
+              h5toh4 file.h5
+              h5toh4 -m file1.h5 file2.h5 ...</pre>
+        
+        <p>
+
+        The following HDF5 objects occurring in an HDF5 file are 
+        converted to HDF4 objects in the HDF4 file:
+
+        <ul>
+          <li>HDF5 group objects are converted into HDF4 Vgroup 
+              objects.  HDF5 hard links and soft links pointing to 
+              objects are converted to HDF4 Vgroup references.
+          <li>HDF5 dataset objects of integer datatype are 
+              converted into HDF4 SDS objects.  These datasets 
+              may have up to 32 fixed dimensions.  
+              The slowest varying dimension may be extendable.  
+              8-bit, 16-bit, and 32-bit integer datatypes are 
+              supported.
+          <li>HDF5 dataset objects of floating point datatype 
+              are converted into HDF4 SDS objects.  
+              These datasets may have up to 32 fixed dimensions.  
+              The slowest varying dimension may be extendable.  
+              32-bit and 64-bit floating point datatypes are 
+              supported.
+          <li>HDF5 dataset objects of single dimension and 
+              compound datatype are converted into HDF4 Vdata 
+              objects. The length of that single dimension may 
+              be fixed or extendable.  The members of the 
+              compound datatype are constrained to be no more 
+              than rank 4.
+          <li>HDF5 dataset objects of single dimension and fixed length string
+              datatype are converted into HDF4 Vdata objects.  The HDF4 Vdata 
+              is a single field whose order is the length of the HDF5 string 
+              type.  The number of records of the Vdata is the length of the 
+              single dimension which may be fixed or extendable.
+        </ul>
+
+        Other objects are not converted and are not recorded
+        in the resulting <em>h4file</em>.
+        <p>
+        Attributes associated with any of the supported HDF5 
+        objects are carried over to the HDF4 objects.  
+        Attributes may be of integer, floating point, or fixed length 
+        string datatype and they may have up to 32 fixed dimensions.
+        <p>
+        All datatypes are converted to big-endian.  
+        Floating point datatypes are converted to IEEE format.
+        
+<dt><strong>Note:</strong>
+    <dd>The <code>h5toh4</code> and <code>h4toh5</code> utilities 
+        are no longer part of the HDF5 product;  
+	they are distributed separately through the page
+	<a href="http://www.hdfgroup.org/h4toh5/">
+	Converting between HDF (4.x) and HDF5</a>.
+	</p>
+<dt><strong>Options and Parameters:</strong>
+    <dl>
+        <dt><code>-h</code>
+            <dd>Displays a syntax summary.
+        <dt><code>-m</code>
+            <dd>Converts multiple HDF5 files to multiple HDF4 files.
+        <dt><em>h5file</em>
+            <dd>The HDF5 file to be converted.
+        <dt><em>h4file</em>
+            <dd>The HDF4 file to be created.
+    </dl>
+<!--
+<dt><strong>Current Status:</strong>
+    <dd>
+<dt><strong>See Also:</strong>
+    <dd>
+-->
+</dl>
+

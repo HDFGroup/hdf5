@@ -1,0 +1,57 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_class_name" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetClassName">H5Pget_class_name</a>
+
+  <dt><strong>Purpose:</strong>
+    <dd>Retrieves the name of a class.
+
+  <dt><strong>Signature:</strong>
+    <dd><em>char *</em> <code>H5Pget_class_name</code>(
+                  <em>hid_t</em> <code>pcid</code>
+	)
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_class_name</code> retrieves the name of a 
+    generic property list class.  The pointer to the name 
+    must be freed by the user after each successful call.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em>&nbsp;<code>pcid&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td>IN: Identifier of the property class  to query</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a pointer to an allocated string containing the class name
+    <dd>Failure: NULL
+
+  <dt><strong>Fortran90 Interface:</strong> h5pget_class_name_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_class_name_f(prp_id, name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier to
+                                           ! query 
+  CHARACTER(LEN=*), INTENT(INOUT) :: name  ! Buffer to retrieve class name
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code, possible values:
+                                           ! Success:  Actual length of the 
+                                           ! class name
+                                           ! If provided buffer "name" is 
+                                           ! smaller, than name will be 
+                                           ! truncated to fit into
+                                           ! provided user buffer
+                                           ! Failure: -1   
+END SUBROUTINE h5pget_class_name_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

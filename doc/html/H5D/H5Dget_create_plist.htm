@@ -1,0 +1,48 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dget_create_plist" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-GetCreatePlist">H5Dget_create_plist</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Dget_create_plist</code>(<em>hid_t </em><code>dataset_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns an identifier for a copy of the 
+        dataset creation property list for a dataset.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dget_create_plist</code> returns an identifier for a 
+        copy of the dataset creation property list for a dataset.
+        <p>
+        The creation property list identifier should be released with 
+        the <code>H5Pclose</code> function.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>dataset_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of the dataset to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a dataset creation property list identifier if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5dget_create_plist_f
+    <dd>
+	<pre>
+SUBROUTINE h5dget_create_plist_f(dataset_id, creation_prp, hdferr) 
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN) :: dataset_id    ! Dataset identifier
+  INTEGER(HID_T), INTENT(OUT) :: creation_id  ! Dataset creation
+                                              ! property list identifier
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code 
+                                              ! 0 on success and -1 on failure
+END SUBROUTINE h5dget_create_plist_f  
+
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

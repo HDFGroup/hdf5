@@ -1,0 +1,43 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Tget_precision" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Datatype-GetPrecision">H5Tget_precision</a>
+<dt><strong>Signature:</strong>
+    <dd><em>size_t </em><code>H5Tget_precision</code>(<em>hid_t </em><code>type_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the precision of an atomic datatype.
+<dt><strong>Description:</strong>
+    <dd><code>H5Tget_precision</code> returns the precision of an atomic 
+        datatype.  The precision is the number of significant bits which, 
+        unless padding is present, is 8 times larger than the value returned 
+        by <code>H5Tget_size</code>.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+            <td valign="top"><em>hid_t</em>&nbsp;<code>type_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Identifier of datatype to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the number of significant bits if successful;
+        otherwise 0.
+<dt><strong>Fortran90 Interface:</strong> h5tget_precision_f
+    <dd>
+	<pre>
+SUBROUTINE h5tget_precision_f(type_id, precision, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: type_id ! Datatype identifier 
+  INTEGER, INTENT(OUT) :: precision     ! Datatype precision
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+END SUBROUTINE h5tget_precision_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

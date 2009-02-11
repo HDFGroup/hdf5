@@ -1,0 +1,60 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Gmove" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Group-Move">H5Gmove</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Gmove</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>const char</em> <code>*src_name</code>,
+        <em>const char</em> <code>*dst_name</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Renames an object within an HDF5 file.  
+  <dt><strong>Description:</strong>
+    <dd><code>H5Gmove</code> renames an object within an HDF5 file.  
+        The original name, <code>src_name</code>, is unlinked from the 
+        group graph and the new name, <code>dst_name</code>, is inserted   
+        as an atomic operation.  Both names are interpreted relative 
+        to <code>loc_id</code>, which is either a file or a group 
+        identifier.
+  <dt><strong>Warning:</strong>
+    <dd>Exercise care in moving groups as it is possible to render data in 
+        a file inaccessible with <code>H5Gmove</code>.  
+        See <a href="Groups.html#H5GUnlinkToCorrupt">The Group Interface</a> 
+        in the <cite>HDF5 User's Guide</cite>.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+      <tr>
+	    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+        <td valign="top">IN: File or group identifier.</td></tr>
+      <tr>
+	    <td valign="top"><em>const&nbsp;char</em>&nbsp;<code>*src_name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td valign="top">IN: Object's original name.</td></tr>
+      <tr>
+	    <td valign="top"><em>const char</em> <code>*dst_name</code></td>
+        <td valign="top">IN: Object's new name.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5gmove_f
+    <dd>
+	<pre>
+SUBROUTINE h5gmove_f(loc_id, name, new_name, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: loc_id     ! File or group identifier
+  CHARACTER(LEN=*), INTENT(IN) :: name     ! Original name of an object 
+  CHARACTER(LEN=*), INTENT(IN) :: new_name ! New name of an object 
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code 
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5gmove_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

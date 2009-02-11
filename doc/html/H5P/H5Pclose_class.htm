@@ -1,0 +1,53 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pclose_class" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-CloseClass">H5Pclose_class</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pclose_class</code>(
+                  <em>hid_t</em> <code>class</code>
+	)
+
+  <dt><strong>Purpose:</strong>
+    <dd>Closes an existing property list class.
+
+  <dt><strong>Description:</strong>
+    <dd>Removes a property list class from the library.  
+    
+    <p>
+    Existing property lists of this class will continue to exist, 
+    but new ones are not able to be created.
+
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em>&nbsp;<code>class&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <td>IN: Property list class to close</td></tr>
+    </table></ul>
+
+  <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <dt><strong>Fortran90 Interface:</strong> h5pclose_class_f
+    <dd>
+	<pre>
+SUBROUTINE h5pclose_class_f(class, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: class ! Property list class identifier 
+                                      ! to close
+  INTEGER, INTENT(OUT) :: hdferr      ! Error code
+                                      ! 0 on success and -1 on failure
+END SUBROUTINE h5pclose_class_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+
+

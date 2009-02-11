@@ -1,0 +1,83 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Aiterate" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Annot-Iterate">H5Aiterate</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Aiterate</code>(<em>hid_t</em> <code>loc_id</code>,
+        <em>unsigned *</em> <code>idx</code>,
+        <em>H5A_operator_t</em> <code>op</code>,
+        <em>void *</em><code>op_data</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Calls a user's function for each attribute on an object.
+<dt><strong>Description:</strong>
+    <dd><code>H5Aiterate</code> iterates over the attributes of
+        the object specified by its identifier, <code>loc_id</code>.
+        The object can be a group, dataset, or named datatype.
+        For each attribute of the object, the <code>op_data</code>
+        and some additional information specified below are passed 
+        to the operator function <code>op</code>.
+        The iteration begins with the attribute specified by its
+        index, <code>idx</code>; the index for the next attribute 
+        to be processed by the operator, <code>op</code>, is 
+        returned in <code>idx</code>.
+        If <code>idx</code> is the null pointer, then all attributes
+        are processed.
+        <p>
+        The prototype for <code>H5A_operator_t</code> is: <br>
+            <code>typedef herr_t (*H5A_operator_t)(hid_t <em>loc_id</em>,
+                  const char *<em>attr_name</em>, 
+                  void *<em>operator_data</em>);
+            </code>
+        <p>
+        The operation receives the identifier for the group, dataset
+        or named datatype being iterated over, <code>loc_id</code>, the
+        name of the current attribute about the object, <code>attr_name</code>,
+        and the pointer to the operator data passed in to <code>H5Aiterate</code>,
+        <code>op_data</code>.  The return values from an operator are:
+        <ul>
+        <li>Zero causes the iterator to continue, returning zero when all 
+            attributes have been processed.
+        <li>Positive causes the iterator to immediately return that positive
+            value, indicating short-circuit success.  The iterator can be
+            restarted at the next attribute.
+        <li>Negative causes the iterator to immediately return that value,
+            indicating failure.  The iterator can be restarted at the next
+            attribute.
+        </ul>
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: Identifier of a group, dataset or named datatype.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned *</em> <code>idx</code></td>
+            <td valign="top">IN/OUT: Starting (IN) and ending (OUT) attribute index.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5A_operator_t</em>&nbsp;<code>op&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: User's function to pass each attribute to</td></tr>
+        <tr>
+		    <td valign="top"><em>void *</em><code>op_data</code></td>
+            <td valign="top">IN/OUT: User's data to pass through to iterator operator function</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>If successful, returns the return value of the last operator 
+        if it was non-zero, or zero if all attributes were processed.
+        Otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--	
+	<pre>
+SUBROUTINE
+	</pre>
+-->		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,56 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Soffset_simple" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-OffsetSimple">H5Soffset_simple</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Soffset_simple</code>(<em>hid_t</em> <code>space_id</code>,
+    <em>const hssize_t *</em><code>offset</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Sets the offset of a simple dataspace.
+<dt><strong>Description:</strong>
+    <dd><code>H5Soffset_simple</code> sets the offset of a 
+    simple dataspace <code>space_id</code>.  The <code>offset</code> 
+    array must be the same number of elements as the number of 
+    dimensions for the dataspace.  If the <code>offset</code> 
+    array is set to <TT>NULL</TT>, the offset for the dataspace 
+    is reset to 0.
+    <p>
+    This function allows the same shaped selection to be moved 
+    to different locations within a dataspace without requiring it 
+    to be redefined.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>space_id</code></td>
+          <td valign="top">IN: The identifier for the dataspace object to reset.</td></tr>
+        <tr>
+		  <td valign="top"><em>const&nbsp;hssize_t&nbsp;*</em><code>offset&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: The offset at which to position the selection.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5soffset_simple_f
+    <dd>
+	<pre>
+SUBROUTINE h5soffset_simple_f(space_id, offset, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: space_id    ! Dataspace identifier 
+  INTEGER(HSSIZE_T), DIMENSION(*), INTENT(IN) ::  offset
+                                            ! The offset at which to position
+                                            ! the selection  
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5soffset_simple_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

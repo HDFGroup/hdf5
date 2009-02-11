@@ -1,0 +1,74 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_dxpl_mpio" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetDxplMpio">H5Pset_dxpl_mpio</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_dxpl_mpio</code>(
+                     <em>hid_t</em> <code>dxpl_id</code>,
+                     <em>H5FD_mpio_xfer_t</em> <code>xfer_mode</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets data transfer mode.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_dxpl_mpio</code> sets the data transfer property list 
+        <code>dxpl_id</code> to use transfer mode <code>xfer_mode</code>. 
+        The property list can then be used to control the I/O transfer mode 
+        during data I/O operations. 
+        <p>
+        Valid transfer modes are as follows:
+        <dir>
+        <dl>
+          <dt><code>H5FD_MPIO_INDEPENDENT</code>
+            <dd>Use independent I/O access (default).
+          <dt><code>H5FD_MPIO_COLLECTIVE</code>
+            <dd>Use collective I/O access.
+        </dl>
+        </dir></p>
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>dxpl_id</code></td>
+            <td valign="top">IN: Data transfer property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>H5FD_mpio_xfer_t</em>&nbsp;<code>xfer_mode&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Transfer mode.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong>
+    <dd>
+	<pre>
+SUBROUTINE h5pset_dxpl_mpio_f(prp_id, data_xfer_mode, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
+  INTEGER, INTENT(IN) :: data_xfer_mode ! Data transfer mode 
+                                        ! Possible values are:
+                                        !    H5FD_MPIO_INDEPENDENT_F
+                                        !    H5FD_MPIO_COLLECTIVE_F
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_dxpl_mpio_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

@@ -1,0 +1,127 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fget_obj_count" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-GetObjCount">H5Fget_obj_count</a>
+<dt><strong>Signature:</strong>
+    <dd><em>ssize_t </em><code>H5Fget_obj_count</code>(
+            <em>hid_t</em> <code>file_id</code>,
+	    <em>unsigned int</em> <code>types</code>
+            )
+<dt><strong>Purpose:</strong>
+        <dd>Returns the number of open object identifiers for an open file.
+<dt><strong>Description:</strong>
+    <dd>Given the identifier of an open file, <code>file_id</code>, 
+	and the desired object types, <code>types</code>,
+	<code>H5Fget_obj_count</code> returns the number of 
+        open object identifiers for the file.
+        <p>
+        To retrieve a count of open identifiers for open objects in 
+	all HDF5 application files that are currently open, 
+        pass the value <code>H5F_OBJ_ALL</code> in <code>file_id</code>.
+        <p>
+        The types of objects to be counted are specified 
+	in <code>types</code> as follows:
+	<center>
+        <table width=90% border=0>
+          <tr><td valign=top>
+            <code>H5F_OBJ_FILE</code>
+            </td><td valign=top>
+            Files only
+          </td></tr><tr><td valign=top>
+            <code>H5F_OBJ_DATASET</code>
+            </td><td valign=top>
+            Datasets only
+          </td></tr><tr><td valign=top>
+            <code>H5F_OBJ_GROUP</code>
+            </td><td valign=top>
+            Groups only
+          </td></tr><tr><td valign=top>
+            <code>H5F_OBJ_DATATYPE&nbsp;&nbsp;</code>
+            </td><td valign=top>
+            Named datatypes only
+          </td></tr><tr><td valign=top>
+            <code>H5F_OBJ_ATTR</code>
+            </td><td valign=top>
+            Attributes only
+          </td></tr><tr><td valign=top>
+            <code>H5F_OBJ_ALL</code>
+            </td><td valign=top>
+            All of the above
+	    <br>
+	    (I.e., <code>H5F_OBJ_FILE</code> | <code>H5F_OBJ_DATASET</code> | 
+	    <code>H5F_OBJ_GROUP</code> | <code>H5F_OBJ_DATATYPE</code> 
+	    | <code>H5F_OBJ_ATTR</code> )
+          </td></tr><tr><td valign=top>
+            <code>H5F_OBJ_LOCAL</code>
+            </td><td valign=top>
+            Restrict search to objects opened through current file identifier.
+          </td></tr>
+        </table>
+	</center>
+        <p>
+	Multiple object types can be combined with the 
+	logical <code>OR</code> operator (<code>|</code>).
+	For example, the expression <code>(H5F_OBJ_DATASET|H5F_OBJ_GROUP)</code> would call for 
+	datasets and groups.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>file_id</code></td>
+            <td valign="top">IN: Identifier of a currently-open HDF5 file or 
+	        <code>H5F_OBJ_ALL</code> for all currently-open HDF5 files.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;int</em>&nbsp;<code>types&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Type of object for which identifiers are to be returned.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the number of open objects if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5fget_obj_count_f
+    <dd>
+	<pre>
+SUBROUTINE h5fget_obj_count_f(file_id, obj_type, obj_count, hdferr)
+
+  IMPLICIT NONE 
+  INTEGER(HID_T), INTENT(IN)  :: file_id   ! File identifier
+  INTEGER, INTENT(IN)         :: obj_type  ! Object types, possible values are:
+                                           !     H5F_OBJ_FILE_F
+                                           !     H5F_OBJ_GROUP_F
+                                           !     H5F_OBJ_DATASET_F
+                                           !     H5F_OBJ_DATATYPE_F
+                                           !     H5F_OBJ_ALL_F
+  INTEGER, INTENT(OUT)        :: obj_count ! Number of opened objects
+  INTEGER, INTENT(OUT)        :: hdferr    ! Error code 
+                                           ! 0 on success and -1 on failure
+END SUBROUTINE h5fget_obj_count_f
+	</pre>
+	
+<dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+          <td valign="top" align="left" width="10%">
+            <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+            <strong>Change</strong></td></tr>
+        <tr>
+          <td valign="top">1.6.5</td>
+          <td valign="top">
+            <code>H5F_OBJ_LOCAL</code> has been added as a qualifier 
+            on the types of objects to be counted. 
+            <code>H5F_OBJ_LOCAL</code> restricts the search to objects 
+            opened through current file identifier.</td></tr>
+        <tr>
+          <td valign="top">1.6.8</td>
+          <td valign="top">
+              C function return type changed to <code><em>ssize_t</em></code>.
+              </td></tr>
+    </table></ul>
+
+        <!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,106 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_cache" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetCache">H5Pset_cache</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_cache</code>(<em>hid_t</em> <code>plist_id</code>,
+        <em>int</em> <code>mdc_nelmts</code>,
+        <em>size_t</em> <code>rdcc_nelmts</code>,
+        <em>size_t</em> <code>rdcc_nbytes</code>,
+        <em>double</em> <code>rdcc_w0</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Sets the meta data cache and raw data chunk cache parameters.  
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_cache</code> sets 
+        the number of elements (objects) in the meta data cache and 
+        the number of elements, the total number of bytes, and 
+        the preemption policy value in the raw data chunk cache.
+        <p>
+	The <em>plist_id</em> is a file access property list.  
+        The number of elements (objects) in the meta data cache 
+	and the raw data chunk cache are <em>mdc_nelmts</em> and 
+	<em>rdcc_nelmts</em>, respectively.  
+        The total size of the raw data chunk cache and the preemption policy 
+        are <em>rdcc_nbytes</em> and <em>rdcc_w0</em>.  
+        <p>
+        Any (or all) of the <code>H5Pget_cache</code> pointer arguments 
+        may be null pointers.
+        <p>
+        The <em>rdcc_w0</em> value should be between 0 and 1 inclusive and
+        indicates how much chunks that have been fully read are
+        favored for preemption.  A value of zero means fully read
+        chunks are treated no differently than other chunks (the
+        preemption is strictly LRU) while a value of one means fully
+        read chunks are always preempted before other chunks. 
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist_id</code></td>
+            <td valign="top">IN: Identifier of the file access property list.</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>mdc_nelmts</code></td>
+            <td valign="top">IN: Number of elements (objects) in the meta data cache.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>rdcc_nelmts</code></td>
+            <td valign="top">IN: Number of elements (objects) in the raw data chunk cache.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em>&nbsp;<code>rdcc_nbytes&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Total size of the raw data chunk cache, in bytes.</td></tr>
+        <tr>
+		    <td valign="top"><em>double</em> <code>rdcc_w0</code></td>
+            <td valign="top">IN: Preemption policy.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pset_cache_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_cache_f(prp_id, mdc_nelmts,rdcc_nelmts, rdcc_nbytes, rdcc_w0, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id        ! Property list identifier
+  INTEGER, INTENT(IN) :: mdc_nelmts           ! Number of elements (objects)
+                                              ! in the meta data cache
+  INTEGER(SIZE_T), INTENT(IN) :: rdcc_nelmts  ! Number of elements (objects)
+                                              ! in the meta data cache
+  INTEGER(SIZE_T), INTENT(IN) :: rdcc_nbytes  ! Total size of the raw data
+                                              ! chunk cache, in bytes
+  REAL, INTENT(IN) :: rdcc_w0                 ! Preemption policy
+  INTEGER, INTENT(OUT) :: hdferr              ! Error code
+                                              ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_cache_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td>
+		  <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+		  <td valign="top"><strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.1</td>
+		  <td valign="top">&nbsp;</td>
+		  <td valign="top">&nbsp;</td>
+          <td valign="top"><code>rdcc_nbytes</code>&nbsp;parameter&nbsp;type&nbsp;changed&nbsp;
+		    to <code>INTEGER(SIZE_T)</code>.</td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+		  <td valign="top">The <code>rdcc_nbytes</code>
+                    and <code>rdcc_nelmts</code> parameters changed 
+		    from type <em>int</em> to <em>size_t</em>.</td>
+		  <td valign="top">&nbsp;</td>
+          <td valign="top">&nbsp;</td></tr>
+    </table></ul>
+</dl>
+

@@ -1,0 +1,42 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Sget_select_elem_npoints" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-SelectElemNPoints">H5Sget_select_elem_npoints</a>
+<dt><strong>Signature:</strong>
+    <dd><em>hssize_t </em><code>H5Sget_select_elem_npoints</code>(<em>hid_t </em><code>space_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Gets the number of element points in the current selection.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sget_select_elem_npoints</code> returns
+    the number of element points in the current dataspace selection.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Identifier of dataspace to query.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the number of element points in the current dataspace selection if successful.
+        Otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5sget_select_elem_npoints_f
+    <dd>
+	<pre>
+SUBROUTINE h5sget_select_elem_npoints_f(space_id, num_points, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: space_id ! Dataspace identifier
+  INTEGER, INTENT(OUT) :: num_points     ! Number of points in 
+                                         ! the current elements selection
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code
+END SUBROUTINE h5sget_select_elem_npoints_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

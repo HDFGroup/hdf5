@@ -1,0 +1,64 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5get_libversion" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-Version">H5get_libversion</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5get_libversion</code>(<em>unsigned *</em><code>majnum</code>,
+            <em>unsigned *</em><code>minnum</code>,
+            <em>unsigned *</em><code>relnum</code>
+        )
+<dt><strong>Purpose:</strong>
+    <dd>Returns the HDF library release number.
+<dt><strong>Description:</strong>
+    <dd><code>H5get_libversion</code> retrieves the major, minor, and release
+        numbers of the version of the HDF library which is linked to 
+        the application.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>unsigned *</em><code>majnum</code></td>
+            <td valign="top">OUT: The major version of the library.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;*</em><code>minnum&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: The minor version of the library.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned *</em><code>relnum</code></td>
+            <td valign="top">OUT: The release number of the library.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5get_libversion_f
+    <dd>
+	<pre>
+SUBROUTINE h5get_libversion_f(hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(OUT) :: majnum      ! The major version of the library
+  INTEGER, INTENT(OUT) :: minnum      ! The minor version of the library
+  INTEGER, INTENT(OUT) :: relnum      ! The release number 
+  INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+END SUBROUTINE h5get_libversion_f
+	</pre>
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>Fortran90</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.5</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

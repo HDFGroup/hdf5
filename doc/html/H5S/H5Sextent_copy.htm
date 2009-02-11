@@ -1,0 +1,51 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Sextent_copy" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataspace-ExtentCopy">H5Sextent_copy</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Sextent_copy</code>(<em>hid_t</em> <code>dest_space_id</code>,
+    <em>hid_t</em> <code>source_space_id</code>
+    )
+<dt><strong>Purpose:</strong>
+    <dd>Copies the extent of a dataspace.
+<dt><strong>Description:</strong>
+    <dd><code>H5Sextent_copy</code> copies the extent from 
+    <code>source_space_id</code> to <code>dest_space_id</code>. 
+    This action may change the type of the dataspace.  
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		  <td valign="top"><em>hid_t</em> <code>dest_space_id</code></td>
+          <td valign="top">IN: The identifier for the dataspace to which 
+              the extent is copied.</td></tr>
+        <tr>
+		  <td valign="top"><em>hid_t</em>&nbsp;<code>source_space_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: The identifier for the dataspace from which 
+              the extent is copied.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5sextent_copy_f
+    <dd>
+	<pre>
+SUBROUTINE h5sextent_copy_f(dest_space_id, source_space_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: dest_space_id   ! Identifier of destination
+                                                ! dataspace
+  INTEGER(HID_T), INTENT(IN) :: source_space_id ! Identifier of source 
+                                                ! dataspace
+  INTEGER, INTENT(OUT) :: hdferr                ! Error code
+                                                ! 0 on success and -1 on failure 
+END SUBROUTINE h5sextent_copy_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

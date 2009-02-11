@@ -1,0 +1,133 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset_fapl_split" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-SetFaplSplit">H5Pset_fapl_split</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset_fapl_split</code>(
+                     <em>hid_t</em> <code>fapl_id</code>,
+                     <em>const char *</em><code>meta_ext</code>,
+                     <em>hid_t</em> <code>meta_plist_id</code>,
+                     <em>const char *</em><code>raw_ext</code>,
+                     <em>hid_t</em> <code>raw_plist_id</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Emulates the old split file driver.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset_fapl_split</code> is a compatibility function that
+        enables the multi-file driver to emulate the split driver from 
+        HDF5 Releases 1.0 and 1.2. 
+        The split file driver stored metadata and raw data in separate files
+        but provided no mechanism for separating types of metadata.
+        <p> 
+        <code>fapl_id</code> is a file access property list identifier.
+        <p> 
+        <code>meta_ext</code> is the filename extension for the metadata file.
+	The extension is appended to the name passed to <code>H5FDopen</code>,
+	usually from <code>H5Fcreate</code> or <code>H5Fopen</code>,
+	to form the name of the metadata file.
+	If the string %s is used in the extension, it works like the
+	name generator as in <code>H5Pset_fapl_multi</code>.
+        <p> 
+        <code>meta_plist_id</code> is the file access property list identifier 
+        for the metadata file.
+        <p> 
+        <code>raw_ext</code> is the filename extension for the raw data file.
+	The extension is appended to the name passed to <code>H5FDopen</code>,
+	usually from <code>H5Fcreate</code> or <code>H5Fopen</code>,
+	to form the name of the rawdata file.
+	If the string %s is used in the extension, it works like the
+	name generator as in <code>H5Pset_fapl_multi</code>.
+        <p> 
+        <code>raw_plist_id</code> is the file access property list identifier 
+        for the raw data file.
+        <p>
+        If a user wishes to check to see whether this driver is in use, 
+        the user must call <code>H5Pget_driver</code> and compare the
+        returned value to the string <code>H5FD_MULTI</code>.
+        A positive match will confirm that the multi driver is in use; 
+        HDF5 provides no mechanism to determine whether it was called
+        as the special case invoked by <code>H5Pset_fapl_split</code>.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>fapl_id</code>,</td>
+            <td valign="top">IN: File access property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>meta_ext,&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Metadata filename extension.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>meta_plist_id</code>,</td>
+            <td valign="top">IN: File access property list identifier for the metadata file.</td></tr>
+        <tr>
+		    <td valign="top"><em>const char *</em><code>raw_ext</code>,</td>
+            <td valign="top">IN: Raw data filename extension.</td></tr>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>raw_plist_id</code></td>
+            <td valign="top">IN: File access property list identifier for the raw data file.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful.
+        Otherwise returns a negative value.
+  <dt><strong>Example:</strong>
+    <dd>
+    <pre>
+/* Example 1: Both metadata and rawdata files are in the same  */
+/*    directory.   Use Station1-m.h5 and Station1-r.h5 as      */
+/*    the metadata and rawdata files.                          */
+hid_t fapl, fid;
+fapl = H5Pcreate(H5P_FILE_ACCESS);
+H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "-r.h5", H5P_DEFAULT);
+fid=H5Fcreate("Station1",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);</pre>
+<!-- NEW PAGE -->
+<pre>
+/* Example 2: metadata and rawdata files are in different      */
+/*    directories.  Use PointA-m.h5 and /pfs/PointA-r.h5 as    */
+/*    the metadata and rawdata files.                          */
+hid_t fapl, fid;
+fapl = H5Pcreate(H5P_FILE_ACCESS);
+H5Pset_fapl_split(fapl, "-m.h5", H5P_DEFAULT, "/pfs/%s-r.h5", H5P_DEFAULT);
+fid=H5Fcreate("PointA",H5F_ACC_TRUNC,H5P_DEFAULT,fapl);</pre>
+  </dt>
+  
+  <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_split_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_fapl_split_f(prp_id, meta_ext, meta_plist, raw_ext, &
+                               raw_plist, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T),INTENT(IN)   :: prp_id     ! Property list identifier
+  CHARACTER(LEN=*),INTENT(IN) :: meta_ext   ! Name of the extension for
+                                            ! the metafile filename
+  INTEGER(HID_T),INTENT(IN)   :: meta_plist ! Identifier of the meta file
+                                            ! access property list
+  CHARACTER(LEN=*),INTENT(IN) :: raw_ext    ! Name extension for the raw 
+                                            ! file filename
+  INTEGER(HID_T),INTENT(IN)   :: raw_plist  ! Identifier of the raw file
+                                            ! access property list
+  INTEGER, INTENT(OUT) :: hdferr            ! Error code
+                                            ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_fapl_split_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History:</strong>
+	<ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.4.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+
+

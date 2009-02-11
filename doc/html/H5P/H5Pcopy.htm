@@ -1,0 +1,45 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pcopy" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Copy">H5Pcopy</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>hid_t </em><code>H5Pcopy</code>(<em>hid_t</em> <code>plist</code>
+        )
+  <dt><strong>Purpose:</strong>
+    <dd>Copies an existing property list to create a new property list.
+  <dt><strong>Description:</strong>
+        <dd><code>H5Pcopy</code> copies an existing property list to create 
+            a new property list.
+            The new property list has the same properties and values 
+            as the original property list.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em>&nbsp;<code>plist&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Identifier of property list to duplicate.</td></tr>
+    </table></ul>
+  <dt><strong>Returns:</strong>
+    <dd>Returns a property list identifier if successful;
+        otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pcopy_f
+    <dd>
+	<pre>
+SUBROUTINE h5pcopy_f(prp_id, new_prp_id, hdferr) 
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id       ! Property list identifier 
+  INTEGER(HID_T), INTENT(OUT) :: new_prp_id  ! Identifier  of property list
+                                             ! copy  
+  INTEGER, INTENT(OUT) :: hdferr             ! Error code
+                                             ! 0 on success and -1 on failure
+END SUBROUTINE h5pcopy_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

@@ -1,0 +1,44 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5close" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Library-Close">H5close</a>
+<dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5close</code>(<em>void</em>)
+<dt><strong>Purpose:</strong>
+    <dd>Flushes all data to disk, closes file identifiers, and cleans up memory.
+<dt><strong>Description:</strong>
+    <dd><code>H5close</code> flushes all data to disk, 
+        closes all file identifiers, and cleans up all memory used by
+        the library.  This function is generally called when the 
+        application calls <code>exit()</code>, but may be called earlier 
+        in event of an emergency shutdown or out of desire to free all 
+        resources used by the HDF5 library.
+        <p>
+        <code>h5close_f</code> and <code>h5open_f</code> are 
+        required calls in Fortran90 applications.	
+<dt><strong>Parameters:</strong>
+    <dl>
+        <dt>None.
+    </dl>
+<dt><strong>Returns:</strong>
+    <dd>Returns a non-negative value if successful;
+        otherwise returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5close_f
+    <dd>
+	<pre>
+SUBROUTINE h5close_f(hdferr) 
+  IMPLICIT NONE
+  INTEGER, INTENT(OUT) :: hdferr      ! Error code
+
+END SUBROUTINE h5close_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

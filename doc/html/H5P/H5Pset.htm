@@ -1,0 +1,81 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pset" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-Set">H5Pset</a>
+
+  <dt><strong>Signature:</strong>
+    <dd><em>herr_t</em> <code>H5Pset</code>(
+                  <em>hid_t</em> <code>plid</code>,
+                  <em>const char *</em><code>name</code>,
+                  <em>void *</em><code>value</code>)
+        )
+
+  <dt><strong>Purpose:</strong>
+    <dd>Sets a property list value.
+
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pset</code> sets a new value for a property in a 
+    property list.  If there is a <code>set</code> callback 
+    routine registered for this property, the <code>value</code> will be 
+    passed to that routine and any changes to the <code>value</code> 
+    will be used when setting the property value.  
+    The information pointed to by the <code>value</code> pointer 
+    (possibly modified by the <code>set</code> callback) is copied into 
+    the property list value and may be changed by the application making 
+    the <code>H5Pset</code> call without affecting the property value.
+
+    <P>
+    The property name must exist or this routine will fail.  
+
+    <P>
+    If the <code>set</code> callback routine returns an error, the 
+    property value will not be modified.  
+
+    <P>
+    This routine may not be called for zero-sized properties 
+    and will return an error in that case.
+	
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+    <tr>
+        <td><em>hid_t</em> <code>plid</code>;
+        <td>IN: Property list identifier to modify</td></tr>
+    <tr>
+        <td><em>const&nbsp;char&nbsp;*</em><code>name;&nbsp;&nbsp;&nbsp;&nbsp;</code>
+        <td>IN: Name of property to modify</td></tr>
+    <tr>
+        <td><em>void *</em><code>value</code>;
+        <td>IN: Pointer to value to set the property to</td></tr>
+    </table></ul>
+
+ <dt><strong>Returns:</strong>
+    <dd>Success: a non-negative value
+    <dd>Failure: a negative value
+
+  <dt><strong>Fortran90 Interface:</strong> h5pset_f
+    <dd>
+	<pre>
+SUBROUTINE h5pset_f(plid, name, value, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: plid    ! Property list identifier 
+  CHARACTER(LEN=*), INTENT(IN) :: name  ! Name of property to set
+  TYPE,   INTENT(IN) :: value           ! Property value
+                                        ! Supported types are:
+                                        !    INTEGER
+                                        !    REAL
+                                        !    DOUBLE PRECISION
+                                        !    CHARACTER(LEN=*)
+  INTEGER, INTENT(OUT) :: hdferr        ! Error code
+                                        ! 0 on success and -1 on failure
+END SUBROUTINE h5pset_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

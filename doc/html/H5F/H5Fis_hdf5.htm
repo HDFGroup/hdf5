@@ -1,0 +1,47 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Fis_hdf5" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="File-IsHDF5">H5Fis_hdf5</a>
+<dt><strong>Signature:</strong>
+    <dd><em>htri_t </em><code>H5Fis_hdf5</code>(<em>const char *</em><code>name</code>
+        )
+<dt><strong>Purpose:</strong>
+        <dd>Determines whether a file is in the HDF5 format.
+<dt><strong>Description:</strong>
+        <dd><code>H5Fis_hdf5</code> determines whether a file is in 
+            the HDF5 format.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: File name to check format.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>When successful, returns a positive value, for <code>TRUE</code>,
+        or <code>0</code> (zero), for <code>FALSE</code>.
+        <br>
+        On any error, including the case that the file does not exist, 
+        returns a negative value.
+<dt><strong>Fortran90 Interface:</strong> h5fis_hdf5_f
+    <dd>
+	<pre>
+SUBROUTINE h5fis_hdf5_f(name, status, hdferr)   
+  IMPLICIT NONE 
+  CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the file
+  LOGICAL, INTENT(OUT) :: status         ! This parameter indicates 
+                                         ! whether file is an HDF5 file 
+                                         ! ( TRUE or FALSE ) 
+  INTEGER, INTENT(OUT) :: hdferr         ! Error code 
+                                         ! 0 on success and -1 on failure
+END SUBROUTINE h5fis_hdf5_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+</dl>
+

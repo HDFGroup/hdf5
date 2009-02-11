@@ -1,0 +1,150 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_filter" -->
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetFilter">H5Pget_filter</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>H5Z_filter_t</em> <code>H5Pget_filter</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned int</em> <code>filter_number</code>,
+        <em>unsigned int *</em><code>flags</code>,
+        <em>size_t *</em><code>cd_nelmts</code>,
+        <em>unsigned int *</em><code>cd_values</code>,
+        <em>size_t</em> <code>namelen</code>,
+        <em>char</em> <code>name[]</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Returns information about a filter in a pipeline.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_filter</code> returns information about a
+        filter, specified by its filter number, in a filter pipeline,
+        specified by the property list with which it is associated.
+        <p>
+        If <code>plist</code> is a dataset creation property list, 
+        the pipeline is a permanent filter pipeline; 
+        if <code>plist</code> is a dataset transfer property list, 
+        the pipeline is a transient filter pipeline.
+        <p>
+        On input, <code>cd_nelmts</code> indicates the number of entries 
+        in the <code>cd_values</code> array, as allocated by the caller;
+        on return,<code>cd_nelmts</code> contains the number of values 
+        defined by the filter. 
+        <p>
+        <code>filter_number</code> is a value between zero and 
+        <em>N</em>-1, as described in 
+        <a href="#Property-GetNFilters"><code>H5Pget_nfilters</code></a>.
+        The function will return a negative value if the filter number 
+        is out of range.  
+        <p>
+        If <code>name</code> is a pointer to an array of at least 
+        <code>namelen</code> bytes, the filter name will be copied 
+        into that array.  The name will be null terminated if 
+        <code>namelen</code> is large enough.  The filter name returned 
+        will be the name appearing in the file, the name registered
+        for the filter, or an empty string.  
+        <p>
+        The structure of the <code>flags</code> argument is discussed
+        in <a href="#Property-SetFilter"><code>H5Pset_filter</code></a>.
+  <dt><strong>Note:</strong>
+    <dd>This function currently supports only the permanent filter
+        pipeline; <code>plist</code> must be a dataset creation property 
+        list.
+  <dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top">IN: Property list identifier.</td></tr>
+        <tr>
+		    <td valign="top"><em>int</em> <code>filter_number</code></td>
+            <td valign="top">IN: Sequence number within the filter pipeline of 
+                the filter for which information is sought.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned int *</em><code>flags</code></td>
+            <td valign="top">OUT: Bit vector specifying certain general properties
+                of the filter.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t *</em><code>cd_nelmts</code></td>
+            <td valign="top">IN/OUT: Number of elements in <code>cd_values</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>unsigned&nbsp;int&nbsp;*</em><code>cd_values&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">OUT: Auxiliary data for the filter.</td></tr>
+        <tr>
+		    <td valign="top"><em>size_t</em> <code>namelen</code></td>
+            <td valign="top">IN: Anticipated number of characters in <code>name</code>.</td></tr>
+        <tr>
+		    <td valign="top"><em>char</em> <code>name[]</code></td>
+            <td valign="top">OUT: Name of the filter.</td></tr>
+    </table></ul>
+<!-- NEW PAGE -->
+  <dt><strong>Returns:</strong>
+    <dd>Returns the filter identifier if successful:
+         <center>
+        <table width=75%>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_DEFLATE</code> 
+            </td><td>
+            Data compression filter, employing the gzip algorithm 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_SHUFFLE</code> 
+            </td><td>
+            Data shuffling filter 
+        </td></tr>
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_FLETCHER32&nbsp;&nbsp;</code> 
+            </td><td>
+            Error detection filter, employing the Fletcher32 checksum algorithm 
+        </td></tr>	
+        <tr valign=top align=left><td>
+            <code>H5Z_FILTER_SZIP</code> 
+            </td><td>
+            Data compression filter, employing the SZIP algorithm 
+        </td></tr>
+	</table>
+	</center>
+        Otherwise returns a negative value.
+  <dt><strong>Fortran90 Interface:</strong> h5pget_filter_f
+    <dd>
+	<pre>
+SUBROUTINE h5pget_filter_f(prp_id, filter_number, flags, cd_nelmts, 
+                           cd_values, namelen, name, filter_id, hdferr)
+  IMPLICIT NONE
+  INTEGER(HID_T), INTENT(IN) :: prp_id    ! Property list identifier
+  INTEGER, INTENT(IN) :: filter_number    ! Sequence number within the filter
+                                          ! pipeline of the filter for which
+                                          ! information is sought
+  INTEGER, DIMENSION(*), INTENT(OUT) :: cd_values  
+                                          ! Auxiliary data for the filter
+  INTEGER, INTENT(OUT) :: flags           ! Bit vector specifying certain 
+                                          ! general properties of the filter
+  INTEGER(SIZE_T), INTENT(INOUT) :: cd_nelmts      
+                                          ! Number of elements in cd_values
+  INTEGER(SIZE_T), INTENT(IN) :: namelen  ! Anticipated number of characters 
+                                          ! in name
+  CHARACTER(LEN=*), INTENT(OUT) :: name   ! Name of the filter
+  INTEGER, INTENT(OUT) :: filter_id       ! Filter identification number
+  INTEGER, INTENT(OUT) :: hdferr          ! Error code
+                                          ! 0 on success and -1 on failure
+END SUBROUTINE h5pget_filter_f
+	</pre>		
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+  <dt><strong>History</strong>:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.4</td>
+          <td valign="top">
+		    <code>filter</code> parameter type changed to 
+			<em>unsigned</em>.</td></tr>
+    </table></ul>
+</dl>
+

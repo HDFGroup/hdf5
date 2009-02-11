@@ -1,0 +1,51 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Dget_offset" -->
+<hr>
+<dl>
+<dt><strong>Name:</strong> <a name="Dataset-GetOffset">H5Dget_offset</a>
+<dt><strong>Signature:</strong>
+    <dd><em>haddr_t </em><code>H5Dget_offset</code>(<em>hid_t </em><code>dset_id</code>)
+<dt><strong>Purpose:</strong>
+    <dd>Returns dataset address in file.
+<dt><strong>Description:</strong>
+    <dd><code>H5Dget_offset</code> returns the address in the file 
+        of the dataset <code>dset_id</code>.
+	That address is expressed as the offset in bytes from 
+	the beginning of the file.
+<dt><strong>Parameters:</strong>
+    <ul><table>
+        <tr>
+		    <td valign="top"><em>hid_t&nbsp;</em><code>dset_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">Dataset identifier.</td></tr>
+    </table></ul>
+<dt><strong>Returns:</strong>
+    <dd>Returns the offset in bytes; 
+        otherwise returns <code>HADDR_UNDEF</code>, a negative value.
+<dt><strong>Fortran90 Interface:</strong>
+    <dd>None.
+<!--
+	<pre>
+SUBROUTINE
+	</pre>		
+-->
+		
+		<!--<dt><strong>Non-C API(s):</strong>
+    	<dd>
+        
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+        -->
+<dt><strong>History:</strong>
+    <ul><table width="90%">
+        <tr>
+		  <td valign="top" align="left" width="10%">
+		    <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td valign="top" align="left">
+		    <strong>C</strong></td></tr>
+        <tr>
+		  <td valign="top">1.6.0</td>
+          <td valign="top">
+		    Function introduced in this release.</td></tr>
+    </table></ul>
+</dl>
+

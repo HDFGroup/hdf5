@@ -1,0 +1,48 @@
+<!-- NEW PAGE -->
+<!-- HEADER RIGHT "H5Pget_compression" -->
+
+<!--
+
+<hr>
+<dl>
+  <dt><strong>Name:</strong> <a name="Property-GetCompression">H5Pget_compression</a>
+  <dt><strong>Signature:</strong>
+    <dd><em>H5Z_method_t</em> <code>H5Pget_compression</code>(<em>hid_t</em> <code>plist</code>,
+        <em>unsigned int</em> <code>*flags</code>,
+        <em>size_t</em> <code>*cd_size</code>,
+        <em>void</em> <code>*client_data</code>
+    )
+  <dt><strong>Purpose:</strong>
+    <dd>Gets compression method.
+  <dt><strong>Description:</strong>
+    <dd><code>H5Pget_compression</code> gets the compression method 
+        information from a dataset creation property list.  
+        The <code>client_data</code> buffer is initially 
+        <code>cd_size</code> bytes.  On return, <code>client_data</code>
+        will be initialized with at most that many bytes, and 
+        <code>cd_size</code> will contain the actual size of the 
+        client data, which might be larger than its original value.
+  <dt><strong>Parameters:</strong>
+    <dl>
+        <dt><em>hid_t</em> <code>plist</code>
+            <dd>IN: Identifier for the dataset creation property list.
+        <dt><em>unsigned int</em> <code>*flags</code>
+            <dd>OUT: Compression flags.
+        <dt><em>size_t</em> <code>*cd_size</code>
+            <dd>IN/OUT: Size of the <code>client_data</code> array.
+        <dt><em>void</em> <code>*client_data</code>
+            <dd>OUT: Byte array for the client data.
+    </dl>
+  <dt><strong>Returns:</strong>
+    <dd>Returns compression method if successful;
+        otherwise returns a negative value.
+  <dt><strong>Non-C API(s):</strong>
+    <dd><a href="fortran/h5p_FORTRAN.html#h5pxxx" 
+        target="FortranWin"><img src="Graphics/FORTRAN.gif" border=0></a>
+        <img src="Graphics/Java.gif"> 
+        <img src="Graphics/C++.gif">
+</dl>
+
+-->
+
+
