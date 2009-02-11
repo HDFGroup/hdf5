@@ -1473,6 +1473,8 @@
 ./tools/h5diff/testfiles/h5diff_203.txt
 ./tools/h5diff/testfiles/h5diff_204.txt
 ./tools/h5diff/testfiles/h5diff_205.txt
+./tools/h5diff/testfiles/h5diff_206.txt
+./tools/h5diff/testfiles/h5diff_207.txt
 
 
 

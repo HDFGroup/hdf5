@@ -331,12 +331,37 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
 
     /* not comparable objects */
     {
+
+        typedef struct cmp1_t
+        {
+            double       d;
+            int          i;
+        } cmp1_t;
+
+        typedef struct cmp2_t
+        {
+            int          i;
+            double       d;
+        } cmp2_t;
+
+        typedef struct cmp3_t
+        {
+            int          i;
+        } cmp3_t;
+
         double       data2[6] = {0,0,0,0,0,0};
         int          data3[6] = {0,0,0,0,0,0};
         int          data4[3][2] = {{0,0},{0,0},{0,0}};
-        hsize_t      dims3[2] = { 2,2 };
         int          data5[2][2] = {{0,0},{0,0}};
         unsigned int data6[3][2] = {{0,0},{0,0},{0,0}};
+        cmp1_t       data7[1] = {1,2};
+        cmp2_t       data8[1] = {1,2};
+        hsize_t      dims3[2] = { 2,2 };
+        hsize_t      dims4[1] = { 1 };
+        size_t       type_size;
+        hid_t        tid;
+
+        
 
         write_dset(gid3,1,dims1,"dset1",H5T_NATIVE_DOUBLE,NULL);
         write_dset(gid3,1,dims1,"dset2",H5T_NATIVE_DOUBLE,data2);
@@ -344,7 +369,28 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
         write_dset(gid3,2,dims2,"dset4",H5T_NATIVE_INT,data4);
         write_dset(gid3,2,dims3,"dset5",H5T_NATIVE_INT,data5);
         write_dset(gid3,2,dims2,"dset6",H5T_NATIVE_UINT,data6);
-        
+
+        /* case of compound with different type members */
+        type_size = sizeof( cmp1_t );
+        tid = H5Tcreate (H5T_COMPOUND, type_size );
+        H5Tinsert(tid, "d", HOFFSET( cmp1_t, d ), H5T_NATIVE_DOUBLE );
+        H5Tinsert(tid, "i", HOFFSET( cmp1_t, i ), H5T_NATIVE_INT );
+        write_dset(gid3,1,dims4,"dset7",tid,data7);
+        H5Tclose(tid);
+
+        type_size = sizeof( cmp2_t );
+        tid = H5Tcreate (H5T_COMPOUND, type_size );
+        H5Tinsert(tid, "i", HOFFSET( cmp2_t, i ), H5T_NATIVE_INT  );
+        H5Tinsert(tid, "d", HOFFSET( cmp2_t, d ), H5T_NATIVE_DOUBLE );
+        write_dset(gid3,1,dims4,"dset8",tid,data8);
+        H5Tclose(tid);
+
+        /* case of compound with different number of members */
+        type_size = sizeof( cmp3_t );
+        tid = H5Tcreate (H5T_COMPOUND, type_size );
+        H5Tinsert(tid, "i", HOFFSET( cmp2_t, i ), H5T_NATIVE_INT  );
+        write_dset(gid3,1,dims4,"dset9",tid,NULL);
+        H5Tclose(tid);
         
     }
     
