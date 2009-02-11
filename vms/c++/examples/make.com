@@ -15,23 +15,51 @@ $!#
 $!
 $! Make HDF5 C++ examples
 $!
-$ cxxopt = "/float=ieee_float/standard=strict_ansi/define=H5_VMS"
-$ define zlib_dir sys$sysusers:[pourmale.zlib-1_2_3]
-$
+$ define zlib_dir sys$sysusers:[pourmal.zlib-1_2_3]
+$ cxxopt = "/float=ieee_float/standard=strict_ansi/define=H5_VMS/include=zlib_dir"
 $ ccc := cxx 'cxxopt /include=([-.-.include])
 $!
 $!
-$ cxxobj= "create.cxx, readdata.cxx, writedata.cxx, compound.cxx,"+-
-          "extend_ds.cxx, chunks.cxx, h5group.cxx"
+$ cxxobj= "chunks.cxx, compound.cxx, create.cxx, extend_ds.cxx, h5group.cxx, "+-
+          "readdata.cxx, writedata.cxx"
 $! 
 $!                              
 $ ccc 'cxxobj
+$ type sys$input
+
+       Creating chunks 
+$ cxxlink  chunks, -
+           [-.-.lib]hdf5_cplus.olb/lib, -
+           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$!
+$ type sys$input
+
+       Creating compound 
+$ cxxlink  compound, -
+           [-.-.lib]hdf5_cplus.olb/lib, -
+           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$!
 $ type sys$input
 
        Creating create 
 $ cxxlink  create, -
            [-.-.lib]hdf5_cplus.olb/lib, -
            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$!
+$ type sys$input
+
+       Creating extend_ds  
+$ cxxlink  extend_ds, -
+           [-.-.lib]hdf5_cplus.olb/lib, -
+           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$!
+$ type sys$input
+
+       Creating h5group 
+$ cxxlink  h5group, -
+           [-.-.lib]hdf5_cplus.olb/lib, -
+           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
+$!
 $ type sys$input
 
        Creating readdata  
@@ -45,33 +73,7 @@ $ type sys$input
 $ cxxlink  writedata, -
            [-.-.lib]hdf5_cplus.olb/lib, -
            [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$ !                              
+$!                              
 $ type sys$input
-
-       Creating compound 
-$ cxxlink  compound, -
-           [-.-.lib]hdf5_cplus.olb/lib, -
-           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$!
-$ type sys$input
-
-       Creating extend_ds  
-$ cxxlink  extend_ds, -
-           [-.-.lib]hdf5_cplus.olb/lib, -
-           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$!
-$ type sys$input
-
-       Creating chunks 
-$ cxxlink  chunks, -
-           [-.-.lib]hdf5_cplus.olb/lib, -
-           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$!
-$ type sys$input
-
-       Creating h5group 
-$ cxxlink  h5group, -
-           [-.-.lib]hdf5_cplus.olb/lib, -
-           [-.-.lib]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ exit
