@@ -526,6 +526,13 @@ rem ############################################################################
 	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset5  g2/dset6
     call :tooltest h5diff_205.txt -c %file2% %file2% g2/dset5  g2/dset6
 	
+    rem   New option added rev #16463  - ADB 2/11/2009
+	rem # not comparable in compound
+	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset7  g2/dset8
+    call :tooltest h5diff_206.txt -c %file2% %file2% g2/dset7  g2/dset8
+
+	call :testing %h5diff% -c %srcfile2% %srcfile2% g2/dset8  g2/dset9
+    call :tooltest h5diff_207.txt -c %file2% %file2% g2/dset8  g2/dset9
 	
     rem ##############################################################################
     rem # END
