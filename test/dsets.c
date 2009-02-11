@@ -44,6 +44,7 @@ const char *FILENAME[] = {
     "random_chunks",
     "huge_chunks",
     "chunk_cache",
+    "big_chunk",
     NULL
 };
 #define FILENAME_BUF_SIZE       1024
@@ -163,6 +164,12 @@ const char *FILENAME[] = {
 #define TOO_HUGE_CHUNK_DIM2_1   ((hsize_t)1024)
 #define TOO_HUGE_CHUNK_DIM2_2   ((hsize_t)1024)
 
+/* Parameters for testing bypassing chunk cache */
+#define BYPASS_DATASET           "Dset"
+#define BYPASS_DIM               1000
+#define BYPASS_CHUNK_DIM         500
+#define BYPASS_FILL_VALUE        7
+ 
 /* Shared global arrays */
 #define DSET_DIM1       100
 #define DSET_DIM2       200
@@ -6683,6 +6690,133 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    test_big_chunks_bypass_cache
+ *
+ * Purpose:     When the chunk size is bigger than the cache size and the
+ *              chunk isn't on disk, this test verifies that the library
+ *              bypasses the cache. 
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Raymond Lu
+ *              11 Feb 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_big_chunks_bypass_cache(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       /* File ID */
+    hid_t       dcpl = -1;      /* Dataset creation property list ID */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hid_t       dsid = -1;      /* Dataset ID */
+    hsize_t     dim, chunk_dim; /* Dataset and chunk dimensions */
+    size_t      rdcc_nelmts, rdcc_nbytes;
+    int         fvalue = BYPASS_FILL_VALUE;
+    hsize_t     count, stride, offset, block;
+    static int  wdata[BYPASS_CHUNK_DIM], rdata[BYPASS_DIM];
+    int         i, j;
+    herr_t      ret;            /* Generic return value */
+
+    TESTING("big chunks bypassing the cache");
+
+    h5_fixname(FILENAME[9], fapl, filename, sizeof filename);
+
+    /* Define cache size to be smaller than chunk size */
+    rdcc_nelmts = BYPASS_CHUNK_DIM/5;
+    rdcc_nbytes = sizeof(int)*BYPASS_CHUNK_DIM/5;
+    if(H5Pset_cache(fapl, 0, rdcc_nelmts, rdcc_nbytes, 0) < 0) FAIL_STACK_ERROR
+
+    /* Create file */
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+    /* Create 1-D dataspace */
+    dim = BYPASS_DIM;
+    if((sid = H5Screate_simple(1, &dim, NULL)) < 0) FAIL_STACK_ERROR
+
+    /* Create dataset creation property list */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+
+    /* Define chunk size.  There will be only 2 chunks in the dataset. */
+    chunk_dim = BYPASS_CHUNK_DIM;
+    if(H5Pset_chunk(dcpl, 1, &chunk_dim) < 0) FAIL_STACK_ERROR
+
+    /* Define fill value, fill time, and chunk allocation time */
+    if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fvalue) < 0) FAIL_STACK_ERROR
+
+    if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET) < 0) FAIL_STACK_ERROR
+
+    if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_INCR) < 0) FAIL_STACK_ERROR
+
+    /* Try to create dataset */
+    dsid = H5Dcreate2(fid, BYPASS_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+
+    /* Select first chunk to write the data */
+    offset = 0;
+    count = 1;
+    stride = 1;
+    block = BYPASS_CHUNK_DIM;
+    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, &offset, &stride, &count, &block) < 0) 
+        FAIL_STACK_ERROR
+
+    for(i = 0; i < BYPASS_CHUNK_DIM; i++)
+        wdata[i] = i;
+
+    /* This write should bypass the cache because the chunk is bigger than the cache size
+     * and it's not allocated on disk. */
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, wdata) < 0)
+        FAIL_STACK_ERROR
+
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+    /* Reopen the dataset */
+    if((dsid = H5Dopen(fid, BYPASS_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Reads both 2 chunks.  Reading the second chunk should bypass the cache because the 
+     * chunk is bigger than the cache size and it isn't allocated on disk. */
+    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0) 
+        FAIL_STACK_ERROR
+
+    for(i = 0; i < BYPASS_CHUNK_DIM; i++)
+        if(rdata[i] != i) {
+            printf("    Read different values than written in the 1st chunk.\n");
+            printf("    At line %d and index %d, rdata = %d. It should be %d.\n", __LINE__, 
+                i, rdata[i], i);
+            FAIL_STACK_ERROR
+        }
+
+    for(j = BYPASS_CHUNK_DIM; j < BYPASS_DIM; j++)
+        if(rdata[j] != fvalue) {
+            printf("    Read different values than written in the 2nd chunk.\n");
+            printf("    At line %d and index %d, rdata = %d. It should be %d.\n", __LINE__, 
+                i, rdata[i], fvalue);
+            FAIL_STACK_ERROR
+        }
+   
+    /* Close IDs */
+    if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+    if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_huge_chunks() */
+
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Tests the dataset interface (H5D)
@@ -6803,6 +6937,7 @@ main(void)
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
         nerrors += (test_huge_chunks(my_fapl) < 0		? 1 : 0);
         nerrors += (test_chunk_cache(my_fapl) < 0		? 1 : 0);
+        nerrors += (test_big_chunks_bypass_cache(my_fapl) < 0   ? 1 : 0);
 
         if(H5Fclose(file) < 0)
             goto error;
