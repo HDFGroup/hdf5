@@ -147,7 +147,8 @@ hsize_t diff_attr(hid_t loc1_id,
             NULL,
             name1,
             name2,
-            options)!=1)
+            options,
+            0)!=1)
         {
 
 

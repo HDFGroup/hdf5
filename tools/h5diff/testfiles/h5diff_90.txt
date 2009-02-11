@@ -13,6 +13,9 @@ file1     file2
     x      x    /g2/dset4      
     x      x    /g2/dset5      
     x      x    /g2/dset6      
+    x      x    /g2/dset7      
+    x      x    /g2/dset8      
+    x      x    /g2/dset9      
 
 group  : </> and </>
 0 differences found
@@ -38,6 +41,13 @@ dataset: </g2/dset4> and </g2/dset4>
 dataset: </g2/dset5> and </g2/dset5>
 0 differences found
 dataset: </g2/dset6> and </g2/dset6>
+0 differences found
+dataset: </g2/dset7> and </g2/dset7>
+0 differences found
+dataset: </g2/dset8> and </g2/dset8>
+0 differences found
+dataset: </g2/dset9> and </g2/dset9>
+</g2/dset9> or </g2/dset9> are empty datasets
 0 differences found
 --------------------------------
 Some objects are not comparable

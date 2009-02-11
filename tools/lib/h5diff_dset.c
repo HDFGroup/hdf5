@@ -287,7 +287,8 @@ hsize_t diff_datasetid( hid_t did1,
         maxdim2,
         obj1_name,
         obj2_name,
-        options)!=1)
+        options,
+        0)!=1)
     {
         can_compare=0;
     }
@@ -661,7 +662,8 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
                    hsize_t     *maxdim2,
                    const char  *obj1_name,
                    const char  *obj2_name,
-                   diff_opt_t  *options )
+                   diff_opt_t  *options,
+                   int         is_compound)
 {
     
     
@@ -685,12 +687,32 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
     
     if ( tclass1 != tclass2 )
     {
+
         if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
         {
-            parallel_print("<%s> is of class %s and <%s> is of class %s\n",
-                obj1_name, get_class(tclass1),
-                obj2_name, get_class(tclass2) );
+            
+            if ( is_compound )
+            {
+                
+                parallel_print("<%s> has a class %s and <%s> has a class %s\n",
+                    obj1_name, get_class(tclass1),
+                    obj2_name, get_class(tclass2) );
+                
+            }
+            
+            else
+                
+            {
+                
+                parallel_print("<%s> is of class %s and <%s> is of class %s\n",
+                    obj1_name, get_class(tclass1),
+                    obj2_name, get_class(tclass2) );
+                
+            }
+
         }
+
+       
         can_compare = 0;
         options->not_cmp = 1;
         return can_compare;
@@ -850,6 +872,74 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
             parallel_print("\n");
         }
     }
+
+
+    if ( tclass1 == H5T_COMPOUND )
+    {
+        
+        int   nmembs1;
+        int   nmembs2;
+        int   j;
+        hid_t memb_type1;
+        hid_t memb_type2;
+
+        nmembs1 = H5Tget_nmembers(f_tid1);
+        nmembs2 = H5Tget_nmembers(f_tid2);
+
+        if ( nmembs1 != nmembs2 )
+        {
+            
+            if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
+            {
+                parallel_print("<%s> has %d members ", obj1_name, nmembs1);
+                parallel_print("<%s> has %d members ", obj2_name, nmembs2);
+                parallel_print("\n");
+            }
+
+            can_compare = 0;
+            options->not_cmp = 1;
+            return can_compare;
+        }
+               
+        for (j = 0; j < nmembs1; j++)
+        {
+            memb_type1 = H5Tget_member_type(f_tid1, (unsigned)j);
+            memb_type2 = H5Tget_member_type(f_tid2, (unsigned)j);
+
+            if (diff_can_type(memb_type1,
+                memb_type2,
+                rank1,
+                rank2,
+                dims1,
+                dims2,
+                maxdim1,
+                maxdim2,
+                obj1_name,
+                obj2_name,
+                options,
+                1)!=1)
+            {
+                can_compare = 0;
+                options->not_cmp = 1;
+                H5Tclose(memb_type1);
+                H5Tclose(memb_type2);
+                return can_compare;
+            }
+            
+            H5Tclose(memb_type1);
+            H5Tclose(memb_type2);
+            
+        }
+        
+        
+        
+        
+        
+    }
+    
+      
+
+
     
     return can_compare;
 }
