@@ -142,6 +142,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed an assertion failure caused by opening an attribute multiple times
+            through multiple file handles. (NAF - 2009/02/06)
       - Fixed a problem that could prevent the user from adding attributes (or
             any object header message) in some circumstances. (NAF - 2009/02/12)
       - Fixed a bug that could cause problems when an attribute was added to a

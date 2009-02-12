@@ -700,14 +700,14 @@ htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char*
                 HGOTO_ERROR(H5E_ATTR, H5E_BADTYPE, FAIL, "not an attribute")
 
             /* Get file serial number for attribute */
-            if(H5F_get_fileno((*attr)->shared->oloc.file, &attr_fnum) < 0)
+            if(H5F_get_fileno((*attr)->oloc.file, &attr_fnum) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "can't get file serial number")
 
             /* Verify whether it's the right object.  The attribute name, object address
              * to which the attribute is attached, and file serial number should all
              * match. */
             if(!strcmp(name_to_open, (*attr)->shared->name) &&
-                loc->addr == (*attr)->shared->oloc.addr &&
+                loc->addr == (*attr)->oloc.addr &&
                 loc_fnum == attr_fnum) {
                 ret_value = TRUE;
                 break;

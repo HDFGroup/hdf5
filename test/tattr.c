@@ -135,6 +135,10 @@ float attr_data5=(float)-5.123;        /* Test data for 5th attribute */
 #define BUG2_NATTR  100
 #define BUG2_NATTR2 16
 
+#define BUG3_DSET_NAME  "dset"
+#define BUG3_DT_NAME    "dt"
+#define BUG3_ATTR_NAME  "attr"
+
 /* Attribute iteration struct */
 typedef struct {
     H5_iter_order_t order;      /* Direction of iteration */
@@ -9288,7 +9292,7 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
                 attr = H5Acreate2(dataset, attrname, attr_tid, big_sid, H5P_DEFAULT, H5P_DEFAULT);
                 CHECK(attr, FAIL, "H5Acreate2");
 
-                /* Check that attribute is shared */
+                /* ChecFk that attribute is shared */
                 is_shared = H5A_is_shared_test(attr);
                 VERIFY(is_shared, TRUE, "H5A_is_shared_test");
 
@@ -9984,6 +9988,163 @@ test_attr_bug4(hid_t fcpl, hid_t fapl)
 
 /****************************************************************
 **
+**  test_attr_bug5(): Test basic H5A (attribute) code.
+**      Tests opening an attribute multiple times through
+**      objects opened through different file handles.
+**
+****************************************************************/
+static void
+test_attr_bug5(hid_t fcpl, hid_t fapl)
+{
+    hid_t   fid1, fid2;     /* File IDs */
+    hid_t   gid1, gid2;     /* Group IDs */
+    hid_t   did1, did2;     /* Dataset IDs */
+    hid_t   tid1, tid2;     /* Datatype IDs */
+    hid_t   aidg1, aidg2,
+            aidd1, aidd2,
+            aidt1, aidt2;   /* Attribute IDs */
+    hid_t   sid;            /* Dataspace ID */
+    hsize_t dims[1] = {5};  /* Attribute dimensions */
+    herr_t  ret;            /* Generic return status */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Opening an Attribute Through Multiple Files Concurrently\n"));
+
+    /* Create dataspace ID for attributes and datasets */
+    sid = H5Screate_simple(1, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create file */
+    fid1 = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid1, FAIL, "H5Fcreate");
+
+    /* Open root group */
+    gid1 = H5Gopen2(fid1, "/", H5P_DEFAULT);
+    CHECK(gid1, FAIL, "H5Gopen2");
+
+    /* Create and commit datatype */
+    tid1 = H5Tcopy(H5T_STD_I32LE);
+    CHECK(tid1, FAIL, "H5Tcopy");
+    ret = H5Tcommit2(fid1, BUG3_DT_NAME, tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
+
+    /* Create dataset */
+    did1 = H5Dcreate2(fid1, BUG3_DSET_NAME, tid1, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(did1, FAIL, "H5Dcreate2");
+
+    /* Create attribute on root group */
+    aidg1 = H5Acreate2(gid1, BUG3_ATTR_NAME, tid1, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aidg1, FAIL, "H5Acreate2");
+
+    /* Create attribute on dataset */
+    aidd1 = H5Acreate2(did1, BUG3_ATTR_NAME, tid1, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aidd1, FAIL, "H5Acreate2");
+
+    /* Create attribute on datatype */
+    aidt1 = H5Acreate2(tid1, BUG3_ATTR_NAME, tid1, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aidt1, FAIL, "H5Acreate2");
+
+    /* Close all IDs */
+    ret = H5Aclose(aidt1);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Aclose(aidd1);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Aclose(aidg1);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Dclose(did1);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Gclose(gid1);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+
+    /* Open file twice */
+    fid1 = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl);
+    CHECK(fid1, FAIL, "H5Fopen");
+    fid2 = H5Fopen(FILENAME, H5F_ACC_RDONLY, fapl);
+    CHECK(fid2, FAIL, "H5Fopen");
+
+    /* Open the root group twice */
+    gid1 = H5Gopen2(fid1, "/", H5P_DEFAULT);
+    CHECK(gid1, FAIL, "H5Gopen2");
+    gid2 = H5Gopen2(fid2, "/", H5P_DEFAULT);
+    CHECK(gid2, FAIL, "H5Gopen2");
+
+    /* Open the root group attribute twice */
+    aidg1 = H5Aopen(gid1, BUG3_ATTR_NAME, H5P_DEFAULT);
+    CHECK(aidg1, FAIL, "H5Aopen");
+    aidg2 = H5Aopen(gid2, BUG3_ATTR_NAME, H5P_DEFAULT);
+    CHECK(aidg1, FAIL, "H5Aopen");
+
+    /* Open the dataset twice */
+    did1 = H5Dopen2(fid1, BUG3_DSET_NAME, H5P_DEFAULT);
+    CHECK(did1, FAIL, "H5Dopen2");
+    did2 = H5Dopen2(fid2, BUG3_DSET_NAME, H5P_DEFAULT);
+    CHECK(did2, FAIL, "H5Dopen2");
+
+    /* Open the dataset attribute twice */
+    aidd1 = H5Aopen(did1, BUG3_ATTR_NAME, H5P_DEFAULT);
+    CHECK(aidd1, FAIL, "H5Aopen");
+    aidd2 = H5Aopen(did2, BUG3_ATTR_NAME, H5P_DEFAULT);
+    CHECK(aidd1, FAIL, "H5Aopen");
+
+    /* Open the datatype twice */
+    tid1 = H5Topen2(fid1, BUG3_DT_NAME, H5P_DEFAULT);
+    CHECK(tid1, FAIL, "H5Topen2");
+    tid2 = H5Topen2(fid2, BUG3_DT_NAME, H5P_DEFAULT);
+    CHECK(tid2, FAIL, "H5Topen2");
+
+    /* Open the datatype attribute twice */
+    aidt1 = H5Aopen(tid1, BUG3_ATTR_NAME, H5P_DEFAULT);
+    CHECK(aidt1, FAIL, "H5Aopen");
+    aidt2 = H5Aopen(tid2, BUG3_ATTR_NAME, H5P_DEFAULT);
+    CHECK(aidt2, FAIL, "H5Aopen");
+
+    /* Close all attributes */
+    ret = H5Aclose(aidg1);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Aclose(aidg2);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Aclose(aidd1);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Aclose(aidd2);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Aclose(aidt1);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Aclose(aidt2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close root groups */
+    ret = H5Gclose(gid1);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Gclose(gid2);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    /* Close datasets */
+    ret = H5Dclose(did1);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Dclose(did2);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close datatypes */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Tclose(tid2);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close files */
+    ret = H5Fclose(fid1);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(fid2);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_bug5() */
+
+/****************************************************************
+**
 **  test_attr(): Main H5A (attribute) testing routine.
 **
 ****************************************************************/
@@ -10126,6 +10287,7 @@ test_attr(void)
                 test_attr_bug2(my_fcpl, my_fapl);               /* Test many deleted attributes */
                 test_attr_bug3(my_fcpl, my_fapl);               /* Test "self referential" attributes */
                 test_attr_bug4(my_fcpl, my_fapl);               /* Test attributes on named datatypes */
+                test_attr_bug5(my_fcpl, my_fapl);               /* Test opening/closing attributes through different file handles */
             } /* end for */
         } /* end if */
         else {
@@ -10148,6 +10310,7 @@ test_attr(void)
             test_attr_bug2(fcpl, my_fapl);                      /* Test many deleted attributes */
             test_attr_bug3(fcpl, my_fapl);                      /* Test "self referential" attributes */
             test_attr_bug4(fcpl, my_fapl);                      /* Test attributes on named datatypes */
+            test_attr_bug5(fcpl, my_fapl);                      /* Test opening/closing attributes through different file handles */
         } /* end else */
     } /* end for */
 
