@@ -114,6 +114,8 @@ Bug Fixes since HDF5-1.8.2
 
     Library
     -------
+    - Fixed a bug that prevented more than one dataset chunk from being cached
+      at a time. NAF - 2009/02/12
     - Fixed an assertion failure caused by opening an attribute multiple times
       through multiple file handles. NAF - 2009/02/12
     - Fixed a problem that could prevent the user from adding attributes (or any

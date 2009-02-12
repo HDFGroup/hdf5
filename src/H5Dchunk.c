@@ -1396,7 +1396,7 @@ H5D_chunk_cacheable(const H5D_io_info_t *io_info)
              * cache, just write the data to it directly.
              */
             H5_CHECK_OVERFLOW(dataset->shared->layout.u.chunk.size, uint32_t, size_t);
-            if((size_t)dataset->shared->layout.u.chunk.size > dataset->shared->cache.chunk.nbytes)
+            if((size_t)dataset->shared->layout.u.chunk.size > dataset->shared->cache.chunk.nbytes_max)
                 ret_value = FALSE;
             else
                 ret_value = TRUE;
@@ -1848,19 +1848,19 @@ H5D_chunk_init(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, const H5D_t *dset)
     if(rdcc->nslots == H5D_CHUNK_CACHE_NSLOTS_DEFAULT)
         rdcc->nslots = H5F_RDCC_NSLOTS(f);
 
-    if(H5P_get(dapl, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc->nbytes) < 0)
+    if(H5P_get(dapl, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc->nbytes_max) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache byte size");
-    if(rdcc->nbytes == H5D_CHUNK_CACHE_NBYTES_DEFAULT)
-        rdcc->nbytes = H5F_RDCC_NBYTES(f);
+    if(rdcc->nbytes_max == H5D_CHUNK_CACHE_NBYTES_DEFAULT)
+        rdcc->nbytes_max = H5F_RDCC_NBYTES(f);
 
     if(H5P_get(dapl, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &rdcc->w0) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get preempt read chunks");
     if(rdcc->w0 < 0)
         rdcc->w0 = H5F_RDCC_W0(f);
 
-    /* If nbytes or nslots is 0, set them both to 0 and avoid allocating space */
-    if(!rdcc->nbytes || !rdcc->nslots)
-        rdcc->nbytes = rdcc->nslots = 0;
+    /* If nbytes_max or nslots is 0, set them both to 0 and avoid allocating space */
+    if(!rdcc->nbytes_max || !rdcc->nslots)
+        rdcc->nbytes_max = rdcc->nslots = 0;
     else {
         rdcc->slot = H5FL_SEQ_CALLOC(H5D_rdcc_ent_ptr_t, rdcc->nslots);
         if(NULL == rdcc->slot)
@@ -2135,7 +2135,7 @@ H5D_chunk_get_info(const H5D_t *dset, hid_t dxpl_id, const hsize_t *chunk_offset
 
         /* The same condition check as H5D_chunk_cacheable. */
         if(dset->shared->dcpl_cache.pline.nused || 
-            ((size_t)dset->shared->layout.u.chunk.size <= dset->shared->cache.chunk.nbytes))
+            ((size_t)dset->shared->layout.u.chunk.size <= dset->shared->cache.chunk.nbytes_max))
             /* Cache the information retrieved */
             H5D_chunk_cinfo_cache_update(&dset->shared->cache.chunk.last, udata);
     } /* end if */
@@ -2345,7 +2345,7 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     /* Remove from cache */
     rdcc->slot[ent->idx] = NULL;
     ent->idx = UINT_MAX;
-    rdcc->nbytes -= ent->chunk_size;
+    rdcc->nbytes_used -= ent->chunk_size;
     --rdcc->nused;
 
     /* Free */
@@ -2375,7 +2375,7 @@ H5D_chunk_cache_prune(const H5D_t *dset, hid_t dxpl_id,
     const H5D_dxpl_cache_t *dxpl_cache, size_t size)
 {
     const H5D_rdcc_t	*rdcc = &(dset->shared->cache.chunk);
-    size_t		total = rdcc->nbytes;
+    size_t		total = rdcc->nbytes_max;
     const int		nmeth = 2;	/*number of methods		*/
     int		        w[1];		/*weighting as an interval	*/
     H5D_rdcc_ent_t	*p[2], *cur;	/*list pointers			*/
@@ -2399,7 +2399,7 @@ H5D_chunk_cache_prune(const H5D_t *dset, hid_t dxpl_id,
     p[0] = rdcc->head;
     p[1] = NULL;
 
-    while((p[0] || p[1]) && (rdcc->nbytes + size) > total) {
+    while((p[0] || p[1]) && (rdcc->nbytes_used + size) > total) {
         int i;          /* Local index variable */
 
 	/* Introduce new pointers */
@@ -2412,7 +2412,7 @@ H5D_chunk_cache_prune(const H5D_t *dset, hid_t dxpl_id,
             n[i] = p[i] ? p[i]->next : NULL;
 
 	/* Give each method a chance */
-	for(i = 0; i < nmeth && (rdcc->nbytes + size) > total; i++) {
+	for(i = 0; i < nmeth && (rdcc->nbytes_used + size) > total; i++) {
 	    if(0 == i && p[0] && !p[0]->locked &&
                     ((0 == p[0]->rd_count && 0 == p[0]->wr_count) ||
                      (0 == p[0]->rd_count && p[0]->chunk_size == p[0]->wr_count) ||
@@ -2632,7 +2632,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
     } /* end else */
     HDassert(found || chunk_size > 0);
 
-    if(!found && rdcc->nslots > 0 && chunk_size <= rdcc->nbytes &&
+    if(!found && rdcc->nslots > 0 && chunk_size <= rdcc->nbytes_max &&
             (!ent || !ent->locked)) {
         /*
          * Add the chunk to the cache only if the slot is not already locked.
@@ -2662,7 +2662,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
         HDassert(NULL == rdcc->slot[idx]);
         rdcc->slot[idx] = ent;
         ent->idx = idx;
-        rdcc->nbytes += chunk_size;
+        rdcc->nbytes_used += chunk_size;
         rdcc->nused++;
 
         /* Add it to the linked list */
