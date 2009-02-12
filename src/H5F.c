@@ -428,7 +428,7 @@ H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref)
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_obj_count)
 
     /* H5F_get_objects doesn't fail */
-    ret_value=H5F_get_objects(f, types, 0, NULL, app_ref);
+    ret_value = H5F_get_objects(f, types, 0, NULL, app_ref);
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -518,8 +518,6 @@ H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *oid_list
  * Programmer:  Raymond Lu
  *              Wednesday, Dec 5, 2001
  *
- * Modification:
- *
  *---------------------------------------------------------------------------
  */
 static size_t
@@ -587,7 +585,7 @@ H5F_get_objects(const H5F_t *f, unsigned types, size_t max_index, hid_t *obj_id_
     ret_value = obj_id_count;
 
     FUNC_LEAVE_NOAPI(ret_value)
-}
+} /* end H5F_get_objects() */
 
 
 /*-------------------------------------------------------------------------

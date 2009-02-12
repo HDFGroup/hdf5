@@ -112,9 +112,11 @@ H5O_is_attr_dense_test(hid_t oid)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(oloc->file, H5AC_ind_dxpl_id, oh, &ainfo))
-        /* Clear error stack from not finding attribute info */
-        H5E_clear_stack(NULL);
+    if(oh->version > H5O_VERSION_1) {
+        /* Check for (& retrieve if available) attribute info */
+        if(H5A_get_ainfo(oloc->file, H5AC_ind_dxpl_id, oh, &ainfo) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+    } /* end if */
 
     /* Check if dense storage is being used */
     if(H5F_addr_defined(ainfo.fheap_addr)) {
@@ -157,7 +159,7 @@ H5O_is_attr_empty_test(hid_t oid)
 {
     H5O_t *oh = NULL;           /* Object header */
     H5O_ainfo_t ainfo;          /* Attribute information for object */
-    H5O_ainfo_t *ainfo_ptr = NULL;      /* Pointer to attribute information for object */
+    htri_t ainfo_exists = FALSE;        /* Whether the attribute info exists in the file */
     H5O_loc_t *oloc;            /* Pointer to object's location */
     hsize_t nattrs;             /* Number of attributes */
     htri_t ret_value;           /* Return value */
@@ -173,17 +175,18 @@ H5O_is_attr_empty_test(hid_t oid)
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
-    ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == (ainfo_ptr = H5A_get_ainfo(oloc->file, H5AC_ind_dxpl_id, oh, &ainfo)))
-        /* Clear error stack from not finding attribute info */
-        H5E_clear_stack(NULL);
+    if(oh->version > H5O_VERSION_1) {
+        /* Check for (& retrieve if available) attribute info */
+        if((ainfo_exists = H5A_get_ainfo(oloc->file, H5AC_ind_dxpl_id, oh, &ainfo)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+    } /* end if */
 
     /* Retrieve the number of attribute messages in header */
     nattrs = H5O_msg_count_real(oh, H5O_MSG_ATTR);
 
     /* Check for later version of object header format & attribute info available */
     if(oh->version > H5O_VERSION_1) {
-        if(ainfo_ptr) {
+        if(ainfo_exists) {
             /* Check for using dense storage */
             if(H5F_addr_defined(ainfo.fheap_addr)) {
                 /* Check for any messages in object header */
@@ -252,9 +255,11 @@ H5O_num_attrs_test(hid_t oid, hsize_t *nattrs)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(oloc->file, H5AC_ind_dxpl_id, oh, &ainfo))
-        /* Clear error stack from not finding attribute info */
-        H5E_clear_stack(NULL);
+    if(oh->version > H5O_VERSION_1) {
+        /* Check for (& retrieve if available) attribute info */
+        if(H5A_get_ainfo(oloc->file, H5AC_ind_dxpl_id, oh, &ainfo) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+    } /* end if */
 
     /* Retrieve the number of attribute messages in header */
     obj_nattrs = H5O_msg_count_real(oh, H5O_MSG_ATTR);
@@ -327,9 +332,11 @@ H5O_attr_dense_info_test(hid_t oid, hsize_t *name_count, hsize_t *corder_count)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(oloc->file, H5AC_ind_dxpl_id, oh, &ainfo))
-        /* Clear error stack from not finding attribute info */
-        H5E_clear_stack(NULL);
+    if(oh->version > H5O_VERSION_1) {
+        /* Check for (& retrieve if available) attribute info */
+        if(H5A_get_ainfo(oloc->file, H5AC_ind_dxpl_id, oh, &ainfo) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+    } /* end if */
 
     /* Check for 'dense' attribute storage file addresses being defined */
     if(!H5F_addr_defined(ainfo.fheap_addr))

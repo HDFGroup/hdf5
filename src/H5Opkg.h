@@ -534,6 +534,9 @@ H5_DLL herr_t H5O_shared_debug(const H5O_shared_t *mesg, FILE *stream,
 H5_DLL herr_t H5O_attr_reset(void *_mesg);
 H5_DLL herr_t H5O_attr_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg);
 H5_DLL herr_t H5O_attr_link(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg);
+H5_DLL herr_t H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
+    hsize_t *nattrs);
+
 
 /* These functions operate on object locations */
 H5_DLL H5O_loc_t *H5O_get_loc(hid_t id);

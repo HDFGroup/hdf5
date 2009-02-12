@@ -676,8 +676,5 @@ H5_DLL herr_t H5O_link_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
 /* Shared message operators */
 H5_DLL herr_t H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src);
 
-/* Attribute operators */
-H5_DLL hsize_t H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh);
-
 #endif /* _H5Oprivate_H */
 
