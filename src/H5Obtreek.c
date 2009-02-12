@@ -28,8 +28,8 @@
 #include "H5Opkg.h"             /* Object headers			*/
 #include "H5MMprivate.h"	/* Memory management			*/
 
-static void  *H5O_btreek_decode(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
-    unsigned *ioflags, const uint8_t *p);
+static void  *H5O_btreek_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh,
+    unsigned mesg_flags, unsigned *ioflags, const uint8_t *p);
 static herr_t H5O_btreek_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
 static void  *H5O_btreek_copy(const void *_mesg, void *_dest);
 static size_t H5O_btreek_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
@@ -79,8 +79,8 @@ const H5O_msg_class_t H5O_MSG_BTREEK[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_btreek_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, unsigned UNUSED mesg_flags,
-    unsigned UNUSED *ioflags, const uint8_t *p)
+H5O_btreek_decode(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
+    unsigned UNUSED mesg_flags, unsigned UNUSED *ioflags, const uint8_t *p)
 {
     H5O_btreek_t	*mesg;          /* Native message */
     void                *ret_value;     /* Return value */

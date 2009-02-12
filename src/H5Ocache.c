@@ -536,7 +536,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
                 unsigned ioflags = 0;   /* Flags for decode routine */
 
                 /* Decode continuation message */
-                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(f, dxpl_id, 0, &ioflags, oh->mesg[curmesg].raw);
+                cont = (H5O_cont_t *)(H5O_MSG_CONT->decode)(f, dxpl_id, NULL, 0, &ioflags, oh->mesg[curmesg].raw);
                 cont->chunkno = oh->nchunks;	/*the next chunk to allocate */
 
                 /* Save 'native' form of continuation message */
@@ -559,7 +559,7 @@ H5O_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void UNUSED * _udata1,
 
                 /* Decode ref. count message */
                 HDassert(oh->version > H5O_VERSION_1);
-                refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(f, dxpl_id, 0, &ioflags, oh->mesg[curmesg].raw);
+                refcount = (H5O_refcount_t *)(H5O_MSG_REFCOUNT->decode)(f, dxpl_id, NULL, 0, &ioflags, oh->mesg[curmesg].raw);
 
                 /* Save 'native' form of ref. count message */
                 oh->mesg[curmesg].native = refcount;

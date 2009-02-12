@@ -9773,6 +9773,135 @@ test_attr_bug2(hid_t fcpl, hid_t fapl)
 
 /****************************************************************
 **
+**  test_attr_bug3(): Test basic H5A (attribute) code.
+**      Tests creating and deleting attributes which use a
+**      datatype and/or dataspace stored in the same object
+**      header.
+**
+****************************************************************/
+static void
+test_attr_bug3(hid_t fcpl, hid_t fapl)
+{
+    hid_t   fid;            /* File ID */
+    hid_t   aid1, aid2;     /* Attribute IDs */
+    hid_t   sid1, sid2;     /* Dataspace ID */
+    hid_t   tid1, tid2;     /* Datatype IDs */
+    hid_t   did;            /* Dataset ID */
+    hsize_t dims1[2] = {2, 2},
+            dims2[2] = {3, 3}; /* Dimensions */
+    int     wdata1[2][2];
+    unsigned wdata2[3][3];  /* Write buffers */
+    herr_t  ret;            /* Generic return status */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing Attributes in the Same Header as their Datatypes\n"));
+
+    /* Create dataspaces */
+    sid1 = H5Screate_simple(2, dims1, NULL);
+    CHECK(sid1, FAIL, "H5Screate_simple");
+    sid2 = H5Screate_simple(2, dims2, NULL);
+    CHECK(sid2, FAIL, "H5Screate_simple");
+
+    /* Create file to operate on */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Create datatypes and commit tid1 */
+    tid1 = H5Tcopy(H5T_STD_I16BE);
+    CHECK(tid1, FAIL, "H5Tcopy");
+    tid2 = H5Tcopy(H5T_STD_U64LE);
+    CHECK(tid1, FAIL, "H5Tcopy");
+    ret = H5Tcommit2(fid, "dtype", tid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
+
+    /* Create dataset */
+    did = H5Dcreate2(fid, "dset", tid2, sid2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate2");
+
+    /* Create attribute on datatype, using that datatype as its datatype */
+    aid1 = H5Acreate2(tid1, "attr", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid1, FAIL, "H5Acreate2");
+
+    /* Create attribute on dataset, using its datatype and dataspace */
+    aid2 = H5Acreate2(did, "attr", tid2, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid2, FAIL, "H5Acreate2");
+
+    /* Close attributes */
+    ret = H5Aclose(aid1);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Aclose(aid2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Reopen attributes */
+    aid1 = H5Aopen(tid1, "attr", H5P_DEFAULT);
+    CHECK(aid1, FAIL, "H5Aopen");
+    aid2 = H5Aopen(did, "attr", H5P_DEFAULT);
+    CHECK(aid2, FAIL, "H5Aopen");
+
+    /* Write data to the attributes (the data is uninitialized, we only care
+     * that H5Awrite succeeds for now) */
+    ret = H5Awrite(aid1, H5T_NATIVE_INT, wdata1[0]);
+    CHECK(ret, FAIL, "H5Awrite");
+    ret = H5Awrite(aid2, H5T_NATIVE_UINT, wdata2[0]);
+    CHECK(ret, FAIL, "H5Awrite");
+
+    /* Close attributes */
+    ret = H5Aclose(aid1);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Aclose(aid2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Delete attributes */
+    ret = H5Adelete(tid1, "attr");
+    CHECK(ret, FAIL, "H5Adelete");
+    ret = H5Adelete(did, "attr");
+    CHECK(ret, FAIL, "H5Adelete");
+
+    /* Recreate attributes */
+    aid1 = H5Acreate2(tid1, "attr", tid1, sid1, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid1, FAIL, "H5Acreate2");
+    aid2 = H5Acreate2(did, "attr", tid2, sid2, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid2, FAIL, "H5Acreate2");
+
+    /* Delete attributes (note they are still open) */
+    ret = H5Adelete(tid1, "attr");
+    CHECK(ret, FAIL, "H5Adelete");
+    ret = H5Adelete(did, "attr");
+    CHECK(ret, FAIL, "H5Adelete");
+
+    /* Close dataspaces and transient datatype */
+    ret = H5Sclose(sid1);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Sclose(sid2);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Tclose(tid2);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    /* Close dataset and committed datatype */
+    ret = H5Tclose(tid1);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Delete dataset and committed datatype */
+    ret = H5Ldelete(fid, "dtype", H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tclose");
+    ret = H5Ldelete(fid, "dset", H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    /* Close attributes */
+    ret = H5Aclose(aid1);
+    CHECK(ret, FAIL, "H5Aclose");
+    ret = H5Aclose(aid2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Close file */
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+}   /* test_attr_bug3() */
+
+/****************************************************************
+**
 **  test_attr(): Main H5A (attribute) testing routine.
 **
 ****************************************************************/
@@ -9913,6 +10042,7 @@ test_attr(void)
                 /* Tests that address specific bugs */
                 test_attr_bug1(my_fcpl, my_fapl);               /* Test odd allocation operations */
                 test_attr_bug2(my_fcpl, my_fapl);               /* Test many deleted attributes */
+                test_attr_bug3(my_fcpl, my_fapl);               /* Test "self referential" attributes */
             } /* end for */
         } /* end if */
         else {
@@ -9933,6 +10063,7 @@ test_attr(void)
             /* Tests that address specific bugs */
             test_attr_bug1(fcpl, my_fapl);                      /* Test odd allocation operations */
             test_attr_bug2(fcpl, my_fapl);                      /* Test many deleted attributes */
+            test_attr_bug3(fcpl, my_fapl);                      /* Test "self referential" attributes */
         } /* end else */
     } /* end for */
 
