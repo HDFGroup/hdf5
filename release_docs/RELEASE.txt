@@ -81,6 +81,8 @@ Bug Fixes since HDF5-1.6.8 Release
 
     Library
     -------
+    - Fixed a bug that prevented more than one dataset chunk from being cached
+            at a time. NAF - 2009/02/12
     - H5Dset_extent: when shrinking dimensions, some chunks were not deleted. 
             Shrinking to a zero size dimension caused an assertion in the library.
             (PVN - 2009/01/8)

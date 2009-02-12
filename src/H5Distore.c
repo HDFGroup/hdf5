@@ -919,7 +919,7 @@ H5D_istore_init (const H5F_t *f, const H5D_t *dset)
     FUNC_ENTER_NOAPI(H5D_istore_init, FAIL)
 
     if (H5F_RDCC_NBYTES(f)>0 && H5F_RDCC_NELMTS(f)>0) {
-        rdcc->nbytes=H5F_RDCC_NBYTES(f);
+        rdcc->nbytes_max = H5F_RDCC_NBYTES(f);
 	rdcc->nslots = H5F_RDCC_NELMTS(f);
 	rdcc->slot = H5FL_SEQ_CALLOC (H5D_rdcc_ent_ptr_t,rdcc->nslots);
 	if (NULL==rdcc->slot)
@@ -1101,7 +1101,7 @@ H5D_istore_preempt(const H5D_io_info_t *io_info, H5D_rdcc_ent_t * ent, hbool_t f
     /* Remove from cache */
     rdcc->slot[ent->idx] = NULL;
     ent->idx = UINT_MAX;
-    rdcc->nbytes -= ent->chunk_size;
+    rdcc->nbytes_used -= ent->chunk_size;
     --rdcc->nused;
 
     /* Free */
@@ -1337,7 +1337,7 @@ H5D_istore_prune (const H5D_io_info_t *io_info, size_t size)
 {
     int		i, j, nerrors=0;
     const H5D_rdcc_t	*rdcc = &(io_info->dset->shared->cache.chunk);
-    size_t		total = rdcc->nbytes;
+    size_t		total = rdcc->nbytes_max;
     const int		nmeth=2;	/*number of methods		*/
     int		        w[1];		/*weighting as an interval	*/
     H5D_rdcc_ent_t	*p[2], *cur;	/*list pointers			*/
@@ -1360,7 +1360,7 @@ H5D_istore_prune (const H5D_io_info_t *io_info, size_t size)
     p[0] = rdcc->head;
     p[1] = NULL;
 
-    while ((p[0] || p[1]) && rdcc->nbytes+size>total) {
+    while ((p[0] || p[1]) && rdcc->nbytes_used+size>total) {
 
 	/* Introduce new pointers */
 	for (i=0; i<nmeth-1; i++)
@@ -1372,7 +1372,7 @@ H5D_istore_prune (const H5D_io_info_t *io_info, size_t size)
             n[i] = p[i] ? p[i]->next : NULL;
 
 	/* Give each method a chance */
-	for (i=0; i<nmeth && rdcc->nbytes+size>total; i++) {
+	for (i=0; i<nmeth && rdcc->nbytes_used+size>total; i++) {
 	    if (0==i && p[0] && !p[0]->locked &&
                     ((0==p[0]->rd_count && 0==p[0]->wr_count) ||
                      (0==p[0]->rd_count && p[0]->chunk_size==p[0]->wr_count) ||
@@ -1699,7 +1699,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info,
     }
     assert (found || chunk_size>0);
 
-    if (!found && rdcc->nslots>0 && chunk_size<=rdcc->nbytes &&
+    if (!found && rdcc->nslots>0 && chunk_size<=rdcc->nbytes_max &&
             (!ent || !ent->locked)) {
         /*
          * Add the chunk to the cache only if the slot is not already locked.
@@ -1732,7 +1732,7 @@ H5D_istore_lock(const H5D_io_info_t *io_info,
         assert(NULL==rdcc->slot[idx]);
         rdcc->slot[idx] = ent;
         ent->idx = idx;
-        rdcc->nbytes += chunk_size;
+        rdcc->nbytes_used += chunk_size;
         rdcc->nused++;
 
         /* Add it to the linked list */
@@ -1951,7 +1951,7 @@ HDfprintf(stderr,"%s: buf=%p\n",FUNC,buf);
      * writing to other elements in the same chunk.  Do a direct
      * read-through of only the elements requested.
      */
-    if (dset->shared->dcpl_cache.pline.nused==0 && ((dset->shared->layout.u.chunk.size>dset->shared->cache.chunk.nbytes && chunk_addr!=HADDR_UNDEF)
+    if (dset->shared->dcpl_cache.pline.nused==0 && ((dset->shared->layout.u.chunk.size>dset->shared->cache.chunk.nbytes_max && chunk_addr!=HADDR_UNDEF)
             || (IS_H5FD_MPI(dset->ent.file) && (H5F_ACC_RDWR & H5F_get_intent(dset->ent.file))))) {
         H5D_io_info_t chk_io_info;      /* Temporary I/O info object */
         H5D_storage_t chk_store;        /* Chunk storage information */
@@ -2151,7 +2151,7 @@ HDfprintf(stderr,"%s: mem_offset_arr[%Zu]=%Hu\n",FUNC,*mem_curr_seq,mem_offset_a
     } /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
-    if (dset->shared->dcpl_cache.pline.nused==0 && ((dset->shared->layout.u.chunk.size>dset->shared->cache.chunk.nbytes && chunk_addr!=HADDR_UNDEF)
+    if (dset->shared->dcpl_cache.pline.nused==0 && ((dset->shared->layout.u.chunk.size>dset->shared->cache.chunk.nbytes_max && chunk_addr!=HADDR_UNDEF)
             || (IS_H5FD_MPI(dset->ent.file) && (H5F_ACC_RDWR & H5F_get_intent(dset->ent.file))))) {
         H5D_io_info_t chk_io_info;      /* Temporary I/O info object */
         H5D_storage_t chk_store;        /* Chunk storage information */

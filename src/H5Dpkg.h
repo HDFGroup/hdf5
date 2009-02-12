@@ -123,10 +123,11 @@ typedef struct H5D_rdcc_t {
     unsigned		nmisses;/* Number of cache misses		*/
     unsigned		nflushes;/* Number of cache flushes		*/
 #endif /* H5D_ISTORE_DEBUG */
-    size_t		nbytes;	/* Current cached raw data in bytes	*/
+    size_t		nbytes_max; /* Maximum cached raw data in bytes	*/
     size_t		nslots;	/* Number of chunk slots allocated	*/
     struct H5D_rdcc_ent_t *head; /* Head of doubly linked list		*/
     struct H5D_rdcc_ent_t *tail; /* Tail of doubly linked list		*/
+    size_t		nbytes_used; /* Current cached raw data in bytes */
     int		nused;	/* Number of chunk slots in use		*/
     struct H5D_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
 } H5D_rdcc_t;
@@ -332,6 +333,7 @@ H5_DLL htri_t H5D_mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *m
 #ifdef H5D_TESTING
 H5_DLL herr_t H5D_layout_version_test(hid_t did, unsigned *version);
 H5_DLL herr_t H5D_layout_contig_size_test(hid_t did, hsize_t *size);
+H5_DLL herr_t H5D_current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused);
 #endif /* H5D_TESTING */
 
 #endif /*_H5Dpkg_H*/
