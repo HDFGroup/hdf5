@@ -1804,10 +1804,16 @@ done:
  *		slu@ncsa.uiuc.edu
  *		July 14, 2004
  *
+ * Modifications: Neil Fortner
+ *              Feb 4 2009
+ *              Added open_oh parameter.  This parameter is optional and
+ *              contains this message's protected object header
+ *
  *-------------------------------------------------------------------------
  */
 void *
-H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, const unsigned char *buf)
+H5O_msg_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned type_id,
+    const unsigned char *buf)
 {
     const H5O_msg_class_t   *type;      /* Actual H5O class type for the ID */
     void *ret_value;                    /* Return value */
@@ -1822,7 +1828,7 @@ H5O_msg_decode(H5F_t *f, hid_t dxpl_id, unsigned type_id, const unsigned char *b
     HDassert(type);
 
     /* decode */
-    if((ret_value = (type->decode)(f, dxpl_id, 0, &ioflags, buf)) == NULL)
+    if((ret_value = (type->decode)(f, dxpl_id, open_oh, 0, &ioflags, buf)) == NULL)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode message")
 
 done:

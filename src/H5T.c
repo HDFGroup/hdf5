@@ -2920,7 +2920,7 @@ H5T_decode(const unsigned char *buf)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_VERSION, NULL, "unknown version of encoded datatype")
 
     /* Decode the serialized datatype message */
-    if((ret_value = H5O_msg_decode(f, H5AC_dxpl_id, H5O_DTYPE_ID, buf)) == NULL)
+    if((ret_value = H5O_msg_decode(f, H5AC_dxpl_id, NULL, H5O_DTYPE_ID, buf)) == NULL)
 	HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, NULL, "can't decode object")
 
 done:
