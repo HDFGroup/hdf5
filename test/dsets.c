@@ -6772,7 +6772,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
 
     /* Reopen the dataset */
-    if((dsid = H5Dopen(fid, BYPASS_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dsid = H5Dopen2(fid, BYPASS_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Reads both 2 chunks.  Reading the second chunk should bypass the cache because the 
      * chunk is bigger than the cache size and it isn't allocated on disk. */
