@@ -76,7 +76,6 @@
 typedef struct H5A_shared_t {
     unsigned    version;    /* Version to encode attribute with */
     hbool_t     initialized;/* Indicate whether the attribute has been modified */
-    H5O_loc_t   oloc;       /* Object location for object attribute is on */
 
     char        *name;      /* Attribute's name */
     H5T_cset_t  encoding;   /* Character encoding of attribute name */
@@ -96,6 +95,7 @@ typedef struct H5A_shared_t {
 /* Define the main attribute structure */
 struct H5A_t {
     H5O_shared_t sh_loc;     /* Shared message info (must be first) */
+    H5O_loc_t    oloc;       /* Object location for object attribute is on */
     hbool_t      obj_opened; /* Object header entry opened? */
     H5G_name_t   path;       /* Group hierarchy path */
     H5A_shared_t *shared;    /* Shared attribute information */

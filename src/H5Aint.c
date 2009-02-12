@@ -830,7 +830,7 @@ H5A_attr_copy_file(const H5A_t *attr_src, H5F_t *file_dst, hbool_t *recompute_si
         HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate shared attr structure")
 
     /* Don't have an opened group location for copy */
-    H5O_loc_reset(&(attr_dst->shared->oloc));
+    H5O_loc_reset(&(attr_dst->oloc));
     H5G_name_reset(&(attr_dst->path));
     attr_dst->obj_opened = FALSE;
 

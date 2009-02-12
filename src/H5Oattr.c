@@ -812,7 +812,7 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
 	    mesg->obj_opened);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	    "Object:",
-	    mesg->shared->oloc.addr);
+	    mesg->oloc.addr);
 
     /* Check for attribute creation order index on the attribute */
     if(mesg->shared->crt_idx != H5O_MAX_CRT_ORDER_IDX)
