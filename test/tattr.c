@@ -9902,6 +9902,88 @@ test_attr_bug3(hid_t fcpl, hid_t fapl)
 
 /****************************************************************
 **
+**  test_attr_bug4(): Test basic H5A (attribute) code.
+**      Attempts to trigger a bug which would result in being
+**      unable to add an attribute to a named datatype.  This
+**      happened when an object header chunk was too small to
+**      hold a continuation message and could not be extended.
+**
+****************************************************************/
+static void
+test_attr_bug4(hid_t fcpl, hid_t fapl)
+{
+    hid_t   fid;            /* File ID */
+    hid_t   gid;            /* Group ID */
+    hid_t   aid1, aid2, aid3; /* Attribute IDs */
+    hid_t   sid;            /* Dataspace ID */
+    hid_t   tid;            /* Datatype ID */
+    hid_t   did;            /* Dataset ID */
+    hsize_t dims[1] = {5};  /* Attribute dimensions */
+    herr_t  ret;            /* Generic return status */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing that attributes can always be added to named datatypes\n"));
+
+    /* Create dataspace */
+    sid = H5Screate_simple(1, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Open root group */
+    gid = H5Gopen2(fid, "/", H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
+
+    /* Create committed datatype */
+    tid = H5Tcopy(H5T_STD_I32LE);
+    CHECK(tid, FAIL, "H5Tcopy");
+    ret = H5Tcommit2(fid, "dtype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Tcommit2");
+
+    /* Create dataset */
+    did = H5Dcreate2(fid, "dset", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate2");
+
+    /* Create attributes on group and dataset */
+    aid1 = H5Acreate2(gid, "attr", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid1, FAIL, "H5Acreate2");
+    aid2 = H5Acreate2(did, "attr", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid2, FAIL, "H5Acreate2");
+
+    /* Create attribute on datatype (this is the main test) */
+    aid3 = H5Acreate2(tid, "attr", tid, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid3, FAIL, "H5Acreate2");
+
+    /* Close IDs */
+    ret = H5Aclose(aid3);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Aclose(aid2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Aclose(aid1);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+    ret = H5Tclose(tid);
+    CHECK(ret, FAIL, "H5Tclose");
+
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+}   /* test_attr_bug4() */
+
+/****************************************************************
+**
 **  test_attr(): Main H5A (attribute) testing routine.
 **
 ****************************************************************/
@@ -10043,6 +10125,7 @@ test_attr(void)
                 test_attr_bug1(my_fcpl, my_fapl);               /* Test odd allocation operations */
                 test_attr_bug2(my_fcpl, my_fapl);               /* Test many deleted attributes */
                 test_attr_bug3(my_fcpl, my_fapl);               /* Test "self referential" attributes */
+                test_attr_bug4(my_fcpl, my_fapl);               /* Test attributes on named datatypes */
             } /* end for */
         } /* end if */
         else {
@@ -10064,6 +10147,7 @@ test_attr(void)
             test_attr_bug1(fcpl, my_fapl);                      /* Test odd allocation operations */
             test_attr_bug2(fcpl, my_fapl);                      /* Test many deleted attributes */
             test_attr_bug3(fcpl, my_fapl);                      /* Test "self referential" attributes */
+            test_attr_bug4(fcpl, my_fapl);                      /* Test attributes on named datatypes */
         } /* end else */
     } /* end for */
 
