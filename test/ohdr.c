@@ -43,6 +43,101 @@ const char *FILENAME[] = {
  */
 #define FILE_BOGUS "tbogus.h5"
 
+/*
+ *  Verify that messages are moved forward into a "continuation message":
+ *	Create an object header with several continuation chunks
+ *	Remove a message in the last chunk
+ *	The remaining message(s) in the last chunk should be moved forward into the continuation message
+ *	The process will repeat when the continuation message is big enough to hold all the 
+ *		messages in the last chunk.
+ *	Result: the number of chunks should be reduced
+ */
+static herr_t
+test_cont(char *filename, hid_t fapl)
+{
+    hid_t	file=-1;
+    H5F_t	*f = NULL;
+    H5O_info_t  oinfo;               
+    H5O_loc_t	oh_locA, oh_locB;
+    time_t	time_new;
+    char	*short_name = "T";
+    char	*long_name = "This is the message";
+    size_t	nchunks;
+
+    TESTING("object header continuation block");
+
+    /* Create the file to operate on */
+    if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if(NULL == (f = (H5F_t *)H5I_object(file))) FAIL_STACK_ERROR
+
+    HDmemset(&oh_locA, 0, sizeof(oh_locA));
+    HDmemset(&oh_locB, 0, sizeof(oh_locB));
+
+    if(H5O_create(f, H5P_DATASET_XFER_DEFAULT, (size_t)H5O_MIN_SIZE, H5P_GROUP_CREATE_DEFAULT, &oh_locA/*out*/) < 0)
+            FAIL_STACK_ERROR
+
+    if(H5O_create(f, H5P_DATASET_XFER_DEFAULT, (size_t)H5O_MIN_SIZE, H5P_GROUP_CREATE_DEFAULT, &oh_locB/*out*/) < 0)
+            FAIL_STACK_ERROR
+
+    time_new = 11111111;
+
+    if(H5O_msg_create(&oh_locA, H5O_NAME_ID, 0, 0, &long_name, H5P_DATASET_XFER_DEFAULT) < 0)
+	FAIL_STACK_ERROR
+
+    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
+	FAIL_STACK_ERROR
+    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
+	FAIL_STACK_ERROR
+    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
+	FAIL_STACK_ERROR
+
+    if(H5O_msg_create(&oh_locA, H5O_MTIME_NEW_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
+	FAIL_STACK_ERROR
+
+    if(H5O_msg_create(&oh_locB, H5O_MTIME_ID, 0, 0, &time_new, H5P_DATASET_XFER_DEFAULT) < 0)
+            FAIL_STACK_ERROR
+
+    if(H5O_msg_create(&oh_locA, H5O_NAME_ID, 0, 0, &short_name, H5P_DATASET_XFER_DEFAULT) < 0)
+	FAIL_STACK_ERROR
+
+    if(H5AC_flush(f, H5P_DATASET_XFER_DEFAULT, TRUE) < 0)
+	FAIL_STACK_ERROR
+
+    if(H5O_get_info(&oh_locA, H5P_DATASET_XFER_DEFAULT, FALSE, &oinfo) < 0)
+	FAIL_STACK_ERROR
+    nchunks = oinfo.hdr.nchunks;
+
+    /* remove the 1st H5O_NAME_ID message */
+    if(H5O_msg_remove(&oh_locA, H5O_NAME_ID, 0, FALSE, H5P_DATASET_XFER_DEFAULT) < 0)
+	FAIL_STACK_ERROR
+
+    if(H5O_get_info(&oh_locA, H5P_DATASET_XFER_DEFAULT, FALSE, &oinfo) < 0)
+	FAIL_STACK_ERROR
+
+    if (oinfo.hdr.nchunks >= nchunks)
+	TEST_ERROR
+
+    if(H5O_close(&oh_locA) < 0)
+	FAIL_STACK_ERROR
+    if(H5O_close(&oh_locB) < 0)
+	FAIL_STACK_ERROR
+    if(H5Fclose(file) < 0)
+	FAIL_STACK_ERROR
+
+    PASSED();
+
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5O_close(&oh_locA);
+        H5O_close(&oh_locB);
+        H5Fclose (file);
+    } H5E_END_TRY;
+    return -1;
+} /* test_cont() */
+
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -84,11 +179,15 @@ main(void)
         /* Display info about testing */
         if(b)
             HDputs("Using new file format:");
-        else
+        else	
             HDputs("Using default file format:");
 
         /* Set the format to use for the file */
         if (H5Pset_libver_bounds(fapl, (b ? H5F_LIBVER_LATEST : H5F_LIBVER_EARLIEST), H5F_LIBVER_LATEST) < 0) FAIL_STACK_ERROR
+
+	/* test on object continuation block */
+	if (test_cont(filename, fapl) < 0)
+            FAIL_STACK_ERROR
 
         /* Create the file to operate on */
         if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
