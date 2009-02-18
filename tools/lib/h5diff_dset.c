@@ -204,7 +204,7 @@ hsize_t diff_datasetid( hid_t did1,
     hsize_t    storage_size1;
     hsize_t    storage_size2;
     hsize_t    nfound=0;               /* number of differences found */
-    int        cmp=1;                  /* do diff or not */
+    int        can_compare=1;          /* do diff or not */
     void       *buf1=NULL;                  
     void       *buf2=NULL; 
     void       *sm_buf1=NULL;                
@@ -256,14 +256,12 @@ hsize_t diff_datasetid( hid_t did1,
     
     storage_size1=H5Dget_storage_size(did1);
     storage_size2=H5Dget_storage_size(did2);
-    if (storage_size1<0 || storage_size2<0)
-        goto error;
     
     if (storage_size1==0 || storage_size2==0)
     {
-        if (options->m_verbose && obj1_name && obj2_name)
+        if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
             printf("<%s> or <%s> are empty datasets\n", obj1_name, obj2_name);
-        cmp=0;
+        can_compare=0;
         options->not_cmp=1;
     }
     
@@ -282,10 +280,10 @@ hsize_t diff_datasetid( hid_t did1,
         maxdim2,
         obj1_name,
         obj2_name,
-        options)!=1)
+        options,
+        0)!=1)
     {
-        cmp=0;
-        options->not_cmp=1;
+        can_compare=0;
     }
     
    /*-------------------------------------------------------------------------
@@ -310,13 +308,13 @@ hsize_t diff_datasetid( hid_t did1,
     sign2=H5Tget_sign(m_tid2);
     if ( sign1 != sign2 )
     {
-        if (options->m_verbose && obj1_name) 
+        if ((options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name) 
         {
-            printf("Comparison not supported: <%s> has sign %s ", obj1_name, get_sign(sign1));
+            printf("<%s> has sign %s ", obj1_name, get_sign(sign1));
             printf("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
         }
         
-        cmp=0;
+        can_compare=0;
         options->not_cmp=1;
     }
     
@@ -324,7 +322,7 @@ hsize_t diff_datasetid( hid_t did1,
     * only attempt to compare if possible
     *-------------------------------------------------------------------------
     */
-    if (cmp)
+    if (can_compare ) /* it is possible to compare */
     {
         
        /*-------------------------------------------------------------------------
@@ -494,10 +492,8 @@ hsize_t diff_datasetid( hid_t did1,
                 if ( H5Dread(did2,m_tid2,sm_space,sid2,H5P_DEFAULT,sm_buf2) < 0 )
                     goto error;
                 
-                /* get array differences. in the case of hyperslab read, increment the 
-                   number of differences found in each hyperslab and pass the 
-                   position at the beggining for printing
-                 */
+                /* get array differences. in the case of hyperslab read, increment the number of differences
+                found in each hyperslab and pass the position at the beggining for printing */
                 nfound += diff_array(sm_buf1,
                     sm_buf2,
                     hs_nelmts,
@@ -543,8 +539,7 @@ hsize_t diff_datasetid( hid_t did1,
             }
             
   } /* hyperslab read */
- 
- }/*cmp*/
+ }/*can_compare*/
  
  /*-------------------------------------------------------------------------
   * compare attributes
@@ -635,21 +630,21 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function: diff_can_type
- *
- * Purpose: check for comparable TYPE and SPACE
- *
- * Return:
- *  1, can compare
- *  0, cannot compare
- * -1, error
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: November 3, 2003
- *
- *-------------------------------------------------------------------------
- */
+* Function: diff_can_type
+*
+* Purpose: check for comparable TYPE and SPACE
+*
+* Return:
+*  1, can compare
+*  0, cannot compare
+* -1, error
+*
+* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+*
+* Date: November 3, 2003
+*
+*-------------------------------------------------------------------------
+*/
 
 int diff_can_type( hid_t       f_tid1, /* file data type */
                    hid_t       f_tid2, /* file data type */
@@ -661,20 +656,24 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
                    hsize_t     *maxdim2,
                    const char  *obj1_name,
                    const char  *obj2_name,
-                   diff_opt_t  *options )
+                   diff_opt_t  *options,
+                   int         is_compound)
 {
+    
+    
     H5T_class_t  tclass1;
     H5T_class_t  tclass2;
     int          maxdim_diff=0;          /* maximum dimensions are different */
     int          dim_diff=0;             /* current dimensions are different */
     int          i;
+    int          can_compare = 1;        /* return value */
     
-   /*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * check for the same class
     *-------------------------------------------------------------------------
     */
     
-   if ((tclass1=H5Tget_class(f_tid1)) < 0)
+    if ((tclass1=H5Tget_class(f_tid1)) < 0)
         return -1;
     
     if ((tclass2=H5Tget_class(f_tid2)) < 0)
@@ -682,16 +681,38 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
     
     if ( tclass1 != tclass2 )
     {
-        if (options->m_verbose && obj1_name) 
+
+        if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
         {
-            printf("Comparison not possible: <%s> is of class %s and <%s> is of class %s\n",
-                obj1_name, get_class(tclass1),
-                obj2_name, get_class(tclass2) );
+            
+            if ( is_compound )
+            {
+                
+                printf("<%s> has a class %s and <%s> has a class %s\n",
+                    obj1_name, get_class(tclass1),
+                    obj2_name, get_class(tclass2) );
+                
+            }
+            
+            else
+                
+            {
+                
+                printf("<%s> is of class %s and <%s> is of class %s\n",
+                    obj1_name, get_class(tclass1),
+                    obj2_name, get_class(tclass2) );
+                
+            }
+
         }
-        return 0;
+
+       
+        can_compare = 0;
+        options->not_cmp = 1;
+        return can_compare;
     }
     
-   /*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * check for non supported classes
     *-------------------------------------------------------------------------
     */
@@ -713,22 +734,30 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
         break;
         
     default: /*H5T_TIME */
-        if (options->m_verbose && obj1_name )
-            printf("Comparison not supported: <%s> and <%s> are of class %s\n",
-            obj1_name,obj2_name,get_class(tclass2) );
-        return 0;
+        
+
+        if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
+        {
+            printf("<%s> and <%s> are of class %s\n",
+                obj1_name,obj2_name,get_class(tclass2) );
+        }
+        can_compare = 0;
+        options->not_cmp = 1;
+        return can_compare;
     }
     
-   /*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * check for equal file datatype; warning only
     *-------------------------------------------------------------------------
     */
     
-    if ( (H5Tequal(f_tid1, f_tid2)==0) && options->m_verbose && obj1_name)
+    if ( (H5Tequal(f_tid1, f_tid2)==0) &&
+        (options->m_verbose) && obj1_name && obj2_name)
     {
         
         H5T_class_t cl = H5Tget_class(f_tid1);
-        
+         
+
         printf("Warning: different storage datatype\n");
         if ( cl == H5T_INTEGER || cl == H5T_FLOAT )
         {
@@ -739,18 +768,22 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
             print_type(f_tid2);
             printf("\n");
         }
+
+
+        
     }
     
-   /*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * check for the same rank
     *-------------------------------------------------------------------------
     */
     
     if ( rank1 != rank2 )
     {
-        if (options->m_verbose && obj1_name) 
+
+        if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
         {
-            printf("Comparison not supported: <%s> has rank %d, dimensions ", obj1_name, rank1);
+            printf("<%s> has rank %d, dimensions ", obj1_name, rank1);
             print_dimensions(rank1,dims1);
             printf(", max dimensions ");
             print_dimensions(rank1,maxdim1);
@@ -759,11 +792,15 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
             print_dimensions(rank2,dims2);
             printf(", max dimensions ");
             print_dimensions(rank2,maxdim2);
+            printf("\n");
         }
-        return 0;
+
+        can_compare = 0;
+        options->not_cmp = 1;
+        return can_compare;
     }
     
-   /*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * check for different dimensions
     *-------------------------------------------------------------------------
     */
@@ -780,16 +817,16 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
             dim_diff=1;
     }
     
-   /*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * current dimensions
     *-------------------------------------------------------------------------
     */
     
     if (dim_diff==1)
     {
-        if (options->m_verbose && obj1_name) 
+        if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
         {
-            printf("Comparison not supported: <%s> has rank %d, dimensions ", obj1_name, rank1);
+            printf("<%s> has rank %d, dimensions ", obj1_name, rank1);
             print_dimensions(rank1,dims1);
             if (maxdim1 && maxdim2) 
             {
@@ -800,19 +837,26 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
                 print_dimensions(rank2,dims2);
                 printf(", max dimensions ");
                 print_dimensions(rank2,maxdim2);
+                printf("\n");
             }
         }
-        return 0;
+        
+
+        can_compare = 0;
+        options->not_cmp = 1;
+        return can_compare;
+
+
+
     }
     
-   /*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * maximum dimensions; just give a warning
     *-------------------------------------------------------------------------
     */
     if (maxdim1 && maxdim2 && maxdim_diff==1 && obj1_name )
     {
-        if (options->m_verbose) 
-        {
+        if (options->m_verbose) {
             printf( "Warning: different maximum dimensions\n");
             printf("<%s> has max dimensions ", obj1_name);
             print_dimensions(rank1,maxdim1);
@@ -822,9 +866,78 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
             printf("\n");
         }
     }
+
+
+    if ( tclass1 == H5T_COMPOUND )
+    {
+        
+        int   nmembs1;
+        int   nmembs2;
+        int   j;
+        hid_t memb_type1;
+        hid_t memb_type2;
+
+        nmembs1 = H5Tget_nmembers(f_tid1);
+        nmembs2 = H5Tget_nmembers(f_tid2);
+
+        if ( nmembs1 != nmembs2 )
+        {
+            
+            if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
+            {
+                printf("<%s> has %d members ", obj1_name, nmembs1);
+                printf("<%s> has %d members ", obj2_name, nmembs2);
+                printf("\n");
+            }
+
+            can_compare = 0;
+            options->not_cmp = 1;
+            return can_compare;
+        }
+               
+        for (j = 0; j < nmembs1; j++)
+        {
+            memb_type1 = H5Tget_member_type(f_tid1, (unsigned)j);
+            memb_type2 = H5Tget_member_type(f_tid2, (unsigned)j);
+
+            if (diff_can_type(memb_type1,
+                memb_type2,
+                rank1,
+                rank2,
+                dims1,
+                dims2,
+                maxdim1,
+                maxdim2,
+                obj1_name,
+                obj2_name,
+                options,
+                1)!=1)
+            {
+                can_compare = 0;
+                options->not_cmp = 1;
+                H5Tclose(memb_type1);
+                H5Tclose(memb_type2);
+                return can_compare;
+            }
+            
+            H5Tclose(memb_type1);
+            H5Tclose(memb_type2);
+            
+        }
+        
+        
+        
+        
+        
+    }
     
-    return 1;
+      
+
+
+    
+    return can_compare;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function: print_sizes

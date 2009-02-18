@@ -2,3 +2,4 @@ Comparison not possible: </dset> is of type H5G_DATASET and </l1> is of type H5G
 --------------------------------
 Some objects are not comparable
 --------------------------------
+Use -c for a list of objects.

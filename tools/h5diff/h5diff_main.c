@@ -35,7 +35,7 @@ const char  *progname = "h5diff";
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *s_opts = "hVrvqn:d:p:N";
+static const char *s_opts = "hVrvqn:d:p:Nc";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "version", no_arg, 'V' },
@@ -46,6 +46,7 @@ static struct long_options l_opts[] = {
     { "delta", require_arg, 'd' },
     { "relative", require_arg, 'p' },
     { "nan", no_arg, 'N' },
+    { "compare", no_arg, 'c' },
     { NULL, 0, '\0' }
 };
 
@@ -132,30 +133,30 @@ int main(int argc, const char *argv[])
  *-------------------------------------------------------------------------
  */
 
-void parse_command_line(int argc, 
-                        const char* argv[], 
-                        const char** fname1, 
+void parse_command_line(int argc,
+                        const char* argv[],
+                        const char** fname1,
                         const char** fname2,
-                        const char** objname1, 
-                        const char** objname2, 
+                        const char** objname1,
+                        const char** objname2,
                         diff_opt_t* options)
 {
-    
+
     int opt;
-    
+
     /* process the command-line */
     memset(options, 0, sizeof (diff_opt_t));
 
     /* assume equal contents initially */
     options->contents = 1;
 
-     /* NaNs are handled by default */
+    /* NaNs are handled by default */
     options->do_nans = 1;
-    
+
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) 
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF)
     {
-        switch ((char)opt) 
+        switch ((char)opt)
         {
         default:
             usage();
@@ -178,7 +179,7 @@ void parse_command_line(int argc,
             break;
         case 'd':
             options->d=1;
-            
+
             if ( check_d_input( opt_arg )==-1)
             {
                 printf("<-d %s> is not a valid option\n", opt_arg );
@@ -187,9 +188,9 @@ void parse_command_line(int argc,
             }
             options->delta = atof( opt_arg );
             break;
-            
+
         case 'p':
-            
+
             options->p=1;
             if ( check_p_input( opt_arg )==-1)
             {
@@ -199,9 +200,9 @@ void parse_command_line(int argc,
             }
             options->percent = atof( opt_arg );
             break;
-            
+
         case 'n':
-            
+
             options->n=1;
             if ( check_n_input( opt_arg )==-1)
             {
@@ -210,37 +211,37 @@ void parse_command_line(int argc,
                 h5diff_exit(EXIT_FAILURE);
             }
             options->count = atol( opt_arg );
-            
+
             break;
 
-            
         case 'N':
             options->do_nans = 0;
             break;
-
-
+        case 'c':
+            options->m_list_not_cmp = 1;
+            break;
         }
     }
-    
+
     /* check for file names to be processed */
-    if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL) 
+    if (argc <= opt_ind || argv[ opt_ind + 1 ] == NULL)
     {
         error_msg(progname, "missing file names\n");
         usage();
         h5diff_exit(EXIT_FAILURE);
     }
-    
+
     *fname1 = argv[ opt_ind ];
     *fname2 = argv[ opt_ind + 1 ];
     *objname1 = argv[ opt_ind + 2 ];
-    
+
     if ( *objname1 == NULL )
     {
         *objname2 = NULL;
         return;
     }
-    
-    if ( argv[ opt_ind + 3 ] != NULL) 
+
+    if ( argv[ opt_ind + 3 ] != NULL)
     {
         *objname2 = argv[ opt_ind + 3 ];
     }
@@ -248,8 +249,8 @@ void parse_command_line(int argc,
     {
         *objname2 = *objname1;
     }
-    
-    
+
+
 }
 
 
@@ -276,11 +277,15 @@ void  print_info(diff_opt_t* options)
     
     if (options->not_cmp==1)
     {
-        printf("--------------------------------\n");
-        printf("Some objects are not comparable\n");
-        printf("--------------------------------\n");
-        if (!options->m_verbose)
-            printf("Use -v for a list of objects.\n");
+        if ( options->m_list_not_cmp == 0 )
+        {
+            printf("--------------------------------\n");
+            printf("Some objects are not comparable\n");
+            printf("--------------------------------\n");
+            printf("Use -c for a list of objects.\n");
+        }
+        
+        
     }
     
 }
@@ -413,13 +418,13 @@ void usage(void)
  printf("   -r, --report            Report mode. Print differences\n");
  printf("   -v, --verbose           Verbose mode. Print differences, list of objects\n");
  printf("   -q, --quiet             Quiet mode. Do not do output\n");
+ printf("   -c, --compare           List objects that are not comparable\n");
+ printf("   -N, --nan               Avoid NaNs detection\n");
 
  printf("   -n C, --count=C         Print differences up to C number\n");
  printf("   -d D, --delta=D         Print difference when greater than limit D\n");
  printf("   -p R, --relative=R      Print difference when greater than relative limit R\n");
- printf("   -N, --nan               Avoid NaNs detection\n");
 
- 
 
  printf("\n");
 
@@ -441,10 +446,9 @@ void usage(void)
  printf(" Compare criteria\n");
  printf("\n");
  printf(" If no objects [obj1[obj2]] are specified, h5diff only compares objects\n");
- printf("   with the same absolute path in both files.\n");
-
+ printf("   with the same absolute path in both files\n");
  printf("\n");
-   
+
  printf(" The compare criteria is:\n");
  printf("   1) datasets: numerical array differences 2) groups: name string difference\n");
  printf("   3) datatypes: the return value of H5Tequal 4) links: name string difference\n");
@@ -481,6 +485,7 @@ void usage(void)
 
 
 }
+
 
 
 /*-------------------------------------------------------------------------

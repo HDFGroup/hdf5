@@ -9,10 +9,11 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
    -r, --report            Report mode. Print differences
    -v, --verbose           Verbose mode. Print differences, list of objects
    -q, --quiet             Quiet mode. Do not do output
+   -c, --compare           List objects that are not comparable
+   -N, --nan               Avoid NaNs detection
    -n C, --count=C         Print differences up to C number
    -d D, --delta=D         Print difference when greater than limit D
    -p R, --relative=R      Print difference when greater than relative limit R
-   -N, --nan               Avoid NaNs detection
 
   C - is a positive integer
   D - is a positive number. Compare criteria is |a - b| > D
@@ -28,7 +29,7 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]]
  Compare criteria
 
  If no objects [obj1[obj2]] are specified, h5diff only compares objects
-   with the same absolute path in both files.
+   with the same absolute path in both files
 
  The compare criteria is:
    1) datasets: numerical array differences 2) groups: name string difference

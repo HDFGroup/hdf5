@@ -11,3 +11,4 @@ position        dset9           dset10          difference      relative
 --------------------------------
 Some objects are not comparable
 --------------------------------
+Use -c for a list of objects.
