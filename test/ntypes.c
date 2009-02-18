@@ -284,7 +284,7 @@ test_compound_dtype2(hid_t file)
         char            c;
         int             i;
         s2              st;
-        unsigned long_long       l;
+        unsigned long long       l;
     } s1;
     hid_t		dataset, space;
     hid_t               dtype, native_type, tid, tid2, tid_m, tid_m2,
@@ -310,7 +310,7 @@ test_compound_dtype2(hid_t file)
 	    temp_point->i = n++;
 	    temp_point->st.c2 = (short)(i + j);
 	    temp_point->st.l2 = (i * 5 + j * 50) * n;
-	    temp_point->l = (unsigned long_long)((i * 10 + j * 100) * n);
+	    temp_point->l = (unsigned long long)((i * 10 + j * 100) * n);
 	}
     }
 
@@ -531,7 +531,7 @@ test_compound_dtype(hid_t file)
     typedef struct {
         char            c;
         unsigned int    i;
-        long_long       l;
+        long long       l;
     } s1;
     hid_t		dataset, space;
     hid_t               dtype, native_type, tid, tid2, mem_id;
@@ -703,7 +703,7 @@ test_compound_dtype3(hid_t file)
     typedef struct {
         char            c;
         int             a[5];
-        long_long       l;
+        long long       l;
     } s1;
     hid_t		dataset, space;
     hid_t               dtype, native_type, tid, tid2, tid_m, tid_m2,
@@ -902,7 +902,7 @@ test_compound_opaque(hid_t file)
     typedef struct {
         char            c;
         unsigned char   o[5];
-        long_long       l;
+        long long       l;
     } s1;
     hid_t		dataset, space;
     hid_t               dtype, native_type, tid, tid2, tid_m,
@@ -1218,7 +1218,7 @@ test_array_dtype(hid_t file)
     typedef struct {
         char    c;
         int     i;
-        long_long l;
+        long long l;
     } s1;
     hid_t		dataset, space;
     hid_t               dtype, native_type, tid, tid2, tid3, tid_m;

@@ -44,10 +44,10 @@ main(void)
     int       rowi4i = (int)1 , coli4i = (int)2 , plni4i = (int)5 ;
 
 #ifndef WIN32
-    long_long b64i2[3][4], b64i3[5][3][4];
-    long_long row4i64[3], col4i64[4], pln4i64[5];
-    long_long rowo4i64 = (long_long)11 , colo4i64 = (long_long)21 , plno4i64 = (long_long)51 ;
-    long_long rowi4i64 = (long_long)1 , coli4i64 = (long_long)2 , plni4i64 = (long_long)5 ;
+    long long b64i2[3][4], b64i3[5][3][4];
+    long long row4i64[3], col4i64[4], pln4i64[5];
+    long long rowo4i64 = (long long)11 , colo4i64 = (long long)21 , plno4i64 = (long long)51 ;
+    long long rowi4i64 = (long long)1 , coli4i64 = (long long)2 , plni4i64 = (long long)5 ;
 #endif
 
     short     b16i3[5][3][4];

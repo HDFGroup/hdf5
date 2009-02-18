@@ -3065,9 +3065,9 @@ dump_fcpl(hid_t fid)
     indentation(indent + COL);
     printf("%s %u\n","OBJECTHEADER_VERSION", shhdr);
     indentation(indent + COL);
-    HDfprintf(stdout,"%s %Hd\n","OFFSET_SIZE", (long_long)off_size);
+    HDfprintf(stdout,"%s %Hd\n","OFFSET_SIZE", (long long)off_size);
     indentation(indent + COL);
-    HDfprintf(stdout,"%s %Hd\n","LENGTH_SIZE", (long_long)len_size);
+    HDfprintf(stdout,"%s %Hd\n","LENGTH_SIZE", (long long)len_size);
     indentation(indent + COL);
     printf("%s %u\n","BTREE_RANK", sym_ik);
     indentation(indent + COL);
@@ -4505,12 +4505,12 @@ print_enum(hid_t type)
     /*
      * Determine what datatype to use for the native values.  To simplify
      * things we entertain three possibilities:
-     *  1. long_long -- the largest native signed integer
-     *    2. unsigned long_long -- the largest native unsigned integer
+     *  1. long long -- the largest native signed integer
+     *    2. unsigned long long -- the largest native unsigned integer
      *    3. raw format
      */
-    if (H5Tget_size(type) <= sizeof(long_long)) {
-    dst_size = sizeof(long_long);
+    if (H5Tget_size(type) <= sizeof(long long)) {
+    dst_size = sizeof(long long);
 
     if (H5T_SGN_NONE == H5Tget_sign(type)) {
         native = H5T_NATIVE_ULLONG;
@@ -4556,14 +4556,14 @@ print_enum(hid_t type)
         /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
          *strangely, unless use another pointer "copy".*/
         copy = value+i*dst_size;
-        HDfprintf(stdout,"%" H5_PRINTF_LL_WIDTH "u", *((unsigned long_long *)
+        HDfprintf(stdout,"%" H5_PRINTF_LL_WIDTH "u", *((unsigned long long *)
                           ((void *)copy)));
     } else {
         /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
          *strangely, unless use another pointer "copy".*/
         copy = value+i*dst_size;
         HDfprintf(stdout,"%" H5_PRINTF_LL_WIDTH "d",
-           *((long_long *) ((void *)copy)));
+           *((long long *) ((void *)copy)));
     }
 
     printf(";\n");
@@ -6684,12 +6684,12 @@ xml_print_enum(hid_t type)
     /*
      * Determine what datatype to use for the native values.  To simplify
      * things we entertain three possibilities:
-     *  1. long_long -- the largest native signed integer
-     *    2. unsigned long_long -- the largest native unsigned integer
+     *  1. long long -- the largest native signed integer
+     *    2. unsigned long long -- the largest native unsigned integer
      *    3. raw format
      */
-    if (H5Tget_size(type) <= sizeof(long_long)) {
-        dst_size = sizeof(long_long);
+    if (H5Tget_size(type) <= sizeof(long long)) {
+        dst_size = sizeof(long long);
 
         if (H5T_SGN_NONE == H5Tget_sign(type)) {
             native = H5T_NATIVE_ULLONG;
@@ -6737,11 +6737,11 @@ xml_print_enum(hid_t type)
             for (j = 0; j < dst_size; j++)
                 printf("%02x", value[i * dst_size + j]);
         } else if (H5T_SGN_NONE == H5Tget_sign(native)) {
-            HDfprintf(stdout,"%" H5_PRINTF_LL_WIDTH "u", *((unsigned long_long *)
+            HDfprintf(stdout,"%" H5_PRINTF_LL_WIDTH "u", *((unsigned long long *)
                               ((void *) (value + i * dst_size))));
         } else {
             HDfprintf(stdout,"%" H5_PRINTF_LL_WIDTH "d",
-               *((long_long *) ((void *) (value + i * dst_size))));
+               *((long long *) ((void *) (value + i * dst_size))));
         }
         printf("\n");
         indentation(indent);

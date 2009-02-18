@@ -241,7 +241,7 @@
 
 #define H5T_CONV_sS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_xX, long long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_sU_CORE(S,D,ST,DT,D_MIN,D_MAX) {			      \
@@ -266,7 +266,7 @@
 
 #define H5T_CONV_sU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_sU, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_sU, long long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_uS_CORE(S,D,ST,DT,D_MIN,D_MAX) {			      \
@@ -291,17 +291,17 @@
 
 #define H5T_CONV_uS(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_uS, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_uS, long long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_uU(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)<=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_xX, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_xX, long long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_Ss(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Xx, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_Xx, long long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_Su_CORE(S,D,ST,DT,D_MIN,D_MAX) {			      \
@@ -337,17 +337,17 @@
 
 #define H5T_CONV_Su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_Su, long long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_Us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_Ux, long long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_Uu(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)>=sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_Ux, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_Ux, long long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_su_CORE(S,D,ST,DT,D_MIN,D_MAX) {			      \
@@ -374,7 +374,7 @@
 
 #define H5T_CONV_su(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_su, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_su, long long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_us_CORE(S,D,ST,DT,D_MIN,D_MAX) {			      \
@@ -401,7 +401,7 @@
 
 #define H5T_CONV_us(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
     assert(sizeof(ST)==sizeof(DT));					      \
-    H5T_CONV(H5T_CONV_us, long_long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
+    H5T_CONV(H5T_CONV_us, long long, STYPE, DTYPE, ST, DT, D_MIN, D_MAX)      \
 }
 
 #define H5T_CONV_fF(STYPE,DTYPE,ST,DT,D_MIN,D_MAX) {			      \
@@ -5019,7 +5019,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_schar_llong
  *
- * Purpose:	Converts `signed char' to `long_long'
+ * Purpose:	Converts `signed char' to `long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -5042,7 +5042,7 @@ H5T_conv_schar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_llong, FAIL)
 
-    H5T_CONV_sS(SCHAR, LLONG, signed char, long_long, -, -);
+    H5T_CONV_sS(SCHAR, LLONG, signed char, long long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5052,7 +5052,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_schar_ullong
  *
- * Purpose:	Converts `signed char' to `unsigned long_long'
+ * Purpose:	Converts `signed char' to `unsigned long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -5075,7 +5075,7 @@ H5T_conv_schar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_schar_ullong, FAIL)
 
-    H5T_CONV_sU(SCHAR, ULLONG, signed char, unsigned long_long, -, -);
+    H5T_CONV_sU(SCHAR, ULLONG, signed char, unsigned long long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5085,7 +5085,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_uchar_llong
  *
- * Purpose:	Converts `unsigned char' to `long_long'
+ * Purpose:	Converts `unsigned char' to `long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -5108,7 +5108,7 @@ H5T_conv_uchar_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_llong, FAIL)
 
-    H5T_CONV_uS(UCHAR, LLONG, unsigned char, long_long, -, LLONG_MAX);
+    H5T_CONV_uS(UCHAR, LLONG, unsigned char, long long, -, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5118,7 +5118,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_uchar_ullong
  *
- * Purpose:	Converts `unsigned char' to `unsigned long_long'
+ * Purpose:	Converts `unsigned char' to `unsigned long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -5141,7 +5141,7 @@ H5T_conv_uchar_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uchar_ullong, FAIL)
 
-    H5T_CONV_uU(UCHAR, ULLONG, unsigned char, unsigned long_long, -, -);
+    H5T_CONV_uU(UCHAR, ULLONG, unsigned char, unsigned long long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5613,7 +5613,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_short_llong
  *
- * Purpose:	Converts `short' to `long_long'
+ * Purpose:	Converts `short' to `long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -5636,7 +5636,7 @@ H5T_conv_short_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_llong, FAIL)
 
-    H5T_CONV_sS(SHORT, LLONG, short, long_long, -, -);
+    H5T_CONV_sS(SHORT, LLONG, short, long long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5646,7 +5646,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_short_ullong
  *
- * Purpose:	Converts `short' to `unsigned long_long'
+ * Purpose:	Converts `short' to `unsigned long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -5669,7 +5669,7 @@ H5T_conv_short_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_short_ullong, FAIL)
 
-    H5T_CONV_sU(SHORT, ULLONG, short, unsigned long_long, -, -);
+    H5T_CONV_sU(SHORT, ULLONG, short, unsigned long long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5679,7 +5679,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ushort_llong
  *
- * Purpose:	Converts `unsigned short' to `long_long'
+ * Purpose:	Converts `unsigned short' to `long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -5702,7 +5702,7 @@ H5T_conv_ushort_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_llong, FAIL)
 
-    H5T_CONV_uS(USHORT, LLONG, unsigned short, long_long, -, LLONG_MAX);
+    H5T_CONV_uS(USHORT, LLONG, unsigned short, long long, -, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5712,7 +5712,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ushort_ullong
  *
- * Purpose:	Converts `unsigned short' to `unsigned long_long'
+ * Purpose:	Converts `unsigned short' to `unsigned long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -5735,7 +5735,7 @@ H5T_conv_ushort_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ushort_ullong, FAIL)
 
-    H5T_CONV_uU(USHORT, ULLONG, unsigned short, unsigned long_long, -, -);
+    H5T_CONV_uU(USHORT, ULLONG, unsigned short, unsigned long long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6201,7 +6201,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_int_llong
  *
- * Purpose:	Converts `int' to `long_long'
+ * Purpose:	Converts `int' to `long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -6223,7 +6223,7 @@ H5T_conv_int_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_llong, FAIL)
 
-    H5T_CONV_sS(INT, LLONG, int, long_long, -, -);
+    H5T_CONV_sS(INT, LLONG, int, long long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6233,7 +6233,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_int_ullong
  *
- * Purpose:	Converts `int' to `unsigned long_long'
+ * Purpose:	Converts `int' to `unsigned long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -6255,7 +6255,7 @@ H5T_conv_int_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_int_ullong, FAIL)
 
-    H5T_CONV_sU(INT, ULLONG, int, unsigned long_long, -, -);
+    H5T_CONV_sU(INT, ULLONG, int, unsigned long long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6265,7 +6265,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_uint_llong
  *
- * Purpose:	Converts `unsigned int' to `long_long'
+ * Purpose:	Converts `unsigned int' to `long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -6287,7 +6287,7 @@ H5T_conv_uint_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_llong, FAIL)
 
-    H5T_CONV_uS(UINT, LLONG, unsigned, long_long, -, LLONG_MAX);
+    H5T_CONV_uS(UINT, LLONG, unsigned, long long, -, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6297,7 +6297,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_uint_ullong
  *
- * Purpose:	Converts `unsigned int' to `unsigned long_long'
+ * Purpose:	Converts `unsigned int' to `unsigned long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -6320,7 +6320,7 @@ H5T_conv_uint_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_uint_ullong, FAIL)
 
-    H5T_CONV_uU(UINT, ULLONG, unsigned, unsigned long_long, -, -);
+    H5T_CONV_uU(UINT, ULLONG, unsigned, unsigned long long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6782,7 +6782,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_long_llong
  *
- * Purpose:	Converts `long' to `long_long'
+ * Purpose:	Converts `long' to `long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -6804,7 +6804,7 @@ H5T_conv_long_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_llong, FAIL)
 
-    H5T_CONV_sS(LONG, LLONG, long, long_long, -, -);
+    H5T_CONV_sS(LONG, LLONG, long, long long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6814,7 +6814,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_long_ullong
  *
- * Purpose:	Converts `long' to `unsigned long_long'
+ * Purpose:	Converts `long' to `unsigned long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -6837,7 +6837,7 @@ H5T_conv_long_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_long_ullong, FAIL)
 
-    H5T_CONV_sU(LONG, ULLONG, long, unsigned long_long, -, -);
+    H5T_CONV_sU(LONG, ULLONG, long, unsigned long long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6847,7 +6847,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ulong_llong
  *
- * Purpose:	Converts `unsigned long' to `long_long'
+ * Purpose:	Converts `unsigned long' to `long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -6870,7 +6870,7 @@ H5T_conv_ulong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_llong, FAIL)
 
-    H5T_CONV_uS(ULONG, LLONG, unsigned long, long_long, -, LLONG_MAX);
+    H5T_CONV_uS(ULONG, LLONG, unsigned long, long long, -, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6880,7 +6880,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ulong_ullong
  *
- * Purpose:	Converts `unsigned long' to `unsigned long_long'
+ * Purpose:	Converts `unsigned long' to `unsigned long long'
  *
  * Return:	Success:	Non-negative
  *
@@ -6903,7 +6903,7 @@ H5T_conv_ulong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ulong_ullong, FAIL)
 
-    H5T_CONV_uU(ULONG, ULLONG, unsigned long, unsigned long_long, -, -);
+    H5T_CONV_uU(ULONG, ULLONG, unsigned long, unsigned long long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6913,7 +6913,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_schar
  *
- * Purpose:	Converts `long_long' to `signed char'
+ * Purpose:	Converts `long long' to `signed char'
  *
  * Return:	Success:	Non-negative
  *
@@ -6936,7 +6936,7 @@ H5T_conv_llong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_schar, FAIL)
 
-    H5T_CONV_Ss(LLONG, SCHAR, long_long, signed char, SCHAR_MIN, SCHAR_MAX);
+    H5T_CONV_Ss(LLONG, SCHAR, long long, signed char, SCHAR_MIN, SCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6946,7 +6946,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_uchar
  *
- * Purpose:	Converts `long_long' to `unsigned char'
+ * Purpose:	Converts `long long' to `unsigned char'
  *
  * Return:	Success:	Non-negative
  *
@@ -6969,7 +6969,7 @@ H5T_conv_llong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_uchar, FAIL)
 
-    H5T_CONV_Su(LLONG, UCHAR, long_long, unsigned char, -, UCHAR_MAX);
+    H5T_CONV_Su(LLONG, UCHAR, long long, unsigned char, -, UCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6979,7 +6979,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_schar
  *
- * Purpose:	Converts `unsigned long_long' to `signed char'
+ * Purpose:	Converts `unsigned long long' to `signed char'
  *
  * Return:	Success:	Non-negative
  *
@@ -7002,7 +7002,7 @@ H5T_conv_ullong_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_schar, FAIL)
 
-    H5T_CONV_Us(ULLONG, SCHAR, unsigned long_long, signed char, -, SCHAR_MAX);
+    H5T_CONV_Us(ULLONG, SCHAR, unsigned long long, signed char, -, SCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7012,7 +7012,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_uchar
  *
- * Purpose:	Converts `unsigned long_long' to `unsigned char'
+ * Purpose:	Converts `unsigned long long' to `unsigned char'
  *
  * Return:	Success:	Non-negative
  *
@@ -7035,7 +7035,7 @@ H5T_conv_ullong_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_uchar, FAIL)
 
-    H5T_CONV_Uu(ULLONG, UCHAR, unsigned long_long, unsigned char, -, UCHAR_MAX);
+    H5T_CONV_Uu(ULLONG, UCHAR, unsigned long long, unsigned char, -, UCHAR_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7045,7 +7045,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_short
  *
- * Purpose:	Converts `long_long' to `short'
+ * Purpose:	Converts `long long' to `short'
  *
  * Return:	Success:	Non-negative
  *
@@ -7068,7 +7068,7 @@ H5T_conv_llong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_short, FAIL)
 
-    H5T_CONV_Ss(LLONG, SHORT, long_long, short, SHRT_MIN, SHRT_MAX);
+    H5T_CONV_Ss(LLONG, SHORT, long long, short, SHRT_MIN, SHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7078,7 +7078,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_ushort
  *
- * Purpose:	Converts `long_long' to `unsigned short'
+ * Purpose:	Converts `long long' to `unsigned short'
  *
  * Return:	Success:	Non-negative
  *
@@ -7101,7 +7101,7 @@ H5T_conv_llong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_ushort, FAIL)
 
-    H5T_CONV_Su(LLONG, USHORT, long_long, unsigned short, -, USHRT_MAX);
+    H5T_CONV_Su(LLONG, USHORT, long long, unsigned short, -, USHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7111,7 +7111,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_short
  *
- * Purpose:	Converts `unsigned long_long' to `short'
+ * Purpose:	Converts `unsigned long long' to `short'
  *
  * Return:	Success:	Non-negative
  *
@@ -7134,7 +7134,7 @@ H5T_conv_ullong_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_short, FAIL)
 
-    H5T_CONV_Us(ULLONG, SHORT, unsigned long_long, short, -, SHRT_MAX);
+    H5T_CONV_Us(ULLONG, SHORT, unsigned long long, short, -, SHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7144,7 +7144,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_ushort
  *
- * Purpose:	Converts `unsigned long_long' to `unsigned short'
+ * Purpose:	Converts `unsigned long long' to `unsigned short'
  *
  * Return:	Success:	Non-negative
  *
@@ -7167,7 +7167,7 @@ H5T_conv_ullong_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_ushort, FAIL)
 
-    H5T_CONV_Uu(ULLONG, USHORT, unsigned long_long, unsigned short, -, USHRT_MAX);
+    H5T_CONV_Uu(ULLONG, USHORT, unsigned long long, unsigned short, -, USHRT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7177,7 +7177,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_int
  *
- * Purpose:	Converts `long_long' to `int'
+ * Purpose:	Converts `long long' to `int'
  *
  * Return:	Success:	Non-negative
  *
@@ -7199,7 +7199,7 @@ H5T_conv_llong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_int, FAIL)
 
-    H5T_CONV_Ss(LLONG, INT, long_long, int, INT_MIN, INT_MAX);
+    H5T_CONV_Ss(LLONG, INT, long long, int, INT_MIN, INT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7209,7 +7209,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_uint
  *
- * Purpose:	Converts `long_long' to `unsigned int'
+ * Purpose:	Converts `long long' to `unsigned int'
  *
  * Return:	Success:	Non-negative
  *
@@ -7231,7 +7231,7 @@ H5T_conv_llong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_uint, FAIL)
 
-    H5T_CONV_Su(LLONG, UINT, long_long, unsigned, -, UINT_MAX);
+    H5T_CONV_Su(LLONG, UINT, long long, unsigned, -, UINT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7241,7 +7241,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_int
  *
- * Purpose:	Converts `unsigned long_long' to `int'
+ * Purpose:	Converts `unsigned long long' to `int'
  *
  * Return:	Success:	Non-negative
  *
@@ -7263,7 +7263,7 @@ H5T_conv_ullong_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_int, FAIL)
 
-    H5T_CONV_Us(ULLONG, INT, unsigned long_long, int, -, INT_MAX);
+    H5T_CONV_Us(ULLONG, INT, unsigned long long, int, -, INT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7273,7 +7273,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_uint
  *
- * Purpose:	Converts `unsigned long_long' to `unsigned int'
+ * Purpose:	Converts `unsigned long long' to `unsigned int'
  *
  * Return:	Success:	Non-negative
  *
@@ -7296,7 +7296,7 @@ H5T_conv_ullong_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_uint, FAIL)
 
-    H5T_CONV_Uu(ULLONG, UINT, unsigned long_long, unsigned, -, UINT_MAX);
+    H5T_CONV_Uu(ULLONG, UINT, unsigned long long, unsigned, -, UINT_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7306,7 +7306,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_long
  *
- * Purpose:	Converts `long_long' to `long'
+ * Purpose:	Converts `long long' to `long'
  *
  * Return:	Success:	Non-negative
  *
@@ -7328,7 +7328,7 @@ H5T_conv_llong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_long, FAIL)
 
-    H5T_CONV_Ss(LLONG, LONG, long_long, long, LONG_MIN, LONG_MAX);
+    H5T_CONV_Ss(LLONG, LONG, long long, long, LONG_MIN, LONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7338,7 +7338,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_ulong
  *
- * Purpose:	Converts `long_long' to `unsigned long'
+ * Purpose:	Converts `long long' to `unsigned long'
  *
  * Return:	Success:	Non-negative
  *
@@ -7361,7 +7361,7 @@ H5T_conv_llong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_ulong, FAIL)
 
-    H5T_CONV_Su(LLONG, ULONG, long_long, unsigned long, -, ULONG_MAX);
+    H5T_CONV_Su(LLONG, ULONG, long long, unsigned long, -, ULONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7371,7 +7371,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_long
  *
- * Purpose:	Converts `unsigned long_long' to `long'
+ * Purpose:	Converts `unsigned long long' to `long'
  *
  * Return:	Success:	Non-negative
  *
@@ -7394,7 +7394,7 @@ H5T_conv_ullong_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_long, FAIL)
 
-    H5T_CONV_Us(ULLONG, LONG, unsigned long_long, long, -, LONG_MAX);
+    H5T_CONV_Us(ULLONG, LONG, unsigned long long, long, -, LONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7404,7 +7404,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_ulong
  *
- * Purpose:	Converts `unsigned long_long' to `unsigned long'
+ * Purpose:	Converts `unsigned long long' to `unsigned long'
  *
  * Return:	Success:	Non-negative
  *
@@ -7427,7 +7427,7 @@ H5T_conv_ullong_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_ulong, FAIL)
 
-    H5T_CONV_Uu(ULLONG, ULONG, unsigned long_long, unsigned long, -, ULONG_MAX);
+    H5T_CONV_Uu(ULLONG, ULONG, unsigned long long, unsigned long, -, ULONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7437,7 +7437,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_llong_ullong
  *
- * Purpose:	Converts `long_long' to `unsigned long_long'
+ * Purpose:	Converts `long long' to `unsigned long long'
  *
  * Return:	Success:	non-negative
  *
@@ -7460,7 +7460,7 @@ H5T_conv_llong_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_ullong, FAIL)
 
-    H5T_CONV_su(LLONG, ULLONG, long_long, unsigned long_long, -, -);
+    H5T_CONV_su(LLONG, ULLONG, long long, unsigned long long, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7470,7 +7470,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5T_conv_ullong_llong
  *
- * Purpose:	Converts `unsigned long_long' to `long_long'
+ * Purpose:	Converts `unsigned long long' to `long long'
  *
  * Return:	Success:	non-negative
  *
@@ -7493,7 +7493,7 @@ H5T_conv_ullong_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_llong, FAIL)
 
-    H5T_CONV_us(ULLONG, LLONG, unsigned long_long, long_long, -, LLONG_MAX);
+    H5T_CONV_us(ULLONG, LLONG, unsigned long long, long long, -, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8529,7 +8529,7 @@ H5T_conv_llong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_float, FAIL)
 
-    H5T_CONV_xF(LLONG, FLOAT, long_long, float, -, -);
+    H5T_CONV_xF(LLONG, FLOAT, long long, float, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8561,7 +8561,7 @@ H5T_conv_llong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_double, FAIL)
 
-    H5T_CONV_xF(LLONG, DOUBLE, long_long, double, -, -);
+    H5T_CONV_xF(LLONG, DOUBLE, long long, double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8594,7 +8594,7 @@ H5T_conv_llong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_llong_ldouble, FAIL)
 
-    H5T_CONV_xF(LLONG, LDOUBLE, long_long, long double, -, -);
+    H5T_CONV_xF(LLONG, LDOUBLE, long long, long double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8628,7 +8628,7 @@ H5T_conv_ullong_float (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_float, FAIL)
 
-    H5T_CONV_xF(ULLONG, FLOAT, unsigned long_long, float, -, -);
+    H5T_CONV_xF(ULLONG, FLOAT, unsigned long long, float, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8662,7 +8662,7 @@ H5T_conv_ullong_double (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_double, FAIL)
 
-    H5T_CONV_xF(ULLONG, DOUBLE, unsigned long_long, double, -, -);
+    H5T_CONV_xF(ULLONG, DOUBLE, unsigned long long, double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8696,7 +8696,7 @@ H5T_conv_ullong_ldouble (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ullong_ldouble, FAIL)
 
-    H5T_CONV_xF(ULLONG, LDOUBLE, unsigned long_long, long double, -, -);
+    H5T_CONV_xF(ULLONG, LDOUBLE, unsigned long long, long double, -, -);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9514,7 +9514,7 @@ H5T_conv_float_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_llong, FAIL)
 
-    H5T_CONV_Fx(FLOAT, LLONG, float, long_long, LLONG_MIN, LLONG_MAX);
+    H5T_CONV_Fx(FLOAT, LLONG, float, long long, LLONG_MIN, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9548,7 +9548,7 @@ H5T_conv_float_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_float_ullong, FAIL)
 
-    H5T_CONV_Fx(FLOAT, ULLONG, float, unsigned long_long, 0, ULLONG_MAX);
+    H5T_CONV_Fx(FLOAT, ULLONG, float, unsigned long long, 0, ULLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9582,7 +9582,7 @@ H5T_conv_double_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_llong, FAIL)
 
-    H5T_CONV_Fx(DOUBLE, LLONG, double, long_long, LLONG_MIN, LLONG_MAX);
+    H5T_CONV_Fx(DOUBLE, LLONG, double, long long, LLONG_MIN, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9616,7 +9616,7 @@ H5T_conv_double_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_double_ullong, FAIL)
 
-    H5T_CONV_Fx(DOUBLE, ULLONG, double, unsigned long_long, 0, ULLONG_MAX);
+    H5T_CONV_Fx(DOUBLE, ULLONG, double, unsigned long long, 0, ULLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9650,7 +9650,7 @@ H5T_conv_ldouble_llong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_llong, FAIL)
 
-    H5T_CONV_Fx(LDOUBLE, LLONG, long double, long_long, LLONG_MIN, LLONG_MAX);
+    H5T_CONV_Fx(LDOUBLE, LLONG, long double, long long, LLONG_MIN, LLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9684,7 +9684,7 @@ H5T_conv_ldouble_ullong (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata,
 
     FUNC_ENTER_NOAPI(H5T_conv_ldouble_ullong, FAIL)
 
-    H5T_CONV_Fx(LDOUBLE, ULLONG, long double, unsigned long_long, 0, ULLONG_MAX);
+    H5T_CONV_Fx(LDOUBLE, ULLONG, long double, unsigned long long, 0, ULLONG_MAX);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

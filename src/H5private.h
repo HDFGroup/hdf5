@@ -401,12 +401,12 @@
  * most part.
  */
 #ifndef LLONG_MAX
-#   define LLONG_MAX	((long_long)(((unsigned long_long)1		      \
-				      <<(8*sizeof(long_long)-1))-1))
-#   define LLONG_MIN    ((long_long)(-LLONG_MAX)-1)
+#   define LLONG_MAX	((long long)(((unsigned long long)1		      \
+				      <<(8*sizeof(long long)-1))-1))
+#   define LLONG_MIN    ((long long)(-LLONG_MAX)-1)
 #endif
 #ifndef ULLONG_MAX
-#   define ULLONG_MAX	((unsigned long_long)((long_long)(-1)))
+#   define ULLONG_MAX	((unsigned long long)((long long)(-1)))
 #endif
 #ifndef SIZET_MAX
 #   define SIZET_MAX	((size_t)(ssize_t)(-1))

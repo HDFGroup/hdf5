@@ -43,7 +43,7 @@
 #define FILE11   "h5diff_empty.h5"
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
-#define GBLL    ((unsigned long_long) 1024 * 1024 *1024 )
+#define GBLL    ((unsigned long long) 1024 * 1024 *1024 )
 
 
 #define MY_LINKCLASS 187
@@ -202,12 +202,12 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
     
     /*-------------------------------------------------------------------------
     * relative error, compare divide by zero, both zero
-    * # 1.6.2 with -p (unsigned long_long)
+    * # 1.6.2 with -p (unsigned long long)
     *-------------------------------------------------------------------------
     */
     {
-        unsigned long_long data7[3][2] = {{100,100},{100,0},{0,100}};
-        unsigned long_long data8[3][2] = {{120,80}, {0,100},{0,50}};
+        unsigned long long data7[3][2] = {{100,100},{100,0},{0,100}};
+        unsigned long long data8[3][2] = {{120,80}, {0,100},{0,50}};
         
         write_dset(gid1,2,dims2,"dset7",H5T_NATIVE_ULLONG,data7);
         write_dset(gid1,2,dims2,"dset8",H5T_NATIVE_ULLONG,data8);
@@ -575,11 +575,11 @@ int test_datatypes(const char *fname)
     char          buf7a[3][2] = {{-1,-128},{-1,-1},{-1,-1}};
     unsigned char buf7b[3][2] = {{1,128},{1,1},{1,1}};
     
-    /* long_long test */
-    long_long            buf8a[3][2] = {{1,1},{1,1},{1,1}};
-    long_long            buf8b[3][2] = {{1,1},{3,4},{5,6}};
-    unsigned long_long   buf9a[3][2] = {{1,1},{1,1},{1,1}};
-    unsigned long_long   buf9b[3][2] = {{1,1},{3,4},{5,6}};
+    /* long long test */
+    long long            buf8a[3][2] = {{1,1},{1,1},{1,1}};
+    long long            buf8b[3][2] = {{1,1},{3,4},{5,6}};
+    unsigned long long   buf9a[3][2] = {{1,1},{1,1},{1,1}};
+    unsigned long long   buf9b[3][2] = {{1,1},{3,4},{5,6}};
     
     unsigned int    buf10a[3][2] = {{UIMAX,1},{1,1},{1,1}};
     unsigned int    buf10b[3][2] = {{UIMAX-1,1},{3,4},{5,6}};

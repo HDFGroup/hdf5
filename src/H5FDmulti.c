@@ -1945,9 +1945,9 @@ H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, unsigned closing)
 	if (HADDR_UNDEF!=file->memb_addr[mt]) {
 	    haddr_t eoa = H5FDget_eoa(file->memb[mt], mt);
 	    fprintf(stderr, "    %6d %20llu %20llu %20llu %s\n",
-		    (int)mt, (unsigned long_long)(file->memb_addr[mt]),
-		    (unsigned long_long)eoa,
-		    (unsigned long_long)(file->memb_next[mt]),
+		    (int)mt, (unsigned long long)(file->memb_addr[mt]),
+		    (unsigned long long)eoa,
+		    (unsigned long long)(file->memb_next[mt]),
 		    file->memb_name[mt]);
 	}
     }

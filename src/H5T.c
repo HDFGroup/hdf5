@@ -1052,7 +1052,7 @@ H5T_init_interface(void)
     status |= H5T_register(H5T_PERS_HARD, "ldbl_dbl", native_ldouble, native_double, H5T_conv_ldouble_double, H5AC_dxpl_id, FALSE);
 #endif /*H5T_CONV_INTERNAL_FP_LDOUBLE*/
 
-    /* from long_long */
+    /* from long long */
     status |= H5T_register(H5T_PERS_HARD, "llong_ullong", native_llong, native_ullong, H5T_conv_llong_ullong, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "ullong_llong", native_ullong, native_llong, H5T_conv_ullong_llong, H5AC_dxpl_id, FALSE);
     status |= H5T_register(H5T_PERS_HARD, "llong_long", native_llong, native_long, H5T_conv_llong_long, H5AC_dxpl_id, FALSE);
@@ -2992,7 +2992,7 @@ H5T_create(H5T_class_t type, size_t size)
                 subtype = H5T_NATIVE_INT_g;
             } else if (sizeof(long)==size) {
                 subtype = H5T_NATIVE_LONG_g;
-            } else if (sizeof(long_long)==size) {
+            } else if (sizeof(long long)==size) {
                 subtype = H5T_NATIVE_LLONG_g;
             } else {
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "no applicable native integer type");
