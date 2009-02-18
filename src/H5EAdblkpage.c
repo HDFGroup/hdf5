@@ -223,7 +223,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Protect the data block page */
     if(NULL == (ret_value = (H5EA_dblk_page_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_DBLK_PAGE, dblk_page_addr, NULL, hdr, rw)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block page, address = %llu", (unsigned long_long)dblk_page_addr)
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block page, address = %llu", (unsigned long long)dblk_page_addr)
 
 CATCH
 
@@ -260,7 +260,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Unprotect the data block page */
     if(H5AC_unprotect(dblk_page->hdr->f, dxpl_id, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, cache_flags) < 0)
-        H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array data block page, address = %llu", (unsigned long_long)dblk_page->addr)
+        H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array data block page, address = %llu", (unsigned long long)dblk_page->addr)
 
 CATCH
 

@@ -208,7 +208,7 @@ H5EA__iblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
 
     /* Protect index block */
     if(NULL == (iblock = H5EA__iblock_protect(hdr, dxpl_id, H5AC_READ)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array index block, address = %llu", (unsigned long_long)hdr->idx_blk_addr)
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array index block, address = %llu", (unsigned long long)hdr->idx_blk_addr)
 
     /* Print opening message */
     HDfprintf(stream, "%*sExtensible Array Index Block...\n", indent, "");
@@ -321,7 +321,7 @@ H5EA__sblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
 
     /* Protect super block */
     if(NULL == (sblock = H5EA__sblock_protect(hdr, dxpl_id, addr, sblk_idx, H5AC_READ)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long_long)addr)
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long long)addr)
 
     /* Print opening message */
     HDfprintf(stream, "%*sExtensible Array Super Block...\n", indent, "");
@@ -405,7 +405,7 @@ H5EA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
 
     /* Protect data block */
     if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, addr, dblk_nelmts, H5AC_READ)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long_long)addr)
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long long)addr)
 
     /* Print opening message */
     HDfprintf(stream, "%*sExtensible Array data Block...\n", indent, "");

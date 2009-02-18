@@ -2381,14 +2381,14 @@ main(void)
                     nelmts = (hsize_t)(1 + cparam.idx_blk_elmts +
                         tparam.sblk_info[sblk].start_idx +
                         (tparam.sblk_info[sblk].dblk_nelmts * dblk));
-                    sprintf(test_str, "setting first element of array's data block #%llu", (unsigned long_long)ndblks);
+                    sprintf(test_str, "setting first element of array's data block #%llu", (unsigned long long)ndblks);
                     nerrors += test_set_elmts(fapl, &cparam, &tparam, nelmts, test_str);
 
                     /* Test all elements in data block */
                     nelmts = (hsize_t)(cparam.idx_blk_elmts +
                         tparam.sblk_info[sblk].start_idx +
                         (tparam.sblk_info[sblk].dblk_nelmts * (dblk + 1)));
-                    sprintf(test_str, "setting all elements of array's data block #%llu", (unsigned long_long)ndblks);
+                    sprintf(test_str, "setting all elements of array's data block #%llu", (unsigned long long)ndblks);
                     nerrors += test_set_elmts(fapl, &cparam, &tparam, nelmts, test_str);
 
                     /* Increment data block being tested */

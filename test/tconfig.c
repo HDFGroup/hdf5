@@ -127,7 +127,7 @@ test_config_ctypes(void)
 
     /* standard C99 basic types */
 #if H5_SIZEOF_LONG_LONG > 0
-    vrfy_cint_type(long_long, unsigned long_long, H5_SIZEOF_LONG_LONG);
+    vrfy_cint_type(long long, unsigned long long, H5_SIZEOF_LONG_LONG);
 #endif
 
 #if H5_SIZEOF_INT8_T > 0

@@ -38,7 +38,7 @@ const char *FILENAME[] = {
 #define MAX_TRIES	100
 
 #if H5_SIZEOF_LONG_LONG >= 8
-#   define GB8LL	((unsigned long_long)8*1024*1024*1024)
+#   define GB8LL	((unsigned long long)8*1024*1024*1024)
 #else
 #   define GB8LL	0	/*cannot do the test*/
 #endif
@@ -53,7 +53,7 @@ static hsize_t values_used[WRT_N];
 /*-------------------------------------------------------------------------
  * Function:	randll
  *
- * Purpose:	Create a random long_long value.
+ * Purpose:	Create a random long long value.
  * 		Ensures that a write at this value doesn't overlap any
  *		previous write.
  *
@@ -577,8 +577,8 @@ HDfprintf(stderr, "Random # seed was: %lu\n", seed);
 	 * because we would generate multi-gigabyte files.
 	 */
 	puts("Checking if file system is adequate for this test...");
-	if (sizeof(long_long)<8 || 0==GB8LL) {
-	    puts("Test skipped because sizeof(long_long) is too small. This");
+	if (sizeof(long long)<8 || 0==GB8LL) {
+	    puts("Test skipped because sizeof(long long) is too small. This");
 	    puts("hardware apparently doesn't support 64-bit integer types.");
 	    usage();
 	    goto quit;

@@ -550,22 +550,22 @@ H5T_get_native_integer(size_t prec, H5T_sign_t sign, H5T_direction_t direction,
             native_size = sizeof(long);
         } else if(prec<=H5Tget_precision(H5T_NATIVE_LLONG)) {
             match=H5T_NATIVE_INT_MATCH_LLONG;
-            native_size = sizeof(long_long);
+            native_size = sizeof(long long);
         } else {  /* If no native type matches the querried datatype, simply choose the type of biggest size. */
             match=H5T_NATIVE_INT_MATCH_LLONG;
-            native_size = sizeof(long_long);
+            native_size = sizeof(long long);
         }
     } else if(direction == H5T_DIR_DESCEND) {
         if(prec>=H5Tget_precision(H5T_NATIVE_LLONG)) {
             match=H5T_NATIVE_INT_MATCH_LLONG;
-            native_size = sizeof(long_long);
+            native_size = sizeof(long long);
         } else if(prec>=H5Tget_precision(H5T_NATIVE_LONG)) {
             if(prec==H5Tget_precision(H5T_NATIVE_LONG)) {
                 match=H5T_NATIVE_INT_MATCH_LONG;
                 native_size = sizeof(long);
             } else {
                 match=H5T_NATIVE_INT_MATCH_LLONG;
-                native_size = sizeof(long_long);
+                native_size = sizeof(long long);
             }
         }
         else if(prec>=H5Tget_precision(H5T_NATIVE_INT)) {

@@ -193,9 +193,9 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_ULONG)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_LLONG)					\
-	H5Z_XFORM_LL_DO_OP1((RESL), (RESR), long_long, OP, (SIZE))	\
+	H5Z_XFORM_LL_DO_OP1((RESL), (RESR), long long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_ULLONG)				\
-	H5Z_XFORM_ULL_DO_OP1((RESL), (RESR), unsigned long_long, OP, (SIZE)) \
+	H5Z_XFORM_ULL_DO_OP1((RESL), (RESR), unsigned long long, OP, (SIZE)) \
     else if((TYPE) == H5T_NATIVE_FLOAT)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), float, OP, (SIZE))		\
     else if((TYPE) == H5T_NATIVE_DOUBLE)				\
@@ -225,9 +225,9 @@ static void H5Z_print(H5Z_node *tree, FILE *stream);
     else if((TYPE) == H5T_NATIVE_ULONG)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), unsigned long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_LLONG)					\
-	H5Z_XFORM_LL_DO_OP1((RESL), (RESR), long_long, OP, (SIZE))	\
+	H5Z_XFORM_LL_DO_OP1((RESL), (RESR), long long, OP, (SIZE))	\
     else if((TYPE) == H5T_NATIVE_ULLONG)				\
-	H5Z_XFORM_ULL_DO_OP1((RESL), (RESR), unsigned long_long, OP, (SIZE)) \
+	H5Z_XFORM_ULL_DO_OP1((RESL), (RESR), unsigned long long, OP, (SIZE)) \
     else if((TYPE) == H5T_NATIVE_FLOAT)					\
 	H5Z_XFORM_DO_OP1((RESL), (RESR), float, OP, (SIZE))		\
     else if((TYPE) == H5T_NATIVE_DOUBLE)				\
@@ -942,9 +942,9 @@ H5Z_xform_eval(H5Z_data_xform_t *data_xform_prop, void* array, size_t array_size
         else if(array_type == H5T_NATIVE_ULONG)
             H5Z_XFORM_DO_OP5(unsigned long, array_size)
         else if(array_type == H5T_NATIVE_LLONG)
-            H5Z_XFORM_DO_OP5(long_long, array_size)
+            H5Z_XFORM_DO_OP5(long long, array_size)
         else if(array_type == H5T_NATIVE_ULLONG)
-            H5Z_XFORM_DO_OP5(unsigned long_long, array_size)
+            H5Z_XFORM_DO_OP5(unsigned long long, array_size)
         else if(array_type == H5T_NATIVE_FLOAT)
             H5Z_XFORM_DO_OP5(float, array_size)
 	else if(array_type == H5T_NATIVE_DOUBLE)

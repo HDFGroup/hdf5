@@ -56,7 +56,7 @@ nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertype
     if ((types[0] = (hid_t_f)H5Tcopy(H5T_NATIVE_LONG)) < 0) return ret_value;
     } /*end if */
     else
-    if (sizeof(int_f) == sizeof(long_long)) {
+    if (sizeof(int_f) == sizeof(long long)) {
     if ((types[0] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
 
@@ -115,7 +115,7 @@ nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertype
     else if (sizeof(int_1_f) == sizeof(int)) {
       if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
     } /*end if */
-    else if (sizeof(int_1_f) == sizeof(long_long)) {
+    else if (sizeof(int_1_f) == sizeof(long long)) {
 	if ((types[6] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
 
@@ -128,7 +128,7 @@ nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertype
     else if (sizeof(int_2_f) == sizeof(int)) {
       if ((types[7] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
     } /*end if */
-    else if (sizeof(int_2_f) == sizeof(long_long)) {
+    else if (sizeof(int_2_f) == sizeof(long long)) {
 	if ((types[7] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
 
@@ -141,7 +141,7 @@ nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertype
     else if (sizeof(int_4_f) == sizeof(int)) {
       if ((types[8] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
     } /*end if */
-    else if (sizeof(int_4_f) == sizeof(long_long)) {
+    else if (sizeof(int_4_f) == sizeof(long long)) {
 	if ((types[8] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
 
@@ -154,7 +154,7 @@ nh5init_types_c( hid_t_f * types, hid_t_f * floatingtypes, hid_t_f * integertype
     else if (sizeof(int_8_f) == sizeof(int)) {
       if ((types[9] = (hid_t_f)H5Tcopy(H5T_NATIVE_INT)) < 0) return ret_value;
     } /*end if */
-    else if (sizeof(int_8_f) == sizeof(long_long)) {
+    else if (sizeof(int_8_f) == sizeof(long long)) {
 	if ((types[9] = (hid_t_f)H5Tcopy(H5T_NATIVE_LLONG)) < 0) return ret_value;
     } /*end else */
 

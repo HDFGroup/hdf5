@@ -289,7 +289,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Protect the super block */
     if(NULL == (ret_value = (H5EA_sblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_SBLOCK, sblk_addr, &sblk_idx, hdr, rw)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long_long)sblk_addr)
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long long)sblk_addr)
 
 CATCH
 
@@ -324,7 +324,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Unprotect the super block */
     if(H5AC_unprotect(sblock->hdr->f, dxpl_id, H5AC_EARRAY_SBLOCK, sblock->addr, sblock, cache_flags) < 0)
-        H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array super block, address = %llu", (unsigned long_long)sblock->addr)
+        H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array super block, address = %llu", (unsigned long long)sblock->addr)
 
 CATCH
 
@@ -363,7 +363,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Protect super block */
     if(NULL == (sblock = H5EA__sblock_protect(hdr, dxpl_id, sblk_addr, sblk_idx, H5AC_WRITE)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long_long)sblk_addr)
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long long)sblk_addr)
 
     /* Iterate over data blocks */
     for(u = 0; u < sblock->ndblks; u++) {

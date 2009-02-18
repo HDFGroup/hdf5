@@ -1396,8 +1396,8 @@ detect_C99_integers64(void)
 #endif
 
 #if H5_SIZEOF_LONG_LONG>0
-    DETECT_I(long_long,		  LLONG,        d_g[nd_g]); nd_g++;
-    DETECT_I(unsigned long_long,  ULLONG,       d_g[nd_g]); nd_g++;
+    DETECT_I(long long,		  LLONG,        d_g[nd_g]); nd_g++;
+    DETECT_I(unsigned long long,  ULLONG,       d_g[nd_g]); nd_g++;
 #else
     /*
      * This architecture doesn't support an integer type larger than `long'

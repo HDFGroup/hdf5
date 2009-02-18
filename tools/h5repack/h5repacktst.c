@@ -92,7 +92,7 @@ int d_status = EXIT_SUCCESS;
 #define CDIM1   DIM1/2
 #define CDIM2   DIM2/2
 #define RANK    2
-#define GBLL    ((unsigned long_long) 1024*1024*1024)
+#define GBLL    ((unsigned long long) 1024*1024*1024)
 
 /* Size of userblock (for userblock test) */
 #define USERBLOCK_SIZE  2048
