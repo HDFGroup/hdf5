@@ -6696,6 +6696,9 @@ error:
  *              chunk isn't on disk, this test verifies that the library
  *              bypasses the cache. 
  *
+ * Note:        This test is not very conclusive - it doesn't actually check
+ *              is the chunks bypass the cache... :-(  -QAK
+ *
  * Return:      Success: 0
  *              Failure: -1
  *
@@ -6709,6 +6712,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
 {
     char        filename[FILENAME_BUF_SIZE];
     hid_t       fid = -1;       /* File ID */
+    hid_t       fapl_local = -1; /* File access property list ID */
     hid_t       dcpl = -1;      /* Dataset creation property list ID */
     hid_t       sid = -1;       /* Dataspace ID */
     hid_t       dsid = -1;      /* Dataset ID */
@@ -6724,13 +6728,16 @@ test_big_chunks_bypass_cache(hid_t fapl)
 
     h5_fixname(FILENAME[9], fapl, filename, sizeof filename);
 
+    /* Copy fapl passed to this function (as we will be modifying it) */
+    if((fapl_local = H5Pcopy(fapl)) < 0) FAIL_STACK_ERROR
+
     /* Define cache size to be smaller than chunk size */
     rdcc_nelmts = BYPASS_CHUNK_DIM/5;
     rdcc_nbytes = sizeof(int)*BYPASS_CHUNK_DIM/5;
-    if(H5Pset_cache(fapl, 0, rdcc_nelmts, rdcc_nbytes, 0) < 0) FAIL_STACK_ERROR
+    if(H5Pset_cache(fapl_local, 0, rdcc_nelmts, rdcc_nbytes, 0) < 0) FAIL_STACK_ERROR
 
     /* Create file */
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_local)) < 0) FAIL_STACK_ERROR
 
     /* Create 1-D dataspace */
     dim = BYPASS_DIM;
@@ -6745,13 +6752,12 @@ test_big_chunks_bypass_cache(hid_t fapl)
 
     /* Define fill value, fill time, and chunk allocation time */
     if(H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fvalue) < 0) FAIL_STACK_ERROR
-
     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET) < 0) FAIL_STACK_ERROR
-
     if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_INCR) < 0) FAIL_STACK_ERROR
 
     /* Try to create dataset */
-    dsid = H5Dcreate2(fid, BYPASS_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    if((dsid = H5Dcreate2(fid, BYPASS_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
 
     /* Select first chunk to write the data */
     offset = 0;
@@ -6761,6 +6767,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, &offset, &stride, &count, &block) < 0) 
         FAIL_STACK_ERROR
 
+    /* Initialize data to write */
     for(i = 0; i < BYPASS_CHUNK_DIM; i++)
         wdata[i] = i;
 
@@ -6782,23 +6789,22 @@ test_big_chunks_bypass_cache(hid_t fapl)
     for(i = 0; i < BYPASS_CHUNK_DIM; i++)
         if(rdata[i] != i) {
             printf("    Read different values than written in the 1st chunk.\n");
-            printf("    At line %d and index %d, rdata = %d. It should be %d.\n", __LINE__, 
-                i, rdata[i], i);
-            FAIL_STACK_ERROR
-        }
+            printf("    At line %d and index %d, rdata = %d. It should be %d.\n", __LINE__, i, rdata[i], i);
+            TEST_ERROR
+        } /* end if */
 
     for(j = BYPASS_CHUNK_DIM; j < BYPASS_DIM; j++)
         if(rdata[j] != fvalue) {
             printf("    Read different values than written in the 2nd chunk.\n");
-            printf("    At line %d and index %d, rdata = %d. It should be %d.\n", __LINE__, 
-                i, rdata[i], fvalue);
-            FAIL_STACK_ERROR
-        }
+            printf("    At line %d and index %d, rdata = %d. It should be %d.\n", __LINE__, i, rdata[i], fvalue);
+            TEST_ERROR
+        } /* end if */
    
     /* Close IDs */
     if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
     if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
     if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+    if(H5Pclose(fapl_local) < 0) FAIL_STACK_ERROR
     if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
 
     PASSED();
@@ -6807,13 +6813,13 @@ test_big_chunks_bypass_cache(hid_t fapl)
 error:
     H5E_BEGIN_TRY {
         H5Pclose(dcpl);
+        H5Pclose(fapl_local);
         H5Dclose(dsid);
         H5Sclose(sid);
         H5Fclose(fid);
     } H5E_END_TRY;
     return -1;
-} /* end test_huge_chunks() */
-
+} /* end test_big_chunks_bypass_cache() */
 
 
 /*-------------------------------------------------------------------------
