@@ -151,7 +151,7 @@ case "$cc_vendor-$cc_version" in
         # optimization levels (which shows up as failures for various integer
         # types -> long long conversions in the test/dtypes test).  Perhaps
         # later versions of gcc will fix this bug... - QAK - 2003/10/20
-        PROD_CFLAGS="-O0"
+        PROD_CFLAGS="-O"
         ;;
       gcc-4*)
         # Be optimistic about future versions of gcc.. :-) - QAK - 2003/10/20
