@@ -176,6 +176,8 @@ H5D_nonexistent_readvv(const H5D_io_info_t *io_info,
 /* Helper routines */
 static void *H5D_chunk_alloc(size_t size, const H5O_pline_t *pline);
 static void *H5D_chunk_xfree(void *chk, const H5O_pline_t *pline);
+static herr_t H5D_chunk_cinfo_cache_update(H5D_chunk_cached_t *last,
+    const H5D_chunk_ud_t *udata);
 static herr_t H5D_free_chunk_info(void *item, void *key, void *opdata);
 static herr_t H5D_create_chunk_map_single(H5D_chunk_map_t *fm,
     const H5D_io_info_t *io_info);
@@ -1692,7 +1694,11 @@ H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 /* Make sure the address of the chunk is returned. */
                 if(!H5F_addr_defined(udata.addr))
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "chunk address isn't defined")
-            }
+
+                /* Cache the new chunk information */
+                H5D_chunk_cinfo_cache_update(&io_info->dset->shared->cache.chunk.last, &udata);
+            } /* end if */
+
             /* Set up the storage address information for this chunk */
             ctg_store.contig.dset_addr = udata.addr;
 
