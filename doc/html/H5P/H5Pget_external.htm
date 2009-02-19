@@ -11,8 +11,10 @@
         <em>off_t</em> <code>*offset</code>,
         <em>hsize_t</em> <code>*size</code>
     )
+    <p>
   <dt><strong>Purpose:</strong>
     <dd>Returns information about an external file.  
+    <p>
   <dt><strong>Description:</strong>
     <dd><code>H5Pget_external</code> returns information about an external 
         file.  The external file is specified by its index, <code>idx</code>,
@@ -27,57 +29,54 @@
         null pointer, the external file name is not returned.  
         If <code>offset</code> or <code>size</code> are null pointers 
         then the corresponding information is not returned.
+    <p>
   <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>plist</code></td>
+            <td valign="top"><em>hid_t</em> <code>plist</code></td>
             <td valign="top">IN: Identifier of a dataset creation property list.</td></tr>
         <tr>
-		    <td valign="top"><em>unsigned</em> <code>idx</code></td>
+            <td valign="top"><em>unsigned</em> <code>idx</code></td>
             <td valign="top">IN: External file index.</td></tr>
         <tr>
-		    <td valign="top"><em>size_t</em>&nbsp;<code>name_size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>size_t</em>&nbsp;<code>name_size&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Maximum length of <code>name</code> array.</td></tr>
         <tr>
-		    <td valign="top"><em>char</em> <code>*name</code></td>
+            <td valign="top"><em>char</em> <code>*name</code></td>
             <td valign="top">OUT: Name of the external file.</td></tr>
         <tr>
-		    <td valign="top"><em>off_t</em> <code>*offset</code></td>
+            <td valign="top"><em>off_t</em> <code>*offset</code></td>
             <td valign="top">OUT: Pointer to a location to return an offset value.</td></tr>
         <tr>
-		    <td valign="top"><em>hsize_t</em> <code>*size</code></td>
+            <td valign="top"><em>hsize_t</em> <code>*size</code></td>
             <td valign="top">OUT: Pointer to a location to return the size of the 
                 external file data.</td></tr>
     </table></ul>
+    <p>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+    <p>
   <dt><strong>Fortran90 Interface:</strong> h5pget_external_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5pget_external_f(prp_id, idx, name_size, name, offset,bytes, hdferr)
   IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: prp_id   ! Property list identifier
-  INTEGER, INTENT(IN) :: idx             ! External file index.
-  INTEGER, INTENT(IN) :: name_size       ! Maximum length of name array
-  CHARACTER(LEN=*), INTENT(OUT) :: name  ! Name of an external file
-  INTEGER, INTENT(OUT) :: offset         ! Offset, in bytes, from the 
-                                         ! beginning of the file to the 
-                                         ! location in the file where
-                                         ! the data starts.
-  INTEGER(HSIZE_T), INTENT(OUT) :: bytes ! Number of bytes reserved in 
-                                         ! the file for the data
-  INTEGER, INTENT(OUT) :: hdferr         ! Error code
-                                         ! 0 on success and -1 on failure
+  INTEGER(HID_T), INTENT(IN) :: prp_id     ! Property list identifier
+  INTEGER, INTENT(IN) :: idx               ! External file index.
+  INTEGER(SIZE_T), INTENT(IN) :: name_size ! Maximum length of name array
+  CHARACTER(LEN=*), INTENT(OUT) :: name    ! Name of an external file
+  INTEGER, INTENT(OUT) :: offset           ! Offset, in bytes, from the 
+                                           ! beginning of the file to the 
+                                           ! location in the file where
+                                           ! the data starts.
+  INTEGER(HSIZE_T), INTENT(OUT) :: bytes   ! Number of bytes reserved in 
+                                           ! the file for the data
+  INTEGER, INTENT(OUT) :: hdferr           ! Error code
+                                           ! 0 on success and -1 on failure
 END SUBROUTINE h5pget_external_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
+    </pre>
+    <p>
   <dt><strong>History</strong>:</strong>
     <ul><table width="90%">
         <tr>
