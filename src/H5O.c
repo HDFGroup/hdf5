@@ -2416,7 +2416,8 @@ H5O_get_info(H5O_loc_t *oloc, hid_t dxpl_id, hbool_t want_ih_info, H5O_info_t *o
     } /* end for */
 
     /* Retrieve # of attributes */
-    oinfo->num_attrs = H5O_attr_count_real(oloc->file, dxpl_id, oh);
+    if(H5O_attr_count_real(oloc->file, dxpl_id, oh, &oinfo->num_attrs) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve attribute count")
 
     /* Get B-tree & heap metadata storage size, if requested */
     if(want_ih_info) {

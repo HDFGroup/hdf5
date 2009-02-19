@@ -239,15 +239,16 @@ H5O_attr_create(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 
     /* Check if this object already has attribute information */
     if(oh->version > H5O_VERSION_1) {
-        hbool_t new_ainfo = FALSE;          /* Flag to indicate that the attribute information is new */
+        hbool_t new_ainfo = FALSE;      /* Flag to indicate that the attribute information is new */
+        htri_t ainfo_exists;            /* Whether the attribute info was retrieved */
 
-        if(NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo)) {
-            /* Clear error stack from not finding attribute info */
-            H5E_clear_stack(NULL);
-
+        /* Check for (& retrieve if available) attribute info */
+        if((ainfo_exists = H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+        if(!ainfo_exists) {
             /* Initialize attribute information */
-            ainfo.track_corder = (oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED) ? TRUE : FALSE;
-            ainfo.index_corder = (oh->flags & H5O_HDR_ATTR_CRT_ORDER_INDEXED) ? TRUE : FALSE;
+            ainfo.track_corder = (hbool_t)((oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED) ? TRUE : FALSE);
+            ainfo.index_corder = (hbool_t)((oh->flags & H5O_HDR_ATTR_CRT_ORDER_INDEXED) ? TRUE : FALSE);
             ainfo.max_crt_idx = 0;
             ainfo.corder_bt2_addr = HADDR_UNDEF;
             ainfo.nattrs = 0;
@@ -491,22 +492,29 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo))
-        /* Clear error stack from not finding attribute info */
-        H5E_clear_stack(NULL);
+    if(oh->version > H5O_VERSION_1) {
+        /* Check for (& retrieve if available) attribute info */
+        if(H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "can't check for attribute info message")
+    } /* end if */
 
     /* If found the attribute is already opened, make a copy of it to share the
-       object information.  If not, open attribute as a new object */
+     * object information.  If not, open attribute as a new object
+     */
     if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, name)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
     else if(found_open_attr == TRUE) {
         if(NULL == (ret_value = H5A_copy(NULL, exist_attr)))
             HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute")
-    } else {
-        if(H5F_addr_defined(ainfo.fheap_addr)) { /* Open attribute with dense storage */
+    } /* end else if */
+    else {
+        /* Check for attributes in dense storage */
+        if(H5F_addr_defined(ainfo.fheap_addr)) {
+            /* Open attribute with dense storage */
             if(NULL == (ret_value = H5A_dense_open(loc->file, dxpl_id, &ainfo, name)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "can't open attribute")
-        } else { /* Open attribute in compact storage */
+        } /* end if */
+        else {
             H5O_iter_opn_t udata;           /* User data for callback */
             H5O_mesg_operator_t op;         /* Wrapper for operator */
 
@@ -528,7 +536,7 @@ H5O_attr_open_by_name(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
             HDassert(udata.attr);
             ret_value = udata.attr;
         } /* end else */
-    }
+    } /* end else */
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
@@ -595,12 +603,11 @@ H5A_t *
 H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     H5_iter_order_t order, hsize_t n, hid_t dxpl_id)
 {
+    H5O_t *oh = NULL;                   /* Object header */
     H5A_attr_iter_op_t attr_op;         /* Attribute operator */
     H5A_t *exist_attr = NULL;           /* Opened attribute object */
     htri_t found_open_attr = FALSE;     /* Whether opened object is found */
     H5A_t *ret_value = NULL;            /* Return value */
-    H5O_t *oh = NULL;                   /* Object header */
-    H5O_ainfo_t ainfo;                  /* Attribute information for object */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_open_by_idx)
 
@@ -615,38 +622,30 @@ H5O_attr_open_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     if(H5O_attr_iterate_real((hid_t)-1, loc, dxpl_id, idx_type, order, n, NULL, &attr_op, &ret_value) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_BADITER, NULL, "can't locate attribute")
 
-
     /* Protect the object header to iterate over */
     if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, NULL, "unable to load object header")
 
-    /* Check for attribute info stored */
-    ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo))
-        /* Clear error stack from not finding attribute info */
-        H5E_clear_stack(NULL);
-
     /* Find out whether it has already been opened.  If it has, close the object
-     * and make a copy of the already opened object to share the object info. */
+     * and make a copy of the already opened object to share the object info.
+     */
     if(ret_value) {
-        if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr,
-            ret_value->shared->name)) < 0)
+        if((found_open_attr = H5O_attr_find_opened_attr(loc, &exist_attr, ret_value->shared->name)) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, NULL, "failed in finding opened attribute")
 
         /* If found that the attribute is already opened, make a copy of it
-           and close the object just opened. */
+         * and close the object just opened.
+         */
         if(found_open_attr && exist_attr) {
             if(H5A_close(ret_value) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTCLOSEOBJ, NULL, "can't close attribute")
-
             if(NULL == (ret_value = H5A_copy(NULL, exist_attr)))
                 HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, NULL, "can't copy existing attribute")
-        }
-    }
+        } /* end if */
+    } /* end if */
 
 done:
-    if(oh && H5AC_unprotect(loc->file, H5AC_ind_dxpl_id, H5AC_OHDR, loc->addr, oh,
-        H5AC__NO_FLAGS_SET) < 0)
+    if(oh && H5AC_unprotect(loc->file, H5AC_ind_dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)
 	HDONE_ERROR(H5E_ATTR, H5E_PROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -668,14 +667,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static
-htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char* name_to_open)
+static htri_t
+H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char* name_to_open)
 {
-    htri_t ret_value = FALSE;
-    int num_open_attr = 0;
-    hid_t *attr_id_list = NULL;
-    unsigned long loc_fnum, attr_fnum;
-    int i;
+    hid_t *attr_id_list = NULL;         /* List of IDs for opened attributes */
+    unsigned long loc_fnum;             /* File serial # for object */
+    size_t num_open_attr;               /* Number of opened attributes */
+    htri_t ret_value = FALSE;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_find_opened_attr)
 
@@ -684,39 +682,48 @@ htri_t H5O_attr_find_opened_attr(const H5O_loc_t *loc, H5A_t **attr, const char*
         HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "can't get file serial number")
 
     /* Count all opened attributes */
-    if((num_open_attr = H5F_get_obj_count(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, FALSE)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTCOUNT, FAIL, "can't get number of opened attributes")
+    num_open_attr = H5F_get_obj_count(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, FALSE);
 
     /* Find out whether the attribute has been opened */
     if(num_open_attr) {
-        attr_id_list = (hid_t*)H5MM_malloc(num_open_attr*sizeof(hid_t));
+        size_t u;          /* Local index variable */
+
+        /* Allocate space for the attribute ID list */
+        if(NULL == (attr_id_list = (hid_t *)H5MM_malloc(num_open_attr * sizeof(hid_t))))
+            HGOTO_ERROR(H5E_ATTR, H5E_NOSPACE, FAIL, "unable to allocate memory for attribute ID list")
 
         /* Retrieve the IDs of all opened attributes */
-        if(H5F_get_obj_ids(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, num_open_attr, attr_id_list, FALSE) < 0)
-            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't IDs of opened attributes")
+        H5F_get_obj_ids(loc->file, H5F_OBJ_ATTR | H5F_OBJ_LOCAL, num_open_attr, attr_id_list, FALSE);
 
-        for(i=0; i<num_open_attr; i++) {
-            if(NULL == (*attr = (H5A_t *)H5I_object(attr_id_list[i])))
+        /* Iterate over the attributes */
+        for(u = 0; u < num_open_attr; u++) {
+            unsigned long attr_fnum;        /* Attributes file serial number */
+
+            /* Get pointer to attribute */
+            if(NULL == (*attr = (H5A_t *)H5I_object_verify(attr_id_list[u], H5I_ATTR)))
                 HGOTO_ERROR(H5E_ATTR, H5E_BADTYPE, FAIL, "not an attribute")
 
             /* Get file serial number for attribute */
             if(H5F_get_fileno((*attr)->oloc.file, &attr_fnum) < 0)
                 HGOTO_ERROR(H5E_ATTR, H5E_BADVALUE, FAIL, "can't get file serial number")
 
-            /* Verify whether it's the right object.  The attribute name, object address
-             * to which the attribute is attached, and file serial number should all
-             * match. */
-            if(!strcmp(name_to_open, (*attr)->shared->name) &&
-                loc->addr == (*attr)->oloc.addr &&
-                loc_fnum == attr_fnum) {
+            /* Verify whether it's the right object.  The attribute name, object
+             *  address to which the attribute is attached, and file serial
+             *  number should all match.
+             */
+            if(!HDstrcmp(name_to_open, (*attr)->shared->name) &&
+                    loc->addr == (*attr)->oloc.addr &&
+                    loc_fnum == attr_fnum) {
                 ret_value = TRUE;
                 break;
-            }
-        }
-        H5MM_free(attr_id_list);
-    }
+            } /* end if */
+        } /* end for */
+    } /* end if */
 
 done:
+    if(attr_id_list)
+        H5MM_free(attr_id_list);
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_find_opened_attr */
 
@@ -886,9 +893,11 @@ H5O_attr_write(const H5O_loc_t *loc, hid_t dxpl_id, H5A_t *attr)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo))
-        /* Clear error stack from not finding attribute info */
-        H5E_clear_stack(NULL);
+    if(oh->version > H5O_VERSION_1) {
+        /* Check for (& retrieve if available) attribute info */
+        if(H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+    } /* end if */
 
     /* Check for attributes stored densely */
     if(H5F_addr_defined(ainfo.fheap_addr)) {
@@ -1118,9 +1127,11 @@ H5O_attr_rename(const H5O_loc_t *loc, hid_t dxpl_id, const char *old_name,
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo))
-        /* Clear error stack from not finding attribute info */
-        H5E_clear_stack(NULL);
+    if(oh->version > H5O_VERSION_1) {
+        /* Check for (& retrieve if available) attribute info */
+        if(H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+    } /* end if */
 
     /* Check for attributes stored densely */
     if(H5F_addr_defined(ainfo.fheap_addr)) {
@@ -1206,15 +1217,16 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
     HDassert(attr_op);
 
     /* Protect the object header to iterate over */
-    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr,
-        NULL, NULL, H5AC_READ)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_READ)))
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo))
-        /* Clear error stack from not finding attribute info */
-        H5E_clear_stack(NULL);
+    if(oh->version > H5O_VERSION_1) {
+        /* Check for (& retrieve if available) attribute info */
+        if(H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+    } /* end if */
 
     /* Check for attributes stored densely */
     if(H5F_addr_defined(ainfo.fheap_addr)) {
@@ -1228,8 +1240,7 @@ H5O_attr_iterate_real(hid_t loc_id, const H5O_loc_t *loc, hid_t dxpl_id,
         oh = NULL;
 
         /* Iterate over attributes in dense storage */
-        if((ret_value = H5A_dense_iterate(loc->file, dxpl_id, loc_id, &ainfo,
-                idx_type, order, skip, last_attr, attr_op, op_data)) < 0)
+        if((ret_value = H5A_dense_iterate(loc->file, dxpl_id, loc_id, &ainfo, idx_type, order, skip, last_attr, attr_op, op_data)) < 0)
             HERROR(H5E_ATTR, H5E_BADITER, "error iterating over attributes");
     } /* end if */
     else {
@@ -1491,7 +1502,7 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
     H5O_ainfo_t ainfo;                  /* Attribute information for object */
-    H5O_ainfo_t *ainfo_ptr = NULL;      /* Pointer to attribute information for object */
+    htri_t ainfo_exists = FALSE;        /* Whether the attribute info exists in the file */
     unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1507,9 +1518,11 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == (ainfo_ptr = H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo)))
-        /* Clear error stack from not finding attribute info */
-        H5E_clear_stack(NULL);
+    if(oh->version > H5O_VERSION_1) {
+        /* Check for (& retrieve if available) attribute info */
+        if((ainfo_exists = H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+    } /* end if */
 
     /* Check for attributes stored densely */
     if(H5F_addr_defined(ainfo.fheap_addr)) {
@@ -1539,7 +1552,7 @@ H5O_attr_remove(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
     } /* end else */
 
     /* Update the attribute information after removing an attribute */
-    if(ainfo_ptr)
+    if(ainfo_exists)
         if(H5O_attr_remove_update(loc, oh, &ainfo, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute info")
 
@@ -1577,7 +1590,7 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
 {
     H5O_t *oh = NULL;                   /* Pointer to actual object header */
     H5O_ainfo_t ainfo;                  /* Attribute information for object */
-    H5O_ainfo_t *ainfo_ptr = NULL;      /* Pointer to attribute information for object */
+    htri_t ainfo_exists = FALSE;        /* Whether the attribute info exists in the file */
     unsigned oh_flags = H5AC__NO_FLAGS_SET;     /* Metadata cache flags for object header */
     H5A_attr_table_t atable = {0, NULL};        /* Table of attributes */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -1593,9 +1606,11 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == (ainfo_ptr = H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo)))
-        /* Clear error stack from not finding attribute info */
-        H5E_clear_stack(NULL);
+    if(oh->version > H5O_VERSION_1) {
+        /* Check for (& retrieve if available) attribute info */
+        if((ainfo_exists = H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+    } /* end if */
 
     /* Check for attributes stored densely */
     if(H5F_addr_defined(ainfo.fheap_addr)) {
@@ -1633,7 +1648,7 @@ H5O_attr_remove_by_idx(const H5O_loc_t *loc, H5_index_t idx_type,
     } /* end else */
 
     /* Update the attribute information after removing an attribute */
-    if(ainfo_ptr)
+    if(ainfo_exists)
         if(H5O_attr_remove_update(loc, oh, &ainfo, dxpl_id) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTUPDATE, FAIL, "unable to update attribute info")
 
@@ -1666,40 +1681,44 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
-H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
+herr_t
+H5O_attr_count_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, hsize_t *nattrs)
 {
-    hsize_t ret_value;          /* Return value */
+    herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_attr_count_real)
+    FUNC_ENTER_NOAPI_NOINIT(H5O_attr_count_real)
 
     /* Check arguments */
     HDassert(f);
     HDassert(oh);
+    HDassert(nattrs);
 
     /* Check for attributes stored densely */
     if(oh->version > H5O_VERSION_1) {
+        htri_t ainfo_exists = FALSE;        /* Whether the attribute info exists in the file */
         H5O_ainfo_t ainfo;                  /* Attribute information for object */
 
         /* Attempt to get the attribute information from the object header */
-        if(H5A_get_ainfo(f, dxpl_id, oh, &ainfo))
-            ret_value = ainfo.nattrs;
-        else {
-            /* Clear error stack from not finding attribute info */
-            H5E_clear_stack(NULL);
-
-            ret_value = 0;
-        } /* end else */
+        if((ainfo_exists = H5A_get_ainfo(f, dxpl_id, oh, &ainfo)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+        else if(ainfo_exists > 0)
+            *nattrs = ainfo.nattrs;
+        else
+            *nattrs = 0;
     } /* end if */
     else {
+        hsize_t attr_count;     /* Number of attributes found */
         unsigned u;             /* Local index variable */
 
         /* Loop over all messages, counting the attributes */
-        for(u = ret_value = 0; u < oh->nmesgs; u++)
+        attr_count = 0;
+        for(u = 0; u < oh->nmesgs; u++)
             if(oh->mesg[u].type == H5O_MSG_ATTR)
-                ret_value++;
+                attr_count++;
+        *nattrs = attr_count;
     } /* end else */
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_attr_count_real */
 
@@ -1775,9 +1794,11 @@ H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
 
     /* Check for attribute info stored */
     ainfo.fheap_addr = HADDR_UNDEF;
-    if(oh->version > H5O_VERSION_1 && NULL == H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo))
-        /* Clear error stack from not finding attribute info */
-        H5E_clear_stack(NULL);
+    if(oh->version > H5O_VERSION_1) {
+        /* Check for (& retrieve if available) attribute info */
+        if(H5A_get_ainfo(loc->file, dxpl_id, oh, &ainfo) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+    } /* end if */
 
     /* Check for attributes stored densely */
     if(H5F_addr_defined(ainfo.fheap_addr)) {
@@ -1802,7 +1823,7 @@ H5O_attr_exists(const H5O_loc_t *loc, const char *name, hid_t dxpl_id)
             HGOTO_ERROR(H5E_ATTR, H5E_BADITER, FAIL, "error checking for existence of attribute")
 
         /* Check that we found the attribute */
-        ret_value = udata.found;
+        ret_value = (htri_t)udata.found;
     } /* end else */
 
 done:
@@ -1840,12 +1861,12 @@ H5O_attr_bh_info(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5_ih_info_t *bh_info)
     /* Attributes are only stored in fractal heap & indexed w/v2 B-tree in later versions */
     if(oh->version > H5O_VERSION_1) {
         H5O_ainfo_t ainfo;          /* Attribute information for object */
+        htri_t ainfo_exists = FALSE;        /* Whether the attribute info exists in the file */
 
-        /* Check for attribute info stored */
-        if(NULL == H5A_get_ainfo(f, dxpl_id, oh, &ainfo))
-            /* Clear error stack from not finding attribute info */
-            H5E_clear_stack(NULL);
-        else {
+        /* Check for (& retrieve if available) attribute info */
+        if((ainfo_exists = H5A_get_ainfo(f, dxpl_id, oh, &ainfo)) < 0)
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't check for attribute info message")
+        else if(ainfo_exists > 0) {
             /* Get storage size of creation order index, if it's used */
             if(H5F_addr_defined(ainfo.corder_bt2_addr))
                 if(H5B2_iterate_size(f, dxpl_id, H5A_BT2_CORDER, ainfo.corder_bt2_addr, &(bh_info->index_size)) < 0)
@@ -1899,8 +1920,9 @@ done:
 int
 H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id)
 {
-    H5O_t *oh = NULL;                   /* Pointer to actual object header */
-    int ret_value;                      /* Return value */
+    H5O_t *oh = NULL;           /* Pointer to actual object header */
+    hsize_t nattrs;             /* Number of attributes */
+    int ret_value;              /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_attr_count)
 
@@ -1912,7 +1934,11 @@ H5O_attr_count(const H5O_loc_t *loc, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_ATTR, H5E_CANTLOAD, FAIL, "unable to load object header")
 
     /* Retrieve # of attributes on object */
-    ret_value = (int)H5O_attr_count_real(loc->file, dxpl_id, oh);
+    if(H5O_attr_count_real(loc->file, dxpl_id, oh, &nattrs) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't retrieve attribute count")
+
+    /* Set return value */
+    ret_value = (int)nattrs;
 
 done:
     if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, oh, H5AC__NO_FLAGS_SET) < 0)

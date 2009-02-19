@@ -4882,7 +4882,7 @@ test_misc28(void)
     hsize_t count[] = {MISC28_SIZE, 1};
     size_t  nbytes_used;
     int     nused;
-    char    buf[10];
+    char    buf[MISC28_SIZE];
     int     i;
     herr_t  ret;            /* Generic return value */
 
