@@ -157,13 +157,22 @@ static void h5diff_print_char(char ch);
  * NaN detection
  *-------------------------------------------------------------------------
  */
+
+#if H5_SIZEOF_LONG_DOUBLE !=0
 typedef enum dtype_t
 {
-    FLT_FLOAT, FLT_DOUBLE,
-#if H5_SIZEOF_LONG_DOUBLE !=0
-    FLT_LDOUBLE,
-#endif
+    FLT_FLOAT, 
+    FLT_DOUBLE,
+    FLT_LDOUBLE
 } dtype_t;
+#else
+
+typedef enum dtype_t
+{
+    FLT_FLOAT, 
+    FLT_DOUBLE
+} dtype_t;
+#endif
 
 static int my_isnan(dtype_t type, void *val);
 
