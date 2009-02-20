@@ -356,9 +356,9 @@ hsize_t diff_array( void *_mem1,
  * H5T_COMPOUND
  *  Recursively call this function for each member
  * H5T_ARRAY
- *  Recursively call this function for each element�
+ *  Recursively call this function for each element
  * H5T_VLEN
- *  Recursively call this function for each element�
+ *  Recursively call this function for each element
  * H5T_STRING
  *  compare byte by byte in a cycle from 0 to type_size. this type_size is the
  *  value obtained by the get_size function but it is the string lenght for
