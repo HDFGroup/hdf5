@@ -99,7 +99,7 @@ extern MPI_Info h5_io_info_g;         /* MPI INFO object for IO */
  * the H5_FAILED() macro is invoked automatically when an API function fails.
  */
 #define TESTING(WHAT)	{printf("Testing %-62s",WHAT); fflush(stdout);}
-#define TESTING2(WHAT)	{printf(" Testing %-62s",WHAT); fflush(stdout);}
+#define TESTING_2(WHAT)	{printf(" Testing %-62s",WHAT); fflush(stdout);}
 #define PASSED()	{puts(" PASSED");fflush(stdout);}
 #define H5_FAILED()	{puts("*FAILED*");fflush(stdout);}
 #define H5_WARNING()	{puts("*WARNING*");fflush(stdout);}

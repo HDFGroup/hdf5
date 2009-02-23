@@ -153,7 +153,7 @@ static int do_ranks( hid_t fapl )
     hbool_t set_istore_k = 0;
       
       
-    TESTING2("with fill value, no compression");
+    TESTING_2("with fill value, no compression");
 
     do_fillvalue = 1;
 
@@ -187,7 +187,7 @@ static int do_ranks( hid_t fapl )
     PASSED();
 
 
-    TESTING2("no fill value, no compression");
+    TESTING_2("no fill value, no compression");
 
     do_fillvalue = 0;
 
@@ -208,7 +208,7 @@ static int do_ranks( hid_t fapl )
 
     PASSED();
     
-    TESTING2("with fill value, with compression");
+    TESTING_2("with fill value, with compression");
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 
@@ -246,7 +246,7 @@ static int do_ranks( hid_t fapl )
     SKIPPED();
 #endif
 
-    TESTING2("no fill value, with compression");
+    TESTING_2("no fill value, with compression");
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 
@@ -270,7 +270,7 @@ static int do_ranks( hid_t fapl )
     SKIPPED();
 #endif
 
-    TESTING2("with non-default indexed storage B-tree");
+    TESTING_2("with non-default indexed storage B-tree");
 
     do_fillvalue = 1;
     set_istore_k = 1;
@@ -299,7 +299,7 @@ error:
 static int do_layouts( hid_t fapl )
 {
     
-    TESTING2("storage layout use");
+    TESTING_2("storage layout use");
  
     if (test_layouts( H5D_COMPACT, fapl ) < 0)
     {
@@ -2080,7 +2080,7 @@ static int test_external( hid_t fapl )
         }
     }
 
-    TESTING2("external file use");
+    TESTING_2("external file use");
   
     /* create a new file */
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
