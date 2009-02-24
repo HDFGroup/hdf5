@@ -43,7 +43,7 @@
 #define FILE11   "h5diff_empty.h5"
 #define UIMAX    4294967295u /*Maximum value for a variable of type unsigned int */
 #define STR_SIZE 3
-#define GBLL    ((unsigned long_long) 1024 * 1024 *1024 )
+#define GBLL    ((unsigned long long) 1024 * 1024 *1024 )
 
 
 #define MY_LINKCLASS 187
@@ -202,12 +202,12 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
     
     /*-------------------------------------------------------------------------
     * relative error, compare divide by zero, both zero
-    * # 1.6.2 with -p (unsigned long_long)
+    * # 1.6.2 with -p (unsigned long long)
     *-------------------------------------------------------------------------
     */
     {
-        unsigned long_long data7[3][2] = {{100,100},{100,0},{0,100}};
-        unsigned long_long data8[3][2] = {{120,80}, {0,100},{0,50}};
+        unsigned long long data7[3][2] = {{100,100},{100,0},{0,100}};
+        unsigned long long data8[3][2] = {{120,80}, {0,100},{0,50}};
         
         write_dset(gid1,2,dims2,"dset7",H5T_NATIVE_ULLONG,data7);
         write_dset(gid1,2,dims2,"dset8",H5T_NATIVE_ULLONG,data8);
@@ -331,12 +331,37 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
 
     /* not comparable objects */
     {
+
+        typedef struct cmp1_t
+        {
+            double       d;
+            int          i;
+        } cmp1_t;
+
+        typedef struct cmp2_t
+        {
+            int          i;
+            double       d;
+        } cmp2_t;
+
+        typedef struct cmp3_t
+        {
+            int          i;
+        } cmp3_t;
+
         double       data2[6] = {0,0,0,0,0,0};
         int          data3[6] = {0,0,0,0,0,0};
         int          data4[3][2] = {{0,0},{0,0},{0,0}};
-        hsize_t      dims3[2] = { 2,2 };
         int          data5[2][2] = {{0,0},{0,0}};
         unsigned int data6[3][2] = {{0,0},{0,0},{0,0}};
+        cmp1_t       data7[1] = {1,2};
+        cmp2_t       data8[1] = {1,2};
+        hsize_t      dims3[2] = { 2,2 };
+        hsize_t      dims4[1] = { 1 };
+        size_t       type_size;
+        hid_t        tid;
+
+        
 
         write_dset(gid3,1,dims1,"dset1",H5T_NATIVE_DOUBLE,NULL);
         write_dset(gid3,1,dims1,"dset2",H5T_NATIVE_DOUBLE,data2);
@@ -344,7 +369,28 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
         write_dset(gid3,2,dims2,"dset4",H5T_NATIVE_INT,data4);
         write_dset(gid3,2,dims3,"dset5",H5T_NATIVE_INT,data5);
         write_dset(gid3,2,dims2,"dset6",H5T_NATIVE_UINT,data6);
-        
+
+        /* case of compound with different type members */
+        type_size = sizeof( cmp1_t );
+        tid = H5Tcreate (H5T_COMPOUND, type_size );
+        H5Tinsert(tid, "d", HOFFSET( cmp1_t, d ), H5T_NATIVE_DOUBLE );
+        H5Tinsert(tid, "i", HOFFSET( cmp1_t, i ), H5T_NATIVE_INT );
+        write_dset(gid3,1,dims4,"dset7",tid,data7);
+        H5Tclose(tid);
+
+        type_size = sizeof( cmp2_t );
+        tid = H5Tcreate (H5T_COMPOUND, type_size );
+        H5Tinsert(tid, "i", HOFFSET( cmp2_t, i ), H5T_NATIVE_INT  );
+        H5Tinsert(tid, "d", HOFFSET( cmp2_t, d ), H5T_NATIVE_DOUBLE );
+        write_dset(gid3,1,dims4,"dset8",tid,data8);
+        H5Tclose(tid);
+
+        /* case of compound with different number of members */
+        type_size = sizeof( cmp3_t );
+        tid = H5Tcreate (H5T_COMPOUND, type_size );
+        H5Tinsert(tid, "i", HOFFSET( cmp2_t, i ), H5T_NATIVE_INT  );
+        write_dset(gid3,1,dims4,"dset9",tid,NULL);
+        H5Tclose(tid);
         
     }
     
@@ -529,11 +575,11 @@ int test_datatypes(const char *fname)
     char          buf7a[3][2] = {{-1,-128},{-1,-1},{-1,-1}};
     unsigned char buf7b[3][2] = {{1,128},{1,1},{1,1}};
     
-    /* long_long test */
-    long_long            buf8a[3][2] = {{1,1},{1,1},{1,1}};
-    long_long            buf8b[3][2] = {{1,1},{3,4},{5,6}};
-    unsigned long_long   buf9a[3][2] = {{1,1},{1,1},{1,1}};
-    unsigned long_long   buf9b[3][2] = {{1,1},{3,4},{5,6}};
+    /* long long test */
+    long long            buf8a[3][2] = {{1,1},{1,1},{1,1}};
+    long long            buf8b[3][2] = {{1,1},{3,4},{5,6}};
+    unsigned long long   buf9a[3][2] = {{1,1},{1,1},{1,1}};
+    unsigned long long   buf9b[3][2] = {{1,1},{3,4},{5,6}};
     
     unsigned int    buf10a[3][2] = {{UIMAX,1},{1,1},{1,1}};
     unsigned int    buf10b[3][2] = {{UIMAX-1,1},{3,4},{5,6}};

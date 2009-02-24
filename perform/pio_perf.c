@@ -1107,7 +1107,7 @@ print_indent(register int indent)
 }
 
 static void
-recover_size_and_print(long_long val, const char *end)
+recover_size_and_print(long long val, const char *end)
 {
     if (val >= ONE_KB && (val % ONE_KB) == 0) {
         if (val >= ONE_MB && (val % ONE_MB) == 0) {
@@ -1147,67 +1147,67 @@ report_parameters(struct options *opts)
     print_io_api(opts->io_types);
 
     HDfprintf(output, "rank %d: Number of files=%Hd\n", rank,
-              (long_long)opts->num_files);
+              (long long)opts->num_files);
     HDfprintf(output, "rank %d: Number of datasets=%Hd\n", rank,
-              (long_long)opts->num_dsets);
+              (long long)opts->num_dsets);
     HDfprintf(output, "rank %d: Number of iterations=%Hd\n", rank,
-              (long_long)opts->num_iters);
+              (long long)opts->num_iters);
     HDfprintf(output, "rank %d: Number of processes=%d:%d\n", rank,
               opts->min_num_procs, opts->max_num_procs);
 
     if (opts->dim2d){
     HDfprintf(output, "rank %d: Number of bytes per process per dataset=", rank);
-    recover_size_and_print((long_long)(opts->num_bpp * opts->num_bpp * opts->min_num_procs), ":");
-    recover_size_and_print((long_long)(opts->num_bpp * opts->num_bpp * opts->max_num_procs), "\n");
+    recover_size_and_print((long long)(opts->num_bpp * opts->num_bpp * opts->min_num_procs), ":");
+    recover_size_and_print((long long)(opts->num_bpp * opts->num_bpp * opts->max_num_procs), "\n");
 
     HDfprintf(output, "rank %d: Size of dataset(s)=", rank);
-    recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs), "x");
-    recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs), ":");
-    recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs), "x");
-    recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs), "\n");
+    recover_size_and_print((long long)(opts->num_bpp * opts->min_num_procs), "x");
+    recover_size_and_print((long long)(opts->num_bpp * opts->min_num_procs), ":");
+    recover_size_and_print((long long)(opts->num_bpp * opts->max_num_procs), "x");
+    recover_size_and_print((long long)(opts->num_bpp * opts->max_num_procs), "\n");
 
     HDfprintf(output, "rank %d: File size=", rank);
-    recover_size_and_print((long_long)(pow(opts->num_bpp * opts->min_num_procs,2)
+    recover_size_and_print((long long)(pow(opts->num_bpp * opts->min_num_procs,2)
             * opts->num_dsets), ":");
-    recover_size_and_print((long_long)(pow(opts->num_bpp * opts->max_num_procs,2)
+    recover_size_and_print((long long)(pow(opts->num_bpp * opts->max_num_procs,2)
             * opts->num_dsets), "\n");
 
     HDfprintf(output, "rank %d: Transfer buffer size=", rank);
     if(opts->interleaved){
-        recover_size_and_print((long_long)opts->min_xfer_size, "x");
-        recover_size_and_print((long_long)opts->blk_size, ":");
-        recover_size_and_print((long_long)opts->max_xfer_size, "x");
-        recover_size_and_print((long_long)opts->blk_size, "\n");
+        recover_size_and_print((long long)opts->min_xfer_size, "x");
+        recover_size_and_print((long long)opts->blk_size, ":");
+        recover_size_and_print((long long)opts->max_xfer_size, "x");
+        recover_size_and_print((long long)opts->blk_size, "\n");
     }
     else{
-        recover_size_and_print((long_long)opts->blk_size, "x");
-        recover_size_and_print((long_long)opts->min_xfer_size, ":");
-        recover_size_and_print((long_long)opts->blk_size, "x");
-        recover_size_and_print((long_long)opts->max_xfer_size, "\n");
+        recover_size_and_print((long long)opts->blk_size, "x");
+        recover_size_and_print((long long)opts->min_xfer_size, ":");
+        recover_size_and_print((long long)opts->blk_size, "x");
+        recover_size_and_print((long long)opts->max_xfer_size, "\n");
     }
     HDfprintf(output, "rank %d: Block size=", rank);
-    recover_size_and_print((long_long)opts->blk_size, "x");
-    recover_size_and_print((long_long)opts->blk_size, "\n");
+    recover_size_and_print((long long)opts->blk_size, "x");
+    recover_size_and_print((long long)opts->blk_size, "\n");
     }
     else{
     HDfprintf(output, "rank %d: Number of bytes per process per dataset=", rank);
-    recover_size_and_print((long_long)opts->num_bpp, "\n");
+    recover_size_and_print((long long)opts->num_bpp, "\n");
 
     HDfprintf(output, "rank %d: Size of dataset(s)=", rank);
-    recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs), ":");
-    recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs), "\n");
+    recover_size_and_print((long long)(opts->num_bpp * opts->min_num_procs), ":");
+    recover_size_and_print((long long)(opts->num_bpp * opts->max_num_procs), "\n");
 
     HDfprintf(output, "rank %d: File size=", rank);
-    recover_size_and_print((long_long)(opts->num_bpp * opts->min_num_procs
+    recover_size_and_print((long long)(opts->num_bpp * opts->min_num_procs
             * opts->num_dsets), ":");
-    recover_size_and_print((long_long)(opts->num_bpp * opts->max_num_procs
+    recover_size_and_print((long long)(opts->num_bpp * opts->max_num_procs
             * opts->num_dsets), "\n");
 
     HDfprintf(output, "rank %d: Transfer buffer size=", rank);
-    recover_size_and_print((long_long)opts->min_xfer_size, ":");
-    recover_size_and_print((long_long)opts->max_xfer_size, "\n");
+    recover_size_and_print((long long)opts->min_xfer_size, ":");
+    recover_size_and_print((long long)opts->max_xfer_size, "\n");
     HDfprintf(output, "rank %d: Block size=", rank);
-    recover_size_and_print((long_long)opts->blk_size, "\n");
+    recover_size_and_print((long long)opts->blk_size, "\n");
     }
 
     HDfprintf(output, "rank %d: Block Pattern in Dataset=", rank);

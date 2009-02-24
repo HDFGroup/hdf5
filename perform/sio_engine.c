@@ -202,7 +202,7 @@ do_sio(parameters param)
         /* Validate transfer buffer size */
         if (param.buf_size[i]<=0) {
             HDfprintf(stderr,
-            "Transfer buffer size[%d] (%Hd) must be > 0\n", i,(long_long)buf_size[i]);
+            "Transfer buffer size[%d] (%Hd) must be > 0\n", i,(long long)buf_size[i]);
             GOTOERROR(FAIL);
         }
 
@@ -210,7 +210,7 @@ do_sio(parameters param)
             HDfprintf(stderr,
             "Dataset size[%d] (%Hd) must be a multiple of the "
             "trasfer buffer size[%d] (%Hd)\n",param.rank,
-            (long_long)param.dset_size[i], param.rank, (long_long)param.buf_size[i]);
+            (long long)param.dset_size[i], param.rank, (long long)param.buf_size[i]);
             GOTOERROR(FAIL);
         }
 
@@ -220,7 +220,7 @@ do_sio(parameters param)
     buffer2 = malloc(linear_buf_size);
     if ((buffer = malloc(linear_buf_size)) == NULL){
         HDfprintf(stderr, "malloc for transfer buffer size (%Hd) failed\n",
-        (long_long)(linear_buf_size));
+        (long long)(linear_buf_size));
         GOTOERROR(FAIL);
     }
 

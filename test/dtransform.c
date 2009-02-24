@@ -265,14 +265,14 @@ int main(void)
     TEST_TYPE_CONTIG(dxpl_id_utrans_inv, unsigned long, H5T_NATIVE_ULONG, "ulong", transformData, 0);
 
 #ifdef H5_LLONG_TO_FP_CAST_WORKS
-    TEST_TYPE_CONTIG(dxpl_id_c_to_f, long_long, H5T_NATIVE_LLONG, "llong", windchillFfloat, 1);
+    TEST_TYPE_CONTIG(dxpl_id_c_to_f, long long, H5T_NATIVE_LLONG, "llong", windchillFfloat, 1);
 #else
     TESTING("contiguous, with type conversion (float->llong)")
     SKIPPED()
 #endif
 
 #ifdef H5_ULLONG_TO_FP_CAST_WORKS
-    TEST_TYPE_CONTIG(dxpl_id_utrans_inv, unsigned long_long, H5T_NATIVE_ULLONG, "ullong", transformData, 0);
+    TEST_TYPE_CONTIG(dxpl_id_utrans_inv, unsigned long long, H5T_NATIVE_ULLONG, "ullong", transformData, 0);
 #else
     TESTING("contiguous, with type conversion (float->ullong)")
     SKIPPED()
@@ -293,14 +293,14 @@ int main(void)
     TEST_TYPE_CHUNK(dxpl_id_c_to_f, long, H5T_NATIVE_LONG, "long", windchillFfloat, 1);
     TEST_TYPE_CHUNK(dxpl_id_utrans_inv, unsigned long, H5T_NATIVE_ULONG, "ulong", transformData, 0);
 #ifdef H5_LLONG_TO_FP_CAST_WORKS
-    TEST_TYPE_CHUNK(dxpl_id_c_to_f, long_long, H5T_NATIVE_LLONG, "llong", windchillFfloat, 1);
+    TEST_TYPE_CHUNK(dxpl_id_c_to_f, long long, H5T_NATIVE_LLONG, "llong", windchillFfloat, 1);
 #else
     TESTING("chunked, with type conversion (float->llong)")
     SKIPPED()
 #endif
 
 #ifdef H5_ULLONG_TO_FP_CAST_WORKS
-    TEST_TYPE_CHUNK(dxpl_id_utrans_inv, unsigned long_long, H5T_NATIVE_ULLONG, "ullong", transformData, 0);
+    TEST_TYPE_CHUNK(dxpl_id_utrans_inv, unsigned long long, H5T_NATIVE_ULLONG, "ullong", transformData, 0);
 #else
     TESTING("chunked, with type conversion (float->ullong)")
     SKIPPED()

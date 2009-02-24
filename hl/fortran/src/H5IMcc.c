@@ -87,7 +87,7 @@ herr_t H5IMmake_image_8bitf(hid_t loc_id,
   } else if(sizeof(int_f) == sizeof(long)) {
       if(H5Dwrite(did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
        return -1;
-  } else if(sizeof(int_f) == sizeof(long_long)) {
+  } else if(sizeof(int_f) == sizeof(long long)) {
       if(H5Dwrite(did, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
        return -1;
   } else
@@ -200,7 +200,7 @@ herr_t H5IMmake_image_24bitf(hid_t loc_id,
   } else if(sizeof(int_f) == sizeof(long)) {
       if(H5Dwrite(did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
        return -1;
-  } else if(sizeof(int_f) == sizeof(long_long)) {
+  } else if(sizeof(int_f) == sizeof(long long)) {
       if(H5Dwrite(did, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
        return -1;
   } else
@@ -276,7 +276,7 @@ herr_t H5IMread_imagef(hid_t loc_id,
         tid = H5T_NATIVE_INT;
     else if(sizeof(int_f) == sizeof(long))
         tid = H5T_NATIVE_LONG;
-    else if(sizeof(int_f) == sizeof(long_long))
+    else if(sizeof(int_f) == sizeof(long long))
         tid = H5T_NATIVE_LLONG;
     else
         goto out;
@@ -360,7 +360,7 @@ herr_t H5IMmake_palettef(hid_t loc_id,
   } else if(sizeof(int_f) == sizeof(long)) {
       if(H5Dwrite(did, H5T_NATIVE_LONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, pal_data) < 0)
        return -1;
-  } else if(sizeof(int_f) == sizeof(long_long)) {
+  } else if(sizeof(int_f) == sizeof(long long)) {
       if(H5Dwrite(did, H5T_NATIVE_LLONG, H5S_ALL, H5S_ALL, H5P_DEFAULT, pal_data) < 0)
        return -1;
   } else
@@ -424,7 +424,7 @@ herr_t H5IMget_palettef(hid_t loc_id,
   return H5IM_get_palette(loc_id,image_name,pal_number,H5T_NATIVE_INT,pal_data);
  else if(sizeof(int_f) == sizeof(long))
   return H5IM_get_palette(loc_id,image_name,pal_number,H5T_NATIVE_LONG,pal_data);
- else if(sizeof(int_f) == sizeof(long_long))
+ else if(sizeof(int_f) == sizeof(long long))
   return H5IM_get_palette(loc_id,image_name,pal_number,H5T_NATIVE_LLONG,pal_data);
  else
   return -1;

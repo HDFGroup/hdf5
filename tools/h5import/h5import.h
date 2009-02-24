@@ -68,7 +68,7 @@
 #define H5DT_UINT8     unsigned char
 #define H5DT_UINT16    unsigned short
 #define H5DT_UINT32    unsigned int
-#define H5DT_INT64     long_long
+#define H5DT_INT64     long long
 #define H5DT_UINT64    unsigned H5DT_INT64
 
 struct path_info

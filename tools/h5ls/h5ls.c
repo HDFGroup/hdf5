@@ -770,11 +770,11 @@ display_enum_type(hid_t type, int ind)
 
     /* Determine what data type to use for the native values.  To simplify
      * things we entertain three possibilities:
-     *  1. long_long -- the largest native signed integer
-     * 2. unsigned long_long -- the largest native unsigned integer
+     *  1. long long -- the largest native signed integer
+     * 2. unsigned long long -- the largest native unsigned integer
      *     3. raw format */
-    if (H5Tget_size(type)<=sizeof(long_long)) {
-        dst_size = sizeof(long_long);
+    if (H5Tget_size(type)<=sizeof(long long)) {
+        dst_size = sizeof(long long);
         if (H5T_SGN_NONE==H5Tget_sign(type)) {
             native = H5T_NATIVE_ULLONG;
         } else {
@@ -813,13 +813,13 @@ display_enum_type(hid_t type, int ind)
  	     *strangely, unless use another pointer "copy".*/
  	    copy = value+i*dst_size;
             HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"u",
-            *((unsigned long_long*)((void*)copy)));
+            *((unsigned long long*)((void*)copy)));
         } else {
  	    /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
  	     *strangely, unless use another pointer "copy".*/
  	    copy = value+i*dst_size;
             HDfprintf(stdout,"%"H5_PRINTF_LL_WIDTH"d",
-            *((long_long*)((void*)copy)));
+            *((long long*)((void*)copy)));
         }
     }
 
@@ -952,9 +952,9 @@ display_reference_type(hid_t type, int UNUSED ind)
 {
     if (H5T_REFERENCE!=H5Tget_class(type)) return FALSE;
 
-    if (H5Tequal(type, H5T_STD_REF_OBJ)) {
+    if (H5Tequal(type, H5T_STD_REF_OBJ)==TRUE) {
         printf("object reference");
-    } else if (H5Tequal(type, H5T_STD_REF_DSETREG)) {
+    } else if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
         printf("dataset region reference");
     } else {
         printf("%lu-byte unknown reference",

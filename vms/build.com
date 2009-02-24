@@ -14,7 +14,7 @@ $!# access to either file, you may request a copy from help@hdfgroup.org.
 $!#
 $!
 $!
-$! This file builds C, Frtran, C++ HDF5 librraies and runs the tests
+$! This file builds C, Fortran, C++ HDF5 libraries and runs the tests
 $! Specify location of the top HDF5 source directory
 $
 $ hdf5top == "sys$sysusers:[pourmal.hdf5]"
@@ -25,6 +25,8 @@ $ hdf5ctest   = tmp + ".TEST]"
 $ hdf5f90test = tmp + ".FORTRAN.TEST]"
 $ hdf5cxxtest = tmp  + ".C__.TEST]"
 $ hdf5toolstest = tmp  + ".TOOLS.TESTFILES]"
+$ hdf5toolstest_h5diff = tmp  + ".TOOLS.H5DIFF.TESTFILES]"
+$ hdf5toolstest_h5repack = tmp  + ".TOOLS.H5REPACK.TESTFILES]"
 $ h5importtest  = tmp  + ".TOOLS.H5IMPORT.TESTFILES]"
 $ set def 'hdf5vms'
 $@make
@@ -37,11 +39,13 @@ $@check
 $ set def 'hdf5toolstest'
 $ copy [-.h5dump]check_h5dump.com     check_h5dump.com 
 $ copy [-.h5ls]check_h5ls.com         check_h5ls.com
-$ copy [-.h5diff]check_h5diff.com     check_h5diff.com
-$ copy [-.h5repack]check_h5repack.com check_h5repack.com
 $@check_h5dump.com
 $@check_h5ls.com
+$ set def 'hdf5toolstest_h5diff'
+$ copy [-]check_h5diff.com     check_h5diff.com
 $@check_h5diff.com
+$ set def 'hdf5toolstest_h5repack'
+$ copy [-]check_h5repack.com check_h5repack.com
 $@check_h5repack.com
 $!
 $ set def 'h5importtest'

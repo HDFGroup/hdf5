@@ -322,9 +322,9 @@ H5EA__test_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
     HDassert(elmt);
 
     /* Print element */
-    sprintf(temp_str, "Element #%llu:", (unsigned long_long)idx);
+    sprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
     HDfprintf(stream, "%*s%-*s %llu\n", indent, "", fwidth, temp_str,
-        (unsigned long_long)*(const uint64_t *)elmt);
+        (unsigned long long)*(const uint64_t *)elmt);
 
 END_FUNC(STATIC)  /* end H5EA__test_debug() */
 

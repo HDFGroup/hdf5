@@ -292,7 +292,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Protect the index block */
     if(NULL == (ret_value = (H5EA_iblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_IBLOCK, hdr->idx_blk_addr, NULL, hdr, rw)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array index block, address = %llu", (unsigned long_long)hdr->idx_blk_addr)
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array index block, address = %llu", (unsigned long long)hdr->idx_blk_addr)
 
 CATCH
 
@@ -327,7 +327,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Unprotect the index block */
     if(H5AC_unprotect(iblock->hdr->f, dxpl_id, H5AC_EARRAY_IBLOCK, iblock->addr, iblock, cache_flags) < 0)
-        H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array index block, address = %llu", (unsigned long_long)iblock->addr)
+        H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array index block, address = %llu", (unsigned long long)iblock->addr)
 
 CATCH
 
@@ -364,7 +364,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Protect index block */
     if(NULL == (iblock = H5EA__iblock_protect(hdr, dxpl_id, H5AC_WRITE)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array index block, address = %llu", (unsigned long_long)hdr->idx_blk_addr)
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array index block, address = %llu", (unsigned long long)hdr->idx_blk_addr)
 
     /* Check for index block having data block pointers */
     if(iblock->ndblk_addrs > 0) {

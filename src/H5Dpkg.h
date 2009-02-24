@@ -366,11 +366,12 @@ typedef struct H5D_rdcc_t {
         unsigned	nmisses;/* Number of cache misses		*/
         unsigned	nflushes;/* Number of cache flushes		*/
     } stats;
-    size_t		nbytes;	/* Current cached raw data in bytes	*/
+    size_t		nbytes_max; /* Maximum cached raw data in bytes	*/
     size_t		nslots;	/* Number of chunk slots allocated	*/
     double      w0;     /* Chunk preemption policy          */
     struct H5D_rdcc_ent_t *head; /* Head of doubly linked list		*/
     struct H5D_rdcc_ent_t *tail; /* Tail of doubly linked list		*/
+    size_t		nbytes_used; /* Current cached raw data in bytes */
     int		nused;	/* Number of chunk slots in use		*/
     H5D_chunk_cached_t last;    /* Cached copy of last chunk information */
     struct H5D_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
@@ -573,7 +574,7 @@ H5_DLL herr_t H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_
     H5O_layout_t *layout_dst, H5T_t *src_dtype, H5O_copy_t *cpy_info, hid_t dxpl_id);
 
 /* Functions that operate on chunked dataset storage */
-H5_DLL hbool_t H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr);
+H5_DLL hbool_t H5D_chunk_cacheable(const H5D_io_info_t *io_info);
 H5_DLL herr_t H5D_chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
 H5_DLL herr_t H5D_chunk_create(H5D_t *dset /*in,out*/, hid_t dxpl_id);
 H5_DLL herr_t H5D_chunk_init(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, const H5D_t *dset);
@@ -670,6 +671,7 @@ H5_DLL htri_t H5D_mpio_opt_possible(const H5D_io_info_t *io_info,
 H5_DLL herr_t H5D_layout_version_test(hid_t did, unsigned *version);
 H5_DLL herr_t H5D_layout_contig_size_test(hid_t did, hsize_t *size);
 H5_DLL herr_t H5D_layout_idx_type_test(hid_t did, H5D_chunk_index_t *idx_type);
+H5_DLL herr_t H5D_current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused);
 #endif /* H5D_TESTING */
 
 #endif /*_H5Dpkg_H*/

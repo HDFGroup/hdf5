@@ -300,6 +300,11 @@ unsigned m13_rdata[MISC13_DIM1][MISC13_DIM2];          /* Data read from dataset
 #define MISC27_FILE             "tbad_msg_count.h5"
 #define MISC27_GROUP            "Group"
 
+/* Definitions for misc. test #28 */
+#define MISC28_FILE             "tmisc28.h5"
+#define MISC28_SIZE             10
+#define MISC28_NSLOTS           10000
+
 /****************************************************************
 **
 **  test_misc1(): test unlinking a dataset from a group and immediately
@@ -4854,6 +4859,183 @@ test_misc27(void)
     CHECK(ret, FAIL, "H5Fclose");
 } /* end test_misc27() */
 
+
+/****************************************************************
+**
+**  test_misc28(): Ensure that the dataset chunk cache will hold
+**                 the correct number of chunks in cache without
+**                 evicting them.
+**
+****************************************************************/
+static void
+test_misc28(void)
+{
+    hid_t   fid;            /* File ID */
+    hid_t   sidf;           /* File Dataspace ID */
+    hid_t   sidm;           /* Memory Dataspace ID */
+    hid_t   did;            /* Dataset ID */
+    hid_t   dcpl, fapl;     /* Property List IDs */
+    hsize_t dims[] = {MISC28_SIZE, MISC28_SIZE};
+    hsize_t mdims[] = {MISC28_SIZE};
+    hsize_t cdims[] = {1, 1};
+    hsize_t start[] = {0,0};
+    hsize_t count[] = {MISC28_SIZE, 1};
+    size_t  nbytes_used;
+    int     nused;
+    char    buf[MISC28_SIZE];
+    int     i;
+    herr_t  ret;            /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Dataset chunk cache\n"));
+
+    /* Create the fapl and set the cache size.  Set nelmts to larger than the
+     * file size so we can be guaranteed that no chunks will be evicted due to
+     * a hash collision.  Set nbytes to fit exactly 1 column of chunks (10
+     * bytes). */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+    CHECK(fapl, FAIL, "H5Pcreate");
+    ret = H5Pset_cache(fapl, MISC28_NSLOTS, MISC28_NSLOTS, MISC28_SIZE, 0.75);
+    CHECK(ret, FAIL, "H5Pset_cache");
+
+    /* Create the dcpl and set the chunk size */
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
+    CHECK(dcpl, FAIL, "H5Pcreate");
+    ret = H5Pset_chunk(dcpl, 2, cdims);
+    CHECK(ret, FAIL, "H5Pset_chunk");
+
+
+    /* Create a new file and datasets within that file that use these
+     * property lists
+     */
+    fid = H5Fcreate(MISC28_FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    sidf = H5Screate_simple(2, dims, NULL);
+    CHECK(sidf, FAIL, "H5Screate_simple");
+
+    did = H5Dcreate2(fid, "dataset", H5T_NATIVE_CHAR, sidf, H5P_DEFAULT, dcpl, H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dcreate2");
+
+    /* Verify that the chunk cache is empty */
+    ret = H5D_current_cache_size_test(did, &nbytes_used, &nused);
+    CHECK(ret, FAIL, "H5D_current_cache_size_test");
+    VERIFY(nbytes_used, (size_t) 0, "H5D_current_cache_size_test");
+    VERIFY(nused, 0, "H5D_current_cache_size_test");
+
+    /* Initialize write buffer */
+    for(i=0; i<MISC28_SIZE; i++)
+        buf[i] = i;
+
+    /* Create memory dataspace and selection in file dataspace */
+    sidm = H5Screate_simple(1, mdims, NULL);
+    CHECK(sidm, FAIL, "H5Screate_simple");
+
+    ret = H5Sselect_hyperslab(sidf, H5S_SELECT_SET, start, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Write hypserslab */
+    ret = H5Dwrite(did, H5T_NATIVE_CHAR, sidm, sidf, H5P_DEFAULT, buf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Verify that all 10 chunks written have been cached */
+    ret = H5D_current_cache_size_test(did, &nbytes_used, &nused);
+    CHECK(ret, FAIL, "H5D_current_cache_size_test");
+    VERIFY(nbytes_used, (size_t) MISC28_SIZE, "H5D_current_cache_size_test");
+    VERIFY(nused, MISC28_SIZE, "H5D_current_cache_size_test");
+
+    /* Initialize write buffer */
+    for(i=0; i<MISC28_SIZE; i++)
+        buf[i] = MISC28_SIZE - 1 - i;
+
+    /* Select new hyperslab */
+    start[1] = 1;
+    ret = H5Sselect_hyperslab(sidf, H5S_SELECT_SET, start, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Write hyperslab */
+    ret = H5Dwrite(did, H5T_NATIVE_CHAR, sidm, sidf, H5P_DEFAULT, buf);
+    CHECK(ret, FAIL, "H5Dwrite");
+
+    /* Verify that the size of the cache remains at 10 */
+    ret = H5D_current_cache_size_test(did, &nbytes_used, &nused);
+    CHECK(ret, FAIL, "H5D_current_cache_size_test");
+    VERIFY(nbytes_used, (size_t) MISC28_SIZE, "H5D_current_cache_size_test");
+    VERIFY(nused, MISC28_SIZE, "H5D_current_cache_size_test");
+
+    /* Close dataset */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+
+    /* Re open dataset */
+    did = H5Dopen2(fid, "dataset", H5P_DEFAULT);
+    CHECK(did, FAIL, "H5Dopen2");
+
+    /* Verify that the chunk cache is empty */
+    ret = H5D_current_cache_size_test(did, &nbytes_used, &nused);
+    CHECK(ret, FAIL, "H5D_current_cache_size_test");
+    VERIFY(nbytes_used, (size_t) 0, "H5D_current_cache_size_test");
+    VERIFY(nused, 0, "H5D_current_cache_size_test");
+
+    /* Select hyperslabe for reading */
+    start[1] = 0;
+    ret = H5Sselect_hyperslab(sidf, H5S_SELECT_SET, start, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Read hypserslab */
+    ret = H5Dread(did, H5T_NATIVE_CHAR, sidm, sidf, H5P_DEFAULT, buf);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Verify the data read */
+    for(i=0; i<MISC28_SIZE; i++)
+        VERIFY(buf[i], i, "H5Dread");
+
+    /* Verify that all 10 chunks read have been cached */
+    ret = H5D_current_cache_size_test(did, &nbytes_used, &nused);
+    CHECK(ret, FAIL, "H5D_current_cache_size_test");
+    VERIFY(nbytes_used, (size_t) MISC28_SIZE, "H5D_current_cache_size_test");
+    VERIFY(nused, MISC28_SIZE, "H5D_current_cache_size_test");
+
+    /* Select new hyperslab */
+    start[1] = 1;
+    ret = H5Sselect_hyperslab(sidf, H5S_SELECT_SET, start, NULL, count, NULL);
+    CHECK(ret, FAIL, "H5Sselect_hyperslab");
+
+    /* Read hyperslab */
+    ret = H5Dread(did, H5T_NATIVE_CHAR, sidm, sidf, H5P_DEFAULT, buf);
+    CHECK(ret, FAIL, "H5Dread");
+
+    /* Verify the data read */
+    for(i=0; i<MISC28_SIZE; i++)
+        VERIFY(buf[i], MISC28_SIZE - 1 - i, "H5Dread");
+
+    /* Verify that the size of the cache remains at 10 */
+    ret = H5D_current_cache_size_test(did, &nbytes_used, &nused);
+    CHECK(ret, FAIL, "H5D_current_cache_size_test");
+    VERIFY(nbytes_used, (size_t) MISC28_SIZE, "H5D_current_cache_size_test");
+    VERIFY(nused, MISC28_SIZE, "H5D_current_cache_size_test");
+
+    /* Close dataset */
+    ret = H5Dclose(did);
+    CHECK(ret, FAIL, "H5Dclose");
+
+
+    /* Close the dataspaces and file */
+    ret = H5Sclose(sidf);
+    CHECK_I(ret, "H5Sclose");
+    ret = H5Sclose(sidm);
+    CHECK_I(ret, "H5Sclose");
+    ret = H5Fclose(fid);
+    CHECK_I(ret, "H5Fclose");
+
+    /* Close the property lists.  */
+    ret = H5Pclose(dcpl);
+    CHECK_I(ret, "H5Pclose");
+    ret = H5Pclose(fapl);
+    CHECK_I(ret, "H5Pclose");
+} /* end test_misc28() */
+
 /****************************************************************
 **
 **  test_misc(): Main misc. test routine.
@@ -4896,6 +5078,7 @@ test_misc(void)
     test_misc25c();     /* Exercise another null object header message merge bug */
     test_misc26();      /* Test closing property lists with long filter pipelines */
     test_misc27();      /* Test opening file with object that has bad # of object header messages */
+    test_misc28();      /* Test that chunks are cached appropriately */
 
 
 } /* test_misc() */
@@ -4950,5 +5133,6 @@ cleanup_misc(void)
     HDremove(MISC25A_FILE);
     HDremove(MISC25C_FILE);
     HDremove(MISC26_FILE);
+    HDremove(MISC28_FILE);
 }
 

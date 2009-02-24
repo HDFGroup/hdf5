@@ -317,8 +317,8 @@ H5G_obj_ent_encode(const H5F_t *f, uint8_t **pp, const H5O_loc_t *oloc)
  * Purpose:     Retrieves the "link info" message for an object.  Also
  *              sets the number of links correctly, if it isn't set up yet.
  *
- * Return:	Success:	Ptr to message in native format.
- *              Failure:        NULL
+ * Return:	Success:	TRUE/FALSE whether message was found & retrieved
+ *              Failure:        FAIL if error occurred
  *
  * Programmer:  Quincey Koziol
  *              koziol@hdfgroup.org

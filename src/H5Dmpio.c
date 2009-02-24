@@ -1224,7 +1224,7 @@ if(H5DEBUG(D))
                     HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
 
                 /* Load the chunk into cache and lock it. */
-                if(H5D_chunk_cacheable(io_info, udata.addr)) {
+                if(H5D_chunk_cacheable(io_info)) {
                     hbool_t entire_chunk = TRUE;         /* Whether whole chunk is selected */
 
                     /* Compute # of bytes accessed in chunk */
@@ -1449,7 +1449,7 @@ if(H5DEBUG(D)) {
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't switch to independent I/O")
 
             /* Load the chunk into cache and lock it. */
-            if(H5D_chunk_cacheable(io_info, udata.addr)) {
+            if(H5D_chunk_cacheable(io_info)) {
                 hbool_t entire_chunk = TRUE;         /* Whether whole chunk is selected */
 
                 /* Compute # of bytes accessed in chunk */

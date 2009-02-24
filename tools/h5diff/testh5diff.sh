@@ -598,6 +598,16 @@ TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset5  g2/dset6
 TOOLTEST h5diff_205.txt -c $FILE2 $FILE2 g2/dset5  g2/dset6
 
 
+# not comparable in compound
+TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset7  g2/dset8
+TOOLTEST h5diff_206.txt -c $FILE2 $FILE2 g2/dset7  g2/dset8
+
+TESTING $H5DIFF -c $SRCFILE2 $SRCFILE2 g2/dset8  g2/dset9
+TOOLTEST h5diff_207.txt -c $FILE2 $FILE2 g2/dset8  g2/dset9
+
+
+
+
 # ##############################################################################
 # # END
 # ##############################################################################

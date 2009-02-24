@@ -48,7 +48,7 @@
  *-------------------------------------------------------------------------
  */
 static H5_inline void *
-H5O_SHARED_DECODE(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
+H5O_SHARED_DECODE(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned mesg_flags,
     unsigned *ioflags, const uint8_t *p)
 {
     void *ret_value;            /* Return value */
@@ -68,7 +68,7 @@ H5O_SHARED_DECODE(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
     /* Check for shared message */
     if(mesg_flags & H5O_MSG_FLAG_SHARED) {
         /* Retrieve native message info indirectly through shared message */
-        if(NULL == (ret_value = H5O_shared_decode(f, dxpl_id, ioflags, p, H5O_SHARED_TYPE)))
+        if(NULL == (ret_value = H5O_shared_decode(f, dxpl_id, open_oh, ioflags, p, H5O_SHARED_TYPE)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode shared message")
 
         /* We currently do not support automatically fixing shared messages */
@@ -81,7 +81,7 @@ H5O_SHARED_DECODE(H5F_t *f, hid_t dxpl_id, unsigned mesg_flags,
     } /* end if */
     else {
         /* Decode native message directly */
-        if(NULL == (ret_value = H5O_SHARED_DECODE_REAL(f, dxpl_id, mesg_flags, ioflags, p)))
+        if(NULL == (ret_value = H5O_SHARED_DECODE_REAL(f, dxpl_id, open_oh, mesg_flags, ioflags, p)))
 	    HGOTO_ERROR(H5E_OHDR, H5E_CANTDECODE, NULL, "unable to decode native message")
     } /* end else */
 

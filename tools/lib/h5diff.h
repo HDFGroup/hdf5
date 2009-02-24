@@ -134,7 +134,8 @@ int diff_can_type( hid_t       f_type1, /* file data type */
                    hsize_t     *maxdim2,
                    const char  *obj1_name,
                    const char  *obj2_name,
-                   diff_opt_t  *options );
+                   diff_opt_t  *options,
+                   int         is_compound);
 
 
 hsize_t diff_attr(hid_t loc1_id,

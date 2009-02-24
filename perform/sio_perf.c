@@ -820,7 +820,7 @@ print_indent(register int indent)
 }
 
 static void
-recover_size_and_print(long_long val, const char *end)
+recover_size_and_print(long long val, const char *end)
 {
     if (val >= ONE_KB && (val % ONE_KB) == 0) {
         if (val >= ONE_MB && (val % ONE_MB) == 0) {
@@ -859,23 +859,23 @@ report_parameters(struct options *opts)
     print_io_api(opts->io_types);
 
     HDfprintf(output, "Number of iterations=%Hd\n",
-              (long_long)opts->num_iters);
+              (long long)opts->num_iters);
 
     HDfprintf(output, "Dataset size=");
 
     for (i=0; i<rank; i++)
-        recover_size_and_print((long_long)opts->dset_size[i], " ");
+        recover_size_and_print((long long)opts->dset_size[i], " ");
     HDfprintf(output, "\n");
 
 
     HDfprintf(output, "Transfer buffer size=");
     for (i=0; i<rank; i++)
-        recover_size_and_print((long_long)opts->buf_size[i], " ");
+        recover_size_and_print((long long)opts->buf_size[i], " ");
     HDfprintf(output, "\n");
 
     HDfprintf(output, "Dimension access order=");
     for (i=0; i<rank; i++)
-        recover_size_and_print((long_long)opts->order[i], " ");
+        recover_size_and_print((long long)opts->order[i], " ");
     HDfprintf(output, "\n");
 
     if (opts->io_types & SIO_HDF5) {
@@ -887,7 +887,7 @@ report_parameters(struct options *opts)
             HDfprintf(output, "Chunked\n");
             HDfprintf(output, "HDF5 chunk size=");
             for (i=0; i<rank; i++)
-                recover_size_and_print((long_long)opts->chk_size[i], " ");
+                recover_size_and_print((long long)opts->chk_size[i], " ");
             HDfprintf(output, "\n");
 
             HDfprintf(output, "HDF5 dataset dimensions=");

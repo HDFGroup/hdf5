@@ -1227,7 +1227,7 @@ herr_t H5LTset_attribute_long( hid_t loc_id,
 herr_t H5LTset_attribute_long_long( hid_t loc_id,
                                const char *obj_name,
                                const char *attr_name,
-                               const long_long *data,
+                               const long long *data,
                                size_t size )
 {
 
@@ -2557,7 +2557,7 @@ herr_t H5LTget_attribute_long( hid_t loc_id,
 herr_t H5LTget_attribute_long_long( hid_t loc_id,
                               const char *obj_name,
                               const char *attr_name,
-                              long_long *data )
+                              long long *data )
 {
     /* Get the attribute */
     if(H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_LLONG, data) < 0)

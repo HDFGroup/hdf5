@@ -371,7 +371,7 @@ get_class(H5T_class_t tclass)
 void print_found(hsize_t nfound)
 {
  if(g_Parallel)
-  parallel_print("%"H5_PRINTF_LL_WIDTH"u differences found\n", (unsigned long_long)nfound);
+  parallel_print("%"H5_PRINTF_LL_WIDTH"u differences found\n", (unsigned long long)nfound);
  else
   HDfprintf(stdout,"%Hu differences found\n",nfound);
 }

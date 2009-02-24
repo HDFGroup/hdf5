@@ -116,7 +116,7 @@ typedef struct {
     float f, g, h[16], i, j;
     double k, l, m, n;
     long o, p, q;
-    long_long r, s, t;
+    long long r, s, t;
 } stype4;
 
 #define NX	100u

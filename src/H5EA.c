@@ -199,7 +199,7 @@ H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, const H5EA_class_t *cls))
 HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
 #endif /* QAK */
     if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, cls, NULL, H5AC_READ)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header, address = %llu", (unsigned long_long)ea_addr)
+        H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header, address = %llu", (unsigned long long)ea_addr)
 
     /* Check for pending array deletion */
     if(hdr->pending_delete)
@@ -365,7 +365,7 @@ HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
 
     /* Protect index block */
     if(NULL == (iblock = H5EA__iblock_protect(hdr, dxpl_id, H5AC_WRITE)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array index block, address = %llu", (unsigned long_long)hdr->idx_blk_addr)
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array index block, address = %llu", (unsigned long long)hdr->idx_blk_addr)
 
     /* Check if element is in index block */
     if(idx < hdr->cparam.idx_blk_elmts) {
@@ -420,7 +420,7 @@ HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_i
 
             /* Protect data block */
             if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, iblock->dblk_addrs[dblk_idx], hdr->sblk_info[sblk_idx].dblk_nelmts, H5AC_WRITE)))
-                H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long_long)iblock->dblk_addrs[dblk_idx])
+                H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long long)iblock->dblk_addrs[dblk_idx])
 
             /* Adjust index to offset in data block */
             elmt_idx %= hdr->sblk_info[sblk_idx].dblk_nelmts;
@@ -455,7 +455,7 @@ HDfprintf(stderr, "%s: New super block address is: %a\n", FUNC, sblk_addr);
 
             /* Protect super block */
             if(NULL == (sblock = H5EA__sblock_protect(hdr, dxpl_id, iblock->sblk_addrs[sblk_off], sblk_idx, H5AC_WRITE)))
-                H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long_long)iblock->sblk_addrs[sblk_off])
+                H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long long)iblock->sblk_addrs[sblk_off])
 
             /* Compute the data block index in super block */
             dblk_idx = (size_t)(elmt_idx / sblock->dblk_nelmts);
@@ -532,7 +532,7 @@ HDfprintf(stderr, "%s: sblock->dblk_page_size = %Zu\n", FUNC, sblock->dblk_page_
 
                 /* Protect data block page */
                 if(NULL == (dblk_page = H5EA__dblk_page_protect(hdr, dxpl_id, dblk_page_addr, H5AC_WRITE)))
-                    H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block page, address = %llu", (unsigned long_long)dblk_page_addr)
+                    H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block page, address = %llu", (unsigned long long)dblk_page_addr)
 
                 /* Set pointer to elements */
                 elmts = dblk_page->elmts;
@@ -540,7 +540,7 @@ HDfprintf(stderr, "%s: sblock->dblk_page_size = %Zu\n", FUNC, sblock->dblk_page_
             else {
                 /* Protect data block */
                 if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, sblock->dblk_addrs[dblk_idx], sblock->dblk_nelmts, H5AC_WRITE)))
-                    H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long_long)sblock->dblk_addrs[dblk_idx])
+                    H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long long)sblock->dblk_addrs[dblk_idx])
 
                 /* Set pointer to elements */
                 elmts = dblock->elmts;
@@ -639,7 +639,7 @@ HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
 
         /* Protect index block */
         if(NULL == (iblock = H5EA__iblock_protect(hdr, dxpl_id, H5AC_READ)))
-            H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array index block, address = %llu", (unsigned long_long)hdr->idx_blk_addr)
+            H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array index block, address = %llu", (unsigned long long)hdr->idx_blk_addr)
 
         /* Check if element is in index block */
         if(idx < hdr->cparam.idx_blk_elmts) {
@@ -681,7 +681,7 @@ HDfprintf(stderr, "%s: dblk_idx = %u\n", FUNC, dblk_idx);
                 else {
                     /* Protect data block */
                     if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, iblock->dblk_addrs[dblk_idx], hdr->sblk_info[sblk_idx].dblk_nelmts, H5AC_READ)))
-                        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long_long)iblock->dblk_addrs[dblk_idx])
+                        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long long)iblock->dblk_addrs[dblk_idx])
 
                     /* Adjust index to offset in data block */
                     elmt_idx %= hdr->sblk_info[sblk_idx].dblk_nelmts;
@@ -705,7 +705,7 @@ HDfprintf(stderr, "%s: dblk_idx = %u\n", FUNC, dblk_idx);
                 else {
                     /* Protect super block */
                     if(NULL == (sblock = H5EA__sblock_protect(hdr, dxpl_id, iblock->sblk_addrs[sblk_off], sblk_idx, H5AC_READ)))
-                        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long_long)iblock->sblk_addrs[sblk_off])
+                        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long long)iblock->sblk_addrs[sblk_off])
 
                     /* Compute the data block index in super block */
                     dblk_idx = (size_t)(elmt_idx / sblock->dblk_nelmts);
@@ -779,7 +779,7 @@ HDfprintf(stderr, "%s: elmt_idx = %Hu, dblk_page_addr = %a\n", FUNC, elmt_idx, d
 
                                 /* Protect data block page */
                                 if(NULL == (dblk_page = H5EA__dblk_page_protect(hdr, dxpl_id, dblk_page_addr, H5AC_READ)))
-                                    H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block page, address = %llu", (unsigned long_long)dblk_page_addr)
+                                    H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block page, address = %llu", (unsigned long long)dblk_page_addr)
 
                                 /* Set pointer to elements */
                                 elmts = dblk_page->elmts;
@@ -788,7 +788,7 @@ HDfprintf(stderr, "%s: elmt_idx = %Hu, dblk_page_addr = %a\n", FUNC, elmt_idx, d
                         else {
                             /* Protect data block */
                             if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, sblock->dblk_addrs[dblk_idx], sblock->dblk_nelmts, H5AC_READ)))
-                                H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long_long)sblock->dblk_addrs[dblk_idx])
+                                H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long long)sblock->dblk_addrs[dblk_idx])
 
                             /* Set pointer to elements */
                             elmts = dblock->elmts;
@@ -924,7 +924,7 @@ H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr))
 HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
 #endif /* QAK */
     if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, NULL, NULL, H5AC_WRITE)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array header, address = %llu", (unsigned long_long)ea_addr)
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array header, address = %llu", (unsigned long long)ea_addr)
 
     /* Check for files using shared array header */
     if(hdr->file_rc)

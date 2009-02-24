@@ -404,7 +404,7 @@ H5D_earray_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
     HDassert(elmt);
 
     /* Print element */
-    sprintf(temp_str, "Element #%llu:", (unsigned long_long)idx);
+    sprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, temp_str,
         *(const haddr_t *)elmt);
 
@@ -563,7 +563,7 @@ H5D_earray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
     HDassert(elmt);
 
     /* Print element */
-    sprintf(temp_str, "Element #%llu:", (unsigned long_long)idx);
+    sprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
     HDfprintf(stream, "%*s%-*s {%a, %u, %0x}\n", indent, "", fwidth, temp_str,
         elmt->addr, elmt->nbytes, elmt->filter_mask);
 

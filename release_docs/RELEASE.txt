@@ -1,4 +1,4 @@
-HDF5 version 1.9.30 currently under development
+HDF5 version 1.9.32 currently under development
 ================================================================================
 
 
@@ -142,8 +142,17 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
-      - Fixed a bug that could cause problems when copying an object with a shared
-            message in its own object header. (NAF - 2009/01/29)
+      - Fixed a bug that prevented more than one dataset chunk from being cached
+            at a time. (NAF - 2009/02/12)
+      - Fixed an assertion failure caused by opening an attribute multiple times
+            through multiple file handles. (NAF - 2009/02/12)
+      - Fixed a problem that could prevent the user from adding attributes (or
+            any object header message) in some circumstances. (NAF - 2009/02/12)
+      - Fixed a bug that could cause problems when an attribute was added to a
+            committed datatype using the committed datatype's datatype.
+            (NAF - 2009/02/12)
+      - Fixed a bug that could cause problems when copying an object with a
+            shared message in its own object header. (NAF - 2009/01/29)
       - Changed H5Tset_order to properly reject H5T_ORDER_NONE for most
             datatypes. (NAF - 2009/01/27)
       - Fixed a bug where H5Tpack wouldn't remove trailing space from an

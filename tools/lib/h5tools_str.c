@@ -586,8 +586,8 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
      * some tempvars to store the value before we append it to the string to
      * get rid of the memory alignment problem
      */
-    unsigned long_long tempullong;
-    long_long          templlong;
+    unsigned long long tempullong;
+    long long          templlong;
     unsigned long      tempulong;
     long               templong;
     unsigned int       tempuint;
@@ -737,10 +737,10 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         HDmemcpy(&tempulong, vp, sizeof(unsigned long));
         h5tools_str_append(str, OPT(info->fmt_ulong, "%lu"), tempulong);
     } else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
-        HDmemcpy(&templlong, vp, sizeof(long_long));
+        HDmemcpy(&templlong, vp, sizeof(long long));
         h5tools_str_append(str, OPT(info->fmt_llong, fmt_llong), templlong);
     } else if (H5Tequal(type, H5T_NATIVE_ULLONG)) {
-        HDmemcpy(&tempullong, vp, sizeof(unsigned long_long));
+        HDmemcpy(&tempullong, vp, sizeof(unsigned long long));
         h5tools_str_append(str, OPT(info->fmt_ullong, fmt_ullong), tempullong);
     } else if (H5Tequal(type, H5T_NATIVE_HSSIZE)) {
         if (sizeof(hssize_t) == sizeof(int)) {
@@ -750,7 +750,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             memcpy(&templong, vp, sizeof(long));
             h5tools_str_append(str, OPT(info->fmt_long, "%ld"), templong);
         } else {
-            memcpy(&templlong, vp, sizeof(long_long));
+            memcpy(&templlong, vp, sizeof(long long));
             h5tools_str_append(str, OPT(info->fmt_llong, fmt_llong), templlong);
         }
     } else if (H5Tequal(type, H5T_NATIVE_HSIZE)) {
@@ -761,7 +761,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             memcpy(&tempulong, vp, sizeof(long));
             h5tools_str_append(str, OPT(info->fmt_ulong, "%lu"), tempulong);
         } else {
-            memcpy(&tempullong, vp, sizeof(unsigned long_long));
+            memcpy(&tempullong, vp, sizeof(unsigned long long));
             h5tools_str_append(str, OPT(info->fmt_ullong, fmt_ullong), tempullong);
         }
     } else if (H5Tget_class(type) == H5T_COMPOUND) {

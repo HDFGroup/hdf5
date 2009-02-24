@@ -440,7 +440,7 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     attr->shared->initialized = TRUE; /*for now, set to false later*/
 
     /* Copy the object header information */
-    if(H5O_loc_copy(&(attr->shared->oloc), loc->oloc, H5_COPY_DEEP) < 0)
+    if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
 
     /* Deep copy of the group hierarchy path */
@@ -450,9 +450,9 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     /* Check if any of the pieces should be (or are already) shared in the
      * SOHM table
      */
-    if(H5SM_try_share(attr->shared->oloc.file, dxpl_id, NULL, H5O_DTYPE_ID, attr->shared->dt, NULL) < 0)
+    if(H5SM_try_share(attr->oloc.file, dxpl_id, NULL, H5O_DTYPE_ID, attr->shared->dt, NULL) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "trying to share datatype failed")
-    if(H5SM_try_share(attr->shared->oloc.file, dxpl_id, NULL, H5O_SDSPACE_ID, attr->shared->ds, NULL) < 0)
+    if(H5SM_try_share(attr->oloc.file, dxpl_id, NULL, H5O_SDSPACE_ID, attr->shared->ds, NULL) < 0)
 	HGOTO_ERROR(H5E_OHDR, H5E_BADMESG, FAIL, "trying to share dataspace failed")
 
     /* Check whether datatype is committed & increment ref count
@@ -469,8 +469,8 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
      * datatype and dataspace messages themselves, or the size of the "shared"
      * messages if either or both of them are shared.
      */
-    attr->shared->dt_size = H5O_msg_raw_size(attr->shared->oloc.file, H5O_DTYPE_ID, FALSE, attr->shared->dt);
-    attr->shared->ds_size = H5O_msg_raw_size(attr->shared->oloc.file, H5O_SDSPACE_ID, FALSE, attr->shared->ds);
+    attr->shared->dt_size = H5O_msg_raw_size(attr->oloc.file, H5O_DTYPE_ID, FALSE, attr->shared->dt);
+    attr->shared->ds_size = H5O_msg_raw_size(attr->oloc.file, H5O_SDSPACE_ID, FALSE, attr->shared->ds);
 
     /* Get # of elements for attribute's dataspace */
     if((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
@@ -482,16 +482,16 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     attr->shared->data_size = nelmts * H5T_GET_SIZE(attr->shared->dt);
 
     /* Hold the symbol table entry (and file) open */
-    if(H5O_open(&(attr->shared->oloc)) < 0)
+    if(H5O_open(&(attr->oloc)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open")
     attr->obj_opened = TRUE;
 
     /* Set the version to encode the attribute with */
-    if(H5A_set_version(attr->shared->oloc.file, attr) < 0)
+    if(H5A_set_version(attr->oloc.file, attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "unable to update attribute version")
 
     /* Insert the attribute into the object header */
-    if(H5O_attr_create(&(attr->shared->oloc), dxpl_id, attr) < 0)
+    if(H5O_attr_create(&(attr->oloc), dxpl_id, attr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "unable to create attribute in object header")
 
     /* Register the new attribute and get an ID for it */
@@ -737,7 +737,7 @@ H5A_open_common(const H5G_loc_t *loc, H5A_t *attr)
 
 #if defined(H5_USING_MEMCHECKER) || !defined(NDEBUG)
     /* Clear object location */
-    if(H5O_loc_reset(&(attr->shared->oloc)) < 0)
+    if(H5O_loc_reset(&(attr->oloc)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to reset location")
 #endif /* H5_USING_MEMCHECKER */
 
@@ -746,7 +746,7 @@ H5A_open_common(const H5G_loc_t *loc, H5A_t *attr)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release group hier. path")
 
     /* Deep copy of the symbol table entry */
-    if(H5O_loc_copy(&(attr->shared->oloc), loc->oloc, H5_COPY_DEEP) < 0)
+    if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
 
     /* Deep copy of the group hier. path */
@@ -754,7 +754,7 @@ H5A_open_common(const H5G_loc_t *loc, H5A_t *attr)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTCOPY, FAIL, "unable to copy entry")
 
     /* Hold the symbol table entry (and file) open */
-    if(H5O_open(&(attr->shared->oloc)) < 0)
+    if(H5O_open(&(attr->oloc)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to open")
     attr->obj_opened = TRUE;
 
@@ -1032,7 +1032,7 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
         } /* end else */
 
         /* Modify the attribute in the object header */
-        if(H5O_attr_write(&(attr->shared->oloc), dxpl_id, attr) < 0)
+        if(H5O_attr_write(&(attr->oloc), dxpl_id, attr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to modify attribute")
     } /* end if */
 
@@ -2432,7 +2432,7 @@ H5A_close(H5A_t *attr)
     HDassert(attr->shared);
 
     /* Close the object's symbol-table entry */
-    if(attr->obj_opened && (H5O_close(&(attr->shared->oloc)) < 0))
+    if(attr->obj_opened && (H5O_close(&(attr->oloc)) < 0))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTRELEASE, FAIL, "can't release object header info")
 
     /* Reference count can be 0.  It only happens when H5A_create fails. */
@@ -2486,7 +2486,7 @@ H5A_oloc(H5A_t *attr)
     HDassert(attr);
 
     /* Set return value */
-    ret_value = &(attr->shared->oloc);
+    ret_value = &(attr->oloc);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

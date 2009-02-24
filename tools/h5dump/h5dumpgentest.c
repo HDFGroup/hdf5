@@ -5608,7 +5608,7 @@ gent_binary(void)
  *
  *-------------------------------------------------------------------------
  */
-#define GB4LL    ((unsigned long_long) 4*1024*1024*1024)
+#define GB4LL    ((unsigned long long) 4*1024*1024*1024)
 #define DIM_4GB  (GB4LL + 10)
 
 static void

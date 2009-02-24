@@ -76,7 +76,6 @@
 typedef struct H5A_shared_t {
     unsigned    version;    /* Version to encode attribute with */
     hbool_t     initialized;/* Indicate whether the attribute has been modified */
-    H5O_loc_t   oloc;       /* Object location for object attribute is on */
 
     char        *name;      /* Attribute's name */
     H5T_cset_t  encoding;   /* Character encoding of attribute name */
@@ -96,6 +95,7 @@ typedef struct H5A_shared_t {
 /* Define the main attribute structure */
 struct H5A_t {
     H5O_shared_t sh_loc;     /* Shared message info (must be first) */
+    H5O_loc_t    oloc;       /* Object location for object attribute is on */
     hbool_t      obj_opened; /* Object header entry opened? */
     H5G_name_t   path;       /* Group hierarchy path */
     H5A_shared_t *shared;    /* Shared attribute information */
@@ -218,8 +218,7 @@ H5_DLL H5A_t *H5A_copy(H5A_t *new_attr, const H5A_t *old_attr);
 H5_DLL herr_t H5A_get_info(const H5A_t *attr, H5A_info_t *ainfo);
 H5_DLL herr_t H5A_free(H5A_t *attr);
 H5_DLL herr_t H5A_close(H5A_t *attr);
-H5_DLL H5O_ainfo_t *H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh,
-    H5O_ainfo_t *ainfo);
+H5_DLL htri_t H5A_get_ainfo(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_ainfo_t *ainfo);
 H5_DLL herr_t H5A_set_version(const H5F_t *f, H5A_t *attr);
 
 /* Attribute "dense" storage routines */

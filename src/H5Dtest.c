@@ -176,3 +176,49 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }   /* H5D_layout_idx_type_test() */
 
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5D_current_cache_size_test
+ PURPOSE
+    Determine current the size of the dataset's chunk cache
+ USAGE
+    herr_t H5D_layout_contig_size_test(did, size)
+        hid_t did;              IN: Dataset to query
+        hsize_t *size;          OUT: Pointer to location to place size info
+ RETURNS
+    Non-negative on success, negative on failure
+ DESCRIPTION
+    Checks the size of a contiguous dataset's storage.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+    DO NOT USE THIS FUNCTION FOR ANYTHING EXCEPT TESTING
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+herr_t
+H5D_current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused)
+{
+    H5D_t	*dset;          /* Pointer to dataset to query */
+    herr_t ret_value = SUCCEED;   /* return value */
+
+    FUNC_ENTER_NOAPI(H5D_current_cache_size_test, FAIL)
+
+    /* Check args */
+    if(NULL == (dset = (H5D_t *)H5I_object_verify(did, H5I_DATASET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
+
+    if(nbytes_used) {
+        HDassert(dset->shared->layout.type == H5D_CHUNKED);
+        *nbytes_used = dset->shared->cache.chunk.nbytes_used;
+    } /* end if */
+
+    if(nused) {
+        HDassert(dset->shared->layout.type == H5D_CHUNKED);
+        *nused = dset->shared->cache.chunk.nused;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+}   /* H5D_current_cache_size_test() */
+

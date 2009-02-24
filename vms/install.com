@@ -33,6 +33,8 @@ $ hdf5tools_h5ls        = hdf5top_dir + "TOOLS.H5LS]"
 $ hdf5tools_h5repack    = hdf5top_dir + "TOOLS.H5REPACK]"
 $ hdf5tools_h5jam       = hdf5top_dir + "TOOLS.H5JAM]"
 $ hdf5tools_h5import    = hdf5top_dir + "TOOLS.H5IMPORT]"
+$ hdf5tools_h5stat      = hdf5top_dir + "TOOLS.H5STAT]"
+$ hdf5tools_h5misc      = hdf5top_dir + "TOOLS.H5MISC]"
 $ hdf5fortran_examples  = hdf5top_dir + "FORTRAN.EXAMPLES]"
 $ hdf5fortran_src       = hdf5top_dir + "FORTRAN.SRC]"
 $ hdf5cxx_src           = hdf5top_dir + "C__.SRC]"
@@ -136,6 +138,13 @@ $ copy h5unjam.exe 'hdf5install_bin'
 $!
 $ set def 'hdf5tools_h5import'
 $ copy h5import.exe 'hdf5install_bin'
+$!
+$ set def 'hdf5tools_h5stat'
+$ copy h5stat.exe 'hdf5install_bin'
+$!
+$ set def 'hdf5tools_h5misc'
+$ copy h5debug.exe 'hdf5install_bin'
+$ copy h5mkgrp.exe 'hdf5install_bin'
 $!
 $ write sys$output "Installing examples"
 $ set def 'hdf5examples'

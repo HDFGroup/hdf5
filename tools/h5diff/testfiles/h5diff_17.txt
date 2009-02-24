@@ -29,6 +29,9 @@ file1     file2
            x    /g2/dset4      
            x    /g2/dset5      
            x    /g2/dset6      
+           x    /g2/dset7      
+           x    /g2/dset8      
+           x    /g2/dset9      
 
 group  : </> and </>
 0 differences found

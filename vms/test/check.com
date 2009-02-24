@@ -56,11 +56,6 @@ $ run  cache
 $ type sys$input
 
 $ type sys$input
--------			Running cache_common   	-------
-$ run  cache_common
-$ type sys$input
-
-$ type sys$input
 -------			Running chunk_info   	-------
 $ run  chunk_info 
 $ type sys$input
