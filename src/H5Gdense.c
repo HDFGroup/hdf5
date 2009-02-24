@@ -656,28 +656,33 @@ H5G_dense_lookup_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
     /* Determine the address of the index to use */
     if(idx_type == H5_INDEX_NAME) {
-        /* Check if "native" order is OK - since names are hashed, getting them
-         *      in strictly increasing or decreasing order requires building a
-         *      table and sorting it.
+        /* Since names are hashed, getting them in strictly increasing or 
+         *      decreasing order requires building a table and sorting it.
+         *      If the order is native, use the B-tree for names.
          */
-        if(order == H5_ITER_NATIVE) {
-            bt2_addr = linfo->name_bt2_addr;
-            bt2_class = H5G_BT2_NAME;
-            HDassert(H5F_addr_defined(bt2_addr));
-        } /* end if */
-        else
-            bt2_addr = HADDR_UNDEF;
+        bt2_addr = HADDR_UNDEF;
     } /* end if */
     else {
         HDassert(idx_type == H5_INDEX_CRT_ORDER);
 
         /* This address may not be defined if creation order is tracked, but
          *      there's no index on it.  If there's no v2 B-tree that indexes
-         *      the links, a table will be built.
+         *      the links and the order is native, use the B-tree for names.
+         *      Otherwise, build a table.
          */
         bt2_addr = linfo->corder_bt2_addr;
         bt2_class = H5G_BT2_CORDER;
     } /* end else */
+
+    /* If the order is native and there's no B-tree for indexing the links,
+     * use the B-tree for names instead of building a table to speed up the 
+     * process.
+     */
+    if(order == H5_ITER_NATIVE && !H5F_addr_defined(bt2_addr)) {
+        bt2_addr = linfo->name_bt2_addr;
+        bt2_class = H5G_BT2_NAME;
+        HDassert(H5F_addr_defined(bt2_addr));
+    } /* end if */
 
     /* If there is an index defined for the field, use it */
     if(H5F_addr_defined(bt2_addr)) {
@@ -953,31 +958,37 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
     /* Determine the address of the index to use */
     if(idx_type == H5_INDEX_NAME) {
-        /* Check if "native" order is OK - since names are hashed, getting them
-         *      in strictly increasing or decreasing order requires building a
-         *      table and sorting it.
+        /* Since names are hashed, getting them in strictly increasing or 
+         * decreasing order requires building a table and sorting it. If
+         * the order is native, use the B-tree for names.
          */
-        if(order == H5_ITER_NATIVE) {
-            HDassert(H5F_addr_defined(linfo->name_bt2_addr));
-            bt2_addr = linfo->name_bt2_addr;
-            bt2_class = H5G_BT2_NAME;
-        } /* end if */
-        else
-            bt2_addr = HADDR_UNDEF;
+        bt2_addr = HADDR_UNDEF;
     } /* end if */
     else {
         HDassert(idx_type == H5_INDEX_CRT_ORDER);
 
         /* This address may not be defined if creation order is tracked, but
          *      there's no index on it.  If there's no v2 B-tree that indexes
-         *      the links, a table will be built.
+         *      the links and the order is native, use the B-tree for names.
+         *      Otherwise, build a table.
          */
         bt2_addr = linfo->corder_bt2_addr;
         bt2_class = H5G_BT2_CORDER;
     } /* end else */
 
+    /* If the order is native and there's no B-tree for indexing the links,
+     * use the B-tree for names instead of building a table to speed up the 
+     * process.
+     */
+    if(order == H5_ITER_NATIVE && !H5F_addr_defined(bt2_addr)) {
+        HDassert(H5F_addr_defined(linfo->name_bt2_addr));
+        bt2_addr = linfo->name_bt2_addr;
+        bt2_class = H5G_BT2_NAME;
+    } /* end if */
+
     /* Check on iteration order */
-    if(order == H5_ITER_NATIVE && H5F_addr_defined(bt2_addr)) {
+    if(order == H5_ITER_NATIVE) {
+        HDassert(H5F_addr_defined(bt2_addr));
         H5G_bt2_ud_it_t udata;              /* User data for iterator callback */
 
         /* Open the fractal heap */
@@ -1146,28 +1157,33 @@ H5G_dense_get_name_by_idx(H5F_t *f, hid_t dxpl_id, H5O_linfo_t *linfo,
 
     /* Determine the address of the index to use */
     if(idx_type == H5_INDEX_NAME) {
-        /* Check if "native" order is OK - since names are hashed, getting them
-         *      in strictly increasing or decreasing order requires building a
-         *      table and sorting it.
+        /* Since names are hashed, getting them in strictly increasing or 
+         * decreasing order requires building a table and sorting it.  If
+         * the order is native, use the B-tree for names.
          */
-        if(order == H5_ITER_NATIVE) {
-            bt2_addr = linfo->name_bt2_addr;
-            bt2_class = H5G_BT2_NAME;
-            HDassert(H5F_addr_defined(bt2_addr));
-        } /* end if */
-        else
-            bt2_addr = HADDR_UNDEF;
+        bt2_addr = HADDR_UNDEF;
     } /* end if */
     else {
         HDassert(idx_type == H5_INDEX_CRT_ORDER);
 
         /* This address may not be defined if creation order is tracked, but
          *      there's no index on it.  If there's no v2 B-tree that indexes
-         *      the links, a table will be built.
+         *      the links and the order is native, use the B-tree for names.
+         *      Otherwise, build a table.
          */
         bt2_addr = linfo->corder_bt2_addr;
         bt2_class = H5G_BT2_CORDER;
     } /* end else */
+
+    /* If the order is native and there's no B-tree for indexing the links,
+     * use the B-tree for names instead of building a table to speed up the 
+     * process.
+     */
+    if(order == H5_ITER_NATIVE && !H5F_addr_defined(bt2_addr)) {
+        bt2_addr = linfo->name_bt2_addr;
+        bt2_class = H5G_BT2_NAME;
+        HDassert(H5F_addr_defined(bt2_addr));
+    } /* end if */
 
     /* If there is an index defined for the field, use it */
     if(H5F_addr_defined(bt2_addr)) {
@@ -1561,29 +1577,34 @@ H5G_dense_remove_by_idx(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
     /* Determine the address of the index to use */
     if(idx_type == H5_INDEX_NAME) {
-        /* Check if "native" order is OK - since names are hashed, getting them
-         *      in strictly increasing or decreasing order requires building a
-         *      table and sorting it.
+        /* Since names are hashed, getting them in strictly increasing or 
+         * decreasing order requires building a table and sorting it.  If
+         * the order is native, use the B-tree for names.
          */
-        if(order == H5_ITER_NATIVE) {
-            bt2_addr = linfo->name_bt2_addr;
-            bt2_class = H5G_BT2_NAME;
-            HDassert(H5F_addr_defined(bt2_addr));
-        } /* end if */
-        else
-            bt2_addr = HADDR_UNDEF;
+        bt2_addr = HADDR_UNDEF;
     } /* end if */
     else {
         HDassert(idx_type == H5_INDEX_CRT_ORDER);
 
         /* This address may not be defined if creation order is tracked, but
          *      there's no index on it.  If there's no v2 B-tree that indexes
-         *      the links, a table will be built.
+         *      the links and the order is native, use the B-tree for names.
+         *      Otherwise, build a table.
          */
         bt2_addr = linfo->corder_bt2_addr;
         bt2_class = H5G_BT2_CORDER;
     } /* end else */
 
+    /* If the order is native and there's no B-tree for indexing the links,
+     * use the B-tree for names instead of building a table to speed up the 
+     * process.
+     */
+    if(order == H5_ITER_NATIVE && !H5F_addr_defined(bt2_addr)) {
+        bt2_addr = linfo->name_bt2_addr;
+        bt2_class = H5G_BT2_NAME;
+        HDassert(H5F_addr_defined(bt2_addr));
+    } /* end if */
+ 
     /* If there is an index defined for the field, use it */
     if(H5F_addr_defined(bt2_addr)) {
         H5G_bt2_ud_rmbi_t udata;            /* User data for v2 B-tree record removal */
