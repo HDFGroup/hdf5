@@ -24,7 +24,7 @@ include $(top_srcdir)/config/commence.am
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # Test programs and scripts
-TEST_SCRIPT=$(srcdir)/testh5ls.sh
+TEST_SCRIPT=testh5ls.sh
 check_SCRIPTS=$(TEST_SCRIPT)
 SCRIPT_DEPEND=h5ls$(EXEEXT)
 
