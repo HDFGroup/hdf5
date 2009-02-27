@@ -572,7 +572,8 @@ H5_DLL herr_t H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_
     H5O_layout_t *layout_dst, H5T_t *src_dtype, H5O_copy_t *cpy_info, hid_t dxpl_id);
 
 /* Functions that operate on chunked dataset storage */
-H5_DLL hbool_t H5D_chunk_cacheable(const H5D_io_info_t *io_info);
+H5_DLL htri_t H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr,
+    hbool_t write_op);
 H5_DLL herr_t H5D_chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
 H5_DLL herr_t H5D_chunk_create(H5D_t *dset /*in,out*/, hid_t dxpl_id);
 H5_DLL herr_t H5D_chunk_init(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, const H5D_t *dset);
