@@ -22,6 +22,8 @@ CMP='cmp -s'
 DIFF='diff -c'
 NLINES=20			# Max. lines of output to display if test fails
 
+WORDS_BIGENDIAN="@WORDS_BIGENDIAN@"
+
 nerrors=0
 verbose=yes
 
@@ -155,10 +157,19 @@ TOOLTEST tattr2.ls -w80 -v -S tattr2.h5
 TOOLTEST nosuchfile.ls nosuchfile.h5
 
 # test for variable length data types in verbose mode 
-TOOLTEST tvldtypes2.ls -v tvldtypes1.h5
+if test $WORDS_BIGENDIAN != "yes"; then
+ TOOLTEST tvldtypes2le.ls  -v tvldtypes1.h5
+else
+ TOOLTEST tvldtypes2be.ls  -v tvldtypes1.h5
+fi 
+
 
 # test for dataset region references data types in verbose mode 
-TOOLTEST tdatareg.ls -v tdatareg.h5
+if test $WORDS_BIGENDIAN != "yes"; then
+ TOOLTEST tdataregle.ls -v tdatareg.h5
+else
+ TOOLTEST tdataregbe.ls -v tdatareg.h5
+fi 
 
 if test $nerrors -eq 0 ; then
 	echo "All h5ls tests passed."

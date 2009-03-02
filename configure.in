@@ -2055,6 +2055,15 @@ else
   BYTESEX="little-endian"
 fi
 
+if test "X$ac_cv_c_bigendian" = "Xyes"; then
+  WORDS_BIGENDIAN="yes"
+else
+  WORDS_BIGENDIAN="no"
+fi
+AC_SUBST([WORDS_BIGENDIAN])
+
+
+
 dnl Are we compiling static libraries, shared libraries, or both?  This
 dnl is only used for the libhdf5.settings file. We can't just look at
 dnl $enable_static and $enable_shared because if they're yes the ltconfig
@@ -2300,6 +2309,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/Makefile
                  tools/h5dump/Makefile
                  tools/h5dump/testh5dump.sh
+                 tools/h5ls/testh5ls.sh
                  tools/h5import/Makefile
                  tools/h5diff/Makefile
                  tools/h5jam/Makefile

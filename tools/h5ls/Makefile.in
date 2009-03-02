@@ -28,7 +28,8 @@ CPPFLAGS=-I. -I$(srcdir) -I$(top_builddir)/src -I$(top_srcdir)/src  \
 ## Test programs and scripts.
 ##
 TEST_PROGS=
-TEST_SCRIPTS=$(srcdir)/testh5ls.sh
+#TEST_SCRIPTS=$(srcdir)/testh5ls.sh
+TEST_SCRIPTS=testh5ls.sh
 
 ## These are our main targets: library and tools.
 ##
