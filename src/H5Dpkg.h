@@ -583,7 +583,8 @@ H5_DLL herr_t H5D_chunk_get_info(const H5D_t *dset, hid_t dxpl_id,
 H5_DLL void *H5D_chunk_lock(const H5D_io_info_t *io_info,
     H5D_chunk_ud_t *udata, hbool_t relax, unsigned *idx_hint/*in,out*/);
 H5_DLL herr_t H5D_chunk_unlock(const H5D_io_info_t *io_info,
-    hbool_t dirty, unsigned idx_hint, void *chunk, uint32_t naccessed);
+    const H5D_chunk_ud_t *udata, hbool_t dirty, unsigned idx_hint, void *chunk,
+    uint32_t naccessed);
 H5_DLL herr_t H5D_chunk_flush(H5D_t *dset, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D_chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes);
 H5_DLL herr_t H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite);
