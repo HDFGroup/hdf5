@@ -1580,7 +1580,7 @@ H5D_chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked read failed")
 
             /* Release the cache lock on the chunk. */
-            if(chunk && H5D_chunk_unlock(io_info, FALSE, idx_hint, chunk, src_accessed_bytes) < 0)
+            if(chunk && H5D_chunk_unlock(io_info, &udata, FALSE, idx_hint, chunk, src_accessed_bytes) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
         } /* end if */
 
@@ -1734,7 +1734,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunked write failed")
 
         /* Release the cache lock on the chunk. */
-        if(chunk && H5D_chunk_unlock(io_info, TRUE, idx_hint, chunk, dst_accessed_bytes) < 0)
+        if(chunk && H5D_chunk_unlock(io_info, &udata, TRUE, idx_hint, chunk, dst_accessed_bytes) < 0)
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
 
         /* Advance to next chunk in list */
@@ -2736,8 +2736,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_chunk_unlock(const H5D_io_info_t *io_info, hbool_t dirty, unsigned idx_hint,
-    void *chunk, uint32_t naccessed)
+H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
+    hbool_t dirty, unsigned idx_hint, void *chunk, uint32_t naccessed)
 {
     const H5O_layout_t *layout = &(io_info->dset->shared->layout); /* Dataset layout */
     const H5D_rdcc_t	*rdcc = &(io_info->dset->shared->cache.chunk);
@@ -2747,6 +2747,7 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, hbool_t dirty, unsigned idx_hint,
     FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_unlock)
 
     HDassert(io_info);
+    HDassert(udata);
 
     if(UINT_MAX == idx_hint) {
         /*
@@ -2762,7 +2763,7 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, hbool_t dirty, unsigned idx_hint,
             x.dirty = TRUE;
             HDmemcpy(x.offset, io_info->store->chunk.offset, layout->u.chunk.ndims * sizeof(x.offset[0]));
             HDassert(layout->u.chunk.size > 0);
-            x.chunk_addr = HADDR_UNDEF;
+            x.chunk_addr = udata->addr;
             x.chunk_size = layout->u.chunk.size;
             H5_ASSIGN_OVERFLOW(x.alloc_size, x.chunk_size, uint32_t, size_t);
             x.chunk = (uint8_t *)chunk;
@@ -3324,7 +3325,7 @@ H5D_chunk_prune_fill(const H5D_chunk_rec_t *chunk_rec, H5D_chunk_it_ud1_t *udata
     bytes_accessed = (uint32_t)sel_nelmts * layout->u.chunk.dim[rank];
 
     /* Release lock on chunk */
-    if(H5D_chunk_unlock(io_info, TRUE, idx_hint, chunk, bytes_accessed) < 0)
+    if(H5D_chunk_unlock(io_info, &chk_udata, TRUE, idx_hint, chunk, bytes_accessed) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to unlock raw data chunk")
 
 done:

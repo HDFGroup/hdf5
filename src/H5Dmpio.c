@@ -1272,7 +1272,7 @@ if(H5DEBUG(D))
                 } /* end else */
 
                 /* Release the cache lock on the chunk. */
-                if(chunk && H5D_chunk_unlock(io_info, (io_info->op_type == H5D_IO_OP_WRITE), idx_hint, chunk, accessed_bytes) < 0)
+                if(chunk && H5D_chunk_unlock(io_info, &udata, (io_info->op_type == H5D_IO_OP_WRITE), idx_hint, chunk, accessed_bytes) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
             } /* end if */
 #else /* !defined(H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS) || !defined(H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS) */
@@ -1502,7 +1502,7 @@ if(H5DEBUG(D)) {
 
             /* Release the cache lock on the chunk. */
             if(chunk)
-                if(H5D_chunk_unlock(io_info, (io_info->op_type == H5D_IO_OP_WRITE), idx_hint, chunk, accessed_bytes) < 0)
+                if(H5D_chunk_unlock(io_info, &udata, (io_info->op_type == H5D_IO_OP_WRITE), idx_hint, chunk, accessed_bytes) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
         } /* end if */
         else { /*collective I/O */
