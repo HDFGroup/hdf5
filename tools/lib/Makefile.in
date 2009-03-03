@@ -239,6 +239,7 @@ USE_FILTER_SHUFFLE = @USE_FILTER_SHUFFLE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 USINGMEMCHECKER = @USINGMEMCHECKER@
 VERSION = @VERSION@
+WORDS_BIGENDIAN = @WORDS_BIGENDIAN@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@

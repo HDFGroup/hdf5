@@ -1026,7 +1026,7 @@
 ./tools/h5ls/Makefile.am
 ./tools/h5ls/Makefile.in
 ./tools/h5ls/h5ls.c
-./tools/h5ls/testh5ls.sh
+./tools/h5ls/testh5ls.sh.in
 
 ./tools/h5copy/testh5copy.sh
 ./tools/h5copy/Makefile.in
@@ -1328,8 +1328,10 @@
 ./tools/testfiles/tslink-1.ls
 ./tools/testfiles/tstr-1.ls
 ./tools/testfiles/tattr2.ls
-./tools/testfiles/tdatareg.ls
-./tools/testfiles/tvldtypes2.ls
+./tools/testfiles/tvldtypes2le.ls
+./tools/testfiles/tdataregle.ls
+./tools/testfiles/tvldtypes2be.ls
+./tools/testfiles/tdataregbe.ls
 
 
 #additional test input and output for h5dump XML

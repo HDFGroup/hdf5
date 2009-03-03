@@ -46,12 +46,12 @@ const char *FILENAME[] = {
 #define RANK1 1
 #define RANK2 2
 #define RANK3 3
-#define DIM0  4
-#define DIM1  4
-#define DIM2  4
-#define DIMS0 2
-#define DIMS1 2
-#define DIMS2 2
+#define DIM0  5
+#define DIM1  5
+#define DIM2  5
+#define DIMS0 3
+#define DIMS1 3
+#define DIMS2 3
 #define DIME0 7
 #define DIME1 7
 #define DIME2 7
@@ -89,6 +89,7 @@ int main( void )
     hid_t fapl;                 /* file access property list */
     hid_t fapl2;                /* file access property list w/latest format set */
     hbool_t new_format;         /* Whether to use the latest file format */
+    hbool_t chunk_cache;        /* Whether to enable chunk caching */
     int	  nerrors = 0;
 
     h5_reset();
@@ -97,6 +98,9 @@ int main( void )
     /* Copy the file access property list */
     if((fapl2 = H5Pcopy(fapl)) < 0) TEST_ERROR
 
+    /* Disable chunk caching on fapl2 */
+    if(H5Pset_cache(fapl2, 521, 0, 0, 0.) < 0) TEST_ERROR
+
     /* Set the "use the latest version of the format" bounds for creating objects in the file */
     if(H5Pset_libver_bounds(fapl2, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) TEST_ERROR
 
@@ -104,19 +108,44 @@ int main( void )
     for(new_format = FALSE; new_format <= TRUE; new_format++) {
         hid_t my_fapl;
 
-        /* Set the FAPL for the type of format */
-        if(new_format) {
-            puts("Testing with new file format:");
-            my_fapl = fapl2;
-        } /* end if */
-        else {
-            puts("Testing with old file format:");
-            my_fapl = fapl;
-        } /* end else */
+        /* Test chunked datasets with and without chunk cache */
+        for(chunk_cache = FALSE; chunk_cache <= TRUE; chunk_cache++) {
+            /* Output message about the type of format */
+            if(new_format)
+                printf("Testing with new file format");
+            else
+                printf("Testing with old file format");
 
-        nerrors += do_ranks( my_fapl ) < 0 ? 1 : 0;
-        nerrors += test_external( my_fapl ) < 0 ? 1 : 0;
-        nerrors += do_layouts( my_fapl ) < 0 ? 1 : 0;
+            /* Set the FAPL for the chunk cache settings */
+            if(chunk_cache) {
+                puts(" and chunk cache enabled:");
+                my_fapl = fapl;
+            } /* end if */
+            else {
+                puts(" and chunk cache disabled:");
+                my_fapl = fapl2;
+            } /* end else */
+
+            /* Set the FAPL for the type of format */
+            if(new_format) {
+                /* Set the "use the latest version of the format" bounds for
+                 * creating objects in the file */
+                if(H5Pset_libver_bounds(my_fapl, H5F_LIBVER_LATEST,
+                        H5F_LIBVER_LATEST) < 0) TEST_ERROR
+            } /* end if */
+            else
+                /* Set the "use the earliest version of the format" bounds for
+                 * creating objects in the file */
+                if(H5Pset_libver_bounds(my_fapl, H5F_LIBVER_EARLIEST,
+                        H5F_LIBVER_LATEST) < 0) TEST_ERROR
+
+            /* Tests which use chunked datasets */
+            nerrors += do_ranks( my_fapl ) < 0 ? 1 : 0;
+        } /* end for */
+
+        /* Tests which do not use chunked datasets */
+        nerrors += test_external( fapl ) < 0 ? 1 : 0;
+        nerrors += do_layouts( fapl ) < 0 ? 1 : 0;
     } /* end for */
 
     /* Close 2nd FAPL */
@@ -153,7 +182,7 @@ static int do_ranks( hid_t fapl )
     hbool_t set_istore_k = 0;
       
       
-    TESTING2("with fill value, no compression");
+    TESTING_2("with fill value, no compression");
 
     do_fillvalue = 1;
 
@@ -187,7 +216,7 @@ static int do_ranks( hid_t fapl )
     PASSED();
 
 
-    TESTING2("no fill value, no compression");
+    TESTING_2("no fill value, no compression");
 
     do_fillvalue = 0;
 
@@ -208,7 +237,7 @@ static int do_ranks( hid_t fapl )
 
     PASSED();
     
-    TESTING2("with fill value, with compression");
+    TESTING_2("with fill value, with compression");
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 
@@ -246,7 +275,7 @@ static int do_ranks( hid_t fapl )
     SKIPPED();
 #endif
 
-    TESTING2("no fill value, with compression");
+    TESTING_2("no fill value, with compression");
 
 #ifdef H5_HAVE_FILTER_DEFLATE
 
@@ -270,7 +299,7 @@ static int do_ranks( hid_t fapl )
     SKIPPED();
 #endif
 
-    TESTING2("with non-default indexed storage B-tree");
+    TESTING_2("with non-default indexed storage B-tree");
 
     do_fillvalue = 1;
     set_istore_k = 1;
@@ -299,7 +328,7 @@ error:
 static int do_layouts( hid_t fapl )
 {
     
-    TESTING2("storage layout use");
+    TESTING_2("storage layout use");
  
     if (test_layouts( H5D_COMPACT, fapl ) < 0)
     {
@@ -2080,7 +2109,7 @@ static int test_external( hid_t fapl )
         }
     }
 
-    TESTING2("external file use");
+    TESTING_2("external file use");
   
     /* create a new file */
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);

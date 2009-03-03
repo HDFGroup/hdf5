@@ -924,7 +924,7 @@ H5D_earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 {
     H5EA_t      *ea;            /* Pointer to extensible array structure */
     H5EA_stat_t ea_stat;        /* Extensible array statistics */
-    int ret_value;              /* Return value */
+    int ret_value = H5_ITER_CONT;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_iterate)
 

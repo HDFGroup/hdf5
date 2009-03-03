@@ -26,7 +26,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.9.32], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.34], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
@@ -3606,6 +3606,14 @@ else
   BYTESEX="little-endian"
 fi
 
+
+if test "X$ac_cv_c_bigendian" = "Xyes"; then
+  WORDS_BIGENDIAN="yes"
+else
+  WORDS_BIGENDIAN="no"
+fi
+AC_SUBST([WORDS_BIGENDIAN])
+
 dnl Parallel support? (set above except empty if none)
 PARALLEL=${PARALLEL:-no}
 
@@ -3934,6 +3942,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/h5dump/Makefile
                  tools/h5dump/testh5dump.sh
                  tools/h5dump/testh5dumpxml.sh
+                 tools/h5ls/testh5ls.sh
                  tools/h5import/Makefile
                  tools/h5diff/Makefile
                  tools/h5jam/Makefile

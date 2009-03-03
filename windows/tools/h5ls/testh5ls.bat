@@ -219,10 +219,10 @@ rem ############################################################################
     call :tooltest nosuchfile.ls 0 nosuchfile.h5
 
     rem test for variable length data types in verbose mode 
-    call :tooltest tvldtypes2.ls 0 -v tvldtypes1.h5
+    call :tooltest tvldtypes2le.ls 0 -v tvldtypes1.h5
 
     rem test for dataset region references data types in verbose mode 
-    call :tooltest tdatareg.ls 0 -v tdatareg.h5
+    call :tooltest tdataregle.ls 0 -v tdatareg.h5
 
     if %nerrors% equ 0 (
         echo.All h5ls tests passed.

@@ -305,6 +305,7 @@ USE_FILTER_SHUFFLE = @USE_FILTER_SHUFFLE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 USINGMEMCHECKER = @USINGMEMCHECKER@
 VERSION = @VERSION@
+WORDS_BIGENDIAN = @WORDS_BIGENDIAN@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -408,7 +409,7 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog
 # Add libtool shared library version numbers to the HDF5 library
 # See libtool versioning documentation online.
 LT_VERS_INTERFACE = 6
-LT_VERS_REVISION = 22
+LT_VERS_REVISION = 24
 LT_VERS_AGE = 0
 H5detect_CFLAGS = -g
 

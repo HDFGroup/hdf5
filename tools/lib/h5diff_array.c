@@ -156,13 +156,22 @@ static void h5diff_print_char(char ch);
  * NaN detection
  *-------------------------------------------------------------------------
  */
+
+#if H5_SIZEOF_LONG_DOUBLE !=0
 typedef enum dtype_t
 {
-    FLT_FLOAT, FLT_DOUBLE,
-#if H5_SIZEOF_LONG_DOUBLE !=0
-    FLT_LDOUBLE,
-#endif
+    FLT_FLOAT, 
+    FLT_DOUBLE,
+    FLT_LDOUBLE
 } dtype_t;
+#else
+
+typedef enum dtype_t
+{
+    FLT_FLOAT, 
+    FLT_DOUBLE
+} dtype_t;
+#endif
 
 static int my_isnan(dtype_t type, void *val);
 
@@ -356,9 +365,9 @@ hsize_t diff_array( void *_mem1,
  * H5T_COMPOUND
  *  Recursively call this function for each member
  * H5T_ARRAY
- *  Recursively call this function for each element�
+ *  Recursively call this function for each element
  * H5T_VLEN
- *  Recursively call this function for each element�
+ *  Recursively call this function for each element
  * H5T_STRING
  *  compare byte by byte in a cycle from 0 to type_size. this type_size is the
  *  value obtained by the get_size function but it is the string lenght for

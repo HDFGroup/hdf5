@@ -574,7 +574,8 @@ H5_DLL herr_t H5D_contig_copy(H5F_t *f_src, const H5O_layout_t *layout_src, H5F_
     H5O_layout_t *layout_dst, H5T_t *src_dtype, H5O_copy_t *cpy_info, hid_t dxpl_id);
 
 /* Functions that operate on chunked dataset storage */
-H5_DLL hbool_t H5D_chunk_cacheable(const H5D_io_info_t *io_info);
+H5_DLL htri_t H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr,
+    hbool_t write_op);
 H5_DLL herr_t H5D_chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
 H5_DLL herr_t H5D_chunk_create(H5D_t *dset /*in,out*/, hid_t dxpl_id);
 H5_DLL herr_t H5D_chunk_init(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, const H5D_t *dset);
@@ -584,7 +585,8 @@ H5_DLL herr_t H5D_chunk_get_info(const H5D_t *dset, hid_t dxpl_id,
 H5_DLL void *H5D_chunk_lock(const H5D_io_info_t *io_info,
     H5D_chunk_ud_t *udata, hbool_t relax, unsigned *idx_hint/*in,out*/);
 H5_DLL herr_t H5D_chunk_unlock(const H5D_io_info_t *io_info,
-    hbool_t dirty, unsigned idx_hint, void *chunk, uint32_t naccessed);
+    const H5D_chunk_ud_t *udata, hbool_t dirty, unsigned idx_hint, void *chunk,
+    uint32_t naccessed);
 H5_DLL herr_t H5D_chunk_flush(H5D_t *dset, hid_t dxpl_id, unsigned flags);
 H5_DLL herr_t H5D_chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes);
 H5_DLL herr_t H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite);

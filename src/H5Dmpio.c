@@ -1209,6 +1209,7 @@ if(H5DEBUG(D))
                 void *chunk;                    /* Pointer to the data chunk in cache */
                 uint32_t accessed_bytes;          /* Total accessed size in a chunk */
                 unsigned idx_hint = 0;          /* Cache index hint      */
+                htri_t cacheable;               /* Whether the chunk is cacheable */
 
                 /* Switch to independent I/O */
                 if(last_xfer_mode != H5FD_MPIO_INDEPENDENT) {
@@ -1224,7 +1225,10 @@ if(H5DEBUG(D))
                     HGOTO_ERROR(H5E_STORAGE, H5E_CANTGET, FAIL, "couldn't get chunk info from skipped list")
 
                 /* Load the chunk into cache and lock it. */
-                if(H5D_chunk_cacheable(io_info)) {
+                if((cacheable = H5D_chunk_cacheable(io_info, udata.addr,
+                        io_info->op_type == H5D_IO_OP_WRITE)) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if chunk is cacheable")
+                if(cacheable) {
                     hbool_t entire_chunk = TRUE;         /* Whether whole chunk is selected */
 
                     /* Compute # of bytes accessed in chunk */
@@ -1268,7 +1272,7 @@ if(H5DEBUG(D))
                 } /* end else */
 
                 /* Release the cache lock on the chunk. */
-                if(chunk && H5D_chunk_unlock(io_info, (io_info->op_type == H5D_IO_OP_WRITE), idx_hint, chunk, accessed_bytes) < 0)
+                if(chunk && H5D_chunk_unlock(io_info, &udata, (io_info->op_type == H5D_IO_OP_WRITE), idx_hint, chunk, accessed_bytes) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
             } /* end if */
 #else /* !defined(H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS) || !defined(H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS) */
@@ -1439,17 +1443,21 @@ if(H5DEBUG(D)) {
 
         /* Independent I/O */
         if(make_ind) {
-            void *chunk;                /* Pointer to the data chunk in cache */
+            void *chunk;                    /* Pointer to the data chunk in cache */
             H5D_io_info_t *chk_io_info;     /* Pointer to I/O info object for this chunk */
-            uint32_t accessed_bytes = 0;  /* Total accessed size in a chunk */
-            unsigned idx_hint = 0;      /* Cache index hint      */
+            uint32_t accessed_bytes = 0;    /* Total accessed size in a chunk */
+            unsigned idx_hint = 0;          /* Cache index hint      */
+            htri_t cacheable;               /* Whether the chunk is cacheable */
 
             /* Switch to independent I/O */
             if(H5D_ioinfo_xfer_mode(io_info, dx_plist, H5FD_MPIO_INDEPENDENT) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't switch to independent I/O")
 
             /* Load the chunk into cache and lock it. */
-            if(H5D_chunk_cacheable(io_info)) {
+            if((cacheable = H5D_chunk_cacheable(io_info, udata.addr,
+                    io_info->op_type == H5D_IO_OP_WRITE)) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't tell if chunk is cacheable")
+            if(cacheable) {
                 hbool_t entire_chunk = TRUE;         /* Whether whole chunk is selected */
 
                 /* Compute # of bytes accessed in chunk */
@@ -1494,7 +1502,7 @@ if(H5DEBUG(D)) {
 
             /* Release the cache lock on the chunk. */
             if(chunk)
-                if(H5D_chunk_unlock(io_info, (io_info->op_type == H5D_IO_OP_WRITE), idx_hint, chunk, accessed_bytes) < 0)
+                if(H5D_chunk_unlock(io_info, &udata, (io_info->op_type == H5D_IO_OP_WRITE), idx_hint, chunk, accessed_bytes) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "unable to unlock raw data chunk")
         } /* end if */
         else { /*collective I/O */
