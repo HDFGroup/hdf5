@@ -988,8 +988,9 @@ H5G_dense_iterate(H5F_t *f, hid_t dxpl_id, const H5O_linfo_t *linfo,
 
     /* Check on iteration order */
     if(order == H5_ITER_NATIVE) {
-        HDassert(H5F_addr_defined(bt2_addr));
         H5G_bt2_ud_it_t udata;              /* User data for iterator callback */
+
+        HDassert(H5F_addr_defined(bt2_addr));
 
         /* Open the fractal heap */
         if(NULL == (fheap = H5HF_open(f, dxpl_id, linfo->fheap_addr)))
