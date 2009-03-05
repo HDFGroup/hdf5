@@ -142,6 +142,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Removed the long_long #define and replaced all instances with 
+            "long long". This caused problems with third party products. All 
+            currently supported compliers support the type. (ADB - 2009/03/05)
       - Fixed various bugs that could prevent the fill value from being written
             in certain rare cases. (NAF - 2009/02/26)
       - Fixed a bug that prevented more than one dataset chunk from being cached
