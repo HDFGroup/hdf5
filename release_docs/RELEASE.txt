@@ -61,9 +61,6 @@ New Features
 
     Library
     -------
-    - Removed the long_long #define and replaced all instances with 
-      "long long". This caused problems with third party products. All 
-      currently supported compliers support the type. (ADB - 2009/03/05)
     - Added support for dense attributes to H5Ocopy. XCao/NAF - 2009/01/29
     - Added H5Pset_elink_cb and H5Pget_elink_cb functions to support a
       user-defined callback function for external link traversal.
@@ -117,6 +114,9 @@ Bug Fixes since HDF5-1.8.2
 
     Library
     -------
+    - Removed the long_long #define and replaced all instances with 
+      "long long". This caused problems with third party products. All 
+      currently supported compliers support the type. (ADB - 2009/03/05)
     - Fixed various bugs that could prevent the fill value from being written
       in certain rare cases. NAF - 2009/02/26
     - Fixed a bug that prevented more than one dataset chunk from being cached
