@@ -1740,7 +1740,7 @@
 ./vms/tools/h5repack/make.com
 ./vms/tools/h5stat/make.com
 ./vms/tools/lib/make.com
-./vms/tools/lib/misc.com
+./vms/tools/misc/make.com
 ./vms/tools/testfiles/tattr-3.ddl
 ./vms/tools/testfiles/tdset-2.ddl
 ./vms/tools/testfiles/tgroup-2.ddl
