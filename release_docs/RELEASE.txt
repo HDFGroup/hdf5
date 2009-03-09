@@ -111,6 +111,9 @@ Bug Fixes since HDF5-1.8.2
 
     Configuration
     -------------
+    - Configure no longer removes the '-g' flag from CFLAGS when in production
+      mode if it has been explicitly set in the CFLAGS environment variable 
+      prior to configuration. MAM - 2009/03/09 - BZ #1401
 
     Library
     -------
