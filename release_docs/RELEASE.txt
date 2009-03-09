@@ -288,6 +288,12 @@ Footnotes:
 
 Known Problems
 ==============
+* When in production mode, any presence of the '-g' flag within CFLAGS is
+  stripped out during configuration. This currently cannot be overridden. 
+  In order to build with '-g' specified within CFLAGS, use the
+  --disable-production configure flag in order to configure in development
+  mode. MAM - 2009/03/09.
+
 * We discovered two problems when running collective IO parallel HDF5 tests
   with chunking storage with the ChaMPIon MPI compiler on tungsten, a Linux
   cluster at NCSA.
