@@ -230,6 +230,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - Configure no longer removes the '-g' flag from CFLAGS when in production
+      mode if it has been explicitly set in the CFLAGS environment variable 
+      prior to configuration. MAM - 2009/03/09 - BZ #1401.
     - Fixed error with 'make check install' failing due to h5dump
       needing other tools built first. MAM - 2008/10/24.
     - When using shared szip, it is no longer necessary to specify
