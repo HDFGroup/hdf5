@@ -230,6 +230,10 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - The --includedir=DIR configuration option now works as intended, and can
+      be used to specify the location to install C header files. The default
+      location remains unchanged, residing at ${prefix}/include. 
+      MAM - 2009/03/10 - BZ #1381
     - Configure no longer removes the '-g' flag from CFLAGS when in production
       mode if it has been explicitly set in the CFLAGS environment variable 
       prior to configuration. MAM - 2009/03/09 - BZ #1401.
