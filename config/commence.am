@@ -43,7 +43,6 @@ LIBH5F_HL=$(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
 LIBH5CPP_HL=$(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 
 # Install directories that automake doesn't know about
-includedir = $(exec_prefix)/include
 docdir = $(exec_prefix)/doc
 
 # Scripts used to build examples
