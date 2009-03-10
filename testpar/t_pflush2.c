@@ -49,7 +49,8 @@ static double	the_data[100][100];
  *
  *-------------------------------------------------------------------------
  */
-int check_file(char* name, hid_t fapl)
+static int
+check_file(char* name, hid_t fapl)
 {
     hid_t	file, space, dset, groups, grp, plist;
     hsize_t	ds_size[2];

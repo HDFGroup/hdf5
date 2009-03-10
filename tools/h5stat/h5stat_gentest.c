@@ -23,6 +23,7 @@
  * of the expected output and update the corresponding *.ddl files.
  */
 
+#include <assert.h>
 #include "hdf5.h"
 
 #define FILE 		"h5stat_newgrat.h5"
@@ -47,6 +48,7 @@ static void gen_file(void)
 
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
+    assert(ret >= 0);
 
      /* Create dataset */
     file = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
@@ -68,12 +70,17 @@ static void gen_file(void)
         sprintf(attrname, "%s%d", ATTR_NAME,i);
         attr_id = H5Acreate2(dset_id, attrname, type_id, space_id, H5P_DEFAULT, H5P_DEFAULT);
         ret = H5Aclose(attr_id);
+        assert(ret >= 0);
     } /* end for */
 
     ret = H5Dclose(dset_id);
+    assert(ret >= 0);
     ret = H5Sclose(space_id);
+    assert(ret >= 0);
     ret = H5Tclose(type_id);
+    assert(ret >= 0);
     ret = H5Fclose(file);
+    assert(ret >= 0);
 }
 
 int main(void)

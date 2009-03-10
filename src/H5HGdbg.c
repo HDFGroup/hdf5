@@ -113,7 +113,7 @@ H5HG_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 		     (unsigned long)H5HG_ALIGN(h->obj[u].size));
 	    p = h->obj[u].begin + H5HG_SIZEOF_OBJHDR (f);
 	    for (j=0; j<h->obj[u].size; j+=16) {
-		fprintf (stream, "%*s%04d: ", indent+6, "", j);
+		fprintf (stream, "%*s%04u: ", indent+6, "", j);
 		for (k=0; k<16; k++) {
 		    if (8==k) fprintf (stream, " ");
 		    if (j+k<h->obj[u].size) {

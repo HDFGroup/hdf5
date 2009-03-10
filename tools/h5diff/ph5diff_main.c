@@ -16,6 +16,7 @@
 #include "h5diff.h"
 #include "ph5diff.h"
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include "h5diff_common.h"
 
@@ -59,7 +60,6 @@ int main(int argc, const char *argv[])
     const char *fname2 = NULL;
     const char *objname1  = NULL;
     const char *objname2  = NULL;
-    hsize_t    nfound=0;
     diff_opt_t options;
 
     outBuffOffset = 0;
@@ -78,7 +78,7 @@ int main(int argc, const char *argv[])
 
         parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
 
-        nfound = h5diff(fname1, fname2, objname1, objname2, &options);
+        h5diff(fname1, fname2, objname1, objname2, &options);
 
         print_info(&options);
 
@@ -92,7 +92,7 @@ int main(int argc, const char *argv[])
     {
         parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &options);
 
-        nfound = h5diff(fname1, fname2, objname1, objname2, &options);
+        h5diff(fname1, fname2, objname1, objname2, &options);
 
         MPI_Barrier(MPI_COMM_WORLD);
 
@@ -131,7 +131,6 @@ ph5diff_worker(int nID)
     hid_t file1_id, file2_id;
     char    filenames[2][1024];
     char    out_data[PRINT_DATA_MAX_SIZE] = {0};
-    hsize_t    nfound=0;
     struct diffs_found  diffs;
     int i;
     MPI_Status Status;
@@ -170,8 +169,7 @@ ph5diff_worker(int nID)
         /*Recv parameters for diff from manager task */
         MPI_Recv(&args, sizeof(args), MPI_BYTE, 0, MPI_TAG_ARGS, MPI_COMM_WORLD, &Status);
         /*Do the diff */
-        nfound = diff(file1_id, args.name, file2_id, args.name, &(args.options), args.type);
-        diffs.nfound = nfound;
+        diffs.nfound = diff(file1_id, args.name, file2_id, args.name, &(args.options), args.type);
         diffs.not_cmp = args.options.not_cmp;
 
         /*If print buffer has something in it, request print token.*/

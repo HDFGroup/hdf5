@@ -127,7 +127,6 @@ static int         cont_dim;       /* lowest dimension for contiguous POSIX
 static size_t      cont_size;      /* size of contiguous POSIX access */
 static hid_t       fapl;           /* file access list */
 static unsigned char *buf_p;       /* buffer pointer */
-static unsigned char *buf2_p;      /* buffer pointer */
 static const char *multi_letters = "msbrglo"; /* string for multi driver */
 static char *buffer2=NULL;         /* buffer for data verification */
 
@@ -151,10 +150,7 @@ static hid_t       h5dxpl = -1;            /* Dataset transfer property list */
 do_sio(parameters param)
 {
     char       *buffer = NULL; /*data buffer pointer           */
-    off_t       nbytes;                 /* dataset raw size */
-    off_t       dset_size[MAX_DIMS];    /* dataset size in bytes     */
     size_t      buf_size[MAX_DIMS];     /* general buffer size in bytes     */
-    size_t      chk_size[MAX_DIMS];     /* chunk size in bytes     */
     file_descr  fd;                     /* file handles */
     iotype      iot;                    /* API type */
     char base_name[256];                /* test file base name */
@@ -183,17 +179,14 @@ do_sio(parameters param)
         break;
     default:
         /* unknown request */
-        fprintf(stderr, "Unknown IO type request (%d)\n", iot);
+        fprintf(stderr, "Unknown IO type request (%d)\n", (int)iot);
         GOTOERROR(FAIL);
     }
 
-    nbytes = param.num_bytes;
     linear_buf_size = 1;
 
     for (i=0; i<param.rank; i++){
-        dset_size[i] = param.dset_size[i];
         buf_size[i] = param.buf_size[i];
-        chk_size[i] = param.chk_size[i];
         order[i] = param.order[i];
         linear_buf_size *= buf_size[i];
         buf_offset[i] = 0;
@@ -777,7 +770,6 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
     /* HDF5 variables */
     herr_t      hrc;                    /*HDF5 return code              */
     hsize_t     h5dims[MAX_DIMS];       /*dataset dim sizes             */
-    hsize_t     h5chunk[MAX_DIMS];      /*dataset dim sizes             */
     hsize_t     h5block[MAX_DIMS];      /*dataspace selection           */
     hsize_t     h5stride[MAX_DIMS];     /*selection stride              */
     hsize_t     h5start[MAX_DIMS];      /*selection start               */
@@ -816,7 +808,6 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
             h5stride[i] = 1;
             h5block[i] = 1;
             h5count[i] = parms->buf_size[i];
-            h5chunk[i] = parms->chk_size[i];
         }
 
         h5dset_space_id = H5Screate_simple(rank, h5dims, NULL);
@@ -955,7 +946,6 @@ static herr_t dset_read(int local_dim, file_descr *fd, parameters *parms, void *
                    buf_offset[j] = 0;
                 }
                 buf_p = (unsigned char*)buffer;
-                buf2_p = (unsigned char*)buffer2;
                 posix_buffer_read(0, fd, parms, buffer);
                 break;
 
@@ -1028,13 +1018,6 @@ static herr_t posix_buffer_read(int local_dim, file_descr *fd, parameters *parms
         rc = ((ssize_t)cont_size ==
              POSIXREAD(fd->posixfd, buf_p, cont_size));
         VRFY((rc != 0), "POSIXREAD");
-#if 0
-        for (j=0; j<cont_size; j++) {
-            if (buf_p[j]!=buf2_p[j])
-                printf("Inconsistent data in %d\n", j);
-        }
-        buf2_p += cont_size;
-#endif
 
         /* Advance location in buffer */
         buf_p += cont_size;

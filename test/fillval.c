@@ -1966,7 +1966,7 @@ skip:
  *-------------------------------------------------------------------------
  */
 static int
-test_compatible(hid_t fapl)
+test_compatible(void)
 {
     hid_t      file=-1, dset1=-1, dset2=-1;
     hid_t      dcpl1=-1, dcpl2=-1, fspace=-1, mspace=-1;
@@ -2170,7 +2170,7 @@ main(int argc, char *argv[])
             nerrors += test_create(my_fapl, FILENAME[1], H5D_CONTIGUOUS);
             nerrors += test_rdwr  (my_fapl, FILENAME[3], H5D_CONTIGUOUS);
             nerrors += test_extend(my_fapl, FILENAME[5], H5D_CONTIGUOUS);
-            nerrors += test_compatible(my_fapl);
+            nerrors += test_compatible();
         } /* end if */
 
         /* Compact dataset storage tests */

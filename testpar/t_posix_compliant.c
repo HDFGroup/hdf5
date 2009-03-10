@@ -701,7 +701,8 @@ static int find_writesize(int rank, int numprocs, int size)
     return write_size;
 }
 
-static void vrfy_elements(int* a, int* b, int size, int rank)
+static void
+vrfy_elements(int* a, int* b, int size, int rank)
 {
     int i, counter = 0;
 
@@ -725,6 +726,7 @@ static void vrfy_elements(int* a, int* b, int size, int rank)
 
 /* print an explanation message by MAIN (0) process.
  */
+static void
 header_msg(void)
 {
     printf(
@@ -736,7 +738,8 @@ header_msg(void)
     );
 }
 
-int main(int argc, char* argv[])
+int
+main(int argc, char* argv[])
 {
 
     int numprocs, rank, opt, mpi_tests=1, posix_tests=1;

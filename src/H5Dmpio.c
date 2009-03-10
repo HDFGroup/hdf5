@@ -117,8 +117,10 @@ static herr_t H5D_inter_collective_io(H5D_io_info_t *io_info,
 static herr_t H5D_final_collective_io(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, size_t nelmts, MPI_Datatype *mpi_file_type,
     MPI_Datatype *mpi_buf_type);
+#ifdef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
 static herr_t H5D_sort_chunk(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
     H5D_chunk_addr_info_t chunk_addr_info_array[], int many_chunk_opt);
+#endif /* H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS */
 static herr_t H5D_obtain_mpio_mode(H5D_io_info_t *io_info, H5D_chunk_map_t *fm,
     H5P_genplist_t *dx_plist, uint8_t assign_io_mode[], haddr_t chunk_addr[]);
 static herr_t H5D_ioinfo_xfer_mode(H5D_io_info_t *io_info, H5P_genplist_t *dx_plist,
@@ -1074,7 +1076,6 @@ static herr_t
 H5D_multi_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     H5D_chunk_map_t *fm, H5P_genplist_t *dx_plist)
 {
-    H5D_t              *dataset = io_info->dset;/* Local pointer to dataset info */
     H5D_io_info_t       ctg_io_info;          /* Contiguous I/O info object */
     H5D_storage_t       ctg_store;            /* Chunk storage information as contiguous dataset */
     H5D_io_info_t       cpt_io_info;          /* Compact I/O info object */
@@ -1347,7 +1348,6 @@ static herr_t
 H5D_multi_chunk_collective_io_no_opt(H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, H5D_chunk_map_t *fm, H5P_genplist_t *dx_plist)
 {
-    H5D_t          *dataset = io_info->dset;/* Local pointer to dataset info */
     H5SL_node_t    *chunk_node;           /* Current node in chunk skip list */
     H5D_io_info_t   ctg_io_info;          /* Contiguous I/O info object */
     H5D_storage_t   ctg_store;            /* Chunk storage information as contiguous dataset */
@@ -1366,7 +1366,7 @@ if(H5DEBUG(D)) {
     int mpi_rank;
 
     mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file);
-    HDfprintf(H5DEBUG(D), "coming to multi_chunk_collective_io_no_opt\n");
+    HDfprintf(H5DEBUG(D), "Rank %d: coming to multi_chunk_collective_io_no_opt\n", mpi_rank);
 }
 #endif
 
@@ -1614,7 +1614,6 @@ static herr_t
 H5D_final_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
     size_t mpi_buf_count, MPI_Datatype *mpi_file_type, MPI_Datatype *mpi_buf_type)
 {
-    int         mpi_code;               /* MPI return code */
     hbool_t	plist_is_setup = FALSE; /* Whether the dxpl has been customized */
     herr_t      ret_value = SUCCEED;
 
@@ -1626,13 +1625,11 @@ H5D_final_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type_info
     plist_is_setup = TRUE;
 
     if(io_info->op_type == H5D_IO_OP_WRITE) {
-        if((io_info->io_ops.single_write)(io_info, type_info,
-                (hsize_t)mpi_buf_count, NULL, NULL) < 0)
+        if((io_info->io_ops.single_write)(io_info, type_info, (hsize_t)mpi_buf_count, NULL, NULL) < 0)
 	    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "optimized write failed")
     } /* end if */
     else {
-        if((io_info->io_ops.single_read)(io_info, type_info,
-                (hsize_t)mpi_buf_count, NULL, NULL) < 0)
+        if((io_info->io_ops.single_read)(io_info, type_info, (hsize_t)mpi_buf_count, NULL, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "optimized read failed")
     } /* end else */
 
@@ -1649,6 +1646,7 @@ if(H5DEBUG(D))
       FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_final_collective_io */
 
+#ifdef H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS
 
 /*-------------------------------------------------------------------------
  * Function:	H5D_sort_chunk
@@ -1790,6 +1788,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_sort_chunk() */
+#endif /* H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS */
 
 
 /*-------------------------------------------------------------------------
@@ -1833,17 +1832,19 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
     H5P_genplist_t *dx_plist, uint8_t assign_io_mode[], haddr_t chunk_addr[])
 {
     int               total_chunks;
-    unsigned          percent_nproc_per_chunk,threshold_nproc_per_chunk;
+    unsigned          percent_nproc_per_chunk, threshold_nproc_per_chunk;
+#if defined(H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS) && defined(H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS)
     H5FD_mpio_chunk_opt_t chunk_opt_mode;
-    uint8_t*          io_mode_info=NULL;
-    uint8_t*          recv_io_mode_info=NULL;
-    uint8_t*          mergebuf=NULL;
+#endif
+    uint8_t*          io_mode_info = NULL;
+    uint8_t*          recv_io_mode_info = NULL;
+    uint8_t*          mergebuf = NULL;
     uint8_t*          tempbuf;
     H5SL_node_t*      chunk_node;
     H5D_chunk_info_t* chunk_info;
-    int               mpi_size,mpi_rank;
+    int               mpi_size, mpi_rank;
     MPI_Comm          comm;
-    int               ic,root;
+    int               ic, root;
     int               mpi_code;
     int               mem_cleanup      = 0;
 #ifdef H5_HAVE_INSTRUMENTED_LIBRARY

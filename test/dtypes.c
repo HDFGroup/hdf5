@@ -64,15 +64,11 @@
  * the soft conversion list.  One must call reset_hdf5() after this.
  */
 #define CHECK_NMEMBS(NMEMBS,SRC_ID,DST_ID)                                     \
-    if (H5Tunregister(H5T_PERS_SOFT, NULL, SRC_ID, DST_ID, NULL) < 0) {        \
+    if(H5Tunregister(H5T_PERS_SOFT, NULL, SRC_ID, DST_ID, NULL) < 0)           \
         FAIL_STACK_ERROR                                                       \
-        goto error;                                                            \
-    }                                                                          \
-    if (H5Tclose(SRC_ID) < 0 || ((SRC_ID) != (DST_ID) && H5Tclose(DST_ID) < 0)) { \
+    if(H5Tclose(SRC_ID) < 0 || ((SRC_ID) != (DST_ID) && H5Tclose(DST_ID) < 0)) \
         FAIL_STACK_ERROR                                                       \
-        goto error;                                                            \
-    }                                                                          \
-    if ((NMEMBS) != H5I_nmembers(H5I_DATATYPE)) {                              \
+    if((NMEMBS) != H5I_nmembers(H5I_DATATYPE)) {                               \
         H5_FAILED();                                                           \
         printf("    #dtype ids expected: %d; found: %d\n", NMEMBS,             \
             H5I_nmembers(H5I_DATATYPE));                                       \
@@ -4096,7 +4092,6 @@ test_conv_str_3(void)
     int			ret_value = 1;
     int                 size;
     H5T_pad_t           inpad;
-    H5T_cset_t          cset;
     H5T_sign_t          sign;
     char*               tag;
     herr_t              ret;
@@ -4116,13 +4111,13 @@ test_conv_str_3(void)
             buf[i*8+j++] = '\0';
     }
 
-    if ((size=H5Tget_precision(type))==0) goto error;
-    if ((size=H5Tget_size(type))==0) goto error;
-    if (H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE) < 0) goto error;
-    if ((cset=H5Tget_cset(type)) < 0) goto error;
-    if (H5Tget_strpad(type) < 0) goto error;
-    if (H5Tset_offset(type, 0) < 0) goto error;
-    if (H5Tget_order(type) < 0) goto error;
+    if(H5Tget_precision(type) == 0) FAIL_STACK_ERROR
+    if(H5Tget_size(type) == 0) FAIL_STACK_ERROR
+    if(H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE) < 0) FAIL_STACK_ERROR
+    if(H5Tget_cset(type) < 0) FAIL_STACK_ERROR
+    if(H5Tget_strpad(type) < 0) FAIL_STACK_ERROR
+    if(H5Tset_offset(type, 0) < 0) FAIL_STACK_ERROR
+    if(H5Tget_order(type) < 0) FAIL_STACK_ERROR
 
     H5E_BEGIN_TRY {
         ret=H5Tset_precision(type, nelmts);
@@ -4134,7 +4129,7 @@ test_conv_str_3(void)
     } /* end if */
 
     H5E_BEGIN_TRY {
-        size=H5Tget_ebias(type);
+        size = H5Tget_ebias(type);
     } H5E_END_TRY;
     if (size>0) {
         H5_FAILED();

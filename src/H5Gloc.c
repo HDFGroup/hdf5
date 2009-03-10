@@ -727,6 +727,7 @@ H5G_loc_set_comment_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
 {
     H5G_loc_sc_t *udata = (H5G_loc_sc_t *)_udata;   /* User data passed in */
     H5O_name_t comment;                 /* Object header "comment" message */
+    htri_t exists;                      /* Whether a "comment" message already exists */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5G_loc_set_comment_cb)
@@ -735,9 +736,14 @@ H5G_loc_set_comment_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     if(obj_loc == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "name doesn't exist")
 
+    /* Check for existing comment message */
+    if((exists = H5O_msg_exists(obj_loc->oloc, H5O_NAME_ID, udata->dxpl_id)) < 0)
+	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to read object header")
+
     /* Remove the previous comment message if any */
-    if(H5O_msg_remove(obj_loc->oloc, H5O_NAME_ID, 0, TRUE, udata->dxpl_id) < 0)
-        H5E_clear_stack(NULL);
+    if(exists)
+        if(H5O_msg_remove(obj_loc->oloc, H5O_NAME_ID, 0, TRUE, udata->dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete existing comment object header message")
 
     /* Add the new message */
     if(udata->comment && *udata->comment) {
@@ -830,7 +836,7 @@ H5G_loc_get_comment_cb(H5G_loc_t UNUSED *grp_loc/*in*/, const char UNUSED *name,
     } else {
         if(udata->comment && udata->bufsize)
 	   HDstrncpy(udata->comment, comment.s, udata->bufsize);
-	udata->comment_size = HDstrlen(comment.s);
+	udata->comment_size = (ssize_t)HDstrlen(comment.s);
 	H5O_msg_reset(H5O_NAME_ID, &comment);
     } /* end else */
 

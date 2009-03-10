@@ -33,7 +33,6 @@ main(void)
     int       i, j, k;
     FILE      *sp;
 
-    float     b32r3[5][3][4];
     float     row4[3], col4[4], pln4[5];
     float     rowo4 = (float)11.0e0, colo4 = (float)21.0e0, plno4 = (float)51.0e0;
     float     rowi4 = (float)1.0e0, coli4 = (float)2.0e0, plni4 = (float)5.0e0;
@@ -44,7 +43,6 @@ main(void)
     int       rowi4i = (int)1 , coli4i = (int)2 , plni4i = (int)5 ;
 
 #ifndef WIN32
-    long long b64i2[3][4], b64i3[5][3][4];
     long long row4i64[3], col4i64[4], pln4i64[5];
     long long rowo4i64 = (long long)11 , colo4i64 = (long long)21 , plno4i64 = (long long)51 ;
     long long rowi4i64 = (long long)1 , coli4i64 = (long long)2 , plni4i64 = (long long)5 ;
@@ -142,16 +140,6 @@ main(void)
         pln4i8[k] = pln4i8[k - 1] + plni4i8;
     }
 
-    for (i = 0; i < nrow; i++)
-    {
-        for (j = 0; j < ncol; j++)
-        {
-#ifndef WIN32
-            b64i2[i][j] = row4i64[i] + col4i64[j];
-#endif
-        }
-    }
-
     /*
     * build array elements - rank 3
     *
@@ -159,28 +147,17 @@ main(void)
     */
 
     for (i = 0; i < nrow; i++)
-    {
         for (j = 0; j < ncol; j++)
-        {
-            for (k = 0; k < npln; k++)
-            {
-                b32r3[k][i][j] = row4[i] + col4[j] + pln4[k];
+            for (k = 0; k < npln; k++) {
                 b64r3[k][i][j] = row8[i] + col8[j] + pln8[k];
                 b32i3[k][i][j] = row4i[i] + col4i[j] + pln4i[k];
-#ifndef WIN32
-                b64i3[k][i][j] = row4i64[i] + col4i64[j] + pln4i64[k];
-#endif
                 b16i3[k][i][j] = row4i16[i] + col4i16[j] + pln4i16[k];
                 b8i3[k][i][j] = row4i8[i] + col4i8[j] + pln4i8[k];
             }
-        }
-    }
 
 
 
 #ifndef UNICOS
-
-
 
  /*-------------------------------------------------------------------------
   * TOOLTEST txtin16.txt -c $srcdir/testfiles/txtin16.conf -o txtin16.h5

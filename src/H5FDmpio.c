@@ -1913,7 +1913,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_mpio_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t closing)
+H5FD_mpio_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
 {
     H5FD_mpio_t		*file = (H5FD_mpio_t*)_file;
     herr_t              ret_value = SUCCEED;

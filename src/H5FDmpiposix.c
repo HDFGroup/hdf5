@@ -1215,7 +1215,9 @@ H5FD_mpiposix_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 		size_t size, const void *buf)
 {
     H5FD_mpiposix_t	*file = (H5FD_mpiposix_t*)_file;
+#if 0 /* JRM */
     int			mpi_code;	/* MPI return code */
+#endif /* JRM */
     ssize_t	        nbytes;         /* Number of bytes written each I/O call */
     H5P_genplist_t      *plist;         /* Property list pointer */
     herr_t             	ret_value=SUCCEED;      /* Return value */

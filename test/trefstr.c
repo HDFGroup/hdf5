@@ -290,7 +290,6 @@ test_refstr_wrap(void)
 static void
 test_refstr_own(void)
 {
-    static const char *FUNC = "test_refstr_own";
     H5RS_str_t *rs;     /* Ref-counted string created */
     char *s;            /* Pointer to string to transfer */
     const char *t;      /* Temporary pointers to string */

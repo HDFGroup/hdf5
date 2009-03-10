@@ -1008,7 +1008,7 @@ done:
  */
 /* ARGSUSED */
 static herr_t
-H5FD_windows_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t closing)
+H5FD_windows_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
 {
     H5FD_windows_t	*file = (H5FD_windows_t*)_file;
 #ifndef WINDOWS_USE_STDIO

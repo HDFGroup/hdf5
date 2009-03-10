@@ -71,12 +71,9 @@ static void coll_chunktest(const char* filename,int chunk_factor,int select_fact
 void
 coll_chunk1(void)
 {
+    const char *filename = GetTestParameters();
 
-  const char *filename;
-
-  filename = GetTestParameters();
-  coll_chunktest(filename,1,BYROW_CONT,API_NONE);
-
+    coll_chunktest(filename, 1, BYROW_CONT, API_NONE);
 }
 
 
@@ -118,12 +115,9 @@ coll_chunk1(void)
 void
 coll_chunk2(void)
 {
+    const char *filename = GetTestParameters();
 
-  const char *filename;
-
-  filename = GetTestParameters();
-  coll_chunktest(filename,1,BYROW_DISCONT,API_NONE);
-
+    coll_chunktest(filename, 1, BYROW_DISCONT, API_NONE);
 }
 
 
@@ -166,16 +160,11 @@ coll_chunk2(void)
 void
 coll_chunk3(void)
 {
+    const char *filename = GetTestParameters();
+    int mpi_size;
 
-  const char *filename;
-  int mpi_size;
-
-  MPI_Comm comm = MPI_COMM_WORLD;
-  MPI_Comm_size(comm,&mpi_size);
-
-  filename = GetTestParameters();
-  coll_chunktest(filename,mpi_size,BYROW_CONT,API_NONE);
-
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    coll_chunktest(filename, mpi_size, BYROW_CONT, API_NONE);
 }
 
 /*-------------------------------------------------------------------------
@@ -217,15 +206,9 @@ coll_chunk3(void)
 void
 coll_chunk4(void)
 {
+    const char *filename = GetTestParameters();
 
-  const char *filename;
-  int mpi_size;
-
-  MPI_Comm comm = MPI_COMM_WORLD;
-
-  filename = GetTestParameters();
-  coll_chunktest(filename,1,BYROW_SELECTNONE,API_NONE);
-
+    coll_chunktest(filename, 1, BYROW_SELECTNONE, API_NONE);
 }
 
 /*-------------------------------------------------------------------------
@@ -267,15 +250,9 @@ coll_chunk4(void)
 void
 coll_chunk5(void)
 {
+    const char *filename = GetTestParameters();
 
-  const char *filename;
-  int mpi_size;
-
-  MPI_Comm comm = MPI_COMM_WORLD;
-
-  filename = GetTestParameters();
-  coll_chunktest(filename,4,BYROW_SELECTUNBALANCE,API_LINK_HARD);
-
+    coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_LINK_HARD);
 }
 
 /*-------------------------------------------------------------------------
@@ -317,15 +294,9 @@ coll_chunk5(void)
 void
 coll_chunk6(void)
 {
+    const char *filename = GetTestParameters();
 
-  const char *filename;
-  int mpi_size;
-
-  MPI_Comm comm = MPI_COMM_WORLD;
-
-  filename = GetTestParameters();
-  coll_chunktest(filename,4,BYROW_SELECTUNBALANCE,API_MULTI_HARD);
-
+    coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_MULTI_HARD);
 }
 
 /*-------------------------------------------------------------------------
@@ -367,15 +338,9 @@ coll_chunk6(void)
 void
 coll_chunk7(void)
 {
+    const char *filename = GetTestParameters();
 
-  const char *filename;
-  int mpi_size;
-
-  MPI_Comm comm = MPI_COMM_WORLD;
-
-  filename = GetTestParameters();
-  coll_chunktest(filename,4,BYROW_SELECTUNBALANCE,API_LINK_TRUE);
-
+    coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_LINK_TRUE);
 }
 
 /*-------------------------------------------------------------------------
@@ -417,15 +382,9 @@ coll_chunk7(void)
 void
 coll_chunk8(void)
 {
+    const char *filename = GetTestParameters();
 
-  const char *filename;
-  int mpi_size;
-
-  MPI_Comm comm = MPI_COMM_WORLD;
-
-  filename = GetTestParameters();
-  coll_chunktest(filename,4,BYROW_SELECTUNBALANCE,API_LINK_FALSE);
-
+    coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_LINK_FALSE);
 }
 
 /*-------------------------------------------------------------------------
@@ -467,15 +426,9 @@ coll_chunk8(void)
 void
 coll_chunk9(void)
 {
+  const char *filename = GetTestParameters();
 
-  const char *filename;
-  int mpi_size;
-
-  MPI_Comm comm = MPI_COMM_WORLD;
-
-  filename = GetTestParameters();
-  coll_chunktest(filename,4,BYROW_SELECTUNBALANCE,API_MULTI_COLL);
-
+  coll_chunktest(filename, 4, BYROW_SELECTUNBALANCE, API_MULTI_COLL);
 }
 
 /*-------------------------------------------------------------------------
@@ -517,15 +470,9 @@ coll_chunk9(void)
 void
 coll_chunk10(void)
 {
+  const char *filename = GetTestParameters();
 
-  const char *filename;
-  int mpi_size;
-
-  MPI_Comm comm = MPI_COMM_WORLD;
-
-  filename = GetTestParameters();
-  coll_chunktest(filename,4,BYROW_SELECTINCHUNK,API_MULTI_IND);
-
+  coll_chunktest(filename, 4, BYROW_SELECTINCHUNK, API_MULTI_IND);
 }
 
 
@@ -555,8 +502,8 @@ static void
 coll_chunktest(const char* filename,
 	       int chunk_factor,
 	       int select_factor,
-               int api_option) {
-
+               int api_option)
+{
   hid_t	   file,dataset, file_dataspace;
   hid_t    acc_plist,xfer_plist,crp_plist;
 

@@ -5502,7 +5502,6 @@ static int gent_ldouble(void)
  hid_t       did;
  hid_t       tid;
  hid_t       sid;
- size_t      size;
  hsize_t     dims[1] = {3};
  long double buf[3] = {1,2,3};
 
@@ -5515,7 +5514,7 @@ static int gent_ldouble(void)
  if((tid = H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0)
   goto error;
 
- if((size = H5Tget_size(tid)) == 0)
+ if(H5Tget_size(tid) == 0)
   goto error;
 
  if((did = H5Dcreate2(fid, "dset", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)

@@ -77,282 +77,271 @@ char    opt_pvfstab[256] = "notset\0";
 int     opt_pvfstab_set = 0;
 
 /* function prototypes */
-int parse_args(int argc, char **argv);
-double Wtime(void);
+static int parse_args(int argc, char **argv);
 
 extern int errno;
-extern int debug_on;
 
 /* globals needed for getopt */
 extern char *optarg;
-extern int optind, opterr;
 
 int main(int argc, char **argv)
 {
-	char *buf, *tmp, *buf2, *tmp2, *check;
-	int i, j, mynod=0, nprocs=1, err, my_correct = 1, correct, myerrno;
-	double stim, etim;
-	double write_tim = 0;
-	double read_tim = 0;
-	double read_bw, write_bw;
-	double max_read_tim, max_write_tim;
-	double min_read_tim, min_write_tim;
-	double ave_read_tim, ave_write_tim;
-	int64_t iter_jump = 0;
-	int64_t seek_position = 0;
-	MPI_File fh;
-	MPI_Status status;
-	int nchars;
+    char *buf, *tmp, *buf2, *tmp2, *check;
+    int i, j, mynod=0, nprocs=1, err, my_correct = 1, correct, myerrno;
+    double stim, etim;
+    double write_tim = 0;
+    double read_tim = 0;
+    double read_bw, write_bw;
+    double max_read_tim, max_write_tim;
+    double min_read_tim, min_write_tim;
+    double ave_read_tim, ave_write_tim;
+    int64_t iter_jump = 0;
+    int64_t seek_position = 0;
+    MPI_File fh;
+    MPI_Status status;
+    int nchars;
 
-	/* startup MPI and determine the rank of this process */
-	MPI_Init(&argc,&argv);
-	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-	MPI_Comm_rank(MPI_COMM_WORLD, &mynod);
+    /* startup MPI and determine the rank of this process */
+    MPI_Init(&argc,&argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mynod);
 
-	/* parse the command line arguments */
-	parse_args(argc, argv);
+    /* parse the command line arguments */
+    parse_args(argc, argv);
 
-	if (mynod == 0) printf("# Using mpi-io calls.\n");
+    if (mynod == 0) printf("# Using mpi-io calls.\n");
 
 
-	/* kindof a weird hack- if the location of the pvfstab file was
-	 * specified on the command line, then spit out this location into
-	 * the appropriate environment variable: */
+    /* kindof a weird hack- if the location of the pvfstab file was
+     * specified on the command line, then spit out this location into
+     * the appropriate environment variable: */
 
 #if H5_HAVE_SETENV
 /* no setenv or unsetenv */
-	if (opt_pvfstab_set) {
-		if((setenv("PVFSTAB_FILE", opt_pvfstab, 1)) < 0){
-			perror("setenv");
-			goto die_jar_jar_die;
-		}
-	}
+    if (opt_pvfstab_set) {
+            if((setenv("PVFSTAB_FILE", opt_pvfstab, 1)) < 0){
+                    perror("setenv");
+                    goto die_jar_jar_die;
+            }
+    }
 #endif
 
-	/* this is how much of the file data is covered on each iteration of
-	 * the test.  used to help determine the seek offset on each
-	 * iteration */
-	iter_jump = nprocs * opt_block;
+    /* this is how much of the file data is covered on each iteration of
+     * the test.  used to help determine the seek offset on each
+     * iteration */
+    iter_jump = nprocs * opt_block;
 
-	/* setup a buffer of data to write */
-	if (!(tmp = (char *) malloc(opt_block + 256))) {
-		perror("malloc");
-		goto die_jar_jar_die;
-	}
-	buf = tmp + 128 - (((long)tmp) % 128);  /* align buffer */
+    /* setup a buffer of data to write */
+    if (!(tmp = (char *) malloc(opt_block + 256))) {
+            perror("malloc");
+            goto die_jar_jar_die;
+    }
+    buf = tmp + 128 - (((long)tmp) % 128);  /* align buffer */
 
-	if (opt_correct) {
-		/* do the same buffer setup for verifiable data */
-		if (!(tmp2 = (char *) malloc(opt_block + 256))) {
-			perror("malloc2");
-			goto die_jar_jar_die;
-		 }
-		buf2 = tmp + 128 - (((long)tmp) % 128);
-	}
+    if (opt_correct) {
+            /* do the same buffer setup for verifiable data */
+            if (!(tmp2 = (char *) malloc(opt_block + 256))) {
+                    perror("malloc2");
+                    goto die_jar_jar_die;
+             }
+            buf2 = tmp + 128 - (((long)tmp) % 128);
+    }
 
-	/* open the file for writing */
-	err = MPI_File_open(MPI_COMM_WORLD, opt_file,
-	MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
-	if (err < 0) {
-		fprintf(stderr, "node %d, open error: %s\n", mynod, strerror(errno));
-		goto die_jar_jar_die;
-	}
+    /* open the file for writing */
+    err = MPI_File_open(MPI_COMM_WORLD, opt_file,
+    MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
+    if (err < 0) {
+            fprintf(stderr, "node %d, open error: %s\n", mynod, strerror(errno));
+            goto die_jar_jar_die;
+    }
 
-	/* now repeat the write operations the number of times
-	 * specified on the command line */
-	for (j=0; j < opt_iter; j++) {
+    /* now repeat the write operations the number of times
+     * specified on the command line */
+    for (j=0; j < opt_iter; j++) {
 
-		/* calculate the appropriate position depending on the iteration
-		 * and rank of the current process */
-		seek_position = (j*iter_jump)+(mynod*opt_block);
+            /* calculate the appropriate position depending on the iteration
+             * and rank of the current process */
+            seek_position = (j*iter_jump)+(mynod*opt_block);
 
-		if (opt_correct) /* fill in buffer for iteration */ {
-			for (i=mynod+j, check=buf; i<opt_block; i++,check++) *check=(char)i;
-		}
+            if (opt_correct) /* fill in buffer for iteration */ {
+                    for (i=mynod+j, check=buf; i<opt_block; i++,check++) *check=(char)i;
+            }
 
-		/* discover the starting time of the operation */
-	   MPI_Barrier(MPI_COMM_WORLD);
-	   stim = MPI_Wtime();
+            /* discover the starting time of the operation */
+       MPI_Barrier(MPI_COMM_WORLD);
+       stim = MPI_Wtime();
 
-		/* write out the data */
-		nchars = opt_block/sizeof(char);
-		err = MPI_File_write_at(fh, seek_position, buf, nchars, MPI_CHAR, &status);
-		if(err){
-			fprintf(stderr, "node %d, write error: %s\n", mynod,
-			strerror(errno));
-		}
+            /* write out the data */
+            nchars = opt_block/sizeof(char);
+            err = MPI_File_write_at(fh, seek_position, buf, nchars, MPI_CHAR, &status);
+            if(err){
+                    fprintf(stderr, "node %d, write error: %s\n", mynod,
+                    strerror(errno));
+            }
 
-		/* discover the ending time of the operation */
-	   etim = MPI_Wtime();
+            /* discover the ending time of the operation */
+       etim = MPI_Wtime();
 
-	   write_tim += (etim - stim);
+       write_tim += (etim - stim);
 
-		/* we are done with this "write" iteration */
-	}
+            /* we are done with this "write" iteration */
+    }
 
-	err = MPI_File_close(&fh);
-	if(err){
-		fprintf(stderr, "node %d, close error after write\n", mynod);
-	}
+    err = MPI_File_close(&fh);
+    if(err){
+            fprintf(stderr, "node %d, close error after write\n", mynod);
+    }
 
-	/* wait for everyone to synchronize at this point */
-	MPI_Barrier(MPI_COMM_WORLD);
+    /* wait for everyone to synchronize at this point */
+    MPI_Barrier(MPI_COMM_WORLD);
 
-	/* reopen the file to read the data back out */
-	err = MPI_File_open(MPI_COMM_WORLD, opt_file,
-	MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
-	if (err < 0) {
-		fprintf(stderr, "node %d, open error: %s\n", mynod, strerror(errno));
-		goto die_jar_jar_die;
-	}
+    /* reopen the file to read the data back out */
+    err = MPI_File_open(MPI_COMM_WORLD, opt_file,
+    MPI_MODE_CREATE | MPI_MODE_RDWR, MPI_INFO_NULL, &fh);
+    if (err < 0) {
+            fprintf(stderr, "node %d, open error: %s\n", mynod, strerror(errno));
+            goto die_jar_jar_die;
+    }
 
 
-	/* we are going to repeat the read operation the number of iterations
-	 * specified */
-	for (j=0; j < opt_iter; j++) {
-		/* calculate the appropriate spot give the current iteration and
-		 * rank within the MPI processes */
-		seek_position = (j*iter_jump)+(mynod*opt_block);
+    /* we are going to repeat the read operation the number of iterations
+     * specified */
+    for (j=0; j < opt_iter; j++) {
+            /* calculate the appropriate spot give the current iteration and
+             * rank within the MPI processes */
+            seek_position = (j*iter_jump)+(mynod*opt_block);
 
-		/* discover the start time */
-	   MPI_Barrier(MPI_COMM_WORLD);
-	   stim = MPI_Wtime();
+            /* discover the start time */
+       MPI_Barrier(MPI_COMM_WORLD);
+       stim = MPI_Wtime();
 
-		/* read in the file data */
-		if (!opt_correct){
-			err = MPI_File_read_at(fh, seek_position, buf, nchars, MPI_CHAR, &status);
-		}
-		else{
-			err = MPI_File_read_at(fh, seek_position, buf2, nchars, MPI_CHAR, &status);
-		}
-		myerrno = errno;
+            /* read in the file data */
+            if (!opt_correct){
+                    err = MPI_File_read_at(fh, seek_position, buf, nchars, MPI_CHAR, &status);
+            }
+            else{
+                    err = MPI_File_read_at(fh, seek_position, buf2, nchars, MPI_CHAR, &status);
+            }
+            myerrno = errno;
 
-		/* discover the end time */
-	   etim = MPI_Wtime();
-	   read_tim += (etim - stim);
+            /* discover the end time */
+       etim = MPI_Wtime();
+       read_tim += (etim - stim);
 
-	   if (err < 0) fprintf(stderr, "node %d, read error, loc = %Ld: %s\n",
-			mynod, mynod*opt_block, strerror(myerrno));
+       if (err < 0) fprintf(stderr, "node %d, read error, loc = %Ld: %s\n",
+                    mynod, mynod*opt_block, strerror(myerrno));
 
-		/* if the user wanted to check correctness, compare the write
-		 * buffer to the read buffer */
-		if (opt_correct && memcmp(buf, buf2, opt_block)) {
-			fprintf(stderr, "node %d, correctness test failed\n", mynod);
-			my_correct = 0;
-			MPI_Allreduce(&my_correct, &correct, 1, MPI_INT, MPI_MIN,
-				MPI_COMM_WORLD);
-		}
+            /* if the user wanted to check correctness, compare the write
+             * buffer to the read buffer */
+            if (opt_correct && memcmp(buf, buf2, opt_block)) {
+                    fprintf(stderr, "node %d, correctness test failed\n", mynod);
+                    my_correct = 0;
+                    MPI_Allreduce(&my_correct, &correct, 1, MPI_INT, MPI_MIN,
+                            MPI_COMM_WORLD);
+            }
 
-		/* we are done with this read iteration */
-	}
+            /* we are done with this read iteration */
+    }
 
-	/* close the file */
-	err = MPI_File_close(&fh);
-	if(err){
-		fprintf(stderr, "node %d, close error after write\n", mynod);
-	}
+    /* close the file */
+    err = MPI_File_close(&fh);
+    if(err){
+            fprintf(stderr, "node %d, close error after write\n", mynod);
+    }
 
-	/* compute the read and write times */
-	MPI_Allreduce(&read_tim, &max_read_tim, 1, MPI_DOUBLE, MPI_MAX,
-		MPI_COMM_WORLD);
-	MPI_Allreduce(&read_tim, &min_read_tim, 1, MPI_DOUBLE, MPI_MIN,
-		MPI_COMM_WORLD);
-	MPI_Allreduce(&read_tim, &ave_read_tim, 1, MPI_DOUBLE, MPI_SUM,
-		MPI_COMM_WORLD);
+    /* compute the read and write times */
+    MPI_Allreduce(&read_tim, &max_read_tim, 1, MPI_DOUBLE, MPI_MAX,
+            MPI_COMM_WORLD);
+    MPI_Allreduce(&read_tim, &min_read_tim, 1, MPI_DOUBLE, MPI_MIN,
+            MPI_COMM_WORLD);
+    MPI_Allreduce(&read_tim, &ave_read_tim, 1, MPI_DOUBLE, MPI_SUM,
+            MPI_COMM_WORLD);
 
-	/* calculate the average from the sum */
-	ave_read_tim = ave_read_tim / nprocs;
+    /* calculate the average from the sum */
+    ave_read_tim = ave_read_tim / nprocs;
 
-	MPI_Allreduce(&write_tim, &max_write_tim, 1, MPI_DOUBLE, MPI_MAX,
-		MPI_COMM_WORLD);
-	MPI_Allreduce(&write_tim, &min_write_tim, 1, MPI_DOUBLE, MPI_MIN,
-		MPI_COMM_WORLD);
-	MPI_Allreduce(&write_tim, &ave_write_tim, 1, MPI_DOUBLE, MPI_SUM,
-		MPI_COMM_WORLD);
+    MPI_Allreduce(&write_tim, &max_write_tim, 1, MPI_DOUBLE, MPI_MAX,
+            MPI_COMM_WORLD);
+    MPI_Allreduce(&write_tim, &min_write_tim, 1, MPI_DOUBLE, MPI_MIN,
+            MPI_COMM_WORLD);
+    MPI_Allreduce(&write_tim, &ave_write_tim, 1, MPI_DOUBLE, MPI_SUM,
+            MPI_COMM_WORLD);
 
-	/* calculate the average from the sum */
-	ave_write_tim = ave_write_tim / nprocs;
+    /* calculate the average from the sum */
+    ave_write_tim = ave_write_tim / nprocs;
 
-	/* print out the results on one node */
-	if (mynod == 0) {
-	   read_bw = ((int64_t)(opt_block*nprocs*opt_iter))/(max_read_tim*1000000.0);
-	   write_bw = ((int64_t)(opt_block*nprocs*opt_iter))/(max_write_tim*1000000.0);
+    /* print out the results on one node */
+    if (mynod == 0) {
+       read_bw = ((int64_t)(opt_block*nprocs*opt_iter))/(max_read_tim*1000000.0);
+       write_bw = ((int64_t)(opt_block*nprocs*opt_iter))/(max_write_tim*1000000.0);
 
-			printf("nr_procs = %d, nr_iter = %d, blk_sz = %ld\n", nprocs,
-		opt_iter, (long)opt_block);
+                    printf("nr_procs = %d, nr_iter = %d, blk_sz = %ld\n", nprocs,
+            opt_iter, (long)opt_block);
 
-			printf("# total_size = %ld\n", (long)(opt_block*nprocs*opt_iter));
+                    printf("# total_size = %ld\n", (long)(opt_block*nprocs*opt_iter));
 
-			printf("# Write:  min_time = %f, max_time = %f, mean_time = %f\n",
-				min_write_tim, max_write_tim, ave_write_tim);
-			printf("# Read:  min_time = %f, max_time = %f, mean_time = %f\n",
-				min_read_tim, max_read_tim, ave_read_tim);
+                    printf("# Write:  min_time = %f, max_time = %f, mean_time = %f\n",
+                            min_write_tim, max_write_tim, ave_write_tim);
+                    printf("# Read:  min_time = %f, max_time = %f, mean_time = %f\n",
+                            min_read_tim, max_read_tim, ave_read_tim);
 
-	   printf("Write bandwidth = %f Mbytes/sec\n", write_bw);
-	   printf("Read bandwidth = %f Mbytes/sec\n", read_bw);
+       printf("Write bandwidth = %f Mbytes/sec\n", write_bw);
+       printf("Read bandwidth = %f Mbytes/sec\n", read_bw);
 
-		if (opt_correct) {
-			printf("Correctness test %s.\n", correct ? "passed" : "failed");
-		}
-	}
+            if (opt_correct) {
+                    printf("Correctness test %s.\n", correct ? "passed" : "failed");
+            }
+    }
 
 
 die_jar_jar_die:
 
 #if H5_HAVE_SETENV
 /* no setenv or unsetenv */
-	/* clear the environment variable if it was set earlier */
-	if	(opt_pvfstab_set){
-		unsetenv("PVFSTAB_FILE");
-	}
+    /* clear the environment variable if it was set earlier */
+    if	(opt_pvfstab_set){
+            unsetenv("PVFSTAB_FILE");
+    }
 #endif
 
-	free(tmp);
-	if (opt_correct) free(tmp2);
-	MPI_Finalize();
-	return(0);
+    free(tmp);
+    if (opt_correct) free(tmp2);
+    MPI_Finalize();
+    return(0);
 }
 
-int parse_args(int argc, char **argv)
+static int
+parse_args(int argc, char **argv)
 {
-	int c;
+    int c;
 
-	while ((c = getopt(argc, argv, "s:b:i:f:p:c")) != EOF) {
-		switch (c) {
-			case 's': /* stripe */
-				opt_stripe = atoi(optarg);
-				break;
-			case 'b': /* block size */
-				opt_block = atoi(optarg);
-				break;
-			case 'i': /* iterations */
-				opt_iter = atoi(optarg);
-				break;
-			case 'f': /* filename */
-				strncpy(opt_file, optarg, 255);
-				break;
-			case 'p': /* pvfstab file */
-				strncpy(opt_pvfstab, optarg, 255);
-				opt_pvfstab_set = 1;
-				break;
-			case 'c': /* correctness */
-				opt_correct = 1;
-				break;
-			case '?': /* unknown */
-			default:
-				break;
-		}
-	}
-	return(0);
-}
-
-/* Wtime() - returns current time in sec., in a double */
-double Wtime()
-{
-	struct timeval t;
-
-	gettimeofday(&t, NULL);
-	return((double)t.tv_sec + (double)t.tv_usec / 1000000);
+    while ((c = getopt(argc, argv, "s:b:i:f:p:c")) != EOF) {
+        switch (c) {
+            case 's': /* stripe */
+                opt_stripe = atoi(optarg);
+                break;
+            case 'b': /* block size */
+                opt_block = atoi(optarg);
+                break;
+            case 'i': /* iterations */
+                opt_iter = atoi(optarg);
+                break;
+            case 'f': /* filename */
+                strncpy(opt_file, optarg, 255);
+                break;
+            case 'p': /* pvfstab file */
+                strncpy(opt_pvfstab, optarg, 255);
+                opt_pvfstab_set = 1;
+                break;
+            case 'c': /* correctness */
+                opt_correct = 1;
+                break;
+            case '?': /* unknown */
+            default:
+                break;
+        }
+    }
+    return(0);
 }
 
 /*
@@ -364,11 +353,12 @@ double Wtime()
  */
 
 #else /* H5_HAVE_PARALLEL */
-/* dummy program since H5_HAVE_PARALLE is not configured in */
+/* dummy program since H5_HAVE_PARALLEL is not configured in */
 int
-main()
+main(int UNUSED argc, char UNUSED **argv)
 {
-printf("No parallel performance because parallel is not configured in\n");
-return(0);
+    printf("No parallel performance because parallel is not configured in\n");
+    return(0);
 }
 #endif /* H5_HAVE_PARALLEL */
+

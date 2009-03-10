@@ -164,21 +164,21 @@
 
 
 /* Location comparison function */
-int compare_size_t(const void *s1, const void *s2);
+static int compare_size_t(const void *s1, const void *s2);
 
-herr_t test_select_hyper_iter1(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
-herr_t test_select_point_iter1(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
-herr_t test_select_all_iter1(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
-herr_t test_select_none_iter1(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
-herr_t test_select_hyper_iter2(void *_elem, hid_t type_id, unsigned ndim, const hsize_t *point, void *_operator_data);
-herr_t test_select_hyper_iter3(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
+static herr_t test_select_hyper_iter1(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
+static herr_t test_select_point_iter1(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
+static herr_t test_select_all_iter1(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
+static herr_t test_select_none_iter1(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
+static herr_t test_select_hyper_iter2(void *_elem, hid_t type_id, unsigned ndim, const hsize_t *point, void *_operator_data);
+static herr_t test_select_hyper_iter3(void *elem,hid_t type_id, unsigned ndim, const hsize_t *point, void *operator_data);
 
 /****************************************************************
 **
 **  test_select_hyper_iter1(): Iterator for checking hyperslab iteration
 **
 ****************************************************************/
-herr_t
+static herr_t
 test_select_hyper_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *_operator_data)
 {
     uint8_t *tbuf=(uint8_t *)_elem,     /* temporary buffer pointer */
@@ -367,7 +367,7 @@ struct pnt_iter {
 **  (This is really ugly code, not a very good example of correct usage - QAK)
 **
 ****************************************************************/
-herr_t
+static herr_t
 test_select_point_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *_operator_data)
 {
     uint8_t *elem=(uint8_t *)_elem;  /* Pointer to the element to examine */
@@ -641,7 +641,7 @@ test_select_point(hid_t xfer_plist)
 **
 **
 ****************************************************************/
-herr_t
+static herr_t
 test_select_all_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void *_operator_data)
 {
     uint8_t *tbuf=(uint8_t *)_elem,     /* temporary buffer pointer */
@@ -661,7 +661,7 @@ test_select_all_iter1(void *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, c
 **      (This is never supposed to be called, so it always returns -1)
 **
 ****************************************************************/
-herr_t
+static herr_t
 test_select_none_iter1(void UNUSED *_elem, hid_t UNUSED type_id, unsigned UNUSED ndim, const hsize_t UNUSED *point, void UNUSED *_operator_data)
 {
     return(-1);
@@ -1012,7 +1012,7 @@ test_select_combo(void)
     HDfree(rbuf);
 }   /* test_select_combo() */
 
-int
+static int
 compare_size_t(const void *s1, const void *s2)
 {
     if(*(const size_t *)s1<*(const size_t *)s2)
@@ -3714,7 +3714,7 @@ test_select_hyper_nota_2d(void)
 **  test_select_hyper_iter2(): Iterator for checking hyperslab iteration
 **
 ****************************************************************/
-herr_t
+static herr_t
 test_select_hyper_iter2(void *_elem, hid_t UNUSED type_id, unsigned ndim, const hsize_t *point, void *_operator_data)
 {
     int *tbuf=(int *)_elem,     /* temporary buffer pointer */
@@ -4900,7 +4900,7 @@ typedef struct {
 **  test_select_hyper_iter3(): Iterator for checking hyperslab iteration
 **
 ****************************************************************/
-herr_t
+static herr_t
 test_select_hyper_iter3(void *_elem, hid_t UNUSED type_id, unsigned ndim, const hsize_t *point, void *_operator_data)
 {
     unsigned short *tbuf=(unsigned short *)_elem;     /* temporary buffer pointer */

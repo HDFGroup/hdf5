@@ -276,52 +276,51 @@ MPI_Datatype mpi_mssg_t;	/* for MPI derived type created from mssg */
 
 /* stats functions */
 
-void print_stats(void);
-void reset_stats(void);
+static void reset_stats(void);
 
 /* MPI setup functions */
 
-hbool_t set_up_file_communicator(void);
+static hbool_t set_up_file_communicator(void);
 
 
 /* data array manipulation functions */
 
-int addr_to_datum_index(haddr_t base_addr);
-void init_data(void);
+static int addr_to_datum_index(haddr_t base_addr);
+static void init_data(void);
 
 
 /* test coodination related functions */
 
-int do_express_test(void);
-void do_sync(void);
-int get_max_nerrors(void);
+static int do_express_test(void);
+static void do_sync(void);
+static int get_max_nerrors(void);
 
 
 /* mssg xfer related functions */
 
-hbool_t recv_mssg(struct mssg_t *mssg_ptr, int mssg_tag_offset);
-hbool_t send_mssg(struct mssg_t *mssg_ptr, hbool_t add_req_to_tag);
-hbool_t setup_derived_types(void);
-hbool_t takedown_derived_types(void);
+static hbool_t recv_mssg(struct mssg_t *mssg_ptr, int mssg_tag_offset);
+static hbool_t send_mssg(struct mssg_t *mssg_ptr, hbool_t add_req_to_tag);
+static hbool_t setup_derived_types(void);
+static hbool_t takedown_derived_types(void);
 
 
 /* server functions */
 
-hbool_t server_main(void);
-hbool_t serve_read_request(struct mssg_t * mssg_ptr);
-hbool_t serve_sync_request(struct mssg_t * mssg_ptr);
-hbool_t serve_write_request(struct mssg_t * mssg_ptr);
+static hbool_t server_main(void);
+static hbool_t serve_read_request(struct mssg_t * mssg_ptr);
+static hbool_t serve_sync_request(struct mssg_t * mssg_ptr);
+static hbool_t serve_write_request(struct mssg_t * mssg_ptr);
 
 
 /* call back functions & related data structures */
 
-herr_t clear_datum(H5F_t * f, void *  thing, hbool_t dest);
-herr_t destroy_datum(H5F_t UNUSED * f, void * thing);
-herr_t flush_datum(H5F_t *f, hid_t UNUSED dxpl_id, hbool_t dest, haddr_t addr,
+static herr_t clear_datum(H5F_t * f, void *  thing, hbool_t dest);
+static herr_t destroy_datum(H5F_t UNUSED * f, void * thing);
+static herr_t flush_datum(H5F_t *f, hid_t UNUSED dxpl_id, hbool_t dest, haddr_t addr,
                    void *thing);
-void * load_datum(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
+static void * load_datum(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t addr,
                   const void UNUSED *udata1, void UNUSED *udata2);
-herr_t size_datum(H5F_t UNUSED * f, void * thing, size_t * size_ptr);
+static herr_t size_datum(H5F_t UNUSED * f, void * thing, size_t * size_ptr);
 
 #define DATUM_ENTRY_TYPE	H5AC_TEST_ID
 
@@ -398,6 +397,7 @@ hbool_t trace_file_check(void);
 /****************************** stats functions ******************************/
 /*****************************************************************************/
 
+#ifdef UNUSED
 /*****************************************************************************
  *
  * Function:	print_stats()
@@ -417,7 +417,7 @@ hbool_t trace_file_check(void);
  *
  *****************************************************************************/
 
-void
+static void
 print_stats(void)
 {
     HDfprintf(stdout,
@@ -436,6 +436,7 @@ print_stats(void)
     return;
 
 } /* print_stats() */
+#endif /* UNUSED */
 
 /*****************************************************************************
  *
@@ -453,7 +454,7 @@ print_stats(void)
  *
  *****************************************************************************/
 
-void
+static void
 reset_stats(void)
 {
     datum_clears          = 0;
@@ -494,7 +495,7 @@ reset_stats(void)
  *
  *****************************************************************************/
 
-hbool_t
+static hbool_t
 set_up_file_communicator(void)
 {
     const char * fcn_name = "set_up_file_communicator()";
@@ -647,7 +648,7 @@ set_up_file_communicator(void)
  *
  *****************************************************************************/
 
-int
+static int
 addr_to_datum_index(haddr_t base_addr)
 {
     /* const char * fcn_name = "addr_to_datum_index()"; */
@@ -704,7 +705,7 @@ addr_to_datum_index(haddr_t base_addr)
  *
  *****************************************************************************/
 
-void
+static void
 init_data(void)
 {
     /* const char * fcn_name = "init_data()"; */
@@ -785,7 +786,7 @@ init_data(void)
  *
  *****************************************************************************/
 
-int
+static int
 do_express_test(void)
 {
     const char * fcn_name = "do_express_test()";
@@ -839,7 +840,7 @@ do_express_test(void)
  *
  *****************************************************************************/
 
-void
+static void
 do_sync(void)
 {
     const char * fcn_name = "do_sync()";
@@ -915,7 +916,7 @@ do_sync(void)
  *
  *****************************************************************************/
 
-int
+static int
 get_max_nerrors(void)
 {
     const char * fcn_name = "get_max_nerrors()";
@@ -970,7 +971,7 @@ get_max_nerrors(void)
 
 #define CACHE_TEST_TAG	99 /* different from any used by the library */
 
-hbool_t
+static hbool_t
 recv_mssg(struct mssg_t *mssg_ptr,
 	  int mssg_tag_offset)
 {
@@ -1055,7 +1056,7 @@ recv_mssg(struct mssg_t *mssg_ptr,
  *
  *****************************************************************************/
 
-hbool_t
+static hbool_t
 send_mssg(struct mssg_t *mssg_ptr,
 	  hbool_t add_req_to_tag)
 {
@@ -1129,7 +1130,7 @@ send_mssg(struct mssg_t *mssg_ptr,
  *
  *****************************************************************************/
 
-hbool_t
+static hbool_t
 setup_derived_types(void)
 {
     const char * fcn_name = "setup_derived_types()";
@@ -1223,7 +1224,7 @@ setup_derived_types(void)
  *
  *****************************************************************************/
 
-hbool_t
+static hbool_t
 takedown_derived_types(void)
 {
     const char * fcn_name = "takedown_derived_types()";
@@ -1275,7 +1276,7 @@ takedown_derived_types(void)
  *
  *****************************************************************************/
 
-hbool_t
+static hbool_t
 server_main(void)
 {
     const char * fcn_name = "server_main()";
@@ -1382,7 +1383,7 @@ server_main(void)
  *
  *****************************************************************************/
 
-hbool_t
+static hbool_t
 serve_read_request(struct mssg_t * mssg_ptr)
 {
     const char * fcn_name = "serve_read_request()";
@@ -1488,7 +1489,7 @@ serve_read_request(struct mssg_t * mssg_ptr)
  *
  *****************************************************************************/
 
-hbool_t
+static hbool_t
 serve_sync_request(struct mssg_t * mssg_ptr)
 {
     const char * fcn_name = "serve_sync_request()";
@@ -1556,7 +1557,7 @@ serve_sync_request(struct mssg_t * mssg_ptr)
  *
  *****************************************************************************/
 
-hbool_t
+static hbool_t
 serve_write_request(struct mssg_t * mssg_ptr)
 {
     const char * fcn_name = "serve_write_request()";
@@ -1682,7 +1683,7 @@ serve_write_request(struct mssg_t * mssg_ptr)
  *-------------------------------------------------------------------------
  */
 
-herr_t
+static herr_t
 clear_datum(H5F_t * f,
             void *  thing,
             hbool_t dest)
@@ -1756,7 +1757,7 @@ clear_datum(H5F_t * f,
  *-------------------------------------------------------------------------
  */
 
-herr_t
+static herr_t
 destroy_datum(H5F_t UNUSED * f,
               void *         thing)
 {
@@ -1822,7 +1823,7 @@ destroy_datum(H5F_t UNUSED * f,
  *-------------------------------------------------------------------------
  */
 
-herr_t
+static herr_t
 flush_datum(H5F_t *f,
             hid_t UNUSED dxpl_id,
             hbool_t dest,
@@ -1959,7 +1960,7 @@ flush_datum(H5F_t *f,
  *-------------------------------------------------------------------------
  */
 
-void *
+static void *
 load_datum(H5F_t UNUSED *f,
            hid_t UNUSED dxpl_id,
            haddr_t addr,
@@ -2129,7 +2130,7 @@ load_datum(H5F_t UNUSED *f,
  *-------------------------------------------------------------------------
  */
 
-herr_t
+static herr_t
 size_datum(H5F_t UNUSED *  f,
            void *   thing,
            size_t * size_ptr)

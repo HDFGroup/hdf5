@@ -3105,7 +3105,6 @@ H5HF_sect_indirect_reduce_row(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_
     unsigned start_col;                 /* Start column in indirect block */
     unsigned end_entry;                 /* Entry for last block covered */
     unsigned end_row;                   /* End row in indirect block */
-    unsigned end_col;                   /* End column in indirect block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_reduce_row)
@@ -3132,7 +3131,6 @@ HDfprintf(stderr, "%s: row_start_entry = %u, row_end_entry = %u\n", FUNC, row_st
     start_entry = (start_row * hdr->man_dtable.cparam.width) + start_col;
     end_entry = (start_entry + sect->u.indirect.num_entries) - 1;
     end_row = end_entry / hdr->man_dtable.cparam.width;
-    end_col = end_entry % hdr->man_dtable.cparam.width;
 
     /* Additional sanity check */
     HDassert(sect->u.indirect.span_size > 0);
@@ -3144,7 +3142,7 @@ HDfprintf(stderr, "%s: row_start_entry = %u, row_end_entry = %u\n", FUNC, row_st
 HDfprintf(stderr, "%s: sect->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect->sect_info.addr, sect->sect_info.size, sect->sect_info.type, (sect->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 HDfprintf(stderr, "%s: sect->u.indirect.parent = %p, sect->u.indirect.par_entry = %u\n", FUNC, sect->u.indirect.parent, sect->u.indirect.par_entry);
 HDfprintf(stderr, "%s: start_entry = %u, start_row = %u, start_col = %u\n", FUNC, start_entry, start_row, start_col);
-HDfprintf(stderr, "%s: end_entry = %u, end_row = %u, end_col = %u\n", FUNC, end_entry, end_row, end_col);
+HDfprintf(stderr, "%s: end_entry = %u, end_row = %u\n", FUNC, end_entry, end_row);
 #endif /* QAK */
 
     /* Check if we should allocate from end of indirect section */
@@ -3400,7 +3398,6 @@ H5HF_sect_indirect_reduce(H5HF_hdr_t *hdr, hid_t dxpl_id, H5HF_free_section_t *s
     unsigned start_col;                 /* Start column in indirect block */
     unsigned end_entry;                 /* Entry for last block covered */
     unsigned end_row;                   /* End row in indirect block */
-    unsigned end_col;                   /* End column in indirect block */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5HF_sect_indirect_reduce)
@@ -3422,12 +3419,11 @@ HDfprintf(stderr, "%s: child_entry = %u\n", FUNC, child_entry);
     start_entry = (start_row * hdr->man_dtable.cparam.width) + start_col;
     end_entry = (start_entry + sect->u.indirect.num_entries) - 1;
     end_row = end_entry / hdr->man_dtable.cparam.width;
-    end_col = end_entry % hdr->man_dtable.cparam.width;
 #ifdef QAK
 HDfprintf(stderr, "%s: sect->sect_info = {%a, %Hu, %u, %s}\n", FUNC, sect->sect_info.addr, sect->sect_info.size, sect->sect_info.type, (sect->sect_info.state == H5FS_SECT_LIVE ? "H5FS_SECT_LIVE" : "H5FS_SECT_SERIALIZED"));
 HDfprintf(stderr, "%s: sect->u.indirect.parent = %p, sect->u.indirect.par_entry = %u\n", FUNC, sect->u.indirect.parent, sect->u.indirect.par_entry);
 HDfprintf(stderr, "%s: start_entry = %u, start_row = %u, start_col = %u\n", FUNC, start_entry, start_row, start_col);
-HDfprintf(stderr, "%s: end_entry = %u, end_row = %u, end_col = %u\n", FUNC, end_entry, end_row, end_col);
+HDfprintf(stderr, "%s: end_entry = %u, end_row = %u\n", FUNC, end_entry, end_row);
 #endif /* QAK */
 
     /* Check how to adjust section for allocated entry */
@@ -3780,9 +3776,7 @@ H5HF_sect_indirect_merge_row(H5HF_hdr_t *hdr, hid_t dxpl_id,
     unsigned start_row1, start_col1;    /* Starting row & column for section #1 */
     unsigned end_entry1;                /* End entry for section #1 */
     unsigned end_row1;                  /* Ending row for section #1 */
-    unsigned start_entry2;              /* Start entry for section #2 */
-    unsigned start_row2, start_col2;    /* Starting row & column for section #2 */
-    unsigned end_entry2;                /* End entry for section #2 */
+    unsigned start_row2;                /* Starting row for section #2 */
     hbool_t merged_rows;                /* Flag to indicate that rows was merged together */
     unsigned u;                         /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
@@ -3831,12 +3825,9 @@ HDfprintf(stderr, "%s: sect1->u.indirect.num_entries = %u\n", FUNC, sect1->u.ind
 HDfprintf(stderr, "%s: end_row1 = %u, end_entry1 = %u\n", FUNC, end_row1, end_entry1);
 #endif /* QAK */
     start_row2 = sect2->u.indirect.row;
-    start_col2 = sect2->u.indirect.col;
-    start_entry2 = (start_row2 * hdr->man_dtable.cparam.width) + start_col2;
-    end_entry2 = (start_entry2 + sect2->u.indirect.num_entries) - 1;
 #ifdef QAK
 HDfprintf(stderr, "%s: sect2->u.indirect.dir_nrows = %u\n", FUNC, sect2->u.indirect.dir_nrows);
-HDfprintf(stderr, "%s: start_row2 = %u, start_col2 = %u, start_entry2 = %u\n", FUNC, start_row2, start_col2, start_entry2);
+HDfprintf(stderr, "%s: start_row2 = %u\n", FUNC, start_row2);
 HDfprintf(stderr, "%s: sect2->u.indirect.num_entries = %u\n", FUNC, sect2->u.indirect.num_entries);
 #endif /* QAK */
 

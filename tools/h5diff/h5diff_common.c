@@ -19,9 +19,9 @@
 #include "h5diff_common.h"
 #include "h5tools_utils.h"
 
-int check_n_input( const char* );
-int check_p_input( const char* );
-int check_d_input( const char* );
+static int check_n_input( const char* );
+static int check_p_input( const char* );
+static int check_d_input( const char* );
 
 
 /* module-scoped variables */
@@ -228,7 +228,8 @@ void parse_command_line(int argc,
  *
  *-------------------------------------------------------------------------
  */
-int check_n_input( const char *str )
+static int
+check_n_input( const char *str )
 {
     unsigned i;
     char c;
@@ -263,7 +264,8 @@ int check_n_input( const char *str )
  *
  *-------------------------------------------------------------------------
  */
-int check_p_input( const char *str )
+static int
+check_p_input( const char *str )
 {
     double x;
 
@@ -296,7 +298,8 @@ int check_p_input( const char *str )
  *
  *-------------------------------------------------------------------------
  */
-int check_d_input( const char *str )
+static int
+check_d_input( const char *str )
 {
     double x;
 

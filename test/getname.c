@@ -2672,7 +2672,6 @@ test_reg_ref(hid_t fapl)
     hsize_t	dimsr[1] = {2};
     int		rank = 2;
     int		rankr = 1;
-    herr_t	status;
     hdset_reg_ref_t ref[2];
     hdset_reg_ref_t ref_out[2];
     int		data[2][9] = {{1,1,2,3,3,4,5,5,6},{1,2,2,3,4,4,5,6,6}};
@@ -2701,9 +2700,9 @@ test_reg_ref(hid_t fapl)
 	TEST_ERROR
 
      /* Write data to the dataset */
-    if((status = H5Dwrite(dsetv_id, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT,data)) < 0)
+    if(H5Dwrite(dsetv_id, H5T_NATIVE_INT, H5S_ALL , H5S_ALL, H5P_DEFAULT, data) < 0)
 	TEST_ERROR
-    if((status = H5Dclose(dsetv_id)) < 0)
+    if(H5Dclose(dsetv_id) < 0)
 	TEST_ERROR
 
     /* Dataset with references */
@@ -2717,31 +2716,31 @@ test_reg_ref(hid_t fapl)
     start[1] = 3;
     count[0] = 2;
     count[1] = 3;
-    if((status = H5Sselect_hyperslab(space_id,H5S_SELECT_SET,start,NULL,count,NULL)) < 0)
+    if(H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
 	TEST_ERROR
-    if((status = H5Rcreate(&ref[0], file_id, REFREG_DSETNAMEV, H5R_DATASET_REGION, space_id)) < 0)
+    if(H5Rcreate(&ref[0], file_id, REFREG_DSETNAMEV, H5R_DATASET_REGION, space_id) < 0)
 	TEST_ERROR
 
     /* Create a reference to elements selection */
-    if((status = H5Sselect_none(space_id)) < 0)
+    if(H5Sselect_none(space_id) < 0)
 	TEST_ERROR
-    if((status = H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t *)coord)) < 0)
+    if(H5Sselect_elements(space_id, H5S_SELECT_SET, num_points, (const hsize_t *)coord) < 0)
 	TEST_ERROR
-    if((status = H5Rcreate(&ref[1], file_id, REFREG_DSETNAMEV, H5R_DATASET_REGION, space_id)) < 0)
+    if(H5Rcreate(&ref[1], file_id, REFREG_DSETNAMEV, H5R_DATASET_REGION, space_id) < 0)
 	TEST_ERROR
 
     /* Write dataset with the references */
-    if((status = H5Dwrite(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT,ref)) < 0)
+    if(H5Dwrite(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref) < 0)
 	TEST_ERROR
 
     /* Close all objects */
-    if((status = H5Sclose(space_id)) < 0)
+    if(H5Sclose(space_id) < 0)
 	TEST_ERROR
-    if((status = H5Sclose(spacer_id)) < 0)
+    if(H5Sclose(spacer_id) < 0)
 	TEST_ERROR
-    if((status = H5Dclose(dsetr_id)) < 0)
+    if(H5Dclose(dsetr_id) < 0)
 	TEST_ERROR
-    if((status = H5Fclose(file_id)) < 0)
+    if(H5Fclose(file_id) < 0)
 	TEST_ERROR
 
 
@@ -2753,7 +2752,7 @@ test_reg_ref(hid_t fapl)
     if((dsetr_id = H5Dopen2(file_id, REFREG_DSETNAMER, H5P_DEFAULT)) < 0)
 	TEST_ERROR
 
-    if((status = H5Dread(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_out)) < 0)
+    if(H5Dread(dsetr_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_out) < 0)
 	TEST_ERROR
 
     /* Get name of the dataset the first region reference points to using H5Rget_name */
@@ -2773,7 +2772,7 @@ test_reg_ref(hid_t fapl)
     name_size2 = H5Iget_name(dsetv_id, (char*)buf2, NAME_BUF_SIZE);
     if(!((HDstrcmp(buf2, "/MATRIX") == 0) &&(name_size2 == 7))) TEST_ERROR
 
-    if((status = H5Dclose(dsetv_id)) < 0) TEST_ERROR
+    if(H5Dclose(dsetv_id) < 0) TEST_ERROR
 
     PASSED()
 
@@ -2794,13 +2793,13 @@ test_reg_ref(hid_t fapl)
     name_size2 = H5Iget_name(dsetv_id, (char*)buf2, NAME_BUF_SIZE);
     if(!((HDstrcmp(buf2, "/MATRIX") == 0) &&(name_size2 == 7))) TEST_ERROR
 
-    if((status = H5Dclose(dsetv_id)) < 0) TEST_ERROR
+    if(H5Dclose(dsetv_id) < 0) TEST_ERROR
 
     PASSED()
 
-    if((status = H5Dclose(dsetr_id)) < 0)
+    if(H5Dclose(dsetr_id) < 0)
 	TEST_ERROR
-    if((status = H5Fclose(file_id)) < 0)
+    if(H5Fclose(file_id) < 0)
 	TEST_ERROR
 
     return 0;
