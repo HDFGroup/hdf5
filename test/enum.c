@@ -455,7 +455,6 @@ test_funcs(void)
     hid_t	type=-1;
     c_e1	val;
     size_t      size;
-    int         offset;
     H5T_pad_t   inpad;
     H5T_cset_t  cset;
     herr_t      ret;
@@ -463,18 +462,18 @@ test_funcs(void)
     TESTING("some functions with enumeration types");
 
     /* A native integer */
-    if ((type = H5Tcreate(H5T_ENUM, sizeof(c_e1)))<0) goto error;
-    if (H5Tenum_insert(type, "RED",   CPTR(val, E1_RED  ))<0) goto error;
-    if (H5Tenum_insert(type, "GREEN", CPTR(val, E1_GREEN))<0) goto error;
-    if (H5Tenum_insert(type, "BLUE",  CPTR(val, E1_BLUE ))<0) goto error;
-    if (H5Tenum_insert(type, "WHITE", CPTR(val, E1_WHITE))<0) goto error;
-    if (H5Tenum_insert(type, "BLACK", CPTR(val, E1_BLACK))<0) goto error;
+    if((type = H5Tcreate(H5T_ENUM, sizeof(c_e1))) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(type, "RED",   CPTR(val, E1_RED  )) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(type, "GREEN", CPTR(val, E1_GREEN)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(type, "BLUE",  CPTR(val, E1_BLUE )) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(type, "WHITE", CPTR(val, E1_WHITE)) < 0) FAIL_STACK_ERROR
+    if(H5Tenum_insert(type, "BLACK", CPTR(val, E1_BLACK)) < 0) FAIL_STACK_ERROR
 
-    if ((size=H5Tget_precision(type))==0) goto error;
-    if ((size=H5Tget_size(type))==0) goto error;
-    if ((offset=H5Tget_offset(type))<0) goto error;
-    if (H5Tget_sign(type)<0) goto error;
-    if (H5Tget_super(type)<0) goto error;
+    if(H5Tget_precision(type) == 0) FAIL_STACK_ERROR
+    if(H5Tget_size(type) == 0) FAIL_STACK_ERROR
+    if(H5Tget_offset(type) < 0) FAIL_STACK_ERROR
+    if(H5Tget_sign(type) < 0) FAIL_STACK_ERROR
+    if(H5Tget_super(type) < 0) FAIL_STACK_ERROR
 
     H5E_BEGIN_TRY {
         ret=H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE);

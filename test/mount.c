@@ -2558,7 +2558,6 @@ test_acc_perm(hid_t fapl)
     hid_t gidA = -1, gidB = -1, gidC = -1, gidM = -1, gidAM = -1, gidAMZ = -1;    	/* Group IDs */
     hid_t bad_id = -1;                          /* Bad ID from object create */
     char    name[NAME_BUF_SIZE];        /* Buffer for filename retrieved */
-    ssize_t name_len;                   /* Filename length */
     char	filename1[1024],
 		filename2[1024],
 		filename3[1024]; 	/* Name of files to mount */
@@ -2605,7 +2604,7 @@ test_acc_perm(hid_t fapl)
         TEST_ERROR
 
     /* Get and verify file name */
-    if((name_len = H5Fget_name(gidA, name, NAME_BUF_SIZE)) < 0)
+    if(H5Fget_name(gidA, name, NAME_BUF_SIZE) < 0)
         TEST_ERROR
     if(HDstrcmp(name, filename1) != 0)
         TEST_ERROR
@@ -2614,7 +2613,7 @@ test_acc_perm(hid_t fapl)
         TEST_ERROR
 
     /* Get and verify file name */
-    if((name_len = H5Fget_name(fid2, name, NAME_BUF_SIZE)) < 0)
+    if(H5Fget_name(fid2, name, NAME_BUF_SIZE) < 0)
         TEST_ERROR
     if(HDstrcmp(name, filename2) != 0)
         TEST_ERROR
@@ -2624,7 +2623,7 @@ test_acc_perm(hid_t fapl)
         TEST_ERROR
 
     /* Get and verify file name */
-    if((name_len = H5Fget_name(fid2, name, NAME_BUF_SIZE)) < 0)
+    if(H5Fget_name(fid2, name, NAME_BUF_SIZE) < 0)
         TEST_ERROR
     if(HDstrcmp(name, filename2) != 0)
         TEST_ERROR
@@ -2634,7 +2633,7 @@ test_acc_perm(hid_t fapl)
         TEST_ERROR
 
     /* Get and verify file name */
-    if((name_len = H5Fget_name(gidAM, name, NAME_BUF_SIZE)) < 0)
+    if(H5Fget_name(gidAM, name, NAME_BUF_SIZE) < 0)
         TEST_ERROR
     if(HDstrcmp(name, filename2) != 0)
         TEST_ERROR
@@ -2676,7 +2675,7 @@ test_acc_perm(hid_t fapl)
         TEST_ERROR
 
     /* Get and verify file name */
-    if((name_len = H5Fget_name(gidAMZ, name, NAME_BUF_SIZE)) < 0)
+    if(H5Fget_name(gidAMZ, name, NAME_BUF_SIZE) < 0)
         TEST_ERROR
     if(HDstrcmp(name, filename3) != 0)
         TEST_ERROR

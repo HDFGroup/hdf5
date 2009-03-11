@@ -210,7 +210,7 @@ filter_read_internal(const char *filename, hid_t dcpl,
 void
 test_filter_read(void)
 {
-    hid_t	dc,file;                 /* HDF5 IDs */
+    hid_t	dc;                 /* HDF5 IDs */
     const hsize_t chunk_size[2] = {CHUNK_DIM1, CHUNK_DIM2};  /* Chunk dimensions */
     hsize_t     null_size;          /* Size of dataset without filters */
     herr_t      hrc;

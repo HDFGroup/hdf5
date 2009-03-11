@@ -1580,11 +1580,11 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
 		"Version:", dt->shared->version);
 
     if (H5T_COMPOUND == dt->shared->type) {
-	fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
+	fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 		"Number of members:",
 		dt->shared->u.compnd.nmembs);
 	for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
-	    sprintf(buf, "Member %d:", i);
+	    sprintf(buf, "Member %u:", i);
 	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    buf,
 		    dt->shared->u.compnd.memb[i].name);
@@ -1597,11 +1597,11 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
     } else if(H5T_ENUM == dt->shared->type) {
 	fprintf(stream, "%*s%s\n", indent, "", "Base type:");
 	H5O_dtype_debug(f, dxpl_id, dt->shared->parent, stream, indent+3, MAX(0, fwidth-3));
-	fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
+	fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 		"Number of members:",
 		dt->shared->u.enumer.nmembs);
 	for(i = 0; i < dt->shared->u.enumer.nmembs; i++) {
-	    sprintf(buf, "Member %d:", i);
+	    sprintf(buf, "Member %u:", i);
 	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    buf,
 		    dt->shared->u.enumer.name[i]);
@@ -1678,7 +1678,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 s = "disk";
                 break;
             default:
-                sprintf(buf, "H5T_LOC_%d", dt->shared->u.vlen.loc);
+                sprintf(buf, "H5T_LOC_%d", (int)dt->shared->u.vlen.loc);
                 s = buf;
                 break;
         } /* end switch */
@@ -1723,7 +1723,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                     s);
         } /* end if */
     } else if(H5T_ARRAY == dt->shared->type) {
-	fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
+	fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 		"Rank:",
 		dt->shared->u.array.ndims);
         fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");

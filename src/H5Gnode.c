@@ -815,7 +815,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
 
         /* Get a pointer to the name of the link */
         if(NULL == (lnk.name = (char *)H5HL_offset_into(f, udata->common.heap, sn->entry[idx].name_off)))
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get link name")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B_INS_ERROR, "unable to get link name")
 
         /* Set up rest of link structure */
         lnk.corder_valid = FALSE;
@@ -833,7 +833,7 @@ H5G_node_remove(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *_lt_key/*in,out*/,
 
         /* Replace any object names */
         if(H5G_link_name_replace(f, dxpl_id, udata->grp_full_path_r, &lnk) < 0)
-            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get object type")
+            HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5B_INS_ERROR, "unable to get object type")
 
         /* Decrement the ref. count for hard links */
         if(lnk.type == H5L_TYPE_HARD) {

@@ -63,7 +63,7 @@ H5RS_xstrdup(const char *s)
 {
     char *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5RS_xstrdup)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5RS_xstrdup)
 
     if(s) {
         ret_value = (char *)H5FL_BLK_MALLOC(str_buf, HDstrlen(s) + 1);
@@ -99,21 +99,21 @@ H5RS_xstrdup(const char *s)
 H5RS_str_t *
 H5RS_create(const char *s)
 {
-    H5RS_str_t *ret_value=NULL;   /* Return value */
+    H5RS_str_t *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5RS_create,NULL);
+    FUNC_ENTER_NOAPI(H5RS_create, NULL)
 
     /* Allocate ref-counted string structure */
-    if((ret_value=H5FL_MALLOC(H5RS_str_t))==NULL)
-        HGOTO_ERROR(H5E_RS,H5E_NOSPACE,NULL,"memory allocation failed");
+    if(NULL == (ret_value = H5FL_MALLOC(H5RS_str_t)))
+        HGOTO_ERROR(H5E_RS, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set the internal fields */
-    ret_value->s=H5RS_xstrdup(s);
-    ret_value->wrapped=0;
-    ret_value->n=1;
+    ret_value->s = H5RS_xstrdup(s);
+    ret_value->wrapped = 0;
+    ret_value->n = 1;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_create() */
 
 
@@ -139,21 +139,21 @@ done:
 H5RS_str_t *
 H5RS_wrap(const char *s)
 {
-    H5RS_str_t *ret_value=NULL;   /* Return value */
+    H5RS_str_t *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5RS_wrap,NULL);
+    FUNC_ENTER_NOAPI(H5RS_wrap, NULL)
 
     /* Allocate ref-counted string structure */
-    if((ret_value=H5FL_MALLOC(H5RS_str_t))==NULL)
-        HGOTO_ERROR(H5E_RS,H5E_NOSPACE,NULL,"memory allocation failed");
+    if(NULL == (ret_value = H5FL_MALLOC(H5RS_str_t)))
+        HGOTO_ERROR(H5E_RS, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set the internal fields */
-    ret_value->s=(char*)s;      /* (Cast away const OK - QAK) */
-    ret_value->wrapped=1;
-    ret_value->n=1;
+    ret_value->s = (char*)s;      /* (Cast away const OK - QAK) */
+    ret_value->wrapped = 1;
+    ret_value->n = 1;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_wrap() */
 
 
@@ -181,21 +181,21 @@ done:
 H5RS_str_t *
 H5RS_own(char *s)
 {
-    H5RS_str_t *ret_value=NULL;   /* Return value */
+    H5RS_str_t *ret_value;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5RS_own,NULL);
+    FUNC_ENTER_NOAPI(H5RS_own, NULL)
 
     /* Allocate ref-counted string structure */
-    if((ret_value=H5FL_MALLOC(H5RS_str_t))==NULL)
-        HGOTO_ERROR(H5E_RS,H5E_NOSPACE,NULL,"memory allocation failed");
+    if(NULL == (ret_value = H5FL_MALLOC(H5RS_str_t)))
+        HGOTO_ERROR(H5E_RS, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set the internal fields */
-    ret_value->s=s;
-    ret_value->wrapped=0;
-    ret_value->n=1;
+    ret_value->s = s;
+    ret_value->wrapped = 0;
+    ret_value->n = 1;
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_own() */
 
 
@@ -259,25 +259,25 @@ H5RS_decr(H5RS_str_t *rs)
 herr_t
 H5RS_incr(H5RS_str_t *rs)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5RS_incr);
+    FUNC_ENTER_NOAPI_NOFUNC(H5RS_incr)
 
     /* Sanity check */
-    assert(rs);
-    assert(rs->n > 0);
+    HDassert(rs);
+    HDassert(rs->n > 0);
 
     /* If the ref-counted string started life as a wrapper around an existing
      * string, duplicate the string now, so that the wrapped string can go out
      * scope appropriately.
      */
     if(rs->wrapped) {
-        rs->s=H5RS_xstrdup(rs->s);
-        rs->wrapped=0;
+        rs->s = H5RS_xstrdup(rs->s);
+        rs->wrapped = 0;
     } /* end if */
 
     /* Increment reference count for string */
     rs->n++;
 
-    FUNC_LEAVE_NOAPI(SUCCEED);
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5RS_incr() */
 
 
@@ -303,14 +303,14 @@ H5RS_incr(H5RS_str_t *rs)
 H5RS_str_t *
 H5RS_dup(H5RS_str_t *ret_value)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5RS_dup);
+    FUNC_ENTER_NOAPI_NOFUNC(H5RS_dup)
 
     /* Check for valid reference counted string */
-    if(ret_value!=NULL)
+    if(ret_value != NULL)
         /* Increment reference count for string */
         ret_value->n++;
 
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_dup() */
 
 
@@ -335,7 +335,7 @@ H5RS_dup(H5RS_str_t *ret_value)
 H5RS_str_t *
 H5RS_dup_str(const char *s)
 {
-    char *new_str = NULL;       /* Duplicate of string */
+    char *new_str;              /* Duplicate of string */
     size_t path_len;            /* Length of the path */
     H5RS_str_t *ret_value;
 
@@ -387,15 +387,15 @@ int
 H5RS_cmp(const H5RS_str_t *rs1, const H5RS_str_t *rs2)
 {
     /* Can't return invalid value from this function */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5RS_cmp);
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5RS_cmp)
 
     /* Sanity check */
-    assert(rs1);
-    assert(rs1->s);
-    assert(rs2);
-    assert(rs2->s);
+    HDassert(rs1);
+    HDassert(rs1->s);
+    HDassert(rs2);
+    HDassert(rs2->s);
 
-    FUNC_LEAVE_NOAPI(HDstrcmp(rs1->s,rs2->s));
+    FUNC_LEAVE_NOAPI(HDstrcmp(rs1->s, rs2->s))
 } /* end H5RS_cmp() */
 
 
@@ -420,13 +420,13 @@ H5RS_cmp(const H5RS_str_t *rs1, const H5RS_str_t *rs2)
 ssize_t
 H5RS_len(const H5RS_str_t *rs)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5RS_len);
+    FUNC_ENTER_NOAPI_NOFUNC(H5RS_len)
 
     /* Sanity check */
-    assert(rs);
-    assert(rs->s);
+    HDassert(rs);
+    HDassert(rs->s);
 
-    FUNC_LEAVE_NOAPI((ssize_t)HDstrlen(rs->s));
+    FUNC_LEAVE_NOAPI((ssize_t)HDstrlen(rs->s))
 } /* end H5RS_len() */
 
 
@@ -454,13 +454,13 @@ H5RS_len(const H5RS_str_t *rs)
 char *
 H5RS_get_str(const H5RS_str_t *rs)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5RS_get_str);
+    FUNC_ENTER_NOAPI_NOFUNC(H5RS_get_str)
 
     /* Sanity check */
-    assert(rs);
-    assert(rs->s);
+    HDassert(rs);
+    HDassert(rs->s);
 
-    FUNC_LEAVE_NOAPI(rs->s);
+    FUNC_LEAVE_NOAPI(rs->s)
 } /* end H5RS_get_str() */
 
 
@@ -486,12 +486,12 @@ H5RS_get_str(const H5RS_str_t *rs)
 unsigned
 H5RS_get_count(const H5RS_str_t *rs)
 {
-    FUNC_ENTER_NOAPI_NOFUNC(H5RS_get_count);
+    FUNC_ENTER_NOAPI_NOFUNC(H5RS_get_count)
 
     /* Sanity check */
-    assert(rs);
-    assert(rs->n>0);
+    HDassert(rs);
+    HDassert(rs->n > 0);
 
-    FUNC_LEAVE_NOAPI(rs->n);
+    FUNC_LEAVE_NOAPI(rs->n)
 } /* end H5RS_get_count() */
 

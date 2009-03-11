@@ -617,12 +617,10 @@ generates_sigfpe(void)
 static int
 test_hard_query(void)
 {
-    htri_t      ret;
-
     TESTING("query functions of compiler conversion");
 
     /* Verify the conversion from int to float is a hard conversion. */
-    if((ret = H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT))!=TRUE) {
+    if(H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != TRUE) {
         H5_FAILED();
         printf("Can't query conversion function\n");
         goto error;
@@ -631,7 +629,7 @@ test_hard_query(void)
     /* Unregister the hard conversion from int to float.  Verify the conversion
      * is a soft conversion. */
     H5Tunregister(H5T_PERS_HARD, NULL, H5T_NATIVE_INT, H5T_NATIVE_FLOAT, H5T_conv_int_float);
-    if((ret = H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT))!=FALSE) {
+    if(H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != FALSE) {
         H5_FAILED();
         printf("Can't query conversion function\n");
         goto error;
@@ -640,7 +638,7 @@ test_hard_query(void)
     /* Register the hard conversion from int to float.  Verify the conversion
      * is a hard conversion. */
     H5Tregister(H5T_PERS_HARD, "int_flt", H5T_NATIVE_INT, H5T_NATIVE_FLOAT, H5T_conv_int_float);
-    if((ret = H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT))!=TRUE) {
+    if(H5Tcompiler_conv(H5T_NATIVE_INT, H5T_NATIVE_FLOAT) != TRUE) {
         H5_FAILED();
         printf("Can't query conversion function\n");
         goto error;
@@ -676,19 +674,18 @@ static H5T_conv_ret_t
 expt_handle(H5T_conv_except_t except_type, hid_t UNUSED src_id, hid_t UNUSED dst_id, void UNUSED *src_buf,
 		 void *dst_buf, void *user_data)
 {
-    H5T_conv_ret_t      ret = H5T_CONV_HANDLED;
     signed char         fill_value1 = 7;
     int                 fill_value2 = 13;
 
     if(except_type == H5T_CONV_EXCEPT_RANGE_HI || except_type == H5T_CONV_EXCEPT_RANGE_LOW ||
-        except_type == H5T_CONV_EXCEPT_TRUNCATE) {
+            except_type == H5T_CONV_EXCEPT_TRUNCATE) {
         if(*(hbool_t*)user_data)
             *(signed char*)dst_buf = fill_value1;
         else
             *(int*)dst_buf = fill_value2;
-    }
+    } /* end if */
 
-    return ret;
+    return H5T_CONV_HANDLED;
 }
 
 
@@ -2710,7 +2707,6 @@ my_isinf(int endian, unsigned char *val, size_t size,
     unsigned char *bits;
     int retval = 0;
     size_t i;
-    ssize_t ret1=0, ret2=0;
 
     bits = (unsigned char*)calloc(1, size);
 
@@ -2732,8 +2728,8 @@ my_isinf(int endian, unsigned char *val, size_t size,
         bits[size-(i+1)] = *(val + ENDIAN(size, i, endian));
 #endif /*H5_VMS*/
 
-    if((ret1=H5T_bit_find(bits, mpos, msize, H5T_BIT_LSB, 1))<0 &&
-       (ret2=H5T_bit_find(bits, epos, esize, H5T_BIT_LSB, 0))<0)
+    if(H5T_bit_find(bits, mpos, msize, H5T_BIT_LSB, 1) < 0 &&
+            H5T_bit_find(bits, epos, esize, H5T_BIT_LSB, 0) < 0)
         retval = 1;
 
     free(bits);

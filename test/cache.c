@@ -15734,7 +15734,6 @@ check_evictions_enabled(void)
     hbool_t	   in_cache;
     int 	   i;
     int		   mile_stone = 1;
-    size_t	   entry_size;
     H5C_t *        cache_ptr = NULL;
     test_entry_t * base_addr;
     test_entry_t * entry_ptr;
@@ -15791,7 +15790,6 @@ check_evictions_enabled(void)
                                 (size_t)(     512 * 1024));
 
         base_addr = entries[MONSTER_ENTRY_TYPE];
-	entry_size = MONSTER_ENTRY_SIZE;
     }
 
     if ( show_progress ) /* 2 */

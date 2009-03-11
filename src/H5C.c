@@ -9874,8 +9874,6 @@ H5C_flush_invalidate_cache(H5F_t *  f,
     herr_t		ret_value = SUCCEED;
     hbool_t		done = FALSE;
     hbool_t		first_flush = TRUE;
-    hbool_t		first_pass = TRUE;
-    hbool_t		have_pinned_entries;
     int32_t		protected_entries = 0;
     int32_t		i;
     int32_t		cur_pel_len;
@@ -9952,10 +9950,6 @@ H5C_flush_invalidate_cache(H5F_t *  f,
 
     while ( ! done )
     {
-        first_pass = FALSE;
-
-	have_pinned_entries = ( cur_pel_len > 0 );
-
 	/* first, try to flush-destroy any dirty entries.   Do this by
 	 * making a scan through the slist.  Note that new dirty entries
 	 * may be created by the flush call backs.  Thus it is possible

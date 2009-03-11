@@ -403,7 +403,7 @@ H5O_ainfo_pre_copy_file(H5F_t UNUSED *file_src, const void UNUSED *native_src,
  */
 static void *
 H5O_ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, 
-    hbool_t *recompute_size, H5O_copy_t *cpy_info, void *udata, hid_t dxpl_id)
+    hbool_t *recompute_size, H5O_copy_t *cpy_info, void UNUSED *udata, hid_t dxpl_id)
 {
     H5O_ainfo_t *ainfo_src = (H5O_ainfo_t *)mesg_src;
     H5O_ainfo_t *ainfo_dst = NULL;
@@ -467,7 +467,7 @@ static herr_t
 H5O_ainfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src,
     H5O_loc_t *dst_oloc, void *mesg_dst, hid_t dxpl_id, H5O_copy_t *cpy_info)
 {
-    H5O_ainfo_t *ainfo_src = (const H5O_ainfo_t *)mesg_src;
+    const H5O_ainfo_t *ainfo_src = (const H5O_ainfo_t *)mesg_src;
     herr_t ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_ainfo_post_copy_file)

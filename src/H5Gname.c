@@ -578,7 +578,6 @@ H5G_name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char 
     if(full_suffix_len < path_len) {
         const char *dst_suffix;         /* Destination suffix that changes */
         const char *src_suffix;         /* Source suffix that changes */
-        const char *path_prefix;        /* Prefix for path */
         size_t path_prefix_len;         /* Length of path prefix */
         const char *path_prefix2;       /* 2nd prefix for path */
         size_t path_prefix2_len;        /* Length of 2nd path prefix */
@@ -589,7 +588,6 @@ H5G_name_move_path(H5RS_str_t **path_r_ptr, const char *full_suffix, const char 
 
 
         /* Compute path prefix before full suffix*/
-        path_prefix = path;
         path_prefix_len = path_len - full_suffix_len;
 
         /* Determine the common prefix for src & dst paths */

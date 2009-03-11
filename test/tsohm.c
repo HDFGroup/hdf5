@@ -731,7 +731,6 @@ static void test_sohm_size1(void)
     hid_t       file = -1;
     hid_t       fcpl_id = -1;
     hid_t       fapl_id = -1;
-    hsize_t     norm_oh_size;
     hsize_t     sohm_oh_size;
     hsize_t     sohm_btree_oh_size;
     h5_stat_size_t norm_empty_filesize;
@@ -782,13 +781,8 @@ static void test_sohm_size1(void)
     CHECK_I(file, "H5Fopen");
     file = size1_helper(file, FILENAME, fapl_id, 0);
     CHECK_I(file, "size1_helper");
-
-    /* Get the size of a dataset object header */
-    ret = H5Oget_info_by_name(file, DSETNAME[0], &oinfo, H5P_DEFAULT);
-    CHECK_I(ret, "H5Oget_info_by_name");
     ret = H5Fclose(file);
     CHECK_I(ret, "H5Fclose");
-    norm_oh_size = oinfo.hdr.space.total;
 
     /* Get the new file size */
     norm_final_filesize = h5_get_file_size(FILENAME, fapl_id);
@@ -927,13 +921,6 @@ static void test_sohm_size1(void)
      * headers.  How the SOHM messages are stored shouldn't affect the
      * size of the object header.
      */
-    /* JAMES: this fails because while the headers are the same size, the
-     * SOHM header is broken up by the SOHM table, so has to have a
-     * continuation message and a NULL message.
-
-    if(sohm_oh_size >= norm_oh_size)
-        VERIFY(sohm_oh_size, 1, "H5Oget_info_by_name");
-    */
     if(sohm_oh_size != sohm_btree_oh_size)
         VERIFY(sohm_btree_oh_size, 1, "H5Oget_info_by_name");
 
@@ -1378,14 +1365,14 @@ static void
 size2_dump_struct(const char *name, size2_helper_struct *sizes)
 {
   puts(name);
-  printf("    empty size: %llu\n", sizes->empty_size);
-  printf(" first dataset: %llu \tdelta: %llu\n", sizes->first_dset, sizes->first_dset - sizes->empty_size);
-  printf("second dataset: %llu \tdelta: %llu\n", sizes->second_dset, sizes->second_dset - sizes->first_dset);
-  printf("       dsets 1: %llu \tdelta: %llu\n", sizes->dsets1, sizes->dsets1 - sizes->second_dset);
-  printf("       dsets 2: %llu \tdelta: %llu\n", sizes->dsets2, sizes->dsets2 - sizes->dsets1);
-  printf("   interleaved: %llu \tdelta: %llu\n", sizes->interleaved, sizes->interleaved - sizes->dsets2);
-  printf("    attributes: %llu \tdelta: %llu\n", sizes->attrs1, sizes->attrs1 - sizes->interleaved);
-  printf("  attributes 2: %llu \tdelta: %llu\n", sizes->attrs2, sizes->attrs2 - sizes->attrs1);
+  printf("    empty size: %llu\n", (unsigned long long)sizes->empty_size);
+  printf(" first dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->first_dset, (unsigned long long)(sizes->first_dset - sizes->empty_size));
+  printf("second dataset: %llu \tdelta: %llu\n", (unsigned long long)sizes->second_dset, (unsigned long long)(sizes->second_dset - sizes->first_dset));
+  printf("       dsets 1: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets1, (unsigned long long)(sizes->dsets1 - sizes->second_dset));
+  printf("       dsets 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->dsets2, (unsigned long long)(sizes->dsets2 - sizes->dsets1));
+  printf("   interleaved: %llu \tdelta: %llu\n", (unsigned long long)sizes->interleaved, (unsigned long long)(sizes->interleaved - sizes->dsets2));
+  printf("    attributes: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs1, (unsigned long long)(sizes->attrs1 - sizes->interleaved));
+  printf("  attributes 2: %llu \tdelta: %llu\n", (unsigned long long)sizes->attrs2, (unsigned long long)(sizes->attrs2 - sizes->attrs1));
 }
 
 

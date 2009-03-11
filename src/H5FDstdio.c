@@ -563,7 +563,9 @@ H5FD_stdio_alloc(H5FD_t *_file, H5FD_mem_t /*UNUSED*/ type, hid_t /*UNUSED*/ dxp
 {
     H5FD_stdio_t	*file = (H5FD_stdio_t*)_file;
     haddr_t		addr;
+#ifndef H5_HAVE_FSEEKO
     static const char   *func = "H5FD_stdio_alloc";  /* Function Name for error reporting */
+#endif
     haddr_t ret_value;          /* Return value */
 
     /* Shut compiler up */

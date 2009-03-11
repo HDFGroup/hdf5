@@ -512,7 +512,6 @@ herr_t H5IMlink_palette( hid_t loc_id,
  hid_t       attr_type=-1;
  hid_t       attr_id=-1;
  hid_t       attr_space_id=-1;
- hid_t       attr_class=-1;
  hobj_ref_t  ref;         /* write a new reference */
  hobj_ref_t  *refbuf;     /* buffer to read references */
  hssize_t    n_refs;
@@ -579,7 +578,7 @@ herr_t H5IMlink_palette( hid_t loc_id,
   if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
 
-  if((attr_class = H5Tget_class(attr_type)) < 0)
+  if(H5Tget_class(attr_type) < 0)
    goto out;
 
   /* Get and save the old reference(s) */
@@ -862,7 +861,6 @@ herr_t H5IMget_palette_info( hid_t loc_id,
  hid_t      attr_type=-1;
  hid_t      attr_id;
  hid_t      attr_space_id=-1;
- hid_t      attr_class;
  hssize_t   n_refs;
  hsize_t    dim_ref;
  hobj_ref_t *refbuf;     /* buffer to read references */
@@ -885,7 +883,7 @@ herr_t H5IMget_palette_info( hid_t loc_id,
   if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
 
-  if((attr_class = H5Tget_class(attr_type)) < 0)
+  if(H5Tget_class(attr_type) < 0)
    goto out;
 
   /* Get the reference(s) */
@@ -976,7 +974,6 @@ herr_t H5IMget_palette( hid_t loc_id,
  hid_t      attr_type=-1;
  hid_t      attr_id;
  hid_t      attr_space_id=-1;
- hid_t      attr_class;
  hssize_t   n_refs;
  hsize_t    dim_ref;
  hobj_ref_t *refbuf;     /* buffer to read references */
@@ -997,7 +994,7 @@ herr_t H5IMget_palette( hid_t loc_id,
   if((attr_type = H5Aget_type(attr_id)) < 0)
    goto out;
 
-  if((attr_class = H5Tget_class(attr_type)) < 0)
+  if(H5Tget_class(attr_type) < 0)
    goto out;
 
   /* Get the reference(s) */

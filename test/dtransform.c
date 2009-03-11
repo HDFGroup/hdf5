@@ -19,12 +19,12 @@
 #define COLS    18
 #define FLOAT_TOL 0.0001
 
-int init_test(hid_t file_id);
-int test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_copy);
-int test_trivial(const hid_t dxpl_id_simple);
-int test_poly(const hid_t dxpl_id_polynomial);
-int test_set(void);
-int test_getset(const hid_t dxpl_id_simple);
+static int init_test(hid_t file_id);
+static int test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_copy);
+static int test_trivial(const hid_t dxpl_id_simple);
+static int test_poly(const hid_t dxpl_id_polynomial);
+static int test_set(void);
+static int test_getset(const hid_t dxpl_id_simple);
 
 /* These are needed for multiple tests, so are declared here globally and are init'ed in init_test */
 hid_t dset_id_int;
@@ -336,7 +336,8 @@ error:
    return -1;
 }
 
-int init_test(hid_t file_id)
+static int
+init_test(hid_t file_id)
 {
     const char* f_to_c = "(5/9.0)*(x-32)";
     /* utrans is a transform for unsigned types: no negative numbers involved and results are < 255 to fit into uchar */
@@ -389,7 +390,8 @@ error:
    return -1;
 }
 
-int test_poly(const hid_t dxpl_id_polynomial)
+static int
+test_poly(const hid_t dxpl_id_polynomial)
 {
     float polyflres[ROWS][COLS];
     int   polyintread[ROWS][COLS];
@@ -430,7 +432,8 @@ error:
     return -1;
 }
 
-int test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_copy)
+static int
+test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_copy)
 {
     int windchillC;
     float polyflres[ROWS][COLS];
@@ -462,7 +465,8 @@ error:
     return -1;
 }
 
-int test_trivial(const hid_t dxpl_id_simple)
+static int
+test_trivial(const hid_t dxpl_id_simple)
 {
     float windchillFfloatread[ROWS][COLS];
     int windchillFintread[ROWS][COLS];
@@ -505,7 +509,8 @@ error:
     return -1;
 }
 
-int test_getset(const hid_t dxpl_id_c_to_f)
+static int
+test_getset(const hid_t dxpl_id_c_to_f)
 {
     int row, col;
     float windchillFfloatread[ROWS][COLS];
@@ -566,7 +571,8 @@ error:
   return -1;
 }
 
-int test_set(void)
+static int
+test_set(void)
 {
     hid_t	dxpl_id;
     H5E_auto2_t func;

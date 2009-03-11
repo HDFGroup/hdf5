@@ -55,7 +55,7 @@ return -1;
 }
 const H5L_class_t UD_link_class[1] = {{
     H5L_LINK_CLASS_T_VERS,    /* H5L_class_t version       */
-    MY_LINKCLASS,             /* Link type id number            */
+    (H5L_type_t)MY_LINKCLASS,             /* Link type id number            */
     "UD link class",          /* name for debugging             */
     NULL,                     /* Creation callback              */
     NULL,                     /* Move/rename callback           */
@@ -492,7 +492,7 @@ int test_types(const char *fname)
     */
     H5Lcreate_external("filename", "objname", fid1, "ext_link", H5P_DEFAULT, H5P_DEFAULT);
     H5Lregister(UD_link_class);
-    H5Lcreate_ud(fid1, "ud_link", MY_LINKCLASS, NULL, (size_t)0, H5P_DEFAULT, H5P_DEFAULT);
+    H5Lcreate_ud(fid1, "ud_link", (H5L_type_t)MY_LINKCLASS, NULL, (size_t)0, H5P_DEFAULT, H5P_DEFAULT);
     
     /*-------------------------------------------------------------------------
     * Close
@@ -2608,6 +2608,7 @@ void gen_datareg(hid_t fid,
     sid1   = H5Screate_simple(2, dims1, NULL);
     did1   = H5Dcreate2(fid, "dsetref", H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     status = H5Dwrite(did1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    assert(status >= 0);
     
     /* create the reference dataset */
     sid2   = H5Screate_simple(1, dims2, NULL);
@@ -2624,10 +2625,12 @@ void gen_datareg(hid_t fid,
     }
     
     status = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, NULL, count, NULL);
+    assert(status >= 0);
     H5Sget_select_npoints(sid1);
     
     /* store first dataset region */
     status = H5Rcreate(&rbuf[0], fid, "dsetref", H5R_DATASET_REGION, sid1);
+    assert(status >= 0);
     
     /* select sequence of five points for second reference */
     coord[0][0]=6; coord[0][1]=9;
@@ -2649,15 +2652,20 @@ void gen_datareg(hid_t fid,
     
     /* write */
     status = H5Dwrite(did2,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,rbuf);
+    assert(status >= 0);
     
     /* close, free memory buffers */
     status = H5Dclose(did1);
+    assert(status >= 0);
     status = H5Sclose(sid1);
+    assert(status >= 0);
     status = H5Dclose(did2);
+    assert(status >= 0);
     status = H5Sclose(sid2);
+    assert(status >= 0);
+
     free(rbuf);
     free(buf);
-    
 }
 
 

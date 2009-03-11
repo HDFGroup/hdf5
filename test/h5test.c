@@ -1031,49 +1031,45 @@ int h5_szip_can_encode(void )
  *
  *-------------------------------------------------------------------------
  */
-
-char* getenv_all(MPI_Comm comm, int root, const char* name)
+char *
+getenv_all(MPI_Comm comm, int root, const char* name)
 {
     int mpi_size, mpi_rank, mpi_initialized;
     int len;
     static char* env = NULL;
-    MPI_Status Status;
 
     assert(name);
 
     MPI_Initialized(&mpi_initialized);
-    if (!mpi_initialized){
+    if(!mpi_initialized) {
 	/* use original getenv */
 	if(env)
 	    HDfree(env);
 	env = HDgetenv(name);
-    }else{
+    } /* end if */
+    else {
 	MPI_Comm_rank(comm, &mpi_rank);
 	MPI_Comm_size(comm, &mpi_size);
 	assert(root < mpi_size);
 
 	/* The root task does the getenv call
 	 * and sends the result to the other tasks */
-	if(mpi_rank == root)
-	{
+	if(mpi_rank == root) {
 	    env = HDgetenv(name);
-	    if(env)
-	    {
+	    if(env) {
 		len = HDstrlen(env);
 		MPI_Bcast(&len, 1, MPI_INT, root, comm);
 		MPI_Bcast(env, len, MPI_CHAR, root, comm);
 	    }
-	    else{
+	    else {
 		/* len -1 indicates that the variable was not in the environment */
 		len = -1;
 		MPI_Bcast(&len, 1, MPI_INT, root, comm);
 	    }
 	}
-	else
-	{
+	else {
 	    MPI_Bcast(&len, 1, MPI_INT, root, comm);
-	    if(len >= 0)
-	    {
+	    if(len >= 0) {
 		if(env == NULL)
 		    env = (char*) HDmalloc(len+1);
 		else if(strlen(env) < len)
@@ -1082,8 +1078,7 @@ char* getenv_all(MPI_Comm comm, int root, const char* name)
 		MPI_Bcast(env, len, MPI_CHAR, root, comm);
 		env[len] = '\0';
 	    }
-	    else
-	    {
+	    else {
 		if(env)
 		    HDfree(env);
 		env = NULL;

@@ -248,7 +248,7 @@ void coll_write_test(int chunk_factor)
   hsize_t  chunk_dims[2];
 
   herr_t   ret;
-  unsigned i,j;
+  unsigned i;
   int      fillvalue = 0;   /* Fill value for the dataset */
 
 #if 0
@@ -689,7 +689,8 @@ void coll_write_test(int chunk_factor)
                 coll_write_test.
  *-------------------------------------------------------------------------
  */
-void coll_read_test(int chunk_factor)
+static void
+coll_read_test(int chunk_factor)
 {
 
   const   char *filename;
@@ -713,7 +714,7 @@ void coll_read_test(int chunk_factor)
   hsize_t  block[2];  /* Block sizes */
   herr_t   ret;
 
-  unsigned i,j;
+  unsigned i;
 
   int     *matrix_out;
   int     *matrix_out1;
@@ -932,3 +933,4 @@ void coll_read_test(int chunk_factor)
 
   return ;
 }
+

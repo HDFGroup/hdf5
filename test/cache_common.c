@@ -1755,7 +1755,7 @@ resize_pinned_entry(H5C_t * cache_ptr,
     HDassert( cache_ptr );
     HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
     HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
-    HDassert( type = VARIABLE_ENTRY_TYPE ) ;
+    HDassert( type == VARIABLE_ENTRY_TYPE ) ;
     HDassert( ( 0 < new_size ) && ( new_size <= entry_sizes[type] ) );
 
     if ( pass ) {

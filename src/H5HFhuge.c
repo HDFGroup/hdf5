@@ -69,13 +69,13 @@
 static herr_t H5HF_huge_bt2_create(H5HF_hdr_t *hdr, hid_t dxpl_id);
 
 /* v2 B-tree function callbacks (in H5HFbtree2.c) */
-herr_t H5HF_huge_bt2_indir_found(const void *nrecord, void *op_data);
-herr_t H5HF_huge_bt2_indir_remove(const void *nrecord, void *op_data);
-herr_t H5HF_huge_bt2_filt_indir_found(const void *nrecord, void *op_data);
-herr_t H5HF_huge_bt2_filt_indir_remove(const void *nrecord, void *op_data);
-herr_t H5HF_huge_bt2_dir_remove(const void *nrecord, void *op_data);
-herr_t H5HF_huge_bt2_filt_dir_found(const void *nrecord, void *op_data);
-herr_t H5HF_huge_bt2_filt_dir_remove(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF_huge_bt2_indir_found(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF_huge_bt2_indir_remove(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF_huge_bt2_filt_indir_found(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF_huge_bt2_filt_indir_remove(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF_huge_bt2_dir_remove(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF_huge_bt2_filt_dir_found(const void *nrecord, void *op_data);
+H5_DLL herr_t H5HF_huge_bt2_filt_dir_remove(const void *nrecord, void *op_data);
 
 /* Local 'huge' object support routines */
 static hsize_t H5HF_huge_new_id(H5HF_hdr_t *hdr);

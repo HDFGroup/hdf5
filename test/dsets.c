@@ -5732,23 +5732,15 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filters_endianess(hid_t fapl)
+test_filters_endianess(void)
 {
     hid_t     fid=-1;                   /* file ID */
     hid_t     dsid=-1;                  /* dataset ID */
     hid_t     sid=-1;                   /* dataspace ID */
     hid_t     dcpl=-1;                  /* dataset creation property list ID */
-    hsize_t   dims[1]={2};           /* dataspace dimensions */
-    hsize_t   chunk_dims[1]={2};     /* chunk dimensions */
-    int       buf[2];
-    int       rank=1;
     int       i;
     char      *srcdir = getenv("srcdir"); /* the source directory */
     char      data_file[512]="";          /* buffer to hold name of existing file */
-
-    for(i=0; i<2; i++){
-     buf[i]=1;
-    }
 
     TESTING("filters with big-endian/little-endian data");
 
@@ -6724,7 +6716,6 @@ test_big_chunks_bypass_cache(hid_t fapl)
     static int  wdata[BYPASS_CHUNK_DIM/2], rdata1[BYPASS_DIM], 
                 rdata2[BYPASS_CHUNK_DIM/2];
     int         i, j;
-    herr_t      ret;            /* Generic return value */
 
     TESTING("big chunks bypassing the cache");
 
@@ -6966,7 +6957,7 @@ main(void)
         nerrors += (test_can_apply_szip(file) < 0		? 1 : 0);
         nerrors += (test_compare_dcpl(file) < 0		? 1 : 0);
         nerrors += (test_filter_delete(file) < 0		? 1 : 0);
-        nerrors += (test_filters_endianess(my_fapl) < 0	? 1 : 0);
+        nerrors += (test_filters_endianess() < 0	? 1 : 0);
         nerrors += (test_zero_dims(file) < 0		? 1 : 0);
         nerrors += (test_missing_chunk(file) < 0		? 1 : 0);
         nerrors += (test_random_chunks(my_fapl) < 0		? 1 : 0);
