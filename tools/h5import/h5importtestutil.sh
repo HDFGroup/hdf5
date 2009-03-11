@@ -66,7 +66,7 @@ TESTING "ASCII I16 rank 3 - Output LE - CHUNKED - extended"
 TOOLTEST $srcdir/testfiles/txtin16.txt -c $srcdir/testfiles/txtin16.conf -o txtin16.h5
 
 
-TESTING "ASCII I8 - rank 3 - Output I8 Chunked+Extended+Compressed " 
+TESTING "ASCII I8 - rank 3 - Output I8 LE-Chunked+Extended+Compressed " 
 TOOLTEST $srcdir/testfiles/txtin16.txt -c $srcdir/testfiles/txtin8.conf  -o txtin8.h5
 
 TESTING "ASCII UI32 - rank 3 - Output BE" 

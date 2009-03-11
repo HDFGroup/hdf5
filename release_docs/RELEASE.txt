@@ -99,7 +99,7 @@ New Features
     ------
 
      - h5import: By selecting a compression type, a big endian byte order was being 
-            selected (PVN - 2009/11/3)
+            selected (PVN - 2009/3/11)
      - h5dump: added a printing of the compression ratio of uncompressed and compressed 
          sizes for cases where compression  filters are present. (PVN - 2008/05/01)
      - h5dump: added an option to allow a user defined formatting string for printf 
