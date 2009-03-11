@@ -55,6 +55,8 @@ New Features
 
     Tools:
     ------
+    - h5import: By selecting a compression type, a big endian byte order was being 
+            selected. PVN - 2009/3/11
     - h5dump: binary output defaults to NATIVE with -b optionally accepting
       the form of binary output (NATIVE, FILE, BE, LE). PVN - 2008/11/14
     - h5repack: When user doesn't specify a chunk size, h5repack now defines a default 

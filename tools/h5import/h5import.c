@@ -1432,7 +1432,6 @@ processConfigurationFile(char *infile, struct Input *in, FILE **strm)
         if (in->configOptionVector[COMPRESS] == 0)
           in->compressionType = 0;
 
-        in->configOptionVector[COMPRESS] = 1;
       break;
 
       case 12: /* EXTERNAL-STORAGE */
@@ -1985,7 +1984,7 @@ getCompressionType(struct Input *in, FILE** strm)
     return (-1);
   }
 
-  in->outputByteOrder = kindex;
+  in->compressionType = kindex;
   return (0);
 
 }
