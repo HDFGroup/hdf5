@@ -82,6 +82,8 @@ New Features
 
     Tools
     -----
+    - h5import: By selecting a compression type, a big endian byte order was being 
+            selected. PVN - 2009/3/11
     - h5repack: When user doesn't specify a chunk size, h5repack now defines a default 
             chunk size as the same size of the size of the hyperslab used to read the chunks. 
             The size of the hyperslabs are defined as the size of each dimension or a 
