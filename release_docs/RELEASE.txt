@@ -123,6 +123,9 @@ New Features
             The size of the hyperslabs are defined as the size of each dimension or a 
             predefined constant, whatever is smaller. This assures that the chunk 
             read fits in the chunk cache. (PVN - 2008/11/21)
+     - h5import: By selecting a compression type, a big endian byte order was being 
+            selected (PVN - 2009/11/3)
+
 
 
 
