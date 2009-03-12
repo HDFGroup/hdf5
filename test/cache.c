@@ -27,19 +27,19 @@
 
 /* private function declarations: */
 
-static void smoke_check_1(void);
-static void smoke_check_2(void);
-static void smoke_check_3(void);
-static void smoke_check_4(void);
-static void smoke_check_5(void);
-static void smoke_check_6(void);
-static void smoke_check_7(void);
-static void smoke_check_8(void);
-static void smoke_check_9(void);
-static void smoke_check_10(void);
-static void write_permitted_check(void);
-static void check_insert_entry(void);
-static void check_flush_cache(void);
+static unsigned smoke_check_1(void);
+static unsigned smoke_check_2(void);
+static unsigned smoke_check_3(void);
+static unsigned smoke_check_4(void);
+static unsigned smoke_check_5(void);
+static unsigned smoke_check_6(void);
+static unsigned smoke_check_7(void);
+static unsigned smoke_check_8(void);
+static unsigned smoke_check_9(void);
+static unsigned smoke_check_10(void);
+static unsigned write_permitted_check(void);
+static unsigned check_insert_entry(void);
+static unsigned check_flush_cache(void);
 static void check_flush_cache__empty_cache(H5C_t * cache_ptr);
 static void check_flush_cache__multi_entry(H5C_t * cache_ptr);
 static void check_flush_cache__multi_entry_test(H5C_t * cache_ptr,
@@ -92,36 +92,37 @@ static void check_flush_cache__flush_op_test(H5C_t * cache_ptr,
 					int check_size,
                                         struct fo_flush_entry_check check[]);
 static void check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr);
-static void check_flush_protected_err(void);
-static void check_get_entry_status(void);
-static void check_expunge_entry(void);
-static void check_multiple_read_protect(void);
-static void check_rename_entry(void);
+static unsigned check_flush_protected_err(void);
+static unsigned check_get_entry_status(void);
+static unsigned check_expunge_entry(void);
+static unsigned check_multiple_read_protect(void);
+static unsigned check_rename_entry(void);
 static void check_rename_entry__run_test(H5C_t * cache_ptr, int test_num,
                                       struct rename_entry_test_spec * spec_ptr);
-static void check_pin_protected_entry(void);
-static void check_resize_entry(void);
-static void check_evictions_enabled(void);
-static void check_destroy_pinned_err(void);
-static void check_destroy_protected_err(void);
-static void check_duplicate_insert_err(void);
-static void check_rename_err(void);
-static void check_double_pin_err(void);
-static void check_double_unpin_err(void);
-static void check_pin_entry_errs(void);
-static void check_double_protect_err(void);
-static void check_double_unprotect_err(void);
-static void check_mark_entry_dirty_errs(void);
-static void check_expunge_entry_errs(void);
-static void check_resize_entry_errs(void);
-static void check_unprotect_ro_dirty_err(void);
-static void check_protect_ro_rw_err(void);
-static void check_check_evictions_enabled_err(void);
-static void check_auto_cache_resize(void);
-static void check_auto_cache_resize_disable(void);
-static void check_auto_cache_resize_epoch_markers(void);
-static void check_auto_cache_resize_input_errs(void);
-static void check_auto_cache_resize_aux_fcns(void);
+static unsigned check_pin_protected_entry(void);
+static unsigned check_resize_entry(void);
+static unsigned check_evictions_enabled(void);
+static unsigned check_destroy_pinned_err(void);
+static unsigned check_destroy_protected_err(void);
+static unsigned check_duplicate_insert_err(void);
+static unsigned check_rename_err(void);
+static unsigned check_double_pin_err(void);
+static unsigned check_double_unpin_err(void);
+static unsigned check_pin_entry_errs(void);
+static unsigned check_double_protect_err(void);
+static unsigned check_double_unprotect_err(void);
+static unsigned check_mark_entry_dirty_errs(void);
+static unsigned check_expunge_entry_errs(void);
+static unsigned check_resize_entry_errs(void);
+static unsigned check_unprotect_ro_dirty_err(void);
+static unsigned check_protect_ro_rw_err(void);
+static unsigned check_check_evictions_enabled_err(void);
+static unsigned check_auto_cache_resize(void);
+static unsigned check_auto_cache_resize_disable(void);
+static unsigned check_auto_cache_resize_epoch_markers(void);
+static unsigned check_auto_cache_resize_input_errs(void);
+static unsigned check_auto_cache_resize_aux_fcns(void);
+static unsigned check_metadata_blizzard_absence(hbool_t fill_via_insertion);
 
 
 /**************************************************************************/
@@ -151,7 +152,7 @@ static void check_auto_cache_resize_aux_fcns(void);
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 smoke_check_1(void)
 {
     const char * fcn_name = "smoke_check_1";
@@ -167,12 +168,9 @@ smoke_check_1(void)
     TESTING("smoke check #1 -- all clean, ins, dest, ren, 4/2 MB cache");
 
     if ( skip_long_tests ) {
-
         SKIPPED();
-
         HDfprintf(stdout, "	Long tests disabled.\n");
-
-        return;
+        return 0;  /* <========== note return */
     }
 
     pass = TRUE;
@@ -318,7 +316,7 @@ smoke_check_1(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* smoke_check_1() */
 
@@ -345,7 +343,7 @@ smoke_check_1(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 smoke_check_2(void)
 {
     const char * fcn_name = "smoke_check_2";
@@ -361,12 +359,9 @@ smoke_check_2(void)
     TESTING("smoke check #2 -- ~1/2 dirty, ins, dest, ren, 4/2 MB cache");
 
     if ( skip_long_tests ) {
-
         SKIPPED();
-
         HDfprintf(stdout, "	Long tests disabled.\n");
-
-        return;
+        return 0;  /* <========== note return */
     }
 
     pass = TRUE;
@@ -512,7 +507,7 @@ smoke_check_2(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* smoke_check_2() */
 
@@ -538,7 +533,7 @@ smoke_check_2(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 smoke_check_3(void)
 {
     const char * fcn_name = "smoke_check_3";
@@ -554,12 +549,9 @@ smoke_check_3(void)
     TESTING("smoke check #3 -- all clean, ins, dest, ren, 2/1 KB cache");
 
     if ( skip_long_tests ) {
-
         SKIPPED();
-
         HDfprintf(stdout, "	Long tests disabled.\n");
-
-        return;
+        return 0;  /* <========== note return */
     }
 
     pass = TRUE;
@@ -705,7 +697,7 @@ smoke_check_3(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* smoke_check_3() */
 
@@ -732,7 +724,7 @@ smoke_check_3(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 smoke_check_4(void)
 {
     const char * fcn_name = "smoke_check_4";
@@ -748,12 +740,9 @@ smoke_check_4(void)
     TESTING("smoke check #4 -- ~1/2 dirty, ins, dest, ren, 2/1 KB cache");
 
     if ( skip_long_tests ) {
-
         SKIPPED();
-
         HDfprintf(stdout, "	Long tests disabled.\n");
-
-        return;
+        return 0;  /* <========== note return */
     }
 
     pass = TRUE;
@@ -899,7 +888,7 @@ smoke_check_4(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* smoke_check_4() */
 
@@ -926,7 +915,7 @@ smoke_check_4(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 smoke_check_5(void)
 {
     const char * fcn_name = "smoke_check_5";
@@ -995,7 +984,7 @@ smoke_check_5(void)
 
         HDfprintf(stdout, "	Long tests disabled.\n");
 
-        return;
+        return 0;  /* <========== note return */
     }
 
     if ( run_full_test ) {
@@ -1139,7 +1128,7 @@ smoke_check_5(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* smoke_check_5() */
 
@@ -1166,7 +1155,7 @@ smoke_check_5(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 smoke_check_6(void)
 {
     const char * fcn_name = "smoke_check_6";
@@ -1232,12 +1221,9 @@ smoke_check_6(void)
     pass = TRUE;
 
     if ( skip_long_tests ) {
-
         SKIPPED();
-
         HDfprintf(stdout, "	Long tests disabled.\n");
-
-        return;
+        return 0;  /* <========== note return */
     }
 
     if ( run_full_test ) {
@@ -1379,7 +1365,7 @@ smoke_check_6(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* smoke_check_6() */
 
@@ -1406,7 +1392,7 @@ smoke_check_6(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 smoke_check_7(void)
 {
     const char * fcn_name = "smoke_check_7";
@@ -1471,12 +1457,9 @@ smoke_check_7(void)
     TESTING("smoke check #7 -- all clean, ins, prot, unprot, AR cache 2");
 
     if ( skip_long_tests ) {
-
         SKIPPED();
-
         HDfprintf(stdout, "	Long tests disabled.\n");
-
-        return;
+        return 0;  /* <========== note return */
     }
 
     if ( run_full_test ) {
@@ -1620,7 +1603,7 @@ smoke_check_7(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* smoke_check_7() */
 
@@ -1647,7 +1630,7 @@ smoke_check_7(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 smoke_check_8(void)
 {
     const char * fcn_name = "smoke_check_8";
@@ -1712,12 +1695,9 @@ smoke_check_8(void)
     TESTING("smoke check #8 -- ~1/2 dirty, ins, prot, unprot, AR cache 2");
 
     if ( skip_long_tests ) {
-
         SKIPPED();
-
         HDfprintf(stdout, "	Long tests disabled.\n");
-
-        return;
+        return 0;  /* <========== note return */
     }
 
     if ( run_full_test ) {
@@ -1861,7 +1841,7 @@ smoke_check_8(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* smoke_check_8() */
 
@@ -1889,7 +1869,7 @@ smoke_check_8(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 smoke_check_9(void)
 {
     const char * fcn_name = "smoke_check_9";
@@ -1907,12 +1887,9 @@ smoke_check_9(void)
     TESTING("smoke check #9 -- all clean, ins, dest, ren, 4/2 MB, corked");
 
     if ( skip_long_tests ) {
-
         SKIPPED();
-
         HDfprintf(stdout, "	Long tests disabled.\n");
-
-        return;
+        return 0;  /* <========== note return */
     }
 
     pass = TRUE;
@@ -2168,7 +2145,7 @@ smoke_check_9(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* smoke_check_9() */
 
@@ -2196,7 +2173,7 @@ smoke_check_9(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 smoke_check_10(void)
 {
     const char * fcn_name = "smoke_check_10";
@@ -2214,12 +2191,9 @@ smoke_check_10(void)
     TESTING("smoke check #10 -- ~1/2 dirty, ins, dest, ren, 4/2 MB, corked");
 
     if ( skip_long_tests ) {
-
         SKIPPED();
-
         HDfprintf(stdout, "	Long tests disabled.\n");
-
-        return;
+        return 0;  /* <========== note return */
     }
 
     pass = TRUE;
@@ -2470,7 +2444,7 @@ smoke_check_10(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* smoke_check_10() */
 
@@ -2494,7 +2468,7 @@ smoke_check_10(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 write_permitted_check(void)
 {
 
@@ -2661,7 +2635,7 @@ write_permitted_check(void)
 
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
-    return;
+    return (unsigned)!pass;
 
 } /* write_permitted_check() */
 
@@ -2687,7 +2661,7 @@ write_permitted_check(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_insert_entry(void)
 {
     const char *               fcn_name = "check_insert_entry";
@@ -2963,7 +2937,7 @@ check_insert_entry(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_insert_entry() */
 
@@ -2984,7 +2958,7 @@ check_insert_entry(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_flush_cache(void)
 {
     const char * fcn_name = "check_flush_cache";
@@ -3084,7 +3058,7 @@ check_flush_cache(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_flush_cache() */
 
@@ -13526,7 +13500,7 @@ check_flush_cache__pinned_single_entry_test(H5C_t * cache_ptr,
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_get_entry_status(void)
 {
     const char *  fcn_name = "check_get_entry_status";
@@ -13705,7 +13679,7 @@ check_get_entry_status(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_get_entry_status() */
 
@@ -13727,7 +13701,7 @@ check_get_entry_status(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_expunge_entry(void)
 {
     const char *  fcn_name = "check_expunge_entry";
@@ -14005,7 +13979,7 @@ check_expunge_entry(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_expunge_entry() */
 
@@ -14029,7 +14003,7 @@ check_expunge_entry(void)
  */
 
 
-static void
+static unsigned
 check_multiple_read_protect(void)
 {
     const char * fcn_name = "check_multiple_read_protect()";
@@ -14426,7 +14400,7 @@ check_multiple_read_protect(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_multiple_read_protect() */
 
@@ -14448,7 +14422,7 @@ check_multiple_read_protect(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_rename_entry(void)
 {
     const char * fcn_name = "check_rename_entry";
@@ -14539,7 +14513,7 @@ check_rename_entry(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_rename_entry() */
 
@@ -14709,7 +14683,7 @@ check_rename_entry__run_test(H5C_t * cache_ptr,
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_pin_protected_entry(void)
 {
     const char *  fcn_name = "check_pin_protected_entry";
@@ -14779,7 +14753,7 @@ check_pin_protected_entry(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_pin_protected_entry() */
 
@@ -14802,7 +14776,7 @@ check_pin_protected_entry(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_resize_entry(void)
 {
     const char *   fcn_name = "check_resize_entry";
@@ -15700,7 +15674,7 @@ check_resize_entry(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_resize_entry() */
 
@@ -15723,7 +15697,7 @@ check_resize_entry(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_evictions_enabled(void)
 {
     const char *   fcn_name = "check_evictions_enabled";
@@ -16400,7 +16374,7 @@ check_evictions_enabled(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_evictions_enabled() */
 
@@ -16421,7 +16395,7 @@ check_evictions_enabled(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_flush_protected_err(void)
 {
     const char * fcn_name = "check_flush_protected_err";
@@ -16476,7 +16450,7 @@ check_flush_protected_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_flush_protected_err() */
 
@@ -16498,7 +16472,7 @@ check_flush_protected_err(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_destroy_pinned_err(void)
 {
     const char * fcn_name = "check_destroy_pinned_err()";
@@ -16549,7 +16523,7 @@ check_destroy_pinned_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_destroy_pinned_err() */
 
@@ -16570,7 +16544,7 @@ check_destroy_pinned_err(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_destroy_protected_err(void)
 {
     const char * fcn_name = "check_destroy_protected_err";
@@ -16620,7 +16594,7 @@ check_destroy_protected_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_destroy_protected_err() */
 
@@ -16641,7 +16615,7 @@ check_destroy_protected_err(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_duplicate_insert_err(void)
 {
     const char * fcn_name = "check_duplicate_insert_err";
@@ -16699,7 +16673,7 @@ check_duplicate_insert_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_duplicate_insert_err() */
 
@@ -16720,7 +16694,7 @@ check_duplicate_insert_err(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_rename_err(void)
 {
     const char * fcn_name = "check_rename_err()";
@@ -16792,7 +16766,7 @@ check_rename_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_rename_err() */
 
@@ -16815,7 +16789,7 @@ check_rename_err(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_double_pin_err(void)
 {
     const char * fcn_name = "check_double_pin_err()";
@@ -16880,7 +16854,7 @@ check_double_pin_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_double_pin_err() */
 
@@ -16903,7 +16877,7 @@ check_double_pin_err(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_double_unpin_err(void)
 {
     const char * fcn_name = "check_double_unpin_err()";
@@ -16979,7 +16953,7 @@ check_double_unpin_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_double_unpin_err() */
 
@@ -17002,7 +16976,7 @@ check_double_unpin_err(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_pin_entry_errs(void)
 {
     const char * fcn_name = "check_pin_entry_errs()";
@@ -17090,7 +17064,7 @@ check_pin_entry_errs(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_pin_entry_errs() */
 
@@ -17116,7 +17090,7 @@ check_pin_entry_errs(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_double_protect_err(void)
 {
     const char * fcn_name = "check_double_protect_err()";
@@ -17147,7 +17121,7 @@ check_double_protect_err(void)
 
     if ( pass ) {
 
-        cache_entry_ptr = H5C_protect(NULL, -1, -1, cache_ptr, &(types[0]),
+        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(NULL, -1, -1, cache_ptr, &(types[0]),
                                       entry_ptr->addr, NULL, NULL,
 				      H5C__NO_FLAGS_SET);
 
@@ -17176,7 +17150,7 @@ check_double_protect_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_double_protect_err() */
 
@@ -17205,7 +17179,7 @@ check_double_protect_err(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_double_unprotect_err(void)
 {
     const char * fcn_name = "check_double_unprotect_err()";
@@ -17263,7 +17237,7 @@ check_double_unprotect_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_double_unprotect_err() */
 
@@ -17295,7 +17269,7 @@ check_double_unprotect_err(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_mark_entry_dirty_errs(void)
 {
     const char * fcn_name = "check_mark_entry_dirty_errs()";
@@ -17393,7 +17367,7 @@ check_mark_entry_dirty_errs(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_mark_entry_dirty_errs() */
 
@@ -17416,7 +17390,7 @@ check_mark_entry_dirty_errs(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_expunge_entry_errs(void)
 {
     const char * fcn_name = "check_expunge_entry_errs()";
@@ -17517,7 +17491,7 @@ check_expunge_entry_errs(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_expunge_entry_errs() */
 
@@ -17540,7 +17514,7 @@ check_expunge_entry_errs(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_resize_entry_errs(void)
 {
     const char * fcn_name = "check_resize_entry_errs()";
@@ -17623,7 +17597,7 @@ check_resize_entry_errs(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_resize_entry_errs() */
 
@@ -17646,7 +17620,7 @@ check_resize_entry_errs(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_unprotect_ro_dirty_err(void)
 {
     const char * fcn_name = "check_unprotect_ro_dirty_err()";
@@ -17753,7 +17727,7 @@ check_unprotect_ro_dirty_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_unprotect_ro_dirty_err() */
 
@@ -17776,7 +17750,7 @@ check_unprotect_ro_dirty_err(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_protect_ro_rw_err(void)
 {
     const char * fcn_name = "check_protect_ro_rw_err()";
@@ -17836,7 +17810,7 @@ check_protect_ro_rw_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_protect_ro_rw_err() */
 
@@ -17859,7 +17833,7 @@ check_protect_ro_rw_err(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_check_evictions_enabled_err(void)
 {
     const char * fcn_name = "check_evictions_enabled_err()";
@@ -17973,7 +17947,7 @@ check_check_evictions_enabled_err(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_evictions_enabled_err() */
 
@@ -18016,7 +17990,7 @@ static void test_rpt_fcn(UNUSED H5C_t * cache_ptr,
     rpt_status = status;
 }
 
-static void
+static unsigned
 check_auto_cache_resize(void)
 {
     const char * fcn_name = "check_auto_cache_resize()";
@@ -22314,7 +22288,7 @@ check_auto_cache_resize(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_auto_cache_resize() */
 
@@ -22339,7 +22313,7 @@ check_auto_cache_resize(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_auto_cache_resize_disable(void)
 {
     const char * fcn_name = "check_auto_cache_resize_disable()";
@@ -25068,7 +25042,7 @@ check_auto_cache_resize_disable(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_auto_cache_resize_disable() */
 
@@ -25089,7 +25063,7 @@ check_auto_cache_resize_disable(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_auto_cache_resize_epoch_markers(void)
 {
     const char * fcn_name = "check_auto_cache_resize_epoch_markers()";
@@ -25776,7 +25750,7 @@ check_auto_cache_resize_epoch_markers(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_auto_cache_resize_epoch_markers() */
 
@@ -25802,6 +25776,9 @@ check_auto_cache_resize_epoch_markers(void)
  *-------------------------------------------------------------------------
  */
 
+/* Epsilon for floating-point comparisons */
+#define FP_EPSILON 0.000001
+
 #define RESIZE_CONFIGS_ARE_EQUAL(a, b, compare_init)              \
 ( ( (a).version                == (b).version ) &&                \
   ( (a).rpt_fcn                == (b).rpt_fcn ) &&                \
@@ -25809,31 +25786,28 @@ check_auto_cache_resize_epoch_markers(void)
     ( (a).set_initial_size     == (b).set_initial_size ) ) &&     \
   ( ( ! compare_init ) ||                                         \
     ( (a).initial_size         == (b).initial_size ) ) &&         \
-  ( (a).min_clean_fraction     == (b).min_clean_fraction ) &&     \
+  ( HDfabs((a).min_clean_fraction - (b).min_clean_fraction) < FP_EPSILON ) &&     \
   ( (a).max_size               == (b).max_size ) &&               \
   ( (a).min_size               == (b).min_size ) &&               \
   ( (a).epoch_length           == (b).epoch_length ) &&           \
   ( (a).incr_mode              == (b).incr_mode ) &&              \
-  ( (a).lower_hr_threshold     == (b).lower_hr_threshold ) &&     \
-  ( (a).increment              == (b).increment ) &&              \
+  ( HDfabs((a).lower_hr_threshold - (b).lower_hr_threshold) < FP_EPSILON ) &&     \
+  ( HDfabs((a).increment - (b).increment) < FP_EPSILON ) &&              \
   ( (a).apply_max_increment    == (b).apply_max_increment ) &&    \
   ( (a).max_increment          == (b).max_increment ) &&          \
   ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&        \
-  ( (a).flash_multiple         == (b).flash_multiple ) &&         \
-  ( (a).flash_threshold        == (b).flash_threshold ) &&        \
+  ( HDfabs((a).flash_multiple - (b).flash_multiple) < FP_EPSILON ) &&         \
+  ( HDfabs((a).flash_threshold - (b).flash_threshold) < FP_EPSILON ) &&        \
   ( (a).decr_mode              == (b).decr_mode ) &&              \
-  ( (a).upper_hr_threshold     == (b).upper_hr_threshold ) &&     \
-  ( (a).flash_incr_mode        == (b).flash_incr_mode ) &&        \
-  ( (a).flash_multiple         == (b).flash_multiple ) &&         \
-  ( (a).flash_threshold        == (b).flash_threshold ) &&        \
-  ( (a).decrement              == (b).decrement ) &&              \
+  ( HDfabs((a).upper_hr_threshold - (b).upper_hr_threshold) < FP_EPSILON ) &&     \
+  ( HDfabs((a).decrement - (b).decrement) < FP_EPSILON ) &&              \
   ( (a).apply_max_decrement    == (b).apply_max_decrement ) &&    \
   ( (a).max_decrement          == (b).max_decrement ) &&          \
   ( (a).epochs_before_eviction == (b).epochs_before_eviction ) && \
   ( (a).apply_empty_reserve    == (b).apply_empty_reserve ) &&    \
-  ( (a).empty_reserve          == (b).empty_reserve ) )
+  ( HDfabs((a).empty_reserve - (b).empty_reserve) < FP_EPSILON ) )
 
-static void
+static unsigned
 check_auto_cache_resize_input_errs(void)
 {
     const char * fcn_name = "check_auto_cache_resize_input_errs()";
@@ -28244,7 +28218,7 @@ check_auto_cache_resize_input_errs(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_auto_cache_resize_input_errs() */
 
@@ -28270,7 +28244,7 @@ check_auto_cache_resize_input_errs(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_auto_cache_resize_aux_fcns(void)
 {
     const char * fcn_name = "check_auto_cache_resize_aux_fcns()";
@@ -28392,7 +28366,7 @@ check_auto_cache_resize_aux_fcns(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
 
-        } else if ( hit_rate != 0.0 ) {
+        } else if ( hit_rate > FP_EPSILON ) {   /* i.e. hit_rate != 0.0 */
 
             pass = FALSE;
             failure_mssg =
@@ -28426,7 +28400,7 @@ check_auto_cache_resize_aux_fcns(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
 
-        } else if ( hit_rate != 0.0 ) {
+        } else if ( hit_rate > FP_EPSILON ) {   /* i.e. hit_rate != 0.0 */
 
             pass = FALSE;
             failure_mssg =
@@ -28472,7 +28446,7 @@ check_auto_cache_resize_aux_fcns(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
 
-        } else if ( hit_rate != 0.5 ) {
+        } else if ( HDfabs(hit_rate - 0.5) > FP_EPSILON ) { /* i.e. hit_rate != 0.5 */
 
             pass = FALSE;
             failure_mssg =
@@ -28556,7 +28530,7 @@ check_auto_cache_resize_aux_fcns(void)
             pass = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
 
-        } else if ( hit_rate != 0.5 ) {
+        } else if ( HDfabs(hit_rate - 0.5) > FP_EPSILON ) { /* i.e. hit_rate != 0.5 */
 
             pass = FALSE;
             failure_mssg =
@@ -28826,7 +28800,7 @@ check_auto_cache_resize_aux_fcns(void)
                   fcn_name, failure_mssg);
     }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_auto_cache_resize_aux_fcns() */
 
@@ -28859,7 +28833,7 @@ check_auto_cache_resize_aux_fcns(void)
  *-------------------------------------------------------------------------
  */
 
-static void
+static unsigned
 check_metadata_blizzard_absence(hbool_t fill_via_insertion)
 {
     const char * fcn_name = "check_metadata_blizzard_absence";
@@ -28874,7 +28848,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
     /* Expected loaded status of entries depends on how they get into 
      * the cache. Insertions = not loaded, protect/unprotect = loaded.
      */
-    hbool_t loaded = !(fill_via_insertion);
+    hbool_t loaded = (hbool_t)!(fill_via_insertion);
 
     /* Set up the expected array. This is used to maintain a table of the
      * expected status of every entry used in this test.
@@ -29698,7 +29672,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
 
     if ( pass ) { PASSED(); } else { H5_FAILED(); }
 
-    return;
+    return (unsigned)!pass;
 
 } /* check_metadata_blizzard_absence() */
 
@@ -29723,6 +29697,8 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
 int
 main(void)
 {
+    unsigned nerrs = 0;
+
     H5open();
 
     skip_long_tests = FALSE;
@@ -29733,55 +29709,51 @@ main(void)
     run_full_test = FALSE;
 #endif /* NDEBUG */
 
-#if 0
-    run_full_test = TRUE;
-#endif
+    nerrs += smoke_check_1();
+    nerrs += smoke_check_2();
+    nerrs += smoke_check_3();
+    nerrs += smoke_check_4();
+    nerrs += smoke_check_5();
+    nerrs += smoke_check_6();
+    nerrs += smoke_check_7();
+    nerrs += smoke_check_8();
+    nerrs += smoke_check_9();
+    nerrs += smoke_check_10();
 
-#if 1
-    smoke_check_1();
-    smoke_check_2();
-    smoke_check_3();
-    smoke_check_4();
-    smoke_check_5();
-    smoke_check_6();
-    smoke_check_7();
-    smoke_check_8();
-    smoke_check_9();
-    smoke_check_10();
-#endif
+    nerrs += write_permitted_check();
+    nerrs += check_insert_entry();
+    nerrs += check_flush_cache();
+    nerrs += check_get_entry_status();
+    nerrs += check_expunge_entry();
+    nerrs += check_multiple_read_protect();
+    nerrs += check_rename_entry();
+    nerrs += check_pin_protected_entry();
+    nerrs += check_resize_entry();
+    nerrs += check_evictions_enabled();
+    nerrs += check_flush_protected_err();
+    nerrs += check_destroy_pinned_err();
+    nerrs += check_destroy_protected_err();
+    nerrs += check_duplicate_insert_err();
+    nerrs += check_rename_err();
+    nerrs += check_double_pin_err();
+    nerrs += check_double_unpin_err();
+    nerrs += check_pin_entry_errs();
+    nerrs += check_double_protect_err();
+    nerrs += check_double_unprotect_err();
+    nerrs += check_mark_entry_dirty_errs();
+    nerrs += check_expunge_entry_errs();
+    nerrs += check_resize_entry_errs();
+    nerrs += check_unprotect_ro_dirty_err();
+    nerrs += check_protect_ro_rw_err();
+    nerrs += check_check_evictions_enabled_err();
+    nerrs += check_auto_cache_resize();
+    nerrs += check_auto_cache_resize_disable();
+    nerrs += check_auto_cache_resize_epoch_markers();
+    nerrs += check_auto_cache_resize_input_errs();
+    nerrs += check_auto_cache_resize_aux_fcns();
+    nerrs += check_metadata_blizzard_absence(TRUE);   
+    nerrs += check_metadata_blizzard_absence(FALSE);  
 
-    write_permitted_check();
-    check_insert_entry();
-    check_flush_cache();
-    check_get_entry_status();
-    check_expunge_entry();
-    check_multiple_read_protect();
-    check_rename_entry();
-    check_pin_protected_entry();
-    check_resize_entry();
-    check_evictions_enabled();
-    check_flush_protected_err();
-    check_destroy_pinned_err();
-    check_destroy_protected_err();
-    check_duplicate_insert_err();
-    check_rename_err();
-    check_double_pin_err();
-    check_double_unpin_err();
-    check_pin_entry_errs();
-    check_double_protect_err();
-    check_double_unprotect_err();
-    check_mark_entry_dirty_errs();
-    check_expunge_entry_errs();
-    check_resize_entry_errs();
-    check_unprotect_ro_dirty_err();
-    check_protect_ro_rw_err();
-    check_check_evictions_enabled_err();
-    check_auto_cache_resize();
-    check_auto_cache_resize_disable();
-    check_auto_cache_resize_epoch_markers();
-    check_auto_cache_resize_input_errs();
-    check_auto_cache_resize_aux_fcns();
-    check_metadata_blizzard_absence(TRUE);   
-    check_metadata_blizzard_absence(FALSE);  
     return(0);
 }
+
