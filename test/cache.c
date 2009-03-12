@@ -29754,6 +29754,6 @@ main(void)
     nerrs += check_metadata_blizzard_absence(TRUE);   
     nerrs += check_metadata_blizzard_absence(FALSE);  
 
-    return(0);
+    return(nerrs > 0);
 }
 
