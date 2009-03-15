@@ -1,4 +1,4 @@
-HDF5 version 1.6.8-post8 released on Sun Feb 22 13:58:46 CST 2009
+HDF5 version 1.6.8-post9 released on Sun Mar 15 15:48:29 CDT 2009
 ================================================================================
 
 INTRODUCTION
@@ -55,6 +55,8 @@ New Features
 
     Tools:
     ------
+    - h5import: By selecting a compression type, a big endian byte order was being 
+            selected. PVN - 2009/3/11
     - h5dump: binary output defaults to NATIVE with -b optionally accepting
       the form of binary output (NATIVE, FILE, BE, LE). PVN - 2008/11/14
     - h5repack: When user doesn't specify a chunk size, h5repack now defines a default 
@@ -288,6 +290,12 @@ Footnotes:
 
 Known Problems
 ==============
+* When in production mode, any presence of the '-g' flag within CFLAGS is
+  stripped out during configuration. This currently cannot be overridden. 
+  In order to build with '-g' specified within CFLAGS, use the
+  --disable-production configure flag in order to configure in development
+  mode. MAM - 2009/03/09.
+
 * We discovered two problems when running collective IO parallel HDF5 tests
   with chunking storage with the ChaMPIon MPI compiler on tungsten, a Linux
   cluster at NCSA.

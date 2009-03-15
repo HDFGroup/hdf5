@@ -1,4 +1,4 @@
-HDF5 version 1.6.8-post9 currently under development
+HDF5 version 1.6.8-post10 currently under development
 ==> README.txt <==
 
 Periodic code snapshots are provided at the following URL:
