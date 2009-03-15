@@ -59,6 +59,7 @@ const int   NPOINTS = 4;	// Number of points that will be selected...
 
 int main (void)
 {
+#ifdef SKIP_UNTIL_APRIL_2009
    /*
    * Buffers' initialization.
    */
@@ -250,7 +251,6 @@ int main (void)
       error.printError();
       return -1;
    }
-
+#endif
    return 0;
-
 }

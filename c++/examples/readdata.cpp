@@ -50,6 +50,7 @@ const int    RANK_OUT = 3;
 
 int main (void)
 {
+#ifdef SKIP_UNTIL_APRIL_2009
    /*
     * Output buffer initialization.
     */
@@ -216,7 +217,7 @@ int main (void)
       error.printError();
       return -1;
    }
-
+#endif
    return 0;  // successfully terminated
 }
 

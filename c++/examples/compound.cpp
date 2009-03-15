@@ -49,6 +49,7 @@ const int   RANK = 1;
 
 int main(void)
 {
+#ifdef SKIP_UNTIL_APRIL_2009
    /* First structure  and dataset*/
    typedef struct s1_t {
 	int      a;
@@ -218,6 +219,6 @@ int main(void)
       error.printError();
       return -1;
    }
-
+#endif
    return 0;
 }

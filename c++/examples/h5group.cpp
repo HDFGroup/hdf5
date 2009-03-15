@@ -49,7 +49,7 @@ extern "C" herr_t file_info(hid_t loc_id, const char *name, void *opdata);
 
 int main(void)
 {
-
+#ifdef SKIP_UNTIL_APRIL_2009
     hsize_t  dims[2];
     hsize_t  cdims[2];
 
@@ -205,6 +205,7 @@ int main(void)
       error.printError();
       return -1;
    }
+#endif
    return 0;
 }
 
