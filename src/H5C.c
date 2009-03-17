@@ -3147,6 +3147,10 @@ H5C_create(size_t		      max_cache_size,
     cache_ptr->epoch_marker_ringbuf_last	= 0;
     cache_ptr->epoch_marker_ringbuf_size	= 0;
 
+    /* Initialize all epoch marker entries' fields to zero/FALSE/NULL */
+    HDmemset(cache_ptr->epoch_markers, 0, sizeof(cache_ptr->epoch_markers));
+
+    /* Set non-zero/FALSE/NULL fields for epoch markers */
     for ( i = 0; i < H5C__MAX_EPOCH_MARKERS; i++ )
     {
         (cache_ptr->epoch_marker_active)[i]		 = FALSE;
@@ -3155,27 +3159,7 @@ H5C_create(size_t		      max_cache_size,
 		                                  H5C__H5C_CACHE_ENTRY_T_MAGIC;
 #endif /* NDEBUG */
         ((cache_ptr->epoch_markers)[i]).addr		 = (haddr_t)i;
-        ((cache_ptr->epoch_markers)[i]).size		 = (size_t)0;
         ((cache_ptr->epoch_markers)[i]).type		 = &epoch_marker_class;
-        ((cache_ptr->epoch_markers)[i]).is_dirty	 = FALSE;
-        ((cache_ptr->epoch_markers)[i]).dirtied		 = FALSE;
-        ((cache_ptr->epoch_markers)[i]).is_protected	 = FALSE;
-	((cache_ptr->epoch_markers)[i]).is_read_only	 = FALSE;
-	((cache_ptr->epoch_markers)[i]).ro_ref_count	 = 0;
-        ((cache_ptr->epoch_markers)[i]).is_pinned	 = FALSE;
-        ((cache_ptr->epoch_markers)[i]).in_slist	 = FALSE;
-        ((cache_ptr->epoch_markers)[i]).ht_next		 = NULL;
-        ((cache_ptr->epoch_markers)[i]).ht_prev		 = NULL;
-        ((cache_ptr->epoch_markers)[i]).next		 = NULL;
-        ((cache_ptr->epoch_markers)[i]).prev		 = NULL;
-        ((cache_ptr->epoch_markers)[i]).aux_next	 = NULL;
-        ((cache_ptr->epoch_markers)[i]).aux_prev	 = NULL;
-#if H5C_COLLECT_CACHE_ENTRY_STATS
-        ((cache_ptr->epoch_markers)[i]).accesses	 = 0;
-        ((cache_ptr->epoch_markers)[i]).clears		 = 0;
-        ((cache_ptr->epoch_markers)[i]).flushes		 = 0;
-        ((cache_ptr->epoch_markers)[i]).pins		 = 0;
-#endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
     }
 
     if ( H5C_reset_cache_hit_rate_stats(cache_ptr) != SUCCEED ) {
@@ -3836,10 +3820,7 @@ H5C_flush_cache(H5F_t *  f,
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
 		                "next_entry_ptr == NULL 1 ?!?!");
                 }
-#ifndef NDEBUG
-		HDassert( next_entry_ptr->magic ==
-                          H5C__H5C_CACHE_ENTRY_T_MAGIC );
-#endif /* NDEBUG */
+		HDassert( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
 	        HDassert( next_entry_ptr->is_dirty );
                 HDassert( next_entry_ptr->in_slist );
 
@@ -3955,10 +3936,7 @@ H5C_flush_cache(H5F_t *  f,
                         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                                     "next_entry_ptr == NULL 2 ?!?!");
                     }
-#ifndef NDEBUG
-		    HDassert( next_entry_ptr->magic ==
-                              H5C__H5C_CACHE_ENTRY_T_MAGIC );
-#endif /* NDEBUG */
+		    HDassert( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
                     HDassert( next_entry_ptr->is_dirty );
                     HDassert( next_entry_ptr->in_slist );
                 } else {
@@ -4802,9 +4780,7 @@ H5C_insert_entry(H5F_t * 	     f,
                  void *		     thing,
                  unsigned int        flags)
 {
-    /* const char *	fcn_name = "H5C_insert_entry()"; */
     herr_t		result;
-    herr_t		ret_value = SUCCEED;    /* Return value */
     hbool_t		first_flush = TRUE;
     hbool_t		insert_pinned;
     hbool_t             set_flush_marker;
@@ -4812,6 +4788,8 @@ H5C_insert_entry(H5F_t * 	     f,
     size_t		empty_space;
     H5C_cache_entry_t *	entry_ptr;
     H5C_cache_entry_t *	test_entry_ptr;
+    unsigned            u;                      /* Local index variable */
+    herr_t		ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_insert_entry, FAIL)
 
@@ -4899,6 +4877,12 @@ H5C_insert_entry(H5F_t * 	     f,
     entry_ptr->flush_in_progress = FALSE;
     entry_ptr->destroy_in_progress = FALSE;
     entry_ptr->free_file_space_on_destroy = FALSE;
+
+    /* Initialize flush dependency height fields */
+    entry_ptr->flush_dep_parent = NULL;
+    for(u = 0; u < H5C__NUM_FLUSH_DEP_HEIGHTS; u++)
+        entry_ptr->child_flush_dep_height_rc[u] = 0;
+    entry_ptr->flush_dep_height = 0;
 
     entry_ptr->ht_next = NULL;
     entry_ptr->ht_prev = NULL;
@@ -7661,19 +7645,13 @@ H5C_stats__reset(H5C_t UNUSED * cache_ptr)
 /*-------------------------------------------------------------------------
  * Function:    H5C_unpin_entry()
  *
- * Purpose:	Unpin a cache entry.  The entry must be unprotected at
- * 		the time of call, and must be pinned.
+ * Purpose:	Unpin a cache entry.  The entry can be either protected or
+ * 		unprotected at the time of call, but must be pinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  John Mainzer
  *              3/22/06
- *
- * Modifications:
- *
- * 		JRM -- 4/26/06
- *		Modified routine to allow it to operate on protected
- *		entries.
  *
  *-------------------------------------------------------------------------
  */
@@ -8488,6 +8466,341 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C_validate_resize_config() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_adjust_flush_dependency_rc()
+ *
+ * Purpose:	"Atomicly" adjust flush dependency ref. counts for an entry,
+ *              as a result of a flush dependency child's height changing.
+ *
+ * Note:	Entry will remain in flush dependency relationship with its
+ *              child entry (i.e. it's not going to get unpinned as a result
+ *              of this change), but change could trickle upward, if this
+ *              entry's height changes and it has a flush dependency parent.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              3/05/09
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+H5C_adjust_flush_dependency_rc(H5C_cache_entry_t * cache_entry,
+    unsigned old_child_height, unsigned new_child_height)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C_adjust_flush_dependency_rc)
+
+    /* Sanity checks */
+    HDassert(cache_entry);
+    HDassert(cache_entry->is_pinned);
+    HDassert(cache_entry->flush_dep_height > 0);
+    HDassert(cache_entry->flush_dep_height < H5C__NUM_FLUSH_DEP_HEIGHTS);
+    HDassert(cache_entry->child_flush_dep_height_rc[old_child_height] > 0);
+    HDassert(old_child_height < H5C__NUM_FLUSH_DEP_HEIGHTS);
+    HDassert(old_child_height != new_child_height);
+    HDassert(new_child_height < H5C__NUM_FLUSH_DEP_HEIGHTS);
+
+    /* Adjust ref. counts for entry's flush dependency children heights */
+    cache_entry->child_flush_dep_height_rc[new_child_height]++;
+    cache_entry->child_flush_dep_height_rc[old_child_height]--;
+
+    /* Check for flush dependency height of entry increasing */
+    if((new_child_height + 1) > cache_entry->flush_dep_height) {
+
+        /* Check if entry has _its_ own parent flush dependency entry */
+        if(NULL != cache_entry->flush_dep_parent) {
+            /* Adjust flush dependency ref. counts on entry's parent */
+            H5C_adjust_flush_dependency_rc(cache_entry->flush_dep_parent, cache_entry->flush_dep_height, new_child_height + 1);
+        } /* end if */
+
+        /* Set new flush dependency height of entry */
+        cache_entry->flush_dep_height = new_child_height + 1;
+    } /* end if */
+    else {
+        /* Check for child's flush dep. height decreasing and ref. count of 
+         *      old child height going to zero, it could mean the parent's
+         *      flush dependency height dropped.
+         */
+        if((new_child_height < old_child_height)
+                && ((old_child_height + 1) == cache_entry->flush_dep_height)
+                && (0 == cache_entry->child_flush_dep_height_rc[old_child_height])) {
+            int i;                      /* Local index variable */
+
+            /* Re-scan child flush dependency height ref. counts to determine
+             *  this entry's height.
+             */
+#ifndef NDEBUG
+            for(i = (H5C__NUM_FLUSH_DEP_HEIGHTS - 1); i > (int)new_child_height; i--)
+                HDassert(0 == cache_entry->child_flush_dep_height_rc[i]);
+#endif /* NDEBUG */
+            for(i = (int)new_child_height; i >= 0; i--)
+                /* Check for child flush dependencies of this height */
+                if(cache_entry->child_flush_dep_height_rc[i] > 0)
+                    break;
+
+            /* Sanity checks */
+            HDassert((unsigned)(i + 1) < cache_entry->flush_dep_height);
+
+            /* Check if entry has _its_ own parent flush dependency entry */
+            if(NULL != cache_entry->flush_dep_parent) {
+                /* Adjust flush dependency ref. counts on entry's parent */
+                H5C_adjust_flush_dependency_rc(cache_entry->flush_dep_parent, cache_entry->flush_dep_height, (unsigned)(i + 1));
+            } /* end if */
+
+            /* Set new flush dependency height of entry */
+            cache_entry->flush_dep_height = (unsigned)(i + 1);
+        } /* end if */
+    } /* end else */
+
+
+    /* Post-conditions, for successful operation */
+    HDassert(cache_entry->is_pinned);
+    HDassert(cache_entry->flush_dep_height > 0);
+    HDassert(cache_entry->flush_dep_height <= H5C__NUM_FLUSH_DEP_HEIGHTS);
+    HDassert(cache_entry->child_flush_dep_height_rc[new_child_height] > 0);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* H5C_adjust_flush_dependency_rc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_create_flush_dependency()
+ *
+ * Purpose:	Initiates a parent<->child entry flush dependency.  The parent
+ *              entry must be protected at the time of call, and must have all
+ *              dependencies removed before the cache can shut down.
+ *
+ * Note:	Flush dependencies in the cache indicate that a child entry
+ *              must be flushed to the file before its parent.  (This is
+ *              currently used to implement Single-Writer/Multiple-Reader (SWMR)
+ *              I/O access for data structures in the file).
+ *
+ *              Each child entry can have only one parent entry, but parent
+ *              entries can have >1 child entries.  The flush dependency
+ *              height of a parent entry is one greater than the max. flush
+ *              dependency height of its children.
+ *
+ *              Creating a flush dependency between two entries will also pin
+ *              the parent entry.  (The parent entry must _not_ be pinned
+ *              through some other mechanism)
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              3/05/09
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifndef NDEBUG
+herr_t
+H5C_create_flush_dependency(H5C_t * cache_ptr, void * parent_thing,
+    void * child_thing)
+#else
+herr_t
+H5C_create_flush_dependency(H5C_t UNUSED * cache_ptr, void * parent_thing,
+    void * child_thing)
+#endif
+{
+    H5C_cache_entry_t *	parent_entry = (H5C_cache_entry_t *)parent_thing;   /* Ptr to parent thing's entry */
+    H5C_cache_entry_t * child_entry = (H5C_cache_entry_t *)child_thing;    /* Ptr to child thing's entry */
+#ifndef NDEBUG
+    unsigned prev_flush_dep_height = parent_entry->flush_dep_height; /* Previous flush height for parent entry */
+#endif /* NDEBUG */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C_create_flush_dependency, FAIL)
+
+    /* Sanity checks */
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(parent_entry);
+    HDassert(parent_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(parent_entry->flush_dep_height <= H5C__NUM_FLUSH_DEP_HEIGHTS);
+    HDassert(H5F_addr_defined(parent_entry->addr));
+    HDassert(child_entry);
+    HDassert(child_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(H5F_addr_defined(child_entry->addr));
+    HDassert(child_entry->flush_dep_height <= H5C__NUM_FLUSH_DEP_HEIGHTS);
+
+    /* More sanity checks */
+    if(child_entry == parent_entry)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Child entry flush dependency parent can't be itself")
+    if(!parent_entry->is_protected)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Parent entry isn't protected")
+    if(NULL != child_entry->flush_dep_parent)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Child entry already has flush dependency parent")
+    {
+        H5C_cache_entry_t *tmp_entry = parent_entry;  /* Temporary cache entry in flush dependency chain */
+        unsigned tmp_flush_height = 0;          /* Different in heights of parent entry */
+
+        /* Find the top entry in the flush dependency list */
+        while(NULL != tmp_entry->flush_dep_parent) {
+            tmp_flush_height++;
+            tmp_entry = tmp_entry->flush_dep_parent;
+        } /* end while */
+
+        /* Check if we will make the dependency chain too long */
+        if((tmp_flush_height + child_entry->flush_dep_height + 1)
+                > H5C__NUM_FLUSH_DEP_HEIGHTS)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Combined flush dependency height too large")
+    }
+
+    /* Check for parent already pinned */
+    if(parent_entry->is_pinned) {
+        /* Verify that the parent entry was pinned through a flush dependency relationship */
+        if(0 == parent_entry->flush_dep_height)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Parent entry wasn't pinned through flush dependency")
+    } /* end if */
+    else {
+        /* Sanity check */
+        HDassert(parent_entry->flush_dep_height == 0);
+
+        /* Pin the parent entry */
+        parent_entry->is_pinned = TRUE;
+        H5C__UPDATE_STATS_FOR_PIN(cache_ptr, parent_entry)
+    } /* end else */
+
+    /* Increment ref. count for parent's flush dependency children heights */
+    parent_entry->child_flush_dep_height_rc[child_entry->flush_dep_height]++;
+
+    /* Check for increasing parent flush dependency height */
+    if((child_entry->flush_dep_height + 1) > parent_entry->flush_dep_height) {
+
+        /* Check if parent entry has _its_ own parent flush dependency entry */
+        if(NULL != parent_entry->flush_dep_parent) {
+            /* Adjust flush dependency ref. counts on parent entry's parent */
+            H5C_adjust_flush_dependency_rc(parent_entry->flush_dep_parent, parent_entry->flush_dep_height, (child_entry->flush_dep_height + 1));
+        } /* end if */
+
+        /* Increase flush dependency height of parent entry */
+        parent_entry->flush_dep_height = child_entry->flush_dep_height + 1;
+    } /* end if */
+
+    /* Set parent for child entry */
+    child_entry->flush_dep_parent = parent_entry;
+
+
+    /* Post-conditions, for successful operation */
+    HDassert(parent_entry->is_pinned);
+    HDassert(parent_entry->flush_dep_height > 0);
+    HDassert(parent_entry->flush_dep_height < H5C__NUM_FLUSH_DEP_HEIGHTS);
+    HDassert(prev_flush_dep_height <= parent_entry->flush_dep_height);
+    HDassert(parent_entry->child_flush_dep_height_rc[child_entry->flush_dep_height] > 0);
+    HDassert(NULL != child_entry->flush_dep_parent);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_create_flush_dependency() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5C_destroy_flush_dependency()
+ *
+ * Purpose:	Terminates a parent<-> child entry flush dependency.  The
+ *              parent entry must be pinned and have a positive flush
+ *              dependency height (which could go to zero as a result of
+ *              this operation).
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              3/05/09
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_destroy_flush_dependency(H5C_t * cache_ptr, void *parent_thing,
+    void * child_thing)
+{
+    H5C_cache_entry_t *	parent_entry = (H5C_cache_entry_t *)parent_thing; /* Ptr to parent entry */
+    H5C_cache_entry_t *	child_entry = (H5C_cache_entry_t *)child_thing; /* Ptr to child entry */
+#ifndef NDEBUG
+    unsigned prev_flush_dep_height = parent_entry->flush_dep_height; /* Previous flush height for parent entry */
+#endif /* NDEBUG */
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5C_destroy_flush_dependency, FAIL)
+
+    /* Sanity checks */
+    HDassert(cache_ptr);
+    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(parent_entry);
+    HDassert(parent_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(H5F_addr_defined(parent_entry->addr));
+    HDassert(parent_entry->flush_dep_height <= H5C__NUM_FLUSH_DEP_HEIGHTS);
+    HDassert(child_entry);
+    HDassert(child_entry->flush_dep_parent != child_entry);
+    HDassert(child_entry->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+    HDassert(H5F_addr_defined(child_entry->addr));
+
+    /* Usage checks */
+    if(!parent_entry->is_protected)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Parent entry isn't pinned")
+    if(!parent_entry->is_pinned)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Parent entry isn't pinned")
+    if(0 == parent_entry->flush_dep_height)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Parent entry isn't a flush dependency parent")
+    if(NULL == child_entry->flush_dep_parent)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Child entry doesn't have a flush dependency parent")
+    if(0 == parent_entry->child_flush_dep_height_rc[child_entry->flush_dep_height])
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Parent entry flush dependency ref. count has no child entries of this height")
+    if(child_entry->flush_dep_parent != parent_entry)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "Parent entry isn't flush dependency parent for child entry")
+
+    /* Decrement the ref. count for flush dependency height of children for parent entry */
+    parent_entry->child_flush_dep_height_rc[child_entry->flush_dep_height]--;
+
+    /* Check for flush dependency ref. count at this height going to zero and
+     *  parent entry flush dependency height dropping
+     */
+    if(((child_entry->flush_dep_height + 1) == parent_entry->flush_dep_height) &&
+            0 == parent_entry->child_flush_dep_height_rc[child_entry->flush_dep_height]) {
+        int i;             /* Local index variable */
+
+        /* Reverse scan for new flush dependency height of parent */
+#ifndef NDEBUG
+        for(i = (H5C__NUM_FLUSH_DEP_HEIGHTS - 1); i > (int)child_entry->flush_dep_height; i--)
+            HDassert(0 == parent_entry->child_flush_dep_height_rc[i]);
+#endif /* NDEBUG */
+        for(i = (int)child_entry->flush_dep_height; i >= 0; i--)
+            /* Check for child flush dependencies of this height */
+            if(parent_entry->child_flush_dep_height_rc[i] > 0)
+                break;
+
+        /* Sanity check */
+        HDassert((unsigned)(i + 1) < parent_entry->flush_dep_height);
+
+        /* Check if parent entry is a child in another flush dependency relationship */
+        if(NULL != parent_entry->flush_dep_parent) {
+            /* Change flush dependency ref. counts of parent's parent */
+            H5C_adjust_flush_dependency_rc(parent_entry->flush_dep_parent, parent_entry->flush_dep_height, (unsigned)(i + 1));
+        } /* end if */
+
+        /* Increase flush dependency height of parent entry */
+        parent_entry->flush_dep_height = (unsigned)(i + 1);
+
+        /* Check for height of parent dropping to zero (i.e. no longer a
+         *  parent of _any_ child flush dependencies).
+         */
+        if(0 == parent_entry->flush_dep_height) {
+            /* Unpin parent entry */
+            parent_entry->is_pinned = FALSE;
+            H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, parent_entry)
+        } /* end if */
+    } /* end if */
+
+    /* Reset parent of child entry */
+    child_entry->flush_dep_parent = NULL;
+
+    /* Post-conditions, for successful operation */
+    HDassert(prev_flush_dep_height >= parent_entry->flush_dep_height);
+    HDassert(NULL == child_entry->flush_dep_parent);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_destroy_flush_dependency() */
 
 
 /*************************************************************************/
@@ -9976,9 +10289,7 @@ H5C_flush_invalidate_cache(H5F_t *  f,
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                             "next_entry_ptr == NULL 1 ?!?!");
             }
-#ifndef NDEBUG
 	    HDassert( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
-#endif /* NDEBUG */
             HDassert( next_entry_ptr->is_dirty );
             HDassert( next_entry_ptr->in_slist );
 
@@ -10074,10 +10385,7 @@ H5C_flush_invalidate_cache(H5F_t *  f,
                     HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                                 "next_entry_ptr == NULL 2 ?!?!");
                 }
-#ifndef NDEBUG
-		HDassert( next_entry_ptr->magic ==
-                          H5C__H5C_CACHE_ENTRY_T_MAGIC );
-#endif /* NDEBUG */
+		HDassert( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC );
                 HDassert( next_entry_ptr->is_dirty );
                 HDassert( next_entry_ptr->in_slist );
 
@@ -10217,11 +10525,8 @@ H5C_flush_invalidate_cache(H5F_t *  f,
                 entry_ptr = next_entry_ptr;
 
                 next_entry_ptr = entry_ptr->ht_next;
-#ifndef NDEBUG
 		HDassert ( ( next_entry_ptr == NULL ) ||
-                           ( next_entry_ptr->magic ==
-                             H5C__H5C_CACHE_ENTRY_T_MAGIC ) );
-#endif /* NDEBUG */
+                           ( next_entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC ) );
                 if ( entry_ptr->is_protected ) {
 
                     /* we have major problems -- but lets flush and destroy
@@ -11023,8 +11328,9 @@ H5C_load_entry(H5F_t *             f,
 #endif /* NDEBUG */
 {
     void *		thing = NULL;
-    void *		ret_value = NULL;
     H5C_cache_entry_t *	entry_ptr = NULL;
+    unsigned            u;                      /* Local index variable */
+    void *		ret_value = NULL;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5C_load_entry)
 
@@ -11090,6 +11396,12 @@ H5C_load_entry(H5F_t *             f,
     }
 
     HDassert( entry_ptr->size < H5C_MAX_ENTRY_SIZE );
+
+    /* Initialize flush dependency height fields */
+    entry_ptr->flush_dep_parent = NULL;
+    for(u = 0; u < H5C__NUM_FLUSH_DEP_HEIGHTS; u++)
+        entry_ptr->child_flush_dep_height_rc[u] = 0;
+    entry_ptr->flush_dep_height = 0;
 
     entry_ptr->ht_next = NULL;
     entry_ptr->ht_prev = NULL;

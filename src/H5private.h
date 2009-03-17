@@ -1898,6 +1898,11 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 } /*end scope from beginning of FUNC_ENTER*/
 
 
+/* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
+/* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */
+#define H5_STRINGIZE(x) #x
+#define H5_TOSTRING(x) H5_STRINGIZE(x)
+
 /* Macro for "glueing" together items, for re-scanning macros */
 #define H5_GLUE(x,y)       x##y
 #define H5_GLUE3(x,y,z)    x##y##z
