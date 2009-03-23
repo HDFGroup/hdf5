@@ -896,6 +896,24 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *loc)
 	 */
 	if(H5O_open(loc->oloc) < 0)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open root group")
+
+#ifndef H5_STRICT_FORMAT_CHECKS
+        /* If symbol table information is cached, check if we should replace the
+         * symbol table message with the cached symbol table information */
+        if((H5F_INTENT(f) & H5F_ACC_RDWR) && f->shared->root_ent
+                && (f->shared->root_ent->type == H5G_CACHED_STAB)) {
+            H5O_stab_t      cached_stab;
+
+            /* Retrieve the cached symbol table information */
+            cached_stab.btree_addr = f->shared->root_ent->cache.stab.btree_addr;
+            cached_stab.heap_addr = f->shared->root_ent->cache.stab.heap_addr;
+
+            /* Check if the symbol table message is valid, and replace with the
+             * cached symbol table if necessary */
+            if(H5G_stab_valid(loc->oloc, dxpl_id, &cached_stab) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to verify symbol table")
+        } /* end if */
+#endif /* H5_STRICT_FORMAT_CHECKS */
     } /* end else */
 
     /* Create the path names for the root group's entry */

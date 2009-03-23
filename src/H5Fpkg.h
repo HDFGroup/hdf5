@@ -158,6 +158,7 @@ typedef struct H5F_file_t {
     int	ncwfs;			/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
     struct H5G_t *root_grp;	/* Open root group			*/
+    H5G_entry_t *root_ent;      /* Root group symbol table entry */
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5RC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
 
@@ -193,7 +194,7 @@ struct H5F_t {
     H5FO_t              *obj_count;     /* # of time each object is opened through top file structure */
     hid_t               file_id;        /* ID of this file              */
     hbool_t             closing;        /* File is in the process of being closed */
-    struct H5F_t	    *parent;        /* Parent file that this file is mounted to */
+    struct H5F_t        *parent;        /* Parent file that this file is mounted to */
     unsigned            nmounts;        /* Number of children mounted to this file */
 };
 

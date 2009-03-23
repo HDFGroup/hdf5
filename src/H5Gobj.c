@@ -237,31 +237,49 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_obj_ent_decode(H5F_t *f, const uint8_t **pp, H5O_loc_t *oloc)
+H5G_obj_ent_decode(H5F_t *f, const uint8_t **pp, H5O_loc_t *oloc, H5G_entry_t **entp)
 {
     const uint8_t	*p_ret = *pp;
+    herr_t          ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOFUNC(H5G_obj_ent_decode)
+    FUNC_ENTER_NOAPI(H5G_obj_ent_decode, FAIL)
 
     /* check arguments */
     HDassert(f);
     HDassert(pp);
     HDassert(oloc);
 
-    /* Set file pointer for root object location */
-    oloc->file = f;
-    oloc->holding_file = FALSE;
+    if(entp) {
+        /* If entp is not NULL we allocate space for the symbol table entry and 
+         * decode the entire entry. */
+        if(!(*entp))    /* Only allocate space if *entp is NULL */
+            if(NULL == (*entp = (H5G_entry_t *) H5MM_calloc(sizeof(H5G_entry_t))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate space for symbol table entry")
+        if(H5G_ent_decode_vec(f, pp, *entp, 1) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTDECODE, FAIL, "can't decode symbol table entry")
 
-    /* decode header */
-    *pp += H5F_SIZEOF_SIZE(f);          /* Skip over local heap address */
-    H5F_addr_decode(f, pp, &(oloc->addr));
-    *pp += 4;                           /* Skip over "cache type" */
-    *pp += 4;                           /* Reserved */
+        /* Set oloc to the correct values */
+        oloc->file = (*entp)->file;
+        oloc->addr = (*entp)->header;
+    } else {   
+        /* Set file pointer for root object location */
+        oloc->file = f;
+
+        /* decode header */
+        *pp += H5F_SIZEOF_SIZE(f);          /* Skip over local heap address */
+        H5F_addr_decode(f, pp, &(oloc->addr));
+        *pp += 4;                           /* Skip over "cache type" */
+        *pp += 4;                           /* Reserved */
+    }
+
+    /* Common oloc settings */
+    oloc->holding_file = FALSE;
 
     /* Set decode pointer */
     *pp = p_ret + H5G_SIZEOF_ENTRY(f);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_obj_ent_decode() */
 
 
