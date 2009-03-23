@@ -95,6 +95,12 @@ New Features
     - Table: In version 3.0 of Table, the writing of the "NROWS" attribute (used to store 
             number of records)was deprecated. PVN - 2008/11/24
 
+    Fortran High-Level APIs:
+    ------
+     - Lite: The h5ltget_dataset_info_f function (gets information about a dataset) 
+           was not correctly returning the dimension array (PVN - 2009/3/23)
+
+
 
     F90 API
     ------
