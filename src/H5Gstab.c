@@ -982,6 +982,81 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_stab_lookup_by_idx() */
 
+#ifndef H5_STRICT_FORMAT_CHECKS
+
+/*-------------------------------------------------------------------------
+ * Function:	H5G_stab_valid
+ *
+ * Purpose:	Verify that a group's symbol table message is valid.  If
+ *              provided, the addresses in alt_stab will be tried if the
+ *              addresses in the group's stab message are invalid, and
+ *              the stab message will be updated if necessary.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Neil Fortner
+ *		nfortne2@hdfgroup.org
+ *		Mar 17, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5G_stab_valid(H5O_loc_t *grp_oloc, hid_t dxpl_id, H5O_stab_t *alt_stab)
+{
+    H5O_stab_t  stab;                   /* Current symbol table */
+    H5HL_t      *heap = NULL;           /* Pointer to local heap */
+    hbool_t     changed = FALSE;        /* Whether stab has been modified */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5G_stab_valid, FAIL)
+
+    /* Read the symbol table message */
+    H5O_msg_read(grp_oloc, H5O_STAB_ID, &stab, dxpl_id);
+
+    /* Check if the symbol table message's b-tree address is valid */
+    if(H5B_valid(grp_oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr) < 0) {
+        /* Address is invalid, try the b-tree address in the alternate symbol
+         * table message */
+        if(!alt_stab || H5B_valid(grp_oloc->file, dxpl_id, H5B_SNODE, alt_stab->btree_addr) < 0)
+            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "unable to locate b-tree")
+        else {
+            /* The alternate symbol table's b-tree address is valid.  Adjust the
+             * symbol table message in the group. */
+            stab.btree_addr = alt_stab->btree_addr;
+            changed = TRUE;
+        } /* end else */
+    } /* end if */
+
+    /* Check if the symbol table message's heap address is valid */
+    if(NULL == (heap = H5HL_protect(grp_oloc->file, dxpl_id, stab.heap_addr, H5AC_READ))) {
+        /* Address is invalid, try the heap address in the alternate symbol
+         * table message */
+        if(!alt_stab || NULL == (heap = H5HL_protect(grp_oloc->file, dxpl_id, alt_stab->heap_addr, H5AC_READ)))
+            HGOTO_ERROR(H5E_HEAP, H5E_NOTFOUND, FAIL, "unable to locate heap")
+        else {
+            /* The alternate symbol table's heap address is valid.  Adjust the
+             * symbol table message in the group. */
+            stab.heap_addr = alt_stab->heap_addr;
+            changed = TRUE;
+        } /* end else */
+    } /* end if */
+
+    /* Update the symbol table message and clear errors if necessary */
+    if(changed) {
+        H5E_clear_stack(NULL);
+        if(H5O_msg_write(grp_oloc, H5O_STAB_ID, 0, H5O_UPDATE_TIME | H5O_UPDATE_FORCE, &stab, dxpl_id) < 0)
+            HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to correct symbol table message")
+    } /* end if */
+
+done:
+    /* Release resources */
+    if(heap && H5HL_unprotect(grp_oloc->file, dxpl_id, heap, stab.heap_addr) < 0)
+        HDONE_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to unprotect symbol table heap")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5G_stab_valid */
+#endif /* H5_STRICT_FORMAT_CHECKS */
+
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /*-------------------------------------------------------------------------

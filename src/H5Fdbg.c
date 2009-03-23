@@ -123,21 +123,26 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
 	      "Root group symbol table entry:",
 	      f->shared->root_grp ? "" : "(none)");
     if(f->shared->root_grp) {
-        H5O_loc_t *root_oloc;   /* Root object location */
-        H5G_entry_t root_ent;   /* Constructed root symbol table entry */
+        if(f->shared->root_ent) /* Use real root group symbol table entry */
+            H5G_ent_debug(f, f->shared->root_ent, stream, indent + 3,
+                MAX(0, fwidth - 3), NULL);
+        else {
+            H5O_loc_t *root_oloc;   /* Root object location */
+            H5G_entry_t root_ent;   /* Constructed root symbol table entry */
 
-        /* Reset the root group entry */
-        H5G_ent_reset(&root_ent);
+            /* Reset the root group entry */
+            H5G_ent_reset(&root_ent);
 
-        /* Build up a simulated root group symbol table entry */
-        root_oloc = H5G_oloc(f->shared->root_grp);
-        HDassert(root_oloc);
-        root_ent.type = H5G_NOTHING_CACHED;
-        root_ent.header = root_oloc->addr;
-        root_ent.file = f;
+            /* Build up a simulated root group symbol table entry */
+            root_oloc = H5G_oloc(f->shared->root_grp);
+            HDassert(root_oloc);
+            root_ent.type = H5G_NOTHING_CACHED;
+            root_ent.header = root_oloc->addr;
+            root_ent.file = f;
 
-        /* Display root group symbol table entry info */
-	H5G_ent_debug(f, &root_ent, stream, indent + 3, MAX(0, fwidth - 3), NULL);
+            /* Display root group symbol table entry info */
+            H5G_ent_debug(f, &root_ent, stream, indent + 3, MAX(0, fwidth - 3), NULL);
+        }
     } /* end if */
 
 done:

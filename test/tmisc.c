@@ -2273,7 +2273,7 @@ insert_user_block(const char *old_name, const char *new_name,const char *str,siz
     VERIFY(ret, 0, "HDfclose");
 
     /* Close the new file */
-    ret=fclose(new_fp);
+    ret=HDfclose(new_fp);
     VERIFY(ret, 0, "HDfclose");
 
     /* Free the copy buffer */

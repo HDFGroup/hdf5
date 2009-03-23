@@ -2057,3 +2057,47 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_get_info() */
 
+#ifndef H5_STRICT_FORMAT_CHECKS
+
+/*-------------------------------------------------------------------------
+ * Function:    H5B_valid
+ *
+ * Purpose:     Attempt to load a b-tree node.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Neil Fortner
+ *              March 17, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5B_valid(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr)
+{
+    H5B_t               *bt;                        /* The btree */
+    htri_t		ret_value = SUCCEED;        /* Return value */
+
+    FUNC_ENTER_NOAPI(H5B_valid, FAIL)
+
+    /*
+     * Check arguments.
+     */
+    HDassert(f);
+    HDassert(type);
+
+    if(!H5F_addr_defined(addr))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "address is undefined")
+
+    /* Protect the node */
+    if(NULL == (bt = (H5B_t *)H5AC_protect(f, dxpl_id, H5AC_BT, addr, type, NULL, H5AC_READ)))
+	HGOTO_ERROR(H5E_BTREE, H5E_CANTLOAD, FAIL, "unable to load B-tree node")
+
+    /* Release the node */
+    if(H5AC_unprotect(f, dxpl_id, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
+        HGOTO_ERROR(H5E_BTREE, H5E_PROTECT, FAIL, "unable to release B-tree node")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5B_valid() */
+#endif /* H5_STRICT_FORMAT_CHECKS */
+

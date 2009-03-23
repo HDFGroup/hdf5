@@ -123,6 +123,11 @@ Bug Fixes since HDF5-1.8.2
 
     Library
     -------
+    - Fixed a rare problem that could occur with files using the old (pre 1.4)
+      array datatype. NAF - 2009/03/23
+    - Modified library to be able to open files with corrupt root group symbol
+      table messages, and correct these errors if they are found.  Such files
+      can only be successfully opened with write access. NAF - 2009/03/23 - 1189
     - Removed the long_long #define and replaced all instances with 
       "long long". This caused problems with third party products. All 
       currently supported compliers support the type. (ADB - 2009/03/05)
