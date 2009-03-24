@@ -1597,6 +1597,9 @@
 ./hl/src/H5IM.c
 ./hl/src/H5IMprivate.h
 ./hl/src/H5IMpublic.h
+./hl/src/H5LR.c
+./hl/src/H5LRprivate.h
+./hl/src/H5LRpublic.h
 ./hl/src/H5LT.c
 ./hl/src/H5LTanalyze.l
 ./hl/src/H5LTanalyze.c
@@ -1632,6 +1635,7 @@
 ./hl/test/test_lite.c
 ./hl/test/test_packet.c
 ./hl/test/test_table.c
+./hl/test/test_regref_hyper.c
 ./hl/test/test_table_le.hdf5
 ./hl/test/test_table_be.hdf5
 ./hl/test/test_table_cray.hdf5
