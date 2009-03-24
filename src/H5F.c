@@ -891,6 +891,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
         for(u = 0; u < NELMTS(f->shared->fs_addr); u++)
             f->shared->fs_addr[u] = HADDR_UNDEF;
 	f->shared->driver_addr = HADDR_UNDEF;
+	f->shared->write_driver = TRUE;
 	f->shared->accum.loc = HADDR_UNDEF;
         f->shared->lf = lf;
 

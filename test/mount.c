@@ -502,6 +502,7 @@ test_assoc(hid_t fapl)
      * of file2.
      */
     if(H5Oget_info_by_name(file1, "/mnt1", &oi2, H5P_DEFAULT) < 0) FAIL_STACK_ERROR
+
     if(oi1.fileno != oi2.fileno || H5F_addr_ne(oi1.addr, oi2.addr)) {
 	H5_FAILED();
 	puts("    Association failed.");

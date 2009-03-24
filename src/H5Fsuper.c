@@ -466,6 +466,16 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
             if(H5FD_sb_decode(lf, drv_name, p) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to decode driver information")
         } /* end if */
+        else
+            /* This flag is false only if a file was created with v1.6 library or 
+             * before and no driver info was saved in the superblock.  When the file is
+             * closed and superblock is written to the file, v1.8 library or after 
+             * doesn't write the driver info in the superblock.  Otherwise, the newly 
+             * added driver block will overwrite the (meta)data right after the 
+             * superblock. SLU - 2009/3/24
+             */  
+            shared->write_driver = FALSE;
+
     } /* end if */
     else {
         haddr_t root_addr;              /* Address of root group */
@@ -934,7 +944,7 @@ H5F_super_write(H5F_t *f, hid_t dxpl_id)
 
         /* Encode the driver information block. */
         H5_ASSIGN_OVERFLOW(driver_size, H5FD_sb_size(f->shared->lf), hsize_t, size_t);
-        if(driver_size > 0) {
+        if(driver_size > 0 && f->shared->write_driver) {
             char driver_name[9];    /* Name of driver, for driver info block */
             uint8_t *dbuf = p;      /* Pointer to beginning of driver info */
 
