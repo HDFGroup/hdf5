@@ -626,8 +626,15 @@ H5FD_family_sb_encode(H5FD_t *_file, char *name/*out*/, unsigned char *buf/*out*
     HDstrncpy(name, "NCSAfami", (size_t)8);
     name[8] = '\0';
 
-    /* Store member file size */
-    UINT64ENCODE(buf, (uint64_t)file->memb_size);
+    /* Store member file size.  Use the member file size from the property here.
+     * This is to guarantee backward compatibility.  If a file is created with 
+     * v1.6 library and the driver info isn't saved in the superblock.  We open
+     * it with v1.8, the FILE->MEMB_SIZE will be the actual size of the first 
+     * member file (see H5FD_family_open).  So it isn't safe to use FILE->MEMB_SIZE.
+     * If the file is created with v1.8, the correctness of FILE->PMEM_SIZE is
+     * checked in H5FD_family_sb_decode. SLU - 2009/3/21
+     */
+    UINT64ENCODE(buf, (uint64_t)file->pmem_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_family_sb_encode() */
@@ -668,9 +675,9 @@ H5FD_family_sb_decode(H5FD_t *_file, const char UNUSED *name, const unsigned cha
     /* For h5repart only. Private property of new member size is used to signal
      * h5repart is being used to change member file size.  h5repart will open
      * files for read and write.  When the files are closed, metadata will be
-     * flushed to the files and updated this new size */
+     * flushed to the files and updated to this new size */
     if(file->mem_newsize) {
-        file->memb_size = file->mem_newsize;
+        file->memb_size = file->pmem_size = file->mem_newsize;
         HGOTO_DONE(ret_value)
     } /* end if */
 
@@ -682,7 +689,7 @@ H5FD_family_sb_decode(H5FD_t *_file, const char UNUSED *name, const unsigned cha
     if(msize != file->pmem_size) {
         char                err_msg[128];
 
-        sprintf(err_msg, "family member size should be %lu, is %lu", (unsigned long)msize, (unsigned long)file->pmem_size);
+        sprintf(err_msg, "Family member size should be %lu.  But the size from file access property is %lu", (unsigned long)msize, (unsigned long)file->pmem_size);
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, err_msg)
     } /* end if */
 
