@@ -277,6 +277,8 @@ H5_DLL herr_t H5AC_get_entry_status(H5F_t * f, haddr_t addr,
 H5_DLL herr_t H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
                        haddr_t addr, void *thing, unsigned int flags);
 H5_DLL herr_t H5AC_pin_protected_entry(H5F_t * f, void *  thing);
+H5_DLL herr_t H5AC_create_flush_dependency(H5F_t *f, void *parent_thing,
+    void *child_thing);
 H5_DLL void * H5AC_protect(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type,
                            haddr_t addr, const void *udata1, void *udata2,
                            H5AC_protect_t rw);
@@ -285,6 +287,8 @@ H5_DLL herr_t H5AC_resize_pinned_entry(H5F_t * f,
                                        size_t  new_size);
 H5_DLL herr_t H5AC_unpin_entry(H5F_t * f,
 		               void *  thing);
+H5_DLL herr_t H5AC_destroy_flush_dependency(H5F_t *f, void *parent_thing,
+    void *child_thing);
 H5_DLL herr_t H5AC_unprotect(H5F_t *f, hid_t dxpl_id,
                              const H5AC_class_t *type, haddr_t addr,
 			     void *thing, unsigned flags);
