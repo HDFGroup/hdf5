@@ -125,6 +125,7 @@ static unsigned check_auto_cache_resize_aux_fcns(void);
 static unsigned check_metadata_blizzard_absence(hbool_t fill_via_insertion);
 static unsigned check_flush_deps(void);
 static unsigned check_flush_deps_err(void);
+static unsigned check_flush_deps_order(void);
 
 
 /**************************************************************************/
@@ -5458,17 +5459,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -5486,17 +5487,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -5566,17 +5567,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -5594,17 +5595,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:		idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0 } },
+	    /*	op_code:		type:		idx:	flag:	size: order_ptr*/
+	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,		0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -5671,17 +5672,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
+	    /*	op_code:		type:			idx:	flag:	size: order_ptr:*/
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -5750,17 +5751,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
+	    /*	op_code:		type:			idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -5830,17 +5831,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
+	    /*	op_code:		type:			idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -5942,17 +5943,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
+	    /*	op_code:		type:			idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -6056,17 +6057,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 2,
 	    /* flush_ops          = */
-	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
+	    /*	op_code:		type:			idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -6168,17 +6169,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 2,
 	    /* flush_ops          = */
-	    /*	op_code:		type:			idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0 } },
+	    /*	op_code:		type:			idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4,    NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,			0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -6283,17 +6284,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 2,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	0,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__DIRTY,	0,	2,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -6381,17 +6382,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 2,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	0,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__DIRTY,	0,	2,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -6478,17 +6479,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 4,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -6575,17 +6576,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 4,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -6672,17 +6673,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 6,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -6801,17 +6802,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 6,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -6942,17 +6943,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 6,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -6970,17 +6971,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 6,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ FALSE,
@@ -6998,17 +6999,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7026,17 +7027,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ FALSE,
@@ -7157,17 +7158,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 6,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7185,17 +7186,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 6,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7213,17 +7214,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7241,17 +7242,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ FALSE,
@@ -7269,17 +7270,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7297,17 +7298,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7427,17 +7428,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 6,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7455,17 +7456,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 6,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	10,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	12,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7483,17 +7484,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7511,17 +7512,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7539,17 +7540,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7567,17 +7568,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	0,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7693,17 +7694,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7721,17 +7722,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	100,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7749,17 +7750,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	100,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ FALSE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7827,17 +7828,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7855,17 +7856,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	100,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -7883,17 +7884,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 1,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	PICO_ENTRY_TYPE,	100,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ FALSE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8031,17 +8032,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8059,17 +8060,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8087,17 +8088,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ FALSE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8115,17 +8116,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 4,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ FALSE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8143,17 +8144,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2200,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2300,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2100,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2200,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2300,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8171,17 +8172,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	350,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	350,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8199,17 +8200,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	450,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	450,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8227,17 +8228,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	650,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	650,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ FALSE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8255,17 +8256,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	750,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	750,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8283,17 +8284,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 4,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	350,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	450,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	650,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	750,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	350,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	450,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	650,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	750,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8468,17 +8469,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8496,17 +8497,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8524,17 +8525,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ FALSE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8552,17 +8553,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 4,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ FALSE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8580,17 +8581,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2200,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2300,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2100,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	2200,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	2300,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8608,17 +8609,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	350,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	350,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8636,17 +8637,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	450,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	450,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8664,17 +8665,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	650,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	650,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ FALSE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8692,17 +8693,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {1000, 2000, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	750,	FALSE,	VARIABLE_ENTRY_SIZE / 4 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	1000,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	2000,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	750,	FALSE,	VARIABLE_ENTRY_SIZE / 4, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8720,17 +8721,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 4,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	350,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	450,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	650,	FALSE,	0 },
-	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	750,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	350,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	450,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	650,	FALSE,	0, NULL },
+	      { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	750,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8830,17 +8831,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8858,17 +8859,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8886,17 +8887,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {400, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	400,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	400,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8914,17 +8915,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -8942,17 +8943,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -9023,17 +9024,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -9051,17 +9052,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	VARIABLE_ENTRY_SIZE, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	200,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -9079,17 +9080,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {400, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	400,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	400,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	300,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -9107,17 +9108,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {0, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 0,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -9135,17 +9136,17 @@ check_flush_cache__flush_ops(H5C_t * cache_ptr)
 	    /* pin_idx            = */ {100, 0, 0, 0, 0, 0, 0, 0},
 	    /* num_flush_ops      = */ 3,
 	    /* flush_ops          = */
-	    /*	op_code:		type:	idx:	flag:	size: */
-	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0 },
-	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	VARIABLE_ENTRY_SIZE / 2 },
-	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 },
-	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0 } },
+	    /*	op_code:		type:	idx:	flag:	size: order_ptr: */
+	    { { FLUSH_OP__DIRTY,	VARIABLE_ENTRY_TYPE,	100,	FALSE,	0, NULL },
+	      { FLUSH_OP__RESIZE,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	VARIABLE_ENTRY_SIZE / 2, NULL },
+	      { FLUSH_OP__RENAME,	VARIABLE_ENTRY_TYPE,	500,	FALSE,	0, NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL },
+	      { FLUSH_OP__NO_OP,	0,	0,	FALSE,	0,    NULL } },
 	    /* expected_loaded    = */ TRUE,
 	    /* expected_cleared   = */ FALSE,
 	    /* expected_flushed   = */ TRUE,
@@ -9419,7 +9420,8 @@ check_flush_cache__flush_op_test(H5C_t * cache_ptr,
 			 spec[i].flush_ops[j].type,
 			 spec[i].flush_ops[j].idx,
 			 spec[i].flush_ops[j].flag,
-			 spec[i].flush_ops[j].size);
+			 spec[i].flush_ops[j].size,
+                         spec[i].flush_ops[j].order_ptr);
 	}
 
         i++;
@@ -9793,61 +9795,61 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
        * array only processes as much of it as it is told to, we don't have to
        * worry about maintaining the status of entries that we haven't used yet.
        */
-      /* entry			entry				in	at main                                                        flush dep flush dep    child flush    flush       */
-      /* type:			index:	size:			cache:	addr:	dirty:	prot:	pinned:	loaded:	clrd:	flshd:	dest:  par type: par idx: dep ref.count: dep height: */
-      { VARIABLE_ENTRY_TYPE,	0,	VARIABLE_ENTRY_SIZE/2,	TRUE,	TRUE,	TRUE,	FALSE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { VARIABLE_ENTRY_TYPE,	1,	VARIABLE_ENTRY_SIZE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { VARIABLE_ENTRY_TYPE,	2,	VARIABLE_ENTRY_SIZE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { VARIABLE_ENTRY_TYPE,	3,	VARIABLE_ENTRY_SIZE/2,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { VARIABLE_ENTRY_TYPE,	4,	VARIABLE_ENTRY_SIZE/2,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { VARIABLE_ENTRY_TYPE,	5,	VARIABLE_ENTRY_SIZE/2,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { VARIABLE_ENTRY_TYPE,	6,	VARIABLE_ENTRY_SIZE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { VARIABLE_ENTRY_TYPE,	7,	VARIABLE_ENTRY_SIZE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	0,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	1,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	2,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	3,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	4,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	5,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	6,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	7,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	8,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	9,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	10,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	11,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	12,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	13,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	14,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	15,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	16,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	17,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	18,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	19,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	20,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	21,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	22,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	23,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	24,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	25,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	26,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	27,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	28,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	29,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { MONSTER_ENTRY_TYPE,	30,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	0,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	1,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	2,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	3,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	4,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	5,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	6,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	7,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	8,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	9,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	10,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	11,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	12,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  },
-      { LARGE_ENTRY_TYPE,	13,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0  }
+      /* entry			entry				in	at main                                                        flush dep flush dep child flush   flush       flush */
+      /* type:			index:	size:			cache:	addr:	dirty:	prot:	pinned:	loaded:	clrd:	flshd:	dest:  par type: par idx: dep ref.count: dep height: order: */
+      { VARIABLE_ENTRY_TYPE,	0,	VARIABLE_ENTRY_SIZE/2,	TRUE,	TRUE,	TRUE,	FALSE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { VARIABLE_ENTRY_TYPE,	1,	VARIABLE_ENTRY_SIZE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { VARIABLE_ENTRY_TYPE,	2,	VARIABLE_ENTRY_SIZE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { VARIABLE_ENTRY_TYPE,	3,	VARIABLE_ENTRY_SIZE/2,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { VARIABLE_ENTRY_TYPE,	4,	VARIABLE_ENTRY_SIZE/2,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { VARIABLE_ENTRY_TYPE,	5,	VARIABLE_ENTRY_SIZE/2,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { VARIABLE_ENTRY_TYPE,	6,	VARIABLE_ENTRY_SIZE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { VARIABLE_ENTRY_TYPE,	7,	VARIABLE_ENTRY_SIZE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	0,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	1,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	2,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	3,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	4,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	5,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	6,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	7,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	8,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	9,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	10,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	11,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	12,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	13,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	14,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	15,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	16,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	17,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	18,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	19,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	20,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	21,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	22,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	23,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	24,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	25,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	26,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	27,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	28,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	29,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { MONSTER_ENTRY_TYPE,	30,	MONSTER_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	0,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	1,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	2,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	3,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	4,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	5,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	6,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	7,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	8,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	9,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	10,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	11,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	12,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { LARGE_ENTRY_TYPE,	13,	LARGE_ENTRY_SIZE,	TRUE,	TRUE,	TRUE,	FALSE,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 }
     };
 
     if ( pass ) {
@@ -9980,25 +9982,25 @@ check_flush_cache__flush_op_eviction_test(H5C_t * cache_ptr)
 	 *          (VET, 7) dirties (VET, 6)
 	 */
         add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__DIRTY,
-                     VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
+                     VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0, NULL);
         add_flush_op(VARIABLE_ENTRY_TYPE, 1, FLUSH_OP__RESIZE,
                      VARIABLE_ENTRY_TYPE, 0, FALSE,
-		     3 * VARIABLE_ENTRY_SIZE / 4);
+		     3 * VARIABLE_ENTRY_SIZE / 4, NULL);
 
         add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__DIRTY,
-                     VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
+                     VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0, NULL);
         add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__RESIZE,
-                     VARIABLE_ENTRY_TYPE, 0, FALSE, VARIABLE_ENTRY_SIZE);
+                     VARIABLE_ENTRY_TYPE, 0, FALSE, VARIABLE_ENTRY_SIZE, NULL);
         add_flush_op(VARIABLE_ENTRY_TYPE, 2, FLUSH_OP__RENAME,
-                     VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
+                     VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0, NULL);
 
         add_flush_op(VARIABLE_ENTRY_TYPE, 3, FLUSH_OP__DIRTY,
-                     VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0);
+                     VARIABLE_ENTRY_TYPE, 0, FALSE, (size_t)0, NULL);
         add_flush_op(VARIABLE_ENTRY_TYPE, 3, FLUSH_OP__RESIZE,
-                     VARIABLE_ENTRY_TYPE, 3, FALSE, VARIABLE_ENTRY_SIZE);
+                     VARIABLE_ENTRY_TYPE, 3, FALSE, VARIABLE_ENTRY_SIZE, NULL);
 
         add_flush_op(VARIABLE_ENTRY_TYPE, 7, FLUSH_OP__DIRTY,
-                     VARIABLE_ENTRY_TYPE, 6, FALSE, (size_t)0);
+                     VARIABLE_ENTRY_TYPE, 6, FALSE, (size_t)0, NULL);
     }
 
     if ( pass ) {
@@ -28885,158 +28887,158 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion)
      */
     struct expected_entry_status expected[150] =
     {
-      /* entry		entry			in	at main                                                        flush dep flush dep    child flush    flush       */
-      /* type:		index:	size:		cache:	addr:	dirty:	prot:	pinned:	loaded:	clrd:	flshd:	dest:  par type: par idx: dep ref.count: dep height: */
-      { entry_type,	0,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	1,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	2,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	3,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	4,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	5,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	6,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	7,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	8,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	9,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	10,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	11,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	12,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	13,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	14,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	15,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	16,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	17,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	18,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	19,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	20,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	21,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	22,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	23,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	24,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	25,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	26,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	27,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	28,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	29,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	30,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	31,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	32,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	33,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	34,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	35,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	36,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	37,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	38,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	39,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	40,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	41,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	42,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	43,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	44,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	45,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	46,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	47,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	48,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	49,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	50,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	51,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	52,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	53,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	54,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	55,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	56,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	57,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	58,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	59,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	60,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	61,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	62,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	63,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	64,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	65,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	66,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	67,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	68,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	69,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	70,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	71,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	72,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	73,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	74,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	75,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	76,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	77,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	78,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	79,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	80,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	81,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	82,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	83,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	84,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	85,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	86,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	87,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	88,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	89,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	90,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	91,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	92,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	93,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	94,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	95,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	96,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	97,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	98,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	99,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	100,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	101,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	102,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	103,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	104,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	105,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	106,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	107,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	108,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	109,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	110,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	111,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	112,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	113,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	114,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	115,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	116,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	117,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	118,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	119,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	120,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	121,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	122,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	123,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	124,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	125,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	126,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	127,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	128,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	129,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	130,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	131,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	132,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	133,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	134,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	135,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	136,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	137,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	138,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	139,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	140,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	141,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	142,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	143,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	144,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	145,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	146,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	147,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	148,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	149,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 }
+      /* entry		entry			in	at main                                                        flush dep flush dep child flush   flush       flush */
+      /* type:		index:	size:		cache:	addr:	dirty:	prot:	pinned:	loaded:	clrd:	flshd:	dest:  par type: par idx: dep ref.count: dep height: order: */
+      { entry_type,	0,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	1,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	2,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	3,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	4,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	5,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	6,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	7,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	8,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	9,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	10,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	11,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	12,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	13,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	14,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	15,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	16,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	17,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	18,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	19,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	20,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	21,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	22,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	23,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	24,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	25,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	26,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	27,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	28,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	29,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	30,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	31,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	32,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	33,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	34,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	35,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	36,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	37,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	38,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	39,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	40,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	41,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	42,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	43,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	44,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	45,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	46,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	47,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	48,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	49,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	50,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	51,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	52,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	53,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	54,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	55,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	56,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	57,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	58,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	59,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	60,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	61,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	62,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	63,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	64,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	65,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	66,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	67,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	68,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	69,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	70,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	71,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	72,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	73,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	74,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	75,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	76,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	77,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	78,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	79,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	80,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	81,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	82,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	83,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	84,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	85,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	86,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	87,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	88,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	89,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	90,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	91,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	92,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	93,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	94,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	95,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	96,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	97,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	98,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	99,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	100,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	101,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	102,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	103,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	104,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	105,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	106,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	107,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	108,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	109,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	110,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	111,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	112,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	113,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	114,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	115,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	116,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	117,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	118,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	119,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	120,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	121,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	122,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	123,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	124,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	125,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	126,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	127,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	128,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	129,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	130,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	131,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	132,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	133,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	134,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	135,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	136,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	137,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	138,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	139,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	140,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	141,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	142,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	143,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	144,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	145,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	146,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	147,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	148,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	149,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 }
     };
 
     pass = TRUE;
@@ -29729,13 +29731,13 @@ check_flush_deps(void)
     unsigned u;                         /* Local index variable */
     struct expected_entry_status expected[5] =
     {
-      /* entry			entry		in	at main                                                        flush dep flush dep child flush   flush       */
-      /* type:		index:	size:		cache:	addr:	dirty:	prot:	pinned:	loaded:	clrd:	flshd:	dest:  par type: par idx: dep ref.count: dep height: */
-      { entry_type,	0,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	1,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	2,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	3,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 },
-      { entry_type,	4,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0 }
+      /* entry			entry		in	at main                                                        flush dep flush dep child flush   flush       flush */
+      /* type:		index:	size:		cache:	addr:	dirty:	prot:	pinned:	loaded:	clrd:	flshd:	dest:  par type: par idx: dep ref.count: dep height: order: */
+      { entry_type,	0,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	1,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	2,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	3,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	4,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 }
     };
 
     TESTING("flush dependencies");
@@ -30057,7 +30059,7 @@ check_flush_deps(void)
     }
 
 /* Test Case #3a2 - Single chain of flush dependencies, 4 entries tall
- *      created from the "bottom up" and destroyed from the "bottom up"
+ *      created from the "bottom up" and destroyed from the "top down"
  */
 
     /* Create flush dependency between entries (child) 0->1->2->3 (parent) */
@@ -31626,6 +31628,2035 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	check_flush_deps_order()
+ *
+ * Purpose:	Verify that the order that entries with flush dependencies
+ *              is correct
+ *
+ * Return:	0 on success, non-zero on failure
+ *
+ * Programmer:	Quincey Koziol
+ *               3/17/09
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static unsigned
+check_flush_deps_order(void)
+{
+    H5C_t * cache_ptr = NULL;           /* Metadata cache for this test */
+    int entry_type = PICO_ENTRY_TYPE;   /* Use very small entry size (size of entries doesn't matter) */
+    size_t entry_size = PICO_ENTRY_SIZE; /* 1 byte */
+    unsigned u;                         /* Local index variable */
+    struct expected_entry_status expected[5] =
+    {
+      /* entry			entry		in	at main                                                        flush dep flush dep child flush   flush       flush */
+      /* type:		index:	size:		cache:	addr:	dirty:	prot:	pinned:	loaded:	clrd:	flshd:	dest:  par type: par idx: dep ref.count: dep height: order: */
+      { entry_type,	0,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	1,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	2,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	3,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	4,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 }
+    };
+    unsigned flush_order;       /* Index for tracking flush order */
+
+    TESTING("flush dependencies flush order");
+
+    pass = TRUE;
+
+    /* allocate a cache, build up flush dependency hierarchy and tear it down.
+     * Verify that all performs as expected.
+     */
+
+    reset_entries();
+    cache_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024));
+
+    if ( !pass ) CACHE_ERROR("setup_cache failed")
+
+    /* Insert entries to work with into the cache */
+    for(u = 0; u < 5; u++) {
+        insert_entry(cache_ptr, entry_type, (int32_t)u, TRUE, H5C__NO_FLAGS_SET);
+        if ( !pass ) CACHE_ERROR("insert_entry failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after each insertion 
+         */
+        expected[u].in_cache = TRUE;
+        expected[u].is_dirty = TRUE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)u,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    } /* end for */
+
+/* Test Case #1a - Single flush dependency relationship, increasing addr order */
+
+    /* Create flush dependency between entries 0 (child) & 1 (parent) */
+    {
+        protect_entry(cache_ptr, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[0].flush_dep_par_type = entry_type;
+        expected[0].flush_dep_par_idx = 1;
+        expected[1].is_protected = TRUE;
+        expected[1].is_pinned = TRUE;
+        expected[1].child_flush_dep_height_rc[0] = 1;
+        expected[1].flush_dep_height = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Flush the cache and verify that the entries were flushed in correct order */
+    {
+        herr_t result;                  /* Generic return value */
+
+        add_flush_op(entry_type, 0, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 1, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        1,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Reset index for tracking flush order */
+        flush_order = 0;
+
+        result = H5C_flush_cache(NULL, -1, -1, cache_ptr, H5C__NO_FLAGS_SET);
+        if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].is_dirty = FALSE;
+        expected[0].flushed = TRUE;
+        expected[0].flush_order = 0;
+        expected[1].is_dirty = FALSE;
+        expected[1].flushed = TRUE;
+        expected[1].flush_order = 1;
+        expected[1].is_protected = FALSE;
+        expected[2].is_dirty = FALSE;
+        expected[2].flushed = TRUE;
+        expected[3].is_dirty = FALSE;
+        expected[3].flushed = TRUE;
+        expected[4].is_dirty = FALSE;
+        expected[4].flushed = TRUE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Destroy flush dependency between entries 0 (child) & 1 (parent) */
+    {
+        destroy_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].flush_dep_par_type = -1;
+        expected[0].flush_dep_par_idx = -1;
+        expected[1].is_pinned = FALSE;
+        expected[1].child_flush_dep_height_rc[0] = 0;
+        expected[1].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+/* Test Case #1b - Single flush dependency relationship, decreasing addr order */
+
+    /* Create flush dependency between entries 0 (child) & 1 (parent) */
+    {
+        protect_entry(cache_ptr, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 0, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[0].is_protected = TRUE;
+        expected[0].is_pinned = TRUE;
+        expected[0].child_flush_dep_height_rc[0] = 1;
+        expected[0].flush_dep_height = 1;
+        expected[1].flush_dep_par_type = entry_type;
+        expected[1].flush_dep_par_idx = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Flush the cache and verify that the entries were flushed in correct order */
+    {
+        herr_t result;                  /* Generic return value */
+
+        add_flush_op(entry_type, 0, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 1, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        0,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Mark entries 0 & 1 dirty, so they are flushed */
+        dirty_entry(cache_ptr, entry_type, 0, TRUE);
+        dirty_entry(cache_ptr, entry_type, 1, FALSE);
+        if ( !pass ) CACHE_ERROR("dirty_entry failed")
+
+        /* Reset 'flushed' flag & 'flush_order' value in expected array */
+        expected[0].flushed = FALSE;
+        expected[0].flush_order = -1;
+        expected[1].flushed = FALSE;
+        expected[1].flush_order = -1;
+
+        /* Reset index for tracking flush order */
+        flush_order = 0;
+
+        result = H5C_flush_cache(NULL, -1, -1, cache_ptr, H5C__NO_FLAGS_SET);
+        if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].is_dirty = FALSE;
+        expected[0].flushed = TRUE;
+        expected[0].flush_order = 1;
+        expected[0].is_protected = FALSE;
+        expected[1].is_dirty = FALSE;
+        expected[1].flushed = TRUE;
+        expected[1].flush_order = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Destroy flush dependency between entries 0 (child) & 1 (parent) */
+    {
+        destroy_flush_dependency(cache_ptr, entry_type, 0, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].is_pinned = FALSE;
+        expected[0].child_flush_dep_height_rc[0] = 0;
+        expected[0].flush_dep_height = 0;
+        expected[1].flush_dep_par_type = -1;
+        expected[1].flush_dep_par_idx = -1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+/* Test Case #2a - Multiple children for one parent flush dependency relationship
+ *      increasing addr order
+ */
+
+    /* Create flush dependency between entries 0, 1 (children) & 2 (parent) */
+    {
+        protect_entry(cache_ptr, entry_type, 2);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 2, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        create_flush_dependency(cache_ptr, entry_type, 2, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[0].flush_dep_par_type = entry_type;
+        expected[0].flush_dep_par_idx = 2;
+        expected[1].flush_dep_par_type = entry_type;
+        expected[1].flush_dep_par_idx = 2;
+        expected[2].is_protected = TRUE;
+        expected[2].is_pinned = TRUE;
+        expected[2].child_flush_dep_height_rc[0] = 2;
+        expected[2].flush_dep_height = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Flush the cache and verify that the entries were flushed in correct order */
+    {
+        herr_t result;                  /* Generic return value */
+
+        add_flush_op(entry_type, 0, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 1, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 2, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        2,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Mark entries 0, 1 & 2 dirty, so they are flushed */
+        dirty_entry(cache_ptr, entry_type, 0, FALSE);
+        dirty_entry(cache_ptr, entry_type, 1, FALSE);
+        dirty_entry(cache_ptr, entry_type, 2, TRUE);
+        if ( !pass ) CACHE_ERROR("dirty_entry failed")
+
+        /* Reset 'flushed' flag & 'flush_order' value in expected array */
+        expected[0].flushed = FALSE;
+        expected[0].flush_order = -1;
+        expected[1].flushed = FALSE;
+        expected[1].flush_order = -1;
+        expected[2].flushed = FALSE;
+        expected[2].flush_order = -1;
+
+        /* Reset index for tracking flush order */
+        flush_order = 0;
+
+        result = H5C_flush_cache(NULL, -1, -1, cache_ptr, H5C__NO_FLAGS_SET);
+        if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].is_dirty = FALSE;
+        expected[0].flushed = TRUE;
+        expected[0].flush_order = 0;
+        expected[1].is_dirty = FALSE;
+        expected[1].flushed = TRUE;
+        expected[1].flush_order = 1;
+        expected[2].is_dirty = FALSE;
+        expected[2].flushed = TRUE;
+        expected[2].flush_order = 2;
+        expected[2].is_protected = FALSE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Destroy flush dependency between entries 0, 1 (children) & 2 (parent) */
+    {
+        destroy_flush_dependency(cache_ptr, entry_type, 2, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 2, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].flush_dep_par_type = -1;
+        expected[0].flush_dep_par_idx = -1;
+        expected[1].flush_dep_par_type = -1;
+        expected[1].flush_dep_par_idx = -1;
+        expected[2].is_pinned = FALSE;
+        expected[2].child_flush_dep_height_rc[0] = 0;
+        expected[2].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+/* Test Case #2b - Multiple children for one parent flush dependency relationship
+ *      decreasing addr order
+ */
+
+    /* Create flush dependency between entries 1, 2 (children) & 0 (parent) */
+    {
+        protect_entry(cache_ptr, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 0, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        create_flush_dependency(cache_ptr, entry_type, 0, entry_type, 2);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[0].is_protected = TRUE;
+        expected[0].is_pinned = TRUE;
+        expected[0].child_flush_dep_height_rc[0] = 2;
+        expected[0].flush_dep_height = 1;
+        expected[1].flush_dep_par_type = entry_type;
+        expected[1].flush_dep_par_idx = 0;
+        expected[2].flush_dep_par_type = entry_type;
+        expected[2].flush_dep_par_idx = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Flush the cache and verify that the entries were flushed in correct order */
+    {
+        herr_t result;                  /* Generic return value */
+
+        add_flush_op(entry_type, 0, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 1, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 2, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        0,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Mark entries 0, 1 & 2 dirty, so they are flushed */
+        dirty_entry(cache_ptr, entry_type, 0, TRUE);
+        dirty_entry(cache_ptr, entry_type, 1, FALSE);
+        dirty_entry(cache_ptr, entry_type, 2, FALSE);
+        if ( !pass ) CACHE_ERROR("dirty_entry failed")
+
+        /* Reset 'flushed' flag & 'flush_order' value in expected array */
+        expected[0].flushed = FALSE;
+        expected[0].flush_order = -1;
+        expected[1].flushed = FALSE;
+        expected[1].flush_order = -1;
+        expected[2].flushed = FALSE;
+        expected[2].flush_order = -1;
+
+        /* Reset index for tracking flush order */
+        flush_order = 0;
+
+        result = H5C_flush_cache(NULL, -1, -1, cache_ptr, H5C__NO_FLAGS_SET);
+        if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].is_dirty = FALSE;
+        expected[0].flushed = TRUE;
+        expected[0].flush_order = 2;
+        expected[0].is_protected = FALSE;
+        expected[1].is_dirty = FALSE;
+        expected[1].flushed = TRUE;
+        expected[1].flush_order = 0;
+        expected[2].is_dirty = FALSE;
+        expected[2].flushed = TRUE;
+        expected[2].flush_order = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Destroy flush dependency between entries 1, 2 (children) & 0 (parent) */
+    {
+        destroy_flush_dependency(cache_ptr, entry_type, 0, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 0, entry_type, 2);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].is_pinned = FALSE;
+        expected[0].child_flush_dep_height_rc[0] = 0;
+        expected[0].flush_dep_height = 0;
+        expected[1].flush_dep_par_type = -1;
+        expected[1].flush_dep_par_idx = -1;
+        expected[2].flush_dep_par_type = -1;
+        expected[2].flush_dep_par_idx = -1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+/* Test Case #3a - Single chain of flush dependencies, 4 entries tall,
+ *      increasing addr order
+ */
+
+    /* Create flush dependency between entries (child) 0->1->2->3 (parent) */
+    {
+        protect_entry(cache_ptr, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[0].flush_dep_par_type = entry_type;
+        expected[0].flush_dep_par_idx = 1;
+        expected[1].is_protected = TRUE;
+        expected[1].is_pinned = TRUE;
+        expected[1].child_flush_dep_height_rc[0] = 1;
+        expected[1].flush_dep_height = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        protect_entry(cache_ptr, entry_type, 2);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 2, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[1].flush_dep_par_type = entry_type;
+        expected[1].flush_dep_par_idx = 2;
+        expected[2].is_protected = TRUE;
+        expected[2].is_pinned = TRUE;
+        expected[2].child_flush_dep_height_rc[1] = 1;
+        expected[2].flush_dep_height = 2;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        protect_entry(cache_ptr, entry_type, 3);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 3, entry_type, 2);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[2].flush_dep_par_type = entry_type;
+        expected[2].flush_dep_par_idx = 3;
+        expected[3].is_protected = TRUE;
+        expected[3].is_pinned = TRUE;
+        expected[3].child_flush_dep_height_rc[2] = 1;
+        expected[3].flush_dep_height = 3;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Flush the cache and verify that the entries were flushed in correct order */
+    {
+        herr_t result;                  /* Generic return value */
+
+        add_flush_op(entry_type, 0, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 1, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 2, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 3, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        1,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        2,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        3,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Mark entries 0-3 dirty, so they are flushed */
+        dirty_entry(cache_ptr, entry_type, 0, FALSE);
+        dirty_entry(cache_ptr, entry_type, 1, TRUE);
+        dirty_entry(cache_ptr, entry_type, 2, TRUE);
+        dirty_entry(cache_ptr, entry_type, 3, TRUE);
+        if ( !pass ) CACHE_ERROR("dirty_entry failed")
+
+        /* Reset 'flushed' flag & 'flush_order' value in expected array */
+        expected[0].flushed = FALSE;
+        expected[0].flush_order = -1;
+        expected[1].flushed = FALSE;
+        expected[1].flush_order = -1;
+        expected[2].flushed = FALSE;
+        expected[2].flush_order = -1;
+        expected[3].flushed = FALSE;
+        expected[3].flush_order = -1;
+
+        /* Reset index for tracking flush order */
+        flush_order = 0;
+
+        result = H5C_flush_cache(NULL, -1, -1, cache_ptr, H5C__NO_FLAGS_SET);
+        if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].is_dirty = FALSE;
+        expected[0].flushed = TRUE;
+        expected[0].flush_order = 0;
+        expected[1].is_dirty = FALSE;
+        expected[1].flushed = TRUE;
+        expected[1].flush_order = 1;
+        expected[1].is_protected = FALSE;
+        expected[2].is_dirty = FALSE;
+        expected[2].flushed = TRUE;
+        expected[2].flush_order = 2;
+        expected[2].is_protected = FALSE;
+        expected[3].flushed = TRUE;
+        expected[3].flush_order = 3;
+        expected[3].is_protected = FALSE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Destroy flush dependency between entries, from the "top down" */
+    {
+        destroy_flush_dependency(cache_ptr, entry_type, 3, entry_type, 2);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[2].flush_dep_par_type = -1;
+        expected[2].flush_dep_par_idx = -1;
+        expected[3].is_pinned = FALSE;
+        expected[3].child_flush_dep_height_rc[2] = 0;
+        expected[3].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 2, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[1].flush_dep_par_type = -1;
+        expected[1].flush_dep_par_idx = -1;
+        expected[2].is_pinned = FALSE;
+        expected[2].child_flush_dep_height_rc[1] = 0;
+        expected[2].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[0].flush_dep_par_type = -1;
+        expected[0].flush_dep_par_idx = -1;
+        expected[1].is_pinned = FALSE;
+        expected[1].child_flush_dep_height_rc[0] = 0;
+        expected[1].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+/* Test Case #3b - Single chain of flush dependencies, 4 entries tall
+ *      decreasing addr order
+ */
+
+    /* Create flush dependency between entries (child) 0->1->2->3 (parent) */
+    {
+        protect_entry(cache_ptr, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 0, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[0].is_protected = TRUE;
+        expected[0].is_pinned = TRUE;
+        expected[0].child_flush_dep_height_rc[0] = 1;
+        expected[0].flush_dep_height = 1;
+        expected[1].flush_dep_par_type = entry_type;
+        expected[1].flush_dep_par_idx = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        protect_entry(cache_ptr, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 1, entry_type, 2);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[0].child_flush_dep_height_rc[0] = 0;
+        expected[0].child_flush_dep_height_rc[1] = 1;
+        expected[0].flush_dep_height = 2;
+        expected[1].is_protected = TRUE;
+        expected[1].is_pinned = TRUE;
+        expected[1].child_flush_dep_height_rc[0] = 1;
+        expected[1].flush_dep_height = 1;
+        expected[2].flush_dep_par_type = entry_type;
+        expected[2].flush_dep_par_idx = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        protect_entry(cache_ptr, entry_type, 2);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 2, entry_type, 3);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[0].child_flush_dep_height_rc[1] = 0;
+        expected[0].child_flush_dep_height_rc[2] = 1;
+        expected[0].flush_dep_height = 3;
+        expected[1].child_flush_dep_height_rc[0] = 0;
+        expected[1].child_flush_dep_height_rc[1] = 1;
+        expected[1].flush_dep_height = 2;
+        expected[2].is_protected = TRUE;
+        expected[2].is_pinned = TRUE;
+        expected[2].child_flush_dep_height_rc[0] = 1;
+        expected[2].flush_dep_height = 1;
+        expected[3].flush_dep_par_type = entry_type;
+        expected[3].flush_dep_par_idx = 2;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Flush the cache and verify that the entries were flushed in correct order */
+    {
+        herr_t result;                  /* Generic return value */
+
+        add_flush_op(entry_type, 0, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 1, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 2, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 3, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        0,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        1,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        2,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Mark entries 0-3 dirty, so they are flushed */
+        dirty_entry(cache_ptr, entry_type, 0, TRUE);
+        dirty_entry(cache_ptr, entry_type, 1, TRUE);
+        dirty_entry(cache_ptr, entry_type, 2, TRUE);
+        dirty_entry(cache_ptr, entry_type, 3, FALSE);
+        if ( !pass ) CACHE_ERROR("dirty_entry failed")
+
+        /* Reset 'flushed' flag & 'flush_order' value in expected array */
+        expected[0].flushed = FALSE;
+        expected[0].flush_order = -1;
+        expected[1].flushed = FALSE;
+        expected[1].flush_order = -1;
+        expected[2].flushed = FALSE;
+        expected[2].flush_order = -1;
+        expected[3].flushed = FALSE;
+        expected[3].flush_order = -1;
+
+        /* Reset index for tracking flush order */
+        flush_order = 0;
+
+        result = H5C_flush_cache(NULL, -1, -1, cache_ptr, H5C__NO_FLAGS_SET);
+        if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].is_dirty = FALSE;
+        expected[0].flushed = TRUE;
+        expected[0].flush_order = 3;
+        expected[0].is_protected = FALSE;
+        expected[1].is_dirty = FALSE;
+        expected[1].flushed = TRUE;
+        expected[1].flush_order = 2;
+        expected[1].is_protected = FALSE;
+        expected[2].is_dirty = FALSE;
+        expected[2].flushed = TRUE;
+        expected[2].flush_order = 1;
+        expected[2].is_protected = FALSE;
+        expected[3].is_dirty = FALSE;
+        expected[3].flushed = TRUE;
+        expected[3].flush_order = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Destroy flush dependency between entries, from the "bottom up" */
+    {
+        destroy_flush_dependency(cache_ptr, entry_type, 2, entry_type, 3);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[0].child_flush_dep_height_rc[2] = 0;
+        expected[0].child_flush_dep_height_rc[1] = 1;
+        expected[0].flush_dep_height = 2;
+        expected[1].child_flush_dep_height_rc[1] = 0;
+        expected[1].child_flush_dep_height_rc[0] = 1;
+        expected[1].flush_dep_height = 1;
+        expected[2].is_pinned = FALSE;
+        expected[2].child_flush_dep_height_rc[0] = 0;
+        expected[2].flush_dep_height = 0;
+        expected[3].flush_dep_par_type = -1;
+        expected[3].flush_dep_par_idx = -1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 1, entry_type, 2);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[0].child_flush_dep_height_rc[1] = 0;
+        expected[0].child_flush_dep_height_rc[0] = 1;
+        expected[0].flush_dep_height = 1;
+        expected[1].is_pinned = FALSE;
+        expected[1].child_flush_dep_height_rc[0] = 0;
+        expected[1].flush_dep_height = 0;
+        expected[2].flush_dep_par_type = -1;
+        expected[2].flush_dep_par_idx = -1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 0, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[0].is_pinned = FALSE;
+        expected[0].child_flush_dep_height_rc[0] = 0;
+        expected[0].flush_dep_height = 0;
+        expected[1].flush_dep_par_type = -1;
+        expected[1].flush_dep_par_idx = -1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+/* Test Case #4a - Multiple children for a single parent, increasing addr order  */
+
+    /* Create flush dependency between entries (child) 0,1,2,3->4 (parent) */
+    {
+        protect_entry(cache_ptr, entry_type, 4);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        for(u = 0; u < 4; u++) {
+            create_flush_dependency(cache_ptr, entry_type, 4, entry_type, (int32_t)u);
+            if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+            /* Change expected values, and verify the status of the entries 
+             * after creating flush dependency
+             */
+            expected[u].flush_dep_par_type = entry_type;
+            expected[u].flush_dep_par_idx = 4;
+            expected[4].is_protected = TRUE;
+            expected[4].is_pinned = TRUE;
+            expected[4].child_flush_dep_height_rc[0] = u + 1;
+            expected[4].flush_dep_height = 1;
+
+            /* Verify the status */
+            verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                                (int)0,     /* int tag */
+                                (int)5,     /* int num_entries */
+                                expected);  /* struct expected_entry_staus[] */
+            if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+        } /* end for */
+    }
+
+    /* Flush the cache and verify that the entries were flushed in correct order */
+    {
+        herr_t result;                  /* Generic return value */
+
+        add_flush_op(entry_type, 0, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 1, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 2, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 3, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 4, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        4,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Mark entries 0-4 dirty, so they are flushed */
+        dirty_entry(cache_ptr, entry_type, 0, FALSE);
+        dirty_entry(cache_ptr, entry_type, 1, FALSE);
+        dirty_entry(cache_ptr, entry_type, 2, FALSE);
+        dirty_entry(cache_ptr, entry_type, 3, FALSE);
+        dirty_entry(cache_ptr, entry_type, 4, TRUE);
+        if ( !pass ) CACHE_ERROR("dirty_entry failed")
+
+        /* Reset 'flushed' flag & 'flush_order' value in expected array */
+        expected[0].flushed = FALSE;
+        expected[0].flush_order = -1;
+        expected[1].flushed = FALSE;
+        expected[1].flush_order = -1;
+        expected[2].flushed = FALSE;
+        expected[2].flush_order = -1;
+        expected[3].flushed = FALSE;
+        expected[3].flush_order = -1;
+        expected[4].flushed = FALSE;
+        expected[4].flush_order = -1;
+
+        /* Reset index for tracking flush order */
+        flush_order = 0;
+
+        result = H5C_flush_cache(NULL, -1, -1, cache_ptr, H5C__NO_FLAGS_SET);
+        if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].is_dirty = FALSE;
+        expected[0].flushed = TRUE;
+        expected[0].flush_order = 0;
+        expected[1].is_dirty = FALSE;
+        expected[1].flushed = TRUE;
+        expected[1].flush_order = 1;
+        expected[2].is_dirty = FALSE;
+        expected[2].flushed = TRUE;
+        expected[2].flush_order = 2;
+        expected[3].is_dirty = FALSE;
+        expected[3].flushed = TRUE;
+        expected[3].flush_order = 3;
+        expected[4].is_dirty = FALSE;
+        expected[4].flushed = TRUE;
+        expected[4].flush_order = 4;
+        expected[4].is_protected = FALSE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Destroy flush dependency between entries */
+    {
+        for(u = 0; u < 4; u++) {
+            destroy_flush_dependency(cache_ptr, entry_type, 4, entry_type, (int32_t)u);
+            if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+            /* Change expected values, and verify the status of the entries 
+             * after destroying flush dependency
+             */
+            expected[u].flush_dep_par_type = -1;
+            expected[u].flush_dep_par_idx = -1;
+            expected[4].child_flush_dep_height_rc[0] = 3 - u;
+
+            /* Check for destroying flush dependency on last entry */
+            if(3 == u) {
+                /* Change expected values, and verify the status of the entries 
+                 * after destroying flush dependency
+                 */
+                expected[4].is_pinned = FALSE;
+                expected[4].flush_dep_height = 0;
+            } /* end if */
+
+            /* Verify the status */
+            verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                                (int)0,     /* int tag */
+                                (int)5,     /* int num_entries */
+                                expected);  /* struct expected_entry_staus[] */
+            if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+        } /* end for */
+    }
+
+/* Test Case #4b - Multiple children for a single parent, decreasing addr order  */
+
+    /* Create flush dependency between entries (child) 0,1,2,3->4 (parent) */
+    {
+        protect_entry(cache_ptr, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        for(u = 1; u < 5; u++) {
+            create_flush_dependency(cache_ptr, entry_type, 0, entry_type, (int32_t)u);
+            if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+            /* Change expected values, and verify the status of the entries 
+             * after creating flush dependency
+             */
+            expected[u].flush_dep_par_type = entry_type;
+            expected[u].flush_dep_par_idx = 0;
+            expected[0].is_protected = TRUE;
+            expected[0].is_pinned = TRUE;
+            expected[0].child_flush_dep_height_rc[0] = u;
+            expected[0].flush_dep_height = 1;
+
+            /* Verify the status */
+            verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                                (int)0,     /* int tag */
+                                (int)5,     /* int num_entries */
+                                expected);  /* struct expected_entry_staus[] */
+            if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+        } /* end for */
+    }
+
+    /* Flush the cache and verify that the entries were flushed in correct order */
+    {
+        herr_t result;                  /* Generic return value */
+
+        add_flush_op(entry_type, 0, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 1, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 2, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 3, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 4, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        0,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Mark entries 0-4 dirty, so they are flushed */
+        dirty_entry(cache_ptr, entry_type, 0, TRUE);
+        dirty_entry(cache_ptr, entry_type, 1, FALSE);
+        dirty_entry(cache_ptr, entry_type, 2, FALSE);
+        dirty_entry(cache_ptr, entry_type, 3, FALSE);
+        dirty_entry(cache_ptr, entry_type, 4, FALSE);
+        if ( !pass ) CACHE_ERROR("dirty_entry failed")
+
+        /* Reset 'flushed' flag & 'flush_order' value in expected array */
+        expected[0].flushed = FALSE;
+        expected[0].flush_order = -1;
+        expected[1].flushed = FALSE;
+        expected[1].flush_order = -1;
+        expected[2].flushed = FALSE;
+        expected[2].flush_order = -1;
+        expected[3].flushed = FALSE;
+        expected[3].flush_order = -1;
+        expected[4].flushed = FALSE;
+        expected[4].flush_order = -1;
+
+        /* Reset index for tracking flush order */
+        flush_order = 0;
+
+        result = H5C_flush_cache(NULL, -1, -1, cache_ptr, H5C__NO_FLAGS_SET);
+        if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].is_dirty = FALSE;
+        expected[0].flushed = TRUE;
+        expected[0].flush_order = 4;
+        expected[0].is_protected = FALSE;
+        expected[1].is_dirty = FALSE;
+        expected[1].flushed = TRUE;
+        expected[1].flush_order = 0;
+        expected[2].is_dirty = FALSE;
+        expected[2].flushed = TRUE;
+        expected[2].flush_order = 1;
+        expected[3].is_dirty = FALSE;
+        expected[3].flushed = TRUE;
+        expected[3].flush_order = 2;
+        expected[4].is_dirty = FALSE;
+        expected[4].flushed = TRUE;
+        expected[4].flush_order = 3;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Destroy flush dependency between entries */
+    {
+        for(u = 1; u < 5; u++) {
+            destroy_flush_dependency(cache_ptr, entry_type, 0, entry_type, (int32_t)u);
+            if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+            /* Change expected values, and verify the status of the entries 
+             * after destroying flush dependency
+             */
+            expected[u].flush_dep_par_type = -1;
+            expected[u].flush_dep_par_idx = -1;
+            expected[0].child_flush_dep_height_rc[0] = 4 - u;
+
+            /* Check for destroying flush dependency on last entry */
+            if(4 == u) {
+                /* Change expected values, and verify the status of the entries 
+                 * after destroying flush dependency
+                 */
+                expected[0].is_pinned = FALSE;
+                expected[0].flush_dep_height = 0;
+            } /* end if */
+
+            /* Verify the status */
+            verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                                (int)0,     /* int tag */
+                                (int)5,     /* int num_entries */
+                                expected);  /* struct expected_entry_staus[] */
+            if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+        } /* end for */
+    }
+
+/* Test Case #5a - Join two flush dependency chains together, creating a single
+ *      un-forked dependency chain
+ */
+
+    /* Create flush dependency between entries (child) 0->1 and 3->4 (parent)
+     *  then add entry 4 as a child of 0
+     */
+    {
+        protect_entry(cache_ptr, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[0].flush_dep_par_type = entry_type;
+        expected[0].flush_dep_par_idx = 1;
+        expected[1].is_protected = TRUE;
+        expected[1].is_pinned = TRUE;
+        expected[1].child_flush_dep_height_rc[0] = 1;
+        expected[1].flush_dep_height = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        protect_entry(cache_ptr, entry_type, 4);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 4, entry_type, 3);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[3].flush_dep_par_type = entry_type;
+        expected[3].flush_dep_par_idx = 4;
+        expected[4].is_protected = TRUE;
+        expected[4].is_pinned = TRUE;
+        expected[4].child_flush_dep_height_rc[0] = 1;
+        expected[4].flush_dep_height = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        protect_entry(cache_ptr, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 0, entry_type, 4);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[4].flush_dep_par_type = entry_type;
+        expected[4].flush_dep_par_idx = 0;
+        expected[0].is_protected = TRUE;
+        expected[0].is_pinned = TRUE;
+        expected[0].child_flush_dep_height_rc[1] = 1;
+        expected[0].flush_dep_height = 2;
+        expected[1].child_flush_dep_height_rc[0] = 0;
+        expected[1].child_flush_dep_height_rc[2] = 1;
+        expected[1].flush_dep_height = 3;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+    }
+
+    /* Flush the cache and verify that the entries were flushed in correct order */
+    {
+        herr_t result;                  /* Generic return value */
+
+        add_flush_op(entry_type, 0, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 1, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+
+        add_flush_op(entry_type, 3, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 4, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        0,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        1,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        4,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Mark entries 0 & 1, 3 & 4 dirty, so they are flushed */
+        dirty_entry(cache_ptr, entry_type, 0, TRUE);
+        dirty_entry(cache_ptr, entry_type, 1, TRUE);
+        dirty_entry(cache_ptr, entry_type, 3, FALSE);
+        dirty_entry(cache_ptr, entry_type, 4, TRUE);
+        if ( !pass ) CACHE_ERROR("dirty_entry failed")
+
+        /* Reset 'flushed' flag & 'flush_order' value in expected array */
+        expected[0].flushed = FALSE;
+        expected[0].flush_order = -1;
+        expected[1].flushed = FALSE;
+        expected[1].flush_order = -1;
+        expected[2].flushed = FALSE;
+        expected[2].flush_order = -1;
+        expected[3].flushed = FALSE;
+        expected[3].flush_order = -1;
+        expected[4].flushed = FALSE;
+        expected[4].flush_order = -1;
+
+        /* Reset index for tracking flush order */
+        flush_order = 0;
+
+        result = H5C_flush_cache(NULL, -1, -1, cache_ptr, H5C__NO_FLAGS_SET);
+        if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].is_dirty = FALSE;
+        expected[0].flushed = TRUE;
+        expected[0].flush_order = 2;
+        expected[0].is_protected = FALSE;
+        expected[1].is_dirty = FALSE;
+        expected[1].flushed = TRUE;
+        expected[1].flush_order = 3;
+        expected[1].is_protected = FALSE;
+        expected[2].is_dirty = FALSE;
+        expected[2].flushed = TRUE;
+        expected[3].is_dirty = FALSE;
+        expected[3].flushed = TRUE;
+        expected[3].flush_order = 0;
+        expected[4].is_dirty = FALSE;
+        expected[4].flushed = TRUE;
+        expected[4].flush_order = 1;
+        expected[4].is_protected = FALSE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Destroy flush dependency between entries, detaching 3->4 from 0 first */
+    {
+        destroy_flush_dependency(cache_ptr, entry_type, 0, entry_type, 4);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[4].flush_dep_par_type = -1;
+        expected[4].flush_dep_par_idx = -1;
+        expected[0].is_pinned = FALSE;
+        expected[0].child_flush_dep_height_rc[1] = 0;
+        expected[0].flush_dep_height = 0;
+        expected[1].child_flush_dep_height_rc[0] = 1;
+        expected[1].child_flush_dep_height_rc[2] = 0;
+        expected[1].flush_dep_height = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 4, entry_type, 3);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[3].flush_dep_par_type = -1;
+        expected[3].flush_dep_par_idx = -1;
+        expected[4].is_pinned = FALSE;
+        expected[4].child_flush_dep_height_rc[0] = 0;
+        expected[4].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[0].flush_dep_par_type = -1;
+        expected[0].flush_dep_par_idx = -1;
+        expected[1].is_pinned = FALSE;
+        expected[1].child_flush_dep_height_rc[0] = 0;
+        expected[1].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+/* Test Case #5b - Join two flush dependency chains together, creating a
+ *      forked dependency chain
+ */
+
+    /* Create flush dependency between entries (child) 0->1->2 and 3->4 (parent)
+     *  then add entry 4 as a child of 1
+     */
+    {
+        protect_entry(cache_ptr, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[0].flush_dep_par_type = entry_type;
+        expected[0].flush_dep_par_idx = 1;
+        expected[1].is_protected = TRUE;
+        expected[1].is_pinned = TRUE;
+        expected[1].child_flush_dep_height_rc[0] = 1;
+        expected[1].flush_dep_height = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        protect_entry(cache_ptr, entry_type, 2);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 2, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[1].flush_dep_par_type = entry_type;
+        expected[1].flush_dep_par_idx = 2;
+        expected[2].is_protected = TRUE;
+        expected[2].is_pinned = TRUE;
+        expected[2].child_flush_dep_height_rc[1] = 1;
+        expected[2].flush_dep_height = 2;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        protect_entry(cache_ptr, entry_type, 4);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 4, entry_type, 3);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[3].flush_dep_par_type = entry_type;
+        expected[3].flush_dep_par_idx = 4;
+        expected[4].is_protected = TRUE;
+        expected[4].is_pinned = TRUE;
+        expected[4].child_flush_dep_height_rc[0] = 1;
+        expected[4].flush_dep_height = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        create_flush_dependency(cache_ptr, entry_type, 1, entry_type, 4);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[4].flush_dep_par_type = entry_type;
+        expected[4].flush_dep_par_idx = 1;
+        expected[1].child_flush_dep_height_rc[1] = 1;
+        expected[1].flush_dep_height = 2;
+        expected[2].child_flush_dep_height_rc[1] = 0;
+        expected[2].child_flush_dep_height_rc[2] = 1;
+        expected[2].flush_dep_height = 3;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+    }
+
+    /* Flush the cache and verify that the entries were flushed in correct order */
+    {
+        herr_t result;                  /* Generic return value */
+
+        add_flush_op(entry_type, 0, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 1, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 2, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 3, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 4, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        1,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        2,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        4,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Mark entries 0-4 dirty, so they are flushed */
+        dirty_entry(cache_ptr, entry_type, 0, FALSE);
+        dirty_entry(cache_ptr, entry_type, 1, TRUE);
+        dirty_entry(cache_ptr, entry_type, 2, TRUE);
+        dirty_entry(cache_ptr, entry_type, 3, FALSE);
+        dirty_entry(cache_ptr, entry_type, 4, TRUE);
+        if ( !pass ) CACHE_ERROR("dirty_entry failed")
+
+        /* Reset 'flushed' flag & 'flush_order' value in expected array */
+        expected[0].flushed = FALSE;
+        expected[0].flush_order = -1;
+        expected[1].flushed = FALSE;
+        expected[1].flush_order = -1;
+        expected[2].flushed = FALSE;
+        expected[2].flush_order = -1;
+        expected[3].flushed = FALSE;
+        expected[3].flush_order = -1;
+        expected[4].flushed = FALSE;
+        expected[4].flush_order = -1;
+
+        /* Reset index for tracking flush order */
+        flush_order = 0;
+
+        result = H5C_flush_cache(NULL, -1, -1, cache_ptr, H5C__NO_FLAGS_SET);
+        if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].is_dirty = FALSE;
+        expected[0].flushed = TRUE;
+        expected[0].flush_order = 0;
+        expected[0].is_protected = FALSE;
+        expected[1].is_dirty = FALSE;
+        expected[1].flushed = TRUE;
+        expected[1].flush_order = 3;
+        expected[1].is_protected = FALSE;
+        expected[2].is_dirty = FALSE;
+        expected[2].flushed = TRUE;
+        expected[2].flush_order = 4;
+        expected[2].is_protected = FALSE;
+        expected[3].is_dirty = FALSE;
+        expected[3].flushed = TRUE;
+        expected[3].flush_order = 1;
+        expected[4].is_dirty = FALSE;
+        expected[4].flushed = TRUE;
+        expected[4].flush_order = 2;
+        expected[4].is_protected = FALSE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Destroy flush dependency between entries, detaching 3->4 from 1 first */
+    {
+        destroy_flush_dependency(cache_ptr, entry_type, 1, entry_type, 4);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[4].flush_dep_par_type = -1;
+        expected[4].flush_dep_par_idx = -1;
+        expected[1].child_flush_dep_height_rc[1] = 0;
+        expected[1].flush_dep_height = 1;
+        expected[2].child_flush_dep_height_rc[1] = 1;
+        expected[2].child_flush_dep_height_rc[2] = 0;
+        expected[2].flush_dep_height = 2;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 4, entry_type, 3);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[3].flush_dep_par_type = -1;
+        expected[3].flush_dep_par_idx = -1;
+        expected[4].is_pinned = FALSE;
+        expected[4].child_flush_dep_height_rc[0] = 0;
+        expected[4].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 2, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[1].flush_dep_par_type = -1;
+        expected[1].flush_dep_par_idx = -1;
+        expected[2].is_pinned = FALSE;
+        expected[2].child_flush_dep_height_rc[1] = 0;
+        expected[2].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[0].flush_dep_par_type = -1;
+        expected[0].flush_dep_par_idx = -1;
+        expected[1].is_pinned = FALSE;
+        expected[1].child_flush_dep_height_rc[0] = 0;
+        expected[1].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+/* Test Case #5c - Join two flush dependency chains together, creating a
+ *      forked dependency chain
+ */
+
+    /* Create flush dependency between entries (child) 0->1->2 and 3->4 (parent)
+     *  then add entry 4 as a child of 2
+     */
+    {
+        protect_entry(cache_ptr, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[0].flush_dep_par_type = entry_type;
+        expected[0].flush_dep_par_idx = 1;
+        expected[1].is_protected = TRUE;
+        expected[1].is_pinned = TRUE;
+        expected[1].child_flush_dep_height_rc[0] = 1;
+        expected[1].flush_dep_height = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        protect_entry(cache_ptr, entry_type, 2);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 2, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[1].flush_dep_par_type = entry_type;
+        expected[1].flush_dep_par_idx = 2;
+        expected[2].is_protected = TRUE;
+        expected[2].is_pinned = TRUE;
+        expected[2].child_flush_dep_height_rc[1] = 1;
+        expected[2].flush_dep_height = 2;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        protect_entry(cache_ptr, entry_type, 4);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        create_flush_dependency(cache_ptr, entry_type, 4, entry_type, 3);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[3].flush_dep_par_type = entry_type;
+        expected[3].flush_dep_par_idx = 4;
+        expected[4].is_protected = TRUE;
+        expected[4].is_pinned = TRUE;
+        expected[4].child_flush_dep_height_rc[0] = 1;
+        expected[4].flush_dep_height = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        create_flush_dependency(cache_ptr, entry_type, 2, entry_type, 4);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[4].flush_dep_par_type = entry_type;
+        expected[4].flush_dep_par_idx = 2;
+        expected[2].child_flush_dep_height_rc[1] = 2;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+    }
+
+    /* Flush the cache and verify that the entries were flushed in correct order */
+    {
+        herr_t result;                  /* Generic return value */
+
+        add_flush_op(entry_type, 0, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 1, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 2, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 3, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+        add_flush_op(entry_type, 4, FLUSH_OP__ORDER,
+                     entry_type, 0, FALSE, (size_t)0, &flush_order);
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        1,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        2,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        4,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Mark entries 0-4 dirty, so they are flushed */
+        dirty_entry(cache_ptr, entry_type, 0, FALSE);
+        dirty_entry(cache_ptr, entry_type, 1, TRUE);
+        dirty_entry(cache_ptr, entry_type, 2, TRUE);
+        dirty_entry(cache_ptr, entry_type, 3, FALSE);
+        dirty_entry(cache_ptr, entry_type, 4, TRUE);
+        if ( !pass ) CACHE_ERROR("dirty_entry failed")
+
+        /* Reset 'flushed' flag & 'flush_order' value in expected array */
+        expected[0].flushed = FALSE;
+        expected[0].flush_order = -1;
+        expected[1].flushed = FALSE;
+        expected[1].flush_order = -1;
+        expected[2].flushed = FALSE;
+        expected[2].flush_order = -1;
+        expected[3].flushed = FALSE;
+        expected[3].flush_order = -1;
+        expected[4].flushed = FALSE;
+        expected[4].flush_order = -1;
+
+        /* Reset index for tracking flush order */
+        flush_order = 0;
+
+        result = H5C_flush_cache(NULL, -1, -1, cache_ptr, H5C__NO_FLAGS_SET);
+        if( result < 0 ) CACHE_ERROR("flushing entries with flush dependendices")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].is_dirty = FALSE;
+        expected[0].flushed = TRUE;
+        expected[0].flush_order = 0;
+        expected[0].is_protected = FALSE;
+        expected[1].is_dirty = FALSE;
+        expected[1].flushed = TRUE;
+        expected[1].flush_order = 2;
+        expected[1].is_protected = FALSE;
+        expected[2].is_dirty = FALSE;
+        expected[2].flushed = TRUE;
+        expected[2].flush_order = 4;
+        expected[2].is_protected = FALSE;
+        expected[3].is_dirty = FALSE;
+        expected[3].flushed = TRUE;
+        expected[3].flush_order = 1;
+        expected[4].is_dirty = FALSE;
+        expected[4].flushed = TRUE;
+        expected[4].flush_order = 3;
+        expected[4].is_protected = FALSE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Destroy flush dependency between entries, detaching 3->4 from 2 first */
+    {
+        destroy_flush_dependency(cache_ptr, entry_type, 2, entry_type, 4);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[4].flush_dep_par_type = -1;
+        expected[4].flush_dep_par_idx = -1;
+        expected[2].child_flush_dep_height_rc[1] = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 4, entry_type, 3);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[3].flush_dep_par_type = -1;
+        expected[3].flush_dep_par_idx = -1;
+        expected[4].is_pinned = FALSE;
+        expected[4].child_flush_dep_height_rc[0] = 0;
+        expected[4].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 2, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[1].flush_dep_par_type = -1;
+        expected[1].flush_dep_par_idx = -1;
+        expected[2].is_pinned = FALSE;
+        expected[2].child_flush_dep_height_rc[1] = 0;
+        expected[2].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroying flush dependency
+         */
+        expected[0].flush_dep_par_type = -1;
+        expected[0].flush_dep_par_idx = -1;
+        expected[1].is_pinned = FALSE;
+        expected[1].child_flush_dep_height_rc[0] = 0;
+        expected[1].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+
+done:
+    if(cache_ptr) 
+        takedown_cache(cache_ptr, FALSE, FALSE);
+
+    if ( pass )
+        PASSED()
+    else {
+        H5_FAILED();
+        HDfprintf(stdout, "%s.\n", failure_mssg);
+    } /* end else */
+
+    return (unsigned)!pass;
+} /* check_flush_deps_order() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Run tests on the cache code contained in H5C.c
@@ -31703,6 +33734,7 @@ main(void)
     nerrs += check_metadata_blizzard_absence(FALSE);  
     nerrs += check_flush_deps();
     nerrs += check_flush_deps_err();
+    nerrs += check_flush_deps_order();
 
     return(nerrs > 0);
 }

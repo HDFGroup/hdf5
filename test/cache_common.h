@@ -127,7 +127,8 @@
 #define FLUSH_OP__DIRTY		1
 #define FLUSH_OP__RESIZE	2
 #define FLUSH_OP__RENAME	3
-#define FLUSH_OP__MAX_OP	3
+#define FLUSH_OP__ORDER		4
+#define FLUSH_OP__MAX_OP	4
 
 #define MAX_FLUSH_OPS		10	/* Maximum number of flush operations
 					 * that can be associated with a
@@ -144,6 +145,7 @@ typedef struct flush_op
 					 *   FLUSH_OP__DIRTY
 					 *   FLUSH_OP__RESIZE
 					 *   FLUSH_OP__RENAME
+					 *   FLUSH_OP__ORDER
 					 */
     int			type;		/* type code of the cache entry that
 					 * is the target of the operation.
@@ -183,6 +185,10 @@ typedef struct flush_op
 					 * FLUSH_OP__RENAME operation.
 					 * Unused elsewhere.
 					 */
+    unsigned          * order_ptr;      /* Pointer to outside counter for
+                                         * recording the order of entries
+                                         * flushed.
+                                         */
 } flush_op;
 
 typedef struct test_entry_t
@@ -300,6 +306,7 @@ typedef struct test_entry_t
                                          * dependency children
                                          */
     unsigned            flush_dep_height; /* flush dependency height of entry */
+    unsigned            flush_order;    /* Order that entry was flushed in */
 } test_entry_t;
 
 /* The following is a cut down copy of the hash table manipulation
@@ -471,6 +478,7 @@ struct expected_entry_status
                                          * dependency children
                                          */
     unsigned            flush_dep_height; /* flush dependency height of entry */
+    int                 flush_order;    /* flush order of entry */
 };
 
 
@@ -602,7 +610,8 @@ void add_flush_op(int target_type,
                   int type,
                   int idx,
                   hbool_t flag,
-                  size_t size);
+                  size_t size,
+                  unsigned * order);
 
 
 void addr_to_type_and_index(haddr_t addr,

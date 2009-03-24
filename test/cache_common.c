@@ -1171,7 +1171,8 @@ add_flush_op(int target_type,
 	     int type,
 	     int idx,
 	     hbool_t flag,
-	     size_t new_size)
+	     size_t new_size,
+             unsigned * order_ptr)
 {
     int i;
     test_entry_t * target_base_addr;
@@ -1204,6 +1205,7 @@ add_flush_op(int target_type,
 	(target_entry_ptr->flush_ops)[i].idx = idx;
 	(target_entry_ptr->flush_ops)[i].flag = flag;
 	(target_entry_ptr->flush_ops)[i].size = new_size;
+	(target_entry_ptr->flush_ops)[i].order_ptr = order_ptr;
 
     }
 
@@ -1470,6 +1472,12 @@ execute_flush_op(H5C_t * cache_ptr,
 			     op_ptr->flag);
 		break;
 
+	    case FLUSH_OP__ORDER:
+                HDassert( op_ptr->order_ptr );
+                entry_ptr->flush_order = *op_ptr->order_ptr;
+                (*op_ptr->order_ptr)++;
+		break;
+
 	    default:
                 pass = FALSE;
                 failure_mssg = "Undefined flush op code.";
@@ -1655,6 +1663,8 @@ reset_entries(void)
                 for ( k = 0; k < H5C__NUM_FLUSH_DEP_HEIGHTS; k++ )
                     base_addr[j].child_flush_dep_height_rc[k] = 0;
                 base_addr[j].flush_dep_height = 0;
+
+                base_addr[j].flush_order = 0;
 
                 addr += (haddr_t)entry_size;
                 alt_addr += (haddr_t)entry_size;
@@ -2252,8 +2262,25 @@ verify_entry_status(H5C_t * cache_ptr,
             } /* end if */
         } /* end if */
 
+        /* Flush dependency flush order */
+        if ( pass ) {
+            if ( expected[i].flush_order >= 0 && entry_ptr->flush_order != (unsigned)expected[i].flush_order ) {
+                pass = FALSE;
+                sprintf(msg,
+                      "%d entry (%d, %d) flush_order actual/expected = %u/%d.\n",
+                      tag,
+                      expected[i].entry_type,
+                      expected[i].entry_index,
+                      entry_ptr->flush_order,
+                      expected[i].flush_order);
+                failure_mssg = msg;
+            } /* end if */
+        } /* end if */
+
 	i++;
     } /* while */
+if(!pass)
+    HDfprintf(stderr, "failure_mssg = '%s'\n", failure_mssg);
 
     return;
 
@@ -5023,7 +5050,6 @@ destroy_flush_dependency(H5C_t * cache_ptr,
         /* Sanity check parent entry */
         HDassert( par_entry_ptr->index == par_idx );
         HDassert( par_entry_ptr->type == par_type );
-        HDassert( par_entry_ptr->is_protected );
         HDassert( par_entry_ptr->is_pinned );
         HDassert( par_entry_ptr->flush_dep_height > 0 );
         HDassert( par_entry_ptr == par_entry_ptr->self );
