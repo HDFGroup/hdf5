@@ -27,6 +27,7 @@
 #include "H5IMpublic.h" /* image */
 #include "H5TBpublic.h" /* table */
 #include "H5PTpublic.h" /* table */
+#include "H5LRpublic.h" /* region */
 
 #endif /*H5_INCLUDE_HL*/
 
