@@ -1115,6 +1115,9 @@ H5F_dest(H5F_t *f, hid_t dxpl_id)
         f->shared->mtab.child = (H5F_mount_t *)H5MM_xfree(f->shared->mtab.child);
         f->shared->mtab.nalloc = 0;
 
+        /* Free root group symbol table entry, if any */
+        f->shared->root_ent = H5MM_xfree(f->shared->root_ent);
+
         /* Destroy shared file struct */
         f->shared = (H5F_file_t *)H5FL_FREE(H5F_file_t, f->shared);
 

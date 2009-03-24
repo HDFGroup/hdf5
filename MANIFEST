@@ -791,6 +791,7 @@
 ./test/cache_common.c
 ./test/cache_common.h
 ./test/cmpd_dset.c
+./test/corrupt_stab_msg.h5
 ./test/cross_read.c
 ./test/dangle.c
 ./test/deflate.h5
@@ -1739,7 +1740,9 @@
 ./vms/tools/h5jam/make.com
 ./vms/tools/h5repack/check_h5repack.com
 ./vms/tools/h5repack/make.com
+./vms/tools/h5stat/make.com
 ./vms/tools/lib/make.com
+./vms/tools/misc/make.com
 ./vms/tools/testfiles/tattr-3.ddl
 ./vms/tools/testfiles/tdset-2.ddl
 ./vms/tools/testfiles/tgroup-2.ddl

@@ -3735,9 +3735,11 @@ void make_dset_reg_ref(hid_t loc_id)
     
     /* Write selection to disk */
     ret = H5Dwrite(dset2, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dwbuf);
+    assert(ret >= 0);
     
     /* Close Dataset */
     ret = H5Dclose(dset2);
+    assert(ret >= 0);
     
     /* Create dataspace for the reference dataset */
     sid1 = H5Screate_simple(SPACE1_RANK, dims1, NULL);
@@ -3753,17 +3755,23 @@ void make_dset_reg_ref(hid_t loc_id)
     count[0] = 6; count[1] = 6;
     block[0] = 1; block[1] = 1;
     ret = H5Sselect_hyperslab(sid2, H5S_SELECT_SET, start, stride, count, block);
+    assert(ret >= 0);
     
     /* Store dataset region */
     ret = H5Rcreate(&wbuf[0], loc_id, "dsetreg", H5R_DATASET_REGION, sid2);
+    assert(ret >= 0);
     
     /* Write selection to disk */
     ret=H5Dwrite(dset1,H5T_STD_REF_DSETREG,H5S_ALL,H5S_ALL,H5P_DEFAULT,wbuf);
+    assert(ret >= 0);
     
     /* Close all objects */
     ret = H5Sclose(sid1);
+    assert(ret >= 0);
     ret = H5Dclose(dset1);
+    assert(ret >= 0);
     ret = H5Sclose(sid2);
+    assert(ret >= 0);
     
     free(wbuf);
     free(dwbuf);

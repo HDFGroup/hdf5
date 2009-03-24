@@ -77,7 +77,7 @@ hid_t   ERR_MIN_GETNUM;
 
 #define LONG_DESC_SIZE          8192
 
-herr_t custom_print_cb(unsigned n, const H5E_error2_t *err_desc,
+static herr_t custom_print_cb(unsigned n, const H5E_error2_t *err_desc,
     void *client_data);
 
 
@@ -420,7 +420,7 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void* client_data)
 {
     FILE		*stream  = (FILE *)client_data;

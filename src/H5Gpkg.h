@@ -100,14 +100,14 @@ typedef union H5G_cache_t {
  * also appears in the object header to which this symbol table entry
  * points.
  */
-typedef struct H5G_entry_t {
+struct H5G_entry_t {
     hbool_t     dirty;                  /*entry out-of-date?                 */
     H5G_cache_type_t type;              /*type of information cached         */
     H5G_cache_t cache;                  /*cached data from object header     */
     size_t      name_off;               /*offset of name within name heap    */
     haddr_t     header;                 /*file address of object header      */
     H5F_t       *file;                  /*file to which this obj hdr belongs */
-} H5G_entry_t;
+};
 
 /*
  * A symbol table node is a collection of symbol table entries.  It can
@@ -402,6 +402,10 @@ H5_DLL herr_t H5G_stab_lookup(H5O_loc_t *grp_oloc, const char *name,
     H5O_link_t *lnk, hid_t dxpl_id);
 H5_DLL herr_t H5G_stab_lookup_by_idx(H5O_loc_t *grp_oloc, H5_iter_order_t order,
     hsize_t n, H5O_link_t *lnk, hid_t dxpl_id);
+#ifndef H5_STRICT_FORMAT_CHECKS
+H5_DLL herr_t H5G_stab_valid(H5O_loc_t *grp_oloc, hid_t dxpl_id,
+    H5O_stab_t *alt_stab);
+#endif /* H5_STRICT_FORMAT_CHECKS */
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 H5_DLL H5G_obj_t H5G_stab_get_type_by_idx(H5O_loc_t *oloc, hsize_t idx,
     hid_t dxpl_id);

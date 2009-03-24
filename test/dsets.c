@@ -175,7 +175,8 @@ const char *FILENAME[] = {
 #define TOO_HUGE_CHUNK_DIM2_2   ((hsize_t)1024)
 
 /* Parameters for testing bypassing chunk cache */
-#define BYPASS_DATASET           "Dset"
+#define BYPASS_DATASET1          "Dset1"
+#define BYPASS_DATASET2          "Dset2"
 #define BYPASS_DIM               1000
 #define BYPASS_CHUNK_DIM         500
 #define BYPASS_FILL_VALUE        7
@@ -5741,20 +5742,15 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filters_endianess(hid_t fapl)
+test_filters_endianess(void)
 {
     hid_t     fid=-1;                   /* file ID */
     hid_t     dsid=-1;                  /* dataset ID */
     hid_t     sid=-1;                   /* dataspace ID */
     hid_t     dcpl=-1;                  /* dataset creation property list ID */
-    int       buf[2];
     int       i;
     char      *srcdir = getenv("srcdir"); /* the source directory */
     char      data_file[512]="";          /* buffer to hold name of existing file */
-
-    for(i=0; i<2; i++){
-     buf[i]=1;
-    }
 
     TESTING("filters with big-endian/little-endian data");
 
@@ -6704,7 +6700,7 @@ error:
  *              bypasses the cache. 
  *
  * Note:        This test is not very conclusive - it doesn't actually check
- *              is the chunks bypass the cache... :-(  -QAK
+ *              if the chunks bypass the cache... :-(  -QAK
  *
  * Return:      Success: 0
  *              Failure: -1
@@ -6727,9 +6723,9 @@ test_big_chunks_bypass_cache(hid_t fapl)
     size_t      rdcc_nelmts, rdcc_nbytes;
     int         fvalue = BYPASS_FILL_VALUE;
     hsize_t     count, stride, offset, block;
-    static int  wdata[BYPASS_CHUNK_DIM], rdata[BYPASS_DIM];
+    static int  wdata[BYPASS_CHUNK_DIM/2], rdata1[BYPASS_DIM], 
+                rdata2[BYPASS_CHUNK_DIM/2];
     int         i, j;
-    herr_t      ret;            /* Generic return value */
 
     TESTING("big chunks bypassing the cache");
 
@@ -6762,51 +6758,81 @@ test_big_chunks_bypass_cache(hid_t fapl)
     if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET) < 0) FAIL_STACK_ERROR
     if(H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_INCR) < 0) FAIL_STACK_ERROR
 
-    /* Try to create dataset */
-    if((dsid = H5Dcreate2(fid, BYPASS_DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+    /* Create a first dataset */
+    if((dsid = H5Dcreate2(fid, BYPASS_DATASET1, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
     /* Select first chunk to write the data */
     offset = 0;
     count = 1;
     stride = 1;
-    block = BYPASS_CHUNK_DIM;
+    block = BYPASS_CHUNK_DIM / 2;
     if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, &offset, &stride, &count, &block) < 0) 
         FAIL_STACK_ERROR
 
     /* Initialize data to write */
-    for(i = 0; i < BYPASS_CHUNK_DIM; i++)
+    for(i = 0; i < BYPASS_CHUNK_DIM / 2; i++)
         wdata[i] = i;
 
-    /* This write should bypass the cache because the chunk is bigger than the cache size
-     * and it's not allocated on disk. */
+    /* This write should go through the cache because fill value is used. */
     if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, wdata) < 0)
         FAIL_STACK_ERROR
 
     if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
 
     /* Reopen the dataset */
-    if((dsid = H5Dopen2(fid, BYPASS_DATASET, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+    if((dsid = H5Dopen2(fid, BYPASS_DATASET1, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
 
     /* Reads both 2 chunks.  Reading the second chunk should bypass the cache because the 
      * chunk is bigger than the cache size and it isn't allocated on disk. */
-    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0) 
+    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata1) < 0) 
         FAIL_STACK_ERROR
 
-    for(i = 0; i < BYPASS_CHUNK_DIM; i++)
-        if(rdata[i] != i) {
+    for(i = 0; i < BYPASS_CHUNK_DIM / 2; i++)
+        if(rdata1[i] != i) {
             printf("    Read different values than written in the 1st chunk.\n");
-            printf("    At line %d and index %d, rdata = %d. It should be %d.\n", __LINE__, i, rdata[i], i);
+            printf("    At line %d and index %d, rdata1 = %d. It should be %d.\n", __LINE__, i, rdata1[i], i);
             TEST_ERROR
         } /* end if */
 
-    for(j = BYPASS_CHUNK_DIM; j < BYPASS_DIM; j++)
-        if(rdata[j] != fvalue) {
+    for(j = BYPASS_CHUNK_DIM / 2; j < BYPASS_DIM; j++)
+        if(rdata1[j] != fvalue) {
             printf("    Read different values than written in the 2nd chunk.\n");
-            printf("    At line %d and index %d, rdata = %d. It should be %d.\n", __LINE__, i, rdata[i], fvalue);
+            printf("    At line %d and index %d, rdata1 = %d. It should be %d.\n", __LINE__, i, rdata1[i], fvalue);
             TEST_ERROR
         } /* end if */
+
+    /* Close the first dataset */
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
    
+    /* Create a second dataset without fill value.  This time, both write
+     * and read should bypass the cache because the chunk is bigger than the 
+     * cache size and it's not allocated on disk. */
+    if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER) < 0) FAIL_STACK_ERROR
+
+    if((dsid = H5Dcreate2(fid, BYPASS_DATASET2, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    if(H5Dwrite(dsid, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, wdata) < 0)
+        FAIL_STACK_ERROR
+
+    if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+    /* Reopen the dataset */
+    if((dsid = H5Dopen2(fid, BYPASS_DATASET2, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+    /* Read back only the part that was written to the file.  Reading the 
+     * half chunk should bypass the cache because the chunk is bigger than
+     * the cache size. */
+    if(H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, rdata2) < 0) 
+
+    for(i = 0; i < BYPASS_CHUNK_DIM / 2; i++)
+        if(rdata2[i] != i) {
+            printf("    Read different values than written in the chunk.\n");
+            printf("    At line %d and index %d, rdata2 = %d. It should be %d.\n", __LINE__, i, rdata2[i], i);
+            TEST_ERROR
+        } /* end if */
+
     /* Close IDs */
     if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
     if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
@@ -7181,7 +7207,7 @@ main(void)
         nerrors += (test_can_apply_szip(file) < 0		? 1 : 0);
         nerrors += (test_compare_dcpl(file) < 0		? 1 : 0);
         nerrors += (test_filter_delete(file) < 0		? 1 : 0);
-        nerrors += (test_filters_endianess(my_fapl) < 0	? 1 : 0);
+        nerrors += (test_filters_endianess() < 0	? 1 : 0);
         nerrors += (test_zero_dims(file) < 0		? 1 : 0);
         nerrors += (test_missing_chunk(file) < 0		? 1 : 0);
         nerrors += (test_random_chunks(my_fapl) < 0		? 1 : 0);

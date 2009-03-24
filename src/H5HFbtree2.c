@@ -59,15 +59,6 @@
 /* Local Prototypes */
 /********************/
 
-/* v2 B-tree function callbacks */
-herr_t H5HF_huge_bt2_indir_found(const void *nrecord, void *op_data);
-herr_t H5HF_huge_bt2_indir_remove(const void *nrecord, void *op_data);
-herr_t H5HF_huge_bt2_filt_indir_found(const void *nrecord, void *op_data);
-herr_t H5HF_huge_bt2_filt_indir_remove(const void *nrecord, void *op_data);
-herr_t H5HF_huge_bt2_dir_remove(const void *nrecord, void *op_data);
-herr_t H5HF_huge_bt2_filt_dir_found(const void *nrecord, void *op_data);
-herr_t H5HF_huge_bt2_filt_dir_remove(const void *nrecord, void *op_data);
-
 /* v2 B-tree driver callbacks */
 static herr_t H5HF_huge_btree2_indir_store(void *native, const void *udata);
 static herr_t H5HF_huge_btree2_indir_retrieve(void *udata, const void *native);

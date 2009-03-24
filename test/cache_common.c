@@ -33,16 +33,18 @@ hbool_t skip_long_tests = TRUE;
 hbool_t run_full_test = TRUE;
 const char *failure_mssg = NULL;
 
-test_entry_t pico_entries[NUM_PICO_ENTRIES];
-test_entry_t nano_entries[NUM_NANO_ENTRIES];
-test_entry_t micro_entries[NUM_MICRO_ENTRIES];
-test_entry_t tiny_entries[NUM_TINY_ENTRIES];
-test_entry_t small_entries[NUM_SMALL_ENTRIES];
-test_entry_t medium_entries[NUM_MEDIUM_ENTRIES];
-test_entry_t large_entries[NUM_LARGE_ENTRIES];
-test_entry_t huge_entries[NUM_HUGE_ENTRIES];
-test_entry_t monster_entries[NUM_MONSTER_ENTRIES];
-test_entry_t variable_entries[NUM_VARIABLE_ENTRIES];
+test_entry_t pico_entries[NUM_PICO_ENTRIES], orig_pico_entries[NUM_PICO_ENTRIES];
+test_entry_t nano_entries[NUM_NANO_ENTRIES], orig_nano_entries[NUM_NANO_ENTRIES];
+test_entry_t micro_entries[NUM_MICRO_ENTRIES], orig_micro_entries[NUM_MICRO_ENTRIES];
+test_entry_t tiny_entries[NUM_TINY_ENTRIES], orig_tiny_entries[NUM_TINY_ENTRIES];
+test_entry_t small_entries[NUM_SMALL_ENTRIES], orig_small_entries[NUM_SMALL_ENTRIES];
+test_entry_t medium_entries[NUM_MEDIUM_ENTRIES], orig_medium_entries[NUM_MEDIUM_ENTRIES];
+test_entry_t large_entries[NUM_LARGE_ENTRIES], orig_large_entries[NUM_LARGE_ENTRIES];
+test_entry_t huge_entries[NUM_HUGE_ENTRIES], orig_huge_entries[NUM_HUGE_ENTRIES];
+test_entry_t monster_entries[NUM_MONSTER_ENTRIES], orig_monster_entries[NUM_MONSTER_ENTRIES];
+test_entry_t variable_entries[NUM_VARIABLE_ENTRIES], orig_variable_entries[NUM_VARIABLE_ENTRIES];
+
+hbool_t orig_entry_arrays_init = FALSE;
 
 test_entry_t * entries[NUMBER_OF_ENTRY_TYPES] =
 {
@@ -56,6 +58,20 @@ test_entry_t * entries[NUMBER_OF_ENTRY_TYPES] =
     huge_entries,
     monster_entries,
     variable_entries
+};
+
+test_entry_t * orig_entries[NUMBER_OF_ENTRY_TYPES] =
+{
+    orig_pico_entries,
+    orig_nano_entries,
+    orig_micro_entries,
+    orig_tiny_entries,
+    orig_small_entries,
+    orig_medium_entries,
+    orig_large_entries,
+    orig_huge_entries,
+    orig_monster_entries,
+    orig_variable_entries
 };
 
 const int32_t max_indices[NUMBER_OF_ENTRY_TYPES] =
@@ -1155,7 +1171,8 @@ add_flush_op(int target_type,
 	     int type,
 	     int idx,
 	     hbool_t flag,
-	     size_t new_size)
+	     size_t new_size,
+             unsigned * order_ptr)
 {
     int i;
     test_entry_t * target_base_addr;
@@ -1188,6 +1205,7 @@ add_flush_op(int target_type,
 	(target_entry_ptr->flush_ops)[i].idx = idx;
 	(target_entry_ptr->flush_ops)[i].flag = flag;
 	(target_entry_ptr->flush_ops)[i].size = new_size;
+	(target_entry_ptr->flush_ops)[i].order_ptr = order_ptr;
 
     }
 
@@ -1454,6 +1472,12 @@ execute_flush_op(H5C_t * cache_ptr,
 			     op_ptr->flag);
 		break;
 
+	    case FLUSH_OP__ORDER:
+                HDassert( op_ptr->order_ptr );
+                entry_ptr->flush_order = *op_ptr->order_ptr;
+                (*op_ptr->order_ptr)++;
+		break;
+
 	    default:
                 pass = FALSE;
                 failure_mssg = "Undefined flush op code.";
@@ -1524,7 +1548,7 @@ entry_in_cache(H5C_t * cache_ptr,
 /*-------------------------------------------------------------------------
  * Function:	reset_entries
  *
- * Purpose:	reset the contents of the entries arrays to know values.
+ * Purpose:	reset the contents of the entries arrays to known values.
  *
  * Return:	void
  *
@@ -1549,87 +1573,121 @@ reset_entries(void)
 
 {
     int i;
-    int j;
-    int k;
-    int32_t max_index;
-    haddr_t addr = 0;
-    haddr_t alt_addr = PICO_ALT_BASE_ADDR;
-    size_t entry_size;
-    test_entry_t * base_addr;
 
-    for ( i = 0; i < NUMBER_OF_ENTRY_TYPES; i++ )
+    if( !orig_entry_arrays_init)
     {
-        entry_size = entry_sizes[i];
-        max_index = max_indices[i];
-        base_addr = entries[i];
+        haddr_t addr = 0;
+        haddr_t alt_addr = PICO_ALT_BASE_ADDR;
 
-        HDassert( base_addr );
-
-        for ( j = 0; j <= max_index; j++ )
+        for ( i = 0; i < NUMBER_OF_ENTRY_TYPES; i++ )
         {
-            /* one can argue that we should fill the header with garbage.
-             * If this is desired, we can simply comment out the header
-             * initialization - the headers will be full of garbage soon
-             * enough.
-             */
+            int32_t max_index;
+            size_t entry_size;
+            test_entry_t * base_addr;
+            test_entry_t * orig_base_addr;
+            int j;
 
-            base_addr[j].header.addr = (haddr_t)0;
-            base_addr[j].header.size = (size_t)0;
-            base_addr[j].header.type = NULL;
-            base_addr[j].header.is_dirty = FALSE;
-            base_addr[j].header.is_protected = FALSE;
-            base_addr[j].header.is_read_only = FALSE;
-            base_addr[j].header.ro_ref_count = FALSE;
-            base_addr[j].header.next = NULL;
-            base_addr[j].header.prev = NULL;
-            base_addr[j].header.aux_next = NULL;
-            base_addr[j].header.aux_prev = NULL;
+            entry_size = entry_sizes[i];
+            max_index = max_indices[i];
+            base_addr = entries[i];
+            orig_base_addr = orig_entries[i];
 
-            base_addr[j].self = &(base_addr[j]);
-            base_addr[j].cache_ptr = NULL;
-            base_addr[j].addr = addr;
-            base_addr[j].at_main_addr = TRUE;
-            base_addr[j].main_addr = addr;
-            base_addr[j].alt_addr = alt_addr;
-            base_addr[j].size = entry_size;
-            base_addr[j].type = i;
-            base_addr[j].index = j;
-            base_addr[j].reads = 0;
-            base_addr[j].writes = 0;
-            base_addr[j].is_dirty = FALSE;
-            base_addr[j].is_protected = FALSE;
-            base_addr[j].is_read_only = FALSE;
-            base_addr[j].ro_ref_count = FALSE;
+            HDassert( base_addr );
+            HDassert( orig_base_addr );
 
-            base_addr[j].is_pinned = FALSE;
-	    base_addr[j].pinning_ref_count = 0;
-	    base_addr[j].num_pins = 0;
-	    for ( k = 0; k < MAX_PINS; k++ )
+            for ( j = 0; j <= max_index; j++ )
             {
-	        base_addr[j].pin_type[k] = -1;
-		base_addr[j].pin_idx[k] = -1;
-	    }
+                int k;
 
-	    base_addr[j].num_flush_ops = 0;
-	    for ( k = 0; k < MAX_FLUSH_OPS; k++ )
-	    {
-		base_addr[j].flush_ops[k].op_code = FLUSH_OP__NO_OP;
-		base_addr[j].flush_ops[k].type = -1;
-		base_addr[j].flush_ops[k].idx = -1;
-		base_addr[j].flush_ops[k].flag = FALSE;
-		base_addr[j].flush_ops[k].size = 0;
-            }
-	    base_addr[j].flush_op_self_resize_in_progress = FALSE;
+                /* one can argue that we should fill the header with garbage.
+                 * If this is desired, we can simply comment out the header
+                 * initialization - the headers will be full of garbage soon
+                 * enough.
+                 */
 
-            base_addr[j].loaded = FALSE;
-            base_addr[j].cleared = FALSE;
-            base_addr[j].flushed = FALSE;
-            base_addr[j].destroyed = FALSE;
+                base_addr[j].header.addr = (haddr_t)0;
+                base_addr[j].header.size = (size_t)0;
+                base_addr[j].header.type = NULL;
+                base_addr[j].header.is_dirty = FALSE;
+                base_addr[j].header.is_protected = FALSE;
+                base_addr[j].header.is_read_only = FALSE;
+                base_addr[j].header.ro_ref_count = FALSE;
+                base_addr[j].header.next = NULL;
+                base_addr[j].header.prev = NULL;
+                base_addr[j].header.aux_next = NULL;
+                base_addr[j].header.aux_prev = NULL;
 
-            addr += (haddr_t)entry_size;
-            alt_addr += (haddr_t)entry_size;
-        }
-    }
+                base_addr[j].self = &(base_addr[j]);
+                base_addr[j].cache_ptr = NULL;
+                base_addr[j].addr = addr;
+                base_addr[j].at_main_addr = TRUE;
+                base_addr[j].main_addr = addr;
+                base_addr[j].alt_addr = alt_addr;
+                base_addr[j].size = entry_size;
+                base_addr[j].type = i;
+                base_addr[j].index = j;
+                base_addr[j].reads = 0;
+                base_addr[j].writes = 0;
+                base_addr[j].is_dirty = FALSE;
+                base_addr[j].is_protected = FALSE;
+                base_addr[j].is_read_only = FALSE;
+                base_addr[j].ro_ref_count = FALSE;
+
+                base_addr[j].is_pinned = FALSE;
+                base_addr[j].pinning_ref_count = 0;
+                base_addr[j].num_pins = 0;
+                for ( k = 0; k < MAX_PINS; k++ )
+                {
+                    base_addr[j].pin_type[k] = -1;
+                    base_addr[j].pin_idx[k] = -1;
+                }
+
+                base_addr[j].num_flush_ops = 0;
+                for ( k = 0; k < MAX_FLUSH_OPS; k++ )
+                {
+                    base_addr[j].flush_ops[k].op_code = FLUSH_OP__NO_OP;
+                    base_addr[j].flush_ops[k].type = -1;
+                    base_addr[j].flush_ops[k].idx = -1;
+                    base_addr[j].flush_ops[k].flag = FALSE;
+                    base_addr[j].flush_ops[k].size = 0;
+                }
+                base_addr[j].flush_op_self_resize_in_progress = FALSE;
+
+                base_addr[j].loaded = FALSE;
+                base_addr[j].cleared = FALSE;
+                base_addr[j].flushed = FALSE;
+                base_addr[j].destroyed = FALSE;
+
+                base_addr[j].flush_dep_par_type = -1;
+                base_addr[j].flush_dep_par_idx = -1;
+                for ( k = 0; k < H5C__NUM_FLUSH_DEP_HEIGHTS; k++ )
+                    base_addr[j].child_flush_dep_height_rc[k] = 0;
+                base_addr[j].flush_dep_height = 0;
+
+                base_addr[j].flush_order = 0;
+
+                addr += (haddr_t)entry_size;
+                alt_addr += (haddr_t)entry_size;
+            } /* end for */
+
+            /* Make copy of entries in base_addr for later */
+            HDmemcpy(orig_base_addr, base_addr, (size_t)(max_index + 1) * sizeof( *base_addr ));
+        } /* end for */
+
+        /* Indicate that we've made a copy for later */
+        orig_entry_arrays_init = TRUE;
+    } /* end if */
+    else {
+        for ( i = 0; i < NUMBER_OF_ENTRY_TYPES; i++ )
+        {
+            int32_t max_index = max_indices[i];
+            test_entry_t * base_addr = entries[i];
+            test_entry_t * orig_base_addr = orig_entries[i];
+
+            /* Make copy of entries in base_addr for later */
+            HDmemcpy(base_addr, orig_base_addr, (size_t)(max_index + 1) * sizeof( *base_addr ));
+        } /* end for */
+    } /* end else */
 
     return;
 
@@ -1755,7 +1813,7 @@ resize_pinned_entry(H5C_t * cache_ptr,
     HDassert( cache_ptr );
     HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
     HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
-    HDassert( type = VARIABLE_ENTRY_TYPE ) ;
+    HDassert( type == VARIABLE_ENTRY_TYPE ) ;
     HDassert( ( 0 < new_size ) && ( new_size <= entry_sizes[type] ) );
 
     if ( pass ) {
@@ -1891,16 +1949,15 @@ verify_entry_status(H5C_t * cache_ptr,
 		    struct expected_entry_status expected[])
 {
     static char    msg[128];
-    hbool_t        in_cache = FALSE; /* will set to TRUE if necessary */
     int            i;
-    test_entry_t * entry_ptr;
-    test_entry_t * base_addr;
 
     i = 0;
     while ( ( pass ) && ( i < num_entries ) )
     {
-        base_addr = entries[expected[i].entry_type];
-	entry_ptr = &(base_addr[expected[i].entry_index]);
+        test_entry_t  * base_addr = entries[expected[i].entry_type];
+        test_entry_t  * entry_ptr = &(base_addr[expected[i].entry_index]);
+        hbool_t         in_cache = FALSE; /* will set to TRUE if necessary */
+        unsigned        u;              /* Local index variable */
 
 	if ( ( ! expected[i].in_cache ) &&
 	     ( ( expected[i].is_dirty ) ||
@@ -1937,7 +1994,7 @@ verify_entry_status(H5C_t * cache_ptr,
 
 	        pass = FALSE;
 	        sprintf(msg,
-                        "%d entry (%d, %d) size actualexpected = %ld/%ld.\n",
+                        "%d entry (%d, %d) size actual/expected = %ld/%ld.\n",
 			tag,
 	                (int)expected[i].entry_type,
 		        (int)expected[i].entry_index,
@@ -2099,8 +2156,131 @@ verify_entry_status(H5C_t * cache_ptr,
                 failure_mssg = msg;
             }
         }
+
+        /* Check flush dependency fields */
+
+        /* Flush dependency parent type & index */
+	if ( pass ) {
+	    if ( entry_ptr->flush_dep_par_type != expected[i].flush_dep_par_type ) {
+	        pass = FALSE;
+	        sprintf(msg,
+                      "%d entry (%d, %d) flush_dep_par_type actual/expected = %d/%d.\n",
+		      tag,
+		      expected[i].entry_type,
+		      expected[i].entry_index,
+		      entry_ptr->flush_dep_par_type,
+		      expected[i].flush_dep_par_type);
+	        failure_mssg = msg;
+	    } /* end if */
+	} /* end if */
+	if ( pass ) {
+	    if ( entry_ptr->flush_dep_par_idx != expected[i].flush_dep_par_idx ) {
+	        pass = FALSE;
+	        sprintf(msg,
+                      "%d entry (%d, %d) flush_dep_par_idx actual/expected = %d/%d.\n",
+		      tag,
+		      expected[i].entry_type,
+		      expected[i].entry_index,
+		      entry_ptr->flush_dep_par_idx,
+		      expected[i].flush_dep_par_idx);
+	        failure_mssg = msg;
+	    } /* end if */
+	} /* end if */
+	if ( ( pass ) && ( in_cache ) && expected[i].flush_dep_par_idx >= 0 ) {
+            test_entry_t * par_base_addr = entries[expected[i].flush_dep_par_type];
+
+	    if ( entry_ptr->header.flush_dep_parent != (H5C_cache_entry_t *)&(par_base_addr[expected[i].flush_dep_par_idx]) ) {
+	        pass = FALSE;
+	        sprintf(msg,
+                  "%d entry (%d, %d) header flush_dep_parent actual/expected = %p/%p.\n",
+		  tag,
+		  expected[i].entry_type,
+		  expected[i].entry_index,
+		  (void *)entry_ptr->header.flush_dep_parent,
+	          (void *)&(par_base_addr[expected[i].flush_dep_par_idx]));
+	        failure_mssg = msg;
+	    } /* end if */
+	} /* end if */
+
+        /* Flush dependency child ref. counts */
+        for(u = 0; u < H5C__NUM_FLUSH_DEP_HEIGHTS; u++) {
+            if ( pass ) {
+                if ( entry_ptr->child_flush_dep_height_rc[u] != expected[i].child_flush_dep_height_rc[u] ) {
+                    pass = FALSE;
+                    sprintf(msg,
+                          "%d entry (%d, %d) child_flush_dep_height_rc[%u] actual/expected = %llu/%llu.\n",
+                          tag,
+                          expected[i].entry_type,
+                          expected[i].entry_index,
+                          u,
+                          (unsigned long long)(entry_ptr->child_flush_dep_height_rc[u]),
+                          (unsigned long long)expected[i].child_flush_dep_height_rc[u]);
+                    failure_mssg = msg;
+                } /* end if */
+            } /* end if */
+            if ( ( pass ) && ( in_cache ) ) {
+                if ( entry_ptr->header.child_flush_dep_height_rc[u] != expected[i].child_flush_dep_height_rc[u] ) {
+                    pass = FALSE;
+                    sprintf(msg,
+                      "%d entry (%d, %d) header child_flush_dep_height_rc[%u] actual/expected = %llu/%llu.\n",
+                      tag,
+                      expected[i].entry_type,
+                      expected[i].entry_index,
+                      u,
+                      (unsigned long long)entry_ptr->header.child_flush_dep_height_rc[u],
+                      (unsigned long long)expected[i].child_flush_dep_height_rc[u]);
+                    failure_mssg = msg;
+                } /* end if */
+            } /* end if */
+        } /* end for */
+
+        /* Flush dependency height */
+        if ( pass ) {
+            if ( entry_ptr->flush_dep_height != expected[i].flush_dep_height ) {
+                pass = FALSE;
+                sprintf(msg,
+                      "%d entry (%d, %d) flush_dep_height actual/expected = %u/%u.\n",
+                      tag,
+                      expected[i].entry_type,
+                      expected[i].entry_index,
+                      entry_ptr->flush_dep_height,
+                      expected[i].flush_dep_height);
+                failure_mssg = msg;
+            } /* end if */
+        } /* end if */
+        if ( ( pass ) && ( in_cache ) ) {
+            if ( entry_ptr->header.flush_dep_height != expected[i].flush_dep_height ) {
+                pass = FALSE;
+                sprintf(msg,
+                  "%d entry (%d, %d) header flush_dep_height actual/expected = %u/%u.\n",
+                  tag,
+                  expected[i].entry_type,
+                  expected[i].entry_index,
+                  entry_ptr->header.flush_dep_height,
+                  expected[i].flush_dep_height);
+                failure_mssg = msg;
+            } /* end if */
+        } /* end if */
+
+        /* Flush dependency flush order */
+        if ( pass ) {
+            if ( expected[i].flush_order >= 0 && entry_ptr->flush_order != (unsigned)expected[i].flush_order ) {
+                pass = FALSE;
+                sprintf(msg,
+                      "%d entry (%d, %d) flush_order actual/expected = %u/%d.\n",
+                      tag,
+                      expected[i].entry_type,
+                      expected[i].entry_index,
+                      entry_ptr->flush_order,
+                      expected[i].flush_order);
+                failure_mssg = msg;
+            } /* end if */
+        } /* end if */
+
 	i++;
     } /* while */
+if(!pass)
+    HDfprintf(stderr, "failure_mssg = '%s'\n", failure_mssg);
 
     return;
 
@@ -2461,7 +2641,7 @@ insert_entry(H5C_t * cache_ptr,
         HDassert( entry_ptr == entry_ptr->self );
         HDassert( !(entry_ptr->is_protected) );
 
-	insert_pinned = ((flags & H5C__PIN_ENTRY_FLAG) != 0 );
+	insert_pinned = (hbool_t)((flags & H5C__PIN_ENTRY_FLAG) != 0 );
 
 	entry_ptr->is_dirty = TRUE;
 
@@ -2852,7 +3032,7 @@ protect_entry(H5C_t * cache_ptr,
         HDassert( entry_ptr == entry_ptr->self );
         HDassert( !(entry_ptr->is_protected) );
 
-        cache_entry_ptr = H5C_protect(NULL, -1, -1, cache_ptr, &(types[type]),
+        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(NULL, -1, -1, cache_ptr, &(types[type]),
                                       entry_ptr->addr, NULL, NULL,
 				      H5C__NO_FLAGS_SET);
 
@@ -2951,7 +3131,7 @@ protect_entry_ro(H5C_t * cache_ptr,
 		  ( ( entry_ptr->is_read_only ) &&
 		    ( entry_ptr->ro_ref_count > 0 ) ) );
 
-        cache_entry_ptr = H5C_protect(NULL, -1, -1, cache_ptr, &(types[type]),
+        cache_entry_ptr = (H5C_cache_entry_t *)H5C_protect(NULL, -1, -1, cache_ptr, &(types[type]),
                                       entry_ptr->addr, NULL, NULL,
 				      H5C__READ_ONLY_FLAG);
 
@@ -2983,6 +3163,67 @@ protect_entry_ro(H5C_t * cache_ptr,
     return;
 
 } /* protect_entry_ro() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	pin_entry()
+ *
+ * Purpose:	Pin the entry indicated by the type and index.
+ *
+ *		Do nothing if pass is FALSE on entry.
+ *
+ * Return:	void
+ *
+ * Programmer:	Quincey Koziol
+ *              3/17/09
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+pin_entry(H5C_t * cache_ptr,
+              int32_t type,
+              int32_t idx)
+{
+    HDassert( cache_ptr );
+    HDassert( ( 0 <= type ) && ( type < NUMBER_OF_ENTRY_TYPES ) );
+    HDassert( ( 0 <= idx ) && ( idx <= max_indices[type] ) );
+
+    if ( pass ) {
+        test_entry_t * base_addr;
+        test_entry_t * entry_ptr;
+        herr_t result;
+
+        base_addr = entries[type];
+        entry_ptr = &(base_addr[idx]);
+
+        HDassert( entry_ptr->index == idx );
+        HDassert( entry_ptr->type == type );
+        HDassert( entry_ptr == entry_ptr->self );
+        HDassert( entry_ptr->is_protected );
+        HDassert( !(entry_ptr->is_pinned) );
+
+	result = H5C_pin_protected_entry(cache_ptr, (void *)entry_ptr);
+
+	if ( result < 0 ) {
+
+            pass = FALSE;
+            failure_mssg = "H5C_pin_protected_entry() reports failure.";
+
+	} else if ( ! ( entry_ptr->header.is_pinned ) ) {
+
+            pass = FALSE;
+            failure_mssg = "entry not pinned when it should be.";
+
+	} else {
+
+	    entry_ptr->is_pinned = TRUE;
+	}
+    } /* end if */
+
+    return;
+
+} /* pin_entry() */
 
 
 /*-------------------------------------------------------------------------
@@ -3027,7 +3268,6 @@ unpin_entry(H5C_t * cache_ptr,
         HDassert( entry_ptr->type == type );
         HDassert( entry_ptr == entry_ptr->self );
 	HDassert( entry_ptr->cache_ptr == cache_ptr );
-        HDassert( ! (entry_ptr->header.is_protected) );
         HDassert( entry_ptr->header.is_pinned );
 	HDassert( entry_ptr->is_pinned );
 
@@ -3120,8 +3360,8 @@ unprotect_entry(H5C_t * cache_ptr,
         HDassert( entry_ptr->header.is_protected );
         HDassert( entry_ptr->is_protected );
 
-	pin_flag_set = ((flags & H5C__PIN_ENTRY_FLAG) != 0 );
-	unpin_flag_set = ((flags & H5C__UNPIN_ENTRY_FLAG) != 0 );
+	pin_flag_set = (hbool_t)((flags & H5C__PIN_ENTRY_FLAG) != 0 );
+	unpin_flag_set = (hbool_t)((flags & H5C__UNPIN_ENTRY_FLAG) != 0 );
 
 	HDassert ( ! ( pin_flag_set && unpin_flag_set ) );
 	HDassert ( ( ! pin_flag_set ) || ( ! (entry_ptr->is_pinned) ) );
@@ -3130,7 +3370,7 @@ unprotect_entry(H5C_t * cache_ptr,
         if ( ( dirty == TRUE ) || ( dirty == FALSE ) ) {
 
             flags |= (dirty ? H5C__DIRTIED_FLAG : H5C__NO_FLAGS_SET);
-            entry_ptr->is_dirty = (entry_ptr->is_dirty || dirty);
+            entry_ptr->is_dirty = (hbool_t)(entry_ptr->is_dirty || dirty);
         }
 
         result = H5C_unprotect(NULL, -1, -1, cache_ptr, &(types[type]),
@@ -3278,10 +3518,10 @@ unprotect_entry_with_size_change(H5C_t * cache_ptr,
         HDassert( entry_ptr->header.is_protected );
         HDassert( entry_ptr->is_protected );
 
-	dirty_flag_set = ((flags & H5C__DIRTIED_FLAG) != 0 );
-	pin_flag_set = ((flags & H5C__PIN_ENTRY_FLAG) != 0 );
-	unpin_flag_set = ((flags & H5C__UNPIN_ENTRY_FLAG) != 0 );
-	size_changed_flag_set = ((flags & H5C__SIZE_CHANGED_FLAG) != 0 );
+	dirty_flag_set = (hbool_t)((flags & H5C__DIRTIED_FLAG) != 0 );
+	pin_flag_set = (hbool_t)((flags & H5C__PIN_ENTRY_FLAG) != 0 );
+	unpin_flag_set = (hbool_t)((flags & H5C__UNPIN_ENTRY_FLAG) != 0 );
+	size_changed_flag_set = (hbool_t)((flags & H5C__SIZE_CHANGED_FLAG) != 0 );
 
 	HDassert ( ! ( pin_flag_set && unpin_flag_set ) );
 	HDassert ( ( ! pin_flag_set ) || ( ! (entry_ptr->is_pinned) ) );
@@ -3290,7 +3530,7 @@ unprotect_entry_with_size_change(H5C_t * cache_ptr,
 	HDassert ( ( ! size_changed_flag_set ) ||
 		   ( type == VARIABLE_ENTRY_TYPE ) );
 
-        entry_ptr->is_dirty = (entry_ptr->is_dirty || dirty_flag_set);
+        entry_ptr->is_dirty = (hbool_t)(entry_ptr->is_dirty || dirty_flag_set);
 
 	if ( size_changed_flag_set ) {
 
@@ -4666,4 +4906,214 @@ hl_col_major_scan_backward(H5C_t * cache_ptr,
     return;
 
 } /* hl_col_major_scan_backward() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	create_flush_dependency()
+ *
+ * Purpose:	Create a 'flush dependency' between two entries.
+ *
+ *		Do nothing if pass is false.
+ *
+ * Return:	void
+ *
+ * Programmer:	Quincey Koziol
+ *              3/16/09
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+create_flush_dependency(H5C_t * cache_ptr,
+             int32_t par_type,
+             int32_t par_idx,
+             int32_t chd_type,
+             int32_t chd_idx)
+{
+    HDassert( cache_ptr );
+    HDassert( ( 0 <= par_type ) && ( par_type < NUMBER_OF_ENTRY_TYPES ) );
+    HDassert( ( 0 <= par_idx ) && ( par_idx <= max_indices[par_type] ) );
+    HDassert( ( 0 <= chd_type ) && ( chd_type < NUMBER_OF_ENTRY_TYPES ) );
+    HDassert( ( 0 <= chd_idx ) && ( chd_idx <= max_indices[chd_type] ) );
+
+    if ( pass ) {
+        test_entry_t * par_base_addr;   /* Base entry of parent's entry array */
+        test_entry_t * par_entry_ptr;   /* Parent entry */
+        test_entry_t * chd_base_addr;   /* Base entry of child's entry array */
+        test_entry_t * chd_entry_ptr;   /* Child entry */
+        hbool_t par_is_pinned;          /* Whether parent is already pinned */
+        herr_t result;                  /* API routine status */
+
+        /* Get parent entry */
+        par_base_addr = entries[par_type];
+        par_entry_ptr = &(par_base_addr[par_idx]);
+        par_is_pinned = par_entry_ptr->header.is_pinned;
+
+        /* Sanity check parent entry */
+        HDassert( par_entry_ptr->index == par_idx );
+        HDassert( par_entry_ptr->type == par_type );
+        HDassert( par_entry_ptr->header.is_protected );
+        HDassert( par_entry_ptr == par_entry_ptr->self );
+
+        /* Get parent entry */
+        chd_base_addr = entries[chd_type];
+        chd_entry_ptr = &(chd_base_addr[chd_idx]);
+
+        /* Sanity check child entry */
+        HDassert( chd_entry_ptr->index == chd_idx );
+        HDassert( chd_entry_ptr->type == chd_type );
+        HDassert( chd_entry_ptr == chd_entry_ptr->self );
+
+        result = H5C_create_flush_dependency(cache_ptr, par_entry_ptr,
+                chd_entry_ptr);
+
+        if ( ( result < 0 ) ||
+             ( !par_entry_ptr->header.is_pinned ) ||
+             ( !(par_entry_ptr->header.flush_dep_height > 0) ) ) {
+
+            pass = FALSE;
+            failure_mssg = "error in H5C_create_flush_dependency().";
+        } /* end if */
+
+        /* Update information about entries */
+        chd_entry_ptr->flush_dep_par_type = par_type;
+        chd_entry_ptr->flush_dep_par_idx = par_idx;
+        par_entry_ptr->child_flush_dep_height_rc[chd_entry_ptr->flush_dep_height]++;
+        if( !par_is_pinned )
+            par_entry_ptr->is_pinned = TRUE;
+
+        /* Check flush dependency heights */
+        while(chd_entry_ptr->flush_dep_height >= par_entry_ptr->flush_dep_height) {
+            unsigned prev_par_flush_dep_height = par_entry_ptr->flush_dep_height;       /* Save the previous height */
+
+            par_entry_ptr->flush_dep_height = chd_entry_ptr->flush_dep_height + 1;
+
+            /* Check for parent entry being in flush dependency relationship */
+            if(par_entry_ptr->flush_dep_par_idx >= 0) {
+                /* Move parent & child entries up the flushd dependency 'chain' */
+                chd_entry_ptr = par_entry_ptr;
+                par_base_addr = entries[chd_entry_ptr->flush_dep_par_type];
+                par_entry_ptr = &(par_base_addr[chd_entry_ptr->flush_dep_par_idx]);
+
+                /* Adjust the ref. counts in new parent */
+                HDassert(par_entry_ptr->child_flush_dep_height_rc[prev_par_flush_dep_height] > 0);
+                par_entry_ptr->child_flush_dep_height_rc[prev_par_flush_dep_height]--;
+                par_entry_ptr->child_flush_dep_height_rc[chd_entry_ptr->flush_dep_height]++;
+            } /* end if */
+        } /* end if */
+    } /* end if */
+
+    return;
+
+} /* create_flush_dependency() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	destroy_flush_dependency()
+ *
+ * Purpose:	Destroy a 'flush dependency' between two entries.
+ *
+ *		Do nothing if pass is false.
+ *
+ * Return:	void
+ *
+ * Programmer:	Quincey Koziol
+ *              3/16/09
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+destroy_flush_dependency(H5C_t * cache_ptr,
+             int32_t par_type,
+             int32_t par_idx,
+             int32_t chd_type,
+             int32_t chd_idx)
+{
+    HDassert( cache_ptr );
+    HDassert( ( 0 <= par_type ) && ( par_type < NUMBER_OF_ENTRY_TYPES ) );
+    HDassert( ( 0 <= par_idx ) && ( par_idx <= max_indices[par_type] ) );
+    HDassert( ( 0 <= chd_type ) && ( chd_type < NUMBER_OF_ENTRY_TYPES ) );
+    HDassert( ( 0 <= chd_idx ) && ( chd_idx <= max_indices[chd_type] ) );
+
+    if ( pass ) {
+        test_entry_t * par_base_addr;   /* Base entry of parent's entry array */
+        test_entry_t * par_entry_ptr;   /* Parent entry */
+        test_entry_t * chd_base_addr;   /* Base entry of child's entry array */
+        test_entry_t * chd_entry_ptr;   /* Child entry */
+        unsigned chd_flush_dep_height;  /* Child flush dep. height */
+
+        /* Get parent entry */
+        par_base_addr = entries[par_type];
+        par_entry_ptr = &(par_base_addr[par_idx]);
+
+        /* Sanity check parent entry */
+        HDassert( par_entry_ptr->index == par_idx );
+        HDassert( par_entry_ptr->type == par_type );
+        HDassert( par_entry_ptr->is_pinned );
+        HDassert( par_entry_ptr->flush_dep_height > 0 );
+        HDassert( par_entry_ptr == par_entry_ptr->self );
+
+        /* Get parent entry */
+        chd_base_addr = entries[chd_type];
+        chd_entry_ptr = &(chd_base_addr[chd_idx]);
+
+        /* Sanity check child entry */
+        HDassert( chd_entry_ptr->index == chd_idx );
+        HDassert( chd_entry_ptr->type == chd_type );
+        HDassert( chd_entry_ptr->flush_dep_height < par_entry_ptr->flush_dep_height );
+        HDassert( chd_entry_ptr == chd_entry_ptr->self );
+
+        if ( H5C_destroy_flush_dependency(cache_ptr, par_entry_ptr, chd_entry_ptr) < 0 ) {
+            pass = FALSE;
+            failure_mssg = "error in H5C_destroy_flush_dependency().";
+        } /* end if */
+
+        /* Update information about entries */
+        chd_entry_ptr->flush_dep_par_type = -1;
+        chd_entry_ptr->flush_dep_par_idx = -1;
+        par_entry_ptr->child_flush_dep_height_rc[chd_entry_ptr->flush_dep_height]--;
+
+        /* Check flush dependency heights */
+        chd_flush_dep_height = chd_entry_ptr->flush_dep_height;
+        while( 0 == par_entry_ptr->child_flush_dep_height_rc[chd_flush_dep_height] ) {
+            unsigned prev_par_flush_dep_height = par_entry_ptr->flush_dep_height;       /* Save the previous height */
+            int i;         /* Local index variable */
+
+            /* Check for new flush dependency height of parent */
+            for(i = (H5C__NUM_FLUSH_DEP_HEIGHTS - 1); i >= 0; i--)
+                if(par_entry_ptr->child_flush_dep_height_rc[i] > 0)
+                    break;
+
+            HDassert((i + 1) <= (int)prev_par_flush_dep_height);
+
+            if((unsigned)(i + 1) < prev_par_flush_dep_height) {
+                par_entry_ptr->flush_dep_height = (unsigned)(i + 1);
+                if(i < 0)
+                    par_entry_ptr->is_pinned = FALSE;
+
+                /* Check for parent entry being in flush dependency relationship */
+                if(par_entry_ptr->flush_dep_par_idx >= 0) {
+                    /* Move parent & child entries up the flushd dependency 'chain' */
+                    chd_entry_ptr = par_entry_ptr;
+                    par_base_addr = entries[chd_entry_ptr->flush_dep_par_type];
+                    par_entry_ptr = &(par_base_addr[chd_entry_ptr->flush_dep_par_idx]);
+
+                    /* Adjust the ref. counts in new parent */
+                    HDassert(par_entry_ptr->child_flush_dep_height_rc[prev_par_flush_dep_height] > 0);
+                    par_entry_ptr->child_flush_dep_height_rc[prev_par_flush_dep_height]--;
+                    par_entry_ptr->child_flush_dep_height_rc[chd_entry_ptr->flush_dep_height]++;
+                    chd_flush_dep_height = prev_par_flush_dep_height;
+                } /* end if */
+                else
+                    break;
+            } /* end if */
+            else
+                break;
+        } /* end while */
+    } /* end if */
+
+    return;
+
+} /* destroy_flush_dependency() */
 

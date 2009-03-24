@@ -19,17 +19,23 @@
  *		This file contains common #defines, type definitions, and
  *		externs for tests of the cache implemented in H5C.c
  */
-#include "h5test.h"
-#include "H5Iprivate.h"
-#include "H5ACprivate.h"
+#ifndef _CACHE_COMMON_H
+#define _CACHE_COMMON_H
 
 #define H5C_PACKAGE             /*suppress error about including H5Cpkg   */
-
-#include "H5Cpkg.h"
-
 #define H5F_PACKAGE             /*suppress error about including H5Fpkg   */
 
+/* Include library header files */
+#include "H5ACprivate.h"
+#include "H5Cpkg.h"
 #include "H5Fpkg.h"
+#include "H5Iprivate.h"
+
+/* Include test header files */
+#include "h5test.h"
+
+/* Macro to make error reporting easier */
+#define CACHE_ERROR(s)      {failure_mssg = "Line #" H5_TOSTRING(__LINE__) ": " s ; goto done;}
 
 #define NO_CHANGE       -1
 
@@ -121,7 +127,8 @@
 #define FLUSH_OP__DIRTY		1
 #define FLUSH_OP__RESIZE	2
 #define FLUSH_OP__RENAME	3
-#define FLUSH_OP__MAX_OP	3
+#define FLUSH_OP__ORDER		4
+#define FLUSH_OP__MAX_OP	4
 
 #define MAX_FLUSH_OPS		10	/* Maximum number of flush operations
 					 * that can be associated with a
@@ -138,6 +145,7 @@ typedef struct flush_op
 					 *   FLUSH_OP__DIRTY
 					 *   FLUSH_OP__RESIZE
 					 *   FLUSH_OP__RENAME
+					 *   FLUSH_OP__ORDER
 					 */
     int			type;		/* type code of the cache entry that
 					 * is the target of the operation.
@@ -177,6 +185,10 @@ typedef struct flush_op
 					 * FLUSH_OP__RENAME operation.
 					 * Unused elsewhere.
 					 */
+    unsigned          * order_ptr;      /* Pointer to outside counter for
+                                         * recording the order of entries
+                                         * flushed.
+                                         */
 } flush_op;
 
 typedef struct test_entry_t
@@ -287,6 +299,14 @@ typedef struct test_entry_t
     hbool_t               destroyed;    /* entry has been destroyed since the
                                          * last time it was reset.
                                          */
+    int                 flush_dep_par_type; /* Entry type of flush dependency parent */
+    int                 flush_dep_par_idx; /* Index of flush dependency parent */
+    uint64_t            child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
+                                        /* flush dependency heights of flush
+                                         * dependency children
+                                         */
+    unsigned            flush_dep_height; /* flush dependency height of entry */
+    unsigned            flush_order;    /* Order that entry was flushed in */
 } test_entry_t;
 
 /* The following is a cut down copy of the hash table manipulation
@@ -451,6 +471,14 @@ struct expected_entry_status
     hbool_t		cleared;
     hbool_t		flushed;
     hbool_t		destroyed;
+    int                 flush_dep_par_type; /* Entry type of flush dependency parent */
+    int                 flush_dep_par_idx; /* Index of flush dependency parent */
+    uint64_t            child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
+                                        /* flush dependency heights of flush
+                                         * dependency children
+                                         */
+    unsigned            flush_dep_height; /* flush dependency height of entry */
+    int                 flush_order;    /* flush order of entry */
 };
 
 
@@ -582,7 +610,8 @@ void add_flush_op(int target_type,
                   int type,
                   int idx,
                   hbool_t flag,
-                  size_t size);
+                  size_t size,
+                  unsigned * order);
 
 
 void addr_to_type_and_index(haddr_t addr,
@@ -631,6 +660,10 @@ void protect_entry(H5C_t * cache_ptr,
 void protect_entry_ro(H5C_t * cache_ptr,
                       int32_t type,
                       int32_t idx);
+
+void pin_entry(H5C_t * cache_ptr,
+                 int32_t type,
+                 int32_t idx);
 
 hbool_t entry_in_cache(H5C_t * cache_ptr,
                        int32_t type,
@@ -783,4 +816,18 @@ void verify_entry_status(H5C_t * cache_ptr,
                          struct expected_entry_status expected[]);
 
 void verify_unprotected(void);
+
+void create_flush_dependency(H5C_t * cache_ptr,
+             int32_t parent_type,
+             int32_t parent_idx,
+             int32_t child_type,
+             int32_t child_idx);
+
+void destroy_flush_dependency(H5C_t * cache_ptr,
+             int32_t parent_type,
+             int32_t parent_idx,
+             int32_t child_type,
+             int32_t child_idx);
+
+#endif /* _CACHE_COMMON_H */
 

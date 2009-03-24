@@ -82,7 +82,7 @@ typedef enum access_ {
  * elements. The allocation time is set to H5D_ALLOC_TIME_EARLY. Another
  * routine will open this in parallel for extension test.
  */
-void
+static void
 create_chunked_dataset(const char *filename, int nchunks, write_type write_pattern)
 {
     hid_t       file_id, dataset;                          /* handles */
@@ -98,7 +98,6 @@ create_chunked_dataset(const char *filename, int nchunks, write_type write_patte
     hsize_t     offset[1];            /* Selection offset within dataspace */
     /* Variables used in reading data back */
     char         buffer[CHUNKSIZE];
-    int           i;
 
     herr_t       hrc;
 
@@ -195,7 +194,7 @@ create_chunked_dataset(const char *filename, int nchunks, write_type write_patte
  * opens the dataset. At the end, it verifies the size of the dataset to be
  * consistent with argument 'nchunks'.
  */
-void
+static void
 parallel_access_dataset(const char *filename, int nchunks, access_type action, hid_t *file_id, hid_t *dataset)
 {
     /* HDF5 gubbins */
@@ -203,7 +202,6 @@ parallel_access_dataset(const char *filename, int nchunks, access_type action, h
     hid_t    access_plist;         /* HDF5 ID for file access property list */
     herr_t   hrc;                  /* HDF5 return code */
     hsize_t  size[1];
-    hsize_t  dim_size;
 
     hsize_t     chunk_dims[1] ={CHUNKSIZE};
     hsize_t     count[1];
@@ -217,7 +215,6 @@ parallel_access_dataset(const char *filename, int nchunks, access_type action, h
     /* MPI Gubbins */
     MPI_Offset  filesize,	    /* actual file size */
 		est_filesize;	    /* estimated file size */
-    int         mpierr;
 
     /* Initialize MPI */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
@@ -328,7 +325,8 @@ parallel_access_dataset(const char *filename, int nchunks, access_type action, h
  * 3. it returns correct values when the whole dataset has been written in an
  *    interleaved pattern.
  */
-void verify_data(const char *filename, int nchunks, write_type write_pattern, int close, hid_t *file_id, hid_t *dataset)
+static void
+verify_data(const char *filename, int nchunks, write_type write_pattern, int close, hid_t *file_id, hid_t *dataset)
 {
     /* HDF5 gubbins */
     hid_t    dataspace, memspace;     /* HDF5 file identifier */
@@ -343,12 +341,7 @@ void verify_data(const char *filename, int nchunks, write_type write_pattern, in
     /* Variables used in reading data back */
     char         buffer[CHUNKSIZE];
     int         value, i;
-    int         index, current;
-
-    /* MPI Gubbins */
-    MPI_Offset  filesize,	    /* actual file size */
-		est_filesize;	    /* estimated file size */
-    int         mpierr;
+    int         index;
 
     /* Initialize MPI */
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);

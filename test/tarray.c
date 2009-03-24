@@ -1952,9 +1952,9 @@ test_compat(void)
         /* Check the 1st field's name */
         mname=H5Tget_member_name(tid1,0);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"i")!=0)
+        if(mname && HDstrcmp(mname,"i")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-        free(mname);
+        if(mname) free(mname);
 
         /* Check the 1st field's offset */
         off=H5Tget_member_offset(tid1,0);
@@ -1971,9 +1971,9 @@ test_compat(void)
         /* Check the 2nd field's name */
         mname=H5Tget_member_name(tid1,1);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"f")!=0)
+        if(mname && HDstrcmp(mname,"f")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-        free(mname);
+        if(mname) free(mname);
 
         /* Check the 2nd field's offset */
         off=H5Tget_member_offset(tid1,1);
@@ -2016,9 +2016,9 @@ test_compat(void)
         /* Check the 3rd field's name */
         mname=H5Tget_member_name(tid1,2);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"l")!=0)
+        if(mname && HDstrcmp(mname,"l")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-        free(mname);
+        if(mname) free(mname);
 
         /* Check the 3rd field's offset */
         off=H5Tget_member_offset(tid1,2);
@@ -2061,9 +2061,9 @@ test_compat(void)
         /* Check the 4th field's name */
         mname=H5Tget_member_name(tid1,3);
         CHECK(mname, NULL, "H5Tget_member_name");
-        if(HDstrcmp(mname,"d")!=0)
+        if(mname && HDstrcmp(mname,"d")!=0)
             TestErrPrintf("Compound field name doesn't match!, mname=%s\n",mname);
-        free(mname);
+        if(mname) free(mname);
 
         /* Check the 4th field's offset */
         off=H5Tget_member_offset(tid1,3);

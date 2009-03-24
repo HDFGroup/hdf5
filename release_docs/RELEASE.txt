@@ -1,4 +1,4 @@
-HDF5 version 1.9.34 currently under development
+HDF5 version 1.9.36 currently under development
 ================================================================================
 
 
@@ -98,6 +98,8 @@ New Features
     Tools:
     ------
 
+     - h5import: By selecting a compression type, a big endian byte order was being 
+            selected (PVN - 2009/3/11)
      - h5dump: added a printing of the compression ratio of uncompressed and compressed 
          sizes for cases where compression  filters are present. (PVN - 2008/05/01)
      - h5dump: added an option to allow a user defined formatting string for printf 
@@ -123,6 +125,8 @@ New Features
             The size of the hyperslabs are defined as the size of each dimension or a 
             predefined constant, whatever is smaller. This assures that the chunk 
             read fits in the chunk cache. (PVN - 2008/11/21)
+    
+
 
 
 
@@ -130,6 +134,12 @@ New Features
     ------
      - Table: In version 3.0 of Table, "NROWS" (used to store number of records) was 
            deprecated (PVN - 2008/11/24)
+
+    Fortran High-Level APIs:
+    ------
+     - Lite: The h5ltget_dataset_info_f function (gets information about a dataset) 
+           was not correctly returning the dimension array (PVN - 2009/3/23)
+
     
     Documentation 
     ------------- 
@@ -142,6 +152,15 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a rare problem that could occur with files using the old (pre 1.4)
+            array datatype. (NAF - 2009/03/23)
+      - Modified library to be able to open files with corrupt root group symbol
+            table messages, and correct these errors if they are found.  Such
+            files can only be successfully opened with write access.
+            (NAF - 2009/03/23 - 1189)
+      - Removed the long_long #define and replaced all instances with 
+            "long long". This caused problems with third party products. All 
+            currently supported compliers support the type. (ADB - 2009/03/05)
       - Fixed various bugs that could prevent the fill value from being written
             in certain rare cases. (NAF - 2009/02/26)
       - Fixed a bug that prevented more than one dataset chunk from being cached
@@ -227,6 +246,13 @@ Bug Fixes since HDF5-1.8.0 release
 
     Configuration
     -------------
+    - The --includedir=DIR configuration option now works as intended, and can
+      be used to specify the location to install C header files. The default
+      location remains unchanged, residing at ${prefix}/include. 
+      MAM - 2009/03/10 - BZ #1381
+    - Configure no longer removes the '-g' flag from CFLAGS when in production
+      mode if it has been explicitly set in the CFLAGS environment variable 
+      prior to configuration. MAM - 2009/03/09 - BZ #1401.
     - Fixed error with 'make check install' failing due to h5dump
       needing other tools built first. MAM - 2008/10/24.
     - When using shared szip, it is no longer necessary to specify

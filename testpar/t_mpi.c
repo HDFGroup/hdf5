@@ -697,10 +697,10 @@ static int test_mpio_derived_dtype(char *filename) {
     MPI_Datatype  etype,filetype;
     MPI_Datatype  adv_filetype,bas_filetype[2];
     MPI_Datatype  etypenew, filetypenew;
-    MPI_Offset    disp,dispnew;
+    MPI_Offset    disp;
     MPI_Status    Status;
     MPI_Aint      adv_disp[2];
-    MPI_Aint      offsets[1],adv_offsets[2];
+    MPI_Aint      offsets[1];
     int           blocklens[1],adv_blocklens[2];
     int           count,outcount;
     int           retcode;
@@ -896,9 +896,9 @@ If it turns out that the previous working MPI-IO package no longer works, this t
 we can turn off the support for special collective IO; currently only special collective IO.
 */
 
-static int test_mpio_special_collective(char *filename) {
-
-    char hostname[128];
+static int
+test_mpio_special_collective(char *filename)
+{
     int  mpi_size, mpi_rank;
     MPI_File fh;
     MPI_Datatype etype,buftype,filetype;
@@ -907,12 +907,10 @@ static int test_mpio_special_collective(char *filename) {
     int  mpi_err;
     char writedata[2];
     char *buf;
-    char expect_val;
-    int  i, irank;
+    int  i;
     int  count,bufcount;
     int blocklens[2];
     MPI_Aint offsets[2];
-    int  nerrors = 0;		/* number of errors */
     MPI_Offset  mpi_off;
     MPI_Status  mpi_stat;
     int  retcode;

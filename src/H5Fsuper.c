@@ -383,7 +383,8 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
         H5F_addr_decode(f, (const uint8_t **)&p, &shared->extension_addr/*out*/);
         H5F_addr_decode(f, (const uint8_t **)&p, &stored_eoa/*out*/);
         H5F_addr_decode(f, (const uint8_t **)&p, &shared->driver_addr/*out*/);
-        if(H5G_obj_ent_decode(f, (const uint8_t **)&p, root_loc->oloc/*out*/) < 0)
+        if(H5G_obj_ent_decode(f, (const uint8_t **)&p, root_loc->oloc/*out*/,
+            &shared->root_ent/*out*/) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read root symbol entry")
 
         /*

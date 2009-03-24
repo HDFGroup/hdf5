@@ -1081,7 +1081,8 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
     hbool_t		_must_align = TRUE;
     herr_t      	ret_value=SUCCEED;       /* Return value */
     size_t		alloc_size;
-    void		*copy_buf, *p1, *p3;
+    void		*copy_buf, *p1;
+    const void		*p3;
     size_t		_boundary;
     size_t		_fbsize;
     size_t		_cbsize;
@@ -1187,7 +1188,7 @@ H5FD_direct_write(H5FD_t *_file, H5FD_mem_t UNUSED type, hid_t UNUSED dxpl_id, h
 		    HDmemcpy(p1, p3, copy_size);
 	    	}else if(size >= _cbsize && copy_size > (alloc_size-(size_t)(copy_addr%_fbsize))) {
 		    HDmemcpy(p1, p3, (alloc_size - (size_t)(copy_addr % _fbsize)));
-		    p3 = (unsigned char*)p3 + (alloc_size - (size_t)(copy_addr % _fbsize));
+		    p3 = (const unsigned char *)p3 + (alloc_size - (size_t)(copy_addr % _fbsize));
 	    	}
 
 	    	/*look for the aligned position for writing the data*/

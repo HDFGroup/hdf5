@@ -115,20 +115,23 @@ const H5O_msg_class_t H5O_MSG_DTYPE[1] = {{
  *
  * Purpose:	Decodes a datatype
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:	TRUE if we can upgrade the parent type's version even
+ *                  with strict format checks
+ *              FALSE if we cannot
+ *              Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Monday, December  8, 1997
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static htri_t
 H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **pp, H5T_t *dt)
 {
     unsigned	flags, version;
     unsigned	i;
     size_t	z;
-    herr_t      ret_value = SUCCEED;       /* Return value */
+    htri_t      ret_value = FALSE;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_dtype_decode_helper)
 
@@ -254,6 +257,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                 unsigned offset_nbytes;         /* Size needed to encode member offsets */
                 size_t max_memb_pos = 0;        /* Maximum member covered, so far */
                 unsigned max_version = 0;       /* Maximum member version */
+                hbool_t upgrade_to = 0;         /* Version number we can "soft" upgrade to */
                 unsigned j;
 
                 /* Compute the # of bytes required to store a member offset */
@@ -271,6 +275,7 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
                 for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
                     unsigned ndims = 0;     /* Number of dimensions of the array field */
+                    htri_t can_upgrade;     /* Whether we can upgrade this type's version */
                     hsize_t dim[H5O_LAYOUT_NDIMS];  /* Dimensions of the array */
                     H5T_t *array_dt;    /* Temporary pointer to the array datatype */
                     H5T_t *temp_type;   /* Temporary pointer to the field's datatype */
@@ -318,16 +323,20 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
 
                     /* Decode the field's datatype information */
-                    if(H5O_dtype_decode_helper(f, ioflags, pp, temp_type) < 0) {
+                    if((can_upgrade = H5O_dtype_decode_helper(f, ioflags, pp, temp_type)) < 0) {
                         for(j = 0; j <= i; j++)
                             H5MM_xfree(dt->shared->u.compnd.memb[j].name);
                         H5MM_xfree(dt->shared->u.compnd.memb);
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDECODE, FAIL, "unable to decode member type")
                     } /* end if */
 
-                    /* Keep track of the maximum member version found */
-                    if(temp_type->shared->version > max_version)
-                        max_version = temp_type->shared->version;
+                    /* Upgrade the version if we can and it is necessary */
+                    if(can_upgrade && temp_type->shared->version > version) {
+                        upgrade_to = temp_type->shared->version;
+
+                        /* Pass "can_upgrade" flag down to parent type */
+                        ret_value = TRUE;
+                    } /* end if */
 
                     /* Go create the array datatype now, for older versions of the datatype message */
                     if(version == H5O_DTYPE_VERSION_1) {
@@ -346,8 +355,25 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
 
                             /* Make the array type the type that is set for the field */
                             temp_type = array_dt;
+
+                            /* Reset array version if NOCHANGE is specified (i.e. h5debug) */
+                            if(*ioflags & H5O_DECODEIO_NOCHANGE)
+                                temp_type->shared->version = H5O_DTYPE_VERSION_1;
+                            else {
+                                /* Otherwise upgrade the compound version */
+                                if(upgrade_to < temp_type->shared->version)
+                                    upgrade_to = temp_type->shared->version;
+
+                                /* Set the return value to indicate that we should freely
+                                 * upgrade parent types */
+                                ret_value = TRUE;
+                            } /* end else */
                         } /* end if */
                     } /* end if */
+
+                    /* Keep track of the maximum member version found */
+                    if(temp_type->shared->version > max_version)
+                        max_version = temp_type->shared->version;
 
                     /*
                      * Set the "force conversion" flag if VL datatype fields exist in this
@@ -397,6 +423,17 @@ H5O_dtype_decode_helper(H5F_t *f, unsigned *ioflags/*in,out*/, const uint8_t **p
                             dt->shared->u.compnd.packed = FALSE;
                     } /* end if */
                 } /* end for */
+
+                /* Upgrade the compound if requested */
+                if(version < upgrade_to) {
+                    version = upgrade_to;
+                    if(H5T_upgrade_version(dt, upgrade_to) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't upgrade compound encoding version")
+                    /* We won't mark the message dirty since there were no
+                     * errors in the file, simply type versions that we will no
+                     * longer encode. */
+                } /* end if */
+
                 /* Check that no member of this compound has a version greater
                  * than the compound itself. */
                 H5O_DTYPE_CHECK_VERSION(dt, version, max_version, ioflags, "compound", FAIL)
@@ -1580,11 +1617,11 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
 		"Version:", dt->shared->version);
 
     if (H5T_COMPOUND == dt->shared->type) {
-	fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
+	fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 		"Number of members:",
 		dt->shared->u.compnd.nmembs);
 	for(i = 0; i < dt->shared->u.compnd.nmembs; i++) {
-	    sprintf(buf, "Member %d:", i);
+	    sprintf(buf, "Member %u:", i);
 	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    buf,
 		    dt->shared->u.compnd.memb[i].name);
@@ -1597,11 +1634,11 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
     } else if(H5T_ENUM == dt->shared->type) {
 	fprintf(stream, "%*s%s\n", indent, "", "Base type:");
 	H5O_dtype_debug(f, dxpl_id, dt->shared->parent, stream, indent+3, MAX(0, fwidth-3));
-	fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
+	fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 		"Number of members:",
 		dt->shared->u.enumer.nmembs);
 	for(i = 0; i < dt->shared->u.enumer.nmembs; i++) {
-	    sprintf(buf, "Member %d:", i);
+	    sprintf(buf, "Member %u:", i);
 	    fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
 		    buf,
 		    dt->shared->u.enumer.name[i]);
@@ -1678,7 +1715,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                 s = "disk";
                 break;
             default:
-                sprintf(buf, "H5T_LOC_%d", dt->shared->u.vlen.loc);
+                sprintf(buf, "H5T_LOC_%d", (int)dt->shared->u.vlen.loc);
                 s = buf;
                 break;
         } /* end switch */
@@ -1723,7 +1760,7 @@ H5O_dtype_debug(H5F_t *f, hid_t dxpl_id, const void *mesg, FILE *stream,
                     s);
         } /* end if */
     } else if(H5T_ARRAY == dt->shared->type) {
-	fprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
+	fprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
 		"Rank:",
 		dt->shared->u.array.ndims);
         fprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");

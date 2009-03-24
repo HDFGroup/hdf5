@@ -224,7 +224,7 @@ static void soft_link_example(void)
     const H5L_class_t UD_soft_class[1] = {{
         H5L_LINK_CLASS_T_VERS,      /* Version number for this struct.
                                      * This field is always H5L_LINK_CLASS_T_VERS */
-        UD_SOFT_CLASS,              /* Link class id number. This can be any
+        (H5L_type_t)UD_SOFT_CLASS,  /* Link class id number. This can be any
                                      * value between H5L_TYPE_UD_MIN (64) and
                                      * H5L_TYPE_MAX (255). It should be a
                                      * value that isn't already being used by
@@ -258,7 +258,7 @@ static void soft_link_example(void)
     /* Now create a user-defined link.  We give it the path to the group
      * as its udata.1
      */
-    H5Lcreate_ud(file_id, UD_SOFT_LINK_NAME, UD_SOFT_CLASS, TARGET_GROUP,
+    H5Lcreate_ud(file_id, UD_SOFT_LINK_NAME, (H5L_type_t)UD_SOFT_CLASS, TARGET_GROUP,
                  strlen(TARGET_GROUP) + 1, H5P_DEFAULT, H5P_DEFAULT);
 
     /* We can access the group through the UD soft link like we would through
@@ -327,7 +327,7 @@ static void hard_link_example(void)
     const H5L_class_t UD_hard_class[1] = {{
         H5L_LINK_CLASS_T_VERS,      /* Version number for this struct.
                                      * This field is always H5L_LINK_CLASS_T_VERS */
-        UD_HARD_CLASS,              /* Link class id number. This can be any
+        (H5L_type_t)UD_HARD_CLASS,  /* Link class id number. This can be any
                                      * value between H5L_TYPE_UD_MIN (64) and
                                      * H5L_TYPE_MAX (255). It should be a
                                      * value that isn't already being used by
@@ -368,7 +368,7 @@ static void hard_link_example(void)
     /* Now create a user-defined link.  We give it the group's address
      * as its udata.
      */
-    H5Lcreate_ud(file_id, UD_HARD_LINK_NAME, UD_HARD_CLASS, &(li.u.address),
+    H5Lcreate_ud(file_id, UD_HARD_LINK_NAME, (H5L_type_t)UD_HARD_CLASS, &(li.u.address),
                  sizeof(li.u.address), H5P_DEFAULT, H5P_DEFAULT);
 
     /* The UD hard link has now incremented the group's reference count
@@ -546,7 +546,7 @@ static void plist_link_example(void)
     const H5L_class_t UD_plist_class[1] = {{
         H5L_LINK_CLASS_T_VERS,      /* Version number for this struct.
                                      * This field is always H5L_LINK_CLASS_T_VERS */
-        UD_PLIST_CLASS,             /* Link class id number. This can be any
+        (H5L_type_t)UD_PLIST_CLASS, /* Link class id number. This can be any
                                      * value between H5L_TYPE_UD_MIN (64) and
                                      * H5L_TYPE_MAX (255). It should be a
                                      * value that isn't already being used by
@@ -572,7 +572,7 @@ static void plist_link_example(void)
 
     /* Register "plist links" and create one.  It has no udata at all. */
     H5Lregister(UD_plist_class);
-    H5Lcreate_ud(file_id, "plist_link", UD_PLIST_CLASS, NULL, 0,
+    H5Lcreate_ud(file_id, "plist_link", (H5L_type_t)UD_PLIST_CLASS, NULL, 0,
                  H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create a group access property list to pass in the target for the

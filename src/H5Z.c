@@ -271,17 +271,17 @@ done:
 herr_t
 H5Z_register (const H5Z_class_t *cls)
 {
-    size_t		i;
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    size_t	i;
+    herr_t      ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_register, FAIL)
 
-    assert (cls);
-    assert (cls->id>=0 && cls->id<=H5Z_FILTER_MAX);
+    HDassert(cls);
+    HDassert(cls->id >= 0 && cls->id <= H5Z_FILTER_MAX);
 
     /* Is the filter already registered? */
-    for (i=0; i<H5Z_table_used_g; i++)
-	if (H5Z_table_g[i].id==cls->id)
+    for(i = 0; i < H5Z_table_used_g; i++)
+	if(H5Z_table_g[i].id == cls->id)
             break;
 
     /* Filter not already registered */
@@ -572,7 +572,7 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
                                 break;
 
                             default:
-                                assert("invalid prelude type" && 0);
+                                HDassert("invalid prelude type" && 0);
                         } /* end switch */
                     } /* end else */
                 } /* end for */

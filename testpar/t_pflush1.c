@@ -50,7 +50,8 @@ static double	the_data[100][100];
  *
  *-------------------------------------------------------------------------
  */
-hid_t create_file(char* name, hid_t fapl)
+static hid_t
+create_file(char* name, hid_t fapl)
 {
     hid_t	file, dcpl, space, dset, groups, grp, plist;
     hsize_t	ds_size[2] = {100, 100};
@@ -121,8 +122,7 @@ int
 main(int argc, char* argv[])
 {
     hid_t file1, file2, fapl;
-    MPI_File	mpifh=-2;
-    int		*mpifh_p = NULL;
+    MPI_File	*mpifh_p = NULL;
     char	name[1024];
     const char  *envval = NULL;
     int mpi_size, mpi_rank;

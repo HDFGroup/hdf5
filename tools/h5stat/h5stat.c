@@ -98,9 +98,7 @@ int               d_status = EXIT_SUCCESS;
 static int        display_all = TRUE;
 static int        display_file_metadata = FALSE;
 static int        display_file = FALSE;
-static int        display_group_metadata = FALSE;
 static int        display_group = FALSE;
-static int        display_dset_metadata = FALSE;
 static int        display_dset = FALSE;
 static int        display_dtype_metadata = FALSE;
 static int        display_object = FALSE;
@@ -698,7 +696,6 @@ parse_command_line(int argc, const char *argv[])
 
             case 'G':
                 display_all = FALSE;
-                display_group_metadata = TRUE;
                 break;
 
             case 'g':
@@ -713,7 +710,6 @@ parse_command_line(int argc, const char *argv[])
 
             case 'D':
                 display_all = FALSE;
-                display_dset_metadata = TRUE;
                 break;
 
             case 'd':
@@ -1106,7 +1102,6 @@ print_file_statistics(const iter_t *iter)
         display_file = TRUE;
         display_file_metadata = TRUE;
         display_group = TRUE;
-        display_group_metadata = TRUE;
         display_dset = TRUE;
         display_dtype_metadata = TRUE;
         display_attr = TRUE;

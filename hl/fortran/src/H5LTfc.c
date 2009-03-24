@@ -1247,6 +1247,7 @@ nh5ltget_dataset_info_c(hid_t_f *loc_id,
  size_t       c_type_size;
  hsize_t      c_dims[32];
  int          i;
+ int          c_rank;
 
 /*
  * Convert FORTRAN name to C name
@@ -1261,15 +1262,23 @@ nh5ltget_dataset_info_c(hid_t_f *loc_id,
  c_loc_id = (hid_t)*loc_id;
 
  ret = H5LTget_dataset_info(c_loc_id, c_name, c_dims, &c_classtype, &c_type_size);
+ if (ret < 0) return ret_value;
 
  *type_class = c_classtype;
  *type_size = (size_t_f)c_type_size;
- for (i = 0; i < 32 ; i++) {
-  dims[i] = (hsize_t_f) c_dims[i];
+
+ /*
+ * Transpose dimension arrays because of C-FORTRAN storage order
+ */
+
+ ret = H5LTget_dataset_ndims(c_loc_id, c_name, &c_rank);
+ if (ret < 0) return ret_value;
+
+ for (i = 0; i < c_rank ; i++) {
+  dims[i] = (hsize_t_f) c_dims[c_rank - i - 1];
  }
 
 
- if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
 }
@@ -1375,6 +1384,7 @@ nh5ltget_attribute_info_c(hid_t_f *loc_id,
  size_t       c_type_size;
  hsize_t      c_dims[32];
  int          i;
+ int          c_rank;
 
 /*
  * Convert FORTRAN name to C name
@@ -1388,20 +1398,27 @@ nh5ltget_attribute_info_c(hid_t_f *loc_id,
  if (c_attrname == NULL) return ret_value;
 
 /*
- * Call H5LTget_dataset_ndims function.
+ * Call H5LTget_attribute_info function.
  */
  c_loc_id = (hid_t)*loc_id;
 
  ret = H5LTget_attribute_info(c_loc_id,c_name,c_attrname,c_dims,&c_classtype,&c_type_size);
+ if (ret < 0) return ret_value;
 
  *type_class = c_classtype;
  *type_size = (size_t_f)c_type_size;
- for (i = 0; i < 32 ; i++) {
-  dims[i] = (hsize_t_f) c_dims[i];
+
+/*
+ * Transpose dimension arrays because of C-FORTRAN storage order
+ */
+
+ ret = H5LTget_attribute_ndims(c_loc_id,c_name,c_attrname,&c_rank);
+ if (ret < 0) return ret_value;
+
+ for (i = 0; i < c_rank ; i++) {
+  dims[i] = (hsize_t_f) c_dims[c_rank - i - 1];
  }
 
-
- if (ret < 0) return ret_value;
  ret_value = 0;
  return ret_value;
 }

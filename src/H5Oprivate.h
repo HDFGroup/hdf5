@@ -79,6 +79,7 @@ typedef struct H5O_t H5O_t;
 
 /* Flags for updating messages */
 #define H5O_UPDATE_TIME         0x01u
+#define H5O_UPDATE_FORCE        0x02u   /* Force updating the message */
 
 /* Hash value constants */
 #define H5O_HASH_SIZE 32

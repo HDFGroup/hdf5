@@ -379,6 +379,7 @@ character(LEN=5), parameter :: dsetname3 = "dset3"          ! Dataset name
 character(LEN=5), parameter :: dsetname4 = "dset4"          ! Dataset name
 integer(HID_T) :: file_id                                   ! File identifier 
 integer(HSIZE_T), dimension(3) :: dims = (/DIM1,DIM2,DIM3/) ! Dataset dimensions
+integer(HSIZE_T), dimension(3) :: dimsr                     ! Dataset dimensions
 integer, dimension(DIM1*DIM2*DIM3) :: buf                   ! Data buffer
 integer, dimension(DIM1*DIM2*DIM3) :: bufr                  ! Data buffer
 integer, dimension(DIM1,DIM2,DIM3) :: buf2                  ! Data buffer
@@ -390,6 +391,8 @@ double precision, dimension(DIM1,DIM2,DIM3) :: buf4r        ! Data buffer
 integer        :: rank = 3                                  ! Dataset rank
 integer        :: errcode                                   ! Error flag
 integer        :: i, j, k, n                                ! general purpose integers
+integer          :: type_class
+integer(SIZE_T)  :: type_size
 
 call test_begin(' Make/Read datasets (3D)        ')
 
@@ -537,6 +540,18 @@ do i = 1, dims(1)
  end do
 end do
 
+call h5ltget_dataset_info_f(file_id,dsetname4,dimsr,type_class,type_size,errcode ) 
+
+!
+! compare dimensions
+!
+do i = 1, rank
+ if ( dimsr(i) .ne. dims(i) ) then
+   print *, 'dimensions differ '
+   stop
+  endif
+end do
+
 !
 ! Close the file.
 !
@@ -574,6 +589,7 @@ character(LEN=5), parameter :: dsetname1 = "dset1"   ! Dataset name
 character(LEN=5), parameter :: dsetname2 = "dset2"   ! Dataset name
 character(LEN=5), parameter :: dsetname3 = "dset3"   ! Dataset name
 character(LEN=5), parameter :: dsetname4 = "dset4"   ! Dataset name
+character(LEN=5), parameter :: dsetname5 = "dset5"   ! Dataset name
 integer(HSIZE_T), dimension(1) :: dims = (/DIM1/)    ! Dataset dimensions
 integer(HSIZE_T), dimension(1) :: dimsr              ! Dataset dimensions
 integer        :: rank = 1                           ! Dataset rank
@@ -701,7 +717,7 @@ end do
 
 call passed()
 
-call test_begin(' Get dataset dimensions         ')
+call test_begin(' Get dataset dimensions/info    ')
 
 !-------------------------------------------------------------------------
 ! h5ltget_dataset_ndims_f 
@@ -713,20 +729,39 @@ if ( rankr .ne. rank ) then
  stop
 endif
 
-call passed()
 
 !-------------------------------------------------------------------------
-! test find dataset function
+! test h5ltfind_dataset_f function
 !-------------------------------------------------------------------------
 
-call test_begin(' Find dataset                   ')
+
+has = h5ltfind_dataset_f(file_id,dsetname4)
+if ( has .ne. 1 ) then
+ print *, 'h5ltfind_dataset_f return error'
+ stop
+endif
+
+!-------------------------------------------------------------------------
+! test h5ltget_dataset_info_f function
+!-------------------------------------------------------------------------
 
 
-!has = h5ltfind_dataset_f(file_id,dsetname4)
-!if ( has .ne. 1 ) then
-! print *, 'h5ltfind_dataset_f return error'
-! stop
-!endif
+call h5ltget_dataset_info_f(file_id,dsetname4,dimsr,type_class,type_size,errcode ) 
+
+!
+! compare dimensions
+!
+do i = 1, rank
+ if ( dimsr(i) .ne. dims(i) ) then
+   print *, 'dimensions differ '
+   stop
+  endif
+end do
+
+if ( type_class .ne. 1 ) then ! H5T_FLOAT
+   print *, 'wrong type class '
+   stop
+endif
 
 !
 ! Close the file.
@@ -756,15 +791,16 @@ use HDF5 ! module of HDF5 library
 
 implicit none
 
-character(len=9), parameter :: filename = "dsetf4.h5"! File name
+character(len=9), parameter :: filename = "dsetf5.h5"! File name
 integer(HID_T) :: file_id                            ! File identifier 
 integer, parameter :: DIM1 = 10;                     ! Dimension of array
 character(LEN=5), parameter :: attrname1 = "attr1"   ! Attribute name
 character(LEN=5), parameter :: attrname2 = "attr2"   ! Attribute name
 character(LEN=5), parameter :: attrname3 = "attr3"   ! Attribute name
 character(LEN=5), parameter :: attrname4 = "attr4"   ! Attribute name
-character(LEN=8), parameter :: buf1 = "mystring"     ! Data buffer
-character(LEN=8)                  :: bufr1           ! Data buffer
+character(LEN=5), parameter :: attrname5 = "attr5"   ! Attribute name
+character(LEN=9), parameter :: buf1 = "mystring"     ! Data buffer
+character(LEN=9)                  :: bufr1           ! Data buffer
 integer, dimension(DIM1)          :: buf2            ! Data buffer
 integer, dimension(DIM1)          :: bufr2           ! Data buffer
 real, dimension(DIM1)             :: buf3            ! Data buffer
@@ -900,12 +936,11 @@ end do
 
 call passed()
 
-
 !-------------------------------------------------------------------------
 ! get attribute rank
 !-------------------------------------------------------------------------
 
-call test_begin(' Get attribute rank             ')
+call test_begin(' Get attribute rank/info        ')
 
 
 call h5ltget_attribute_ndims_f(file_id,dsetname1,attrname2,rankr,errcode) 
@@ -914,6 +949,19 @@ if ( rankr .ne. 1 ) then
  print *, 'h5ltget_attribute_ndims_f return error'
  stop
 endif
+
+
+call h5ltget_attribute_info_f(file_id,dsetname1,attrname2,dimsr,type_class,type_size,errcode) 
+
+!
+! compare dimensions
+!
+do i = 1, rank
+ if ( dimsr(i) .ne. dims(i) ) then
+   print *, 'dimensions differ '
+   stop
+  endif
+end do
 
 
 !

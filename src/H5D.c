@@ -368,14 +368,13 @@ done:
 herr_t
 H5Dclose(hid_t dset_id)
 {
-    H5D_t	*dset;	                /* Dataset object to release */
     herr_t       ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(H5Dclose, FAIL)
     H5TRACE1("e", "i", dset_id);
 
     /* Check args */
-    if(NULL == (dset = (H5D_t *)H5I_object_verify(dset_id, H5I_DATASET)))
+    if(NULL == H5I_object_verify(dset_id, H5I_DATASET))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a dataset")
 
     /*

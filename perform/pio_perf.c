@@ -427,7 +427,6 @@ run_test_loop(struct options *opts)
     parameters parms;
     int num_procs;
     int doing_pio;      /* if this process is doing PIO */
-    off_t snbytes;
 
     parms.num_files = opts->num_files;
     parms.num_dsets = opts->num_dsets;

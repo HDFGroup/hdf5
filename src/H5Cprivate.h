@@ -32,7 +32,7 @@
 
 #include "H5Cpublic.h"		/*public prototypes			     */
 
-/* Pivate headers needed by this header */
+/* Private headers needed by this header */
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Fprivate.h"		/* File access				*/
 
@@ -182,6 +182,14 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
 
 #define H5C__DEFAULT_MAX_CACHE_SIZE     ((size_t)(4 * 1024 * 1024))
 #define H5C__DEFAULT_MIN_CLEAN_SIZE     ((size_t)(2 * 1024 * 1024))
+
+/* Maximum height of flush dependency relationships between entries.  This is
+ * currently tuned to the extensible array (H5EA) data structure, which only
+ * requires 4 levels of dependency (i.e. heights 0-4).
+ */
+
+#define H5C__NUM_FLUSH_DEP_HEIGHTS            4
+
 
 
 /****************************************************************************
@@ -495,6 +503,12 @@ typedef struct H5C_cache_entry_t
     hbool_t		flush_in_progress;
     hbool_t		destroy_in_progress;
     hbool_t		free_file_space_on_destroy;
+
+    /* fields supporting the 'flush dependency height': */
+
+    struct H5C_cache_entry_t *	flush_dep_parent;
+    uint64_t            child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
+    unsigned            flush_dep_height;
 
     /* fields supporting the hash table: */
 
@@ -1040,6 +1054,9 @@ H5_DLL herr_t H5C_rename_entry(H5C_t *             cache_ptr,
 H5_DLL herr_t H5C_pin_protected_entry(H5C_t * cache_ptr,
                                       void *  thing);
 
+H5_DLL herr_t H5C_create_flush_dependency(H5C_t *cache_ptr, void *parent_thing,
+    void *child_thing);
+
 H5_DLL void * H5C_protect(H5F_t *             f,
                           hid_t               primary_dxpl_id,
                           hid_t               secondary_dxpl_id,
@@ -1078,6 +1095,9 @@ H5_DLL herr_t H5C_stats(H5C_t * cache_ptr,
 H5_DLL void H5C_stats__reset(H5C_t * cache_ptr);
 
 H5_DLL herr_t H5C_unpin_entry(H5C_t * cache_ptr, void * thing);
+
+H5_DLL herr_t H5C_destroy_flush_dependency(H5C_t *cache_ptr, void *parent_thing,
+    void *child_thing);
 
 H5_DLL herr_t H5C_unprotect(H5F_t *             f,
                             hid_t               primary_dxpl_id,

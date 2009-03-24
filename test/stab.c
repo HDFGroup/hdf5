@@ -75,6 +75,12 @@ const char *FILENAME[] = {
 /* Definitions for 'old_api' test */
 #define OLD_API_GROUP           "/old_api"
 
+/* Definitions for 'corrupt_stab_msg' test */
+#define CORRUPT_STAB_FILE           "corrupt_stab_msg.h5"
+#define CORRUPT_STAB_TMP_FILE       "corrupt_stab_msg_tmp.h5"
+#define CORRUPT_STAB_COPY_BUF_SIZE  4096
+#define CORRUPT_STAB_DSET           "DS1"
+
 
 /*-------------------------------------------------------------------------
  * Function:	test_misc
@@ -1084,6 +1090,121 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    corrupt_stab_msg
+ *
+ * Purpose:     Test that a corrupt symbol table message can be fixed
+ *              using the cached symbol table information.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              Wednesday, March 18, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+corrupt_stab_msg(void)
+{
+    char testfile[512]="";              /* Character buffer for corrected test file name */
+    char *srcdir = HDgetenv("srcdir");  /* Pointer to the directory the source code is located within */
+    FILE        *tmp_fp, *old_fp;       /* Pointers to temp & old files */
+    void        *copy_buf;              /* Pointer to buffer for copying data */
+    size_t      written;                /* Amount of data written to new file */
+    size_t      read_in;                /* Amount of data read in from old file */
+    hid_t       fid = (-1);             /* File ID */
+    hid_t       did = (-1);             /* Dataset ID */
+
+    TESTING("corrupt symbol table message");
+
+    /* Generate the correct name for the test file, by prepending the source path */
+    if(srcdir && ((HDstrlen(srcdir) + HDstrlen(CORRUPT_STAB_FILE) + 1) < sizeof(testfile))) {
+        HDstrcpy(testfile, srcdir);
+        HDstrcat(testfile, "/");
+    }
+    HDstrcat(testfile, CORRUPT_STAB_FILE);
+
+    /* Open the temporary file */
+    if(NULL == (tmp_fp = HDfopen(CORRUPT_STAB_TMP_FILE,"wb"))) TEST_ERROR
+
+    /* Open the old file */
+    if(NULL == (old_fp = fopen(testfile,"rb"))) TEST_ERROR
+
+    /* Allocate space for the copy buffer */
+    if(NULL == (copy_buf = HDmalloc((size_t)CORRUPT_STAB_COPY_BUF_SIZE))) TEST_ERROR
+
+    /* Copy data from the old file to the new file */
+    while((read_in = HDfread(copy_buf, (size_t)1, (size_t)CORRUPT_STAB_COPY_BUF_SIZE, old_fp)) > 0)
+        /* Write the data to the new file */
+        if(read_in != (written = HDfwrite(copy_buf, (size_t)1, read_in, tmp_fp))) TEST_ERROR
+
+    /* Close the old file */
+    if(HDfclose(old_fp)) TEST_ERROR
+
+    /* Close the new file */
+    if(HDfclose(tmp_fp)) TEST_ERROR
+
+    /* Free the copy buffer */
+    free(copy_buf);
+
+#ifndef H5_STRICT_FORMAT_CHECKS
+    /* Open temp file through HDF5 library */
+    if((fid = H5Fopen(CORRUPT_STAB_TMP_FILE, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Open dataset */
+    if((did = H5Dopen2(fid, CORRUPT_STAB_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Close dataset and file */
+    if(H5Dclose(did) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+    /* Now reopen with read only access.  This verifies that the issue has been
+     * corrected, as the symbol table message is not patched in read only mode.
+     */
+
+    /* Open file */
+    if((fid = H5Fopen(CORRUPT_STAB_TMP_FILE, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Open dataset */
+    if((did = H5Dopen2(fid, CORRUPT_STAB_DSET, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Close dataset and file */
+    if(H5Dclose(did) < 0) TEST_ERROR
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+#else /* H5_STRICT_FORMAT_CHECKS */
+    /* Open file */
+    if((fid = H5Fopen(CORRUPT_STAB_TMP_FILE, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Verify that an error is thrown when we try to access the dataset */
+    H5E_BEGIN_TRY {
+        did = H5Dopen2(fid, CORRUPT_STAB_DSET, H5P_DEFAULT);
+    } H5E_END_TRY
+    if(did >= 0) TEST_ERROR
+
+    /* Close file */
+    if(H5Fclose(fid) < 0) TEST_ERROR
+
+#endif /* H5_STRICT_FORMAT_CHECKS */
+    /* Remove temporary file */
+    if(HDremove(CORRUPT_STAB_TMP_FILE)) TEST_ERROR
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+    	H5Dclose(did);
+    	H5Fclose(fid);
+    } H5E_END_TRY;
+    HDremove(CORRUPT_STAB_TMP_FILE);
+
+    return 1;
+} /* end old_api() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Test groups
@@ -1133,6 +1254,7 @@ main(void)
 
     /* Old group API specific tests */
     nerrors += old_api(fapl);
+    nerrors += corrupt_stab_msg();
 
     /* Close 2nd FAPL */
     H5Pclose(fapl2);
@@ -1152,3 +1274,4 @@ error:
     puts("*** TESTS FAILED ***");
     return 1;
 }
+
