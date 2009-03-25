@@ -831,7 +831,7 @@ test_family_compat(void)
     if((file = H5Fopen(pathname, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
 
-    if((dset = H5Dopen(file, dname, H5P_DEFAULT)) < 0)
+    if((dset = H5Dopen2(file, dname, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if(H5Dclose(dset) < 0)
@@ -844,7 +844,7 @@ test_family_compat(void)
     if((file = H5Fopen(pathname, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
 
-    if((dset = H5Dopen(file, dname, H5P_DEFAULT)) < 0)
+    if((dset = H5Dopen2(file, dname, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
     if(H5Dclose(dset) < 0)

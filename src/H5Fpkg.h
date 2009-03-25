@@ -134,7 +134,6 @@ typedef struct H5F_file_t {
     unsigned	sohm_vers;	/* Version of shared message table on disk */
     unsigned	sohm_nindexes;	/* Number of shared messages indexes in the table */
     haddr_t	driver_addr;	/* File driver information block address*/
-    hbool_t     write_driver;   /* Whether to write file driver block in the superblock */
     unsigned long feature_flags; /* VFL Driver feature Flags            */
     haddr_t	maxaddr;	/* Maximum address for file             */
 
