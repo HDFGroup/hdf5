@@ -650,7 +650,7 @@ int do_copy_objects(hid_t fidin,
                 {
                     
                     int      j;
-                    
+                   
                     if((dset_in = H5Dopen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
                         goto error;
                     if((f_space_id = H5Dget_space(dset_in)) < 0)
@@ -790,8 +790,12 @@ int do_copy_objects(hid_t fidin,
                                      */
                                     sm_nbytes = p_type_nbytes;
 
-                                    for (k = rank; k > 0; --k) {
-                                        sm_size[k - 1] = MIN(dims[k - 1], H5TOOLS_BUFSIZE / sm_nbytes);
+                                    for (k = rank; k > 0; --k) 
+                                    {
+                                        hsize_t size = H5TOOLS_BUFSIZE / sm_nbytes;
+                                        if ( size == 0) /* datum size > H5TOOLS_BUFSIZE */
+                                            size = 1;
+                                        sm_size[k - 1] = MIN(dims[k - 1], size);
                                         sm_nbytes *= sm_size[k - 1];
                                         assert(sm_nbytes > 0);
                                     }
