@@ -2,133 +2,166 @@
 <!-- HEADER RIGHT "H5Pcreate_class" -->
 <hr>
 <dl>
+  <dt><div align=right><font color=999999 size=-1><i>
+      Last modified: 26 March 2009
+      </i></font></div>
+
   <dt><strong>Name:</strong> <a name="Property-CreateClass">H5Pcreate_class</a>
 
   <dt><strong>Signature:</strong>
     <dd><em>hid_t</em> <code>H5Pcreate_class</code>(
-                 <em>hid_t</em> <code>class</code>,
+                 <em>hid_t</em> <code>parent_class</code>,
                  <em>const char *</em><code>name</code>,
                  <em>H5P_cls_create_func_t</em> <code>create</code>,
+                 <em>void *</em><code>create_data</code>,
                  <em>H5P_cls_copy_func_t</em> <code>copy</code>,
-                 <em>H5P_cls_close_func_t</em> <code>close</code>
+                 <em>void *</em><code>copy_data</code>,
+                 <em>H5P_cls_close_func_t</em> <code>close</code>,
+                 <em>void *</em><code>close_data</code>
          )
 
+  <p>
   <dt><strong>Purpose:</strong>
     <dd>Creates a new property list class.
 
+  <p>
   <dt><strong>Description:</strong>
     <dd><code>H5Pcreate_class</code> registers a new property list class 
-	with the library.  
-	The new property list class can inherit from an existing property 
-    list class or may be derived from the default "empty" class.  
-	New classes with inherited properties from existing classes 
-    may not remove those existing properties, only add or remove 
-    their own class properties.
-    </P>
-	
-	The <code>create</code> routine is called when a new property list 
-	of this class is being created.  
-	The <code>H5P_cls_create_func_t</code> callback function is defined 
-	as follows:
-    <ul><em>typedef herr_t</em> (*<code>H5P_cls_create_func_t</code>)(
+        with the library.  
+        The new property list class can inherit from an existing property 
+        list class, <code>parent_class</code>, or may be derived from the 
+        default &ldquo;empty&rdquo; class, <code>NULL</code>.  
+        New classes with inherited properties from existing classes 
+        may not remove those existing properties, only add or remove 
+        their own class properties.
+        Property list classes defined and supported in the HDF5 Library
+        distribution are listed and briefly described in 
+        <a href="#Property-Create"><code>H5Pcreate</code></a>.
+        <p></P>
+        
+        The <code>create</code> routine is called when a new property list 
+        of this class is being created.  
+        The <code>H5P_cls_create_func_t</code> callback function is defined 
+        as follows:
+        <ul><em>typedef herr_t</em> (*<code>H5P_cls_create_func_t</code>)(
             <em>hid_t</em> <code>prop_id</code>,
             <em>void *</em> <code>create_data</code>
             );
-    </ul>
-    The parameters to this callback function are defined as follows:
-    <ul><table>
-      <tr>
-        <td><em>hid_t</em> <code>prop_id</code></td>
-        <td>IN: The identifier of the property list being created</td></tr>
-      <tr>
-        <td><em>void *</em> <code>create_data</code></td>
-        <td>IN/OUT: User pointer to any class creation information needed</td></tr>
-    </table></ul>
-    The <code>create</code> routine is called after any registered 
-	<code>create</code> function is called for each property value.  
-    If the <code>create</code> routine returns a negative value, 
-    the new list is not returned to the user and the
-    property list creation routine returns an error value.
-    </P>
-	
-	The <code>copy</code> routine is called when an existing property list 
-    of this class is copied.  
-	The <code>H5P_cls_copy_func_t</code> callback function  
-	is defined as follows:
+        </ul>
+        The parameters to this callback function are defined as follows:
+        <ul><table>
+            <tr>
+              <td valign=top><em>hid_t</em> <code>prop_id</code></td>
+              <td>IN: The identifier of the property list being created</td></tr>
+            <tr>
+              <td valign=top><em>void&nbsp;*</em>&nbsp;<code>create_data&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+              <td>IN: User pointer to any <i>class creation</i> data 
+                  required</td></tr>
+        </table></ul>
+
+        The <code>create</code> routine is called after any registered 
+        <code>create</code> function is called for each property value.  
+        If the <code>create</code> routine returns a negative value, 
+        the new list is not returned to the user and the
+        property list creation routine returns an error value.
+        <p></P>
+
+        The <code>copy</code> routine is called when an existing property list 
+        of this class is copied.  
+        The <code>H5P_cls_copy_func_t</code> callback function  
+        is defined as follows:
         <ul><em>typedef herr_t</em> (*<code>H5P_cls_copy_func_t</code>)(
             <em>hid_t</em> <code>prop_id</code>,
             <em>void *</em> <code>copy_data</code>
             );
         </ul>
-    The parameters to this callback function are defined as follows:
-    <ul><table>
-      <tr>
-        <td><em>hid_t</em> <code>prop_id</code></td>
-        <td>IN: The identifier of the property list created by copying</td></tr>
-      <tr>
-        <td><em>void *</em> <code>copy_data</code></td>
-        <td>IN/OUT: User pointer to any class copy information needed</td></tr>
-    </table></ul>
-    The <code>copy</code> routine is called after any registered 
-	<code>copy</code> function is called for each property value.  
-    If the <code>copy</code> routine returns a negative value, the new list 
-    is not returned to the user and the property list copy routine returns 
-    an error value.
-    </P>
+        The parameters to this callback function are defined as follows:
+        <ul><table>
+            <tr>
+              <td valign=top><em>hid_t</em> <code>prop_id</code></td>
+              <td>IN: The identifier of the property list created by 
+                  copying</td></tr>
+            <tr>
+              <td valign=top><em>void&nbsp;*</em>&nbsp;<code>copy_data&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+              <td>IN: User pointer to any <i>class copy</i> data 
+                  required</td></tr>
+        </table></ul>
+        The <code>copy</code> routine is called after any registered 
+        <code>copy</code> function is called for each property value.  
+        If the <code>copy</code> routine returns a negative value, the new list 
+        is not returned to the user and the property list copy routine returns 
+        an error value.
+        <p></P>
 
-	The <code>close</code> routine is called when a property list of this 
-	class
-    is being closed.  
-	The <code></code>H5P_cls_close_func_t</code> callback function is defined 
-	as follows:
+        The <code>close</code> routine is called when a property list of this 
+        class
+        is being closed.  
+        The <code>H5P_cls_close_func_t</code> callback function is defined 
+        as follows:
         <ul><em>typedef herr_t</em> (*<code>H5P_cls_close_func_t</code>)(
             <em>hid_t</em> <code>prop_id</code>,
             <em>void *</em> <code>close_data</code>
             );
         </ul>
-    The parameters to this callback function are defined as follows:
-    <ul><table>
-      <tr>
-        <td><em>hid_t</em> <code>prop_id</code></td>
-        <td>IN: The identifier of the property list being closed</td></tr>
-      <tr>
-        <td><em>void *</em> <code>close_data</code></td>
-        <td>IN/OUT: User pointer to any class close information needed</td></tr>
-    </table></ul>
-    The <code>close</code> routine is called before any registered 
-	<code>close</code> function is called for each property value.  
-    If the <code>close</code> routine returns a negative value, 
-    the property list close routine returns an error value 
-    but the property list is still closed.
-	
+        The parameters to this callback function are defined as follows:
+        <ul><table>
+            <tr>
+              <td valign=top><em>hid_t</em> <code>prop_id</code></td>
+              <td>IN: The identifier of the property list being closed</td></tr>
+            <tr>
+              <td valign=top><em>void&nbsp;*</em>&nbsp;<code>close_data&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+              <td>IN: User pointer to any <i>class close</i> data 
+                  required</td></tr>
+        </table></ul>
+        The <code>close</code> routine is called before any registered 
+        <code>close</code> function is called for each property value.  
+        If the <code>close</code> routine returns a negative value, 
+        the property list close routine returns an error value 
+        but the property list is still closed.
+        
+  <p>
   <dt><strong>Parameters:</strong>
     <ul><table>
-    <tr>
-        <td><em>hid_t</em> <code>class</code></td>
-        <td>IN: Property list class to inherit from.</td></tr>
-    <tr>
-        <td><em>const char *</em><code>name</code></td>
+        <tr>
+        <td valign=top><em>hid_t</em> <code>parent_class</code></td>
+        <td>IN: Property list class to inherit from or <code>NULL</code></td></tr>
+        <tr>
+        <td valign=top><em>const char *</em><code>name</code></td>
         <td>IN: Name of property list class to register</td></tr>
-    <tr>
-        <td><em>H5P_cls_create_func_t</em>&nbsp;<code>create&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+        <tr>
+        <td valign=top><em>H5P_cls_create_func_t</em>&nbsp;<code>create&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
         <td>IN: Callback routine called when a property list is created</td></tr>
-    <tr>
-        <td><em>H5P_cls_copy_func_t</em> <code>copy</code></td>
+        <tr>
+        <td valign=top><em>void *</em><code>create_data</code></td>
+        <td>IN: Pointer to user-defined <i>class create</i> data, to be
+                    passed along to <i>class create</i> callback</td></tr>
+        <tr>
+        <td valign=top><em>H5P_cls_copy_func_t</em> <code>copy</code></td>
         <td>IN: Callback routine called when a property list is copied</td></tr>
-    <tr>
-        <td><em>H5P_cls_close_func_t</em> <code>close</code></td>
+        <tr>
+        <td valign=top><em>void *</em><code>copy_data</code></td>
+        <td>IN: Pointer to user-defined <i>class copy</i> data, to be
+                    passed along to <i>class copy</i> callback</td></tr>
+        <tr>
+        <td valign=top><em>H5P_cls_close_func_t</em> <code>close</code></td>
         <td>IN: Callback routine called when a property list is being closed</td></tr>
-    </table>
+        <tr>
+        <td valign=top><em>void *</em><code>close_data</code></td>
+        <td>IN: Pointer to user-defined <i>class close</i> data, to be
+                    passed along to <i>class close</i> callback</td></tr>
+        </table>
     </ul>
-	
+
+  <p>
   <dt><strong>Returns:</strong>
-    <dd>Success: a valid property list class identifier
-    <dd>Failure: a negative value
+    <dd>On success, returns a valid property list class identifier;
+      otherwise returns a negative value.
 
 <!-- NEW PAGE -->
+  <p>
   <dt><strong>Fortran90 Interface:</strong> h5pcreate_class_f
     <dd>
-	<pre>
+    <pre>
 SUBROUTINE h5pcreate_class_f(parent, name, class, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: parent  ! Parent property list class 
@@ -145,14 +178,8 @@ SUBROUTINE h5pcreate_class_f(parent, name, class, hdferr)
   INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                         ! 0 on success and -1 on failure
 END SUBROUTINE h5pcreate_class_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
+    </pre>
+
 </dl>
 
 
