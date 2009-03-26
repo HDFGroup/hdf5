@@ -178,7 +178,7 @@ END_FUNC(PKG)   /* end H5EA__iblock_alloc() */
  */
 BEGIN_FUNC(PKG, ERR,
 haddr_t, HADDR_UNDEF, HADDR_UNDEF,
-H5EA__iblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty))
+H5EA__iblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *stats_changed))
 
     /* Local variables */
     H5EA_iblock_t *iblock = NULL;       /* Extensible array index block */
@@ -190,7 +190,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Sanity check */
     HDassert(hdr);
-    HDassert(hdr_dirty);
+    HDassert(stats_changed);
 
     /* Allocate the index block */
     if(NULL == (iblock = H5EA__iblock_alloc(hdr)))
@@ -235,16 +235,16 @@ HDfprintf(stderr, "%s: iblock->size = %Zu\n", FUNC, iblock->size);
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array index block to cache")
 
     /* Update extensible array index block statistics */
-    HDassert(0 == hdr->stats.nindex_blks);
-    HDassert(0 == hdr->stats.index_blk_size);
-    hdr->stats.nindex_blks = 1;
-    hdr->stats.index_blk_size = iblock->size;
+    HDassert(0 == hdr->stats.computed.nindex_blks);
+    HDassert(0 == hdr->stats.computed.index_blk_size);
+    hdr->stats.computed.nindex_blks = 1;
+    hdr->stats.computed.index_blk_size = iblock->size;
 
     /* Increment count of elements "realized" */
-    hdr->stats.nelmts += hdr->cparam.idx_blk_elmts;
+    hdr->stats.stored.nelmts += hdr->cparam.idx_blk_elmts;
 
-    /* Mark the header dirty (for updating statistics) */
-    *hdr_dirty = TRUE;
+    /* Mark the statistics as changed */
+    *stats_changed = TRUE;
 
     /* Set address of index block to return */
     ret_value = iblock_addr;

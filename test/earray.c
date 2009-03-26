@@ -312,51 +312,51 @@ check_stats(const H5EA_t *ea, const earray_state_t *state)
         FAIL_STACK_ERROR
 
     /* Compare information */
-    if(earray_stats.max_idx_set != state->max_idx_set) {
-        HDfprintf(stdout, "earray_stats.max_idx_set = %Hu, state->max_idx_set = %Hu\n", earray_stats.max_idx_set, state->max_idx_set);
+    if(earray_stats.stored.max_idx_set != state->max_idx_set) {
+        HDfprintf(stdout, "earray_stats.stored.max_idx_set = %Hu, state->max_idx_set = %Hu\n", earray_stats.stored.max_idx_set, state->max_idx_set);
         TEST_ERROR
     } /* end if */
-    if(earray_stats.nelmts != state->nelmts) {
-        HDfprintf(stdout, "earray_stats.nelmts = %Hu, state->nelmts = %Hu\n", earray_stats.nelmts, state->nelmts);
+    if(earray_stats.stored.nelmts != state->nelmts) {
+        HDfprintf(stdout, "earray_stats.stored.nelmts = %Hu, state->nelmts = %Hu\n", earray_stats.stored.nelmts, state->nelmts);
         TEST_ERROR
     } /* end if */
-    if(earray_stats.hdr_size != state->hdr_size) {
-        HDfprintf(stdout, "earray_stats.hdr_size = %Hu, state->hdr_size = %Hu\n", earray_stats.hdr_size, state->hdr_size);
+    if(earray_stats.computed.hdr_size != state->hdr_size) {
+        HDfprintf(stdout, "earray_stats.computed.hdr_size = %Hu, state->hdr_size = %Hu\n", earray_stats.computed.hdr_size, state->hdr_size);
         TEST_ERROR
     } /* end if */
-    if(earray_stats.nindex_blks != state->nindex_blks) {
-        HDfprintf(stdout, "earray_stats.nindex_blks = %Hu, state->nindex_blks = %Hu\n", earray_stats.nindex_blks, state->nindex_blks);
+    if(earray_stats.computed.nindex_blks != state->nindex_blks) {
+        HDfprintf(stdout, "earray_stats.computed.nindex_blks = %Hu, state->nindex_blks = %Hu\n", earray_stats.computed.nindex_blks, state->nindex_blks);
         TEST_ERROR
     } /* end if */
-    if(earray_stats.index_blk_size != state->index_blk_size) {
-        HDfprintf(stdout, "earray_stats.index_blk_size = %Hu, state->index_blk_size = %Hu\n", earray_stats.index_blk_size, state->index_blk_size);
+    if(earray_stats.computed.index_blk_size != state->index_blk_size) {
+        HDfprintf(stdout, "earray_stats.computed.index_blk_size = %Hu, state->index_blk_size = %Hu\n", earray_stats.computed.index_blk_size, state->index_blk_size);
         TEST_ERROR
     } /* end if */
-    if(earray_stats.ndata_blks != state->ndata_blks) {
-        HDfprintf(stdout, "earray_stats.ndata_blks = %Hu, state->ndata_blks = %Hu\n", earray_stats.ndata_blks, state->ndata_blks);
+    if(earray_stats.stored.ndata_blks != state->ndata_blks) {
+        HDfprintf(stdout, "earray_stats.stored.ndata_blks = %Hu, state->ndata_blks = %Hu\n", earray_stats.stored.ndata_blks, state->ndata_blks);
         TEST_ERROR
     } /* end if */
 /* Don't compare this currently, it's very hard to compute */
 #ifdef NOT_YET
-    if(earray_stats.data_blk_size != state->data_blk_size) {
-        HDfprintf(stdout, "earray_stats.data_blk_size = %Hu, state->data_blk_size = %Hu\n", earray_stats.data_blk_size, state->data_blk_size);
+    if(earray_stats.stored.data_blk_size != state->data_blk_size) {
+        HDfprintf(stdout, "earray_stats.stored.data_blk_size = %Hu, state->data_blk_size = %Hu\n", earray_stats.stored.data_blk_size, state->data_blk_size);
         TEST_ERROR
     } /* end if */
 #endif /* NOT_YET */
-    if(earray_stats.nsuper_blks != state->nsuper_blks) {
-        HDfprintf(stdout, "earray_stats.nsuper_blks = %Hu, state->nsuper_blks = %Hu\n", earray_stats.nsuper_blks, state->nsuper_blks);
+    if(earray_stats.stored.nsuper_blks != state->nsuper_blks) {
+        HDfprintf(stdout, "earray_stats.stored.nsuper_blks = %Hu, state->nsuper_blks = %Hu\n", earray_stats.stored.nsuper_blks, state->nsuper_blks);
         TEST_ERROR
     } /* end if */
 /* Don't compare this currently, it's very hard to compute */
 #ifdef NOT_YET
-    if(earray_stats.super_blk_size != state->super_blk_size) {
-        HDfprintf(stdout, "earray_stats.super_blk_size = %Hu, state->super_blk_size = %Hu\n", earray_stats.super_blk_size, state->super_blk_size);
+    if(earray_stats.stored.super_blk_size != state->super_blk_size) {
+        HDfprintf(stdout, "earray_stats.stored.super_blk_size = %Hu, state->super_blk_size = %Hu\n", earray_stats.stored.super_blk_size, state->super_blk_size);
         TEST_ERROR
     } /* end if */
 #endif /* NOT_YET */
 #ifdef QAK
-HDfprintf(stderr, "nelmts = %Hu, total EA size = %Hu\n", earray_stats.nelmts,
-        (earray_stats.hdr_size + earray_stats.index_blk_size + earray_stats.super_blk_size + earray_stats.data_blk_size));
+HDfprintf(stderr, "nelmts = %Hu, total EA size = %Hu\n", earray_stats.stored.nelmts,
+        (earray_stats.computed.hdr_size + earray_stats.computed.index_blk_size + earray_stats.stored.super_blk_size + earray_stats.stored.data_blk_size));
 #endif /* QAK */
 
     /* All tests passed */
@@ -1198,7 +1198,7 @@ eiter_fw_state(void *_eiter, const H5EA_create_t *cparam,
     /* Compute the state of the extensible array */
     state->hdr_size = EA_HDR_SIZE;
     state->nindex_blks = 1;
-    state->index_blk_size = 298;
+    state->index_blk_size = EA_IBLOCK_SIZE;
     state->max_idx_set = idx + 1;
     if(idx < cparam->idx_blk_elmts) {
         state->nelmts = (hsize_t)cparam->idx_blk_elmts;
@@ -1416,7 +1416,7 @@ eiter_rv_state(void *_eiter, const H5EA_create_t *cparam,
     /* Compute the state of the extensible array */
     state->hdr_size = EA_HDR_SIZE;
     state->nindex_blks = 1;
-    state->index_blk_size = 298;
+    state->index_blk_size = EA_IBLOCK_SIZE;
     state->max_idx_set = eiter->max + 1;
     if(eiter->max < cparam->idx_blk_elmts) {
         state->nelmts = (hsize_t)cparam->idx_blk_elmts;

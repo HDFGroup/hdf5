@@ -147,16 +147,16 @@ H5EA__hdr_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int indent,
 	      (unsigned)hdr->cparam.max_dblk_page_nelmts_bits);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Highest element index stored (+1):",
-	      hdr->stats.max_idx_set);
+	      hdr->stats.stored.max_idx_set);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Number of super blocks created:",
-	      hdr->stats.nsuper_blks);
+	      hdr->stats.stored.nsuper_blks);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Number of data blocks created:",
-	      hdr->stats.ndata_blks);
+	      hdr->stats.stored.ndata_blks);
     HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
 	      "Number of elements 'realized':",
-	      hdr->stats.nelmts);
+	      hdr->stats.stored.nelmts);
     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
 	      "Index Block Address:",
 	      hdr->idx_blk_addr);

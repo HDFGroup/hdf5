@@ -160,7 +160,7 @@ END_FUNC(PKG)   /* end H5EA__dblock_alloc() */
  */
 BEGIN_FUNC(PKG, ERR,
 haddr_t, HADDR_UNDEF, HADDR_UNDEF,
-H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty,
+H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *stats_changed,
     hsize_t dblk_off, size_t nelmts))
 
     /* Local variables */
@@ -173,7 +173,7 @@ HDfprintf(stderr, "%s: Called, hdr->dblk_page_nelmts = %Zu, nelmts = %Zu\n", FUN
 
     /* Sanity check */
     HDassert(hdr);
-    HDassert(hdr_dirty);
+    HDassert(stats_changed);
     HDassert(nelmts > 0);
 
     /* Allocate the data block */
@@ -208,14 +208,14 @@ HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array data block to cache")
 
     /* Update extensible array data block statistics */
-    hdr->stats.ndata_blks++;
-    hdr->stats.data_blk_size += dblock->size;
+    hdr->stats.stored.ndata_blks++;
+    hdr->stats.stored.data_blk_size += dblock->size;
 
     /* Increment count of elements "realized" */
-    hdr->stats.nelmts += nelmts;
+    hdr->stats.stored.nelmts += nelmts;
 
-    /* Mark the header dirty (for updating statistics) */
-    *hdr_dirty = TRUE;
+    /* Mark the statistics as changed */
+    *stats_changed = TRUE;
 
     /* Set address of data block to return */
     ret_value = dblock_addr;

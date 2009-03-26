@@ -254,13 +254,13 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
     hdr->cparam.max_dblk_page_nelmts_bits = *p++;  /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */
 
     /* Array statistics */
-    hdr->stats.hdr_size = size;                         /* Size of header in file */
-    H5F_DECODE_LENGTH(f, p, hdr->stats.nsuper_blks);    /* Number of super blocks created */
-    H5F_DECODE_LENGTH(f, p, hdr->stats.super_blk_size); /* Size of super blocks created */
-    H5F_DECODE_LENGTH(f, p, hdr->stats.ndata_blks);     /* Number of data blocks created */
-    H5F_DECODE_LENGTH(f, p, hdr->stats.data_blk_size);  /* Size of data blocks created */
-    H5F_DECODE_LENGTH(f, p, hdr->stats.max_idx_set);    /* Max. index set (+1) */
-    H5F_DECODE_LENGTH(f, p, hdr->stats.nelmts);         /* Number of elements 'realized' */
+    hdr->stats.computed.hdr_size = size;                        /* Size of header in file */
+    H5F_DECODE_LENGTH(f, p, hdr->stats.stored.nsuper_blks);    /* Number of super blocks created */
+    H5F_DECODE_LENGTH(f, p, hdr->stats.stored.super_blk_size); /* Size of super blocks created */
+    H5F_DECODE_LENGTH(f, p, hdr->stats.stored.ndata_blks);     /* Number of data blocks created */
+    H5F_DECODE_LENGTH(f, p, hdr->stats.stored.data_blk_size);  /* Size of data blocks created */
+    H5F_DECODE_LENGTH(f, p, hdr->stats.stored.max_idx_set);    /* Max. index set (+1) */
+    H5F_DECODE_LENGTH(f, p, hdr->stats.stored.nelmts);         /* Number of elements 'realized' */
 
     /* Internal information */
     H5F_addr_decode(f, &p, &hdr->idx_blk_addr); /* Address of index block */
@@ -270,7 +270,7 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
         H5EA_iblock_t iblock;           /* Fake index block for computing size */
 
         /* Set index block count for file */
-        hdr->stats.nindex_blks = 1;
+        hdr->stats.computed.nindex_blks = 1;
 
         /* Set up fake index block for computing size on disk */
         iblock.hdr = hdr;
@@ -279,11 +279,11 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
         iblock.nsblk_addrs = hdr->nsblks - iblock.nsblks;
 
         /* Compute size of index block in file */
-        hdr->stats.index_blk_size = H5EA_IBLOCK_SIZE(&iblock);
+        hdr->stats.computed.index_blk_size = H5EA_IBLOCK_SIZE(&iblock);
     } /* end if */
     else {
-        hdr->stats.nindex_blks = 0;       /* Number of index blocks in file */
-        hdr->stats.index_blk_size = 0;    /* Size of index blocks in file */
+        hdr->stats.computed.nindex_blks = 0;       /* Number of index blocks in file */
+        hdr->stats.computed.index_blk_size = 0;    /* Size of index blocks in file */
     } /* end else */
 
     /* Sanity check */
@@ -389,12 +389,12 @@ H5EA__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         *p++ = hdr->cparam.max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */
 
         /* Array statistics */
-        H5F_ENCODE_LENGTH(f, p, hdr->stats.nsuper_blks);    /* Number of super blocks created */
-        H5F_ENCODE_LENGTH(f, p, hdr->stats.super_blk_size); /* Size of super blocks created */
-        H5F_ENCODE_LENGTH(f, p, hdr->stats.ndata_blks);     /* Number of data blocks created */
-        H5F_ENCODE_LENGTH(f, p, hdr->stats.data_blk_size);  /* Size of data blocks created */
-        H5F_ENCODE_LENGTH(f, p, hdr->stats.max_idx_set);    /* Max. index set (+1) */
-        H5F_ENCODE_LENGTH(f, p, hdr->stats.nelmts);         /* Number of elements 'realized' */
+        H5F_ENCODE_LENGTH(f, p, hdr->stats.stored.nsuper_blks);    /* Number of super blocks created */
+        H5F_ENCODE_LENGTH(f, p, hdr->stats.stored.super_blk_size); /* Size of super blocks created */
+        H5F_ENCODE_LENGTH(f, p, hdr->stats.stored.ndata_blks);     /* Number of data blocks created */
+        H5F_ENCODE_LENGTH(f, p, hdr->stats.stored.data_blk_size);  /* Size of data blocks created */
+        H5F_ENCODE_LENGTH(f, p, hdr->stats.stored.max_idx_set);    /* Max. index set (+1) */
+        H5F_ENCODE_LENGTH(f, p, hdr->stats.stored.nelmts);         /* Number of elements 'realized' */
 
         /* Internal information */
         H5F_addr_encode(f, &p, hdr->idx_blk_addr);  /* Address of index block */

@@ -190,7 +190,7 @@ END_FUNC(PKG)   /* end H5EA__sblock_alloc() */
  */
 BEGIN_FUNC(PKG, ERR,
 haddr_t, HADDR_UNDEF, HADDR_UNDEF,
-H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty,
+H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *stats_changed,
     unsigned sblk_idx))
 
     /* Local variables */
@@ -204,7 +204,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 
     /* Sanity check */
     HDassert(hdr);
-    HDassert(hdr_dirty);
+    HDassert(stats_changed);
 
     /* Allocate the super block */
     if(NULL == (sblock = H5EA__sblock_alloc(hdr, sblk_idx)))
@@ -235,11 +235,11 @@ HDfprintf(stderr, "%s: sblock->block_off = %Hu\n", FUNC, sblock->block_off);
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array super block to cache")
 
     /* Update extensible array super block statistics */
-    hdr->stats.nsuper_blks++;
-    hdr->stats.super_blk_size += sblock->size;
+    hdr->stats.stored.nsuper_blks++;
+    hdr->stats.stored.super_blk_size += sblock->size;
 
-    /* Mark the header dirty (for updating statistics) */
-    *hdr_dirty = TRUE;
+    /* Mark the statistics as changed */
+    *stats_changed = TRUE;
 
     /* Set address of super block to return */
     ret_value = sblock_addr;

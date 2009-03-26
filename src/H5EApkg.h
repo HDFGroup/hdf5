@@ -371,7 +371,7 @@ func_init_failed:							      \
     + 1 /* Min. # of data block pointers for a super block */                 \
     + 1 /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */ \
                                                                               \
-    /* Extensible Array Header statistics fields */                           \
+    /* Extensible Array statistics fields */                                  \
     + (h)->sizeof_size /* Number of super blocks created */		      \
     + (h)->sizeof_size /* Size of super blocks created */		      \
     + (h)->sizeof_size /* Number of data blocks created */		      \
@@ -472,7 +472,7 @@ typedef struct H5EA_hdr_t {
     /* Index block information (stored in header) */
     haddr_t idx_blk_addr;               /* Address of index block in header */
 
-    /* Statistics for array (stored in header) */
+    /* Statistics for array (stored in index block, actually) */
     /* (header and index number/size fields not stored) */
     H5EA_stat_t stats;                  /* Statistics for extensible array */
 
@@ -640,7 +640,7 @@ H5_DLL herr_t H5EA__hdr_dest(H5EA_hdr_t *hdr);
 /* Index block routines */
 H5_DLL H5EA_iblock_t *H5EA__iblock_alloc(H5EA_hdr_t *hdr);
 H5_DLL haddr_t H5EA__iblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    hbool_t *hdr_dirty);
+    hbool_t *stats_changed);
 H5_DLL H5EA_iblock_t *H5EA__iblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
     H5AC_protect_t rw);
 H5_DLL herr_t H5EA__iblock_unprotect(H5EA_iblock_t *iblock, hid_t dxpl_id,
@@ -650,8 +650,8 @@ H5_DLL herr_t H5EA__iblock_dest(H5F_t *f, H5EA_iblock_t *iblock);
 
 /* Super block routines */
 H5_DLL H5EA_sblock_t *H5EA__sblock_alloc(H5EA_hdr_t *hdr, unsigned sblk_idx);
-H5_DLL haddr_t H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty,
-    unsigned sblk_idx);
+H5_DLL haddr_t H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id,
+    hbool_t *stats_changed, unsigned sblk_idx);
 H5_DLL H5EA_sblock_t *H5EA__sblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
     haddr_t sblk_addr, unsigned sblk_idx, H5AC_protect_t rw);
 H5_DLL herr_t H5EA__sblock_unprotect(H5EA_sblock_t *sblock, hid_t dxpl_id,
@@ -662,8 +662,8 @@ H5_DLL herr_t H5EA__sblock_dest(H5F_t *f, H5EA_sblock_t *sblock);
 
 /* Data block routines */
 H5_DLL H5EA_dblock_t *H5EA__dblock_alloc(H5EA_hdr_t *hdr, size_t nelmts);
-H5_DLL haddr_t H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty,
-    hsize_t dblk_off, size_t nelmts);
+H5_DLL haddr_t H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id,
+    hbool_t *stats_changed, hsize_t dblk_off, size_t nelmts);
 H5_DLL unsigned H5EA__dblock_sblk_idx(const H5EA_hdr_t *hdr, hsize_t idx);
 H5_DLL H5EA_dblock_t *H5EA__dblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
     haddr_t dblk_addr, size_t dblk_nelmts, H5AC_protect_t rw);

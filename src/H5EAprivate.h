@@ -82,19 +82,26 @@ typedef struct H5EA_create_t {
 } H5EA_create_t;
 
 /* Extensible array metadata statistics info */
+/* (If these are ever exposed to applications, don't let the application see
+ *      which fields are computed vs. which fields are stored. -QAK)
+ */
 typedef struct H5EA_stat_t {
     /* Non-stored (i.e. computed) fields */
-    hsize_t hdr_size;           /* Size of header */
-    hsize_t nindex_blks;        /* # of index blocks (should be 0 or 1) */
-    hsize_t index_blk_size;     /* Size of index blocks allocated */
+    struct {
+        hsize_t hdr_size;           /* Size of header */
+        hsize_t nindex_blks;        /* # of index blocks (should be 0 or 1) */
+        hsize_t index_blk_size;     /* Size of index blocks allocated */
+    } computed;
 
     /* Stored fields */
-    hsize_t nsuper_blks;        /* # of super blocks */
-    hsize_t super_blk_size;     /* Size of super blocks allocated */
-    hsize_t ndata_blks;         /* # of data blocks */
-    hsize_t data_blk_size;      /* Size of data blocks allocated */
-    hsize_t max_idx_set;        /* Highest element index stored (+1 - i.e. if element 0 has been set, this value with be '1', if no elements have been stored, this value will be '0') */
-    hsize_t nelmts;             /* # of elements "realized" */
+    struct {
+        hsize_t nsuper_blks;        /* # of super blocks */
+        hsize_t super_blk_size;     /* Size of super blocks allocated */
+        hsize_t ndata_blks;         /* # of data blocks */
+        hsize_t data_blk_size;      /* Size of data blocks allocated */
+        hsize_t max_idx_set;        /* Highest element index stored (+1 - i.e. if element 0 has been set, this value with be '1', if no elements have been stored, this value will be '0') */
+        hsize_t nelmts;             /* # of elements "realized" */
+    } stored;
 } H5EA_stat_t;
 
 /* Extensible array info (forward decl - defined in H5EApkg.h) */

@@ -265,7 +265,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     HDassert(nelmts);
 
     /* Retrieve the max. index set */
-    *nelmts = ea->hdr->stats.max_idx_set;
+    *nelmts = ea->hdr->stats.stored.max_idx_set;
 
 END_FUNC(PRIV)  /* end H5EA_get_nelmts() */
 
@@ -333,7 +333,8 @@ H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt))
     unsigned sblock_cache_flags = H5AC__NO_FLAGS_SET;   /* Flags to unprotecting super block */
     unsigned dblock_cache_flags = H5AC__NO_FLAGS_SET;   /* Flags to unprotecting data block */
     unsigned dblk_page_cache_flags = H5AC__NO_FLAGS_SET;   /* Flags to unprotecting data block page */
-    hbool_t hdr_dirty = FALSE;          /* Whether header information changed */
+    hbool_t stats_changed = FALSE;      /* Whether array statistics changed */
+    hbool_t hdr_dirty = FALSE;          /* Whether the array header changed */
 
 #ifdef QAK
 HDfprintf(stderr, "%s: Called\n", FUNC);
@@ -355,9 +356,10 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
 HDfprintf(stderr, "%s: Index block address not defined!\n", FUNC, idx);
 #endif /* QAK */
         /* Create the index block */
-        hdr->idx_blk_addr = H5EA__iblock_create(hdr, dxpl_id, &hdr_dirty);
+        hdr->idx_blk_addr = H5EA__iblock_create(hdr, dxpl_id, &stats_changed);
         if(!H5F_addr_defined(hdr->idx_blk_addr))
             H5E_THROW(H5E_CANTCREATE, "unable to create index block")
+        hdr_dirty = TRUE;
     } /* end if */
 #ifdef QAK
 HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
@@ -371,7 +373,7 @@ HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
     if(idx < hdr->cparam.idx_blk_elmts) {
         /* Set element in index block */
         HDmemcpy(((uint8_t *)iblock->elmts) + (hdr->cparam.cls->nat_elmt_size * idx), elmt, hdr->cparam.cls->nat_elmt_size);
-        iblock_cache_flags |= H5AC__DIRTIED_FLAG;
+        dblock_cache_flags |= H5AC__DIRTIED_FLAG;
     } /* end if */
     else {
         unsigned sblk_idx;      /* Which superblock does this index fall in? */
@@ -409,13 +411,13 @@ HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_i
 
                 /* Create data block */
                 dblk_off = hdr->sblk_info[sblk_idx].start_idx + (dblk_idx * hdr->sblk_info[sblk_idx].dblk_nelmts);
-                dblk_addr = H5EA__dblock_create(hdr, dxpl_id, &hdr_dirty, dblk_off, hdr->sblk_info[sblk_idx].dblk_nelmts);
+                dblk_addr = H5EA__dblock_create(hdr, dxpl_id, &stats_changed, dblk_off, hdr->sblk_info[sblk_idx].dblk_nelmts);
                 if(!H5F_addr_defined(dblk_addr))
                     H5E_THROW(H5E_CANTCREATE, "unable to create extensible array data block")
 
                 /* Set data block address in index block */
                 iblock->dblk_addrs[dblk_idx] = dblk_addr;
-                iblock_cache_flags |= H5AC__DIRTIED_FLAG;
+                dblock_cache_flags |= H5AC__DIRTIED_FLAG;
             } /* end if */
 
             /* Protect data block */
@@ -441,7 +443,7 @@ HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_i
                 haddr_t sblk_addr;        /* Address of data block created */
 
                 /* Create super block */
-                sblk_addr = H5EA__sblock_create(hdr, dxpl_id, &hdr_dirty, sblk_idx);
+                sblk_addr = H5EA__sblock_create(hdr, dxpl_id, &stats_changed, sblk_idx);
 #ifdef QAK
 HDfprintf(stderr, "%s: New super block address is: %a\n", FUNC, sblk_addr);
 #endif /* QAK */
@@ -450,7 +452,7 @@ HDfprintf(stderr, "%s: New super block address is: %a\n", FUNC, sblk_addr);
 
                 /* Set super block address in index block */
                 iblock->sblk_addrs[sblk_off] = sblk_addr;
-                iblock_cache_flags |= H5AC__DIRTIED_FLAG;
+                dblock_cache_flags |= H5AC__DIRTIED_FLAG;
             } /* end if */
 
             /* Protect super block */
@@ -471,7 +473,7 @@ HDfprintf(stderr, "%s: dblk_idx = %u, sblock->ndblks = %Zu\n", FUNC, dblk_idx, s
 
                 /* Create data block */
                 dblk_off = hdr->sblk_info[sblk_idx].start_idx + (dblk_idx * hdr->sblk_info[sblk_idx].dblk_nelmts);
-                dblk_addr = H5EA__dblock_create(hdr, dxpl_id, &hdr_dirty, dblk_off, sblock->dblk_nelmts);
+                dblk_addr = H5EA__dblock_create(hdr, dxpl_id, &stats_changed, dblk_off, sblock->dblk_nelmts);
                 if(!H5F_addr_defined(dblk_addr))
                     H5E_THROW(H5E_CANTCREATE, "unable to create extensible array data block")
 
@@ -561,12 +563,17 @@ HDfprintf(stderr, "%s: sblock->dblk_page_size = %Zu\n", FUNC, sblock->dblk_page_
 #ifdef QAK
 HDfprintf(stderr, "%s: idx = %Hu, hdr->stats.max_idx_set = %Hu\n", FUNC, idx, hdr->stats.max_idx_set);
 #endif /* QAK */
-    if(idx >= hdr->stats.max_idx_set) {
-        hdr->stats.max_idx_set = idx + 1;
-        hdr_dirty = TRUE;
+    if(idx >= hdr->stats.stored.max_idx_set) {
+        HDassert(iblock);
+        hdr->stats.stored.max_idx_set = idx + 1;
+        stats_changed = TRUE;
     } /* end if */
 
 CATCH
+    /* Check for updating array statistics */
+    if(stats_changed)
+        hdr_dirty = TRUE;
+
     /* Check for header modified */
     if(hdr_dirty)
         if(H5EA__hdr_modified(hdr) < 0)
@@ -624,7 +631,7 @@ HDfprintf(stderr, "%s: Index %Hu\n", FUNC, idx);
     hdr->f = ea->f;
 
     /* Check for element beyond max. element in array */
-    if(idx >= hdr->stats.max_idx_set) {
+    if(idx >= hdr->stats.stored.max_idx_set) {
 #ifdef QAK
 HDfprintf(stderr, "%s: Element beyond max. index set, hdr->stats.max_idx_set = %Hu, idx = %Hu\n", FUNC, hdr->stats.max_idx_set, idx);
 #endif /* QAK */
