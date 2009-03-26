@@ -560,7 +560,8 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
      * Tell the file driver how much address space has already been
      * allocated so that it knows how to allocate additional memory.
      */
-    if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, stored_eoa) < 0)
+    /* (Account for the stored EOA being absolute offset -NAF) */
+    if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, stored_eoa - H5F_BASE_ADDR(f)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to set end-of-address marker for file")
 
     /* Read the file's superblock extension, if there is one. */
