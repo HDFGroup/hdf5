@@ -31214,6 +31214,145 @@ check_flush_deps(void)
         if ( !pass ) CACHE_ERROR("verify_entry_status failed")
     }
 
+/* Test Case #6a - Make certain that flush dependency relationship with parent
+ *      already pinned works (unpin ater destroying flush dependency)
+ */
+
+    /* Create flush dependency between entries 0 (child) & 1 (parent) */
+    {
+        protect_entry(cache_ptr, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        pin_entry(cache_ptr, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("pin_entry failed")
+
+        create_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[0].flush_dep_par_type = entry_type;
+        expected[0].flush_dep_par_idx = 1;
+        expected[1].is_protected = TRUE;
+        expected[1].is_pinned = TRUE;
+        expected[1].child_flush_dep_height_rc[0] = 1;
+        expected[1].flush_dep_height = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Unpin entry & destroy flush dependency between entries 0 (child) & 1 (parent) */
+    {
+        destroy_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        unpin_entry(cache_ptr, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("unpin_entry failed")
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        1,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].flush_dep_par_type = -1;
+        expected[0].flush_dep_par_idx = -1;
+        expected[1].is_protected = FALSE;
+        expected[1].is_pinned = FALSE;
+        expected[1].child_flush_dep_height_rc[0] = 0;
+        expected[1].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+/* Test Case #6b - Make certain that flush dependency relationship with parent
+ *      already pinned works (unpin before destroying flush dependency)
+ */
+
+    /* Create flush dependency between entries 0 (child) & 1 (parent) */
+    {
+        protect_entry(cache_ptr, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+        
+        pin_entry(cache_ptr, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("pin_entry failed")
+
+        create_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after creating flush dependency
+         */
+        expected[0].flush_dep_par_type = entry_type;
+        expected[0].flush_dep_par_idx = 1;
+        expected[1].is_protected = TRUE;
+        expected[1].is_pinned = TRUE;
+        expected[1].child_flush_dep_height_rc[0] = 1;
+        expected[1].flush_dep_height = 1;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
+    /* Unpin entry & destroy flush dependency between entries 0 (child) & 1 (parent) */
+    {
+        unpin_entry(cache_ptr, entry_type, 1);
+        if ( !pass ) CACHE_ERROR("unpin_entry failed")
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        destroy_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
+        if ( !pass ) CACHE_ERROR("destroy_flush_dependency failed")
+
+        unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
+                        entry_type,         /* int32_t type */
+                        1,                  /* int32_t idx */
+                        FALSE,              /* int32_t dirty */
+                        H5C__NO_FLAGS_SET); /* unsigned int flags */
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after destroy flush dependency
+         */
+        expected[0].flush_dep_par_type = -1;
+        expected[0].flush_dep_par_idx = -1;
+        expected[1].is_protected = FALSE;
+        expected[1].is_pinned = FALSE;
+        expected[1].child_flush_dep_height_rc[0] = 0;
+        expected[1].flush_dep_height = 0;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)0,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+    }
+
 
 done:
     if(cache_ptr) 
@@ -31257,7 +31396,7 @@ check_flush_deps_err(void)
     /* Loop over test cases, check for various errors in configuring flush
      *  dependencies.  Verify that all performs as expected.
      */
-    for(test_count = 0; test_count < 11; test_count++) {
+    for(test_count = 0; test_count < 9; test_count++) {
         unsigned u;             /* Local index variable */
         herr_t result;          /* Generic return value */
 
@@ -31421,36 +31560,14 @@ check_flush_deps_err(void)
                 if ( !pass ) CACHE_ERROR("unprotect_entry failed")
                 break;
 
-            /* Verify that parent entry isn't already pinned */
-            case 4:
-                protect_entry(cache_ptr, entry_type, 0);
-                if ( !pass ) CACHE_ERROR("protect_entry failed")
-
-                pin_entry(cache_ptr, entry_type, 0);
-                if ( !pass ) CACHE_ERROR("pin_entry failed")
-
-                result = H5C_create_flush_dependency(cache_ptr, &((entries[entry_type])[0]), &((entries[entry_type])[1]));
-                if( result != FAIL ) CACHE_ERROR("Creating dependency when parent is pinned")
-
-                unpin_entry(cache_ptr, entry_type, 0);
-                if ( !pass ) CACHE_ERROR("unpin_entry failed")
-
-                unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
-                                entry_type,         /* int32_t type */
-                                0,                  /* int32_t idx */
-                                FALSE,              /* int32_t dirty */
-                                H5C__NO_FLAGS_SET); /* unsigned int flags */
-                if ( !pass ) CACHE_ERROR("unprotect_entry failed")
-                break;
-
             /* Verify that parent entry must be protected */
-            case 5:
+            case 4:
                 result = H5C_destroy_flush_dependency(cache_ptr, &((entries[entry_type])[0]), &((entries[entry_type])[1]));
                 if( result != FAIL ) CACHE_ERROR("Destroying [non-existant] dependency when parent isn't protected")
                 break;
         
             /* Verify that parent entry has flush dependency */
-            case 6:
+            case 5:
                 protect_entry(cache_ptr, entry_type, 0);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
 
@@ -31465,30 +31582,8 @@ check_flush_deps_err(void)
                 if ( !pass ) CACHE_ERROR("unprotect_entry failed")
                 break;
         
-            /* Verify that parent entry is still pinned */
-            case 7:
-                protect_entry(cache_ptr, entry_type, 0);
-                if ( !pass ) CACHE_ERROR("protect_entry failed")
-
-                create_flush_dependency(cache_ptr, entry_type, 0, entry_type, 1);
-                if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
-
-                unpin_entry(cache_ptr, entry_type, 0);
-                if ( !pass ) CACHE_ERROR("unpin_entry failed")
-
-                result = H5C_destroy_flush_dependency(cache_ptr, &((entries[entry_type])[0]), &((entries[entry_type])[1]));
-                if( result != FAIL ) CACHE_ERROR("Destroying dependency when parent isn't in relationship")
-
-                unprotect_entry(cache_ptr,          /* H5C_t * cache_ptr */
-                                entry_type,         /* int32_t type */
-                                0,                  /* int32_t idx */
-                                FALSE,              /* int32_t dirty */
-                                H5C__NO_FLAGS_SET); /* unsigned int flags */
-                if ( !pass ) CACHE_ERROR("unprotect_entry failed")
-                break;
-
             /* Verify that child entry is in flush dependency relationship */
-            case 8:
+            case 6:
                 protect_entry(cache_ptr, entry_type, 0);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
 
@@ -31510,7 +31605,7 @@ check_flush_deps_err(void)
                 break;
 
             /* Verify that parent has child entries at this height */
-            case 9:
+            case 7:
                 protect_entry(cache_ptr, entry_type, 0);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
 
@@ -31565,7 +31660,7 @@ check_flush_deps_err(void)
 
 
             /* Verify that child entry is child of parent */
-            case 10:
+            case 8:
                 protect_entry(cache_ptr, entry_type, 0);
                 if ( !pass ) CACHE_ERROR("protect_entry failed")
 

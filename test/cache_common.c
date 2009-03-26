@@ -1663,6 +1663,8 @@ reset_entries(void)
                 for ( k = 0; k < H5C__NUM_FLUSH_DEP_HEIGHTS; k++ )
                     base_addr[j].child_flush_dep_height_rc[k] = 0;
                 base_addr[j].flush_dep_height = 0;
+                base_addr[j].pinned_from_client = FALSE;
+                base_addr[j].pinned_from_cache = FALSE;
 
                 base_addr[j].flush_order = 0;
 
@@ -2279,8 +2281,6 @@ verify_entry_status(H5C_t * cache_ptr,
 
 	i++;
     } /* while */
-if(!pass)
-    HDfprintf(stderr, "failure_mssg = '%s'\n", failure_mssg);
 
     return;
 
@@ -2680,14 +2680,15 @@ insert_entry(H5C_t * cache_ptr,
 	if ( insert_pinned ) {
 
 	    HDassert( entry_ptr->header.is_pinned );
-	    entry_ptr->is_pinned = TRUE;
 
 	} else {
 
 	    HDassert( ! ( entry_ptr->header.is_pinned ) );
-	    entry_ptr->is_pinned = FALSE;
 
 	}
+        entry_ptr->is_pinned = insert_pinned;
+        entry_ptr->pinned_from_client = insert_pinned;
+
         HDassert( entry_ptr->header.is_dirty );
         HDassert( ((entry_ptr->header).type)->id == type );
     }
@@ -3201,7 +3202,7 @@ pin_entry(H5C_t * cache_ptr,
         HDassert( entry_ptr->type == type );
         HDassert( entry_ptr == entry_ptr->self );
         HDassert( entry_ptr->is_protected );
-        HDassert( !(entry_ptr->is_pinned) );
+        HDassert( !(entry_ptr->pinned_from_client) );
 
 	result = H5C_pin_protected_entry(cache_ptr, (void *)entry_ptr);
 
@@ -3217,7 +3218,9 @@ pin_entry(H5C_t * cache_ptr,
 
 	} else {
 
+            entry_ptr->pinned_from_client = TRUE;
 	    entry_ptr->is_pinned = TRUE;
+
 	}
     } /* end if */
 
@@ -3269,12 +3272,15 @@ unpin_entry(H5C_t * cache_ptr,
         HDassert( entry_ptr == entry_ptr->self );
 	HDassert( entry_ptr->cache_ptr == cache_ptr );
         HDassert( entry_ptr->header.is_pinned );
+        HDassert( entry_ptr->header.pinned_from_client );
 	HDassert( entry_ptr->is_pinned );
+	HDassert( entry_ptr->pinned_from_client );
 
         result = H5C_unpin_entry(cache_ptr, (void *)entry_ptr);
 
         if ( ( result < 0 ) ||
-             ( entry_ptr->header.is_pinned ) ||
+             ( entry_ptr->header.pinned_from_client ) ||
+             ( entry_ptr->header.is_pinned && !entry_ptr->header.pinned_from_cache ) ||
              ( entry_ptr->header.type != &(types[type]) ) ||
              ( entry_ptr->size != entry_ptr->header.size ) ||
              ( entry_ptr->addr != entry_ptr->header.addr ) ) {
@@ -3284,7 +3290,9 @@ unpin_entry(H5C_t * cache_ptr,
 
         }
 
-	entry_ptr->is_pinned = FALSE;
+        entry_ptr->pinned_from_client = FALSE;
+
+	entry_ptr->is_pinned = entry_ptr->pinned_from_cache;
 
         HDassert( ((entry_ptr->header).type)->id == type );
 
@@ -3430,12 +3438,14 @@ unprotect_entry(H5C_t * cache_ptr,
 	    if ( pin_flag_set ) {
 
 	        HDassert ( entry_ptr->header.is_pinned );
+		entry_ptr->pinned_from_client = TRUE;
 		entry_ptr->is_pinned = TRUE;
 
 	    } else if ( unpin_flag_set ) {
 
-	        HDassert ( ! ( entry_ptr->header.is_pinned ) );
-		entry_ptr->is_pinned = FALSE;
+	        HDassert ( entry_ptr->header.is_pinned == entry_ptr->header.pinned_from_cache );
+		entry_ptr->pinned_from_client = FALSE;
+		entry_ptr->is_pinned = entry_ptr->pinned_from_cache;
 
             }
         }
@@ -3592,12 +3602,14 @@ unprotect_entry_with_size_change(H5C_t * cache_ptr,
 	    if ( pin_flag_set ) {
 
 	        HDassert ( entry_ptr->header.is_pinned );
+		entry_ptr->pinned_from_client = TRUE;
 		entry_ptr->is_pinned = TRUE;
 
 	    } else if ( unpin_flag_set ) {
 
-	        HDassert ( ! ( entry_ptr->header.is_pinned ) );
-		entry_ptr->is_pinned = FALSE;
+	        HDassert ( entry_ptr->header.is_pinned == entry_ptr->header.pinned_from_cache );
+		entry_ptr->pinned_from_client = FALSE;
+		entry_ptr->is_pinned = entry_ptr->pinned_from_cache;
 
             }
         }
@@ -4979,6 +4991,7 @@ create_flush_dependency(H5C_t * cache_ptr,
         chd_entry_ptr->flush_dep_par_type = par_type;
         chd_entry_ptr->flush_dep_par_idx = par_idx;
         par_entry_ptr->child_flush_dep_height_rc[chd_entry_ptr->flush_dep_height]++;
+        par_entry_ptr->pinned_from_cache = TRUE;
         if( !par_is_pinned )
             par_entry_ptr->is_pinned = TRUE;
 
@@ -5051,6 +5064,7 @@ destroy_flush_dependency(H5C_t * cache_ptr,
         HDassert( par_entry_ptr->index == par_idx );
         HDassert( par_entry_ptr->type == par_type );
         HDassert( par_entry_ptr->is_pinned );
+        HDassert( par_entry_ptr->pinned_from_cache );
         HDassert( par_entry_ptr->flush_dep_height > 0 );
         HDassert( par_entry_ptr == par_entry_ptr->self );
 
@@ -5089,8 +5103,10 @@ destroy_flush_dependency(H5C_t * cache_ptr,
 
             if((unsigned)(i + 1) < prev_par_flush_dep_height) {
                 par_entry_ptr->flush_dep_height = (unsigned)(i + 1);
-                if(i < 0)
-                    par_entry_ptr->is_pinned = FALSE;
+                if(i < 0) {
+                    par_entry_ptr->pinned_from_cache = FALSE;
+                    par_entry_ptr->is_pinned = par_entry_ptr->pinned_from_client;
+                } /* end if */
 
                 /* Check for parent entry being in flush dependency relationship */
                 if(par_entry_ptr->flush_dep_par_idx >= 0) {
