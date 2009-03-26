@@ -378,6 +378,37 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
  *              'dest' callback routine.
  *
  *
+ * Fields supporting the 'flush dependency' feature:
+ *
+ * Entries in the cache may have a 'flush dependency' on another entry in the
+ * cache.  A flush dependency requires that all dirty child entries be flushed
+ * to the file before a dirty parent entry (of those child entries) can be
+ * flushed to the file.  This can be used by cache clients to create data
+ * structures that allow Single-Writer/Multiple-Reader (SWMR) access for the
+ * data structure.
+ *
+ * The leaf child entry will have a "height" of 0, with any parent entries
+ * having a height of 1 greater than the maximum height of any of their child
+ * entries (flush dependencies are allowed to create asymmetric trees of
+ * relationships).
+ *
+ * flush_dep_parent:	Pointer to the parent entry for an entry in a flush
+ *		dependency relationship.
+ *
+ * child_flush_dep_height_rc:	An array of reference counts for child entries,
+ *		where the number of children of each height is tracked.
+ *
+ * flush_dep_height:	The height of the entry, which is one greater than the
+ *		maximum height of any of its child entries..
+ *
+ * pinned_from_client:	Whether the entry was pinned by an explicit pin request
+ *		from a cache client.
+ *
+ * pinned_from_cache:	Whether the entry was pinned implicitly as a
+ *		request of being a parent entry in a flush dependency
+ *		relationship.
+ *
+ *
  * Fields supporting the hash table:
  *
  * Fields in the cache are indexed by a more or less conventional hash table.
@@ -504,11 +535,13 @@ typedef struct H5C_cache_entry_t
     hbool_t		destroy_in_progress;
     hbool_t		free_file_space_on_destroy;
 
-    /* fields supporting the 'flush dependency height': */
+    /* fields supporting the 'flush dependency' feature: */
 
     struct H5C_cache_entry_t *	flush_dep_parent;
     uint64_t            child_flush_dep_height_rc[H5C__NUM_FLUSH_DEP_HEIGHTS];
     unsigned            flush_dep_height;
+    hbool_t		pinned_from_client;
+    hbool_t		pinned_from_cache;
 
     /* fields supporting the hash table: */
 

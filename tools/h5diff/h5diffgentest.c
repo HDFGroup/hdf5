@@ -17,6 +17,8 @@
 #include <stdlib.h>
 #include "hdf5.h"
 #include "H5private.h"
+#include "h5tools.h"
+
 
 /*-------------------------------------------------------------------------
  * Program: h5diffgentest
@@ -153,12 +155,12 @@ int test_basic(const char *fname1, const char *fname2, const char *fname3)
         goto out;
     if (( fid2 = H5Fcreate (fname2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0 )
         goto out;
-    
-        /*-------------------------------------------------------------------------
-        * create groups
-        *-------------------------------------------------------------------------
+
+    /*-------------------------------------------------------------------------
+    * create groups
+    *-------------------------------------------------------------------------
     */
-    
+
     gid1 = H5Gcreate2(fid1, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     gid2 = H5Gcreate2(fid2, "g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     gid3 = H5Gcreate2(fid2, "g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -600,42 +602,42 @@ int test_datatypes(const char *fname)
     write_dset(fid1,2,dims,"dset0b",H5T_STD_I32LE,buf3b);
     
     /*-------------------------------------------------------------------------
-    * Check H5T_NATIVE_CHAR
+    * H5T_NATIVE_CHAR
     *-------------------------------------------------------------------------
     */
     write_dset(fid1,2,dims,"dset1a",H5T_NATIVE_CHAR,buf1a);
     write_dset(fid1,2,dims,"dset1b",H5T_NATIVE_CHAR,buf1b);
     
     /*-------------------------------------------------------------------------
-    * Check H5T_NATIVE_SHORT
+    * H5T_NATIVE_SHORT
     *-------------------------------------------------------------------------
     */
     write_dset(fid1,2,dims,"dset2a",H5T_NATIVE_SHORT,buf2a);
     write_dset(fid1,2,dims,"dset2b",H5T_NATIVE_SHORT,buf2b);
     
     /*-------------------------------------------------------------------------
-    * Check H5T_NATIVE_INT
+    * H5T_NATIVE_INT
     *-------------------------------------------------------------------------
     */
     write_dset(fid1,2,dims,"dset3a",H5T_NATIVE_INT,buf3a);
     write_dset(fid1,2,dims,"dset3b",H5T_NATIVE_INT,buf3b);
     
     /*-------------------------------------------------------------------------
-    * Check H5T_NATIVE_LONG
+    * H5T_NATIVE_LONG
     *-------------------------------------------------------------------------
     */
     write_dset(fid1,2,dims,"dset4a",H5T_NATIVE_LONG,buf4a);
     write_dset(fid1,2,dims,"dset4b",H5T_NATIVE_LONG,buf4b);
     
     /*-------------------------------------------------------------------------
-    * Check H5T_NATIVE_FLOAT
+    * H5T_NATIVE_FLOAT
     *-------------------------------------------------------------------------
     */
     write_dset(fid1,2,dims,"dset5a",H5T_NATIVE_FLOAT,buf5a);
     write_dset(fid1,2,dims,"dset5b",H5T_NATIVE_FLOAT,buf5b);
     
     /*-------------------------------------------------------------------------
-    * Check H5T_NATIVE_DOUBLE
+    * H5T_NATIVE_DOUBLE
     *-------------------------------------------------------------------------
     */
     
@@ -1909,7 +1911,7 @@ void write_dset_in(hid_t loc_id,
     typedef enum
     {
         RED,
-            GREEN
+        GREEN
     } e_t;
     
     hid_t   did;
@@ -2155,7 +2157,47 @@ void write_dset_in(hid_t loc_id,
     tid = H5Tarray_create2(H5T_NATIVE_INT, 1, dimarray);
     write_dset(loc_id, 1, dims, "array", tid, buf6);
     status = H5Tclose(tid);
-    
+
+    {
+
+        double  *dbuf;                           /* information to write */
+        hid_t   did;                             /* dataset ID   */
+        hid_t   sid;                             /* dataspace ID   */
+        hid_t   tid;                             /* datatype ID   */
+        size_t  size;
+        hsize_t sdims[] = {1};
+        hsize_t tdims[] = {H5TOOLS_MALLOCSIZE / sizeof(double) + 1};
+        int     j;
+
+        /* allocate and initialize array data to write */
+        size = ( H5TOOLS_MALLOCSIZE / sizeof(double) + 1 ) * sizeof(double);
+        dbuf = malloc( size );
+
+        for( j = 0; j < H5TOOLS_MALLOCSIZE / sizeof(double) + 1; j++)
+            dbuf[j] = j;
+
+        if (make_diffs)
+        {
+            dbuf[5] = 0;
+            dbuf[6] = 0;
+        }
+
+        /* create a type larger than H5TOOLS_MALLOCSIZE */
+        tid = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, tdims);
+        size = H5Tget_size(tid);
+        sid = H5Screate_simple(1, sdims, NULL);
+        did = H5Dcreate2(loc_id, "arrayd", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+#if defined(WRITE_ARRAY)
+        H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
+#endif
+
+        /* close */
+        H5Dclose(did);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        free( dbuf );
+    }
+
     /*-------------------------------------------------------------------------
     * H5T_INTEGER and H5T_FLOAT
     *-------------------------------------------------------------------------

@@ -194,6 +194,11 @@ done:
  *
  * Purpose:	Private version of H5FDset_eoa()
  *
+ *              This function expects the EOA is a RELATIVE address, i.e.
+ *              relative to the base address.  This is NOT the same as the
+ *              EOA stored in the superblock, which is an absolute
+ *              address.  Object addresses are relative.
+ *
  * Return:	Success:	Non-negative
  *		Failure:	Negative, no side effect
  *
@@ -212,7 +217,7 @@ H5FD_set_eoa(H5FD_t *file, H5FD_mem_t type, haddr_t addr)
     HDassert(file && file->cls);
     HDassert(H5F_addr_defined(addr) && addr <= file->maxaddr);
 
-    /* Dispatch to driver */
+    /* Dispatch to driver, convert to absolute address */
     if((file->cls->set_eoa)(file, type, addr + file->base_addr) < 0)
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver set_eoa request failed")
 
@@ -225,6 +230,11 @@ done:
  * Function:	H5FD_get_eoa
  *
  * Purpose:	Private version of H5FDget_eoa()
+ *
+ *              This function returns the EOA as a RELATIVE address, i.e.
+ *              relative to the base address.  This is NOT the same as the
+ *              EOA stored in the superblock, which is an absolute
+ *              address.  Object addresses are relative.
  *
  * Return:	Success:	First byte after allocated memory.
  *		Failure:	HADDR_UNDEF
@@ -247,7 +257,7 @@ H5FD_get_eoa(const H5FD_t *file, H5FD_mem_t type)
     if(HADDR_UNDEF == (ret_value = (file->cls->get_eoa)(file, type)))
 	HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "driver get_eoa request failed")
 
-    /* Adjust for base address in file */
+    /* Adjust for base address in file (convert to relative address) */
     ret_value -= file->base_addr;
 
 done:
@@ -259,6 +269,11 @@ done:
  * Function:	H5FD_get_eof
  *
  * Purpose:	Private version of H5FDget_eof()
+ *
+ *              This function returns the EOF as a RELATIVE address, i.e.
+ *              relative to the base address.  This will be different
+ *              from  the end of the physical file if there is a user
+ *              block.
  *
  * Return:	Success:	The EOF address.
  *
@@ -288,7 +303,7 @@ H5FD_get_eof(const H5FD_t *file)
     else
 	ret_value = file->maxaddr;
 
-    /* Adjust for base address in file */
+    /* Adjust for base address in file (convert to relative address)  */
     ret_value -= file->base_addr;
 
 done:

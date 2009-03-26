@@ -1308,6 +1308,9 @@
 ./tools/testfiles/torderattr.h5
 ./tools/testfiles/tfpformat.ddl
 ./tools/testfiles/tfpformat.h5
+./tools/testfiles/tarray8.h5
+./tools/testfiles/tarray8.ddl
+
 
 # Expected output from h5ls tests
 ./tools/testfiles/nosuchfile.ls

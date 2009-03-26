@@ -802,6 +802,8 @@ static herr_t
 test_family_compat(void)
 {
     hid_t       file = (-1), fapl;
+    hid_t       dset;
+    char        dname[]="dataset";
     char        filename[1024];
     char        pathname[1024];
     char       *srcdir = getenv("srcdir"); /*where the src code is located*/
@@ -824,7 +826,28 @@ test_family_compat(void)
     }
     HDstrcat(pathname, filename);
 
-    if((file = H5Fopen(pathname, H5F_ACC_RDONLY, fapl)) < 0)
+    /* Make sure we can open the file.  Use the read and write mode to flush the
+     * superblock. */
+    if((file = H5Fopen(pathname, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+
+    if((dset = H5Dopen2(file, dname, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset) < 0)
+        TEST_ERROR;
+
+    if(H5Fclose(file) < 0)
+        TEST_ERROR;
+
+    /* Open the file again to make sure it isn't corrupted. */
+    if((file = H5Fopen(pathname, H5F_ACC_RDWR, fapl)) < 0)
+        TEST_ERROR;
+
+    if((dset = H5Dopen2(file, dname, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    if(H5Dclose(dset) < 0)
         TEST_ERROR;
 
     if(H5Fclose(file) < 0)

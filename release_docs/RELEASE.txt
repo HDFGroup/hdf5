@@ -152,6 +152,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a bug that caused files with a user block to grow by the size of
+            the user block every time they were opened.
+            (NAF - 2009/03/26 - 1499)
       - Fixed a rare problem that could occur with files using the old (pre 1.4)
             array datatype. (NAF - 2009/03/23)
       - Modified library to be able to open files with corrupt root group symbol
@@ -162,20 +165,21 @@ Bug Fixes since HDF5-1.8.0 release
             "long long". This caused problems with third party products. All 
             currently supported compliers support the type. (ADB - 2009/03/05)
       - Fixed various bugs that could prevent the fill value from being written
-            in certain rare cases. (NAF - 2009/02/26)
+            in certain rare cases. (NAF - 2009/02/26 - 1469)
       - Fixed a bug that prevented more than one dataset chunk from being cached
-            at a time. (NAF - 2009/02/12)
+            at a time. (NAF - 2009/02/12 - 1015)
       - Fixed an assertion failure caused by opening an attribute multiple times
-            through multiple file handles. (NAF - 2009/02/12)
+            through multiple file handles. (NAF - 2009/02/12 - 1420)
       - Fixed a problem that could prevent the user from adding attributes (or
-            any object header message) in some circumstances. (NAF - 2009/02/12)
+            any object header message) in some circumstances.
+            (NAF - 2009/02/12 - 1427)
       - Fixed a bug that could cause problems when an attribute was added to a
             committed datatype using the committed datatype's datatype.
             (NAF - 2009/02/12)
       - Fixed a bug that could cause problems when copying an object with a
             shared message in its own object header. (NAF - 2009/01/29)
       - Changed H5Tset_order to properly reject H5T_ORDER_NONE for most
-            datatypes. (NAF - 2009/01/27)
+            datatypes. (NAF - 2009/01/27 - 1443)
       - Fixed a bug where H5Tpack wouldn't remove trailing space from an
             otherwise packed compound type. (NAF - 2009/01/14)
       - Fixed up some old v2 btree assertions that get run in debug mode that
