@@ -20,6 +20,8 @@
 #include "H5Eprivate.h"		/* Error handling */
 #include "H5LRprivate.h"
 
+
+
 /*-------------------------------------------------------------------------
  *
  * internal functions
@@ -88,7 +90,7 @@ herr_t H5LRget_region_info(hid_t obj_id,
   if( path == NULL) {
 
     /* Determine the size of the name buffer, with null character included */
-    *len = (size_t)(1 + H5Iget_name (dset, NULL, 0));
+    *len = (size_t)(1 + H5Iget_name (dset, NULL, (size_t)0));
 
     /* Determine the rank of the space */
     H5E_BEGIN_TRY {
@@ -211,108 +213,63 @@ herr_t H5LRget_region_info(hid_t obj_id,
   FUNC_LEAVE_API(ret_value)
 }
 
-herr_t H5LRread_region(hid_t obj_id,
-		       const hdset_reg_ref_t *ref, 
-		       hid_t mem_type,
-		       size_t *numelem,
-		       void *buf )
+/*-------------------------------------------------------------------------
+ * Function: H5LRread_region
+ *
+ * Purpose: Read raw data pointed by a region reference 
+ *          to an application buffer
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: M. Scot Breitenfeld
+ *
+ * Date: February 17, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t H5LRread_region(hid_t obj_id,               /* -IN-      Id. of any object in a file associated with reference */
+		       const hdset_reg_ref_t *ref, /* -IN-      Id. of the memory datatype                            */
+		       hid_t mem_type,             /* -IN-      Id. of the memory datatype                            */
+		       size_t *numelem,            /* -IN/OUT-  Number of elements in the referenced region           */
+		       void *buf                   /* -OUT-     Buffer containing data from the referenced region     */
+		       )
 
 {
-  hid_t dset = -1, sid = -1;
-  hid_t ret_value = SUCCEED;          /* Return value */
-  H5S_sel_type sel_type;
-  hid_t mem_space;
-  herr_t status;
-  hsize_t dims1[1];		
+  hid_t dset = -1, file_space = -1;  /* Identifier of the dataset's dataspace in the file */
+  hid_t ret_value = SUCCEED;         /* Return value                                      */
+  H5S_sel_type sel_type;             /* Type of the dataspace selection                   */
+  hid_t mem_space;                   /* Identifier of the memory dataspace                */
+  herr_t status;                     /* API's error status                                */
+  hsize_t dims1[1];	      	
   
   FUNC_ENTER_API(H5LRread_region, FAIL)
 
+  /* Open the HDF5 object referenced */    
   dset = H5Rdereference(obj_id, H5R_DATASET_REGION, ref);
 
-  sid = H5Rget_region (dset, H5R_DATASET_REGION, ref);
+  /* Retrieve the dataspace with the specified region selected */
+  file_space = H5Rget_region (dset, H5R_DATASET_REGION, ref);
 
-  sel_type = H5Sget_select_type(sid);
+  /* Determine the type of the dataspace selection */
+  sel_type = H5Sget_select_type(file_space);
 
-  dims1[0] = H5Sget_select_npoints(sid);
-
-  *numelem = (size_t)dims1[0];	
-
+  /* Determine the number of elements the dataspace selection */
+  dims1[0] = H5Sget_select_npoints(file_space);
+  *numelem = (size_t)dims1[0];
+  
+  /* If only wanted the number of elments, return */
   if( buf == NULL) return SUCCEED;
 
+  /* Create a new simple dataspace in memory and open it for access */
   mem_space = H5Screate_simple (1, dims1, NULL);
 
+  /* Read the region data from the file_space into the mem_space */
+  status = H5Dread (dset, mem_type, mem_space, file_space, H5P_DEFAULT, buf);
 
-  status = H5Dread (dset, mem_type, mem_space, sid, H5P_DEFAULT, buf);
-
-/* close the data */
-
-  return SUCCEED;
-
- done:
-  FUNC_LEAVE_API(ret_value)
-}
-
-herr_t H5LTread_region(const char *file,
-		       const char *path,
-                       hsize_t *block_coord,
-		       hid_t mem_type,
-		       void *buf )
-{
-  hid_t ret_value = SUCCEED;          /* Return value */
-  herr_t status;
-  H5S_sel_type sel_type;
-  hsize_t  *dims1;
-  hid_t file_id;
-  hid_t dset_id;
-  hid_t sid1;
-  hid_t sid2;
-  int ndim;
-  int i;
-  hsize_t *start, *count;
-  
-  FUNC_ENTER_API(H5LTread_region, FAIL)
-
-  /* Open the  file */
-  file_id = H5Fopen(file, H5F_ACC_RDONLY,  H5P_DEFAULT);
-
-  /* Open the dataset for a given the path */
-  dset_id = H5Dopen2(file_id, path, H5P_DEFAULT);
-
-  /* Get the dataspace of the dataset */
-  sid1 = H5Dget_space(dset_id);
-
-  /* Find the rank of the dataspace */
-  ndim = H5Sget_simple_extent_ndims(sid1);
-
-
-  /* Allocate space for the dimension array */
-  dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
-
-  /* find the dimensions of each data space from the block coordinates */
-  for (i=0; i<ndim; i++)
-    dims1[i] = block_coord[i+ndim] - block_coord[i] + 1;
-
-  /* Create dataspace for reading buffer */
-  sid2 = H5Screate_simple(ndim, dims1, NULL);
-
-  /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
-  /*          1   2        n      1   2        n                                       */
-
-  start = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
-  count = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
-  for (i=0; i<ndim; i++) {
-    start[i] = block_coord[i];
-    count[i] = dims1[i];
-  }
-
-  status = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,NULL,count,NULL);
-
-  status = H5Dread(dset_id, mem_type, sid2, sid1, H5P_DEFAULT, buf);
-
-/*   H5Sget_select_npoints(hid_t space_id) */
-
-
-/* close the data */
+  /* Close appropriate items */
+  status = H5Dclose(dset);
+  status = H5Sclose(mem_space);
+  status = H5Sclose(file_space);
 
   return SUCCEED;
 
@@ -320,6 +277,21 @@ herr_t H5LTread_region(const char *file,
   FUNC_LEAVE_API(ret_value)
 }
 
+/*-------------------------------------------------------------------------
+ * Function: H5LRcreate_region_references
+ *
+ * Purpose: Create an array of region references using an array of paths
+ *          to datasets in a file and an array of the corresponding
+ *          hyperslab descriptions.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: M. Scot Breitenfeld
+ *
+ * Date: February 17, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
 
 herr_t H5LRcreate_region_references(hid_t file_id,
 				    size_t num_elem,
@@ -339,7 +311,7 @@ herr_t H5LRcreate_region_references(hid_t file_id,
   FUNC_ENTER_API(H5LRcreate_region_references, FAIL)
 
     nstart = 0;
-    for(i=0; i<num_elem; i++) {
+  for(i=0; i<(int)num_elem; i++) {
 
       /* Open the dataset for a given the path */
       dset_id = H5Dopen2(file_id, path[i], H5P_DEFAULT);
@@ -386,6 +358,20 @@ herr_t H5LRcreate_region_references(hid_t file_id,
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function: H5LRmake_dataset
+ *
+ * Purpose: Creates a dataset and writes data associated with a list of
+ *          region references to it.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: M. Scot Breitenfeld
+ *
+ * Date: February 17, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
 
 herr_t H5LRmake_dataset(hid_t loc_id, const char *path, hid_t type_id, hid_t loc_id_ref, int buf_size, hdset_reg_ref_t *ref)
 {
@@ -430,7 +416,7 @@ herr_t H5LRmake_dataset(hid_t loc_id, const char *path, hid_t type_id, hid_t loc
 
      bounds_coor = (hsize_t *)malloc (sizeof (hsize_t) * nrank * 2);
      /* a region reference is only allowed to reference one block */
-     status = H5Sget_select_hyper_blocklist(sid_ref, 0, 1, bounds_coor  );
+     status = H5Sget_select_hyper_blocklist(sid_ref, (hsize_t)0, (hsize_t)1, bounds_coor  );
 
      for (j=0; j<nrank; j++) 
        dims1[j] = bounds_coor[nrank +j] - bounds_coor[j] + 1;
@@ -449,7 +435,7 @@ herr_t H5LRmake_dataset(hid_t loc_id, const char *path, hid_t type_id, hid_t loc
      status = H5Sget_select_bounds(sid_ref, start, end  );
 
     /*    dims1[0] = 6; */
-
+     /* Create dataspace for datasets */
      sid = H5Screate_simple(nrank, dims1, NULL);
      dset_id = H5Dcreate2(loc_id, path, type_id, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT  );
 
@@ -496,6 +482,21 @@ herr_t H5LRmake_dataset(hid_t loc_id, const char *path, hid_t type_id, hid_t loc
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function: H5LRcopy_region
+ *
+ * Purpose: Copies data from a region specified by a reference to a region
+ *          in a destination dataset.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: M. Scot Breitenfeld
+ *
+ * Date: February 17, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+
 herr_t H5LRcopy_region(hid_t obj_id,
 		       hdset_reg_ref_t *ref,
 		       const char *file,
@@ -535,7 +536,7 @@ herr_t H5LRcopy_region(hid_t obj_id,
   dims1 = (hsize_t *)malloc (sizeof (hsize_t) * nrank);
 
   bounds_coor = (hsize_t *)malloc (sizeof (hsize_t) * nrank * 2);
-  status = H5Sget_select_hyper_blocklist(sid_ref, 0, 1, bounds_coor);
+  status = H5Sget_select_hyper_blocklist(sid_ref, (hsize_t)0, (hsize_t)1, bounds_coor);
 
   numelem = 1;
   for (j=0; j<nrank; j++) {
@@ -630,137 +631,20 @@ herr_t H5LRcopy_region(hid_t obj_id,
   FUNC_LEAVE_API(ret_value)
 }
 
-
-herr_t H5LTcopy_region(const char *file_src,
-		       const char *path_src,
-		       const hsize_t *block_coord_src,
-		       const char *file_dest,
-		       const char *path_dest,
-                       hsize_t *block_coord_dset)
-{
-  hid_t ret_value = SUCCEED;          /* Return value */
-  herr_t status;
-  H5S_sel_type sel_type;
-  hsize_t  *dims1, *dims_src;
-  hid_t sid1;
-  hid_t sid2;
-  hid_t fid_src, type_id, file_id;
-  hid_t did_src, sid_src,dset_id;
-  int ndim;
-  void *buf;
-  hsize_t  numelem_src;
-  int  nrank_src;
-  int i, j;
-  hsize_t *start, *count;
-  hid_t dtype;
-
-  FUNC_ENTER_API(H5LTcopy_region, FAIL)
-
-  /* Open the file */
-  fid_src = H5Fopen(file_src, H5F_ACC_RDONLY,  H5P_DEFAULT);
-
-  /* Open the dataset for a given the path */
-  did_src = H5Dopen2(fid_src, path_src, H5P_DEFAULT);
-
-  /* Get the dataspace of the dataset */
-  sid_src = H5Dget_space(did_src);
-
-  /* Find the rank of the dataspace */
-  nrank_src = H5Sget_simple_extent_ndims(sid_src);
-
-  /* Allocate space for the dimension array */
-  dims_src = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src);
-
-/*   bounds_coor = (hsize_t *)malloc (sizeof (hsize_t) * nrank * 2); */
-/*   status = H5Sget_select_hyper_blocklist(sid_ref, 0, 1, bounds_coor); */
-
-  numelem_src = 1;
-  for (j=0; j<nrank_src; j++) {
-    dims_src[j] = block_coord_src[nrank_src + j] - block_coord_src[j] + 1;
-    numelem_src = dims_src[j]*numelem_src;
-  }
-
-  dtype = H5Dget_type(did_src);
-  type_id = H5Tget_native_type(dtype , H5T_DIR_DEFAULT );
-
-  buf = malloc(sizeof(type_id) * numelem_src);
-
-  /* Create dataspace for reading buffer */
-  sid2 = H5Screate_simple(nrank_src, dims_src, NULL);
-
-  /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
-  /*          1   2        n      1   2        n                                       */
-
-  start = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src);
-  count = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src);
-  for (i=0; i<nrank_src; i++) {
-    start[i] = block_coord_src[i];
-    count[i] = dims_src[i];
-  }
-
-  status = H5Sselect_hyperslab(sid_src,H5S_SELECT_SET,start,NULL,count,NULL);
-
-  status = H5Dread(did_src, type_id, sid2, sid_src, H5P_DEFAULT, buf);
-
-  status = H5Dclose(did_src);
-  status = H5Sclose(sid_src);
-  status = H5Sclose(sid2);
-  status = H5Fclose(fid_src);
-  free(dims_src);
-
-/*   Open the file */
-   file_id = H5Fopen(file_dest, H5F_ACC_RDWR,  H5P_DEFAULT);
-
-/*   Open the dataset for a given the path */
-   dset_id = H5Dopen2(file_id, path_dest, H5P_DEFAULT);
-
-/*   Get the dataspace of the dataset */
-   sid1 = H5Dget_space(dset_id);
-
-
-/*   Find the rank of the dataspace */
-   ndim = H5Sget_simple_extent_ndims(sid1);
-
-  /* Allocate space for the dimension array */
-   dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
-
-  /* find the dimensions of each data space from the block coordinates */
-  for (i=0; i<ndim; i++)
-    dims1[i] = block_coord_dset[i+ndim] - block_coord_dset[i] + 1;
-
-   /* Create dataspace for writing the buffer */
-   sid2 = H5Screate_simple(ndim, dims1, NULL);
-
-/*   Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for writing memory dataset */
-/*            1   2        n      1   2        n                                       */
-
-   start = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
-   count = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
-
-   for (i=0; i<ndim; i++) {
-     start[i] = block_coord_dset[i];
-     count[i] = block_coord_dset[i + ndim] - start[i] + 1;
-   }
-
-  status = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,NULL,count,NULL);
-
-  status = H5Dwrite(dset_id, type_id, sid2, sid1, H5P_DEFAULT, buf);
-
-/* close the data */
-
-  status = H5Dclose(dset_id);
-  status = H5Sclose(sid1);
-  status = H5Sclose(sid2);
-  status = H5Tclose(type_id);
-  status = H5Fclose(file_id);
-  free(dims1);
-  free(buf);
-
-    return SUCCEED;
-
- done:
-  FUNC_LEAVE_API(ret_value)
-}
+/*-------------------------------------------------------------------------
+ * Function: H5LRcopy_references
+ *
+ * Purpose: Copy data from the specified dataset to a new location and
+ *          create a reference to it.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: M. Scot Breitenfeld
+ *
+ * Date: February 17, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
 
 herr_t H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,
 			  const char *path, const hsize_t *block_coord_dset, hdset_reg_ref_t *ref_new)
@@ -797,7 +681,7 @@ herr_t H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,
   dims_src = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src);
 
   bounds_coor = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src * 2);
-  status = H5Sget_select_hyper_blocklist(sid_src, 0, 1, bounds_coor);
+  status = H5Sget_select_hyper_blocklist(sid_src, (hsize_t)0, (hsize_t)1, bounds_coor);
 
   numelem_src = 1;
   for (j=0; j<nrank_src; j++) {
@@ -889,3 +773,4 @@ herr_t H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,
  done:
   FUNC_LEAVE_API(ret_value)
 }
+

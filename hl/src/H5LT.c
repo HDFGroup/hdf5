@@ -1573,8 +1573,6 @@ out:
 }
 
 
-
-
 /*-------------------------------------------------------------------------
  * Function: H5LTtext_to_dtype
  *
@@ -2892,4 +2890,256 @@ out:
 
 }
 
+/*-------------------------------------------------------------------------
+ * Function: H5LTread_region
+ *
+ * Purpose: Reads selected data to an appication buffer
+ *
+ * Return: FAIL on error, SUCCESS on success
+ *
+ * Programmer: M. Scot Breitenfeld
+ *
+ * Date: February 17, 2009
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
 
+herr_t H5LTread_region(const char *file,     /* */
+		       const char *path,
+                       hsize_t *block_coord,
+		       hid_t mem_type,
+		       void *buf )
+{
+  hid_t ret_value = SUCCEED;          /* Return value */
+  herr_t status;
+  hsize_t  *dims1;
+  hid_t file_id;
+  hid_t dset_id;
+  hid_t sid1;
+  hid_t sid2;
+  int ndim;
+  int i;
+  hsize_t *start, *count;
+  
+
+  /* Open the  file */
+  file_id = H5Fopen(file, H5F_ACC_RDONLY,  H5P_DEFAULT);
+
+  /* Open the dataset for a given the path */
+  dset_id = H5Dopen2(file_id, path, H5P_DEFAULT);
+
+  /* Get the dataspace of the dataset */
+  sid1 = H5Dget_space(dset_id);
+
+  /* Find the rank of the dataspace */
+  ndim = H5Sget_simple_extent_ndims(sid1);
+
+
+  /* Allocate space for the dimension array */
+  dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
+
+  /* find the dimensions of each data space from the block coordinates */
+  for (i=0; i<ndim; i++)
+    dims1[i] = block_coord[i+ndim] - block_coord[i] + 1;
+
+  /* Create dataspace for reading buffer */
+  sid2 = H5Screate_simple(ndim, dims1, NULL);
+
+  /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
+  /*          1   2        n      1   2        n                                       */
+
+  start = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
+  count = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
+  for (i=0; i<ndim; i++) {
+    start[i] = block_coord[i];
+    count[i] = dims1[i];
+  }
+
+  status = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,NULL,count,NULL);
+
+  status = H5Dread(dset_id, mem_type, sid2, sid1, H5P_DEFAULT, buf);
+
+/*   H5Sget_select_npoints(hid_t space_id) */
+
+  return ret_value;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: H5LTcopy_region
+ *
+ * Purpose: Copy data from a specified region in a source dataset to a
+ *          specified region in a destination dataset.
+ *
+ * Return: FAIL on error, SUCCESS on success
+ *
+ * Programmer: M. Scot Breitenfeld
+ *
+ * Date: February 17, 2009
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5LTcopy_region(const char *file_src,
+		       const char *path_src,
+		       const hsize_t *block_coord_src,
+		       const char *file_dest,
+		       const char *path_dest,
+                       hsize_t *block_coord_dset)
+{
+  hid_t ret_value = SUCCEED;          /* Return value */
+  herr_t status;
+  hsize_t  *dims1, *dims_src;
+  hid_t sid1;
+  hid_t sid2;
+  hid_t fid_src, type_id, file_id;
+  hid_t did_src, sid_src,dset_id;
+  int ndim;
+  void *buf;
+  hsize_t  numelem_src;
+  int  nrank_src;
+  int i, j;
+  hsize_t *start, *count;
+  hid_t dtype;
+
+
+  /* Open the file */
+  fid_src = H5Fopen(file_src, H5F_ACC_RDONLY,  H5P_DEFAULT);
+
+  /* Open the dataset for a given the path */
+  did_src = H5Dopen2(fid_src, path_src, H5P_DEFAULT);
+
+  /* Get the dataspace of the dataset */
+  sid_src = H5Dget_space(did_src);
+
+  /* Find the rank of the dataspace */
+  nrank_src = H5Sget_simple_extent_ndims(sid_src);
+
+  /* Allocate space for the dimension array */
+  dims_src = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src);
+
+/*   bounds_coor = (hsize_t *)malloc (sizeof (hsize_t) * nrank * 2); */
+/*   status = H5Sget_select_hyper_blocklist(sid_ref, 0, 1, bounds_coor); */
+
+  numelem_src = 1;
+  for (j=0; j<nrank_src; j++) {
+    dims_src[j] = block_coord_src[nrank_src + j] - block_coord_src[j] + 1;
+    numelem_src = dims_src[j]*numelem_src;
+  }
+
+  dtype = H5Dget_type(did_src);
+  type_id = H5Tget_native_type(dtype , H5T_DIR_DEFAULT );
+
+  buf = malloc(sizeof(type_id) * numelem_src);
+
+  /* Create dataspace for reading buffer */
+  sid2 = H5Screate_simple(nrank_src, dims_src, NULL);
+
+  /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
+  /*          1   2        n      1   2        n                                       */
+
+  start = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src);
+  count = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src);
+  for (i=0; i<nrank_src; i++) {
+    start[i] = block_coord_src[i];
+    count[i] = dims_src[i];
+  }
+
+  status = H5Sselect_hyperslab(sid_src,H5S_SELECT_SET,start,NULL,count,NULL);
+
+  status = H5Dread(did_src, type_id, sid2, sid_src, H5P_DEFAULT, buf);
+
+  status = H5Dclose(did_src);
+  status = H5Sclose(sid_src);
+  status = H5Sclose(sid2);
+  status = H5Fclose(fid_src);
+  free(dims_src);
+
+/*   Open the file */
+   file_id = H5Fopen(file_dest, H5F_ACC_RDWR,  H5P_DEFAULT);
+
+/*   Open the dataset for a given the path */
+   dset_id = H5Dopen2(file_id, path_dest, H5P_DEFAULT);
+
+/*   Get the dataspace of the dataset */
+   sid1 = H5Dget_space(dset_id);
+
+
+/*   Find the rank of the dataspace */
+   ndim = H5Sget_simple_extent_ndims(sid1);
+
+  /* Allocate space for the dimension array */
+   dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
+
+  /* find the dimensions of each data space from the block coordinates */
+  for (i=0; i<ndim; i++)
+    dims1[i] = block_coord_dset[i+ndim] - block_coord_dset[i] + 1;
+
+   /* Create dataspace for writing the buffer */
+   sid2 = H5Screate_simple(ndim, dims1, NULL);
+
+/*   Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for writing memory dataset */
+/*            1   2        n      1   2        n                                       */
+
+   start = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
+   count = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
+
+   for (i=0; i<ndim; i++) {
+     start[i] = block_coord_dset[i];
+     count[i] = block_coord_dset[i + ndim] - start[i] + 1;
+   }
+
+  status = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,NULL,count,NULL);
+
+  status = H5Dwrite(dset_id, type_id, sid2, sid1, H5P_DEFAULT, buf);
+
+/* close the data */
+
+  status = H5Dclose(dset_id);
+  status = H5Sclose(sid1);
+  status = H5Sclose(sid2);
+  status = H5Tclose(type_id);
+  status = H5Fclose(file_id);
+  free(dims1);
+  free(buf);
+
+  return ret_value;
+
+}
+
+/*-------------------------------------------------------------------------
+ * Function: H5LTread_quality_flag
+ *
+ * Purpose: Retrieves the values of quality flags for each element to the
+ *          application provided buffer.
+ *
+ * Return: FAIL on error, SUCCESS on success
+ *
+ * Programmer: M. Scot Breitenfeld
+ *
+ * Date: March 30, 2009
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+
+herr_t H5LTread_quality_flag(hid_t dset_id, int num_flags, const unsigned *offset,
+			     const unsigned *length, hid_t *dtype, hid_t *space, void *buf)
+{
+  hid_t ret_value = SUCCEED;          /* Return value */
+  herr_t status;
+
+
+    return ret_value;
+
+}

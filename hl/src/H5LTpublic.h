@@ -83,6 +83,14 @@ H5_HLDLL herr_t  H5LTmake_dataset_string( hid_t loc_id,
                                const char *buf );
 
 
+H5_HLDLL herr_t H5LTcopy_region(const char *file_src,
+				const char *path_src,
+				const hsize_t *block_coord_src,
+				const char *file_dest,
+				const char *path_dest,
+				hsize_t *block_coord_dset);
+
+
 /*-------------------------------------------------------------------------
  *
  * Read dataset functions
@@ -122,6 +130,17 @@ H5_HLDLL herr_t  H5LTread_dataset_double( hid_t loc_id,
 H5_HLDLL herr_t  H5LTread_dataset_string( hid_t loc_id,
                                 const char *dset_name,
                                 char *buf );
+
+
+H5_HLDLL herr_t  H5LTread_region(const char *file,
+				 const char *path,
+				 hsize_t *block_coord,
+				 hid_t mem_type,
+				 void *buf );
+
+H5_HLDLL herr_t H5LTread_quality_flag(hid_t dset_id, int num_flags, const unsigned *offset,
+				      const unsigned *length, hid_t *dtype, hid_t *space, void *buf);
+
 
 /*-------------------------------------------------------------------------
  *
@@ -317,9 +336,6 @@ H5_HLDLL herr_t  H5LTget_attribute_info( hid_t loc_id,
                                hsize_t *dims,
                                H5T_class_t *type_class,
                                size_t *type_size );
-
-
-
 
 
 /*-------------------------------------------------------------------------
