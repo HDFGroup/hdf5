@@ -1703,10 +1703,7 @@ HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
-{
-HDfprintf(stderr, "%s: stored_chksum = %8x, computed_chksum = %8x\n", FUNC, stored_chksum, computed_chksum);
 	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for extensible array data block page")
-}
 
     /* Set return value */
     ret_value = dblk_page;

@@ -4535,10 +4535,12 @@ H5C_get_entry_status(H5C_t *   cache_ptr,
                      hbool_t * in_cache_ptr,
                      hbool_t * is_dirty_ptr,
                      hbool_t * is_protected_ptr,
-		     hbool_t * is_pinned_ptr)
+		     hbool_t * is_pinned_ptr,
+		     hbool_t * is_flush_dep_parent_ptr,
+                     hbool_t * is_flush_dep_child_ptr)
 {
-    herr_t		ret_value = SUCCEED;      /* Return value */
     H5C_cache_entry_t *	entry_ptr = NULL;
+    herr_t		ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_get_entry_status, FAIL)
 
@@ -4586,6 +4588,16 @@ H5C_get_entry_status(H5C_t *   cache_ptr,
         if ( is_pinned_ptr != NULL ) {
 
             *is_pinned_ptr = entry_ptr->is_pinned;
+        }
+
+        if ( is_flush_dep_parent_ptr != NULL ) {
+
+            *is_flush_dep_parent_ptr = (entry_ptr->flush_dep_height > 0);
+        }
+
+        if ( is_flush_dep_child_ptr != NULL ) {
+
+            *is_flush_dep_child_ptr = (entry_ptr->flush_dep_parent != NULL);
         }
     }
 
@@ -8715,8 +8727,8 @@ H5C_create_flush_dependency(H5C_t UNUSED * cache_ptr, void * parent_thing,
     /* More sanity checks */
     if(child_entry == parent_entry)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Child entry flush dependency parent can't be itself")
-    if(!parent_entry->is_protected)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Parent entry isn't protected")
+    if(!(parent_entry->is_protected || parent_entry->is_pinned))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Parent entry isn't pinned or protected")
     if(NULL != child_entry->flush_dep_parent)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Child entry already has flush dependency parent")
     {

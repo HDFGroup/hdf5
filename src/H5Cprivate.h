@@ -1047,7 +1047,9 @@ H5_DLL herr_t H5C_get_entry_status(H5C_t *   cache_ptr,
                                    hbool_t * in_cache_ptr,
                                    hbool_t * is_dirty_ptr,
                                    hbool_t * is_protected_ptr,
-				   hbool_t * is_pinned_ptr);
+				   hbool_t * is_pinned_ptr,
+				   hbool_t * is_flush_dep_parent_ptr,
+				   hbool_t * is_flush_dep_child_ptr);
 
 H5_DLL herr_t H5C_get_evictions_enabled(H5C_t * cache_ptr,
                                         hbool_t * evictions_enabled_ptr);

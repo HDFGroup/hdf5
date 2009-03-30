@@ -2727,7 +2727,7 @@ check_insert_entry(void)
 
 	result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
 			              &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+				      &is_pinned, NULL, NULL);
 
         if ( result < 0 ) {
 
@@ -13541,7 +13541,7 @@ check_get_entry_status(void)
          */
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
+                &in_cache, &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -13565,7 +13565,7 @@ check_get_entry_status(void)
     if ( pass ) {
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
+                &in_cache, &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -13587,7 +13587,7 @@ check_get_entry_status(void)
     if ( pass ) {
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
+                &in_cache, &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -13609,7 +13609,7 @@ check_get_entry_status(void)
     if ( pass ) {
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
+                &in_cache, &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -13631,7 +13631,7 @@ check_get_entry_status(void)
     if ( pass ) {
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
+                &in_cache, &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -13653,7 +13653,7 @@ check_get_entry_status(void)
     if ( pass ) {
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
+                &in_cache, &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -13743,7 +13743,7 @@ check_expunge_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
                                       &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+				      &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -13781,7 +13781,7 @@ check_expunge_entry(void)
     if ( pass ) {
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
+                &in_cache, &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -13821,7 +13821,7 @@ check_expunge_entry(void)
          */
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
-                &in_cache, &is_dirty, &is_protected, &is_pinned);
+                &in_cache, &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -13863,7 +13863,7 @@ check_expunge_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
                                       &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+				      &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -13902,7 +13902,7 @@ check_expunge_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
                                       &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+				      &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -13943,7 +13943,7 @@ check_expunge_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
                                       &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+				      &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -14878,7 +14878,7 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+				      &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -14948,7 +14948,7 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+				      &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -15021,7 +15021,7 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+				      &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -15086,7 +15086,7 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+				      &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -15147,7 +15147,7 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+				      &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -15184,7 +15184,7 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
                                       &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+				      &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -15290,7 +15290,7 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+				      &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -15362,7 +15362,7 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+				      &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -15435,7 +15435,7 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+				      &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -15502,7 +15502,7 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+				      &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -15563,7 +15563,7 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
 			              &reported_entry_size, &in_cache,
-				      &is_dirty, &is_protected, &is_pinned);
+				      &is_dirty, &is_protected, &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -15600,7 +15600,7 @@ check_resize_entry(void)
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr, &entry_size,
                                       &in_cache, &is_dirty, &is_protected,
-				      &is_pinned);
+				      &is_pinned, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -15878,7 +15878,7 @@ check_evictions_enabled(void)
         entry_ptr = &(base_addr[0]);
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
-			              NULL, &in_cache, NULL, NULL, NULL);
+			              NULL, &in_cache, NULL, NULL, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -15941,7 +15941,7 @@ check_evictions_enabled(void)
         entry_ptr = &(base_addr[1]);
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
-			              NULL, &in_cache, NULL, NULL, NULL);
+			              NULL, &in_cache, NULL, NULL, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -16148,7 +16148,7 @@ check_evictions_enabled(void)
         entry_ptr = &(base_addr[2]);
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
-			              NULL, &in_cache, NULL, NULL, NULL);
+			              NULL, &in_cache, NULL, NULL, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -16184,7 +16184,7 @@ check_evictions_enabled(void)
         entry_ptr = &(base_addr[3]);
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
-			              NULL, &in_cache, NULL, NULL, NULL);
+			              NULL, &in_cache, NULL, NULL, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -16313,7 +16313,7 @@ check_evictions_enabled(void)
         entry_ptr = &(base_addr[4]);
 
         result = H5C_get_entry_status(cache_ptr, entry_ptr->addr,
-			              NULL, &in_cache, NULL, NULL, NULL);
+			              NULL, &in_cache, NULL, NULL, NULL, NULL, NULL);
 
 	if ( result < 0 ) {
 
@@ -29726,6 +29726,7 @@ static unsigned
 check_flush_deps(void)
 {
     H5C_t * cache_ptr = NULL;           /* Metadata cache for this test */
+    test_entry_t *base_addr;            /* Base address of entries for test */
     int entry_type = PICO_ENTRY_TYPE;   /* Use very small entry size (size of entries doesn't matter) */
     size_t entry_size = PICO_ENTRY_SIZE; /* 1 byte */
     unsigned u;                         /* Local index variable */
@@ -29750,6 +29751,7 @@ check_flush_deps(void)
 
     reset_entries();
     cache_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024));
+    base_addr = entries[entry_type];
 
     if ( !pass ) CACHE_ERROR("setup_cache failed")
 
@@ -29776,11 +29778,46 @@ check_flush_deps(void)
 
     /* Create flush dependency between entries 0 (child) & 1 (parent) */
     {
+        hbool_t in_cache, is_flush_dep_parent, is_flush_dep_child;
+        test_entry_t * entry_ptr;
+
         protect_entry(cache_ptr, entry_type, 1);
         if ( !pass ) CACHE_ERROR("protect_entry failed")
         
+        /* Check the parent's entry status */
+	entry_ptr = &(base_addr[1]);
+	if(H5C_get_entry_status(cache_ptr, entry_ptr->addr, NULL, &in_cache,
+                NULL, NULL, NULL, &is_flush_dep_parent, &is_flush_dep_child) < 0)
+            CACHE_ERROR("H5C_get_entry_status() failed")
+        if(!in_cache || is_flush_dep_parent || is_flush_dep_child)
+            CACHE_ERROR("invalid entry status")
+
+        /* Check the child's entry status */
+	entry_ptr = &(base_addr[0]);
+	if(H5C_get_entry_status(cache_ptr, entry_ptr->addr, NULL, &in_cache,
+                NULL, NULL, NULL, &is_flush_dep_parent, &is_flush_dep_child) < 0)
+            CACHE_ERROR("H5C_get_entry_status() failed")
+        if(!in_cache || is_flush_dep_parent || is_flush_dep_child)
+            CACHE_ERROR("invalid entry status")
+
         create_flush_dependency(cache_ptr, entry_type, 1, entry_type, 0);
         if ( !pass ) CACHE_ERROR("create_flush_dependency failed")
+
+        /* Check the parent's entry status */
+	entry_ptr = &(base_addr[1]);
+	if(H5C_get_entry_status(cache_ptr, entry_ptr->addr, NULL, &in_cache,
+                NULL, NULL, NULL, &is_flush_dep_parent, &is_flush_dep_child) < 0)
+            CACHE_ERROR("H5C_get_entry_status() failed")
+        if(!in_cache || !is_flush_dep_parent || is_flush_dep_child)
+            CACHE_ERROR("invalid entry status")
+
+        /* Check the child's entry status */
+	entry_ptr = &(base_addr[0]);
+	if(H5C_get_entry_status(cache_ptr, entry_ptr->addr, NULL, &in_cache,
+                NULL, NULL, NULL, &is_flush_dep_parent, &is_flush_dep_child) < 0)
+            CACHE_ERROR("H5C_get_entry_status() failed")
+        if(!in_cache || is_flush_dep_parent || !is_flush_dep_child)
+            CACHE_ERROR("invalid entry status")
 
         /* Change expected values, and verify the status of the entries 
          * after creating flush dependency

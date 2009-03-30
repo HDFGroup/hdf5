@@ -1154,6 +1154,8 @@ H5AC_get_entry_status(H5F_t *    f,
     hbool_t	is_dirty;
     hbool_t	is_protected;
     hbool_t	is_pinned;
+    hbool_t	is_flush_dep_child;
+    hbool_t	is_flush_dep_parent;
     size_t	entry_size;
     unsigned	status = 0;
 
@@ -1168,7 +1170,8 @@ H5AC_get_entry_status(H5F_t *    f,
     }
 
     result = H5C_get_entry_status(cache_ptr, addr, &entry_size, &in_cache,
-		                  &is_dirty, &is_protected, &is_pinned);
+            &is_dirty, &is_protected, &is_pinned, &is_flush_dep_parent,
+            &is_flush_dep_child);
 
     if ( result < 0 ) {
 
@@ -1188,6 +1191,12 @@ H5AC_get_entry_status(H5F_t *    f,
 
 	if ( is_pinned )
 	    status |= H5AC_ES__IS_PINNED;
+
+	if ( is_flush_dep_parent )
+	    status |= H5AC_ES__IS_FLUSH_DEP_PARENT;
+
+	if ( is_flush_dep_child )
+	    status |= H5AC_ES__IS_FLUSH_DEP_CHILD;
     }
 
     *status_ptr = status;

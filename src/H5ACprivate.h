@@ -266,6 +266,8 @@ extern hid_t H5AC_ind_dxpl_id;
 #define H5AC_ES__IS_DIRTY	0x0002
 #define H5AC_ES__IS_PROTECTED	0x0004
 #define H5AC_ES__IS_PINNED	0x0008
+#define H5AC_ES__IS_FLUSH_DEP_PARENT	0x0010
+#define H5AC_ES__IS_FLUSH_DEP_CHILD	0x0020
 
 
 /* external function declarations: */
