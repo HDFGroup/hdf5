@@ -334,6 +334,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_flush_func_t)flush_datum,
     (H5C_dest_func_t)destroy_datum,
     (H5C_clear_func_t)clear_datum,
+    (H5C_notify_func_t)NULL,
     (H5C_size_func_t)size_datum
   }
 };
