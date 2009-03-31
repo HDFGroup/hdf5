@@ -62,9 +62,16 @@
 /* Local Typedefs */
 /******************/
 
+/* Extensible array create/open user data */
+typedef struct H5D_earray_ctx_ud_t {
+    const H5F_t *f;             /* Pointer to file info */
+    const H5O_layout_t *layout; /* Pointer to layout info */
+} H5D_earray_ctx_ud_t;
+
 /* Extensible array callback context */
 typedef struct H5D_earray_ctx_t {
-    size_t file_addr_len;       /* Size of addresses in the file        */
+    size_t file_addr_len;       /* Size of addresses in the file (bytes) */
+    size_t chunk_size_len;      /* Size of chunk sizes in the file (bytes) */
 } H5D_earray_ctx_t;
 
 /* User data for chunk callbacks */
@@ -208,20 +215,29 @@ static void *
 H5D_earray_crt_context(void *_udata)
 {
     H5D_earray_ctx_t *ctx;      /* Extensible array callback context */
-    H5F_t *f = (H5F_t *)_udata; /* User data for extensible array context */
+    H5D_earray_ctx_ud_t *udata = (H5D_earray_ctx_ud_t *)_udata; /* User data for extensible array context */
     void *ret_value;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_earray_crt_context)
 
     /* Sanity checks */
-    HDassert(f);
+    HDassert(udata);
+    HDassert(udata->f);
+    HDassert(udata->layout);
 
     /* Allocate new context structure */
     if(NULL == (ctx = H5FL_MALLOC(H5D_earray_ctx_t)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, NULL, "can't allocate extensible array client callback context")
 
     /* Initialize the context */
-    ctx->file_addr_len = H5F_SIZEOF_ADDR(f);
+    ctx->file_addr_len = H5F_SIZEOF_ADDR(udata->f);
+
+    /* Compute the size required for encoding the size of a chunk, allowing
+     *      for an extra byte, in case the filter makes the chunk larger.
+     */
+    ctx->chunk_size_len = 1 + ((H5V_log2_gen(udata->layout->u.chunk.size) + 8) / 8);
+    if(ctx->chunk_size_len > 8)
+        ctx->chunk_size_len = 8;
 
     /* Set return value */
     ret_value = ctx;
@@ -477,7 +493,7 @@ H5D_earray_filt_encode(void *_raw, const void *_elmt, size_t nelmts, void *_ctx)
         /* Encode element */
         /* (advances 'raw' pointer */
         H5F_addr_encode_len(ctx->file_addr_len, &raw, elmt->addr);
-        UINT32ENCODE(raw, elmt->nbytes);
+        UINT64ENCODE_VAR(raw, elmt->nbytes, ctx->chunk_size_len);
         UINT32ENCODE(raw, elmt->filter_mask);
 
         /* Advance native element pointer */
@@ -523,7 +539,7 @@ H5D_earray_filt_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
         /* Decode element */
         /* (advances 'raw' pointer */
         H5F_addr_decode_len(ctx->file_addr_len, &raw, &elmt->addr);
-        UINT32DECODE(raw, elmt->nbytes);
+        UINT64DECODE_VAR(raw, elmt->nbytes, ctx->chunk_size_len);
         UINT32DECODE(raw, elmt->filter_mask);
 
         /* Advance native element pointer */
@@ -590,6 +606,7 @@ static herr_t
 H5D_earray_idx_open(const H5D_chk_idx_info_t *idx_info)
 {
     const H5EA_class_t *cls;            /* Extensible array class to use */
+    H5D_earray_ctx_ud_t udata;          /* User data for extensible array open call */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_open)
@@ -603,9 +620,13 @@ H5D_earray_idx_open(const H5D_chk_idx_info_t *idx_info)
     HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.earray.addr));
     HDassert(NULL == idx_info->layout->u.chunk.u.earray.ea);
 
+    /* Set up the user data */
+    udata.f = idx_info->f;
+    udata.layout = idx_info->layout;
+
     /* Open the extensible array for the chunk index */
     cls = (idx_info->pline->nused > 0) ?  H5EA_CLS_FILT_CHUNK : H5EA_CLS_CHUNK;
-    if(NULL == (idx_info->layout->u.chunk.u.earray.ea = H5EA_open(idx_info->f, idx_info->dxpl_id, idx_info->layout->u.chunk.u.earray.addr, cls, idx_info->f)))
+    if(NULL == (idx_info->layout->u.chunk.u.earray.ea = H5EA_open(idx_info->f, idx_info->dxpl_id, idx_info->layout->u.chunk.u.earray.addr, cls, &udata)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open extensible array")
 
 done:
@@ -635,6 +656,7 @@ static herr_t
 H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info)
 {
     H5EA_create_t cparam;               /* Extensible array creation parameters */
+    H5D_earray_ctx_ud_t udata;          /* User data for extensible array create call */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_create)
@@ -649,8 +671,17 @@ H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info)
 
     /* General parameters */
     if(idx_info->pline->nused > 0) {
+        unsigned chunk_size_len;        /* Size of encoded chunk size */
+        
+        /* Compute the size required for encoding the size of a chunk, allowing
+         *      for an extra byte, in case the filter makes the chunk larger.
+         */
+        chunk_size_len = 1 + ((H5V_log2_gen(idx_info->layout->u.chunk.size) + 8) / 8);
+        if(chunk_size_len > 8)
+            chunk_size_len = 8;
+
         cparam.cls = H5EA_CLS_FILT_CHUNK;
-        cparam.raw_elmt_size = (uint8_t)(H5F_SIZEOF_ADDR(idx_info->f) + 4 + 4);
+        cparam.raw_elmt_size = (uint8_t)(H5F_SIZEOF_ADDR(idx_info->f) + chunk_size_len + 4);
     } /* end if */
     else {
         cparam.cls = H5EA_CLS_CHUNK;
@@ -662,8 +693,12 @@ H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info)
     cparam.data_blk_min_elmts = H5D_EARRAY_DATA_BLK_MIN_ELMTS;
     cparam.max_dblk_page_nelmts_bits = H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
 
+    /* Set up the user data */
+    udata.f = idx_info->f;
+    udata.layout = idx_info->layout;
+
     /* Create the extensible array for the chunk index */
-    if(NULL == (idx_info->layout->u.chunk.u.earray.ea = H5EA_create(idx_info->f, idx_info->dxpl_id, &cparam, idx_info->f)))
+    if(NULL == (idx_info->layout->u.chunk.u.earray.ea = H5EA_create(idx_info->f, idx_info->dxpl_id, &cparam, &udata)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create extensible array")
 
     /* Get the address of the extensible array in file */
@@ -750,7 +785,25 @@ H5D_earray_idx_insert(const H5D_chk_idx_info_t *idx_info, H5D_chunk_ud_t *udata)
     /* Check for filters on chunks */
     if(idx_info->pline->nused > 0) {
         H5D_earray_filt_elmt_t elmt;            /* Extensible array element */
+        unsigned allow_chunk_size_len;          /* Allowed size of encoded chunk size */
+        unsigned new_chunk_size_len;            /* Size of encoded chunk size */
         hbool_t alloc_chunk = FALSE;            /* Whether to allocate chunk */
+
+        /* Compute the size required for encoding the size of a chunk, allowing
+         *      for an extra byte, in case the filter makes the chunk larger.
+         */
+        allow_chunk_size_len = 1 + ((H5V_log2_gen(idx_info->layout->u.chunk.size) + 8) / 8);
+        if(allow_chunk_size_len > 8)
+            allow_chunk_size_len = 8;
+
+        /* Compute encoded size of chunk */
+        new_chunk_size_len = (H5V_log2_gen(udata->nbytes) + 8) / 8;
+        if(new_chunk_size_len > 8)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "encoded chunk size is more than 8 bytes?!?")
+
+        /* Check if the chunk became too large to be encoded */
+        if(new_chunk_size_len > allow_chunk_size_len)
+            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk size can't be encoded")
 
         /* Get the information for the chunk */
         if(H5EA_get(ea, idx_info->dxpl_id, idx, &elmt) < 0)
