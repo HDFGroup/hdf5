@@ -71,7 +71,7 @@ typedef struct H5EA__test_ctx_t {
 /********************/
 
 /* Extensible array class callbacks */
-static void *H5EA__test_crt_context(const H5F_t *f);
+static void *H5EA__test_crt_context(void *udata);
 static herr_t H5EA__test_dst_context(void *ctx);
 static herr_t H5EA__test_fill(void *nat_blk, size_t nelmts);
 static herr_t H5EA__test_encode(void *raw, const void *elmt, size_t nelmts,
@@ -128,13 +128,12 @@ H5FL_DEFINE_STATIC(H5EA__test_ctx_t);
  */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
-H5EA__test_crt_context(const H5F_t UNUSED *f))
+H5EA__test_crt_context(void UNUSED *udata))
 
     /* Local variables */
     H5EA__test_ctx_t *ctx;              /* Context for callbacks */
 
     /* Sanity checks */
-    HDassert(f);
 
     /* Allocate new context structure */
     if(NULL == (ctx = H5FL_MALLOC(H5EA__test_ctx_t)))

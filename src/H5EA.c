@@ -110,7 +110,7 @@ H5FL_DEFINE_STATIC(H5EA_t);
  */
 BEGIN_FUNC(PRIV, ERR,
 H5EA_t *, NULL, NULL,
-H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam))
+H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam, void *ctx_udata))
 
     /* Local variables */
     H5EA_t *ea = NULL;          /* Pointer to new extensible array */
@@ -128,7 +128,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     HDassert(cparam);
 
     /* Create extensible array header */
-    if(HADDR_UNDEF == (ea_addr = H5EA__hdr_create(f, dxpl_id, cparam)))
+    if(HADDR_UNDEF == (ea_addr = H5EA__hdr_create(f, dxpl_id, cparam, ctx_udata)))
 	H5E_THROW(H5E_CANTINIT, "can't create extensible array header")
 
     /* Allocate extensible array wrapper */
@@ -181,7 +181,8 @@ END_FUNC(PRIV)  /* end H5EA_create() */
  */
 BEGIN_FUNC(PRIV, ERR,
 H5EA_t *, NULL, NULL,
-H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, const H5EA_class_t *cls))
+H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, const H5EA_class_t *cls,
+    void *ctx_udata))
 
     /* Local variables */
     H5EA_t *ea = NULL;          /* Pointer to new extensible array wrapper */
@@ -198,7 +199,7 @@ H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr, const H5EA_class_t *cls))
 #ifdef QAK
 HDfprintf(stderr, "%s: ea_addr = %a\n", FUNC, ea_addr);
 #endif /* QAK */
-    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, cls, NULL, H5AC_READ)))
+    if(NULL == (hdr = (H5EA_hdr_t *)H5AC_protect(f, dxpl_id, H5AC_EARRAY_HDR, ea_addr, cls, ctx_udata, H5AC_READ)))
         H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header, address = %llu", (unsigned long long)ea_addr)
 
     /* Check for pending array deletion */

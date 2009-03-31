@@ -199,7 +199,7 @@ const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1] = {{
 BEGIN_FUNC(STATIC, ERR,
 H5EA_hdr_t *, NULL, NULL,
 H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
-    void UNUSED *udata2))
+    void *ctx_udata))
 
     /* Local variables */
     const H5EA_class_t  *cls = (const H5EA_class_t *)_cls;      /* Extensible array class */
@@ -217,7 +217,7 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
     HDassert(H5F_addr_defined(addr));
 
     /* Allocate space for the extensible array data structure */
-    if(NULL == (hdr = H5EA__hdr_alloc(f, cls)))
+    if(NULL == (hdr = H5EA__hdr_alloc(f, cls, ctx_udata)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array shared header")
 
     /* Set the extensible array header's address */
