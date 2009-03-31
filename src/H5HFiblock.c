@@ -1105,7 +1105,7 @@ HDfprintf(stderr, "%s: dir_rows = %u\n", FUNC, dir_rows);
     iblock->max_child = 0;
 
     /* Cache the new indirect block */
-    if(H5AC_set(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, *addr_p, iblock, H5AC__NO_FLAGS_SET, NULL) < 0)
+    if(H5AC_set(hdr->f, dxpl_id, H5AC_FHEAP_IBLOCK, *addr_p, iblock, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add fractal heap indirect block to cache")
 
 done:

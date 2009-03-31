@@ -160,7 +160,7 @@ H5HL_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, haddr_t *addr_p/*out*/)
 	heap->freelist = NULL;
 
     /* add to cache */
-    if(H5AC_set(f, dxpl_id, H5AC_LHEAP, *addr_p, heap, H5AC__NO_FLAGS_SET, NULL) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_LHEAP, *addr_p, heap, H5AC__NO_FLAGS_SET) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "unable to cache heap")
 
 done:

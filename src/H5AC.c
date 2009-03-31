@@ -1274,7 +1274,7 @@ done:
 
 herr_t
 H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
-    void *thing, unsigned int flags, void *udata)
+    void *thing, unsigned int flags)
 {
     herr_t		result;
     H5AC_info_t        *info;
@@ -1356,8 +1356,7 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
                               type,
                               addr,
                               thing,
-                              flags,
-                              udata);
+                              flags);
 
     if ( result < 0 ) {
 

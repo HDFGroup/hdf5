@@ -151,8 +151,7 @@ typedef herr_t (*H5C_clear_func_t)(H5F_t *f,
                                    void *thing,
                                    hbool_t dest);
 typedef herr_t (*H5C_notify_func_t)(H5C_notify_action_t action,
-                                 void *thing,
-                                 void *udata);
+                                 void *thing);
 typedef herr_t (*H5C_size_func_t)(const H5F_t *f,
                                   const void *thing,
                                   size_t *size_ptr);
@@ -1081,8 +1080,7 @@ H5_DLL herr_t H5C_insert_entry(H5F_t *             f,
                                const H5C_class_t * type,
                                haddr_t             addr,
                                void *              thing,
-                               unsigned int        flags,
-                               void *              udata);
+                               unsigned int        flags);
 
 H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t   * f,
                                         hid_t     primary_dxpl_id,

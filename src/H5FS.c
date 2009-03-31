@@ -138,7 +138,7 @@ HDfprintf(stderr, "%s: Creating free space manager, nclasses = %Zu\n", FUNC, ncl
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "file allocation failed for free space header")
 
         /* Cache the new free space header (pinned) */
-        if(H5AC_set(f, dxpl_id, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG, NULL) < 0)
+        if(H5AC_set(f, dxpl_id, H5AC_FSPACE_HDR, fspace->addr, fspace, H5AC__PIN_ENTRY_FLAG) < 0)
             HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, NULL, "can't add free space header to cache")
 
         /* Return free space header address to caller, if desired */
@@ -391,7 +391,7 @@ HDfprintf(stderr, "%s: Real sections to store in file\n", FUNC);
                 HDassert(H5F_addr_defined(fspace->sect_addr));
 
             /* Cache the free space section info */
-            if(H5AC_set(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET, NULL) < 0)
+            if(H5AC_set(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, fspace->sinfo, H5AC__NO_FLAGS_SET) < 0)
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTINIT, FAIL, "can't add free space sections to cache")
         } /* end if */
         else {

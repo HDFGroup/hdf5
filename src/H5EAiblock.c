@@ -231,8 +231,7 @@ HDfprintf(stderr, "%s: iblock->size = %Zu\n", FUNC, iblock->size);
     } /* end if */
 
     /* Cache the new extensible array index block */
-    /* (pass in header, so the 'notify' callback can create flush dependency on it) */
-    if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_IBLOCK, iblock_addr, iblock, H5AC__NO_FLAGS_SET, hdr) < 0)
+    if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_IBLOCK, iblock_addr, iblock, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array index block to cache")
 
     /* Update extensible array index block statistics */

@@ -4835,8 +4835,7 @@ H5C_insert_entry(H5F_t * 	     f,
                  const H5C_class_t * type,
                  haddr_t 	     addr,
                  void *		     thing,
-                 unsigned int        flags,
-                 void *              udata)
+                 unsigned int        flags)
 {
     herr_t		result;
     hbool_t		first_flush = TRUE;
@@ -5091,7 +5090,7 @@ H5C_insert_entry(H5F_t * 	     f,
      * notice now that the entry is fully integrated into the cache.
      */
     if(entry_ptr->type->notify &&
-            (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_INSERT, entry_ptr, udata) < 0)
+            (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_INSERT, entry_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry inserted into cache")
 
     H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)
@@ -6438,7 +6437,7 @@ H5C_protect(H5F_t *	        f,
          * notice now that the entry is fully integrated into the cache.
          */
         if(entry_ptr->type->notify &&
-                (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_INSERT, entry_ptr, udata2) < 0)
+                (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_INSERT, entry_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, NULL, "can't notify client about entry inserted into cache")
     }
 
@@ -11108,7 +11107,7 @@ H5C_flush_single_entry(H5F_t *		   f,
          */
         if(destroy) {
             if(entry_ptr->type->notify &&
-                    (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_BEFORE_EVICT, entry_ptr, NULL) < 0)
+                    (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_BEFORE_EVICT, entry_ptr) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry to evict")
         } /* end if */
 

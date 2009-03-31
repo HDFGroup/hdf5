@@ -16653,7 +16653,7 @@ check_duplicate_insert_err(void)
 
             result = H5C_insert_entry(NULL, -1, -1, cache_ptr,
                                       &(types[0]), entry_ptr->addr,
-                                      (void *)entry_ptr, H5C__NO_FLAGS_SET, NULL);
+                                      (void *)entry_ptr, H5C__NO_FLAGS_SET);
 
             if ( result >= 0 ) {
 

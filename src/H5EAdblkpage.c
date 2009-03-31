@@ -178,7 +178,7 @@ HDfprintf(stderr, "%s: dblk_page->size = %Zu\n", FUNC, dblk_page->size);
         H5E_THROW(H5E_CANTSET, "can't set extensible array data block page elements to class's fill value")
 
     /* Cache the new extensible array data block page */
-    if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET, NULL) < 0)
+    if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array data block page to cache")
 
 CATCH

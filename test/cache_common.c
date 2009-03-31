@@ -2656,7 +2656,7 @@ insert_entry(H5C_t * cache_ptr,
 	entry_ptr->is_dirty = TRUE;
 
         result = H5C_insert_entry(NULL, -1, -1, cache_ptr, &(types[type]),
-                                  entry_ptr->addr, (void *)entry_ptr, flags, NULL);
+                                  entry_ptr->addr, (void *)entry_ptr, flags);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.is_protected ) ||
