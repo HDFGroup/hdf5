@@ -539,6 +539,7 @@ typedef struct H5EA_sblock_t {
     /* Internal array information (not stored) */
     size_t      rc;             /* Reference count of objects using this block */
     H5EA_hdr_t	*hdr;	        /* Shared array header info	              */
+    H5EA_iblock_t *parent;	/* Parent object for super block (index block) */
     haddr_t     addr;           /* Address of this index block on disk	      */
     size_t      size;           /* Size of index block on disk		      */
 
@@ -562,6 +563,7 @@ typedef struct H5EA_dblock_t {
 
     /* Internal array information (not stored) */
     H5EA_hdr_t	*hdr;	        /* Shared array header info	              */
+    void        *parent;        /* Parent object for data block (index or super block) */
     haddr_t     addr;           /* Address of this data block on disk	      */
     size_t      size;           /* Size of data block on disk		      */
 
@@ -580,6 +582,7 @@ typedef struct H5EA_dbk_page_t {
 
     /* Internal array information (not stored) */
     H5EA_hdr_t	*hdr;	        /* Shared array header info	              */
+    H5EA_sblock_t *parent;      /* Parent object for data block page (super block) */
     haddr_t     addr;           /* Address of this data block page on disk    */
     size_t      size;           /* Size of data block page on disk	      */
 
@@ -592,6 +595,25 @@ struct H5EA_t {
     H5EA_hdr_t  *hdr;           /* Pointer to internal extensible array header info */
     H5F_t      *f;              /* Pointer to file for extensible array */
 };
+
+/* Metadata cache callback user data types */
+
+/* Info needed for loading data block page */
+typedef struct H5EA_dblk_page_load_ud_t {
+    H5EA_sblock_t *parent;      /* Pointer to parent object for data block page (super block) */
+} H5EA_dblk_page_load_ud_t;
+
+/* Info needed for loading data block */
+typedef struct H5EA_dblock_load_ud_t {
+    void *parent;               /* Pointer to parent object for data block (index or super block) */
+    size_t nelmts;              /* Number of elements in data block */
+} H5EA_dblock_load_ud_t;
+
+/* Info needed for loading super block */
+typedef struct H5EA_sblock_load_ud_t {
+    H5EA_iblock_t *parent;      /* Pointer to parent object for super block (index block) */
+    unsigned sblk_idx;          /* Index of super block */
+} H5EA_sblock_load_ud_t;
 
 
 /*****************************/
@@ -623,6 +645,12 @@ H5_DLLVAR const H5EA_class_t H5EA_CLS_TEST[1];
 /* Package Private Prototypes */
 /******************************/
 
+/* Generic routines */
+H5_DLL herr_t H5EA__create_flush_depend(H5EA_hdr_t *hdr, H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+H5_DLL herr_t H5EA__destroy_flush_depend(H5EA_hdr_t *hdr, H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+
 /* Header routines */
 H5_DLL H5EA_hdr_t *H5EA__hdr_alloc(H5F_t *f, const H5EA_class_t *cls);
 H5_DLL herr_t H5EA__hdr_init(H5EA_hdr_t *hdr);
@@ -649,36 +677,38 @@ H5_DLL herr_t H5EA__iblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5EA__iblock_dest(H5F_t *f, H5EA_iblock_t *iblock);
 
 /* Super block routines */
-H5_DLL H5EA_sblock_t *H5EA__sblock_alloc(H5EA_hdr_t *hdr, unsigned sblk_idx);
+H5_DLL H5EA_sblock_t *H5EA__sblock_alloc(H5EA_hdr_t *hdr, H5EA_iblock_t *parent,
+    unsigned sblk_idx);
 H5_DLL haddr_t H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    hbool_t *stats_changed, unsigned sblk_idx);
+    H5EA_iblock_t *parent, hbool_t *stats_changed, unsigned sblk_idx);
 H5_DLL H5EA_sblock_t *H5EA__sblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t sblk_addr, unsigned sblk_idx, H5AC_protect_t rw);
+    H5EA_iblock_t *parent, haddr_t sblk_addr, unsigned sblk_idx, H5AC_protect_t rw);
 H5_DLL herr_t H5EA__sblock_unprotect(H5EA_sblock_t *sblock, hid_t dxpl_id,
     unsigned cache_flags);
 H5_DLL herr_t H5EA__sblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t sblk_addr, unsigned sblk_idx);
+    H5EA_iblock_t *parent, haddr_t sblk_addr, unsigned sblk_idx);
 H5_DLL herr_t H5EA__sblock_dest(H5F_t *f, H5EA_sblock_t *sblock);
 
 /* Data block routines */
-H5_DLL H5EA_dblock_t *H5EA__dblock_alloc(H5EA_hdr_t *hdr, size_t nelmts);
-H5_DLL haddr_t H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id,
+H5_DLL H5EA_dblock_t *H5EA__dblock_alloc(H5EA_hdr_t *hdr, void *parent,
+    size_t nelmts);
+H5_DLL haddr_t H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
     hbool_t *stats_changed, hsize_t dblk_off, size_t nelmts);
 H5_DLL unsigned H5EA__dblock_sblk_idx(const H5EA_hdr_t *hdr, hsize_t idx);
 H5_DLL H5EA_dblock_t *H5EA__dblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t dblk_addr, size_t dblk_nelmts, H5AC_protect_t rw);
+    void *parent, haddr_t dblk_addr, size_t dblk_nelmts, H5AC_protect_t rw);
 H5_DLL herr_t H5EA__dblock_unprotect(H5EA_dblock_t *dblock, hid_t dxpl_id,
     unsigned cache_flags);
-H5_DLL herr_t H5EA__dblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id,
+H5_DLL herr_t H5EA__dblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
     haddr_t dblk_addr, size_t dblk_nelmts);
 H5_DLL herr_t H5EA__dblock_dest(H5F_t *f, H5EA_dblock_t *dblock);
 
 /* Data block page routines */
-H5_DLL H5EA_dblk_page_t *H5EA__dblk_page_alloc(H5EA_hdr_t *hdr);
+H5_DLL H5EA_dblk_page_t *H5EA__dblk_page_alloc(H5EA_hdr_t *hdr, H5EA_sblock_t *parent);
 H5_DLL herr_t H5EA__dblk_page_create(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t addr);
+    H5EA_sblock_t *parent, haddr_t addr);
 H5_DLL H5EA_dblk_page_t *H5EA__dblk_page_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t dblk_page_addr, H5AC_protect_t rw);
+    H5EA_sblock_t *parent, haddr_t dblk_page_addr, H5AC_protect_t rw);
 H5_DLL herr_t H5EA__dblk_page_unprotect(H5EA_dblk_page_t *dblk_page,
     hid_t dxpl_id, unsigned cache_flags);
 H5_DLL herr_t H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page);

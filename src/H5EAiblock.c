@@ -376,7 +376,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
             /* Check for data block existing */
             if(H5F_addr_defined(iblock->dblk_addrs[u])) {
                 /* Delete data block */
-                if(H5EA__dblock_delete(hdr, dxpl_id, iblock->dblk_addrs[u], hdr->sblk_info[sblk_idx].dblk_nelmts) < 0)
+                if(H5EA__dblock_delete(hdr, dxpl_id, iblock, iblock->dblk_addrs[u], hdr->sblk_info[sblk_idx].dblk_nelmts) < 0)
                     H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array data block")
                 iblock->dblk_addrs[u] = HADDR_UNDEF;
             } /* end if */
@@ -401,7 +401,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
             /* Check for data block existing */
             if(H5F_addr_defined(iblock->sblk_addrs[u])) {
                 /* Delete super block */
-                if(H5EA__sblock_delete(hdr, dxpl_id, iblock->sblk_addrs[u], (unsigned)(u + iblock->nsblks)) < 0)
+                if(H5EA__sblock_delete(hdr, dxpl_id, iblock, iblock->sblk_addrs[u], (unsigned)(u + iblock->nsblks)) < 0)
                     H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array super block")
                 iblock->sblk_addrs[u] = HADDR_UNDEF;
             } /* end if */

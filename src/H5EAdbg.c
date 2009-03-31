@@ -320,7 +320,8 @@ H5EA__sblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
 	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Protect super block */
-    if(NULL == (sblock = H5EA__sblock_protect(hdr, dxpl_id, addr, sblk_idx, H5AC_READ)))
+    /* (Note: setting parent of super block to 'hdr' for this operation should be OK -QAK) */
+    if(NULL == (sblock = H5EA__sblock_protect(hdr, dxpl_id, hdr, addr, sblk_idx, H5AC_READ)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long long)addr)
 
     /* Print opening message */
@@ -404,7 +405,8 @@ H5EA__dblock_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream, int inde
 	H5E_THROW(H5E_CANTPROTECT, "unable to load extensible array header")
 
     /* Protect data block */
-    if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, addr, dblk_nelmts, H5AC_READ)))
+    /* (Note: setting parent of data block to 'hdr' for this operation should be OK -QAK) */
+    if(NULL == (dblock = H5EA__dblock_protect(hdr, dxpl_id, hdr, addr, dblk_nelmts, H5AC_READ)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu", (unsigned long long)addr)
 
     /* Print opening message */

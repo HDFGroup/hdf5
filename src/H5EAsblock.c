@@ -107,7 +107,7 @@ H5FL_BLK_DEFINE(page_init);
  */
 BEGIN_FUNC(PKG, ERR,
 H5EA_sblock_t *, NULL, NULL,
-H5EA__sblock_alloc(H5EA_hdr_t *hdr, unsigned sblk_idx))
+H5EA__sblock_alloc(H5EA_hdr_t *hdr, H5EA_iblock_t *parent, unsigned sblk_idx))
 
     /* Local variables */
     H5EA_sblock_t *sblock = NULL;          /* Extensible array super block */
@@ -125,6 +125,7 @@ H5EA__sblock_alloc(H5EA_hdr_t *hdr, unsigned sblk_idx))
     sblock->hdr = hdr;
 
     /* Set non-zero internal fields */
+    sblock->parent = parent;
     sblock->addr = HADDR_UNDEF;
 
     /* Compute/cache information */
@@ -190,8 +191,8 @@ END_FUNC(PKG)   /* end H5EA__sblock_alloc() */
  */
 BEGIN_FUNC(PKG, ERR,
 haddr_t, HADDR_UNDEF, HADDR_UNDEF,
-H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *stats_changed,
-    unsigned sblk_idx))
+H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_iblock_t *parent,
+    hbool_t *stats_changed, unsigned sblk_idx))
 
     /* Local variables */
     H5EA_sblock_t *sblock = NULL;       /* Extensible array super block */
@@ -207,7 +208,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     HDassert(stats_changed);
 
     /* Allocate the super block */
-    if(NULL == (sblock = H5EA__sblock_alloc(hdr, sblk_idx)))
+    if(NULL == (sblock = H5EA__sblock_alloc(hdr, parent, sblk_idx)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array super block")
 
     /* Set size of super block on disk */
@@ -274,10 +275,12 @@ END_FUNC(PKG)   /* end H5EA__sblock_create() */
  */
 BEGIN_FUNC(PKG, ERR,
 H5EA_sblock_t *, NULL, NULL,
-H5EA__sblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, haddr_t sblk_addr,
-    unsigned sblk_idx, H5AC_protect_t rw))
+H5EA__sblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_iblock_t *parent,
+    haddr_t sblk_addr, unsigned sblk_idx, H5AC_protect_t rw))
 
     /* Local variables */
+    H5EA_sblock_load_ud_t load_ud;      /* Information needed for loading super block */
+
 
 #ifdef QAK
 HDfprintf(stderr, "%s: Called\n", FUNC);
@@ -287,8 +290,12 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     HDassert(hdr);
     HDassert(H5F_addr_defined(sblk_addr));
 
+    /* Set up user data */
+    load_ud.parent = parent;
+    load_ud.sblk_idx = sblk_idx;
+
     /* Protect the super block */
-    if(NULL == (ret_value = (H5EA_sblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_SBLOCK, sblk_addr, &sblk_idx, hdr, rw)))
+    if(NULL == (ret_value = (H5EA_sblock_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_SBLOCK, sblk_addr, &load_ud, hdr, rw)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long long)sblk_addr)
 
 CATCH
@@ -346,8 +353,8 @@ END_FUNC(PKG)   /* end H5EA__sblock_unprotect() */
  */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__sblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id, haddr_t sblk_addr,
-    unsigned sblk_idx))
+H5EA__sblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_iblock_t *parent,
+    haddr_t sblk_addr, unsigned sblk_idx))
 
     /* Local variables */
     H5EA_sblock_t *sblock = NULL;       /* Pointer to super block */
@@ -362,7 +369,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     HDassert(H5F_addr_defined(sblk_addr));
 
     /* Protect super block */
-    if(NULL == (sblock = H5EA__sblock_protect(hdr, dxpl_id, sblk_addr, sblk_idx, H5AC_WRITE)))
+    if(NULL == (sblock = H5EA__sblock_protect(hdr, dxpl_id, parent, sblk_addr, sblk_idx, H5AC_WRITE)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array super block, address = %llu", (unsigned long long)sblk_addr)
 
     /* Iterate over data blocks */
@@ -370,7 +377,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
         /* Check for data block existing */
         if(H5F_addr_defined(sblock->dblk_addrs[u])) {
             /* Delete data block */
-            if(H5EA__dblock_delete(hdr, dxpl_id, sblock->dblk_addrs[u], sblock->dblk_nelmts) < 0)
+            if(H5EA__dblock_delete(hdr, dxpl_id, sblock, sblock->dblk_addrs[u], sblock->dblk_nelmts) < 0)
                 H5E_THROW(H5E_CANTDELETE, "unable to delete extensible array data block")
             sblock->dblk_addrs[u] = HADDR_UNDEF;
         } /* end if */
