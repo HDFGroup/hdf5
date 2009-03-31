@@ -374,6 +374,7 @@ typedef struct H5O_layout_chunk_t {
     H5D_chunk_index_t idx_type;		/* Type of chunk index               */
     unsigned	ndims;			/* Num dimensions in chunk           */
     uint32_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
+    unsigned    enc_bytes_per_dim;      /* Encoded # of bytes for storing each chunk dimension */
     uint32_t    size;                   /* Size of chunk in bytes            */
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked layout operations */
     union {

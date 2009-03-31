@@ -86,7 +86,7 @@ typedef struct H5D_earray_filt_elmt_t {
 /********************/
 
 /* Extensible array class callbacks for chunks w/o filters */
-static void *H5D_earray_crt_context(const H5F_t *f);
+static void *H5D_earray_crt_context(void *udata);
 static herr_t H5D_earray_dst_context(void *ctx);
 static herr_t H5D_earray_fill(void *nat_blk, size_t nelmts);
 static herr_t H5D_earray_encode(void *raw, const void *elmt, size_t nelmts,
@@ -205,9 +205,10 @@ H5FL_DEFINE_STATIC(H5D_earray_ctx_t);
  *-------------------------------------------------------------------------
  */
 static void *
-H5D_earray_crt_context(const H5F_t *f)
+H5D_earray_crt_context(void *_udata)
 {
     H5D_earray_ctx_t *ctx;      /* Extensible array callback context */
+    H5F_t *f = (H5F_t *)_udata; /* User data for extensible array context */
     void *ret_value;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_earray_crt_context)
@@ -604,7 +605,7 @@ H5D_earray_idx_open(const H5D_chk_idx_info_t *idx_info)
 
     /* Open the extensible array for the chunk index */
     cls = (idx_info->pline->nused > 0) ?  H5EA_CLS_FILT_CHUNK : H5EA_CLS_CHUNK;
-    if(NULL == (idx_info->layout->u.chunk.u.earray.ea = H5EA_open(idx_info->f, idx_info->dxpl_id, idx_info->layout->u.chunk.u.earray.addr, cls)))
+    if(NULL == (idx_info->layout->u.chunk.u.earray.ea = H5EA_open(idx_info->f, idx_info->dxpl_id, idx_info->layout->u.chunk.u.earray.addr, cls, idx_info->f)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open extensible array")
 
 done:
@@ -662,7 +663,7 @@ H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info)
     cparam.max_dblk_page_nelmts_bits = H5D_EARRAY_MAX_DBLOCK_PAGE_NELMTS_BITS;
 
     /* Create the extensible array for the chunk index */
-    if(NULL == (idx_info->layout->u.chunk.u.earray.ea = H5EA_create(idx_info->f, idx_info->dxpl_id, &cparam)))
+    if(NULL == (idx_info->layout->u.chunk.u.earray.ea = H5EA_create(idx_info->f, idx_info->dxpl_id, &cparam, idx_info->f)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create extensible array")
 
     /* Get the address of the extensible array in file */

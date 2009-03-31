@@ -237,6 +237,11 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                     mesg->u.chunk.ops = H5D_COPS_BTREE;
                 } /* end if */
                 else {
+                    /* Encoded # of bytes for each chunk dimension */
+                    mesg->u.chunk.enc_bytes_per_dim = *p++;
+                    if(mesg->u.chunk.enc_bytes_per_dim == 0 || mesg->u.chunk.enc_bytes_per_dim > 8)
+                        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "encoded chunk dimension size is too large")
+
                     /* Dimensionality */
                     mesg->u.chunk.ndims = *p++;
                     if(mesg->u.chunk.ndims > H5O_LAYOUT_NDIMS)
@@ -244,7 +249,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 
                     /* Chunk dimensions */
                     for(u = 0; u < mesg->u.chunk.ndims; u++)
-                        UINT32DECODE(p, mesg->u.chunk.dim[u]);
+                        UINT64DECODE_VAR(p, mesg->u.chunk.dim[u], mesg->u.chunk.enc_bytes_per_dim);
 
                     /* Compute chunk size */
                     for(u = 1, mesg->u.chunk.size = mesg->u.chunk.dim[0]; u < mesg->u.chunk.ndims; u++)
@@ -326,6 +331,10 @@ done:
  *      really n-byte values (where n usually is 8)) and additionally clean up
  *      the information written out.
  *
+ *      Quincey Koziol, 2009-3-31
+ *      Added version number 4 case to allow different kinds of indices for
+ *      looking up chunks.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -384,13 +393,17 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
                     UINT32ENCODE(p, mesg->u.chunk.dim[u]);
             } /* end if */
             else {
+                /* Encoded # of bytes for each chunk dimension */
+                HDassert(mesg->u.chunk.enc_bytes_per_dim > 0 && mesg->u.chunk.enc_bytes_per_dim <= 8);
+                *p++ = mesg->u.chunk.enc_bytes_per_dim;
+
                 /* Number of dimensions */
                 HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
                 *p++ = (uint8_t)mesg->u.chunk.ndims;
 
                 /* Dimension sizes */
                 for(u = 0; u < mesg->u.chunk.ndims; u++)
-                    UINT32ENCODE(p, mesg->u.chunk.dim[u]);
+                    UINT64ENCODE_VAR(p, mesg->u.chunk.dim[u], mesg->u.chunk.enc_bytes_per_dim);
 
                 /* Chunk index type */
                 *p++ = (uint8_t)mesg->u.chunk.idx_type;
@@ -866,18 +879,29 @@ H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
             break;
 
         case H5D_CHUNKED:
-            /* Number of dimensions (1 byte) */
-            HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-            ret_value++;
-
-            /* Dimension sizes */
-            ret_value += mesg->u.chunk.ndims * 4;
-
             if(mesg->version < H5O_LAYOUT_VERSION_4) {
+                /* Number of dimensions (1 byte) */
+                HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                ret_value++;
+
                 /* B-tree address */
                 ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
+
+                /* Dimension sizes */
+                ret_value += mesg->u.chunk.ndims * 4;
             } /* end if */
             else {
+                /* Encoded # of bytes for each chunk dimension */
+                HDassert(mesg->u.chunk.enc_bytes_per_dim > 0 && mesg->u.chunk.enc_bytes_per_dim <= 8);
+                ret_value++;
+
+                /* Number of dimensions (1 byte) */
+                HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
+                ret_value++;
+
+                /* Dimension sizes */
+                ret_value += mesg->u.chunk.ndims * mesg->u.chunk.enc_bytes_per_dim;
+
                 /* Type of chunk index */
                 ret_value++;
 
