@@ -62,7 +62,7 @@ typedef struct H5EA_class_t {
     size_t nat_elmt_size;       /* Size of native (memory) element */
 
     /* Extensible array client callback methods */
-    void *(*crt_context)(const H5F_t *f);       /* Create context for other callbacks */
+    void *(*crt_context)(void *udata);          /* Create context for other callbacks */
     herr_t (*dst_context)(void *ctx);           /* Destroy context */
     herr_t (*fill)(void *nat_blk, size_t nelmts);    /* Fill array of elements with encoded form of "missing element" value */
     herr_t (*encode)(void *raw, const void *elmt, size_t nelmts, void *ctx);   /* Encode elements from native form to disk storage form */
@@ -118,9 +118,10 @@ typedef struct H5EA_t H5EA_t;
 /***************************************/
 
 /* General routines */
-H5_DLL H5EA_t *H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam);
+H5_DLL H5EA_t *H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
+    void *ctx_udata);
 H5_DLL H5EA_t *H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr,
-    const H5EA_class_t *cls);
+    const H5EA_class_t *cls, void *ctx_udata);
 H5_DLL herr_t H5EA_get_nelmts(const H5EA_t *ea, hsize_t *nelmts);
 H5_DLL herr_t H5EA_get_addr(const H5EA_t *ea, haddr_t *addr);
 H5_DLL herr_t H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt);

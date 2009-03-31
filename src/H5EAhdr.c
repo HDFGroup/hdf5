@@ -116,7 +116,7 @@ H5FL_SEQ_DEFINE_STATIC(H5EA_sblk_info_t);
  */
 BEGIN_FUNC(PKG, ERR,
 H5EA_hdr_t *, NULL, NULL,
-H5EA__hdr_alloc(H5F_t *f, const H5EA_class_t *cls))
+H5EA__hdr_alloc(H5F_t *f, const H5EA_class_t *cls, void *udata))
 
     /* Local variables */
     H5EA_hdr_t *hdr = NULL;          /* Shared extensible array header */
@@ -141,7 +141,7 @@ H5EA__hdr_alloc(H5F_t *f, const H5EA_class_t *cls))
     hdr->cparam.cls = cls;
 
     /* Create the callback context */
-    if(NULL == (hdr->cb_ctx = (*cls->crt_context)(f)))
+    if(NULL == (hdr->cb_ctx = (*cls->crt_context)(udata)))
 	H5E_THROW(H5E_CANTCREATE, "unable to create extensible array client callback context")
 
     /* Set the return value */
@@ -368,7 +368,8 @@ END_FUNC(PKG)   /* end H5EA__hdr_free_elmts() */
  */
 BEGIN_FUNC(PKG, ERR,
 haddr_t, HADDR_UNDEF, HADDR_UNDEF,
-H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam))
+H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
+    void *ctx_udata))
 
     /* Local variables */
     H5EA_hdr_t *hdr = NULL;     /* Extensible array header */
@@ -416,7 +417,7 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
 #endif /* NDEBUG */
 
     /* Allocate space for the shared information */
-    if(NULL == (hdr = H5EA__hdr_alloc(f, cparam->cls)))
+    if(NULL == (hdr = H5EA__hdr_alloc(f, cparam->cls, ctx_udata)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array shared header")
 
     /* Set the internal parameters for the array */

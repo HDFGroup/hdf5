@@ -652,9 +652,11 @@ H5_DLL herr_t H5EA__destroy_flush_depend(H5EA_hdr_t *hdr, H5AC_info_t *parent_en
     H5AC_info_t *child_entry);
 
 /* Header routines */
-H5_DLL H5EA_hdr_t *H5EA__hdr_alloc(H5F_t *f, const H5EA_class_t *cls);
+H5_DLL H5EA_hdr_t *H5EA__hdr_alloc(H5F_t *f, const H5EA_class_t *cls,
+    void *ctx_udata);
 H5_DLL herr_t H5EA__hdr_init(H5EA_hdr_t *hdr);
-H5_DLL haddr_t H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam);
+H5_DLL haddr_t H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
+    void *ctx_udata);
 H5_DLL void *H5EA__hdr_alloc_elmts(H5EA_hdr_t *hdr, size_t nelmts);
 H5_DLL herr_t H5EA__hdr_free_elmts(H5EA_hdr_t *hdr, size_t nelmts, void *elmts);
 H5_DLL herr_t H5EA__hdr_incr(H5EA_hdr_t *hdr);

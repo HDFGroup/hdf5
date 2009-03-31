@@ -411,7 +411,7 @@ reopen_file(hid_t *file, H5F_t **f, hid_t fapl, hid_t dxpl,
 
         /* Re-open array, if given */
         if(ea) {
-            if(NULL == (*ea = H5EA_open(*f, dxpl, ea_addr, ea_cls)))
+            if(NULL == (*ea = H5EA_open(*f, dxpl, ea_addr, ea_cls, NULL)))
                 FAIL_STACK_ERROR
         } /* end if */
     } /* end if */
@@ -445,7 +445,7 @@ create_array(H5F_t *f, hid_t dxpl, const H5EA_create_t *cparam,
     earray_state_t state;               /* State of extensible array */
 
     /* Create array */
-    if(NULL == (*ea = H5EA_create(f, dxpl, cparam)))
+    if(NULL == (*ea = H5EA_create(f, dxpl, cparam, NULL)))
         FAIL_STACK_ERROR
 
     /* Check status of array */
@@ -598,7 +598,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
     test_cparam.raw_elmt_size = 0;
     H5E_BEGIN_TRY {
-        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam, NULL);
     } H5E_END_TRY;
     if(ea) {
         /* Close opened extensible array */
@@ -613,7 +613,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
     test_cparam.max_nelmts_bits = 0;
     H5E_BEGIN_TRY {
-        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam, NULL);
     } H5E_END_TRY;
     if(ea) {
         /* Close opened extensible array */
@@ -627,7 +627,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
     test_cparam.max_nelmts_bits = 65;
     H5E_BEGIN_TRY {
-        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam, NULL);
     } H5E_END_TRY;
     if(ea) {
         /* Close opened extensible array */
@@ -642,7 +642,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
     test_cparam.sup_blk_min_data_ptrs = 0;
     H5E_BEGIN_TRY {
-        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam, NULL);
     } H5E_END_TRY;
     if(ea) {
         /* Close opened extensible array */
@@ -655,7 +655,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
     test_cparam.sup_blk_min_data_ptrs = 1;
     H5E_BEGIN_TRY {
-        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam, NULL);
     } H5E_END_TRY;
     if(ea) {
         /* Close opened extensible array */
@@ -668,7 +668,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
     test_cparam.sup_blk_min_data_ptrs = 6;
     H5E_BEGIN_TRY {
-        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam, NULL);
     } H5E_END_TRY;
     if(ea) {
         /* Close opened extensible array */
@@ -683,7 +683,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
     test_cparam.data_blk_min_elmts = 0;
     H5E_BEGIN_TRY {
-        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam, NULL);
     } H5E_END_TRY;
     if(ea) {
         /* Close opened extensible array */
@@ -699,7 +699,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
         HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
         test_cparam.max_dblk_page_nelmts_bits = H5V_log2_gen((uint64_t)test_cparam.idx_blk_elmts) - 1;
         H5E_BEGIN_TRY {
-            ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+            ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam, NULL);
         } H5E_END_TRY;
         if(ea) {
             /* Close opened extensible array */
@@ -713,7 +713,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
     test_cparam.max_dblk_page_nelmts_bits = 4;  /* corresponds to 16 elements in data block page, which is less than the 64 elements for the default settings */
     H5E_BEGIN_TRY {
-        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam, NULL);
     } H5E_END_TRY;
     if(ea) {
         /* Close opened extensible array */
@@ -726,7 +726,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     HDmemcpy(&test_cparam, cparam, sizeof(test_cparam));
     test_cparam.max_dblk_page_nelmts_bits = test_cparam.max_nelmts_bits + 1;
     H5E_BEGIN_TRY {
-        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam);
+        ea = H5EA_create(f, H5P_DATASET_XFER_DEFAULT, &test_cparam, NULL);
     } H5E_END_TRY;
     if(ea) {
         /* Close opened extensible array */
@@ -825,7 +825,7 @@ test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         TEST_ERROR
 
     /* Re-open the array */
-    if(NULL == (ea = H5EA_open(f, H5P_DATASET_XFER_DEFAULT, ea_addr, cparam->cls)))
+    if(NULL == (ea = H5EA_open(f, H5P_DATASET_XFER_DEFAULT, ea_addr, cparam->cls, NULL)))
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
@@ -890,7 +890,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         TEST_ERROR
 
     /* Open the array again, through the first file handle */
-    if(NULL == (ea2 = H5EA_open(f, H5P_DATASET_XFER_DEFAULT, ea_addr, cparam->cls)))
+    if(NULL == (ea2 = H5EA_open(f, H5P_DATASET_XFER_DEFAULT, ea_addr, cparam->cls, NULL)))
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
@@ -917,7 +917,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Open the extensible array through the second file handle */
-    if(NULL == (ea2 = H5EA_open(f2, H5P_DATASET_XFER_DEFAULT, ea_addr, cparam->cls)))
+    if(NULL == (ea2 = H5EA_open(f2, H5P_DATASET_XFER_DEFAULT, ea_addr, cparam->cls, NULL)))
         FAIL_STACK_ERROR
 
     /* Verify the creation parameters */
@@ -996,7 +996,7 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
         TEST_ERROR
 
     /* Open the array again */
-    if(NULL == (ea2 = H5EA_open(f, H5P_DATASET_XFER_DEFAULT, ea_addr, cparam->cls)))
+    if(NULL == (ea2 = H5EA_open(f, H5P_DATASET_XFER_DEFAULT, ea_addr, cparam->cls, NULL)))
         FAIL_STACK_ERROR
 
     /* Request that the array be deleted */
@@ -1016,7 +1016,7 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 
     /* Try re-opening the array again (should fail, as array will be deleted) */
     H5E_BEGIN_TRY {
-        ea2 = H5EA_open(f, H5P_DATASET_XFER_DEFAULT, ea_addr, cparam->cls);
+        ea2 = H5EA_open(f, H5P_DATASET_XFER_DEFAULT, ea_addr, cparam->cls, NULL);
     } H5E_END_TRY;
     if(ea2) {
         /* Close opened array */
@@ -1037,7 +1037,7 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
 
     /* Try re-opening the array again (should fail, as array is now deleted) */
     H5E_BEGIN_TRY {
-        ea = H5EA_open(f, H5P_DATASET_XFER_DEFAULT, ea_addr, cparam->cls);
+        ea = H5EA_open(f, H5P_DATASET_XFER_DEFAULT, ea_addr, cparam->cls, NULL);
     } H5E_END_TRY;
     if(ea) {
         /* Close opened array */
