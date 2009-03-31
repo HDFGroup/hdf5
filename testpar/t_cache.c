@@ -2297,7 +2297,7 @@ insert_entry(H5C_t * cache_ptr,
         entry_ptr->dirty = TRUE;
 
         result = H5AC_set(file_ptr, -1, &(types[0]), entry_ptr->base_addr,
-                          (void *)(&(entry_ptr->header)), flags);
+                          (void *)(&(entry_ptr->header)), flags, NULL);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.type != &(types[0]) ) ||

@@ -257,7 +257,7 @@ H5B_create(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, void *udata,
     /*
      * Cache the new B-tree node.
      */
-    if (H5AC_set(f, dxpl_id, H5AC_BT, *addr_p, bt, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_BT, *addr_p, bt, H5AC__NO_FLAGS_SET, NULL) < 0)
 	HGOTO_ERROR(H5E_BTREE, H5E_CANTINIT, FAIL, "can't add B-tree root node to cache")
 #ifdef H5B_DEBUG
     H5B_assert(f, dxpl_id, *addr_p, shared->type, udata);
@@ -713,7 +713,7 @@ H5B_insert(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr,
     HDmemcpy(H5B_NKEY(new_bt,shared,2), rt_key, shared->type->sizeof_nkey);
 
     /* Insert the modified copy of the old root into the file again */
-    if (H5AC_set(f, dxpl_id, H5AC_BT, addr, new_bt, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(f, dxpl_id, H5AC_BT, addr, new_bt, H5AC__NO_FLAGS_SET, NULL) < 0)
         HGOTO_ERROR(H5E_BTREE, H5E_CANTFLUSH, FAIL, "unable to flush old B-tree root node")
 
 #ifdef H5B_DEBUG

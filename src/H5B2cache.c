@@ -94,6 +94,7 @@ const H5AC_class_t H5AC_BT2_HDR[1] = {{
     (H5AC_flush_func_t)H5B2_cache_hdr_flush,
     (H5AC_dest_func_t)H5B2_cache_hdr_dest,
     (H5AC_clear_func_t)H5B2_cache_hdr_clear,
+    (H5AC_notify_func_t)NULL,
     (H5AC_size_func_t)H5B2_cache_hdr_size,
 }};
 
@@ -104,6 +105,7 @@ const H5AC_class_t H5AC_BT2_INT[1] = {{
     (H5AC_flush_func_t)H5B2_cache_internal_flush,
     (H5AC_dest_func_t)H5B2_cache_internal_dest,
     (H5AC_clear_func_t)H5B2_cache_internal_clear,
+    (H5AC_notify_func_t)NULL,
     (H5AC_size_func_t)H5B2_cache_internal_size,
 }};
 
@@ -114,6 +116,7 @@ const H5AC_class_t H5AC_BT2_LEAF[1] = {{
     (H5AC_flush_func_t)H5B2_cache_leaf_flush,
     (H5AC_dest_func_t)H5B2_cache_leaf_dest,
     (H5AC_clear_func_t)H5B2_cache_leaf_clear,
+    (H5AC_notify_func_t)NULL,
     (H5AC_size_func_t)H5B2_cache_leaf_size,
 }};
 

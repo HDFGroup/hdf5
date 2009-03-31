@@ -2798,6 +2798,7 @@ static herr_t H5C_epoch_marker_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
 				     unsigned *flags_ptr);
 static herr_t H5C_epoch_marker_dest(H5F_t *f, void *thing);
 static herr_t H5C_epoch_marker_clear(H5F_t *f, void *thing, hbool_t dest);
+static herr_t H5C_epoch_marker_notify(H5C_notify_action_t action, void *thing, void *udata);
 static herr_t H5C_epoch_marker_size(const H5F_t *f, const void *thing, size_t *size_ptr);
 
 const H5C_class_t epoch_marker_class =
@@ -2807,6 +2808,7 @@ const H5C_class_t epoch_marker_class =
     /* flush = */ &H5C_epoch_marker_flush,
     /* dest  = */ &H5C_epoch_marker_dest,
     /* clear = */ &H5C_epoch_marker_clear,
+    /* notify = */&H5C_epoch_marker_notify,
     /* size  = */ &H5C_epoch_marker_size
 };
 
@@ -2884,6 +2886,21 @@ H5C_epoch_marker_clear(H5F_t UNUSED * f,
 
 done:
 
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+static herr_t
+H5C_epoch_marker_notify(H5C_notify_action_t UNUSED action,
+                       void UNUSED * thing,
+                       void UNUSED * udata)
+{
+    herr_t ret_value = FAIL;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5C_epoch_marker_notify)
+
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "called unreachable fcn.")
+
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -4818,7 +4835,8 @@ H5C_insert_entry(H5F_t * 	     f,
                  const H5C_class_t * type,
                  haddr_t 	     addr,
                  void *		     thing,
-                 unsigned int        flags)
+                 unsigned int        flags,
+                 void *              udata)
 {
     herr_t		result;
     hbool_t		first_flush = TRUE;
@@ -5068,6 +5086,13 @@ H5C_insert_entry(H5F_t * 	     f,
                         "LRU sanity check failed.\n");
     }
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
+
+    /* If the entry's type has a 'notify' callback send a 'after insertion'
+     * notice now that the entry is fully integrated into the cache.
+     */
+    if(entry_ptr->type->notify &&
+            (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_INSERT, entry_ptr, udata) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry inserted into cache")
 
     H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)
 
@@ -6408,6 +6433,13 @@ H5C_protect(H5F_t *	        f,
          * code.  If we do this often enough, we may want to optimize this.
          */
         H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, NULL)
+
+        /* If the entry's type has a 'notify' callback send a 'after insertion'
+         * notice now that the entry is fully integrated into the cache.
+         */
+        if(entry_ptr->type->notify &&
+                (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_INSERT, entry_ptr, udata2) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, NULL, "can't notify client about entry inserted into cache")
     }
 
     HDassert( entry_ptr->addr == addr );
@@ -11069,6 +11101,16 @@ H5C_flush_single_entry(H5F_t *		   f,
         if ( destroy ) {
             H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr)
         }
+
+        /* If the entry's type has a 'notify' callback and the entry is about
+         * to be removed from the cache, send a 'before eviction' notice while
+         * the entry is still fully integrated in the cache.
+         */
+        if(destroy) {
+            if(entry_ptr->type->notify &&
+                    (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_BEFORE_EVICT, entry_ptr, NULL) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry to evict")
+        } /* end if */
 
         /* Always remove the entry from the hash table on a destroy.  On a
          * flush with destroy, it is cheaper to discard the skip list all at

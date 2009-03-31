@@ -113,6 +113,9 @@ typedef struct H5C_t H5C_t;
  *
  * CLEAR:	Just marks object as non-dirty.
  *
+ * NOTIFY:	Notify client that an action on an entry has taken/will take
+ *              place
+ *
  * SIZE:	Report the size (on disk) of the specified cache object.
  *		Note that the space allocated on disk may not be contiguous.
  */
@@ -120,6 +123,16 @@ typedef struct H5C_t H5C_t;
 #define H5C_CALLBACK__NO_FLAGS_SET		0x0
 #define H5C_CALLBACK__SIZE_CHANGED_FLAG		0x1
 #define H5C_CALLBACK__RENAMED_FLAG		0x2
+
+/* Actions that can be reported to 'notify' client callback */
+typedef enum H5C_notify_action_t {
+    H5C_NOTIFY_ACTION_AFTER_INSERT,     /* Entry has been added to the cache */
+                                        /* (could be loaded from file with
+                                         *      'protect' call, or inserted
+                                         *      with 'set' call)
+                                         */
+    H5C_NOTIFY_ACTION_BEFORE_EVICT      /* Entry is about to be evicted from cache */
+} H5C_notify_action_t;
 
 typedef void *(*H5C_load_func_t)(H5F_t *f,
                                  hid_t dxpl_id,
@@ -137,6 +150,9 @@ typedef herr_t (*H5C_dest_func_t)(H5F_t *f,
 typedef herr_t (*H5C_clear_func_t)(H5F_t *f,
                                    void *thing,
                                    hbool_t dest);
+typedef herr_t (*H5C_notify_func_t)(H5C_notify_action_t action,
+                                 void *thing,
+                                 void *udata);
 typedef herr_t (*H5C_size_func_t)(const H5F_t *f,
                                   const void *thing,
                                   size_t *size_ptr);
@@ -147,6 +163,7 @@ typedef struct H5C_class_t {
     H5C_flush_func_t	flush;
     H5C_dest_func_t	dest;
     H5C_clear_func_t	clear;
+    H5C_notify_func_t	notify;
     H5C_size_func_t	size;
 } H5C_class_t;
 
@@ -1064,7 +1081,8 @@ H5_DLL herr_t H5C_insert_entry(H5F_t *             f,
                                const H5C_class_t * type,
                                haddr_t             addr,
                                void *              thing,
-                               unsigned int        flags);
+                               unsigned int        flags,
+                               void *              udata);
 
 H5_DLL herr_t H5C_mark_entries_as_clean(H5F_t   * f,
                                         hid_t     primary_dxpl_id,

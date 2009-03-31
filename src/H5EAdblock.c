@@ -204,7 +204,7 @@ HDfprintf(stderr, "%s: dblock->block_off = %Hu\n", FUNC, dblock->block_off);
             H5E_THROW(H5E_CANTSET, "can't set extensible array data block elements to class's fill value")
 
     /* Cache the new extensible array data block */
-    if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(hdr->f, dxpl_id, H5AC_EARRAY_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET, NULL) < 0)
 	H5E_THROW(H5E_CANTINSERT, "can't add extensible array data block to cache")
 
     /* Update extensible array data block statistics */

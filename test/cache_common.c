@@ -155,6 +155,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_flush_func_t)pico_flush,
     (H5C_dest_func_t)pico_dest,
     (H5C_clear_func_t)pico_clear,
+    (H5C_notify_func_t)NULL,
     (H5C_size_func_t)pico_size
   },
   {
@@ -163,6 +164,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_flush_func_t)nano_flush,
     (H5C_dest_func_t)nano_dest,
     (H5C_clear_func_t)nano_clear,
+    (H5C_notify_func_t)NULL,
     (H5C_size_func_t)nano_size
   },
   {
@@ -171,6 +173,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_flush_func_t)micro_flush,
     (H5C_dest_func_t)micro_dest,
     (H5C_clear_func_t)micro_clear,
+    (H5C_notify_func_t)NULL,
     (H5C_size_func_t)micro_size
   },
   {
@@ -179,6 +182,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_flush_func_t)tiny_flush,
     (H5C_dest_func_t)tiny_dest,
     (H5C_clear_func_t)tiny_clear,
+    (H5C_notify_func_t)NULL,
     (H5C_size_func_t)tiny_size
   },
   {
@@ -187,6 +191,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_flush_func_t)small_flush,
     (H5C_dest_func_t)small_dest,
     (H5C_clear_func_t)small_clear,
+    (H5C_notify_func_t)NULL,
     (H5C_size_func_t)small_size
   },
   {
@@ -195,6 +200,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_flush_func_t)medium_flush,
     (H5C_dest_func_t)medium_dest,
     (H5C_clear_func_t)medium_clear,
+    (H5C_notify_func_t)NULL,
     (H5C_size_func_t)medium_size
   },
   {
@@ -203,6 +209,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_flush_func_t)large_flush,
     (H5C_dest_func_t)large_dest,
     (H5C_clear_func_t)large_clear,
+    (H5C_notify_func_t)NULL,
     (H5C_size_func_t)large_size
   },
   {
@@ -211,6 +218,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_flush_func_t)huge_flush,
     (H5C_dest_func_t)huge_dest,
     (H5C_clear_func_t)huge_clear,
+    (H5C_notify_func_t)NULL,
     (H5C_size_func_t)huge_size
   },
   {
@@ -219,6 +227,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_flush_func_t)monster_flush,
     (H5C_dest_func_t)monster_dest,
     (H5C_clear_func_t)monster_clear,
+    (H5C_notify_func_t)NULL,
     (H5C_size_func_t)monster_size
   },
   {
@@ -227,6 +236,7 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_flush_func_t)variable_flush,
     (H5C_dest_func_t)variable_dest,
     (H5C_clear_func_t)variable_clear,
+    (H5C_notify_func_t)NULL,
     (H5C_size_func_t)variable_size
   }
 };
@@ -2646,7 +2656,7 @@ insert_entry(H5C_t * cache_ptr,
 	entry_ptr->is_dirty = TRUE;
 
         result = H5C_insert_entry(NULL, -1, -1, cache_ptr, &(types[type]),
-                                  entry_ptr->addr, (void *)entry_ptr, flags);
+                                  entry_ptr->addr, (void *)entry_ptr, flags, NULL);
 
         if ( ( result < 0 ) ||
              ( entry_ptr->header.is_protected ) ||

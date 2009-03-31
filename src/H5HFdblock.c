@@ -178,7 +178,7 @@ HDfprintf(stderr, "%s: direct block address = %a\n", FUNC, dblock_addr);
     } /* end else */
 
     /* Cache the new fractal heap direct block */
-    if(H5AC_set(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET) < 0)
+    if(H5AC_set(hdr->f, dxpl_id, H5AC_FHEAP_DBLOCK, dblock_addr, dblock, H5AC__NO_FLAGS_SET, NULL) < 0)
 	HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, FAIL, "can't add fractal heap direct block to cache")
 
     /* Increase the allocated heap size */
