@@ -1154,6 +1154,8 @@ H5AC_get_entry_status(H5F_t *    f,
     hbool_t	is_dirty;
     hbool_t	is_protected;
     hbool_t	is_pinned;
+    hbool_t	is_flush_dep_child;
+    hbool_t	is_flush_dep_parent;
     size_t	entry_size;
     unsigned	status = 0;
 
@@ -1168,7 +1170,8 @@ H5AC_get_entry_status(H5F_t *    f,
     }
 
     result = H5C_get_entry_status(cache_ptr, addr, &entry_size, &in_cache,
-		                  &is_dirty, &is_protected, &is_pinned);
+            &is_dirty, &is_protected, &is_pinned, &is_flush_dep_parent,
+            &is_flush_dep_child);
 
     if ( result < 0 ) {
 
@@ -1188,6 +1191,12 @@ H5AC_get_entry_status(H5F_t *    f,
 
 	if ( is_pinned )
 	    status |= H5AC_ES__IS_PINNED;
+
+	if ( is_flush_dep_parent )
+	    status |= H5AC_ES__IS_FLUSH_DEP_PARENT;
+
+	if ( is_flush_dep_child )
+	    status |= H5AC_ES__IS_FLUSH_DEP_CHILD;
     }
 
     *status_ptr = status;
@@ -1264,12 +1273,12 @@ done:
  */
 
 herr_t
-H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing, unsigned int flags)
+H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
+    void *thing, unsigned int flags)
 {
     herr_t		result;
     H5AC_info_t        *info;
     H5AC_t             *cache;
-    herr_t ret_value=SUCCEED;      /* Return value */
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t        * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
@@ -1278,6 +1287,7 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
     size_t              trace_entry_size = 0;
     FILE *        	trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
+    herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_set, FAIL)
 
@@ -4421,7 +4431,7 @@ H5AC_log_renamed_entry(H5AC_t * cache_ptr,
 
     /* get entry status, size, etc here */
     if ( H5C_get_entry_status(cache_ptr, old_addr, &entry_size, &entry_in_cache,
-                              &entry_dirty, NULL, NULL) < 0 ) {
+                              &entry_dirty, NULL, NULL, NULL, NULL) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get entry status.")
 

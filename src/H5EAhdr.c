@@ -236,7 +236,7 @@ HDfprintf(stderr, "%s: hdr->sblk_info[%Zu] = {%Zu, %Zu, %Hu, %Hu}\n", FUNC, u, h
     } /* end for */
 
     /* Set size of header on disk (locally and in statistics) */
-    hdr->stats.hdr_size = hdr->size = H5EA_HEADER_SIZE(hdr);
+    hdr->stats.computed.hdr_size = hdr->size = H5EA_HEADER_SIZE(hdr);
 
 CATCH
 

@@ -79,3 +79,66 @@
 /*******************/
 
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__create_flush_depend
+ *
+ * Purpose:	Create a flush dependency between two data structure components
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar 26 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PKG, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA__create_flush_depend(H5EA_hdr_t *hdr, H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry))
+
+    /* Sanity check */
+    HDassert(hdr);
+    HDassert(parent_entry);
+    HDassert(child_entry);
+
+    /* Create a flush dependency between parent and child entry */
+    if(H5AC_create_flush_dependency(hdr->f, parent_entry, child_entry) < 0)
+        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency")
+
+CATCH
+
+END_FUNC(PKG)   /* end H5EA__create_flush_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__destroy_flush_depend
+ *
+ * Purpose:	Destroy a flush dependency between two data structure components
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar 26 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PKG, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA__destroy_flush_depend(H5EA_hdr_t *hdr, H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
+
+    /* Sanity check */
+    HDassert(hdr);
+    HDassert(parent_entry);
+    HDassert(child_entry);
+
+    /* Destroy a flush dependency between parent and child entry */
+    if(H5AC_destroy_flush_dependency(hdr->f, parent_entry, child_entry) < 0)
+        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency")
+
+CATCH
+
+END_FUNC(PKG)   /* end H5EA__destroy_flush_depend() */
+

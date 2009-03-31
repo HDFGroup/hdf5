@@ -951,7 +951,7 @@ H5D_earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array statistics")
 
     /* Check if there are any array elements */
-    if(ea_stat.max_idx_set > 0) {
+    if(ea_stat.stored.max_idx_set > 0) {
         H5D_chunk_rec_t chunk_rec;  /* Generic chunk record for callback */
         hsize_t u;              /* Local index variable */
 
@@ -962,7 +962,7 @@ H5D_earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 
             /* Loop over array elements */
             /* (Note: this may be too simple for datasets with >1 dimension) */
-            for(u = 0; u < ea_stat.max_idx_set; u++, chunk_rec.offset[0] += idx_info->layout->u.chunk.dim[0]) {
+            for(u = 0; u < ea_stat.stored.max_idx_set; u++, chunk_rec.offset[0] += idx_info->layout->u.chunk.dim[0]) {
                 H5D_earray_filt_elmt_t elmt;            /* Extensible array element */
 
                 /* Get the info about the chunk for the index */
@@ -990,7 +990,7 @@ H5D_earray_idx_iterate(const H5D_chk_idx_info_t *idx_info,
 
             /* Loop over array elements */
             /* (Note: this may be too simple for datasets with >1 dimension) */
-            for(u = 0; u < ea_stat.max_idx_set; u++, chunk_rec.offset[0] += idx_info->layout->u.chunk.dim[0]) {
+            for(u = 0; u < ea_stat.stored.max_idx_set; u++, chunk_rec.offset[0] += idx_info->layout->u.chunk.dim[0]) {
                 haddr_t addr;       /* Chunk address */
 
                 /* Get the address of the chunk for the index */
@@ -1331,8 +1331,8 @@ H5D_earray_idx_size(const H5D_chk_idx_info_t *idx_info, hsize_t *index_size)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array statistics")
 
     /* Set the size of the extensible array */
-    *index_size = ea_stat.hdr_size + ea_stat.index_blk_size
-            + ea_stat.super_blk_size + ea_stat.data_blk_size;
+    *index_size = ea_stat.computed.hdr_size + ea_stat.computed.index_blk_size
+            + ea_stat.stored.super_blk_size + ea_stat.stored.data_blk_size;
 
 done:
     if(idx_info->layout->u.chunk.u.earray.ea) {

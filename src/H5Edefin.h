@@ -166,6 +166,7 @@ hid_t H5E_CANTEXPUNGE_g    = FAIL;      /* Unable to expunge a metadata cache en
 hid_t H5E_CANTRESIZE_g     = FAIL;      /* Unable to resize a metadata cache entry */
 hid_t H5E_CANTDEPEND_g     = FAIL;      /* Unable to create a flush dependency */
 hid_t H5E_CANTUNDEPEND_g   = FAIL;      /* Unable to destroy a flush dependency */
+hid_t H5E_CANTNOTIFY_g     = FAIL;      /* Unable to notify object about action */
 
 /* Link related errors */
 hid_t H5E_TRAVERSE_g       = FAIL;      /* Link traversal failure */

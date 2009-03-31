@@ -100,6 +100,7 @@ const H5AC_class_t H5AC_FSPACE_HDR[1] = {{
     (H5AC_flush_func_t)H5FS_cache_hdr_flush,
     (H5AC_dest_func_t)H5FS_cache_hdr_dest,
     (H5AC_clear_func_t)H5FS_cache_hdr_clear,
+    (H5AC_notify_func_t)NULL,
     (H5AC_size_func_t)H5FS_cache_hdr_size,
 }};
 
@@ -110,6 +111,7 @@ const H5AC_class_t H5AC_FSPACE_SINFO[1] = {{
     (H5AC_flush_func_t)H5FS_cache_sinfo_flush,
     (H5AC_dest_func_t)H5FS_cache_sinfo_dest,
     (H5AC_clear_func_t)H5FS_cache_sinfo_clear,
+    (H5AC_notify_func_t)NULL,
     (H5AC_size_func_t)H5FS_cache_sinfo_size,
 }};
 
