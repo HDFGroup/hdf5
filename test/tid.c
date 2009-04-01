@@ -394,7 +394,7 @@ static int test_is_valid(void)
 
     /* Check that an id of -1 is invalid */
     tri_ret = H5Iis_valid(-1);
-    VERIFY(tri_ret, FALSE, "H5Iis_valid");
+    VERIFY(tri_ret, FALSE, "H4Iis_valid");
     if (tri_ret != FALSE)
         goto out;
 
@@ -408,6 +408,46 @@ out:
     return -1;
 }
 
+/* Test the H5Iget_type function */
+static int test_get_type(void)
+{
+    hid_t   dtype;           /* datatype id */
+    H5I_type_t  type_ret;    /* return value */
+
+    /* Create a datatype id */
+    dtype = H5Tcopy(H5T_NATIVE_INT);
+    CHECK(dtype, FAIL, "H5Tcopy");
+    if (dtype < 0)
+        goto out;
+
+    /* Check that the ID is correct */
+    type_ret = H5Iget_type(dtype);
+    VERIFY(type_ret, H5I_DATATYPE, "H5Iget_type");
+    if (type_ret == H5I_BADID)
+        goto out;
+
+    /* Check that the ID is correct */
+    type_ret = H5Iget_type(H5T_STRING);
+    VERIFY(type_ret, H5I_BADID, "H5Iget_type");
+    if (type_ret != H5I_BADID)
+        goto out;
+
+    /* Check that the ID is correct */
+    type_ret = H5Iget_type(-1);
+    VERIFY(type_ret, H5I_BADID, "H5Iget_type");
+    if (type_ret != H5I_BADID)
+        goto out;
+
+    H5Tclose(dtype);
+
+    return 0;
+
+out:
+    if(dtype != H5I_INVALID_HID)
+	H5Tclose(dtype);
+
+    return -1;
+}
 
 	/* Test boundary cases with lots of types */
 
@@ -498,6 +538,7 @@ void test_ids(void)
 	if (basic_id_test() < 0) TestErrPrintf("Basic ID test failed\n");
 	if (id_predefined_test() < 0) TestErrPrintf("Predefined ID type test failed\n");
 	if (test_is_valid() < 0) TestErrPrintf("H5Iis_valid test failed\n");
+	if (test_get_type() < 0) TestErrPrintf("H5Iget_type test failed\n");
 	if (test_id_type_list() < 0) TestErrPrintf("ID type list test failed\n");
 
 }
