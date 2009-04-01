@@ -170,7 +170,7 @@ Bug Fixes since HDF5-1.8.2
     -----
      - h5dump, h5diff, h5repack were not reading (by hyperslabs) datasets 
             that have a datatype datum size greater than H5TOOLS_BUFSIZE, a 
-            constant define as 1024Kb, such as array types with large 
+            constant defined as 1024Kb, such as array types with large 
             dimensions. PVN - 2009/4/1 - 1501
      - h5import: By selecting a compression type, a big endian byte order was being 
             selected. PVN - 2009/3/11 - 1462
