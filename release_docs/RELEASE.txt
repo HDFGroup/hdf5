@@ -55,8 +55,6 @@ New Features
 
     Tools:
     ------
-    - h5import: By selecting a compression type, a big endian byte order was being 
-            selected. PVN - 2009/3/11
     - h5dump: binary output defaults to NATIVE with -b optionally accepting
       the form of binary output (NATIVE, FILE, BE, LE). PVN - 2008/11/14
     - h5repack: When user doesn't specify a chunk size, h5repack now defines a default 
@@ -98,6 +96,12 @@ Bug Fixes since HDF5-1.6.8 Release
 
     Tools
     -----
+    - h5dump, h5diff, h5repack were not reading (by hyperslabs) datasets 
+            that have a datatype datum size greater than H5TOOLS_BUFSIZE, a 
+            constant define as 1024Kb, such as array types with large 
+            dimensions. PVN - 2009/4/1 - 1501
+    - h5import: By selecting a compression type, a big endian byte order was being 
+            selected. PVN - 2009/3/11 - 1462
     - zip_perf.c had missing argument on one of the open() calls. Fixed.
       AKC - 2008/12/9
 
