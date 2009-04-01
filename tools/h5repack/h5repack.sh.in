@@ -504,6 +504,9 @@ TOOLTEST $arg
 #       to new version and be readable, etc.)
 TOOLTEST $FILE14
 
+# test for datum size > H5TOOLS_MALLOCSIZE
+TOOLTEST $FILE1 -f GZIP=1
+
 if test $nerrors -eq 0 ; then
    echo "All $H5REPACK tests passed."
 fi

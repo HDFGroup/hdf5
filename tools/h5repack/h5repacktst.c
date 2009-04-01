@@ -3337,6 +3337,46 @@ void write_dset_in(hid_t loc_id,
     type_id = H5Tarray_create2(H5T_NATIVE_INT, 1, dimarray);
     write_dset(loc_id, 1, dims, "array", type_id, buf6);
     status = H5Tclose(type_id);
+
+    {
+
+        double  *dbuf;                           /* information to write */
+        hid_t   did;                             /* dataset ID   */
+        hid_t   sid;                             /* dataspace ID   */
+        hid_t   tid;                             /* datatype ID   */
+        size_t  size;
+        hsize_t sdims[] = {1};
+        hsize_t tdims[] = {H5TOOLS_MALLOCSIZE / sizeof(double) + 1};
+        int     j;
+
+        /* allocate and initialize array data to write */
+        size = ( H5TOOLS_MALLOCSIZE / sizeof(double) + 1 ) * sizeof(double);
+        dbuf = malloc( size );
+
+        for( j = 0; j < H5TOOLS_MALLOCSIZE / sizeof(double) + 1; j++)
+            dbuf[j] = j;
+
+        if (make_diffs)
+        {
+            dbuf[5] = 0;
+            dbuf[6] = 0;
+        }
+
+        /* create a type larger than H5TOOLS_MALLOCSIZE */
+        tid = H5Tarray_create2(H5T_NATIVE_DOUBLE, 1, tdims);
+        size = H5Tget_size(tid);
+        sid = H5Screate_simple(1, sdims, NULL);
+        did = H5Dcreate2(loc_id, "arrayd", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+#if defined(WRITE_ARRAY)
+        H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dbuf);
+#endif
+
+        /* close */
+        H5Dclose(did);
+        H5Tclose(tid);
+        H5Sclose(sid);
+        free( dbuf );
+    }
     
     /*-------------------------------------------------------------------------
     * H5T_INTEGER and H5T_FLOAT
