@@ -397,6 +397,8 @@ TOOLTEST $arg
 arg="$FILE1 -t 1 -a 1 "
 TOOLTEST $arg
 
+# test for datum size > H5TOOLS_MALLOCSIZE
+TOOLTEST $FILE1 -f GZIP=1
 
 
 if test $nerrors -eq 0 ; then

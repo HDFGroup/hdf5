@@ -681,7 +681,10 @@ int do_copy_objects(hid_t fidin,
                             
                             for (k = rank; k > 0; --k) 
                             {
-                                sm_size[k - 1] = MIN(dims[k - 1], H5TOOLS_BUFSIZE / sm_nbytes);
+                                hsize_t size = H5TOOLS_BUFSIZE / sm_nbytes;
+                                if ( size == 0) /* datum size > H5TOOLS_BUFSIZE */
+                                    size = 1;
+                                sm_size[k - 1] = MIN(dims[k - 1], size);
                                 sm_nbytes *= sm_size[k - 1];
                                 assert(sm_nbytes > 0);
                             }

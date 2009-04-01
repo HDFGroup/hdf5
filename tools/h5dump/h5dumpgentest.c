@@ -86,6 +86,8 @@
 #define FILE57  "thyperslab.h5"
 /* FILE58 and 59  not defined in this version  */
 #define FILE60  "tfpformat.h5"
+#define FILE64  "tarray8.h5"
+
 
 
 /*-------------------------------------------------------------------------
@@ -2732,6 +2734,53 @@ static void gent_array7(void)
     ret = H5Fclose(fid1);
     assert(ret>=0);
 }
+
+
+static void gent_array8(void)
+{
+    int     *buf;                            /* information to write */
+    hid_t   fid;                             /* HDF5 File ID  */
+    hid_t   did;                             /* dataset ID   */
+    hid_t   sid;                             /* dataspace ID   */
+    hid_t   tid;                             /* datatype ID   */
+    size_t  size;
+    hsize_t sdims[] = {1};
+    hsize_t tdims[] = {H5TOOLS_BUFSIZE / sizeof(int) + 1};
+    int     i;                               
+    herr_t  ret;                             
+
+    size = ( H5TOOLS_BUFSIZE / sizeof(int) + 1 ) * sizeof(int);
+    buf = malloc( size );
+
+    for( i = 0; i < H5TOOLS_BUFSIZE / sizeof(int) + 1; i++)
+        buf[i] = i;
+
+    /* create file */
+    fid = H5Fcreate(FILE64, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* create a type larger than H5TOOLS_BUFSIZE */
+    tid = H5Tarray_create(H5T_NATIVE_INT, 1, tdims, NULL);
+    size = H5Tget_size(tid);
+    sid = H5Screate_simple(1, sdims, NULL);
+    did = H5Dcreate(fid, "dset", tid, sid, H5P_DEFAULT);
+    ret = H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
+    assert(ret >= 0);
+
+
+    /* close */
+    ret = H5Dclose(did);
+    assert(ret >= 0);
+    ret = H5Tclose(tid);
+    assert(ret >= 0);
+    ret = H5Sclose(sid);
+    assert(ret >= 0);
+
+    ret = H5Fclose(fid);
+    assert(ret >= 0);
+    free( buf );
+}
+
+
 
 static void gent_empty(void)
 {

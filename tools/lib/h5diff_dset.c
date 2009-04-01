@@ -447,7 +447,10 @@ hsize_t diff_datasetid( hid_t did1,
             
             for (i = rank1; i > 0; --i) 
             {
-                sm_size[i - 1] = MIN(dims1[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
+                hsize_t size = H5TOOLS_BUFSIZE / sm_nbytes;
+                if ( size == 0) /* datum size > H5TOOLS_BUFSIZE */
+                    size = 1;
+                sm_size[i - 1] = MIN(dims1[i - 1], size);
                 sm_nbytes *= sm_size[i - 1];
                 assert(sm_nbytes > 0);
             }
