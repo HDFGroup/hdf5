@@ -275,7 +275,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5B2_t *bt2, unsigned UNUSED * flags_ptr)
+H5B2_cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
+    H5B2_t *bt2, unsigned UNUSED * flags_ptr)
 {
     H5WB_t      *wb = NULL;             /* Wrapped buffer for header data */
     uint8_t     hdr_buf[H5B2_HDR_BUF_SIZE]; /* Buffer for header */
