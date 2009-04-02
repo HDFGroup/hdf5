@@ -138,6 +138,14 @@ parse_options(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     /* setup default chunk-size. Make sure sizes are > 0 */
+    if (mpi_size < PROCS_THRESHOLD) {
+        dim0 = ROW_FACTOR*mpi_size;
+        dim1 = COL_FACTOR*mpi_size;
+    } else {
+        dim0 = MIN_ROW_FACTOR*(mpi_size-PROCS_THRESHOLD)+ROW_FACTOR*PROCS_THRESHOLD;
+        dim1 = MIN_COL_FACTOR*(mpi_size-PROCS_THRESHOLD)+COL_FACTOR*PROCS_THRESHOLD;
+    }  
+
     chunkdim0 = (dim0+9)/10;
     chunkdim1 = (dim1+9)/10;
 
@@ -367,7 +375,6 @@ int main(int argc, char **argv)
 	    "extendible dataset independent write #2", PARATESTFILE);
     AddTest("selnone", none_selection_chunk, NULL,
             "chunked dataset with none-selection", PARATESTFILE);
-
     AddTest("calloc", test_chunk_alloc, NULL,
 	    "parallel extend Chunked allocation on serial file", PARATESTFILE);
     AddTest("fltread", test_filter_read, NULL,
