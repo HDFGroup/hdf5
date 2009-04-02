@@ -131,7 +131,7 @@ int h5repack_addlayout (const char* str, pack_opt_t *options);
 int h5repack_init      (pack_opt_t *options, int verbose);
 int h5repack_end       (pack_opt_t *options);
 int h5repack_verify    (const char *fname,pack_opt_t *options);
-int h5repack_cmpdcpl   (const char *fname1,
+int h5repack_cmp_pl   (const char *fname1,
                         const char *fname2);
 
 
