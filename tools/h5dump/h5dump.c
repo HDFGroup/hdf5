@@ -104,8 +104,8 @@ static H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | d
  **/
 
 /* module-scoped variables for XML option */
-#define DEFAULT_XSD     "http://hdfgroup.org/DTDs/HDF5-File.xsd"
-#define DEFAULT_DTD     "http://hdfgroup.org/DTDs/HDF5-File.dtd"
+#define DEFAULT_XSD     "http://www.hdfgroup.org/DTDs/HDF5-File.xsd"
+#define DEFAULT_DTD     "http://www.hdfgroup.org/DTDs/HDF5-File.dtd"
 
 static int              doxml = 0;
 static int              useschema = 1;
@@ -4389,8 +4389,8 @@ main(int argc, const char *argv[])
 
                 printf("<%sHDF5-File xmlns:%s=\"http://hdfgroup.org/DTDs/HDF5-File\" "
                     "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-                    "xsi:schemaLocation=\"http://hdfgroup.org/DTDs/HDF5File "
-                    "http://hdfgroup.org/DTDs/HDF5-File.xsd\">\n",xmlnsprefix,ns);
+                    "xsi:schemaLocation=\"http://hdfgroup.org/DTDs/HDF5-File "
+                    "http://www.hdfgroup.org/DTDs/HDF5-File.xsd\">\n",xmlnsprefix,ns);
             }
         } else {
                 printf("<!DOCTYPE HDF5-File PUBLIC \"HDF5-File.dtd\" \"%s\">\n",
