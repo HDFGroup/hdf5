@@ -47,7 +47,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\src"
+				AdditionalIncludeDirectories="..\..\..\..\src,..\..\..\..\tools\lib"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -140,7 +140,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\..\..\src"
+				AdditionalIncludeDirectories="..\..\..\..\src,..\..\..\..\tools\lib"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -231,7 +231,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\src"
+				AdditionalIncludeDirectories="..\..\..\..\src,..\..\..\..\tools\lib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -324,7 +324,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\..\src"
+				AdditionalIncludeDirectories="..\..\..\..\src,..\..\..\..\tools\lib"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -447,6 +447,10 @@
 			>
 			<File
 				RelativePath="..\..\..\..\tools\h5diff\testh5diff.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\..\tools\lib\h5tools.h"
 				>
 			</File>
 		</Filter>

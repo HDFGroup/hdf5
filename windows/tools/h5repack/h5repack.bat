@@ -601,6 +601,9 @@ rem
     rem       to new version and be readable, etc.)
     call :tooltest %file14%
     
+    rem test for datum size > H5TOOLS_MALLOCSIZE
+    set arg=%file1% -f GZIP=1
+    call :tooltest %arg%
     
     if %nerrors% equ 0 (
         echo.All %h5repack% tests passed.
