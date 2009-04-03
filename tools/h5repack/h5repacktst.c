@@ -40,9 +40,11 @@
 #define FNAME5     "h5repack_early.h5"
 #define FNAME5OUT  "h5repack_early_out.h5"
 #define FNAME6     "h5repack_early2.h5"
+#ifdef H5_HAVE_FILTER_SZIP
 /* SZIP filter  */
 #define FNAME7     "h5repack_szip.h5"
 #define FNAME7OUT  "h5repack_szip_out.h5"
+#endif
 /* GZIP filter  */
 #define FNAME8     "h5repack_deflate.h5"
 #define FNAME8OUT  "h5repack_deflate_out.h5"
@@ -92,7 +94,6 @@ int d_status = EXIT_SUCCESS;
 #define CDIM1   DIM1/2
 #define CDIM2   DIM2/2
 #define RANK    2
-#define GBLL    ((unsigned long long) 1024*1024*1024)
 
 /* Size of userblock (for userblock test) */
 #define USERBLOCK_SIZE  2048
@@ -101,30 +102,30 @@ int d_status = EXIT_SUCCESS;
 * prototypes
 *-------------------------------------------------------------------------
 */
-int make_all_objects(hid_t loc_id);
-int make_attributes(hid_t loc_id);
-int make_hlinks(hid_t loc_id);
-int make_early(void);
-int make_layout(hid_t loc_id);
+static int make_all_objects(hid_t loc_id);
+static int make_attributes(hid_t loc_id);
+static int make_hlinks(hid_t loc_id);
+static int make_early(void);
+static int make_layout(hid_t loc_id);
 #ifdef H5_HAVE_FILTER_SZIP
 int make_szip(hid_t loc_id);
 #endif /* H5_HAVE_FILTER_SZIP */
-int make_deflate(hid_t loc_id);
-int make_shuffle(hid_t loc_id);
-int make_fletcher32(hid_t loc_id);
-int make_nbit(hid_t loc_id);
-int make_scaleoffset(hid_t loc_id);
-int make_all(hid_t loc_id);
-int make_fill(hid_t loc_id);
-int make_big(hid_t loc_id);
-int make_testfiles(void);
-int write_dset_in(hid_t loc_id,const char* dset_name,hid_t file_id,int make_diffs );
-int write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs );
-int write_dset(hid_t loc_id,int rank,hsize_t *dims,const char *dset_name,hid_t tid,void *buf );
-int make_dset(hid_t loc_id,const char *name,hid_t sid,hid_t dcpl,void *buf);
-int make_attr(hid_t loc_id,int rank,hsize_t *dims,const char *attr_name,hid_t tid,void *buf);
-int make_dset_reg_ref(hid_t loc_id);
-int make_external(hid_t loc_id);
+static int make_deflate(hid_t loc_id);
+static int make_shuffle(hid_t loc_id);
+static int make_fletcher32(hid_t loc_id);
+static int make_nbit(hid_t loc_id);
+static int make_scaleoffset(hid_t loc_id);
+static int make_all_filters(hid_t loc_id);
+static int make_fill(hid_t loc_id);
+static int make_big(hid_t loc_id);
+static int make_testfiles(void);
+static int write_dset_in(hid_t loc_id,const char* dset_name,hid_t file_id,int make_diffs );
+static int write_attr_in(hid_t loc_id,const char* dset_name,hid_t fid,int make_diffs );
+static int write_dset(hid_t loc_id,int rank,hsize_t *dims,const char *dset_name,hid_t tid,void *buf );
+static int make_dset(hid_t loc_id,const char *name,hid_t sid,hid_t dcpl,void *buf);
+static int make_attr(hid_t loc_id,int rank,hsize_t *dims,const char *attr_name,hid_t tid,void *buf);
+static int make_dset_reg_ref(hid_t loc_id);
+static int make_external(hid_t loc_id);
 static int make_userblock(void);
 static int verify_userblock( const char* filename);
 static int make_userblock_file(void);
@@ -1522,6 +1523,7 @@ error:
 *
 *-------------------------------------------------------------------------
 */
+static 
 int make_testfiles(void)
 {
     hid_t  fid;  
@@ -1641,7 +1643,7 @@ int make_testfiles(void)
     */
     if((fid = H5Fcreate(FNAME11,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
         return -1;
-    if (make_all(fid) < 0)
+    if (make_all_filters(fid) < 0)
         goto out;
     if(H5Fclose(fid) < 0)
         return -1;
@@ -1720,6 +1722,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
+static 
 int make_all_objects(hid_t loc_id)
 {
     hid_t   did=-1;
@@ -1841,6 +1844,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
+static 
 int make_attributes(hid_t loc_id)
 {
     hid_t   did=-1;
@@ -1910,6 +1914,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
+static 
 int make_hlinks(hid_t loc_id)
 {
     hid_t   g1id=-1;
@@ -1980,6 +1985,7 @@ out:
 *-------------------------------------------------------------------------
 */
 #ifdef H5_HAVE_FILTER_SZIP
+static 
 int make_szip(hid_t loc_id)
 {
     hid_t    dcpl; /* dataset creation property list */
@@ -2056,6 +2062,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
+static 
 int make_deflate(hid_t loc_id)
 {
     hid_t      dcpl; /* dataset creation property list */
@@ -2132,6 +2139,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
+static 
 int make_shuffle(hid_t loc_id)
 {
     hid_t    dcpl; /* dataset creation property list */
@@ -2197,6 +2205,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
+static 
 int make_fletcher32(hid_t loc_id)
 {
     hid_t    dcpl; /* dataset creation property list */
@@ -2266,6 +2275,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
+static 
 int make_nbit(hid_t loc_id)
 {
     hid_t    dcpl; /* dataset creation property list */
@@ -2366,6 +2376,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
+static
 int make_scaleoffset(hid_t loc_id)
 {
     hid_t    dcpl; /* dataset creation property list */
@@ -2448,13 +2459,14 @@ out:
 
 
 /*-------------------------------------------------------------------------
-* Function: make_all
+* Function: make_all_filters
 *
 * Purpose: make a file with all filters
 *
 *-------------------------------------------------------------------------
 */
-int make_all(hid_t loc_id)
+static
+int make_all_filters(hid_t loc_id)
 {
     hid_t    dcpl; /* dataset creation property list */
     hid_t    sid;  /* dataspace ID */
@@ -2632,6 +2644,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
+static
 int make_early(void)
 {
     hsize_t dims[1] ={3000};
@@ -2728,6 +2741,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
+static
 int make_layout(hid_t loc_id)
 {
     hid_t    dcpl=-1; /* dataset creation property list */
@@ -2832,6 +2846,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
+static
 int make_fill(hid_t loc_id)
 {
     hid_t   did=-1;
@@ -2884,7 +2899,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-
+static
 int make_big(hid_t loc_id)
 {
     hid_t   did=-1;
@@ -2965,7 +2980,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-
+static
 int make_external(hid_t loc_id)
 {
     hid_t   did=-1;
@@ -3196,7 +3211,7 @@ out:
 *-------------------------------------------------------------------------
 */
 
-
+static
 int write_dset_in(hid_t loc_id,
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t file_id,
@@ -3459,21 +3474,18 @@ int write_dset_in(hid_t loc_id,
 
     {
 
-        double  *dbuf;                           /* information to write */
-        hid_t   did;                             /* dataset ID   */
-        hid_t   sid;                             /* dataspace ID   */
-        hid_t   tid;                             /* datatype ID   */
-        size_t  size;
-        hsize_t sdims[] = {1};
-        hsize_t tdims[] = {H5TOOLS_MALLOCSIZE / sizeof(double) + 1};
-        int     j;
+        double   *dbuf;                           /* information to write */
+        size_t   size;
+        hsize_t  sdims[] = {1};
+        hsize_t  tdims[] = {H5TOOLS_MALLOCSIZE / sizeof(double) + 1};
+        unsigned u;
 
         /* allocate and initialize array data to write */
         size = ( H5TOOLS_MALLOCSIZE / sizeof(double) + 1 ) * sizeof(double);
-        dbuf = malloc( size );
+        dbuf = (double*)malloc( size );
 
-        for( j = 0; j < H5TOOLS_MALLOCSIZE / sizeof(double) + 1; j++)
-            dbuf[j] = j;
+        for( u = 0; u < H5TOOLS_MALLOCSIZE / sizeof(double) + 1; u++)
+            dbuf[u] = u;
 
         if (make_diffs)
         {
@@ -3971,8 +3983,7 @@ out:
 #define SPACE2_RANK 2
 #define SPACE2_DIM1 10
 #define SPACE2_DIM2 10
-#define NPOINTS 10
-
+static
 int make_dset_reg_ref(hid_t loc_id)
 {
     hid_t           did1=-1; /* Dataset ID   */
@@ -4075,7 +4086,7 @@ out:
 *-------------------------------------------------------------------------
 */
 
-
+static
 int write_attr_in(hid_t loc_id,
                    const char* dset_name, /* for saving reference to dataset*/
                    hid_t fid, /* for reference create */
@@ -5244,6 +5255,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
+static
 int make_dset(hid_t loc_id,
               const char *name,
               hid_t sid,
@@ -5279,7 +5291,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-
+static
 int write_dset( hid_t loc_id,
                int rank,
                hsize_t *dims,
@@ -5317,7 +5329,7 @@ out:
 
 
 /*-------------------------------------------------------------------------
-* Function: write_attr
+* Function: make_attr
 *
 * Purpose: utility function to write an attribute in LOC_ID
 *
@@ -5327,7 +5339,7 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-
+static
 int make_attr(hid_t loc_id,
               int rank,
               hsize_t *dims,
