@@ -118,9 +118,6 @@
 /* Define to 1 if you have the `dmalloc' library (-ldmalloc). */
 #undef HAVE_LIBDMALLOC
 
-/* Define to 1 if you have the `lmpe' library (-llmpe). */
-#undef HAVE_LIBLMPE
-
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
