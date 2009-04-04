@@ -234,8 +234,10 @@ H5O_chunk_unprotect(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_chunk_proxy_t *chk_p
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTMARKDIRTY, FAIL, "unable to mark object header as dirty")
         } /* end else/if */
         else
+        {
             /* Sanity check */
             HDassert(0 && "Unknown chunk proxy flag(s)?!?");
+        }
 
         /* Free fake chunk proxy */
         H5FL_FREE(H5O_chunk_proxy_t, chk_proxy);

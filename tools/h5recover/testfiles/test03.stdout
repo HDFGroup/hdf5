@@ -1,0 +1,7 @@
+
+test03.h5 was journaled and not closed properly.
+The journal file test03.jnl is empty.
+Thus is is impossible to verify that it is the matching journal file.
+Recovery forced.
+Journal file has no complete transactions. Nothing to recover!
+File marked as recovered.

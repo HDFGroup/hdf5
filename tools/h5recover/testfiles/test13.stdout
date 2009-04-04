@@ -1,0 +1,12 @@
+Examining the putative HDF5 file test13.h5:
+	test13.h5 was journaled and not closed properly.
+	It is probably corrupt, and it cannot be opened by the HDF5 library.
+		journaling enabled = 1
+		magic = 0x60622d70
+		journal file name = "trecover.h5.jnl".
+
+Examining the putative HDF5 journal file test13.jnl:
+	bad first char of header -- not a journal file.
+
+errors reading test13.jnl.  Journal un-useable.
+

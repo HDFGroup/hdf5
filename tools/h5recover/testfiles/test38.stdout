@@ -1,0 +1,27 @@
+Examining the putative HDF5 file test38.h5:
+	attempting to get the length of test38.h5...
+		file length = 49152
+	attempting to open test38.h5...
+		opened file successfully.
+	searching for super block...
+	super block not found in test38.h5 -- not an HDF5 file?
+	attempting to close test38.h5...
+		closed file successfully
+
+Encountered errors examining test38.h5 -- can't run journal.
+
+Examining the putative HDF5 journal file test38.jnl:
+	attempting to determine journal file length...
+		file length = 49152
+	attempting to open test38.jnl...
+		opened file successfully.
+	attempting to read header.
+		journal file version = 1.
+		target file = "trecover.h5"
+		magic = 0x60622d70
+		creation date = Wed_Apr__1
+		human readable = 1
+	attempting to close test38.jnl...
+		closed file successfully.
+	header in test38.jnl looks OK.
+

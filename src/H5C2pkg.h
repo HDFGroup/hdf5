@@ -62,9 +62,17 @@
  *
  *
  * magic:		Unsigned 32-bit integer always set to 
- * 			H5C2__H5C2_JBRB_T_MAGIC.  This field is used to validate
- * 			pointers to instances of H5C_jbrb_t.
- *			
+ * 			H5C2__H5C2_JBRB_T_MAGIC.  This field is used to 
+ *			validate pointers to instances of H5C_jbrb_t.
+ *
+ * journal_magic:	int32_t used to store a randomly selected integer
+ *			used to tag both the journal file and the 
+ *			mdj_config_block.  Should the journal ever be 
+ *			run, we will check to see if the magic number 
+ *			from the target HDF5 file matches that in the 
+ *			journal, and refuse to run the journal if it does
+ *			not.
+ *
  * journal_file_fd:	File Descriptor of the journal file that is being 
  * 			written to from this ring buffer.
  *
@@ -157,9 +165,17 @@
 #define H5C2__H5C2_JBRB_T_MAGIC   	(unsigned)0x00D0A03
 #define H5C2__JOURNAL_VERSION		1
 
+/* tags used to mark entries in the journal file header */
+#define H5C2_JNL__VER_NUM_TAG		"ver_num"
+#define H5C2_JNL__TGT_FILE_NAME_TAG	"target_file_name"
+#define H5C2_JNL__JNL_MAGIC_TAG		"journal_magic"
+#define H5C2_JNL__CREATION_DATE_TAG	"creation_date"
+#define H5C2_JNL__HUMAN_READABLE_TAG	"human_readable"
+
 struct H5C2_jbrb_t 
 {
 	uint32_t	magic;
+        int32_t		journal_magic;
 	int 		journal_file_fd;
 	int 		num_bufs;
 	size_t		buf_size;
@@ -794,45 +810,17 @@ typedef struct H5C2_mdjsc_record_t
  * 		been modified have been written to disk in the journal
  * 		file.
  *
- * mdj_file_name_ptr:  Pointer to a string containing the path of the 
- * 		journal file, or NULL if this path is undefined.
- * 		At present, the journal will always be stored in an 
- * 		external file, so this field must be defined if 
- * 		journaling is enabled.
+ * jnl_magic:   Randomly selected int32_t used to reduce the possibility
+ *              of running the wrong journal on an HDF5 file.  The basic 
+ *              idea is to pick a random number, store it in both the HDF5 
+ *		file and the journal file, and then refuse to run the 
+ *		journal unless the numbers match.
  *
- * 		To avoid allocating extra memory, mdj_file_name_ptr
- * 		points into the approprite location in the in core
- * 		image of the metadata journaling configuration block.
+ * jnl_file_name_len: Length of the journal file name, or zero if the
+ *		journal file name is undefined.
  *
- * mdj_conf_block_addr:  Address of the metadata journaling configuration
- * 		block on disk, or HADDR_UNDEF if that block is undefined.
- *
- * mdj_conf_block_len: Length (in bytes) of the metadata journaling 
- * 		configuration block, or 0 if that block is undefined.
- *
- * mdj_conf_block_ptr: Pointer to a dynamically allocated chunk of 
- * 		memory of size mdj_conf_block_len used to construct 
- * 		an image of the on disk metadata journaling configuration
- * 		block.  This block is used to record the path of the 
- * 		journal file in the HDF5 file, so that it can be 
- * 		found in the event of a crash.
- *
- * 		The metadata journaling configuration block has the 
- * 		following format:
- *
- * 		4 bytes		signature
- *
- * 		1 byte		version
- *
- * 		4 bytes		path length
- *
- * 		variable	string containing path of journal file
- *
- * 		4 bytes		checksum
- *
- * 		The base address and lenth of the metadata journaling 
- * 		configuration block is stored in the mdj_msg superblock
- * 		extension message.
+ * jnl_file_name: Array of char of length H5C2__MAX_JOURNAL_FILE_NAME_LEN 
+ *		+ 1 used to store the journal file path.
  *
  * mdj_jbrb:    Instance of H5C2_jbrb_t used to manage logging of journal
  * 		entries to the journal file.
@@ -1160,16 +1148,6 @@ typedef struct H5C2_mdjsc_record_t
 #define H5C2__PREFIX_LEN		32
 #define H5C2__MAX_API_NAME_LEN		128
 
-#define H5C2__JOURNAL_MAGIC_LEN		(size_t)4
-#define H5C2__JOURNAL_CONF_MAGIC	"MDJC"
-#define H5C2__JOURNAL_CONF_VERSION	((uint8_t)1)
-#define H5C2__JOURNAL_BLOCK_LEN(pathLen, f)	\
-	( H5C2__JOURNAL_MAGIC_LEN +		\
-	  1 + /* version */			\
-          H5F_SIZEOF_SIZE(f) +			\
-	  ((pathLen) + 1) +             	\
-	  4 /* checksum */ )
-
 #define H5C2__MIN_MDJSC_CB_TBL_LEN		16
 #define H5C2__MDJSC_CB_TBL_MIN_ACTIVE_RATIO	0.25
 
@@ -1216,7 +1194,7 @@ struct H5C2_t
 
     int32_t                     pel_len;
     size_t                      pel_size;
-    H5C2_cache_entry_t *	        pel_head_ptr;
+    H5C2_cache_entry_t *        pel_head_ptr;
     H5C2_cache_entry_t *  	pel_tail_ptr;
 
     int32_t                     LRU_list_len;
@@ -1259,10 +1237,10 @@ struct H5C2_t
     char			trans_api_name[H5C2__MAX_API_NAME_LEN];
     uint64_t			trans_num;
     uint64_t			last_trans_on_disk;
-    char *			mdj_file_name_ptr;
-    haddr_t			mdj_conf_block_addr;
-    hsize_t			mdj_conf_block_len;
-    void *			mdj_conf_block_ptr;
+    int32_t			jnl_magic;
+    int32_t			jnl_file_name_len;
+    char 			jnl_file_name[H5C2__MAX_JOURNAL_FILE_NAME_LEN 
+                                              + 1];
     struct H5C2_jbrb_t		mdj_jbrb;
     int32_t			tl_len;
     size_t			tl_size;

@@ -1,0 +1,60 @@
+Examining the putative HDF5 file test20.h5:
+	attempting to get the length of test20.h5...
+		file length = 6752
+	attempting to open test20.h5...
+		opened file successfully.
+	searching for super block...
+		superblock found at 0x0.
+	reading super block version...
+		super block version = 2.
+	reading offset and length sizes from super block...
+		offset_size = 8.
+		length_size = 8.
+	computing eoa addr and offset...
+		eoa_addr = 0x1c
+		eoa_offset = 0x1c
+	reading base addr from super block...
+		base addr = 0x0
+	reading super block extension addr...
+		super block extension addr = 0xda7
+	reading SB extension object header version...
+		object header version = 2.
+	scanning SB extension for metadata journaling msg...
+	preparing to examine v2 SBE ohdr...
+		size of chunk size = 1
+		creation order stored = 0
+		phase change values stored = 0
+		times stored = 1
+		chunk 0 size = 0x1f
+		chunk 0 addr = 0xdbe
+	scanning SB ext chunk 0.
+	found journaling message at 0xdc2
+		metadata journaling msg addr = 0xdc2
+	reading metadata journaling message...
+	reading metadata journaling message.
+		MDJ msg version = 0
+		journaling enabled = TRUE
+		magic = 0x60622d70
+		journal file path len = 15
+	journal file = "trecover.h5.jnl"
+	attempting to close test20.h5...
+		closed file successfully
+	test20.h5 was journaled and not closed properly.
+	It is probably corrupt, and it cannot be opened by the HDF5 library.
+		journaling enabled = 1
+		magic = 0x60622d70
+		journal file name = "trecover.h5.jnl".
+
+Examining the putative HDF5 journal file test20.jnl:
+	attempting to determine journal file length...
+		file length = 49152
+	attempting to open test20.jnl...
+		opened file successfully.
+	attempting to read header.
+		journal file version = 1.
+	Unexpected target file tag "target_filename".
+	attempting to close test20.jnl...
+		closed file successfully.
+
+errors reading test20.jnl.  Journal un-useable.
+

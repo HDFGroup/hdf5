@@ -1,0 +1,12 @@
+Examining the putative HDF5 file test34.h5:
+	test34.h5 was journaled and not closed properly.
+	It is probably corrupt, and it cannot be opened by the HDF5 library.
+		journaling enabled = 1
+		magic = 0x60622d70
+		journal file name = "trecover.h5.jnl".
+
+Examining the putative HDF5 journal file test34.jnl:
+	human readable value out of range (2).
+
+errors reading test34.jnl.  Journal un-useable.
+

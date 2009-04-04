@@ -97,6 +97,7 @@ verify_chunked_dset(void)
     hbool_t dump_crash_dset = FALSE;
     hbool_t good_data;
     hbool_t odd_streak;
+    hbool_t prev_entry_matched;
     int streak_len;
     int transitions;
     int ret_val = 0;
@@ -424,7 +425,6 @@ verify_chunked_dset(void)
     /* set up the file space selections */
     if ( ( ret_val == 0 ) && ( ! done ) ) {
 
-
         ctl_result = H5Sselect_hyperslab(ctl_dspace, H5S_SELECT_SET, 
 			                 zero_offset, NULL, ctl_dims, NULL);
 
@@ -491,6 +491,7 @@ verify_chunked_dset(void)
 
         good_data = TRUE;
         odd_streak = FALSE;
+        prev_entry_matched = FALSE;
         streak_len = 0;
         transitions = 0;
 
@@ -503,6 +504,7 @@ verify_chunked_dset(void)
                     if ( ctl_data[i][j] != crash_data[i][j] ) {
 
                         good_data = FALSE;
+                        prev_entry_matched = FALSE;
                         transitions++;
 
                         if ( (streak_len % ChunkY) != 0 ) {
@@ -520,17 +522,25 @@ verify_chunked_dset(void)
 
                     if ( ctl_data[i][j] == crash_data[i][j] ) {
 
-                        good_data = TRUE;
-                        transitions++;
+                        /* don't begin a good data streak unless we have 
+                         * two good values in a row.
+                         */
+                        if ( prev_entry_matched ) {
 
-                        if ( (streak_len % ChunkY) != 0 ) {
+                            good_data = TRUE;
+                            transitions++;
 
-                            odd_streak = TRUE;
+                            if ( ((streak_len - 1) % ChunkY) != 0 ) {
+
+                                odd_streak = TRUE;
+                            }
+                            streak_len = 1;
+                        } else {
+                            prev_entry_matched = TRUE;
                         }
-                        streak_len = 0;
-
                     } else {
 
+                        prev_entry_matched = FALSE;
                         streak_len++;
 
                     }

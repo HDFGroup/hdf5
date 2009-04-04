@@ -2012,15 +2012,22 @@ H5O_copy_mesg(H5F_t *f, hid_t dxpl_id, H5O_t *oh, unsigned idx,
     HDassert(mesg);
 
     /* Protect chunk */
-    if(NULL == (chk_proxy = H5O_chunk_protect(f, dxpl_id, oh, idx_msg->chunkno)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, "unable to load object header chunk")
+    if ( NULL == 
+         (chk_proxy = H5O_chunk_protect(f, dxpl_id, oh, idx_msg->chunkno)) ) {
+
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, FAIL, \
+                    "unable to load object header chunk")
+    }
 
     /* Reset existing native information for the header's message */
     H5O_msg_reset_real(type, idx_msg->native);
 
     /* Copy the native object for the message */
-    if(NULL == (idx_msg->native = (type->copy)(mesg, idx_msg->native)))
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to copy message to object header")
+    if ( NULL == (idx_msg->native = (type->copy)(mesg, idx_msg->native)) ) {
+
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, \
+                    "unable to copy message to object header")
+    }
 
     /* Update the message flags */
     idx_msg->flags = mesg_flags;

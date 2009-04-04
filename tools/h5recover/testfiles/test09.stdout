@@ -1,0 +1,2 @@
+no metadata journaling message found in test09.h5.
+Thus either journaling was not enabled, or the file was closed properly.

@@ -656,10 +656,9 @@ H5C2_create(size_t		        max_cache_size,
     cache_ptr->trans_api_name[0]                         = '\0';
     cache_ptr->trans_num                                 = 0;
     cache_ptr->last_trans_on_disk                        = 0;
-    cache_ptr->mdj_file_name_ptr                         = NULL;
-    cache_ptr->mdj_conf_block_addr                       = HADDR_UNDEF;
-    cache_ptr->mdj_conf_block_len                        = 0;
-    cache_ptr->mdj_conf_block_ptr                        = NULL;
+    cache_ptr->jnl_magic                                 = 0;
+    cache_ptr->jnl_file_name_len                         = 0;
+    (cache_ptr->jnl_file_name)[0]                        = '\0';
     (cache_ptr->mdj_jbrb).magic                          = 
 	    					H5C2__H5C2_JBRB_T_MAGIC;
     cache_ptr->tl_len                                    = 0;
@@ -712,7 +711,7 @@ H5C2_create(size_t		        max_cache_size,
     /* We used to check for journaling here, but the super block hasn't 
      * been read in yet at cache creation time -- thus the check for 
      * journaling has been moved to H5AC2_check_for_journaling(), which 
-     * is simply a * wrapper for H5C2_check_for_journaling().
+     * is simply a wrapper for H5C2_check_for_journaling().
      *
      * H5AC2_check_for_journaling() is called at the end of H5Fopen() --
      * at which point the superblock has been read.

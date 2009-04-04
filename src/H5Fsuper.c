@@ -356,9 +356,10 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
      * super block to indicate that journaling is not turned on at 
      * present.  These initialization may be overridden shortly.
      */
-    shared->mdc_jrnl_enabled = FALSE;
-    shared->mdc_jrnl_block_loc = HADDR_UNDEF;
-    shared->mdc_jrnl_block_len = 0;
+    shared->mdc_jnl_enabled        = FALSE;
+    shared->mdc_jnl_magic          = 0;
+    shared->mdc_jnl_file_name_len  = 0;
+    (shared->mdc_jnl_file_name)[0] = '\0';
 
     /* Get the shared file creation property list */
     if(NULL == (c_plist = H5I_object(shared->fcpl_id)))
@@ -744,17 +745,44 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
         } /* end if */
         else {
 
-	    shared->mdc_jrnl_enabled = mdj_msg.mdc_jrnl_enabled;
+	    shared->mdc_jnl_enabled = mdj_msg.mdc_jnl_enabled;
 
-	    if ( shared->mdc_jrnl_enabled ) {
+	    if ( shared->mdc_jnl_enabled ) {
 
-		shared->mdc_jrnl_block_loc = mdj_msg.mdc_jrnl_block_loc;
-		shared->mdc_jrnl_block_len = mdj_msg.mdc_jrnl_block_len;
+                shared->mdc_jnl_magic         = mdj_msg.mdc_jnl_magic;
+                shared->mdc_jnl_file_name_len = mdj_msg.mdc_jnl_file_name_len;
+
+                if ( shared->mdc_jnl_file_name_len <= 0 ) {
+
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, \
+                        "journaling enabled, but journal file path empty?!?")
+                }
+
+                if ( shared->mdc_jnl_file_name_len > 
+                     H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, \
+                        "journal file path too long")
+                }
+
+                HDstrncpy(shared->mdc_jnl_file_name,
+                          mdj_msg.mdc_jnl_file_name,
+                          mdj_msg.mdc_jnl_file_name_len + 1);
+
+                if ( ( (shared->mdc_jnl_file_name)
+                         [shared->mdc_jnl_file_name_len] != '\0' ) ||
+                     ( HDstrlen(shared->mdc_jnl_file_name) != 
+                       shared->mdc_jnl_file_name_len ) ) {
+
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, \
+                                "bad journal file path and/or path len???")
+                }
             }
 	    else
             {
-		shared->mdc_jrnl_block_loc = HADDR_UNDEF;
-		shared->mdc_jrnl_block_len = 0;
+                shared->mdc_jnl_magic          = 0;
+                shared->mdc_jnl_file_name_len  = 0;
+                (shared->mdc_jnl_file_name)[0] = '\0';
             }
 
             /* Reset metadata journaling config message */
@@ -765,9 +793,15 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
          * closing the file (since this will be the only open object).
          */
         f->nopen_objs++;
-        if(H5O_close(&ext_loc) < 0)
-            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, "unable to close superblock extension")
+
+        if(H5O_close(&ext_loc) < 0) {
+
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, \
+                        "unable to close superblock extension")
+        }
+
         f->nopen_objs--;
+
     } /* end if */
 
 done:
@@ -962,15 +996,35 @@ H5F_super_init(H5F_t *f, hid_t dxpl_id)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to update driver info header message")
         } /* end if */
 
-	/* check for journaling config data to store */
-	if ( f->shared->mdc_jrnl_enabled ) {
 
-	    struct H5O_mdj_msg_t mdj_conf;
+        /* One might expect us to check to see if journaling is enabled
+         * at this point, and write a metadata journaling message to the
+         * super block extension if it is.
+         *
+         * However, the cache has not been initialized at this point,
+         * so we don't know if we will be successful in creating the 
+         * journal file (the journal file may already exist, or some
+         * directory on the journal path may not exist.  
+         *
+         * Further, the cache should refuse to allow the file to open if
+         * it detects journaling in progress -- so marking journaling in
+         * progress here would introduce some complexities.
+         * status now 
+         *
+         * Thus, don't write the metadata journaling message now.  Instead,
+         * initialize the metadata journaling related fields to indicate 
+         * that journaling is not in progress.  If journaling is requested,
+         * we will write the metadata journaling message after we have 
+         * successfully opened the journal file and started journaling.
+         *
+         *                                        JRM -- 2/19/09
+         */
 
-	    mdj_conf.mdc_jrnl_enabled = f->shared->mdc_jrnl_enabled;
-	    mdj_conf.mdc_jrnl_block_loc = f->shared->mdc_jrnl_block_loc;
-            mdj_conf.mdc_jrnl_block_len = f->shared->mdc_jrnl_block_len;
-	}
+        f->shared->mdc_jnl_enabled        = FALSE;
+        f->shared->mdc_jnl_magic          = 0;
+        f->shared->mdc_jnl_file_name_len  = 0;
+        (f->shared->mdc_jnl_file_name)[0] = '\0';
+
 
         /* Twiddle the number of open objects to avoid closing the file
          * (since this will be the only open object currently).
@@ -1139,14 +1193,13 @@ done:
 
 } /* end H5F_super_write() */
 
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_super_write_mdj_msg
  *
  *              If journaling is enabled, create a superblock extension
  *              if necessary and then write the current contents of 
- *              the mdc_jrnl_enabled, mdc_jrnl_block_loc, and 
+ *              the mdc_jnl_enabled, mdc_jrnl_block_loc, and 
  *              mdc_jrnl_block_len fields of the shared structure to the 
  *              mdj_msg in the superblock extention, overwriting the old 
  *              message if it exists.
@@ -1162,6 +1215,17 @@ done:
  *
  * Programmer:  John Mainzer
  *              3/3/08
+ *
+ * Changes:	JRM -- 2/17/09
+ *		Heavily re-worked the function to move the journal file 
+ *              name and journal file magic into the metadata journaling 
+ *		message.  
+ *
+ *		Note that this makes the metadata journaling message 
+ *		variable length, so we now delete any existing metadata 
+ *		journaling message, and then replace it with a new 
+ *		message if metadata journaling is enabled.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1204,111 +1268,133 @@ H5F_super_write_mdj_msg(H5F_t *f,
         }
     }
 
+    /* The metadata journaling message is a variable length message.
+     * This raises the question of how to deal with any pre-existing 
+     * message.
+     *
+     * While in theory we could try to re-size it, after looking through
+     * the code and talking to Quincey, it appears that the standard 
+     * practice in such cases seems to be to delete the old message, 
+     * and then replace it with a new message.
+     *
+     * Add to this the fact that the metadata journaling message 
+     * should not exist unless journaling is enabled (or to put it 
+     * another way, the message should never appear in a valid HDF5 
+     * file).  
+     *
+     * Thus, here we check to see if a metadata jouraling message exists,
+     * and delete it if it does.  If metadata data journaling is enabled,
+     * we will replace it with a new message shortly.
+     */
+
     tri_result = H5O_msg_exists(&ext_loc, H5O_MDJ_MSG_ID, dxpl_id);
 
     if ( tri_result < 0 ) { /* failure */
 
         HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, \
-                    "unable to open superblock extension?!?!");
+            "unable to determine if metadata journaling message exists?!?!");
 
-    } else if ( tri_result == 0 ) { 
-        /* metadata journaling message doesn't exist */
+    } else if ( tri_result == TRUE ) {
 
-	if ( f->shared->mdc_jrnl_enabled ) {
+        /* metadata journaling message exists -- delete it from the 
+         * super block extension now.  We will replace it later if 
+         * metadata journaling is enabled.
+         */
 
-	    /* create a metadata journaling message and insert it in 
-	     * the superblock extension.
-	     */
-            mdj_msg.mdc_jrnl_enabled = f->shared->mdc_jrnl_enabled;
-            mdj_msg.mdc_jrnl_block_loc = f->shared->mdc_jrnl_block_loc;
-            mdj_msg.mdc_jrnl_block_len = f->shared->mdc_jrnl_block_len;
+        result = H5O_msg_remove(&ext_loc,
+                                H5O_MDJ_MSG_ID,
+                                H5O_ALL,
+        /* the next parameter is the "adj_link" parameter, which is 
+	 * boolean.  Unfortunately, its meaning is not documented
+	 * in the code.  The value gets stuffed into an instance of 
+	 * H5O_iter_rm_t, and then passed along somehow to a function
+	 * whose address appears to be picked out of a table somewhere.
+	 * 
+	 * The documentation on the adj_link field of H5O_iter_rm_t
+	 * simply says that the value specifies "Whether to adjust 
+	 * links when removing messages" -- but unfortunately, I 
+	 * don't know what a "link" is in this context.
+	 *
+	 * Bottom line is that after spending over an hour dredging 
+	 * through the code, I haven't a clue as to what the value 
+	 * of this parameter should be.  We will set it to FALSE and
+	 * see if anything blows up.
+	 *
+	 * 					JRM -- 3/5/08
+	 */
+			        FALSE,
+			        dxpl_id);
 
-	    result = H5O_msg_create(&ext_loc, 
-		           H5O_MDJ_MSG_ID, 
-			   H5O_MSG_FLAG_DONTSHARE, 
-			   H5O_UPDATE_TIME, 
-			   &mdj_msg, 
-			   dxpl_id);
+    } else if ( tri_result != FALSE ) {
 
-	    if ( result < 0 ) {
-
-                HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, \
-                         "unable to add mdj_msg to superblock extension?!?!");
-	    }
-
-	} else {
-
-	    /* do nothing */
-	}
-
-    } else { 
-        /* metadata journaling message exists */
-
-	if ( f->shared->mdc_jrnl_enabled ) {
-
-	    /* overwrite the old metadata journaling message with a 
-	     * new one in the superblock extension.
-	     */
-            mdj_msg.mdc_jrnl_enabled = f->shared->mdc_jrnl_enabled;
-            mdj_msg.mdc_jrnl_block_loc = f->shared->mdc_jrnl_block_loc;
-            mdj_msg.mdc_jrnl_block_len = f->shared->mdc_jrnl_block_len;
-
-	    result = H5O_msg_write(&ext_loc, 
-		           H5O_MDJ_MSG_ID, 
-			   H5O_MSG_FLAG_DONTSHARE, 
-			   H5O_UPDATE_TIME, 
-			   &mdj_msg, 
-			   dxpl_id);
-
-	    if ( result < 0 ) {
-
-                HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, \
-                     "unable to overwrite mdj_msg in superblock extension?!?!");
-	    }
-
-
-	} else {
-
-	    /* delete the old metadata journaling message from the
-	     * superblock extension.
-	     */
-
-	    result = H5O_msg_remove(&ext_loc,
-                                    H5O_MDJ_MSG_ID,
-				    H5O_ALL,
-	    /* the next parameter is the "adj_link" parameter, which is 
-	     * boolean.  Unfortunately, its meaning is not documented
-	     * in the code.  The value gets stuffed into an instance of 
-	     * H5O_iter_rm_t, and then passed along somehow to a funcition
-	     * whose address appears to be picked out of a table somewhere.
-	     * 
-	     * The documentation on the adj_link field of H5O_iter_rm_t
-	     * simply says that the value specifies "Whether to adjust 
-	     * links when removing messages" -- but unfortunately, I 
-	     * don't know what a "link" is in this context.
-	     *
-	     * Bottom line is that after spending over an hour dredging 
-	     * through the code, I haven't a clue as to what the value 
-	     * of this parameter should be.  We will set it to FALSE and
-	     * see if anything blows up.
-	     *
-	     * 					JRM -- 3/5/08
-	     */
-				    FALSE,
-				    dxpl_id);
-	}
-
+        HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, \
+                    "unexpected return value from H5O_msg_exists()");
     }
+
+    if ( f->shared->mdc_jnl_enabled ) {
+
+        /* create a metadata journaling message and insert it in 
+         * the superblock extension.
+         */
+        mdj_msg.mdc_jnl_enabled       = f->shared->mdc_jnl_enabled;
+        mdj_msg.mdc_jnl_magic         = f->shared->mdc_jnl_magic;
+        mdj_msg.mdc_jnl_file_name_len = f->shared->mdc_jnl_file_name_len;
+
+        if ( f->shared->mdc_jnl_file_name_len == 0 ) {
+
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, \
+                        "journaling enabled, but journal file path empty?!?")
+
+        }
+      
+        if ( f->shared->mdc_jnl_file_name_len > 
+             H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, \
+                    "journal file path too long?!?")
+
+        }
+
+        HDstrncpy(mdj_msg.mdc_jnl_file_name,
+                  f->shared->mdc_jnl_file_name,
+                  f->shared->mdc_jnl_file_name_len + 1);
+
+        if ( ( (mdj_msg.mdc_jnl_file_name)[mdj_msg.mdc_jnl_file_name_len]
+                    != '\0' ) ||
+             ( HDstrlen(mdj_msg.mdc_jnl_file_name) != 
+                   mdj_msg.mdc_jnl_file_name_len ) ) {
+
+            HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, \
+                        "bad journal file path and/or path len???")
+        }
+
+        result = H5O_msg_create(&ext_loc, 
+	                        H5O_MDJ_MSG_ID, 
+		                H5O_MSG_FLAG_DONTSHARE, 
+		                H5O_UPDATE_TIME, 
+		                &mdj_msg, 
+		                dxpl_id);
+
+        if ( result < 0 ) {
+
+            HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, \
+                        "unable to add mdj_msg to superblock extension?!?!");
+        }
+
+    } 
 
     /* Close the extension.  Twiddle the number of open objects to avoid
      * closing the file (since this may be the only open object).
      */
+
     f->nopen_objs++;
+
     if(H5O_close(&ext_loc) < 0) {
 
         HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENFILE, FAIL, 
 		     "unable to close superblock extension")
     }
+
     f->nopen_objs--;
 
 done:

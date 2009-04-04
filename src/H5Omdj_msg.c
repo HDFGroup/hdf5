@@ -20,29 +20,34 @@
  *              John Mainzer
  *
  * Purpose:     A message detailing whether metadata jouraling is enabled,
- * 		and if so, the base address in file and length of the block
- * 		that contains the journaling configuration data.
+ * 		and if so, the journal file magic and journal file path.
+ *
+ *		Note that the size of this message is variable.
  *
  * 		The mdj_msg only appears in the superblock extension.
  *
  * Modifications:
  *
- *              None.
+ *              Re-worked message to include the journal file name and 
+ *		magic, instead of simply containing a pointer to a 
+ *		journal configuration block containing this data.
  *
  *-------------------------------------------------------------------------
  */
 
-#define H5O_PACKAGE             /*suppress error about including H5Opkg   */
+#define H5O_PACKAGE             /* suppress error about including H5Opkg */
 
-#include "H5private.h"          /* Generic Functions                    */
-#include "H5Eprivate.h"         /* Error handling                       */
-#include "H5Opkg.h"             /* Object headers                       */
-#include "H5MMprivate.h"        /* Memory management                    */
+#include "H5private.h"          /* Generic Functions                     */
+#include "H5Eprivate.h"         /* Error handling                        */
+#include "H5Opkg.h"             /* Object headers                        */
+#include "H5MMprivate.h"        /* Memory management                     */
 
-#define MDJ_MSG_LEN(f)	( 1 +                  /* Version number */               \
-                	  2 +                  /* flags */                        \
-			  H5F_SIZEOF_ADDR(f) + /* addr of journal config block */ \
-                	  H5F_SIZEOF_SIZE(f) ) /* journal config block len */ 
+#define MDJ_MSG_LEN(f, pathlen)	                                                 \
+                        ( 1 +      /* Version number */                      \
+                	  2 +      /* flags */                               \
+                          4 +      /* magic -- sizeof(int32_t) */            \
+                          4 +      /* jnl file path len - sizeof(int32_t) */ \
+                          pathlen + 1 ) /* jnl file path */
 
 static void * H5O_mdj_msg_decode(H5F_t UNUSED *f,
                                  hid_t UNUSED dxpl_id,
@@ -95,12 +100,6 @@ const H5O_msg_class_t H5O_MSG_MDJ_CONF[1] = {{
     H5O_mdj_msg_debug            /* debug the message                    */
 }};
 
-
-/* Current version of the metadata journaling configuration information */
-#define H5O_MDJ_CONF_VERSION      0
-
-#define MDJ_MSG__JOURNALING_ENABLED_FLAG	0x0001
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_mdj_msg_decode
@@ -123,8 +122,12 @@ H5O_mdj_msg_decode(H5F_t *f,
 		    unsigned UNUSED mesg_flags,
 		    const uint8_t *p)
 {
+    char                ch;
     uint16_t            flags = 0;      /* packed boolean fields */
-    H5O_mdj_msg_t      *mesg;          /* Native message        */
+    int                 i;
+    int32_t		journal_magic;  /* magic number -- if defined */
+    int32_t		path_len;       /* journal file path length */
+    H5O_mdj_msg_t      *mesg;           /* Native message        */
     void                *ret_value;     /* Return value          */
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_mdj_msg_decode)
@@ -142,7 +145,8 @@ H5O_mdj_msg_decode(H5F_t *f,
 
     /* Allocate space for message */
 
-    if( NULL == ( mesg = H5MM_calloc(sizeof(H5O_mdj_msg_t)))) {
+    if ( NULL == 
+         (mesg = (H5O_mdj_msg_t *)H5MM_calloc(sizeof(H5O_mdj_msg_t))) ) {
 
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, \
 	           "memory allocation failed for metadata journaling message.");
@@ -154,21 +158,51 @@ H5O_mdj_msg_decode(H5F_t *f,
 
     if ( (flags & MDJ_MSG__JOURNALING_ENABLED_FLAG) != 0 ) {
 
-	mesg->mdc_jrnl_enabled = TRUE;
+	mesg->mdc_jnl_enabled = TRUE;
 
     } else {
 
-	mesg->mdc_jrnl_enabled = FALSE;
+	mesg->mdc_jnl_enabled = FALSE;
 
     }
 
-    /* retrieve the journal block location */
 
-    H5F_addr_decode(f, &p, &(mesg->mdc_jrnl_block_loc));
+    /* get the journal file magic number */
+    INT32DECODE(p, journal_magic);
 
-    /* retrieve the journal block length */
+    mesg->mdc_jnl_magic = journal_magic;
 
-    H5F_DECODE_LENGTH(f, p, mesg->mdc_jrnl_block_len);
+
+    /* get the journal file path length */
+    INT32DECODE(p, path_len);
+
+    if ( path_len > H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "path length too big.")
+    }
+
+    mesg->mdc_jnl_file_name_len = (size_t)path_len;
+
+
+    /* copy out the journal file path -- check length in passing.
+     *
+     * we could probably do this faster with a memcpy(), but this 
+     * operation happens very infrequently, and doing it this way 
+     * adds a bit of sanity checking.
+     */
+    i = 0;
+    do {
+
+	ch = (char)(*p++);
+        mesg->mdc_jnl_file_name[i++] = ch;
+
+    } while ( ( ch != '\0' ) && ( i <= path_len ) );
+
+    if ( ( ch != '\0' ) || ( i != path_len + 1 ) ) {
+    
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, \
+		    "bad path and/or path len")
+    }
 
     /* Set return value */
     ret_value = (void *)mesg;
@@ -201,6 +235,8 @@ H5O_mdj_msg_encode(H5F_t *f,
 {
     const H5O_mdj_msg_t *mesg = (const H5O_mdj_msg_t *)_mesg;
     uint16_t flags = 0;
+    int32_t magic;
+    int32_t path_len;
     herr_t ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_mdj_msg_encode)
@@ -210,28 +246,40 @@ H5O_mdj_msg_encode(H5F_t *f,
     HDassert(p);
     HDassert(mesg);
     
-    /* this error check exists to keep the compiler happy */
     if ( ( f == NULL ) || ( p == NULL ) || ( mesg == NULL ) ) {
 
 	HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, "Bad params on entry.");
     }
 
+    if ( mesg->mdc_jnl_file_name_len > H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+        HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, \
+        	"Bad params on entry -- path len too long.");
+    }
+
     /* setup the flags */
-    if ( mesg->mdc_jrnl_enabled ) {
+    if ( mesg->mdc_jnl_enabled ) {
 
 	flags |= MDJ_MSG__JOURNALING_ENABLED_FLAG;
 
     }
 
-    /* Store version, flags, internal_loc, path_len, & path buffer */
+    magic = mesg->mdc_jnl_magic;
+
+    path_len = (int32_t)(mesg->mdc_jnl_file_name_len);
+
+    /* Store version, flags, magic, path_len, & path */
 
     *p++ = H5O_MDJ_CONF_VERSION;
 
     UINT16ENCODE(p, flags);
 
-    H5F_addr_encode(f, &p, mesg->mdc_jrnl_block_loc);
-    
-    H5F_ENCODE_LENGTH(f, p, mesg->mdc_jrnl_block_len);
+    INT32ENCODE(p, magic);
+
+    INT32ENCODE(p, path_len);
+
+    HDmemcpy(p, mesg->mdc_jnl_file_name, path_len + 1);
+    p += path_len + 1;
 
 done:
 
@@ -267,6 +315,11 @@ H5O_mdj_msg_copy(const void *_mesg, void *_dest)
     /* Sanity check */
     HDassert(mesg);
 
+    if ( mesg->mdc_jnl_file_name_len > H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+        HGOTO_ERROR(H5E_SYSTEM, H5E_SYSERRSTR, FAIL, "path len too long.");
+    }
+
     if ( ( ! dest ) &&
          ( NULL == (dest = H5MM_malloc(sizeof(H5O_mdj_msg_t))) ) ) {
 
@@ -276,9 +329,41 @@ H5O_mdj_msg_copy(const void *_mesg, void *_dest)
     }
 
     /* now copy the message */
-    dest->mdc_jrnl_enabled   = mesg->mdc_jrnl_enabled;
-    dest->mdc_jrnl_block_loc = mesg->mdc_jrnl_block_loc;
-    dest->mdc_jrnl_block_len = mesg->mdc_jrnl_block_len;
+    dest->mdc_jnl_enabled       = mesg->mdc_jnl_enabled;
+    dest->mdc_jnl_magic         = mesg->mdc_jnl_magic;
+    dest->mdc_jnl_file_name_len = mesg->mdc_jnl_file_name_len;
+
+    /* copy the journal file path -- check length in passing.
+     *
+     * we could probably do this faster with a memcpy(), but this 
+     * operation happens very infrequently, and doing it this way 
+     * adds a bit of sanity checking.
+     */
+    if ( mesg->mdc_jnl_file_name_len == 0 ) {
+
+        (dest->mdc_jnl_file_name)[0] = '\0';
+
+    } else {
+
+        char ch;
+        int i = 0;
+        size_t path_len;
+
+        path_len = mesg->mdc_jnl_file_name_len;
+    
+        do {
+
+	    ch = (mesg->mdc_jnl_file_name)[i];
+            (dest->mdc_jnl_file_name)[i++] = ch;
+
+        } while ( ( ch != '\0' ) && ( i <= path_len ) );
+
+        if ( ( ch != '\0' ) || ( i != path_len + 1 ) ) {
+    
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, NULL, \
+		    "bad path and/or path len???")
+        }
+    }
 
     /* Set return value */
     ret_value = dest;
@@ -314,10 +399,12 @@ H5O_mdj_msg_size(const H5F_t *f,
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5O_mdj_msg_size)
 
     /* Sanity check */
-    HDassert(f);
-    HDassert(mesg);
+    HDassert( f );
+    HDassert( mesg );
+    HDassert( mesg->mdc_jnl_file_name_len >= 0 );
 
-    FUNC_LEAVE_NOAPI(MDJ_MSG_LEN(f))
+    FUNC_LEAVE_NOAPI(MDJ_MSG_LEN(f, mesg->mdc_jnl_file_name_len))
+
 } /* end H5O_mdj_msg_size() */
 
 
@@ -348,11 +435,13 @@ H5O_mdj_msg_reset(void *_mesg)
     HDassert(mesg);
 
     /* reset */
-    mesg->mdc_jrnl_enabled = FALSE;
-    mesg->mdc_jrnl_block_loc = HADDR_UNDEF;
-    mesg->mdc_jrnl_block_len = 0;
+    mesg->mdc_jnl_enabled        = FALSE;
+    mesg->mdc_jnl_magic          = 0;
+    mesg->mdc_jnl_file_name_len  = 0;
+    (mesg->mdc_jnl_file_name)[0] = '\0';
 
     FUNC_LEAVE_NOAPI(SUCCEED)
+
 } /* H5O_mdj_msg_reset() */
 
 
@@ -389,17 +478,22 @@ H5O_mdj_msg_debug(H5F_t UNUSED *f,
     HDassert(fwidth >= 0);
 
     HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
-             "mdc_jrnl_enabled:", 
-	     (int)(mesg->mdc_jrnl_enabled));
-
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
-             "mdc_jrnl_bloc_loc:", 
-	     mesg->mdc_jrnl_block_loc);
+             "mdc_jnl_enabled:", 
+	     (int)(mesg->mdc_jnl_enabled));
 
     HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
-              "mdc_jrnl_block_len:", 
-	      (int)(mesg->mdc_jrnl_block_len));
+             "mdc_jnl_magic:", 
+	     (int)(mesg->mdc_jnl_magic));
+
+    HDfprintf(stream, "%*s%-*s %d\n", indent, "", fwidth,
+             "mdc_jnl_file_name_len:", 
+	     (int)(mesg->mdc_jnl_file_name_len));
+
+    HDfprintf(stream, "%*s%-*s \"%s\"\n", indent, "", fwidth,
+             "mdc_jnl_file_name:", 
+	     (char *)(mesg->mdc_jnl_file_name));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
+
 } /* end H5O_mdj_msg_debug() */
 

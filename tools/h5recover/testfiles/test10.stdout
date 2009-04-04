@@ -1,0 +1,7 @@
+Examining the putative HDF5 file test10.h5:
+	no metadata journaling message found in test10.h5.
+	Thus either journaling was not enabled, or the file was closed properly.
+
+Examining the putative HDF5 journal file test10.jnl:
+	the file test10.jnl is empty.
+

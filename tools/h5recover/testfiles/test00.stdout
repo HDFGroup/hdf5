@@ -1,0 +1,6 @@
+
+test00.h5 was journaled and not closed properly.
+
+the journal file test00.jnl has matching magic.
+
+HDF5 file successfuly recovered.

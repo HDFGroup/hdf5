@@ -138,7 +138,12 @@ typedef struct H5F_file_t {
     struct H5G_t *root_grp;	/* Open root group			*/
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5RC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
-    hbool_t mdc_jrnl_enabled;   /* TRUE iff journaling is in progress	*/
+    hbool_t mdc_jnl_enabled;    /* TRUE iff journaling is in progress	*/
+    int32_t mdc_jnl_magic;      /* journal file magic -- if defined     */
+    size_t  mdc_jnl_file_name_len; /* journal file name length          */
+    char    mdc_jnl_file_name[H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+                                /* journal file name -- if defined      */
+/* todo -- delete the following lines.  -- JRM */
     haddr_t mdc_jrnl_block_loc; /* Rel addr of mdc journal block	*/
     hsize_t mdc_jrnl_block_len; /* Length of mdc journal block		*/
 } H5F_file_t;

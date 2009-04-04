@@ -169,11 +169,6 @@ static void write_noflush_verify(H5C2_jbrb_t * struct_ptr,
                                  FILE * readback, 
                                  int repeats);
 
-static void check_mdj_config_block_IO(void);
-
-static void test_mdj_conf_blk_read_write_discard(H5F_t * file_ptr,
-                                                 const char * jrnl_file_path);
-
 static void check_superblock_extensions(void);
 
 static void check_mdjsc_callbacks(void);
@@ -2794,13 +2789,13 @@ verify_journal_contents(const char * journal_file_path_ptr,
     }
 
     /* The first lines of the journal and expected files will usually differ
-     * in creation date.  We could look at everything else on the line, but
-     * for now we will just skip past it, and compute the length of the remainder
-     * of the journal and expected files as we do so.
+     * in magic number and creation date.  We could look at everything else 
+     * on the line, but for now we will just skip past it, and compute the 
+     * length of the remainder of the journal and expected files as we do so.
      *
-     * Do this by reading the file one character at a time until we hit a newline.
-     * This is very inefficient, but this is test code, and the first line
-     * can't be very long.
+     * Do this by reading the file one character at a time until we hit a 
+     * newline.  This is very inefficient, but this is test code, and the 
+     * first line can't be very long.
      */
     if ( pass2 ) {
 
@@ -2808,7 +2803,7 @@ verify_journal_contents(const char * journal_file_path_ptr,
 	read_result = HDread(journal_file_fd, &ch, 1);
 
 	while ( ( ch != '\n' ) && 
-		( first_line_len < 128 ) &&
+		( first_line_len < 256 ) &&
 	        ( read_result == 1 ) ) {
 
 	    first_line_len++;
@@ -2837,7 +2832,7 @@ verify_journal_contents(const char * journal_file_path_ptr,
 	read_result = HDread(expected_file_fd, &ch, 1);
 
 	while ( ( ch != '\n' ) && 
-		( first_line_len < 128 ) &&
+		( first_line_len < 256 ) &&
 	        ( read_result == 1 ) ) {
 
 	    first_line_len++;
@@ -4954,7 +4949,7 @@ mdj_smoke_check_02(void)
      *
      * Thus, if we want to use the core file driver when available, we 
      * will either have to remove the end of address space from the 
-     * journal entries, get the different file drivers to aggree on 
+     * journal entries, get the different file drivers to agree on 
      * end of address space, or maintain different sets of architype
      * files for the different file drivers.
      */
@@ -6168,621 +6163,6 @@ mdj_api_example_test(void)
 
 } /* mdj_api_example_test() */
 
-
-/*** metatada journaling config block I/O test code ***/
-
-/*-------------------------------------------------------------------------
- * Function:    check_mdj_config_block_IO()
- *
- * Purpose:     Verify that the functions that read, write, and discard
- *              metadata journaling config blocks operate as they should.
- *
- * Return:      void
- *
- * Programmer:  John Mainzer
- *              3/11/08
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static void
-check_mdj_config_block_IO(void)
-{
-    const char * fcn_name = "check_mdj_config_block_IO()";
-    const char * test_path = "/a/full/path";
-    char filename[512];
-    hbool_t show_progress = FALSE;
-    int cp = 0;
-    herr_t result;
-    hsize_t block_len = 0;
-    haddr_t block_addr = HADDR_UNDEF;
-    hid_t fapl_id = -1;
-    hid_t file_id = -1;
-    H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
-
-    TESTING("metadata journaling config block I/O");
-
-    pass2 = TRUE;
-
-    /* 1) Open a file
-     *
-     * 2) Go through several create, read, and discard cycles.  Verify that 
-     *    the correct information is read back.  Use a variety of journal 
-     *    file path length to ensure that we don't have problems with blocks 
-     *    with length some multiple of 4.
-     *
-     * 3) Create a metadata journaling configuration block.
-     *
-     * 4) Close the file, and reopen it.
-     *
-     * 5) Read the metadata journaling configuration block, and verify 
-     *    that it contains the expected data.
-     *
-     * 6) Close and discard the file.
-     *
-     * Note that we don't do any tests to verify that the config block
-     * code fails where expected -- We will do this in a separate test
-     * function if at all.
-     * 						-- JRM
-     */
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    /******************/
-    /* 1) Open a file */
-    /******************/
-
-    /* setup the file name */
-    if ( pass2 ) {
-
-        if ( h5_fixname(FILENAMES[2], H5P_DEFAULT, filename, sizeof(filename))
-				            == NULL ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed.\n";
-        }
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    /* create a file access propertly list -- this isn't necessary in this
-     * case, but it is how we will open the file when we journal, so we do
-     * it regardless.
-     */
-    if ( pass2 ) {
-
-        fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-
-        if ( fapl_id < 0 ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pcreate() failed.\n";
-        }
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    /* call H5Pset_libver_bounds() on the fapl_id */
-    if ( pass2 ) {
-
-	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
-				  H5F_LIBVER_LATEST) < 0 ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
-        }
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    /* create the file using fapl_id */
-    if ( pass2 ) {
-
-        file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
-
-        if ( file_id < 0 ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fcreate() failed.\n";
-        }
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    /* get a pointer to the files internal data structure and then 
-     * to the cache structure
-     */
-    if ( pass2 ) {
-
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
-
-        if ( file_ptr == NULL ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "Can't get file_ptr (1).\n";
-
-        } else if ( file_ptr->shared->cache2 == NULL ) {
-	
-	    pass2 = FALSE;
-	    failure_mssg2 = "can't get cache2 pointer(1).\n";
-
-	} else {
-
-	    cache_ptr = file_ptr->shared->cache2;
-	}
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-
-    /*************************************************************************/
-    /* 2) Go through several create, read, and discard cycles.  Verify that  */
-    /*    the correct information is read back.  Use a variety of journal    */
-    /*    file path length to ensure that we don't have problems with blocks */
-    /*    with length some multiple of 4.                                    */
-    /*************************************************************************/
-
-    test_mdj_conf_blk_read_write_discard(file_ptr, "a");
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    test_mdj_conf_blk_read_write_discard(file_ptr, "ab");
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    test_mdj_conf_blk_read_write_discard(file_ptr, "abc");
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    test_mdj_conf_blk_read_write_discard(file_ptr, "abcd");
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    test_mdj_conf_blk_read_write_discard(file_ptr, "abcde");
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    test_mdj_conf_blk_read_write_discard(file_ptr, 
-		                         "abcdefghijklmnopqrstuvwxyz");
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-
-    /********************************************************/
-    /* 3) Create a metadata journaling configuration block. */
-    /********************************************************/
-
-    if ( pass2 ) {
-
-	if ( ( cache_ptr->mdj_file_name_ptr != NULL ) ||
-	     ( cache_ptr->mdj_conf_block_addr != HADDR_UNDEF ) ||
-	     ( cache_ptr->mdj_conf_block_len != 0 ) ||
-	     ( cache_ptr->mdj_conf_block_ptr != NULL ) ) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = "Bad cache config on entry.";
-	}
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    if ( pass2 ) {
-    
-        result = H5C2_create_journal_config_block(file_ptr,
-			                          H5P_DATASET_XFER_DEFAULT,
-						  test_path);
-	
-	if ( result != SUCCEED ) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_create_journal_config_block() failed.";
-	
-	} else {
-
-	    block_addr = cache_ptr->mdj_conf_block_addr;
-            block_len = cache_ptr->mdj_conf_block_len;
-
-	    if ( cache_ptr->mdj_conf_block_ptr == NULL ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"cache_ptr->mdj_conf_block_ptr == NULL after create.";
-
-	    } else if ( cache_ptr->mdj_file_name_ptr == NULL ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"cache_ptr->mdj_file_name_ptr == NULL after create.";
-	
-	    } else if ( strcmp(test_path, cache_ptr->mdj_file_name_ptr) 
-		        != 0 ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"journal file path mismatch after create.";
-
-	    } else if ( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-                  "cache_ptr->mdj_conf_block_addr == HADDR_UNDEF after create.";
-
-	    } else if ( cache_ptr->mdj_conf_block_len == 0 ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-                    "cache_ptr->mdj_conf_block_len == 0 after create.";
-	    }
-	}
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-
-    /*************************************/ 
-    /* 4) Close the file, and reopen it. */
-    /*************************************/
-
-    /* close the file. */
-    if ( pass2 ) {
-
-	if ( H5Fclose(file_id) < 0 ) {
-
-            pass2 = FALSE;
-	    failure_mssg2 = "file close failed (1).";
-	}
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    /* open the file r/w using the same FAPL */
-    if ( pass2 ) {
-
-        file_id = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
-
-        if ( file_id < 0 ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "H5Fopen() failed (3).\n";
-        }
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    /* get a pointer to the files internal data structure and then 
-     * to the cache structure
-     */
-    if ( pass2 ) {
-
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
-
-        if ( file_ptr == NULL ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "Can't get file_ptr (1).\n";
-
-        } else if ( file_ptr->shared->cache2 == NULL ) {
-	
-	    pass2 = FALSE;
-	    failure_mssg2 = "can't get cache2 pointer(1).\n";
-
-	} else {
-
-	    cache_ptr = file_ptr->shared->cache2;
-	}
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    /*******************************************************************/
-    /* 5) Read the metadata journaling configuration block, and verify */
-    /*    that it contains the expected data.                          */
-    /*******************************************************************/
-
-    if ( pass2 ) {
-
-        H5MM_xfree(cache_ptr->mdj_conf_block_ptr);
-
-        cache_ptr->mdj_conf_block_addr = HADDR_UNDEF;
-        cache_ptr->mdj_conf_block_len = 0;
-        cache_ptr->mdj_conf_block_ptr = NULL;
-        cache_ptr->mdj_file_name_ptr = NULL;
-
-	result = H5C2_load_journal_config_block(file_ptr,
-			                        H5P_DATASET_XFER_DEFAULT,
-						cache_ptr,
-						block_addr,
-						block_len);
-	
-	if ( result != SUCCEED ) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_load_journal_config_block() failed.";
-	
-	} else {
-
-	    if ( cache_ptr->mdj_conf_block_ptr == NULL ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"cache_ptr->mdj_conf_block_ptr == NULL after load.";
-
-	    } else if ( cache_ptr->mdj_file_name_ptr == NULL ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"cache_ptr->mdj_file_name_ptr == NULL after load.";
-	
-	    } else if ( strcmp(test_path, cache_ptr->mdj_file_name_ptr ) 
-		        != 0) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"journal file path mismatch after load.";
-
-	    } else if ( cache_ptr->mdj_conf_block_addr != block_addr ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-                    "cache_ptr->mdj_conf_block_addr != block_addr after load.";
-
-	    } else if ( cache_ptr->mdj_conf_block_len != block_len ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-                    "cache_ptr->mdj_conf_block_len != block_len after load.";
-	    }
-	}
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    /**********************************/
-    /* 6) Close and discard the file. */
-    /**********************************/
-    
-    if ( pass2 ) {
-
-	if ( H5Fclose(file_id) < 0 ) {
-
-            pass2 = FALSE;
-	    failure_mssg2 = "file close failed (5).";
-
-        } else if ( HDremove(filename) < 0 ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "HDremove() failed.\n";
-        }
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-
-    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
-
-    if ( ! pass2 ) {
-
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
-    }
-
-} /* check_mdj_config_block_IO() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    test_mdj_conf_blk_read_write_discard()
- *
- * Purpose:     Using the supplied cache and journal file path, create 
- * 		a metadata journal configuration block, read it and 
- * 		verify the contents, and then discard it.
- *
- * 		Do nothing if pass2 is false on entry
- *
- * Return:      void
- *
- * Programmer:  John Mainzer
- *              3/13/08
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-
-static void
-test_mdj_conf_blk_read_write_discard(H5F_t * file_ptr,
-		                     const char * jrnl_file_path)
-{
-    const char * fcn_name = "test_mdj_conf_blk_read_write_discard()";
-    H5C2_t * cache_ptr = file_ptr->shared->cache2;
-    hbool_t show_progress = FALSE;
-    int cp = 0;
-    herr_t result;
-    hsize_t block_len = 0;
-    haddr_t block_addr = HADDR_UNDEF;
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    if ( cache_ptr == NULL ) {
-
-        pass2 = FALSE;
-        failure_mssg2 = "cache_ptr NULL on entry.";
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    if ( pass2 ) {
-
-	if ( ( cache_ptr->mdj_file_name_ptr != NULL ) ||
-	     ( cache_ptr->mdj_conf_block_addr != HADDR_UNDEF ) ||
-	     ( cache_ptr->mdj_conf_block_len != 0 ) ||
-	     ( cache_ptr->mdj_conf_block_ptr != NULL ) ) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = "Bad cache config on entry.";
-	}
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    if ( pass2 ) {
-    
-        result = H5C2_create_journal_config_block(file_ptr,
-			                          H5P_DATASET_XFER_DEFAULT,
-						  jrnl_file_path);
-	
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-	if ( result != SUCCEED ) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_create_journal_config_block() failed.";
-	
-	} else {
-
-	    block_addr = cache_ptr->mdj_conf_block_addr;
-            block_len = cache_ptr->mdj_conf_block_len;
-
-	    if ( cache_ptr->mdj_conf_block_ptr == NULL ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"cache_ptr->mdj_conf_block_ptr == NULL after create.";
-
-	    } else if ( cache_ptr->mdj_file_name_ptr == NULL ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"cache_ptr->mdj_file_name_ptr == NULL after create.";
-	
-	    } else if ( strcmp(jrnl_file_path, cache_ptr->mdj_file_name_ptr) 
-		        != 0 ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"journal file path mismatch after create.";
-
-	    } else if ( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-                    "cache_ptr->mdj_conf_block_addr == HADDR_UNDEF after create.";
-
-	    } else if ( cache_ptr->mdj_conf_block_len == 0 ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-                    "cache_ptr->mdj_conf_block_len == 0 after create.";
-	    }
-	}
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    if ( pass2 ) {
-
-        H5MM_xfree(cache_ptr->mdj_conf_block_ptr);
-
-        cache_ptr->mdj_conf_block_addr = HADDR_UNDEF;
-        cache_ptr->mdj_conf_block_len = 0;
-        cache_ptr->mdj_conf_block_ptr = NULL;
-        cache_ptr->mdj_file_name_ptr = NULL;
-
-	result = H5C2_load_journal_config_block(file_ptr,
-			                        H5P_DATASET_XFER_DEFAULT,
-						cache_ptr,
-						block_addr,
-						block_len);
-	
-	if ( result != SUCCEED ) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_load_journal_config_block() failed.";
-	
-	} else {
-
-	    if ( cache_ptr->mdj_conf_block_ptr == NULL ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"cache_ptr->mdj_conf_block_ptr == NULL after load.";
-
-	    } else if ( cache_ptr->mdj_file_name_ptr == NULL ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"cache_ptr->mdj_file_name_ptr == NULL after load.";
-	
-	    } else if ( strcmp(jrnl_file_path, cache_ptr->mdj_file_name_ptr) 
-		        != 0) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"journal file path mismatch after load.";
-
-	    } else if ( cache_ptr->mdj_conf_block_addr != block_addr ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-                    "cache_ptr->mdj_conf_block_addr != block_addr after load.";
-
-	    } else if ( cache_ptr->mdj_conf_block_len != block_len ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-                    "cache_ptr->mdj_conf_block_len != block_len after load.";
-	    }
-	}
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    if ( pass2 ) {
-
-        result = H5C2_discard_journal_config_block(file_ptr, 
-			                           H5P_DATASET_XFER_DEFAULT);
-	
-	if ( result != SUCCEED ) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = "H5C2_discard_journal_config_block() failed.";
-	
-	} else {
-
-	    if ( cache_ptr->mdj_conf_block_ptr != NULL ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"cache_ptr->mdj_conf_block_ptr != NULL after discard.";
-
-	    } else if ( cache_ptr->mdj_file_name_ptr != NULL ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-			"cache_ptr->mdj_file_name_ptr != NULL after discard.";
-	
-	    } else if ( cache_ptr->mdj_conf_block_addr != HADDR_UNDEF ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-                    "cache_ptr->mdj_conf_block_addr != HADDR_UNDEF after discard.";
-
-	    } else if ( cache_ptr->mdj_conf_block_len != 0 ) {
-
-		pass2 = FALSE;
-		failure_mssg2 = 
-                    "cache_ptr->mdj_conf_block_len != 0 after discard.";
-	    }
-	}
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    return;
-
-} /* test_mdj_conf_blk_read_write_discard() */
 
 /*** super block extension related test code ***/
 
@@ -6790,7 +6170,7 @@ test_mdj_conf_blk_read_write_discard(H5F_t * file_ptr,
  * Function:    check_superblock_extensions()
  *
  * Purpose:     Verify that the super block extensions for tracking 
- * 		operate as they should.
+ *              journaling status operate as they should.
  *
  *              Note that this test code will have to be re-worked
  *              once journaling is fully implemented.
@@ -6813,8 +6193,7 @@ check_superblock_extensions(void)
     const char * fcn_name = "check_superblock_extensions()";
     char filename[512];
     hbool_t show_progress = FALSE;
-    haddr_t mdc_jrnl_block_loc = 0x1000;
-    hsize_t mdc_jrnl_block_len = 0x100;
+    hbool_t verbose = FALSE;
     int cp = 0; 
     hid_t fapl_id = -1;
     hid_t file_id = -1;
@@ -6908,7 +6287,8 @@ check_superblock_extensions(void)
     /* call H5Pset_libver_bounds() on the fapl_id */
     if ( pass2 ) {
 
-	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0 ) {
+	if ( H5Pset_libver_bounds(fapl_id, H5F_LIBVER_LATEST, 
+                                  H5F_LIBVER_LATEST) < 0 ) {
 
             pass2 = FALSE;
             failure_mssg2 = "H5Pset_libver_bounds() failed.\n";
@@ -6943,7 +6323,7 @@ check_superblock_extensions(void)
             pass2 = FALSE;
             failure_mssg2 = "Can't get file_ptr (1).\n";
 
-        } else if ( file_ptr->shared->mdc_jrnl_enabled ) {
+        } else if ( file_ptr->shared->mdc_jnl_enabled ) {
 	
 	    pass2 = FALSE;
 	    failure_mssg2 = "Journaling enabled on file creation.\n";
@@ -7031,7 +6411,7 @@ check_superblock_extensions(void)
             pass2 = FALSE;
             failure_mssg2 = "Can't get file_ptr (2).\n";
 
-        } else if ( file_ptr->shared->mdc_jrnl_enabled ) {
+        } else if ( file_ptr->shared->mdc_jnl_enabled ) {
 	
 	    pass2 = FALSE;
 	    failure_mssg2 = "Journaling enabled on file open (1).\n";
@@ -7053,9 +6433,24 @@ check_superblock_extensions(void)
 
     if ( pass2 ) {
 
-        file_ptr->shared->mdc_jrnl_enabled = TRUE;
-        file_ptr->shared->mdc_jrnl_block_loc = mdc_jrnl_block_loc;
-        file_ptr->shared->mdc_jrnl_block_len = mdc_jrnl_block_len;
+        file_ptr->shared->mdc_jnl_enabled       = TRUE;
+        file_ptr->shared->mdc_jnl_magic         = 123;
+        file_ptr->shared->mdc_jnl_file_name_len = strlen("abc");
+        HDstrncpy(file_ptr->shared->mdc_jnl_file_name,
+                  "abc",
+                  file_ptr->shared->mdc_jnl_file_name_len + 1);
+
+        if ( verbose ) {
+
+            HDfprintf(stdout, "f->shared->mdc_jnl_enabled       = %d\n",
+                      (int)(file_ptr->shared->mdc_jnl_enabled));
+            HDfprintf(stdout, "f->shared->mdc_jnl_magic         = %d\n",
+                      (int)(file_ptr->shared->mdc_jnl_magic));
+            HDfprintf(stdout, "f->shared->mdc_jnl_file_name_len = %d\n",
+                      (int)(file_ptr->shared->mdc_jnl_file_name_len));
+            HDfprintf(stdout, "f->shared->mdc_jnl_file_name     = \"%s\"\n",
+                      file_ptr->shared->mdc_jnl_file_name);
+        }
 
 	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
 
@@ -7114,25 +6509,29 @@ check_superblock_extensions(void)
             pass2 = FALSE;
             failure_mssg2 = "Can't get file_ptr (3).\n";
 
-        } else if ( ! file_ptr->shared->mdc_jrnl_enabled ) {
+        } else if ( ! file_ptr->shared->mdc_jnl_enabled ) {
 	
 	    pass2 = FALSE;
 	    failure_mssg2 = "Journaling disabled on file open (1).\n";
 
-	} else if ( file_ptr->shared->mdc_jrnl_block_loc != 
-			mdc_jrnl_block_loc ) {
+	} else if ( file_ptr->shared->mdc_jnl_magic != 123 ) {
 	
 	    pass2 = FALSE;
-	    HDfprintf(stdout, "%s: block_loc = %ld (%ld).\n",
-		      fcn_name, (long)(file_ptr->shared->mdc_jrnl_block_loc),
-		      (long)(mdc_jrnl_block_loc));
-	    failure_mssg2 = "unexpected mdc_jrnl_block_loc(1).\n";
+	    HDfprintf(stdout, "%s: mdc_jnl_magic = %d (%d).\n",
+		      fcn_name, (int)(file_ptr->shared->mdc_jnl_magic),
+		      123);
+	    failure_mssg2 = "unexpected mdc_jnl_magic(1).\n";
 
-	} else if ( file_ptr->shared->mdc_jrnl_block_len != 
-		    (hsize_t)mdc_jrnl_block_len ) {
+	} else if ( file_ptr->shared->mdc_jnl_file_name_len != 
+		    (size_t)strlen("abc") ) {
 	
 	    pass2 = FALSE;
-	    failure_mssg2 = "unexpected mdc_jrnl_block_len (1).\n";
+	    failure_mssg2 = "unexpected mdc_jnl_file_name_len (1).\n";
+
+	} else if ( strcmp(file_ptr->shared->mdc_jnl_file_name, "abc") != 0 ) {
+	
+	    pass2 = FALSE;
+	    failure_mssg2 = "unexpected mdc_jnl_file_name (1).\n";
 
         }
     }
@@ -7146,7 +6545,7 @@ check_superblock_extensions(void)
 
     if ( pass2 ) {
 
-	file_ptr->shared->mdc_jrnl_enabled = FALSE;
+	file_ptr->shared->mdc_jnl_enabled = FALSE;
 
 	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
 
@@ -7201,7 +6600,7 @@ check_superblock_extensions(void)
             pass2 = FALSE;
             failure_mssg2 = "Can't get file_ptr (4).\n";
 
-        } else if ( file_ptr->shared->mdc_jrnl_enabled ) {
+        } else if ( file_ptr->shared->mdc_jnl_enabled ) {
 	
 	    pass2 = FALSE;
 	    failure_mssg2 = "Journaling enabled on file open (2).\n";
@@ -7219,9 +6618,12 @@ check_superblock_extensions(void)
 
     if ( pass2 ) {
 
-        file_ptr->shared->mdc_jrnl_enabled = TRUE;
-        file_ptr->shared->mdc_jrnl_block_loc = mdc_jrnl_block_loc * 2;
-        file_ptr->shared->mdc_jrnl_block_len = mdc_jrnl_block_len * 2;
+        file_ptr->shared->mdc_jnl_enabled       = TRUE;
+        file_ptr->shared->mdc_jnl_magic         = 456;
+        file_ptr->shared->mdc_jnl_file_name_len = strlen("qrst");
+        HDstrncpy(file_ptr->shared->mdc_jnl_file_name,
+                  "qrst",
+                  file_ptr->shared->mdc_jnl_file_name_len + 1);
 
 	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
 
@@ -7234,9 +6636,12 @@ check_superblock_extensions(void)
 
     if ( pass2 ) {
 
-        file_ptr->shared->mdc_jrnl_enabled = TRUE;
-        file_ptr->shared->mdc_jrnl_block_loc = mdc_jrnl_block_loc / 2;
-        file_ptr->shared->mdc_jrnl_block_len = mdc_jrnl_block_len / 2;
+        file_ptr->shared->mdc_jnl_enabled       = TRUE;
+        file_ptr->shared->mdc_jnl_magic         = 789;
+        file_ptr->shared->mdc_jnl_file_name_len = strlen("z");
+        HDstrncpy(file_ptr->shared->mdc_jnl_file_name,
+                  "z",
+                  file_ptr->shared->mdc_jnl_file_name_len + 1);
 
 	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
 
@@ -7295,25 +6700,29 @@ check_superblock_extensions(void)
             pass2 = FALSE;
             failure_mssg2 = "Can't get file_ptr (5).\n";
 
-        } else if ( ! file_ptr->shared->mdc_jrnl_enabled ) {
+        } else if ( ! file_ptr->shared->mdc_jnl_enabled ) {
 	
 	    pass2 = FALSE;
 	    failure_mssg2 = "Journaling disabled on file open (2).\n";
 
-	} else if ( file_ptr->shared->mdc_jrnl_block_loc != 
-			mdc_jrnl_block_loc / 2 ) {
+	} else if ( file_ptr->shared->mdc_jnl_magic != 789 ) {
 	
 	    pass2 = FALSE;
-	    HDfprintf(stdout, "%s: block_loc = %ld (%ld).\n",
-		      fcn_name, (long)(file_ptr->shared->mdc_jrnl_block_loc),
-		      (long)(mdc_jrnl_block_loc));
-	    failure_mssg2 = "unexpected mdc_jrnl_block_loc(2).\n";
+	    HDfprintf(stdout, "%s: mdc_jnl_magic = %d (%d).\n",
+		      fcn_name, (int)(file_ptr->shared->mdc_jnl_magic),
+		      789);
+	    failure_mssg2 = "unexpected mdc_jnl_magic(2).\n";
 
-	} else if ( file_ptr->shared->mdc_jrnl_block_len != 
-		    (hsize_t)mdc_jrnl_block_len / 2 ) {
+	} else if ( file_ptr->shared->mdc_jnl_file_name_len != 
+		    (size_t)strlen("z") ) {
 	
 	    pass2 = FALSE;
-	    failure_mssg2 = "unexpected mdc_jrnl_block_len (2).\n";
+	    failure_mssg2 = "unexpected mdc_jnl_file_name_len (2).\n";
+
+	} else if ( strcmp(file_ptr->shared->mdc_jnl_file_name, "z") != 0 ) {
+	
+	    pass2 = FALSE;
+	    failure_mssg2 = "unexpected mdc_jnl_file_name (2).\n";
 
         }
     }
@@ -7328,7 +6737,7 @@ check_superblock_extensions(void)
 
     if ( pass2 ) {
 
-	file_ptr->shared->mdc_jrnl_enabled = FALSE;
+	file_ptr->shared->mdc_jnl_enabled = FALSE;
 
 	if ( H5F_super_write_mdj_msg(file_ptr, -1) < 0 ) {
 
@@ -7383,7 +6792,7 @@ check_superblock_extensions(void)
             pass2 = FALSE;
             failure_mssg2 = "Can't get file_ptr (6).\n";
 
-        } else if ( file_ptr->shared->mdc_jrnl_enabled ) {
+        } else if ( file_ptr->shared->mdc_jnl_enabled ) {
 	
 	    pass2 = FALSE;
 	    failure_mssg2 = "Journaling enabled on file open (3).\n";
@@ -10961,6 +10370,7 @@ check_buffer_writes(void)
     if ( pass2 ) {
 
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* journal_magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
                                /* Buffer size */            16, 
@@ -10976,6 +10386,16 @@ check_buffer_writes(void)
        	} /* end if */
 
     } /* end if */
+
+    /* generate the header message manually */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__write_header_entry failed";
+        }
+    }
 	
     if ( show_progress ) /* 3 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
@@ -11261,6 +10681,10 @@ write_noflush_verify(H5C2_jbrb_t * struct_ptr,
  *
  * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
  *              Tuesday, February 26, 2008
+ *
+ * Changes:	JRM -- 3/21/09
+ *		Updated test to handle the new journal creation time strings
+ *		in which all white space is replaced with underscores.
  * 
  **************************************************************************/
 static void 
@@ -11268,14 +10692,16 @@ check_message_format(void)
 {
     const char * fcn_name = "check_message_format(): ";
     char filename[512];
-    int i;
-    herr_t result;
-    H5C2_jbrb_t jbrb_struct;
-    FILE * readback;
-    hbool_t show_progress = FALSE;
-    int32_t checkpoint = 1;
+    char time_buf[32];
     char verify[9][500];
     char from_journal[9][500];
+    char * p;
+    hbool_t show_progress = FALSE;
+    int32_t checkpoint = 1;
+    int i;
+    herr_t result;
+    FILE * readback;
+    H5C2_jbrb_t jbrb_struct;
     time_t current_date;
 
     TESTING("journal file message format");
@@ -11302,6 +10728,7 @@ check_message_format(void)
     if ( pass2 ) {
 
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* journal_magic */          123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
                                /* Buffer size */            16, 
@@ -11489,42 +10916,94 @@ check_message_format(void)
 
     } /* end if */
 
-    current_date = time(NULL);
+    if ( pass2 ) {
+
+        current_date = time(NULL);
+
+        /* load ascii representation of current_date into time_buf[],
+         * replacing white space with underscores.
+         */
+        time_buf[31] = '\0'; /* just to be safe */
+
+        if ( (p = HDctime(&current_date)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "HDctime() failed";
+
+        } else {
+
+            /* copy the string into time_buf, replacing white space with
+             * underscores.
+             *
+             * Do this to make parsing the header easier.
+             */
+            i = 0;
+
+            while ( ( i < 31 ) && ( *p != '\0' ) ) {
+
+                if ( isspace(*p) ) {
+
+                    time_buf[i] = '_';
+
+                } else {
+
+                    time_buf[i] = *p;
+                }
+
+                i++;
+                p++;
+            }
+
+            time_buf[i] = '\0';
+        }
+    }
 
     if ( show_progress ) /* 10 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
 		  checkpoint++, (int)pass2);
 
-    /* Fill out verify array with expected messages */
-    sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %10.10s human_readable 1\n", ctime(&current_date));
-    sprintf(verify[1], "1 bgn_trans 1\n");
-    sprintf(verify[2], "2 trans_num 1 length 1 base_addr 0x0 body  41 \n");
-    sprintf(verify[3], "2 trans_num 1 length 2 base_addr 0x1 body  41 42 \n");
-    sprintf(verify[4], "2 trans_num 1 length 4 base_addr 0x3 body  43 44 45 46 \n");
-    sprintf(verify[5], "3 end_trans 1\n");
-    sprintf(verify[6], "1 bgn_trans 2\n");
-    sprintf(verify[7], "2 trans_num 2 length 11 base_addr 0x11d body  54 65 73 74 20 44 61 74 61 3f 21 \n");
-    sprintf(verify[8], "3 end_trans 2\n");
+    if ( pass2 ) {
 
-    /* verify that messages in journal are same as expected */
-    readback = fopen(filename, "r");
-    for (i = 0; i < 9; i++) {
+        /* Fill out verify array with expected messages */
+        sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file journal_magic 123 creation_date %10.10s human_readable 1\n", time_buf);
+        sprintf(verify[1], "1 bgn_trans 1\n");
+        sprintf(verify[2], "2 trans_num 1 length 1 base_addr 0x0 body  41 \n");
+        sprintf(verify[3], "2 trans_num 1 length 2 base_addr 0x1 body  41 42 \n");
+        sprintf(verify[4], "2 trans_num 1 length 4 base_addr 0x3 body  43 44 45 46 \n");
+        sprintf(verify[5], "3 end_trans 1\n");
+        sprintf(verify[6], "1 bgn_trans 2\n");
+        sprintf(verify[7], "2 trans_num 2 length 11 base_addr 0x11d body  54 65 73 74 20 44 61 74 61 3f 21 \n");
+        sprintf(verify[8], "3 end_trans 2\n");
 
-        if ( pass2) {
+        /* verify that messages in journal are same as expected */
+        readback = fopen(filename, "r");
+        for (i = 0; i < 9; i++) {
 
-            fgets(from_journal[i], 300, readback);
+            if ( pass2) {
 
-            if ( HDstrcmp(verify[i], from_journal[i]) != 0) {
+                fgets(from_journal[i], 300, readback);
 
-                pass2 = FALSE;
-                failure_mssg2 = "journal file not written correctly";
+                if ( HDstrcmp(verify[i], from_journal[i]) != 0) {
+
+                    if ( show_progress ) {
+
+                        HDfprintf(stdout, "verify[%d]       = \"%s\"\n", 
+                                  i, verify[i]);
+                        HDfprintf(stdout, "from_journal[%d] = \"%s\"\n", 
+                                  i, from_journal[i]);
+                    }
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "journal file not written correctly 1";
+
+                } /* end if */
 
             } /* end if */
 
-        } /* end if */
-
-    } /* end for */
-    fclose(readback);
+        } /* end for */
+ 
+        fclose(readback);
+    }
 
     /* Truncate the journal file */
     if ( pass2 ) {
@@ -11645,39 +11124,92 @@ check_message_format(void)
 
     } /* end if */
 
-    current_date = time(NULL);
+    if ( pass2 ) {
+
+        current_date = time(NULL);
+
+        /* load ascii representation of current_date into time_buf[],
+         * replacing white space with underscores.
+         */
+
+        time_buf[31] = '\0'; /* just to be safe */
+
+        if ( (p = HDctime(&current_date)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "HDctime() failed";
+
+        } else {
+
+            /* copy the string into time_buf, replacing white space with
+             * underscores.
+             *
+             * Do this to make parsing the header easier.
+             */
+            i = 0;
+
+            while ( ( i < 31 ) && ( *p != '\0' ) ) {
+
+                if ( isspace(*p) ) {
+
+                    time_buf[i] = '_';
+
+                } else {
+
+                    time_buf[i] = *p;
+                }
+
+                i++;
+                p++;
+            }
+
+            time_buf[i] = '\0';
+        }
+    }
 
     if ( show_progress ) /* 15 */ 
 	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
 		  checkpoint++, (int)pass2);
 
-    /* Fill out verify array with expected messages */
-    sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file creation_date %10.10s human_readable 1\n", ctime(&current_date));
-    sprintf(verify[1], "1 bgn_trans 3\n");
-    sprintf(verify[2], "2 trans_num 3 length 6 base_addr 0x6faf body  23 31 6e 4e 60 7d \n");
-    sprintf(verify[3], "3 end_trans 3\n");
-    sprintf(verify[4], "C comment This is a comment!\n");
-    sprintf(verify[5], "C comment This is another comment!\n");
+    if ( pass2 ) {
 
-    /* verify that messages in journal are same as expected */
-    readback = fopen(filename, "r");
-    for (i = 0; i < 6; i++) {
+        /* Fill out verify array with expected messages */
+        sprintf(verify[0], "0 ver_num 1 target_file_name HDF5.file journal_magic 123 creation_date %10.10s human_readable 1\n", time_buf);
+        sprintf(verify[1], "1 bgn_trans 3\n");
+        sprintf(verify[2], "2 trans_num 3 length 6 base_addr 0x6faf body  23 31 6e 4e 60 7d \n");
+        sprintf(verify[3], "3 end_trans 3\n");
+        sprintf(verify[4], "C comment This is a comment!\n");
+        sprintf(verify[5], "C comment This is another comment!\n");
 
-        if ( pass2) {
+        /* verify that messages in journal are same as expected */
+        readback = fopen(filename, "r");
+        for (i = 0; i < 6; i++) {
 
-            fgets(from_journal[i], 300, readback);
+            if ( pass2) {
 
-            if ( HDstrcmp(verify[i], from_journal[i]) != 0) {
-    
-                pass2 = FALSE;
-                failure_mssg2 = "journal file not written correctly";
+                fgets(from_journal[i], 300, readback);
+
+                if ( HDstrcmp(verify[i], from_journal[i]) != 0) {
+
+                    if ( show_progress ) {
+
+                        HDfprintf(stdout, "verify[%d]       = \"%s\"\n", 
+                                  i, verify[i]);
+                        HDfprintf(stdout, "from_journal[%d] = \"%s\"\n", 
+                                  i, from_journal[i]);
+                    }
+
+                    pass2 = FALSE;
+                    failure_mssg2 = "journal file not written correctly 2";
+
+                } /* end if */
 
             } /* end if */
 
-        } /* end if */
+        } /* end for */
 
-    } /* end for */
-    fclose(readback);
+        fclose(readback);
+    }
 
     /* Truncate the journal file */
     if ( pass2 ) {
@@ -11773,6 +11305,7 @@ check_legal_calls(void)
     if ( pass2 ) {
 
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* journal magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
                                /* Buffer size */            4000, 
@@ -11788,7 +11321,7 @@ check_legal_calls(void)
        	} /* end if */
 
     } /* end if */
-	
+
     if ( show_progress ) /* 2 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
                   checkpoint++, (int)pass2);
@@ -12284,6 +11817,7 @@ check_transaction_tracking(void)
     if ( pass2 ) {
 
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* journal magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
                                /* Buffer size */            250, 
@@ -12299,6 +11833,22 @@ check_transaction_tracking(void)
        	} /* end if */
 
     } /* end if */
+
+
+    /* H5C2_jb__init() no longer generates the header message -- instead
+     * it is generated by the first real journal entry.  This causes 
+     * problems in this test, so generate the header message manually
+     * and then flush it.
+     */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__write_header_entry failed";
+        }
+    }
+
 
     if ( show_progress ) /* 2 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
@@ -12409,6 +11959,7 @@ check_transaction_tracking(void)
     if ( pass2 ) {
 
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* journal magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
                                /* Buffer size */            100, 
@@ -12424,6 +11975,16 @@ check_transaction_tracking(void)
        	} /* end if */
 
     } /* end if */
+
+    /* generate the header message manually */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__write_header_entry failed";
+        }
+    }
 
     /* Flush the journal buffers. */
     if ( pass2 ) {
@@ -12514,6 +12075,7 @@ check_transaction_tracking(void)
     if ( pass2 ) {
 
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* journal_magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
                                /* Buffer size */            30, 
@@ -12529,6 +12091,17 @@ check_transaction_tracking(void)
        	} /* end if */
 
     } /* end if */
+
+    /* generate the header message manually */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__write_header_entry failed";
+        }
+    }
+
 
     if ( show_progress ) /* 8 */ 
         HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
@@ -12655,6 +12228,7 @@ check_transaction_tracking(void)
     if ( pass2 ) {
 
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+			       /* journal_magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
                                /* journal file name */      filename, 
                                /* Buffer size */            1, 
@@ -12670,6 +12244,17 @@ check_transaction_tracking(void)
        	} /* end if */
 
     } /* end if */
+
+    /* generate the header message manually */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__write_header_entry(&jbrb_struct) != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__write_header_entry failed";
+        }
+    }
+
 
     /* Flush the journal buffers. */
     if ( pass2 ) {
@@ -12951,9 +12536,6 @@ main(void)
 #endif
 #if 1
     check_superblock_extensions();
-#endif 
-#if 1
-    check_mdj_config_block_IO();
 #endif 
 #if 1
     check_mdjsc_callbacks();

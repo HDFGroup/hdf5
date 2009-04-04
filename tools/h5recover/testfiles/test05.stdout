@@ -1,0 +1,60 @@
+Examining the putative HDF5 file test05.h5:
+	attempting to get the length of test05.h5...
+		file length = 12832
+	attempting to open test05.h5...
+		opened file successfully.
+	searching for super block...
+		superblock found at 0x0.
+	reading super block version...
+		super block version = 2.
+	reading offset and length sizes from super block...
+		offset_size = 8.
+		length_size = 8.
+	computing eoa addr and offset...
+		eoa_addr = 0x1c
+		eoa_offset = 0x1c
+	reading base addr from super block...
+		base addr = 0x0
+	reading super block extension addr...
+		super block extension addr = 0xda7
+	reading SB extension object header version...
+		object header version = 2.
+	scanning SB extension for metadata journaling msg...
+	preparing to examine v2 SBE ohdr...
+		size of chunk size = 1
+		creation order stored = 0
+		phase change values stored = 0
+		times stored = 1
+		chunk 0 size = 0x1f
+		chunk 0 addr = 0xdbe
+	scanning SB ext chunk 0.
+	found journaling message at 0xdc2
+		metadata journaling msg addr = 0xdc2
+	reading metadata journaling message...
+	reading metadata journaling message.
+		MDJ msg version = 0
+		journaling enabled = TRUE
+		magic = 0x30430f5c
+		journal file path len = 15
+	journal file = "trecover.h5.jnl"
+	attempting to close test05.h5...
+		closed file successfully
+	test05.h5 was journaled and not closed properly.
+	It is probably corrupt, and it cannot be opened by the HDF5 library.
+		journaling enabled = 1
+		magic = 0x30430f5c
+		journal file name = "trecover.h5.jnl".
+
+Examining the putative HDF5 journal file test05.jnl:
+	attempting to determine journal file length...
+	the file test05.jnl is empty.
+
+Since test05.jnl is empty, either test05.h5
+already has consistent metadata and need only be marked as not having
+journaling in progress so it can opened with the hdf5 library, or
+test05.jnl is not really its journal file.
+
+Unfortunately, which is true can't be determined by this program.
+If you are sure you have the correct journal file, go ahead and run
+test05.jnl on test05.h5.
+

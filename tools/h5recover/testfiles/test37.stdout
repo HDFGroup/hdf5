@@ -1,0 +1,8 @@
+Examining the putative HDF5 file test37.h5:
+	super block not found in test37.h5 -- not an HDF5 file?
+
+Encountered errors examining test37.h5 -- can't run journal.
+
+Examining the putative HDF5 journal file test37.jnl:
+	header in test37.jnl looks OK.
+

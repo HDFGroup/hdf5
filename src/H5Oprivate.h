@@ -509,30 +509,44 @@ typedef uint32_t H5O_refcount_t;        /* Contains # of links to object, if >1 
 /*
  * Metadata journaling message
  *
- * Information on whether are being journaled, and if so, the size and
- * location of the on disk block containing the deatils of the journaling.
+ * Information on whether are being journaled, and if so, the magic
+ * number (if defined) and path to the journal file.
  * (Data structure in memory)
  *
  * The fields of the H5O_mdj_msg_t structure are discussed individually
  * below:
  *
- * mdc_jrnl_enabled: Boolean flag indicating whether metadata journaling
+ * mdc_jnl_enabled: Boolean flag indicating whether metadata journaling
  * 	is currently enabled.  
  *
- * mdc_jrnl_block_loc: haddr_t containing the base address of the 
- * 	of the block containing the configuration details of the 
- * 	journaling.
+ * mdc_jnl_magic: Randomly selected int32_t used to reduce the possibility
+ *	of running the wrong journal on an HDF5 file.  The basic idea is 
+ *	to pick a random number, store it in both the HDF5 file and the 
+ *	journal file, and then refuse to run the journal unless the numbers
+ *	match.
  *
- * mdc_jrnl_block_len: hsize_t containing the size of the buffer needed to 
- * 	contain the journaling configuration block
+ *	The value of this field is undefined unless mdc_jnl_enabled is TRUE.
  *
- * 	If the journal is internal, this field must be NULL.
+ * mdc_jnl_file_name_len: Length of the journal file name.
+ *
+ *	The value of this field is undefined unless mdc_jnl_enabled is TRUE.
+ *
+ * mdc_jnl_file_name: Array of char of length 
+ *	H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1 used to store the journal 
+ *	file path.
+ *
+ *	The value of this field is undefined unless mdc_jnl_enabled is TRUE.
  */
+
+#define H5O_MDJ_CONF_VERSION 			0
+#define MDJ_MSG__JOURNALING_ENABLED_FLAG        0x0001
+
 typedef struct H5O_mdj_msg_t {
 
-    hbool_t	mdc_jrnl_enabled;
-    haddr_t	mdc_jrnl_block_loc;
-    hsize_t     mdc_jrnl_block_len;
+    hbool_t	mdc_jnl_enabled;
+    int32_t     mdc_jnl_magic;
+    size_t      mdc_jnl_file_name_len;
+    char        mdc_jnl_file_name[H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1];
 
 } H5O_mdj_msg_t;
 

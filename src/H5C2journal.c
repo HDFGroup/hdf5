@@ -97,6 +97,14 @@ static herr_t H5C2_shrink_mdjsc_callback_table(H5C2_t * cache_ptr);
  *		starts, and to call the metadata journaling status
  *		change callbacks after journaling has been started.
  *
+ *		JRM -- 2/10/09
+ *		Added journal_magic variable and supporting code.  
+ *
+ *		The idea is to assign a random magic number to both the 
+ *		journal file, and to the journal configuration information
+ *		information in the super block so that it will be hard to
+ *		apply the wrong journal file to a corrupted hdf5 file.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -108,6 +116,7 @@ H5C2_begin_journaling(H5F_t * f,
 {
     herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
+    int32_t journal_magic;
     H5C2_mdj_config_t config;
 
     FUNC_ENTER_NOAPI(H5C2_begin_journaling, FAIL)
@@ -159,11 +168,18 @@ H5C2_begin_journaling(H5F_t * f,
     HDfprintf(stdout, "%s Finished flushing the cache.\n", FUNC);
 #endif /* JRM */ 
 
+    journal_magic = (int32_t)HDrand();
+
+#if 0 /* JRM */
+    HDfprintf(stdout, "%s journal_magic = %d.\n", FUNC, (int)journal_magic);
+#endif /* JRM */ 
+
 #if 0 /* JRM */
     HDfprintf(stdout, "%s calling H5C2_jb__init().\n", FUNC);
 #endif /* JRM */ 
 
     result = H5C2_jb__init(&(cache_ptr->mdj_jbrb),
+                           journal_magic,
 		           f->name,
 			   config_ptr->journal_file_path,
 			   config_ptr->jbrb_buf_size,
@@ -185,7 +201,7 @@ H5C2_begin_journaling(H5F_t * f,
 #endif /* JRM */ 
 
     /* Note that this call flushes the HDF5 file in passing */
-    result = H5C2_mark_journaling_in_progress(f, dxpl_id, 
+    result = H5C2_mark_journaling_in_progress(f, dxpl_id, journal_magic,
 		                              config_ptr->journal_file_path);
 
     if ( result != SUCCEED ) {
@@ -373,7 +389,8 @@ H5C2_end_journaling(H5F_t * f,
         cache_ptr->mdj_enabled = FALSE;
 
         /* Remove the journal configuration information from the superblock
-         *      extension.
+         * extension.  In passing, also discard the cache's copies of the 
+         * metadata journaling magic, and the journal file name.
          */
         result = H5C2_unmark_journaling_in_progress(f, dxpl_id, cache_ptr);
 
@@ -411,7 +428,7 @@ H5C2_end_journaling(H5F_t * f,
 done:
 
 #if 0 /* JRM */
-    HDfprintf(stdout, "%s: entering.\n", FUNC);
+    HDfprintf(stdout, "%s: exiting.\n", FUNC);
 #endif /* JRM */    
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -593,7 +610,7 @@ H5C2_get_journal_config(H5C2_t * cache_ptr,
         config_ptr->enable_journaling = TRUE;
 
 	HDstrncpy(&(config_ptr->journal_file_path[0]), 
-		  cache_ptr->mdj_file_name_ptr,
+		  cache_ptr->jnl_file_name,
 		  H5C2__MAX_JOURNAL_FILE_NAME_LEN);
 
 	config_ptr->journal_file_path[H5C2__MAX_JOURNAL_FILE_NAME_LEN] = '\0';
@@ -1161,7 +1178,7 @@ done:
 
 
 /**************************************************************************/
-/***************** journal config block management code *******************/
+/************* superblock journaling message management code **************/
 /**************************************************************************/
 
 /*-------------------------------------------------------------------------
@@ -1216,10 +1233,8 @@ H5C2_check_for_journaling(H5F_t * f,
     HDassert( f );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF );
-    HDassert( cache_ptr->mdj_conf_block_len == 0 );
-    HDassert( cache_ptr->mdj_conf_block_ptr == NULL );
-    HDassert( cache_ptr->mdj_file_name_ptr == NULL );
+    HDassert( cache_ptr->jnl_magic == 0 );
+    HDassert( cache_ptr->jnl_file_name_len == 0 );
 
     if ( H5C2__check_for_journaling ) {
 
@@ -1231,8 +1246,8 @@ H5C2_check_for_journaling(H5F_t * f,
                         "H5C2_get_journaling_in_progress() failed.")
         }
 
-        if ( cache_ptr->mdj_file_name_ptr != NULL ) /* journaling was in */
-						    /* progress          */
+        if ( cache_ptr->jnl_file_name_len > 0 ) /* journaling was in */
+					        /* progress          */
         {
 #if 0 /* JRM */
             HDfprintf(stdout, "%s: journaling was in progress.\n", FUNC);
@@ -1240,8 +1255,9 @@ H5C2_check_for_journaling(H5F_t * f,
 
             if ( journal_recovered ) {
 
-	        /* delete the metadata journaling config block and the 
-	         * superblock extenstion refering to it.
+	        /* Just forget that we were journaling.  Do this by
+                 * deleting the superblock extension message that says
+                 * we were.
 	         */
 
                 result = H5C2_unmark_journaling_in_progress(f, dxpl_id, cache_ptr);
@@ -1261,7 +1277,7 @@ H5C2_check_for_journaling(H5F_t * f,
                 (void)H5Epush2(H5E_DEFAULT, __FILE__, FUNC, __LINE__, 
 			       H5E_ERR_CLS_g, H5E_CACHE, H5E_CANTJOURNAL, 
 			       "%s%s%s%s%s%s", l0, l1, l2, l3, 
-			       cache_ptr->mdj_file_name_ptr, l4);
+			       cache_ptr->jnl_file_name, l4);
 	        (void)H5E_dump_api_stack((int)H5_IS_API(FUNC));
 	        HGOTO_DONE(FAIL)
 
@@ -1282,217 +1298,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C2_check_for_journaling() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5C2_create_journal_config_block()
- *
- * Purpose:     Given a string containing a journal file name and a pointer
- * 		to the associated instance of H5C2_t, allocate a journal
- * 		configuration block, write it to file, and update the 
- * 		instance of H5C2_t.
- *
- * 		Note that the method assumes that mdj_conf_block_addr is 
- * 		NULL on entry.
- *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              March 7, 2008
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t
-H5C2_create_journal_config_block(const H5F_t * f,
-                                 hid_t dxpl_id,
-                                 const char * journal_file_name_ptr)
-{
-    H5C2_t * cache_ptr;
-    size_t path_len = 0;
-    hsize_t block_len = 0;
-    haddr_t block_addr = HADDR_UNDEF;
-    void * block_ptr = NULL;
-    uint8_t version = H5C2__JOURNAL_CONF_VERSION;
-    uint8_t * p = NULL;
-    char * jfn_ptr = NULL;
-    uint32_t chksum;
-    herr_t ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI(H5C2_create_journal_config_block, FAIL)
-
-    HDassert( f );
-    HDassert( f->shared );
-    cache_ptr = f->shared->cache2;
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-
-    if ( cache_ptr->mdj_conf_block_ptr != NULL ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-		        "cache_ptr->mdj_conf_block_ptr != NULL on entry?!?")
-    } 
-
-    HDassert( journal_file_name_ptr != NULL );
-
-    path_len = HDstrlen(journal_file_name_ptr) + 1;
-
-    HDassert( path_len > 0 );
-
-    block_len = H5C2__JOURNAL_BLOCK_LEN(path_len, f);
-
-    block_ptr = (void *)H5MM_malloc((size_t)block_len);
-
-    if ( block_ptr == NULL ) {
-
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                    "allocation of in core journal config block failed.");
-    }
-
-    p = (uint8_t *)block_ptr;
-
-    /* copy the signature into the config block */
-    HDmemcpy(p, H5C2__JOURNAL_CONF_MAGIC, H5C2__JOURNAL_MAGIC_LEN);
-    p += H5C2__JOURNAL_MAGIC_LEN;
-
-    /* copy the version into the config block */
-    HDmemcpy(p, &version, 1);
-    p++;
-
-    /* copy the length of the journal file path into the config block */
-    H5F_ENCODE_LENGTH(f, p, path_len);
-
-    /* copy the path to the journal file into the config block, including 
-     * the terminalting null.  Before we do so, make note of p, as its 
-     * value will be the address of our copy of the journal file path.
-     */
-    jfn_ptr = (char *)p;
-    HDmemcpy(p, journal_file_name_ptr, path_len + 1);
-    p += path_len + 1;
-
-    HDassert( strcmp(jfn_ptr, journal_file_name_ptr) == 0 );
-
-    /* compute and save checksum */
-    chksum = H5_checksum_metadata(block_ptr, (size_t)(block_len - 4), 0);
-    UINT32ENCODE(p, chksum);
-
-    HDassert( (unsigned)(p - (uint8_t *)block_ptr) == block_len );
-
-
-    /* having created an in core image of the journaling configuration block,
-     * we must now allocate space for it in file, and write it to disk.
-     */
-
-    block_addr = H5MF_alloc(f,
-		            H5FD_MEM_MDJCONFIG,
-			    dxpl_id,
-			    block_len);
-
-    if ( block_addr == HADDR_UNDEF ) {
-
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                    "allocation of file journal config block failed.");
-    }
-
-    /* now write the block to disk -- note that we don't sync.  We will
-     * have to do that later.
-     */
-     if ( H5F_block_write(f, H5FD_MEM_MDJCONFIG, block_addr,
-                          (size_t)block_len, dxpl_id, block_ptr) < 0 )
-     {
-         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                     "Can't write metadata journaling config block to file.")
-     }
-
-     /* finally, if we we get this far, update the cache data structure to
-      * record the metadata journaling configuration block.
-      */
-     cache_ptr->mdj_file_name_ptr = jfn_ptr;
-     cache_ptr->mdj_conf_block_addr = block_addr;
-     cache_ptr->mdj_conf_block_len = block_len;
-     cache_ptr->mdj_conf_block_ptr = block_ptr;
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5AC2__create_journal_config_block() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5C2_discard_journal_config_block()
- *
- * Purpose:     Free the file and core space allocated to the metadata 
- *              journaling configuration block, and re-set all the associated
- *              fields in the cache's instance of H5C2_t.
- *
- * 		Note that the method assumes that 
- *
- * 			struct_ptr->mdj_file_name_ptr,
- * 			struct_ptr->mdj_conf_block_addr,
- * 			struct_ptr->mdj_conf_block_len, and
- * 			struct_ptr->mdj_conf_block_ptr
- * 		
- * 		are all set up for the current metadata journaling 
- * 		configuration block on entry.  On successful exit, these
- * 		fields will all be reset to their initial values.
- *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              March 7, 2008
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t
-H5C2_discard_journal_config_block(const H5F_t * f,
-                                  hid_t dxpl_id)
-{
-    H5C2_t * cache_ptr;
-    herr_t ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI(H5C2_discard_journal_config_block, FAIL)
-
-    HDassert( f );
-    HDassert( f->shared );
-    cache_ptr = f->shared->cache2;
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-
-    if ( ( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF ) ||
-         ( cache_ptr->mdj_conf_block_len == 0 ) ||
-	 ( cache_ptr->mdj_conf_block_ptr == NULL ) ||
-	 ( cache_ptr->mdj_file_name_ptr == NULL ) ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-		        "metadata journaling config block undefined on entry?!?")
-    } 
-
-    if ( H5MF_xfree(f, H5FD_MEM_MDJCONFIG, dxpl_id, 
-		    cache_ptr->mdj_conf_block_addr,
-		    cache_ptr->mdj_conf_block_len) < 0 ) {
-
-	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                    "deallocation of file journal config block failed.");
-    }
-
-    H5MM_xfree(cache_ptr->mdj_conf_block_ptr);
-
-    /* if we get this far, go ahead and null out the fields in *cache_ptr */
-
-    cache_ptr->mdj_conf_block_addr = HADDR_UNDEF;
-    cache_ptr->mdj_conf_block_len = 0;
-    cache_ptr->mdj_conf_block_ptr = NULL;
-    cache_ptr->mdj_file_name_ptr = NULL;
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5AC2_discard_journal_config_block() */
 
 
 /*-------------------------------------------------------------------------
@@ -1524,6 +1329,13 @@ done:
  * Programmer:  John Mainzer
  *              March 11, 2008
  *
+ * Changes:	JRM -- 2/20/09
+ *		Reworked to reflect the move of the journal file name 
+ *		and magic from the journaling configuration block to 
+ *		the metadata journaling superblock extension message.
+ *		Note that the journaling configuration block no longer
+ *		exists.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1532,7 +1344,6 @@ H5C2_get_journaling_in_progress(const H5F_t * f,
                                 hid_t dxpl_id,
 				H5C2_t * cache_ptr)
 {
-    herr_t result;
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C2_get_journaling_in_progress, FAIL)
@@ -1545,31 +1356,42 @@ H5C2_get_journaling_in_progress(const H5F_t * f,
     HDassert( f->shared != NULL );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF );
-    HDassert( cache_ptr->mdj_conf_block_len == 0 );
-    HDassert( cache_ptr->mdj_conf_block_ptr == NULL );
-    HDassert( cache_ptr->mdj_file_name_ptr == NULL );
+    HDassert( cache_ptr->jnl_file_name_len == 0 );
 
 #if 0 /* JRM */
-        HDfprintf(stdout, "%s: f->shared->mdc_jrnl_enabled = %d.\n", FUNC,
-		  (int)(f->shared->mdc_jrnl_enabled));
+        HDfprintf(stdout, "%s: f->shared->mdc_jnl_enabled = %d.\n", FUNC,
+		  (int)(f->shared->mdc_jnl_enabled));
 #endif /* JRM */
 
-    if ( f->shared->mdc_jrnl_enabled == TRUE ) {
+    if ( f->shared->mdc_jnl_enabled == TRUE ) {
 
-	cache_ptr->mdj_conf_block_addr = f->shared->mdc_jrnl_block_loc;
-	cache_ptr->mdj_conf_block_len = f->shared->mdc_jrnl_block_len;
-	    
-        result = H5C2_load_journal_config_block(f,
-                                                dxpl_id,
-						cache_ptr,
-                                                cache_ptr->mdj_conf_block_addr,
-                                                cache_ptr->mdj_conf_block_len);
-        if ( result != SUCCEED ) {
+        if ( f->shared->mdc_jnl_file_name_len <= 0 ) {
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_load_journal_config_block() failed.")
-	}
+                        "journaling enabled but jnl file name empty?!?.")
+        }
+
+        if ( f->shared->mdc_jnl_file_name_len > 
+             H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "journal file name too long?!?.")
+        }
+
+        cache_ptr->jnl_magic         = f->shared->mdc_jnl_magic;
+        cache_ptr->jnl_file_name_len = f->shared->mdc_jnl_file_name_len;
+        HDstrncpy(cache_ptr->jnl_file_name,
+                  f->shared->mdc_jnl_file_name,
+                  f->shared->mdc_jnl_file_name_len + 1);
+
+        if ( ( (cache_ptr->jnl_file_name)[cache_ptr->jnl_file_name_len]
+               != '\0' ) ||
+             ( strlen(cache_ptr->jnl_file_name) != 
+               (size_t)(cache_ptr->jnl_file_name_len) ) ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "bad jnl file name or name len?!?.")
+        }
     }
 
 #if 0 /* JRM */
@@ -1585,140 +1407,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5C2_get_journaling_in_progress() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    H5C2_load_journal_config_block()
- *
- * Purpose:     Given the base address and lenght of a journal configuration
- * 		block, attempt to load it, and store it in the cache structure.
- *
- * 		Note that the method assumes that mdj_conf_block_addr is 
- * 		NULL on entry.
- *
- * Return:      Success:        SUCCEED
- *              Failure:        FAIL
- *
- * Programmer:  John Mainzer
- *              March 11, 2008
- *
- *-------------------------------------------------------------------------
- */
-
-herr_t
-H5C2_load_journal_config_block(const H5F_t * f,
-                               hid_t dxpl_id,
-			       H5C2_t * cache_ptr,
-                               haddr_t block_addr,
-                               hsize_t block_len)
-{
-    size_t path_len = 0;
-    void * block_ptr = NULL;
-    uint8_t version;
-    uint8_t * p = NULL;
-    char * jfn_ptr = NULL;
-    uint32_t computed_chksum;
-    uint32_t read_chksum;
-    herr_t ret_value = SUCCEED;      /* Return value */
-
-    FUNC_ENTER_NOAPI(H5C2_load_journal_config_block, FAIL)
-
-    HDassert( f );
-    HDassert( f->shared );
-    HDassert( cache_ptr );
-    HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-
-    if ( cache_ptr->mdj_conf_block_ptr != NULL ) {
-
-       HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                   "cache_ptr->mdj_conf_block_ptr != NULL on entry?!?")
-    } 
-
-    block_ptr = (void *)H5MM_malloc((size_t)block_len);
-
-    if ( block_ptr == NULL ) {
-
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                    "allocation of in core journal config block failed.");
-    }
-
-    p = (uint8_t *)block_ptr;
-
-    /* read the metadata journaling block from file */
-    if ( H5F_block_read(f, H5FD_MEM_MDJCONFIG, block_addr, 
-			(size_t)block_len, dxpl_id, block_ptr) < 0 ) {
-
-#if 0 /* JRM */
-	HDfprintf(stdout, "%s: block_addr = %lld, block_len = %lld.\n",
-		  FUNC, (long long)block_addr, (long long)block_len);
-#endif /* JRM */
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "Can't read metadata journaling configuration block.")
-    }
-
-    /* verify the signature */
-    if ( HDmemcmp(p, H5C2__JOURNAL_CONF_MAGIC, H5C2__JOURNAL_MAGIC_LEN) != 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "Bad signature on metadata journaling configuration block.")
-    }
-    p += H5C2__JOURNAL_MAGIC_LEN;
-
-    /* get the version of the config block */
-    version = *p++;
-
-    if ( version != H5C2__JOURNAL_CONF_VERSION ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "Bad version on metadata journaling configuration block.")
-    }
-
-    /* get the length of the journal file path into the config block */
-    H5F_DECODE_LENGTH(f, p, path_len);
-
-    /* Verify that the length matches the actual path length.  Also,
-     * make note of p, as its value will be the address of our copy of 
-     * the journal file path.
-     */
-    jfn_ptr = (char *)p;
-    if ( HDstrlen(jfn_ptr) != path_len - 1 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "Bad path_len in metadata journaling configuration block.")
-    }
-
-    p += path_len + 1;
-
-    /* get the checksum from the block */
-    UINT32DECODE(p, read_chksum);
-
-    /* compute the actual checksum */
-    computed_chksum = 
-	    H5_checksum_metadata(block_ptr, (size_t)(block_len - 4), 0);
-
-    /* verify that the computed and read checksums match */
-    if ( computed_chksum != read_chksum ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "Bad checksum in metadata journaling configuration block.")
-    }
-
-    HDassert( (unsigned)(p - (uint8_t *)block_ptr) == block_len );
-
-     /* finally, if we we get this far, we have read the metadata journaling
-      * configuration block successfully.  Record the data in the cache 
-      * structure.
-      */
-    cache_ptr->mdj_file_name_ptr   = jfn_ptr;
-    cache_ptr->mdj_conf_block_addr = block_addr;
-    cache_ptr->mdj_conf_block_len  = block_len;
-    cache_ptr->mdj_conf_block_ptr  = block_ptr;
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* H5C2_load_journal_config_block() */
 
 
 /*-------------------------------------------------------------------------
@@ -1740,12 +1428,22 @@ done:
  * Programmer:  John Mainzer
  *              March 11, 2008
  *
+ * Changes:	JRM -- 2/10/09
+ *		Added the journal_magic parameter and related code.
+ *
+ *		JRM -- 2/20/09
+ *		Reworked function to reflect the move of the journal
+ *		file name and magic to the super block extension message
+ *		and out of the metadata journaling configuration block
+ *		which no longer exists.
+ *
  *-------------------------------------------------------------------------
  */
 
 herr_t
 H5C2_mark_journaling_in_progress(H5F_t * f,
                                  hid_t dxpl_id,
+				 const int32_t journal_magic,
                                  const char * journal_file_name_ptr)
 {
     H5C2_t * cache_ptr;
@@ -1758,16 +1456,13 @@ H5C2_mark_journaling_in_progress(H5F_t * f,
 #endif /* JRM */
     HDassert( f != NULL );
     HDassert( f->shared != NULL );
-    HDassert( ! f->shared->mdc_jrnl_enabled );
+    HDassert( ! f->shared->mdc_jnl_enabled );
 
     cache_ptr = f->shared->cache2;
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF );
-    HDassert( cache_ptr->mdj_conf_block_len == 0 );
-    HDassert( cache_ptr->mdj_conf_block_ptr == NULL );
-    HDassert( cache_ptr->mdj_file_name_ptr == NULL );
+    HDassert( cache_ptr->jnl_file_name_len == 0 );
     HDassert( journal_file_name_ptr != NULL );
 
     /* Can't journal a read only file, so verify that we are
@@ -1779,32 +1474,35 @@ H5C2_mark_journaling_in_progress(H5F_t * f,
                     "File is opened read only.")
     }
 
-    /* first, create a metadata journaling configuration block */
-#if 0 /* JRM */
-    HDfprintf(stdout, "%s: creating mdj config block.\n", FUNC);
-#endif /* JRM */
-    result = H5C2_create_journal_config_block(f,
-                                              dxpl_id,
-                                              journal_file_name_ptr);
+    cache_ptr->jnl_magic = journal_magic;
+    cache_ptr->jnl_file_name_len = strlen(journal_file_name_ptr);
 
-    if ( result != SUCCEED ) {
+    if ( cache_ptr->jnl_file_name_len <= 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_create_journal_config_block() failed.")
+                    "length of journal file name is zero.")
     }
 
-    HDassert( cache_ptr->mdj_conf_block_addr != HADDR_UNDEF );
-    HDassert( cache_ptr->mdj_conf_block_len != 0 );
-    HDassert( cache_ptr->mdj_conf_block_ptr != NULL );
-    HDassert( cache_ptr->mdj_file_name_ptr != NULL );
+    if ( cache_ptr->jnl_file_name_len > H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
-    /* now, load the base addr and length of the configuration block
-     * into shared, and then call H5F_super_write_mdj_msg() to write
-     * the metadata journaling superblock extension message to file.
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "journal file name too long.")
+    }
+
+    HDstrncpy(cache_ptr->jnl_file_name,
+              journal_file_name_ptr,
+              (size_t)(cache_ptr->jnl_file_name_len + 1));
+
+    /* now, load the journaling information into shared, and then call
+     * H5F_super_write_mdj_msg() to write the metadata journaling 
+     * superblock extension message to file.  
      */
-    f->shared->mdc_jrnl_enabled = TRUE;
-    f->shared->mdc_jrnl_block_loc = cache_ptr->mdj_conf_block_addr;
-    f->shared->mdc_jrnl_block_len = cache_ptr->mdj_conf_block_len;
+    f->shared->mdc_jnl_enabled       = TRUE;
+    f->shared->mdc_jnl_magic         = journal_magic;
+    f->shared->mdc_jnl_file_name_len = (size_t)(cache_ptr->jnl_file_name_len);
+    HDstrncpy(f->shared->mdc_jnl_file_name,
+              journal_file_name_ptr,
+              (size_t)(cache_ptr->jnl_file_name_len + 1));
 
 #if 0 /* JRM */
     HDfprintf(stdout, "%s: writing superblock extension.\n", FUNC);
@@ -1868,6 +1566,13 @@ done:
  * Programmer:  John Mainzer
  *              March 11, 2008
  *
+ * Changes:	JRM -- 2/20/09
+ *		Reworked function to reflect the move of the journal 
+ *		file name and magic from the metadata journaling config
+ *		block and into a superblock extension message.  Note that 
+ *		the metadata journaling configuration block no longer 
+ *		exists.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1890,18 +1595,11 @@ H5C2_unmark_journaling_in_progress(H5F_t * f,
 #endif /* JRM */
     HDassert( f != NULL );
     HDassert( f->shared != NULL );
-    HDassert( f->shared->mdc_jrnl_enabled );
+    HDassert( f->shared->mdc_jnl_enabled );
     HDassert( f->shared->cache2 == cache_ptr );
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C2__H5C2_T_MAGIC );
-    HDassert( cache_ptr->mdj_conf_block_addr != HADDR_UNDEF );
-    HDassert( cache_ptr->mdj_conf_block_len > 0 );
-    HDassert( cache_ptr->mdj_conf_block_ptr != NULL );
-    HDassert( cache_ptr->mdj_file_name_ptr != NULL );
-    HDassert( f->shared->mdc_jrnl_block_loc == 
-              cache_ptr->mdj_conf_block_addr );
-    HDassert( f->shared->mdc_jrnl_block_len == 
-              cache_ptr->mdj_conf_block_len );
+    HDassert( cache_ptr->jnl_file_name_len > 0 );
 
 
     /* Can't journal a read only file, so verify that we are
@@ -1913,27 +1611,19 @@ H5C2_unmark_journaling_in_progress(H5F_t * f,
                     "File is opened read only.")
     }
 
-    /* next, discard the metadata journaling configuration block */
-    result = H5C2_discard_journal_config_block(f, dxpl_id);
-
-    if ( result != SUCCEED ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_discard_journal_config_block() failed.")
-    }
-
-    HDassert( cache_ptr->mdj_conf_block_addr == HADDR_UNDEF );
-    HDassert( cache_ptr->mdj_conf_block_len == 0 );
-    HDassert( cache_ptr->mdj_conf_block_ptr == NULL );
-    HDassert( cache_ptr->mdj_file_name_ptr == NULL );
+    /* Discard the journal file name and magic in *cache_ptr */
+    cache_ptr->jnl_magic          = 0;
+    cache_ptr->jnl_file_name_len  = 0;
+    (cache_ptr->jnl_file_name)[0] = '\0';
 
     /* now, mark f->shared to indicate that journaling is not in 
      * progress, and then call H5F_super_write_mdj_msg() to write
      * the changes to disk.
      */
-    f->shared->mdc_jrnl_enabled = FALSE;
-    f->shared->mdc_jrnl_block_loc = HADDR_UNDEF;
-    f->shared->mdc_jrnl_block_len = 0;
+    f->shared->mdc_jnl_enabled        = FALSE;
+    f->shared->mdc_jnl_magic          = 0;
+    f->shared->mdc_jnl_file_name_len  = 0;
+    (f->shared->mdc_jnl_file_name)[0] = '\0';
 
     if ( H5F_super_write_mdj_msg(f, dxpl_id) < 0 ) {
 
@@ -2655,134 +2345,277 @@ done:
 
 } /* H5C2_shrink_mdjsc_callback_table() */
 
-
+
 /**************************************************************************/
 /********************** journal file management code **********************/
 /**************************************************************************/
 
 /******************************************************************************
  *
- * Function:		H5C2_jb__flush_full_buffers
+ * Function:		H5C2_jb__bin2hex
  *
  * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
- *			Wednesday, February 6, 2008
+ *			Tuesday, March 4, 2008
  *
- * Purpose:		Flush all the dirtied buffers in the ring buffer 
- *                      starting with the buffer referenced by struct_ptr->get 
- *                      and ending with the buffer right before the one
- *                      referenced by struct_ptr->put. 
+ * Purpose:		Convert binary data into hexadecimal.
  *
  * Returns:		SUCCEED on success.
  *
  ******************************************************************************/
 
 herr_t 
-H5C2_jb__flush_full_buffers(H5C2_jbrb_t * struct_ptr)	
+H5C2_jb__bin2hex(const uint8_t * buf, 
+                 char * hexdata,
+                 size_t * hexlength,
+                 size_t buf_size)
+
 {
-    hbool_t verbose = FALSE;
-    int result;
+    size_t         v;                   /* Local index variable */
+    uint8_t        c;
+    char *         t;
+	
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C2_jb__bin2hex)
+
+    t = hexdata;
+    t[0] = ' ';
+    for (v = 0; v < buf_size; v++) {
+
+        t = &hexdata[v * 3 + 1];
+        c = buf[v];
+        HDsnprintf(t, (size_t)3, "%02x ", c);
+        t[2] = ' ';
+
+    } /* end for */
+    t[3] = '\n';
+    t[4] = 0;
+
+    * hexlength = v * 3 + 2;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+
+} /* end H5C2_jb__bin2hex*/
+
+
+/******************************************************************************
+ *
+ * Function:		H5C2_jb__comment
+ *
+ * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
+ *			Wednesday, February 6, 2008
+ *
+ * Purpose:		Insert the supplied comment in the journal file. This 
+ * 			call may be ignored if the journal file is machine 
+ *			readable.
+ *
+ * Returns:		SUCCEED on success.
+ *
+ ******************************************************************************/
+
+herr_t 
+H5C2_jb__comment(H5C2_jbrb_t * struct_ptr,
+		 const char * comment_ptr)
+{
+    char * temp = NULL;
+    size_t temp_len;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(H5C2_jb__flush_full_buffers, FAIL)
-
-    if ( verbose ) { HDfprintf(stdout, "%s: entering.\n", FUNC); }
+    FUNC_ENTER_NOAPI(H5C2_jb__comment, FAIL)
 	
-    /* this asserts that at least one buffer is in use */
-    HDassert(struct_ptr->bufs_in_use > 0);
-    /* write an assert to verify that at least one buffer is full */
-    HDassert( (struct_ptr->put != struct_ptr->get) ||
-              (struct_ptr->rb_free_space == 0)      );
+    /* Check Arguments */
+    HDassert(struct_ptr);
+    HDassert(comment_ptr);
+    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->hdf5_file_name);
 
-    /* flush all full, dirtied journal buffers to disk */
-    if (struct_ptr->get < struct_ptr->put) {
+    /* Verify that header message is present in journal file or ring buffer. 
+     * If not, write it. 
+     */
+    if ( struct_ptr->header_present == FALSE ) {
 
-	/* can write solid chunk from get up to, but not 
-	 * including, put 
-	 */
-	result = HDwrite(struct_ptr->journal_file_fd, 
-	              (*struct_ptr->buf)[struct_ptr->get], 
-	              (struct_ptr->put - struct_ptr->get) * struct_ptr->buf_size);
+        if ( H5C2_jb__write_header_entry(struct_ptr) != SUCCEED ) {
 
-	if ( result == -1 ) {
-
-            if ( verbose ) { HDfprintf(stdout, "%s: write failed 1.\n", FUNC); }
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
-		        "Journal file write failed (1).")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_jb__write_header_entry() failed.\n")
         }
-
-	struct_ptr->bufs_in_use -= (struct_ptr->put - struct_ptr->get);
-        struct_ptr->rb_free_space += (struct_ptr->put - struct_ptr->get) * struct_ptr->buf_size;
 
     } /* end if */
 
-    else {
+    temp_len = HDstrlen(comment_ptr) + 11;
+    if ( ( temp = H5MM_malloc(HDstrlen(comment_ptr) + 11) ) == NULL ) {
 
-	/* write from get through end of buffer */
-	result = HDwrite(struct_ptr->journal_file_fd, 
-	      (*struct_ptr->buf)[struct_ptr->get], 
-	      (struct_ptr->num_bufs - struct_ptr->get) * struct_ptr->buf_size);
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                   "allocation of temp buffer failed.");
+    } /* end if */
 
-	if ( result == -1 ) {
+    /* Write comment message */
+    HDsnprintf(temp, temp_len, "C comment %s", comment_ptr);
 
-            if ( verbose ) { HDfprintf(stdout, "%s: write failed 2.\n", FUNC); }
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
-		        "Journal file write failed (2).")
-        }
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, struct_ptr->cur_trans ) < 0 ) {
 
-	struct_ptr->bufs_in_use -= (struct_ptr->num_bufs - struct_ptr->get);
-        struct_ptr->rb_free_space += (struct_ptr->num_bufs - struct_ptr->get) * struct_ptr->buf_size;
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__write_to_buffer() failed.\n")
+    } /* end if */
 
-        /* if put = 0, then everything that needs to be flushed will have been
-           flushed, so we can stop here. Otherwise, need to flush all buffers
-           from the start of the ring buffer's allocated space up to, but not
-           including, the buffer indexed by put. */
-        if (struct_ptr->put != 0) {
+    if ( H5C2_jb__write_to_buffer(struct_ptr, 1, "\n", FALSE, struct_ptr->cur_trans ) < 0 ) {
 
-            result = HDwrite(struct_ptr->journal_file_fd, 
-                             (*struct_ptr->buf)[0], 
-                             (struct_ptr->put) * struct_ptr->buf_size);
-
-	    if ( result == -1 ) {
-
-                if ( verbose ) { 
-		    HDfprintf(stdout, "%s: write failed 3.\n", FUNC); 
-		}
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
-		            "Journal file write failed(3).")
-            } /* end if */
-
-        struct_ptr->rb_free_space += (struct_ptr->put * struct_ptr->buf_size);
-
-        } /* end if */
-
-	struct_ptr->bufs_in_use -= struct_ptr->put;
-
-    } /* end else */
-	
-    HDassert(struct_ptr->bufs_in_use <= 1);
-
-    /* update get index */
-    struct_ptr->get = struct_ptr->put;
-	
-    /* record last transaction number that made it to disk */
-    if (struct_ptr->put == 0) {
-
-	struct_ptr->last_trans_on_disk = 
-		(*struct_ptr->trans_tracking)[struct_ptr->num_bufs - 1];
-
-    } else {
-
-	struct_ptr->last_trans_on_disk = 
-		(*struct_ptr->trans_tracking)[struct_ptr->put - 1];
-    }
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__write_to_buffer() failed.\n")
+    } /* end if */
 
 done:
 
-    if ( verbose ) { HDfprintf(stdout, "%s: exiting.\n", FUNC); }
+    if ( temp != NULL ) {
+
+        temp = H5MM_xfree(temp);
+        if ( temp != NULL ) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "free of assembly buffer failed.");
+        }
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* end H5C2_jb__flush_full_buffers */
+} /* end H5C2_jb__comment */
+
+
+/*****************************************************************************
+ *
+ * Function:		H5C2_jb__end_transaction
+ *
+ * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
+ *			Wednesday, February 6, 2008
+ *
+ * Purpose:		Verify that the supplied transaction is in progress,
+ *			and that at least one journal entry has been written 
+ *			under it. Then construct an end transaction message,
+ *			and write it to the current journal buffer. Make note
+ *			that the supplied transaction is closed, and that no
+ *			transaction is in progress.
+ *
+ * Returns:		SUCCEED on success.
+ *
+ *****************************************************************************/
+herr_t
+H5C2_jb__end_transaction(H5C2_jbrb_t * struct_ptr,
+			 uint64_t trans_num)
+{
+    char temp[25];
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5C2_jb__end_transaction, FAIL)
+#if 0 /* JRM */
+    HDfprintf(stdout, "%s trans_num = %lld.\n", FUNC, trans_num);
+#endif /* JRM */	
+    /* Check Arguments */
+    HDassert(struct_ptr);
+    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+	
+    /* Verify that the supplied transaction is in progress */
+    if ( ( struct_ptr->trans_in_prog != TRUE ) ||
+         ( struct_ptr->cur_trans != trans_num ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "Transaction not in progress or bad transaction number.")
+    } /* end if */
+	
+    /* Verify that at least one journal entry has been written under 
+     * the current transaction 
+     */
+    if ( struct_ptr->jentry_written != TRUE ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "Empty transaction -- at least one journal entry required.")
+    } /* end if */
+
+
+    /* Prepare end transaction message */
+    HDsnprintf(temp, (size_t)25, "3 end_trans %llu\n", trans_num);
+
+    /* Write end transaction message */
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
+			          TRUE, trans_num ) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__write_to_buffer() failed.\n")
+    } /* end if */
+
+    /* reset boolean flag indicating if at least one journal entry has 
+     * been written under transaction 
+     */
+    struct_ptr->jentry_written = FALSE;
+
+    /* Close current transaction */
+    struct_ptr->trans_in_prog = FALSE;
+
+done:
+	
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5C2_jb__end_transaction */
+
+
+/******************************************************************************
+ *
+ * Function:		H5C2_jb__eoa
+ *
+ * Programmer:		Mike McGreevy <mamcgree@hdfgroup.org>
+ *			July 29, 2008
+ *
+ * Purpose:		Insert the supplied EOA into the journal file.
+ *
+ * Returns:		SUCCEED on success.
+ *
+ ******************************************************************************/
+
+herr_t 
+H5C2_jb__eoa(H5C2_jbrb_t * struct_ptr,
+		 haddr_t eoa)
+{
+    char temp[40];
+    size_t temp_len = 40;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5C2_jb__eoa, FAIL)
+	
+    /* Check Arguments */
+    HDassert(struct_ptr);
+    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+    HDassert(struct_ptr->hdf5_file_name);
+
+    /* Verify that header message is present in journal file or ring buffer. 
+     * If not, write it. 
+     */
+    if ( struct_ptr->header_present == FALSE ) {
+
+        if ( H5C2_jb__write_header_entry(struct_ptr) != SUCCEED ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_jb__write_header_entry() failed.\n")
+        }
+    } /* end if */
+
+    /* Write EOA message */
+    HDsnprintf(temp, temp_len, "E eoa_value 0x%llx", eoa);
+
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, struct_ptr->cur_trans ) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__write_to_buffer() failed.\n")
+    } /* end if */
+
+    if ( H5C2_jb__write_to_buffer(struct_ptr, 1, "\n", FALSE, 
+                                  struct_ptr->cur_trans ) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__write_to_buffer() failed.\n")
+    } /* end if */
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5C2_jb__eoa */
 
 
 /******************************************************************************
@@ -2930,6 +2763,1020 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5C2_jb__flush */
+
+
+/******************************************************************************
+ *
+ * Function:		H5C2_jb__flush_full_buffers
+ *
+ * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
+ *			Wednesday, February 6, 2008
+ *
+ * Purpose:		Flush all the dirtied buffers in the ring buffer 
+ *                      starting with the buffer referenced by struct_ptr->get 
+ *                      and ending with the buffer right before the one
+ *                      referenced by struct_ptr->put. 
+ *
+ * Returns:		SUCCEED on success.
+ *
+ ******************************************************************************/
+
+herr_t 
+H5C2_jb__flush_full_buffers(H5C2_jbrb_t * struct_ptr)	
+{
+    hbool_t verbose = FALSE;
+    int result;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5C2_jb__flush_full_buffers, FAIL)
+
+    if ( verbose ) { HDfprintf(stdout, "%s: entering.\n", FUNC); }
+	
+    /* this asserts that at least one buffer is in use */
+    HDassert(struct_ptr->bufs_in_use > 0);
+    /* write an assert to verify that at least one buffer is full */
+    HDassert( (struct_ptr->put != struct_ptr->get) ||
+              (struct_ptr->rb_free_space == 0)      );
+
+    /* flush all full, dirtied journal buffers to disk */
+    if (struct_ptr->get < struct_ptr->put) {
+
+	/* can write solid chunk from get up to, but not 
+	 * including, put 
+	 */
+	result = HDwrite(struct_ptr->journal_file_fd, 
+	                 (*struct_ptr->buf)[struct_ptr->get], 
+	                 (struct_ptr->put - struct_ptr->get) * 
+                           struct_ptr->buf_size);
+
+	if ( result == -1 ) {
+
+            if ( verbose ) { HDfprintf(stdout, "%s: write failed 1.\n", FUNC); }
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
+		        "Journal file write failed (1).")
+        }
+
+	struct_ptr->bufs_in_use -= (struct_ptr->put - struct_ptr->get);
+        struct_ptr->rb_free_space += (struct_ptr->put - struct_ptr->get) * struct_ptr->buf_size;
+
+    } /* end if */
+
+    else {
+
+	/* write from get through end of buffer */
+	result = HDwrite(struct_ptr->journal_file_fd, 
+	      (*struct_ptr->buf)[struct_ptr->get], 
+	      (struct_ptr->num_bufs - struct_ptr->get) * struct_ptr->buf_size);
+
+	if ( result == -1 ) {
+
+            if ( verbose ) { HDfprintf(stdout, "%s: write failed 2.\n", FUNC); }
+            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
+		        "Journal file write failed (2).")
+        }
+
+	struct_ptr->bufs_in_use -= (struct_ptr->num_bufs - struct_ptr->get);
+        struct_ptr->rb_free_space += (struct_ptr->num_bufs - struct_ptr->get) *
+                                     struct_ptr->buf_size;
+
+        /* if put = 0, then everything that needs to be flushed will have been
+         * flushed, so we can stop here. Otherwise, need to flush all buffers
+         * from the start of the ring buffer's allocated space up to, but not
+         * including, the buffer indexed by put. 
+         */
+        if (struct_ptr->put != 0) {
+
+            result = HDwrite(struct_ptr->journal_file_fd, 
+                             (*struct_ptr->buf)[0], 
+                             (struct_ptr->put) * struct_ptr->buf_size);
+
+	    if ( result == -1 ) {
+
+                if ( verbose ) { 
+		    HDfprintf(stdout, "%s: write failed 3.\n", FUNC); 
+		}
+                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, \
+		            "Journal file write failed(3).")
+            } /* end if */
+
+        struct_ptr->rb_free_space += (struct_ptr->put * struct_ptr->buf_size);
+
+        } /* end if */
+
+	struct_ptr->bufs_in_use -= struct_ptr->put;
+
+    } /* end else */
+	
+    HDassert(struct_ptr->bufs_in_use <= 1);
+
+    /* update get index */
+    struct_ptr->get = struct_ptr->put;
+	
+    /* record last transaction number that made it to disk */
+    if (struct_ptr->put == 0) {
+
+	struct_ptr->last_trans_on_disk = 
+		(*struct_ptr->trans_tracking)[struct_ptr->num_bufs - 1];
+
+    } else {
+
+	struct_ptr->last_trans_on_disk = 
+		(*struct_ptr->trans_tracking)[struct_ptr->put - 1];
+    }
+
+done:
+
+    if ( verbose ) { HDfprintf(stdout, "%s: exiting.\n", FUNC); }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5C2_jb__flush_full_buffers */
+
+
+/******************************************************************************
+ *
+ * Function:		H5C2_jb__get_last_transaction_on_disk
+ *
+ * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
+ *			Wednesday, February 6, 2008
+ *
+ * Purpose:		Lookup the number of the last transaction to have been
+ *			fully written to disk, and place its transaction
+ *			number in *trans_num_ptr. If no transaction has made
+ *			it to disk, load zero into *trans_num_ptr.
+ *
+ * Returns:		SUCCEED on success.
+ *
+ ******************************************************************************/
+
+herr_t 
+H5C2_jb__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
+				      uint64_t * trans_num_ptr)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5C2_jb__get_last_transaction_on_disk, FAIL)
+	
+    /* Check Arguments */
+    HDassert( trans_num_ptr != NULL );
+
+    /* This should really be an assert, but the func enter/exit 
+     * macros get testy if there isn't at least one goto error 
+     * macro call in the funtion.
+     */
+    if ( ( struct_ptr == NULL ) ||
+         ( struct_ptr->magic != H5C2__H5C2_JBRB_T_MAGIC ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad struct_ptr.")
+    }
+
+    /* JRM: In machine readable version, lets check to see if a sync is 
+     *      necessary, and call it only if it is.
+     */
+    /* perform a sync to ensure everything gets to disk before continuing */
+    /* Note: there is no HDfsync function, so for now, the standard
+       fsync is being used. */
+    if ( fsync(struct_ptr->journal_file_fd) < 0 ) {
+
+        HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, "Jounal file sync failed.")
+
+    } /* end if */
+
+    * trans_num_ptr = struct_ptr->last_trans_on_disk;
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5C2_jb__get_last_transaction_on_disk */
+
+
+/******************************************************************************
+ *
+ * Function:		H5C2_jb__init
+ *
+ * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
+ *			Tuesday, February 5, 2008
+ *
+ * Purpose:		Initialize the supplied instance of H5C2_jbrb_t as
+ *			specified by the buf_size and num_bufs fields. Open the
+ *			journal file whose name is supplied in journal_file_name
+ *			for either synchronous or asynchronous I/O as specified
+ * 			by use_aio.
+ *
+ * Returns:		SUCCEED on success.
+ *
+ * Changes:		JRM -- 2/10/09
+ *			Added the journal_magic parameter and related code.
+ *
+ *			Also deleted code to write the header message.
+ *			Since the base address of the journal magic in 
+ *			the HDF5 file isn't available at this time, wait
+ *			until our first real entry to write the header.
+ *
+ ******************************************************************************/
+
+herr_t 
+H5C2_jb__init(H5C2_jbrb_t * struct_ptr,  	
+              const int32_t journal_magic,
+	      const char * HDF5_file_name,	 	
+	      const char * journal_file_name, 	
+	      size_t buf_size,		
+	      int num_bufs,		 	
+	      hbool_t use_aio,		
+ 	      hbool_t human_readable)
+{
+    char 	temp[150];
+    int 	i;
+    herr_t 	ret_value = SUCCEED;
+    time_t      current_date;
+
+    FUNC_ENTER_NOAPI(H5C2_jb__init, FAIL)
+
+    /* Check Arguments */
+    HDassert( struct_ptr );
+    HDassert( HDF5_file_name );
+    HDassert( journal_file_name );
+    HDassert( buf_size > 0 );
+    HDassert( num_bufs > 0 );
+    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+
+    /* Initialize Fields of H5C2_jbrb_t structure.  Note that we will
+     * overwrite some of these initializations almost immediately.
+     */
+    struct_ptr->journal_magic = journal_magic;
+    struct_ptr->journal_file_fd = -1;
+    struct_ptr->num_bufs = num_bufs;
+    struct_ptr->buf_size = buf_size;
+    struct_ptr->bufs_in_use = 0;
+    struct_ptr->jvers = H5C2__JOURNAL_VERSION;
+    struct_ptr->get = 0;
+    struct_ptr->put = 0;
+    struct_ptr->jentry_written = FALSE;
+    struct_ptr->use_aio = use_aio;
+    struct_ptr->human_readable = human_readable;
+    struct_ptr->journal_is_empty = TRUE;
+    struct_ptr->cur_trans = 0;
+    struct_ptr->last_trans_on_disk = 0;
+    struct_ptr->trans_in_prog = FALSE;
+    struct_ptr->jname = HDstrdup(journal_file_name);
+
+    if ( struct_ptr->jname == NULL ) {
+
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                "allocation of space for copy of journal_file_name failed.");
+    } 
+
+    struct_ptr->hdf5_file_name = HDstrdup(HDF5_file_name);
+
+    if ( struct_ptr->jname == NULL ) {
+
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                "allocation of space for copy of HDF5_file_name failed.");
+    } 
+
+    struct_ptr->header_present = FALSE;
+    struct_ptr->cur_buf_free_space = buf_size;
+    struct_ptr->rb_space_to_rollover = num_bufs * buf_size;
+    struct_ptr->rb_free_space = num_bufs * buf_size;
+    struct_ptr->head = NULL;
+    struct_ptr->trans_tracking = NULL;
+    struct_ptr->buf = NULL;
+
+	
+    /* Open journal file */
+    struct_ptr->journal_file_fd = 
+	    HDopen(journal_file_name, O_WRONLY|O_CREAT|O_EXCL, 0777);
+
+    if ( struct_ptr->journal_file_fd  == -1) {
+
+	HDfprintf(stdout, 
+	      "%s: Can't create journal file \"%s\".  Does it already exist?\n", 
+	      FUNC, journal_file_name);
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, \
+                    "Can't create journal file.  Does it already exist?")
+    } /* end if */
+
+	
+    /* Allocate space for the ring buffer's journal buffer pointers */
+    struct_ptr->buf = H5MM_malloc(struct_ptr->num_bufs * sizeof(char *));
+
+    if ( struct_ptr->buf == NULL ) {
+
+	HDfprintf(stdout, 
+	          "%s: allocation of buf pointer array failed.\n", 
+		  FUNC);
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "allocation of buf pointer array failed.");
+    } /* end if */
+	
+    /* Allocate space for journal buffers */
+    (*struct_ptr->buf)[0] = 
+            H5MM_malloc(struct_ptr->buf_size * struct_ptr->num_bufs);
+
+    if ( (*struct_ptr->buf)[0] == NULL ) {
+
+	HDfprintf(stdout, 
+	          "%s: allocation of buffers failed.\n", 
+		  FUNC);
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "allocation of buffers failed.");
+    } /* end if */
+
+    /* Allocate space for the purposes of tracking the last 
+     * transaction on disk 
+     */
+    struct_ptr->trans_tracking = 
+    	H5MM_malloc(struct_ptr->num_bufs * sizeof(unsigned long));
+
+    if ( struct_ptr->trans_tracking == NULL ) {
+
+	HDfprintf(stdout, 
+	          "%s: allocation of trans_tracking failed.\n", 
+		  FUNC);
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "allocation of trans_tracking failed.");
+    } /* end if */
+	
+    /* Initialize the transaction tracking array */
+    for (i=0; i<struct_ptr->num_bufs; i++)
+    {
+	(*struct_ptr->trans_tracking)[i] = 0;
+    }
+	
+    /* Make journal buffer pointers point to the right location in 
+     * chunk of allocated memory above 
+     */
+    for ( i = 1; i < struct_ptr->num_bufs; i++ )
+    {
+	(*struct_ptr->buf)[i] = 
+		&((*struct_ptr->buf)[0])[i * struct_ptr->buf_size];
+    }
+
+    /* Define head pointer to point at where we are writing to in the buffer */
+    struct_ptr->head = (*struct_ptr->buf)[struct_ptr->put];
+#if 0 /* JRM */
+    if ( H5C2_jb__write_header_entry(struct_ptr) != SUCCEED ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__write_header_entry() failed.\n")
+    }
+#endif /* JRM */
+done:
+	
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5C2_jb__init */
+
+
+/******************************************************************************
+ *
+ * Function:		H5C2_jb__journal_entry
+ *
+ * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
+ *			Wednesday, February 6, 2008
+ *
+ * Purpose:		Verify that the specified transaction is open. Then
+ *			construct a journal entry recording the supplied base
+ *			address, length, and body, and write it to the current
+ *			journal buffer.
+ *
+ * Returns:		SUCCEED on success.
+ *
+ ******************************************************************************/
+
+herr_t 
+H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
+			uint64_t trans_num,
+			haddr_t base_addr,
+			size_t length,
+			const uint8_t * body)
+{
+
+    char * temp = NULL;
+    char * hexdata = NULL;
+    size_t hexlength;
+    herr_t ret_value = SUCCEED;
+    uint8_t * bodydata;
+
+    FUNC_ENTER_NOAPI(H5C2_jb__journal_entry, FAIL)
+#if 0 /* JRM */
+    HDfprintf(stdout, "%s trans_num = %lld, base_addr = %d, length = %ld.\n",
+              FUNC, trans_num, (int)base_addr, (int)length);
+#endif /* JRM */	
+    /* Check Arguments */
+    HDassert(struct_ptr);
+    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+
+    /* Make a copy of body data */
+    if ( (bodydata = H5MM_malloc(length)) == NULL ) {
+
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                   "allocation of assembly buffer failed.");
+    }
+
+    HDmemcpy(bodydata, body, length);
+	
+    /* Verify that the supplied transaction is in progress */
+    if ( ( struct_ptr->trans_in_prog != TRUE ) ||
+         ( struct_ptr->cur_trans != trans_num ) ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "Transaction not in progress or bad transaction number.")
+    } /* end if */
+
+    if ( (temp = H5MM_malloc(length + 100)) == NULL ) {
+
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                   "allocation of assembly buffer failed.");
+    }
+
+    if ( (hexdata = H5MM_malloc(length * 40)) == NULL ) {
+
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                   "allocation of assembly buffer failed.");
+    }
+
+    /* Write journal entry */
+    HDsnprintf(temp, 
+               (size_t)(length + 100),
+               "2 trans_num %llu length %zu base_addr 0x%lx body ", 
+ 	       trans_num, 
+	       length, 
+	       (unsigned long)base_addr);
+
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, trans_num) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__write_to_buffer() failed.\n")
+    } /* end if */
+
+    /* Convert data from binary to hex */
+    H5C2_jb__bin2hex(bodydata, hexdata, &hexlength, length);
+
+    if ( H5C2_jb__write_to_buffer(struct_ptr, hexlength, hexdata, FALSE, trans_num) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__write_to_buffer() failed.\n")
+    } /* end if */
+
+    /* Indicate that at least one journal entry has been written under 
+     * this transaction 
+     */
+    if ( struct_ptr->jentry_written == FALSE ) {
+
+	struct_ptr->jentry_written = TRUE;
+    }
+
+done:
+
+    if ( bodydata != NULL )
+    {
+        bodydata = H5MM_xfree(bodydata);
+        if ( bodydata != NULL ) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "free of assembly buffer failed.");
+        }
+    }
+
+    if ( temp != NULL )
+    {
+        temp = H5MM_xfree(temp);
+        if ( temp != NULL ) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "free of assembly buffer failed.");
+        }
+    }
+
+    if ( hexdata != NULL )
+    {
+        hexdata = H5MM_xfree(hexdata);
+        if ( hexdata != NULL ) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "free of assembly buffer failed.");
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5C2_jb__journal_entry */
+
+
+/******************************************************************************
+ *
+ * Function:		H5C2_jb__start_transaction
+ *
+ * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
+ *			Wednesday, February 6, 2008
+ *
+ * Purpose:		Verify that there is no transaction in progress, and
+ *			that the supplied transaction number greater than 
+ *			the last.  Then construct a start transaction message, 
+ *			and write it to the current journal buffer. Make note
+ *			of the fact that the supplied transaction is in
+ *			progress.
+ *
+ * Returns:		SUCCEED on success.
+ *
+ ******************************************************************************/
+
+herr_t 
+H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
+			   uint64_t trans_num)
+
+{
+    char temp[150];
+    herr_t ret_value = SUCCEED;
+    time_t current_date;
+
+    FUNC_ENTER_NOAPI(H5C2_jb__start_transaction, FAIL)
+#if 0 /* JRM */
+    HDfprintf(stdout, "%s trans_num = %lld.\n", FUNC, trans_num);
+#endif /* JRM */	
+    /* Check Arguments */
+    HDassert(struct_ptr);
+    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+	
+    /* Verify that there is no transaction in progress */
+    if ( struct_ptr->trans_in_prog != FALSE ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "Transaction already in progress.")
+    } /* end if */
+
+    /* JRM: Heads up:  we may relax this constraint to rquire that the 
+     *      new transaction number is greater than the old, but possibly
+     *      not the next integer in sequence.  Will this cause problems
+     *      with testing?
+     */
+
+    /* Verify that the supplied transaction number greater than the last */
+    if ( (struct_ptr->cur_trans) >= trans_num ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+                    "New transaction out of sequence.")
+    } /* end if */
+
+    /* Verify that header message is present in journal file or ring buffer. 
+     * If not, write it. 
+     */
+    if ( struct_ptr->header_present == FALSE ) {
+
+        if ( H5C2_jb__write_header_entry(struct_ptr) != SUCCEED ) {
+
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                        "H5C2_jb__write_header_entry() failed.\n")
+        }
+
+    } /* end if */
+
+    /* Write start transaction message */
+    HDsnprintf(temp, (size_t)150, "1 bgn_trans %llu\n", trans_num);
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
+			          FALSE, trans_num) < 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__write_to_buffer() failed.\n")
+    } /* end if */
+		
+    /* Make note of the fact that supplied transaction is in progress */
+    struct_ptr->trans_in_prog = TRUE;
+    struct_ptr->cur_trans = trans_num;
+
+done:
+	
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5C2_jb__start_transaction */
+
+
+/******************************************************************************
+ *
+ * Function:		H5C2_jb__takedown
+ *
+ * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
+ *			Thursday, February 7, 2008
+ *
+ * Purpose:		Verify that the journal buffers are empty, and that the
+ *			journal file has been truncated. Then close and delete
+ *			the journal file associated with *struct_ptr, and free
+ *			all dynamically allocated memory associated with 
+ *			*struct_ptr.
+ *
+ * Returns:		SUCCEED on success.
+ *
+ ******************************************************************************/
+
+herr_t 
+H5C2_jb__takedown(H5C2_jbrb_t * struct_ptr)
+
+{
+    herr_t ret_value = SUCCEED;
+    hbool_t verbose = FALSE;
+	
+    FUNC_ENTER_NOAPI(H5C2_jb__takedown, FAIL)
+
+    if ( verbose ) {
+
+        HDfprintf(stdout, "%s: entering.\n", FUNC);
+    }
+
+    /* Check Arguments */
+    HDassert(struct_ptr);
+    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+	
+    /* Verify that the journal buffers are empty */
+    if ( struct_ptr->bufs_in_use != 0 ) {
+
+	if ( verbose ) {
+	    HDfprintf(stdout, "%s: Attempt to takedown with non-empty buffers.\n",
+		      FUNC);
+	}
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+	            "Attempt to takedown with non-empty buffers.")
+    } /* end if */	
+
+    /* Verify that the journal file has been truncated */
+    if (struct_ptr->journal_is_empty != TRUE) {
+
+	if ( verbose ) {
+	    HDfprintf(stdout, 
+		     "%s: Attempt to takedown with journal file not truncated.\n",
+		     FUNC);
+	}
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+	            "Attempt to takedown with journal file not truncated.")
+    } /* end if */
+
+    /* Close and delete the journal file associated with struct_ptr */
+    if ( HDclose(struct_ptr->journal_file_fd) < 0 ) {
+
+	if ( verbose ) {
+	    HDfprintf(stdout, 
+		     "%s: journal file close failed. errno = %d(%s), fd = %d.\n",
+		     FUNC, errno, strerror(errno), struct_ptr->journal_file_fd);
+	}
+        HGOTO_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "Jounal file close failed.")
+    } /* end if */
+
+    if ( HDremove(struct_ptr->jname) < 0) {
+
+	if ( verbose ) {
+	    HDfprintf(stdout, 
+		      "%s: journal file remove failed. errno = %d(%s).\n",
+		      FUNC, errno, strerror(errno));
+	}
+        HGOTO_ERROR(H5E_IO, H5E_REMOVEFAIL, FAIL, "Jounal file close failed.")
+    } /* end if */
+
+    /* Free all memory associated with struct_ptr */
+
+    if ( struct_ptr->jname != NULL ) {
+
+        struct_ptr->jname = H5MM_xfree(struct_ptr->jname);
+
+        if ( struct_ptr->jname != NULL ) {
+
+	    if ( verbose ) {
+
+	        HDfprintf(stdout, "%s: free of jname failed.\n", FUNC);
+
+	    }
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "free of jname failed.");
+        }
+    }
+
+    if ( struct_ptr->hdf5_file_name != NULL ) {
+
+        struct_ptr->hdf5_file_name = H5MM_xfree(struct_ptr->hdf5_file_name);
+
+        if ( struct_ptr->hdf5_file_name != NULL ) {
+
+	    if ( verbose ) {
+
+	        HDfprintf(stdout, "%s: free of hdf5_file_name failed.\n", FUNC);
+
+	    }
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "free of hdf5_file_name failed.");
+        }
+    }
+
+    if ( (*struct_ptr->buf)[0] != NULL ) {
+
+        (*struct_ptr->buf)[0] = H5MM_xfree((*struct_ptr->buf)[0]);
+        if ( (*struct_ptr->buf)[0] != NULL ) {
+
+	    if ( verbose ) {
+	        HDfprintf(stdout, "%s: free of buffers failed.\n", FUNC);
+	    }
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "free of buffers failed.");
+        }
+    }
+
+    if ( struct_ptr->buf != NULL ) {
+
+        struct_ptr->buf = H5MM_xfree(struct_ptr->buf);
+        if ( struct_ptr->buf != NULL ) {
+
+	    if ( verbose ) {
+	        HDfprintf(stdout, "%s: free of buffer ptr array faileid.\n", 
+			  FUNC);
+	    }
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "free of buffer pointer array failed.");
+        }
+    }
+
+    if ( struct_ptr->trans_tracking != NULL ) {
+
+        struct_ptr->trans_tracking = H5MM_xfree(struct_ptr->trans_tracking);
+
+        if ( struct_ptr->trans_tracking != NULL ) {
+
+	    if ( verbose ) {
+	        HDfprintf(stdout, 
+                          "%s: free of trans tracking array faileid.\n", 
+			  FUNC);
+	    }
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "free of transaction tracking array failed.");
+        }
+    }
+
+done:
+
+    if ( verbose ) {
+
+        HDfprintf(stdout, "%s: exiting.\n", FUNC);
+        fflush(stdout);
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5C2_jb__takedown */
+
+
+/******************************************************************************
+ *
+ * Function:		H5C2_jb__trunc
+ *
+ * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
+ *			Thursday, February 7, 2008
+ *
+ * Purpose:		Verify that there is no transaction in progress, and 
+ *			that the journal entry buffers are empty. Truncate
+ *			the journal file. Does not return until the file
+ *			is truncated on disk.
+ *
+ * Returns:		SUCCEED on success.
+ *
+ ******************************************************************************/
+
+herr_t 
+H5C2_jb__trunc(H5C2_jbrb_t * struct_ptr)
+
+{
+    int i;
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(H5C2_jb__trunc, FAIL)
+
+    /* Check Arguments */
+    HDassert(struct_ptr);
+    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
+	
+    /* Verify that there is no transaction in progress */
+    if ( struct_ptr->trans_in_prog != FALSE ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+	     "Attempt to truncate journal file while transaction in progress.")
+    } /* end if */
+
+    /* Verify that the journal buffers are empty */
+    if ( struct_ptr->bufs_in_use != 0 ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
+	            "Attempt to truncate with non-empty buffers.")
+    } /* end if */	
+
+    /* Truncate the journal file */
+    if ( HDftruncate(struct_ptr->journal_file_fd, (off_t)0) < 0 ) {
+
+        HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, "Jounal file truncate failed.")
+    } /* end if */
+
+    /* Start back to top of journal buffer and journal file */
+    struct_ptr->header_present = FALSE;
+    struct_ptr->journal_is_empty = TRUE;
+
+    /* reset the transaction number fields */
+    struct_ptr->cur_trans = 0;
+    struct_ptr->last_trans_on_disk = 0;
+	
+    /* reset the transaction tracking array */
+    for (i=0; i<struct_ptr->num_bufs; i++)
+    {
+	(*struct_ptr->trans_tracking)[i] = 0;
+    }
+
+    if ( HDlseek(struct_ptr->journal_file_fd, (off_t)0, SEEK_SET) == (off_t)-1 )
+    {
+        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "Jounal file seek failed.")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5C2_jb__trunc */
+
+
+/******************************************************************************
+ *
+ * Function:		H5C2_jb__write_header_entry
+ *
+ * Programmer:		John Mainzer
+ *			2/12/09
+ *
+ * Purpose:		Write the header message to the journal file.
+ * 
+ *			This message appear exactly once in every journal
+ *			file, and is always the first message in the file.
+ *			It identifies the journal file, and contains 
+ *			information required to run the journal, should 
+ *			that be necessary.
+ *
+ *			It is always in human readable format.
+ *			
+ * Returns:		SUCCEED on success.
+ *			FAIL on failure.
+ *
+ * Changes:		JRM -- 3/21/09
+ *                      Moved the entry tag strings into #defines.  
+ *			Replaced all white space in the creation date 
+ *			string with underscores.
+ *
+ ******************************************************************************/
+
+herr_t 
+H5C2_jb__write_header_entry(H5C2_jbrb_t * struct_ptr)
+
+{
+    herr_t      ret_value = SUCCEED;
+    hbool_t	verbose = FALSE;
+    char 	*buf;
+    char      * p;
+    char	time_buf[32];
+    int		chars_written;
+    int         i;
+    size_t      file_name_len;
+    size_t	buf_len;
+    time_t      current_date;
+	
+    FUNC_ENTER_NOAPI(H5C2_jb__write_header_entry, FAIL)
+
+    /* Check Arguments */
+    HDassert( struct_ptr );
+    HDassert( struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC );
+    HDassert( struct_ptr->hdf5_file_name != NULL );
+    HDassert( struct_ptr->header_present == FALSE );
+    HDassert( struct_ptr->journal_is_empty == TRUE );
+
+    file_name_len = strlen(struct_ptr->hdf5_file_name);
+
+    HDassert( file_name_len > 0 );
+
+    buf_len = file_name_len + 256;
+	
+    /* Allocate space for journal buffers */
+    buf = H5MM_malloc(buf_len);
+
+    if ( buf == NULL ) {
+
+        if ( verbose ) {
+
+	    HDfprintf(stdout, "%s: buffer allocation failed.\n", FUNC);
+        }
+
+	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
+                    "buffer allocation failed.");
+    } /* end if */
+	
+    /* Get the current date */
+    current_date = time(NULL);
+
+    /* load ascii representation of current_date into time_buf[],
+     * replacing white space with underscores.
+     */
+    time_buf[31] = '\0'; /* just to be safe */
+
+    if ( (p = HDctime(&current_date)) == NULL ) {
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "Can't get ascii representation of current date.")
+
+    } else {
+
+        /* copy the string into time_buf, replacing white space with 
+         * underscores.
+         *
+         * Do this to make parsing the header easier.
+         */
+        i = 0;
+
+        while ( ( i < 31 ) && ( *p != '\0' ) ) {
+
+            if ( isspace(*p) ) {
+
+                time_buf[i] = '_';
+
+            } else {
+
+                time_buf[i] = *p;
+            }
+
+            i++;
+            p++;
+        }
+
+        time_buf[i] = '\0';
+    }
+
+    /* Format the header message in the temporary buffer */
+
+    chars_written = 
+        HDsnprintf(buf, 
+                   buf_len - 1,
+                   "0 %s %ld %s %s %s %d %s %10.10s %s %d\n",
+                   H5C2_JNL__VER_NUM_TAG,
+	           struct_ptr->jvers, 
+                   H5C2_JNL__TGT_FILE_NAME_TAG,
+	           struct_ptr->hdf5_file_name, 
+                   H5C2_JNL__JNL_MAGIC_TAG,
+                   (int)(struct_ptr->journal_magic),
+                   H5C2_JNL__CREATION_DATE_TAG,
+	           time_buf,
+                   H5C2_JNL__HUMAN_READABLE_TAG,
+	           struct_ptr->human_readable);
+
+    if ( chars_written >= buf_len - 1 ) {
+
+        if ( verbose ) {
+
+	    HDfprintf(stdout, "%s: tried to overwrite buffer.\n", FUNC);
+        }
+
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, \
+                    "tried to overwrite buffer.");
+    }
+
+    HDassert( strlen(buf) < buf_len );
+
+    /* Write the header message into the ring buffer */
+    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(buf), buf, FALSE, 
+			          (uint64_t)0) < 0) {
+
+        if ( verbose ) {
+
+	    HDfprintf(stdout, 
+	              "%s: H5C2_jb__write_to_buffer() failed.\n", 
+		      FUNC);
+        }
+
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
+                    "H5C2_jb__write_to_buffer() failed.\n")
+    } /* end if */
+
+    /* Update boolean flags */
+    struct_ptr->header_present = TRUE;
+    struct_ptr->journal_is_empty = FALSE;
+
+done:
+
+    if ( buf != NULL ) {
+
+        buf = H5MM_xfree(buf);
+
+        if ( buf != NULL ) {
+
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
+                        "free of buf failed.");
+        }
+    }
+
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5C2_jb__write_header_entry() */
 
 
 /******************************************************************************
@@ -3207,992 +4054,4 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5C2_jb__write_to_buffer */
-
-
-/******************************************************************************
- *
- * Function:		H5C2_jb__init
- *
- * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
- *			Tuesday, February 5, 2008
- *
- * Purpose:		Initialize the supplied instance of H5C2_jbrb_t as
- *			specified by the buf_size and num_bufs fields. Open the
- *			journal file whose name is supplied in journal_file_name
- *			for either synchronous or asynchronous I/O as specified
- * 			by use_aio.
- *
- * Returns:		SUCCEED on success.
- *
- ******************************************************************************/
-
-herr_t 
-H5C2_jb__init(H5C2_jbrb_t * struct_ptr,  	
-	      const char * HDF5_file_name,	 	
-	      const char * journal_file_name, 	
-	      size_t buf_size,		
-	      int num_bufs,		 	
-	      hbool_t use_aio,		
- 	      hbool_t human_readable)
-{
-    char 	temp[150];
-    int 	i;
-    herr_t 	ret_value = SUCCEED;
-    time_t      current_date;
-
-    FUNC_ENTER_NOAPI(H5C2_jb__init, FAIL)
-
-    /* Check Arguments */
-    HDassert(struct_ptr);
-    HDassert(HDF5_file_name);
-    HDassert(journal_file_name);
-    HDassert(buf_size > 0);
-    HDassert(num_bufs > 0);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-	
-    /* Open journal file */
-    struct_ptr->journal_file_fd = 
-	    HDopen(journal_file_name, O_WRONLY|O_CREAT|O_EXCL, 0777);
-    if ( struct_ptr->journal_file_fd  == -1) {
-
-	HDfprintf(stdout, 
-	      "%s: Can't create journal file \"%s\".  Does it already exist?\n", 
-	      FUNC, journal_file_name);
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCREATE, FAIL, \
-                    "Can't create journal file.  Does it already exist?")
-    } /* end if */
-
-    /* Initialize Fields of H5C2_jbrb_t structure */
-    /* this should be modified to check error returns, etc.   Also, should
-     * probably do the same with the HDF5 file name.
-     */
-    struct_ptr->jname = HDstrdup(journal_file_name);
-    struct_ptr->hdf5_file_name = HDF5_file_name;
-    struct_ptr->buf_size = buf_size;
-    struct_ptr->num_bufs = num_bufs;
-    struct_ptr->use_aio = use_aio;
-    struct_ptr->human_readable = human_readable;
-    struct_ptr->bufs_in_use = 0;
-    struct_ptr->trans_in_prog = FALSE;
-    struct_ptr->get = 0;
-    struct_ptr->put = 0;
-    struct_ptr->jvers = H5C2__JOURNAL_VERSION;
-    struct_ptr->cur_trans = 0;
-    struct_ptr->last_trans_on_disk = 0;
-    struct_ptr->cur_buf_free_space = struct_ptr->buf_size;
-    struct_ptr->rb_free_space = struct_ptr->num_bufs * struct_ptr->buf_size;
-    struct_ptr->rb_space_to_rollover = struct_ptr->num_bufs * struct_ptr->buf_size;
-    struct_ptr->jentry_written = FALSE;
-    struct_ptr->journal_is_empty = TRUE;
-	
-    /* Allocate space for the ring buffer's journal buffer pointers */
-    struct_ptr->buf = H5MM_malloc(struct_ptr->num_bufs * sizeof(char *));
-
-    if ( struct_ptr->buf == NULL ) {
-
-	HDfprintf(stdout, 
-	          "%s: allocation of buf pointer array failed.\n", 
-		  FUNC);
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                    "allocation of buf pointer array failed.");
-    } /* end if */
-	
-    /* Allocate space for journal buffers */
-    (*struct_ptr->buf)[0] = 
-            H5MM_malloc(struct_ptr->buf_size * struct_ptr->num_bufs);
-
-    if ( (*struct_ptr->buf)[0] == NULL ) {
-
-	HDfprintf(stdout, 
-	          "%s: allocation of buffers failed.\n", 
-		  FUNC);
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                    "allocation of buffers failed.");
-    } /* end if */
-
-    /* Allocate space for the purposes of tracking the last 
-     * transaction on disk 
-     */
-    struct_ptr->trans_tracking = 
-    	H5MM_malloc(struct_ptr->num_bufs * sizeof(unsigned long));
-
-    if ( struct_ptr->trans_tracking == NULL ) {
-
-	HDfprintf(stdout, 
-	          "%s: allocation of trans_tracking failed.\n", 
-		  FUNC);
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                    "allocation of trans_tracking failed.");
-    } /* end if */
-	
-    /* Initialize the transaction tracking array */
-    for (i=0; i<struct_ptr->num_bufs; i++)
-    {
-	(*struct_ptr->trans_tracking)[i] = 0;
-    }
-	
-    /* Make journal buffer pointers point to the right location in 
-     * chunk of allocated memory above 
-     */
-    for (i=1; i<struct_ptr->num_bufs; i++)
-    {
-	(*struct_ptr->buf)[i] = 
-		&((*struct_ptr->buf)[0])[i * struct_ptr->buf_size];
-    }
-
-    /* Define head pointer to point at where we are writing to in the buffer */
-    struct_ptr->head = (*struct_ptr->buf)[struct_ptr->put];
-	
-    /* Get the current date */
-    current_date = time(NULL);
-
-    /* Format the header message into a temporary buffer */
-    HDsnprintf(temp, 
-        (size_t)150,
-	"0 ver_num %ld target_file_name %s creation_date %10.10s human_readable %d\n",
-	struct_ptr->jvers, 
-	struct_ptr->hdf5_file_name, 
-	ctime(&current_date), 
-	struct_ptr->human_readable);
-
-    /* Write the header message into the ring buffer */
-    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, 
-			          (uint64_t)0) < 0) {
-
-	HDfprintf(stdout, 
-	          "%s: H5C2_jb__write_to_buffer() failed.\n", 
-		  FUNC);
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
-    } /* end if */
-
-    /* Update boolean flags */
-    struct_ptr->header_present = TRUE;
-    struct_ptr->journal_is_empty = FALSE;
-
-done:
-	
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5C2_jb__init */
-
-
-/******************************************************************************
- *
- * Function:		H5C2_jb__start_transaction
- *
- * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
- *			Wednesday, February 6, 2008
- *
- * Purpose:		Verify that there is no transaction in progress, and
- *			that the supplied transaction number greater than 
- *			the last.  Then construct a start transaction message, 
- *			and write it to the current journal buffer. Make note
- *			of the fact that the supplied transaction is in
- *			progress.
- *
- * Returns:		SUCCEED on success.
- *
- ******************************************************************************/
-
-herr_t 
-H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
-			   uint64_t trans_num)
-
-{
-    char temp[150];
-    herr_t ret_value = SUCCEED;
-    time_t current_date;
-
-    FUNC_ENTER_NOAPI(H5C2_jb__start_transaction, FAIL)
-#if 0 /* JRM */
-    HDfprintf(stdout, "%s trans_num = %lld.\n", FUNC, trans_num);
-#endif /* JRM */	
-    /* Check Arguments */
-    HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-	
-    /* Verify that there is no transaction in progress */
-    if ( struct_ptr->trans_in_prog != FALSE ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "Transaction already in progress.")
-    } /* end if */
-
-    /* JRM: Heads up:  we may relax this constraint to rquire that the 
-     *      new transaction number is greater than the old, but possibly
-     *      not the next integer in sequence.  Will this cause problems
-     *      with testing?
-     */
-
-    /* Verify that the supplied transaction number greater than the last */
-    if ( (struct_ptr->cur_trans) >= trans_num ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "New transaction out of sequence.")
-    } /* end if */
-
-    /* Verify that header message is present in journal file or ring buffer. 
-     * If not, write it. 
-     */
-    if ( struct_ptr->header_present == FALSE ) {
-
-        /* Get the current date */
-        current_date = time(NULL);
-
-	HDsnprintf(temp, 
-	(size_t)150,
-	"0 ver_num %ld target_file_name %s creation_date %10.10s human_readable %d\n",
-	    struct_ptr->jvers, 
-	    struct_ptr->hdf5_file_name, 
-	    ctime(&current_date), 
-	    struct_ptr->human_readable);
-
-        if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
-				      FALSE, trans_num) < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_to_buffer() failed.\n")
-        } /* end if */
-
-	struct_ptr->header_present = 1;
-	struct_ptr->journal_is_empty = 0;
-    } /* end if */
-
-    /* Write start transaction message */
-    HDsnprintf(temp, (size_t)150, "1 bgn_trans %llu\n", trans_num);
-    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
-			          FALSE, trans_num) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
-    } /* end if */
-		
-    /* Make note of the fact that supplied transaction is in progress */
-    struct_ptr->trans_in_prog = TRUE;
-    struct_ptr->cur_trans = trans_num;
-
-done:
-	
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5C2_jb__start_transaction */
-
-
-/******************************************************************************
- *
- * Function:		H5C2_jb__journal_entry
- *
- * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
- *			Wednesday, February 6, 2008
- *
- * Purpose:		Verify that the specified transaction is open. Then
- *			construct a journal entry recording the supplied base
- *			address, length, and body, and write it to the current
- *			journal buffer.
- *
- * Returns:		SUCCEED on success.
- *
- ******************************************************************************/
-
-herr_t 
-H5C2_jb__journal_entry(H5C2_jbrb_t * struct_ptr,
-			uint64_t trans_num,
-			haddr_t base_addr,
-			size_t length,
-			const uint8_t * body)
-{
-
-    char * temp = NULL;
-    char * hexdata = NULL;
-    size_t hexlength;
-    herr_t ret_value = SUCCEED;
-    uint8_t * bodydata;
-
-    FUNC_ENTER_NOAPI(H5C2_jb__journal_entry, FAIL)
-#if 0 /* JRM */
-    HDfprintf(stdout, "%s trans_num = %lld, base_addr = %d, length = %ld.\n",
-              FUNC, trans_num, (int)base_addr, (int)length);
-#endif /* JRM */	
-    /* Check Arguments */
-    HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-
-    /* Make a copy of body data */
-    if ( (bodydata = H5MM_malloc(length)) == NULL ) {
-
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                   "allocation of assembly buffer failed.");
-    }
-
-    HDmemcpy(bodydata, body, length);
-	
-    /* Verify that the supplied transaction is in progress */
-    if ( ( struct_ptr->trans_in_prog != TRUE ) ||
-         ( struct_ptr->cur_trans != trans_num ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "Transaction not in progress or bad transaction number.")
-    } /* end if */
-
-    if ( (temp = H5MM_malloc(length + 100)) == NULL ) {
-
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                   "allocation of assembly buffer failed.");
-    }
-
-    if ( (hexdata = H5MM_malloc(length * 40)) == NULL ) {
-
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                   "allocation of assembly buffer failed.");
-    }
-
-    /* Write journal entry */
-    HDsnprintf(temp, 
-               (size_t)(length + 100),
-               "2 trans_num %llu length %zu base_addr 0x%lx body ", 
- 	       trans_num, 
-	       length, 
-	       (unsigned long)base_addr);
-
-    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, trans_num) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
-    } /* end if */
-
-    /* Convert data from binary to hex */
-    H5C2_jb__bin2hex(bodydata, hexdata, &hexlength, length);
-
-    if ( H5C2_jb__write_to_buffer(struct_ptr, hexlength, hexdata, FALSE, trans_num) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
-    } /* end if */
-
-    /* Indicate that at least one journal entry has been written under 
-     * this transaction 
-     */
-    if ( struct_ptr->jentry_written == FALSE ) {
-
-	struct_ptr->jentry_written = TRUE;
-    }
-
-done:
-
-    if ( bodydata != NULL )
-    {
-        bodydata = H5MM_xfree(bodydata);
-        if ( bodydata != NULL ) {
-
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                        "free of assembly buffer failed.");
-        }
-    }
-
-    if ( temp != NULL )
-    {
-        temp = H5MM_xfree(temp);
-        if ( temp != NULL ) {
-
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                        "free of assembly buffer failed.");
-        }
-    }
-
-    if ( hexdata != NULL )
-    {
-        hexdata = H5MM_xfree(hexdata);
-        if ( hexdata != NULL ) {
-
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                        "free of assembly buffer failed.");
-        }
-    }
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5C2_jb__journal_entry */
-
-
-/*****************************************************************************
- *
- * Function:		H5C2_jb__end_transaction
- *
- * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
- *			Wednesday, February 6, 2008
- *
- * Purpose:		Verify that the supplied transaction is in progress,
- *			and that at least one journal entry has been written 
- *			under it. Then construct an end transaction message,
- *			and write it to the current journal buffer. Make note
- *			that the supplied transaction is closed, and that no
- *			transaction is in progress.
- *
- * Returns:		SUCCEED on success.
- *
- *****************************************************************************/
-herr_t
-H5C2_jb__end_transaction(H5C2_jbrb_t * struct_ptr,
-			 uint64_t trans_num)
-{
-    char temp[25];
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5C2_jb__end_transaction, FAIL)
-#if 0 /* JRM */
-    HDfprintf(stdout, "%s trans_num = %lld.\n", FUNC, trans_num);
-#endif /* JRM */	
-    /* Check Arguments */
-    HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-	
-    /* Verify that the supplied transaction is in progress */
-    if ( ( struct_ptr->trans_in_prog != TRUE ) ||
-         ( struct_ptr->cur_trans != trans_num ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "Transaction not in progress or bad transaction number.")
-    } /* end if */
-	
-    /* Verify that at least one journal entry has been written under 
-     * the current transaction 
-     */
-    if ( struct_ptr->jentry_written != TRUE ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-                    "Empty transaction -- at least one journal entry required.")
-    } /* end if */
-
-
-    /* Prepare end transaction message */
-    HDsnprintf(temp, (size_t)25, "3 end_trans %llu\n", trans_num);
-
-    /* Write end transaction message */
-    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, 
-			          TRUE, trans_num ) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
-    } /* end if */
-
-    /* reset boolean flag indicating if at least one journal entry has 
-     * been written under transaction 
-     */
-    struct_ptr->jentry_written = FALSE;
-
-    /* Close current transaction */
-    struct_ptr->trans_in_prog = FALSE;
-
-done:
-	
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5C2_jb__end_transaction */
-
-
-/******************************************************************************
- *
- * Function:		H5C2_jb__comment
- *
- * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
- *			Wednesday, February 6, 2008
- *
- * Purpose:		Insert the supplied comment in the journal file. This 
- * 			call may be ignored if the journal file is machine 
- *			readable.
- *
- * Returns:		SUCCEED on success.
- *
- ******************************************************************************/
-
-herr_t 
-H5C2_jb__comment(H5C2_jbrb_t * struct_ptr,
-		 const char * comment_ptr)
-{
-    char * temp = NULL;
-    size_t temp_len;
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5C2_jb__comment, FAIL)
-	
-    /* Check Arguments */
-    HDassert(struct_ptr);
-    HDassert(comment_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-    HDassert(struct_ptr->hdf5_file_name);
-
-    /* Verify that header message is present in journal file or ring buffer. 
-     * If not, write it. 
-     */
-    if ( struct_ptr->header_present == FALSE ) {
-
-	char buf[150];
-        time_t current_date;
-
-        /* Get the current date */
-        current_date = time(NULL);
-
-	HDsnprintf(buf, 
-	(size_t)150,
-	"0 ver_num %ld target_file_name %s creation_date %10.10s human_readable %d\n",
-	    struct_ptr->jvers, 
-	    struct_ptr->hdf5_file_name, 
-	    ctime(&current_date), 
-	    struct_ptr->human_readable);
-
-        if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(buf), buf, 
-				      FALSE, struct_ptr->cur_trans) < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_to_buffer() failed.\n")
-        } /* end if */
-
-	struct_ptr->header_present = 1;
-	struct_ptr->journal_is_empty = 0;
-    } /* end if */
-
-    temp_len = HDstrlen(comment_ptr) + 11;
-    if ( ( temp = H5MM_malloc(HDstrlen(comment_ptr) + 11) ) == NULL ) {
-
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, \
-                   "allocation of temp buffer failed.");
-    } /* end if */
-
-    /* Write comment message */
-    HDsnprintf(temp, temp_len, "C comment %s", comment_ptr);
-
-    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, struct_ptr->cur_trans ) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
-    } /* end if */
-
-    if ( H5C2_jb__write_to_buffer(struct_ptr, 1, "\n", FALSE, struct_ptr->cur_trans ) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
-    } /* end if */
-
-done:
-
-    if ( temp != NULL ) {
-
-        temp = H5MM_xfree(temp);
-        if ( temp != NULL ) {
-
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                        "free of assembly buffer failed.");
-        }
-    }
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5C2_jb__comment */
-
-
-/******************************************************************************
- *
- * Function:		H5C2_jb__eoa
- *
- * Programmer:		Mike McGreevy <mamcgree@hdfgroup.org>
- *			July 29, 2008
- *
- * Purpose:		Insert the supplied EOA into the journal file.
- *
- * Returns:		SUCCEED on success.
- *
- ******************************************************************************/
-
-herr_t 
-H5C2_jb__eoa(H5C2_jbrb_t * struct_ptr,
-		 haddr_t eoa)
-{
-    char temp[40];
-    size_t temp_len = 40;
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5C2_jb__eoa, FAIL)
-	
-    /* Check Arguments */
-    HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-    HDassert(struct_ptr->hdf5_file_name);
-
-    /* Verify that header message is present in journal file or ring buffer. 
-     * If not, write it. 
-     */
-    if ( struct_ptr->header_present == FALSE ) {
-
-	char buf[150];
-        time_t current_date;
-
-        /* Get the current date */
-        current_date = time(NULL);
-
-	HDsnprintf(buf, 
-	(size_t)150,
-	"0 ver_num %ld target_file_name %s creation_date %10.10s human_readable %d\n",
-	    struct_ptr->jvers, 
-	    struct_ptr->hdf5_file_name, 
-	    ctime(&current_date), 
-	    struct_ptr->human_readable);
-
-        if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(buf), buf, 
-				      FALSE, struct_ptr->cur_trans) < 0 ) {
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                        "H5C2_jb__write_to_buffer() failed.\n")
-        } /* end if */
-
-	struct_ptr->header_present = 1;
-	struct_ptr->journal_is_empty = 0;
-    } /* end if */
-
-    /* Write EOA message */
-    HDsnprintf(temp, temp_len, "E eoa_value 0x%llx", eoa);
-
-    if ( H5C2_jb__write_to_buffer(struct_ptr, HDstrlen(temp), temp, FALSE, struct_ptr->cur_trans ) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
-    } /* end if */
-
-    if ( H5C2_jb__write_to_buffer(struct_ptr, 1, "\n", FALSE, struct_ptr->cur_trans ) < 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTJOURNAL, FAIL, \
-                    "H5C2_jb__write_to_buffer() failed.\n")
-    } /* end if */
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5C2_jb__eoa */
-
-
-/******************************************************************************
- *
- * Function:		H5C2_jb__get_last_transaction_on_disk
- *
- * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
- *			Wednesday, February 6, 2008
- *
- * Purpose:		Lookup the number of the last transaction to have been
- *			fully written to disk, and place its transaction
- *			number in *trans_num_ptr. If no transaction has made
- *			it to disk, load zero into *trans_num_ptr.
- *
- * Returns:		SUCCEED on success.
- *
- ******************************************************************************/
-
-herr_t 
-H5C2_jb__get_last_transaction_on_disk(H5C2_jbrb_t * struct_ptr,
-				      uint64_t * trans_num_ptr)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5C2_jb__get_last_transaction_on_disk, FAIL)
-	
-    /* Check Arguments */
-    HDassert( trans_num_ptr != NULL );
-
-    /* This should really be an assert, but the func enter/exit 
-     * macros get testy if there isn't at least one goto error 
-     * macro call in the funtion.
-     */
-    if ( ( struct_ptr == NULL ) ||
-         ( struct_ptr->magic != H5C2__H5C2_JBRB_T_MAGIC ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "bad struct_ptr.")
-    }
-
-    /* JRM: In machine readable version, lets check to see if a sync is 
-     *      necessary, and call it only if it is.
-     */
-    /* perform a sync to ensure everything gets to disk before continuing */
-    /* Note: there is no HDfsync function, so for now, the standard
-       fsync is being used. */
-    if ( fsync(struct_ptr->journal_file_fd) < 0 ) {
-
-        HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, "Jounal file sync failed.")
-
-    } /* end if */
-
-    * trans_num_ptr = struct_ptr->last_trans_on_disk;
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5C2_jb__get_last_transaction_on_disk */
-
-
-/******************************************************************************
- *
- * Function:		H5C2_jb__trunc
- *
- * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
- *			Thursday, February 7, 2008
- *
- * Purpose:		Verify that there is no transaction in progress, and 
- *			that the journal entry buffers are empty. Truncate
- *			the journal file. Does not return until the file
- *			is truncated on disk.
- *
- * Returns:		SUCCEED on success.
- *
- ******************************************************************************/
-
-herr_t 
-H5C2_jb__trunc(H5C2_jbrb_t * struct_ptr)
-
-{
-    int i;
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(H5C2_jb__trunc, FAIL)
-
-    /* Check Arguments */
-    HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-	
-    /* Verify that there is no transaction in progress */
-    if ( struct_ptr->trans_in_prog != FALSE ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-	     "Attempt to truncate journal file while transaction in progress.")
-    } /* end if */
-
-    /* Verify that the journal buffers are empty */
-    if ( struct_ptr->bufs_in_use != 0 ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-	            "Attempt to truncate with non-empty buffers.")
-    } /* end if */	
-
-    /* Truncate the journal file */
-    if ( HDftruncate(struct_ptr->journal_file_fd, (off_t)0) < 0 ) {
-
-        HGOTO_ERROR(H5E_IO, H5E_SYNCFAIL, FAIL, "Jounal file truncate failed.")
-    } /* end if */
-
-    /* Start back to top of journal buffer and journal file */
-    struct_ptr->header_present = FALSE;
-    struct_ptr->journal_is_empty = TRUE;
-
-    /* reset the transaction number fields */
-    struct_ptr->cur_trans = 0;
-    struct_ptr->last_trans_on_disk = 0;
-	
-    /* reset the transaction tracking array */
-    for (i=0; i<struct_ptr->num_bufs; i++)
-    {
-	(*struct_ptr->trans_tracking)[i] = 0;
-    }
-
-    if ( HDlseek(struct_ptr->journal_file_fd, (off_t)0, SEEK_SET) == (off_t)-1 )
-    {
-        HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "Jounal file seek failed.")
-    }
-
-done:
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5C2_jb__trunc */
-
-
-/******************************************************************************
- *
- * Function:		H5C2_jb__takedown
- *
- * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
- *			Thursday, February 7, 2008
- *
- * Purpose:		Verify that the journal buffers are empty, and that the
- *			journal file has been truncated. Then close and delete
- *			the journal file associated with *struct_ptr, and free
- *			all dynamically allocated memory associated with 
- *			*struct_ptr.
- *
- * Returns:		SUCCEED on success.
- *
- ******************************************************************************/
-
-herr_t 
-H5C2_jb__takedown(H5C2_jbrb_t * struct_ptr)
-
-{
-    herr_t ret_value = SUCCEED;
-    hbool_t verbose = FALSE;
-	
-    FUNC_ENTER_NOAPI(H5C2_jb__takedown, FAIL)
-
-    if ( verbose ) {
-
-        HDfprintf(stdout, "%s: entering.\n", FUNC);
-    }
-
-    /* Check Arguments */
-    HDassert(struct_ptr);
-    HDassert(struct_ptr->magic == H5C2__H5C2_JBRB_T_MAGIC);
-	
-    /* Verify that the journal buffers are empty */
-    if ( struct_ptr->bufs_in_use != 0 ) {
-
-	if ( verbose ) {
-	    HDfprintf(stdout, "%s: Attempt to takedown with non-empty buffers.\n",
-		      FUNC);
-	}
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-	            "Attempt to takedown with non-empty buffers.")
-    } /* end if */	
-
-    /* Verify that the journal file has been truncated */
-    if (struct_ptr->journal_is_empty != TRUE) {
-
-	if ( verbose ) {
-	    HDfprintf(stdout, 
-		     "%s: Attempt to takedown with journal file not truncated.\n",
-		     FUNC);
-	}
-        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
-	            "Attempt to takedown with journal file not truncated.")
-    } /* end if */
-
-    /* Close and delete the journal file associated with struct_ptr */
-    if ( HDclose(struct_ptr->journal_file_fd) < 0 ) {
-
-	if ( verbose ) {
-	    HDfprintf(stdout, 
-		     "%s: journal file close failed. errno = %d(%s), fd = %d.\n",
-		     FUNC, errno, strerror(errno), struct_ptr->journal_file_fd);
-	}
-        HGOTO_ERROR(H5E_IO, H5E_CLOSEERROR, FAIL, "Jounal file close failed.")
-    } /* end if */
-
-    if ( HDremove(struct_ptr->jname) < 0) {
-
-	if ( verbose ) {
-	    HDfprintf(stdout, 
-		      "%s: journal file remove failed. errno = %d(%s).\n",
-		      FUNC, errno, strerror(errno));
-	}
-        HGOTO_ERROR(H5E_IO, H5E_REMOVEFAIL, FAIL, "Jounal file close failed.")
-    } /* end if */
-
-    /* Free all memory associated with struct_ptr */
-
-    if ( struct_ptr->jname != NULL ) {
-
-        struct_ptr->jname = H5MM_xfree(struct_ptr->jname);
-        if ( struct_ptr->jname != NULL ) {
-
-	    if ( verbose ) {
-	        HDfprintf(stdout, "%s: free of jname failed.\n", FUNC);
-	    }
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                        "free of jname failed.");
-        }
-    }
-
-    if ( (*struct_ptr->buf)[0] != NULL ) {
-
-        (*struct_ptr->buf)[0] = H5MM_xfree((*struct_ptr->buf)[0]);
-        if ( (*struct_ptr->buf)[0] != NULL ) {
-
-	    if ( verbose ) {
-	        HDfprintf(stdout, "%s: free of buffers failed.\n", FUNC);
-	    }
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                        "free of buffers failed.");
-        }
-    }
-
-    if ( struct_ptr->buf != NULL ) {
-
-        struct_ptr->buf = H5MM_xfree(struct_ptr->buf);
-        if ( struct_ptr->buf != NULL ) {
-
-	    if ( verbose ) {
-	        HDfprintf(stdout, "%s: free of buffer ptr array faileid.\n", 
-			  FUNC);
-	    }
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                        "free of buffer pointer array failed.");
-        }
-    }
-
-    if ( struct_ptr->trans_tracking != NULL ) {
-
-        struct_ptr->trans_tracking = H5MM_xfree(struct_ptr->trans_tracking);
-        if ( struct_ptr->trans_tracking != NULL ) {
-
-	    if ( verbose ) {
-	        HDfprintf(stdout, "%s: free of trans tracking array faileid.\n", 
-			  FUNC);
-	    }
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, \
-                        "free of transaction tracking array failed.");
-        }
-    }
-
-done:
-
-    if ( verbose ) {
-
-        HDfprintf(stdout, "%s: exiting.\n", FUNC);
-        fflush(stdout);
-    }
-
-    FUNC_LEAVE_NOAPI(ret_value)
-
-} /* end H5C2_jb__takedown */
-
-
-/******************************************************************************
- *
- * Function:		H5C2_jb__bin2hex
- *
- * Programmer:		Mike McGreevy <mcgreevy@hdfgroup.org>
- *			Tuesday, March 4, 2008
- *
- * Purpose:		Convert binary data into hexadecimal.
- *
- * Returns:		SUCCEED on success.
- *
- ******************************************************************************/
-
-herr_t 
-H5C2_jb__bin2hex(const uint8_t * buf, 
-                 char * hexdata,
-                 size_t * hexlength,
-                 size_t buf_size)
-
-{
-    size_t         v;                   /* Local index variable */
-    uint8_t        c;
-    char *         t;
-	
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5C2_jb__bin2hex)
-
-    t = hexdata;
-    t[0] = ' ';
-    for (v = 0; v < buf_size; v++) {
-
-        t = &hexdata[v * 3 + 1];
-        c = buf[v];
-        HDsnprintf(t, (size_t)3, "%02x ", c);
-        t[2] = ' ';
-
-    } /* end for */
-    t[3] = '\n';
-    t[4] = 0;
-
-    * hexlength = v * 3 + 2;
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5C2_jb__bin2hex*/
 
