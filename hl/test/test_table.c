@@ -13,11 +13,17 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5TA.h"
+
 
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "hdf5.h"
+#if H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 6
+#include "H5TA.h"
+#else
+#include <hdf5_hl.h>
+#endif
 
 #define TEST_FILE_BE "test_table_be.hdf5"
 #define TEST_FILE_LE "test_table_le.hdf5"

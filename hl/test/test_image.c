@@ -13,8 +13,13 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include "hdf5.h"
 
+#if H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 6
 #include "H5IM.h"
+#else
+#include <hdf5_hl.h>
+#endif
 
 #define FILE_NAME "test_image.h5"
 

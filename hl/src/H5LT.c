@@ -13,9 +13,14 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "H5LT.h"
 #include <string.h>
 #include <stdlib.h>
+#include "hdf5.h"
+#if H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 6
+#include "H5LT.h"
+#else
+#include <hdf5_hl.h>
+#endif
 
 /*-------------------------------------------------------------------------
  *
