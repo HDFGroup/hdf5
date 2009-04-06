@@ -108,7 +108,7 @@ static int make_hlinks(hid_t loc_id);
 static int make_early(void);
 static int make_layout(hid_t loc_id);
 #ifdef H5_HAVE_FILTER_SZIP
-int make_szip(hid_t loc_id);
+static int make_szip(hid_t loc_id);
 #endif /* H5_HAVE_FILTER_SZIP */
 static int make_deflate(hid_t loc_id);
 static int make_shuffle(hid_t loc_id);
