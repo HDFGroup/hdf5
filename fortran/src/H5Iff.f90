@@ -78,9 +78,9 @@
             INTERFACE
               INTEGER FUNCTION h5iget_type_c(obj_id, type)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5IGET_TYPE_C':: h5iget_type_c
-              !DEC$ ENDIF
+              !DEC$ENDIF
               INTEGER(HID_T), INTENT(IN) :: obj_id 
               INTEGER, INTENT(OUT) :: type
               END FUNCTION h5iget_type_c
@@ -133,9 +133,9 @@
             INTERFACE
               INTEGER FUNCTION h5iget_name_c(obj_id, buf, buf_size, name_size)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5IGET_NAME_C'::h5iget_name_c
-              !DEC$ ENDIF
+              !DEC$ENDIF
               !DEC$ATTRIBUTES reference :: buf
               INTEGER(HID_T), INTENT(IN) :: obj_id
               CHARACTER(LEN=*), INTENT(OUT) :: buf
@@ -186,9 +186,9 @@
             INTERFACE
               INTEGER FUNCTION h5iinc_ref_c(obj_id, ref_count)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5IINC_REF_C':: h5iinc_ref_c
-              !DEC$ ENDIF
+              !DEC$ENDIF
               INTEGER(HID_T), INTENT(IN) :: obj_id 
               INTEGER, INTENT(OUT) :: ref_count
               END FUNCTION h5iinc_ref_c
@@ -235,9 +235,9 @@
             INTERFACE
               INTEGER FUNCTION h5idec_ref_c(obj_id, ref_count)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5IDEC_REF_C':: h5idec_ref_c
-              !DEC$ ENDIF
+              !DEC$ENDIF
               INTEGER(HID_T), INTENT(IN) :: obj_id 
               INTEGER, INTENT(OUT) :: ref_count
               END FUNCTION h5idec_ref_c
@@ -284,9 +284,9 @@
             INTERFACE
               INTEGER FUNCTION h5iget_ref_c(obj_id, ref_count)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5IGET_REF_C':: h5iget_ref_c
-              !DEC$ ENDIF
+              !DEC$ENDIF
               INTEGER(HID_T), INTENT(IN) :: obj_id 
               INTEGER, INTENT(OUT) :: ref_count
               END FUNCTION h5iget_ref_c
@@ -330,9 +330,9 @@
             INTERFACE
               INTEGER FUNCTION h5iget_file_id_c(obj_id, file_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
               !MS$ATTRIBUTES C,reference,alias:'_H5IGET_FILE_ID_C':: h5iget_file_id_c
-              !DEC$ ENDIF
+              !DEC$ENDIF
               INTEGER(HID_T), INTENT(IN)  :: obj_id 
               INTEGER(HID_T), INTENT(OUT) :: file_id 
               END FUNCTION h5iget_file_id_c
