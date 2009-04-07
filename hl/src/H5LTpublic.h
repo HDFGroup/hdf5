@@ -138,9 +138,8 @@ H5_HLDLL herr_t  H5LTread_region(const char *file,
 				 hid_t mem_type,
 				 void *buf );
 
-H5_HLDLL herr_t H5LTread_quality_flag(hid_t dset_id, int num_flags, const unsigned *offset,
-				      const unsigned *length, hid_t *dtype, hid_t *space, void *buf);
-
+H5_HLDLL herr_t H5LTread_bitfield_value(hid_t dset_id, int num_values, const unsigned *offset,
+					const unsigned *lengths, hid_t *space, hid_t *dtype,  int *buf);
 
 /*-------------------------------------------------------------------------
  *
