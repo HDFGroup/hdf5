@@ -13,10 +13,12 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#define H5LR_MODULE
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "H5ERROR.h"
 #include "H5Eprivate.h"		/* Error handling */
 #include "H5LRprivate.h"
 
@@ -51,34 +53,30 @@
  *-------------------------------------------------------------------------
  */
    
-herr_t H5LRget_region_info(hid_t obj_id,
-			   const hdset_reg_ref_t *ref,  
-			   size_t *len,
-			   char *path,
-			   int *rank, 
-			   hid_t *dtype, 
-			   H5S_sel_type *sel_type,
-			   size_t *numelem,
-			   hsize_t *buf )
+herr_t H5LRget_region_info(hid_t obj_id,               /* -IN-      Id. of any object in a file associated with reference */
+			   const hdset_reg_ref_t *ref, /* -IN-      Region reference to query                             */ 
+			   size_t *len,                /* -IN/OUT-  Size of the buffer path                               */
+			   char *path,                 /* -OUT-     Full path that a region reference points to           */
+			   int *rank,                  /* -OUT-     The number of dimensions of the dataset pointed by region reference */
+			   hid_t *dtype,               /* -OUT-     Dataset datatype pointed by region reference          */
+			   H5S_sel_type *sel_type,     /* -OUT-     Type fo the selection (point or hyperslab)            */
+			   size_t *numelem,            /* -IN/OUT-  Number of coordinate blocks or selected elements      */
+			   hsize_t *buf )              /* -OUT-     Buffer containing description of the region           */
 
 {
   hid_t dset = -1, sid = -1;
   hid_t ret_value = SUCCEED;          /* Return value */
   herr_t status;
   
-  FUNC_ENTER_API(H5LRget_region_info, FAIL)
-
+  /* Determine the rank of the space */
   sid = H5Rget_region(obj_id, H5R_DATASET_REGION, ref);
-
+  /* Determine the type of the dataspace selection */
   *sel_type = H5Sget_select_type(sid);
 
   if(*sel_type!=H5S_SEL_HYPERSLABS) printf("wrong select type\n");
     
-    
-    /* Try to open object */
-  H5E_BEGIN_TRY {
-    dset = H5Rdereference(obj_id, H5R_DATASET_REGION, ref);
-  } H5E_END_TRY;
+  /* Try to open object */
+  dset = H5Rdereference(obj_id, H5R_DATASET_REGION, ref);
   
   if(dset < 0){
     H5Eclear2(H5E_DEFAULT);
@@ -93,48 +91,33 @@ herr_t H5LRget_region_info(hid_t obj_id,
     *len = (size_t)(1 + H5Iget_name (dset, NULL, (size_t)0));
 
     /* Determine the rank of the space */
-    H5E_BEGIN_TRY {
       sid = H5Rget_region (obj_id,  H5R_DATASET_REGION, ref);
-    } H5E_END_TRY;
     if(sid < 0){
       H5Eclear2(H5E_DEFAULT);
       HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
     }
 
-    H5E_BEGIN_TRY { 
       *rank = (int)H5Sget_simple_extent_ndims(sid);
-    } H5E_END_TRY;
     if(*rank < 0){
       H5Eclear2(H5E_DEFAULT);
       HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
     }
-
-    H5E_BEGIN_TRY {
+  /* Determine the type of the dataspace selection */
       *sel_type = H5Sget_select_type(sid);
-    } H5E_END_TRY;
 
   /* get the number of elements */
-    H5E_BEGIN_TRY {
       if(*sel_type==H5S_SEL_HYPERSLABS){
 	*numelem = (size_t)H5Sget_select_hyper_nblocks(sid);
       } else if(*sel_type==H5S_SEL_POINTS){
 	*numelem = (size_t)H5Sget_select_npoints(sid);
       }
-	
-    } H5E_END_TRY;
-
-
-    H5E_BEGIN_TRY {
       status = H5Sclose(sid);
-    } H5E_END_TRY;
     if(status < 0){
       H5Eclear2(H5E_DEFAULT);
       HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
     }
 
-    H5E_BEGIN_TRY {
-      status = H5Dclose(dset);
-    } H5E_END_TRY;
+    status = H5Dclose(dset);
     if(status < 0){
       H5Eclear2(H5E_DEFAULT);
       HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
@@ -143,27 +126,21 @@ herr_t H5LRget_region_info(hid_t obj_id,
   }
 
   /* Get the space identity region reference points to */
-  H5E_BEGIN_TRY {
-    sid = H5Rget_region (obj_id, H5R_DATASET_REGION, ref);
-  } H5E_END_TRY;
+  sid = H5Rget_region (obj_id, H5R_DATASET_REGION, ref);
   if(sid < 0){
     H5Eclear2(H5E_DEFAULT);
     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
   }
   
   /* Get the data set name the region reference points to */
-  H5E_BEGIN_TRY {
-    status = H5Iget_name (dset, path, *len);
-  } H5E_END_TRY;
+  status = H5Iget_name (dset, path, *len);
   if(status < 0){
     H5Eclear2(H5E_DEFAULT);
     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
   }
 
   /* get the data type */
-  H5E_BEGIN_TRY {
     *dtype = (hid_t)H5Dget_type(dset);
-  } H5E_END_TRY;
   if(status < 0){
     H5Eclear2(H5E_DEFAULT);
     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
@@ -172,37 +149,30 @@ herr_t H5LRget_region_info(hid_t obj_id,
 /*       if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) */
 
   /* get the number of elements */
-  H5E_BEGIN_TRY {
     if(*sel_type==H5S_SEL_HYPERSLABS){
       *numelem = (size_t)H5Sget_select_hyper_nblocks(sid);
     } else if(*sel_type==H5S_SEL_POINTS){
       *numelem = (size_t)H5Sget_select_npoints(sid);
     }
-  } H5E_END_TRY;
 
 
   /* get the corner coordinates of the hyperslab */
   if(*sel_type == H5S_SEL_HYPERSLABS) {
-    H5E_BEGIN_TRY {
+    /* get the list of hyperslab blocks currently selected */
       status = H5Sget_select_hyper_blocklist(sid, (hsize_t)0, (hsize_t)1, buf);
-    } H5E_END_TRY;
   }    
   if(status < 0){
     H5Eclear2(H5E_DEFAULT);
     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
   }
 
-  H5E_BEGIN_TRY {
-    status = H5Sclose(sid);
-  } H5E_END_TRY;
+  status = H5Sclose(sid);
   if(status < 0){
     H5Eclear2(H5E_DEFAULT);
     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
   }
   
-  H5E_BEGIN_TRY {
-    status = H5Dclose(dset);
-  } H5E_END_TRY;
+  status = H5Dclose(dset);
   if(status < 0){
     H5Eclear2(H5E_DEFAULT);
     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
@@ -210,7 +180,7 @@ herr_t H5LRget_region_info(hid_t obj_id,
   return SUCCEED;
 
  done:
-  FUNC_LEAVE_API(ret_value)
+  return SUCCEED;
 }
 
 /*-------------------------------------------------------------------------
@@ -227,25 +197,34 @@ herr_t H5LRget_region_info(hid_t obj_id,
  *
  *-------------------------------------------------------------------------
  */
-herr_t H5LRread_region(hid_t obj_id,               /* -IN-      Id. of any object in a file associated with reference */
-		       const hdset_reg_ref_t *ref, /* -IN-      Id. of the memory datatype                            */
-		       hid_t mem_type,             /* -IN-      Id. of the memory datatype                            */
-		       size_t *numelem,            /* -IN/OUT-  Number of elements in the referenced region           */
-		       void *buf                   /* -OUT-     Buffer containing data from the referenced region     */
-		       )
 
-{
+/* BEGIN_FUNC(scope, use_err, ret_typ, ret_init, err, func) */
+BEGIN_FUNC(PUB, ERR,
+herr_t, NULL, ret_value,
+H5LRread_region(hid_t obj_id,               /* -IN-      Id. of any object in a file associated with reference */
+		const hdset_reg_ref_t *ref, /* -IN-      Region reference to query                             */
+		hid_t mem_type,             /* -IN-      Id. of the memory datatype                            */
+		size_t *numelem,            /* -IN/OUT-  Number of elements in the referenced region           */
+		void *buf                   /* -OUT-     Buffer containing data from the referenced region     */
+		) )
+
   hid_t dset = -1, file_space = -1;  /* Identifier of the dataset's dataspace in the file */
   hid_t ret_value = SUCCEED;         /* Return value                                      */
   H5S_sel_type sel_type;             /* Type of the dataspace selection                   */
   hid_t mem_space;                   /* Identifier of the memory dataspace                */
   herr_t status;                     /* API's error status                                */
-  hsize_t dims1[1];	      	
-  
-  FUNC_ENTER_API(H5LRread_region, FAIL)
+  hsize_t dims1[1];
 
-  /* Open the HDF5 object referenced */    
-  dset = H5Rdereference(obj_id, H5R_DATASET_REGION, ref);
+  /* Open the HDF5 object referenced */ 
+
+  H5E_BEGIN_TRY {
+    dset = H5Rdereference(obj_id, H5R_DATASET_REGION, ref);
+  } H5E_END_TRY
+  
+  if( dset < 0){
+    H5Eclear2(H5E_DEFAULT);
+    H5E_THROW(H5E_BADSELECT, "Unable to open object referenced");
+  }
 
   /* Retrieve the dataspace with the specified region selected */
   file_space = H5Rget_region (dset, H5R_DATASET_REGION, ref);
@@ -267,15 +246,29 @@ herr_t H5LRread_region(hid_t obj_id,               /* -IN-      Id. of any objec
   status = H5Dread (dset, mem_type, mem_space, file_space, H5P_DEFAULT, buf);
 
   /* Close appropriate items */
-  status = H5Dclose(dset);
-  status = H5Sclose(mem_space);
-  status = H5Sclose(file_space);
+  H5E_BEGIN_TRY {
+    status = H5Dclose(dset);
+  } H5E_END_TRY
 
-  return SUCCEED;
+/*   if( (status = H5Dclose(dset) ) < 0 ) */
+/*     H5E_THROW(H5E_CLOSEERROR, "Unable to close dataset"); */
 
- done:
-  FUNC_LEAVE_API(ret_value)
-}
+  H5E_BEGIN_TRY {
+    status = H5Sclose(mem_space);
+  } H5E_END_TRY
+  
+  H5E_BEGIN_TRY {
+    status = H5Sclose(file_space);
+  } H5E_END_TRY
+
+
+CATCH
+
+   ret_value = FAIL;
+/*   return ret_value; */
+
+
+END_FUNC(PUB)
 
 /*-------------------------------------------------------------------------
  * Function: H5LRcreate_region_references
@@ -307,10 +300,7 @@ herr_t H5LRcreate_region_references(hid_t file_id,
   int i, j, nstart;
   hsize_t *start, *count;
 
-
-  FUNC_ENTER_API(H5LRcreate_region_references, FAIL)
-
-    nstart = 0;
+  nstart = 0;
   for(i=0; i<(int)num_elem; i++) {
 
       /* Open the dataset for a given the path */
@@ -352,10 +342,6 @@ herr_t H5LRcreate_region_references(hid_t file_id,
     }
 
   return SUCCEED;
-
- done:
-  FUNC_LEAVE_API(ret_value)
-
 }
 
 /*-------------------------------------------------------------------------
@@ -389,7 +375,6 @@ herr_t H5LRmake_dataset(hid_t loc_id, const char *path, hid_t type_id, hid_t loc
   hsize_t start[2], end[2];
   hsize_t *bounds_coor;
 
-  FUNC_ENTER_API(H5LRmake_dataset, FAIL)
 
   for (i=0; i<buf_size; i++) {
 
@@ -401,14 +386,14 @@ herr_t H5LRmake_dataset(hid_t loc_id, const char *path, hid_t type_id, hid_t loc
 
     
      dset_ref = H5Rdereference(loc_id_ref, H5R_DATASET_REGION, ref[i]);
- 
+     /* Retrieve the dataspace with the specified region selected */
      sid_ref = H5Rget_region (dset_ref, H5R_DATASET_REGION, ref[i]);
 
     /* get the rank of the region reference */
      nrank = H5Sget_simple_extent_ndims(sid_ref);
 
      /* Allocate space for the dimension array */
-      dims1 = (hsize_t *)malloc (sizeof (hsize_t) * nrank);
+     dims1 = (hsize_t *)malloc (sizeof (hsize_t) * nrank);
 
     /* get extents of the referenced data */
     
@@ -441,12 +426,14 @@ herr_t H5LRmake_dataset(hid_t loc_id, const char *path, hid_t type_id, hid_t loc
 
      status = H5Dwrite(dset_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf);
 
-	status = H5Sclose(sid);
-	status = H5Dclose(dset_id);
-	
-	free(dims1);
-	free(bounds_coor);
-	free(buf);
+     status = H5Sclose(sid);
+     status = H5Dclose(dset_id);
+     status = H5Dclose(dset_ref);
+     status = H5Sclose(sid_ref);
+
+     free(dims1);
+     free(bounds_coor);
+     free(buf);
   }
 /*   /\* Find the rank of the dataspace *\/ */
 /*   ndim = H5Sget_simple_extent_ndims(sid1); */
@@ -477,8 +464,6 @@ herr_t H5LRmake_dataset(hid_t loc_id, const char *path, hid_t type_id, hid_t loc
 
   return SUCCEED;
 
- done:
-  FUNC_LEAVE_API(ret_value)
 
 }
 
@@ -521,21 +506,21 @@ herr_t H5LRcopy_region(hid_t obj_id,
   hsize_t *bounds_coor;
   hid_t dtype;
   
-  FUNC_ENTER_API(H5LRcopy_region, FAIL)
 
-  /* REGION REFERENCE DATA */
+  /* Region reference data */
   dset_ref = H5Rdereference(obj_id, H5R_DATASET_REGION, ref);
 
-  /* REGION REFERENCE SPACE */
+  /* Region reference space */
   sid_ref = H5Rget_region(dset_ref, H5R_DATASET_REGION, ref);
 
-  /* GET THE RANK OF THE REGION REFERENCE */
+  /* Get the rank of the region reference */
   nrank = H5Sget_simple_extent_ndims(sid_ref);
 
   /* Allocate space for the dimension array */
   dims1 = (hsize_t *)malloc (sizeof (hsize_t) * nrank);
 
   bounds_coor = (hsize_t *)malloc (sizeof (hsize_t) * nrank * 2);
+/* get the list of hyperslab blocks currently selected */
   status = H5Sget_select_hyper_blocklist(sid_ref, (hsize_t)0, (hsize_t)1, bounds_coor);
 
   numelem = 1;
@@ -566,6 +551,11 @@ herr_t H5LRcopy_region(hid_t obj_id,
 
 /*   status = H5Dread (dset, mem_type, mem_space, sid, H5P_DEFAULT, buf); */
 
+  
+  status = H5Sclose(sid_ref);
+  status = H5Dclose(dset_ref);
+
+
 /*   Open the file */
    file_id = H5Fopen(file, H5F_ACC_RDWR,  H5P_DEFAULT);
 
@@ -574,7 +564,6 @@ herr_t H5LRcopy_region(hid_t obj_id,
 
 /*   Get the dataspace of the dataset */
    sid1 = H5Dget_space(dset_id);
-
 
 /*   Find the rank of the dataspace */
    ndim = H5Sget_simple_extent_ndims(sid1);
@@ -621,14 +610,23 @@ herr_t H5LRcopy_region(hid_t obj_id,
 
 /*   status = H5Dread (dset, mem_type, mem_space, sid, H5P_DEFAULT, buf); */
 
+  free(start);
+  free(count);
+  free(buf);
+  free(dims1);
+  free(bounds_coor);
 
+  status = H5Sclose(sid1);
+  status = H5Sclose(sid2);
+  status = H5Dclose(dset_id);
+  status = H5Fclose(file_id);
+  status = H5Tclose(dtype);
+  status = H5Tclose(type_id);
 
 /* close the data */
 
-    return SUCCEED;
+  return SUCCEED;
 
- done:
-  FUNC_LEAVE_API(ret_value)
 }
 
 /*-------------------------------------------------------------------------
@@ -666,12 +664,13 @@ herr_t H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,
   hsize_t *bounds_coor;
   hid_t dtype;
 
-  FUNC_ENTER_API(H5LRcopy_references, FAIL)
-
+  /* Region reference data */
   did_src = H5Rdereference(obj_id, H5R_DATASET_REGION, ref);
 
+  /* Region reference space */
   sid_src = H5Rget_region (did_src, H5R_DATASET_REGION, ref);
 
+  /* Determine the type of the dataspace selection */
   sel_type = H5Sget_select_type(sid_src);
 
   /* Find the rank of the dataspace */
@@ -681,6 +680,7 @@ herr_t H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,
   dims_src = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src);
 
   bounds_coor = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src * 2);
+/* get the list of hyperslab blocks currently selected */
   status = H5Sget_select_hyper_blocklist(sid_src, (hsize_t)0, (hsize_t)1, bounds_coor);
 
   numelem_src = 1;
@@ -711,25 +711,26 @@ herr_t H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,
 
   status = H5Dread(did_src, type_id, sid2, sid_src, H5P_DEFAULT, buf);
 
+
   status = H5Dclose(did_src);
   status = H5Sclose(sid_src);
   status = H5Sclose(sid2);
   free(dims_src);
 
 /* Open the file */
-   file_id = H5Fopen(file, H5F_ACC_RDWR,  H5P_DEFAULT);
+  file_id = H5Fopen(file, H5F_ACC_RDWR,  H5P_DEFAULT);
 
 /* Open the dataset for a given the path */
-   dset_id = H5Dopen2(file_id, path, H5P_DEFAULT);
+  dset_id = H5Dopen2(file_id, path, H5P_DEFAULT);
 
 /*   Get the dataspace of the dataset */
-   sid1 = H5Dget_space(dset_id);
+  sid1 = H5Dget_space(dset_id);
 
 /*   Find the rank of the dataspace */
-   ndim = H5Sget_simple_extent_ndims(sid1);
+  ndim = H5Sget_simple_extent_ndims(sid1);
 
   /* Allocate space for the dimension array */
-   dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
+  dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
 
   /* find the dimensions of each data space from the block coordinates */
   for (i=0; i<ndim; i++)
@@ -768,9 +769,7 @@ herr_t H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,
   free(dims1);
   free(buf);
 
-    return SUCCEED;
+  return SUCCEED;
 
- done:
-  FUNC_LEAVE_API(ret_value)
 }
 
