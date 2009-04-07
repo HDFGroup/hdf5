@@ -56,9 +56,9 @@
             INTERFACE
               INTEGER FUNCTION h5zunregister_c (filter)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5ZUNREGISTER_C':: h5zunregister_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ZUNREGISTER_C':: h5zunregister_c
+              !DEC$ENDIF
               INTEGER, INTENT(IN) :: filter
               END FUNCTION h5zunregister_c
             END INTERFACE
@@ -104,9 +104,9 @@
             INTERFACE
               INTEGER FUNCTION h5zfilter_avail_c(filter, flag) 
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5ZFILTER_AVAIL_C'::h5zfilter_avail_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ZFILTER_AVAIL_C'::h5zfilter_avail_c
+              !DEC$ENDIF
               INTEGER, INTENT(IN) :: filter
               INTEGER :: flag
               END FUNCTION h5zfilter_avail_c
@@ -161,9 +161,9 @@
             INTERFACE
               INTEGER FUNCTION h5zget_filter_info_c(filter, config_flags) 
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5ZGET_FILTER_INFO_C'::h5zget_filter_info_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5ZGET_FILTER_INFO_C'::h5zget_filter_info_c
+              !DEC$ENDIF
               INTEGER, INTENT(IN) :: filter
               INTEGER, INTENT(OUT) :: config_flags
               END FUNCTION h5zget_filter_info_c
