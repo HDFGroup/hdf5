@@ -1630,12 +1630,13 @@
 ./hl/test/image24plane.txt
 ./hl/test/pal_rgb.h
 ./hl/test/sepia.pal
+./hl/test/test_bitfield.c
 ./hl/test/test_ds.c
 ./hl/test/test_image.c
 ./hl/test/test_lite.c
 ./hl/test/test_packet.c
-./hl/test/test_table.c
 ./hl/test/test_regref_hyper.c
+./hl/test/test_table.c
 ./hl/test/test_table_le.hdf5
 ./hl/test/test_table_be.hdf5
 ./hl/test/test_table_cray.hdf5
