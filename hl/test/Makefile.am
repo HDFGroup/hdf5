@@ -29,12 +29,12 @@ LDADD=$(LIBH5_HL) $(LIBH5TEST) $(LIBHDF5)
 
 # Test programs.  These are our main targets.  They should be listed in the
 # order to be executed, generally most specific tests to least specific tests.
-TEST_PROG=test_lite test_image test_table test_ds test_packet
+TEST_PROG=test_lite test_image test_table test_ds test_packet test_regref_hyper test_bitfield 
 check_PROGRAMS=$(TEST_PROG)
 
 # Temporary files.  These files are the ones created by running `make test'.
 CHECK_CLEANFILES+=combine_tables[1-2].h5 test_ds[1-6].h5 test_image[1-3].h5 \
         test_lite[1-2].h5 test_table.h5 test_packet_table.h5                \
-        test_packet_compress.h5
+        test_packet_compress.h5 FileA.h5 NPOESS_EDR.h5
 
 include $(top_srcdir)/config/conclude.am
