@@ -7177,6 +7177,14 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
     if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
 
+    /* Try to create internally defined links with H5Lcreate_ud */
+    H5E_BEGIN_TRY {
+        if(H5Lcreate_ud(fid, "/ud_link", H5L_TYPE_HARD, NULL, 0, H5P_DEFAULT, H5P_DEFAULT) >= 0)
+            TEST_ERROR
+        if(H5Lcreate_ud(fid, "/ud_link", H5L_TYPE_SOFT, "str", 4, H5P_DEFAULT, H5P_DEFAULT) >= 0)
+            TEST_ERROR
+    } H5E_END_TRY
+
     /* Create a user-defined link to the group. */
     strcpy(group_name, "/group");
     if(H5Lcreate_ud(fid, "/ud_link", UD_CBFAIL_TYPE, &group_name, HDstrlen(group_name) + 1, H5P_DEFAULT, H5P_DEFAULT) < 0) FAIL_STACK_ERROR

@@ -151,6 +151,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed a bug where H5Lcopy and H5Lmove wouldn't create intermediate
+            groups when that property was set. (NAF - 2009/04/07 - 1526)
       - Fixed a bug that caused files with a user block to grow by the size of
             the user block every time they were opened.
             (NAF - 2009/03/26 - 1499)
