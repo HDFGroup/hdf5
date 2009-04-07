@@ -2,26 +2,50 @@
 <!-- HEADER RIGHT "H5Screate" -->
 <hr>
 <dl>
+<dt><div align=right><font color=999999 size=-1><i>
+      Last modified: 7 April 2009
+      </i></font></div>
+
 <dt><strong>Name:</strong> <a name="Dataspace-Create">H5Screate</a>
 <dt><strong>Signature:</strong>
     <dd><em>hid_t</em> <code>H5Screate</code>(<em>H5S_class_t</em> <code>type</code>)
+
+<p>
 <dt><strong>Purpose:</strong>
     <dd>Creates a new dataspace of a specified type.
+
+<p>
 <dt><strong>Description:</strong>
     <dd><code>H5Screate</code> creates a new dataspace of a particular 
         <code>type</code>.  
         The types currently supported are <code>H5S_SCALAR</code> and 
         <code>H5S_SIMPLE</code>;
-        others are planned to be added later.  
+        others may be added later.  
+        <p>
+        A <i>scalar dataspace</i>, <code>H5S_SCALAR</code>, 
+          has a single element, though that element may be of a complex 
+          datatype, such as a compound or array datatype.
+          By convention, the rank of a scalar dataspace is always 
+          <code>0</code> (zero); think of it geometrically as a single,
+          dimensionless point, though that point can be complex.
+        <p>
+        A <i>simple dataspace</i>, <code>H5S_SIMPLE</code>, consists of 
+          a regular array of elements.
+
+<p>
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
 		  <td valign="top"><em>H5S_class_t</em>&nbsp;<code>type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
           <td valign="top">The type of dataspace to be created.</td></tr>
     </table></ul>
+
+<p>
 <dt><strong>Returns:</strong>
     <dd>Returns a dataspace identifier if successful; 
         otherwise returns a negative value.
+
+<p>
 <dt><strong>Fortran90 Interface:</strong> h5screate_f
     <dd>
 	<pre>
@@ -38,11 +62,5 @@ SUBROUTINE h5screate_f(classtype, space_id, hdferr)
 END SUBROUTINE h5screate_f
 	</pre>		
 		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
