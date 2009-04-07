@@ -749,13 +749,21 @@ herr_t H5DSdetach_scale(hid_t did,
                 goto out;
 
             /* same object, reset */
-            if(oi1.fileno == oi2.fileno && oi1.addr == oi2.addr) {
+            if(oi1.fileno == oi2.fileno && oi1.addr == oi2.addr) 
+            {
+                size_t len;
+
                 for(jj=j; jj<buf[idx].len-1; jj++)
+                {
                     ((hobj_ref_t *)buf[idx].p)[jj] = ((hobj_ref_t *)buf[idx].p)[jj+1];
+                }
+               
                 buf[idx].len--;
-
+                len = buf[idx].len;
+                buf[idx].p = realloc( buf[idx].p, len * sizeof(hobj_ref_t));
+                
                 found_ds = 1;
-
+                
                 /* close the dereferenced dataset and break */
                 if (H5Dclose(dsid_j) < 0)
                     goto out;
