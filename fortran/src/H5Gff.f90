@@ -94,9 +94,9 @@ CONTAINS
        INTEGER FUNCTION h5gcreate_c(loc_id, name, namelen, &
             size_hint_default, grp_id, lcpl_id_default, gcpl_id_default, gapl_id_default)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GCREATE_C'::h5gcreate_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GCREATE_C'::h5gcreate_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: name
@@ -178,9 +178,9 @@ CONTAINS
 !!$       INTEGER FUNCTION h5gcreate_c(loc_id, name, namelen, &
 !!$            OBJECT_NAMELEN_DEFAULT, grp_id, lcpl_id_default, gcpl_id_default, gapl_id_default)
 !!$         USE H5GLOBAL
-!!$         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-!!$         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GCREATE_C'::h5gcreate_c
-!!$         !DEC$ ENDIF
+!!$         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+!!$         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GCREATE_C'::h5gcreate_c
+!!$         !DEC$ENDIF
 !!$         !DEC$ATTRIBUTES reference :: name
 !!$         INTEGER(HID_T), INTENT(IN) :: loc_id
 !!$         CHARACTER(LEN=*), INTENT(IN) :: name
@@ -255,9 +255,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5gopen_c(loc_id, name, namelen, gapl_id_default, grp_id)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GOPEN_C'::h5gopen_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GOPEN_C'::h5gopen_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: name
@@ -309,9 +309,9 @@ CONTAINS
             INTERFACE
               INTEGER FUNCTION h5gclose_c(grp_id)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GCLOSE_C'::h5gclose_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GCLOSE_C'::h5gclose_c
+              !DEC$ENDIF
               INTEGER(HID_T), INTENT(IN) :: grp_id
               END FUNCTION h5gclose_c
             END INTERFACE
@@ -370,9 +370,9 @@ CONTAINS
                                namelen, idx, &
                                obj_name, obj_namelen, obj_type)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GGET_OBJ_INFO_IDX_C'::h5gget_obj_info_idx_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GGET_OBJ_INFO_IDX_C'::h5gget_obj_info_idx_c
+              !DEC$ENDIF
               !DEC$ATTRIBUTES reference :: name
               !DEC$ATTRIBUTES reference :: obj_name
               INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -434,9 +434,9 @@ CONTAINS
             INTERFACE
               INTEGER FUNCTION h5gn_members_c(loc_id, name, namelen, nmembers)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GN_MEMBERS_C'::h5gn_members_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GN_MEMBERS_C'::h5gn_members_c
+              !DEC$ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -507,9 +507,9 @@ CONTAINS
                                current_namelen, new_name, new_namelen)
                               
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GLINK_C'::h5glink_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GLINK_C'::h5glink_c
+              !DEC$ENDIF
               !DEC$ATTRIBUTES reference :: current_name
               !DEC$ATTRIBUTES reference :: new_name
               INTEGER(HID_T), INTENT(IN) :: loc_id 
@@ -581,9 +581,9 @@ CONTAINS
                                new_name, new_namelen)
                               
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GLINK2_C'::h5glink2_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GLINK2_C'::h5glink2_c
+              !DEC$ENDIF
               !DEC$ATTRIBUTES reference :: cur_name
               !DEC$ATTRIBUTES reference :: new_name
               INTEGER(HID_T), INTENT(IN) :: cur_loc_id 
@@ -643,9 +643,9 @@ CONTAINS
             INTERFACE
               INTEGER FUNCTION h5gunlink_c(loc_id, name, namelen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GUNLINK_C'::h5gunlink_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GUNLINK_C'::h5gunlink_c
+              !DEC$ENDIF
               !DEC$ATTRIBUTES reference :: name
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -700,9 +700,9 @@ CONTAINS
             INTERFACE
               INTEGER FUNCTION h5gmove_c(loc_id, name, namelen, new_name, new_namelen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GMOVE_C'::h5gmove_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GMOVE_C'::h5gmove_c
+              !DEC$ENDIF
               !DEC$ATTRIBUTES reference :: name
               !DEC$ATTRIBUTES reference :: new_name
               INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -760,9 +760,9 @@ CONTAINS
               INTEGER FUNCTION h5gmove2_c(src_loc_id, src_name, src_namelen, &
                                dst_loc_id, dst_name, dst_namelen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GMOVE2_C'::h5gmove2_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GMOVE2_C'::h5gmove2_c
+              !DEC$ENDIF
               !DEC$ATTRIBUTES reference :: src_name
               !DEC$ATTRIBUTES reference :: dst_name
               INTEGER(HID_T), INTENT(IN) :: src_loc_id
@@ -829,9 +829,9 @@ CONTAINS
             INTERFACE
               INTEGER FUNCTION h5gget_linkval_c(loc_id, name, namelen, size, buffer)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GGET_LINKVAL_C'::h5gget_linkval_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GGET_LINKVAL_C'::h5gget_linkval_c
+              !DEC$ENDIF
               !DEC$ATTRIBUTES reference :: name
               !DEC$ATTRIBUTES reference :: buffer 
               INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -889,9 +889,9 @@ CONTAINS
               INTEGER FUNCTION h5gset_comment_c(loc_id, name, namelen, &
                                                 comment, commentlen)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GSET_COMMENT_C'::h5gset_comment_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GSET_COMMENT_C'::h5gset_comment_c
+              !DEC$ENDIF
               !DEC$ATTRIBUTES reference :: name 
               !DEC$ATTRIBUTES reference :: comment 
               INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -952,9 +952,9 @@ CONTAINS
               INTEGER FUNCTION h5gget_comment_c(loc_id, name, namelen, &
                                                 size, buffer)
               USE H5GLOBAL
-              !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-              !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GGET_COMMENT_C'::h5gget_comment_c
-              !DEC$ ENDIF
+              !DEC$IF DEFINED(HDF5F90_WINDOWS)
+              !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GGET_COMMENT_C'::h5gget_comment_c
+              !DEC$ENDIF
               !DEC$ATTRIBUTES reference :: name, buffer
               INTEGER(HID_T), INTENT(IN) :: loc_id
               CHARACTER(LEN=*), INTENT(IN) :: name
@@ -1005,9 +1005,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5gcreate_anon_c(loc_id, gcpl_id_default, gapl_id_default, grp_id)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GCREATE_ANON_C'::h5gcreate_anon_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GCREATE_ANON_C'::h5gcreate_anon_c
+         !DEC$ENDIF
          INTEGER(HID_T), INTENT(IN) :: loc_id   ! File or group identifier
          INTEGER(HID_T), INTENT(IN) :: gcpl_id_default  ! Property list for group creation
          INTEGER(HID_T), INTENT(IN) :: gapl_id_default  ! Property list for group access
@@ -1057,9 +1057,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5gget_create_plist_c(grp_id, gcpl_id )
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GGET_CREATE_PLIST_C'::h5gget_create_plist_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GGET_CREATE_PLIST_C'::h5gget_create_plist_c
+         !DEC$ENDIF
          INTEGER(HID_T), INTENT(IN)  :: grp_id
          INTEGER(HID_T), INTENT(OUT) :: gcpl_id
        END FUNCTION h5gget_create_plist_c
@@ -1122,9 +1122,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5gget_info_c(group_id, storage_type, nlinks, max_corder, mounted_c)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GGET_INFO_C'::h5gget_info_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GGET_INFO_C'::h5gget_info_c
+         !DEC$ENDIF
          INTEGER(HID_T), INTENT(IN) :: group_id
          INTEGER, INTENT(OUT) :: storage_type
          INTEGER, INTENT(OUT) :: nlinks
@@ -1212,9 +1212,9 @@ CONTAINS
        INTEGER FUNCTION h5gget_info_by_idx_c(loc_id, group_name, group_name_len, index_type, order, n, lapl_id_default, &
             storage_type, nlinks, max_corder, mounted_c)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GGET_INFO_BY_IDX_C'::h5gget_info_by_idx_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GGET_INFO_BY_IDX_C'::h5gget_info_by_idx_c
+         !DEC$ENDIF
          
          !DEC$ATTRIBUTES reference :: group_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
@@ -1312,9 +1312,9 @@ CONTAINS
        INTEGER FUNCTION h5gget_info_by_name_c(loc_id, group_name, group_name_len, lapl_id_default, &
             storage_type, nlinks, max_corder, mounted_c)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5GGET_INFO_BY_NAME_C'::h5gget_info_by_name_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5GGET_INFO_BY_NAME_C'::h5gget_info_by_name_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: group_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: group_name
