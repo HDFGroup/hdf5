@@ -3133,13 +3133,48 @@ herr_t H5LTcopy_region(const char *file_src,
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTread_quality_flag(hid_t dset_id, int num_flags, const unsigned *offset,
-			     const unsigned *length, hid_t *dtype, hid_t *space, void *buf)
+herr_t H5LTread_bitfield_value(hid_t dset_id, int num_values, const unsigned *offset,
+			       const unsigned *lengths, hid_t *space, hid_t *dtype,  int *buf)
 {
   hid_t ret_value = SUCCEED;          /* Return value */
   herr_t status;
+  H5S_sel_type sel_type;
+  hid_t space_id, mem_space;
+  hsize_t dims1[1];
+  unsigned char *buf2;
+  int i, j, icnt;
 
-
+  /* Determine the type of the dataspace selection */
+  space_id = H5Dget_space (dset_id);
+  sel_type = H5Sget_select_type(space_id);
+  
+  /* Get the number of elements */
+  if(sel_type==H5S_SEL_HYPERSLABS){
+    dims1[0] = H5Sget_select_hyper_nblocks(space_id);
+  } else if(sel_type==H5S_SEL_POINTS){
+    dims1[0] = H5Sget_select_npoints(space_id);
+  } else if(sel_type==H5S_SEL_NONE){
     return ret_value;
+  } else if(sel_type==H5S_SEL_ALL){
+    dims1[0] = H5Sget_select_npoints(space_id);
+  }
 
+  /* Create a new simple dataspace in memory and open it for access */
+  mem_space = H5Screate_simple (1, dims1, NULL);
+
+  buf2 = malloc(sizeof(unsigned char) * dims1[0]);
+
+  /* Read the region data from the file_space into the mem_space */
+  status = H5Dread (dset_id, dtype, mem_space, space_id, H5P_DEFAULT, buf2);
+
+  icnt = 0;
+  for (i = 0; i<dims1[0]; i++)
+    for (j = 0; j<num_values; j++){
+      buf[icnt] = (int*)((buf2[i] >> (offset[j]) ) & ((1 << lengths[j] ) - 1));
+      icnt  += 1;
+    }
+
+  free(buf2);
+
+  return ret_value;
 }
