@@ -196,7 +196,7 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
  * This program performs three different types of parallel access. It writes on
  * the entire dataset, it extends the dataset to nchunks*CHUNK_SIZE, and it only
  * opens the dataset. At the end, it verifies the size of the dataset to be
- * consistent with argument 'nchunks'.
+ * consistent with argument 'chunk_factor'.
  */
 static void
 parallel_access_dataset(const char *filename, int chunk_factor, access_type action, hid_t *file_id, hid_t *dataset)
