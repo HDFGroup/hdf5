@@ -664,6 +664,7 @@ herr_t H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,
   hsize_t *bounds_coor;
   hid_t dtype;
 
+
   /* Region reference data */
   did_src = H5Rdereference(obj_id, H5R_DATASET_REGION, ref);
 
@@ -757,10 +758,9 @@ herr_t H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,
   status = H5Dwrite(dset_id, type_id, sid2, sid1, H5P_DEFAULT, buf);
 
   /* create reference */
-  status = H5Rcreate(&ref_new, file_id, path, H5R_DATASET_REGION, sid1);
+  status = H5Rcreate(ref_new, file_id, path, H5R_DATASET_REGION, sid1);
 
   /* close the data */
-
   status = H5Dclose(dset_id);
   status = H5Sclose(sid1);
   status = H5Sclose(sid2);
