@@ -7451,6 +7451,10 @@ main(void)
         hid_t fcpl_src;
         hid_t fcpl_dst;
 
+        /* No need to test dense attributes with old format */
+        if(!(configuration & CONFIG_NEW_FORMAT) && (configuration & CONFIG_DENSE))
+            continue;
+
         /* Test with and without shared messages */
         if(configuration & CONFIG_SHARE_SRC) {
             puts("\nTesting with shared src messages:");
@@ -7473,21 +7477,22 @@ main(void)
         if(configuration & CONFIG_NEW_FORMAT) {
             puts("Testing with new group format:");
             my_fapl = fapl2;
+
+                /* Test with and without dense attributes */
+            if(configuration & CONFIG_DENSE) {
+                puts("Testing with dense attributes:");
+                num_attributes_g = max_compact + 1;
+            }
+            else {
+                puts("Testing without dense attributes:");
+                num_attributes_g = MAX(min_dense, 2) - 1;
+            }
         } /* end if */
         else {
             puts("Testing with old group format:");
             my_fapl = fapl;
+            num_attributes_g = 4;
         } /* end else */
-
-        /* Test with and without dense attributes */
-        if(configuration & CONFIG_DENSE) {
-            puts("Testing with dense attributes:");
-            num_attributes_g = max_compact + 1;
-        }
-        else {
-            puts("Testing without dense attributes:");
-            num_attributes_g = MAX(min_dense, 2) - 1;
-        }
 
         /* The tests... */
         nerrors += test_copy_dataset_simple(fcpl_src, fcpl_dst, my_fapl);

@@ -158,7 +158,8 @@ typedef struct H5F_file_t {
     int	ncwfs;			/* Num entries on cwfs list		*/
     struct H5HG_heap_t **cwfs;	/* Global heap cache			*/
     struct H5G_t *root_grp;	/* Open root group			*/
-    H5G_entry_t *root_ent;      /* Root group symbol table entry */
+    H5G_entry_t *root_ent;      /* Root group symbol table entry        */
+    haddr_t     root_addr;      /* Root group address                   */
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5RC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
 
@@ -225,7 +226,7 @@ H5_DLL herr_t H5F_mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nop
 /* Superblock related routines */
 H5_DLL herr_t H5F_super_init(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5F_super_write(H5F_t *f, hid_t dxpl_id);
-H5_DLL herr_t H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc);
+H5_DLL herr_t H5F_super_read(H5F_t *f, hid_t dxpl_id);
 H5_DLL herr_t H5F_super_ext_size(H5F_t *f, hid_t dxpl_id, hsize_t *super_ext_info);
 
 /* Metadata accumulator routines */
@@ -247,6 +248,7 @@ H5_DLL herr_t H5F_sfile_remove(H5F_file_t *shared);
 #ifdef H5F_TESTING
 H5_DLL herr_t H5F_get_sohm_mesg_count_test(hid_t fid, unsigned type_id,
     size_t *mesg_count);
+H5_DLL herr_t H5F_check_cached_stab_test(hid_t file_id);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

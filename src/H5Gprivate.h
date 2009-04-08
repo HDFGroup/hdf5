@@ -151,7 +151,7 @@ typedef struct H5G_entry_t H5G_entry_t;
  * Library prototypes...  These are the ones that other packages routinely
  * call.
  */
-H5_DLL herr_t H5G_mkroot(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc);
+H5_DLL herr_t H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root);
 H5_DLL struct H5O_loc_t *H5G_oloc(H5G_t *grp);
 H5_DLL H5G_t *H5G_rootof(H5F_t *f);
 H5_DLL H5G_name_t * H5G_nameof(H5G_t *grp);
@@ -181,10 +181,8 @@ H5_DLL herr_t H5G_node_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stream
 /*
  * These functions operate on group object locations.
  */
-H5_DLL herr_t H5G_obj_ent_decode(H5F_t *f, const uint8_t **pp,
-    struct H5O_loc_t *oloc, H5G_entry_t **entp);
-H5_DLL herr_t H5G_obj_ent_encode(const H5F_t *f, uint8_t **pp,
-    const struct H5O_loc_t *oloc);
+H5_DLL herr_t H5G_root_ent_decode(H5F_t *f, const uint8_t **pp);
+H5_DLL herr_t H5G_root_ent_encode(H5F_t *f, uint8_t **pp);
 
 /*
  * These functions operate on group hierarchy names.
