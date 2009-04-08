@@ -1975,7 +1975,7 @@ H5G_visit(hid_t loc_id, const char *group_name, H5_index_t idx_type,
     udata.curr_path_len = 0;
 
     /* Create skip list to store visited object information */
-    if((udata.visited = H5SL_create(H5SL_TYPE_OBJ, 0.5, (size_t)16)) == NULL)
+    if((udata.visited = H5SL_create(H5SL_TYPE_OBJ)) == NULL)
         HGOTO_ERROR(H5E_SYM, H5E_CANTCREATE, FAIL, "can't create skip list for visited objects")
 
     /* Get the group's reference count and type */

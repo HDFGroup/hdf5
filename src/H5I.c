@@ -1847,7 +1847,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:	H5Iis_valid
  *
- * Purpose:	Check if the given id is valid.  And id is valid if it is in
+ * Purpose:	Check if the given id is valid.  An id is valid if it is in
  *              use and has an application reference count of at least 1.
  *
  * Return:	Success:        TRUE if the id is valid, FALSE otherwise.

@@ -36,9 +36,6 @@
 /* Local Macros */
 /****************/
 
-/* Default skip list height for storing list of chunks */
-#define H5D_CHUNK_DEFAULT_SKIPLIST_HEIGHT     8
-
 /* Macros for iterating over chunks to operate on */
 #define H5D_CHUNK_GET_FIRST_NODE(map) (map->use_single ? (H5SL_node_t *)(1) : H5SL_first(map->sel_chunks))
 #define H5D_CHUNK_GET_NODE_INFO(map, node)  (map->use_single ? map->single_chunk_info : (H5D_chunk_info_t *)H5SL_item(node))
@@ -495,7 +492,7 @@ H5D_chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info
     else {
         /* Initialize skip list for chunk selections */
         if(NULL == dataset->shared->cache.chunk.sel_chunks) {
-            if(NULL == (dataset->shared->cache.chunk.sel_chunks = H5SL_create(H5SL_TYPE_HSIZE, 0.5, (size_t)H5D_CHUNK_DEFAULT_SKIPLIST_HEIGHT)))
+            if(NULL == (dataset->shared->cache.chunk.sel_chunks = H5SL_create(H5SL_TYPE_HSIZE)))
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "can't create skip list for chunk selections")
         } /* end if */
         fm->sel_chunks = dataset->shared->cache.chunk.sel_chunks;
