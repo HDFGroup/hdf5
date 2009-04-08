@@ -142,13 +142,18 @@ herr_t H5DSattach_scale(hid_t did,
     H5I_type_t it1, it2;
     int        i, len;
     int        found_ds=0;
+    htri_t     is_scale;
 
     /*-------------------------------------------------------------------------
     * parameter checking
     *-------------------------------------------------------------------------
     */
+   
+    if ((is_scale = H5DSis_scale(did)) < 0)
+        return FAIL;
+  
     /* the dataset cannot be a DS dataset */
-    if ((H5DSis_scale(did))==1)
+    if ( is_scale == 1)
         return FAIL;
 
     /* get info for the dataset in the parameter list */
@@ -637,13 +642,18 @@ herr_t H5DSdetach_scale(hid_t did,
     H5O_info_t oi1, oi2, oi3, oi4;
     int        found_dset = 0, found_ds = 0;
     H5I_type_t it1, it2;
+    htri_t     is_scale;
 
     /*-------------------------------------------------------------------------
     * parameter checking
     *-------------------------------------------------------------------------
     */
+   
+    if ((is_scale = H5DSis_scale(did)) < 0)
+        return FAIL;
+  
     /* the dataset cannot be a DS dataset */
-    if ((H5DSis_scale(did))==1)
+    if ( is_scale == 1)
         return FAIL;
 
     /* get info for the dataset in the parameter list */
@@ -691,6 +701,9 @@ herr_t H5DSdetach_scale(hid_t did,
     if (H5Sclose(sid) < 0)
         return FAIL;
 
+    /* parameter range checking */
+    if (idx>(unsigned)rank-1)
+        return FAIL;
 
     /*-------------------------------------------------------------------------
     * find "REFERENCE_LIST"
@@ -1022,13 +1035,18 @@ htri_t H5DSis_attached(hid_t did,
     H5I_type_t it1, it2;
     int        i;
     int        found_dset=0, found_ds=0;
+    htri_t     is_scale;
 
     /*-------------------------------------------------------------------------
     * parameter checking
     *-------------------------------------------------------------------------
     */
+   
+    if ((is_scale = H5DSis_scale(did)) < 0)
+        return FAIL;
+  
     /* the dataset cannot be a DS dataset */
-    if ((H5DSis_scale(did))==1)
+    if ( is_scale == 1)
         return FAIL;
 
     /* get info for the dataset in the parameter list */
@@ -1071,7 +1089,7 @@ htri_t H5DSis_attached(hid_t did,
 
     /* parameter range checking */
     if(idx > ((unsigned)rank - 1))
-        goto out;
+        return FAIL;
 
     /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
     if((has_dimlist = H5LT_find_attribute(did, DIMENSION_LIST)) < 0)
@@ -1339,6 +1357,13 @@ herr_t H5DSiterate_scales(hid_t did,
     if ((nscales = H5DSget_num_scales(did,dim)) < 0)
         return FAIL;
 
+    /* parameter range checking */
+    if (idx!=NULL)
+    {
+        if (*idx>=nscales)
+            return FAIL;
+    }
+
     /* get dataset space */
     if ((sid = H5Dget_space(did)) < 0)
         return FAIL;
@@ -1470,16 +1495,17 @@ out:
 *-------------------------------------------------------------------------
 */
 
-herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label) {
-    int has_labels;
-    hid_t sid; /* space ID */
-    hid_t tid = -1; /* attribute type ID */
-    hid_t aid = -1; /* attribute ID */
-    int rank; /* rank of dataset */
-    hsize_t dims[1]; /* dimensions of dataset */
-    const char **buf = NULL; /* buffer to store in the attribute */
-    H5I_type_t it; /* ID type */
-    unsigned int i;
+herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label) 
+{
+    int        has_labels;
+    hid_t      sid = -1;      /* space ID */
+    hid_t      tid = -1;      /* attribute type ID */
+    hid_t      aid = -1;      /* attribute ID */
+    int        rank;          /* rank of dataset */
+    hsize_t    dims[1];       /* dimensions of dataset */
+    const char **buf = NULL;  /* buffer to store in the attribute */
+    H5I_type_t it;            /* ID type */
+    unsigned   int i;
 
     /*-------------------------------------------------------------------------
     * parameter checking
@@ -1492,16 +1518,7 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label) {
     if (H5I_DATASET != it)
         return FAIL;
 
-    /*-------------------------------------------------------------------------
-    * attribute "DIMENSION_LABELS"
-    *-------------------------------------------------------------------------
-    */
-
-    /* try to find the attribute "DIMENSION_LABELS" on the >>data<< dataset */
-    if ((has_labels = H5LT_find_attribute(did, DIMENSION_LABELS)) < 0)
-        return FAIL;
-
-    /* get dataset space */
+     /* get dataset space */
     if ((sid = H5Dget_space(did)) < 0)
         return FAIL;
 
@@ -1513,12 +1530,25 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label) {
     if (H5Sclose(sid) < 0)
         goto out;
 
+    if ( idx >= (unsigned)rank )
+        return FAIL;
+
+    /*-------------------------------------------------------------------------
+    * attribute "DIMENSION_LABELS"
+    *-------------------------------------------------------------------------
+    */
+
+    /* try to find the attribute "DIMENSION_LABELS" on the >>data<< dataset */
+    if ((has_labels = H5LT_find_attribute(did, DIMENSION_LABELS)) < 0)
+        return FAIL;
+
     /*-------------------------------------------------------------------------
     * make the attribute and insert label
     *-------------------------------------------------------------------------
     */
 
-    if (has_labels == 0) {
+    if (has_labels == 0) 
+    {
         dims[0] = rank;
 
         /* space for the attribute */
@@ -1532,8 +1562,7 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label) {
             goto out;
 
         /* create the attribute */
-        if ((aid = H5Acreate2(did, DIMENSION_LABELS, tid, sid,
-            H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        if ((aid = H5Acreate2(did, DIMENSION_LABELS, tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             goto out;
 
         /* allocate and initialize */
@@ -1571,7 +1600,8 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label) {
     *-------------------------------------------------------------------------
     */
 
-    else {
+    else 
+    {
         if ((aid = H5Aopen(did, DIMENSION_LABELS, H5P_DEFAULT)) < 0)
             goto out;
 
@@ -1603,7 +1633,8 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label) {
         buf[idx] = NULL;
 
         /* free all the ptr's from the H5Aread() */
-        for (i = 0; i < (unsigned int) rank; i++) {
+        for (i = 0; i < (unsigned int) rank; i++) 
+        {
             if (buf[i])
                 free(buf[i]);
         }
@@ -1624,11 +1655,13 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label) {
 
     /* error zone */
 out: 
-    if (buf) {
+    if (buf) 
+    {
         if (buf[idx]) /* check if we errored during H5Awrite */
             buf[idx] = NULL; /* don't free label */
         /* free all the ptr's from the H5Aread() */
-        for (i = 0; i < (unsigned int) rank; i++) {
+        for (i = 0; i < (unsigned int) rank; i++) 
+        {
             if (buf[i])
                 free(buf[i]);
         }
@@ -1664,17 +1697,18 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size) {
-    int has_labels;
-    hid_t sid; /* space ID */
-    hid_t tid = -1; /* attribute type ID */
-    hid_t aid = -1; /* attribute ID */
-    int rank; /* rank of dataset */
-    char **buf = NULL; /* buffer to store in the attribute */
-    H5I_type_t it; /* ID type */
-    size_t nbytes;
-    size_t copy_len;
-    int i;
+ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size) 
+{
+    int        has_labels;
+    hid_t      sid = -1;     /* space ID */
+    hid_t      tid = -1;     /* attribute type ID */
+    hid_t      aid = -1;     /* attribute ID */
+    int        rank;         /* rank of dataset */
+    char       **buf = NULL; /* buffer to store in the attribute */
+    H5I_type_t it;           /* ID type */
+    size_t     nbytes;
+    size_t     copy_len;
+    int        i;
 
     /*-------------------------------------------------------------------------
     * parameter checking
@@ -1685,6 +1719,21 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size) {
         return FAIL;
 
     if (H5I_DATASET != it)
+        return FAIL;
+
+     /* get dataset space */
+    if ((sid = H5Dget_space(did)) < 0)
+        return FAIL;
+
+    /* get rank */
+    if ((rank = H5Sget_simple_extent_ndims(sid)) < 0)
+        goto out;
+
+    /* close dataset space */
+    if (H5Sclose(sid) < 0)
+        goto out;
+
+    if ( idx >= (unsigned)rank )
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -1702,19 +1751,7 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size) {
         if (label)
             label[0] = 0;
         return 0;
-    }
-
-    /* get dataset space */
-    if ((sid = H5Dget_space(did)) < 0)
-        return FAIL;
-
-    /* get rank */
-    if ((rank = H5Sget_simple_extent_ndims(sid)) < 0)
-        goto out;
-
-    /* close dataset space */
-    if (H5Sclose(sid) < 0)
-        goto out;
+    }   
 
     /*-------------------------------------------------------------------------
     * open the attribute and read label
@@ -1745,7 +1782,8 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size) {
     copy_len = MIN(size-1, nbytes);
 
     /* copy all/some of the name */
-    if (label) {
+    if (label) 
+    {
         memcpy(label, buf[idx], copy_len);
 
         /* terminate the string */
@@ -1753,7 +1791,8 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size) {
     }
 
     /* free all the ptr's from the H5Aread() */
-    for (i = 0; i < (unsigned int) rank; i++) {
+    for (i = 0; i < rank; i++) 
+    {
         if (buf[i])
             free(buf[i]);
     }
@@ -1773,9 +1812,11 @@ ssize_t H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size) {
 
     /* error zone */
 out: 
-    if (buf) {
+    if (buf) 
+    {
         /* free all the ptr's from the H5Aread() */
-        for (i = 0; i < (unsigned int) rank; i++) {
+        for (i = 0; i < rank; i++) 
+        {
             if (buf[i])
                 free(buf[i]);
         }
@@ -2194,7 +2235,8 @@ herr_t H5DS_is_reserved(hid_t did)
 
     /* error zone */
 out:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY 
+    {
         H5Tclose(tid);
         H5Aclose(aid);
     } H5E_END_TRY;
