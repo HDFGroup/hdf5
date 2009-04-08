@@ -1680,7 +1680,8 @@ out:
 /*-------------------------------------------------------------------------
  * Function: op_continue
  *
- * Purpose: example operator function used by H5DSiterate_scales, that does nothing
+ * Purpose: example operator function used by H5DSiterate_scales that continues 
+ *  iteration and increments visitor_data (Note: int*)
  *
  * Return:
  * The return values from an operator are:
@@ -1699,7 +1700,11 @@ static herr_t op_continue(hid_t dset, unsigned dim, hid_t scale_id, void *visito
     dset = dset;
     dim = dim;
     scale_id = scale_id;
-    visitor_data = visitor_data;
+
+    if ( visitor_data != NULL )
+    {
+        (*(int *)visitor_data)++;
+    }
 
     /* define a default zero value for return. This will cause the iterator to continue */
     return 0;
@@ -1709,7 +1714,8 @@ static herr_t op_continue(hid_t dset, unsigned dim, hid_t scale_id, void *visito
 /*-------------------------------------------------------------------------
  * Function: op_stop
  *
- * Purpose: example operator function used by H5DSiterate_scales, that does nothing
+ * Purpose: example operator function used by H5DSiterate_scales that stops 
+ *  iteration and increments visitor_data (Note: int*)
  *
  * Return:
  * The return values from an operator are:
@@ -1728,7 +1734,11 @@ static herr_t op_stop(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_da
     dset = dset;
     dim = dim;
     scale_id = scale_id;
-    visitor_data = visitor_data;
+    
+    if ( visitor_data != NULL )
+    {
+        (*(int *)visitor_data)++;
+    }
 
     /* define a default 1 value for return. This will cause the iterator to stop */
     return 1;
@@ -2946,8 +2956,10 @@ static int test_errors2(void)
     hsize_t dimd[2]  = {3,3};                 /* size of data dataset */
     hsize_t dims[1]  = {3};                   /* size of scale dataset */
     char    lbuf[255];                        /* label buffer */
-    size_t  label_len;
-    int     ds_idx;
+    size_t  label_len;                        /* label lenght */
+    int     scale_idx;                        /* scale index */
+    int     nscales;                          /* number of scales in DIM */
+    int     count;                            /* visitor data */
    
     printf("Testing parameter errors\n");
 
@@ -2967,6 +2979,11 @@ static int test_errors2(void)
     /* make a scale dataset  */
     if(H5LTmake_dataset_int(fid,"ds1",1,dims,NULL) < 0)
         goto out;
+
+    /* make a scale dataset  */
+    if(H5LTmake_dataset_int(fid,"ds2",1,dims,NULL) < 0)
+        goto out;
+
 
 
     /*-------------------------------------------------------------------------
@@ -3027,11 +3044,12 @@ static int test_errors2(void)
 
 
     /*-------------------------------------------------------------------------
-    * iterate_scales invalid indices
+    * iterate_scales invalid indices and return DS_IDX and visitor data
     *-------------------------------------------------------------------------
     */
     if ((did = H5Dopen2(fid,"dset", H5P_DEFAULT)) < 0)
         goto out;
+
     if ((dsid = H5Dopen2(fid,"ds1", H5P_DEFAULT)) < 0)
         goto out;
     if (H5DSattach_scale(did,dsid,0) < 0)
@@ -3039,22 +3057,48 @@ static int test_errors2(void)
     if (H5Dclose(dsid) < 0)
         goto out;
 
+    if ((dsid = H5Dopen2(fid,"ds2", H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5DSattach_scale(did,dsid,0) < 0)
+        goto out;
+    if (H5Dclose(dsid) < 0)
+        goto out;
 
+    if((nscales = H5DSget_num_scales(did,0)) < 0)
+        goto out;
+    if(nscales!=2)
+        goto out;
+
+    /* invalid DIM */
     if (H5DSiterate_scales(did,2,NULL,op_continue,NULL)== SUCCEED)
         goto out;
-    ds_idx = 2; /* invalid */
-    if (H5DSiterate_scales(did,0,&ds_idx,op_continue,NULL)== SUCCEED)
+    /* invalid DS_IDX */
+    scale_idx = 2; 
+    if (H5DSiterate_scales(did,0,&scale_idx,op_continue,NULL)== SUCCEED)
         goto out;
-    if (H5DSiterate_scales(did,0,NULL,op_continue,NULL) < 0)
+    
+    /* continue iteration */
+    scale_idx = 0;
+    count = 0;
+    if (H5DSiterate_scales(did,0,&scale_idx,op_continue,(void *)&count) < 0)
         goto out;
-    ds_idx = 0;
-    /* stop at first scale iteration and return ds_idx*/
-    if (H5DSiterate_scales(did,0,&ds_idx,op_stop,NULL) < 0)
-        goto out;
-    if ( ds_idx != 0 )
+
+    if ( scale_idx != 1 && count != nscales )
     {
         goto out;
     }
+
+    /* stop iteration */
+    scale_idx = 0;
+    count = 0;
+    if (H5DSiterate_scales(did,0,&scale_idx,op_stop,(void *)&count) < 0)
+        goto out;
+
+    if ( scale_idx != 0 && count != 1 )
+    {
+        goto out;
+    }
+
     
     if (H5Dclose(did) < 0)
         goto out;  
