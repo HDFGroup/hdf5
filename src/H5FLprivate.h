@@ -100,7 +100,6 @@ typedef struct H5FL_reg_head_t {
     unsigned init;      /* Whether the free list has been initialized */
     unsigned allocated; /* Number of blocks allocated */
     unsigned onlist;    /* Number of blocks on free list */
-    size_t list_mem;    /* Amount of memory on free list */
     const char *name;   /* Name of the type */
     size_t size;        /* Size of the blocks in the list */
     H5FL_reg_node_t *list;  /* List of free blocks */
@@ -112,7 +111,7 @@ typedef struct H5FL_reg_head_t {
 #define H5FL_REG_NAME(t)        H5_##t##_reg_free_list
 #ifndef H5_NO_REG_FREE_LISTS
 /* Common macros for H5FL_DEFINE & H5FL_DEFINE_STATIC */
-#define H5FL_DEFINE_COMMON(t) H5FL_reg_head_t H5FL_REG_NAME(t)={0,0,0,0,#t,sizeof(t),NULL}
+#define H5FL_DEFINE_COMMON(t) H5FL_reg_head_t H5FL_REG_NAME(t)={0,0,0,#t,sizeof(t),NULL}
 
 /* Declare a free list to manage objects of type 't' */
 #define H5FL_DEFINE(t) H5_DLL H5FL_DEFINE_COMMON(t)
@@ -349,11 +348,8 @@ typedef struct H5FL_seq_head_t {
 #define H5FL_SEQ_REALLOC(t,obj,new_elem) (t *)H5MM_realloc(obj,(new_elem)*sizeof(t))
 #endif /* H5_NO_SEQ_FREE_LISTS */
 
-/* Data structure for free list block factory */
-typedef struct H5FL_fac_head_t {
-    H5FL_blk_head_t queue;      /* Priority queue of blocks */
-    size_t size;                /* Size of the blocks managed */
-} H5FL_fac_head_t;
+/* Forward declaration of the data structure for free list block factory */
+typedef struct H5FL_fac_head_t H5FL_fac_head_t;
 
 /*
  * Macros for defining & using free list factories
@@ -381,30 +377,42 @@ typedef struct H5FL_fac_head_t {
 /*
  * Library prototypes.
  */
+ /* Block free lists */
 H5_DLL void * H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS);
 H5_DLL void * H5FL_blk_calloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS);
 H5_DLL void * H5FL_blk_free(H5FL_blk_head_t *head, void *block);
 H5_DLL void * H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_PARAMS);
 H5_DLL htri_t H5FL_blk_free_block_avail(H5FL_blk_head_t *head, size_t size);
+
+/* Regular free lists */
 H5_DLL void * H5FL_reg_malloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS);
 H5_DLL void * H5FL_reg_calloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS);
 H5_DLL void * H5FL_reg_free(H5FL_reg_head_t *head, void *obj);
+
+/* Array free lists */
 H5_DLL void * H5FL_arr_malloc(H5FL_arr_head_t *head, size_t elem);
 H5_DLL void * H5FL_arr_calloc(H5FL_arr_head_t *head, size_t elem);
 H5_DLL void * H5FL_arr_free(H5FL_arr_head_t *head, void *obj);
 H5_DLL void * H5FL_arr_realloc(H5FL_arr_head_t *head, void *obj, size_t new_elem);
+
+/* Sequence free lists */
 H5_DLL void * H5FL_seq_malloc(H5FL_seq_head_t *head, size_t elem H5FL_TRACK_PARAMS);
 H5_DLL void * H5FL_seq_calloc(H5FL_seq_head_t *head, size_t elem H5FL_TRACK_PARAMS);
 H5_DLL void * H5FL_seq_free(H5FL_seq_head_t *head, void *obj);
 H5_DLL void * H5FL_seq_realloc(H5FL_seq_head_t *head, void *obj, size_t new_elem H5FL_TRACK_PARAMS);
+
+/* Factory free lists */
 H5_DLL H5FL_fac_head_t *H5FL_fac_init(size_t size);
 H5_DLL void * H5FL_fac_malloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS);
 H5_DLL void * H5FL_fac_calloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS);
 H5_DLL void * H5FL_fac_free(H5FL_fac_head_t *head, void *obj);
 H5_DLL herr_t H5FL_fac_term(H5FL_fac_head_t *head);
+
+/* General free list routines */
 H5_DLL herr_t H5FL_garbage_coll(void);
 H5_DLL herr_t H5FL_set_free_list_limits(int reg_global_lim, int reg_list_lim,
-    int arr_global_lim, int arr_list_lim, int blk_global_lim, int blk_list_lim);
+    int arr_global_lim, int arr_list_lim, int blk_global_lim, int blk_list_lim,
+    int fac_global_lim, int fac_list_lim);
 H5_DLL int   H5FL_term_interface(void);
 
 #endif
