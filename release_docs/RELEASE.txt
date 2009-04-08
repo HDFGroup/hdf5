@@ -125,19 +125,10 @@ New Features
             predefined constant, whatever is smaller. This assures that the chunk 
             read fits in the chunk cache. (PVN - 2008/11/21)
     
-
-
-
-
     High-Level APIs:
     ------
      - Table: In version 3.0 of Table, "NROWS" (used to store number of records) was 
            deprecated (PVN - 2008/11/24)
-
-    Fortran High-Level APIs:
-    ------
-     - Lite: The h5ltget_dataset_info_f function (gets information about a dataset) 
-           was not correctly returning the dimension array (PVN - 2009/3/23)
 
     
     Documentation 
@@ -306,6 +297,18 @@ Bug Fixes since HDF5-1.8.0 release
         - h5dump: when doing binary output (-b), the stdout printing of attributes 
            was done incorrectly. Removed printing of attributes when doing binary 
            output. PVN - 2008/06/05
+
+    High-Level APIs:
+     ------
+      - Dimension scales: The scale index return value in H5DSiterate_scales was not always 
+          incremented. (PVN - 2009/4/8 - 1538)
+
+    Fortran High-Level APIs:
+     ------
+      - Lite: The h5ltget_dataset_info_f function (gets information about a dataset) 
+           was not correctly returning the dimension array (PVN - 2009/3/23)
+
+
 
 
 
