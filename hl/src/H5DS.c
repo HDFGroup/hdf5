@@ -1292,11 +1292,12 @@ out:
 * Parameters:
 *
 *  hid_t DID;               IN: the dataset
-*  unsigned int dim;        IN: the dimension of the dataset
-*  int *idx;                IN/OUT: input the index to start iterating, output the
-*                             next index to visit. If NULL, start at the first position.
-*  H5DS_iterate_t visitor;  IN: the visitor function
-*  void *visitor_data;      IN: arbitrary data to pass to the visitor function.
+*  unsigned int DIM;        IN: the dimension of the dataset
+*  int *DS_IDX;             IN/OUT: on input the dimension scale index to start iterating, 
+*                               on output the next index to visit. If NULL, start at 
+*                               the first position.
+*  H5DS_iterate_t VISITOR;  IN: the visitor function
+*  void *VISITOR_DATA;      IN: arbitrary data to pass to the visitor function.
 *
 *  Iterate over all scales of DIM, calling an application callback
 *   with the item, key and any operator data.
@@ -1324,7 +1325,7 @@ out:
 
 herr_t H5DSiterate_scales(hid_t did,
                           unsigned int dim,
-                          int *idx,
+                          int *ds_idx,
                           H5DS_iterate_t visitor,
                           void *visitor_data )
 {
@@ -1358,9 +1359,9 @@ herr_t H5DSiterate_scales(hid_t did,
         return FAIL;
 
     /* parameter range checking */
-    if (idx!=NULL)
+    if (ds_idx!=NULL)
     {
-        if (*idx>=nscales)
+        if (*ds_idx>=nscales)
             return FAIL;
     }
 
@@ -1375,6 +1376,9 @@ herr_t H5DSiterate_scales(hid_t did,
     /* close dataset space */
     if(H5Sclose(sid) < 0)
         goto out;
+
+    if ( dim >= (unsigned)rank )
+        return FAIL;
 
     /* try to find the attribute "DIMENSION_LIST" on the >>data<< dataset */
     if((has_dimlist = H5LT_find_attribute(did, DIMENSION_LIST)) < 0)
@@ -1404,8 +1408,8 @@ herr_t H5DSiterate_scales(hid_t did,
 
         if ( buf[dim].len > 0 )
         {
-            if (idx!=NULL)
-                j_idx = *idx;
+            if (ds_idx!=NULL)
+                j_idx = *ds_idx;
             else
                 j_idx=0;
 
@@ -1422,14 +1426,16 @@ herr_t H5DSiterate_scales(hid_t did,
                         goto out;
                 } H5E_END_TRY;
 
+                /* set the return IDX OUT value at current scale index */
+                if (ds_idx!=NULL)
+                {
+                    *ds_idx = i;
+                }
+
                 if((ret_value=(visitor)(did,dim,scale_id,visitor_data))!=0)
                 {
-                    /* set the return IDX OUT value at current scale index and break */
-                    if (idx!=NULL)
-                    {
-                        *idx = i;
-                    }
-
+                    /* break */
+                    
                     /* close the DS id */
                     if (H5Dclose(scale_id) < 0)
                         goto out;
