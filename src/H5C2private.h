@@ -1652,10 +1652,6 @@ H5_DLL herr_t H5C2_check_for_journaling(H5F_t * f,
 		                        H5C2_t * cache_ptr,
                                         hbool_t journal_recovered);
 
-H5_DLL herr_t H5C2_get_journaling_in_progress(const H5F_t * f,
-                                              hid_t dxpl_id,
-					      H5C2_t * cache_ptr);
-
 H5_DLL herr_t H5C2_mark_journaling_in_progress(H5F_t * f,
                                             hid_t dxpl_id,
 					    const int32_t journal_magic,

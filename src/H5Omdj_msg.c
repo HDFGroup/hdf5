@@ -174,7 +174,7 @@ H5O_mdj_msg_decode(H5F_t *f,
 
 
     /* get the journal file path length */
-    INT32DECODE(p, path_len);
+    UINT32DECODE(p, path_len);
 
     if ( path_len > H5C2__MAX_JOURNAL_FILE_NAME_LEN ) {
 
@@ -236,7 +236,7 @@ H5O_mdj_msg_encode(H5F_t *f,
     const H5O_mdj_msg_t *mesg = (const H5O_mdj_msg_t *)_mesg;
     uint16_t flags = 0;
     int32_t magic;
-    int32_t path_len;
+    uint32_t path_len;
     herr_t ret_value;
 
     FUNC_ENTER_NOAPI_NOINIT(H5O_mdj_msg_encode)
@@ -266,7 +266,7 @@ H5O_mdj_msg_encode(H5F_t *f,
 
     magic = mesg->mdc_jnl_magic;
 
-    path_len = (int32_t)(mesg->mdc_jnl_file_name_len);
+    path_len = (uint32_t)(mesg->mdc_jnl_file_name_len);
 
     /* Store version, flags, magic, path_len, & path */
 
@@ -276,7 +276,7 @@ H5O_mdj_msg_encode(H5F_t *f,
 
     INT32ENCODE(p, magic);
 
-    INT32ENCODE(p, path_len);
+    UINT32ENCODE(p, path_len);
 
     HDmemcpy(p, mesg->mdc_jnl_file_name, path_len + 1);
     p += path_len + 1;

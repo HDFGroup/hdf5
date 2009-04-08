@@ -143,9 +143,6 @@ typedef struct H5F_file_t {
     size_t  mdc_jnl_file_name_len; /* journal file name length          */
     char    mdc_jnl_file_name[H5C2__MAX_JOURNAL_FILE_NAME_LEN + 1];
                                 /* journal file name -- if defined      */
-/* todo -- delete the following lines.  -- JRM */
-    haddr_t mdc_jrnl_block_loc; /* Rel addr of mdc journal block	*/
-    hsize_t mdc_jrnl_block_len; /* Length of mdc journal block		*/
 } H5F_file_t;
 
 /*

@@ -1919,9 +1919,7 @@ get_mdj_msg_addr__scan_chunk(int fd,
                     break;
 
                 default:
-                    /* Unknown message -- scream and die. */
-                    success = FALSE;
-
+                    /* Unknown message -- scream, but don't die. */
                     HDfprintf(err_file_ptr, "%sSB ext chunk %d %s\n",
                               indent1, chunk_num,
                               "appears to contain an unknown mssg.");
@@ -2049,7 +2047,7 @@ get_mdj_msg_data(int fd,
     uint8_t * p;
     uint16_t flags;
     int32_t magic;
-    int32_t path_len;
+    uint32_t path_len;
     int version;
     off_t offset;
     FILE * err_file_ptr = stderr;
@@ -2119,7 +2117,7 @@ get_mdj_msg_data(int fd,
         p = &(buf[1]);
         UINT16DECODE(p, flags);
         INT32DECODE(p, magic);
-        INT32DECODE(p, path_len);
+        UINT32DECODE(p, path_len);
 
         if ( (flags & MDJ_MSG__JOURNALING_ENABLED_FLAG) == 0 ) {
 

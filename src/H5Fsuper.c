@@ -1199,8 +1199,8 @@ done:
  *
  *              If journaling is enabled, create a superblock extension
  *              if necessary and then write the current contents of 
- *              the mdc_jnl_enabled, mdc_jrnl_block_loc, and 
- *              mdc_jrnl_block_len fields of the shared structure to the 
+ *              the mdc_jnl_enabled, mdc_jnl_magic, mdc_jnl_file_name_lenand 
+ *              mdc_jnl_file_name fields of the shared structure to the 
  *              mdj_msg in the superblock extention, overwriting the old 
  *              message if it exists.
  *

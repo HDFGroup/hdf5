@@ -201,8 +201,8 @@ run_h5recover_output_test() {
 
     TESTING $COMMENT
 
-    cp ./testfiles/${BASE_NAME}.h5 .
-    cp ./testfiles/${BASE_NAME}.jnl .
+    cp $srcdir/testfiles/${BASE_NAME}.h5 .
+    cp $srcdir/testfiles/${BASE_NAME}.jnl .
 
     ( $RUNSERIAL ./h5recover -j ${BASE_NAME}.jnl -n ${FLAGS} ${BASE_NAME}.h5 \
                  > ${BASE_NAME}.stdout ) 2> ${BASE_NAME}.stderr

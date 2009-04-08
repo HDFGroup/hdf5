@@ -1932,15 +1932,6 @@ H5C2_flush_to_min_clean(H5F_t * f,
             entry_ptr = entry_ptr->aux_prev;
         }
 
-        if ( ( flushed_entries_count > cache_ptr->slist_len) ||
-             ( flushed_entries_size < space_needed ) ) {
-            HDfprintf(stdout, "flushed_entries_count = %d <= %d = slist_size\n",
-                      (int)flushed_entries_count, (int)(cache_ptr->slist_size));
-            HDfprintf(stdout,
-                      "flushed_entries_size = %d < %d = space_needed.\n",
-                      (int)flushed_entries_size, (int)space_needed);
-        }
-
         HDassert( flushed_entries_count <= cache_ptr->slist_len );
         HDassert( flushed_entries_size >= space_needed );
 
@@ -9753,13 +9744,11 @@ H5C2_validate_lru_list(H5C2_t * cache_ptr)
          ( cache_ptr->LRU_head_ptr != cache_ptr->LRU_tail_ptr )
        ) {
 
-        HDfprintf(stdout,"H5C2_validate_lru_list: Check 1 failed.\n");
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 1 failed")
     }
 
     if ( ( cache_ptr->LRU_list_len < 0 ) || ( cache_ptr->LRU_list_size < 0 ) ) {
 
-        HDfprintf(stdout,"H5C2_validate_lru_list: Check 2 failed.\n");
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 2 failed")
     }
 
@@ -9773,7 +9762,6 @@ H5C2_validate_lru_list(H5C2_t * cache_ptr)
          )
        ) {
 
-        HDfprintf(stdout,"H5C2_validate_lru_list: Check 3 failed.\n");
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 3 failed")
     }
 
@@ -9789,7 +9777,6 @@ H5C2_validate_lru_list(H5C2_t * cache_ptr)
          )
        ) {
 
-        HDfprintf(stdout,"H5C2_validate_lru_list: Check 4 failed.\n");
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 4 failed")
     }
 
@@ -9801,7 +9788,6 @@ H5C2_validate_lru_list(H5C2_t * cache_ptr)
              ( ( entry_ptr->prev == NULL ) ||
                ( entry_ptr->prev->next != entry_ptr ) ) ) {
 
-            HDfprintf(stdout,"H5C2_validate_lru_list: Check 5 failed.\n");
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 5 failed")
         }
 
@@ -9809,7 +9795,6 @@ H5C2_validate_lru_list(H5C2_t * cache_ptr)
              ( ( entry_ptr->next == NULL ) ||
                ( entry_ptr->next->prev != entry_ptr ) ) ) {
 
-            HDfprintf(stdout,"H5C2_validate_lru_list: Check 6 failed.\n");
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 6 failed")
         }
 
@@ -9821,7 +9806,6 @@ H5C2_validate_lru_list(H5C2_t * cache_ptr)
     if ( ( cache_ptr->LRU_list_len != len ) ||
          ( cache_ptr->LRU_list_size != size ) ) {
 
-        HDfprintf(stdout,"H5C2_validate_lru_list: Check 7 failed.\n");
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Check 7 failed")
     }
 
@@ -9886,9 +9870,6 @@ H5C2_verify_not_in_index(H5C2_t * cache_ptr,
         {
             if ( scan_ptr == entry_ptr ) {
 
-                HDfprintf(stdout,
-                          "H5C2_verify_not_in_index: entry in index (%d/%d)\n",
-                          i, depth);
                 HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
                             "Entry already in index.")
             }
