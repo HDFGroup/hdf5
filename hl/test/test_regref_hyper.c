@@ -26,7 +26,6 @@
     and selected elements data from the integer dataset.
 */
 
-#include <stdlib.h>
 #include "h5hltest.h"
 #include "hdf5.h"
 #include "hdf5_hl.h"
@@ -57,12 +56,9 @@ int main(void)
     int rankr =1;
     herr_t status;
     hdset_reg_ref_t ref[4];
-    hdset_reg_ref_t ref_out[4];
-    int data[9][8];
-    int data_out[2][9] = {{0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0}};
+    int data[9][8], data_read_2D[9][8];
     int data1D[17] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
     int data3D[6][6][6];
-    int rdata1[3][2];
     hsize_t start[2];
     hsize_t count[2];
     hsize_t start3D[3];
@@ -70,65 +66,56 @@ int main(void)
     hsize_t coord[5] = {1,6,9,10,14};
     unsigned num_points = 5;
     int i, j, k;
-    size_t name_size1, name_size2;
-    char buf1[14], buf2[14];
     size_t nlength;
     int rank_out;
-    hid_t dtype, sid, sid2;
-    hid_t dtype_native;
+    hid_t dtype;
     hsize_t *buf;
     char *name;
     size_t numelem;
     H5S_sel_type sel_type;
     int data_out2[3][2];
     int data_out3[2][2][2];
-    int **rdata;
-    hsize_t buf3[4];
-    hsize_t dims2[2] = {3, 2};
-    hid_t mem_space;
-    hid_t dset;	
     hsize_t block_coord_3D[6] ={ 0, 1, 2, 1, 2, 3};
-    int n1=2, n2=2;
-    hsize_t block_coord[4] ={ 2, 2, 3, 3};
-    int data_out2a[n1][n2];
-    size_t      size;                  /*
-				        * size of the data element
-				        * stored in file
-				        */
+    hsize_t block_coord[4] ={ 3, 3, 5, 4};
     hsize_t num_elem = 2;
     const char *path[num_elem];
-    int  ranks[num_elem];
     hsize_t block_coord_6[6] ={ 0, 5, 0, 0, 2, 2};
     hsize_t block_coord_4[4] ={ 1, 2, 3, 4};
     hsize_t block_coord_1D_src[2] ={ 0, 5};
     hsize_t block_coord_1D_dest[2] ={ 5, 10};
     hsize_t block_coord_2D_src[4] ={ 0, 0, 1, 2};
-    hsize_t block_coord_2D_dest[4] ={0, 0, 2, 1 };
+    hsize_t block_coord_2D_dest[4] ={5, 5, 7, 6 };
+    hsize_t block_coord_2D_dest_a[4] ={0, 3, 2, 4 };
     hdset_reg_ref_t ref6[num_elem];
     hdset_reg_ref_t ref_new;
 
     path[0] ="/Group_1D/DS1";
     path[1] ="/Group_2D/DS2";
 
-    ranks[0] =1;
-    ranks[1] =2;
 
-    for (i=0; i<6; i++)
-      for (j=0; j<6; j++)
-	for (k=0; k<6; k++)
-	  data3D[i][j][k] =  100*(i+1)+10*(j+1) + k + 1;
-
-    printf("FULL 2D ARRAY:\n   /                          \\");
-    for (i=0; i<9; i++)
-      {
-	printf("\n  |  ");
-	for (j=0; j<8; j++) {
-	  data[i][j] =  10*(i+1)+j+1;
-	  printf("%d ", data[i][j]);
+    printf("FULL 3D ARRAY:");
+    for (i=0; i<6; i++) {
+      printf("\n"); 
+	for (k=0; k<6; k++) {
+	printf("[ "); 
+	  for (j=0; j<6; j++){
+	    data3D[i][j][k] =  100*(i+1)+10*(j+1) + k + 1;
+	    printf("%d ", data3D[i][j][k]);
+	  }
+	  printf("] ");
 	}
-	printf("  |");
+    }
+    printf("\n");
+
+    printf("FULL 2D ARRAY:");
+    for (i=0; i<9; i++) {
+      printf("\n[ ");
+      for (j=0; j<8; j++) {
+	data[i][j] =  10*(i+1)+j+1;
+	printf("%d ", data[i][j]);
       }
-    printf("\n   \\                          /\n");
+      printf("]");
+    }
     printf("\n");
 
     /*
@@ -305,6 +292,9 @@ int main(void)
                             | NUMBLOCKS |   RANK    |  SIZEOF DATA TYPE | NUMBER COORDINATE POINTS | */
     buf = (hsize_t *)malloc(  numelem   * rank_out  *   sizeof(hsize_t) *          2                );
 
+
+    /* Get region refererce information */
+
     status = H5LRget_region_info(file_id,
 				 (const hdset_reg_ref_t*)ref[1],
 				 &nlength,
@@ -344,25 +334,31 @@ int main(void)
 
 /*     rdata = ( int **) malloc(  numelem * sizeof (int *) ); */
 
-     status = H5LRread_region(file_id, 
+
+    /* Read a region of the data using a region reference */
+
+    status = H5LRread_region(file_id, 
  			     &ref[1], 
- 			     H5T_NATIVE_INT, 
+ 			     H5T_NATIVE_INT,
  			     &numelem, 
  			     data_out2);
-
-     printf("REGION REFERENCED 2D HYPERSLAB:\n   /        \\");
+    
+    printf("REGION REFERENCED 2D HYPERSLAB (H5LRread_region),");
+    printf(" COORDINATES (%d,%d)-(%d,%d):\n",
+	   (int)block_coord[0],(int)block_coord[1],(int)block_coord[2],(int)block_coord[3]);
     for (i=0; i<3; i++)
       {
-	printf("\n  |  ");
+	printf("\n  [ ");
 	for (j=0; j<2; j++) {
 	  printf("%d ", data_out2[i][j]);
 	}
-	printf("  |");
+	printf("]");
       }
-    printf("\n   \\        /\n");
     printf("\n");
 
     status = H5Fclose(file_id);
+
+    /* Read a region of the data using corner coordinates of a block */
 
     status = H5LTread_region(filename,
 			     "/Group_3D/DS3",
@@ -370,18 +366,19 @@ int main(void)
  			     H5T_NATIVE_INT,
  			     data_out3);
 
-    printf("REGION REFERENCED 3D HYPERSLAB:");
+    printf("REGION REFERENCED 3D HYPERSLAB (H5LTread_region),");
+    printf(" COORDINATES (%d,%d,%d)-(%d,%d,%d):\n",(int)block_coord_3D[0],(int)block_coord_3D[1],(int)block_coord_3D[2],
+	   (int)block_coord_3D[3],(int)block_coord_3D[4],(int)block_coord_3D[5]);
+
     for (k=0; k<2; k++){
-      printf("\n   /          \\");
       for (i=0; i<2; i++)
 	{
-	  printf("\n  |  ");
+	  printf("\n  [ ");
 	  for (j=0; j<2; j++) {
 	    printf("%d ", data_out3[i][j][k]);
 	  }
-	  printf("  |");
+	  printf("]");
 	}
-      printf("\n   \\          /\n");
       printf("\n");
     }
  
@@ -393,6 +390,8 @@ int main(void)
 /*  			     "/Group_1D/DS1", */
 /*  			     block_coord_1D_dest); */
 
+
+    /* copy a region described by blocks to another region described by another block */
     status = H5LTcopy_region(filename,
  			     "/Group_2D/DS2",
  	                     block_coord_2D_src,
@@ -400,13 +399,65 @@ int main(void)
   			     "/Group_2D/DS2",
   			     block_coord_2D_dest);
 
+    /*check the region was copied correctly */
     file_id = H5Fopen(filename, H5F_ACC_RDWR,  H5P_DEFAULT);
+    status = H5LTread_dataset(file_id,"/Group_2D/DS2",H5T_NATIVE_INT,data_read_2D);
+    status = H5Fclose(file_id);
 
+    printf("2D DATA AFTER H5LTCOPY_REGION: [(%d,%d)-(%d,%d)] --> [(%d,%d)-(%d,%d)]",
+	   (int)block_coord_2D_src[0],(int)block_coord_2D_src[1], (int)block_coord_2D_src[2],(int)block_coord_2D_src[3],
+	   (int)block_coord_2D_dest[0], (int)block_coord_2D_dest[1],(int)block_coord_2D_dest[2], (int)block_coord_2D_dest[3]);
+    for (i=0; i<9; i++) {
+      printf("\n[ ");
+      for (j=0; j<8; j++) {
+	printf("%d ", data_read_2D[i][j]);
+      }
+      printf("]");
+    }
+    printf("\n");
+
+    file_id = H5Fopen(filename, H5F_ACC_RDWR,  H5P_DEFAULT);
     status =  H5LRcopy_references( file_id, &ref[1], filename,
-				    "/Group_2D/DS2", block_coord_2D_dest, &ref_new);
+				   "/Group_2D/DS2", block_coord_2D_dest_a, &ref_new);
+
+    /* check the region was copied correctly and the region reference is correct */
+
+    status = H5LTread_dataset(file_id,"/Group_2D/DS2",H5T_NATIVE_INT,data_read_2D);
+    
+    printf("2D DATA AFTER H5LRCOPY_REFERENCES: [(%d,%d)-(%d,%d)] --> [(%d,%d)-(%d,%d)]",
+	   (int)block_coord[0],(int)block_coord[1],(int)block_coord[2],(int)block_coord[3],
+	   (int)block_coord_2D_dest_a[0], (int)block_coord_2D_dest_a[1],(int)block_coord_2D_dest_a[2], (int)block_coord_2D_dest_a[3]);
+    for (i=0; i<9; i++) {
+      printf("\n[ ");
+      for (j=0; j<8; j++) {
+	printf("%d ", data_read_2D[i][j]);
+      }
+      printf("]");
+    }
+    printf("\n");
+
+    printf("NEW 2D REGION REFERENCE AFTER COPY: [(%d,%d)-(%d,%d)]",
+	   (int)block_coord[0],(int)block_coord[1],(int)block_coord[2],(int)block_coord[3]);
     
 
-    file_id = H5Fopen(filename, H5F_ACC_RDWR,  H5P_DEFAULT);
+    /* check the data pointed to by the new region reference */
+
+    status = H5LRread_region(file_id,
+  			     &ref_new,
+  			     H5T_NATIVE_INT,
+  			     &numelem,
+  			     data_out2);
+    for (i=0; i<3; i++)
+      {
+	printf("\n  [ ");
+	for (j=0; j<2; j++) {
+	  printf("%d ", data_out2[i][j]);
+	}
+	printf("]");
+      }
+    printf("\n");
+
+    /* create a */
 
     status = H5LRcreate_region_references(file_id,
 					  num_elem,
@@ -414,7 +465,7 @@ int main(void)
 					  block_coord_6,
 					  ref6);
 
-    status = H5LRcopy_region(file_id, ref[1], filename, "/Group_2D/DS2", block_coord_4);
+    status = H5LRcopy_region(file_id, &ref[1], filename, "/Group_2D/DS2", block_coord_4);
 
 
 /*     status = H5LRmake_dataset(file_id, "/Group_2D/DS2a", H5T_NATIVE_INT, file_id, 2, ref6); */
