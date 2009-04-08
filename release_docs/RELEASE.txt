@@ -151,6 +151,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Changed skip lists to use a deterministic algorithm.  The library should
+            now never call rand() or srand(). (NAF - 2009/04/08 - 503)
       - Fixed a bug where H5Lcopy and H5Lmove wouldn't create intermediate
             groups when that property was set. (NAF - 2009/04/07 - 1526)
       - Fixed a bug that caused files with a user block to grow by the size of

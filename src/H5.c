@@ -28,6 +28,7 @@
 #include "H5Lprivate.h"		/* Links		  		*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Tprivate.h"		/* Datatypes				*/
+#include "H5SLprivate.h"    /* Skip lists                           */
 
 
 /****************/
@@ -270,6 +271,9 @@ H5_term_library(void)
             /* Don't shut down the ID code until other APIs which use them are shut down */
             if(pending == 0)
                 pending += DOWN(I);
+            /* Don't shut down the skip list code until everything that uses it is down */
+            if(pending == 0)
+                pending += DOWN(SL);
             /* Don't shut down the free list code until _everything_ else is down */
             if(pending == 0)
                 pending += DOWN(FL);

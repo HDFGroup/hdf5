@@ -589,7 +589,7 @@ H5AC_create(const H5F_t *f,
             if ( mpi_rank == 0 ) {
 
                 aux_ptr->d_slist_ptr =
-                    H5SL_create(H5SL_TYPE_HADDR,0.5,(size_t)16);
+                    H5SL_create(H5SL_TYPE_HADDR);
 
                 if ( aux_ptr->d_slist_ptr == NULL ) {
 
@@ -598,7 +598,7 @@ H5AC_create(const H5F_t *f,
                 }
 
                 aux_ptr->c_slist_ptr =
-                    H5SL_create(H5SL_TYPE_HADDR,0.5,(size_t)16);
+                    H5SL_create(H5SL_TYPE_HADDR);
 
                 if ( aux_ptr->c_slist_ptr == NULL ) {
 

@@ -2879,7 +2879,7 @@ H5O_visit(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
         udata.op_data = op_data;
 
         /* Create skip list to store visited object information */
-        if((udata.visited = H5SL_create(H5SL_TYPE_OBJ, 0.5, (size_t)16)) == NULL)
+        if((udata.visited = H5SL_create(H5SL_TYPE_OBJ)) == NULL)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTCREATE, FAIL, "can't create skip list for visited objects")
 
         /* If its ref count is > 1, we add it to the list of visited objects */
