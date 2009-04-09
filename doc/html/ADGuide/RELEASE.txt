@@ -1,4 +1,4 @@
-HDF5 version 1.6.8-post11 released on Wed Apr  1 15:20:45 CDT 2009
+HDF5 version 1.6.8-post12 released on Wed Apr  8 19:09:53 CDT 2009
 ================================================================================
 
 INTRODUCTION
@@ -55,6 +55,7 @@ New Features
 
     Tools:
     ------
+    - h5dump correctly specifies XML dtd / schema urls ADB - 2009/4/3 - 1519
     - h5dump: binary output defaults to NATIVE with -b optionally accepting
       the form of binary output (NATIVE, FILE, BE, LE). PVN - 2008/11/14
     - h5repack: When user doesn't specify a chunk size, h5repack now defines a default 
