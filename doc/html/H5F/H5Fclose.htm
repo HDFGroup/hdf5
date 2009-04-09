@@ -2,12 +2,21 @@
 <!-- HEADER RIGHT "H5Fclose" -->
 <hr>
 <dl>
+<dt><div align=right><font color=999999 size=-1><i>
+      Last modified: 9 April 2009
+      </i></font></div>
+
 <dt><strong>Name:</strong> <a name="File-Close">H5Fclose</a>
 <dt><strong>Signature:</strong>
-    <dd><em>herr_t </em><code>H5Fclose</code>(<em>hid_t</em> <code>file_id</code>
+    <dd><em>herr_t </em><code>H5Fclose</code>(
+        <em>hid_t</em> <code>file_id</code>
         )
+
+<p>
 <dt><strong>Purpose:</strong>
         <dd>Terminates access to an HDF5 file.  
+
+<p>
 <dt><strong>Description:</strong>
         <dd><code>H5Fclose</code> terminates access to an HDF5 file
             by flushing all data to storage and terminating access
@@ -31,7 +40,7 @@
             The file will be automatically closed once all objects in the
             file have been closed.
             <p>
-            Be warned, hoever, that there are circumstances where it is 
+            Be warned, however, that there are circumstances where it is 
             not possible to delay closing a file.  
             For example, an MPI-IO file close is a collective call; all of
             the processes that opened the file must close it collectively.
@@ -46,31 +55,32 @@
             In such situations, applications must close all open objects 
             in a file before calling <code>H5Fclose</code>.  
             It is generally recommended to do so in all cases.
+
+<p>
 <dt><strong>Parameters:</strong>
     <ul><table>
         <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">IN: Identifier of a file to terminate access to.</td></tr>
+          <td valign="top"><em>hid_t</em>&nbsp;<code>file_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+          <td valign="top">IN: Identifier of a file to terminate access
+              to.</td></tr>
     </table></ul>
+
+<p>
 <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful;
         otherwise returns a negative value.
+
+<p>
 <dt><strong>Fortran90 Interface:</strong> h5fclose_f
     <dd>
-	<pre>
+        <pre>
 SUBROUTINE h5fclose_f(file_id, hdferr) 
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: file_id ! File identifier
   INTEGER, INTENT(OUT) :: hdferr        ! Error code
                                         ! 0 on success and -1 on failure
 END SUBROUTINE h5fclose_f 
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
+        </pre>
+
 </dl>
 
