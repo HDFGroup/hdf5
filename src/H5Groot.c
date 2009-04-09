@@ -189,7 +189,8 @@ done:
 herr_t
 H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
 {
-    H5G_loc_t   root_loc;             /* Root location information */
+    H5G_loc_t   root_loc;               /* Root location information */
+    htri_t      stab_exists = -1;       /* Whether the symbol table exists */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI(H5G_mkroot, FAIL)
@@ -280,23 +281,34 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
 	if(H5O_open(root_loc.oloc) < 0)
 	    HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open root group")
 
+        /* Actions to take if the symbol table information is cached */
+        if(f->shared->root_ent && f->shared->root_ent->type == H5G_CACHED_STAB) {
+            /* Check for the situation where the symbol table is cached but does
+             * not exist.  This can happen if, for example, an external link is
+             * added to the root group. */
+            if((stab_exists = H5O_msg_exists(root_loc.oloc, H5O_STAB_ID, dxpl_id)) < 0)
+                HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check if symbol table message exists")
+
+            /* Remove the cache if the stab does not exist */
+            if(!stab_exists)
+                f->shared->root_ent->type = H5G_NOTHING_CACHED;
 #ifndef H5_STRICT_FORMAT_CHECKS
-        /* If symbol table information is cached, check if we should replace the
-         * symbol table message with the cached symbol table information */
-        if((H5F_INTENT(f) & H5F_ACC_RDWR) && f->shared->root_ent
-                && (f->shared->root_ent->type == H5G_CACHED_STAB)) {
-            H5O_stab_t      cached_stab;
+            /* If symbol table information is cached, check if we should replace the
+            * symbol table message with the cached symbol table information */
+            else if(H5F_INTENT(f) & H5F_ACC_RDWR) {
+                H5O_stab_t      cached_stab;
 
-            /* Retrieve the cached symbol table information */
-            cached_stab.btree_addr = f->shared->root_ent->cache.stab.btree_addr;
-            cached_stab.heap_addr = f->shared->root_ent->cache.stab.heap_addr;
+                /* Retrieve the cached symbol table information */
+                cached_stab.btree_addr = f->shared->root_ent->cache.stab.btree_addr;
+                cached_stab.heap_addr = f->shared->root_ent->cache.stab.heap_addr;
 
-            /* Check if the symbol table message is valid, and replace with the
-             * cached symbol table if necessary */
-            if(H5G_stab_valid(root_loc.oloc, dxpl_id, &cached_stab) < 0)
-                HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to verify symbol table")
-        } /* end if */
+                /* Check if the symbol table message is valid, and replace with the
+                * cached symbol table if necessary */
+                if(H5G_stab_valid(root_loc.oloc, dxpl_id, &cached_stab) < 0)
+                    HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to verify symbol table")
+            } /* end if */
 #endif /* H5_STRICT_FORMAT_CHECKS */
+        } /* end if */
     } /* end else */
 
     /* Cache the root group's symbol table information in the root group symbol
@@ -304,14 +316,14 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
      * present, so we don't need to check the superblock version.  We do this if
      * we have write access, the root entry has been allocated (i.e.
      * super_vers < 2) and the stab info is not already cached. */
-    if((H5F_INTENT(f) & H5F_ACC_RDWR) && f->shared->root_ent
+    if((H5F_INTENT(f) & H5F_ACC_RDWR) && stab_exists != FALSE && f->shared->root_ent
             && f->shared->root_ent->type != H5G_CACHED_STAB) {
-        htri_t          stab_exists;    /* Whether the symbol table exists */
         H5O_stab_t      stab;           /* Symbol table */
 
         /* Check if the stab message exists.  It's possible for the root group
-         * to use the latest version while the superblock is an old version. */
-        if((stab_exists = H5O_msg_exists(root_loc.oloc, H5O_STAB_ID, dxpl_id)) < 0)
+         * to use the latest version while the superblock is an old version.
+         * If stab_exists is not -1 then we have already checked. */
+        if(stab_exists == -1 && (stab_exists = H5O_msg_exists(root_loc.oloc, H5O_STAB_ID, dxpl_id)) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check if symbol table message exists")
 
         if(stab_exists) {
@@ -339,6 +351,18 @@ H5G_mkroot(H5F_t *f, hid_t dxpl_id, hbool_t create_root)
     f->nopen_objs--;
 
 done:
+    /* In case of error, free various memory locations that may have been
+     * allocated */
+    if(ret_value < 0) {
+        if(f->shared->root_grp) {
+            if(f->shared->root_grp->shared)
+                f->shared->root_grp->shared = H5FL_FREE(H5G_shared_t, f->shared->root_grp->shared);
+            f->shared->root_grp = H5FL_FREE(H5G_t, f->shared->root_grp);
+        } /* end if */
+        f->shared->root_ent = (H5G_entry_t *) H5MM_xfree(f->shared->root_ent);
+        H5G_name_free(root_loc.path);
+    } /* end if */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_mkroot() */
 
