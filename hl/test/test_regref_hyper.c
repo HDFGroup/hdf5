@@ -203,7 +203,7 @@ int main(void)
      * Create a reference to the hyperslab.
      */
     start[0] = 0;
-    start[1] = 7;
+    start[1] = 5;
     count[0] = 9;
     count[1] = 2;
     status = H5Sselect_hyperslab(space_id, H5S_SELECT_SET, start, NULL, count, NULL);
