@@ -71,9 +71,6 @@ static int read_data( const char* fname, int ndims, hsize_t *dims, float **buf )
 #define FILE6          "test_ds6.h5"
 #define FILE7          "test_ds7.h5"
 
-
-
-
 /*-------------------------------------------------------------------------
  * the main program
  *-------------------------------------------------------------------------
@@ -84,11 +81,12 @@ int main(void)
 
     nerrors += test_simple() < 0  ?1:0;
     nerrors += test_errors() < 0  ?1:0;
+    nerrors += test_errors2() < 0  ?1:0;
     nerrors += test_rank() < 0  ?1:0;
     nerrors += test_iterators() < 0  ?1:0;
     nerrors += test_types() < 0  ?1:0;
     nerrors += test_data() < 0  ?1:0;
-    nerrors += test_errors2() < 0  ?1:0;
+    
 
     if(nerrors) goto error;
     printf("All dimension scales tests passed.\n");
@@ -106,6 +104,7 @@ error:
  * Functions tested:
  *
  * H5DSattach_scale
+ * H5DSget_num_scales
  * H5DSdetach_scale
  * H5DSset_label
  * H5DSget_label
@@ -113,7 +112,6 @@ error:
  * H5DSget_scale_name
  * H5DSis_scale
  * H5DSiterate_scales
- * H5DSget_num_scales
  *
  *-------------------------------------------------------------------------
  */
@@ -196,9 +194,9 @@ static int test_simple(void)
     if(H5LTmake_dataset_int(fid,DS_22_NAME,rankds,s2_dim,s22_wbuf) < 0)
         goto out;
 
-
+    
     /*-------------------------------------------------------------------------
-    * test 1: attach scale
+    * H5DSattach_scale
     *-------------------------------------------------------------------------
     */
 
@@ -338,9 +336,10 @@ static int test_simple(void)
 
 
     /*-------------------------------------------------------------------------
-    * test 2: get number of scales
+    * H5DSget_num_scales
     *-------------------------------------------------------------------------
     */
+
 
     TESTING2("get number of scales");
 
@@ -428,7 +427,7 @@ static int test_simple(void)
 
 
     /*-------------------------------------------------------------------------
-    * test 3: detach scales
+    * H5DSdetach_scale
     *-------------------------------------------------------------------------
     */
 
@@ -957,15 +956,11 @@ static int test_simple(void)
         goto out;
 
 
-    PASSED();
-
 
     /*-------------------------------------------------------------------------
     * create a dataset and attach only to 1 dimension
     *-------------------------------------------------------------------------
     */
-
-    TESTING2("attach only to 1 dimension");
 
     /* make a dataset */
     if(H5LTmake_dataset_int(fid,"dset_e",rank,dims,NULL) < 0)
@@ -1009,8 +1004,9 @@ static int test_simple(void)
     PASSED();
 
 
+    
     /*-------------------------------------------------------------------------
-    * test 4: set/get label
+    * H5DSset_label, H5DSget_label
     *-------------------------------------------------------------------------
     */
 
@@ -1105,9 +1101,11 @@ static int test_simple(void)
     PASSED();
 
     /*-------------------------------------------------------------------------
-    * test 5: set scale/get scale name
+    * H5DSget_scale_name, H5DSget_scale_name
     *-------------------------------------------------------------------------
     */
+
+
     TESTING2("set scale/get scale name");
 
     if((dsid = H5Dopen2(fid,DS_1_NAME, H5P_DEFAULT)) < 0)
@@ -1211,10 +1209,18 @@ static int test_simple(void)
     PASSED();
 
     /*-------------------------------------------------------------------------
+    * H5DSiterate_scales
+    *-------------------------------------------------------------------------
+    */
+
+
+    TESTING2("iterate scales");
+
+
+    /*-------------------------------------------------------------------------
     * test 6: test iterate scales with a function verify_scale
     *-------------------------------------------------------------------------
     */
-    TESTING2("iterate scales (verify scale)");
 
     /* get the dataset id for "dset_a" */
     if((did = H5Dopen2(fid,"dset_a", H5P_DEFAULT)) < 0)
@@ -1238,14 +1244,11 @@ static int test_simple(void)
     if(H5Dclose(did) < 0)
         goto out;
 
-    PASSED();
-
 
     /*-------------------------------------------------------------------------
-    * test 7: test iterate scales with a function read_scale
+    * test iterate scales with a function read_scale
     *-------------------------------------------------------------------------
     */
-    TESTING2("iterate scales (read scale values)");
 
 
     /* get the dataset id for "dset_a" */
@@ -1270,13 +1273,11 @@ static int test_simple(void)
     if(H5Dclose(did) < 0)
         goto out;
 
-    PASSED();
 
     /*-------------------------------------------------------------------------
-    * test 8: test iterate scales with a function match_dim_scale
+    * test iterate scales with a function match_dim_scale
     *-------------------------------------------------------------------------
     */
-    TESTING2("iterate scales (verify the scale sizes match)");
 
     /* get the dataset id for "dset_a" */
     if((did = H5Dopen2(fid,"dset_a", H5P_DEFAULT)) < 0)
@@ -1321,13 +1322,11 @@ static int test_simple(void)
     if(H5Sclose(sid) < 0)
         goto out;
 
-    PASSED();
 
     /*-------------------------------------------------------------------------
-    * test 9: test iterate scales with a function match_dim_scale
+    * test iterate scales with a function match_dim_scale
     *-------------------------------------------------------------------------
     */
-    TESTING2("iterate scales (verify the scale sizes do not match)");
 
     /*-------------------------------------------------------------------------
     * create 3 datasets: 1 "data" dataset and dimension scales (some are empty)
@@ -2985,6 +2984,8 @@ static int test_errors2(void)
         goto out;
 
 
+    TESTING2("attach scales");
+
 
     /*-------------------------------------------------------------------------
     * attach with invalid indices
@@ -3004,6 +3005,10 @@ static int test_errors2(void)
     if (H5Dclose(did) < 0)
         goto out;
 
+    PASSED();
+
+    TESTING2("detach scales");
+
     /*-------------------------------------------------------------------------
     * detach with invalid indices
     *-------------------------------------------------------------------------
@@ -3019,7 +3024,11 @@ static int test_errors2(void)
     if (H5Dclose(dsid) < 0)
         goto out;
     if (H5Dclose(did) < 0)
-        goto out;  
+        goto out; 
+
+    PASSED();
+
+    TESTING2("set/get label");
 
     /*-------------------------------------------------------------------------
     * set/get label invalid indices
@@ -3040,7 +3049,11 @@ static int test_errors2(void)
     if (H5DSget_label(did,0,lbuf,sizeof(lbuf)) < 0)
         goto out;
     if (H5Dclose(did) < 0)
-        goto out;  
+        goto out; 
+
+    PASSED();
+
+    TESTING2("iterate scales");
 
 
     /*-------------------------------------------------------------------------
@@ -3109,6 +3122,8 @@ static int test_errors2(void)
     */
     if(H5Fclose(fid) < 0)
         goto out;
+
+    PASSED();
 
     return 0;
 
