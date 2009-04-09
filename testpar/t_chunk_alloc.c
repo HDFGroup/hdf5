@@ -26,8 +26,7 @@ static int	mpi_size, mpi_rank;
 
 #define DSET_NAME "ExtendibleArray"
 #define CHUNK_SIZE	1000		/* #elements per chunk */
-#define CHUNK_FACTOR	2000     /* default dataset size in terms of chunks */
-#define MIN_CHUNK_FACTOR	2       /* dataset size in terms of chunks if mpi_size reaches  threshold */
+#define CHUNK_FACTOR	200     /* default dataset size in terms of chunks */
 #define CLOSE           1
 #define NO_CLOSE        0
 
@@ -111,10 +110,7 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
 
     /* Only MAINPROCESS should create the file.  Others just wait. */
     if (MAINPROCESS){
-        if (mpi_size<PROCS_THRESHOLD)
-            nchunks=chunk_factor*mpi_size;
-        else
-            nchunks=MIN_CHUNK_FACTOR*(mpi_size-PROCS_THRESHOLD)+chunk_factor*PROCS_THRESHOLD;
+        nchunks=chunk_factor*mpi_size;
 	dims[0]=nchunks*CHUNK_SIZE;
 	/* Create the data space with unlimited dimensions. */
 	dataspace = H5Screate_simple (1, dims, maxdims);
@@ -227,10 +223,7 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
-    if (mpi_size<PROCS_THRESHOLD)
-        nchunks=chunk_factor*mpi_size;
-    else
-        nchunks=MIN_CHUNK_FACTOR*(mpi_size-PROCS_THRESHOLD)+chunk_factor*PROCS_THRESHOLD;
+    nchunks=chunk_factor*mpi_size;
 
     /* Set up MPIO file access property lists */
     access_plist  = H5Pcreate(H5P_FILE_ACCESS);
@@ -361,10 +354,7 @@ verify_data(const char *filename, int chunk_factor, write_type write_pattern, in
     MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
 
-    if (mpi_size<PROCS_THRESHOLD)
-        nchunks=chunk_factor*mpi_size;
-    else
-        nchunks=MIN_CHUNK_FACTOR*(mpi_size-PROCS_THRESHOLD)+chunk_factor*PROCS_THRESHOLD;
+    nchunks=chunk_factor*mpi_size;
 
     /* Set up MPIO file access property lists */
     access_plist  = H5Pcreate(H5P_FILE_ACCESS);

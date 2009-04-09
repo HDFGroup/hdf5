@@ -24,8 +24,8 @@
 #endif  /* !PATH_MAX */
 
 /* global variables */
-int dim0 = DIM0;
-int dim1 = DIM1;
+int dim0;
+int dim1;
 int chunkdim0;
 int chunkdim1;
 int nerrors = 0;			/* errors count */
@@ -119,8 +119,8 @@ usage(void)
     printf("\t-f <prefix>\tfilename prefix\n");
     printf("\t-2\t\tuse Split-file together with MPIO\n");
     printf("\t-p\t\tuse combo MPI-POSIX driver\n");
-    printf("\t-d <dim0> <dim1>\tdataset dimensions. Defaults (%d,%d)\n",
-	DIM0, DIM1);
+    printf("\t-d <factor0> <factor1>\tdataset dimensions factors. Defaults (%d,%d)\n",
+	ROW_FACTOR, COL_FACTOR);
     printf("\t-c <dim0> <dim1>\tdataset chunk dimensions. Defaults (dim0/10,dim1/10)\n");
     printf("\n");
 }
@@ -138,13 +138,8 @@ parse_options(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     /* setup default chunk-size. Make sure sizes are > 0 */
-    if (mpi_size < PROCS_THRESHOLD) {
-        dim0 = ROW_FACTOR*mpi_size;
-        dim1 = COL_FACTOR*mpi_size;
-    } else {
-        dim0 = MIN_ROW_FACTOR*(mpi_size-PROCS_THRESHOLD)+ROW_FACTOR*PROCS_THRESHOLD;
-        dim1 = MIN_COL_FACTOR*(mpi_size-PROCS_THRESHOLD)+COL_FACTOR*PROCS_THRESHOLD;
-    }  
+    dim0 = ROW_FACTOR*mpi_size;
+    dim1 = COL_FACTOR*mpi_size;
 
     chunkdim0 = (dim0+9)/10;
     chunkdim1 = (dim1+9)/10;
@@ -192,9 +187,9 @@ parse_options(int argc, char **argv)
 				nerrors++;
 				return(1);
 			    }
-			    dim0 = atoi(*(++argv));
+			    dim0 = atoi(*(++argv))*mpi_size;
 			    argc--;
-			    dim1 = atoi(*(++argv));
+			    dim1 = atoi(*(++argv))*mpi_size;
 			    /* set default chunkdim sizes too */
 			    chunkdim0 = (dim0+9)/10;
 			    chunkdim1 = (dim1+9)/10;
