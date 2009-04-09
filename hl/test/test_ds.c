@@ -45,14 +45,12 @@ static int read_data( const char* fname, int ndims, hsize_t *dims, float **buf )
 #define DIM3_SIZE     2
 #define DIM0          0
 #define DIM1          1
-#define DIM2          2
 
 #define DS_1_NAME      "ds_a_1"
 #define DS_11_NAME     "ds_a_11"
 #define DS_2_NAME      "ds_a_2"
 #define DS_21_NAME     "ds_a_21"
 #define DS_22_NAME     "ds_a_22"
-#define DS_3_NAME      "ds_a_3"
 
 #define SCALE_1_NAME   "Latitude set 0"
 #define SCALE_11_NAME  "Latitude set 1"
@@ -1415,6 +1413,10 @@ static int test_simple(void)
             case 1: /* for DIM 1, we get no valid scales */
                 if(match_size!=0 && idx!=0)
                     goto out;
+                break;
+            default:
+                assert(0);
+                break;
             }/*switch*/
         }/*for*/
     }
@@ -1523,7 +1525,7 @@ static herr_t read_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor
     char     *buf=NULL; /* data buffer */
     size_t   size;
     int      i;
-    char     *data=visitor_data;
+    char     *data = (char*) visitor_data;
 
     /* unused */
     dset=dset;
@@ -2955,7 +2957,7 @@ static int test_errors2(void)
     hsize_t dimd[2]  = {3,3};                 /* size of data dataset */
     hsize_t dims[1]  = {3};                   /* size of scale dataset */
     char    lbuf[255];                        /* label buffer */
-    size_t  label_len;                        /* label lenght */
+    ssize_t label_len;                        /* label lenght */
     int     scale_idx;                        /* scale index */
     int     nscales;                          /* number of scales in DIM */
     int     count;                            /* visitor data */
@@ -3138,3 +3140,4 @@ out:
     H5_FAILED();
     return FAIL;
 }
+

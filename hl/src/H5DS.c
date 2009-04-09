@@ -482,7 +482,7 @@ herr_t H5DSattach_scale(hid_t did,
 
         nelmts++;
 
-        dsbuf = malloc((size_t)nelmts * sizeof(ds_list_t));
+        dsbuf = (ds_list_t*) malloc((size_t)nelmts * sizeof(ds_list_t));
 
         if (dsbuf == NULL)
             goto out;
@@ -831,7 +831,7 @@ herr_t H5DSdetach_scale(hid_t did,
     if((nelmts = H5Sget_simple_extent_npoints(sid)) < 0)
         goto out;
 
-    dsbuf = malloc((size_t)nelmts * sizeof(ds_list_t));
+    dsbuf = (ds_list_t*) malloc((size_t)nelmts * sizeof(ds_list_t));
     if(dsbuf == NULL)
         goto out;
 
@@ -907,7 +907,7 @@ herr_t H5DSdetach_scale(hid_t did,
             goto out;
         dims[0] = nelmts;
 
-        dsbufn = malloc((size_t)nelmts * sizeof(ds_list_t));
+        dsbufn = (ds_list_t*) malloc((size_t)nelmts * sizeof(ds_list_t));
         if(dsbufn == NULL)
             goto out;
 
@@ -1195,7 +1195,7 @@ htri_t H5DSis_attached(hid_t did,
         if((nelmts = H5Sget_simple_extent_npoints(sid)) < 0)
             goto out;
 
-        dsbuf = malloc((size_t)nelmts * sizeof(ds_list_t));
+        dsbuf = (ds_list_t*) malloc((size_t)nelmts * sizeof(ds_list_t));
 
         if (dsbuf == NULL)
             goto out;
@@ -1596,7 +1596,7 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label)
             goto out;
         if (buf)
         {
-            free((void *) buf);
+            free(buf);
             buf = NULL;
         }
     }
@@ -1652,7 +1652,7 @@ herr_t H5DSset_label(hid_t did, unsigned int idx, const char *label)
             goto out;
         if (buf)
         {
-            free((void *) buf);
+            free(buf);
             buf = NULL;
         }
     }
