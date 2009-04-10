@@ -46,7 +46,7 @@ $ cobj= "H5, H5checksum, H5dbg, H5system, H5timer, H5trace,"+-
         "H5FDwindows, H5Ffake, H5Fio, H5FL, H5Fmount, H5Fmpi, H5FO, H5Fquery, H5FS, "+-
         "H5FScache, H5FSdbg, H5FSfile, H5FSsection, H5FSstat, H5FStest, H5Fsuper, H5Ftest,"+-
         "H5Gbtree2, H5G, H5Gcache, H5Gcompact, H5Gdense, H5Gdeprec, H5Gent, H5Gint,"+-
-        "H5Glink, H5Gloc, H5Gname, H5Gnode, H5Gobj, H5Goh, H5Gstab, H5Gtest, H5Gtraverse,"+-
+        "H5Glink, H5Gloc, H5Gname, H5Gnode, H5Gobj, H5Goh, H5Groot, H5Gstab, H5Gtest, H5Gtraverse,"+-
         "H5HFbtree2, H5HF, H5HFcache, H5HFdbg, H5HFdblock, H5HFdtable, H5HFhdr, H5HFhuge,"+-
         "H5HFiblock, H5HFiter, H5HFman, H5HFsection, H5HFspace, H5HFstat, H5HFtest, H5HFtiny,"+-
         "H5HG, H5HGcache, H5HGdbg, H5HL, H5HLcache, H5HLdbg, H5HP, H5I, H5L, H5Lexternal"
