@@ -209,7 +209,7 @@ run_h5recover_output_test() {
 
     # check stdout
 
-    ($DIFF ./testfiles/${BASE_NAME}.stdout ./${BASE_NAME}.stdout > \
+    ($DIFF $srcdir/testfiles/${BASE_NAME}.stdout ./${BASE_NAME}.stdout > \
         ./${BASE_NAME}.stdout.stdout) 2> ./${BASE_NAME}.stdout.stderr
 
     # check both return code and contents of stdout and stderr files --
@@ -243,7 +243,7 @@ run_h5recover_output_test() {
 
     # check stderr
 
-    ($DIFF ./testfiles/${BASE_NAME}.stderr ./${BASE_NAME}.stderr > \
+    ($DIFF $srcdir/testfiles/${BASE_NAME}.stderr ./${BASE_NAME}.stderr > \
         ./${BASE_NAME}.stderr.stdout) 2> ./${BASE_NAME}.stderr.stderr
 
     # check both return code and contents of stdout and stderr files --
