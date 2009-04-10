@@ -216,11 +216,6 @@ $ run  set_extent
 $ type sys$input
 
 $ type sys$input
--------			Running space_overflow 	-------
-$ run  space_overflow
-$ type sys$input
-
-$ type sys$input
 -------			Running stab    	-------
 $ run  stab
 $ type sys$input
