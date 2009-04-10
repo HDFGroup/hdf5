@@ -209,7 +209,7 @@ static int test_table(hid_t fid, int do_write)
     int         fill1_new[1] = { -100 };
     hsize_t     position;
     char        tname[20];
-    int         i, j;
+    hsize_t     i, j;
     /* write, read, append, delete, insert some records and fields */
     hsize_t FIELDS   = NFIELDS;
     hsize_t RECORDS  = NRECORDS;
@@ -514,7 +514,7 @@ static int test_table(hid_t fid, int do_write)
         goto out;
 
     /* compare */
-    for( i=(int)rstart; i<(int)rrecords; i++)
+    for( i = rstart; i < rrecords; i++)
     {
         if (cmp_par(i,i,rbuf,wbuf)<0)
             goto out;
@@ -554,12 +554,12 @@ static int test_table(hid_t fid, int do_write)
 
         /* compare */
         wrecords=8;
-        for( i=(int)rstart; i<(int)wrecords; i++)
+        for( i = rstart; i< wrecords; i++)
         {
             if (cmp_par(i,i,rbuf,wbuf)<0)
                 goto out;
         }
-        for( i=(int)wrecords, j=0; i<(int)rrecords; i++,j++)
+        for( i = wrecords, j = 0; i < rrecords; i++,j++)
         {
             if (cmp_par(i,j,rbuf,abuf)<0)
                 goto out;
@@ -598,28 +598,28 @@ static int test_table(hid_t fid, int do_write)
             return 1;
 
         /* compare */
-        for( i=0; i<12; i++)
+        for( i = 0; i < 12; i++)
         {
-            if (i<istart)
+            if (i < istart)
             {
                 if (cmp_par(i,i,rbuf,wbuf)<0)
                     goto out;
             }
-            else if (i>=(int)istart && i<(int)istart+(int)irecords)
+            else if (i >= istart && i < istart + irecords)
             {
-                j=i-(int)istart;
+                j = i - istart;
                 if (cmp_par(i,j,rbuf,ibuf)<0)
                     goto out;
             }
-            else if (i>=(int)istart+(int)irecords && i<10)
+            else if ( i >= istart + irecords && i < 10 )
             {
-                j=i-(int)irecords;
+                j = i - irecords;
                 if (cmp_par(i,j,rbuf,wbuf)<0)
                     goto out;
             }
             else
             {
-                j=i-10;
+                j = i - 10;
                 if (cmp_par(i,j,rbuf,abuf)<0)
                     goto out;
             }
@@ -871,15 +871,15 @@ static int test_table(hid_t fid, int do_write)
                 if (cmp_par(i,i,rbuf,wbuf)<0)
                     goto out;
             }
-            else if ( i < (int)start2+(int)nrecords )
+            else if ( i < start2 + nrecords )
             {
-                j = i-(int)start1;
+                j = i - start1;
                 if (cmp_par(i,j,rbuf,wbuf)<0)
                     goto out;
             }
             else
             {
-                j = i-(int)nrecords;
+                j = i - nrecords;
                 if (cmp_par(i,j,rbuf,wbuf)<0)
                     goto out;
             }
@@ -1180,7 +1180,7 @@ static int test_table(hid_t fid, int do_write)
     /* Compare the extracted table with the initial values */
     for( i = 0; i < 3; i++ )
     {
-        int iistart = (int) start;
+        hsize_t iistart = start;
         if ( ( strcmp( namepre_out[i].name,  namepre_in[iistart+i].name ) != 0 ) ||
             namepre_out[i].pressure != namepre_in[iistart+i].pressure ) {
                 goto out;
