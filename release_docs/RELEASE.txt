@@ -82,6 +82,9 @@ New Features
 
     Tools
     -----
+    - h5diff new flag, -c, --compare, list objects that are not comparable.
+        PVN - 2009/4/2 - 1368
+    - h5diff new flag, -N, --nan, avoids NaNs detection. PVN - 2009/4/2
     - h5dump correctly specifies XML dtd / schema urls ADB - 2009/4/3 - 1519
     - h5repack now handles group creation order. PVN - 2009/4/2 - 1402
     - h5repack: When user doesn't specify a chunk size, h5repack now defines a default 
