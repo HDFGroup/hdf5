@@ -286,6 +286,9 @@ H5L_term_interface(void)
     H5L_table_g = (H5L_class_t *)H5MM_xfree(H5L_table_g);
     H5L_table_used_g = H5L_table_alloc_g = 0;
 
+    /* Mark the interface as uninitialized */
+    H5_interface_initialize_g = 0;
+
     FUNC_LEAVE_NOAPI(n)
 } /* H5L_term_interface() */
 
