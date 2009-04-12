@@ -1,4 +1,4 @@
-HDF5 version 1.6.8-post12 released on Wed Apr  8 19:09:53 CDT 2009
+HDF5 version 1.6.8-post13 released on Sun Apr 12 14:39:11 CDT 2009
 ================================================================================
 
 INTRODUCTION
@@ -55,6 +55,9 @@ New Features
 
     Tools:
     ------
+    - h5diff new flag, -c, --compare, list objects that are not comparable.
+        PVN - 2009/4/10 - 1368
+    - h5diff new flag, -N, --nan, avoids NaNs detection. PVN - 2009/4/10
     - h5dump correctly specifies XML dtd / schema urls ADB - 2009/4/3 - 1519
     - h5dump: binary output defaults to NATIVE with -b optionally accepting
       the form of binary output (NATIVE, FILE, BE, LE). PVN - 2008/11/14
