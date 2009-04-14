@@ -1593,11 +1593,15 @@
 ./hl/src/H5DS.c
 ./hl/src/H5DSprivate.h
 ./hl/src/H5DSpublic.h
+./hl/src/H5HLerror.c
+./hl/src/H5HLerror.h
+./hl/src/H5HLint.c
 ./hl/src/H5HLprivate2.h
 ./hl/src/H5IM.c
 ./hl/src/H5IMprivate.h
 ./hl/src/H5IMpublic.h
 ./hl/src/H5LR.c
+./hl/src/H5LRpkg.h
 ./hl/src/H5LRprivate.h
 ./hl/src/H5LRpublic.h
 ./hl/src/H5LT.c
