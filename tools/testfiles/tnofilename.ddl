@@ -26,6 +26,7 @@ usage: h5dump [OPTIONS] file
      -m T, --format=T     Set the floating point output format
      -q Q, --sort_by=Q    Sort groups and attributes by index Q
      -z Z, --sort_order=Z Sort groups and attributes by order Z
+     -R, --region         Print dataset pointed by region references
      -x, --xml            Output in XML using Schema
      -u, --use-dtd        Output in XML using DTD
      -D U, --xml-dtd=U    Use the DTD or schema at U

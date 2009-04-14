@@ -94,6 +94,7 @@ static int          display_dcpl      = FALSE; /*dcpl */
 static int          display_fi        = FALSE; /*file index */
 static int          display_ai        = TRUE;  /*array index */
 static int          display_escape    = FALSE; /*escape non printable characters */
+static int          display_region    = FALSE; /*print region reference data */
 
 /* sort parameters */
 static H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
@@ -500,6 +501,7 @@ static struct long_options l_opts[] = {
     { "sort_by", require_arg, 'q' },
     { "sort_order", require_arg, 'z' },
     { "format", require_arg, 'm' },
+    { "region", no_arg, 'R' },
     { NULL, 0, '\0' }
 };
 
@@ -653,6 +655,7 @@ usage(const char *prog)
     fprintf(stdout, "     -m T, --format=T     Set the floating point output format\n");
     fprintf(stdout, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
     fprintf(stdout, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
+    fprintf(stdout, "     -R, --region         Print dataset pointed by region references\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
     fprintf(stdout, "     -u, --use-dtd        Output in XML using DTD\n");
     fprintf(stdout, "     -D U, --xml-dtd=U    Use the DTD or schema at U\n");
@@ -3867,6 +3870,10 @@ parse_command_line(int argc, const char *argv[])
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
 parse_start:
         switch ((char)opt) {
+        case 'R':
+            display_region = TRUE;
+            region_output = TRUE;
+            break;
         case 'B':
             display_bb = TRUE;
             last_was_dset = FALSE;

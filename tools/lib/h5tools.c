@@ -39,6 +39,7 @@ int         compound_data;
 FILE       *rawdatastream; /* should initialize to stdout but gcc moans about it */
 int         bin_output;    /* binary output */
 int         bin_form;      /* binary form */
+int         region_output; /* region output */
 
 
 /* local prototypes */
@@ -1801,7 +1802,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
         ctx.sm_pos = elmtno;
 
         f_type = H5Dget_type(dset);
-        if (H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
+        if (region_output && H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
             h5tools_dump_simple_data_region(stream, info, dset, &ctx, flags, hs_nelmts,
                                  p_type, sm_buf);
         }
@@ -1908,7 +1909,7 @@ h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id,
 
     /* Print it */
     f_type = H5Dget_type(obj_id);
-    if (H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
+    if (region_output && H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
         h5tools_dump_simple_data_region(stream, info, obj_id, &ctx, 
                                START_OF_DATA | END_OF_DATA, nelmts,
                                type, mem);
