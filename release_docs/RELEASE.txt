@@ -126,6 +126,8 @@ Bug Fixes since HDF5-1.8.2
 
     Library
     -------
+    - Added direct.h include file to windows section of H5private.h 
+      to fix _getcwd() warning. ADB - 2009/04/14 - 1536
     - Fixed a bug that prevented external links from working after calling
       H5close(). NAF - 2009/04/10 - 1539
     - Modified library to write cached symbol table information to the
