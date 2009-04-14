@@ -56,6 +56,8 @@ New Features
 
     Configuration
     -------------
+    - Added a Make target of check-all-install to test the correctness of
+      installing via the prefix= or $DESTDIR options. AKC - 2009/04/14
     - Add description here. Do not exceed 80 characters per line.
       EIP - 2008/11/12
 
