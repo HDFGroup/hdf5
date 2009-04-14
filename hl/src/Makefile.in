@@ -72,7 +72,7 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_hl_la_LIBADD =
-am_libhdf5_hl_la_OBJECTS = H5DS.lo H5IM.lo H5LT.lo H5LTanalyze.lo \
+am_libhdf5_hl_la_OBJECTS = H5DS.lo H5HLerror.lo H5HLint.lo H5IM.lo H5LT.lo H5LTanalyze.lo \
 	H5LTparse.lo H5PT.lo H5TB.lo H5LR.lo
 libhdf5_hl_la_OBJECTS = $(am_libhdf5_hl_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
@@ -348,7 +348,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src
 
 # This library is our main target.
 lib_LTLIBRARIES = libhdf5_hl.la
-libhdf5_hl_la_SOURCES = H5DS.c H5IM.c H5LT.c H5LTanalyze.c H5LTparse.c H5PT.c H5TB.c H5LR.c
+libhdf5_hl_la_SOURCES = H5DS.c H5HLerror.c H5HLint.c H5IM.c H5LT.c H5LTanalyze.c H5LTparse.c H5PT.c H5TB.c H5LR.c
 
 # Public header files (to be installed)
 include_HEADERS = hdf5_hl.h H5IMpublic.h H5LTpublic.h H5TBpublic.h H5DSpublic.h H5PTpublic.h H5LRpublic.h
@@ -438,6 +438,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5DS.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HLerror.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5HLint.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5IM.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LR.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/H5LT.Plo@am__quote@

@@ -13,23 +13,104 @@
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+
+/**********************/
+/* Module Declaration */
+/**********************/
+
 #define H5LR_MODULE
 
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include "H5ERROR.h"
-#include "H5Eprivate.h"		/* Error handling */
-#include "H5LRprivate.h"
 
+/***********************/
+/* Other Packages Used */
+/***********************/
+
+
+/***********/
+/* Headers */
+/***********/
+//#include <string.h>
+#include <stdlib.h>
+//#include <stdio.h>
+#include "H5LRpkg.h"            /* Lite References */
+
+
+
+/****************/
+/* Local Macros */
+/****************/
+
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/* Package initialization flag */
+hbool_t H5_H5LR_init_g = FALSE;
+
+/* High-Level API error class */
+hid_t H5HL_ERR_CLS_g = (-1);
+
+/* Major error codes */
+hid_t H5E_LREF_g = (-1);
+
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 
 /*-------------------------------------------------------------------------
  *
- * internal functions
+ * Private functions
  *
  *-------------------------------------------------------------------------
  */
+
+
+/*-------------------------------------------------------------------------
+ * Function: H5LR__pkg_init
+ *
+ * Purpose: Package initialization 
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Quincey Koziol
+ *
+ * Date: April 14, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+
+BEGIN_FUNC(PKGINIT, NOERR,
+herr_t, SUCCEED, -,
+H5LR__pkg_init(void))
+
+    /* Perform any package initialization actions (like registering the
+     *  package's major error code, etc) here */
+
+
+END_FUNC(PKGINIT)
 
 /*-------------------------------------------------------------------------
  *
@@ -198,9 +279,8 @@ herr_t H5LRget_region_info(hid_t obj_id,               /* -IN-      Id. of any o
  *-------------------------------------------------------------------------
  */
 
-/* BEGIN_FUNC(scope, use_err, ret_typ, ret_init, err, func) */
 BEGIN_FUNC(PUB, ERR,
-herr_t, NULL, ret_value,
+herr_t, SUCCEED, FAIL,
 H5LRread_region(hid_t obj_id,               /* -IN-      Id. of any object in a file associated with reference */
 		const hdset_reg_ref_t *ref, /* -IN-      Region reference to query                             */
 		hid_t mem_type,             /* -IN-      Id. of the memory datatype                            */
@@ -208,67 +288,57 @@ H5LRread_region(hid_t obj_id,               /* -IN-      Id. of any object in a 
 		void *buf                   /* -OUT-     Buffer containing data from the referenced region     */
 		) )
 
-  hid_t dset = -1, file_space = -1;  /* Identifier of the dataset's dataspace in the file */
-  hid_t ret_value = SUCCEED;         /* Return value                                      */
-  H5S_sel_type sel_type;             /* Type of the dataspace selection                   */
-  hid_t mem_space;                   /* Identifier of the memory dataspace                */
-  herr_t status;                     /* API's error status                                */
-  hsize_t dims1[1];
+    hid_t dset = -1, file_space = -1;   /* Identifier of the dataset's dataspace in the file */
+    hid_t mem_space = -1;               /* Identifier of the memory dataspace                */
 
-  /* Open the HDF5 object referenced */ 
+    /* Open the HDF5 object referenced */ 
+    if((dset = H5Rdereference(obj_id, H5R_DATASET_REGION, ref)) < 0)
+        H5E_THROW(H5E_BADSELECT, "Unable to open object referenced")
 
-  H5E_BEGIN_TRY {
-    dset = H5Rdereference(obj_id, H5R_DATASET_REGION, ref);
-  } H5E_END_TRY
-  
-  if( dset < 0){
-    H5Eclear2(H5E_DEFAULT);
-    H5E_THROW(H5E_BADSELECT, "Unable to open object referenced");
-  }
+    /* Retrieve the dataspace with the specified region selected */
+    if((file_space = H5Rget_region(dset, H5R_DATASET_REGION, ref)) < 0)
+        H5E_THROW(H5E_CANTGET, "Unable to retrieve region")
 
-  /* Retrieve the dataspace with the specified region selected */
-  file_space = H5Rget_region (dset, H5R_DATASET_REGION, ref);
+    /* Check for anything to retrieve */
+    if(numelem || buf) {
+        hssize_t nelmts = 0;                /* The number of elements in selected region */
 
-  /* Determine the type of the dataspace selection */
-  sel_type = H5Sget_select_type(file_space);
+        /* Determine the number of elements the dataspace selection */
+        if((nelmts = H5Sget_select_npoints(file_space)) < 0)
+            H5E_THROW(H5E_CANTGET, "Unable to retrieve number of elements in region")
 
-  /* Determine the number of elements the dataspace selection */
-  dims1[0] = H5Sget_select_npoints(file_space);
-  *numelem = (size_t)dims1[0];
-  
-  /* If only wanted the number of elments, return */
-  if( buf == NULL) return SUCCEED;
+        /* Set the number of elements in the region, if requested */
+        if(numelem)
+            *numelem = (size_t)nelmts;
 
-  /* Create a new simple dataspace in memory and open it for access */
-  mem_space = H5Screate_simple (1, dims1, NULL);
+        /* Check for retrieving the region's elements */
+        if(buf) {
+            hsize_t dims1[1] = {(hsize_t)nelmts};     /* The number of elements in memory dataspace */
 
-  /* Read the region data from the file_space into the mem_space */
-  status = H5Dread (dset, mem_type, mem_space, file_space, H5P_DEFAULT, buf);
+            /* Create a new simple dataspace in memory and open it for access */
+            if((mem_space = H5Screate_simple(1, dims1, NULL)) < 0)
+                H5E_THROW(H5E_CANTCREATE, "Unable to create dataspace for retrieving elements")
 
-  /* Close appropriate items */
-  H5E_BEGIN_TRY {
-    status = H5Dclose(dset);
-  } H5E_END_TRY
-
-/*   if( (status = H5Dclose(dset) ) < 0 ) */
-/*     H5E_THROW(H5E_CLOSEERROR, "Unable to close dataset"); */
-
-  H5E_BEGIN_TRY {
-    status = H5Sclose(mem_space);
-  } H5E_END_TRY
-  
-  H5E_BEGIN_TRY {
-    status = H5Sclose(file_space);
-  } H5E_END_TRY
-
+            /* Read the region data from the file_space into the mem_space */
+            if(H5Dread(dset, mem_type, mem_space, file_space, H5P_DEFAULT, buf) < 0)
+                H5E_THROW(H5E_READERROR, "Unable to retrieve elements")
+        } /* end if */
+    } /* end if */
 
 CATCH
-
-   ret_value = FAIL;
-/*   return ret_value; */
-
+    /* Close appropriate items */
+    if(mem_space > 0)
+        if(H5Sclose(mem_space) < 0)
+            H5E_THROW(H5E_CLOSEERROR, "Unable to close memory dataspace")
+    if(file_space > 0)
+        if(H5Sclose(file_space) < 0)
+            H5E_THROW(H5E_CLOSEERROR, "Unable to close file dataspace")
+    if(dset > 0)
+        if(H5Dclose(dset) < 0)
+            H5E_THROW(H5E_CLOSEERROR, "Unable to close dataset")
 
 END_FUNC(PUB)
+
 
 /*-------------------------------------------------------------------------
  * Function: H5LRcreate_region_references
