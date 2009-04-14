@@ -39,6 +39,8 @@ New Features
 
     Configuration:
     -------------
+    - Added a Make target of check-all-install to test the correctness of
+      installing via the prefix= or $DESTDIR options. AKC - 2009/04/14
     - Configuration suite now uses Libtool 2.2.6a. MAM 2008/10/24
 
     - Configuration suite now uses Autoconf 2.61, Automake 1.10.1. 
