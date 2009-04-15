@@ -77,7 +77,6 @@
 /* Revisions to FUNC_ENTER/LEAVE & Error Macros */
 /************************************************/
 
-#ifndef NDEBUG
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a public API function */
 #define H5_IS_PUB(S) (((isdigit(S[1]) || isupper(S[1])) && islower(S[2])) || \
@@ -96,6 +95,7 @@
     ((isdigit(S[2]) || isupper(S[2])) && '_' == S[3] && '_' == S[4] && islower(S[5])) || \
     ((isdigit(S[3]) || isupper(S[3])) && '_' == S[4] && '_' == S[5] && islower(S[6])))
 
+#ifndef NDEBUG
 #define FUNC_ENTER_NAME_CHECK(asrt)					      \
     {					          			      \
         static hbool_t func_check = FALSE;          			      \
@@ -110,9 +110,6 @@
     } /* end scope */
 #else /* NDEBUG */
 #define FUNC_ENTER_NAME_CHECK(asrt)
-#define H5_IS_PUB(S)
-#define H5_IS_PRIV(S)
-#define H5_IS_PKG(S)
 #endif /* NDEBUG */
 
 /* Macros for referencing package initialization symbols */
