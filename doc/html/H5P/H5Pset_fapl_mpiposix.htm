@@ -2,6 +2,10 @@
 <!-- HEADER RIGHT "H5Pset_fapl_mpiposix" -->
 <hr>
 <dl>
+  <dt><div align=right><font color=999999 size=-1><i>
+      Last modified: 15 April 2009
+      </i></font></div>
+ 
   <dt><strong>Name:</strong> <a name="Property-SetFaplMpiPosix">H5Pset_fapl_mpiposix</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pset_fapl_mpiposix</code>(
@@ -9,8 +13,12 @@
                      <em>MPI_Comm</em> <code>comm</code>,
                      <em>hbool_t</em> <code>use_gpfs_hints</code>
     )
+ 
+  <p>
   <dt><strong>Purpose:</strong>
     <dd>Stores MPI IO communicator information to a file access property list.
+ 
+  <p>
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_fapl_mpiposix</code> stores the user-supplied 
         MPI IO parameter <code>comm</code>, for communicator, 
@@ -42,8 +50,22 @@
         and may improve file access for some applications; 
         the user of a GPFS system is encouraged to experiment 
         by running an application with and without this parameter set.
+ 
+  <p>
+  <dt><strong>Note:</strong>
+    <dd>Raw dataset chunk caching is not currently supported when using 
+        this file driver in read/write mode.  
+        All calls to <code>H5Dread</code> and <code>H5Dwrite</code> 
+        will access the disk directly, and 
+        <code>H5Pset_cache</code> and <code>H5Pset_chunk_cache</code> 
+        will have no effect on performance.
+        <p>
+        Raw dataset chunk caching is supported when this driver is 
+        used in read-only mode.
+ 
+  <p>
   <dt><strong>Parameters:</strong>
-    <ul><table>
+    <dd><table>
         <tr>
             <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
             <td valign="top">IN: File access property list identifier.</td></tr>
@@ -51,15 +73,19 @@
             <td valign="top"><em>MPI_Comm</em>&nbsp;<code>comm</code></td>
             <td valign="top">IN: MPI-2 communicator.</td></tr>
         <tr>
-            <td valign="top"><em>hbool_t</em> <code>use_gpfs_hints&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>hbool_t</em>&nbsp;<code>use_gpfs_hints&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Use of GPFS hints.</td></tr>
-    </table></ul>
+        </table>
+ 
+  <p>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
+ 
+  <p>
   <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_mpiposix_f
     <dd>
-	<pre>
+        <pre>
 SUBROUTINE h5pset_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
   IMPLICIT NONE
   INTEGER(HID_T), INTENT(IN) :: prp_id  ! Property list identifier
@@ -69,28 +95,18 @@ SUBROUTINE h5pset_fapl_mpiposix_f(prp_id, comm, use_gpfs, hdferr)
   LOGICAL, INTENT(IN) :: use_gpfs
   INTEGER, INTENT(OUT) :: hdferr        ! Error code
 END SUBROUTINE h5pset_fapl_mpiposix_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
+        </pre>
+
+  <p>
   <dt><strong>History:</strong>
     <ul><table width="90%">
         <tr>
           <td valign="top" align="left" width="10%">
             <strong>Release</strong>&nbsp;&nbsp;&nbsp;&nbsp;</td>
           <td valign="top" align="left">
-            <strong>C</strong></td>
-          <td valign="top">&nbsp;&nbsp;&nbsp;&nbsp;</td>
-          <td valign="top" align="left">
-            <strong>Fortran90</strong></td></tr>
+            <strong>Change</strong></td>
         <tr>
           <td valign="top">1.6.1</td>
-          <td valign="top">&nbsp;</td>
-          <td valign="top">&nbsp;</td>
           <td valign="top">
             Fortran subroutine introduced in this release.
           </td></tr>
@@ -98,16 +114,12 @@ END SUBROUTINE h5pset_fapl_mpiposix_f
           <td valign="top">1.6.0</td>
           <td valign="top">
             <code>use_gpfs_hints</code> parameter added.</td>
-          <td valign="top">&nbsp;</td>
-          <td valign="top">&nbsp;</td>
         </tr>
         <tr>
           <td valign="top">1.6.0</td>
           <td valign="top">
-            Function introduced in this release.
+            C function introduced in this release.
         	</td>
-          <td valign="top">&nbsp;</td>
-          <td valign="top">&nbsp;</td>
         </tr>
     </table></ul>
 </dl>

@@ -2,6 +2,10 @@
 <!-- HEADER RIGHT "H5Pset_fapl_mpio" -->
 <hr>
 <dl>
+  <dt><div align=right><font color=999999 size=-1><i>
+      Last modified: 15 April 2009
+      </i></font></div>
+
   <dt><strong>Name:</strong> <a name="Property-SetFaplMpio">H5Pset_fapl_mpio</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pset_fapl_mpio</code>(
@@ -9,9 +13,11 @@
                      <em>MPI_Comm</em> <code>comm</code>,
                      <em>MPI_Info</em> <code>info</code>
     )
+
   <p>
   <dt><strong>Purpose:</strong>
     <dd>Stores MPI IO communicator information to the file access property list.
+
   <p>
   <dt><strong>Description:</strong>
     <dd><code>H5Pset_fapl_mpio</code> stores the user-supplied 
@@ -37,9 +43,22 @@
         <p>
         If the file access property list already contains previously-set 
         comm and Info values, those values will be replaced. 
+ 
+  <p>
+  <dt><strong>Note:</strong>
+    <dd>Raw dataset chunk caching is not currently supported when using 
+        this file driver in read/write mode.  
+        All calls to <code>H5Dread</code> and <code>H5Dwrite</code> 
+        will access the disk directly, and 
+        <code>H5Pset_cache</code> and <code>H5Pset_chunk_cache</code> 
+        will have no effect on performance.
+        <p>
+        Raw dataset chunk caching is supported when this driver is 
+        used in read-only mode.
+ 
   <p>
   <dt><strong>Parameters:</strong>
-    <ul><table>
+    <dd><table>
         <tr>
             <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
             <td valign="top">IN: File access property list identifier</td></tr>
@@ -49,11 +68,13 @@
         <tr>
             <td valign="top"><em>MPI_Info</em> <code>info</code></td>
             <td valign="top">IN: MPI-2 info object</td></tr>
-    </table></ul>
+        </table>
+
   <p>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
+
   <p>
   <dt><strong>Fortran90 Interface:</strong> h5pset_fapl_mpio_f
     <dd>
@@ -91,7 +112,7 @@ END SUBROUTINE h5pset_fapl_mpio_f
         <tr>
           <td valign="top">1.4.0</td>
           <td valign="top">
-    	    C function introduced in this release.</td></tr>
+            C function introduced in this release.</td></tr>
     </table></ul>
 </dl>
 
