@@ -350,7 +350,7 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_str_dump_region
+ * Function:    h5tools_str_dump_region_blocks
  *
  * Purpose: Prints information about a dataspace region by appending
  *      the information to the specified string.
@@ -367,9 +367,9 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
  *-------------------------------------------------------------------------
  */
 int
-h5tools_str_dump_region(h5tools_str_t *str, hid_t region, const h5tool_format_t *info)
+h5tools_str_dump_region_blocks(h5tools_str_t *str, hid_t region, const h5tool_format_t *info)
 {
-    hssize_t    nblocks, npoints;
+    hssize_t    nblocks;
     hsize_t     alloc_size;
     hsize_t    *ptdata;
     int     ndims = H5Sget_simple_extent_ndims(region);
@@ -381,14 +381,13 @@ h5tools_str_dump_region(h5tools_str_t *str, hid_t region, const h5tool_format_t 
      */
     H5E_BEGIN_TRY {
         nblocks = H5Sget_select_hyper_nblocks(region);
-        npoints = H5Sget_select_elem_npoints(region);
     } H5E_END_TRY;
-
-    h5tools_str_append(str, "{");
 
     /* Print block information */
     if (nblocks > 0) {
         int i;
+
+        h5tools_str_append(str, "{");
 
         alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
         assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
@@ -416,11 +415,51 @@ h5tools_str_dump_region(h5tools_str_t *str, hid_t region, const h5tool_format_t 
         }
 
         free(ptdata);
+
+        h5tools_str_append(str, "}");
     }
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    h5tools_str_dump_region_points
+ *
+ * Purpose: Prints information about a dataspace region by appending
+ *      the information to the specified string.
+ *
+ * Return:  Success:    0
+ *
+ *      Failure:    NULL
+ *
+ * Programmer:  Robb Matzke
+ *              Monday, June  7, 1999
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+h5tools_str_dump_region_points(h5tools_str_t *str, hid_t region, const h5tool_format_t *info)
+{
+    hssize_t    npoints;
+    hsize_t     alloc_size;
+    hsize_t    *ptdata;
+    int     ndims = H5Sget_simple_extent_ndims(region);
+
+    /*
+     * These two functions fail if the region does not have blocks or points,
+     * respectively. They do not currently know how to translate from one to
+     * the other.
+     */
+    H5E_BEGIN_TRY {
+        npoints = H5Sget_select_elem_npoints(region);
+    } H5E_END_TRY;
 
     /* Print point information */
     if (npoints > 0) {
         int i;
+
+        h5tools_str_append(str, "{");
 
         alloc_size = npoints * ndims * sizeof(ptdata[0]);
         assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
@@ -443,9 +482,9 @@ h5tools_str_dump_region(h5tools_str_t *str, hid_t region, const h5tool_format_t 
         }
 
         free(ptdata);
-    }
 
-    h5tools_str_append(str, "}");
+        h5tools_str_append(str, "}");
+    }
     return 0;
 }
 
@@ -569,6 +608,22 @@ h5tools_print_char(h5tools_str_t *str, const h5tool_format_t *info, char ch)
  *  added H5T_NATIVE_LDOUBLE case
  *-------------------------------------------------------------------------
  */
+void h5tools_str_sprint_region(h5tools_str_t *str, const h5tool_format_t *info, hid_t container,
+        void *vp, h5tools_context_t *ctx)
+{
+    hid_t   obj, region;
+    char    ref_name[1024];
+    
+    obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
+    region = H5Rget_region(container, H5R_DATASET_REGION, vp);
+    H5Rget_name(obj, H5R_DATASET_REGION, vp, (char*)ref_name, 1024);
+    h5tools_str_append(str, info->dset_format, ref_name);
+    h5tools_str_dump_region_blocks(str, region, info);
+    h5tools_str_dump_region_points(str, region, info);
+    H5Sclose(region);
+    H5Dclose(obj);
+}
+
 char *
 h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t container,
                    hid_t type, void *vp, h5tools_context_t *ctx)
@@ -846,19 +901,9 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
          */
         if (h5tools_is_zero(vp, H5Tget_size(type))) {
             h5tools_str_append(str, "NULL");
-        } else {
-            char ref_name[1024];
-
-            obj = H5Rdereference(container, H5R_DATASET_REGION, vp);
-            region = H5Rget_region(container, H5R_DATASET_REGION, vp);
-
-            /* get name of the dataset the region reference points to using H5Rget_name */
-            H5Rget_name(obj, H5R_DATASET_REGION, vp, (char*)ref_name, 1024);
-            h5tools_str_append(str, info->dset_format, ref_name);
-
-            h5tools_str_dump_region(str, region, info);
-            H5Sclose(region);
-            H5Dclose(obj);
+        } 
+        else {
+            h5tools_str_sprint_region(str, info, container, vp, ctx);
         }
     } else if (H5Tequal(type, H5T_STD_REF_OBJ)) {
         /*

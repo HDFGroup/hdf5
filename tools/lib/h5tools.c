@@ -45,6 +45,23 @@ int         region_output; /* region output */
 /* local prototypes */
 static int do_bin_output(FILE *stream, hsize_t nelmts, hid_t tid, void *_mem);
 static int render_bin_output(FILE *stream, hid_t tid, void *_mem);
+hsize_t h5tools_render_element(FILE *stream, const h5tool_format_t *info, 
+        h5tools_context_t *ctx/*in,out*/,
+        h5tools_str_t *buffer/*string into which to render */,
+        hsize_t curr_pos/*total data element position*/, unsigned flags,
+        size_t ncols, hsize_t *elmt_counter, hsize_t i_count/*element counter*/);
+hsize_t h5tools_dump_region_data_points(hid_t region_space,
+        hid_t region_id, FILE *stream, const h5tool_format_t *info, 
+        h5tools_context_t *ctx/*in,out*/,
+        h5tools_str_t *buffer/*string into which to render */,
+        hsize_t curr_pos/*total data element position*/, unsigned flags,
+        size_t ncols, hsize_t *elmt_counter, hsize_t i_count/*element counter*/);
+hsize_t h5tools_dump_region_data_blocks(hid_t region_space,
+        hid_t region_id, FILE *stream, const h5tool_format_t *info, 
+        h5tools_context_t *ctx/*in,out*/,
+        h5tools_str_t *buffer/*string into which to render */,
+        hsize_t curr_pos/*total data element position*/, unsigned flags,
+        size_t ncols, hsize_t *elmt_counter, hsize_t i_count/*element counter*/);
 
 /* module-scoped variables */
 static int  h5tools_init_g;     /* if h5tools lib has been initialized */
@@ -54,16 +71,16 @@ static int  h5tools_mpi_init_g; /* if MPI_Init() has been called */
 
 /* Names of VFDs */
 static const char *drivernames[]={
-    "sec2",
-    "family",
-    "split",
-    "multi",
+        "sec2",
+        "family",
+        "split",
+        "multi",
 #ifdef H5_HAVE_STREAM
-    "stream",
+        "stream",
 #endif /* H5_HAVE_STREAM */
 #ifdef H5_HAVE_PARALLEL
-    "mpio",
-    "mpiposix"
+        "mpio",
+        "mpiposix"
 #endif /* H5_HAVE_PARALLEL */
 };
 
@@ -71,15 +88,15 @@ static const char *drivernames[]={
  * are indexes into the drivers_list array. */
 enum {
     SEC2_IDX = 0
-   ,FAMILY_IDX
-   ,SPLIT_IDX
-   ,MULTI_IDX
+    ,FAMILY_IDX
+    ,SPLIT_IDX
+    ,MULTI_IDX
 #ifdef H5_HAVE_STREAM
-   ,STREAM_IDX
+    ,STREAM_IDX
 #endif /* H5_HAVE_STREAM */
 #ifdef H5_HAVE_PARALLEL
-   ,MPIO_IDX
-   ,MPIPOSIX_IDX
+    ,MPIO_IDX
+    ,MPIPOSIX_IDX
 #endif /* H5_HAVE_PARALLEL */
 } driver_idx;
 #define NUM_DRIVERS     (sizeof(drivernames) / sizeof(drivernames[0]))
@@ -103,10 +120,10 @@ void
 h5tools_init(void)
 {
     if (!h5tools_init_g) {
-    if (!rawdatastream)
-        rawdatastream = stdout;
+        if (!rawdatastream)
+            rawdatastream = stdout;
 
-    h5tools_init_g++;
+        h5tools_init_g++;
     }
 }
 
@@ -132,9 +149,9 @@ h5tools_close(void)
     if (h5tools_init_g) {
         if (rawdatastream && rawdatastream != stdout) {
             if (fclose(rawdatastream))
-            perror("closing rawdatastream");
+                perror("closing rawdatastream");
             else
-            rawdatastream = NULL;
+                rawdatastream = NULL;
         }
 
         /* Clean up the reference path table, if it's been used */
@@ -223,24 +240,24 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 #ifdef H5_HAVE_PARALLEL
     } else if(!strcmp(driver, drivernames[MPIO_IDX])) {
         /* MPI-I/O Driver */
-    /* check if MPI has been initialized. */
-    if(!h5tools_mpi_init_g)
-        MPI_Initialized(&h5tools_mpi_init_g);
+        /* check if MPI has been initialized. */
+        if(!h5tools_mpi_init_g)
+            MPI_Initialized(&h5tools_mpi_init_g);
         if(h5tools_mpi_init_g) {
             if(H5Pset_fapl_mpio(new_fapl, MPI_COMM_WORLD, MPI_INFO_NULL) < 0)
-        goto error;
+                goto error;
 
             if(drivernum)
                 *drivernum = MPIO_IDX;
         } /* end if */
     } else if (!strcmp(driver, drivernames[MPIPOSIX_IDX])) {
         /* MPI-I/O Driver */
-    /* check if MPI has been initialized. */
-    if(!h5tools_mpi_init_g)
-        MPI_Initialized(&h5tools_mpi_init_g);
+        /* check if MPI has been initialized. */
+        if(!h5tools_mpi_init_g)
+            MPI_Initialized(&h5tools_mpi_init_g);
         if(h5tools_mpi_init_g) {
             if(H5Pset_fapl_mpiposix(new_fapl, MPI_COMM_WORLD, TRUE) < 0)
-        goto error;
+                goto error;
 
             if(drivernum)
                 *drivernum = MPIPOSIX_IDX;
@@ -252,7 +269,7 @@ h5tools_get_fapl(hid_t fapl, const char *driver, unsigned *drivernum)
 
     return(new_fapl);
 
-error:
+    error:
     if(new_fapl != H5P_DEFAULT)
         H5Pclose(new_fapl);
     return -1;
@@ -315,7 +332,7 @@ error:
  */
 hid_t
 h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, const char *driver,
-    char *drivername, size_t drivername_size)
+        char *drivername, size_t drivername_size)
 {
     unsigned    drivernum;
     hid_t       fid = FAIL;
@@ -365,7 +382,7 @@ h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, const char *driver,
         }
     }
 
-done:
+    done:
     if(my_fapl != H5P_DEFAULT)
         H5Pclose(my_fapl);
     return fid;
@@ -422,7 +439,7 @@ h5tools_ncols(const char *s)
  */
 static void
 h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
-                      h5tools_context_t *ctx, hsize_t elmtno, int secnum)
+        h5tools_context_t *ctx, hsize_t elmtno, int secnum)
 {
     h5tools_str_t prefix;
     h5tools_str_t str; /*temporary for indentation */
@@ -430,21 +447,21 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
     int i, indentlevel = 0;
 
     if (!ctx->need_prefix)
- return;
+        return;
 
     memset(&prefix, 0, sizeof(h5tools_str_t));
     memset(&str, 0, sizeof(h5tools_str_t));
 
     /* Terminate previous line, if any */
     if (ctx->cur_column) {
-     fputs(OPT(info->line_suf, ""), stream);
-     putc('\n', stream);
-     fputs(OPT(info->line_sep, ""), stream);
+        fputs(OPT(info->line_suf, ""), stream);
+        putc('\n', stream);
+        fputs(OPT(info->line_sep, ""), stream);
     }
 
     /* Calculate new prefix */
     h5tools_str_prefix(&prefix, info, elmtno, ctx->ndims, ctx->p_min_idx,
-                       ctx->p_max_idx, ctx);
+            ctx->p_max_idx, ctx);
 
     /* Write new prefix to output */
     if (ctx->indent_level >= 0) {
@@ -456,15 +473,15 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
          * the ctx->indent_level is negative so we need to skip the above and
          * just print out the default indent levels.
          */
- indentlevel = ctx->default_indent_level;
+        indentlevel = ctx->default_indent_level;
     }
 
     /* when printing array indices, print the indentation before the prefix
        the prefix is printed one indentation level before */
     if (info->pindex) {
-     for (i = 0; i < indentlevel-1; i++){
-      fputs(h5tools_str_fmt(&str, 0, info->line_indent), stream);
-     }
+        for (i = 0; i < indentlevel-1; i++){
+            fputs(h5tools_str_fmt(&str, 0, info->line_indent), stream);
+        }
     }
 
     if (elmtno == 0 && secnum == 0 && info->line_1st)
@@ -478,14 +495,14 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
 
     for (i = 0; i < indentlevel; i++){
         /*we already made the indent for the array indices case */
-     if (!info->pindex) {
-        fputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
-        templength += h5tools_str_len(&prefix);
-     }
-     else {
-      /*we cannot count the prefix for the array indices case */
-      templength += h5tools_str_len(&str);
-     }
+        if (!info->pindex) {
+            fputs(h5tools_str_fmt(&prefix, 0, info->line_indent), stream);
+            templength += h5tools_str_len(&prefix);
+        }
+        else {
+            /*we cannot count the prefix for the array indices case */
+            templength += h5tools_str_len(&str);
+        }
     }
 
     ctx->cur_column = ctx->prev_prefix_len = templength;
@@ -535,8 +552,8 @@ h5tools_simple_prefix(FILE *stream, const h5tool_format_t *info,
  */
 void
 h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t container,
-                         h5tools_context_t *ctx/*in,out*/, unsigned flags,
-                         hsize_t nelmts, hid_t type, void *_mem)
+        h5tools_context_t *ctx/*in,out*/, unsigned flags,
+        hsize_t nelmts, hid_t type, void *_mem)
 {
     unsigned char *mem = (unsigned char*)_mem;
     hsize_t       i;          /*element counter  */
@@ -544,19 +561,22 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
     char          *section;   /*a section of output  */
     int           secnum;     /*section sequence number */
     size_t        size;       /*size of each datum  */
+    hid_t         f_type;
+    hid_t       region_space;
+    hid_t       region_id;
     size_t        ncols = 80; /*available output width */
     h5tools_str_t buffer;     /*string into which to render */
     int           multiline;  /*datum was multiline  */
     hsize_t       curr_pos;   /* total data element position   */
-    int           elmt_counter = 0;/*counts the # elements printed.
-                                    *I (ptl?) needed something that
-                                    *isn't going to get reset when a new
-                                    *line is formed. I'm going to use
-                                    *this var to count elements and
-                                    *break after we see a number equal
-                                    *to the ctx->size_last_dim.   */
+    hsize_t           elmt_counter = 0;/*counts the # elements printed.
+     *I (ptl?) needed something that
+     *isn't going to get reset when a new
+     *line is formed. I'm going to use
+     *this var to count elements and
+     *break after we see a number equal
+     *to the ctx->size_last_dim.   */
 
-     /* binary dump */
+    /* binary dump */
     if(bin_output)
     {
         do_bin_output(stream, nelmts, type, _mem);
@@ -587,115 +607,30 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
             if (i + 1 < nelmts || (flags & END_OF_DATA) == 0)
                 h5tools_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
 
-            s = h5tools_str_fmt(&buffer, 0, "%s");
-
-            /*
-             * If the element would split on multiple lines if printed at our
-             * current location...
-             */
-            if (info->line_multi_new == 1 &&
-                    (ctx->cur_column + h5tools_ncols(s) +
-                     strlen(OPT(info->elmt_suf2, " ")) +
-                     strlen(OPT(info->line_suf, ""))) > ncols) {
-                if (ctx->prev_multiline) {
-                    /*
-                     * ... and the previous element also occupied more than one
-                     * line, then start this element at the beginning of a line.
-                     */
-                    ctx->need_prefix = TRUE;
-                } else if ((ctx->prev_prefix_len + h5tools_ncols(s) +
-                        strlen(OPT(info->elmt_suf2, " ")) +
-                        strlen(OPT(info->line_suf, ""))) <= ncols) {
-                    /*
-                     * ...but *could* fit on one line otherwise, then we
-                     * should end the current line and start this element on its
-                     * own line.
-                     */
-                    ctx->need_prefix = TRUE;
-                }
-            }
-
-            /*
-             * We need to break after each row of a dimension---> we should
-             * break at the end of the each last dimension well that is the
-             * way the dumper did it before
-             */
-            if (info->arr_linebreak && ctx->cur_elmt) {
-                if (ctx->size_last_dim && (ctx->cur_elmt % ctx->size_last_dim) == 0)
-                    ctx->need_prefix = TRUE;
-
-                if ((hsize_t)elmt_counter == ctx->size_last_dim) {
-                    ctx->need_prefix = TRUE;
-                    elmt_counter = 0;
-                }
-            }
-
-            /*
-             * If the previous element occupied multiple lines and this element
-             * is too long to fit on a line then start this element at the
-             * beginning of the line.
-             */
-            if (info->line_multi_new == 1 && ctx->prev_multiline &&
-                    (ctx->cur_column + h5tools_ncols(s) +
-                     strlen(OPT(info->elmt_suf2, " ")) +
-                     strlen(OPT(info->line_suf, ""))) > ncols)
+            curr_pos = h5tools_render_element(stream, info, ctx, &buffer, curr_pos, flags, ncols, &elmt_counter, i);
+            f_type = H5Dget_type(container);
+            if (region_output && H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
+                ctx->indent_level++;
                 ctx->need_prefix = TRUE;
 
-            /*
-             * If too many elements have already been printed then we need to
-             * start a new line.
-             */
-            if (info->line_per_line > 0 && ctx->cur_elmt >= info->line_per_line)
+                /* region data */
+                region_id = H5Rdereference(container, H5R_DATASET_REGION, mem + i * size);
+                region_space = H5Rget_region(container, H5R_DATASET_REGION, mem + i * size);
+
+                /* Print block information */
+                curr_pos = h5tools_dump_region_data_blocks(region_space, region_id, 
+                        stream, info, ctx, &buffer, curr_pos, flags, ncols, &elmt_counter, i);
+                /* Print point information */
+                curr_pos = h5tools_dump_region_data_points(region_space, region_id, 
+                        stream, info, ctx, &buffer, curr_pos, flags, ncols, &elmt_counter, i);
+
+                H5Sclose(region_space);
+                H5Dclose(region_id);
+
                 ctx->need_prefix = TRUE;
-
-            /*
-             * Each OPTIONAL_LINE_BREAK embedded in the rendered string can cause
-             * the data to split across multiple lines.  We display the sections
-             * one-at a time.
-             */
-            for (secnum = 0, multiline = 0;
-                     (section = strtok(secnum ? NULL : s, OPTIONAL_LINE_BREAK));
-                     secnum++) {
-                /*
-                 * If the current section plus possible suffix and end-of-line
-                 * information would cause the output to wrap then we need to
-                 * start a new line.
-                 */
-
-                /*
-                 * Added the info->skip_first because the dumper does not want
-                 * this check to happen for the first line
-                 */
-                if ((!info->skip_first || i) &&
-                        (ctx->cur_column + strlen(section) +
-                         strlen(OPT(info->elmt_suf2, " ")) +
-                         strlen(OPT(info->line_suf, ""))) > ncols)
-                    ctx->need_prefix = 1;
-
-                /*
-                 * Print the prefix or separate the beginning of this element
-                 * from the previous element.
-                 */
-                if (ctx->need_prefix) {
-                    if (secnum)
-                        multiline++;
-
-                    /* pass to the prefix in h5tools_simple_prefix the total
-                     * position instead of the current stripmine position i;
-                     * this is necessary to print the array indices
-                     */
-                    curr_pos = ctx->sm_pos + i;
-
-                    h5tools_simple_prefix(stream, info, ctx, curr_pos, secnum);
-                } else if ((i || ctx->continuation) && secnum == 0) {
-                    fputs(OPT(info->elmt_suf2, " "), stream);
-                    ctx->cur_column += strlen(OPT(info->elmt_suf2, " "));
-                }
-
-                /* Print the section */
-                fputs(section, stream);
-                ctx->cur_column += strlen(section);
+                ctx->indent_level--;
             }
+            H5Tclose(f_type);
 
             ctx->prev_multiline = multiline;
         }
@@ -704,581 +639,289 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
     }/* else bin */
 }
 
-/*-------------------------------------------------------------------------
- * Audience:    Public
- * Chapter:     H5Tools Library
- * Purpose:     Prints NELMTS data elements to output STREAM.
- * Description:
- *      Prints some (NELMTS) data elements to output STREAM. The elements are
- *      stored in _MEM as type TYPE and are printed according to the format
- *      described in INFO. The CTX struct contains context information shared
- *      between calls to this function. The FLAGS is a bit field that
- *      indicates whether the data supplied in this call falls at the
- *      beginning or end of the total data to be printed (START_OF_DATA and
- *      END_OF_DATA).
- * Return:
- *      None
- * Programmer:
- *      Robb Matzke, Monday, April 26, 1999
- * Modifications:
- *  Robb Matzke, 1999-06-04
- * The `container' argument is the optional dataset for reference types.
- *
- *  Robb Matzke, 1999-09-29
- * Understands the `per_line' property which indicates that every Nth
- * element should begin a new line.
- *
- *      Robb Matzke, LLNL, 2003-06-05
- *      Do not dereference the memory for a variable-length string here.
- *      Deref in h5tools_str_sprint() instead so recursive types are
- *      handled correctly.
- *
- *      Pedro Vicente Nunes, The HDF Group, 2005-10-19
- *        pass to the prefix in h5tools_simple_prefix the total position
- *        instead of the current stripmine position i; this is necessary
- *        to print the array indices
- *        new field sm_pos in h5tools_context_t, the current stripmine element position
- *-------------------------------------------------------------------------
- */
-void
-h5tools_dump_simple_data_region(FILE *stream, const h5tool_format_t *info, hid_t container,
-                         h5tools_context_t *ctx/*in,out*/, unsigned flags,
-                         hsize_t nelmts, hid_t type, void *_mem)
+hsize_t h5tools_render_element(FILE *stream, const h5tool_format_t *info, 
+        h5tools_context_t *ctx/*in,out*/,
+        h5tools_str_t *buffer/*string into which to render */,
+        hsize_t curr_pos/*total data element position*/, unsigned flags,
+        size_t ncols, hsize_t *elmt_counter, hsize_t i_count/*element counter*/)
 {
-    unsigned char *mem = (unsigned char*)_mem;
-    hsize_t       i;          /*element counter  */
-    char          *s;
-    char          *section;   /*a section of output  */
-    int           secnum;     /*section sequence number */
-    size_t        size;       /*size of each datum  */
-    size_t        ncols = 80; /*available output width */
-    h5tools_str_t buffer;     /*string into which to render */
-    int           multiline;  /*datum was multiline  */
-    hsize_t       curr_pos;   /* total data element position   */
-    int           elmt_counter = 0;/*counts the # elements printed.
-                                    *I (ptl?) needed something that
-                                    *isn't going to get reset when a new
-                                    *line is formed. I'm going to use
-                                    *this var to count elements and
-                                    *break after we see a number equal
-                                    *to the ctx->size_last_dim.   */
+    char       *s;
+    char       *section;   /*a section of output  */
+    int         secnum;     /*section sequence number */
+    int         multiline;  /*datum was multiline  */
 
-     /* binary dump */
-    if(bin_output)
-    {
-        do_bin_output(stream, nelmts, type, _mem);
-    } /* end if */
-    else
-    {
-        /* setup */
-        HDmemset(&buffer, 0, sizeof(h5tools_str_t));
-        size = H5Tget_size(type);
+    s = h5tools_str_fmt(buffer, 0, "%s");
 
-        if(info->line_ncols > 0)
-            ncols = info->line_ncols;
+    /*
+     * If the element would split on multiple lines if printed at our
+     * current location...
+     */
+    if (info->line_multi_new == 1 &&
+            (ctx->cur_column + h5tools_ncols(s) +
+                    strlen(OPT(info->elmt_suf2, " ")) +
+                    strlen(OPT(info->line_suf, ""))) > ncols) {
+        if (ctx->prev_multiline) {
+            /*
+             * ... and the previous element also occupied more than one
+             * line, then start this element at the beginning of a line.
+             */
+            ctx->need_prefix = TRUE;
+        } 
+        else if ((ctx->prev_prefix_len + h5tools_ncols(s) +
+                strlen(OPT(info->elmt_suf2, " ")) +
+                strlen(OPT(info->line_suf, ""))) <= ncols) {
+            /*
+             * ...but *could* fit on one line otherwise, then we
+             * should end the current line and start this element on its
+             * own line.
+             */
+            ctx->need_prefix = TRUE;
+        }
+    }
 
+    /*
+     * We need to break after each row of a dimension---> we should
+     * break at the end of the each last dimension well that is the
+     * way the dumper did it before
+     */
+    if (info->arr_linebreak && ctx->cur_elmt) {
+        if (ctx->size_last_dim && (ctx->cur_elmt % ctx->size_last_dim) == 0)
+            ctx->need_prefix = TRUE;
 
-        /* pass to the prefix in h5tools_simple_prefix the total position
-         * instead of the current stripmine position i; this is necessary
-         * to print the array indices
+        if ((*elmt_counter) == ctx->size_last_dim) {
+            ctx->need_prefix = TRUE;
+            *elmt_counter = 0;
+        }
+    }
+
+    /*
+     * If the previous element occupied multiple lines and this element
+     * is too long to fit on a line then start this element at the
+     * beginning of the line.
+     */
+    if (info->line_multi_new == 1 && ctx->prev_multiline &&
+            (ctx->cur_column + h5tools_ncols(s) +
+                    strlen(OPT(info->elmt_suf2, " ")) +
+                    strlen(OPT(info->line_suf, ""))) > ncols)
+        ctx->need_prefix = TRUE;
+
+    /*
+     * If too many elements have already been printed then we need to
+     * start a new line.
+     */
+    if (info->line_per_line > 0 && ctx->cur_elmt >= info->line_per_line)
+        ctx->need_prefix = TRUE;
+
+    /*
+     * Each OPTIONAL_LINE_BREAK embedded in the rendered string can cause
+     * the data to split across multiple lines.  We display the sections
+     * one-at a time.
+     */
+    for (secnum = 0, multiline = 0;
+    (section = strtok(secnum ? NULL : s, OPTIONAL_LINE_BREAK));
+    secnum++) {
+        /*
+         * If the current section plus possible suffix and end-of-line
+         * information would cause the output to wrap then we need to
+         * start a new line.
          */
-        curr_pos = ctx->sm_pos;
 
-        h5tools_simple_prefix(stream, info, ctx, curr_pos, 0);
-
-        for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) {
-            /* Render the element */
-            h5tools_str_reset(&buffer);
-            h5tools_str_sprint(&buffer, info, container, type, mem + i * size, ctx);
-
-            if (i + 1 < nelmts || (flags & END_OF_DATA) == 0)
-                h5tools_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
-
-            s = h5tools_str_fmt(&buffer, 0, "%s");
-
-            /*
-             * If the element would split on multiple lines if printed at our
-             * current location...
-             */
-            if (info->line_multi_new == 1 &&
-                    (ctx->cur_column + h5tools_ncols(s) +
-                     strlen(OPT(info->elmt_suf2, " ")) +
-                     strlen(OPT(info->line_suf, ""))) > ncols) {
-                if (ctx->prev_multiline) {
-                    /*
-                     * ... and the previous element also occupied more than one
-                     * line, then start this element at the beginning of a line.
-                     */
-                    ctx->need_prefix = TRUE;
-                } else if ((ctx->prev_prefix_len + h5tools_ncols(s) +
+        /*
+         * Added the info->skip_first because the dumper does not want
+         * this check to happen for the first line
+         */
+        if ((!info->skip_first || i_count) &&
+                (ctx->cur_column + strlen(section) +
                         strlen(OPT(info->elmt_suf2, " ")) +
-                        strlen(OPT(info->line_suf, ""))) <= ncols) {
-                    /*
-                     * ...but *could* fit on one line otherwise, then we
-                     * should end the current line and start this element on its
-                     * own line.
-                     */
-                    ctx->need_prefix = TRUE;
-                }
-            }
+                        strlen(OPT(info->line_suf, ""))) > ncols)
+            ctx->need_prefix = 1;
 
-            /*
-             * We need to break after each row of a dimension---> we should
-             * break at the end of the each last dimension well that is the
-             * way the dumper did it before
+        /*
+         * Print the prefix or separate the beginning of this element
+         * from the previous element.
+         */
+        if (ctx->need_prefix) {
+            if (secnum)
+                multiline++;
+
+            /* pass to the prefix in h5tools_simple_prefix the total
+             * position instead of the current stripmine position i;
+             * this is necessary to print the array indices
              */
-            if (info->arr_linebreak && ctx->cur_elmt) {
-                if (ctx->size_last_dim && (ctx->cur_elmt % ctx->size_last_dim) == 0)
-                    ctx->need_prefix = TRUE;
+            curr_pos = ctx->sm_pos + i_count;
 
-                if ((hsize_t)elmt_counter == ctx->size_last_dim) {
-                    ctx->need_prefix = TRUE;
-                    elmt_counter = 0;
-                }
-            }
+            h5tools_simple_prefix(stream, info, ctx, curr_pos, secnum);
+        } 
+        else if ((i_count || ctx->continuation) && secnum == 0) {
+            fputs(OPT(info->elmt_suf2, " "), stream);
+            ctx->cur_column += strlen(OPT(info->elmt_suf2, " "));
+        }
 
-            /*
-             * If the previous element occupied multiple lines and this element
-             * is too long to fit on a line then start this element at the
-             * beginning of the line.
-             */
-            if (info->line_multi_new == 1 && ctx->prev_multiline &&
-                    (ctx->cur_column + h5tools_ncols(s) +
-                     strlen(OPT(info->elmt_suf2, " ")) +
-                     strlen(OPT(info->line_suf, ""))) > ncols)
-                ctx->need_prefix = TRUE;
-
-            /*
-             * If too many elements have already been printed then we need to
-             * start a new line.
-             */
-            if (info->line_per_line > 0 && ctx->cur_elmt >= info->line_per_line)
-                ctx->need_prefix = TRUE;
-
-            /*
-             * Each OPTIONAL_LINE_BREAK embedded in the rendered string can cause
-             * the data to split across multiple lines.  We display the sections
-             * one-at a time.
-             */
-            for (secnum = 0, multiline = 0;
-                     (section = strtok(secnum ? NULL : s, OPTIONAL_LINE_BREAK));
-                     secnum++) {
-                /*
-                 * If the current section plus possible suffix and end-of-line
-                 * information would cause the output to wrap then we need to
-                 * start a new line.
-                 */
-
-                /*
-                 * Added the info->skip_first because the dumper does not want
-                 * this check to happen for the first line
-                 */
-                if ((!info->skip_first || i) &&
-                        (ctx->cur_column + strlen(section) +
-                         strlen(OPT(info->elmt_suf2, " ")) +
-                         strlen(OPT(info->line_suf, ""))) > ncols)
-                    ctx->need_prefix = 1;
-
-                /*
-                 * Print the prefix or separate the beginning of this element
-                 * from the previous element.
-                 */
-                if (ctx->need_prefix) {
-                    if (secnum)
-                        multiline++;
-
-                    /* pass to the prefix in h5tools_simple_prefix the total
-                     * position instead of the current stripmine position i;
-                     * this is necessary to print the array indices
-                     */
-                    curr_pos = ctx->sm_pos + i;
-
-                    h5tools_simple_prefix(stream, info, ctx, curr_pos, secnum);
-                } else if ((i || ctx->continuation) && secnum == 0) {
-                    fputs(OPT(info->elmt_suf2, " "), stream);
-                    ctx->cur_column += strlen(OPT(info->elmt_suf2, " "));
-                }
-
-                /* Print the section */
-                fputs(section, stream);
-                ctx->cur_column += strlen(section);
-            }
-            ctx->indent_level++;
-
-//////////////////////
-            {   //region data
-                hssize_t    nblocks, npoints;
-                hsize_t     alloc_size;
-                hsize_t    *ptdata;
-                int         ndims;
-                hsize_t    *dims1;
-                hsize_t    *start;
-                hsize_t    *count;
-                int         jndx;
-                int         type_size;
-                int         blkndx;
-
-                size_t      numelem;
-                hid_t       sid1;
-                hid_t       dtype;
-                hid_t       type_id;
-                hid_t       region_space;
-                hid_t       region_id;
-
-                void       *region_buf;
-                hid_t       mem_space;
-                herr_t      status;
-
-                region_id = H5Rdereference(container, H5R_DATASET_REGION, mem + i * size);
-                region_space = H5Rget_region(container, H5R_DATASET_REGION, mem + i * size);
-                ndims = H5Sget_simple_extent_ndims(region_space);
-                /*
-                 * These two functions fail if the region does not have blocks or points,
-                 * respectively. They do not currently know how to translate from one to
-                 * the other.
-                 */
-                H5E_BEGIN_TRY {
-                    nblocks = H5Sget_select_hyper_nblocks(region_space);
-                    npoints = H5Sget_select_elem_npoints(region_space);
-                } H5E_END_TRY;
-
-                ctx->need_prefix = TRUE;
-                /* Print block information */
-                if (nblocks > 0) {
-                    alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
-                    assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
-                    ptdata = (hsize_t*)malloc((size_t)alloc_size);
-                    H5_CHECK_OVERFLOW(nblocks, hssize_t, hsize_t);
-                    H5Sget_select_hyper_blocklist(region_space, (hsize_t)0, (hsize_t)nblocks, ptdata);
-
-                    /* Get the dataspace of the dataset */
-                    sid1 = H5Dget_space(region_id);
-
-                    /* Allocate space for the dimension array */
-                    dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndims);
-
-                    /* find the dimensions of each data space from the block coordinates */
-                    numelem = 1;
-                    for (jndx=0; jndx<ndims; jndx++) {
-                        dims1[jndx] = ptdata[jndx+ndims] - ptdata[jndx] + 1;
-                        numelem = dims1[jndx]*numelem;
-                    }
-
-                    /* Create dataspace for reading buffer */
-                    mem_space = H5Screate_simple(ndims, dims1, NULL);
-
-                    dtype = H5Dget_type(region_id);
-                    type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT);
-
-                    type_size = H5Tget_size(type_id);
-                    region_buf = malloc(type_size * numelem);
-
-                    /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
-                    /*          1   2        n      1   2        n                                       */
-
-                    start = (hsize_t *)malloc (sizeof (hsize_t) * ndims);
-                    count = (hsize_t *)malloc (sizeof (hsize_t) * ndims);
-                    for (blkndx=0; blkndx<nblocks; blkndx++) {
-                        if(blkndx>0)
-                            ctx->need_prefix = TRUE;
-                        for (jndx=0; jndx<ndims; jndx++) {
-                            start[jndx] = ptdata[jndx+blkndx*ndims*2];
-                            count[jndx] = dims1[jndx];
-                        }
-
-                        status = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,NULL,count,NULL);
-
-                        status = H5Dread(region_id, type_id, mem_space, sid1, H5P_DEFAULT, region_buf);
-/*****************************/
-                        /* Render the element */
-                        h5tools_str_reset(&buffer);
-
-                        for (jndx=0; jndx<numelem; jndx++) {
-                            h5tools_str_sprint(&buffer, info, region_id, type_id, (region_buf+jndx*type_size), ctx);
-
-                            if (jndx + 1 < numelem || (flags & END_OF_DATA) == 0)
-                                h5tools_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
-                        }
-                        s = h5tools_str_fmt(&buffer, 0, "%s");
-
-                        /*
-                         * If the element would split on multiple lines if printed at our
-                         * current location...
-                         */
-                        if (info->line_multi_new == 1 &&
-                                (ctx->cur_column + h5tools_ncols(s) +
-                                        strlen(OPT(info->elmt_suf2, " ")) +
-                                        strlen(OPT(info->line_suf, ""))) > ncols) {
-                            if (ctx->prev_multiline) {
-                                /*
-                                 * ... and the previous element also occupied more than one
-                                 * line, then start this element at the beginning of a line.
-                                 */
-                                ctx->need_prefix = TRUE;
-                            } 
-                            else if ((ctx->prev_prefix_len + h5tools_ncols(s) +
-                                    strlen(OPT(info->elmt_suf2, " ")) +
-                                    strlen(OPT(info->line_suf, ""))) <= ncols) {
-                                /*
-                                 * ...but *could* fit on one line otherwise, then we
-                                 * should end the current line and start this element on its
-                                 * own line.
-                                 */
-                                ctx->need_prefix = TRUE;
-                            }
-                        }
-
-                        /*
-                         * We need to break after each row of a dimension---> we should
-                         * break at the end of the each last dimension well that is the
-                         * way the dumper did it before
-                         */
-                        if (info->arr_linebreak && ctx->cur_elmt) {
-                            if (ctx->size_last_dim && (ctx->cur_elmt % ctx->size_last_dim) == 0)
-                                ctx->need_prefix = TRUE;
-
-                            if ((hsize_t)elmt_counter == ctx->size_last_dim) {
-                                ctx->need_prefix = TRUE;
-                                elmt_counter = 0;
-                            }
-                        }
-
-                        /*
-                         * If the previous element occupied multiple lines and this element
-                         * is too long to fit on a line then start this element at the
-                         * beginning of the line.
-                         */
-                        if (info->line_multi_new == 1 && ctx->prev_multiline &&
-                                (ctx->cur_column + h5tools_ncols(s) +
-                                        strlen(OPT(info->elmt_suf2, " ")) +
-                                        strlen(OPT(info->line_suf, ""))) > ncols)
-                            ctx->need_prefix = TRUE;
-
-                        /*
-                         * If too many elements have already been printed then we need to
-                         * start a new line.
-                         */
-                        if (info->line_per_line > 0 && ctx->cur_elmt >= info->line_per_line)
-                            ctx->need_prefix = TRUE;
-
-                        /*
-                         * Each OPTIONAL_LINE_BREAK embedded in the rendered string can cause
-                         * the data to split across multiple lines.  We display the sections
-                         * one-at a time.
-                         */
-                        for (secnum = 0, multiline = 0;
-                        (section = strtok(secnum ? NULL : s, OPTIONAL_LINE_BREAK));
-                        secnum++) {
-                            /*
-                             * If the current section plus possible suffix and end-of-line
-                             * information would cause the output to wrap then we need to
-                             * start a new line.
-                             */
-
-                            /*
-                             * Added the info->skip_first because the dumper does not want
-                             * this check to happen for the first line
-                             */
-                            if ((!info->skip_first || i) &&
-                                    (ctx->cur_column + strlen(section) +
-                                            strlen(OPT(info->elmt_suf2, " ")) +
-                                            strlen(OPT(info->line_suf, ""))) > ncols)
-                                ctx->need_prefix = 1;
-
-                            /*
-                             * Print the prefix or separate the beginning of this element
-                             * from the previous element.
-                             */
-                            if (ctx->need_prefix) {
-                                if (secnum)
-                                    multiline++;
-
-                                /* pass to the prefix in h5tools_simple_prefix the total
-                                 * position instead of the current stripmine position i;
-                                 * this is necessary to print the array indices
-                                 */
-                                curr_pos = ctx->sm_pos + i;
-
-                                h5tools_simple_prefix(stream, info, ctx, curr_pos, secnum);
-                            } 
-                            else if ((i || ctx->continuation) && secnum == 0) {
-                                fputs(OPT(info->elmt_suf2, " "), stream);
-                                ctx->cur_column += strlen(OPT(info->elmt_suf2, " "));
-                            }
-
-                            /* Print the section */
-                            fputs(section, stream);
-                            ctx->cur_column += strlen(section);
-                        }
-/*****************************/
-                    }
-                    free(start);
-                    free(count);
-                    free(region_buf);
-                    free(ptdata);
-                    status = H5Tclose (dtype);
-                    status = H5Sclose (mem_space);
-                    status = H5Sclose (sid1);
-                } /* end if (nblocks > 0) */
-
-                /* Print point information */
-                if (npoints > 0) {
-                    dtype = H5Dget_type(region_id);
-                    type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT);
-                    type_size = H5Tget_size(type_id);
-
-                    region_buf = malloc(type_size * npoints);
-
-                    /* Allocate space for the dimension array */
-                    dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndims);
-
-                    dims1[0] = npoints;
-                    mem_space = H5Screate_simple (1, dims1, NULL);
-
-                    status = H5Dread (region_id, type_id, mem_space, region_space, H5P_DEFAULT, region_buf);
-
-/*****************************/
-                    /* Render the element */
-                    h5tools_str_reset(&buffer);
-
-                    for(jndx=0; jndx<npoints; jndx++) {
-                        h5tools_str_sprint(&buffer, info, region_id, type_id, (region_buf+jndx*type_size), ctx);
-
-                    if (jndx + 1 < npoints || (flags & END_OF_DATA) == 0)
-                        h5tools_str_append(&buffer, "%s", OPT(info->elmt_suf1, ","));
-                    }
-                    s = h5tools_str_fmt(&buffer, 0, "%s");
-
-                    /*
-                     * If the element would split on multiple lines if printed at our
-                     * current location...
-                     */
-                    if (info->line_multi_new == 1 &&
-                            (ctx->cur_column + h5tools_ncols(s) +
-                             strlen(OPT(info->elmt_suf2, " ")) +
-                             strlen(OPT(info->line_suf, ""))) > ncols) {
-                        if (ctx->prev_multiline) {
-                            /*
-                             * ... and the previous element also occupied more than one
-                             * line, then start this element at the beginning of a line.
-                             */
-                            ctx->need_prefix = TRUE;
-                        } 
-                        else if ((ctx->prev_prefix_len + h5tools_ncols(s) +
-                                strlen(OPT(info->elmt_suf2, " ")) +
-                                strlen(OPT(info->line_suf, ""))) <= ncols) {
-                            /*
-                             * ...but *could* fit on one line otherwise, then we
-                             * should end the current line and start this element on its
-                             * own line.
-                             */
-                            ctx->need_prefix = TRUE;
-                        }
-                    }
-
-                    /*
-                     * We need to break after each row of a dimension---> we should
-                     * break at the end of the each last dimension well that is the
-                     * way the dumper did it before
-                     */
-                    if (info->arr_linebreak && ctx->cur_elmt) {
-                        if (ctx->size_last_dim && (ctx->cur_elmt % ctx->size_last_dim) == 0)
-                            ctx->need_prefix = TRUE;
-
-                        if ((hsize_t)elmt_counter == ctx->size_last_dim) {
-                            ctx->need_prefix = TRUE;
-                            elmt_counter = 0;
-                        }
-                    }
-
-                    /*
-                     * If the previous element occupied multiple lines and this element
-                     * is too long to fit on a line then start this element at the
-                     * beginning of the line.
-                     */
-                    if (info->line_multi_new == 1 && ctx->prev_multiline &&
-                            (ctx->cur_column + h5tools_ncols(s) +
-                             strlen(OPT(info->elmt_suf2, " ")) +
-                             strlen(OPT(info->line_suf, ""))) > ncols)
-                        ctx->need_prefix = TRUE;
-
-                    /*
-                     * If too many elements have already been printed then we need to
-                     * start a new line.
-                     */
-                    if (info->line_per_line > 0 && ctx->cur_elmt >= info->line_per_line)
-                        ctx->need_prefix = TRUE;
-
-                    /*
-                     * Each OPTIONAL_LINE_BREAK embedded in the rendered string can cause
-                     * the data to split across multiple lines.  We display the sections
-                     * one-at a time.
-                     */
-                    for (secnum = 0, multiline = 0;
-                             (section = strtok(secnum ? NULL : s, OPTIONAL_LINE_BREAK));
-                             secnum++) {
-                        /*
-                         * If the current section plus possible suffix and end-of-line
-                         * information would cause the output to wrap then we need to
-                         * start a new line.
-                         */
-
-                        /*
-                         * Added the info->skip_first because the dumper does not want
-                         * this check to happen for the first line
-                         */
-                        if ((!info->skip_first || i) &&
-                                (ctx->cur_column + strlen(section) +
-                                 strlen(OPT(info->elmt_suf2, " ")) +
-                                 strlen(OPT(info->line_suf, ""))) > ncols)
-                            ctx->need_prefix = 1;
-
-                        /*
-                         * Print the prefix or separate the beginning of this element
-                         * from the previous element.
-                         */
-                        if (ctx->need_prefix) {
-                            if (secnum)
-                                multiline++;
-
-                            /* pass to the prefix in h5tools_simple_prefix the total
-                             * position instead of the current stripmine position i;
-                             * this is necessary to print the array indices
-                             */
-                            curr_pos = ctx->sm_pos + i;
-
-                            h5tools_simple_prefix(stream, info, ctx, curr_pos, secnum);
-                        } 
-                        else if ((i || ctx->continuation) && secnum == 0) {
-                            fputs(OPT(info->elmt_suf2, " "), stream);
-                            ctx->cur_column += strlen(OPT(info->elmt_suf2, " "));
-                        }
-
-                        /* Print the section */
-                        fputs(section, stream);
-                        ctx->cur_column += strlen(section);
-                    }
-/*****************************/
-
-                    free(region_buf);
-                    status = H5Sclose (mem_space);
-                    status = H5Tclose (dtype);
-                } /* end if (npoints > 0) */
-                ctx->need_prefix = TRUE;
-
-                H5Sclose(region_space);
-                H5Dclose(region_id);
-            } //end region data
-///////////////////////////////
-            ctx->indent_level--;
-
-            ctx->prev_multiline = multiline;
-        } /* end for (i = 0; i < nelmts; i++, ctx->cur_elmt++, elmt_counter++) */
-
-        h5tools_str_close(&buffer);
-    }/* else bin */
+        /* Print the section */
+        fputs(section, stream);
+        ctx->cur_column += strlen(section);
+    }
+    return curr_pos;
 }
 
+hsize_t h5tools_dump_region_data_blocks(hid_t region_space,
+        hid_t region_id, FILE *stream, const h5tool_format_t *info, 
+        h5tools_context_t *ctx/*in,out*/,
+        h5tools_str_t *buffer/*string into which to render */,
+        hsize_t curr_pos/*total data element position*/, unsigned flags,
+        size_t ncols, hsize_t *elmt_counter, hsize_t i_count/*element counter*/)
+{
+    hsize_t     alloc_size;
+    hsize_t    *ptdata;
+    hsize_t    *dims1;
+    hsize_t    *start;
+    hsize_t    *count;
+    hssize_t    nblocks;
+    size_t      numelem;
+    int         ndims;
+    int         jndx;
+    int         type_size;
+    int         blkndx;
+    hid_t       sid1;
+    hid_t       mem_space;
+    hid_t       dtype;
+    hid_t       type_id;
+    void       *region_buf;
+    herr_t      status;
+
+    /*
+     * This function fails if the region does not have blocks. 
+     */
+    {H5E_BEGIN_TRY{nblocks = H5Sget_select_hyper_nblocks(region_space);}H5E_END_TRY};
+    if (nblocks <= 0)
+        return curr_pos;
+
+    /* Print block information */
+    ndims = H5Sget_simple_extent_ndims(region_space);
+    alloc_size = nblocks * ndims * 2 * sizeof(ptdata[0]);
+    assert(alloc_size == (hsize_t)((size_t)alloc_size)); /*check for overflow*/
+    ptdata = (hsize_t*)malloc((size_t)alloc_size);
+    H5_CHECK_OVERFLOW(nblocks, hssize_t, hsize_t);
+    H5Sget_select_hyper_blocklist(region_space, (hsize_t)0, (hsize_t)nblocks, ptdata);
+
+    /* Get the dataspace of the dataset */
+    sid1 = H5Dget_space(region_id);
+
+    /* Allocate space for the dimension array */
+    dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndims);
+
+    /* find the dimensions of each data space from the block coordinates */
+    numelem = 1;
+    for (jndx=0; jndx<ndims; jndx++) {
+        dims1[jndx] = ptdata[jndx+ndims] - ptdata[jndx] + 1;
+        numelem = dims1[jndx]*numelem;
+    }
+
+    /* Create dataspace for reading buffer */
+    mem_space = H5Screate_simple(ndims, dims1, NULL);
+
+    dtype = H5Dget_type(region_id);
+    type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT);
+
+    type_size = H5Tget_size(type_id);
+    region_buf = malloc(type_size * numelem);
+
+    /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
+    /*          1   2        n      1   2        n                                       */
+
+    start = (hsize_t *)malloc (sizeof (hsize_t) * ndims);
+    count = (hsize_t *)malloc (sizeof (hsize_t) * ndims);
+    for (blkndx=0; blkndx<nblocks; blkndx++) {
+        if(blkndx>0)
+            ctx->need_prefix = TRUE;
+        for (jndx=0; jndx<ndims; jndx++) {
+            start[jndx] = ptdata[jndx+blkndx*ndims*2];
+            count[jndx] = dims1[jndx];
+        }
+
+        status = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,NULL,count,NULL);
+
+        status = H5Dread(region_id, type_id, mem_space, sid1, H5P_DEFAULT, region_buf);
+
+        /* Render the element */
+        h5tools_str_reset(buffer);
+
+        for (jndx=0; jndx<numelem; jndx++) {
+            h5tools_str_sprint(buffer, info, region_id, type_id, (region_buf+jndx*type_size), ctx);
+
+            if (jndx + 1 < numelem || (flags & END_OF_DATA) == 0)
+                h5tools_str_append(buffer, "%s", OPT(info->elmt_suf1, ","));
+        }
+        curr_pos = h5tools_render_element(stream, info, ctx, buffer, curr_pos, flags, ncols, elmt_counter, i_count);
+    }
+    free(start);
+    free(count);
+    free(region_buf);
+    free(ptdata);
+    free(dims1);
+    status = H5Tclose (dtype);
+    status = H5Sclose (mem_space);
+    status = H5Sclose (sid1);
+    return curr_pos;
+}
+
+hsize_t h5tools_dump_region_data_points(hid_t region_space,
+        hid_t region_id, FILE *stream, const h5tool_format_t *info, 
+        h5tools_context_t *ctx/*in,out*/,
+        h5tools_str_t *buffer/*string into which to render */,
+        hsize_t curr_pos/*total data element position*/, unsigned flags,
+        size_t ncols, hsize_t *elmt_counter, hsize_t i_count/*element counter*/)
+{
+    hssize_t    npoints;
+    hsize_t     alloc_size;
+    hsize_t    *ptdata;
+    hsize_t    *dims1;
+    int         ndims;
+    int         jndx;
+    int         type_size;
+    hid_t       mem_space;
+    hid_t       dtype;
+    hid_t       type_id;
+    void       *region_buf;
+    herr_t      status;
+
+    /*
+     * This function fails if the region does not have blocks. 
+     */
+    {H5E_BEGIN_TRY{npoints = H5Sget_select_elem_npoints(region_space);}H5E_END_TRY};
+    if (npoints > 0) {
+        dtype = H5Dget_type(region_id);
+        type_id = H5Tget_native_type(dtype, H5T_DIR_DEFAULT);
+        type_size = H5Tget_size(type_id);
+
+        region_buf = malloc(type_size * npoints);
+
+        /* Allocate space for the dimension array */
+        ndims = H5Sget_simple_extent_ndims(region_space);
+        dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndims);
+
+        dims1[0] = npoints;
+        mem_space = H5Screate_simple (1, dims1, NULL);
+
+        status = H5Dread (region_id, type_id, mem_space, region_space, H5P_DEFAULT, region_buf);
+
+        /* Render the element */
+        h5tools_str_reset(buffer);
+
+        for(jndx=0; jndx<npoints; jndx++) {
+            h5tools_str_sprint(buffer, info, region_id, type_id, (region_buf+jndx*type_size), ctx);
+
+            if (jndx + 1 < npoints || (flags & END_OF_DATA) == 0)
+                h5tools_str_append(buffer, "%s", OPT(info->elmt_suf1, ","));
+        }
+        curr_pos = h5tools_render_element(stream, info, ctx, buffer, curr_pos, flags, ncols, elmt_counter, i_count);
+        free(region_buf);
+        free(dims1);
+        status = H5Sclose (mem_space);
+        status = H5Tclose (dtype);
+    }
+    return curr_pos;
+}
 
 /*-------------------------------------------------------------------------
  * Audience:    Public
@@ -1323,8 +966,8 @@ h5tools_dump_simple_data_region(FILE *stream, const h5tool_format_t *info, hid_t
  */
 static herr_t
 h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset,
-                           hid_t p_type, struct subset_t *sset,
-                           int indentlevel)
+        hid_t p_type, struct subset_t *sset,
+        int indentlevel)
 {
     herr_t            ret;                     /* the value to return */
     hid_t             f_space;                 /* file data space */
@@ -1417,36 +1060,36 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
 
 
 
-    /* initialize temporary start, count and maximum start */
-    for (i = 0; i < (size_t)ctx.ndims; i++)
+/* initialize temporary start, count and maximum start */
+for (i = 0; i < (size_t)ctx.ndims; i++)
+{
+    temp_start[ i ] = sset->start[ i ];
+    temp_count[ i ] = sset->count[ i ];
+    temp_block[ i ] = sset->block[ i ];
+    temp_stride[ i ] = sset->stride[ i ];
+    max_start[ i ] = 0;
+
+}
+if (ctx.ndims > 2)
+{
+    for (i = 0; i < (size_t)ctx.ndims - 2; i++)
     {
-        temp_start[ i ] = sset->start[ i ];
-        temp_count[ i ] = sset->count[ i ];
-        temp_block[ i ] = sset->block[ i ];
-        temp_stride[ i ] = sset->stride[ i ];
-        max_start[ i ] = 0;
+        max_start[ i ] = temp_start[ i ] + sset->count[ i ];
+        temp_count[ i ] = 1;
 
     }
-    if (ctx.ndims > 2)
+}
+
+
+/* offset loop */
+for (n = 0; n < outer_count; n++)
+{
+
+    hsize_t row_counter = 0;
+
+    /* number of read iterations in inner loop, read by rows, to match 2D display */
+    if (ctx.ndims > 1)
     {
-        for (i = 0; i < (size_t)ctx.ndims - 2; i++)
-        {
-            max_start[ i ] = temp_start[ i ] + sset->count[ i ];
-            temp_count[ i ] = 1;
-
-        }
-    }
-
-
-    /* offset loop */
-    for (n = 0; n < outer_count; n++)
-    {
-
-        hsize_t row_counter = 0;
-
-        /* number of read iterations in inner loop, read by rows, to match 2D display */
-        if (ctx.ndims > 1)
-        {
 
         /* count is the number of iterations to display all the rows,
             the block size count times */
@@ -1461,181 +1104,181 @@ h5tools_dump_simple_subset(FILE *stream, const h5tool_format_t *info, hid_t dset
                 temp_stride[ row_dim ] = 1;
 
 
-        }
-        /* for the 1D case */
-        else
-        {
-            count = 1;
-        }
-
-
-        size_row_block = sset->block[ row_dim ];
-
-
-        /* display loop */
-        for (; count > 0;
-               temp_start[ row_dim ] += temp_stride[ row_dim ],
-               count--)
-               {
-
-
-                   /* jump rows if size of block exceeded
-                      cases where block > 1 only and stride > block */
-                   if ( size_row_block > 1 &&
-                        row_counter == size_row_block  &&
-                        sset->stride[ row_dim ] > sset->block[ row_dim ]
-                        )
-                   {
-
-                       hsize_t increase_rows = sset->stride[ row_dim ] -
-                           sset->block[ row_dim ];
-
-                       temp_start[ row_dim ] += increase_rows;
-
-                       row_counter = 0;
-
-                   }
-
-                   row_counter++;
-
-
-            /* calculate the potential number of elements we're going to print */
-            H5Sselect_hyperslab(f_space, H5S_SELECT_SET,
-                temp_start,
-                temp_stride,
-                temp_count,
-                temp_block);
-            sm_nelmts = H5Sget_select_npoints(f_space);
-
-            if (sm_nelmts == 0) {
-                /* nothing to print */
-                ret = SUCCEED;
-                goto done_close;
-            }
-
-            /*
-            * determine the strip mine size and allocate a buffer. the strip mine is
-            * a hyperslab whose size is manageable.
-            */
-            sm_nbytes = p_type_nbytes = H5Tget_size(p_type);
-
-            if (ctx.ndims > 0)
-                for (i = ctx.ndims; i > 0; --i) {
-                    sm_size[i - 1] = MIN(total_size[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
-                    sm_nbytes *= sm_size[i - 1];
-                    assert(sm_nbytes > 0);
-                }
-
-                assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
-                sm_buf = malloc((size_t)sm_nelmts * p_type_nbytes);
-                sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
-
-                H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, &zero, NULL, &sm_nelmts, NULL);
-
-                /* read the data */
-                if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0) {
-                    H5Sclose(f_space);
-                    H5Sclose(sm_space);
-                    free(sm_buf);
-                    return FAIL;
-                }
-
-                /* print the data */
-                flags = START_OF_DATA;
-
-                if (count == 1)
-                    flags |= END_OF_DATA;
-
-                for (i = 0; i < ctx.ndims; i++)
-                    ctx.p_max_idx[i] = ctx.p_min_idx[i] + MIN(total_size[i], sm_size[i]);
-
-                /* print array indices. get the lower bound of the hyperslab and calulate
-                the element position at the start of hyperslab */
-                H5Sget_select_bounds(f_space,low,high);
-                elmtno=0;
-                for (i = 0; i < (size_t)ctx.ndims-1; i++)
-                {
-                    hsize_t offset = 1; /* accumulation of the previous dimensions */
-                    for (j = i+1; j < (size_t)ctx.ndims; j++)
-                        offset *= total_size[j];
-                    elmtno+= low[i] * offset;
-                }
-                elmtno+= low[ctx.ndims - 1];
-
-                /* initialize the current stripmine position; this is necessary to print the array
-                indices */
-                ctx.sm_pos = elmtno;
-
-                h5tools_dump_simple_data(stream, info, dset, &ctx, flags, sm_nelmts,
-                    p_type, sm_buf);
-                free(sm_buf);
-
-                /* we need to jump to next line and update the index */
-                ctx.need_prefix = 1;
-
-                ctx.continuation++;
-
-
-#if defined (SANITY_CHECK)
-                printed_points += sm_nelmts;
-#endif
-
-
-        } /* count */
-
-        if (ctx.ndims > 2)
-        {
-            /* dimension for start */
-            current_outer_dim = (ctx.ndims - 2) -1;
-
-            /* set start to original from current_outer_dim up */
-            for (i = current_outer_dim + 1; i < ctx.ndims; i++)
-            {
-                temp_start[ i ] = sset->start[ i ];
-            }
-
-
-            /* increment start dimension */
-            do
-            {
-                reset_dim = 0;
-                temp_start[ current_outer_dim ]++;
-                if (temp_start[ current_outer_dim ] >= max_start[ current_outer_dim ])
-                {
-                    temp_start[ current_outer_dim ] = sset->start[ current_outer_dim ];
-
-                    /* consider block */
-                    if ( sset->block[ current_outer_dim ] > 1 )
-                        temp_start[ current_outer_dim ]++;
-
-                    current_outer_dim--;
-                    reset_dim = 1;
-                }
-            }
-            while (current_outer_dim >= 0 && reset_dim);
-
-        } /* ctx.ndims > 1 */
-
-    } /* outer_count */
-
-#if defined (SANITY_CHECK)
-    assert( printed_points == total_points );
-#endif
-
-
-    /* Terminate the output */
-    if (ctx.cur_column) {
-        fputs(OPT(info->line_suf, ""), stream);
-        putc('\n', stream);
-        fputs(OPT(info->line_sep, ""), stream);
+    }
+    /* for the 1D case */
+    else
+    {
+        count = 1;
     }
 
-    ret = SUCCEED;
+
+    size_row_block = sset->block[ row_dim ];
+
+
+    /* display loop */
+    for (; count > 0;
+    temp_start[ row_dim ] += temp_stride[ row_dim ],
+    count--)
+    {
+
+
+        /* jump rows if size of block exceeded
+                      cases where block > 1 only and stride > block */
+                      if ( size_row_block > 1 &&
+                              row_counter == size_row_block  &&
+                              sset->stride[ row_dim ] > sset->block[ row_dim ]
+                      )
+                      {
+
+                          hsize_t increase_rows = sset->stride[ row_dim ] -
+                          sset->block[ row_dim ];
+
+                          temp_start[ row_dim ] += increase_rows;
+
+                          row_counter = 0;
+
+                      }
+
+                      row_counter++;
+
+
+                      /* calculate the potential number of elements we're going to print */
+                      H5Sselect_hyperslab(f_space, H5S_SELECT_SET,
+                              temp_start,
+                              temp_stride,
+                              temp_count,
+                              temp_block);
+                      sm_nelmts = H5Sget_select_npoints(f_space);
+
+                      if (sm_nelmts == 0) {
+                          /* nothing to print */
+                          ret = SUCCEED;
+                          goto done_close;
+                      }
+
+                      /*
+                       * determine the strip mine size and allocate a buffer. the strip mine is
+                       * a hyperslab whose size is manageable.
+                       */
+                      sm_nbytes = p_type_nbytes = H5Tget_size(p_type);
+
+                      if (ctx.ndims > 0)
+                          for (i = ctx.ndims; i > 0; --i) {
+                              sm_size[i - 1] = MIN(total_size[i - 1], H5TOOLS_BUFSIZE / sm_nbytes);
+                              sm_nbytes *= sm_size[i - 1];
+                              assert(sm_nbytes > 0);
+                          }
+
+                      assert(sm_nbytes == (hsize_t)((size_t)sm_nbytes)); /*check for overflow*/
+                      sm_buf = malloc((size_t)sm_nelmts * p_type_nbytes);
+                      sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
+
+                      H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, &zero, NULL, &sm_nelmts, NULL);
+
+                      /* read the data */
+                      if (H5Dread(dset, p_type, sm_space, f_space, H5P_DEFAULT, sm_buf) < 0) {
+                          H5Sclose(f_space);
+                          H5Sclose(sm_space);
+                          free(sm_buf);
+                          return FAIL;
+                      }
+
+                      /* print the data */
+                      flags = START_OF_DATA;
+
+                      if (count == 1)
+                          flags |= END_OF_DATA;
+
+                      for (i = 0; i < ctx.ndims; i++)
+                          ctx.p_max_idx[i] = ctx.p_min_idx[i] + MIN(total_size[i], sm_size[i]);
+
+                      /* print array indices. get the lower bound of the hyperslab and calulate
+                the element position at the start of hyperslab */
+                      H5Sget_select_bounds(f_space,low,high);
+                      elmtno=0;
+                      for (i = 0; i < (size_t)ctx.ndims-1; i++)
+                      {
+                          hsize_t offset = 1; /* accumulation of the previous dimensions */
+                          for (j = i+1; j < (size_t)ctx.ndims; j++)
+                              offset *= total_size[j];
+                          elmtno+= low[i] * offset;
+                      }
+                      elmtno+= low[ctx.ndims - 1];
+
+                      /* initialize the current stripmine position; this is necessary to print the array
+                indices */
+                      ctx.sm_pos = elmtno;
+
+                      h5tools_dump_simple_data(stream, info, dset, &ctx, flags, sm_nelmts,
+                              p_type, sm_buf);
+                      free(sm_buf);
+
+                      /* we need to jump to next line and update the index */
+                      ctx.need_prefix = 1;
+
+                      ctx.continuation++;
+
+
+#if defined (SANITY_CHECK)
+                      printed_points += sm_nelmts;
+#endif
+
+
+    } /* count */
+
+    if (ctx.ndims > 2)
+    {
+        /* dimension for start */
+        current_outer_dim = (ctx.ndims - 2) -1;
+
+        /* set start to original from current_outer_dim up */
+        for (i = current_outer_dim + 1; i < ctx.ndims; i++)
+        {
+            temp_start[ i ] = sset->start[ i ];
+        }
+
+
+        /* increment start dimension */
+        do
+        {
+            reset_dim = 0;
+            temp_start[ current_outer_dim ]++;
+            if (temp_start[ current_outer_dim ] >= max_start[ current_outer_dim ])
+            {
+                temp_start[ current_outer_dim ] = sset->start[ current_outer_dim ];
+
+                /* consider block */
+                if ( sset->block[ current_outer_dim ] > 1 )
+                    temp_start[ current_outer_dim ]++;
+
+                current_outer_dim--;
+                reset_dim = 1;
+            }
+        }
+        while (current_outer_dim >= 0 && reset_dim);
+
+    } /* ctx.ndims > 1 */
+
+} /* outer_count */
+
+#if defined (SANITY_CHECK)
+assert( printed_points == total_points );
+#endif
+
+
+/* Terminate the output */
+if (ctx.cur_column) {
+    fputs(OPT(info->line_suf, ""), stream);
+    putc('\n', stream);
+    fputs(OPT(info->line_sep, ""), stream);
+}
+
+ret = SUCCEED;
 
 done_close:
-    H5Sclose(f_space);
+H5Sclose(f_space);
 done:
-    return ret;
+return ret;
 }
 
 
@@ -1660,10 +1303,9 @@ done:
  */
 static int
 h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
-                         hid_t p_type, int indentlevel)
+        hid_t p_type, int indentlevel)
 {
     hid_t               f_space;                  /* file data space */
-    hid_t               f_type;
     hsize_t             elmtno;                   /* counter  */
     size_t              i;                        /* counter  */
     int                 carry;                    /* counter carry value */
@@ -1760,7 +1402,7 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
     sm_space = H5Screate_simple(1, &sm_nelmts, NULL);
 
     if(ctx.ndims>0)
-     init_acc_pos(&ctx,total_size);
+        init_acc_pos(&ctx,total_size);
 
     /* The stripmine loop */
     memset(hs_offset, 0, sizeof hs_offset);
@@ -1776,9 +1418,9 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
             }
 
             H5Sselect_hyperslab(f_space, H5S_SELECT_SET, hs_offset, NULL,
-                                hs_size, NULL);
+                    hs_size, NULL);
             H5Sselect_hyperslab(sm_space, H5S_SELECT_SET, zero, NULL,
-                                &hs_nelmts, NULL);
+                    &hs_nelmts, NULL);
         } else {
             H5Sselect_all(f_space);
             H5Sselect_all(sm_space);
@@ -1801,16 +1443,8 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
            indices */
         ctx.sm_pos = elmtno;
 
-        f_type = H5Dget_type(dset);
-        if (region_output && H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
-            h5tools_dump_simple_data_region(stream, info, dset, &ctx, flags, hs_nelmts,
-                                 p_type, sm_buf);
-        }
-        else {
-            h5tools_dump_simple_data(stream, info, dset, &ctx, flags, hs_nelmts,
-                                 p_type, sm_buf);
-        }
-        H5Tclose(f_type);
+        h5tools_dump_simple_data(stream, info, dset, &ctx, flags, hs_nelmts,
+                    p_type, sm_buf);
 
         /* Reclaim any VL memory, if necessary */
         if(vl_data)
@@ -1865,9 +1499,8 @@ h5tools_dump_simple_dset(FILE *stream, const h5tool_format_t *info, hid_t dset,
  */
 static int
 h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id,
-                        hid_t type, hid_t space, void *mem, int indentlevel)
+        hid_t type, hid_t space, void *mem, int indentlevel)
 {
-    hid_t               f_type;
     int   i;   /*counters  */
     hsize_t  nelmts;   /*total selected elmts */
     h5tools_context_t ctx;   /*printing context */
@@ -1897,38 +1530,29 @@ h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id,
 
     if (nelmts == 0)
         return SUCCEED; /*nothing to print*/
-    if(ctx.ndims>0) {
-        assert(ctx.p_max_idx[ctx.ndims - 1]==(hsize_t)((int)ctx.p_max_idx[ctx.ndims - 1]));
-        ctx.size_last_dim = (int)(ctx.p_max_idx[ctx.ndims - 1]);
-    } /* end if */
-    else
-        ctx.size_last_dim = 0;
+        if(ctx.ndims>0) {
+            assert(ctx.p_max_idx[ctx.ndims - 1]==(hsize_t)((int)ctx.p_max_idx[ctx.ndims - 1]));
+            ctx.size_last_dim = (int)(ctx.p_max_idx[ctx.ndims - 1]);
+        } /* end if */
+        else
+            ctx.size_last_dim = 0;
 
-    if(ctx.ndims>0)
-     init_acc_pos(&ctx,ctx.p_max_idx);
+        if(ctx.ndims>0)
+            init_acc_pos(&ctx,ctx.p_max_idx);
 
-    /* Print it */
-    f_type = H5Dget_type(obj_id);
-    if (region_output && H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
-        h5tools_dump_simple_data_region(stream, info, obj_id, &ctx, 
-                               START_OF_DATA | END_OF_DATA, nelmts,
-                               type, mem);
-    }
-    else {
+        /* Print it */
         h5tools_dump_simple_data(stream, info, obj_id, &ctx,
-                                 START_OF_DATA | END_OF_DATA, nelmts, 
-                                 type, mem);
-    }
-    H5Tclose(f_type);
+                    START_OF_DATA | END_OF_DATA, nelmts, 
+                    type, mem);
 
-    /* Terminate the output */
-    if (ctx.cur_column) {
-        fputs(OPT(info->line_suf, ""), stream);
-        putc('\n', stream);
-        fputs(OPT(info->line_sep, ""), stream);
-    }
+        /* Terminate the output */
+        if (ctx.cur_column) {
+            fputs(OPT(info->line_suf, ""), stream);
+            putc('\n', stream);
+            fputs(OPT(info->line_sep, ""), stream);
+        }
 
-    return SUCCEED;
+        return SUCCEED;
 }
 
 /*-------------------------------------------------------------------------
@@ -1965,7 +1589,7 @@ h5tools_dump_simple_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id,
  */
 int
 h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset, hid_t _p_type,
-                  struct subset_t *sset, int indentlevel)
+        struct subset_t *sset, int indentlevel)
 {
     hid_t     f_space;
     hid_t     p_type = _p_type;
@@ -2010,11 +1634,11 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset, hid_t _
     if (space_type == H5S_SIMPLE || space_type == H5S_SCALAR) {
         if (!sset) {
             status = h5tools_dump_simple_dset(rawdatastream, info, dset, p_type,
-                                              indentlevel);
+                    indentlevel);
         }
         else {
             status = h5tools_dump_simple_subset(rawdatastream, info, dset, p_type,
-                                                sset, indentlevel);
+                    sset, indentlevel);
         }
     } else /* space is H5S_NULL */
         status = SUCCEED;
@@ -2022,7 +1646,7 @@ h5tools_dump_dset(FILE *stream, const h5tool_format_t *info, hid_t dset, hid_t _
     /* Close the dataspace */
     H5Sclose(f_space);
 
-done:
+    done:
     if (p_type != _p_type)
         H5Tclose(p_type);
 
@@ -2049,25 +1673,25 @@ done:
  */
 int
 h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id, hid_t type,
-                 hid_t space, void *mem, int indentlevel)
+        hid_t space, void *mem, int indentlevel)
 {
     h5tool_format_t    info_dflt;
 
     /* Use default values */
     if (!stream)
- stream = stdout;
+        stream = stdout;
 
     if (!info) {
- memset(&info_dflt, 0, sizeof(info_dflt));
- info = &info_dflt;
+        memset(&info_dflt, 0, sizeof(info_dflt));
+        info = &info_dflt;
     }
 
     /* Check the data space */
     if (H5Sis_simple(space) <= 0)
- return -1;
+        return -1;
 
     return h5tools_dump_simple_mem(stream, info, obj_id, type, space, mem,
-                                   indentlevel);
+            indentlevel);
 }
 
 /*-------------------------------------------------------------------------
@@ -2085,17 +1709,17 @@ h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id, hid_t 
  */
 void init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
 {
- int i;
+    int i;
 
- assert(ctx->ndims);
+    assert(ctx->ndims);
 
- ctx->acc[ctx->ndims-1]=1;
- for(i=(ctx->ndims-2); i>=0; i--)
- {
-  ctx->acc[i]=ctx->acc[i+1] * dims[i+1];
- }
- for ( i = 0; i < ctx->ndims; i++)
-  ctx->pos[i]=0;
+    ctx->acc[ctx->ndims-1]=1;
+    for(i=(ctx->ndims-2); i>=0; i--)
+    {
+        ctx->acc[i]=ctx->acc[i+1] * dims[i+1];
+    }
+    for ( i = 0; i < ctx->ndims; i++)
+        ctx->pos[i]=0;
 }
 
 
@@ -2117,22 +1741,22 @@ void init_acc_pos(h5tools_context_t *ctx, hsize_t *dims)
 static
 int do_bin_output(FILE *stream, hsize_t nelmts, hid_t tid, void *_mem)
 {
- unsigned char *mem  = (unsigned char*)_mem;
- size_t         size; /* datum size */
- hsize_t        i;    /* element counter  */
+    unsigned char *mem  = (unsigned char*)_mem;
+    size_t         size; /* datum size */
+    hsize_t        i;    /* element counter  */
 
- size = H5Tget_size(tid);
+    size = H5Tget_size(tid);
 
- for (i = 0; i < nelmts; i++)
- {
-  if (render_bin_output(stream,tid,mem + i * size)<0)
-  {
-   printf("\nError in writing binary stream\n");
-   return FAIL;
-  }
- }
+    for (i = 0; i < nelmts; i++)
+    {
+        if (render_bin_output(stream,tid,mem + i * size)<0)
+        {
+            printf("\nError in writing binary stream\n");
+            return FAIL;
+        }
+    }
 
- return SUCCEED;
+    return SUCCEED;
 }
 
 
@@ -2154,384 +1778,384 @@ int do_bin_output(FILE *stream, hsize_t nelmts, hid_t tid, void *_mem)
 static
 int render_bin_output(FILE *stream, hid_t tid, void *_mem)
 {
- unsigned char     *mem  = (unsigned char*)_mem;
- size_t             size;   /* datum size */
- float              tempfloat;
- double             tempdouble;
- unsigned long long tempullong;
- long long          templlong;
- unsigned long      tempulong;
- long               templong;
- unsigned int       tempuint;
- int                tempint;
- unsigned short     tempushort;
- short              tempshort;
- unsigned char      tempuchar;
- char               tempschar;
+    unsigned char     *mem  = (unsigned char*)_mem;
+    size_t             size;   /* datum size */
+    float              tempfloat;
+    double             tempdouble;
+    unsigned long long tempullong;
+    long long          templlong;
+    unsigned long      tempulong;
+    long               templong;
+    unsigned int       tempuint;
+    int                tempint;
+    unsigned short     tempushort;
+    short              tempshort;
+    unsigned char      tempuchar;
+    char               tempschar;
 #if H5_SIZEOF_LONG_DOUBLE !=0
- long double        templdouble;
+long double        templdouble;
 #endif
 #ifdef DEBUG_H5DUMP_BIN
- static char        fmt_llong[8], fmt_ullong[8];
- if (!fmt_llong[0]) {
-  sprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH);
-  sprintf(fmt_ullong, "%%%su", H5_PRINTF_LL_WIDTH);
- }
+static char        fmt_llong[8], fmt_ullong[8];
+if (!fmt_llong[0]) {
+    sprintf(fmt_llong, "%%%sd", H5_PRINTF_LL_WIDTH);
+    sprintf(fmt_ullong, "%%%su", H5_PRINTF_LL_WIDTH);
+}
 #endif
 
- size = H5Tget_size(tid);
+size = H5Tget_size(tid);
 
- if (H5Tequal(tid, H5T_NATIVE_FLOAT))
- {
-  memcpy(&tempfloat, mem, sizeof(float));
+if (H5Tequal(tid, H5T_NATIVE_FLOAT))
+{
+    memcpy(&tempfloat, mem, sizeof(float));
 #ifdef DEBUG_H5DUMP_BIN
-  fprintf(stream, "%g ", tempfloat);
+    fprintf(stream, "%g ", tempfloat);
 #else
-  if (1 != fwrite(&tempfloat, size, 1, stream))
-   return FAIL;
+    if (1 != fwrite(&tempfloat, size, 1, stream))
+        return FAIL;
 #endif
- }
- else if (H5Tequal(tid, H5T_NATIVE_DOUBLE))
- {
-  memcpy(&tempdouble, mem, sizeof(double));
+}
+else if (H5Tequal(tid, H5T_NATIVE_DOUBLE))
+{
+    memcpy(&tempdouble, mem, sizeof(double));
 #ifdef DEBUG_H5DUMP_BIN
-  fprintf(stream, "%g ", tempdouble);
+fprintf(stream, "%g ", tempdouble);
 #else
-  if (1 != fwrite(&tempdouble, size, 1, stream))
-   return FAIL;
+if (1 != fwrite(&tempdouble, size, 1, stream))
+    return FAIL;
 #endif
- }
+}
 #if H5_SIZEOF_LONG_DOUBLE !=0
- else if (H5Tequal(tid, H5T_NATIVE_LDOUBLE))
- {
-  memcpy(&templdouble, mem, sizeof(long double));
+else if (H5Tequal(tid, H5T_NATIVE_LDOUBLE))
+{
+    memcpy(&templdouble, mem, sizeof(long double));
 #ifdef DEBUG_H5DUMP_BIN
-  fprintf(stream, "%Lf ", templdouble);
+fprintf(stream, "%Lf ", templdouble);
 #else
-  if (1 != fwrite(&templdouble, size, 1, stream))
-   return FAIL;
+if (1 != fwrite(&templdouble, size, 1, stream))
+    return FAIL;
 #endif
- }
+}
 #endif
- else if (H5T_STRING == H5Tget_class(tid))
- {
-  unsigned int i;
-  H5T_str_t    pad;
-  char        *s;
+else if (H5T_STRING == H5Tget_class(tid))
+{
+    unsigned int i;
+    H5T_str_t    pad;
+    char        *s;
 
-  pad = H5Tget_strpad(tid);
+    pad = H5Tget_strpad(tid);
 
-  if(H5Tis_variable_str(tid))
-  {
-   s = *(char**)mem;
-   if(s!=NULL)
-    size = HDstrlen(s);
-  }
-  else
-  {
-   s = (char *)mem;
-   size = H5Tget_size(tid);
-  }
-  for (i=0; i<size && (s[i] || pad!=H5T_STR_NULLTERM); i++)
-  {
-   memcpy(&tempuchar, &s[i], sizeof(unsigned char));
+    if(H5Tis_variable_str(tid))
+    {
+        s = *(char**)mem;
+        if(s!=NULL)
+            size = HDstrlen(s);
+    }
+    else
+    {
+        s = (char *)mem;
+        size = H5Tget_size(tid);
+    }
+    for (i=0; i<size && (s[i] || pad!=H5T_STR_NULLTERM); i++)
+    {
+        memcpy(&tempuchar, &s[i], sizeof(unsigned char));
 #ifdef DEBUG_H5DUMP_BIN
-   fprintf(stream, "%d", tempuchar);
+fprintf(stream, "%d", tempuchar);
 #else
-   if (1 != fwrite(&tempuchar, size, 1, stream))
+    if (1 != fwrite(&tempuchar, size, 1, stream))
+        return FAIL;
+#endif
+    } /* i */
+}
+else if (H5Tequal(tid, H5T_NATIVE_INT))
+{
+    memcpy(&tempint, mem, sizeof(int));
+#ifdef DEBUG_H5DUMP_BIN
+fprintf(stream, "%d ", tempint);
+#else
+    if (1 != fwrite(&tempint, size, 1, stream))
+        return FAIL;
+#endif
+}
+else if (H5Tequal(tid, H5T_NATIVE_UINT))
+{
+    memcpy(&tempuint, mem, sizeof(unsigned int));
+#ifdef DEBUG_H5DUMP_BIN
+fprintf(stream, "%u ", tempuint);
+#else
+    if (1 != fwrite(&tempuint, size, 1, stream))
+        return FAIL;
+#endif
+}
+else if (H5Tequal(tid, H5T_NATIVE_SCHAR))
+{
+    memcpy(&tempschar, mem, sizeof(char));
+#ifdef DEBUG_H5DUMP_BIN
+fprintf(stream, "%d ", tempschar);
+#else
+    if (1 != fwrite(&tempschar, size, 1, stream))
+        return FAIL;
+#endif
+}
+else if (H5Tequal(tid, H5T_NATIVE_UCHAR))
+{
+    memcpy(&tempuchar, mem, sizeof(unsigned char));
+#ifdef DEBUG_H5DUMP_BIN
+fprintf(stream, "%u ", tempuchar);
+#else
+if (1 != fwrite(&tempuchar, size, 1, stream))
     return FAIL;
 #endif
-  } /* i */
- }
- else if (H5Tequal(tid, H5T_NATIVE_INT))
- {
-  memcpy(&tempint, mem, sizeof(int));
+}
+else if (H5Tequal(tid, H5T_NATIVE_SHORT))
+{
+    memcpy(&tempshort, mem, sizeof(short));
 #ifdef DEBUG_H5DUMP_BIN
-  fprintf(stream, "%d ", tempint);
+fprintf(stream, "%d ", tempshort);
 #else
-  if (1 != fwrite(&tempint, size, 1, stream))
-   return FAIL;
-#endif
- }
- else if (H5Tequal(tid, H5T_NATIVE_UINT))
- {
-  memcpy(&tempuint, mem, sizeof(unsigned int));
-#ifdef DEBUG_H5DUMP_BIN
-  fprintf(stream, "%u ", tempuint);
-#else
-  if (1 != fwrite(&tempuint, size, 1, stream))
-   return FAIL;
-#endif
- }
- else if (H5Tequal(tid, H5T_NATIVE_SCHAR))
- {
-  memcpy(&tempschar, mem, sizeof(char));
-#ifdef DEBUG_H5DUMP_BIN
-  fprintf(stream, "%d ", tempschar);
-#else
-  if (1 != fwrite(&tempschar, size, 1, stream))
-   return FAIL;
-#endif
- }
- else if (H5Tequal(tid, H5T_NATIVE_UCHAR))
- {
-  memcpy(&tempuchar, mem, sizeof(unsigned char));
-#ifdef DEBUG_H5DUMP_BIN
-  fprintf(stream, "%u ", tempuchar);
-#else
-  if (1 != fwrite(&tempuchar, size, 1, stream))
-   return FAIL;
-#endif
- }
- else if (H5Tequal(tid, H5T_NATIVE_SHORT))
- {
-  memcpy(&tempshort, mem, sizeof(short));
-#ifdef DEBUG_H5DUMP_BIN
-  fprintf(stream, "%d ", tempshort);
-#else
-  if (1 != fwrite(&tempshort, size, 1, stream))
-   return FAIL;
-#endif
- }
- else if (H5Tequal(tid, H5T_NATIVE_USHORT))
- {
-  memcpy(&tempushort, mem, sizeof(unsigned short));
-#ifdef DEBUG_H5DUMP_BIN
-  fprintf(stream, "%u ", tempushort);
-#else
-  if (1 != fwrite(&tempushort, size, 1, stream))
-   return FAIL;
-#endif
- }
- else if (H5Tequal(tid, H5T_NATIVE_LONG))
- {
-  memcpy(&templong, mem, sizeof(long));
-#ifdef DEBUG_H5DUMP_BIN
-  fprintf(stream, "%ld ", templong);
-#else
-  if (1 != fwrite(&templong, size, 1, stream))
-   return FAIL;
-#endif
- }
- else if (H5Tequal(tid, H5T_NATIVE_ULONG))
- {
-  memcpy(&tempulong, mem, sizeof(unsigned long));
-#ifdef DEBUG_H5DUMP_BIN
-  fprintf(stream, "%lu ", tempulong);
-#else
-  if (1 != fwrite(&tempulong, size, 1, stream))
-   return FAIL;
-#endif
- }
- else if (H5Tequal(tid, H5T_NATIVE_LLONG))
- {
-  memcpy(&templlong, mem, sizeof(long long));
-#ifdef DEBUG_H5DUMP_BIN
-  fprintf(stream, fmt_llong, templlong);
-#else
-  if (1 != fwrite(&templlong, size, 1, stream))
-   return FAIL;
-#endif
- }
- else if (H5Tequal(tid, H5T_NATIVE_ULLONG))
- {
-  memcpy(&tempullong, mem, sizeof(unsigned long long));
-#ifdef DEBUG_H5DUMP_BIN
-  fprintf(stream, fmt_ullong, tempullong);
-#else
-  if (1 != fwrite(&tempullong, size, 1, stream))
-   return FAIL;
-#endif
- }
- else if (H5Tequal(tid, H5T_NATIVE_HSSIZE))
- {
-  if (sizeof(hssize_t) == sizeof(int))
-  {
-   memcpy(&tempint, mem, sizeof(int));
-#ifdef DEBUG_H5DUMP_BIN
-   fprintf(stream, "%d ", tempint);
-#else
-   if (1 != fwrite(&tempint, size, 1, stream))
+if (1 != fwrite(&tempshort, size, 1, stream))
     return FAIL;
 #endif
-  }
-  else if (sizeof(hssize_t) == sizeof(long))
-  {
-   memcpy(&templong, mem, sizeof(long));
+}
+else if (H5Tequal(tid, H5T_NATIVE_USHORT))
+{
+    memcpy(&tempushort, mem, sizeof(unsigned short));
 #ifdef DEBUG_H5DUMP_BIN
-   fprintf(stream, "%ld ", templong);
+fprintf(stream, "%u ", tempushort);
 #else
-   if (1 != fwrite(&templong, size, 1, stream))
+if (1 != fwrite(&tempushort, size, 1, stream))
     return FAIL;
 #endif
-  }
-  else
-  {
-   memcpy(&templlong, mem, sizeof(long long));
+}
+else if (H5Tequal(tid, H5T_NATIVE_LONG))
+{
+    memcpy(&templong, mem, sizeof(long));
 #ifdef DEBUG_H5DUMP_BIN
-   fprintf(stream, fmt_llong, templlong);
+fprintf(stream, "%ld ", templong);
 #else
-   if (1 != fwrite(&templlong, size, 1, stream))
+if (1 != fwrite(&templong, size, 1, stream))
     return FAIL;
 #endif
-  }
- }
- else if (H5Tequal(tid, H5T_NATIVE_HSIZE))
- {
-  if (sizeof(hsize_t) == sizeof(int))
-  {
-   memcpy(&tempuint, mem, sizeof(unsigned int));
+}
+else if (H5Tequal(tid, H5T_NATIVE_ULONG))
+{
+    memcpy(&tempulong, mem, sizeof(unsigned long));
 #ifdef DEBUG_H5DUMP_BIN
-   fprintf(stream, "%u ", tempuint);
+fprintf(stream, "%lu ", tempulong);
 #else
-   if (1 != fwrite(&tempuint, size, 1, stream))
+if (1 != fwrite(&tempulong, size, 1, stream))
     return FAIL;
 #endif
-  }
-  else if (sizeof(hsize_t) == sizeof(long))
-  {
-   memcpy(&tempulong, mem, sizeof(unsigned long));
+}
+else if (H5Tequal(tid, H5T_NATIVE_LLONG))
+{
+    memcpy(&templlong, mem, sizeof(long long));
 #ifdef DEBUG_H5DUMP_BIN
-   fprintf(stream, "%lu ", tempulong);
+fprintf(stream, fmt_llong, templlong);
 #else
-   if (1 != fwrite(&tempulong, size, 1, stream))
+if (1 != fwrite(&templlong, size, 1, stream))
     return FAIL;
 #endif
-  }
-  else
-  {
-   memcpy(&tempullong, mem, sizeof(unsigned long long));
+}
+else if (H5Tequal(tid, H5T_NATIVE_ULLONG))
+{
+    memcpy(&tempullong, mem, sizeof(unsigned long long));
 #ifdef DEBUG_H5DUMP_BIN
-   fprintf(stream, fmt_ullong, tempullong);
+fprintf(stream, fmt_ullong, tempullong);
 #else
-   if (1 != fwrite(&tempullong, size, 1, stream))
+if (1 != fwrite(&tempullong, size, 1, stream))
     return FAIL;
 #endif
-  }
- }
- else if (H5Tget_class(tid) == H5T_COMPOUND)
- {
-  unsigned j;
-  hid_t    memb;
-  unsigned nmembs;
-  size_t   offset;
+}
+else if (H5Tequal(tid, H5T_NATIVE_HSSIZE))
+{
+    if (sizeof(hssize_t) == sizeof(int))
+    {
+        memcpy(&tempint, mem, sizeof(int));
+#ifdef DEBUG_H5DUMP_BIN
+fprintf(stream, "%d ", tempint);
+#else
+    if (1 != fwrite(&tempint, size, 1, stream))
+        return FAIL;
+#endif
+    }
+    else if (sizeof(hssize_t) == sizeof(long))
+    {
+        memcpy(&templong, mem, sizeof(long));
+#ifdef DEBUG_H5DUMP_BIN
+fprintf(stream, "%ld ", templong);
+#else
+if (1 != fwrite(&templong, size, 1, stream))
+    return FAIL;
+#endif
+    }
+    else
+    {
+        memcpy(&templlong, mem, sizeof(long long));
+#ifdef DEBUG_H5DUMP_BIN
+fprintf(stream, fmt_llong, templlong);
+#else
+if (1 != fwrite(&templlong, size, 1, stream))
+    return FAIL;
+#endif
+    }
+}
+else if (H5Tequal(tid, H5T_NATIVE_HSIZE))
+{
+    if (sizeof(hsize_t) == sizeof(int))
+    {
+        memcpy(&tempuint, mem, sizeof(unsigned int));
+#ifdef DEBUG_H5DUMP_BIN
+fprintf(stream, "%u ", tempuint);
+#else
+    if (1 != fwrite(&tempuint, size, 1, stream))
+        return FAIL;
+#endif
+    }
+    else if (sizeof(hsize_t) == sizeof(long))
+    {
+        memcpy(&tempulong, mem, sizeof(unsigned long));
+#ifdef DEBUG_H5DUMP_BIN
+fprintf(stream, "%lu ", tempulong);
+#else
+if (1 != fwrite(&tempulong, size, 1, stream))
+    return FAIL;
+#endif
+    }
+    else
+    {
+        memcpy(&tempullong, mem, sizeof(unsigned long long));
+#ifdef DEBUG_H5DUMP_BIN
+fprintf(stream, fmt_ullong, tempullong);
+#else
+if (1 != fwrite(&tempullong, size, 1, stream))
+    return FAIL;
+#endif
+    }
+}
+else if (H5Tget_class(tid) == H5T_COMPOUND)
+{
+    unsigned j;
+    hid_t    memb;
+    unsigned nmembs;
+    size_t   offset;
 
-  nmembs = H5Tget_nmembers(tid);
+    nmembs = H5Tget_nmembers(tid);
 
-  for (j = 0; j < nmembs; j++)
-  {
-   offset = H5Tget_member_offset(tid, j);
-   memb   = H5Tget_member_type(tid, j);
+    for (j = 0; j < nmembs; j++)
+    {
+        offset = H5Tget_member_offset(tid, j);
+        memb   = H5Tget_member_type(tid, j);
 
-   if (render_bin_output(stream,memb,mem + offset)<0)
-    return FAIL;
+        if (render_bin_output(stream,memb,mem + offset)<0)
+            return FAIL;
 
-   H5Tclose(memb);
-  }
- }
- else if (H5Tget_class(tid) == H5T_ENUM)
- {
-  unsigned int i;
-  if (1==size)
-  {
+        H5Tclose(memb);
+    }
+}
+else if (H5Tget_class(tid) == H5T_ENUM)
+{
+    unsigned int i;
+    if (1==size)
+    {
 #ifdef DEBUG_H5DUMP_BIN
-   fprintf(stream, "0x%02x", mem[0]);
+fprintf(stream, "0x%02x", mem[0]);
 #else
-   if (1 != fwrite(&mem[0], size, 1, stream))
-    return FAIL;
+    if (1 != fwrite(&mem[0], size, 1, stream))
+        return FAIL;
 #endif
-  }
-  else
-  {
-   for (i = 0; i < size; i++)
-   {
+    }
+    else
+    {
+        for (i = 0; i < size; i++)
+        {
 #ifdef DEBUG_H5DUMP_BIN
-    fprintf(stream, "%s%02x", i?":":"", mem[i]);
+fprintf(stream, "%s%02x", i?":":"", mem[i]);
 #else
     if (1 != fwrite(&mem[i], sizeof(char), 1, stream))
-     return FAIL;
+        return FAIL;
 #endif
-   } /*i*/
-  }/*else 1 */
- }
- else if (H5Tget_class(tid) == H5T_ARRAY)
- {
-  int     k, ndims;
-  hsize_t i, dims[H5S_MAX_RANK], temp_nelmts, nelmts;
-  hid_t   memb;
+        } /*i*/
+    }/*else 1 */
+}
+else if (H5Tget_class(tid) == H5T_ARRAY)
+{
+    int     k, ndims;
+    hsize_t i, dims[H5S_MAX_RANK], temp_nelmts, nelmts;
+    hid_t   memb;
 
-  /* get the array's base datatype for each element */
-  memb = H5Tget_super(tid);
-  size = H5Tget_size(memb);
-  ndims = H5Tget_array_ndims(tid);
-  H5Tget_array_dims2(tid, dims);
-  assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
+    /* get the array's base datatype for each element */
+    memb = H5Tget_super(tid);
+    size = H5Tget_size(memb);
+    ndims = H5Tget_array_ndims(tid);
+    H5Tget_array_dims2(tid, dims);
+    assert(ndims >= 1 && ndims <= H5S_MAX_RANK);
 
-  /* calculate the number of array elements */
-  for (k = 0, nelmts = 1; k < ndims; k++)
-  {
-   temp_nelmts = nelmts;
-   temp_nelmts *= dims[k];
-   nelmts = (size_t)temp_nelmts;
-  }
+    /* calculate the number of array elements */
+    for (k = 0, nelmts = 1; k < ndims; k++)
+    {
+        temp_nelmts = nelmts;
+        temp_nelmts *= dims[k];
+        nelmts = (size_t)temp_nelmts;
+    }
 
-  /* dump the array element */
-  for (i = 0; i < nelmts; i++)
-  {
-   if (render_bin_output(stream,memb,mem + i * size)<0)
-    return FAIL;
-  }
+    /* dump the array element */
+    for (i = 0; i < nelmts; i++)
+    {
+        if (render_bin_output(stream,memb,mem + i * size)<0)
+            return FAIL;
+    }
 
-  H5Tclose(memb);
- }
- else if (H5Tget_class(tid) == H5T_VLEN)
- {
-  unsigned int i;
-  hsize_t nelmts;
-  hid_t   memb;
+    H5Tclose(memb);
+}
+else if (H5Tget_class(tid) == H5T_VLEN)
+{
+    unsigned int i;
+    hsize_t nelmts;
+    hid_t   memb;
 
-  /* get the VL sequences's base datatype for each element */
-  memb = H5Tget_super(tid);
-  size = H5Tget_size(memb);
+    /* get the VL sequences's base datatype for each element */
+    memb = H5Tget_super(tid);
+    size = H5Tget_size(memb);
 
-  /* Get the number of sequence elements */
-  nelmts = ((hvl_t *)mem)->len;
+    /* Get the number of sequence elements */
+    nelmts = ((hvl_t *)mem)->len;
 
-  for (i = 0; i < nelmts; i++)
-  {
-   /* dump the array element */
-   if (render_bin_output(stream,memb,((char *)(((hvl_t *)mem)->p)) + i * size)<0)
-    return FAIL;
-  }
-  H5Tclose(memb);
- }
- else
- {
-  size_t i;
-  if (1==size)
-  {
+    for (i = 0; i < nelmts; i++)
+    {
+        /* dump the array element */
+        if (render_bin_output(stream,memb,((char *)(((hvl_t *)mem)->p)) + i * size)<0)
+            return FAIL;
+    }
+    H5Tclose(memb);
+}
+else
+{
+    size_t i;
+    if (1==size)
+    {
 #ifdef DEBUG_H5DUMP_BIN
-   fprintf(stream, "0x%02x", mem[0]);
+fprintf(stream, "0x%02x", mem[0]);
 #else
-   if (1 != fwrite(&mem[0], size, 1, stream))
-    return FAIL;
+    if (1 != fwrite(&mem[0], size, 1, stream))
+        return FAIL;
 #endif
-  }
-  else
-  {
-   for (i = 0; i < size; i++)
-   {
+    }
+    else
+    {
+        for (i = 0; i < size; i++)
+        {
 #ifdef DEBUG_H5DUMP_BIN
-    fprintf(stream, "%s%02x", i?":":"", mem[i]);
+fprintf(stream, "%s%02x", i?":":"", mem[i]);
 #else
     if (1 != fwrite(&mem[i], sizeof(char), 1, stream))
-     return FAIL;
+        return FAIL;
 #endif
-   } /*i*/
-  }/*else 1 */
- }
+        } /*i*/
+    }/*else 1 */
+}
 
 
- return SUCCEED;
+return SUCCEED;
 }
 
