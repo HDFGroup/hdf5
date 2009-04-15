@@ -893,7 +893,7 @@ installcheck-local:
 # check-install is just a synonym for installcheck
 check-install: installcheck
 
-# check-all-install tests installing default vs. prefix=<dir> vs. $DESTDIR.
+# check-all-install tests all installation methods.
 # Install via different mechanism and then compare against the default.
 # Fine if only libXXX.a files are different since they may have been ranlib'ed.
 check-all-install:
@@ -904,8 +904,8 @@ check-all-install:
 	@echo Compare against the default installation.
 	@echo Fine if only libXXX.a files are different.
 	-diff -r prefix-tmp ${prefix}
-	@echo Installing to different DESTDIR location
-	$(MAKE) DESTDIR=${ROOT}/destdir-tmp install
+	@echo Installing to different \$DESTDIR location
+	env DESTDIR=${ROOT}/destdir-tmp $(MAKE) install
 	@echo Compare against the default installation.
 	@echo Fine if only libXXX.a files are different.
 	-diff -r destdir-tmp${prefix} ${prefix}
