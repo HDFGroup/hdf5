@@ -165,7 +165,7 @@ check-all-install:
 	@echo Compare against the default installation.
 	@echo Fine if only libXXX.a files are different.
 	-diff -r prefix-tmp ${prefix}
-	@echo Installing to different \$DESTDIR location
+	@echo Installing to different $$\DESTDIR location
 	env DESTDIR=${ROOT}/destdir-tmp $(MAKE) install
 	@echo Compare against the default installation.
 	@echo Fine if only libXXX.a files are different.
