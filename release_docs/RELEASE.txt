@@ -44,7 +44,9 @@ New Features
 ============
     Configuration:
     -------------------------
-     - Add description here. Do not exceed 80 characters for a line
+    - Added a Make target of check-all-install to test the correctness of
+      installing via the prefix= or $DESTDIR options. AKC - 2009/04/14
+    - Add description here. Do not exceed 80 characters for a line
            EIP - 2008/11/12 (year/month/day format)
 
     Library:

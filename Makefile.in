@@ -133,6 +133,23 @@ check-install:
 	  fi;								      \
 	done
 
+# check-all-install tests all installation methods.
+# Install via different mechanism and then compare against the default.
+# Fine if only libXXX.a files are different since they may have been ranlib'ed.
+check-all-install:
+	@echo Installing to default location
+	$(MAKE) install
+	@echo Installing to different prefix location
+	$(MAKE) prefix=${ROOT}/prefix-tmp install
+	@echo Compare against the default installation.
+	@echo Fine if only libXXX.a files are different.
+	-diff -r prefix-tmp ${prefix}
+	@echo Installing to different $$\DESTDIR location
+	env DESTDIR=${ROOT}/destdir-tmp $(MAKE) install
+	@echo Compare against the default installation.
+	@echo Fine if only libXXX.a files are different.
+	-diff -r destdir-tmp${prefix} ${prefix}
+
 ## Number format detection
 H5detect: 
 	(cd src && $(MAKE) $@)
@@ -148,6 +165,7 @@ clean mostlyclean:
 	   (cd $$d && $(MAKE) $@);					      \
 	done
 	-$(RM) conftest conftest.c
+	-$(RM) -rf prefix-tmp destdir-tmp
 
 distclean:
 	@@SETX@; for d in $(SUBDIRS) doc perform examples; do		      \
