@@ -281,7 +281,7 @@ typedef herr_t (*H5D_chunk_copy_shutdown_func_t)(H5O_layout_t *layout_src,
     H5O_layout_t *layout_dst, hid_t dxpl_id);
 typedef herr_t (*H5D_chunk_size_func_t)(const H5D_chk_idx_info_t *idx_info,
     hsize_t *idx_size);
-typedef herr_t (*H5D_chunk_reset_func_t)(H5O_layout_t *layout);
+typedef herr_t (*H5D_chunk_reset_func_t)(H5O_layout_t *layout, hbool_t reset_addr);
 typedef herr_t (*H5D_chunk_dump_func_t)(const H5D_chk_idx_info_t *idx_info,
     FILE *stream);
 typedef herr_t (*H5D_chunk_dest_func_t)(const H5D_chk_idx_info_t *idx_info);

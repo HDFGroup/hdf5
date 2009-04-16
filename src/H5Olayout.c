@@ -447,6 +447,10 @@ done:
  * Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
  *
+ * Modifications:
+ *      Vailin Choi; April 2009
+ *      Reset the pointer of the chunked storage index but not the address
+ *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -474,7 +478,12 @@ H5O_layout_copy(const void *_mesg, void *_dest)
 
         /* Copy over the raw data */
         HDmemcpy(dest->u.compact.buf, mesg->u.compact.buf, dest->u.compact.size);
+
     } /* end if */
+
+    /* Reset the pointer of the chunked storage index but not the address */
+    if(dest->type == H5D_CHUNKED && dest->u.chunk.ops)
+	H5D_chunk_idx_reset(dest, FALSE);
 
     /* Set return value */
     ret_value = dest;
@@ -654,6 +663,10 @@ done:
  * Programmer:  Peter Cao
  *              July 23, 2005
  *
+ * Modifications:
+ *      Vailin Choi; April 2009
+ *      Reset address and pointer of the array struct for the chunked storage index
+ *
  *-------------------------------------------------------------------------
  */
 static void *
@@ -713,7 +726,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
         case H5D_CHUNKED:
             if(H5D_chunk_is_space_alloc(layout_src)) {
                 /* Layout is not created in the destination file, reset index address */
-                if(H5D_chunk_idx_reset(layout_dst) < 0)
+                if(H5D_chunk_idx_reset(layout_dst, TRUE) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to reset chunked storage index in dest")
 
                 /* Create chunked layout */

@@ -153,7 +153,7 @@ static herr_t H5D_btree_idx_copy_shutdown(H5O_layout_t *layout_src,
     H5O_layout_t *layout_dst, hid_t dxpl_id);
 static herr_t H5D_btree_idx_size(const H5D_chk_idx_info_t *idx_info,
     hsize_t *size);
-static herr_t H5D_btree_idx_reset(H5O_layout_t *layout);
+static herr_t H5D_btree_idx_reset(H5O_layout_t *layout, hbool_t reset_addr);
 static herr_t H5D_btree_idx_dump(const H5D_chk_idx_info_t *idx_info,
     FILE *stream);
 static herr_t H5D_btree_idx_dest(const H5D_chk_idx_info_t *idx_info);
@@ -1347,17 +1347,22 @@ done:
  * Programmer:	Quincey Koziol
  *              Thursday, January 15, 2009
  *
+ * Modifications:
+ *	Vailin Choi; April 2009
+ *	Reset address of the chunked storage index if RESET_ADDR is set
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_btree_idx_reset(H5O_layout_t *layout)
+H5D_btree_idx_reset(H5O_layout_t *layout, hbool_t reset_addr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_btree_idx_reset)
 
     HDassert(layout);
 
     /* Reset index info */
-    layout->u.chunk.u.btree.addr = HADDR_UNDEF;
+    if(reset_addr)
+	layout->u.chunk.u.btree.addr = HADDR_UNDEF;
     layout->u.chunk.u.btree.shared = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)

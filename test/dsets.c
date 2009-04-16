@@ -7094,6 +7094,127 @@ error:
     return -1;
 } /* end test_chunk_fast() */
 
+/*-------------------------------------------------------------------------
+ * Function: test_reopen_chunk_fast
+ *
+ * Purpose:  To verify a bug in extensible arrays as chunk index.
+ *		When the dataset is closed in H5D_close(), the pointer
+ *		to the extensible array struct in the layout message
+ *		is copied via H5D_flush_real() before H5D_chunk_dest().
+ *		This causes an abort from "Assertion `ea->hdr' failed."
+ *		later when the dataset is re-opened and read.
+ *
+ * Return:      Success: 0
+ *              Failure: -1
+ *
+ * Programmer:  Vailin Choi
+ *              April 13, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_reopen_chunk_fast(hid_t fapl)
+{
+    char        filename[FILENAME_BUF_SIZE];
+    hid_t       fid = -1;       /* File ID */
+    hid_t       dcpl = -1;      /* Dataset creation property list ID */
+    hid_t       sid = -1;       /* Dataspace ID */
+    hid_t       scalar_sid = -1;/* Scalar dataspace ID */
+    hid_t       dsid = -1;      /* Dataset ID */
+    hsize_t     dim, max_dim, chunk_dim; /* Dataset and chunk dimensions */
+    hsize_t	hs_offset;      /* Hyperslab offset */
+    hsize_t	hs_size;        /* Hyperslab size */
+    H5D_alloc_time_t alloc_time;        /* Storage allocation time */
+    unsigned    write_elem, read_elem;  /* Element written/read */
+    unsigned    u;              /* Local index variable */
+
+    TESTING("datasets w/extensible array open/reopen with read/write");
+
+    h5_fixname(FILENAME[9], fapl, filename, sizeof filename);
+
+    /* Loop over storage allocation time */
+    for(alloc_time = H5D_ALLOC_TIME_EARLY; alloc_time <= H5D_ALLOC_TIME_INCR; alloc_time++) {
+	/* Create file */
+	if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) FAIL_STACK_ERROR
+
+	/* Create dataset creation property list */
+	if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) FAIL_STACK_ERROR
+
+	/* Set chunking */
+	chunk_dim = 10;
+	if(H5Pset_chunk(dcpl, 1, &chunk_dim) < 0) FAIL_STACK_ERROR
+
+	/* Set fill time */
+	if(H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0) FAIL_STACK_ERROR
+
+	/* Set allocation time */
+	if(H5Pset_alloc_time(dcpl, alloc_time) < 0) FAIL_STACK_ERROR
+
+	/* Create scalar dataspace */
+	if((scalar_sid = H5Screate(H5S_SCALAR)) < 0) FAIL_STACK_ERROR
+
+	/* Create 1-D dataspace */
+	dim = 100;
+	max_dim = H5S_UNLIMITED;
+	if((sid = H5Screate_simple(1, &dim, &max_dim)) < 0) FAIL_STACK_ERROR
+
+	/* Create chunked dataset */
+	if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_UINT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+	    FAIL_STACK_ERROR
+
+	/* Fill existing elements */
+	hs_size = 1;
+	for(u = 0; u < 100; u++) {
+	    /* Select a single element in the dataset */
+	    hs_offset = u;
+	    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, &hs_offset, NULL, &hs_size, NULL) < 0) 
+		FAIL_STACK_ERROR
+	    /* Write element to dataset */
+	    write_elem = u;
+	    if(H5Dwrite(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &write_elem) < 0) 
+		FAIL_STACK_ERROR
+	} /* end for */
+
+	/* Close everything */
+	if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+
+	/* Reopen the dataset */
+	if((dsid = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+	    hs_size = 1;
+
+	/* Read from dataset */
+	for(u = 0; u < 100; u++) {
+	    /* Select a single element in the dataset */
+	    hs_offset = u;
+	    if(H5Sselect_hyperslab(sid, H5S_SELECT_SET, &hs_offset, NULL, &hs_size, NULL) < 0) 
+		FAIL_STACK_ERROR
+
+	    /* Read element from dataset */
+	    if(H5Dread(dsid, H5T_NATIVE_UINT, scalar_sid, sid, H5P_DEFAULT, &read_elem) < 0) 
+		FAIL_STACK_ERROR
+	} /* end for */
+
+	if(H5Dclose(dsid) < 0) FAIL_STACK_ERROR
+	if(H5Sclose(sid) < 0) FAIL_STACK_ERROR
+	if(H5Sclose(scalar_sid) < 0) FAIL_STACK_ERROR
+	if(H5Pclose(dcpl) < 0) FAIL_STACK_ERROR
+	if(H5Fclose(fid) < 0) FAIL_STACK_ERROR
+
+    } /* end for */
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        H5Pclose(dcpl);
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Sclose(scalar_sid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    return -1;
+} /* end test_reopen_chunk_fast() */
 
 /*-------------------------------------------------------------------------
  * Function:	main
@@ -7218,6 +7339,8 @@ main(void)
         nerrors += (test_chunk_cache(my_fapl) < 0		? 1 : 0);
         nerrors += (test_big_chunks_bypass_cache(my_fapl) < 0   ? 1 : 0);
         nerrors += (test_chunk_fast(my_fapl) < 0		? 1 : 0);
+        nerrors += (test_reopen_chunk_fast(my_fapl) < 0		? 1 : 0);
+
 
         if(H5Fclose(file) < 0)
             goto error;

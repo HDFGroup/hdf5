@@ -281,6 +281,10 @@ H5FL_DEFINE_STATIC(H5D_chunk_prune_stack_t);
  * Programmer:	Quincey Koziol
  *              Thursday, May 22, 2008
  *
+ * Modifications:
+ *	Vailin Choi; April 2009
+ * 	Reset address and pointer of the array struct for the chunked storage index
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -344,8 +348,8 @@ H5D_chunk_new(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
     /* Retain computed chunk size */
     H5_ASSIGN_OVERFLOW(dset->shared->layout.u.chunk.size, chunk_size, uint64_t, uint32_t);
 
-    /* Reset index address */
-    if(H5D_chunk_idx_reset(&dset->shared->layout) < 0)
+    /* Reset address and pointer of the array struct for the chunked storage index */
+    if(H5D_chunk_idx_reset(&dset->shared->layout, TRUE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to reset chunked storage index")
 
     /* Initialize the chunk cache for the dataset */
@@ -1919,11 +1923,15 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Thursday, January 15, 2009
+ * 
+ * Modifications:
+ *	Vailin Choi; April 2009
+ *	Pass along RESET_ADDR: whether to reset the address of chunked storage index
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_chunk_idx_reset(H5O_layout_t *layout)
+H5D_chunk_idx_reset(H5O_layout_t *layout, hbool_t reset_addr)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
 
@@ -1938,7 +1946,7 @@ H5D_chunk_idx_reset(H5O_layout_t *layout)
                 H5D_COPS_BTREE == layout->u.chunk.ops));
 
     /* Reset index structures */
-    if((layout->u.chunk.ops->reset)(layout) < 0)
+    if((layout->u.chunk.ops->reset)(layout, reset_addr) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "unable to reset chunk index info")
 
 done:
