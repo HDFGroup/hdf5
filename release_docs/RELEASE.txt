@@ -53,6 +53,10 @@ New Features
 
     Library:
     --------
+    - Separated "factory" free list class from block free lists. These free
+      lists are dynamically created and manage blocks of a fixed size.
+      H5set_free_list_limits() will use the same settings specified for block
+      free lists for factory free lists. (NAF - 2009/04/08)
     - Added support for dense attributes to H5Ocopy. (XCao/NAF - 2009/01/29)
     - Added H5Pset_elink_cb and H5Pget_elink_cb functions to support a
       user-defined callback function for external link traversal.
