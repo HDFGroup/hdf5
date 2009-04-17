@@ -209,8 +209,10 @@ void coll_write_test(int chunk_factor)
   hbool_t  use_gpfs = FALSE;
   hid_t   file, datasetc,dataseti;           /* File and dataset identifiers */
   hid_t   mspaceid1, mspaceid, fspaceid,fspaceid1; /* Dataspace identifiers */
+  hsize_t mdim1[1],fsdim[2],mdim[2];
   hid_t   plist;                   /* Dataset property list identifier */
 
+#if 0
   hsize_t mdim1[] = {MSPACE1_DIM};  /* Dimension size of the first dataset
 				      (in memory) */
 
@@ -220,6 +222,7 @@ void coll_write_test(int chunk_factor)
 						  dataset in memory when we
 						  read selection from the
 						  dataset on the disk */
+#endif
 
   hsize_t start[2];   /* Start of hyperslab */
   hsize_t  stride[2]; /* Stride of hyperslab */
@@ -231,10 +234,14 @@ void coll_write_test(int chunk_factor)
   unsigned i,j;
   int fillvalue = 0;   /* Fill value for the dataset */
 
+#if 0
   int    matrix_out[MSPACE_DIM1][MSPACE_DIM2];
   int    matrix_out1[MSPACE_DIM1][MSPACE_DIM2];   /* Buffer to read from the
 						  dataset */
   int    vector[MSPACE1_DIM];
+#endif
+
+  int      *matrix_out, *matrix_out1, *vector;
 
   int    mpi_size,mpi_rank;
 
@@ -252,8 +259,19 @@ void coll_write_test(int chunk_factor)
   /*
    * Buffers' initialization.
    */
-  vector[0] = vector[MSPACE1_DIM - 1] = -1;
-  for (i = 1; i < MSPACE1_DIM - 1; i++) vector[i] = i;
+  mdim1[0] = MSPACE1_DIM *mpi_size;
+  mdim[0]  = MSPACE_DIM1;
+  mdim[1]  = MSPACE_DIM2*mpi_size;
+  fsdim[0] = FSPACE_DIM1;
+  fsdim[1] = FSPACE_DIM2*mpi_size;
+
+  vector = (int*)HDmalloc(sizeof(int)*mdim1[0]*mpi_size);
+  matrix_out  = (int*)HDmalloc(sizeof(int)*mdim[0]*mdim[1]*mpi_size);
+  matrix_out1 = (int*)HDmalloc(sizeof(int)*mdim[0]*mdim[1]*mpi_size);
+
+  HDmemset(vector,0,sizeof(int)*mdim1[0]*mpi_size);
+  vector[0] = vector[MSPACE1_DIM*mpi_size - 1] = -1;
+  for (i = 1; i < MSPACE1_DIM*mpi_size - 1; i++) vector[i] = i;
 
 #if 0
   acc_plist = H5Pcreate(H5P_FILE_ACCESS);
@@ -283,8 +301,8 @@ void coll_write_test(int chunk_factor)
 
   if(chunk_factor != 0) {
 
-    chunk_dims[0] = FSPACE_DIM1/chunk_factor;
-    chunk_dims[1] = FSPACE_DIM2/chunk_factor;
+    chunk_dims[0] = fsdim[0]/chunk_factor;
+    chunk_dims[1] = fsdim[1]/chunk_factor;
      ret = H5Pset_chunk(plist, 2, chunk_dims);
     VRFY((ret >= 0),"chunk creation property list succeeded");
   }
@@ -310,11 +328,11 @@ void coll_write_test(int chunk_factor)
   */
 
   start[0]  = FHSTART0;
-  start[1]  = FHSTART1+mpi_rank*FHSTRIDE1*FHCOUNT1/mpi_size;
+  start[1]  = FHSTART1+mpi_rank*FHSTRIDE1*FHCOUNT1;
   stride[0] = FHSTRIDE0;
   stride[1] = FHSTRIDE1;
   count[0]  = FHCOUNT0;
-  count[1]  = FHCOUNT1/mpi_size;
+  count[1]  = FHCOUNT1;
   block[0]  = FHBLOCK0;
   block[1]  = FHBLOCK1;
 
@@ -327,13 +345,13 @@ void coll_write_test(int chunk_factor)
    */
 
   start[0]  = SHSTART0;
-  start[1]  = SHSTART1+SHCOUNT1*SHBLOCK1*mpi_rank/mpi_size;
+  start[1]  = SHSTART1+SHCOUNT1*SHBLOCK1*mpi_rank;
   stride[0] = SHSTRIDE0;
   stride[1] = SHSTRIDE1;
   count[0]  = SHCOUNT0;
   count[1]  = SHCOUNT1;
   block[0]  = SHBLOCK0;
-  block[1]  = SHBLOCK1/mpi_size;
+  block[1]  = SHBLOCK1;
 
   ret = H5Sselect_hyperslab(fspaceid, H5S_SELECT_OR, start, stride, count, block);
   VRFY((ret >= 0),"hyperslab selection succeeded");
@@ -351,7 +369,7 @@ void coll_write_test(int chunk_factor)
    */
   start[0]  = MHSTART0;
   stride[0] = MHSTRIDE0;
-  count[0]  = MHCOUNT0/mpi_size;
+  count[0]  = MHCOUNT0;
   block[0]  = MHBLOCK0;
 
   ret = H5Sselect_hyperslab(mspaceid1, H5S_SELECT_SET, start, stride, count, block);
@@ -440,13 +458,13 @@ void coll_write_test(int chunk_factor)
 
 
   start[0]  = RFFHSTART0;
-  start[1]  = RFFHSTART1+mpi_rank*RFFHCOUNT1/mpi_size;
+  start[1]  = RFFHSTART1+mpi_rank*RFFHCOUNT1;
   block[0]  = RFFHBLOCK0;
   block[1]  = RFFHBLOCK1;
   stride[0] = RFFHSTRIDE0;
   stride[1] = RFFHSTRIDE1;
   count[0]  = RFFHCOUNT0;
-  count[1]  = RFFHCOUNT1/mpi_size;
+  count[1]  = RFFHCOUNT1;
 
 
   ret = H5Sselect_hyperslab(fspaceid, H5S_SELECT_SET, start, stride, count, block);
@@ -456,13 +474,13 @@ void coll_write_test(int chunk_factor)
 
   /*start[0] = RFSHSTART0+mpi_rank*RFSHCOUNT1/mpi_size; */
   start[0] = RFSHSTART0;
-  start[1] = RFSHSTART1+RFSHCOUNT1*mpi_rank/mpi_size;
+  start[1] = RFSHSTART1+RFSHCOUNT1*mpi_rank;
   block[0] = RFSHBLOCK0;
   block[1] = RFSHBLOCK1;
   stride[0] = RFSHSTRIDE0;
   stride[1] = RFSHSTRIDE0;
   count[0]  = RFSHCOUNT0;
-  count[1]  = RFSHCOUNT1/mpi_size;
+  count[1]  = RFSHCOUNT1;
   ret = H5Sselect_hyperslab(fspaceid, H5S_SELECT_OR, start, stride, count, block);
   VRFY((ret >= 0),"hyperslab selection succeeded");
   ret = H5Sselect_hyperslab(fspaceid1, H5S_SELECT_OR, start, stride, count, block);
@@ -481,24 +499,24 @@ void coll_write_test(int chunk_factor)
 
 
   start[0]  = RMFHSTART0;
-  start[1]  = RMFHSTART1+mpi_rank*RMFHCOUNT1/mpi_size;
+  start[1]  = RMFHSTART1+mpi_rank*RMFHCOUNT1;
   block[0]  = RMFHBLOCK0;
   block[1]  = RMFHBLOCK1;
   stride[0] = RMFHSTRIDE0;
   stride[1] = RMFHSTRIDE1;
   count[0]  = RMFHCOUNT0;
-  count[1]  = RMFHCOUNT1/mpi_size;
+  count[1]  = RMFHCOUNT1;
   ret = H5Sselect_hyperslab(mspaceid, H5S_SELECT_SET, start, stride, count, block);
   VRFY((ret >= 0),"hyperslab selection succeeded");
 
   start[0]  = RMSHSTART0;
-  start[1]  = RMSHSTART1+mpi_rank*RMSHCOUNT1/mpi_size;
+  start[1]  = RMSHSTART1+mpi_rank*RMSHCOUNT1;
   block[0]  = RMSHBLOCK0;
   block[1]  = RMSHBLOCK1;
   stride[0] = RMSHSTRIDE0;
   stride[1] = RMSHSTRIDE1;
   count[0]  = RMSHCOUNT0;
-  count[1]  = RMSHCOUNT1/mpi_size;
+  count[1]  = RMSHCOUNT1;
 
 
   ret = H5Sselect_hyperslab(mspaceid, H5S_SELECT_OR, start, stride, count, block);
@@ -507,10 +525,8 @@ void coll_write_test(int chunk_factor)
   /*
    * Initialize data buffer.
    */
-  for (i = 0; i < MSPACE_DIM1; i++) {
-    for (j = 0; j < MSPACE_DIM2; j++)
-      matrix_out[i][j] = 0;
-  }
+  HDmemset(matrix_out,0,sizeof(int)*MSPACE_DIM1*MSPACE_DIM2*mpi_size);
+  HDmemset(matrix_out1,0,sizeof(int)*MSPACE_DIM1*MSPACE_DIM2*mpi_size);
 
   /*
    * Read data back to the buffer matrix_out.
@@ -521,21 +537,17 @@ void coll_write_test(int chunk_factor)
   VRFY((ret >= 0),"H5D independent read succeed");
 
 
-  for (i = 0; i < MSPACE_DIM1; i++) {
-    for (j = 0; j < MSPACE_DIM2; j++)
-      matrix_out1[i][j] = 0;
-  }
   ret = H5Dread(dataseti, H5T_NATIVE_INT, mspaceid, fspaceid,
 		H5P_DEFAULT, matrix_out1);
   VRFY((ret >= 0),"H5D independent read succeed");
 
   ret = 0;
-  for (i = 0; i < MSPACE_DIM1; i++){
-    for (j = 0; j < MSPACE_DIM2; j++){
-      if(matrix_out[i][j]!=matrix_out1[i][j]) ret = -1;
+
+  for (i = 0; i < MSPACE_DIM1*MSPACE_DIM2*mpi_size; i++){
+         if(matrix_out[i]!=matrix_out1[i]) ret = -1;
       if(ret < 0) break;
     }
-  }
+
   VRFY((ret >= 0),"H5D contiguous irregular collective write succeed");
 
   /*
@@ -582,11 +594,13 @@ void coll_read_test(int chunk_factor)
   hbool_t use_gpfs = FALSE;
 
   /* Dimension sizes of the dataset (on disk) */
+#if 0
   hsize_t mdim[] = {MSPACE_DIM1, MSPACE_DIM2}; /* Dimension sizes of the
 						  dataset in memory when we
 						  read selection from the
 						  dataset on the disk */
-
+#endif
+  hsize_t mdim[2];
   hsize_t  start[2]; /* Start of hyperslab */
   hsize_t  stride[2]; /* Stride of hyperslab */
   hsize_t  count[2];  /* Block count */
@@ -595,10 +609,13 @@ void coll_read_test(int chunk_factor)
   herr_t   ret;
   unsigned i,j;
 
+  int     *matrix_out;
+  int     *matrix_out1;
+#if 0
   int    matrix_out[MSPACE_DIM1][MSPACE_DIM2];
   int    matrix_out1[MSPACE_DIM1][MSPACE_DIM2];   /* Buffer to read from the
 						  dataset */
-
+#endif
   int    mpi_size,mpi_rank;
 
   MPI_Comm comm = MPI_COMM_WORLD;
@@ -615,6 +632,10 @@ void coll_read_test(int chunk_factor)
   /*
    * Buffers' initialization.
    */
+  mdim[0] = MSPACE_DIM1;
+  mdim[1] = MSPACE_DIM2*mpi_size;
+  matrix_out =(int*)HDmalloc(sizeof(int)*MSPACE_DIM1*MSPACE_DIM2*mpi_size);
+  matrix_out1=(int*)HDmalloc(sizeof(int)*MSPACE_DIM1*MSPACE_DIM2*mpi_size);
 
   /*
    * Open the file.
@@ -650,26 +671,26 @@ void coll_read_test(int chunk_factor)
   VRFY((fspaceid1 >= 0),"file dataspace obtained succeeded");
 
   start[0]  = RFFHSTART0;
-  start[1]  = RFFHSTART1+mpi_rank*RFFHCOUNT1/mpi_size;
+  start[1]  = RFFHSTART1+mpi_rank*RFFHCOUNT1;
   block[0]  = RFFHBLOCK0;
   block[1]  = RFFHBLOCK1;
   stride[0] = RFFHSTRIDE0;
   stride[1] = RFFHSTRIDE1;
   count[0]  = RFFHCOUNT0;
-  count[1]  = RFFHCOUNT1/mpi_size;
+  count[1]  = RFFHCOUNT1;
 
   ret = H5Sselect_hyperslab(fspaceid1, H5S_SELECT_SET, start, stride, count, block);
   VRFY((ret >= 0),"hyperslab selection succeeded");
 
 
   start[0] = RFSHSTART0;
-  start[1] = RFSHSTART1+RFSHCOUNT1*mpi_rank/mpi_size;
+  start[1] = RFSHSTART1+RFSHCOUNT1*mpi_rank;
   block[0] = RFSHBLOCK0;
   block[1] = RFSHBLOCK1;
   stride[0] = RFSHSTRIDE0;
   stride[1] = RFSHSTRIDE0;
   count[0]  = RFSHCOUNT0;
-  count[1]  = RFSHCOUNT1/mpi_size;
+  count[1]  = RFSHCOUNT1;
 
   ret = H5Sselect_hyperslab(fspaceid1, H5S_SELECT_OR, start, stride, count, block);
   VRFY((ret >= 0),"hyperslab selection succeeded");
@@ -686,34 +707,32 @@ void coll_read_test(int chunk_factor)
    */
 
   start[0]  = RMFHSTART0;
-  start[1]  = RMFHSTART1+mpi_rank*RMFHCOUNT1/mpi_size;
+  start[1]  = RMFHSTART1+mpi_rank*RMFHCOUNT1;
   block[0]  = RMFHBLOCK0;
   block[1]  = RMFHBLOCK1;
   stride[0] = RMFHSTRIDE0;
   stride[1] = RMFHSTRIDE1;
   count[0]  = RMFHCOUNT0;
-  count[1]  = RMFHCOUNT1/mpi_size;
+  count[1]  = RMFHCOUNT1;
   ret = H5Sselect_hyperslab(mspaceid, H5S_SELECT_SET, start, stride, count, block);
   VRFY((ret >= 0),"hyperslab selection succeeded");
 
   start[0]  = RMSHSTART0;
-  start[1]  = RMSHSTART1+mpi_rank*RMSHCOUNT1/mpi_size;
+  start[1]  = RMSHSTART1+mpi_rank*RMSHCOUNT1;
   block[0]  = RMSHBLOCK0;
   block[1]  = RMSHBLOCK1;
   stride[0] = RMSHSTRIDE0;
   stride[1] = RMSHSTRIDE1;
   count[0]  = RMSHCOUNT0;
-  count[1]  = RMSHCOUNT1/mpi_size;
+  count[1]  = RMSHCOUNT1;
   ret = H5Sselect_hyperslab(mspaceid, H5S_SELECT_OR, start, stride, count, block);
   VRFY((ret >= 0),"hyperslab selection succeeded");
 
   /*
    * Initialize data buffer.
    */
-  for (i = 0; i < MSPACE_DIM1; i++) {
-    for (j = 0; j < MSPACE_DIM2; j++)
-      matrix_out[i][j] = 0;
-  }
+  HDmemset(matrix_out,0,sizeof(int)*MSPACE_DIM1*MSPACE_DIM2*mpi_size);
+  HDmemset(matrix_out1,0,sizeof(int)*MSPACE_DIM1*MSPACE_DIM2*mpi_size);
 
   /*
    * Read data back to the buffer matrix_out.
@@ -732,20 +751,14 @@ void coll_read_test(int chunk_factor)
   ret = H5Pclose(xfer_plist);
   VRFY((ret >= 0),"");
 
-  for (i = 0; i < MSPACE_DIM1; i++) {
-    for (j = 0; j < MSPACE_DIM2; j++)
-      matrix_out1[i][j] = 0;
-  }
   ret = H5Dread(dataseti, H5T_NATIVE_INT, mspaceid, fspaceid1,
 		H5P_DEFAULT, matrix_out1);
 
   VRFY((ret >= 0),"H5D independent read succeed");
   ret = 0;
-  for (i = 0; i < MSPACE_DIM1; i++){
-    for (j = 0; j < MSPACE_DIM2; j++){
-      if(matrix_out[i][j]!=matrix_out1[i][j])ret = -1;
+  for (i = 0; i < MSPACE_DIM1*MSPACE_DIM2*mpi_size; i++){
+      if(matrix_out[i]!=matrix_out1[i])ret = -1;
       if(ret < 0) break;
-    }
   }
   VRFY((ret >= 0),"H5D contiguous irregular collective read succeed");
 

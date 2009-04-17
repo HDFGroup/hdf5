@@ -93,6 +93,8 @@
 /* Constants definitions */
 #define DIM0		600 	/* Default dataset sizes. */
 #define DIM1		1200	/* Values are from a monitor pixel sizes */
+#define ROW_FACTOR      8       /* Nominal row factor for dataset size */
+#define COL_FACTOR      16      /* Nominal column factor for dataset size */
 #define RANK		2
 #define DATASETNAME1	"Data1"
 #define DATASETNAME2	"Data2"
@@ -114,8 +116,8 @@
 #define FACC_MPIPOSIX   0x8     /* MPIPOSIX */
 
 /*Constants for collective chunk definitions */
-#define SPACE_DIM1 5760
-#define SPACE_DIM2 3
+#define SPACE_DIM1 24 
+#define SPACE_DIM2 4 
 #define BYROW_CONT 1
 #define BYROW_DISCONT 2
 #define DSET_COLLECTIVE_CHUNK_NAME "coll_chunk_name"

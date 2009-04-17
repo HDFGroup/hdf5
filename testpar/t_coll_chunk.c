@@ -136,7 +136,7 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
 
   /* setup dimensionality object */
 
-    dims[0] = SPACE_DIM1;
+    dims[0] = SPACE_DIM1*mpi_size;
     dims[1] = SPACE_DIM2;
 
   /* each process takes a slab of rows
@@ -151,7 +151,7 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
   */
 
  /* allocate memory for data buffer */
-    data_array1 = (int *)malloc(SPACE_DIM1*SPACE_DIM2*sizeof(int));
+    data_array1 = (int *)malloc(dims[0]*dims[1]*sizeof(int));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
      /* set up dimensions of the slab this process accesses */
@@ -164,7 +164,7 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
     VRFY((crp_plist >= 0),"");
 
     /* test1: chunk size is equal to dataset size */
-    chunk_dims[0] = SPACE_DIM1/chunk_factor;
+    chunk_dims[0] = dims[0]/chunk_factor;
 
     /* to decrease the testing time, maintain bigger chunk size */
     if(chunk_factor >2) chunk_dims[1] = SPACE_DIM2/2;
@@ -221,11 +221,11 @@ coll_chunktest(const char* filename,int chunk_factor,int select_factor) {
     /* Using read to verify the data inside the dataset is correct */
 
     /* allocate memory for data buffer */
-    data_array1 = (int *)malloc(SPACE_DIM1*SPACE_DIM2*sizeof(int));
+    data_array1 = (int *)malloc(dims[0]*dims[1]*sizeof(int));
     VRFY((data_array1 != NULL), "data_array1 malloc succeeded");
 
      /* allocate memory for data buffer */
-    data_origin1 = (int *)malloc(SPACE_DIM1*SPACE_DIM2*sizeof(int));
+    data_origin1 = (int *)malloc(dims[0]*dims[1]*sizeof(int));
     VRFY((data_origin1 != NULL), "data_origin1 malloc succeeded");
 
     acc_plist = create_faccess_plist(comm, info, facc_type, use_gpfs);
@@ -296,7 +296,7 @@ ccslab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[],
 	block[1] = 1;
 	stride[0] = 1;
 	stride[1] = 1;
-	count[0] = SPACE_DIM1/mpi_size;
+	count[0] = SPACE_DIM1;
 	count[1] = SPACE_DIM2;
 	start[0] = mpi_rank*count[0];
 	start[1] = 0;
@@ -309,16 +309,16 @@ ccslab_set(int mpi_rank, int mpi_size, hsize_t start[], hsize_t count[],
 	block[1] = 1;
         stride[0] = 3;
         stride[1] = 3;
-        count[0]  = (SPACE_DIM1/mpi_size)/(stride[0]*block[0]);
+        count[0]  = (SPACE_DIM1)/(stride[0]*block[0]);
         count[1]  = (SPACE_DIM2)/(stride[1]*block[1]);
-	start[0] = SPACE_DIM1/mpi_size*mpi_rank;
+	start[0] = SPACE_DIM1*mpi_rank;
 	start[1] = 0;
 if (VERBOSE_MED) printf("slab_set BYROW_DISCONT\n");
 	break;
     default:
 	/* Unknown mode.  Set it to cover the whole dataset. */
 	printf("unknown slab_set mode (%d)\n", mode);
-	block[0] = SPACE_DIM1;
+	block[0] = SPACE_DIM1*mpi_size;
 	block[1] = SPACE_DIM2;
 	stride[0] = block[0];
 	stride[1] = block[1];
