@@ -175,6 +175,9 @@ PROGRAM fortranlibtest
   CALL multi_file_test(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Multi file driver test', total_error)
 
+  CALL test_chunk_cache (cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Dataset chunk cache configuration', total_error)
+
 !     write(*,*)
 !     write(*,*) '========================================='
 !     write(*,*) 'Testing ATTRIBUTE interface              ' 
@@ -239,5 +242,3 @@ PROGRAM fortranlibtest
   IF (total_error .NE. 0) CALL h5_exit_f (1)
 
 END PROGRAM fortranlibtest
-
-

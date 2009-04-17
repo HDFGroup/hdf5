@@ -220,7 +220,7 @@ CONTAINS
 !		   port).  February 28, 2001 
 !
 !                 -Added 1.8 (optional) parameter dapl_id
-!                  February, 2008, M.S. Breitenfeld
+!                  February, 2008, M. Scot Breitenfeld
 !
 ! Comment:		
 !----------------------------------------------------------------------
@@ -4276,7 +4276,7 @@ CONTAINS
 !               dcpl_id         - Dataset creation property list identifier.
 !               dapl_id  	- Dataset access property list identifier.
 !
-! Programmer:   M.S. Breitenfeld
+! Programmer:   M. Scot Breitenfeld
 !		February 11, 2008
 !
 ! Modifications:
@@ -4324,6 +4324,48 @@ CONTAINS
     hdferr = h5dcreate_anon_c(loc_id, type_id, space_id, dcpl_id_default, dapl_id_default, dset_id)
 
   END SUBROUTINE h5dcreate_anon_f
+
+!----------------------------------------------------------------------
+! Name:		h5dget_access_plist_f 
+!
+! Purpose: 	Returns a copy of the dataset creation property list.
+!
+! Inputs:  
+!		dset_id         - dataset identifier.
+! Outputs:  
+!		plist_id	- the dataset access property list identifier.
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+!
+! Programmer:   M. Scot Breitenfeld
+!		April 13, 2009
+!
+! Modifications:
+!
+! Comment:		
+!----------------------------------------------------------------------
+  
+  SUBROUTINE h5dget_access_plist_f(dset_id, plist_id, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dset_id
+    INTEGER(HID_T), INTENT(OUT) :: plist_id 
+    INTEGER, INTENT(OUT) :: hdferr         ! Error code.
+    
+    INTERFACE
+       INTEGER FUNCTION h5dget_access_plist_c(dset_id, plist_id)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5DGET_ACCESS_PLIST_C'::h5dget_access_plist_c
+         !DEC$ENDIF
+         INTEGER(HID_T), INTENT(IN) :: dset_id
+         INTEGER(HID_T), INTENT(OUT) :: plist_id
+       END FUNCTION h5dget_access_plist_c
+    END INTERFACE
+
+    hdferr = h5dget_access_plist_c(dset_id, plist_id)
+    
+  END SUBROUTINE h5dget_access_plist_f
 
 END MODULE H5D
 

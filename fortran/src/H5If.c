@@ -211,3 +211,33 @@ nh5iget_file_id_c(hid_t_f *obj_id, hid_t_f *file_id)
 done:
       return ret_value;
 }
+
+/*----------------------------------------------------------------------------
+ * Name:        h5iis_valid_c
+ * Purpose:     Calls H5Iis_valid 
+ * Inputs:      obj_id - object identifier
+ * Outputs:     0 = false, 1 = true
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Elena Pourmal
+ *              Tuesday, August 24, 2004
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+int_f
+nh5iis_valid_c(hid_t_f *obj_id, int_f *c_valid)
+{
+     int ret_value;
+     htri_t c_ret_value;
+     
+     /*
+      * Call H5Iis_valid
+      */
+     if ((c_ret_value = H5Iis_valid(*obj_id)) < 0)
+       HGOTO_DONE(FAIL);
+
+     /* Set output & return values */
+     *c_valid = (int_f)c_ret_value;
+     ret_value=0;
+
+done:
+      return ret_value;
+}
