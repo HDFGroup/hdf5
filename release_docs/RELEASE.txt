@@ -107,6 +107,13 @@ New Features
 
     F90 API
     ------
+
+        - Added for the C APIs the Fortran wrappers:
+            H5D_h5dget_access_plist_f
+            H5I_h5iis_valid_f
+            H5P_h5pset_chunk_cache_f
+            H5P_h5pget_chunk_cache_f
+          (MSB - 2009/04/17)
      
      
     C++ API
