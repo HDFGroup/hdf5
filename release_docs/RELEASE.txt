@@ -81,6 +81,14 @@ New Features
     Fortran Library:
     ----------------
 
+        - Added for the C APIs the Fortran wrappers:
+            H5D_h5dget_access_plist_f
+            H5I_h5iis_valid_f
+            H5P_h5pset_chunk_cache_f
+            H5P_h5pget_chunk_cache_f 
+          (MSB - 2009/04/17)
+
+
     C++ Library:
     ------------
         - These member functions were added as wrapper for H5Rdereference to
