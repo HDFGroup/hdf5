@@ -1992,4 +1992,32 @@ nh5dcreate_anon_c (hid_t_f *loc_id, hid_t_f *type_id, hid_t_f *space_id,
   return ret_value;
 }
 
+/*----------------------------------------------------------------------------
+ * Name:        h5dget_access_plist_c
+ * Purpose:     Call H5Dget_access_plist
+ * Inputs:
+ *              dset_id   - dataset identifier
+ * Outputs:
+ *              plist_id  - the dataset access property list identifier.
+ *
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M.S. Breitenfeld
+ *              April 13, 2009
+ *---------------------------------------------------------------------------*/
+int_f
+nh5dget_access_plist_c (hid_t_f *dset_id, hid_t_f *plist_id)
+{
+  int ret_value = -1;
+  /*
+   * Call H5Dget_access_plist function.
+   */
+  if((*plist_id = (hid_t_f)H5Dget_access_plist((hid_t)*dset_id)) < 0)
+    goto DONE;
+
+  ret_value = 0;
+  
+ DONE:
+  return ret_value;
+}
+
 
