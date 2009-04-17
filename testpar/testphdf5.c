@@ -138,8 +138,6 @@ parse_options(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
     /* setup default chunk-size. Make sure sizes are > 0 */
-    dim0 = ROW_FACTOR*mpi_size;
-    dim1 = COL_FACTOR*mpi_size;
 
     chunkdim0 = (dim0+9)/10;
     chunkdim1 = (dim1+9)/10;
@@ -327,6 +325,9 @@ int main(int argc, char **argv)
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+    dim0 = ROW_FACTOR*mpi_size;
+    dim1 = COL_FACTOR*mpi_size;
 
     if (MAINPROCESS){
 	printf("===================================\n");
