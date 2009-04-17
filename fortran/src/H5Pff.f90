@@ -7034,6 +7034,124 @@
 
   END SUBROUTINE h5pget_create_inter_group_f
 
+!----------------------------------------------------------------------
+! Name:		H5Pset_chunk_cache_f
+!
+! Purpose: 	Set the number of objects in the meta data cache and the
+!            maximum number of chunks and bytes in the raw data chunk cache.
+!            Once set, these values will override the values in the file access
+!            property list.  Each of these values can be individually unset
+!            (or not set at all) by passing the macros:
+!                H5D_CHUNK_CACHE_NSLOTS_DEFAULT,
+!                H5D_CHUNK_CACHE_NBYTES_DEFAULT, and/or
+!                H5D_CHUNK_CACHE_W0_DEFAULT
+!            as appropriate.
+!
+! 	     The RDCC_W0 value should be between 0 and 1 inclusive and
+!	     indicates how much chunks that have been fully read or fully
+!	     written are favored for preemption.  A value of zero means
+!	     fully read or written chunks are treated no differently than
+!            other chunks (the preemption is strictly LRU) while a value
+!	     of one means fully read chunks are always preempted before
+!	     other chunks.
+!
+! Inputs:  
+!		dapl_id            - Link creation property list identifier
+!               rdcc_nslots        - 
+!               rdcc_nbytes        -
+!               rdcc_w0            -
+! Outputs:
+!		hdferr:		   - error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		April 13, 2009
+!
+! Modifications:	
+!--------------------------------------------------------------------------------------
+
+  SUBROUTINE h5pset_chunk_cache_f(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dapl_id
+    INTEGER(SIZE_T), INTENT(IN) :: rdcc_nslots
+    INTEGER(SIZE_T), INTENT(IN) :: rdcc_nbytes
+    REAL, INTENT(IN) :: rdcc_w0 
+    INTEGER, INTENT(OUT) :: hdferr
+    
+
+    INTERFACE
+       INTEGER FUNCTION h5pset_chunk_cache_c(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PSET_CHUNK_CACHE_C'::h5pset_chunk_cache_c
+         !DEC$ENDIF
+         INTEGER(HID_T), INTENT(IN) :: dapl_id
+         INTEGER(SIZE_T), INTENT(IN) :: rdcc_nslots
+         INTEGER(SIZE_T), INTENT(IN) :: rdcc_nbytes
+         REAL, INTENT(IN) :: rdcc_w0
+       END FUNCTION h5pset_chunk_cache_c
+    END INTERFACE
+
+    hdferr = h5pset_chunk_cache_c(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0)
+
+  END SUBROUTINE h5pset_chunk_cache_f
+
+!----------------------------------------------------------------------
+! Name:		H5Pget_chunk_cache_f
+!
+! Purpose: Retrieves the maximum possible number of elements in the meta
+!	   data cache and the maximum possible number of elements and
+!	   bytes and the RDCC_W0 value in the raw data chunk cache.  Any
+!	   (or all) arguments may be null pointers in which case the
+!	   corresponding datum is not returned.  If these properties have
+!          not been set on this property list, the default values for a
+!          file access property list are returned.
+!
+! Inputs:  
+!		dapl_id            - Link creation property list identifier
+!               rdcc_nslots        - 
+!               rdcc_nbytes        -
+!               rdcc_w0            -
+! Outputs:
+!		hdferr:		   - error code		
+!				 	Success:  0
+!				 	Failure: -1   
+! Optional parameters:
+!				NONE
+!
+! Programmer:	M.S. Breitenfeld
+!		April 13, 2009
+!
+! Modifications:	
+!--------------------------------------------------------------------------------------
+
+  SUBROUTINE h5pget_chunk_cache_f(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0, hdferr)
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: dapl_id
+    INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nslots
+    INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes
+    REAL, INTENT(OUT) :: rdcc_w0 
+    INTEGER, INTENT(OUT) :: hdferr
+    
+    INTERFACE
+       INTEGER FUNCTION h5pget_chunk_cache_c(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0)
+         USE H5GLOBAL
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5PGET_CHUNK_CACHE_C'::h5pget_chunk_cache_c
+         !DEC$ENDIF
+         INTEGER(HID_T), INTENT(IN) :: dapl_id
+         INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nslots
+         INTEGER(SIZE_T), INTENT(OUT) :: rdcc_nbytes
+         REAL, INTENT(OUT) :: rdcc_w0
+       END FUNCTION h5pget_chunk_cache_c
+    END INTERFACE
+
+    hdferr = h5pget_chunk_cache_c(dapl_id, rdcc_nslots, rdcc_nbytes, rdcc_w0)
+
+  END SUBROUTINE h5pget_chunk_cache_f
 
 END MODULE H5P
 
