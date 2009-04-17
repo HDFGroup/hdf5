@@ -45,16 +45,14 @@ const char *FILENAME[] = {
     "sec2_file",
     "core_file",
     "family_file",
-    "family_v16_",
     "new_family_v16_",
     "multi_file",
     "direct_file",
     NULL
 };
-/*
+
 #define COMPAT_BASENAME "family_v16_"
-#define COMPAT_NEWNAME "new_family_v16_"
-*/
+
 
 /*-------------------------------------------------------------------------
  * Function:    test_sec2
@@ -177,7 +175,7 @@ test_direct(void)
     fapl = h5_fileaccess();
     if(H5Pset_fapl_direct(fapl, MBOUNDARY, FBSIZE, CBSIZE) < 0)
         TEST_ERROR;
-    h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
 
     /* Verify the file access properties */
     if(H5Pget_fapl_direct(fapl, &mbound, &fbsize, &cbsize) < 0)
@@ -826,8 +824,8 @@ test_family_compat(void)
     if(H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE2, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
-    h5_fixname(FILENAME[4], fapl, newname, sizeof newname);
+    h5_fixname(COMPAT_BASENAME, fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[3], fapl, newname, sizeof newname);
 
     pathname[0] = '\0';
     /* Generate correct name for test file by prepending the source path */
@@ -1023,7 +1021,7 @@ test_multi(void)
 
     if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE) < 0)
         TEST_ERROR;
-    h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
         TEST_ERROR;
