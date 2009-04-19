@@ -34,7 +34,7 @@
 #include "H5DataSpace.h"
 #include "H5File.h"
 #include "H5Attribute.h"
-#include "H5private.h"          // for HDfree
+#include "H5private.h"		// for HDfree
 
 #ifndef H5_NO_NAMESPACE
 namespace H5 {
@@ -102,17 +102,34 @@ void Attribute::write( const DataType& mem_type, const void *buf ) const
 ///\exception	H5::AttributeIException
 // Programmer	Binh-Minh Ribler - Apr, 2003
 //--------------------------------------------------------------------------
-void Attribute::write( const DataType& mem_type, const H5std_string& strg ) const
+void Attribute::write(const DataType& mem_type, const H5std_string& strg) const
 {
-   // Convert string to C-string
-   const char* strg_C;
-   strg_C = strg.c_str();  // strg_C refers to the contents of strg as a C-str
+    // Check if this attribute has variable-len string or fixed-len string and
+    // proceed appropriately.
+    htri_t is_variable_len = H5Tis_variable_str(mem_type.getId());
+    if (is_variable_len < 0)
+    {
+	throw AttributeIException("Attribute::write", "H5Tis_variable_str failed");
+    }
+    // Convert string to C-string
+    const char* strg_C;
+    strg_C = strg.c_str();  // strg_C refers to the contents of strg as a C-str
+    herr_t ret_value = 0;
 
-   herr_t ret_value = H5Awrite( id, mem_type.getId(), &strg_C );
-   if( ret_value < 0 )
-   {
-      throw AttributeIException("Attribute::write", "H5Awrite failed");
-   }
+    // Pass string in differently depends on variable or fixed length
+    if (!is_variable_len)
+    {
+	ret_value = H5Awrite(id, mem_type.getId(), strg_C);
+    }
+    else
+    {
+	// passing third argument by address
+	ret_value = H5Awrite(id, mem_type.getId(), &strg_C);
+    }
+    if (ret_value < 0)
+    {
+	throw AttributeIException("Attribute::write", "H5Awrite failed");
+    }
 }
 
 //--------------------------------------------------------------------------
@@ -128,7 +145,7 @@ void Attribute::read( const DataType& mem_type, void *buf ) const
    herr_t ret_value = H5Aread( id, mem_type.getId(), buf );
    if( ret_value < 0 )
    {
-      throw AttributeIException("Attribute::read", "H5Aread  failed");
+      throw AttributeIException("Attribute::read", "H5Aread failed");
    }
 }
 
@@ -157,22 +174,36 @@ void Attribute::read( const DataType& mem_type, H5std_string& strg ) const
 
     // Check if this attribute has variable-len string or fixed-len string and
     // proceed appropriately.
-    bool is_variable_len = H5Tis_variable_str(mem_type.getId());
+    htri_t is_variable_len = H5Tis_variable_str(mem_type.getId());
+    if (is_variable_len < 0)
+    {
+	throw AttributeIException("Attribute::write", "H5Tis_variable_str failed");
+    }
+
+    // Prepare and call C API to read attribute.
     char *strg_C;
-    void *ptr;
+    herr_t ret_value = 0;
     if (!is_variable_len)	// only allocate for fixed-len string
     {
 	strg_C = new char [(size_t)attr_size+1];
-	ptr = strg_C;
+	if (strg_C == NULL)
+	{
+	    throw AttributeIException("Attribute::read", "Unable to allocate buffer to read the attribute");
+	}
+	ret_value = H5Aread(id, mem_type.getId(), strg_C);
     }
     else
     {
 	// no allocation for variable-len string; C library will
-	ptr = &strg_C;
+	ret_value = H5Aread(id, mem_type.getId(), &strg_C);
     }
 
-    // Call C API to get the attribute data, a string of chars
-    herr_t ret_value = H5Aread(id, mem_type.getId(), ptr);
+    if( ret_value < 0 )
+    {
+	if (!is_variable_len)	// only de-allocate for fixed-len string
+	    delete []strg_C;
+	throw AttributeIException("Attribute::read", "H5Aread failed");
+    }
 
     // Get string from the C char* and release resource allocated locally
     if (!is_variable_len)
@@ -187,7 +218,6 @@ void Attribute::read( const DataType& mem_type, H5std_string& strg ) const
 	strg = strg_C;
 	HDfree(strg_C);
     }
-    ptr = NULL;
 }
 
 //--------------------------------------------------------------------------
@@ -360,21 +390,21 @@ hid_t Attribute::getId() const
 ///\brief       Sets the identifier of this object to a new value.
 ///
 ///\exception   H5::IdComponentException when the attempt to close the HDF5
-///             object fails
+///		object fails
 // Description:
-//              The underlaying reference counting in the C library ensures
-//              that the current valid id of this object is properly closed.
-//              Then the object's id is reset to the new id.
+//		The underlaying reference counting in the C library ensures
+//		that the current valid id of this object is properly closed.
+//		Then the object's id is reset to the new id.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
 void Attribute::p_setId(const hid_t new_id)
 {
     // handling references to this old id
     try {
-        close();
+	close();
     }
     catch (Exception close_error) {
-        throw AttributeIException("Attribute::p_setId", close_error.getDetailMsg());
+	throw AttributeIException("Attribute::p_setId", close_error.getDetailMsg());
     }
    // reset object's id to the given id
    id = new_id;
