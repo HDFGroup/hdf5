@@ -273,7 +273,7 @@ H5O_pline_encode(H5F_t UNUSED *f, uint8_t *p/*out*/, const void *mesg)
             name = NULL;
         } /* end if */
         else {
-            H5Z_class_t	*cls;                   /* Filter class */
+            H5Z_class2_t	*cls;                   /* Filter class */
 
             /*
              * Get the filter name.  If the pipeline message has a name in it then
@@ -453,7 +453,7 @@ H5O_pline_size(const H5F_t UNUSED *f, const void *mesg)
         if(pline->version > H5O_PLINE_VERSION_1 && pline->filter[i].id < H5Z_FILTER_RESERVED)
             name_len = 0;
         else {
-            H5Z_class_t	*cls;                   /* Filter class */
+            H5Z_class2_t	*cls;                   /* Filter class */
 
             /* Get the name of the filter, same as done with H5O_pline_encode() */
             if(NULL == (name = pline->filter[i].name) && (cls = H5Z_find(pline->filter[i].id)))

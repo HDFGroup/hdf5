@@ -122,7 +122,7 @@ set_local_myfilter(hid_t dcpl_id, hid_t tid, hid_t UNUSED sid);
 #define MYFILTER_ID 405
 
 /* This message derives from H5Z */
-const H5Z_class_t H5Z_MYFILTER[1] = {{
+const H5Z_class2_t H5Z_MYFILTER[1] = {{
     H5Z_CLASS_T_VERS,
     MYFILTER_ID,               /* Filter id number      */
     1, 1,

@@ -83,7 +83,7 @@ counter (unsigned UNUSED flags, size_t cd_nelmts,
 	 size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
-const H5Z_class_t H5Z_COUNTER[1] = {{
+const H5Z_class2_t H5Z_COUNTER[1] = {{
     H5Z_CLASS_T_VERS,		/* H5Z_class_t version		*/
     FILTER_COUNTER,		/* Filter id number		*/
     1, 1,			/* Encoding and decoding enabled */

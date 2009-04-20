@@ -53,7 +53,7 @@ typedef enum {
 /* Local variables */
 static size_t		H5Z_table_alloc_g = 0;
 static size_t		H5Z_table_used_g = 0;
-static H5Z_class_t	*H5Z_table_g = NULL;
+static H5Z_class2_t	*H5Z_table_g = NULL;
 #ifdef H5Z_DEBUG
 static H5Z_stats_t	*H5Z_stat_table_g = NULL;
 #endif /* H5Z_DEBUG */
@@ -191,7 +191,7 @@ H5Z_term_interface(void)
 	}
 #endif /* H5Z_DEBUG */
 	/* Free the table of filters */
-	H5Z_table_g = (H5Z_class_t *)H5MM_xfree(H5Z_table_g);
+	H5Z_table_g = (H5Z_class2_t *)H5MM_xfree(H5Z_table_g);
 #ifdef H5Z_DEBUG
 	H5Z_stat_table_g = (H5Z_stats_t *)H5MM_xfree(H5Z_stat_table_g);
 #endif /* H5Z_DEBUG */
@@ -220,32 +220,56 @@ H5Z_term_interface(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Zregister(const H5Z_class_t *cls)
+H5Zregister(const void *cls)
 {
-    herr_t      ret_value=SUCCEED;       /* Return value */
+    const H5Z_class2_t  *cls_real = (const H5Z_class2_t *) cls; /* "Real" class pointer */
+    H5Z_class2_t        cls_new;                /* Translated class struct */
+    herr_t              ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(H5Zregister, FAIL)
     H5TRACE1("e", "*Zc", cls);
 
     /* Check args */
-    if (cls==NULL)
+    if (cls_real==NULL)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter class")
 
     /* Check H5Z_class_t version number; this is where a function to convert
      * from an outdated version should be called.
+     *
+     * If the version number is invalid, we assume that the target of cls is the
+     * old style "H5Z_class1_t" structure, which did not contain a version
+     * field.  In this structure, the first field is the id.  Since both version
+     * and id are integers they will have the same value, and since id must be
+     * at least 256, there should be no overlap and the version of the struct
+     * can be determined by the value of the first field.
      */
-    if(cls->version != H5Z_CLASS_T_VERS)
-    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class_t version number");
+    if(cls_real->version != H5Z_CLASS_T_VERS) {
+        /* Assume it is an old "H5Z_class1_t" instead */
+        const H5Z_class1_t *cls_old = (const H5Z_class1_t *) cls;
 
-    if (cls->id<0 || cls->id>H5Z_FILTER_MAX)
+        /* Translate to new H5Z_class2_t */
+        cls_new.version = H5Z_CLASS_T_VERS;
+        cls_new.id = cls_old->id;
+        cls_new.encoder_present = 1;
+        cls_new.decoder_present = 1;
+        cls_new.name = cls_old->name;
+        cls_new.can_apply = cls_old->can_apply;
+        cls_new.set_local = cls_old->set_local;
+        cls_new.filter = cls_old->filter;
+
+        /* Set cls_real to point to the translated structure */
+        cls_real = &cls_new;
+    } /* end if */
+
+    if (cls_real->id<0 || cls_real->id>H5Z_FILTER_MAX)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "invalid filter identification number")
-    if (cls->id<H5Z_FILTER_RESERVED)
+    if (cls_real->id<H5Z_FILTER_RESERVED)
 	HGOTO_ERROR (H5E_ARGS, H5E_BADVALUE, FAIL, "unable to modify predefined filters")
-    if (cls->filter==NULL)
+    if (cls_real->filter==NULL)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no filter function specified")
 
     /* Do it */
-    if (H5Z_register (cls)<0)
+    if (H5Z_register (cls_real)<0)
 	HGOTO_ERROR (H5E_PLINE, H5E_CANTINIT, FAIL, "unable to register filter")
 
 done:
@@ -269,7 +293,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Z_register (const H5Z_class_t *cls)
+H5Z_register (const H5Z_class2_t *cls)
 {
     size_t	i;
     herr_t      ret_value = SUCCEED;       /* Return value */
@@ -288,7 +312,7 @@ H5Z_register (const H5Z_class_t *cls)
     if(i >= H5Z_table_used_g) {
 	if(H5Z_table_used_g >= H5Z_table_alloc_g) {
 	    size_t n = MAX(H5Z_MAX_NFILTERS, 2*H5Z_table_alloc_g);
-	    H5Z_class_t *table = (H5Z_class_t *)H5MM_realloc(H5Z_table_g, n * sizeof(H5Z_class_t));
+	    H5Z_class2_t *table = (H5Z_class2_t *)H5MM_realloc(H5Z_table_g, n * sizeof(H5Z_class2_t));
 #ifdef H5Z_DEBUG
 	    H5Z_stats_t *stat_table = (H5Z_stats_t *)H5MM_realloc(H5Z_stat_table_g, n * sizeof(H5Z_stats_t));
 #endif /* H5Z_DEBUG */
@@ -305,7 +329,7 @@ H5Z_register (const H5Z_class_t *cls)
 
 	/* Initialize */
 	i = H5Z_table_used_g++;
-	HDmemcpy(H5Z_table_g+i, cls, sizeof(H5Z_class_t));
+	HDmemcpy(H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
 #ifdef H5Z_DEBUG
 	HDmemset(H5Z_stat_table_g+i, 0, sizeof(H5Z_stats_t));
 #endif /* H5Z_DEBUG */
@@ -313,7 +337,7 @@ H5Z_register (const H5Z_class_t *cls)
     /* Filter already registered */
     else {
 	/* Replace old contents */
-	HDmemcpy(H5Z_table_g+i, cls, sizeof(H5Z_class_t));
+	HDmemcpy(H5Z_table_g+i, cls, sizeof(H5Z_class2_t));
     } /* end else */
 
 done:
@@ -394,7 +418,7 @@ H5Z_unregister (H5Z_filter_t id)
 
     /* Remove filter from table */
     /* Don't worry about shrinking table size (for now) */
-    HDmemmove(&H5Z_table_g[i],&H5Z_table_g[i+1],sizeof(H5Z_class_t)*((H5Z_table_used_g-1)-i));
+    HDmemmove(&H5Z_table_g[i],&H5Z_table_g[i+1],sizeof(H5Z_class2_t)*((H5Z_table_used_g-1)-i));
 #ifdef H5Z_DEBUG
     HDmemmove(&H5Z_stat_table_g[i],&H5Z_stat_table_g[i+1],sizeof(H5Z_stats_t)*((H5Z_table_used_g-1)-i));
 #endif /* H5Z_DEBUG */
@@ -516,7 +540,7 @@ H5Z_prelude_callback(hid_t dcpl_id, hid_t type_id, H5Z_prelude_type_t prelude_ty
 
                 /* Iterate over filters */
                 for(u = 0; u < dcpl_pline.nused; u++) {
-                    H5Z_class_t	*fclass;        /* Individual filter information */
+                    H5Z_class2_t	*fclass;        /* Individual filter information */
 
                     /* Get filter information */
                     if(NULL == (fclass = H5Z_find(dcpl_pline.filter[u].id))) {
@@ -890,11 +914,11 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5Z_class_t *
+H5Z_class2_t *
 H5Z_find(H5Z_filter_t id)
 {
     int	idx;                            /* Filter index in global table */
-    H5Z_class_t *ret_value=NULL;        /* Return value */
+    H5Z_class2_t *ret_value=NULL;        /* Return value */
 
     FUNC_ENTER_NOAPI(H5Z_find, NULL)
 
@@ -946,7 +970,7 @@ H5Z_pipeline(const H5O_pline_t *pline, unsigned flags,
 {
     size_t	i, idx, new_nbytes;
     int fclass_idx;             /* Index of filter class in global table */
-    H5Z_class_t	*fclass=NULL;   /* Filter class pointer */
+    H5Z_class2_t	*fclass=NULL;   /* Filter class pointer */
 #ifdef H5Z_DEBUG
     H5Z_stats_t	*fstats=NULL;   /* Filter stats pointer */
     H5_timer_t	timer;
@@ -1242,7 +1266,7 @@ done:
 herr_t
 H5Zget_filter_info(H5Z_filter_t filter, unsigned int *filter_config_flags)
 {
-    H5Z_class_t *fclass;
+    H5Z_class2_t *fclass;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(H5Zget_filter_info, FAIL)
