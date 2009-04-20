@@ -56,6 +56,9 @@ New Features
 
     Configuration
     -------------
+    - Added libtool version numbers to generated c++, fortran, and 
+      hl libraries. MAM 2009/04/19.
+    - Regenerated Makefile.ins using Automake 1.10.2. MAM 2009/04/19.
     - Added a Make target of check-all-install to test the correctness of
       installing via the prefix= or $DESTDIR options. AKC - 2009/04/14
     - Add description here. Do not exceed 80 characters per line.
