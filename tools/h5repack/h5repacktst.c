@@ -72,6 +72,9 @@
 /* File w/userblock */
 #define FNAME16    "h5repack_ub.h5"
 #define FNAME16OUT "h5repack_ub_out.h5"
+/* Named datatypes */
+#define FNAME17     "h5repack_named_dtypes.h5"
+#define FNAME17OUT  "h5repack_named_dtypes_out.h5"
 
 #define FNAME_UB   "ublock.bin"
 
@@ -129,6 +132,7 @@ static int make_external(hid_t loc_id);
 static int make_userblock(void);
 static int verify_userblock( const char* filename);
 static int make_userblock_file(void);
+static int make_named_dtype(hid_t loc_id);
 
 
 /*-------------------------------------------------------------------------
@@ -1487,6 +1491,26 @@ int main (void)
 #endif
 
 
+    /*-------------------------------------------------------------------------
+    * test file with userblock
+    *-------------------------------------------------------------------------
+    */
+    TESTING("    file with committed datatypes");
+
+    if(h5repack_init(&pack_options, 0) < 0)
+        GOERROR;
+
+    if(h5repack(FNAME17, FNAME17OUT, &pack_options) < 0)
+        GOERROR;
+    if(h5diff(FNAME17, FNAME17OUT, NULL, NULL, &diff_options) > 0)
+        GOERROR;
+    if(h5repack_verify(FNAME17OUT, &pack_options) <= 0)
+        GOERROR;
+    if(h5repack_end(&pack_options) < 0)
+        GOERROR;
+
+
+    PASSED();
 
 
 
@@ -1705,6 +1729,17 @@ int make_testfiles(void)
     */
     if(make_userblock_file() < 0)
         goto out;
+
+    /*-------------------------------------------------------------------------
+    * create a file with named datatypes
+    *-------------------------------------------------------------------------
+    */
+    if((fid = H5Fcreate(FNAME17,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
+        return -1;
+    if (make_named_dtype(fid) < 0)
+        goto out;
+    if(H5Fclose(fid) < 0)
+        return -1;
 
     return 0;
 
@@ -5374,4 +5409,128 @@ out:
 }
 
 
+/*-------------------------------------------------------------------------
+* Function: make_named_dtype
+*
+* Purpose: create a file with named datatypes in various configurations
+*
+*-------------------------------------------------------------------------
+*/
+static
+int make_named_dtype(hid_t loc_id)
+{
+    hsize_t dims[1] ={3};
+    hid_t   did=-1;
+    hid_t   aid=-1;
+    hid_t   sid=-1;
+    hid_t   tid=-1;
+    hid_t   gid=-1;
+
+    if ((sid = H5Screate_simple(1, dims, NULL)) < 0)
+        goto out;
+
+    /* Create a dataset with an anonymous committed datatype as the first thing
+     * h5repack sees */
+    if((tid = H5Tcopy(H5T_STD_I16LE)) < 0)
+        goto out;
+    if(H5Tcommit_anon(loc_id, tid, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto out;
+    if ((did = H5Dcreate2(loc_id, "A", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Tclose(tid) < 0)
+        goto out;
+
+    /* Create an attribute on that dataset that uses a committed datatype in
+     * a remote group */
+    if((gid = H5Gcreate2(loc_id, "M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Gclose(gid) < 0)
+        goto out;
+    if((gid = H5Gcreate2(loc_id, "M/M", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Gclose(gid) < 0)
+        goto out;
+    if((tid = H5Tcopy(H5T_STD_I16BE)) < 0)
+        goto out;
+    if(H5Tcommit2(loc_id, "/M/M/A", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto out;
+    if((aid = H5Acreate2(did, "A", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Aclose(aid) < 0)
+        goto out;
+    if(H5Tclose(tid) < 0)
+        goto out;
+    if(H5Dclose(did) < 0)
+        goto out;
+
+    /* Create a dataset in the remote group that uses a committed datatype in
+     * the root group */
+    if((tid = H5Tcopy(H5T_STD_I32LE)) < 0)
+        goto out;
+    if(H5Tcommit2(loc_id, "N", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto out;
+    if((did = H5Dcreate2(loc_id, "M/M/B", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Tclose(tid) < 0)
+        goto out;
+
+    /* Create an attribute on the remote dataset that uses an anonymous
+     * committed datatype */
+    if((tid = H5Tcopy(H5T_STD_I32BE)) < 0)
+        goto out;
+    if(H5Tcommit_anon(loc_id, tid, H5P_DEFAULT, H5P_DEFAULT) < 0)
+        goto out;
+    if((aid = H5Acreate2(did, "A", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Aclose(aid) < 0)
+        goto out;
+
+    /* Create another attribute that uses the same anonymous datatype */
+    if((aid = H5Acreate2(did, "B", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Aclose(aid) < 0)
+        goto out;
+    if(H5Tclose(tid) < 0)
+        goto out;
+    if(H5Dclose(did) < 0)
+        goto out;
+
+    /* Create a dataset in the root group that uses the committed datatype in
+     * the root group */
+    if((tid = H5Topen2(loc_id, "N", H5P_DEFAULT)) < 0)
+        goto out;
+    if((did = H5Dcreate2(loc_id, "O", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Dclose(did) < 0)
+        goto out;
+
+    /* Create 2 attributes on the committed datatype that use that datatype */
+    if((aid =  H5Acreate2(tid, "A", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Aclose(aid) < 0)
+        goto out;
+    if((aid =  H5Acreate2(tid, "B", tid, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto out;
+    if(H5Aclose(aid) < 0)
+        goto out;
+    if(H5Tclose(tid) < 0)
+        goto out;
+
+    /* Close */
+    if (H5Sclose(sid) < 0)
+        goto out;
+
+    return 0;
+
+out:
+    H5E_BEGIN_TRY 
+    {
+        H5Tclose(tid);
+        H5Aclose(aid);
+        H5Sclose(sid);
+        H5Dclose(did);
+        H5Gclose(gid);
+    } H5E_END_TRY;
+    return -1;
+} /* end make_named_dtype() */
 

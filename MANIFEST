@@ -1520,6 +1520,7 @@
 ./tools/h5repack/testfiles/h5repack_ext.bin
 ./tools/h5repack/testfiles/h5repack_ext.h5
 ./tools/h5repack/testfiles/ublock.bin
+./tools/h5repack/testfiles/h5repack_named_dtypes.h5
 
 
 # jam utility and tests

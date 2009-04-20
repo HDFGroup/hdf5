@@ -293,6 +293,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Tools
     -----
+        - Fixed many problems that could occur when using h5repack with named
+            datatypes. (NAF - 2009/4/20 - 1516/1466)
         - h5dump, h5diff, h5repack were not reading (by hyperslabs) datasets 
             that have a datatype datum size greater than H5TOOLS_BUFSIZE, a 
             constant defined as 1024Kb, such as array types with large 

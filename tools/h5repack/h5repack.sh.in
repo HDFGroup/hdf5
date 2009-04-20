@@ -53,6 +53,7 @@ FILE12=h5repack_nbit.h5
 FILE13=h5repack_soffset.h5
 FILE14=h5repack_layouto.h5      # A file with an older version of the layout message
                                 # (copy of test/tlayouto.h5)
+FILE15=h5repack_named_dtypes.h5
 
 
 nerrors=0
@@ -455,7 +456,10 @@ TOOLTEST $FILE4 -l dset_chunk:CONTI
 TOOLTEST $FILE4 -l dset_chunk:CHUNK=18x13
 
 # Native option
-TOOLTEST $FILE1 -n
+# Do not use FILE1, as the named dtype will be converted to native, and h5diff will
+# report a difference.
+TOOLTEST $FILE0 -n
+TOOLTEST $FILE2 -n
 
 
 # latest file format with long switches. use FILE4=h5repack_layout.h5 (no filters)
@@ -506,6 +510,9 @@ TOOLTEST $FILE14
 
 # test for datum size > H5TOOLS_MALLOCSIZE
 TOOLTEST $FILE1 -f GZIP=1
+
+# Check repacking file with committed datatypes in odd configurations
+TOOLTEST $FILE15
 
 if test $nerrors -eq 0 ; then
    echo "All $H5REPACK tests passed."

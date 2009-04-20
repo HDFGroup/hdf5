@@ -21,8 +21,21 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
-extern char  *progname;
+/*-------------------------------------------------------------------------
+* typedefs
+*-------------------------------------------------------------------------
+*/
+typedef struct named_dt_t {
+    haddr_t             addr_in;    /* Address of the named dtype in the in file */
+    hid_t               id_out;     /* Open identifier for the dtype in the out file */
+    struct named_dt_t   *next;      /* Next dtype */
+} named_dt_t;
 
+/*-------------------------------------------------------------------------
+* globals
+*-------------------------------------------------------------------------
+*/
+extern char  *progname;
 
 /*-------------------------------------------------------------------------
 * macros
@@ -36,7 +49,11 @@ extern char  *progname;
 */
 static void  print_dataset_info(hid_t dcpl_id,char *objname,double per, int pr);
 static int   do_copy_objects(hid_t fidin,hid_t fidout,trav_table_t *travt,pack_opt_t *options);
-static int   copy_attr(hid_t loc_in,hid_t loc_out,pack_opt_t *options);
+static int   copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p,
+        trav_table_t *travt, pack_opt_t *options);
+static hid_t copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p,
+        trav_table_t *travt, pack_opt_t *options);
+static int   named_datatype_free(named_dt_t **named_dt_head_p, int ignore_err);
 static int   copy_user_block(const char *infile, const char *outfile, hsize_t size);
 #if defined (H5REPACK_DEBUG_USER_BLOCK)  
 static void  print_user_block(const char *filename, hid_t fid);
@@ -506,6 +523,7 @@ int do_copy_objects(hid_t fidin,
     hid_t    f_space_id=-1;     /* file space ID */
     hid_t    ftype_id=-1;       /* file type ID */
     hid_t    wtype_id=-1;       /* read/write type ID */
+    named_dt_t *named_dt_head=NULL; /* Pointer to the stack of named datatypes copied */
     size_t   msize;             /* size of type */
     hsize_t  nelmts;            /* number of elements in dataset */
     int      rank;              /* rank of dataset */
@@ -522,6 +540,7 @@ int do_copy_objects(hid_t fidin,
     unsigned i;
     unsigned u;
     int      is_ref=0;
+    htri_t   is_named;
 
     /*-------------------------------------------------------------------------
     * copy the suppplied object list
@@ -605,7 +624,7 @@ int do_copy_objects(hid_t fidin,
             * copy attrs
             *-------------------------------------------------------------------------
             */
-            if(copy_attr(grp_in,grp_out,options) < 0)
+            if(copy_attr(grp_in, grp_out, &named_dt_head, travt, options) < 0)
                 goto error;
 
 
@@ -657,6 +676,14 @@ int do_copy_objects(hid_t fidin,
                 goto error;
             if(H5T_REFERENCE == H5Tget_class(ftype_id))
                 is_ref = 1;
+
+            /* Check if the datatype is committed */
+            if((is_named = H5Tcommitted(ftype_id)) < 0)
+                goto error;
+            if(is_named)
+                if((wtype_id = copy_named_datatype(ftype_id, fidout, &named_dt_head, travt, options)) < 0)
+                    goto error;
+
             if(H5Tclose(ftype_id) < 0)
                 goto error;
             if(H5Dclose(dset_in) < 0)
@@ -672,7 +699,8 @@ int do_copy_objects(hid_t fidin,
             if ( options->op_tbl->nelems  || 
                 options->all_filter == 1 || 
                 options->all_layout == 1 || 
-                is_ref) 
+                is_ref ||
+                is_named) 
             {
 
                 int      j;
@@ -698,10 +726,13 @@ int do_copy_objects(hid_t fidin,
                     nelmts *= dims[j];
                 }
 
-                if(options->use_native == 1)
-                    wtype_id = h5tools_get_native_type(ftype_id);
-                else
-                    wtype_id = H5Tcopy(ftype_id); 
+                /* wtype_id will have already been set if using a named dtype */
+                if(!is_named) {
+                    if(options->use_native == 1)
+                        wtype_id = h5tools_get_native_type(ftype_id);
+                    else
+                        wtype_id = H5Tcopy(ftype_id);
+                } /* end if */
 
                 if((msize = H5Tget_size(wtype_id)) == 0)
                     goto error;
@@ -933,7 +964,7 @@ int do_copy_objects(hid_t fidin,
                         * copy attrs
                         *-------------------------------------------------------------------------
                         */
-                        if (copy_attr(dset_in,dset_out,options) < 0)
+                        if (copy_attr(dset_in, dset_out, &named_dt_head, travt, options) < 0)
                             goto error;
 
                         /*close */
@@ -1004,7 +1035,7 @@ int do_copy_objects(hid_t fidin,
                     goto error;
                 if((dset_out = H5Dopen2(fidout, travt->objs[i].name, H5P_DEFAULT)) < 0)
                     goto error;
-                if(copy_attr(dset_in, dset_out, options) < 0)
+                if(copy_attr(dset_in, dset_out, &named_dt_head, travt, options) < 0)
                     goto error;
                 if(H5Dclose(dset_in) < 0)
                     goto error;
@@ -1033,17 +1064,21 @@ int do_copy_objects(hid_t fidin,
             if((type_in = H5Topen2(fidin, travt->objs[i].name, H5P_DEFAULT)) < 0)
                 goto error;
 
-            if((type_out = H5Tcopy(type_in)) < 0)
+            /* Copy the datatype anonymously */
+            if((type_out = copy_named_datatype(type_in, fidout, &named_dt_head,
+                    travt, options)) < 0)
                 goto error;
 
-            if((H5Tcommit2(fidout, travt->objs[i].name, type_out, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            /* Link in to group structure */
+            if(H5Lcreate_hard(type_out, ".", fidout, travt->objs[i].name,
+                    H5P_DEFAULT, H5P_DEFAULT) < 0)
                 goto error;
 
             /*-------------------------------------------------------------------------
             * copy attrs
             *-------------------------------------------------------------------------
             */
-            if(copy_attr(type_in, type_out, options) < 0)
+            if(copy_attr(type_in, type_out, &named_dt_head, travt, options) < 0)
                 goto error;
 
             if(H5Tclose(type_in) < 0)
@@ -1094,6 +1129,9 @@ int do_copy_objects(hid_t fidin,
 
     } /* i */
 
+    /* Finalize (link) the stack of named datatypes (if any) */
+    named_datatype_free(&named_dt_head, 0);
+
     return 0;
 
 error:
@@ -1110,6 +1148,7 @@ error:
         H5Tclose(wtype_id);
         H5Tclose(type_in);
         H5Tclose(type_out);
+        named_datatype_free(&named_dt_head, 1);
     } H5E_END_TRY;
     /* free */
     if (buf!=NULL)
@@ -1139,6 +1178,8 @@ error:
 
 int copy_attr(hid_t loc_in,
               hid_t loc_out,
+              named_dt_t **named_dt_head_p,
+              trav_table_t *travt,
               pack_opt_t *options
               )
 {
@@ -1151,6 +1192,7 @@ int copy_attr(hid_t loc_in,
     void       *buf=NULL;         /* data buffer */
     hsize_t    nelmts;            /* number of elements in dataset */
     int        rank;              /* rank of dataset */
+    htri_t     is_named;          /* Whether the datatype is named */
     hsize_t    dims[H5S_MAX_RANK];/* dimensions of dataset */
     char       name[255];
     H5O_info_t oinfo;             /* object info */
@@ -1182,6 +1224,27 @@ int copy_attr(hid_t loc_in,
         if ((ftype_id = H5Aget_type( attr_id )) < 0 )
             goto error;
 
+        /* Check if the datatype is committed */
+        if((is_named = H5Tcommitted(ftype_id)) < 0)
+            goto error;
+        if(is_named) {
+            hid_t fidout;
+
+            /* Create out file id */
+            if((fidout = H5Iget_file_id(loc_out)) < 0)
+                goto error;
+
+            /* Copy named dt */
+            if((wtype_id = copy_named_datatype(ftype_id, fidout, named_dt_head_p,
+                    travt, options)) < 0) {
+                H5Fclose(fidout);
+                goto error;
+            } /* end if */
+
+            if(H5Fclose(fidout) < 0)
+                goto error;
+        } /* end if */
+
         /* get the dataspace handle  */
         if ((space_id = H5Aget_space( attr_id )) < 0 )
             goto error;
@@ -1194,10 +1257,13 @@ int copy_attr(hid_t loc_in,
         for (j=0; j<rank; j++)
             nelmts*=dims[j];
 
-        if (options->use_native==1)
-            wtype_id = h5tools_get_native_type(ftype_id);
-        else
-            wtype_id = H5Tcopy(ftype_id); 
+        /* wtype_id will have already been set if using a named dtype */
+        if(!is_named) {
+            if (options->use_native==1)
+                wtype_id = h5tools_get_native_type(ftype_id);
+            else
+                wtype_id = H5Tcopy(ftype_id);
+        } /* end if */
 
         if ((msize=H5Tget_size(wtype_id))==0)
             goto error;
@@ -1234,7 +1300,7 @@ int copy_attr(hid_t loc_in,
             *-------------------------------------------------------------------------
             */
 
-            if((attr_out = H5Acreate2(loc_out, name, ftype_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            if((attr_out = H5Acreate2(loc_out, name, wtype_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 goto error;
             if(H5Awrite(attr_out, wtype_id, buf) < 0)
                 goto error;
@@ -1280,8 +1346,6 @@ error:
     } H5E_END_TRY;
     return -1;
 }
-
-
 
 
 /*-------------------------------------------------------------------------
@@ -1387,6 +1451,139 @@ static void print_dataset_info(hid_t dcpl_id,
         printf(FORMAT_OBJ,str,objname);
     }
 }
+
+
+/*-------------------------------------------------------------------------
+* Function: copy_named_datatype
+*
+* Purpose: Copies the specified datatype anonymously, and returns an open
+*          id for that datatype in the output file.  The first time this
+*          is called it scans every named datatype in travt into a
+*          private stack, afterwards it simply scans that stack.  The id
+*          returned must be closed after it is no longer needed.
+*          named_datatype_free must be called before the program exits
+*          to free the stack.
+*
+* Programmer: Neil Fortner
+*
+* Date: April 14, 2009
+*
+*-------------------------------------------------------------------------
+*/
+static hid_t
+copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, trav_table_t *travt, pack_opt_t *options)
+{
+    named_dt_t  *dt = *named_dt_head_p; /* Stack pointer */
+    named_dt_t  *dt_ret = NULL;     /* Datatype to return */
+    H5O_info_t  oinfo;              /* Object info of input dtype */
+    hid_t       ret_value = -1;     /* The identifier of the named dtype in the out file */
+
+    if(H5Oget_info(type_in, &oinfo) < 0)
+        goto error;
+
+    if(*named_dt_head_p) {
+        /* Stack already exists, search for the datatype */
+        while(dt && dt->addr_in != oinfo.addr)
+            dt = dt->next;
+
+        dt_ret = dt;
+    } else {
+        /* Create the stack */
+        size_t  i;
+
+        for(i=0; i<travt->nobjs; i++)
+            if(travt->objs[i].type == H5TRAV_TYPE_NAMED_DATATYPE) {
+                /* Push onto the stack */
+                if(NULL == (dt = (named_dt_t *) HDmalloc(sizeof(named_dt_t))))
+                    goto error;
+                dt->next = *named_dt_head_p;
+                *named_dt_head_p = dt;
+
+                /* Update the address and id */
+                dt->addr_in = travt->objs[i].objno;
+                dt->id_out = -1;
+
+                /* Check if this type is the one requested */
+                if(oinfo.addr == dt->addr_in) {
+                    HDassert(!dt_ret);
+                    dt_ret = dt;
+                } /* end if */
+            } /* end if */
+    } /* end else */
+
+    /* Handle the case that the requested datatype was not found.  This is
+     * possible if the datatype was committed anonymously in the input file. */
+    if(!dt_ret) {
+        /* Push the new datatype onto the stack */
+        if(NULL == (dt_ret = (named_dt_t *) HDmalloc(sizeof(named_dt_t))))
+            goto error;
+        dt_ret->next = *named_dt_head_p;
+        *named_dt_head_p = dt_ret;
+
+        /* Update the address and id */
+        dt_ret->addr_in = oinfo.addr;
+        dt_ret->id_out = -1;
+    } /* end if */
+
+    /* If the requested datatype does not yet exist in the output file, copy it
+     * anonymously */
+    if(dt_ret->id_out < 0) {
+        if (options->use_native==1)
+            dt_ret->id_out = h5tools_get_native_type(type_in);
+        else
+            dt_ret->id_out = H5Tcopy(type_in);
+        if(dt_ret->id_out < 0)
+            goto error;
+        if(H5Tcommit_anon(fidout, dt_ret->id_out, H5P_DEFAULT, H5P_DEFAULT) < 0)
+            goto error;
+    } /* end if */
+
+    /* Set return value */
+    ret_value = dt_ret->id_out;
+
+    /* Increment the ref count on id_out, because the calling function will try
+     * to close it */
+    if(H5Iinc_ref(ret_value) < 0)
+        goto error;
+
+    return(ret_value);
+
+error:
+    return(-1);
+} /* end copy_named_datatype */
+
+
+/*-------------------------------------------------------------------------
+* Function: named_datatype_free
+*
+* Purpose: Frees the stack of named datatypes.
+*
+* Programmer: Neil Fortner
+*
+* Date: April 14, 2009
+*
+*-------------------------------------------------------------------------
+*/
+static int
+named_datatype_free(named_dt_t **named_dt_head_p, int ignore_err)
+{
+    named_dt_t *dt = *named_dt_head_p;
+
+    while(dt) {
+        /* Pop the datatype off the stack and free it */
+        if(H5Tclose(dt->id_out) < 0 && !ignore_err)
+            goto error;
+        dt = dt->next;
+        HDfree(*named_dt_head_p);
+        *named_dt_head_p = dt;
+    } /* end while */
+
+    return 0;
+
+error:
+    return -1;
+} /* end named_datatype_free */
+
 
 /*-------------------------------------------------------------------------
 * Function: copy_user_block 
