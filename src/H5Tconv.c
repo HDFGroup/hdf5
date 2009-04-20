@@ -194,7 +194,7 @@
                 src_id, dst_id, S, D, cb_struct.user_data);                   \
         if(except_ret == H5T_CONV_UNHANDLED)                                  \
             /* Let compiler convert if case is ignored by user handler*/      \
-            *((DT*)D) = (D_MAX);					      \
+            *((DT*)D) = (DT)(D_MAX);					      \
         else if(except_ret == H5T_CONV_ABORT)                                 \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
         /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
@@ -203,7 +203,7 @@
                 src_id, dst_id, S, D, cb_struct.user_data);                   \
         if(except_ret == H5T_CONV_UNHANDLED)                                  \
             /* Let compiler convert if case is ignored by user handler*/      \
-            *((DT*)D) = (D_MIN);					      \
+            *((DT*)D) = (DT)(D_MIN);					      \
         else if(except_ret == H5T_CONV_ABORT)                                 \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
         /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
@@ -212,9 +212,9 @@
 }
 #define H5T_CONV_Xx_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX) {			      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
-        *((DT*)D) = (D_MAX);						      \
+        *((DT*)D) = (DT)(D_MAX);						      \
     } else if (*((ST*)S) < (DT)(D_MIN)) {                                     \
-        *((DT*)D) = (D_MIN);						      \
+        *((DT*)D) = (DT)(D_MIN);						      \
     } else 								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
@@ -225,7 +225,7 @@
                 src_id, dst_id, S, D, cb_struct.user_data);                   \
         if(except_ret == H5T_CONV_UNHANDLED)                                  \
             /* Let compiler convert if case is ignored by user handler*/      \
-            *((DT*)D) = (D_MAX);					      \
+            *((DT*)D) = (DT)(D_MAX);					      \
         else if(except_ret == H5T_CONV_ABORT)                                 \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
         /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
@@ -234,7 +234,7 @@
 }
 #define H5T_CONV_Ux_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX) {			      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
-        *((DT*)D) = (D_MAX);						      \
+        *((DT*)D) = (DT)(D_MAX);						      \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
@@ -270,12 +270,12 @@
 }
 
 #define H5T_CONV_uS_CORE(S,D,ST,DT,D_MIN,D_MAX) {			      \
-    if (sizeof(ST)==sizeof(DT) && *((ST*)S) > (D_MAX)) {                      \
+    if (sizeof(ST)==sizeof(DT) && *((ST*)S) > (DT)(D_MAX)) {                      \
         H5T_conv_ret_t except_ret = (cb_struct.func)(H5T_CONV_EXCEPT_RANGE_HI,               \
                 src_id, dst_id, S, D, cb_struct.user_data);                   \
         if(except_ret == H5T_CONV_UNHANDLED)                                  \
             /* Let compiler convert if case is ignored by user handler*/      \
-            *((DT*)D) = (D_MAX);					      \
+            *((DT*)D) = (DT)(D_MAX);					      \
         else if(except_ret == H5T_CONV_ABORT)                                 \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
         /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
@@ -319,7 +319,7 @@
                 src_id, dst_id, S, D, cb_struct.user_data);                   \
         if(except_ret == H5T_CONV_UNHANDLED)                                  \
             /* Let compiler convert if case is ignored by user handler*/      \
-            *((DT*)D) = (D_MAX);					      \
+            *((DT*)D) = (DT)(D_MAX);					      \
         else if(except_ret == H5T_CONV_ABORT)                                 \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
         /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
@@ -330,7 +330,7 @@
     if (*((ST*)S) < 0) {                                                      \
         *((DT*)D) = 0;						              \
     } else if (sizeof(ST)>sizeof(DT) && *((ST*)S) > (DT)(D_MAX)) {            \
-        *((DT*)D) = (D_MAX);						      \
+        *((DT*)D) = (DT)(D_MAX);						      \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
@@ -384,7 +384,7 @@
                 src_id, dst_id, S, D, cb_struct.user_data);                   \
         if(except_ret == H5T_CONV_UNHANDLED)                                  \
             /* Let compiler convert if case is ignored by user handler*/      \
-            *((DT*)D) = (D_MAX);					      \
+            *((DT*)D) = (DT)(D_MAX);					      \
         else if(except_ret == H5T_CONV_ABORT)                                 \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
         /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
@@ -394,7 +394,7 @@
 #define H5T_CONV_us_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX) {			      \
     /* Assumes memory format of unsigned & signed integers is same */	      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
-        *((DT*)D) = (D_MAX);						      \
+        *((DT*)D) = (DT)(D_MAX);						      \
     } else								      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
 }
@@ -553,7 +553,7 @@
                 src_id, dst_id, S, D, cb_struct.user_data);                   \
         if(except_ret == H5T_CONV_UNHANDLED)                                  \
             /* Let compiler convert if case is ignored by user handler*/      \
-            *((DT*)D) = (D_MAX);					      \
+            *((DT*)D) = (DT)(D_MAX);					      \
         else if(except_ret == H5T_CONV_ABORT)                                 \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
         /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
@@ -562,7 +562,7 @@
                 src_id, dst_id, S, D, cb_struct.user_data);                   \
         if(except_ret == H5T_CONV_UNHANDLED)                                  \
             /* Let compiler convert if case is ignored by user handler*/      \
-            *((DT*)D) = (D_MIN);					      \
+            *((DT*)D) = (DT)(D_MIN);					      \
         else if(except_ret == H5T_CONV_ABORT)                                 \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCONVERT, FAIL, "can't handle conversion exception") \
         /* if(except_ret==H5T_CONV_HANDLED): Fall through, user handled it */ \
@@ -581,9 +581,9 @@
 }
 #define H5T_CONV_Fx_NOEX_CORE(S,D,ST,DT,D_MIN,D_MAX) {			      \
     if (*((ST*)S) > (DT)(D_MAX)) {                                            \
-        *((DT*)D) = (D_MAX);						      \
+        *((DT*)D) = (DT)(D_MAX);						      \
     } else if (*((ST*)S) < (DT)(D_MIN)) {                                     \
-        *((DT*)D) = (D_MIN);						      \
+        *((DT*)D) = (DT)(D_MIN);						      \
     }        								      \
     else                                                                      \
         *((DT*)D) = (DT)(*((ST*)S));					      \
@@ -621,7 +621,7 @@
     case H5T_CONV_INIT:							      \
 	/* Sanity check and initialize statistics */			      \
 	cdata->need_bkg = H5T_BKG_NO;					      \
-        if (NULL==(st=H5I_object(src_id)) || NULL==(dt=H5I_object(dst_id)))   \
+        if (NULL==(st=(H5T_t*)H5I_object(src_id)) || NULL==(dt=(H5T_t*)H5I_object(dst_id)))   \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
                           "unable to dereference datatype object ID")	      \
 	if (st->shared->size!=sizeof(ST) || dt->shared->size!=sizeof(DT))     \
@@ -669,7 +669,7 @@
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get conversion exception callback"); \
                                                                               \
         /* Get source and destination datatypes */			      \
-        if (NULL==(st=H5I_object(src_id)) || NULL==(dt=H5I_object(dst_id)))   \
+        if (NULL==(st=(H5T_t*)H5I_object(src_id)) || NULL==(dt=(H5T_t*)H5I_object(dst_id)))   \
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL,		      \
                           "unable to dereference datatype object ID")	      \
 									      \
@@ -714,7 +714,7 @@
             } /* end if */						      \
             else {							      \
                 /* Single forward pass over all data */			      \
-                src = dst = buf;					      \
+                src = dst = (uint8_t*)buf;					      \
                 safe=nelmts;						      \
             } /* end else */						      \
                                                                               \
@@ -9755,8 +9755,8 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
     switch (cdata->command) {
         case H5T_CONV_INIT:
-            if (NULL==(src_p=H5I_object(src_id)) ||
-                    NULL==(dst_p=H5I_object(dst_id)))
+            if (NULL==(src_p=(H5T_t*)H5I_object(src_id)) ||
+                    NULL==(dst_p=(H5T_t*)H5I_object(dst_id)))
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
             src = src_p->shared->u.atomic;
             dst = dst_p->shared->u.atomic;
@@ -9774,8 +9774,8 @@ H5T_conv_f_i (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
         case H5T_CONV_CONV:
             /* Get the datatypes */
-            if (NULL==(src_p=H5I_object(src_id)) ||
-                    NULL==(dst_p=H5I_object(dst_id)))
+            if (NULL==(src_p=(H5T_t*)H5I_object(src_id)) ||
+                    NULL==(dst_p=(H5T_t*)H5I_object(dst_id)))
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
             src = src_p->shared->u.atomic;
             dst = dst_p->shared->u.atomic;
@@ -10345,8 +10345,8 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
     switch (cdata->command) {
         case H5T_CONV_INIT:
-            if (NULL==(src_p=H5I_object(src_id)) ||
-                    NULL==(dst_p=H5I_object(dst_id)))
+            if (NULL==(src_p=(H5T_t*)H5I_object(src_id)) ||
+                    NULL==(dst_p=(H5T_t*)H5I_object(dst_id)))
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
             src = src_p->shared->u.atomic;
             dst = dst_p->shared->u.atomic;
@@ -10364,8 +10364,8 @@ H5T_conv_i_f (hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts,
 
         case H5T_CONV_CONV:
             /* Get the datatypes */
-            if (NULL==(src_p=H5I_object(src_id)) ||
-                    NULL==(dst_p=H5I_object(dst_id)))
+            if (NULL==(src_p=(H5T_t*)H5I_object(src_id)) ||
+                    NULL==(dst_p=(H5T_t*)H5I_object(dst_id)))
                 HGOTO_ERROR (H5E_ARGS, H5E_BADTYPE, FAIL, "not a datatype");
             src = src_p->shared->u.atomic;
             dst = dst_p->shared->u.atomic;
