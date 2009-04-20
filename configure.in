@@ -3806,6 +3806,25 @@ esac
 
 
 dnl ----------------------------------------------------------------------
+dnl Enable embedded library information
+dnl
+AC_MSG_CHECKING([Whether to have library information embedded in the executables])
+AC_ARG_ENABLE([embedded-libinfo],
+    [AC_HELP_STRING([--enable-embedded-libinfo],
+	[Enable embedded library information [default=yes]])],
+	[enable_embedded_libinfo=$enableval],
+	[enable_embedded_libinfo=yes])
+
+   if test "${enable_embedded_libinfo}" = "yes"; then
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([HAVE_EMBEDDED_LIBINFO], [1],
+                [Define if library information should be embedded in the executables])
+   else
+      AC_MSG_RESULT([no])
+    fi
+
+
+dnl ----------------------------------------------------------------------
 dnl Check if pointer alignments are enforced
 dnl
 AC_MSG_CHECKING([if alignment restrictions are strictly enforced])
