@@ -87,6 +87,8 @@ Bug Fixes since HDF5-1.6.8 Release
 
     Library
     -------
+    - Added H5Z_class1_t macro, as H5Z_class_t is now versioned in 1.8.
+            NAF - 2009/04/20 - 1533
     - Fixed a bug that prevented more than one dataset chunk from being cached
             at a time. NAF - 2009/02/12
     - H5Dset_extent: when shrinking dimensions, some chunks were not deleted. 
@@ -300,6 +302,9 @@ Footnotes:
 
 Known Problems
 ==============
+* h5repack may not handle committed datatypes correctly. NAF - 2009/4/20 - 1516/
+  1466
+
 * When in production mode, any presence of the '-g' flag within CFLAGS is
   stripped out during configuration. This currently cannot be overridden. 
   In order to build with '-g' specified within CFLAGS, use the

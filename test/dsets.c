@@ -4130,7 +4130,7 @@ static herr_t
 test_compat(hid_t file)
 {
     hid_t           dataset, space, dcpl;
-    H5Z_filter_t    filtn;
+    H5Z_class1_t    filter_class;
     herr_t          status;
 
     TESTING("version compatibility macros");
@@ -4158,6 +4158,13 @@ test_compat(hid_t file)
     /* Get the filter info (test H5Pget_filter1 and H5Pget_filter_by_id1) */
     if (H5Pget_filter1(dcpl, 0, NULL, NULL, NULL, 0, NULL) < 0) goto error;
     if (H5Pget_filter_by_id1(dcpl, H5Z_FILTER_SHUFFLE, NULL, NULL, NULL, 0, NULL) < 0) goto error;
+
+    /* Try setting a few fields in H5Z_class1_t */
+    filter_class.id = 365;
+    filter_class.name = "fake_filter";
+    filter_class.can_apply = NULL;
+    filter_class.set_local = NULL;
+    filter_class.filter = NULL;
 
     /* Close */
     if (H5Pclose(dcpl) < 0) goto error;

@@ -74,6 +74,12 @@ typedef int H5Z_filter_t;
 #define H5Z_SZIP_PARM_BPP       2       /* "Local" parameter for bits-per-pixel */
 #define H5Z_SZIP_PARM_PPS       3       /* "Local" parameter for pixels-per-scanline */
 
+/*
+ * API compatibility macros - for backward compatibility of programs that
+ * explicitly use the 1.6 API functions (H5Gcreate1, etc.)
+ */
+#define H5Z_class1_t H5Z_class_t
+
 
 
 /* Values to decide if EDC is enabled for reading data */
