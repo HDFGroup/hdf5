@@ -142,6 +142,8 @@ Bug Fixes since HDF5-1.8.2
 
     Library
     -------
+    - Fixed a problem with using data transforms with non-native types in the
+      file. NAF - 2009/04/20 - 1548
     - Added direct.h include file to windows section of H5private.h 
       to fix _getcwd() warning. ADB - 2009/04/14 - 1536
     - Fixed a bug that prevented external links from working after calling
