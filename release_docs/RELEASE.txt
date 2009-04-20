@@ -142,6 +142,8 @@ Bug Fixes since HDF5-1.8.2
 
     Library
     -------
+    - Added versioning to H5Z_class_t struct to allow compatibility with 1.6
+      API. NAF - 2009/04/20 - 1533
     - Fixed a problem with using data transforms with non-native types in the
       file. NAF - 2009/04/20 - 1548
     - Added direct.h include file to windows section of H5private.h 
