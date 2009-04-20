@@ -968,7 +968,6 @@ static herr_t test_types(H5File& file)
  */
 int main(void)
 {
-#ifdef SKIP_UNTIL_APRIL_2009
     hid_t	fapl_id;
     fapl_id = h5_fileaccess(); // in h5test.c, returns a file access template
 
@@ -1008,8 +1007,6 @@ int main(void)
     // Print out dsets test results
     cerr << endl << endl;
     return(test_report(nerrors, H5std_string(" Dataset")));
-#endif
-    SKIPPED();
 }   // main
 
 /*-------------------------------------------------------------------------
