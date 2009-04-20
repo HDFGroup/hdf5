@@ -531,7 +531,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   ! property will override this setting
 
   nslots_3 = nslots_2 * 2
-  nbytes_3 = H5D_CHUNK_CACHE_NBYTES_DEFAULT_F
+  nbytes_3 = H5D_CHUNK_CACHE_NBYTES_DFLT_F
   w0_3 = w0_2 / 2
 
   CALL H5Pset_chunk_cache_f(dapl1, nslots_3, nbytes_3, w0_3, error)
@@ -628,8 +628,8 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   ENDIF
 
   ! Test H5D_CHUNK_CACHE_NSLOTS_DEFAULT and H5D_CHUNK_CACHE_W0_DEFAULT
-  nslots_2 = H5D_CHUNK_CACHE_NSLOTS_DEFAULT_F
-  w0_2 = H5D_CHUNK_CACHE_W0_DEFAULT_F
+  nslots_2 = H5D_CHUNK_CACHE_NSLOTS_DFLT_F
+  w0_2 = H5D_CHUNK_CACHE_W0_DFLT_F
 
   CALL H5Pset_chunk_cache_f(dapl2, nslots_2, nbytes_2, w0_2, error)
   CALL check("H5Pset_chunk_cache_f", error, total_error)

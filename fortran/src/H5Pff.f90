@@ -7042,9 +7042,9 @@
 !            Once set, these values will override the values in the file access
 !            property list.  Each of these values can be individually unset
 !            (or not set at all) by passing the macros:
-!                H5D_CHUNK_CACHE_NSLOTS_DEFAULT,
-!                H5D_CHUNK_CACHE_NBYTES_DEFAULT, and/or
-!                H5D_CHUNK_CACHE_W0_DEFAULT
+!                H5D_CHUNK_CACHE_NSLOTS_DFLT_F,
+!                H5D_CHUNK_CACHE_NBYTES_DFLT_F, and/or
+!                H5D_CHUNK_CACHE_W0_DFLT_F
 !            as appropriate.
 !
 ! 	     The RDCC_W0 value should be between 0 and 1 inclusive and
