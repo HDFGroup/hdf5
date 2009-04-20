@@ -2,35 +2,48 @@
 <!-- HEADER RIGHT "H5Pisa_class" -->
 <hr>
 <dl>
-  <dt><strong>Name:</strong> <a name="Property-IsAClass">H5Pisa_class</a>
+  <dt><div align=right><font color=999999 size=-1><i>
+      Last modified: 20 April 2009
+      </i></font></div>
 
+  <dt><strong>Name:</strong> <a name="Property-IsAClass">H5Pisa_class</a>
   <dt><strong>Signature:</strong>
     <dd><em>htri_t</em> <code>H5Pisa_class</code>(
                   <em>hid_t</em> <code>plist</code>,
                   <em>hid_t</em> <code>pclass</code>
 	)
 
+  <p>
   <dt><strong>Purpose:</strong>
     <dd>Determines whether a property list is a member of a class.
 
+  <p>
   <dt><strong>Description:</strong>
-    <dd><code>H5Pisa_class</code> checks to determine whether a property list 
-    is a member of the specified class.
+    <dd><code>H5Pisa_class</code> checks to determine whether 
+        the property list <code>plist</code> 
+        is a member of the property list class <code>pclass</code>.
 
+  <p>
   <dt><strong>Parameters:</strong>
-    <ul><table>
-    <tr>
-        <td><em>hid_t</em> <code>plist</code></td>
-        <td>IN: Identifier of the property list</td></tr>
-    <tr>
-        <td><code>hid_t</code>&nbsp;<em>pclass&nbsp;&nbsp;&nbsp;&nbsp;</em></td>
-        <td>IN: Identifier of the property class</td></tr>
-    </table></ul>
+    <dd><table>
+          <tr>
+            <td><em>hid_t</em> <code>plist</code></td>
+            <td>IN: Property list identifier </td></tr>
+          <tr>
+            <td><code>hid_t</code>&nbsp;<em>pclass&nbsp;&nbsp;&nbsp;&nbsp;</em></td>
+            <td>IN: Property list class identifier </td></tr>
+        </table>
 
+  <p>
   <dt><strong>Returns:</strong>
-    <dd>Success: TRUE (positive) if equal; FALSE (zero) if unequal
-    <dd>Failure: a negative value
+    <dd>Returns a positive value if true or zero if false;
+        returns a negative value on failure.
 
+  <p>
+  <dt><strong>See Also:</strong>
+    <dd><a href="RM_H5P.html#Property-Create"><code>H5Pcreate</code></a>
+
+  <p>
   <dt><strong>Fortran90 Interface:</strong> h5pisa_class_f
     <dd>
 	<pre>
@@ -46,11 +59,5 @@ SUBROUTINE h5pisa_class_f(plist, pclass, flag, hdferr)
 END SUBROUTINE h5pisa_class_f
 	</pre>		
 		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
 </dl>
 
