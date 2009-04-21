@@ -3779,6 +3779,7 @@ test_misc23(void)
                 tmp_id=0, create_id=H5P_DEFAULT, access_id=H5P_DEFAULT;
     char        objname[MISC23_NAME_BUF_SIZE];  /* Name of object */
     H5O_info_t  oinfo;
+    htri_t      tri_status;
     herr_t      status;
 
     /* Output message about test being performed */
@@ -4018,6 +4019,87 @@ test_misc23(void)
     status = H5Tclose(tmp_id);
     CHECK(status, FAIL, "H5Tclose");
 
+
+    status = H5Pclose(create_id);
+    CHECK(status, FAIL, "H5Pclose");
+
+    /**********************************************************************
+    * test H5Lcopy()
+    **********************************************************************/
+
+    /* Create link creation property list */
+    create_id = H5Pcreate(H5P_LINK_CREATE);
+    CHECK(create_id, FAIL, "H5Pcreate");
+
+    /* Set flag for intermediate group creation */
+    status = H5Pset_create_intermediate_group(create_id, TRUE);
+    CHECK(status, FAIL, "H5Pset_create_intermediate_group");
+
+    status = H5Lcopy(file_id, "/A/B01/grp", file_id, "/A/B16/grp", create_id, access_id);
+    CHECK(status, FAIL, "H5Lcopy");
+
+    tri_status = H5Lexists(file_id, "/A/B16/grp", access_id);
+    VERIFY(tri_status, TRUE, "H5Lexists");
+
+    tri_status = H5Lexists(file_id, "/A/B01/grp", access_id);
+    VERIFY(tri_status, TRUE, "H5Lexists");
+
+    /**********************************************************************
+    * test H5Lmove()
+    **********************************************************************/
+
+    status = H5Lmove(file_id, "/A/B16/grp", file_id, "/A/B17/grp", create_id, access_id);
+    CHECK(status, FAIL, "H5Lmove");
+
+    tri_status = H5Lexists(file_id, "/A/B17/grp", access_id);
+    VERIFY(tri_status, TRUE, "H5Lexists");
+
+    tri_status = H5Lexists(file_id, "/A/B16/grp", access_id);
+    VERIFY(tri_status, FALSE, "H5Lexists");
+
+    /**********************************************************************
+    * test H5Lcreate_hard()
+    **********************************************************************/
+
+    status = H5Lcreate_hard(file_id, "/A/B01/grp", file_id, "/A/B18/grp", create_id, access_id);
+    CHECK(status, FAIL, "H5Lcreate_hard");
+
+    tri_status = H5Lexists(file_id, "/A/B18/grp", access_id);
+    VERIFY(tri_status, TRUE, "H5Lexists");
+
+    /**********************************************************************
+    * test H5Lcreate_soft()
+    **********************************************************************/
+
+    status = H5Lcreate_soft("/A/B01/grp", file_id, "/A/B19/grp", create_id, access_id);
+    CHECK(status, FAIL, "H5Lcreate_soft");
+
+    tri_status = H5Lexists(file_id, "/A/B19/grp", access_id);
+    VERIFY(tri_status, TRUE, "H5Lexists");
+
+    /**********************************************************************
+    * test H5Lcreate_external()
+    **********************************************************************/
+
+    status = H5Lcreate_external("fake_filename", "fake_path", file_id, "/A/B20/grp", create_id, access_id);
+    CHECK(status, FAIL, "H5Lcreate_external");
+
+    tri_status = H5Lexists(file_id, "/A/B20/grp", access_id);
+    VERIFY(tri_status, TRUE, "H5Lexists");
+
+    /**********************************************************************
+    * test H5Lcreate_ud()
+    **********************************************************************/
+
+    status = H5Lcreate_ud(file_id, "/A/B21/grp", H5L_TYPE_EXTERNAL, "file\0obj", (size_t) 9, create_id, access_id);
+    CHECK(status, FAIL, "H5Lcreate_ud");
+
+    tri_status = H5Lexists(file_id, "/A/B21/grp", access_id);
+    VERIFY(tri_status, TRUE, "H5Lexists");
+
+    /**********************************************************************
+    * close
+    **********************************************************************/
 
     status = H5Pclose(create_id);
     CHECK(status, FAIL, "H5Pclose");

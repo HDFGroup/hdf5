@@ -66,9 +66,9 @@ CONTAINS
        INTEGER FUNCTION h5olink_c(object_id, new_loc_id, new_link_name, new_link_namelen, &
             lcpl_id_default, lapl_id_default)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5OLINK_C'::h5olink_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OLINK_C'::h5olink_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: new_link_name
          INTEGER(HID_T), INTENT(IN) :: object_id
          INTEGER(HID_T), INTENT(IN) :: new_loc_id
@@ -132,9 +132,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5oopen_c(loc_id, name, namelen, lapl_id_default, obj_id)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5OOPEN_C'::h5oopen_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5OOPEN_C'::h5oopen_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: name

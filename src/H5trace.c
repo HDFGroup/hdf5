@@ -1978,7 +1978,7 @@ H5_trace (const double *returning, const char *func, const char *type, ...)
                             fprintf(out, "NULL");
                         }
                     } else {
-                        H5Z_class_t *filter = va_arg (ap, H5Z_class_t*); /*lint !e64 Type mismatch not really occuring */
+                        H5Z_class2_t *filter = va_arg (ap, H5Z_class2_t*); /*lint !e64 Type mismatch not really occuring */
                         fprintf (out, "0x%lx", (unsigned long)filter);
                     }
                     break;

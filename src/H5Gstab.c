@@ -1011,7 +1011,8 @@ H5G_stab_valid(H5O_loc_t *grp_oloc, hid_t dxpl_id, H5O_stab_t *alt_stab)
     FUNC_ENTER_NOAPI(H5G_stab_valid, FAIL)
 
     /* Read the symbol table message */
-    H5O_msg_read(grp_oloc, H5O_STAB_ID, &stab, dxpl_id);
+    if(NULL == H5O_msg_read(grp_oloc, H5O_STAB_ID, &stab, dxpl_id))
+        HGOTO_ERROR(H5E_SYM, H5E_BADMESG, FAIL, "unable to read symbol table message");
 
     /* Check if the symbol table message's b-tree address is valid */
     if(H5B_valid(grp_oloc->file, dxpl_id, H5B_SNODE, stab.btree_addr) < 0) {

@@ -40,6 +40,9 @@ class H5_DLLCPP Attribute : public AbstractDs, public IdComponent {
 	// Returns the amount of storage size required for this attribute.
 	hsize_t getStorageSize() const;
 
+	// Returns the in memory size of this attribute's data.
+	size_t getInMemDataSize() const;
+
 	// Reads data from this attribute.
 	void read( const DataType& mem_type, void *buf ) const;
 	void read( const DataType& mem_type, H5std_string& strg ) const;

@@ -19,6 +19,7 @@
 #
 
 include $(top_srcdir)/config/commence.am
+include $(top_srcdir)/config/lt_vers.am
 
 # Include src directory in both Fortran and C flags (C compiler is used
 # for linking).
@@ -29,6 +30,9 @@ AM_FCLIBS=$(LIBHDF5)
 
 # This is our main target, the fortran library
 lib_LTLIBRARIES=libhdf5_fortran.la
+
+# Add libtool numbers to the HDF5 Fortran library (from config/lt_vers.am)
+libhdf5_fortran_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE)
 
 # Some Fortran compilers can't build shared libraries, so sometimes we
 # want to build a shared C library and a static Fortran library.  If so,

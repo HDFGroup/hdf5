@@ -82,6 +82,7 @@ typedef struct {
     const char *dst_name;               /* Destination name for moving object */
     H5T_cset_t cset;                    /* Char set for new name */
     H5G_loc_t  *dst_loc;		/* Destination location for moving object */
+    unsigned dst_target_flags;          /* Target flags for destination object */
     hbool_t copy;                       /* TRUE if this is a copy operation */
     hid_t lapl_id;                      /* LAPL to use in callback */
     hid_t dxpl_id;                      /* DXPL to use in callback */
@@ -284,6 +285,9 @@ H5L_term_interface(void)
     /* Free the table of link types */
     H5L_table_g = (H5L_class_t *)H5MM_xfree(H5L_table_g);
     H5L_table_used_g = H5L_table_alloc_g = 0;
+
+    /* Mark the interface as uninitialized */
+    H5_interface_initialize_g = 0;
 
     FUNC_LEAVE_NOAPI(n)
 } /* H5L_term_interface() */
@@ -557,6 +561,8 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!link_name || !*link_name)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no link name specified")
+    if(link_type < H5L_TYPE_UD_MIN || link_type > H5L_TYPE_MAX)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid link class")
 
     /* Create external link */
     if(H5L_create_ud(&link_loc, link_name, udata, udata_size, link_type, lcpl_id, lapl_id, H5AC_dxpl_id) < 0)
@@ -2528,7 +2534,8 @@ H5L_move_cb(H5G_loc_t *grp_loc/*in*/, const char *name, const H5O_link_t *lnk,
     orig_name = H5MM_xstrdup(name);
 
     /* Insert the link into its new location */
-    if(H5G_traverse(udata->dst_loc, udata->dst_name, H5G_TARGET_NORMAL, H5L_move_dest_cb, &udata_out, udata->lapl_id, udata->dxpl_id) < 0)
+    if(H5G_traverse(udata->dst_loc, udata->dst_name, udata->dst_target_flags,
+            H5L_move_dest_cb, &udata_out, udata->lapl_id, udata->dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to follow symbolic link")
 
     /* If this is a move and not a copy operation, change the object's name and remove the old link */
@@ -2614,7 +2621,7 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
     const char *dst_name, hbool_t copy_flag, hid_t lcpl_id, hid_t lapl_id,
     hid_t dxpl_id)
 {
-    unsigned    target_flags = H5G_TARGET_MOUNT|H5G_TARGET_SLINK|H5G_TARGET_UDLINK;
+    unsigned    dst_target_flags = H5G_TARGET_NORMAL;
     H5T_cset_t char_encoding = H5F_DEFAULT_CSET; /* Character encoding for link */
     H5P_genplist_t* lc_plist;           /* Link creation property list */
     H5P_genplist_t* la_plist;           /* Link access property list */
@@ -2641,8 +2648,9 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
         if(H5P_get(lc_plist, H5L_CRT_INTERMEDIATE_GROUP_NAME, &crt_intmd_group) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get property value for creating missing groups")
 
+        /* Set target flags for source and destination */
         if(crt_intmd_group > 0)
-            target_flags |= H5G_CRT_INTMD_GROUP;
+            dst_target_flags |= H5G_CRT_INTMD_GROUP;
 
         /* Get character encoding property */
         if(H5P_get(lc_plist, H5P_STRCRT_CHAR_ENCODING_NAME, &char_encoding) < 0)
@@ -2664,13 +2672,15 @@ H5L_move(H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
     /* Set up user data */
     udata.dst_loc = dst_loc;
     udata.dst_name= dst_name;
+    udata.dst_target_flags = dst_target_flags;
     udata.cset = char_encoding;
     udata.copy = copy_flag;
     udata.lapl_id = lapl_copy;
     udata.dxpl_id = dxpl_id;
 
     /* Do the move */
-    if(H5G_traverse(src_loc, src_name, target_flags, H5L_move_cb, &udata, lapl_id, dxpl_id) < 0)
+    if(H5G_traverse(src_loc, src_name, H5G_TARGET_MOUNT | H5G_TARGET_SLINK | H5G_TARGET_UDLINK,
+            H5L_move_cb, &udata, lapl_id, dxpl_id) < 0)
 	HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "unable to find link")
 
 done:

@@ -662,6 +662,12 @@ H5D_scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                     HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file gather failed")
             } /* end if */
 
+            /* Do the data transform before the type conversion (since
+             * transforms must be done in the memory type). */
+            if(!type_info->is_xform_noop)
+	        if(H5Z_xform_eval(dxpl_cache->data_xform_prop, type_info->tconv_buf, smine_nelmts, type_info->mem_type) < 0)
+		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Error performing data transform")
+
             /*
              * Perform datatype conversion.
              */
@@ -669,11 +675,6 @@ H5D_scatgath_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
                     smine_nelmts, (size_t)0, (size_t)0, type_info->tconv_buf,
                     type_info->bkg_buf, io_info->dxpl_id) < 0)
                  HGOTO_ERROR(H5E_DATASET, H5E_CANTCONVERT, FAIL, "datatype conversion failed")
-
-	    /* Do the data transform after the type conversion (since we're using dataset->shared->type). */
-	    if(!type_info->is_xform_noop)
-	        if(H5Z_xform_eval(dxpl_cache->data_xform_prop, type_info->tconv_buf, smine_nelmts, type_info->dset_type) < 0)
-		    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Error performing data transform")
         } /* end else */
 
         /*

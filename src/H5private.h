@@ -144,6 +144,7 @@
 
 #define VC_EXTRALEAN		/*Exclude rarely-used stuff from Windows headers */
 #include <windows.h>
+#include <direct.h>         /* For _getcwd() */
 
 #endif /*_WIN32*/
 

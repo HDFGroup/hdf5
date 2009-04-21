@@ -36,6 +36,8 @@ enum H5TEST_COLL_CHUNK_API {API_NONE=0,API_LINK_HARD,
 /* Constants definitions */
 #define DIM0		600 	/* Default dataset sizes. */
 #define DIM1		1200	/* Values are from a monitor pixel sizes */
+#define ROW_FACTOR	8 	/* Nominal row factor for dataset size */
+#define COL_FACTOR	16	/* Nominal column factor for dataset size */
 #define RANK		2
 #define DATASETNAME1	"Data1"
 #define DATASETNAME2	"Data2"

@@ -106,6 +106,7 @@ const char *FILENAME[] = {
 #define DSET_DEPREC_NAME		"deprecated"
 #define DSET_DEPREC_NAME_CHUNKED	"deprecated_chunked"
 #define DSET_DEPREC_NAME_COMPACT	"deprecated_compact"
+#define DSET_DEPREC_NAME_FILTER         "deprecated_filter"
 
 #define USER_BLOCK              1024
 #define SIXTY_FOUR_KB           65536
@@ -114,6 +115,7 @@ const char *FILENAME[] = {
 #define H5Z_FILTER_BOGUS	305
 #define H5Z_FILTER_CORRUPT	306
 #define H5Z_FILTER_BOGUS2	307
+#define H5Z_FILTER_DEPREC       308
 
 /* Flags for testing filters */
 #define DISABLE_FLETCHER32      0
@@ -1032,7 +1034,7 @@ test_tconv(hid_t file)
 }
 
 /* This message derives from H5Z */
-const H5Z_class_t H5Z_BOGUS[1] = {{
+const H5Z_class2_t H5Z_BOGUS[1] = {{
     H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
     H5Z_FILTER_BOGUS,		/* Filter id number		*/
     1, 1,               /* Encoding and decoding enabled */
@@ -1206,7 +1208,7 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
 }
 
 /* This message derives from H5Z */
-const H5Z_class_t H5Z_CORRUPT[1] = {{
+const H5Z_class2_t H5Z_CORRUPT[1] = {{
     H5Z_CLASS_T_VERS,            /* H5Z_class_t version */
     H5Z_FILTER_CORRUPT,		/* Filter id number		*/
     1, 1,               /* Encoding and decoding enabled */
@@ -4803,7 +4805,7 @@ test_types(hid_t file)
 }
 
 /* This message derives from H5Z */
-const H5Z_class_t H5Z_CAN_APPLY_TEST[1] = {{
+const H5Z_class2_t H5Z_CAN_APPLY_TEST[1] = {{
 	H5Z_CLASS_T_VERS,
     H5Z_FILTER_BOGUS,		/* Filter id number		*/
 	1, 1,
@@ -5163,7 +5165,7 @@ error:
 
 
 /* This message derives from H5Z */
-const H5Z_class_t H5Z_SET_LOCAL_TEST[1] = {{
+const H5Z_class2_t H5Z_SET_LOCAL_TEST[1] = {{
 	H5Z_CLASS_T_VERS,
     H5Z_FILTER_BOGUS2,		/* Filter id number		*/
 	1, 1,
@@ -6191,6 +6193,28 @@ error:
 } /* end test_random_chunks() */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
+/* Empty can_apply and set_local callbacks */
+static herr_t
+can_apply_deprec(hid_t UNUSED dcpl_id, hid_t UNUSED type_id, hid_t UNUSED space_id)
+{
+    return 1;
+}
+
+static herr_t
+set_local_deprec(hid_t UNUSED dcpl_id, hid_t UNUSED type_id, hid_t UNUSED space_id)
+{
+    return(SUCCEED);
+}
+
+/* Old style H5Z_class_t, essentially a copy of the "bogus" filter */
+const H5Z_class1_t H5Z_DEPREC[1] = {{
+    H5Z_FILTER_DEPREC,		/* Filter id number		*/
+    "deprec",			/* Filter name for debugging	*/
+    can_apply_deprec,           /* The "can apply" callback     */
+    set_local_deprec,           /* The "set local" callback     */
+    filter_bogus,		/* The actual filter function	*/
+}};
+
 
 /*-------------------------------------------------------------------------
  * Function: test_deprec
@@ -6208,8 +6232,9 @@ error:
 static herr_t
 test_deprec(hid_t file)
 {
-    hid_t	dataset, space, small_space, create_parms;
+    hid_t	dataset, space, small_space, create_parms, dcpl;
     hsize_t	dims[2], small_dims[2];
+    hsize_t     deprec_size;
     herr_t	status;
     hsize_t	csize[2];
 
@@ -6362,6 +6387,16 @@ test_deprec(hid_t file)
      */
     if((dataset = H5Dopen1(file, DSET_DEPREC_NAME_COMPACT)) < 0) goto error;
     if(H5Dclose(dataset) < 0) goto error;
+
+    /* Test H5Zregister with deprecated H5Z_class1_t */
+    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) goto error;
+    if(H5Pset_chunk(dcpl, 2, csize) < 0) goto error;
+    if(H5Zregister(H5Z_DEPREC) < 0) goto error;
+    if(H5Pset_filter(dcpl, H5Z_FILTER_DEPREC, 0, (size_t)0, NULL) < 0) goto error;
+
+    if(test_filter_internal(file,DSET_DEPREC_NAME_FILTER,dcpl,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&deprec_size) < 0) goto error;
+
+    if(H5Pclose(dcpl) < 0) goto error;
 
     PASSED();
     return 0;

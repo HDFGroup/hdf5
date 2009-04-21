@@ -117,7 +117,8 @@ CHECK_CLEANFILES+=cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offset.h5 \
             enum1.h5 titerate.h5 ttsafe.h5 tarray1.h5 tgenprop.h5            \
             tmisc[0-9]*.h5 set_extent[1-5].h5 ext[12].bin           \
             getname.h5 getname[1-3].h5 sec2_file.h5 direct_file.h5           \
-            family_file000[0-3][0-9].h5 multi_file-[rs].h5 core_file         \
+            family_file000[0-3][0-9].h5 new_family_v16_000[0-3][0-9].h5      \
+            multi_file-[rs].h5 core_file \
             new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
             dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
             unlink_chunked.h5 btree2.h5 objcopy_src.h5 objcopy_dst.h5        \

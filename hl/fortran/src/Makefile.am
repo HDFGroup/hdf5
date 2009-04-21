@@ -20,6 +20,7 @@
 # HDF5 High-Level Fortran Makefile(.in)
 
 include $(top_srcdir)/config/commence.am
+include $(top_srcdir)/config/lt_vers.am
 
 INCLUDES=-I$(top_srcdir)/src -I$(top_srcdir)/hl/src -I$(top_builddir)/hl/src \
          -I$(top_srcdir)/fortran/src -I$(top_builddir)/fortran/src
@@ -27,6 +28,9 @@ AM_FCFLAGS=-I$(top_builddir)/fortran/src $(F9XMODFLAG)$(top_builddir)/fortran/sr
 
 # Our main target, the high-level fortran library
 lib_LTLIBRARIES=libhdf5hl_fortran.la
+
+# Add libtool numbers to the HDF5 HL Fortran library (from config/lt_vers.am)
+libhdf5hl_fortran_la_LDFLAGS= -version-info $(LT_VERS_INTERFACE):$(LT_VERS_REVISION):$(LT_VERS_AGE)
 
 # Some Fortran compilers can't build shared libraries, so sometimes we
 # want to build a shared C library and a static Fortran library.  If so,

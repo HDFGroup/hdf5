@@ -76,9 +76,9 @@ CONTAINS
        INTEGER FUNCTION h5lcopy_c(src_loc_id, src_name, src_namelen, dest_loc_id, dest_name, dest_namelen, &
             lcpl_id_default, lapl_id_default)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LCOPY_C'::h5lcopy_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LCOPY_C'::h5lcopy_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: src_name, dest_name
          INTEGER(HID_T), INTENT(IN) :: src_loc_id
          CHARACTER(LEN=*), INTENT(IN) :: src_name
@@ -145,9 +145,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ldelete_c(loc_id, name, namelen, lapl_id_default)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LDELETE_C'::h5ldelete_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LDELETE_C'::h5ldelete_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: name
@@ -213,9 +213,9 @@ CONTAINS
             link_name,link_name_len, &
             lcpl_id_default, lapl_id_default )
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LCREATE_SOFT_C'::h5lcreate_soft_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LCREATE_SOFT_C'::h5lcreate_soft_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: target_path, link_name
          CHARACTER(LEN=*), INTENT(IN) :: target_path
          INTEGER(SIZE_T) :: target_path_len
@@ -295,9 +295,9 @@ CONTAINS
             link_loc_id, link_name, link_namelen, lcpl_id_default, lapl_id_default) 
 
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LCREATE_HARD_C'::h5lcreate_hard_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LCREATE_HARD_C'::h5lcreate_hard_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: obj_name, link_name
          INTEGER(HID_T), INTENT(IN) :: obj_loc_id
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
@@ -379,9 +379,9 @@ CONTAINS
             link_loc_id, link_name, link_namelen, lcpl_id_default, lapl_id_default) 
 
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LCREATE_EXTERNAL_C'::h5lcreate_external_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LCREATE_EXTERNAL_C'::h5lcreate_external_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: file_name, obj_name, link_name
          CHARACTER(LEN=*), INTENT(IN) :: file_name
          CHARACTER(LEN=*), INTENT(IN) :: obj_name
@@ -473,9 +473,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5ldelete_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, lapl_id_default)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LDELETE_BY_IDX_C'::h5ldelete_by_idx_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LDELETE_BY_IDX_C'::h5ldelete_by_idx_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: group_name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: group_name
@@ -536,9 +536,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5lexists_c(loc_id, name, namelen, lapl_id_default, link_exists_c)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LEXISTS_C'::h5lexists_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LEXISTS_C'::h5lexists_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: name
          INTEGER(HID_T), INTENT(IN) :: loc_id
          CHARACTER(LEN=*), INTENT(IN) :: name
@@ -629,9 +629,9 @@ CONTAINS
             cset, corder, corder_valid, link_type, address, val_size, &
             lapl_id_default)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LGET_INFO_C'::h5lget_info_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LGET_INFO_C'::h5lget_info_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: link_name
          INTEGER(HID_T), INTENT(IN) :: link_loc_id
          CHARACTER(LEN=*), INTENT(IN) :: link_name
@@ -723,9 +723,9 @@ CONTAINS
        INTEGER FUNCTION h5lget_info_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
             corder_valid, corder, cset, data_size, lapl_id_default)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LGET_INFO_BY_IDX_C'::h5lget_info_by_idx_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LGET_INFO_BY_IDX_C'::h5lget_info_by_idx_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: group_name
          INTEGER(HID_T), INTENT(IN) :: loc_id 
          CHARACTER(LEN=*), INTENT(IN) :: group_name
@@ -790,9 +790,9 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5lis_registered_c(link_cls_id)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LIS_REGISTERED_C'::h5lis_registered_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LIS_REGISTERED_C'::h5lis_registered_c
+         !DEC$ENDIF
          INTEGER, INTENT(IN) :: link_cls_id  ! User-defined link class identifier
        END FUNCTION h5lis_registered_c
     END INTERFACE
@@ -858,9 +858,9 @@ CONTAINS
        INTEGER FUNCTION h5lmove_c(src_loc_id, src_name, src_namelen, dest_loc_id, &
             dest_name, dest_namelen, lcpl_id_default, lapl_id_default) 
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LMOVE_C'::h5lmove_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LMOVE_C'::h5lmove_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: src_name, dest_name
          INTEGER(HID_T), INTENT(IN) :: src_loc_id 
          CHARACTER(LEN=*), INTENT(IN) :: src_name
@@ -949,9 +949,9 @@ CONTAINS
        INTEGER FUNCTION h5lget_name_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
              size_default, name, lapl_id_default)
          USE H5GLOBAL
-         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LGET_NAME_BY_IDX_C'::h5lget_name_by_idx_c
-         !DEC$ ENDIF
+         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LGET_NAME_BY_IDX_C'::h5lget_name_by_idx_c
+         !DEC$ENDIF
          !DEC$ATTRIBUTES reference :: group_name, name
          INTEGER(HID_T), INTENT(IN) :: loc_id 
          CHARACTER(LEN=*), INTENT(IN) :: group_name
@@ -1048,9 +1048,9 @@ CONTAINS
 !!$       INTEGER FUNCTION h5lget_val_by_idx_c(loc_id, group_name, group_namelen, index_field, order, n, &
 !!$            corder_valid, corder, cset, data_size, lapl_id_default)
 !!$         USE H5GLOBAL
-!!$         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-!!$         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LGET_VAL_BY_IDX_C'::h5lget_val_by_idx_c
-!!$         !DEC$ ENDIF
+!!$         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+!!$         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LGET_VAL_BY_IDX_C'::h5lget_val_by_idx_c
+!!$         !DEC$ENDIF
 !!$         INTEGER(HID_T), INTENT(IN) :: loc_id 
 !!$         CHARACTER(LEN=*), INTENT(IN) :: group_name
 !!$         INTEGER(SIZE_T)  :: group_namelen
@@ -1130,9 +1130,9 @@ CONTAINS
 !!$       INTEGER FUNCTION h5lget_val_c(link_loc_id, link_name, link_namelen, size, linkval_buff, &
 !!$            lapl_id_default)
 !!$         USE H5GLOBAL
-!!$         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-!!$         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LGET_VAL_C'::h5lget_val_c
-!!$         !DEC$ ENDIF
+!!$         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+!!$         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LGET_VAL_C'::h5lget_val_c
+!!$         !DEC$ENDIF
 !!$         INTEGER(HID_T), INTENT(IN) :: link_loc_id  ! File or group identifier.
 !!$         CHARACTER(LEN=*), INTENT(IN) :: link_name  ! Link whose value is to be returned.
 !!$         INTEGER :: link_namelen 
@@ -1221,9 +1221,9 @@ CONTAINS
 !!$            del_func, del_func_len, &
 !!$            query_func,query_func_len)
 !!$         USE H5GLOBAL
-!!$         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
-!!$         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LREGISTERED_C'::H5Lregistered_c
-!!$         !DEC$ ENDIF
+!!$         !DEC$IF DEFINED(HDF5F90_WINDOWS)
+!!$         !DEC$ATTRIBUTES C,reference,decorate,alias:'H5LREGISTERED_C'::H5Lregistered_c
+!!$         !DEC$ENDIF
 !!$         INTEGER, INTENT(IN) :: version      ! Version number of this struct 
 !!$         INTEGER, INTENT(IN) :: class_id     ! Link class identifier          
 !!$         CHARACTER(LEN=*), INTENT(IN) :: comment      ! Comment for debugging          

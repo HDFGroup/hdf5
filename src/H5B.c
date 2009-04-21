@@ -2057,7 +2057,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_get_info() */
 
-#ifndef H5_STRICT_FORMAT_CHECKS
 
 /*-------------------------------------------------------------------------
  * Function:    H5B_valid
@@ -2099,5 +2098,4 @@ H5B_valid(H5F_t *f, hid_t dxpl_id, const H5B_class_t *type, haddr_t addr)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5B_valid() */
-#endif /* H5_STRICT_FORMAT_CHECKS */
 

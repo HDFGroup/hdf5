@@ -24,11 +24,13 @@
 static herr_t verify_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
 static herr_t read_scale(hid_t dset, unsigned dim, hid_t scale, void *visitor_data);
 static herr_t match_dim_scale(hid_t did, unsigned dim, hid_t dsid, void *visitor_data);
-static herr_t op_bogus(hid_t did, unsigned dim, hid_t dsid, void *visitor_data);
+static herr_t op_continue(hid_t did, unsigned dim, hid_t dsid, void *visitor_data);
+static herr_t op_stop(hid_t did, unsigned dim, hid_t dsid, void *visitor_data);
 
 /* prototypes */
 static int test_simple(void);
 static int test_errors(void);
+static int test_errors2(void);
 static int test_rank(void);
 static int test_types(void);
 static int test_iterators(void);
@@ -43,14 +45,12 @@ static int read_data( const char* fname, int ndims, hsize_t *dims, float **buf )
 #define DIM3_SIZE     2
 #define DIM0          0
 #define DIM1          1
-#define DIM2          2
 
 #define DS_1_NAME      "ds_a_1"
 #define DS_11_NAME     "ds_a_11"
 #define DS_2_NAME      "ds_a_2"
 #define DS_21_NAME     "ds_a_21"
 #define DS_22_NAME     "ds_a_22"
-#define DS_3_NAME      "ds_a_3"
 
 #define SCALE_1_NAME   "Latitude set 0"
 #define SCALE_11_NAME  "Latitude set 1"
@@ -67,8 +67,7 @@ static int read_data( const char* fname, int ndims, hsize_t *dims, float **buf )
 #define FILE4          "test_ds4.h5"
 #define FILE5          "test_ds5.h5"
 #define FILE6          "test_ds6.h5"
-
-
+#define FILE7          "test_ds7.h5"
 
 /*-------------------------------------------------------------------------
  * the main program
@@ -80,10 +79,12 @@ int main(void)
 
     nerrors += test_simple() < 0  ?1:0;
     nerrors += test_errors() < 0  ?1:0;
+    nerrors += test_errors2() < 0  ?1:0;
     nerrors += test_rank() < 0  ?1:0;
     nerrors += test_iterators() < 0  ?1:0;
     nerrors += test_types() < 0  ?1:0;
     nerrors += test_data() < 0  ?1:0;
+    
 
     if(nerrors) goto error;
     printf("All dimension scales tests passed.\n");
@@ -101,6 +102,7 @@ error:
  * Functions tested:
  *
  * H5DSattach_scale
+ * H5DSget_num_scales
  * H5DSdetach_scale
  * H5DSset_label
  * H5DSget_label
@@ -108,7 +110,6 @@ error:
  * H5DSget_scale_name
  * H5DSis_scale
  * H5DSiterate_scales
- * H5DSget_num_scales
  *
  *-------------------------------------------------------------------------
  */
@@ -116,13 +117,13 @@ error:
 
 static int test_simple(void)
 {
-    hid_t   fid;                                              /* file ID */
+    hid_t   fid = -1;                                         /* file ID */
     hid_t   did = -1;                                         /* dataset ID */
-    hid_t   dsid;                                             /* DS dataset ID */
-    hid_t   sid;                                              /* space ID */
-    hid_t   gid;                                              /* group ID */
-    int     rank     = RANK;                                  /* rank of data dataset */
-    int     rankds   = 1;                                     /* rank of DS dataset */
+    hid_t   dsid = -1;                                        /* DS dataset ID */
+    hid_t   sid = -1;                                         /* space ID */
+    hid_t   gid = -1;                                         /* group ID */
+    int     rank = RANK;                                      /* rank of data dataset */
+    int     rankds = 1;                                       /* rank of DS dataset */
     hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};              /* size of data dataset */
     int     buf[DIM_DATA] = {1,2,3,4,5,6,7,8,9,10,11,12};     /* data of data dataset */
     hsize_t s1_dim[1]  = {DIM1_SIZE};                         /* size of DS 1 dataset */
@@ -191,9 +192,9 @@ static int test_simple(void)
     if(H5LTmake_dataset_int(fid,DS_22_NAME,rankds,s2_dim,s22_wbuf) < 0)
         goto out;
 
-
+    
     /*-------------------------------------------------------------------------
-    * test 1: attach scale
+    * H5DSattach_scale
     *-------------------------------------------------------------------------
     */
 
@@ -333,9 +334,10 @@ static int test_simple(void)
 
 
     /*-------------------------------------------------------------------------
-    * test 2: get number of scales
+    * H5DSget_num_scales
     *-------------------------------------------------------------------------
     */
+
 
     TESTING2("get number of scales");
 
@@ -423,7 +425,7 @@ static int test_simple(void)
 
 
     /*-------------------------------------------------------------------------
-    * test 3: detach scales
+    * H5DSdetach_scale
     *-------------------------------------------------------------------------
     */
 
@@ -952,15 +954,11 @@ static int test_simple(void)
         goto out;
 
 
-    PASSED();
-
 
     /*-------------------------------------------------------------------------
     * create a dataset and attach only to 1 dimension
     *-------------------------------------------------------------------------
     */
-
-    TESTING2("attach only to 1 dimension");
 
     /* make a dataset */
     if(H5LTmake_dataset_int(fid,"dset_e",rank,dims,NULL) < 0)
@@ -1004,8 +1002,9 @@ static int test_simple(void)
     PASSED();
 
 
+    
     /*-------------------------------------------------------------------------
-    * test 4: set/get label
+    * H5DSset_label, H5DSget_label
     *-------------------------------------------------------------------------
     */
 
@@ -1100,9 +1099,11 @@ static int test_simple(void)
     PASSED();
 
     /*-------------------------------------------------------------------------
-    * test 5: set scale/get scale name
+    * H5DSget_scale_name, H5DSget_scale_name
     *-------------------------------------------------------------------------
     */
+
+
     TESTING2("set scale/get scale name");
 
     if((dsid = H5Dopen2(fid,DS_1_NAME, H5P_DEFAULT)) < 0)
@@ -1206,10 +1207,18 @@ static int test_simple(void)
     PASSED();
 
     /*-------------------------------------------------------------------------
+    * H5DSiterate_scales
+    *-------------------------------------------------------------------------
+    */
+
+
+    TESTING2("iterate scales");
+
+
+    /*-------------------------------------------------------------------------
     * test 6: test iterate scales with a function verify_scale
     *-------------------------------------------------------------------------
     */
-    TESTING2("iterate scales (verify scale)");
 
     /* get the dataset id for "dset_a" */
     if((did = H5Dopen2(fid,"dset_a", H5P_DEFAULT)) < 0)
@@ -1233,14 +1242,11 @@ static int test_simple(void)
     if(H5Dclose(did) < 0)
         goto out;
 
-    PASSED();
-
 
     /*-------------------------------------------------------------------------
-    * test 7: test iterate scales with a function read_scale
+    * test iterate scales with a function read_scale
     *-------------------------------------------------------------------------
     */
-    TESTING2("iterate scales (read scale values)");
 
 
     /* get the dataset id for "dset_a" */
@@ -1265,13 +1271,11 @@ static int test_simple(void)
     if(H5Dclose(did) < 0)
         goto out;
 
-    PASSED();
 
     /*-------------------------------------------------------------------------
-    * test 8: test iterate scales with a function match_dim_scale
+    * test iterate scales with a function match_dim_scale
     *-------------------------------------------------------------------------
     */
-    TESTING2("iterate scales (verify the scale sizes match)");
 
     /* get the dataset id for "dset_a" */
     if((did = H5Dopen2(fid,"dset_a", H5P_DEFAULT)) < 0)
@@ -1316,13 +1320,11 @@ static int test_simple(void)
     if(H5Sclose(sid) < 0)
         goto out;
 
-    PASSED();
 
     /*-------------------------------------------------------------------------
-    * test 9: test iterate scales with a function match_dim_scale
+    * test iterate scales with a function match_dim_scale
     *-------------------------------------------------------------------------
     */
-    TESTING2("iterate scales (verify the scale sizes do not match)");
 
     /*-------------------------------------------------------------------------
     * create 3 datasets: 1 "data" dataset and dimension scales (some are empty)
@@ -1411,6 +1413,10 @@ static int test_simple(void)
             case 1: /* for DIM 1, we get no valid scales */
                 if(match_size!=0 && idx!=0)
                     goto out;
+                break;
+            default:
+                assert(0);
+                break;
             }/*switch*/
         }/*for*/
     }
@@ -1434,11 +1440,15 @@ static int test_simple(void)
 
     return 0;
 
-    /* error zone, gracefully close */
+    /* error zone */
 out:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY 
+    {
         H5Dclose(did);
+        H5Dclose(dsid);
         H5Fclose(fid);
+        H5Sclose(sid);
+        H5Gclose(gid);
     } H5E_END_TRY;
     H5_FAILED();
     return FAIL;
@@ -1508,14 +1518,14 @@ static herr_t verify_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visit
 static herr_t read_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
 {
     int      ret = 0;   /* define a default zero value for return. This will cause the iterator to continue */
-    hid_t    sid;       /* space ID */
+    hid_t    sid = -1;  /* space ID */
     hid_t    tid = -1;  /* file type ID */
     hid_t    mtid = -1; /* memory type ID */
     hssize_t nelmts;    /* number of data elements */
     char     *buf=NULL; /* data buffer */
     size_t   size;
     int      i;
-    char     *data=visitor_data;
+    char     *data = (char*) visitor_data;
 
     /* unused */
     dset=dset;
@@ -1568,14 +1578,17 @@ static herr_t read_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor
 
     return ret;
 
-    /* error zone, gracefully close */
+    /* error zone */
 out:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY 
+    {
         H5Sclose(sid);
         H5Tclose(tid);
         H5Tclose(mtid);
         if(buf)
+        {
             free(buf);
+        }
     } H5E_END_TRY;
 
     return FAIL;
@@ -1657,7 +1670,8 @@ static herr_t match_dim_scale(hid_t did, unsigned dim, hid_t dsid, void *visitor
     return ret;
 
 out:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY 
+    {
         H5Sclose(sid);
     } H5E_END_TRY;
     return FAIL;
@@ -1665,9 +1679,10 @@ out:
 
 
 /*-------------------------------------------------------------------------
- * Function: op_bogus
+ * Function: op_continue
  *
- * Purpose: example operator function used by H5DSiterate_scales, that does nothing
+ * Purpose: example operator function used by H5DSiterate_scales that continues 
+ *  iteration and increments visitor_data (Note: int*)
  *
  * Return:
  * The return values from an operator are:
@@ -1680,17 +1695,56 @@ out:
  *-------------------------------------------------------------------------
  */
 
-static herr_t op_bogus(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
+static herr_t op_continue(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
 {
     /* Stop compiler from whining about "unused parameters" */
     dset = dset;
     dim = dim;
     scale_id = scale_id;
-    visitor_data = visitor_data;
+
+    if ( visitor_data != NULL )
+    {
+        (*(int *)visitor_data)++;
+    }
 
     /* define a default zero value for return. This will cause the iterator to continue */
     return 0;
 }
+
+
+/*-------------------------------------------------------------------------
+ * Function: op_stop
+ *
+ * Purpose: example operator function used by H5DSiterate_scales that stops 
+ *  iteration and increments visitor_data (Note: int*)
+ *
+ * Return:
+ * The return values from an operator are:
+ * Zero causes the iterator to continue, returning zero when all group members have been processed.
+ * Positive causes the iterator to immediately return that positive value, indicating
+ *  short-circuit success. The iterator can be restarted at the next group member.
+ * Negative causes the iterator to immediately return that value, indicating failure.
+ *  The iterator can be restarted at the next group member.
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t op_stop(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
+{
+    /* Stop compiler from whining about "unused parameters" */
+    dset = dset;
+    dim = dim;
+    scale_id = scale_id;
+    
+    if ( visitor_data != NULL )
+    {
+        (*(int *)visitor_data)++;
+    }
+
+    /* define a default 1 value for return. This will cause the iterator to stop */
+    return 1;
+}
+
 
 
 
@@ -2057,9 +2111,10 @@ static int test_errors(void)
 
     return 0;
 
-    /* error zone, gracefully close */
+    /* error zone */
 out:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY 
+    {
         H5Sclose(sid);
         H5Sclose(sidds);
         H5Dclose(did);
@@ -2086,8 +2141,8 @@ static int test_iterators(void)
     hsize_t dims[RANK]  = {DIM1_SIZE,DIM2_SIZE};              /* size of data dataset */
     hsize_t s1_dim[1]   = {DIM1_SIZE};                        /* size of DS 1 dataset */
     hid_t   gid = -1;                                         /* group ID */
-    hid_t   did;                                              /* dataset ID */
-    hid_t   dsid;                                             /* scale ID */
+    hid_t   did = -1;                                         /* dataset ID */
+    hid_t   dsid = -1;                                        /* scale ID */
     char    dname[30];                                        /* dataset name */
     int     i;
 
@@ -2186,7 +2241,7 @@ static int test_iterators(void)
     }
 
     /* iterate trough the 1st dimension of "dset_a" */
-    if(H5DSiterate_scales(did,0,NULL,op_bogus,NULL) < 0)
+    if(H5DSiterate_scales(did,0,NULL,op_continue,NULL) < 0)
         goto out;
 
     /* close */
@@ -2232,7 +2287,7 @@ static int test_iterators(void)
         goto out;
 
     /* iterate  */
-    if(H5DSiterate_scales(did, 0, NULL, op_bogus, NULL) == SUCCEED)
+    if(H5DSiterate_scales(did, 0, NULL, op_continue, NULL) == SUCCEED)
         goto out;
 
     /* close */
@@ -2248,10 +2303,12 @@ static int test_iterators(void)
 
     return 0;
 
-    /* error zone, gracefully close */
+    /* error zone */
 out:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY 
+    {
         H5Gclose(gid);
+        H5Dclose(did);
         H5Fclose(fid);
     } H5E_END_TRY;
     H5_FAILED();
@@ -2269,8 +2326,8 @@ static int test_rank(void)
     hid_t   fid;                                              /* file ID */
     hid_t   did = -1;                                         /* dataset ID */
     hid_t   dsid = -1;                                        /* scale ID */
-    hid_t   sid;                                              /* space ID */
-    hid_t   sidds;                                            /* space ID */
+    hid_t   sid = -1;                                         /* space ID */
+    hid_t   sidds = -1;                                       /* space ID */
     hsize_t dims1[1]  = {DIM1_SIZE};                          /* size of data dataset */
     hsize_t dims2[2]  = {DIM1_SIZE,DIM2_SIZE};                /* size of data dataset */
     hsize_t dims3[3]  = {DIM1_SIZE,DIM2_SIZE,DIM3_SIZE};      /* size of data dataset */
@@ -2455,11 +2512,14 @@ static int test_rank(void)
 
     return 0;
 
-    /* error zone, gracefully close */
+    /* error zone */
 out:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY 
+    {
         H5Dclose(did);
         H5Dclose(dsid);
+        H5Sclose(sidds);
+        H5Sclose(sid);
         H5Fclose(fid);
     } H5E_END_TRY;
     H5_FAILED();
@@ -2632,9 +2692,10 @@ static int test_types(void)
 
     return 0;
 
-    /* error zone, gracefully close */
+    /* error zone */
 out:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY 
+    {
         H5Dclose(did);
         H5Dclose(dsid);
         H5Fclose(fid);
@@ -2790,9 +2851,10 @@ static int test_data(void)
 
     return 0;
 
-    /* error zone, gracefully close */
+    /* error zone */
 out:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY 
+    {
         H5Dclose(did);
         H5Dclose(dsid);
         H5Fclose(fid);
@@ -2881,4 +2943,201 @@ static int read_data( const char* fname,
 
 }
 
+
+/*-------------------------------------------------------------------------
+ * test parameter errors
+ *-------------------------------------------------------------------------
+ */
+
+static int test_errors2(void)
+{
+    hid_t   fid;                              /* file ID */
+    hid_t   did = -1;                         /* dataset ID */
+    hid_t   dsid = -1;                        /* scale ID */
+    hsize_t dimd[2]  = {3,3};                 /* size of data dataset */
+    hsize_t dims[1]  = {3};                   /* size of scale dataset */
+    char    lbuf[255];                        /* label buffer */
+    ssize_t label_len;                        /* label lenght */
+    int     scale_idx;                        /* scale index */
+    int     nscales;                          /* number of scales in DIM */
+    int     count;                            /* visitor data */
+   
+    printf("Testing parameter errors\n");
+
+    /*-------------------------------------------------------------------------
+    * create a file, a dataset, scales
+    *-------------------------------------------------------------------------
+    */
+
+    /* create a file using default properties */
+    if ((fid=H5Fcreate(FILE7,H5F_ACC_TRUNC,H5P_DEFAULT,H5P_DEFAULT)) < 0)
+        goto out;
+
+    /* make a dataset */
+    if (H5LTmake_dataset_int(fid,"dset",2,dimd,NULL) < 0)
+        goto out;
+
+    /* make a scale dataset  */
+    if(H5LTmake_dataset_int(fid,"ds1",1,dims,NULL) < 0)
+        goto out;
+
+    /* make a scale dataset  */
+    if(H5LTmake_dataset_int(fid,"ds2",1,dims,NULL) < 0)
+        goto out;
+
+
+    TESTING2("attach scales");
+
+
+    /*-------------------------------------------------------------------------
+    * attach with invalid indices
+    *-------------------------------------------------------------------------
+    */
+
+    if ((did = H5Dopen2(fid,"dset", H5P_DEFAULT)) < 0)
+        goto out;
+    if ((dsid = H5Dopen2(fid,"ds1", H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5DSattach_scale(did,dsid,2) == SUCCEED)
+        goto out;
+    if (H5DSattach_scale(did,dsid,0) < 0)
+        goto out;
+    if (H5Dclose(dsid) < 0)
+        goto out;
+    if (H5Dclose(did) < 0)
+        goto out;
+
+    PASSED();
+
+    TESTING2("detach scales");
+
+    /*-------------------------------------------------------------------------
+    * detach with invalid indices
+    *-------------------------------------------------------------------------
+    */
+    if ((did = H5Dopen2(fid,"dset", H5P_DEFAULT)) < 0)
+        goto out;
+    if ((dsid = H5Dopen2(fid,"ds1", H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5DSdetach_scale(did,dsid,2) == SUCCEED)
+        goto out;
+    if (H5DSdetach_scale(did,dsid,0) < 0)
+        goto out;
+    if (H5Dclose(dsid) < 0)
+        goto out;
+    if (H5Dclose(did) < 0)
+        goto out; 
+
+    PASSED();
+
+    TESTING2("set/get label");
+
+    /*-------------------------------------------------------------------------
+    * set/get label invalid indices
+    *-------------------------------------------------------------------------
+    */
+    if ((did = H5Dopen2(fid,"dset", H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5DSset_label(did,2,"label")== SUCCEED)
+        goto out;
+    if (H5DSset_label(did,0,"label") < 0)
+        goto out;
+    if (H5DSget_label(did,2,lbuf,sizeof(lbuf)) == SUCCEED)
+        goto out; 
+    if ((label_len=H5DSget_label(did,0,NULL,0)) < 0)
+        goto out;  
+    if ( label_len != strlen("label") )
+        goto out;
+    if (H5DSget_label(did,0,lbuf,sizeof(lbuf)) < 0)
+        goto out;
+    if (H5Dclose(did) < 0)
+        goto out; 
+
+    PASSED();
+
+    TESTING2("iterate scales");
+
+
+    /*-------------------------------------------------------------------------
+    * iterate_scales invalid indices and return DS_IDX and visitor data
+    *-------------------------------------------------------------------------
+    */
+    if ((did = H5Dopen2(fid,"dset", H5P_DEFAULT)) < 0)
+        goto out;
+
+    if ((dsid = H5Dopen2(fid,"ds1", H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5DSattach_scale(did,dsid,0) < 0)
+        goto out;
+    if (H5Dclose(dsid) < 0)
+        goto out;
+
+    if ((dsid = H5Dopen2(fid,"ds2", H5P_DEFAULT)) < 0)
+        goto out;
+    if (H5DSattach_scale(did,dsid,0) < 0)
+        goto out;
+    if (H5Dclose(dsid) < 0)
+        goto out;
+
+    if((nscales = H5DSget_num_scales(did,0)) < 0)
+        goto out;
+    if(nscales!=2)
+        goto out;
+
+    /* invalid DIM */
+    if (H5DSiterate_scales(did,2,NULL,op_continue,NULL)== SUCCEED)
+        goto out;
+    /* invalid DS_IDX */
+    scale_idx = 2; 
+    if (H5DSiterate_scales(did,0,&scale_idx,op_continue,NULL)== SUCCEED)
+        goto out;
+    
+    /* continue iteration */
+    scale_idx = 0;
+    count = 0;
+    if (H5DSiterate_scales(did,0,&scale_idx,op_continue,(void *)&count) < 0)
+        goto out;
+
+    if ( scale_idx != 1 && count != nscales )
+    {
+        goto out;
+    }
+
+    /* stop iteration */
+    scale_idx = 0;
+    count = 0;
+    if (H5DSiterate_scales(did,0,&scale_idx,op_stop,(void *)&count) < 0)
+        goto out;
+
+    if ( scale_idx != 0 && count != 1 )
+    {
+        goto out;
+    }
+
+    
+    if (H5Dclose(did) < 0)
+        goto out;  
+
+    /*-------------------------------------------------------------------------
+    * close
+    *-------------------------------------------------------------------------
+    */
+    if(H5Fclose(fid) < 0)
+        goto out;
+
+    PASSED();
+
+    return 0;
+
+    /* error zone */
+out:
+    H5E_BEGIN_TRY 
+    {
+        H5Dclose(did);
+        H5Dclose(dsid);
+        H5Fclose(fid);
+    } H5E_END_TRY;
+    H5_FAILED();
+    return FAIL;
+}
 

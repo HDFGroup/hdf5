@@ -28,6 +28,7 @@
 #include "H5Lprivate.h"		/* Links		  		*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5Tprivate.h"		/* Datatypes				*/
+#include "H5SLprivate.h"    /* Skip lists                           */
 
 
 /****************/
@@ -270,6 +271,9 @@ H5_term_library(void)
             /* Don't shut down the ID code until other APIs which use them are shut down */
             if(pending == 0)
                 pending += DOWN(I);
+            /* Don't shut down the skip list code until everything that uses it is down */
+            if(pending == 0)
+                pending += DOWN(SL);
             /* Don't shut down the free list code until _everything_ else is down */
             if(pending == 0)
                 pending += DOWN(FL);
@@ -405,6 +409,9 @@ done:
  *      global lists, up to 3 MB of total storage might be allocated (1MB on
  *      each of regular, array and block type lists).
  *
+ *      The settings for block free lists are duplicated to factory free lists.
+ *      Factory free list limits cannot be set independently currently.
+ *
  * Parameters:
  *  int reg_global_lim;  IN: The limit on all "regular" free list memory used
  *  int reg_list_lim;    IN: The limit on memory used in each "regular" free list
@@ -420,7 +427,9 @@ done:
  * Programmer:	Quincey Koziol
  *              Wednesday, August 2, 2000
  *
- * Modifications:
+ * Modifications:   Neil Fortner
+ *                  Wednesday, April 8, 2009
+ *                  Added support for factory free lists
  *
  *-------------------------------------------------------------------------
  */
@@ -435,7 +444,8 @@ H5set_free_list_limits(int reg_global_lim, int reg_list_lim, int arr_global_lim,
              arr_list_lim, blk_global_lim, blk_list_lim);
 
     /* Call the free list function to actually set the limits */
-    if(H5FL_set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim, blk_global_lim, blk_list_lim)<0)
+    if(H5FL_set_free_list_limits(reg_global_lim, reg_list_lim, arr_global_lim, arr_list_lim,
+            blk_global_lim, blk_list_lim, blk_global_lim, blk_list_lim)<0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTSET, FAIL, "can't set garbage collection limits")
 
 done:

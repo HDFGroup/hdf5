@@ -79,6 +79,9 @@ DIST_SUBDIRS = src test testpar tools . c++ fortran hl perform examples
 # Some files generated during configure that should be cleaned
 DISTCLEANFILES=config/stamp1 config/stamp2
 
+# Some files/directories generated during check that should be cleaned
+CHECK_CLEANFILES+=*-tmp
+
 # Define rules for lib, progs, check, and tests.
 # These simply involve recursing into subdirectories.
 test _test: check
@@ -113,6 +116,7 @@ check-clean:
 	   (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;            \
 	  fi;                                                           \
 	done
+	$(RM) -rf prefix-tmp destdir-tmp
 
 # Some C++ compilers/linkers will create a directory named ii_files in
 # the root directory, which should be cleaned.
@@ -149,6 +153,23 @@ installcheck-local:
 
 # check-install is just a synonym for installcheck
 check-install: installcheck
+
+# check-all-install tests all installation methods.
+# Install via different mechanism and then compare against the default.
+# Fine if only libXXX.a files are different since they may have been ranlib'ed.
+check-all-install:
+	@echo Installing to default location
+	$(MAKE) install
+	@echo Installing to different prefix location
+	$(MAKE) prefix=${ROOT}/prefix-tmp install
+	@echo Compare against the default installation.
+	@echo Fine if only libXXX.a files are different.
+	-diff -r prefix-tmp ${prefix}
+	@echo Installing to different $$\DESTDIR location
+	env DESTDIR=${ROOT}/destdir-tmp $(MAKE) install
+	@echo Compare against the default installation.
+	@echo Fine if only libXXX.a files are different.
+	-diff -r destdir-tmp${prefix} ${prefix}
 
 # Only source files in the src directory include tracing information,
 # so 'make trace' only needs to recurse into that directory.

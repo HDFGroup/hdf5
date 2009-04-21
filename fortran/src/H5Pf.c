@@ -4439,3 +4439,70 @@ nh5pget_create_inter_group_c(hid_t_f *lcpl_id, int_f *crt_intermed_group)
   ret_value = 0;
   return ret_value;
 }
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pset_chunk_cache_c
+ * Purpose:     Calls H5Pset_chunk_cache
+ *
+ * Inputs:	dapl_id            - Link creation property list identifier
+ *              rdcc_nslots        - 
+ *              rdcc_nbytes        -
+ *              rdcc_w0            -
+ *              
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M.S. Breitenfeld
+ *              April 13, 2009
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f
+nh5pset_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nbytes, real_f *rdcc_w0)
+{
+  int ret_value = -1;
+
+  /*
+   * Call H5Pset_chunk_cache function.
+   */
+  if( (H5Pset_chunk_cache((hid_t)*dapl_id, (size_t)*rdcc_nslots, (size_t)*rdcc_nbytes, (double)*rdcc_w0)) <0 )
+    return ret_value; /* error occurred */
+
+  ret_value = 0;
+  return ret_value;
+}
+
+/*----------------------------------------------------------------------------
+ * Name:        h5pget_chunk_cache_c
+ * Purpose:     Calls H5Pget_chunk_cache
+ *
+ * Inputs:	dapl_id            - Link creation property list identifier
+ * Outputs:
+ *              rdcc_nslots        - 
+ *              rdcc_nbytes        -
+ *              rdcc_w0            -
+ *              
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  M.S. Breitenfeld
+ *              April 13, 2009
+ * Modifications:
+ *---------------------------------------------------------------------------*/
+
+int_f
+nh5pget_chunk_cache_c(hid_t_f *dapl_id, size_t_f *rdcc_nslots, size_t_f *rdcc_nbytes, real_f *rdcc_w0)
+{
+  int ret_value = -1;
+  size_t c_rdcc_nslots;
+  size_t c_rdcc_nbytes;
+  double c_rdcc_w0;
+  /*
+   * Call H5Pget_chunk_cache function.
+   */
+  if( (H5Pget_chunk_cache((hid_t)*dapl_id, &c_rdcc_nslots, &c_rdcc_nbytes, &c_rdcc_w0)) <0 )
+    return ret_value; /* error occurred */
+
+  *rdcc_nslots=(size_t_f)c_rdcc_nslots;
+  *rdcc_nbytes=(size_t_f)c_rdcc_nbytes;
+  *rdcc_w0=(real_f)c_rdcc_w0;
+
+  ret_value = 0;
+  return ret_value;
+}
