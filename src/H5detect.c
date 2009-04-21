@@ -522,7 +522,7 @@ static void
 insert_libhdf5_settings(void)
 {
     FILE *fsettings;
-    char inchar;
+    int inchar;
     int	bol=0;	/* indicates the beginning of a new line */
 
     if (NULL==(fsettings=HDfopen(LIBSETTINGSFNAME, "r"))){
