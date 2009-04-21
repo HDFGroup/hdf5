@@ -244,6 +244,7 @@ H5Zregister(const void *cls)
      * can be determined by the value of the first field.
      */
     if(cls_real->version != H5Z_CLASS_T_VERS) {
+#ifndef H5_NO_DEPRECATED_SYMBOLS
         /* Assume it is an old "H5Z_class1_t" instead */
         const H5Z_class1_t *cls_old = (const H5Z_class1_t *) cls;
 
@@ -259,6 +260,11 @@ H5Zregister(const void *cls)
 
         /* Set cls_real to point to the translated structure */
         cls_real = &cls_new;
+
+#else /* H5_NO_DEPRECATED_SYMBOLS */
+        /* Deprecated symbols not allowed, throw an error */
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid H5Z_class_t version number");
+#endif /* H5_NO_DEPRECATED_SYMBOLS */
     } /* end if */
 
     if (cls_real->id<0 || cls_real->id>H5Z_FILTER_MAX)
