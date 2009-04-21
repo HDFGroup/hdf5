@@ -45,11 +45,23 @@
 /* Local Typedefs */
 /******************/
 
+hid_t   H5_MY_PKG_ERR;
+
+hid_t   ERR_MIN;
+
+#define ERR_CLS_NAME            "H5LR"
+#define PROG_NAME               "HDF5:LR"
+
+#define ERR_MAJ_MSG              " *1*"
+#define ERR_MIN_MSG              " *2*"
 
 /********************/
 /* Package Typedefs */
 /********************/
-
+#define AT() 		printf ("	 at %s:%d in %s()...\n",	      \
+				__FILE__, __LINE__, __FUNCTION__);
+#define H5_FAILED()	{puts("*FAILED*");fflush(stdout);}
+#define TEST_ERROR      {H5_FAILED(); AT(); goto error;}
 
 /********************/
 /* Local Prototypes */
@@ -106,11 +118,43 @@ BEGIN_FUNC(PKGINIT, NOERR,
 herr_t, SUCCEED, -,
 H5LR__pkg_init(void))
 
+    char lib_str[256];
+
+    sprintf(lib_str, "%d.%d.%d",H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+
     /* Perform any package initialization actions (like registering the
      *  package's major error code, etc) here */
 
+    if((H5HL_ERR_CLS_g = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, lib_str)) < 0)
+        TEST_ERROR;
+
+    if((H5_MY_PKG_ERR = H5Ecreate_msg(H5HL_ERR_CLS_g, H5E_MAJOR, ERR_MAJ_MSG)) < 0)
+        TEST_ERROR;
+
+     if((ERR_MIN = H5Ecreate_msg(H5HL_ERR_CLS_g, H5E_MINOR, ERR_MIN_MSG)) < 0)
+         TEST_ERROR;
+    return 0;
+
+error:
+    return -1;
 
 END_FUNC(PKGINIT)
+
+/* BEGIN_FUNC(PRIV, NOERR, */
+/* herr_t, SUCCEED, -, */
+/* H5LR__pkg_msg(char *ERR_MAJ_MSG, char *ERR_MIN_MSG )) */
+
+/*     if((ERR_MAJ_IO = H5Ecreate_msg(H5HL_ERR_CLS_g, H5E_MAJOR, ERR_MAJ_MSG)) < 0) */
+/*         TEST_ERROR; */
+
+/*     if((ERR_MIN = H5Ecreate_msg(H5HL_ERR_CLS_g, H5E_MINOR, ERR_MIN_MSG)) < 0) */
+/*         TEST_ERROR; */
+/*     return 0; */
+
+/* error: */
+/*     return -1; */
+
+/* END_FUNC(PRIV) */
 
 /*-------------------------------------------------------------------------
  *
@@ -148,6 +192,10 @@ herr_t H5LRget_region_info(hid_t obj_id,               /* -IN-      Id. of any o
   hid_t dset = -1, sid = -1;
   hid_t ret_value = SUCCEED;          /* Return value */
   herr_t status;
+
+  /* Initialize errors class and messages */
+/*   if(init_error() < 0) */
+/*     TEST_ERROR; */
   
   /* Determine the rank of the space */
   sid = H5Rget_region(obj_id, H5R_DATASET_REGION, ref);
@@ -157,7 +205,10 @@ herr_t H5LRget_region_info(hid_t obj_id,               /* -IN-      Id. of any o
   if(*sel_type!=H5S_SEL_HYPERSLABS) printf("wrong select type\n");
     
   /* Try to open object */
-  dset = H5Rdereference(obj_id, H5R_DATASET_REGION, ref);
+  H5Eclear2(H5E_DEFAULT);
+  H5E_BEGIN_TRY {
+    dset = H5Rdereference(obj_id, H5R_DATASET_REGION, ref);
+  } H5E_END_TRY;
   
   if(dset < 0){
     H5Eclear2(H5E_DEFAULT);
@@ -260,8 +311,12 @@ herr_t H5LRget_region_info(hid_t obj_id,               /* -IN-      Id. of any o
   }
   return SUCCEED;
 
+ error:
+  return SUCCEED;
+
  done:
   return SUCCEED;
+
 }
 
 /*-------------------------------------------------------------------------
@@ -290,14 +345,23 @@ H5LRread_region(hid_t obj_id,               /* -IN-      Id. of any object in a 
 
     hid_t dset = -1, file_space = -1;   /* Identifier of the dataset's dataspace in the file */
     hid_t mem_space = -1;               /* Identifier of the memory dataspace                */
+    const char          *FUNC_H5LRread_region = "H5LRread_region";
 
-    /* Open the HDF5 object referenced */ 
-    if((dset = H5Rdereference(obj_id, H5R_DATASET_REGION, ref)) < 0)
-        H5E_THROW(H5E_BADSELECT, "Unable to open object referenced")
+    H5LR__pkg_init();
+
+    /* Open the HDF5 object referenced */
+    H5E_BEGIN_TRY {
+      dset = H5Rdereference(obj_id, H5R_DATASET_REGION, ref);
+    } H5E_END_TRY;
+
+    if(dset < 0) {
+/*       H5LR__pkg_msg("*1","*2*" ); */
+       H5E_THROW(ERR_MIN, "HL: Unable to open object referenced")
+    } /* end if */
 
     /* Retrieve the dataspace with the specified region selected */
     if((file_space = H5Rget_region(dset, H5R_DATASET_REGION, ref)) < 0)
-        H5E_THROW(H5E_CANTGET, "Unable to retrieve region")
+        H5E_THROW(H5E_CANTGET, "HL: Unable to retrieve region")
 
     /* Check for anything to retrieve */
     if(numelem || buf) {
@@ -336,6 +400,8 @@ CATCH
     if(dset > 0)
         if(H5Dclose(dset) < 0)
             H5E_THROW(H5E_CLOSEERROR, "Unable to close dataset")
+
+/*     H5Eclear2(H5E_DEFAULT); */
 
 END_FUNC(PUB)
 
@@ -751,7 +817,7 @@ herr_t H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,
   dims_src = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src);
 
   bounds_coor = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src * 2);
-/* get the list of hyperslab blocks currently selected */
+  /* get the list of hyperslab blocks currently selected */
   status = H5Sget_select_hyper_blocklist(sid_src, (hsize_t)0, (hsize_t)1, bounds_coor);
 
   numelem_src = 1;
