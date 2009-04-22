@@ -1145,6 +1145,7 @@
 ./tools/testfiles/tcompound_complex.h5
 ./tools/testfiles/tdatareg.h5
 ./tools/testfiles/tdatareg.ddl 
+./tools/testfiles/tdataregR.ddl 
 ./tools/testfiles/tdset-1.ddl
 ./tools/testfiles/tdset-2.ddl
 ./tools/testfiles/tdset-3s.ddl
