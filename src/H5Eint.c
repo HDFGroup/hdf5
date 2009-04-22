@@ -362,8 +362,9 @@ H5E_walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
     if(min_ptr->msg)
         min_str = min_ptr->msg;
 
-    /* Get error class info */
-    cls_ptr = maj_ptr->cls;
+    /* Get error class info.  Don't use the class of the major or minor error because
+     * they might be different. */
+    cls_ptr = (H5E_cls_t *)H5I_object_verify(err_desc->cls_id, H5I_ERROR_CLASS);
 
     /* Print error class header if new class */
     if(eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name)) {
