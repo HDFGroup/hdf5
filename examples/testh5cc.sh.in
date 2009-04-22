@@ -25,8 +25,8 @@
 # Where the tool is installed.
 prefix="${prefix:-@prefix@}"
 PARALLEL=@PARALLEL@		# Am I in parallel mode?
-AR=@AR@
-RANLIB=@RANLIB@
+AR="@AR@"
+RANLIB="@RANLIB@"
 if [ "$PARALLEL" = no ]; then
     H5TOOL="h5cc"           	# The tool name
 else
