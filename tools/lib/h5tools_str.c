@@ -94,32 +94,6 @@ size_t h5tools_str_len(h5tools_str_t *str) {
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5tools_str_newline
- *
- * Purpose: Renders the a new line into string STR.
- *
- * Return:  Nothing
- *
- *-------------------------------------------------------------------------
- */
-char *
-h5tools_str_newline(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
-        h5tools_context_t *ctx) {
-    int x;
-
-    h5tools_str_append(str, "%s", "\n");
-
-    /* need to indent some more here*/
-//    if (ctx->indent_level >= 0)
-//        if (!info->pindex)
-//            h5tools_str_append(str, "%s", OPT(info->line_pre, ""));
-
-    for (x = 0; x < ctx->indent_level + 2; x++)
-        h5tools_str_append(str, "%s", OPT(info->line_indent, ""));
-
-}
-
-/*-------------------------------------------------------------------------
  * Function:    h5tools_str_append
  *
  * Purpose: Formats variable arguments according to printf() format
