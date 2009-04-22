@@ -722,6 +722,9 @@ uninstall-am: uninstall-binPROGRAMS
 help:
 	@$(top_srcdir)/bin/makehelp
 
+# The h5repack.sh script needs h5repacktst to run first.
+h5repack.sh.chkexe_: h5repacktst.chkexe_
+
 # lib/progs/tests targets recurse into subdirectories. build-* targets
 # build files in this directory.
 build-lib: $(LIB)
