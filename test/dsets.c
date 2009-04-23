@@ -7343,6 +7343,8 @@ test_chunk_expand(hid_t fapl)
     hid_t       scalar_sid = -1;/* Scalar dataspace ID */
     hid_t       dsid = -1;      /* Dataset ID */
     hsize_t     dim, max_dim, chunk_dim; /* Dataset and chunk dimensions */
+    H5D_chunk_index_t idx_type; /* Dataset chunk index type */
+    H5F_libver_t low, high;     /* File format bounds */
     hsize_t	hs_offset;      /* Hyperslab offset */
     hsize_t	hs_size;        /* Hyperslab size */
     H5D_alloc_time_t alloc_time;        /* Storage allocation time */
@@ -7354,9 +7356,12 @@ test_chunk_expand(hid_t fapl)
 
     h5_fixname(FILENAME[10], fapl, filename, sizeof filename);
 
-    if(sizeof(size_t) <= 4) {
+    /* Check if we are using the latest version of the format */
+    if(H5Pget_libver_bounds(fapl, &low, &high) < 0) FAIL_STACK_ERROR
+
+    if(sizeof(size_t) <= 4 && low != H5F_LIBVER_LATEST) {
 	SKIPPED();
-	puts("    Current machine can't test for error");
+	puts("    Current machine can't test for error w/old file format");
     } /* end if */
     else {
         /* Register "expansion" filter */
@@ -7407,6 +7412,19 @@ test_chunk_expand(hid_t fapl)
             else {
                 if((dsid = H5Dcreate2(fid, "dset", H5T_NATIVE_UINT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
                     FAIL_STACK_ERROR
+
+                /* Get the chunk index type */
+                if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
+
+                /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
+                if(low == H5F_LIBVER_LATEST) {
+                    /* Verify index type */
+                    if(idx_type != H5D_CHUNK_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
+                } /* end if */
+                else {
+                    /* Verify index type */
+                    if(idx_type != H5D_CHUNK_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+                } /* end else */
 
                 /* Fill elements */
                 hs_size = 1;
@@ -7516,6 +7534,19 @@ test_chunk_expand(hid_t fapl)
 
                 /* Open dataset */
                 if((dsid = H5Dopen2(fid, "dset", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
+
+                /* Get the chunk index type */
+                if(H5D_layout_idx_type_test(dsid, &idx_type) < 0) FAIL_STACK_ERROR
+
+                /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
+                if(low == H5F_LIBVER_LATEST) {
+                    /* Verify index type */
+                    if(idx_type != H5D_CHUNK_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
+                } /* end if */
+                else {
+                    /* Verify index type */
+                    if(idx_type != H5D_CHUNK_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+                } /* end else */
 
                 /* Create scalar dataspace */
                 if((scalar_sid = H5Screate(H5S_SCALAR)) < 0) FAIL_STACK_ERROR
