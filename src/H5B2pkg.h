@@ -124,7 +124,7 @@ typedef struct {
     unsigned    split_nrec;     /* Number of records to split node at */
     unsigned    merge_nrec;     /* Number of records to merge node at */
     hsize_t     cum_max_nrec;   /* Cumulative max. # of records below this node's depth */
-    unsigned char cum_max_nrec_size; /* Size to store cumulative max. # of records for this node (in bytes) */
+    uint8_t     cum_max_nrec_size; /* Size to store cumulative max. # of records for this node (in bytes) */
     H5FL_fac_head_t *nat_rec_fac;   /* Factory for native record blocks */
     H5FL_fac_head_t *node_ptr_fac;  /* Factory for node pointer blocks */
 } H5B2_node_info_t;
@@ -149,7 +149,7 @@ typedef struct H5B2_shared_t {
     unsigned	depth;		/* B-tree's overall depth                     */
 
     /* Derived information from user's information */
-    unsigned char max_nrec_size; /* Size to store max. # of records in any node (in bytes) */
+    uint8_t     max_nrec_size;  /* Size to store max. # of records in any node (in bytes) */
 } H5B2_shared_t;
 
 /* The B-tree information */

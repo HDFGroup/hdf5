@@ -57,6 +57,7 @@
 ./bin/locate_sw
 ./bin/ltmain.sh
 ./bin/make_err
+./bin/make_overflow
 ./bin/make_vers
 ./bin/makehelp
 ./bin/missing
@@ -427,6 +428,8 @@
 ./src/H5err.txt
 ./src/H5config.h.in
 ./src/H5detect.c
+./src/H5overflow.txt
+./src/H5overflow.h
 ./src/H5private.h
 ./src/H5public.h
 ./src/H5system.c

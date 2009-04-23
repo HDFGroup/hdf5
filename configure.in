@@ -1306,6 +1306,7 @@ AC_C_BIGENDIAN
 AC_CHECK_SIZEOF([char], [1])
 AC_CHECK_SIZEOF([short], [2])
 AC_CHECK_SIZEOF([int], [4])
+AC_CHECK_SIZEOF([unsigned], [4])
 AC_CHECK_SIZEOF([long], [4])
 AC_CHECK_SIZEOF([long long], [8])
 AC_CHECK_SIZEOF([__int64], [8])

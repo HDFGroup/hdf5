@@ -457,8 +457,9 @@ H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id)
 {
     H5S_t      *space;              /* Dataset's dataspace */
     hsize_t     space_allocated;    /* The number of bytes allocated for chunks */
-    hssize_t    total_elem;         /* The total number of elements in dataspace */
-    size_t      type_size;          /* The size of the datatype for the dataset */
+    hssize_t    snelmts;            /* Temporary holder for number of elements in dataspace */
+    hsize_t     nelmts;             /* Number of elements in dataspace */
+    size_t      dt_size;            /* Size of datatype */
     hsize_t     full_size;          /* The number of bytes in the dataset when fully populated */
     herr_t      ret_value = SUCCEED;
 
@@ -471,16 +472,20 @@ H5D_get_space_status(H5D_t *dset, H5D_space_status_t *allocation, hid_t dxpl_id)
     HDassert(space);
 
     /* Get the total number of elements in dataset's dataspace */
-    if((total_elem=H5S_GET_EXTENT_NPOINTS(space)) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get # of dataspace elements")
+    if((snelmts = H5S_GET_EXTENT_NPOINTS(space)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of elements in dataspace")
+    nelmts = (hsize_t)snelmts;
 
     /* Get the size of the dataset's datatype */
-    if((type_size = H5T_get_size(dset->shared->type)) == 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTCOUNT, FAIL, "unable to get size of datatype")
+    if(0 == (dt_size = H5T_GET_SIZE(dset->shared->type)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve size of datatype")
 
     /* Compute the maximum size of the dataset in bytes */
-    H5_CHECK_OVERFLOW(total_elem,hssize_t,hsize_t);
-    full_size=((hsize_t)total_elem)*type_size;
+    full_size = nelmts * dt_size;
+
+    /* Check for overflow during multiplication */
+    if(nelmts != (full_size / dt_size))
+        HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
 
     /* Difficult to error check, since the error value is 0 and 0 is a valid value... :-/ */
     space_allocated = H5D_get_storage_size(dset, dxpl_id);
@@ -1407,10 +1412,29 @@ H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
              * truncate the dimension sizes to 32-bits of information. - QAK 5/26/04
              */
             if(dataset->shared->layout.version < 3) {
-                hssize_t tmp_size;                      /* Temporary holder for raw data size */
+                hssize_t snelmts;                   /* Temporary holder for number of elements in dataspace */
+                hsize_t nelmts;                     /* Number of elements in dataspace */
+                size_t dt_size;                     /* Size of datatype */
+                hsize_t tmp_size;                   /* Temporary holder for raw data size */
 
-                tmp_size = H5S_GET_EXTENT_NPOINTS(dataset->shared->space) * H5T_get_size(dataset->shared->type);
-                H5_ASSIGN_OVERFLOW(dataset->shared->layout.u.contig.size, tmp_size, hssize_t, hsize_t);
+                /* Retrieve the number of elements in the dataspace */
+                if((snelmts = H5S_GET_EXTENT_NPOINTS(dataset->shared->space)) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of elements in dataspace")
+                nelmts = (hsize_t)snelmts;
+
+                /* Get the datatype's size */
+                if(0 == (dt_size = H5T_GET_SIZE(dataset->shared->type)))
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve size of datatype")
+
+                /* Compute the size of the dataset's contiguous storage */
+                tmp_size = nelmts * dt_size;
+
+                /* Check for overflow during multiplication */
+                if(nelmts != (tmp_size / dt_size))
+                    HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
+
+                /* Assign the dataset's contiguous storage size */
+                dataset->shared->layout.u.contig.size = tmp_size;
             } /* end if */
 
             /* Get the sieve buffer size for this dataset */

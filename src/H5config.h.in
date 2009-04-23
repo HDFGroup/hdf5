@@ -584,6 +584,9 @@
 /* The size of `uint_least8_t', as computed by sizeof. */
 #undef SIZEOF_UINT_LEAST8_T
 
+/* The size of `unsigned', as computed by sizeof. */
+#undef SIZEOF_UNSIGNED
+
 /* The size of `__int64', as computed by sizeof. */
 #undef SIZEOF___INT64
 
