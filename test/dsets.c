@@ -106,8 +106,9 @@ const char *FILENAME[] = {
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS	305
 #define H5Z_FILTER_CORRUPT	306
-#define H5Z_FILTER_BOGUS2	307
-#define H5Z_FILTER_DEPREC       308
+#define H5Z_FILTER_CAN_APPLY_TEST	307
+#define H5Z_FILTER_SET_LOCAL_TEST	308
+#define H5Z_FILTER_DEPREC       309
 
 /* Flags for testing filters */
 #define DISABLE_FLETCHER32      0
@@ -1116,7 +1117,7 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
         add_on=(unsigned)H5Tget_size(type_id);
 
     /* Get the filter's current parameters */
-    if(H5Pget_filter_by_id2(dcpl_id, H5Z_FILTER_BOGUS2, &flags, &cd_nelmts, cd_values, (size_t)0, NULL, NULL) < 0)
+    if(H5Pget_filter_by_id2(dcpl_id, H5Z_FILTER_SET_LOCAL_TEST, &flags, &cd_nelmts, cd_values, (size_t)0, NULL, NULL) < 0)
         return(FAIL);
 
     /* Check that the parameter values were passed along correctly */
@@ -1130,7 +1131,7 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
     cd_values[3]=add_on;        /* Amount the data was modified by */
 
     /* Modify the filter's parameters for this dataset */
-    if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_BOGUS2, flags, (size_t)BOGUS2_ALL_NPARMS,
+    if(H5Pmodify_filter(dcpl_id, H5Z_FILTER_SET_LOCAL_TEST, flags, (size_t)BOGUS2_ALL_NPARMS,
             cd_values) < 0)
         return(FAIL);
 
@@ -4796,10 +4797,10 @@ test_types(hid_t file)
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_CAN_APPLY_TEST[1] = {{
-	H5Z_CLASS_T_VERS,
-    H5Z_FILTER_BOGUS,		/* Filter id number		*/
-	1, 1,
-    "bogus",			/* Filter name for debugging	*/
+    H5Z_CLASS_T_VERS,
+    H5Z_FILTER_CAN_APPLY_TEST,	/* Filter id number		*/
+    1, 1,
+    "can_apply_test",		/* Filter name for debugging	*/
     can_apply_bogus,            /* The "can apply" callback     */
     NULL,                       /* The "set local" callback     */
     filter_bogus,		/* The actual filter function	*/
@@ -4849,7 +4850,7 @@ test_can_apply(hid_t file)
         printf("    Line %d: Can't register 'can apply' filter\n",__LINE__);
         goto error;
     }
-    if(H5Pset_filter(dcpl, H5Z_FILTER_BOGUS, 0, (size_t)0, NULL) < 0) {
+    if(H5Pset_filter(dcpl, H5Z_FILTER_CAN_APPLY_TEST, 0, (size_t)0, NULL) < 0) {
         H5_FAILED();
         printf("    Line %d: Can't set bogus filter\n",__LINE__);
         goto error;
@@ -5156,10 +5157,10 @@ error:
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_SET_LOCAL_TEST[1] = {{
-	H5Z_CLASS_T_VERS,
-    H5Z_FILTER_BOGUS2,		/* Filter id number		*/
-	1, 1,
-    "bogus2",			/* Filter name for debugging	*/
+    H5Z_CLASS_T_VERS,
+    H5Z_FILTER_SET_LOCAL_TEST,	/* Filter id number		*/
+    1, 1,
+    "set_local_test",		/* Filter name for debugging	*/
     NULL,                       /* The "can apply" callback     */
     set_local_bogus2,           /* The "set local" callback     */
     filter_bogus2,		/* The actual filter function	*/
@@ -5229,7 +5230,7 @@ test_set_local(hid_t fapl)
         printf("    Line %d: Can't register 'set local' filter\n",__LINE__);
         goto error;
     }
-    if(H5Pset_filter(dcpl, H5Z_FILTER_BOGUS2, 0, (size_t)BOGUS2_PERM_NPARMS, cd_values) < 0) {
+    if(H5Pset_filter(dcpl, H5Z_FILTER_SET_LOCAL_TEST, 0, (size_t)BOGUS2_PERM_NPARMS, cd_values) < 0) {
         H5_FAILED();
         printf("    Line %d: Can't set bogus2 filter\n",__LINE__);
         goto error;
@@ -5740,7 +5741,6 @@ test_filters_endianess(void)
     hid_t     dsid=-1;                  /* dataset ID */
     hid_t     sid=-1;                   /* dataspace ID */
     hid_t     dcpl=-1;                  /* dataset creation property list ID */
-    int       i;
     char      *srcdir = getenv("srcdir"); /* the source directory */
     char      data_file[512]="";          /* buffer to hold name of existing file */
 
@@ -6384,11 +6384,11 @@ test_deprec(hid_t file)
     if(H5Zregister(H5Z_DEPREC) < 0) goto error;
     if(H5Pset_filter(dcpl, H5Z_FILTER_DEPREC, 0, (size_t)0, NULL) < 0) goto error;
 
+    puts("");
     if(test_filter_internal(file,DSET_DEPREC_NAME_FILTER,dcpl,DISABLE_FLETCHER32,DATA_NOT_CORRUPTED,&deprec_size) < 0) goto error;
 
     if(H5Pclose(dcpl) < 0) goto error;
 
-    PASSED();
     return 0;
 
  error:
@@ -6762,7 +6762,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     /* Define cache size to be smaller than chunk size */
     rdcc_nelmts = BYPASS_CHUNK_DIM/5;
     rdcc_nbytes = sizeof(int)*BYPASS_CHUNK_DIM/5;
-    if(H5Pset_cache(fapl_local, 0, rdcc_nelmts, rdcc_nbytes, 0) < 0) FAIL_STACK_ERROR
+    if(H5Pset_cache(fapl_local, 0, rdcc_nelmts, rdcc_nbytes, (double)0.0) < 0) FAIL_STACK_ERROR
 
     /* Create file */
     if((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_local)) < 0) FAIL_STACK_ERROR

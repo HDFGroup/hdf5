@@ -101,10 +101,10 @@ typedef struct H5FL_blk_gc_list_t {
 static H5FL_blk_gc_list_t H5FL_blk_gc_head={0,NULL};
 
 /* A garbage collection node for factory free lists */
-typedef struct H5FL_fac_gc_node_t {
+struct H5FL_fac_gc_node_t {
     H5FL_fac_head_t *list;              /* Pointer to the head of the list to garbage collect */
     struct H5FL_fac_gc_node_t *next;    /* Pointer to the next node in the list of things to garbage collect */
-} H5FL_fac_gc_node_t;
+};
 
 /* The garbage collection head for factory free lists */
 typedef struct H5FL_fac_gc_list_t {
@@ -113,18 +113,8 @@ typedef struct H5FL_fac_gc_list_t {
 } H5FL_fac_gc_list_t;
 
 /* Data structure to store each block in factory free list */
-typedef struct H5FL_fac_node_t {
+struct H5FL_fac_node_t {
     struct H5FL_fac_node_t *next;   /* Pointer to next block in free list */
-} H5FL_fac_node_t;
-
-/* Data structure for free list block factory */
-struct H5FL_fac_head_t {
-    unsigned init;      /* Whether the free list has been initialized */
-    unsigned allocated; /* Number of blocks allocated */
-    unsigned onlist;    /* Number of blocks on free list */
-    size_t size;        /* Size of the blocks in the list */
-    H5FL_fac_node_t *list;  /* List of free blocks */
-    H5FL_fac_gc_node_t *prev_gc; /* Previous garbage collection node in list */
 };
 
 /* The head of the list of factory things to garbage collect */

@@ -376,7 +376,10 @@ static herr_t
 H5D_contig_new(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset,
     const H5P_genplist_t UNUSED *dc_plist)
 {
-    hssize_t tmp_size;                  /* Temporary holder for raw data size */
+    hssize_t snelmts;                   /* Temporary holder for number of elements in dataspace */
+    hsize_t nelmts;                     /* Number of elements in dataspace */
+    size_t dt_size;                     /* Size of datatype */
+    hsize_t tmp_size;                   /* Temporary holder for raw data size */
     hsize_t dim[H5O_LAYOUT_NDIMS];	/* Current size of data in elements */
     hsize_t max_dim[H5O_LAYOUT_NDIMS];  /* Maximum size of data in elements */
     int ndims;                          /* Rank of dataspace */
@@ -402,9 +405,24 @@ H5D_contig_new(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset
         if(max_dim[i] > dim[i])
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "extendible contiguous non-external dataset")
 
-    /* Compute the total size of dataset */
-    tmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space) * H5T_get_size(dset->shared->type);
-    H5_ASSIGN_OVERFLOW(dset->shared->layout.u.contig.size, tmp_size, hssize_t, hsize_t);
+    /* Retrieve the number of elements in the dataspace */
+    if((snelmts = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of elements in dataspace")
+    nelmts = (hsize_t)snelmts;
+
+    /* Get the datatype's size */
+    if(0 == (dt_size = H5T_GET_SIZE(dset->shared->type)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve size of datatype")
+
+    /* Compute the size of the dataset's contiguous storage */
+    tmp_size = nelmts * dt_size;
+
+    /* Check for overflow during multiplication */
+    if(nelmts != (tmp_size / dt_size))
+        HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
+
+    /* Assign the dataset's contiguous storage size */
+    dset->shared->layout.u.contig.size = tmp_size;
 
     /* Get the sieve buffer size for this dataset */
     dset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(f);
