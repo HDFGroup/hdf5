@@ -2193,6 +2193,11 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
             if(H5Z_pipeline(&(dset->shared->dcpl_cache.pline), 0, &(udata.filter_mask), dxpl_cache->err_detect,
                      dxpl_cache->filter_cb, &nbytes, &alloc, &buf) < 0)
                 HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, FAIL, "output pipeline failed")
+#if H5_SIZEOF_SIZE_T > 4
+            /* Check for the chunk expanding too much to encode in a 32-bit value */
+            if(nbytes > ((size_t)0xffffffff))
+                HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk too large for 32-bit length")
+#endif /* H5_SIZEOF_SIZE_T > 4 */
             H5_ASSIGN_OVERFLOW(udata.nbytes, nbytes, size_t, uint32_t);
 
             /* Indicate that the chunk must go through 'insert' method */
@@ -3055,6 +3060,11 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
            /* Push the chunk through the filters */
            if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &orig_chunk_size, &buf_size, &fb_info.fill_buf) < 0)
                HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
+#if H5_SIZEOF_SIZE_T > 4
+            /* Check for the chunk expanding too much to encode in a 32-bit value */
+            if(orig_chunk_size > ((size_t)0xffffffff))
+                HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk too large for 32-bit length")
+#endif /* H5_SIZEOF_SIZE_T > 4 */
        } /* end if */
     } /* end if */
 
@@ -3118,6 +3128,12 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
                         /* Push the chunk through the filters */
                         if(H5Z_pipeline(pline, 0, &filter_mask, dxpl_cache->err_detect, dxpl_cache->filter_cb, &nbytes, &buf_size, &fb_info.fill_buf) < 0)
                             HGOTO_ERROR(H5E_PLINE, H5E_WRITEERROR, FAIL, "output pipeline failed")
+
+#if H5_SIZEOF_SIZE_T > 4
+                        /* Check for the chunk expanding too much to encode in a 32-bit value */
+                        if(nbytes > ((size_t)0xffffffff))
+                            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk too large for 32-bit length")
+#endif /* H5_SIZEOF_SIZE_T > 4 */
 
                         /* Keep the number of bytes the chunk turned in to */
                         chunk_size = nbytes;
@@ -4085,6 +4101,11 @@ H5D_chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
     if(has_filters && (is_vlen || fix_ref) ) {
         if(H5Z_pipeline(pline, 0, &(udata_dst.filter_mask), H5Z_NO_EDC, cb_struct, &nbytes, &buf_size, &buf) < 0)
             HGOTO_ERROR(H5E_PLINE, H5E_CANTFILTER, H5_ITER_ERROR, "output pipeline failed")
+#if H5_SIZEOF_SIZE_T > 4
+        /* Check for the chunk expanding too much to encode in a 32-bit value */
+        if(nbytes > ((size_t)0xffffffff))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADRANGE, FAIL, "chunk too large for 32-bit length")
+#endif /* H5_SIZEOF_SIZE_T > 4 */
         H5_ASSIGN_OVERFLOW(udata_dst.nbytes, nbytes, size_t, uint32_t);
 	udata->buf = buf;
 	udata->buf_size = buf_size;
