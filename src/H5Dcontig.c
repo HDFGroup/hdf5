@@ -61,7 +61,7 @@
 /********************/
 
 /* Layout operation callbacks */
-static herr_t H5D_contig_new(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
+static herr_t H5D_contig_construct(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
     const H5P_genplist_t *dc_plist);
 static hbool_t H5D_contig_is_space_alloc(const H5O_layout_t *layout);
 static herr_t H5D_contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
@@ -79,7 +79,7 @@ static herr_t H5D_contig_write_one(H5D_io_info_t *io_info, hsize_t offset,
 
 /* Contiguous storage layout I/O ops */
 const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
-    H5D_contig_new,
+    H5D_contig_construct,
     H5D_contig_is_space_alloc,
     H5D_contig_io_init,
     H5D_contig_read,
@@ -360,7 +360,7 @@ H5D_contig_get_addr(const H5D_t *dset)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_contig_new
+ * Function:	H5D_contig_construct
  *
  * Purpose:	Constructs new contiguous layout information for dataset
  *
@@ -373,7 +373,7 @@ H5D_contig_get_addr(const H5D_t *dset)
  */
 /* ARGSUSED */
 static herr_t
-H5D_contig_new(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset,
+H5D_contig_construct(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset,
     const H5P_genplist_t UNUSED *dc_plist)
 {
     hssize_t snelmts;                   /* Temporary holder for number of elements in dataspace */
@@ -386,7 +386,7 @@ H5D_contig_new(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset
     int i;                              /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_new)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_construct)
 
     /* Sanity checks */
     HDassert(f);
@@ -429,7 +429,7 @@ H5D_contig_new(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_contig_new() */
+} /* end H5D_contig_construct() */
 
 
 /*-------------------------------------------------------------------------

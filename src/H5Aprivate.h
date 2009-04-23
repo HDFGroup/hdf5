@@ -37,7 +37,6 @@
 
 /* Forward references of package typedefs */
 typedef struct H5A_t H5A_t;
-typedef struct H5A_attr_iter_op_t H5A_attr_iter_op_t;
 
 
 /*****************************/

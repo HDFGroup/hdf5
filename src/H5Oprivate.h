@@ -546,11 +546,13 @@ typedef herr_t (*H5O_lib_operator_t)(H5O_t *oh, H5O_mesg_t *mesg/*in,out*/,
     unsigned sequence, hbool_t *oh_modified/*out*/, void *operator_data/*in,out*/);
 
 /* Some syntactic sugar to make the compiler happy with two different kinds of iterator callbacks */
+typedef enum H5O_mesg_operator_type_t {
+    H5O_MESG_OP_APP,            /* Application callback */
+    H5O_MESG_OP_LIB             /* Library internal callback */
+} H5O_mesg_operator_type_t;
+
 typedef struct {
-    enum {
-        H5O_MESG_OP_APP,            /* Application callback */
-        H5O_MESG_OP_LIB             /* Library internal callback */
-    } op_type;
+    H5O_mesg_operator_type_t op_type;
     union {
         H5O_operator_t app_op;      /* Application callback for each message */
         H5O_lib_operator_t lib_op;  /* Library internal callback for each message */

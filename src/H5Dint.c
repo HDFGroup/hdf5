@@ -1137,7 +1137,7 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations")
 
     /* Create the layout information for the new dataset */
-    if((new_dset->shared->layout.ops->new)(file, dapl_id, dxpl_id, new_dset, dc_plist) < 0)
+    if((new_dset->shared->layout.ops->construct)(file, dapl_id, dxpl_id, new_dset, dc_plist) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize layout information")
 
     /* Indicate that the layout information was initialized */
