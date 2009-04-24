@@ -83,19 +83,19 @@ Install HDF5 on Cygwin
 
    The HDF5 source code is distributed in a variety of formats which
    can be unpacked with the following commands, each of which creates 
-   an `hdf5-1.8.2' directory.
+   an `hdf5-1.8.3' directory.
 
    2.1 Non-compressed tar archive (*.tar)
 
-            $ tar xf hdf5-1.8.2.tar
+            $ tar xf hdf5-1.8.3.tar
 
    2.2 Gzip'd tar archive (*.tar.gz)
 
-            $ gunzip < hdf5-1.8.2.tar.gz | tar xf -
+            $ gunzip < hdf5-1.8.3.tar.gz | tar xf -
 
    2.3 Bzip'd tar archive (*.tar.bz2)
 
-            $ bunzip2 < hdf5-1.8.2.tar.bz2 | tar xf - 
+            $ bunzip2 < hdf5-1.8.3.tar.bz2 | tar xf - 
 
 2. Setup Environment
 
