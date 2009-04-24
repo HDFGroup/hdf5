@@ -227,7 +227,7 @@ H5Zregister(const void *cls)
     herr_t              ret_value=SUCCEED;      /* Return value */
 
     FUNC_ENTER_API(H5Zregister, FAIL)
-    H5TRACE1("e", "*Zc", cls);
+    H5TRACE1("e", "*x", cls);
 
     /* Check args */
     if (cls_real==NULL)

@@ -71,10 +71,10 @@ extern "C" {
 /* Version numbers */
 #define H5_VERS_MAJOR	1	/* For major interface/format changes  	     */
 #define H5_VERS_MINOR	8	/* For minor interface/format changes  	     */
-#define H5_VERS_RELEASE	2	/* For tweaks, bug-fixes, or development     */
-#define H5_VERS_SUBRELEASE "post13"	/* For pre-releases like snap0       */
+#define H5_VERS_RELEASE	3	/* For tweaks, bug-fixes, or development     */
+#define H5_VERS_SUBRELEASE "pre1"	/* For pre-releases like snap0       */
 				/* Empty string for real releases.           */
-#define H5_VERS_INFO    "HDF5 library version: 1.8.2-post13"      /* Full version string */
+#define H5_VERS_INFO    "HDF5 library version: 1.8.3-pre1"      /* Full version string */
 
 #define H5check()	H5check_version(H5_VERS_MAJOR,H5_VERS_MINOR,	      \
 				        H5_VERS_RELEASE)
