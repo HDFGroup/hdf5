@@ -42,17 +42,17 @@ Preconditions
 	        c:\                              (any drive)
 	        MyHDFstuff\                      (any folder name)
 
-   3. Download the hdf5-1.6.x source code package and use 7zip or WinZip to 
+   3. Download the hdf5-1.6.9 source code package and use 7zip or WinZip to 
       extract the HDF5 package into c:\MyHDFstuff.  This creates a 
-      directory called 'hdf5-1.6.x' under MyHDFstuff which contains 
-      several files and directories.  Rename "hdf5-1.6.x" to "hdf5".  
+      directory called 'hdf5-1.6.9' under MyHDFstuff which contains 
+      several files and directories.  Rename "hdf5-1.6.9" to "hdf5".  
 
    4. HDF5 provides options for in-memory compression within the HDF5
       library.  Currently, two external compression libraries, Zlib and
       Szip, can be used with HDF5.
 
       4.1 HDF5 uses Zlib version 1.2.3 for compression and Zlib is NOT
-          distributed with HDF5 library in 1.6.x release. To use Zlib
+          distributed with HDF5 library in 1.6.9 release. To use Zlib
           library, you have to install your own Zlib DLL library or go
           to ftp://ftp.hdfgroup.org/lib-external/zlib/1.2/bin/windows 
           to download the Zlib library.
