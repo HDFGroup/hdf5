@@ -336,12 +336,13 @@ int main(void)
 
 
     /* Read a region of the data using a region reference */
+/*     file_id = -1; */
 
-    status = H5LRread_region(file_id, 
- 			     &ref[1], 
- 			     H5T_NATIVE_INT,
- 			     &numelem, 
- 			     data_out2);
+    if ( H5LRread_region(file_id, 
+			 &ref[1], 
+			 H5T_NATIVE_INT,
+			 &numelem, 
+			 data_out2) < 0) goto out;
     
     printf("REGION REFERENCED 2D HYPERSLAB (H5LRread_region),");
     printf(" COORDINATES (%d,%d)-(%d,%d):\n",
@@ -442,11 +443,18 @@ int main(void)
 
     /* check the data pointed to by the new region reference */
 
+
     status = H5LRread_region(file_id,
   			     &ref_new,
   			     H5T_NATIVE_INT,
   			     &numelem,
   			     data_out2);
+
+    if(status<0){
+      printf("\nH5LRread_region FAILED--STOPPING\n");
+      abort();
+    }
+
     for (i=0; i<3; i++)
       {
 	printf("\n  [ ");
@@ -480,6 +488,8 @@ int main(void)
 /* 	  printf("%d %d %d %d \n ",i,j,k,data3D[i][j][k]); */
 
     return 0;
+out:
+    return 1;
 }
 
 

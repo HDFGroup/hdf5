@@ -128,11 +128,11 @@ H5LR__pkg_init(void))
     if((H5HL_ERR_CLS_g = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, lib_str)) < 0)
         TEST_ERROR;
 
-    if((H5_MY_PKG_ERR = H5Ecreate_msg(H5HL_ERR_CLS_g, H5E_MAJOR, ERR_MAJ_MSG)) < 0)
-        TEST_ERROR;
+/*     if((H5_MY_PKG_ERR = H5Ecreate_msg(H5HL_ERR_CLS_g, H5E_MAJOR, ERR_MAJ_MSG)) < 0) */
+/*         TEST_ERROR; */
 
-     if((ERR_MIN = H5Ecreate_msg(H5HL_ERR_CLS_g, H5E_MINOR, ERR_MIN_MSG)) < 0)
-         TEST_ERROR;
+/*      if((ERR_MIN = H5Ecreate_msg(H5HL_ERR_CLS_g, H5E_MINOR, ERR_MIN_MSG)) < 0) */
+/*          TEST_ERROR; */
     return 0;
 
 error:
@@ -345,7 +345,6 @@ H5LRread_region(hid_t obj_id,               /* -IN-      Id. of any object in a 
 
     hid_t dset = -1, file_space = -1;   /* Identifier of the dataset's dataspace in the file */
     hid_t mem_space = -1;               /* Identifier of the memory dataspace                */
-    const char          *FUNC_H5LRread_region = "H5LRread_region";
 
     H5LR__pkg_init();
 
@@ -355,13 +354,19 @@ H5LRread_region(hid_t obj_id,               /* -IN-      Id. of any object in a 
     } H5E_END_TRY;
 
     if(dset < 0) {
-/*       H5LR__pkg_msg("*1","*2*" ); */
-       H5E_THROW(ERR_MIN, "HL: Unable to open object referenced")
+       H5_MY_PKG_ERR = H5E_REFERENCE;
+       H5E_THROW(H5E_NOTFOUND, "HL: Failed to open object referenced")
     } /* end if */
 
     /* Retrieve the dataspace with the specified region selected */
-    if((file_space = H5Rget_region(dset, H5R_DATASET_REGION, ref)) < 0)
-        H5E_THROW(H5E_CANTGET, "HL: Unable to retrieve region")
+    H5E_BEGIN_TRY {
+      file_space = H5Rget_region(dset, H5R_DATASET_REGION, ref);
+    } H5E_END_TRY;
+	
+    if(file_space < 0) {
+      H5_MY_PKG_ERR = H5E_REFERENCE;
+      H5E_THROW(H5E_CANTGET, "HL: Retrieving dataspace referenced failed")
+    } /* end if */
 
     /* Check for anything to retrieve */
     if(numelem || buf) {

@@ -72,8 +72,8 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(includedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libhdf5_hl_la_LIBADD =
-am_libhdf5_hl_la_OBJECTS = H5DS.lo H5HLerror.lo H5HLint.lo H5IM.lo H5LT.lo H5LTanalyze.lo \
-	H5LTparse.lo H5PT.lo H5TB.lo H5LR.lo
+am_libhdf5_hl_la_OBJECTS = H5DS.lo H5HLerror.lo H5HLint.lo H5IM.lo \
+	H5LT.lo H5LTanalyze.lo H5LTparse.lo H5PT.lo H5TB.lo H5LR.lo
 libhdf5_hl_la_OBJECTS = $(am_libhdf5_hl_la_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)/src
 depcomp = $(SHELL) $(top_srcdir)/bin/depcomp

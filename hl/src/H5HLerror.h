@@ -38,6 +38,9 @@ H5_DLLVAR hid_t H5HL_ERR_CLS_g;
 #define H5E_LREF          (H5OPEN H5E_LREF_g)
 H5_DLLVAR hid_t H5E_LREF_g;     /* Lite References */
 
+#define H5E_LT          (H5OPEN H5E_LT_g)
+H5_DLLVAR hid_t H5E_LT_g;     /* HDF5 Lite */
+
 
 /*********************/
 /* Minor error codes */
