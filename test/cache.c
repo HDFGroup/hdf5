@@ -126,6 +126,7 @@ static unsigned check_metadata_blizzard_absence(hbool_t fill_via_insertion);
 static unsigned check_flush_deps(void);
 static unsigned check_flush_deps_err(void);
 static unsigned check_flush_deps_order(void);
+static unsigned check_notify_cb(void);
 
 
 /**************************************************************************/
@@ -33789,6 +33790,205 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	check_notify_cb()
+ *
+ * Purpose:	Exercise the client 'notify' callback.
+ *
+ * Return:	0 on success, non-zero on failure
+ *
+ * Programmer:	Quincey Koziol
+ *               4/28/09
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static unsigned
+check_notify_cb(void)
+{
+    H5C_t * cache_ptr = NULL;           /* Metadata cache for this test */
+    test_entry_t *base_addr;            /* Base address of entries for test */
+    test_entry_t * entry_ptr;           /* Cache entry to examine/manipulate */
+    int entry_type = NOTIFY_ENTRY_TYPE;   /* Use entry w/notify callback (size of entries doesn't matter) */
+    size_t entry_size = NOTIFY_ENTRY_SIZE; /* 1 byte */
+    unsigned u;                         /* Local index variable */
+    struct expected_entry_status expected[5] =
+    {
+      /* entry			entry		in	at main                                                        flush dep flush dep child flush   flush       flush */
+      /* type:		index:	size:		cache:	addr:	dirty:	prot:	pinned:	loaded:	clrd:	flshd:	dest:  par type: par idx: dep ref.count: dep height: order: */
+      { entry_type,	0,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	1,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	2,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	3,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 },
+      { entry_type,	4,	entry_size,	FALSE,	TRUE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE,	FALSE, -1,       -1,      {0,0,0,0},     0,          -1 }
+    };
+
+    TESTING("'notify' callback");
+
+    pass = TRUE;
+
+    /* Allocate a cache, insert & remove entries, triggering 'notify' callback.
+     * Verify that all performs as expected.
+     */
+
+    reset_entries();
+    cache_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024));
+    base_addr = entries[entry_type];
+
+    if ( !pass ) CACHE_ERROR("setup_cache failed")
+
+    /* Insert entries to work with into the cache */
+    for(u = 0; u < 5; u++) {
+        insert_entry(cache_ptr, entry_type, (int32_t)u, TRUE, H5C__NO_FLAGS_SET);
+        if ( !pass ) CACHE_ERROR("insert_entry failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after each insertion 
+         */
+        expected[u].in_cache = TRUE;
+        expected[u].is_dirty = TRUE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)u,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        /* Check the entry's 'after insert' count */
+	entry_ptr = &(base_addr[u]);
+        if(1 != entry_ptr->notify_after_insert_count)
+            CACHE_ERROR("invalid notify after insert count")
+        if(0 != entry_ptr->notify_before_evict_count)
+            CACHE_ERROR("invalid notify before evict count")
+    } /* end for */
+
+    /* Remove entries from the cache */
+    for(u = 0; u < 5; u++) {
+        expunge_entry(cache_ptr, entry_type, (int32_t)u);
+        if ( !pass ) CACHE_ERROR("expunge_entry failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after each insertion 
+         */
+        expected[u].in_cache = FALSE;
+        expected[u].is_dirty = FALSE;
+        expected[u].cleared = TRUE;
+        expected[u].destroyed = TRUE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)u,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        /* Check the entry's 'before evict' count */
+	entry_ptr = &(base_addr[u]);
+        if(1 != entry_ptr->notify_after_insert_count)
+            CACHE_ERROR("invalid notify after insert count")
+        if(1 != entry_ptr->notify_before_evict_count)
+            CACHE_ERROR("invalid notify before evict count")
+    } /* end for */
+
+    /* Protect entries to bring them into the cache */
+    for(u = 0; u < 5; u++) {
+        protect_entry(cache_ptr, entry_type, (int32_t)u);
+        if ( !pass ) CACHE_ERROR("protect_entry failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after each insertion 
+         */
+        expected[u].in_cache = TRUE;
+        expected[u].is_dirty = FALSE;
+        expected[u].is_protected = TRUE;
+        expected[u].loaded = TRUE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)u,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        /* Check the entry's 'after insert' count */
+	entry_ptr = &(base_addr[u]);
+        if(2 != entry_ptr->notify_after_insert_count)
+            CACHE_ERROR("invalid notify after insert count")
+        if(1 != entry_ptr->notify_before_evict_count)
+            CACHE_ERROR("invalid notify before evict count")
+    } /* end for */
+
+    /* Unprotect entries, evicting them from the cache */
+    for(u = 0; u < 5; u++) {
+        unprotect_entry(cache_ptr, entry_type, (int32_t)u, TRUE, H5C__NO_FLAGS_SET);
+        if ( !pass ) CACHE_ERROR("unprotect_entry failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after each insertion 
+         */
+        expected[u].in_cache = TRUE;
+        expected[u].is_dirty = TRUE;
+        expected[u].is_protected = FALSE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)u,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        /* Check the entry's 'after insert' count */
+	entry_ptr = &(base_addr[u]);
+        if(2 != entry_ptr->notify_after_insert_count)
+            CACHE_ERROR("invalid notify after insert count")
+        if(1 != entry_ptr->notify_before_evict_count)
+            CACHE_ERROR("invalid notify before evict count")
+    } /* end for */
+
+    /* Remove entries from the cache */
+    for(u = 0; u < 5; u++) {
+        expunge_entry(cache_ptr, entry_type, (int32_t)u);
+        if ( !pass ) CACHE_ERROR("expunge_entry failed")
+
+        /* Change expected values, and verify the status of the entries 
+         * after each insertion 
+         */
+        expected[u].in_cache = FALSE;
+        expected[u].is_dirty = FALSE;
+        expected[u].cleared = TRUE;
+        expected[u].destroyed = TRUE;
+
+        /* Verify the status */
+        verify_entry_status(cache_ptr,  /* H5C_t * cache_ptr */
+                            (int)u,     /* int tag */
+                            (int)5,     /* int num_entries */
+                            expected);  /* struct expected_entry_staus[] */
+        if ( !pass ) CACHE_ERROR("verify_entry_status failed")
+
+        /* Check the entry's 'before evict' count */
+	entry_ptr = &(base_addr[u]);
+        if(2 != entry_ptr->notify_after_insert_count)
+            CACHE_ERROR("invalid notify after insert count")
+        if(2 != entry_ptr->notify_before_evict_count)
+            CACHE_ERROR("invalid notify before evict count")
+    } /* end for */
+
+done:
+    if(cache_ptr) 
+        takedown_cache(cache_ptr, FALSE, FALSE);
+
+    if ( pass )
+        PASSED()
+    else {
+        H5_FAILED();
+        HDfprintf(stdout, "%s.\n", failure_mssg);
+    } /* end else */
+
+    return (unsigned)!pass;
+} /* check_notify_cb() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	main
  *
  * Purpose:	Run tests on the cache code contained in H5C.c
@@ -33867,6 +34067,7 @@ main(void)
     nerrs += check_flush_deps();
     nerrs += check_flush_deps_err();
     nerrs += check_flush_deps_order();
+    nerrs += check_notify_cb();
 
     return(nerrs > 0);
 }
