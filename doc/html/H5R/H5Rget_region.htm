@@ -2,55 +2,73 @@
 <!-- HEADER RIGHT "H5Rget_region" -->
 <hr>
 <dl>
-<dt><strong>Name:</strong> <a name="Reference-GetRegion">H5Rget_region</a>
-<dt><strong>Signature:</strong>
-    <dd><em>hid_t</em> <code>H5Rget_region</code>(<em>hid_t</em> <code>dataset</code>,
-    <em>H5R_type_t</em> <code>ref_type</code>,
-    <em>void *</em><code>ref</code>
-    )
-<dt><strong>Purpose:</strong>
-    <dd>Retrieves a dataspace with the specified region selected.
-<dt><strong>Description:</strong>
-    <dd>Given a reference to an object <code>ref</code>, 
-        <code>H5Rget_region</code> creates a copy of the dataspace 
-        of the dataset pointed to and defines a selection in the copy 
-        which is the region pointed to.
+  <dt><div align=right><font color=999999 size=-1><i>
+      Last modified: 25 April 2009
+      </i></font></div>
+ 
+<dt><strong>Name:</strong> <a name="Reference-GetRegion">H5Rget_region</a> 
+<dt><strong>Signature:</strong> 
+    <dd><em>hid_t</em> <code>H5Rget_region</code>(
+        <em>hid_t</em> <code>obj_id</code>, 
+        <em>H5R_type_t</em> <code>ref_type</code>, 
+        <em>void *</em><code>ref</code> 
+        ) 
+<p>
+<dt><strong>Purpose:</strong> 
+    <dd>Sets up a dataspace and selection as specified by a region reference. 
+<p>
+<dt><strong>Description:</strong> 
+    <dd><code>H5Rget_region</code> creates a copy of the dataspace 
+        of the dataset pointed to by a region reference, <code>ref</code>, 
+        and defines a selection matching the selection pointed to by 
+        <code>ref</code> within the dataspace copy.
         <p>
-        The parameter <code>ref_type</code> specifies the reference type
-        of <code>ref</code>. 
-        <code>ref_type</code> may contain the following value:
+        <code>obj_id</code> is used to identify the file containing the
+        region reference; it can be the identifier for any object
+        in the file containing <code>ref</code>, including the file itself.
+        <p>
+        The parameter <code>ref_type</code> specifies the reference type of 
+        <code>ref</code> and must contain the following value:
         <ul>
-        <li><code>H5R_DATASET_REGION</code>  (<code>1</code>)
+            <li><code>H5R_DATASET_REGION</code> (<code>1</code>) 
         </ul>
-<dt><strong>Parameters:</strong>
-    <ul><table>
-        <tr>
-		    <td valign="top"><em>hid_t</em> <code>dataset</code></td>
-            <td valign="top">IN: Dataset containing reference object.</td></tr>
-        <tr>
-		    <td valign="top"><em>H5R_type_t</em>&nbsp;<code>ref_type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">IN: The reference type of <code>ref</code>.</td></tr>
-        <tr>
-		    <td valign="top"><em>void *</em><code>ref</code></td>
-            <td valign="top">IN: Reference to open.</td></tr>
-    </table></ul>
-<dt><strong>Returns:</strong>
-    <dd>Returns a valid identifier if successful;
-        otherwise returns a negative value.
-<dt><strong>Fortran90 Interface:</strong> h5rget_region_f
+<p>
+<dt><strong>Parameters:</strong> 
     <dd>
-	<pre>
-SUBROUTINE h5rget_region_f(dset_id, ref, space_id, hdferr) 
+    <table>
+        <tr> 
+            <td valign="top"><em>hid_t</em> <code>obj_id</code></td>
+            <td valign="top">IN: Identifier for any object in the 
+                file containing the region reference</td>
+        </tr>
+        <tr> 
+            <td valign="top"><em>H5R_type_t</em>&nbsp;<code>ref_type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top">IN: Reference type of <code>ref</code>: 
+                <code>H5R_DATASET_REGION</code></td>
+        </tr>
+        <tr> 
+            <td valign="top"><em>void *</em><code>ref</code></td>
+            <td valign="top">IN: Region reference to open</td>
+        </tr>
+    </table>
+<p>
+<dt><strong>Returns:</strong> 
+    <dd>Returns a valid dataspace identifier if successful; 
+        otherwise returns a negative value. 
+<p>
+<dt><strong>Fortran90 Interface:</strong> h5rget_region_f 
+    <dd> 
+    <pre>
+SUBROUTINE h5rget_region_f(obj_id, ref, space_id, hdferr) 
   IMPLICIT NONE
-  INTEGER(HID_T), INTENT(IN) :: dset_id       ! Dataset identifier 
+  INTEGER(HID_T), INTENT(IN) :: obj_id        ! Object identifier 
   TYPE(hdset_reg_ref_t_f), INTENT(IN) :: ref  ! Dataset region reference 
   INTEGER(HID_T), INTENT(OUT) :: space_id     ! Space identifier 
   INTEGER, INTENT(OUT) :: hdferr              ! Error code
  
 END SUBROUTINE h5rget_region_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
+    </pre>
+        <!--<dt><strong>Non-C API(s):</strong>
     	<dd>
         
         <img src="Graphics/Java.gif"> 
