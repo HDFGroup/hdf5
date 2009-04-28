@@ -342,6 +342,65 @@ h5tools_str_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    h5tools_str_region_prefix
+ *
+ * Purpose: Renders the line prefix value into string STR.
+ *
+ * Return:  Success:    Pointer to the prefix.
+ *
+ *      Failure:    NULL
+ *
+ * Programmer:  Robb Matzke
+ *              Thursday, July 23, 1998
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+h5tools_str_region_prefix(h5tools_str_t *str/*in,out*/, const h5tool_format_t *info,
+        hsize_t elmtno, hsize_t *ptdata, unsigned ndims, hsize_t min_idx[], hsize_t max_idx[],
+        h5tools_context_t *ctx) {
+    hsize_t p_prod[H5S_MAX_RANK];
+    size_t i = 0;
+    hsize_t curr_pos = elmtno;
+
+    h5tools_str_reset(str);
+
+    if (ndims > 0) {
+        /*
+         * Calculate the number of elements represented by a unit change in a
+         * certain index position.
+         */
+//        for (i = ndims - 1, p_prod[ndims - 1] = 1; i > 0; --i)
+//            p_prod[i - 1] = (max_idx[i] - min_idx[i]) * p_prod[i];
+//
+//        for (i = 0; i < (size_t) ndims; i++) {
+//            ctx->pos[i] = curr_pos / ctx->acc[i];
+//            curr_pos -= ctx->acc[i] * ctx->pos[i];
+//        }
+//        assert(curr_pos == 0);
+
+        /* Print the index values */
+        for (i = 0; i < (size_t) ndims; i++) {
+            if (i)
+                h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
+
+//            h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t) ctx->pos[i]);
+            h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (unsigned long) ptdata[curr_pos+i]);
+
+        }
+    }
+    else {
+        /* Scalar */
+        h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t) 0);
+    }
+
+    /* Add prefix and suffix to the index */
+    return h5tools_str_fmt(str, 0, OPT(info->idx_fmt, "%s: "));
+}
+
+/*-------------------------------------------------------------------------
  * Function:    h5tools_str_dump_region_blocks
  *
  * Purpose: Prints information about a dataspace region by appending

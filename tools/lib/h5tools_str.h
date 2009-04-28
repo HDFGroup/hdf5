@@ -35,6 +35,9 @@ extern char    *h5tools_str_fmt(h5tools_str_t *str, size_t start, const char *fm
 extern char    *h5tools_str_prefix(h5tools_str_t *str, const h5tool_format_t *info,
                                    hsize_t elmtno, unsigned ndims, hsize_t min_idx[],
                                    hsize_t max_idx[], h5tools_context_t *ctx);
+extern char    *h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info,
+                                   hsize_t elmtno, hsize_t *ptdata, unsigned ndims, hsize_t min_idx[],
+                                   hsize_t max_idx[], h5tools_context_t *ctx);
 extern int      h5tools_str_dump_region_blocks(h5tools_str_t *, hid_t, const h5tool_format_t *,
                                    h5tools_context_t *ctx);
 extern int      h5tools_str_dump_region_points(h5tools_str_t *, hid_t, const h5tool_format_t *,
