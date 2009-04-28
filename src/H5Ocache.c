@@ -98,6 +98,7 @@ const H5AC_class_t H5AC_OHDR[1] = {{
     (H5AC_flush_func_t)H5O_flush,
     (H5AC_dest_func_t)H5O_dest,
     (H5AC_clear_func_t)H5O_clear,
+    (H5AC_notify_func_t)NULL,
     (H5AC_size_func_t)H5O_size,
 }};
 

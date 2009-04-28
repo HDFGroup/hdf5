@@ -39,7 +39,6 @@
 /* Revisions to FUNC_ENTER/LEAVE & Error Macros */
 /************************************************/
 
-#ifndef NDEBUG
 /* `S' is the name of a function which is being tested to check if it's */
 /*      a public API function */
 #define H5_IS_PUB(S) (((HDisdigit(S[1]) || HDisupper(S[1])) && HDislower(S[2])) || \
@@ -58,6 +57,7 @@
     ((HDisdigit(S[2]) || HDisupper(S[2])) && '_' == S[3] && '_' == S[4] && HDislower(S[5])) || \
     ((HDisdigit(S[3]) || HDisupper(S[3])) && '_' == S[4] && '_' == S[5] && HDislower(S[6])))
 
+#ifndef NDEBUG
 #define FUNC_ENTER_NAME_CHECK(asrt)					      \
     {					          			      \
         static hbool_t func_check = FALSE;          			      \
@@ -72,13 +72,11 @@
     } /* end scope */
 #else /* NDEBUG */
 #define FUNC_ENTER_NAME_CHECK(asrt)
-#define H5_IS_PUB(S)
-#define H5_IS_PRIV(S)
-#define H5_IS_PKG(S)
 #endif /* NDEBUG */
 
-/* Macro for referencing package initialization variables */
+/* Macros for referencing package initialization symbols */
 #define H5_PACKAGE_INIT_VAR(x) H5_GLUE3(H5_, x, _init_g)
+#define H5_PACKAGE_INIT_FUNC(x) H5_GLUE(x, __pkg_init)
 
 /* Macros to check if a package is initialized */
 #define H5_CHECK_PACKAGE_INIT_REG_YES(asrt)       HDassert(H5_PACKAGE_INIT_VAR(pkg));
@@ -98,14 +96,18 @@
     } /* end if */
 #define H5_PKG_NO_INIT(pkg)
 
-/* Macros to declare package initialization variable, if a package initialization routine is defined */
+/* Macros to declare package initialization symbols, if a package initialization routine is defined */
 #define H5_PKG_YES_INIT_VAR(pkg) extern hbool_t H5_PACKAGE_INIT_VAR(H5_MY_PKG);
 #define H5_PKG_NO_INIT_VAR(pkg)
+#define H5_PKG_YES_INIT_FUNC(pkg) extern herr_t H5_PACKAGE_INIT_FUNC(pkg)(void);
+#define H5_PKG_NO_INIT_FUNC(pkg)
 
-/* Declare package initialization variable (if in a package) */
+/* Declare package initialization symbols (if in a package) */
 #define H5_DECLARE_PKG_VAR(pkg_init, pkg) H5_GLUE3(H5_PKG_, pkg_init, _INIT_VAR)(pkg)
+#define H5_DECLARE_PKG_FUNC(pkg_init, pkg) H5_GLUE3(H5_PKG_, pkg_init, _INIT_FUNC)(pkg)
 #ifdef H5_MY_PKG
 H5_DECLARE_PKG_VAR(H5_MY_PKG_INIT, H5_MY_PKG)
+H5_DECLARE_PKG_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
 #endif /* H5_MY_PKG */
 
 /* API re-entrance variable */
@@ -226,6 +228,13 @@ func									      \
 #define H5_PRIV_FUNC_INIT_FAILED(pkg_init) H5_GLUE3(H5_PRIV_, pkg_init, _FUNC_INIT_FAILED)
 
 /* Macros for leaving different scopes of routines */
+#define FUNC_LEAVE_PKGINIT					       	      \
+    /* Leave scope for this type of function */				      \
+    }									      \
+                                                                              \
+    /* Pop the name of this function off the function stack */		      \
+    H5_POP_FUNC
+
 #define FUNC_LEAVE_STATIC					       	      \
     /* Leave scope for this type of function */				      \
     }									      \
@@ -371,7 +380,7 @@ func_init_failed:							      \
     + 1 /* Min. # of data block pointers for a super block */                 \
     + 1 /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */ \
                                                                               \
-    /* Extensible Array Header statistics fields */                           \
+    /* Extensible Array statistics fields */                                  \
     + (h)->sizeof_size /* Number of super blocks created */		      \
     + (h)->sizeof_size /* Size of super blocks created */		      \
     + (h)->sizeof_size /* Number of data blocks created */		      \
@@ -472,7 +481,7 @@ typedef struct H5EA_hdr_t {
     /* Index block information (stored in header) */
     haddr_t idx_blk_addr;               /* Address of index block in header */
 
-    /* Statistics for array (stored in header) */
+    /* Statistics for array (stored in index block, actually) */
     /* (header and index number/size fields not stored) */
     H5EA_stat_t stats;                  /* Statistics for extensible array */
 
@@ -539,6 +548,7 @@ typedef struct H5EA_sblock_t {
     /* Internal array information (not stored) */
     size_t      rc;             /* Reference count of objects using this block */
     H5EA_hdr_t	*hdr;	        /* Shared array header info	              */
+    H5EA_iblock_t *parent;	/* Parent object for super block (index block) */
     haddr_t     addr;           /* Address of this index block on disk	      */
     size_t      size;           /* Size of index block on disk		      */
 
@@ -562,6 +572,7 @@ typedef struct H5EA_dblock_t {
 
     /* Internal array information (not stored) */
     H5EA_hdr_t	*hdr;	        /* Shared array header info	              */
+    void        *parent;        /* Parent object for data block (index or super block) */
     haddr_t     addr;           /* Address of this data block on disk	      */
     size_t      size;           /* Size of data block on disk		      */
 
@@ -580,6 +591,7 @@ typedef struct H5EA_dbk_page_t {
 
     /* Internal array information (not stored) */
     H5EA_hdr_t	*hdr;	        /* Shared array header info	              */
+    H5EA_sblock_t *parent;      /* Parent object for data block page (super block) */
     haddr_t     addr;           /* Address of this data block page on disk    */
     size_t      size;           /* Size of data block page on disk	      */
 
@@ -592,6 +604,25 @@ struct H5EA_t {
     H5EA_hdr_t  *hdr;           /* Pointer to internal extensible array header info */
     H5F_t      *f;              /* Pointer to file for extensible array */
 };
+
+/* Metadata cache callback user data types */
+
+/* Info needed for loading data block page */
+typedef struct H5EA_dblk_page_load_ud_t {
+    H5EA_sblock_t *parent;      /* Pointer to parent object for data block page (super block) */
+} H5EA_dblk_page_load_ud_t;
+
+/* Info needed for loading data block */
+typedef struct H5EA_dblock_load_ud_t {
+    void *parent;               /* Pointer to parent object for data block (index or super block) */
+    size_t nelmts;              /* Number of elements in data block */
+} H5EA_dblock_load_ud_t;
+
+/* Info needed for loading super block */
+typedef struct H5EA_sblock_load_ud_t {
+    H5EA_iblock_t *parent;      /* Pointer to parent object for super block (index block) */
+    unsigned sblk_idx;          /* Index of super block */
+} H5EA_sblock_load_ud_t;
 
 
 /*****************************/
@@ -623,10 +654,18 @@ H5_DLLVAR const H5EA_class_t H5EA_CLS_TEST[1];
 /* Package Private Prototypes */
 /******************************/
 
+/* Generic routines */
+H5_DLL herr_t H5EA__create_flush_depend(H5EA_hdr_t *hdr, H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+H5_DLL herr_t H5EA__destroy_flush_depend(H5EA_hdr_t *hdr, H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry);
+
 /* Header routines */
-H5_DLL H5EA_hdr_t *H5EA__hdr_alloc(H5F_t *f, const H5EA_class_t *cls);
+H5_DLL H5EA_hdr_t *H5EA__hdr_alloc(H5F_t *f, const H5EA_class_t *cls,
+    void *ctx_udata);
 H5_DLL herr_t H5EA__hdr_init(H5EA_hdr_t *hdr);
-H5_DLL haddr_t H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam);
+H5_DLL haddr_t H5EA__hdr_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
+    void *ctx_udata);
 H5_DLL void *H5EA__hdr_alloc_elmts(H5EA_hdr_t *hdr, size_t nelmts);
 H5_DLL herr_t H5EA__hdr_free_elmts(H5EA_hdr_t *hdr, size_t nelmts, void *elmts);
 H5_DLL herr_t H5EA__hdr_incr(H5EA_hdr_t *hdr);
@@ -640,7 +679,7 @@ H5_DLL herr_t H5EA__hdr_dest(H5EA_hdr_t *hdr);
 /* Index block routines */
 H5_DLL H5EA_iblock_t *H5EA__iblock_alloc(H5EA_hdr_t *hdr);
 H5_DLL haddr_t H5EA__iblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    hbool_t *hdr_dirty);
+    hbool_t *stats_changed);
 H5_DLL H5EA_iblock_t *H5EA__iblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
     H5AC_protect_t rw);
 H5_DLL herr_t H5EA__iblock_unprotect(H5EA_iblock_t *iblock, hid_t dxpl_id,
@@ -649,36 +688,38 @@ H5_DLL herr_t H5EA__iblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id);
 H5_DLL herr_t H5EA__iblock_dest(H5F_t *f, H5EA_iblock_t *iblock);
 
 /* Super block routines */
-H5_DLL H5EA_sblock_t *H5EA__sblock_alloc(H5EA_hdr_t *hdr, unsigned sblk_idx);
-H5_DLL haddr_t H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty,
+H5_DLL H5EA_sblock_t *H5EA__sblock_alloc(H5EA_hdr_t *hdr, H5EA_iblock_t *parent,
     unsigned sblk_idx);
+H5_DLL haddr_t H5EA__sblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id,
+    H5EA_iblock_t *parent, hbool_t *stats_changed, unsigned sblk_idx);
 H5_DLL H5EA_sblock_t *H5EA__sblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t sblk_addr, unsigned sblk_idx, H5AC_protect_t rw);
+    H5EA_iblock_t *parent, haddr_t sblk_addr, unsigned sblk_idx, H5AC_protect_t rw);
 H5_DLL herr_t H5EA__sblock_unprotect(H5EA_sblock_t *sblock, hid_t dxpl_id,
     unsigned cache_flags);
 H5_DLL herr_t H5EA__sblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t sblk_addr, unsigned sblk_idx);
+    H5EA_iblock_t *parent, haddr_t sblk_addr, unsigned sblk_idx);
 H5_DLL herr_t H5EA__sblock_dest(H5F_t *f, H5EA_sblock_t *sblock);
 
 /* Data block routines */
-H5_DLL H5EA_dblock_t *H5EA__dblock_alloc(H5EA_hdr_t *hdr, size_t nelmts);
-H5_DLL haddr_t H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, hbool_t *hdr_dirty,
-    hsize_t dblk_off, size_t nelmts);
+H5_DLL H5EA_dblock_t *H5EA__dblock_alloc(H5EA_hdr_t *hdr, void *parent,
+    size_t nelmts);
+H5_DLL haddr_t H5EA__dblock_create(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
+    hbool_t *stats_changed, hsize_t dblk_off, size_t nelmts);
 H5_DLL unsigned H5EA__dblock_sblk_idx(const H5EA_hdr_t *hdr, hsize_t idx);
 H5_DLL H5EA_dblock_t *H5EA__dblock_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t dblk_addr, size_t dblk_nelmts, H5AC_protect_t rw);
+    void *parent, haddr_t dblk_addr, size_t dblk_nelmts, H5AC_protect_t rw);
 H5_DLL herr_t H5EA__dblock_unprotect(H5EA_dblock_t *dblock, hid_t dxpl_id,
     unsigned cache_flags);
-H5_DLL herr_t H5EA__dblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id,
+H5_DLL herr_t H5EA__dblock_delete(H5EA_hdr_t *hdr, hid_t dxpl_id, void *parent,
     haddr_t dblk_addr, size_t dblk_nelmts);
 H5_DLL herr_t H5EA__dblock_dest(H5F_t *f, H5EA_dblock_t *dblock);
 
 /* Data block page routines */
-H5_DLL H5EA_dblk_page_t *H5EA__dblk_page_alloc(H5EA_hdr_t *hdr);
+H5_DLL H5EA_dblk_page_t *H5EA__dblk_page_alloc(H5EA_hdr_t *hdr, H5EA_sblock_t *parent);
 H5_DLL herr_t H5EA__dblk_page_create(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t addr);
+    H5EA_sblock_t *parent, haddr_t addr);
 H5_DLL H5EA_dblk_page_t *H5EA__dblk_page_protect(H5EA_hdr_t *hdr, hid_t dxpl_id,
-    haddr_t dblk_page_addr, H5AC_protect_t rw);
+    H5EA_sblock_t *parent, haddr_t dblk_page_addr, H5AC_protect_t rw);
 H5_DLL herr_t H5EA__dblk_page_unprotect(H5EA_dblk_page_t *dblk_page,
     hid_t dxpl_id, unsigned cache_flags);
 H5_DLL herr_t H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page);

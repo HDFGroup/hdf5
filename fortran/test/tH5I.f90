@@ -60,6 +60,30 @@
      INTEGER    ::    ref_count ! Reference count for IDs
 
 
+     INTEGER(hid_t) :: dtype  ! datatype id
+     LOGICAL :: tri_ret       ! value
+
+     !
+     ! Tests the function H5Iis_valid_f
+     !
+     ! check that the ID is not valid
+     dtype = -1
+     CALL H5Iis_valid_f(dtype, tri_ret, error)
+     CALL check("H5Iis_valid_f", error, total_error) 
+     CALL VerifyLogical("H5Iis_valid_f", tri_ret, .FALSE., total_error)
+     
+     ! Create a datatype id
+     CALL H5Tcopy_f(H5T_NATIVE_INTEGER,dtype,error)
+     CALL check("H5Tcopy_f", error, total_error) 
+     
+     ! Check that the ID is valid
+     CALL H5Iis_valid_f(dtype, tri_ret, error)
+     CALL check("H5Iis_valid_f", error, total_error) 
+     CALL VerifyLogical("H5Tequal_f", tri_ret, .TRUE., total_error)
+     
+     CALL H5Tclose_f(dtype, error)
+     CALL check("H5Tclose_f", error, total_error) 
+  
      !
      ! Create a new file using default properties.
      ! 

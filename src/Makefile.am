@@ -62,7 +62,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
         H5G.c H5Gbtree2.c H5Gcache.c \
         H5Gcompact.c H5Gdense.c H5Gdeprec.c H5Gent.c \
         H5Gint.c H5Glink.c \
-        H5Gloc.c H5Gname.c H5Gnode.c H5Gobj.c H5Goh.c H5Gstab.c H5Gtest.c \
+        H5Gloc.c H5Gname.c H5Gnode.c H5Gobj.c H5Goh.c H5Groot.c H5Gstab.c H5Gtest.c \
         H5Gtraverse.c \
         H5HF.c H5HFbtree2.c H5HFcache.c H5HFdbg.c H5HFdblock.c H5HFdtable.c \
         H5HFhdr.c H5HFhuge.c H5HFiblock.c H5HFiter.c H5HFman.c H5HFsection.c \
@@ -103,7 +103,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5system.c H5timer.c H5trace.c \
 
 
 # Public headers
-include_HEADERS = hdf5.h H5api_adpt.h H5pubconf.h H5public.h H5version.h \
+include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5version.h \
         H5Apublic.h H5ACpublic.h \
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5Fpublic.h H5FDpublic.h H5FDcore.h H5FDdirect.h \
@@ -140,6 +140,10 @@ $(top_srcdir)/src/H5Edefin.h: $(top_srcdir)/src/H5err.txt
 # API version macro generation
 $(top_srcdir)/src/H5version.h: $(top_srcdir)/src/H5vers.txt
 	perl $(top_srcdir)/bin/make_vers $?
+
+# Assignment overflow macro generation
+$(top_srcdir)/src/H5overflow.h: $(top_srcdir)/src/H5overflow.txt
+	perl $(top_srcdir)/bin/make_overflow $?
 
 # Add TRACE macros to library source files.  This is done via the trace script
 # in the hdf5/bin directory.  If the file contains HDF5 API macros, a "clean"

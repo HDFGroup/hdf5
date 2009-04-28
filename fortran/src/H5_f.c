@@ -338,6 +338,9 @@ nh5init_flags_c( int_f *h5d_flags, int_f *h5f_flags,
     h5d_flags[16] = (int_f)H5D_FILL_VALUE_UNDEFINED;
     h5d_flags[17] = (int_f)H5D_FILL_VALUE_DEFAULT;
     h5d_flags[18] = (int_f)H5D_FILL_VALUE_USER_DEFINED;
+    h5d_flags[19] = (int_f)H5D_CHUNK_CACHE_NSLOTS_DEFAULT;
+    h5d_flags[20] = (int_f)H5D_CHUNK_CACHE_NBYTES_DEFAULT;
+    h5d_flags[21] = (int_f)H5D_CHUNK_CACHE_W0_DEFAULT;
 
 /*
  *  H5F flags

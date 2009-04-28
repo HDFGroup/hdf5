@@ -84,6 +84,9 @@
 /* Define to 1 if you have the <dmalloc.h> header file. */
 #undef HAVE_DMALLOC_H
 
+/* Define if library information should be embedded in the executables */
+#undef HAVE_EMBEDDED_LIBINFO
+
 /* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H
 
@@ -580,6 +583,9 @@
 
 /* The size of `uint_least8_t', as computed by sizeof. */
 #undef SIZEOF_UINT_LEAST8_T
+
+/* The size of `unsigned', as computed by sizeof. */
+#undef SIZEOF_UNSIGNED
 
 /* The size of `__int64', as computed by sizeof. */
 #undef SIZEOF___INT64

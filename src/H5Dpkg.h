@@ -100,7 +100,7 @@ struct H5D_io_info_t;
 struct H5D_chunk_map_t;
 
 /* Function pointers for I/O on particular types of dataset layouts */
-typedef herr_t (*H5D_layout_new_func_t)(H5F_t *f, hid_t dapl_id, hid_t dxpl_id,
+typedef herr_t (*H5D_layout_construct_func_t)(H5F_t *f, hid_t dapl_id, hid_t dxpl_id,
     H5D_t *dset, const H5P_genplist_t *dc_plist);
 typedef hbool_t (*H5D_layout_is_space_alloc_func_t)(const H5O_layout_t *layout);
 typedef herr_t (*H5D_layout_io_init_func_t)(const struct H5D_io_info_t *io_info,
@@ -123,7 +123,7 @@ typedef herr_t (*H5D_layout_io_term_func_t)(const struct H5D_chunk_map_t *cm);
 
 /* Typedef for grouping layout I/O routines */
 typedef struct H5D_layout_ops_t {
-    H5D_layout_new_func_t new;          /* Layout constructor for new datasets */
+    H5D_layout_construct_func_t construct;          /* Layout constructor for new datasets */
     H5D_layout_is_space_alloc_func_t is_space_alloc;    /* Query routine to determine if storage is allocated */
     H5D_layout_io_init_func_t io_init;  /* I/O initialization routine */
     H5D_layout_read_func_t ser_read;    /* High-level I/O routine for reading data in serial */
@@ -177,6 +177,11 @@ typedef union H5D_storage_t {
 } H5D_storage_t;
 
 /* Typedef for raw data I/O operation info */
+typedef enum H5D_io_op_type_t {
+    H5D_IO_OP_READ,         /* Read operation */
+    H5D_IO_OP_WRITE         /* Write operation */
+} H5D_io_op_type_t;
+
 typedef struct H5D_io_info_t {
     H5D_t *dset;                /* Pointer to dataset being operated on */
 #ifndef H5_HAVE_PARALLEL
@@ -196,10 +201,7 @@ typedef struct H5D_io_info_t {
     H5D_storage_t *store;       /* Dataset storage info */
     H5D_layout_ops_t layout_ops;    /* Dataset layout I/O operation function pointers */
     H5D_io_ops_t io_ops;        /* I/O operation function pointers */
-    enum {
-        H5D_IO_OP_READ,         /* Read operation */
-        H5D_IO_OP_WRITE         /* Write operation */
-    } op_type;
+    H5D_io_op_type_t op_type;
     union {
         void *rbuf;             /* Pointer to buffer for read */
         const void *wbuf;       /* Pointer to buffer to write */
@@ -294,7 +296,7 @@ typedef struct H5D_chunk_ops_t {
     H5D_chunk_get_addr_func_t get_addr;     /* Routine to retrieve address of chunk in file */
     H5D_chunk_iterate_func_t iterate;       /* Routine to iterate over chunks */
     H5D_chunk_remove_func_t remove;         /* Routine to remove a chunk from an index */
-    H5D_chunk_delete_func_t delete;         /* Routine to delete index & all chunks from file*/
+    H5D_chunk_delete_func_t idx_delete;     /* Routine to delete index & all chunks from file*/
     H5D_chunk_copy_setup_func_t copy_setup; /* Routine to perform any necessary setup for copying chunks */
     H5D_chunk_copy_shutdown_func_t copy_shutdown; /* Routine to perform any necessary shutdown for copying chunks */
     H5D_chunk_size_func_t size;             /* Routine to get size of indexing information */

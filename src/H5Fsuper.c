@@ -32,6 +32,7 @@
 #include "H5FDprivate.h"	/* File drivers				*/
 #include "H5Iprivate.h"		/* IDs			  		*/
 #include "H5MFprivate.h"	/* File memory management		*/
+#include "H5MMprivate.h"	/* Memory management			*/
 #include "H5Pprivate.h"		/* Property lists			*/
 #include "H5SMprivate.h"        /* Shared Object Header Messages        */
 
@@ -230,7 +231,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
+H5F_super_read(H5F_t *f, hid_t dxpl_id)
 {
     uint8_t             sbuf[H5F_MAX_SUPERBLOCK_SIZE];     /* Buffer for superblock */
     H5P_genplist_t     *c_plist;            /* File creation property list  */
@@ -383,8 +384,9 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
         H5F_addr_decode(f, (const uint8_t **)&p, &shared->extension_addr/*out*/);
         H5F_addr_decode(f, (const uint8_t **)&p, &stored_eoa/*out*/);
         H5F_addr_decode(f, (const uint8_t **)&p, &shared->driver_addr/*out*/);
-        if(H5G_obj_ent_decode(f, (const uint8_t **)&p, root_loc->oloc/*out*/,
-            &shared->root_ent/*out*/) < 0)
+
+        /* Decode the symbol table entry */
+        if(H5G_root_ent_decode(f, (const uint8_t **)&p) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to read root symbol entry")
 
         /*
@@ -468,7 +470,6 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
         } /* end if */
     } /* end if */
     else {
-        haddr_t root_addr;              /* Address of root group */
         uint32_t computed_chksum;       /* Computed checksum  */
         uint32_t read_chksum;           /* Checksum read from file  */
 
@@ -499,7 +500,7 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
         H5F_addr_decode(f, (const uint8_t **)&p, &shared->base_addr/*out*/);
         H5F_addr_decode(f, (const uint8_t **)&p, &shared->extension_addr/*out*/);
         H5F_addr_decode(f, (const uint8_t **)&p, &stored_eoa/*out*/);
-        H5F_addr_decode(f, (const uint8_t **)&p, &root_addr/*out*/);
+        H5F_addr_decode(f, (const uint8_t **)&p, &shared->root_addr/*out*/);
 
         /* Compute checksum for superblock */
         computed_chksum = H5_checksum_metadata(sbuf, (size_t)(p - sbuf), 0);
@@ -510,11 +511,6 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
         /* Verify correct checksum */
         if(read_chksum != computed_chksum)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "bad checksum on driver information block")
-
-        /* Create root group object location */
-        H5O_loc_reset(root_loc->oloc);
-        root_loc->oloc->file = f;
-        root_loc->oloc->addr = root_addr;
 
         /*
          * Check if superblock address is different from base address and
@@ -560,7 +556,8 @@ H5F_super_read(H5F_t *f, hid_t dxpl_id, H5G_loc_t *root_loc)
      * Tell the file driver how much address space has already been
      * allocated so that it knows how to allocate additional memory.
      */
-    if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, stored_eoa) < 0)
+    /* (Account for the stored EOA being absolute offset -NAF) */
+    if(H5FD_set_eoa(lf, H5FD_MEM_SUPER, stored_eoa - H5F_BASE_ADDR(f)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to set end-of-address marker for file")
 
     /* Read the file's superblock extension, if there is one. */
@@ -929,12 +926,22 @@ H5F_super_write(H5F_t *f, hid_t dxpl_id)
         rel_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_SUPER);
         H5F_addr_encode(f, &p, (rel_eoa + f->shared->base_addr));
         H5F_addr_encode(f, &p, f->shared->driver_addr);
-        if(H5G_obj_ent_encode(f, &p, H5G_oloc(f->shared->root_grp)) < 0)
+
+        /* Encode the root group object entry, including the cached stab info */
+        if(H5G_root_ent_encode(f, &p) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to encode root group information")
 
         /* Encode the driver information block. */
         H5_ASSIGN_OVERFLOW(driver_size, H5FD_sb_size(f->shared->lf), hsize_t, size_t);
-        if(driver_size > 0) {
+
+        /* Checking whether driver block address is defined here is to handle backward
+         * compatibility.  If the file was created with v1.6 library or earlier and no
+         * driver info block was written in the superblock, we don't write it either even
+         * though there's some driver info.  Otherwise, the driver block extended will
+         * overwrite the (meta)data right after the superblock. This situation happens to
+         * the family driver particularly.  SLU - 2009/3/24 
+         */
+        if(driver_size > 0 && H5F_addr_defined(f->shared->driver_addr)) {
             char driver_name[9];    /* Name of driver, for driver info block */
             uint8_t *dbuf = p;      /* Pointer to beginning of driver info */
 

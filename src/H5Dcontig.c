@@ -61,7 +61,7 @@
 /********************/
 
 /* Layout operation callbacks */
-static herr_t H5D_contig_new(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
+static herr_t H5D_contig_construct(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
     const H5P_genplist_t *dc_plist);
 static hbool_t H5D_contig_is_space_alloc(const H5O_layout_t *layout);
 static herr_t H5D_contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
@@ -79,7 +79,7 @@ static herr_t H5D_contig_write_one(H5D_io_info_t *io_info, hsize_t offset,
 
 /* Contiguous storage layout I/O ops */
 const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
-    H5D_contig_new,
+    H5D_contig_construct,
     H5D_contig_is_space_alloc,
     H5D_contig_io_init,
     H5D_contig_read,
@@ -360,7 +360,7 @@ H5D_contig_get_addr(const H5D_t *dset)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_contig_new
+ * Function:	H5D_contig_construct
  *
  * Purpose:	Constructs new contiguous layout information for dataset
  *
@@ -373,17 +373,20 @@ H5D_contig_get_addr(const H5D_t *dset)
  */
 /* ARGSUSED */
 static herr_t
-H5D_contig_new(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset,
+H5D_contig_construct(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset,
     const H5P_genplist_t UNUSED *dc_plist)
 {
-    hssize_t tmp_size;                  /* Temporary holder for raw data size */
+    hssize_t snelmts;                   /* Temporary holder for number of elements in dataspace */
+    hsize_t nelmts;                     /* Number of elements in dataspace */
+    size_t dt_size;                     /* Size of datatype */
+    hsize_t tmp_size;                   /* Temporary holder for raw data size */
     hsize_t dim[H5O_LAYOUT_NDIMS];	/* Current size of data in elements */
     hsize_t max_dim[H5O_LAYOUT_NDIMS];  /* Maximum size of data in elements */
     int ndims;                          /* Rank of dataspace */
     int i;                              /* Local index variable */
     herr_t ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_new)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_contig_construct)
 
     /* Sanity checks */
     HDassert(f);
@@ -402,16 +405,31 @@ H5D_contig_new(H5F_t *f, hid_t UNUSED dapl_id, hid_t UNUSED dxpl_id, H5D_t *dset
         if(max_dim[i] > dim[i])
             HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "extendible contiguous non-external dataset")
 
-    /* Compute the total size of dataset */
-    tmp_size = H5S_GET_EXTENT_NPOINTS(dset->shared->space) * H5T_get_size(dset->shared->type);
-    H5_ASSIGN_OVERFLOW(dset->shared->layout.u.contig.size, tmp_size, hssize_t, hsize_t);
+    /* Retrieve the number of elements in the dataspace */
+    if((snelmts = H5S_GET_EXTENT_NPOINTS(dset->shared->space)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve number of elements in dataspace")
+    nelmts = (hsize_t)snelmts;
+
+    /* Get the datatype's size */
+    if(0 == (dt_size = H5T_GET_SIZE(dset->shared->type)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "unable to retrieve size of datatype")
+
+    /* Compute the size of the dataset's contiguous storage */
+    tmp_size = nelmts * dt_size;
+
+    /* Check for overflow during multiplication */
+    if(nelmts != (tmp_size / dt_size))
+        HGOTO_ERROR(H5E_DATASET, H5E_OVERFLOW, FAIL, "size of dataset's storage overflowed")
+
+    /* Assign the dataset's contiguous storage size */
+    dset->shared->layout.u.contig.size = tmp_size;
 
     /* Get the sieve buffer size for this dataset */
     dset->shared->cache.contig.sieve_buf_size = H5F_SIEVE_BUF_SIZE(f);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_contig_new() */
+} /* end H5D_contig_construct() */
 
 
 /*-------------------------------------------------------------------------

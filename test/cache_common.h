@@ -35,7 +35,7 @@
 #include "h5test.h"
 
 /* Macro to make error reporting easier */
-#define CACHE_ERROR(s)      {failure_mssg = "Line #" H5_TOSTRING(__LINE__) ": " s ; goto done;}
+#define CACHE_ERROR(s)      {failure_mssg = "Line #" H5_TOSTRING(__LINE__) ": " s ; pass = FALSE; goto done;}
 
 #define NO_CHANGE       -1
 
@@ -306,6 +306,8 @@ typedef struct test_entry_t
                                          * dependency children
                                          */
     unsigned            flush_dep_height; /* flush dependency height of entry */
+    hbool_t		pinned_from_client;	/* entry was pinned by client call */
+    hbool_t		pinned_from_cache;	/* entry was pinned by cache internally */
     unsigned            flush_order;    /* Order that entry was flushed in */
 } test_entry_t;
 

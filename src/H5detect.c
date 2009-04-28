@@ -108,6 +108,7 @@ static void detect_C99_integers16(void);
 static void detect_C99_integers32(void);
 static void detect_C99_integers64(void);
 static void detect_alignments(void);
+static void insert_libhdf5_settings(void);
 static size_t align_g[] = {1, 2, 4, 8, 16};
 static jmp_buf jbuf_g;
 
@@ -502,6 +503,64 @@ sigbus_handler(int UNUSED signo)
 
 
 /*-------------------------------------------------------------------------
+ * Function:	insert_libhdf5_settings
+ *
+ * Purpose:	Insert contents of libhdf5.settings so that it is included
+ *		in all hdf5 executables.
+ *
+ * Return:	void
+ *
+ * Programmer:	Albert Cheng
+ *		Apr 20, 2009
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+#define LIBSETTINGSFNAME "libhdf5.settings"
+static void
+insert_libhdf5_settings(void)
+{
+    FILE *fsettings;
+    int inchar;
+    int	bol=0;	/* indicates the beginning of a new line */
+
+    if (NULL==(fsettings=HDfopen(LIBSETTINGSFNAME, "r"))){
+        perror(LIBSETTINGSFNAME);
+        exit(1);
+    }
+    /* print variable definition */
+    printf("extern char H5libhdf5_settings[]=\n");
+    bol++;
+    while (EOF != (inchar = getc(fsettings))){
+	if (bol){
+	    /* Start a new line */
+	    printf("\t\"");
+	    bol = 0;
+	}
+	if (inchar == '\n'){
+	    /* end of a line */
+	    printf("\\n\"\n");
+	    bol++;
+	}else{
+	    putchar(inchar);
+	}
+    }
+    if (feof(fsettings)){
+	/* wrap up */
+	if (!bol){
+	    /* EOF found without a new line */
+	    printf("\\n\"\n");
+	};
+	printf(";\n\n");
+    }else{
+	fprintf(stderr, "Read errors encountered with %s\n", LIBSETTINGSFNAME);
+	exit(1);
+    }
+}
+
+
+/*-------------------------------------------------------------------------
  * Function:	print_results
  *
  * Purpose:	Prints information about the detected data types.
@@ -579,6 +638,11 @@ print_results(int nd, detected_t *d, int na, malign_t *misc_align)
 /* Local Variables */\n\
 /*******************/\n\
 \n");
+
+#ifdef H5_HAVE_EMBEDDED_LIBINFO
+    /* Insert content of libhdf5.settings */
+    insert_libhdf5_settings();
+#endif
 
     /* The interface initialization function */
     printf("\n\

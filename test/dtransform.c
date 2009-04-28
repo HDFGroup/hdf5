@@ -50,17 +50,17 @@ const float windchillFfloat[ROWS][COLS] =
 
 const int transformData[ROWS][COLS] =
     {   {36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22, 28, 34, 40, 46, 52, 57, 63 },
-        {34, 27, 21, 15, 9, 3, 4, 10, 16, 22, 28, 35, 41, 47, 53, 59, 66, 72 } ,
-        {32, 25, 19, 13, 6, 0, 7, 13, 19, 26, 32, 39, 45, 51, 58, 64, 71, 77 },
-        {30, 24, 17, 11, 4, 2, 9, 15, 22, 29, 35, 42, 48, 55, 61, 68, 74, 81 },
-        {29, 23, 16, 9, 3, 4, 11, 17, 24, 31, 37, 44, 51, 58, 64, 71, 78, 84 },
-        {28, 22, 15, 8, 1, 5, 12, 19, 26, 33, 39, 46, 53, 60, 67, 73, 80, 87 },
-        {28, 21, 14, 7, 0, 7, 14, 21, 27, 34, 41, 48, 55, 62, 69, 76, 82, 89 },
-        {27, 20, 13, 6, 1, 8, 15, 22, 29, 36, 43, 50, 57, 64, 71, 78, 84, 91 },
-        {26, 19, 12, 5, 2, 9, 16, 23, 30, 37, 44, 51, 58, 65, 72, 79, 86, 93 },
-        {26, 19, 12, 4, 3, 10, 17, 24, 31, 38, 45, 52, 60, 67, 74, 81, 88, 95},
-        {25, 18, 11, 4, 3, 11, 18, 25, 32, 39, 46, 54, 61, 68, 75, 82, 89, 97},
-        {25, 17, 10, 3, 4, 11, 19, 26, 33, 40, 48, 55, 62, 69, 76, 84, 91, 98}
+        {34, 27, 21, 15, 9, 3, 4, 10, 16, 22, 28, 35, 41, 47, 53, 59, 66, 0 } ,
+        {32, 25, 19, 13, 6, 0, 7, 13, 19, 26, 32, 39, 45, 51, 58, 64, 71, 5 },
+        {30, 24, 17, 11, 4, 2, 9, 15, 22, 29, 35, 42, 48, 55, 61, 68, 2, 9 },
+        {29, 23, 16, 9, 3, 4, 11, 17, 24, 31, 37, 44, 51, 58, 64, 71, 6, 12 },
+        {28, 22, 15, 8, 1, 5, 12, 19, 26, 33, 39, 46, 53, 60, 67, 1, 8, 15 },
+        {28, 21, 14, 7, 0, 7, 14, 21, 27, 34, 41, 48, 55, 62, 69, 4, 10, 17 },
+        {27, 20, 13, 6, 1, 8, 15, 22, 29, 36, 43, 50, 57, 64, 71, 6, 12, 19 },
+        {26, 19, 12, 5, 2, 9, 16, 23, 30, 37, 44, 51, 58, 65, 0, 7, 14, 21 },
+        {26, 19, 12, 4, 3, 10, 17, 24, 31, 38, 45, 52, 60, 67, 2, 9, 16, 23},
+        {25, 18, 11, 4, 3, 11, 18, 25, 32, 39, 46, 54, 61, 68, 3, 10, 17, 25},
+        {25, 17, 10, 3, 4, 11, 19, 26, 33, 40, 48, 55, 62, 69, 4, 12, 19, 26}
     };
 
 #define UCOMPARE(TYPE,VAR1,VAR2,TOL)			\
@@ -104,17 +104,25 @@ const int transformData[ROWS][COLS] =
     /* utrans is a transform for unsigned types: no negative numbers involved and results are < 255 to fit into uchar */ \
     const char* utrans = "((x+100)/4)*3";					\
 										\
-    hid_t dataspace, dxpl_id_f_to_c, dxpl_id_utrans, dset;			\
+    hid_t dataspace, dxpl_id_f_to_c, dxpl_id_utrans, dset, dset_nn, dt_nn;	\
+    H5T_order_t order;                                                          \
     hsize_t dim[2] = {ROWS, COLS};						\
 										\
     if((dataspace = H5Screate_simple(2, dim, NULL)) < 0) TEST_ERROR;		\
-    if((dset = H5Dcreate2(file_id, "/transformtest_"TEST_STR, HDF_TYPE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR;	\
+    if((dset = H5Dcreate2(file_id, "/transformtest_"TEST_STR, HDF_TYPE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR; \
+                                                                                \
+    if((dt_nn = H5Tcopy(HDF_TYPE)) < 0) TEST_ERROR                              \
+    if((order = H5Tget_order(dt_nn)) == H5T_ORDER_ERROR) TEST_ERROR             \
+    if(H5Tset_order(dt_nn, order == H5T_ORDER_LE ? H5T_ORDER_BE : H5T_ORDER_LE) < 0) TEST_ERROR \
+    if((dset_nn = H5Dcreate2(file_id, "/nonnative_transformtest_"TEST_STR, dt_nn, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR	\
+    if(H5Tclose(dt_nn) < 0) TEST_ERROR                                          \
 										\
     if(SIGNED)									\
     {										\
 	if((dxpl_id_f_to_c = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;	\
 	if(H5Pset_data_transform(dxpl_id_f_to_c, f_to_c) < 0) TEST_ERROR;	\
 	if(H5Dwrite(dset, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFfloat) < 0) TEST_ERROR;	\
+	if(H5Dwrite(dset_nn, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, dxpl_id_f_to_c, windchillFfloat) < 0) TEST_ERROR;	\
 	if(H5Pclose(dxpl_id_f_to_c) < 0) TEST_ERROR;			\
     }										\
     else									\
@@ -122,6 +130,7 @@ const int transformData[ROWS][COLS] =
 	if((dxpl_id_utrans = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;	\
 	if(H5Pset_data_transform(dxpl_id_utrans, utrans) < 0) TEST_ERROR;	\
 	if(H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_utrans, transformData) < 0) TEST_ERROR;	\
+	if(H5Dwrite(dset_nn, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_utrans, transformData) < 0) TEST_ERROR;	\
 	if(H5Pclose(dxpl_id_utrans) < 0) TEST_ERROR;			\
     }										\
 										\
@@ -133,16 +142,21 @@ const int transformData[ROWS][COLS] =
         COMPARE(TYPE, array, COMPARE_DATA, 2)					\
     else									\
         UCOMPARE(TYPE, array, COMPARE_DATA, 4)					\
+                                                                                \
+    TESTING("contiguous, byte order conversion ("TEST_STR"->"TEST_STR")")	\
+										\
+    if(H5Dread(dset_nn, HDF_TYPE, H5S_ALL, H5S_ALL, XFORM, array) < 0) TEST_ERROR;	\
+    if(SIGNED)									\
+        COMPARE(TYPE, array, COMPARE_DATA, 2)					\
+    else									\
+        UCOMPARE(TYPE, array, COMPARE_DATA, 4)					\
 										\
     if(SIGNED)									\
     {    									\
         TESTING("contiguous, with type conversion (float->"TEST_STR")")	\
 										\
 	if(H5Dread(dset_id_float, HDF_TYPE, H5S_ALL, H5S_ALL, XFORM, array) < 0) TEST_ERROR;	\
-	if(SIGNED)								\
-	    COMPARE(TYPE, array, COMPARE_DATA, 2)				\
-	else									\
-	    UCOMPARE(TYPE, array, COMPARE_DATA, 4)				\
+	COMPARE(TYPE, array, COMPARE_DATA, 2)				\
     }										\
 										\
    if(H5Dclose(dset) < 0) TEST_ERROR;					\
@@ -200,10 +214,7 @@ const int transformData[ROWS][COLS] =
         TESTING("chunked, with type conversion (float->"TEST_STR")")	\
 										\
 	if(H5Dread(dset_id_float_chunk, HDF_TYPE, memspace, filespace, XFORM, array) < 0) TEST_ERROR;	\
-	if(SIGNED)								\
-	    COMPARE(TYPE, array, COMPARE_DATA, 2)				\
-	else									\
-	    UCOMPARE(TYPE, array, COMPARE_DATA, 4)				\
+	COMPARE(TYPE, array, COMPARE_DATA, 2)				\
     }										\
 										\
 									\
@@ -516,7 +527,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
     float windchillFfloatread[ROWS][COLS];
     const char* simple = "(4/2) * ( (2 + 4)/(5 - 2.5))"; /* this equals 4.8 */
     const char* c_to_f = "(9/5.0)*x + 32";
-    char* ptrgetTest = HDmalloc(HDstrlen(simple)+1);
+    char* ptrgetTest = (char *) HDmalloc(HDstrlen(simple)+1);
 
     TESTING("H5Pget_data_transform")
     H5Pget_data_transform(dxpl_id_c_to_f, ptrgetTest, HDstrlen(c_to_f)+1);
@@ -549,7 +560,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
     PASSED();
 
 
-    ptrgetTest = malloc(strlen(simple)+1);
+    ptrgetTest = (char *) malloc(strlen(simple)+1);
 
     HDmemset(ptrgetTest, 0, strlen(simple)+1);
     TESTING("H5Pget_data_transform, after resetting transform property")
@@ -577,7 +588,7 @@ test_set(void)
     hid_t	dxpl_id;
     H5E_auto2_t func;
     const char* str = "(9/5.0)*x + 32";
-    char* ptrgetTest = malloc(strlen(str)+1);
+    char* ptrgetTest = (char *) malloc(strlen(str)+1);
 
     if((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0) TEST_ERROR;
 

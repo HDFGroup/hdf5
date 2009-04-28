@@ -26,7 +26,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.9.36], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.39], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
@@ -1306,6 +1306,7 @@ AC_C_BIGENDIAN
 AC_CHECK_SIZEOF([char], [1])
 AC_CHECK_SIZEOF([short], [2])
 AC_CHECK_SIZEOF([int], [4])
+AC_CHECK_SIZEOF([unsigned], [4])
 AC_CHECK_SIZEOF([long], [4])
 AC_CHECK_SIZEOF([long long], [8])
 AC_CHECK_SIZEOF([__int64], [8])
@@ -3793,6 +3794,25 @@ case "X-$STRICT_CHECKS" in
     STRICT_FORMAT_CHECKS=no
     ;;
 esac
+
+
+dnl ----------------------------------------------------------------------
+dnl Enable embedded library information
+dnl
+AC_MSG_CHECKING([Whether to have library information embedded in the executables])
+AC_ARG_ENABLE([embedded-libinfo],
+    [AC_HELP_STRING([--enable-embedded-libinfo],
+	[Enable embedded library information [default=yes]])],
+	[enable_embedded_libinfo=$enableval],
+	[enable_embedded_libinfo=yes])
+
+   if test "${enable_embedded_libinfo}" = "yes"; then
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([HAVE_EMBEDDED_LIBINFO], [1],
+                [Define if library information should be embedded in the executables])
+   else
+      AC_MSG_RESULT([no])
+    fi
 
 
 dnl ----------------------------------------------------------------------

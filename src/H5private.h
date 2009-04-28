@@ -144,6 +144,7 @@
 
 #define VC_EXTRALEAN		/*Exclude rarely-used stuff from Windows headers */
 #include <windows.h>
+#include <direct.h>         /* For _getcwd() */
 
 #endif /*_WIN32*/
 
@@ -436,35 +437,6 @@
 #ifndef H5_DEC_ENUM
 #  define H5_DEC_ENUM(TYPE,VAR) (VAR)=((TYPE)((VAR)-1))
 #endif
-
-/*
- * A macro for detecting over/under-flow when casting between types
- */
-#ifndef NDEBUG
-#define H5_CHECK_OVERFLOW(var, vartype, casttype) \
-{                                                 \
-    casttype _tmp_overflow = (casttype)(var);     \
-    assert((var) == (vartype)_tmp_overflow);      \
-}
-#else /* NDEBUG */
-#define H5_CHECK_OVERFLOW(var, vartype, casttype)
-#endif /* NDEBUG */
-
-/*
- * A macro for detecting over/under-flow when assigning between types
- */
-#ifndef NDEBUG
-#define H5_ASSIGN_OVERFLOW(dst, src, srctype, dsttype)  \
-{                                                       \
-    srctype _tmp_overflow = (srctype)(src);             \
-    dsttype _tmp_overflow2 = (dsttype)(_tmp_overflow);  \
-    assert((dsttype)_tmp_overflow == _tmp_overflow2);   \
-    (dst) = _tmp_overflow2;                             \
-}
-#else /* NDEBUG */
-#define H5_ASSIGN_OVERFLOW(dst, src, srctype, dsttype)  \
-    (dst) = (dsttype)(src);
-#endif /* NDEBUG */
 
 /*
  * Data types and functions for timing certain parts of the library.
@@ -763,6 +735,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
         #endif /* HDstat */
         typedef struct stat64       h5_stat_t;
         typedef off64_t             h5_stat_size_t;
+        #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF64_T
     #else /* H5_SIZEOF_OFF_T!=8 && ... */
         #ifndef HDfstat
             #define HDfstat(F,B)        fstat(F,B)
@@ -772,6 +745,7 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
         #endif /* HDstat */
         typedef struct stat         h5_stat_t;
         typedef off_t               h5_stat_size_t;
+        #define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
     #endif /* H5_SIZEOF_OFF_T!=8 && ... */
 #endif /* !defined(HDfstat) || !defined(HDstat) */
 
@@ -1236,6 +1210,9 @@ H5_DLL int64_t HDstrtoll (const char *s, const char **rest, int base);
 #ifndef HDstrtoul
     #define HDstrtoul(S,R,N)	strtoul(S,R,N)
 #endif /* HDstrtoul */
+#ifndef HDstrtoull
+    #define HDstrtoull(S,R,N)	strtoull(S,R,N)
+#endif /* HDstrtoul */
 #ifndef HDstrxfrm
     #define HDstrxfrm(X,Y,Z)	strxfrm(X,Y,Z)
 #endif /* HDstrxfrm */
@@ -1374,6 +1351,78 @@ extern char *strdup(const char *s);
 #ifndef HDpthread_self_ulong
     #define HDpthread_self_ulong()    ((unsigned long)pthread_self())
 #endif /* HDpthread_self_ulong */
+
+/*
+ * A macro for detecting over/under-flow when casting between types
+ */
+#ifndef NDEBUG
+#define H5_CHECK_OVERFLOW(var, vartype, casttype) \
+{                                                 \
+    casttype _tmp_overflow = (casttype)(var);     \
+    assert((var) == (vartype)_tmp_overflow);      \
+}
+#else /* NDEBUG */
+#define H5_CHECK_OVERFLOW(var, vartype, casttype)
+#endif /* NDEBUG */
+
+/*
+ * A macro for detecting over/under-flow when assigning between types
+ */
+#ifndef NDEBUG
+#define ASSIGN_TO_SMALLER_SIZE(dst, dsttype, src, srctype)       \
+{                                                       \
+    srctype _tmp_src = (srctype)(src);  \
+    dsttype _tmp_dst = (dsttype)(_tmp_src);  \
+    assert(_tmp_src == (srctype)_tmp_dst);   \
+    (dst) = _tmp_dst;                             \
+}
+
+#define ASSIGN_TO_LARGER_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)       \
+    (dst) = (dsttype)(src);
+
+#define ASSIGN_TO_LARGER_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)       \
+{                                                       \
+    srctype _tmp_src = (srctype)(src);  \
+    dsttype _tmp_dst = (dsttype)(_tmp_src);  \
+    assert(_tmp_src >= 0);   \
+    assert(_tmp_src == _tmp_dst);   \
+    (dst) = _tmp_dst;                             \
+}
+
+#define ASSIGN_TO_LARGER_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)       \
+    (dst) = (dsttype)(src);
+
+#define ASSIGN_TO_SAME_SIZE_UNSIGNED_TO_SIGNED(dst, dsttype, src, srctype)       \
+{                                                       \
+    srctype _tmp_src = (srctype)(src);  \
+    dsttype _tmp_dst = (dsttype)(_tmp_src);  \
+    assert(_tmp_dst >= 0);   \
+    assert(_tmp_src == (srctype)_tmp_dst);   \
+    (dst) = _tmp_dst;                             \
+}
+
+#define ASSIGN_TO_SAME_SIZE_SIGNED_TO_UNSIGNED(dst, dsttype, src, srctype)       \
+{                                                       \
+    srctype _tmp_src = (srctype)(src);  \
+    dsttype _tmp_dst = (dsttype)(_tmp_src);  \
+    assert(_tmp_src >= 0);   \
+    assert(_tmp_src == (srctype)_tmp_dst);   \
+    (dst) = _tmp_dst;                             \
+}
+
+#define ASSIGN_TO_SAME_SIZE_SAME_SIGNED(dst, dsttype, src, srctype)       \
+    (dst) = (dsttype)(src);
+
+/* Include the generated overflow header file */
+#include "H5overflow.h"
+
+#define H5_ASSIGN_OVERFLOW(dst, src, srctype, dsttype)  \
+    H5_GLUE4(ASSIGN_,srctype,_TO_,dsttype)(dst,dsttype,src,srctype)\
+
+#else /* NDEBUG */
+#define H5_ASSIGN_OVERFLOW(dst, src, srctype, dsttype)  \
+    (dst) = (dsttype)(src);
+#endif /* NDEBUG */
 
 #if defined(H5_HAVE_WINDOW_PATH)
 
@@ -1692,6 +1741,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 
 #define FUNC_ENTER_COMMON(func_name,asrt)                                     \
     static const char FUNC[]=#func_name;                                      \
+    hbool_t err_occurred = FALSE;					      \
     FUNC_ENTER_COMMON_NOFUNC(func_name,asrt);
 
 /* Threadsafety initialization code for API routines */
@@ -1861,7 +1911,9 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 #define FUNC_LEAVE_API(ret_value)                                             \
         FINISH_MPE_LOG;                                                       \
         H5TRACE_RETURN(ret_value);					      \
-        H5_POP_FUNC                                                          \
+        H5_POP_FUNC                                                           \
+        if(err_occurred)						      \
+           (void)H5E_dump_api_stack(TRUE);				      \
         FUNC_LEAVE_API_THREADSAFE                                             \
         return (ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \
@@ -1870,6 +1922,8 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 #define FUNC_LEAVE_API_NOFS(ret_value)                                        \
         FINISH_MPE_LOG;                                                       \
         H5TRACE_RETURN(ret_value);					      \
+        if(err_occurred)						      \
+           (void)H5E_dump_api_stack(TRUE);				      \
         FUNC_LEAVE_API_THREADSAFE                                             \
         return (ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \

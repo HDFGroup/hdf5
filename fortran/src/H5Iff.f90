@@ -306,5 +306,47 @@
             hdferr = h5iget_file_id_c(obj_id, file_id)
           END SUBROUTINE h5iget_file_id_f
 
+!----------------------------------------------------------------------
+! Name:		H5Iis_valid_f
+!
+! Purpose:	Check if an ID is valid without producing an error message
+!
+! Inputs: 	id		- identifier 
+! Outputs:       
+!		valid           - status of id as a valid identifier
+!		hdferr:		- error code		
+!				 	Success:  0
+!				 	Failure: -1
+! Programmer:	M. Scot Breitenfeld
+!		April 13, 2009
+!
+! Comment:		
+!----------------------------------------------------------------------
+          SUBROUTINE h5iis_valid_f(id, valid, hdferr)
+            IMPLICIT NONE
+            INTEGER(HID_T), INTENT(IN)  :: id   ! Identifier 
+            LOGICAL, INTENT(OUT) :: valid    ! Status of id as a valid identifier
+            INTEGER, INTENT(OUT) :: hdferr  ! Error code
+            INTEGER  :: c_valid ! 0 = .false, 1 = .true.
+
+            INTERFACE
+               INTEGER FUNCTION h5iis_valid_c(id, c_valid)
+                 USE H5GLOBAL
+                 !DEC$IF DEFINED(HDF5F90_WINDOWS)
+                 !DEC$ATTRIBUTES C,reference,decorate,alias:'H5IIS_VALID_C':: h5iis_valid_c
+                 !DEC$ENDIF
+                 INTEGER(HID_T), INTENT(IN)  :: id   ! Identifier 
+                 INTEGER  :: c_valid
+               END FUNCTION h5iis_valid_c
+            END INTERFACE
+
+            hdferr = h5iis_valid_c(id, c_valid)
+
+            valid = .FALSE. ! Default
+            IF(c_valid.EQ.1) valid = .TRUE.
+         
+          END SUBROUTINE h5iis_valid_f
+
+
       END MODULE H5I
 

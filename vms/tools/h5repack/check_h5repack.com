@@ -48,6 +48,9 @@ $ CALL TOOLTEST "" h5repack_attr.h5
 $ CALL TOOLTEST "" h5repack_hlink.h5
 $ CALL TOOLTEST "" h5repack_layout.h5
 $ CALL TOOLTEST "" h5repack_early.h5
+
+$! Check repacking file with committed datatypes in odd configurations
+$ CALL TOOLTEST "" h5repack_named_dtypes.h5
 $ 
 $! # use h5repack_layout.h5 to write some filters  (this file has  no filters)
 $ 

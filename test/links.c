@@ -81,6 +81,7 @@ const char *FILENAME[] = {
     "extlinks18B",	/* 41: */
     "extlinks19A",	/* 42: */
     "extlinks19B",	/* 43: */
+    "extlinks20",	/* 44: */
     NULL
 };
 
@@ -131,6 +132,7 @@ const char *FILENAME[] = {
     "extlinks18B",	/* 41: */
     "extlinks19A",	/* 42: */
     "extlinks19B",	/* 43: */
+    "extlinks20",	/* 44: */
     NULL
 };
 
@@ -4218,8 +4220,8 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     if (H5Pset_fapl_family(fam_fapl, op_data.fam_size, op_data.base_fapl) < 0) TEST_ERROR
 
     /* Create parent and target files, group, and external link */
-    h5_fixname(FILENAME[40], fapl, filename1, sizeof filename1);
-    h5_fixname(FILENAME[41], fam_fapl, filename2, sizeof filename2);
+    h5_fixname(FILENAME[42], fapl, filename1, sizeof filename1);
+    h5_fixname(FILENAME[43], fam_fapl, filename2, sizeof filename2);
     if ((file1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
     if ((file2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fam_fapl)) < 0) TEST_ERROR
     if ((group = H5Gcreate2(file1, "group1",H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
@@ -4295,6 +4297,67 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
     } H5E_END_TRY;
     return -1;
 } /* end external_set_elink_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    external_reset_register
+ *
+ * Purpose:     Check that external links are registered after the library
+ *              is reset.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              Apr. 9, 2009
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+external_reset_register(void)
+{
+    hid_t       file;
+    char        filename[NAME_BUF_SIZE];
+
+    TESTING("external links are registered after reset")
+
+    /* Create and close file */
+    h5_fixname(FILENAME[44], H5P_DEFAULT, filename, sizeof filename);
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Fclose(file) < 0) TEST_ERROR
+
+    /* Reset the library */
+    H5close();
+
+    /* Re open file */
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Create an external link */
+    if (H5Lcreate_external("some_file", "some_obj", file, "ext_link1", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+
+    /* Close file */
+    if (H5Fclose(file) < 0) TEST_ERROR
+
+    /* Try again to make sure the previous H5Lcreate_external call does not
+     * affect the ability to reset */
+    H5close();
+    if ((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) TEST_ERROR
+    if (H5Lcreate_external("another_file", "another_obj", file, "ext_link2", H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if (H5Fclose(file) < 0) TEST_ERROR
+
+    if(HDremove(filename) != 0) TEST_ERROR
+
+    PASSED();
+    return 0;
+
+ error:
+    H5E_BEGIN_TRY {
+        H5Fclose(file);
+    } H5E_END_TRY;
+    return -1;
+} /* end external_reset_register() */
 
 
 #ifdef H5_HAVE_WINDOW_PATH
@@ -7176,6 +7239,14 @@ ud_link_errors(hid_t fapl, hbool_t new_format)
     /* Create a group for the UD link to point to */
     if((gid = H5Gcreate2(fid, "group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
     if(H5Gclose(gid) < 0) FAIL_STACK_ERROR
+
+    /* Try to create internally defined links with H5Lcreate_ud */
+    H5E_BEGIN_TRY {
+        if(H5Lcreate_ud(fid, "/ud_link", H5L_TYPE_HARD, NULL, 0, H5P_DEFAULT, H5P_DEFAULT) >= 0)
+            TEST_ERROR
+        if(H5Lcreate_ud(fid, "/ud_link", H5L_TYPE_SOFT, "str", 4, H5P_DEFAULT, H5P_DEFAULT) >= 0)
+            TEST_ERROR
+    } H5E_END_TRY
 
     /* Create a user-defined link to the group. */
     strcpy(group_name, "/group");
@@ -12753,6 +12824,13 @@ main(void)
     /* Close 2nd FAPL */
     H5Pclose(fapl2);
 
+    h5_cleanup(FILENAME, fapl);
+
+    /* Test that external links can be used after a library reset.  MUST be
+     * called last so the reset doesn't interfere with the property lists.  This
+     * routine will delete its own file. */
+    nerrors += external_reset_register() < 0 ? 1 : 0;
+
     /* Results */
     if(nerrors) {
         printf("***** %d LINK TEST%s FAILED! *****\n",
@@ -12760,8 +12838,6 @@ main(void)
         exit(1);
     }
     printf("All link tests passed.\n");
-
-    h5_cleanup(FILENAME, fapl);
 
     /* clean up tmp directory created by external link tests */
     HDrmdir(TMPDIR);

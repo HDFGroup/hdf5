@@ -57,6 +57,7 @@
 ./bin/locate_sw
 ./bin/ltmain.sh
 ./bin/make_err
+./bin/make_overflow
 ./bin/make_vers
 ./bin/makehelp
 ./bin/missing
@@ -427,6 +428,8 @@
 ./src/H5err.txt
 ./src/H5config.h.in
 ./src/H5detect.c
+./src/H5overflow.txt
+./src/H5overflow.h
 ./src/H5private.h
 ./src/H5public.h
 ./src/H5system.c
@@ -582,6 +585,7 @@
 ./src/H5Gpkg.h
 ./src/H5Gprivate.h
 ./src/H5Gpublic.h
+./src/H5Groot.c
 ./src/H5Gstab.c
 ./src/H5Gtest.c
 ./src/H5Gtraverse.c
@@ -1309,6 +1313,7 @@
 ./tools/testfiles/tfpformat.ddl
 ./tools/testfiles/tfpformat.h5
 
+
 # Expected output from h5ls tests
 ./tools/testfiles/nosuchfile.ls
 ./tools/testfiles/help-1.ls
@@ -1519,6 +1524,7 @@
 ./tools/h5repack/testfiles/h5repack_ext.bin
 ./tools/h5repack/testfiles/h5repack_ext.h5
 ./tools/h5repack/testfiles/ublock.bin
+./tools/h5repack/testfiles/h5repack_named_dtypes.h5
 
 
 # jam utility and tests

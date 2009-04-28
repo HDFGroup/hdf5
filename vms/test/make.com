@@ -288,12 +288,6 @@ $ link set_extent, -
        libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
 $!
 $ type sys$input
-       Creating space_overflow test
-$ ccc  space_overflow
-$ link space_overflow, -
-       libh5test.olb/lib,[-.src]hdf5.olb/lib,zlib_dir:libz.olb/lib
-$!
-$ type sys$input
        Creating stab test
 $ ccc  stab
 $ link stab, -

@@ -163,14 +163,16 @@ typedef struct {
 typedef herr_t (*H5A_lib_iterate_t)(const H5A_t *attr, void *op_data);
 
 /* Describe kind of callback to make for each attribute */
-struct H5A_attr_iter_op_t {
-    enum {
+typedef enum H5A_attr_iter_op_type_t {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-        H5A_ATTR_OP_APP,                /* Application callback */
+    H5A_ATTR_OP_APP,                /* Application callback */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-        H5A_ATTR_OP_APP2,               /* Revised application callback */
-        H5A_ATTR_OP_LIB                 /* Library internal callback */
-    } op_type;
+    H5A_ATTR_OP_APP2,               /* Revised application callback */
+    H5A_ATTR_OP_LIB                 /* Library internal callback */
+} H5A_attr_iter_op_type_t;
+
+typedef struct H5A_attr_iter_op_t {
+    H5A_attr_iter_op_type_t op_type;
     union {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         H5A_operator1_t app_op;         /* Application callback for each attribute */
@@ -178,7 +180,7 @@ struct H5A_attr_iter_op_t {
         H5A_operator2_t app_op2;        /* Revised application callback for each attribute */
         H5A_lib_iterate_t lib_op;       /* Library internal callback for each attribute */
     } u;
-};
+} H5A_attr_iter_op_t;
 
 
 /*****************************/

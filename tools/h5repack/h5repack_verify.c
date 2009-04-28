@@ -275,7 +275,7 @@ int has_layout(hid_t pid,
 }
 
 /*-------------------------------------------------------------------------
- * Function: h5repack_cmpdcpl
+ * Function: h5repack_cmp_pl
  *
  * Purpose: compare 2 files for identical property lists of all objects
  *
@@ -288,17 +288,20 @@ int has_layout(hid_t pid,
  *-------------------------------------------------------------------------
  */
 
-int h5repack_cmpdcpl(const char *fname1,
+int h5repack_cmp_pl(const char *fname1,
                      const char *fname2)
 {
-    hid_t         fid1=-1;       /* file ID */
-    hid_t         fid2=-1;       /* file ID */
-    hid_t         dset1=-1;      /* dataset ID */
-    hid_t         dset2=-1;      /* dataset ID */
-    hid_t         dcpl1=-1;      /* dataset creation property list ID */
-    hid_t         dcpl2=-1;      /* dataset creation property list ID */
-    trav_table_t  *travt1=NULL;
-    trav_table_t  *travt2=NULL;
+    hid_t         fid1=-1;         /* file ID */
+    hid_t         fid2=-1;         /* file ID */
+    hid_t         dset1=-1;        /* dataset ID */
+    hid_t         dset2=-1;        /* dataset ID */
+    hid_t         gid=-1;          /* group ID */
+    hid_t         dcpl1=-1;        /* dataset creation property list ID */
+    hid_t         dcpl2=-1;        /* dataset creation property list ID */
+    hid_t         gcplid=-1;       /* group creation property list */
+    unsigned      crt_order_flag1; /* group creation order flag */
+    unsigned      crt_order_flag2; /* group creation order flag */
+    trav_table_t  *trav=NULL;
     int           ret=1;
     unsigned int  i;
 
@@ -330,26 +333,57 @@ int h5repack_cmpdcpl(const char *fname1,
     * get file table list of objects
     *-------------------------------------------------------------------------
     */
-    trav_table_init(&travt1);
-    trav_table_init(&travt2);
-    if(h5trav_gettable(fid1, travt1) < 0)
+    trav_table_init(&trav);
+    if(h5trav_gettable(fid1, trav) < 0)
         goto error;
-    if(h5trav_gettable(fid2, travt2) < 0)
-        goto error;
-
-
+  
    /*-------------------------------------------------------------------------
     * traverse the suppplied object list
     *-------------------------------------------------------------------------
     */
-
-    for(i = 0; i < travt1->nobjs; i++)
+    for(i = 0; i < trav->nobjs; i++)
     {
-        if(travt1->objs[i].type == H5TRAV_TYPE_DATASET)
+
+        if(trav->objs[i].type == H5TRAV_TYPE_GROUP)
         {
-            if((dset1 = H5Dopen2(fid1, travt1->objs[i].name, H5P_DEFAULT)) < 0)
+
+            if ((gid = H5Gopen2(fid1, trav->objs[i].name, H5P_DEFAULT)) < 0)
                 goto error;
-            if((dset2 = H5Dopen2(fid2, travt1->objs[i].name, H5P_DEFAULT)) < 0)
+            if ((gcplid = H5Gget_create_plist(gid)) < 0)
+                goto error;
+            if (H5Pget_link_creation_order(gcplid, &crt_order_flag1) < 0)
+                goto error;
+            if (H5Pclose(gcplid) < 0)
+                goto error;
+            if (H5Gclose(gid) < 0)
+                goto error;
+
+            if ((gid = H5Gopen2(fid2, trav->objs[i].name, H5P_DEFAULT)) < 0)
+                goto error;
+            if ((gcplid = H5Gget_create_plist(gid)) < 0)
+                goto error;
+            if (H5Pget_link_creation_order(gcplid, &crt_order_flag2) < 0)
+                goto error;
+            if (H5Pclose(gcplid) < 0)
+                goto error;
+            if (H5Gclose(gid) < 0)
+                goto error;
+
+            if ( crt_order_flag1 != crt_order_flag2 )
+            {
+                error_msg(progname, "property lists for <%s> are different\n",trav->objs[i].name);
+                goto error;
+            }
+
+        }
+
+
+
+        else if(trav->objs[i].type == H5TRAV_TYPE_DATASET)
+        {
+            if((dset1 = H5Dopen2(fid1, trav->objs[i].name, H5P_DEFAULT)) < 0)
+                goto error;
+            if((dset2 = H5Dopen2(fid2, trav->objs[i].name, H5P_DEFAULT)) < 0)
                 goto error;
             if((dcpl1 = H5Dget_create_plist(dset1)) < 0)
                 goto error;
@@ -365,7 +399,7 @@ int h5repack_cmpdcpl(const char *fname1,
 
             if(ret == 0)
             {
-                error_msg(progname, "property lists for <%s> are different\n",travt1->objs[i].name);
+                error_msg(progname, "property lists for <%s> are different\n",trav->objs[i].name);
                 goto error;
             }
 
@@ -389,8 +423,7 @@ int h5repack_cmpdcpl(const char *fname1,
     *-------------------------------------------------------------------------
     */
 
-    trav_table_free(travt1);
-    trav_table_free(travt2);
+    trav_table_free(trav);
 
    /*-------------------------------------------------------------------------
     * close
@@ -415,8 +448,9 @@ error:
         H5Dclose(dset2);
         H5Fclose(fid1);
         H5Fclose(fid2);
-        trav_table_free(travt1);
-        trav_table_free(travt2);
+        H5Pclose(gcplid);
+        H5Gclose(gid);
+        trav_table_free(trav);
     } H5E_END_TRY;
     return -1;
 

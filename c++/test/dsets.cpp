@@ -352,7 +352,7 @@ test_tconv( H5File& file)
 }   // test_tconv
 
 /* This message derives from H5Z */
-const H5Z_class_t H5Z_BOGUS[1] = {{
+const H5Z_class2_t H5Z_BOGUS[1] = {{
     H5Z_CLASS_T_VERS,		/* H5Z_class_t version number   */
     H5Z_FILTER_BOGUS,		/* Filter id number		*/
     1, 1,			/* Encode and decode enabled    */

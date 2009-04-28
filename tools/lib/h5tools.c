@@ -1651,9 +1651,12 @@ static herr_t h5tools_dump_simple_subset(FILE *stream,
             sm_nbytes = p_type_nbytes = H5Tget_size(p_type);
 
             if (ctx.ndims > 0)
-                for (i = ctx.ndims; i > 0; --i) {
-                    sm_size[i - 1] = MIN(total_size[i - 1], H5TOOLS_BUFSIZE
-                    / sm_nbytes);
+                for (i = ctx.ndims; i > 0; --i) 
+                {
+                    hsize_t size = H5TOOLS_BUFSIZE / sm_nbytes;
+                    if ( size == 0) /* datum size > H5TOOLS_BUFSIZE */
+                        size = 1;
+                    sm_size[i - 1] = MIN(total_size[i - 1], size);
                     sm_nbytes *= sm_size[i - 1];
                     assert(sm_nbytes > 0);
                 }

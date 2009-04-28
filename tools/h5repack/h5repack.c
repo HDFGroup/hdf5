@@ -1,17 +1,17 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
- * All rights reserved.                                                      *
- *                                                                           *
- * This file is part of HDF5.  The full HDF5 copyright notice, including     *
- * terms governing use, modification, and redistribution, is contained in    *
- * the files COPYING and Copyright.html.  COPYING can be found at the root   *
- * of the source code distribution tree; Copyright.html can be found at the  *
- * root level of an installed copy of the electronic HDF5 document set and   *
- * is linked from the top-level documents page.  It can also be found at     *
- * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
- * access to either file, you may request a copy from help@hdfgroup.org.     *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+* Copyright by The HDF Group.                                               *
+* Copyright by the Board of Trustees of the University of Illinois.         *
+* All rights reserved.                                                      *
+*                                                                           *
+* This file is part of HDF5.  The full HDF5 copyright notice, including     *
+* terms governing use, modification, and redistribution, is contained in    *
+* the files COPYING and Copyright.html.  COPYING can be found at the root   *
+* of the source code distribution tree; Copyright.html can be found at the  *
+* root level of an installed copy of the electronic HDF5 document set and   *
+* is linked from the top-level documents page.  It can also be found at     *
+* http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
+* access to either file, you may request a copy from help@hdfgroup.org.     *
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 #include <stdlib.h>
 #include <string.h>
@@ -27,10 +27,10 @@ extern char  *progname;
 
 
 /*-------------------------------------------------------------------------
- * File: h5repack.c
- * Purpose: Public API functions
- *-------------------------------------------------------------------------
- */
+* File: h5repack.c
+* Purpose: Public API functions
+*-------------------------------------------------------------------------
+*/
 
 static int check_options(pack_opt_t *options);
 static int check_objects(const char* fname, pack_opt_t *options);
@@ -40,24 +40,24 @@ static int have_request(pack_opt_t *options);
 
 
 /*-------------------------------------------------------------------------
- * Function: h5repack
- *
- * Purpose: locate all high-level HDF5 objects in the file
- *  and compress/chunk them using options
- *
- * Algorithm: 2 traversals are made to the file; the 1st builds a list of
- *  the objects, the 2nd makes a copy of them, using the options;
- *  the reason for the 1st traversal is to check for invalid
- *  object name requests
- *
- * Return: 0, ok, -1, fail
- *
- * Programmer: pvn@ncsa.uiuc.edu
- *
- * Date: September, 22, 2003
- *
- *-------------------------------------------------------------------------
- */
+* Function: h5repack
+*
+* Purpose: locate all high-level HDF5 objects in the file
+*  and compress/chunk them using options
+*
+* Algorithm: 2 traversals are made to the file; the 1st builds a list of
+*  the objects, the 2nd makes a copy of them, using the options;
+*  the reason for the 1st traversal is to check for invalid
+*  object name requests
+*
+* Return: 0, ok, -1, fail
+*
+* Programmer: pvn@ncsa.uiuc.edu
+*
+* Date: September, 22, 2003
+*
+*-------------------------------------------------------------------------
+*/
 int h5repack(const char* infile,
              const char* outfile,
              pack_opt_t *options)
@@ -81,14 +81,14 @@ int h5repack(const char* infile,
 
 
 /*-------------------------------------------------------------------------
- * Function: h5repack_init
- *
- * Purpose: initialize options
- *
- * Return: 0, ok, -1, fail
- *
- *-------------------------------------------------------------------------
- */
+* Function: h5repack_init
+*
+* Purpose: initialize options
+*
+* Return: 0, ok, -1, fail
+*
+*-------------------------------------------------------------------------
+*/
 
 int h5repack_init (pack_opt_t *options,
                    int verbose)
@@ -110,12 +110,12 @@ int h5repack_init (pack_opt_t *options,
 }
 
 /*-------------------------------------------------------------------------
- * Function: h5repack_end
- *
- * Purpose: free options table
- *
- *-------------------------------------------------------------------------
- */
+* Function: h5repack_end
+*
+* Purpose: free options table
+*
+*-------------------------------------------------------------------------
+*/
 
 int h5repack_end  (pack_opt_t *options)
 {
@@ -123,15 +123,15 @@ int h5repack_end  (pack_opt_t *options)
 }
 
 /*-------------------------------------------------------------------------
- * Function: h5repack_addfilter
- *
- * Purpose: add a compression -f option to table
- *   Example: -f dset:GZIP=6
- *
- * Return: 0, ok, -1, fail
- *
- *-------------------------------------------------------------------------
- */
+* Function: h5repack_addfilter
+*
+* Purpose: add a compression -f option to table
+*   Example: -f dset:GZIP=6
+*
+* Return: 0, ok, -1, fail
+*
+*-------------------------------------------------------------------------
+*/
 
 int h5repack_addfilter(const char* str,
                        pack_opt_t *options)
@@ -177,14 +177,14 @@ int h5repack_addfilter(const char* str,
 
 
 /*-------------------------------------------------------------------------
- * Function: h5repack_addlayout
- *
- * Purpose: add a layout option
- *
- * Return: 0, ok, -1, fail
- *
- *-------------------------------------------------------------------------
- */
+* Function: h5repack_addlayout
+*
+* Purpose: add a layout option
+*
+* Return: 0, ok, -1, fail
+*
+*-------------------------------------------------------------------------
+*/
 
 
 int h5repack_addlayout(const char* str,
@@ -199,9 +199,9 @@ int h5repack_addlayout(const char* str,
     init_packobject(&pack);
 
     if (options->all_layout==1){
-    error_msg(progname, "invalid layout input: 'all' option \
-        is present with other objects <%s>\n",str);
-    return -1;
+        error_msg(progname, "invalid layout input: 'all' option \
+                            is present with other objects <%s>\n",str);
+        return -1;
     }
 
     /* parse the layout option */
@@ -215,7 +215,7 @@ int h5repack_addlayout(const char* str,
         options->layout_g=pack.layout;
         if (pack.layout==H5D_CHUNKED)
         {
-        /* -2 means the NONE option, remove chunking
+            /* -2 means the NONE option, remove chunking
             and set the global layout to contiguous */
             if (pack.chunk.rank==-2)
             {
@@ -243,22 +243,22 @@ int h5repack_addlayout(const char* str,
 
 
 /*-------------------------------------------------------------------------
- * Function: check_options
- *
- * Purpose: print options, checks for invalid options
- *
- * Return: void, return -1 on error
- *
- * Programmer: pvn@ncsa.uiuc.edu
- *
- * Date: September, 22, 2003
- *
- * Modification:
- *   Peter Cao, July 9, 2007
- *   Add "-L, --latest" and other options to pack a file with the latest file format
- *
- *-------------------------------------------------------------------------
- */
+* Function: check_options
+*
+* Purpose: print options, checks for invalid options
+*
+* Return: void, return -1 on error
+*
+* Programmer: pvn@ncsa.uiuc.edu
+*
+* Date: September, 22, 2003
+*
+* Modification:
+*   Peter Cao, July 9, 2007
+*   Add "-L, --latest" and other options to pack a file with the latest file format
+*
+*-------------------------------------------------------------------------
+*/
 static int check_options(pack_opt_t *options)
 {
     unsigned int   i;
@@ -272,7 +272,8 @@ static int check_options(pack_opt_t *options)
     if (options->verbose && have_request(options) /* only print if requested */)
     {
         printf("Objects to modify layout are...\n");
-        if (options->all_layout==1)  {
+        if (options->all_layout==1)  
+        {
             switch (options->layout_g)
             {
             case H5D_COMPACT:
@@ -284,12 +285,17 @@ static int check_options(pack_opt_t *options)
             case H5D_CHUNKED:
                 strcpy(slayout,"chunked");
                 break;
+            case H5D_LAYOUT_ERROR:
+            case H5D_NLAYOUTS:
+                error_msg(progname, "invalid layout\n");
+                return -1;
             default:
-                strcpy(slayout,"unknown");
-                break;
+                strcpy(slayout,"invalid layout\n");
+                return -1;
             }
             printf(" Apply %s layout to all\n", slayout);
-            if (H5D_CHUNKED==options->layout_g) {
+            if (H5D_CHUNKED==options->layout_g) 
+            {
                 printf("with dimension [");
                 for ( j = 0; j < options->chunk_g.rank; j++)
                     printf("%d ",(int)options->chunk_g.chunk_lengths[j]);
@@ -322,9 +328,9 @@ static int check_options(pack_opt_t *options)
 
     if (options->all_layout==1 && has_ck)
     {
-    error_msg(progname, "invalid chunking input: 'all' option\
-        is present with other objects\n");
-    return -1;
+        error_msg(progname, "invalid chunking input: 'all' option\
+                            is present with other objects\n");
+        return -1;
     }
 
     /*-------------------------------------------------------------------------
@@ -356,6 +362,8 @@ static int check_options(pack_opt_t *options)
                         get_sfilter(filtn),
                         options->filter_g[k].cd_values[0]);
                     break;
+                default:
+                    break;
                 } /* k */
             };
         }
@@ -382,9 +390,9 @@ static int check_options(pack_opt_t *options)
 
     if (options->all_filter==1 && has_cp)
     {
-    error_msg(progname, "invalid compression input: 'all' option\
-        is present with other objects\n");
-    return -1;
+        error_msg(progname, "invalid compression input: 'all' option\
+                            is present with other objects\n");
+        return -1;
     }
 
     /*-------------------------------------------------------------------------
@@ -455,19 +463,19 @@ static int check_options(pack_opt_t *options)
 
 
 /*-------------------------------------------------------------------------
- * Function: check_objects
- *
- * Purpose: locate all HDF5 objects in the file and compare with user
- *  supplied list
- *
- * Return: 0, ok, -1 no
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: September, 23, 2003
- *
- *-------------------------------------------------------------------------
- */
+* Function: check_objects
+*
+* Purpose: locate all HDF5 objects in the file and compare with user
+*  supplied list
+*
+* Return: 0, ok, -1 no
+*
+* Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+*
+* Date: September, 23, 2003
+*
+*-------------------------------------------------------------------------
+*/
 static int check_objects(const char* fname,
                          pack_opt_t *options)
 {
@@ -480,9 +488,9 @@ static int check_objects(const char* fname,
         return 0;
 
     /*-------------------------------------------------------------------------
-     * open the file
-     *-------------------------------------------------------------------------
-     */
+    * open the file
+    *-------------------------------------------------------------------------
+    */
     if((fid = h5tools_fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, 0)) < 0)
     {
         printf("<%s>: %s\n", fname, H5FOPENERROR );
@@ -490,9 +498,9 @@ static int check_objects(const char* fname,
     }
 
     /*-------------------------------------------------------------------------
-     * get the list of objects in the file
-     *-------------------------------------------------------------------------
-     */
+    * get the list of objects in the file
+    *-------------------------------------------------------------------------
+    */
 
     /* init table */
     trav_table_init(&travt);
@@ -502,9 +510,9 @@ static int check_objects(const char* fname,
         goto out;
 
     /*-------------------------------------------------------------------------
-     * compare with user supplied list
-     *-------------------------------------------------------------------------
-     */
+    * compare with user supplied list
+    *-------------------------------------------------------------------------
+    */
 
     if(options->verbose)
         printf("Opening file <%s>. Searching for objects to modify...\n", fname);
@@ -529,7 +537,7 @@ static int check_objects(const char* fname,
         switch(options->op_tbl->objs[i].filter->filtn) 
         {
             /* chunk size must be smaller than pixels per block */
-            case H5Z_FILTER_SZIP:
+        case H5Z_FILTER_SZIP:
             {
                 int      j;
                 hsize_t  csize = 1;
@@ -568,10 +576,12 @@ static int check_objects(const char* fname,
                 }
             }
             break;
+        default:
+            break;
         }
     } /* i */
 
-   /*-------------------------------------------------------------------------
+    /*-------------------------------------------------------------------------
     * close
     *-------------------------------------------------------------------------
     */
@@ -590,16 +600,16 @@ out:
 
 
 /*-------------------------------------------------------------------------
- * Function: have_request
- *
- * Purpose: check if a filter or layout was requested
- *
- * Return: 1 yes, 0 no
- *
- * Date: May, 24, 2007
- *
- *-------------------------------------------------------------------------
- */
+* Function: have_request
+*
+* Purpose: check if a filter or layout was requested
+*
+* Return: 1 yes, 0 no
+*
+* Date: May, 24, 2007
+*
+*-------------------------------------------------------------------------
+*/
 static int have_request(pack_opt_t *options)
 {
 
@@ -612,14 +622,14 @@ static int have_request(pack_opt_t *options)
 
 
 /*-------------------------------------------------------------------------
- * Function: get_sfilter
- *
- * Purpose: return the filter as a string name
- *
- * Return: name of filter, exit on error
- *
- *-------------------------------------------------------------------------
- */
+* Function: get_sfilter
+*
+* Purpose: return the filter as a string name
+*
+* Return: name of filter, exit on error
+*
+*-------------------------------------------------------------------------
+*/
 
 static const char* get_sfilter(H5Z_filter_t filtn)
 {
@@ -641,6 +651,5 @@ static const char* get_sfilter(H5Z_filter_t filtn)
         error_msg(progname, "input error in filter type\n");
         exit(1);
     }
-    return NULL;
 }
 

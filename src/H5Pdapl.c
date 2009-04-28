@@ -154,7 +154,7 @@ done:
  *      property list.  Each of thhese values can be individually unset
  *      (or not set at all) by passing the macros:
  *      H5D_CHUNK_CACHE_NCHUNKS_DEFAULT,
- *      H5D_CHUNK_CACHE_NBYTES_DEFAULT, and/or
+ *      H5D_CHUNK_CACHE_NSLOTS_DEFAULT, and/or
  *      H5D_CHUNK_CACHE_W0_DEFAULT
  *      as appropriate.
  *

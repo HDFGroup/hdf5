@@ -62,7 +62,7 @@ typedef struct H5EA_class_t {
     size_t nat_elmt_size;       /* Size of native (memory) element */
 
     /* Extensible array client callback methods */
-    void *(*crt_context)(const H5F_t *f);       /* Create context for other callbacks */
+    void *(*crt_context)(void *udata);          /* Create context for other callbacks */
     herr_t (*dst_context)(void *ctx);           /* Destroy context */
     herr_t (*fill)(void *nat_blk, size_t nelmts);    /* Fill array of elements with encoded form of "missing element" value */
     herr_t (*encode)(void *raw, const void *elmt, size_t nelmts, void *ctx);   /* Encode elements from native form to disk storage form */
@@ -82,19 +82,26 @@ typedef struct H5EA_create_t {
 } H5EA_create_t;
 
 /* Extensible array metadata statistics info */
+/* (If these are ever exposed to applications, don't let the application see
+ *      which fields are computed vs. which fields are stored. -QAK)
+ */
 typedef struct H5EA_stat_t {
     /* Non-stored (i.e. computed) fields */
-    hsize_t hdr_size;           /* Size of header */
-    hsize_t nindex_blks;        /* # of index blocks (should be 0 or 1) */
-    hsize_t index_blk_size;     /* Size of index blocks allocated */
+    struct {
+        hsize_t hdr_size;           /* Size of header */
+        hsize_t nindex_blks;        /* # of index blocks (should be 0 or 1) */
+        hsize_t index_blk_size;     /* Size of index blocks allocated */
+    } computed;
 
     /* Stored fields */
-    hsize_t nsuper_blks;        /* # of super blocks */
-    hsize_t super_blk_size;     /* Size of super blocks allocated */
-    hsize_t ndata_blks;         /* # of data blocks */
-    hsize_t data_blk_size;      /* Size of data blocks allocated */
-    hsize_t max_idx_set;        /* Highest element index stored (+1 - i.e. if element 0 has been set, this value with be '1', if no elements have been stored, this value will be '0') */
-    hsize_t nelmts;             /* # of elements "realized" */
+    struct {
+        hsize_t nsuper_blks;        /* # of super blocks */
+        hsize_t super_blk_size;     /* Size of super blocks allocated */
+        hsize_t ndata_blks;         /* # of data blocks */
+        hsize_t data_blk_size;      /* Size of data blocks allocated */
+        hsize_t max_idx_set;        /* Highest element index stored (+1 - i.e. if element 0 has been set, this value with be '1', if no elements have been stored, this value will be '0') */
+        hsize_t nelmts;             /* # of elements "realized" */
+    } stored;
 } H5EA_stat_t;
 
 /* Extensible array info (forward decl - defined in H5EApkg.h) */
@@ -111,9 +118,10 @@ typedef struct H5EA_t H5EA_t;
 /***************************************/
 
 /* General routines */
-H5_DLL H5EA_t *H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam);
+H5_DLL H5EA_t *H5EA_create(H5F_t *f, hid_t dxpl_id, const H5EA_create_t *cparam,
+    void *ctx_udata);
 H5_DLL H5EA_t *H5EA_open(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr,
-    const H5EA_class_t *cls);
+    const H5EA_class_t *cls, void *ctx_udata);
 H5_DLL herr_t H5EA_get_nelmts(const H5EA_t *ea, hsize_t *nelmts);
 H5_DLL herr_t H5EA_get_addr(const H5EA_t *ea, haddr_t *addr);
 H5_DLL herr_t H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt);

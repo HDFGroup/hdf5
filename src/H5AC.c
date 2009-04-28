@@ -589,7 +589,7 @@ H5AC_create(const H5F_t *f,
             if ( mpi_rank == 0 ) {
 
                 aux_ptr->d_slist_ptr =
-                    H5SL_create(H5SL_TYPE_HADDR,0.5,(size_t)16);
+                    H5SL_create(H5SL_TYPE_HADDR);
 
                 if ( aux_ptr->d_slist_ptr == NULL ) {
 
@@ -598,7 +598,7 @@ H5AC_create(const H5F_t *f,
                 }
 
                 aux_ptr->c_slist_ptr =
-                    H5SL_create(H5SL_TYPE_HADDR,0.5,(size_t)16);
+                    H5SL_create(H5SL_TYPE_HADDR);
 
                 if ( aux_ptr->c_slist_ptr == NULL ) {
 
@@ -1154,6 +1154,8 @@ H5AC_get_entry_status(H5F_t *    f,
     hbool_t	is_dirty;
     hbool_t	is_protected;
     hbool_t	is_pinned;
+    hbool_t	is_flush_dep_child;
+    hbool_t	is_flush_dep_parent;
     size_t	entry_size;
     unsigned	status = 0;
 
@@ -1168,7 +1170,8 @@ H5AC_get_entry_status(H5F_t *    f,
     }
 
     result = H5C_get_entry_status(cache_ptr, addr, &entry_size, &in_cache,
-		                  &is_dirty, &is_protected, &is_pinned);
+            &is_dirty, &is_protected, &is_pinned, &is_flush_dep_parent,
+            &is_flush_dep_child);
 
     if ( result < 0 ) {
 
@@ -1188,6 +1191,12 @@ H5AC_get_entry_status(H5F_t *    f,
 
 	if ( is_pinned )
 	    status |= H5AC_ES__IS_PINNED;
+
+	if ( is_flush_dep_parent )
+	    status |= H5AC_ES__IS_FLUSH_DEP_PARENT;
+
+	if ( is_flush_dep_child )
+	    status |= H5AC_ES__IS_FLUSH_DEP_CHILD;
     }
 
     *status_ptr = status;
@@ -1264,12 +1273,12 @@ done:
  */
 
 herr_t
-H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *thing, unsigned int flags)
+H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr,
+    void *thing, unsigned int flags)
 {
     herr_t		result;
     H5AC_info_t        *info;
     H5AC_t             *cache;
-    herr_t ret_value=SUCCEED;      /* Return value */
 #ifdef H5_HAVE_PARALLEL
     H5AC_aux_t        * aux_ptr = NULL;
 #endif /* H5_HAVE_PARALLEL */
@@ -1278,6 +1287,7 @@ H5AC_set(H5F_t *f, hid_t dxpl_id, const H5AC_class_t *type, haddr_t addr, void *
     size_t              trace_entry_size = 0;
     FILE *        	trace_file_ptr = NULL;
 #endif /* H5AC__TRACE_FILE_ENABLED */
+    herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5AC_set, FAIL)
 
@@ -1826,6 +1836,59 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5AC_create_flush_dependency()
+ *
+ * Purpose:	Create a flush dependency between two entries in the metadata
+ *              cache.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              3/24/09
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_create_flush_dependency(H5F_t * f, void * parent_thing, void * child_thing)
+{
+    H5C_t      *cache_ptr = f->shared->cache;
+#if H5AC__TRACE_FILE_ENABLED
+    char        trace[128] = "";
+    FILE *      trace_file_ptr = NULL;
+#endif /* H5AC__TRACE_FILE_ENABLED */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5AC_create_flush_dependency, FAIL)
+
+    /* Sanity check */
+    HDassert(cache_ptr);
+    HDassert(parent_thing);
+    HDassert(child_thing);
+
+#if H5AC__TRACE_FILE_ENABLED
+    if ( ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
+         ( trace_file_ptr != NULL ) ) {
+        sprintf(trace, "%s %lx %lx",
+                FUNC,
+	        (unsigned long)(((H5C_cache_entry_t *)parent_thing)->addr),
+	        (unsigned long)(((H5C_cache_entry_t *)child_thing)->addr));
+    } /* end if */
+#endif /* H5AC__TRACE_FILE_ENABLED */
+
+    if(H5C_create_flush_dependency(cache_ptr, parent_thing, child_thing) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "H5C_create_flush_dependency() failed.")
+
+done:
+#if H5AC__TRACE_FILE_ENABLED
+    if(trace_file_ptr != NULL)
+	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+#endif /* H5AC__TRACE_FILE_ENABLED */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_create_flush_dependency() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5AC_protect
  *
  * Purpose:     If the target entry is not in the cache, load it.  If
@@ -2187,6 +2250,58 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5AC_unpin_entry() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5AC_destroy_flush_dependency()
+ *
+ * Purpose:	Destroy a flush dependency between two entries.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              3/24/09
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_destroy_flush_dependency(H5F_t * f, void * parent_thing, void * child_thing)
+{
+    H5C_t      *cache_ptr = f->shared->cache;
+#if H5AC__TRACE_FILE_ENABLED
+    char                trace[128] = "";
+    FILE *              trace_file_ptr = NULL;
+#endif /* H5AC__TRACE_FILE_ENABLED */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5AC_destroy_flush_dependency, FAIL)
+
+    /* Sanity check */
+    HDassert(cache_ptr);
+    HDassert(parent_thing);
+    HDassert(child_thing);
+
+#if H5AC__TRACE_FILE_ENABLED
+    if ( ( H5C_get_trace_file_ptr(f->shared->cache, &trace_file_ptr) >= 0 ) &&
+         ( trace_file_ptr != NULL ) ) {
+        sprintf(trace, "%s %lx",
+                FUNC,
+	        (unsigned long)(((H5C_cache_entry_t *)parent_thing)->addr),
+	        (unsigned long)(((H5C_cache_entry_t *)child_thing)->addr));
+    } /* end if */
+#endif /* H5AC__TRACE_FILE_ENABLED */
+
+    if(H5C_destroy_flush_dependency(cache_ptr, parent_thing, child_thing) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNDEPEND, FAIL, "H5C_destroy_flush_dependency() failed.")
+
+done:
+#if H5AC__TRACE_FILE_ENABLED
+    if( trace_file_ptr != NULL )
+	HDfprintf(trace_file_ptr, "%s %d\n", trace, (int)ret_value);
+#endif /* H5AC__TRACE_FILE_ENABLED */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5AC_destroy_flush_dependency() */
 
 
 /*-------------------------------------------------------------------------
@@ -4316,7 +4431,7 @@ H5AC_log_renamed_entry(H5AC_t * cache_ptr,
 
     /* get entry status, size, etc here */
     if ( H5C_get_entry_status(cache_ptr, old_addr, &entry_size, &entry_in_cache,
-                              &entry_dirty, NULL, NULL) < 0 ) {
+                              &entry_dirty, NULL, NULL, NULL, NULL) < 0 ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get entry status.")
 

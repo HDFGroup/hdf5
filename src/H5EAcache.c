@@ -88,22 +88,26 @@ static herr_t H5EA__cache_hdr_dest(H5F_t *f, H5EA_hdr_t *hdr);
 static H5EA_iblock_t *H5EA__cache_iblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
 static herr_t H5EA__cache_iblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5EA_iblock_t *iblock, unsigned * flags_ptr);
 static herr_t H5EA__cache_iblock_clear(H5F_t *f, H5EA_iblock_t *iblock, hbool_t destroy);
+static herr_t H5EA__cache_iblock_notify(H5AC_notify_action_t action, H5EA_iblock_t *iblock);
 static herr_t H5EA__cache_iblock_size(const H5F_t *f, const H5EA_iblock_t *iblock, size_t *size_ptr);
 static herr_t H5EA__cache_iblock_dest(H5F_t *f, H5EA_iblock_t *iblock);
 static H5EA_sblock_t *H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
 static herr_t H5EA__cache_sblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5EA_sblock_t *sblock, unsigned * flags_ptr);
 static herr_t H5EA__cache_sblock_clear(H5F_t *f, H5EA_sblock_t *sblock, hbool_t destroy);
 static herr_t H5EA__cache_sblock_size(const H5F_t *f, const H5EA_sblock_t *sblock, size_t *size_ptr);
+static herr_t H5EA__cache_sblock_notify(H5AC_notify_action_t action, H5EA_sblock_t *sblock);
 static herr_t H5EA__cache_sblock_dest(H5F_t *f, H5EA_sblock_t *sblock);
 static H5EA_dblock_t *H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
 static herr_t H5EA__cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5EA_dblock_t *dblock, unsigned * flags_ptr);
 static herr_t H5EA__cache_dblock_clear(H5F_t *f, H5EA_dblock_t *dblock, hbool_t destroy);
 static herr_t H5EA__cache_dblock_size(const H5F_t *f, const H5EA_dblock_t *dblock, size_t *size_ptr);
+static herr_t H5EA__cache_dblock_notify(H5AC_notify_action_t action, H5EA_dblock_t *dblock);
 static herr_t H5EA__cache_dblock_dest(H5F_t *f, H5EA_dblock_t *dblock);
 static H5EA_dblk_page_t *H5EA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
 static herr_t H5EA__cache_dblk_page_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, H5EA_dblk_page_t *dblk_page, unsigned * flags_ptr);
 static herr_t H5EA__cache_dblk_page_clear(H5F_t *f, H5EA_dblk_page_t *dblk_page, hbool_t destroy);
 static herr_t H5EA__cache_dblk_page_size(const H5F_t *f, const H5EA_dblk_page_t *dblk_page, size_t *size_ptr);
+static herr_t H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, H5EA_dblk_page_t *dblk_page);
 static herr_t H5EA__cache_dblk_page_dest(H5F_t *f, H5EA_dblk_page_t *dblk_page);
 
 
@@ -118,6 +122,7 @@ const H5AC_class_t H5AC_EARRAY_HDR[1] = {{
     (H5AC_flush_func_t)H5EA__cache_hdr_flush,
     (H5AC_dest_func_t)H5EA__cache_hdr_dest,
     (H5AC_clear_func_t)H5EA__cache_hdr_clear,
+    (H5AC_notify_func_t)NULL,
     (H5AC_size_func_t)H5EA__cache_hdr_size,
 }};
 
@@ -128,6 +133,7 @@ const H5AC_class_t H5AC_EARRAY_IBLOCK[1] = {{
     (H5AC_flush_func_t)H5EA__cache_iblock_flush,
     (H5AC_dest_func_t)H5EA__cache_iblock_dest,
     (H5AC_clear_func_t)H5EA__cache_iblock_clear,
+    (H5AC_notify_func_t)H5EA__cache_iblock_notify,
     (H5AC_size_func_t)H5EA__cache_iblock_size,
 }};
 
@@ -138,6 +144,7 @@ const H5AC_class_t H5AC_EARRAY_SBLOCK[1] = {{
     (H5AC_flush_func_t)H5EA__cache_sblock_flush,
     (H5AC_dest_func_t)H5EA__cache_sblock_dest,
     (H5AC_clear_func_t)H5EA__cache_sblock_clear,
+    (H5AC_notify_func_t)H5EA__cache_sblock_notify,
     (H5AC_size_func_t)H5EA__cache_sblock_size,
 }};
 
@@ -148,6 +155,7 @@ const H5AC_class_t H5AC_EARRAY_DBLOCK[1] = {{
     (H5AC_flush_func_t)H5EA__cache_dblock_flush,
     (H5AC_dest_func_t)H5EA__cache_dblock_dest,
     (H5AC_clear_func_t)H5EA__cache_dblock_clear,
+    (H5AC_notify_func_t)H5EA__cache_dblock_notify,
     (H5AC_size_func_t)H5EA__cache_dblock_size,
 }};
 
@@ -158,6 +166,7 @@ const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1] = {{
     (H5AC_flush_func_t)H5EA__cache_dblk_page_flush,
     (H5AC_dest_func_t)H5EA__cache_dblk_page_dest,
     (H5AC_clear_func_t)H5EA__cache_dblk_page_clear,
+    (H5AC_notify_func_t)H5EA__cache_dblk_page_notify,
     (H5AC_size_func_t)H5EA__cache_dblk_page_size,
 }};
 
@@ -190,7 +199,7 @@ const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1] = {{
 BEGIN_FUNC(STATIC, ERR,
 H5EA_hdr_t *, NULL, NULL,
 H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
-    void UNUSED *udata2))
+    void *ctx_udata))
 
     /* Local variables */
     const H5EA_class_t  *cls = (const H5EA_class_t *)_cls;      /* Extensible array class */
@@ -208,7 +217,7 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
     HDassert(H5F_addr_defined(addr));
 
     /* Allocate space for the extensible array data structure */
-    if(NULL == (hdr = H5EA__hdr_alloc(f, cls)))
+    if(NULL == (hdr = H5EA__hdr_alloc(f, cls, ctx_udata)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array shared header")
 
     /* Set the extensible array header's address */
@@ -254,13 +263,13 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
     hdr->cparam.max_dblk_page_nelmts_bits = *p++;  /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */
 
     /* Array statistics */
-    hdr->stats.hdr_size = size;                         /* Size of header in file */
-    H5F_DECODE_LENGTH(f, p, hdr->stats.nsuper_blks);    /* Number of super blocks created */
-    H5F_DECODE_LENGTH(f, p, hdr->stats.super_blk_size); /* Size of super blocks created */
-    H5F_DECODE_LENGTH(f, p, hdr->stats.ndata_blks);     /* Number of data blocks created */
-    H5F_DECODE_LENGTH(f, p, hdr->stats.data_blk_size);  /* Size of data blocks created */
-    H5F_DECODE_LENGTH(f, p, hdr->stats.max_idx_set);    /* Max. index set (+1) */
-    H5F_DECODE_LENGTH(f, p, hdr->stats.nelmts);         /* Number of elements 'realized' */
+    hdr->stats.computed.hdr_size = size;                        /* Size of header in file */
+    H5F_DECODE_LENGTH(f, p, hdr->stats.stored.nsuper_blks);    /* Number of super blocks created */
+    H5F_DECODE_LENGTH(f, p, hdr->stats.stored.super_blk_size); /* Size of super blocks created */
+    H5F_DECODE_LENGTH(f, p, hdr->stats.stored.ndata_blks);     /* Number of data blocks created */
+    H5F_DECODE_LENGTH(f, p, hdr->stats.stored.data_blk_size);  /* Size of data blocks created */
+    H5F_DECODE_LENGTH(f, p, hdr->stats.stored.max_idx_set);    /* Max. index set (+1) */
+    H5F_DECODE_LENGTH(f, p, hdr->stats.stored.nelmts);         /* Number of elements 'realized' */
 
     /* Internal information */
     H5F_addr_decode(f, &p, &hdr->idx_blk_addr); /* Address of index block */
@@ -270,7 +279,7 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
         H5EA_iblock_t iblock;           /* Fake index block for computing size */
 
         /* Set index block count for file */
-        hdr->stats.nindex_blks = 1;
+        hdr->stats.computed.nindex_blks = 1;
 
         /* Set up fake index block for computing size on disk */
         iblock.hdr = hdr;
@@ -279,11 +288,11 @@ H5EA__cache_hdr_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *_cls,
         iblock.nsblk_addrs = hdr->nsblks - iblock.nsblks;
 
         /* Compute size of index block in file */
-        hdr->stats.index_blk_size = H5EA_IBLOCK_SIZE(&iblock);
+        hdr->stats.computed.index_blk_size = H5EA_IBLOCK_SIZE(&iblock);
     } /* end if */
     else {
-        hdr->stats.nindex_blks = 0;       /* Number of index blocks in file */
-        hdr->stats.index_blk_size = 0;    /* Size of index blocks in file */
+        hdr->stats.computed.nindex_blks = 0;       /* Number of index blocks in file */
+        hdr->stats.computed.index_blk_size = 0;    /* Size of index blocks in file */
     } /* end else */
 
     /* Sanity check */
@@ -389,12 +398,12 @@ H5EA__cache_hdr_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr,
         *p++ = hdr->cparam.max_dblk_page_nelmts_bits;  /* Log2(Max. # of elements in data block page) - i.e. # of bits needed to store max. # of elements in data block page */
 
         /* Array statistics */
-        H5F_ENCODE_LENGTH(f, p, hdr->stats.nsuper_blks);    /* Number of super blocks created */
-        H5F_ENCODE_LENGTH(f, p, hdr->stats.super_blk_size); /* Size of super blocks created */
-        H5F_ENCODE_LENGTH(f, p, hdr->stats.ndata_blks);     /* Number of data blocks created */
-        H5F_ENCODE_LENGTH(f, p, hdr->stats.data_blk_size);  /* Size of data blocks created */
-        H5F_ENCODE_LENGTH(f, p, hdr->stats.max_idx_set);    /* Max. index set (+1) */
-        H5F_ENCODE_LENGTH(f, p, hdr->stats.nelmts);         /* Number of elements 'realized' */
+        H5F_ENCODE_LENGTH(f, p, hdr->stats.stored.nsuper_blks);    /* Number of super blocks created */
+        H5F_ENCODE_LENGTH(f, p, hdr->stats.stored.super_blk_size); /* Size of super blocks created */
+        H5F_ENCODE_LENGTH(f, p, hdr->stats.stored.ndata_blks);     /* Number of data blocks created */
+        H5F_ENCODE_LENGTH(f, p, hdr->stats.stored.data_blk_size);  /* Size of data blocks created */
+        H5F_ENCODE_LENGTH(f, p, hdr->stats.stored.max_idx_set);    /* Max. index set (+1) */
+        H5F_ENCODE_LENGTH(f, p, hdr->stats.stored.nelmts);         /* Number of elements 'realized' */
 
         /* Internal information */
         H5F_addr_encode(f, &p, hdr->idx_blk_addr);  /* Address of index block */
@@ -829,6 +838,53 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_clear() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_iblock_notify
+ *
+ * Purpose:	Handle cache action notifications
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar 31 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA__cache_iblock_notify(H5AC_notify_action_t action, H5EA_iblock_t *iblock))
+
+    /* Sanity check */
+    HDassert(iblock);
+
+    /* Determine which action to take */
+    switch(action) {
+        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+            /* Create flush dependency on extensible array header */
+            if(H5EA__create_flush_depend(iblock->hdr, (H5AC_info_t *)iblock->hdr, (H5AC_info_t *)iblock) < 0)
+                H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between index block and header, address = %llu", (unsigned long long)iblock->addr)
+            break;
+
+        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+            /* Destroy flush dependency on extensible array header */
+            if(H5EA__destroy_flush_depend(iblock->hdr, (H5AC_info_t *)iblock->hdr, (H5AC_info_t *)iblock) < 0)
+                H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between index block and header, address = %llu", (unsigned long long)iblock->addr)
+            break;
+
+        default:
+#ifdef NDEBUG
+            H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+    } /* end switch */
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5EA__cache_iblock_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5EA__cache_iblock_size
  *
  * Purpose:	Compute the size in bytes of a extensible array index block
@@ -924,11 +980,11 @@ END_FUNC(STATIC)   /* end H5EA__cache_iblock_dest() */
 BEGIN_FUNC(STATIC, ERR,
 H5EA_sblock_t *, NULL, NULL,
 H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    const void *_sblk_idx, void *_hdr))
+    const void *_udata1, void *_hdr))
 
     /* Local variables */
     H5EA_hdr_t    *hdr = (H5EA_hdr_t *)_hdr;      /* Shared extensible array information */
-    const unsigned      *sblk_idx = (const unsigned *)_sblk_idx;  /* Index of this super block */
+    const H5EA_sblock_load_ud_t *ud_load = (const H5EA_sblock_load_ud_t *)_udata1;      /* User data for loading super block */
     H5EA_sblock_t	*sblock = NULL; /* Super block info */
     size_t		size;           /* Super block size */
     H5WB_t              *wb = NULL;     /* Wrapped buffer for super block data */
@@ -943,11 +999,11 @@ H5EA__cache_sblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     /* Sanity check */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(sblk_idx && *sblk_idx > 0);
+    HDassert(ud_load && ud_load->parent && ud_load->sblk_idx > 0);
     HDassert(hdr);
 
     /* Allocate the extensible array super block */
-    if(NULL == (sblock = H5EA__sblock_alloc(hdr, *sblk_idx)))
+    if(NULL == (sblock = H5EA__sblock_alloc(hdr, ud_load->parent, ud_load->sblk_idx)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array super block")
 
     /* Set the extensible array super block's address */
@@ -1213,6 +1269,53 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_size() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_sblock_notify
+ *
+ * Purpose:	Handle cache action notifications
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar 31 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA__cache_sblock_notify(H5AC_notify_action_t action, H5EA_sblock_t *sblock))
+
+    /* Sanity check */
+    HDassert(sblock);
+
+    /* Determine which action to take */
+    switch(action) {
+        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+            /* Create flush dependency on index block */
+            if(H5EA__create_flush_depend(sblock->hdr, (H5AC_info_t *)sblock->parent, (H5AC_info_t *)sblock) < 0)
+                H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between super block and index block, address = %llu", (unsigned long long)sblock->addr)
+            break;
+
+        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+            /* Destroy flush dependency on index block */
+            if(H5EA__destroy_flush_depend(sblock->hdr, (H5AC_info_t *)sblock->parent, (H5AC_info_t *)sblock) < 0)
+                H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between super block and index block, address = %llu", (unsigned long long)sblock->addr)
+            break;
+
+        default:
+#ifdef NDEBUG
+            H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+    } /* end switch */
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5EA__cache_sblock_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5EA__cache_sblock_dest
  *
  * Purpose:	Destroys an extensible array super block in memory.
@@ -1276,11 +1379,11 @@ END_FUNC(STATIC)   /* end H5EA__cache_sblock_dest() */
 BEGIN_FUNC(STATIC, ERR,
 H5EA_dblock_t *, NULL, NULL,
 H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    const void *_nelmts, void *_hdr))
+    const void *_udata1, void *_hdr))
 
     /* Local variables */
     H5EA_hdr_t          *hdr = (H5EA_hdr_t *)_hdr;  /* Shared extensible array information */
-    const size_t        *nelmts = (const size_t *)_nelmts;  /* Number of elements in data block */
+    const H5EA_dblock_load_ud_t *ud_load = (const H5EA_dblock_load_ud_t *)_udata1;      /* User data for loading data block */
     H5EA_dblock_t	*dblock = NULL; /* Data block info */
     size_t		size;           /* Data block size */
     H5WB_t              *wb = NULL;     /* Wrapped buffer for data block data */
@@ -1294,11 +1397,11 @@ H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     /* Sanity check */
     HDassert(f);
     HDassert(H5F_addr_defined(addr));
-    HDassert(nelmts && *nelmts > 0);
+    HDassert(ud_load && ud_load->parent && ud_load->nelmts > 0);
     HDassert(hdr);
 
     /* Allocate the extensible array data block */
-    if(NULL == (dblock = H5EA__dblock_alloc(hdr, *nelmts)))
+    if(NULL == (dblock = H5EA__dblock_alloc(hdr, ud_load->parent, ud_load->nelmts)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array data block")
 
     /* Set the extensible array data block's information */
@@ -1352,9 +1455,9 @@ H5EA__cache_dblock_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     if(!dblock->npages) {
         /* Decode elements in data block */
         /* Convert from raw elements on disk into native elements in memory */
-        if((hdr->cparam.cls->decode)(p, dblock->elmts, *nelmts, hdr->cb_ctx) < 0)
+        if((hdr->cparam.cls->decode)(p, dblock->elmts, ud_load->nelmts, hdr->cb_ctx) < 0)
             H5E_THROW(H5E_CANTDECODE, "can't decode extensible array data elements")
-        p += (*nelmts * hdr->cparam.raw_elmt_size);
+        p += (ud_load->nelmts * hdr->cparam.raw_elmt_size);
     } /* end if */
 
     /* Sanity check */
@@ -1531,6 +1634,53 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_clear() */
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_dblock_notify
+ *
+ * Purpose:	Handle cache action notifications
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar 31 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA__cache_dblock_notify(H5AC_notify_action_t action, H5EA_dblock_t *dblock))
+
+    /* Sanity check */
+    HDassert(dblock);
+
+    /* Determine which action to take */
+    switch(action) {
+        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+            /* Create flush dependency on parent */
+            if(H5EA__create_flush_depend(dblock->hdr, (H5AC_info_t *)dblock->parent, (H5AC_info_t *)dblock) < 0)
+                H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block and parent, address = %llu", (unsigned long long)dblock->addr)
+            break;
+
+        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+            /* Destroy flush dependency on parent */
+            if(H5EA__destroy_flush_depend(dblock->hdr, (H5AC_info_t *)dblock->parent, (H5AC_info_t *)dblock) < 0)
+                H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block and parent, address = %llu", (unsigned long long)dblock->addr)
+            break;
+
+        default:
+#ifdef NDEBUG
+            H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+    } /* end switch */
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5EA__cache_dblock_notify() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5EA__cache_dblock_size
  *
  * Purpose:	Compute the size in bytes of a extensible array data block
@@ -1631,10 +1781,11 @@ END_FUNC(STATIC)   /* end H5EA__cache_dblock_dest() */
 BEGIN_FUNC(STATIC, ERR,
 H5EA_dblk_page_t *, NULL, NULL,
 H5EA__cache_dblk_page_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
-    const void UNUSED *udata1, void *_hdr))
+    const void *_ud_load, void *_hdr))
 
     /* Local variables */
     H5EA_hdr_t          *hdr = (H5EA_hdr_t *)_hdr;  /* Shared extensible array information */
+    const H5EA_dblk_page_load_ud_t *ud_load = (const H5EA_dblk_page_load_ud_t *)_ud_load;      /* User data for loading data block page */
     H5EA_dblk_page_t	*dblk_page = NULL; /* Data block page info */
     size_t		size;           /* Data block page size */
     H5WB_t              *wb = NULL;     /* Wrapped buffer for data block page data */
@@ -1653,7 +1804,7 @@ HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 #endif /* QAK */
 
     /* Allocate the extensible array data block page */
-    if(NULL == (dblk_page = H5EA__dblk_page_alloc(hdr)))
+    if(NULL == (dblk_page = H5EA__dblk_page_alloc(hdr, ud_load->parent)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array data block page")
 
     /* Set the extensible array data block's information */
@@ -1703,10 +1854,7 @@ HDfprintf(stderr, "%s: addr = %a\n", FUNC, addr);
 
     /* Verify checksum */
     if(stored_chksum != computed_chksum)
-{
-HDfprintf(stderr, "%s: stored_chksum = %8x, computed_chksum = %8x\n", FUNC, stored_chksum, computed_chksum);
 	H5E_THROW(H5E_BADVALUE, "incorrect metadata checksum for extensible array data block page")
-}
 
     /* Set return value */
     ret_value = dblk_page;
@@ -1837,6 +1985,53 @@ H5EA__cache_dblk_page_clear(H5F_t *f, H5EA_dblk_page_t *dblk_page, hbool_t destr
 CATCH
 
 END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA__cache_dblk_page_notify
+ *
+ * Purpose:	Handle cache action notifications
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		Mar 31 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, H5EA_dblk_page_t *dblk_page))
+
+    /* Sanity check */
+    HDassert(dblk_page);
+
+    /* Determine which action to take */
+    switch(action) {
+        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+            /* Create flush dependency on parent */
+            if(H5EA__create_flush_depend(dblk_page->hdr, (H5AC_info_t *)dblk_page->parent, (H5AC_info_t *)dblk_page) < 0)
+                H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block page and parent, address = %llu", (unsigned long long)dblk_page->addr)
+            break;
+
+        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+            /* Destroy flush dependency on parent */
+            if(H5EA__destroy_flush_depend(dblk_page->hdr, (H5AC_info_t *)dblk_page->parent, (H5AC_info_t *)dblk_page) < 0)
+                H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block page and parent, address = %llu", (unsigned long long)dblk_page->addr)
+            break;
+
+        default:
+#ifdef NDEBUG
+            H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+#else /* NDEBUG */
+            HDassert(0 && "Unknown action?!?");
+#endif /* NDEBUG */
+    } /* end switch */
+
+CATCH
+
+END_FUNC(STATIC)   /* end H5EA__cache_dblk_page_notify() */
 
 
 /*-------------------------------------------------------------------------

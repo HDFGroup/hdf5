@@ -819,11 +819,11 @@ main(int argc, char* argv[])
 
     if(write_size == 0)
     {
-	lb = 1024;
+	lb = 16*numprocs*sizeof(int);
 	/* 1MB MPIO-IO overlapping is failing in copper. Lower it now pending
 	   permenant fix for copper.*/
 	/* ub = 1024*1024;*/
-	ub = 1024*512;
+	ub = lb*128;
 	inc = 4;
     }
     else

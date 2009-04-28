@@ -422,9 +422,6 @@ H5FD_sec2_close(H5FD_t *_file)
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_sec2_close, FAIL)
-#ifdef QAK
-HDfprintf(stderr, "%s: file->eof = %a, file->eoa = %a\n", FUNC, file->eof, file->eoa);
-#endif /* QAK */
 
     /* Sanity check */
     HDassert(file);
@@ -863,9 +860,6 @@ H5FD_sec2_truncate(H5FD_t *_file, hid_t UNUSED dxpl_id, hbool_t UNUSED closing)
     herr_t ret_value = SUCCEED;                 /* Return value */
 
     FUNC_ENTER_NOAPI(H5FD_sec2_truncate, FAIL)
-#ifdef QAK
-HDfprintf(stderr, "%s: file->eof = %a, file->eoa = %a\n", FUNC, file->eof, file->eoa);
-#endif /* QAK */
 
     HDassert(file);
 

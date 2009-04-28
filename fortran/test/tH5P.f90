@@ -49,8 +49,6 @@
 
      buf_size = 4*1024*1024
 
-
-
      !
      !Create file "external.h5" using default properties.
      ! 
@@ -395,3 +393,276 @@
      
           RETURN
         END SUBROUTINE multi_file_test
+
+!-------------------------------------------------------------------------
+! Function: test_chunk_cache
+!
+! Purpose: Tests APIs:
+!            H5P_H5PSET_CHUNK_CACHE_F
+!            H5P_H5PGET_CHUNK_CACHE_F
+!            H5D_H5DGET_ACCESS_PLIST_F
+!
+! Return:      Success: 0
+!              Failure: -1
+!
+! C Programmer:  Neil Fortner
+!                Wednesday, October 29, 2008
+!
+! FORTRAN Programmer: M. Scot Breitenfeld
+!                     April 16, 2009
+!-------------------------------------------------------------------------
+!
+SUBROUTINE test_chunk_cache(cleanup, total_error) 
+
+  USE HDF5 ! This module contains all necessary modules 
+  
+  IMPLICIT NONE
+  LOGICAL, INTENT(IN)  :: cleanup
+  INTEGER, INTENT(OUT) :: total_error
+   
+  CHARACTER(LEN=14), PARAMETER :: filename="chunk_cache"
+  CHARACTER(LEN=80) :: fix_filename
+  INTEGER(hid_t) :: fid = -1        ! /* File ID */
+  INTEGER(hid_t) :: file
+  INTEGER(hid_t) :: fapl_local = -1 ! /* Local fapl */
+  INTEGER(hid_t) :: fapl_def = -1  ! /* Default fapl */
+  INTEGER(hid_t) :: dcpl = -1      !/* Dataset creation property list ID */
+  INTEGER(hid_t) :: dapl1 = -1     !/* Dataset access property list ID */
+  INTEGER(hid_t) :: dapl2 = -1     !/* Dataset access property list ID */
+  INTEGER(hid_t) :: sid = -1       !/* Dataspace ID */
+  INTEGER(hid_t) :: dsid = -1      !/* Dataset ID */
+  INTEGER(hsize_t), DIMENSION(1:1) :: chunk_dim, NDIM = (/100/) !/* Dataset and chunk dimensions */
+  INTEGER(size_t) :: nslots_1, nslots_2, nslots_3, nslots_4 !/* rdcc number of elements */
+  INTEGER(size_t) :: nbytes_1, nbytes_2, nbytes_3, nbytes_4 !/* rdcc number of bytes */
+  INTEGER :: mdc_nelmts
+  INTEGER(size_t) ::nlinks         !/* Number of link traversals */
+  REAL :: w0_1, w0_2, w0_3, w0_4; !/* rdcc preemption policy */
+  INTEGER :: error
+  INTEGER(size_t) rdcc_nelmts
+  INTEGER(size_t) rdcc_nbytes
+  REAL :: rdcc_w0
+
+
+  CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+  IF (error .NE. 0) THEN
+     WRITE(*,*) "Cannot modify filename"
+     STOP
+  ENDIF
+
+  !/* Create a default fapl and dapl */
+  CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl_def, error)
+  CALL check("H5Pcreate_f", error, total_error)
+  CALL H5Pcreate_f(H5P_DATASET_ACCESS_F, dapl1, error)
+  CALL check("H5Pcreate_f", error, total_error)
+
+  !  Verify that H5Pget_chunk_cache(dapl) returns the same values as are in
+  !  the default fapl.
+  ! 
+  CALL H5Pget_cache_f(fapl_def, mdc_nelmts, nslots_1, nbytes_1, w0_1, error)
+  CALL check("H5Pget_cache_f", error, total_error)
+  CALL H5Pget_chunk_cache_f(dapl1, nslots_4, nbytes_4, w0_4, error)
+  CALL check("H5Pget_chunk_cache_f", error, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_1), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_1), INT(nbytes_4), total_error)
+  IF(w0_1.NE.w0_4)THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
+  ENDIF
+
+  ! /* Set a lapl property on dapl1 (to verify inheritance) */
+  CALL H5Pset_nlinks_f(dapl1, 134_size_t , error)
+  CALL check("H5Pset_nlinks_f", error, total_error)
+  CALL H5Pget_nlinks_f(dapl1, nlinks, error)
+  CALL check("H5Pget_nlinks_f", error, total_error)
+  CALL VERIFY("H5Pget_nlinks_f", INT(nlinks), 134, total_error)
+
+
+  CALL h5pcreate_f(H5P_FILE_ACCESS_F, fapl_local, error)
+  CALL check("h5pcreate_f", error, total_error)
+  ! Turn off the chunk cache, so all the chunks are immediately written to disk
+  CALL H5Pget_cache_f(fapl_local, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0, error)
+  CALL check("H5Pget_cache_f", error, total_error)
+  rdcc_nbytes = 0;
+  CALL H5Pset_cache_f(fapl_local, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, rdcc_w0, error)
+  CALL check("H5Pset_cache_f", error, total_error)
+
+  ! Set new rdcc settings on fapl!
+  nslots_2 = nslots_1 * 2
+  nbytes_2 = nbytes_1 * 2
+  w0_2 = w0_1 / 2.
+
+  CALL H5Pset_cache_f(fapl_local, 0, nslots_2, nbytes_2, w0_2, error)
+  CALL check("H5Pset_cache_f", error, total_error)
+
+  !/* Create file */
+  CALL H5Fcreate_f(fix_filename, H5F_ACC_TRUNC_F, fid, error,  H5P_DEFAULT_F, fapl_local)
+  CALL check("H5Fcreate_f", error, total_error)
+
+  !/* Create dataset creation property list */
+  CALL H5Pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
+  CALL check("H5Pcreate_f", error, total_error)
+
+  !/* Set chunking */
+  chunk_dim(1) = 10;
+  CALL H5Pset_chunk_f(dcpl, 1, chunk_dim, error)
+  CALL check("H5Pset_chunk_f", error, total_error)
+
+  !/* Create 1-D dataspace */
+  ndim(1) = 100
+  CALL H5Screate_simple_f(1, ndim, sid, error)
+  CALL check("H5Pcreate_f", error, total_error)
+
+  ! /* Create dataset with default dapl */
+  CALL H5Dcreate_f(fid, "dset", H5T_NATIVE_INTEGER, sid, dsid, error,  dcpl, H5P_DEFAULT_F,  dapl1)
+  CALL check("H5Pcreate_f", error, total_error)
+ 
+  ! /* Retrieve dapl from dataset, verify cache values are the same as on fapl_local */
+  CALL H5Dget_access_plist_f(dsid, dapl2, error)
+  CALL check("H5Dget_access_plist_f", error, total_error)
+  CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
+  CALL check("H5Pget_chunk_cache_f", error, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
+  IF(w0_2.NE.w0_4)THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
+  ENDIF
+  CALL H5Pclose_f(dapl2,error); CALL check("H5Pclose_f", error, total_error)
+  
+  ! Set new values on dapl1.  nbytes will be set to default, so the file
+  ! property will override this setting
+
+  nslots_3 = nslots_2 * 2
+  nbytes_3 = H5D_CHUNK_CACHE_NBYTES_DFLT_F
+  w0_3 = w0_2 / 2
+
+  CALL H5Pset_chunk_cache_f(dapl1, nslots_3, nbytes_3, w0_3, error)
+  CALL check("H5Pset_chunk_cache_f", error, total_error)
+
+  ! Close dataset, reopen with dapl1.  Note the use of a dapl with H5Oopen */
+  CALL H5Dclose_f(dsid, error)
+  CALL H5Oopen_f(fid, "dset", dsid, error, dapl1)
+
+  ! Retrieve dapl from dataset, verfiy cache values are the same as on dapl1
+  !
+  ! Note we rely on the knowledge that H5Pget_chunk_cache retrieves these
+  ! values directly from the dataset structure, and not from a copy of the
+  ! dapl used to open the dataset (which is not preserved).
+  !
+  CALL H5Dget_access_plist_f(dsid, dapl2, error)
+  CALL check("H5Dget_access_plist_f", error, total_error)
+  CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
+  CALL check("H5Pget_chunk_cache_f", error, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_3), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
+  IF(w0_3.NE.w0_4)THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f4", .TRUE., .FALSE., total_error)
+  ENDIF
+  CALL H5Pclose_f(dapl2,error); CALL check("H5Pclose_f", error, total_error)
+
+  ! Close dataset, reopen with H5P_DEFAULT as dapl
+  CALL H5Dclose_f(dsid, error); CALL check("H5Dclose_f", error, total_error)
+  CALL H5Oopen_f(fid, "dset", dsid, error)
+  CALL check("H5Oopen_f", error, total_error)
+
+  ! Retrieve dapl from dataset, verfiy cache values are the same as on fapl_local
+
+  CALL H5Dget_access_plist_f(dsid, dapl2, error)
+  CALL check("H5Dget_access_plist_f", error, total_error)
+  CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
+  CALL check("H5Pget_chunk_cache_f", error, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
+  IF(w0_2.NE.w0_4)THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
+  ENDIF
+  CALL H5Pclose_f(dapl2,error); CALL check("H5Pclose_f", error, total_error)
+
+  ! Similary, test use of H5Dcreate2 with H5P_DEFAULT
+  CALL H5Dclose_f(dsid, error); CALL check("H5Dclose_f", error, total_error)
+
+  CALL H5Dcreate_f(fid, "dset2", H5T_NATIVE_INTEGER, sid, dsid, error,  dcpl, H5P_DEFAULT_F,  H5P_DEFAULT_F)
+  CALL check("H5Pcreate_f", error, total_error)
+
+  CALL H5Dget_access_plist_f(dsid, dapl2, error)
+  CALL check("H5Dget_access_plist_f", error, total_error)
+
+  CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
+  CALL check("H5Pget_chunk_cache_f", error, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
+  IF(w0_2.NE.w0_4)THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
+  ENDIF
+  ! Don't close dapl2, we will use it in the next section
+
+  ! Modify cache values on fapl_local
+  nbytes_3 = nbytes_2 * 2
+
+  CALL H5Pset_cache_f(fapl_local, 0, nslots_3, nbytes_3, w0_3, error)
+  CALL check("H5Pset_cache_f", error, total_error)
+
+  !  Close and reopen file with new fapl_local
+  
+  CALL H5Dclose_f(dsid, error); CALL check("H5Dclose_f", error, total_error)
+  CALL H5Fclose_f(fid,error); CALL check("h5fclose_f", error, total_error)
+
+  CALL H5Fopen_f (fix_filename, H5F_ACC_RDWR_F, fid, error, fapl_local)
+  CALL check("h5fopen_f", error, total_error)
+
+  ! Verify that dapl2 retrieved earlier (using values from the old fapl)
+  ! sets its values in the new file (test use of H5Dopen2 with a dapl)
+  !
+  
+  CALL h5dopen_f (fid, "dset", dsid, error, dapl2)
+  CALL check("h5dopen_f", error, total_error)
+  
+  CALL H5Pclose_f(dapl2,error); CALL check("H5Pclose_f", error, total_error) ! Close dapl2, to avoid id leak
+  
+  CALL H5Dget_access_plist_f(dsid, dapl2, error)
+  CALL check("H5Dget_access_plist_f", error, total_error)
+  CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
+  CALL check("H5Pget_chunk_cache_f", error, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
+  IF(w0_2.NE.w0_4)THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
+  ENDIF
+
+  ! Test H5D_CHUNK_CACHE_NSLOTS_DEFAULT and H5D_CHUNK_CACHE_W0_DEFAULT
+  nslots_2 = H5D_CHUNK_CACHE_NSLOTS_DFLT_F
+  w0_2 = H5D_CHUNK_CACHE_W0_DFLT_F
+
+  CALL H5Pset_chunk_cache_f(dapl2, nslots_2, nbytes_2, w0_2, error)
+  CALL check("H5Pset_chunk_cache_f", error, total_error)
+
+  CALL H5Dclose_f(dsid, error); CALL check("H5Dclose_f", error, total_error)
+  CALL h5dopen_f (fid, "dset", dsid, error, dapl2)
+  CALL check("h5dopen_f", error, total_error)
+
+  CALL H5Pclose_f(dapl2,error); CALL check("H5Pclose_f", error, total_error)
+
+  CALL H5Dget_access_plist_f(dsid, dapl2, error)
+  CALL check("H5Dget_access_plist_f", error, total_error)
+  CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
+  CALL check("H5Pget_chunk_cache_f", error, total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nslots_3), INT(nslots_4), total_error)
+  CALL VERIFY("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
+  IF(w0_3.NE.w0_4)THEN
+     CALL VERIFYlogical("H5Pget_chunk_cache_f", .TRUE., .FALSE., total_error)
+  ENDIF
+
+! Close
+
+  CALL H5Dclose_f(dsid, error); CALL check("H5Dclose_f", error, total_error)
+  CALL H5Sclose_f(sid,error); CALL check("H5Sclose_f", error, total_error)
+  CALL H5Pclose_f(fapl_local,error); CALL check("H5Pclose_f", error, total_error) 
+  CALL H5Pclose_f(fapl_def,error); CALL check("H5Pclose_f", error, total_error) 
+  CALL H5Pclose_f(dapl1,error); CALL check("H5Pclose_f", error, total_error) 
+  CALL H5Pclose_f(dapl2,error); CALL check("H5Pclose_f", error, total_error) 
+  CALL H5Pclose_f(dcpl,error); CALL check("H5Pclose_f", error, total_error) 
+  CALL H5Fclose_f(fid,error); CALL check("H5Fclose_f", error, total_error)
+
+  IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+  CALL check("h5_cleanup_f", error, total_error)
+
+END SUBROUTINE test_chunk_cache
+

@@ -100,7 +100,7 @@ H5FL_DEFINE_STATIC(H5EA_dblk_page_t);
  */
 BEGIN_FUNC(PKG, ERR,
 H5EA_dblk_page_t *, NULL, NULL,
-H5EA__dblk_page_alloc(H5EA_hdr_t *hdr))
+H5EA__dblk_page_alloc(H5EA_hdr_t *hdr, H5EA_sblock_t *parent))
 
     /* Local variables */
     H5EA_dblk_page_t *dblk_page = NULL;          /* Extensible array data block page */
@@ -118,7 +118,7 @@ H5EA__dblk_page_alloc(H5EA_hdr_t *hdr))
     dblk_page->hdr = hdr;
 
     /* Set non-zero internal fields */
-    /* <none> */
+    dblk_page->parent = parent;
 
     /* Allocate buffer for elements in data block page */
     if(NULL == (dblk_page->elmts = H5EA__hdr_alloc_elmts(hdr, hdr->dblk_page_nelmts)))
@@ -150,7 +150,8 @@ END_FUNC(PKG)   /* end H5EA__dblk_page_alloc() */
  */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__dblk_page_create(H5EA_hdr_t *hdr, hid_t dxpl_id, haddr_t addr))
+H5EA__dblk_page_create(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_sblock_t *parent,
+    haddr_t addr))
 
     /* Local variables */
     H5EA_dblk_page_t *dblk_page = NULL;      /* Extensible array data block page */
@@ -163,7 +164,7 @@ HDfprintf(stderr, "%s: Called, addr = %a\n", FUNC, addr);
     HDassert(hdr);
 
     /* Allocate the data block page */
-    if(NULL == (dblk_page = H5EA__dblk_page_alloc(hdr)))
+    if(NULL == (dblk_page = H5EA__dblk_page_alloc(hdr, parent)))
 	H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array data block page")
 
     /* Set info about data block page on disk */
@@ -208,10 +209,11 @@ END_FUNC(PKG)   /* end H5EA__dblk_page_create() */
  */
 BEGIN_FUNC(PKG, ERR,
 H5EA_dblk_page_t *, NULL, NULL,
-H5EA__dblk_page_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, haddr_t dblk_page_addr,
-    H5AC_protect_t rw))
+H5EA__dblk_page_protect(H5EA_hdr_t *hdr, hid_t dxpl_id, H5EA_sblock_t *parent,
+    haddr_t dblk_page_addr, H5AC_protect_t rw))
 
     /* Local variables */
+    H5EA_dblk_page_load_ud_t load_ud;      /* Information needed for loading data block page */
 
 #ifdef QAK
 HDfprintf(stderr, "%s: Called\n", FUNC);
@@ -221,8 +223,11 @@ HDfprintf(stderr, "%s: Called\n", FUNC);
     HDassert(hdr);
     HDassert(H5F_addr_defined(dblk_page_addr));
 
+    /* Set up user data */
+    load_ud.parent = parent;
+
     /* Protect the data block page */
-    if(NULL == (ret_value = (H5EA_dblk_page_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_DBLK_PAGE, dblk_page_addr, NULL, hdr, rw)))
+    if(NULL == (ret_value = (H5EA_dblk_page_t *)H5AC_protect(hdr->f, dxpl_id, H5AC_EARRAY_DBLK_PAGE, dblk_page_addr, &load_ud, hdr, rw)))
         H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block page, address = %llu", (unsigned long long)dblk_page_addr)
 
 CATCH

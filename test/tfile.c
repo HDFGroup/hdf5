@@ -27,6 +27,14 @@
 #include "H5Bprivate.h"
 #include "H5Pprivate.h"
 
+/*
+ * This file needs to access private information from the H5F package.
+ * This file also needs to access the file testing code.
+ */
+#define H5F_PACKAGE
+#define H5F_TESTING
+#include "H5Fpkg.h"		/* File access	 			*/
+
 #define F1_USERBLOCK_SIZE  (hsize_t)0
 #define F1_OFFSET_SIZE	   sizeof(haddr_t)
 #define F1_LENGTH_SIZE	   sizeof(hsize_t)
@@ -78,6 +86,8 @@
 #define TESTA_RANK 2
 #define TESTA_NX 4
 #define TESTA_NY 5
+
+#define USERBLOCK_SIZE      ((hsize_t) 512)
 
 static void
 create_objects(hid_t, hid_t, hid_t *, hid_t *, hid_t *, hid_t *);
@@ -1855,6 +1865,168 @@ test_file_double_datatype_open(void)
 
 /****************************************************************
 **
+**  test_userblock_file_size(): low-level file test routine.
+**      This test checks that the presence of a userblock
+**      affects the file size in the expected manner, and that
+**      the filesize is not changed by reopening the file.  It
+**      creates two files which are identical except that one
+**      contains a userblock, and verifies that their file sizes
+**      differ exactly by the userblock size.
+**
+*****************************************************************/
+static void
+test_userblock_file_size(void)
+{
+    hid_t file1_id, file2_id;
+    hid_t group1_id, group2_id;
+    hid_t dset1_id, dset2_id;
+    hid_t space_id;
+    hid_t fcpl2_id;
+    hsize_t dims[2] = {3, 4};
+    hsize_t filesize1, filesize2, filesize;
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing file size with user block\n"));
+
+    /* Create property list with userblock size set */
+    fcpl2_id = H5Pcreate(H5P_FILE_CREATE);
+    CHECK(fcpl2_id, FAIL, "H5Pcreate");
+    ret = H5Pset_userblock(fcpl2_id, USERBLOCK_SIZE);
+    CHECK(ret, FAIL, "H5Pset_userblock");
+
+    /* Create files.  Onyl file2 with have a userblock. */
+    file1_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file1_id, FAIL, "H5Fcreate");
+    file2_id = H5Fcreate(FILE2, H5F_ACC_TRUNC, fcpl2_id, H5P_DEFAULT);
+    CHECK(file2_id, FAIL, "H5Fcreate");
+
+    /* Create groups */
+    group1_id = H5Gcreate2(file1_id, GROUP1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group1_id, FAIL, "H5Gcreate2");
+    group2_id = H5Gcreate2(file2_id, GROUP1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group2_id, FAIL, "H5Gcreate2");
+
+    /* Create dataspace */
+    space_id = H5Screate_simple(2, dims, NULL);
+    CHECK(space_id, FAIL, "H5Screate_simple");
+
+    /* Create datasets */
+    dset1_id = H5Dcreate2(file1_id, DSET2, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset1_id, FAIL, "H5Dcreate2");
+    dset2_id = H5Dcreate2(file2_id, DSET2, H5T_NATIVE_INT, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(dset2_id, FAIL, "H5Dcreate2");
+
+    /* Close IDs */
+    ret = H5Dclose(dset1_id);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Dclose(dset2_id);
+    CHECK(ret, FAIL, "H5Dclose");
+    ret = H5Sclose(space_id);
+    CHECK(ret, FAIL, "H5Sclose");
+    ret = H5Gclose(group1_id);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Gclose(group2_id);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Pclose(fcpl2_id);
+    CHECK(ret, FAIL, "H5Pclose");
+
+    /* Close files */
+    ret = H5Fclose(file1_id);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(file2_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Reopen files */
+    file1_id = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(file1_id, FAIL, "H5Fopen");
+    file2_id = H5Fopen(FILE2, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(file2_id, FAIL, "H5Fopen");
+
+    /* Check file sizes */
+    ret = H5Fget_filesize(file1_id, &filesize1);
+    CHECK(ret, FAIL, "H5Fget_filesize");
+    ret = H5Fget_filesize(file2_id, &filesize2);
+    CHECK(ret, FAIL, "H5Fget_filesize");
+
+    /* Verify that the file sizes differ exactly by the userblock size */
+    VERIFY(filesize2, filesize1 + USERBLOCK_SIZE, "H5Fget_filesize");
+
+    /* Close files */
+    ret = H5Fclose(file1_id);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(file2_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Reopen files */
+    file1_id = H5Fopen(FILE1, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(file1_id, FAIL, "H5Fopen");
+    file2_id = H5Fopen(FILE2, H5F_ACC_RDWR, H5P_DEFAULT);
+    CHECK(file2_id, FAIL, "H5Fopen");
+
+    /* Verify file sizes did not change */
+    ret = H5Fget_filesize(file1_id, &filesize);
+    CHECK(ret, FAIL, "H5Fget_filesize");
+    VERIFY(filesize, filesize1, "H5Fget_filesize");
+    ret = H5Fget_filesize(file2_id, &filesize);
+    CHECK(ret, FAIL, "H5Fget_filesize");
+    VERIFY(filesize, filesize2, "H5Fget_filesize");
+
+    /* Close files */
+    ret = H5Fclose(file1_id);
+    CHECK(ret, FAIL, "H5Fclose");
+    ret = H5Fclose(file2_id);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_userblock_file_size() */
+
+/****************************************************************
+**
+**  test_cached_stab_info(): low-level file test routine.
+**      This test checks that new files are created with cached
+**      symbol table information in the superblock (when using
+**      the old format).  This is necessary to ensure backwards
+**      compatibility with versions from 1.3.0 to 1.6.3.
+**
+*****************************************************************/
+static void
+test_cached_stab_info(void)
+{
+    hid_t file_id;
+    hid_t group_id;
+    herr_t ret;         /* Generic return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing cached symbol table information\n"));
+
+    /* Create file */
+    file_id = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(file_id, FAIL, "H5Fcreate");
+
+    /* Create group */
+    group_id = H5Gcreate2(file_id, GROUP1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(group_id, FAIL, "H5Gcreate2");
+
+    /* Close file and group */
+    ret = H5Gclose(group_id);
+    CHECK(ret, FAIL, "H5Gclose");
+    ret = H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    /* Reopen file */
+    file_id = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    CHECK(ret, FAIL, "H5Fopen");
+
+    /* Verify the cached symbol table information */
+    ret = H5F_check_cached_stab_test(file_id);
+    CHECK(ret, FAIL, "H5F_check_cached_stab_test");
+
+    /* Close file */
+    ret = H5Fclose(file_id);
+    CHECK(ret, FAIL, "H5Fclose");
+} /* end test_cached_stab_info() */
+
+/****************************************************************
+**
 **  test_file(): Main low-level file I/O test routine.
 **
 ****************************************************************/
@@ -1884,6 +2056,8 @@ test_file(void)
     test_file_double_dataset_open();    /* Test opening same dataset from two files works properly */
     test_file_double_datatype_open();   /* Test opening same named datatype from two files works properly */
 #endif /*H5_CANNOT_OPEN_TWICE*/
+    test_userblock_file_size(); /* Tests that files created with a userblock have the correct size */
+    test_cached_stab_info();    /* Tests that files are created with cached stab info in the superblock */
 }				/* test_file() */
 
 
@@ -1909,3 +2083,4 @@ cleanup_file(void)
     HDremove(FILE3);
     HDremove(FILE4);
 }
+

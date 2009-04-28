@@ -21,7 +21,6 @@ rem Last Update : November 17, 2007 by Scott Wegner
 
 pushd %~dp0
 
-copy /y src\H5Tinit.c ..\src > nul
 copy /y src\H5pubconf.h ..\src > nul
 copy /y fortran\src\H5f90i_gen.h ..\fortran\src > nul
 copy /y fortran\src\H5fortran_types.f90 ..\fortran\src > nul

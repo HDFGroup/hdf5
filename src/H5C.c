@@ -2798,6 +2798,7 @@ static herr_t H5C_epoch_marker_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
 				     unsigned *flags_ptr);
 static herr_t H5C_epoch_marker_dest(H5F_t *f, void *thing);
 static herr_t H5C_epoch_marker_clear(H5F_t *f, void *thing, hbool_t dest);
+static herr_t H5C_epoch_marker_notify(H5C_notify_action_t action, void *thing);
 static herr_t H5C_epoch_marker_size(const H5F_t *f, const void *thing, size_t *size_ptr);
 
 const H5C_class_t epoch_marker_class =
@@ -2807,6 +2808,7 @@ const H5C_class_t epoch_marker_class =
     /* flush = */ &H5C_epoch_marker_flush,
     /* dest  = */ &H5C_epoch_marker_dest,
     /* clear = */ &H5C_epoch_marker_clear,
+    /* notify = */&H5C_epoch_marker_notify,
     /* size  = */ &H5C_epoch_marker_size
 };
 
@@ -2884,6 +2886,20 @@ H5C_epoch_marker_clear(H5F_t UNUSED * f,
 
 done:
 
+    FUNC_LEAVE_NOAPI(ret_value)
+}
+
+static herr_t
+H5C_epoch_marker_notify(H5C_notify_action_t UNUSED action,
+                       void UNUSED * thing)
+{
+    herr_t ret_value = FAIL;      /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5C_epoch_marker_notify)
+
+    HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "called unreachable fcn.")
+
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -3029,8 +3045,7 @@ H5C_create(size_t		      max_cache_size,
                     "memory allocation failed")
     }
 
-    if ( (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR,0.5,(size_t)16))
-         == NULL ) {
+    if ( (cache_ptr->slist_ptr = H5SL_create(H5SL_TYPE_HADDR)) == NULL ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, NULL, "can't create skip list.")
     }
@@ -4535,10 +4550,12 @@ H5C_get_entry_status(H5C_t *   cache_ptr,
                      hbool_t * in_cache_ptr,
                      hbool_t * is_dirty_ptr,
                      hbool_t * is_protected_ptr,
-		     hbool_t * is_pinned_ptr)
+		     hbool_t * is_pinned_ptr,
+		     hbool_t * is_flush_dep_parent_ptr,
+                     hbool_t * is_flush_dep_child_ptr)
 {
-    herr_t		ret_value = SUCCEED;      /* Return value */
     H5C_cache_entry_t *	entry_ptr = NULL;
+    herr_t		ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5C_get_entry_status, FAIL)
 
@@ -4586,6 +4603,16 @@ H5C_get_entry_status(H5C_t *   cache_ptr,
         if ( is_pinned_ptr != NULL ) {
 
             *is_pinned_ptr = entry_ptr->is_pinned;
+        }
+
+        if ( is_flush_dep_parent_ptr != NULL ) {
+
+            *is_flush_dep_parent_ptr = (entry_ptr->flush_dep_height > 0);
+        }
+
+        if ( is_flush_dep_child_ptr != NULL ) {
+
+            *is_flush_dep_child_ptr = (entry_ptr->flush_dep_parent != NULL);
         }
     }
 
@@ -4881,6 +4908,7 @@ H5C_insert_entry(H5F_t * 	     f,
     entry_ptr->ro_ref_count = 0;
 
     entry_ptr->is_pinned = insert_pinned;
+    entry_ptr->pinned_from_client = insert_pinned;
 
     /* newly inserted entries are assumed to be dirty */
     entry_ptr->is_dirty = TRUE;
@@ -5055,6 +5083,13 @@ H5C_insert_entry(H5F_t * 	     f,
                         "LRU sanity check failed.\n");
     }
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
+
+    /* If the entry's type has a 'notify' callback send a 'after insertion'
+     * notice now that the entry is fully integrated into the cache.
+     */
+    if(entry_ptr->type->notify &&
+            (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_INSERT, entry_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry inserted into cache")
 
     H5C__UPDATE_STATS_FOR_INSERTION(cache_ptr, entry_ptr)
 
@@ -5973,6 +6008,56 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C_pin_entry_from_client()
+ *
+ * Purpose:	Internal routine to pin a cache entry from a client action.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              3/26/09
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifndef NDEBUG
+static herr_t
+H5C_pin_entry_from_client(H5C_t *	          cache_ptr,
+                        H5C_cache_entry_t * entry_ptr)
+#else
+static herr_t
+H5C_pin_entry_from_client(H5C_t UNUSED *	cache_ptr,
+                        H5C_cache_entry_t * entry_ptr)
+#endif
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5C_pin_entry_from_client)
+
+    /* Sanity checks */
+    HDassert( cache_ptr );
+    HDassert( entry_ptr );
+
+    /* Check if the entry is already pinned */
+    if(entry_ptr->is_pinned) {
+        /* Check if the entry was pinned through an explicit pin from a client */
+        if(entry_ptr->pinned_from_client)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Entry is already pinned")
+    } /* end if */
+    else {
+        entry_ptr->is_pinned = TRUE;
+
+        H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
+    } /* end else */
+
+    /* Mark that the entry was pinned through an explicit pin from a client */
+    entry_ptr->pinned_from_client = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_pin_entry_from_client() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_pin_protected_entry()
  *
  * Purpose:	Pin a protected cache entry.  The entry must be protected
@@ -6000,47 +6085,32 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-#ifndef NDEBUG
 herr_t
 H5C_pin_protected_entry(H5C_t *	          cache_ptr,
                         void *		  thing)
-#else
-herr_t
-H5C_pin_protected_entry(H5C_t UNUSED *	cache_ptr,
-                        void *		  thing)
-#endif
 {
+    H5C_cache_entry_t *	entry_ptr;              /* Pointer to entry to pin */
     herr_t              ret_value = SUCCEED;    /* Return value */
-    H5C_cache_entry_t *	entry_ptr;
 
     FUNC_ENTER_NOAPI(H5C_pin_protected_entry, FAIL)
 
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( thing );
-
     entry_ptr = (H5C_cache_entry_t *)thing;
-
+    HDassert( entry_ptr );
     HDassert( H5F_addr_defined(entry_ptr->addr) );
 
-    if ( ! ( entry_ptr->is_protected ) ) {
-
+    /* Only protected entries can be pinned */
+    if(!entry_ptr->is_protected)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Entry isn't protected")
-    }
 
-    if ( entry_ptr->is_pinned ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Entry is already pinned")
-    }
-
-    entry_ptr->is_pinned = TRUE;
-
-    H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
+    /* Pin the entry from a client */
+    if(H5C_pin_entry_from_client(cache_ptr, entry_ptr) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Can't pin entry by client")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_pin_protected_entry() */
 
 
@@ -6360,6 +6430,13 @@ H5C_protect(H5F_t *	        f,
          * code.  If we do this often enough, we may want to optimize this.
          */
         H5C__UPDATE_RP_FOR_INSERTION(cache_ptr, entry_ptr, NULL)
+
+        /* If the entry's type has a 'notify' callback send a 'after insertion'
+         * notice now that the entry is fully integrated into the cache.
+         */
+        if(entry_ptr->type->notify &&
+                (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_AFTER_INSERT, entry_ptr) < 0)
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, NULL, "can't notify client about entry inserted into cache")
     }
 
     HDassert( entry_ptr->addr == addr );
@@ -7671,6 +7748,58 @@ H5C_stats__reset(H5C_t UNUSED * cache_ptr)
 
 
 /*-------------------------------------------------------------------------
+ * Function:    H5C_unpin_entry_from_client()
+ *
+ * Purpose:	Internal routine to unpin a cache entry from a client action.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              3/24/09
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5C_unpin_entry_from_client(H5C_t *		  cache_ptr,
+                H5C_cache_entry_t *	  entry_ptr,
+                hbool_t update_rp)
+{
+    herr_t              ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5C_unpin_entry_from_client)
+
+    /* Sanity checking */
+    HDassert( cache_ptr );
+    HDassert( entry_ptr );
+
+    /* Error checking (should be sanity checks?) */
+    if(!entry_ptr->is_pinned)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Entry isn't pinned")
+    if(!entry_ptr->pinned_from_client)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Entry wasn't pinned by cache client")
+
+    /* If requested, update the replacement policy if the entry is not protected */
+    if(update_rp && !entry_ptr->is_protected)
+        H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, FAIL)
+
+    /* Check if the entry is not pinned from a flush dependency */
+    if(!entry_ptr->pinned_from_cache) {
+        /* Unpin the entry now */
+        entry_ptr->is_pinned = FALSE;
+
+        /* Update the stats for an unpin operation */
+        H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
+    } /* end if */
+
+    /* Mark the entry as explicitly unpinned by the client */
+    entry_ptr->pinned_from_client = FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5C_unpin_entry_from_client() */
+
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_unpin_entry()
  *
  * Purpose:	Unpin a cache entry.  The entry can be either protected or
@@ -7687,35 +7816,24 @@ herr_t
 H5C_unpin_entry(H5C_t *		  cache_ptr,
                 void *		  thing)
 {
+    H5C_cache_entry_t *	entry_ptr;              /* Pointer to entry to unpin */
     herr_t              ret_value = SUCCEED;    /* Return value */
-    H5C_cache_entry_t *	entry_ptr;
 
     FUNC_ENTER_NOAPI(H5C_unpin_entry, FAIL)
 
+    /* Sanity checking */
     HDassert( cache_ptr );
     HDassert( cache_ptr->magic == H5C__H5C_T_MAGIC );
     HDassert( thing );
-
     entry_ptr = (H5C_cache_entry_t *)thing;
+    HDassert( entry_ptr );
 
-    if ( ! ( entry_ptr->is_pinned ) ) {
-
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Entry isn't pinned")
-    }
-
-    if ( ! ( entry_ptr->is_protected ) ) {
-
-        H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, FAIL)
-    }
-
-    entry_ptr->is_pinned = FALSE;
-
-    H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
+    /* Unpin the entry */
+    if(H5C_unpin_entry_from_client(cache_ptr, entry_ptr, TRUE) < 0)
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Can't unpin entry from client")
 
 done:
-
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* H5C_unpin_entry() */
 
 
@@ -7846,7 +7964,6 @@ H5C_unprotect(H5F_t *		  f,
               unsigned int        flags,
               size_t              new_size)
 {
-    /* const char *	fcn_name = "H5C_unprotect()"; */
     hbool_t		deleted;
     hbool_t		dirtied;
     hbool_t             set_flush_marker;
@@ -7938,23 +8055,15 @@ H5C_unprotect(H5F_t *		  f,
         /* Pin or unpin the entry as requested. */
         if ( pin_entry ) {
 
-            if ( entry_ptr->is_pinned ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, \
-                            "Entry already pinned???")
-            }
-	    entry_ptr->is_pinned = TRUE;
-	    H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
+            /* Pin the entry from a client */
+            if(H5C_pin_entry_from_client(cache_ptr, entry_ptr) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Can't pin entry by client")
 
         } else if ( unpin_entry ) {
 
-            if ( ! ( entry_ptr->is_pinned ) ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, \
-			    "Entry already unpinned???")
-            }
-	    entry_ptr->is_pinned = FALSE;
-	    H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
+            /* Unpin the entry from a client */
+            if(H5C_unpin_entry_from_client(cache_ptr, entry_ptr, FALSE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Can't unpin entry by client")
 
         }
 
@@ -8071,23 +8180,15 @@ H5C_unprotect(H5F_t *		  f,
         /* Pin or unpin the entry as requested. */
         if ( pin_entry ) {
 
-            if ( entry_ptr->is_pinned ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, \
-                            "Entry already pinned???")
-            }
-	    entry_ptr->is_pinned = TRUE;
-	    H5C__UPDATE_STATS_FOR_PIN(cache_ptr, entry_ptr)
+            /* Pin the entry from a client */
+            if(H5C_pin_entry_from_client(cache_ptr, entry_ptr) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTPIN, FAIL, "Can't pin entry by client")
 
         } else if ( unpin_entry ) {
 
-            if ( ! ( entry_ptr->is_pinned ) ) {
-
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, \
-			    "Entry already unpinned???")
-            }
-	    entry_ptr->is_pinned = FALSE;
-	    H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, entry_ptr)
+            /* Unpin the entry from a client */
+            if(H5C_unpin_entry_from_client(cache_ptr, entry_ptr, FALSE) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Can't unpin entry by client")
 
         }
 
@@ -8655,8 +8756,8 @@ H5C_create_flush_dependency(H5C_t UNUSED * cache_ptr, void * parent_thing,
     /* More sanity checks */
     if(child_entry == parent_entry)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Child entry flush dependency parent can't be itself")
-    if(!parent_entry->is_protected)
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Parent entry isn't protected")
+    if(!(parent_entry->is_protected || parent_entry->is_pinned))
+        HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Parent entry isn't pinned or protected")
     if(NULL != child_entry->flush_dep_parent)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Child entry already has flush dependency parent")
     {
@@ -8675,20 +8776,20 @@ H5C_create_flush_dependency(H5C_t UNUSED * cache_ptr, void * parent_thing,
         HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Combined flush dependency height too large")
     }
 
-    /* Check for parent already pinned */
-    if(parent_entry->is_pinned) {
-        /* Verify that the parent entry was pinned through a flush dependency relationship */
-        if(0 == parent_entry->flush_dep_height)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTDEPEND, FAIL, "Parent entry wasn't pinned through flush dependency")
-    } /* end if */
-    else {
+    /* Check for parent not pinned */
+    if(!parent_entry->is_pinned) {
         /* Sanity check */
         HDassert(parent_entry->flush_dep_height == 0);
+        HDassert(!parent_entry->pinned_from_client);
+        HDassert(!parent_entry->pinned_from_cache);
 
         /* Pin the parent entry */
         parent_entry->is_pinned = TRUE;
         H5C__UPDATE_STATS_FOR_PIN(cache_ptr, parent_entry)
     } /* end else */
+
+    /* Mark the entry as pinned from the cache's action (possibly redundantly) */
+    parent_entry->pinned_from_cache = TRUE;
 
     /* Increment ref. count for parent's flush dependency children heights */
     parent_entry->child_flush_dep_height_rc[child_entry->flush_dep_height]++;
@@ -8811,12 +8912,24 @@ H5C_destroy_flush_dependency(H5C_t * cache_ptr, void *parent_thing,
          *  parent of _any_ child flush dependencies).
          */
         if(0 == parent_entry->flush_dep_height) {
-            if(!parent_entry->is_protected)
-                H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, parent_entry, FAIL)
+            /* Sanity check */
+            HDassert(parent_entry->pinned_from_cache);
 
-            /* Unpin parent entry */
-            parent_entry->is_pinned = FALSE;
-            H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, parent_entry)
+            /* Check if we should unpin parent entry now */
+            if(!parent_entry->pinned_from_client) {
+                /* Update the replacement policy if the entry is not protected */
+                if(!parent_entry->is_protected)
+                    H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, parent_entry, FAIL)
+
+                /* Unpin the entry now */
+                parent_entry->is_pinned = FALSE;
+
+                /* Update the stats for an unpin operation */
+                H5C__UPDATE_STATS_FOR_UNPIN(cache_ptr, parent_entry)
+            } /* end if */
+
+            /* Mark the entry as unpinned from the cache's action */
+            parent_entry->pinned_from_cache = FALSE;
         } /* end if */
     } /* end if */
 
@@ -10985,6 +11098,16 @@ H5C_flush_single_entry(H5F_t *		   f,
         if ( destroy ) {
             H5C__UPDATE_STATS_FOR_EVICTION(cache_ptr, entry_ptr)
         }
+
+        /* If the entry's type has a 'notify' callback and the entry is about
+         * to be removed from the cache, send a 'before eviction' notice while
+         * the entry is still fully integrated in the cache.
+         */
+        if(destroy) {
+            if(entry_ptr->type->notify &&
+                    (entry_ptr->type->notify)(H5C_NOTIFY_ACTION_BEFORE_EVICT, entry_ptr) < 0)
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTNOTIFY, FAIL, "can't notify client about entry to evict")
+        } /* end if */
 
         /* Always remove the entry from the hash table on a destroy.  On a
          * flush with destroy, it is cheaper to discard the skip list all at
