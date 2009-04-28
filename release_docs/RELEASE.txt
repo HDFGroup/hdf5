@@ -124,7 +124,9 @@ Bug Fixes since HDF5-1.6.8 Release
                                 
     C++ API
     -------
-    - None
+    - Revised Attribute::write and Attribute::read wrappers to handle
+      memory allocation/deallocation properly. (bugzilla 1045)
+      BMR - 2009/4/19
 
 
 Documentation
