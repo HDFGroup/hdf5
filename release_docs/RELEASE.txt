@@ -420,6 +420,12 @@ Cray XT3 2.0.41          n       n         n         n
 
 Known Problems
 ==============
+* There is a known issue in which HDF5 will change the timestamp on a file 
+  simply by opening it with read/write permissions, even if the file is not
+  modified in any way. This is due to the way in which HDF5 manages the file 
+  superblock. A fix is currently underway and should be included in the 1.8.4
+  release of HDF5. MAM - 2009/04/28
+
 * For Red Storm, a Cray XT3 system, the tools/h5ls/testh5ls.sh and
   tools/h5copy/testh5copy.sh will fail some of its sub-tests. These sub-tests
   are expected to fail and should exit with a non-zero code but the yod
