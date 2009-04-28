@@ -4,24 +4,33 @@ Expected output for 'h5dump -R tdatareg.h5'
 HDF5 "tdatareg.h5" {
 GROUP "/" {
    DATASET "Dataset1" {
-      DATATYPE  H5T_REFERENCE
+      DATATYPE  H5T_REFERENCE { H5T_STD_REF_DSETREG }
       DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
       DATA {
-         DATASET /Dataset2 {
-            REGION_TYPE BLOCK  (2,2)-(7,7)
-            DATATYPE  H5T_STD_U8LE
-            DATA { 
-               66,69,72,75,78,81,96,99,102,105,108,111,126,129,132,135,138,141,156,159,162,165,168,171,186,189,192,195,198,201,216,219,222,225,228,231
-             } 
-         }
-         DATASET /Dataset2  {
-            REGION_TYPE POINT  (6,9), (2,2), (8,4), (1,6), (2,8), (3,2), (0,4),
-             (9,0), (7,1), (3,3)
-            DATATYPE  H5T_STD_U8LE
-            DATA { 
-               207,66,252,48,84,96,12,14,213,99
-             } 
-         }
+      (0): DATASET /Dataset2 {
+         (0): REGION_TYPE BLOCK  (2,2)-(7,7)
+         (0): DATATYPE  H5T_STD_U8LE
+         (0): DATA { 
+            (0,0): 66, 69, 72, 75, 78, 81, 96, 99, 102, 105, 108, 111, 126, 129, 132, 135, 138, 141, 156, 159, 162, 165, 168, 171, 186, 189, 192, 195, 198, 201, 216, 219, 222, 225, 228, 231
+         (0):  } 
+      (0): }
+      (1): DATASET /Dataset2  {
+         (1): REGION_TYPE POINT  (6,9), (2,2), (8,4), (1,6), (2,8), (3,2),
+         (1):  (0,4), (9,0), (7,1), (3,3)
+         (1): DATATYPE  H5T_STD_U8LE
+         (1): DATA { 
+            (0,1):  207,
+            (0,1):  66,
+            (0,1):  252,
+            (0,1):  48,
+            (0,1):  84,
+            (0,1):  96,
+            (0,1):  12,
+            (0,1):  14,
+            (0,1):  213,
+            (0,1):  99
+         (1):  } 
+      (1): }
       }
    }
    DATASET "Dataset2" {

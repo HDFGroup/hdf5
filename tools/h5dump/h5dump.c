@@ -1189,6 +1189,14 @@ print_datatype(hid_t type,unsigned in_group)
 
             case H5T_REFERENCE:
                 printf("H5T_REFERENCE");
+                if(display_region) {
+                    if (H5Tequal(type, H5T_STD_REF_DSETREG)==TRUE) {
+                        printf(" { H5T_STD_REF_DSETREG }");
+                    } 
+                    else {
+                        printf(" { H5T_STD_REF_OBJECT }");
+                    }        
+                }
                 break;
 
             case H5T_ENUM:
@@ -2392,7 +2400,24 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
 
         if (H5Tequal(f_type, H5T_STD_REF_DSETREG))
         {
-            outputformat->pindex = 0;
+            if (display_region) {
+                if (display_index) {
+                    outputformat->pindex = 1;
+                    outputformat->idx_fmt   = "(%s): ";
+                    outputformat->idx_n_fmt = HSIZE_T_FORMAT;
+                    outputformat->idx_sep   = ",";
+                    outputformat->line_pre  = "%s";
+                }
+                else {
+                    outputformat->pindex = 0;
+                    outputformat->idx_fmt   = "";
+                    outputformat->idx_n_fmt = "";
+                    outputformat->idx_sep   = "";
+                    outputformat->line_pre  = "";
+                }
+            }
+            else
+                outputformat->pindex = 0;
         }
         H5Tclose(f_type);
     }
