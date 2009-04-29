@@ -193,10 +193,6 @@ herr_t H5LRget_region_info(hid_t obj_id,               /* -IN-      Id. of any o
   hid_t ret_value = SUCCEED;          /* Return value */
   herr_t status;
 
-  /* Initialize errors class and messages */
-/*   if(init_error() < 0) */
-/*     TEST_ERROR; */
-  
   /* Determine the rank of the space */
   sid = H5Rget_region(obj_id, H5R_DATASET_REGION, ref);
   /* Determine the type of the dataspace selection */
@@ -215,55 +211,28 @@ herr_t H5LRget_region_info(hid_t obj_id,               /* -IN-      Id. of any o
     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n INVALID OBJECT TYPE\n\t- Argument 1 \n");
   }
 
-  /* Determine if the user only wants the size and rank returned */
-
-  if( path == NULL) {
-
-    /* Determine the size of the name buffer, with null character included */
-    *len = (size_t)(1 + H5Iget_name (dset, NULL, (size_t)0));
-
-    /* Determine the rank of the space */
-      sid = H5Rget_region (obj_id,  H5R_DATASET_REGION, ref);
-    if(sid < 0){
-      H5Eclear2(H5E_DEFAULT);
-      HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
-    }
-
-      *rank = (int)H5Sget_simple_extent_ndims(sid);
-    if(*rank < 0){
-      H5Eclear2(H5E_DEFAULT);
-      HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
-    }
-  /* Determine the type of the dataspace selection */
-      *sel_type = H5Sget_select_type(sid);
-
-  /* get the number of elements */
-      if(*sel_type==H5S_SEL_HYPERSLABS){
-	*numelem = (size_t)H5Sget_select_hyper_nblocks(sid);
-      } else if(*sel_type==H5S_SEL_POINTS){
-	*numelem = (size_t)H5Sget_select_npoints(sid);
-      }
-      status = H5Sclose(sid);
-    if(status < 0){
-      H5Eclear2(H5E_DEFAULT);
-      HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
-    }
-
-    status = H5Dclose(dset);
-    if(status < 0){
-      H5Eclear2(H5E_DEFAULT);
-      HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
-    }
-    return SUCCEED;
-  }
-
-  /* Get the space identity region reference points to */
-  sid = H5Rget_region (obj_id, H5R_DATASET_REGION, ref);
-  if(sid < 0){
+  *rank = (int)H5Sget_simple_extent_ndims(sid);
+  if(*rank < 0){
     H5Eclear2(H5E_DEFAULT);
     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
   }
-  
+  /* Determine the type of the dataspace selection */
+  *sel_type = H5Sget_select_type(sid);
+    
+  /* get the number of elements */
+  if(*sel_type==H5S_SEL_HYPERSLABS){
+    *numelem = (size_t)H5Sget_select_hyper_nblocks(sid);
+  } else if(*sel_type==H5S_SEL_POINTS){
+    *numelem = (size_t)H5Sget_select_npoints(sid);
+  }
+
+  /* Determine if the user only wanted the size and rank returned */
+  if( path == NULL) {  
+    /* Determine the size of the name buffer, with null character included */
+    *len = (size_t)(1 + H5Iget_name (dset, NULL, (size_t)0));
+    goto done;
+  }
+
   /* Get the data set name the region reference points to */
   status = H5Iget_name (dset, path, *len);
   if(status < 0){
@@ -272,7 +241,7 @@ herr_t H5LRget_region_info(hid_t obj_id,               /* -IN-      Id. of any o
   }
 
   /* get the data type */
-    *dtype = (hid_t)H5Dget_type(dset);
+  *dtype = (hid_t)H5Dget_type(dset);
   if(status < 0){
     H5Eclear2(H5E_DEFAULT);
     HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
@@ -280,43 +249,37 @@ herr_t H5LRget_region_info(hid_t obj_id,               /* -IN-      Id. of any o
 
 /*       if((native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT)) */
 
-  /* get the number of elements */
-    if(*sel_type==H5S_SEL_HYPERSLABS){
-      *numelem = (size_t)H5Sget_select_hyper_nblocks(sid);
-    } else if(*sel_type==H5S_SEL_POINTS){
-      *numelem = (size_t)H5Sget_select_npoints(sid);
-    }
-
-
   /* get the corner coordinates of the hyperslab */
   if(*sel_type == H5S_SEL_HYPERSLABS) {
     /* get the list of hyperslab blocks currently selected */
       status = H5Sget_select_hyper_blocklist(sid, (hsize_t)0, (hsize_t)1, buf);
-  }    
-  if(status < 0){
-    H5Eclear2(H5E_DEFAULT);
-    HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
+      if(status < 0){
+	H5Eclear2(H5E_DEFAULT);
+	HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
+      }
   }
-
-  status = H5Sclose(sid);
-  if(status < 0){
-    H5Eclear2(H5E_DEFAULT);
-    HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
-  }
-  
-  status = H5Dclose(dset);
-  if(status < 0){
-    H5Eclear2(H5E_DEFAULT);
-    HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
-  }
-  return SUCCEED;
-
- error:
-  return SUCCEED;
 
  done:
-  return SUCCEED;
 
+  if(sid > 0) {
+    /* Close the dataspace */
+    status = H5Sclose(sid);
+    if(status < 0){
+      H5Eclear2(H5E_DEFAULT);
+      HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
+    }
+  }
+
+  if(dset > 0) {
+    /* Close the dataset */
+    status = H5Dclose(dset);
+    if(status < 0){
+      H5Eclear2(H5E_DEFAULT);
+      HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "\n\n  INTERNAL ERROR \n\n   - Argument 1 \n");
+    }
+  }
+
+  return ret_value;
 }
 
 /*-------------------------------------------------------------------------
