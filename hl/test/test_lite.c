@@ -1317,10 +1317,12 @@ static int test_enums(void)
     dt_str = (char*)calloc(str_len, sizeof(char));
     if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
         goto out;
-    /*if(strcmp(dt_str, "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"            5;\n      \"GREEN\"          6;\n      \"BLUE\"           7;\n      \"WHITE\"          8;\n   }")) {
-    printf("dt=\n%s\n", dt_str);
-    goto out;
-    }*/
+    if(strcmp(dt_str, "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"            6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }")) {
+
+        printf("dt=\n%s\n", dt_str);
+        goto out;
+    }
+
     free(dt_str);
 
     if(H5Tclose(dtype)<0)
@@ -1427,10 +1429,11 @@ static int test_arrays(void)
     dt_str = (char*)calloc(str_len, sizeof(char));
     if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
         goto out;
-    /*if(strcmp(dt_str, "H5T_ARRAY { [5][7][13] H5T_ARRAY { [17][19] H5T_COMPOUND { H5T_STD_I8BE \"arr_compound_1\"; H5T_STD_I32BE \"arr_compound_2\"; } } }")) {
-    printf("dt=\n%s\n", dt_str);
-    goto out;
-    }*/
+    if(strcmp(dt_str, "H5T_ARRAY {\n      [5][7][13] H5T_ARRAY {\n         [17][19] H5T_COMPOUND {\n            H5T_STD_I8BE \"arr_compound_1\" : 0;\n            H5T_STD_I32BE \"arr_compound_2\" : 1;\n         }\n      }\n   }")) {
+        printf("dt=\n%s\n", dt_str);
+        goto out;
+    }
+
     free(dt_str);
 
     if(H5Tclose(dtype)<0)

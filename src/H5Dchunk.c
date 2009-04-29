@@ -173,7 +173,7 @@ typedef struct H5D_chunk_it_ud4_t {
 /********************/
 
 /* Chunked layout operation callbacks */
-static herr_t H5D_chunk_new(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
+static herr_t H5D_chunk_construct(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
     const H5P_genplist_t *dc_plist);
 static herr_t H5D_chunk_io_init(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
@@ -216,7 +216,7 @@ static herr_t H5D_chunk_mem_cb(void *elem, hid_t type_id, unsigned ndims,
 
 /* Chunked storage layout I/O ops */
 const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
-    H5D_chunk_new,
+    H5D_chunk_construct,
     H5D_chunk_is_space_alloc,
     H5D_chunk_io_init,
     H5D_chunk_read,
@@ -269,7 +269,7 @@ H5FL_DEFINE_STATIC(H5D_chunk_prune_stack_t);
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_chunk_new
+ * Function:	H5D_chunk_construct
  *
  * Purpose:	Constructs new chunked layout information for dataset
  *
@@ -285,7 +285,7 @@ H5FL_DEFINE_STATIC(H5D_chunk_prune_stack_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_chunk_new(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
+H5D_chunk_construct(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
     const H5P_genplist_t *dc_plist)
 {
     const H5T_t *type = dset->shared->type;     /* Convenience pointer to dataset's datatype */
@@ -295,7 +295,7 @@ H5D_chunk_new(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
     unsigned u;                 /* Local index variable */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_new)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_chunk_construct)
 
     /* Sanity checks */
     HDassert(f);
@@ -355,7 +355,7 @@ H5D_chunk_new(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_chunk_new() */
+} /* end H5D_chunk_construct() */
 
 
 /*-------------------------------------------------------------------------
@@ -3954,7 +3954,7 @@ H5D_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_layout_t *layout)
     idx_info.layout = layout;
 
     /* Delete the chunked storage information in the file */
-    if((layout->u.chunk.ops->delete)(&idx_info) < 0)
+    if((layout->u.chunk.ops->idx_delete)(&idx_info) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDELETE, FAIL, "unable to delete chunk index")
 
 done:

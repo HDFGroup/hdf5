@@ -232,7 +232,7 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTUNPROTECT, FAIL, "unable to release free space section info")
 
                 /* Re-protect the section info with read-write access */
-                if(NULL == (fspace->sinfo = H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, NULL, fspace, H5AC_WRITE)))
+                if(NULL == (fspace->sinfo = (H5FS_sinfo_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, NULL, fspace, H5AC_WRITE)))
                     HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, FAIL, "unable to load free space sections")
 
                 /* Switch the access mode we have */
@@ -251,7 +251,7 @@ HDfprintf(stderr, "%s: fspace->alloc_sect_size = %Hu, fspace->sect_size = %Hu\n"
 HDfprintf(stderr, "%s: Reading in existing sections, fspace->sect_addr = %a\n", FUNC, fspace->sect_addr);
 #endif /* H5FS_SINFO_DEBUG */
             /* Protect the free space sections */
-            if(NULL == (fspace->sinfo = H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, NULL, fspace, accmode)))
+            if(NULL == (fspace->sinfo = (H5FS_sinfo_t *)H5AC_protect(f, dxpl_id, H5AC_FSPACE_SINFO, fspace->sect_addr, NULL, fspace, accmode)))
                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTPROTECT, FAIL, "unable to load free space sections")
 
             /* Remember that we protected the section info & the access mode */
@@ -1186,7 +1186,7 @@ H5FS_sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect, void *op_data)
                 greater_sect_node_valid = TRUE;
 
                 /* Get section for 'less than' skip list node */
-                tmp_sect = H5SL_item(less_sect_node);
+                tmp_sect = (H5FS_section_info_t *)H5SL_item(less_sect_node);
 
                 /* Get classes for right & left sections */
                 tmp_sect_cls = &fspace->sect_cls[tmp_sect->type];
@@ -1229,7 +1229,7 @@ H5FS_sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect, void *op_data)
             /* Check for node after new node able to merge with new node */
             if(greater_sect_node) {
                 /* Get section for 'greater than' skip list node */
-                tmp_sect = H5SL_item(greater_sect_node);
+                tmp_sect = (H5FS_section_info_t *)H5SL_item(greater_sect_node);
 
                 /* Get classes for right & left sections */
                 sect_cls = &fspace->sect_cls[(*sect)->type];
@@ -1307,7 +1307,7 @@ HDfprintf(stderr, "%s: Can shrink!\n", FUNC);
                         /* Check for last node in the merge list */
                         if(NULL != (last_node = H5SL_last(fspace->sinfo->merge_list))) {
                             /* Get the pointer to the last section, from the last node */
-                            *sect = H5SL_item(last_node);
+                            *sect = (H5FS_section_info_t *)H5SL_item(last_node);
                             HDassert(*sect);
 
                             /* Indicate that this section needs to be removed if it causes a shrink */
@@ -1500,7 +1500,7 @@ if(_section_)
 
 */
         /* Look for a section after block to extend */
-        if((sect = H5SL_greater(fspace->sinfo->merge_list, &addr))) {
+        if((sect = (H5FS_section_info_t *)H5SL_greater(fspace->sinfo->merge_list, &addr))) {
             /* Check if this section adjoins the block and is large enough to
              *  fulfill extension request.
              *
@@ -1640,10 +1640,10 @@ HDfprintf(stderr, "%s: bin = %u\n", FUNC, bin);
                     H5SL_node_t *curr_sect_node=NULL;
 
                     /* Get the free space node for free space sections of the same size */
-                    curr_fspace_node = H5SL_item(curr_size_node);
+                    curr_fspace_node = (H5FS_node_t *)H5SL_item(curr_size_node);
 
                     /* Get the Skip list which holds  pointers to actual free list sections */
-                    curr_sect_node = H5SL_first(curr_fspace_node->sect_list);
+                    curr_sect_node = (H5SL_node_t *)H5SL_first(curr_fspace_node->sect_list);
 
                     while(curr_sect_node != NULL) {
                         H5FS_section_info_t *curr_sect=NULL;
@@ -1651,7 +1651,7 @@ HDfprintf(stderr, "%s: bin = %u\n", FUNC, bin);
                         H5FS_section_info_t *split_sect=NULL;
 
                         /* Get section node */
-                        curr_sect = H5SL_item(curr_sect_node);
+                        curr_sect = (H5FS_section_info_t *)H5SL_item(curr_sect_node);
 
                         HDassert(H5F_addr_defined(curr_sect->addr));
                         HDassert(curr_fspace_node->sect_size == curr_sect->size);
@@ -1666,7 +1666,7 @@ HDfprintf(stderr, "%s: bin = %u\n", FUNC, bin);
 
                         if ((curr_sect->size >= (request + frag_size)) && (cls->split)) {
                             /* remove the section with aligned address */
-                            if(NULL == (*node = H5SL_remove(curr_fspace_node->sect_list, &curr_sect->addr)))
+                            if(NULL == (*node = (H5FS_section_info_t *)H5SL_remove(curr_fspace_node->sect_list, &curr_sect->addr)))
                                 HGOTO_ERROR(H5E_FSPACE, H5E_CANTREMOVE, FAIL, "can't remove free space node from skip list")
                             /* Decrement # of sections in section size node */
                             if(H5FS_size_node_decr(fspace->sinfo, bin, curr_fspace_node, cls) < 0)

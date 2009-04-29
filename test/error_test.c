@@ -40,6 +40,7 @@ const char *FILENAME[] = {
 int	ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 
 hid_t   ERR_CLS;
+hid_t   ERR_CLS2;
 hid_t   ERR_STACK;
 
 hid_t   ERR_MAJ_TEST;
@@ -56,7 +57,9 @@ hid_t   ERR_MIN_GETNUM;
 #define FAKE_ID                 0
 
 #define ERR_CLS_NAME            "Error Test"
+#define ERR_CLS2_NAME           "Second Test"
 #define PROG_NAME               "Error Program"
+#define PROG2_NAME              "Second Program"
 #define PROG_VERS               "1.0"
 
 #define ERR_MAJ_TEST_MSG             "Error in test"
@@ -69,12 +72,6 @@ hid_t   ERR_MIN_GETNUM;
 #define ERR_MIN_GETNUM_MSG           "Error in H5Eget_num"
 
 #define MSG_SIZE                64
-#define SPACE1_DIM1             4
-#define SPACE1_RANK             1
-#define SPACE2_RANK	        2
-#define SPACE2_DIM1	        10
-#define SPACE2_DIM2	        10
-
 #define LONG_DESC_SIZE          8192
 
 static herr_t custom_print_cb(unsigned n, const H5E_error2_t *err_desc,
@@ -106,6 +103,7 @@ test_error(hid_t file)
     void                *old_data;
 
     TESTING("error API based on data I/O");
+    printf("\n");
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -189,10 +187,10 @@ static herr_t
 init_error(void)
 {
     ssize_t cls_size = (ssize_t)HDstrlen(ERR_CLS_NAME)+1;
-    char *cls_name = HDmalloc(HDstrlen(ERR_CLS_NAME)+1);
+    char *cls_name = (char*)HDmalloc(HDstrlen(ERR_CLS_NAME)+1);
     ssize_t msg_size = (ssize_t)HDstrlen(ERR_MIN_SUBROUTINE_MSG) + 1;
-    char *msg = HDmalloc(HDstrlen(ERR_MIN_SUBROUTINE_MSG)+1);
-    H5E_type_t *msg_type= HDmalloc(sizeof(H5E_type_t));
+    char *msg = (char*)HDmalloc(HDstrlen(ERR_MIN_SUBROUTINE_MSG)+1);
+    H5E_type_t *msg_type= (H5E_type_t *)HDmalloc(sizeof(H5E_type_t));
 
     if((ERR_CLS = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, PROG_VERS)) < 0)
         TEST_ERROR;
@@ -230,6 +228,10 @@ init_error(void)
     HDfree(cls_name);
     HDfree(msg);
     HDfree(msg_type);
+
+    /* Register another class for later testing. */
+    if((ERR_CLS2 = H5Eregister_class(ERR_CLS2_NAME, PROG2_NAME, PROG_VERS)) < 0)
+        TEST_ERROR;
 
     return 0;
 
@@ -334,8 +336,8 @@ test_long_desc(void)
     const char          *test_FUNC = "test_long_desc";
 
     /* Allocate space for the error description info */
-    if(NULL == (long_desc = HDmalloc(LONG_DESC_SIZE))) TEST_ERROR;
-    if(NULL == (full_desc = HDmalloc(LONG_DESC_SIZE + 128))) TEST_ERROR;
+    if(NULL == (long_desc = (char*)HDmalloc(LONG_DESC_SIZE))) TEST_ERROR;
+    if(NULL == (full_desc = (char*)HDmalloc(LONG_DESC_SIZE + 128))) TEST_ERROR;
 
     /* Create the long part of the error description */
     for(u = 0; u < LONG_DESC_SIZE; u++)
@@ -535,6 +537,9 @@ close_error(void)
     if(H5Eunregister_class(ERR_CLS) < 0)
         TEST_ERROR;
 
+    if(H5Eunregister_class(ERR_CLS2) < 0)
+        TEST_ERROR;
+
     return 0;
 
 error:
@@ -580,6 +585,10 @@ main(void)
 
         /* Delete an error from the top of error stack */
         H5Epop(ERR_STACK, 1);
+
+        /* Make sure we can use other class's major or minor errors. */ 
+        H5Epush(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_CLS2, ERR_MAJ_TEST, ERR_MIN_ERRSTACK,
+                "Error stack test failed");
 
         /* Print out the errors on stack */
         dump_error(ERR_STACK);

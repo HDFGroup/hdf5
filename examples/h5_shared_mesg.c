@@ -261,9 +261,9 @@ create_standard_file(const char *filename, hid_t fcpl_id)
      * disk, so this type will be an array type rather than an atomic type.
      * However, any type can be shared.
      */
-    temp_type_id = H5Tarray_create2(H5T_NATIVE_INT, 10, dims);
+    temp_type_id = H5Tarray_create2(H5T_NATIVE_INT, 2, dims);
     if(temp_type_id < 0) goto error;
-    type_id  = H5Tarray_create2(temp_type_id, 10, dims);
+    type_id  = H5Tarray_create2(temp_type_id, 2, dims);
     if(type_id < 0) goto error;
     ret = H5Tclose(temp_type_id);
     if(ret < 0) goto error;

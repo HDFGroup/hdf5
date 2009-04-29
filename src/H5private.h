@@ -1741,6 +1741,7 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 
 #define FUNC_ENTER_COMMON(func_name,asrt)                                     \
     static const char FUNC[]=#func_name;                                      \
+    hbool_t err_occurred = FALSE;					      \
     FUNC_ENTER_COMMON_NOFUNC(func_name,asrt);
 
 /* Threadsafety initialization code for API routines */
@@ -1910,7 +1911,9 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 #define FUNC_LEAVE_API(ret_value)                                             \
         FINISH_MPE_LOG;                                                       \
         H5TRACE_RETURN(ret_value);					      \
-        H5_POP_FUNC                                                          \
+        H5_POP_FUNC                                                           \
+        if(err_occurred)						      \
+           (void)H5E_dump_api_stack(TRUE);				      \
         FUNC_LEAVE_API_THREADSAFE                                             \
         return (ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \
@@ -1919,6 +1922,8 @@ static herr_t		H5_INTERFACE_INIT_FUNC(void);
 #define FUNC_LEAVE_API_NOFS(ret_value)                                        \
         FINISH_MPE_LOG;                                                       \
         H5TRACE_RETURN(ret_value);					      \
+        if(err_occurred)						      \
+           (void)H5E_dump_api_stack(TRUE);				      \
         FUNC_LEAVE_API_THREADSAFE                                             \
         return (ret_value);						      \
     } /*end scope from end of FUNC_ENTER*/                                    \

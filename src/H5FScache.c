@@ -203,7 +203,7 @@ HDfprintf(stderr, "%s: Load free space header, addr = %a\n", FUNC, addr);
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "wrong free space header version")
 
     /* Client ID */
-    fspace->client = *p++;
+    fspace->client = (H5FS_client_t)*p++;
     if(fspace->client >= H5FS_NUM_CLIENT_ID)
 	HGOTO_ERROR(H5E_FSPACE, H5E_CANTLOAD, NULL, "unknown client ID in free space header")
 
