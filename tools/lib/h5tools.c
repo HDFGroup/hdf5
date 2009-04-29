@@ -1165,7 +1165,7 @@ hsize_t h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
              */
             curr_pos = ctx->sm_pos + i_count;
 
-            h5tools_region_simple_prefix(stream, info, ctx, curr_pos, ptdata, secnum);
+            h5tools_region_simple_prefix(stream, info, ctx, i_count, ptdata, secnum);
         }
         else if ((i_count || ctx->continuation) && secnum == 0) {
             fputs(OPT(info->elmt_suf2, " "), stream);
@@ -1336,9 +1336,8 @@ hsize_t h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
 
     start = (hsize_t *) malloc(sizeof(hsize_t) * ndims);
     count = (hsize_t *) malloc(sizeof(hsize_t) * ndims);
-    region_elmtno = 0;
     region_curr_pos = 0;
-    for (blkndx = 0; blkndx < nblocks; blkndx++, region_elmtno++) {
+    for (blkndx = 0; blkndx < nblocks; blkndx++) {
 
         memset(&region_ctx, 0, sizeof(region_ctx));
         region_ctx.indent_level = ctx->indent_level;
@@ -1361,12 +1360,8 @@ hsize_t h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
         status = H5Dread(region_id, type_id, mem_space, sid1, H5P_DEFAULT,
                 region_buf);
 
-        /* Render the element */
-        h5tools_str_reset(buffer);
-
         region_ctx.indent_level++;
         H5Sget_simple_extent_dims(mem_space, region_total_size, NULL);
-        region_ctx.size_last_dim = region_total_size[region_ctx.ndims - 1];
         /* assume entire data space to be printed */
         for (jndx = 0; jndx < (size_t) region_ctx.ndims; jndx++)
             region_ctx.p_min_idx[jndx] = start[jndx];
@@ -1380,35 +1375,28 @@ hsize_t h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
         for (jndx = 0; jndx < region_ctx.ndims; jndx++)
             region_ctx.p_max_idx[jndx] = dims1[jndx];
 
-//        /* print array indices. get the lower bound of the hyperslab and calulate
-//         the element position at the start of hyperslab */
-//        H5Sget_select_bounds(mem_space, region_low, region_high);
-//        region_ctx.sm_pos = 0;
-//        for (i = 0; i < (size_t) region_ctx.ndims - 1; i++) {
-//            hsize_t region_offset = 1; /* accumulation of the previous dimensions */
-//            for (jndx = i + 1; jndx < (size_t) region_ctx.ndims; jndx++)
-//                region_offset *= region_total_size[jndx];
-//            region_ctx.sm_pos += region_low[i] * region_offset;
-//        }
-//        region_ctx.sm_pos += region_low[region_ctx.ndims - 1];
-
-        region_curr_pos = blkndx*2*ndims;
+        region_curr_pos = 0;
         region_ctx.sm_pos = blkndx*2*ndims;
+        region_ctx.size_last_dim = dims1[ndims-1];
 
         h5tools_region_simple_prefix(stream, info, &region_ctx, region_curr_pos, ptdata, 0);
 
-        for (jndx = 0; jndx < numelem; jndx++) {
+        region_elmtno = 0;
+        for (jndx = 0; jndx < numelem; jndx++, region_elmtno++) {
+            /* Render the element */
+            h5tools_str_reset(buffer);
+
             h5tools_str_append(buffer, "%s",
-                    jndx ? OPTIONAL_LINE_BREAK " " : "");
+                    jndx ? OPTIONAL_LINE_BREAK "" : "");
             h5tools_str_sprint(buffer, info, region_id, type_id, (region_buf
                     + jndx * type_size), &region_ctx);
 
             if (jndx + 1 < numelem || (flags & END_OF_DATA) == 0)
                 h5tools_str_append(buffer, "%s", OPT(info->elmt_suf1, ","));
-        }
 
-        region_curr_pos = h5tools_render_region_element(stream, info, &region_ctx, buffer, region_curr_pos,
-                region_flags, ncols, /*elmt_counter*/&region_elmtno, ptdata, 0);
+            region_curr_pos = h5tools_render_region_element(stream, info, &region_ctx, buffer, region_curr_pos,
+                    region_flags, ncols, /*elmt_counter*/&region_elmtno, ptdata, jndx);
+        }
 
         region_ctx.indent_level--;
     }
@@ -1596,9 +1584,6 @@ hsize_t h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
                 region_ctx.p_min_idx[i] = 0;
             H5Sget_simple_extent_dims(region_space, region_ctx.p_max_idx, NULL);
 
-//            for (i = 0, region_ctx.sm_pos = 1; region_ctx.ndims != 0 && i < region_ctx.ndims; i++)
-//                region_ctx.sm_pos *= region_ctx.p_max_idx[i] - region_ctx.p_min_idx[i];
-
             if (region_ctx.ndims > 0) {
                 region_ctx.size_last_dim = (int) (region_ctx.p_max_idx[region_ctx.ndims - 1]);
             } /* end if */
@@ -1614,7 +1599,7 @@ hsize_t h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
             if (jndx == npoints - 1)
                 region_flags |= END_OF_DATA;
 
-            region_curr_pos = jndx*ndims;
+            region_curr_pos = 0;    /* points requires constant 0 */
             region_ctx.sm_pos = jndx*ndims;
             
             h5tools_region_simple_prefix(stream, info, &region_ctx, region_curr_pos, ptdata, 0);
