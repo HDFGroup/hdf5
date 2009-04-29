@@ -70,60 +70,150 @@ This section lists API-level changes and changes in behavior
 in the transition from HDF5 Release 1.6.8 to Release 1.6.9.
 
 
-    <h3>Function with Changed Syntax</h3>
+    <h3>API Compatibility Macros</h3>
 
         To facilitate writing applications that work with 
         both the HDF5 Release 1.6 series and the 1.8 series,
-        the macro <code>H5Z_class1_t</code> has been defined and
-        maps to <code>H5Z_class_t</code>.
-        <code>H5Zreqister</code> can now be called with either 
-        syntax:
+        API compatibility macros analogous to those in 1.8
+        have been defined.  These macros map directly to the
+        relevant functions and typedefs.  Note that only the
+        1.6-style macros are supported in this branch.
         <p>
-        <dl>
-          <dd><code>
-              <em>herr_t</em> H5Zregister ( 
-              <em>const H5Z_class_t *</em>cls
-              ) </code>
-          <dd><code>
-              <em>herr_t</em> H5Zregister ( 
-              <em>const H5Z_class1_t *</em>cls
-              ) </code>
-        </dl>
+        Any program that is written using these macros
+        exculsively will work with both the 1.6 and 1.8
+        series HDF5 Libraries. The program will work without
+        having to use any special flags or definitions, as
+        long as the 1.8 library was compiled with support
+        for deprecated symbols, which is the default.
+        <p>
+        Following is a list of macros and the
+        symbols they alias:
+        <p>
+        <dl><dd><table width="90%">
+          <tr>
+            <td valign="top" align="left" width="20%">
+              <strong>Macro</strong></td>
+            <td valign="top" align="left">
+              <strong>Symbol</strong></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Acreate1</code></td>
+            <td valign="top"><code>H5Acreate</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Aiterate1</code></td>
+            <td valign="top"><code>H5Aiterate</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5A_operator1_t</code></td>
+            <td valign="top"><code>H5A_operator_t</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Dcreate1</code></td>
+            <td valign="top"><code>H5Dcreate</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Dopen1</code></td>
+            <td valign="top"><code>H5Dopen</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Eclear1</code></td>
+            <td valign="top"><code>H5Eclear</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Eget_auto1</code></td>
+            <td valign="top"><code>H5Eget_auto</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Eprint1</code></td>
+            <td valign="top"><code>H5Eprint</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Epush1</code></td>
+            <td valign="top"><code>H5Epush</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Eset_auto1</code></td>
+            <td valign="top"><code>H5Eset_auto</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Ewalk1</code></td>
+            <td valign="top"><code>H5Ewalk</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5E_walk1_t</code></td>
+            <td valign="top"><code>H5E_walk_t</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5E_error1_t</code></td>
+            <td valign="top"><code>H5E_error_t</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Gcreate1</code></td>
+            <td valign="top"><code>H5Gcreate</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Gopen1</code></td>
+            <td valign="top"><code>H5Gopen</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Pget_filter1</code></td>
+            <td valign="top"><code>H5Pget_filter</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Pget_filter_by_id1</code></td>
+            <td valign="top"><code>H5Pget_filter_by_id</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Pinsert1</code></td>
+            <td valign="top"><code>H5Pinsert</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Pregister1</code></td>
+            <td valign="top"><code>H5Pregister</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Rget_obj_type1</code></td>
+            <td valign="top"><code>H5Rget_obj_type</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Tarray_create1</code></td>
+            <td valign="top"><code>H5Tarray_create</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Tcommit1</code></td>
+            <td valign="top"><code>H5Tcommit</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Tget_array_dims1</code></td>
+            <td valign="top"><code>H5Tget_array_dims</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Topen1</code></td>
+            <td valign="top"><code>H5Topen</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5E_auto1_t</code></td>
+            <td valign="top"><code>H5E_auto_t</code></td>
+          </tr>
+          <tr>
+            <td valign="top"><code>H5Z_class1_t</code></td>
+            <td valign="top"><code>H5Z_class_t</code></td>
+          </tr>
+          </code>
+        </table></dl>
+        <p>
+        Note that for the 1.6 series, the numbered symbols are macros, 
+        while in the 1.8 series, the non-numbered symbols are
+        macros.  This was done because there is no need to
+        switch between different API versions in the 1.6 series.
+        <p>
+        <code>H5Z_class1_t</code> was introduced in Release 1.6.9 while all the
+        others were introduced in Release 1.6.8.  For more information see
+        <cite><a href="http://www.hdfgroup.org/HDF5/doc/RM/APICompatMacros.html">API
+        Compatibility Macros</a></cite>, an HDF5 Release 1.8-series document.
+        <p>
 
-<!--
-        The following function syntaxes have changed;
-        the affected return values and parameter are noted as 
-        <font color=red><u>underscored red text</u></font>.
-        <p>
-        <dl>
-        <dt><u>C function:</u>
-        <dt><a href="../RM_H5F.html#File-GetObjCount">
-          <code>H5Fget_obj_count</code></a>
-          <dd><code>
-              <font color=red><u>
-              ssize_t</u></font> H5Fget_obj_count(
-              <em>hid_t </em><code>file_id</code>,
-              <em>unsigned int</em> <code>types</code>
-              )
-              </code>
-        <p>
-        <dt><a href="../RM_H5F.html#File-GetObjIDs">
-            <code>H5Fget_obj_ids</code></a>
-          <dd><code>
-              <font color=red><u>
-              ssize_t</u></font> H5Fget_obj_ids(
-              <em>hid_t </em><code>file_id</code>,
-              <em>unsigned int</em> <code>types</code>,
-              <br>
-              &nbsp; &nbsp; &nbsp; &nbsp;
-              <font color=red><u>
-              <em>size_t</em> <code>max_objs</code></u></font>,
-              <em>hid_t *</em><code>obj_id_list</code>
-              )
-              </code>
-        </dl>
-        <p>
--->
 
 </dir>
 <dir>
