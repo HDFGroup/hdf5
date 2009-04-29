@@ -86,8 +86,12 @@ New Features
 
     Parallel Library
     ----------------
-    - None
-     
+    - Modified parallel tests to run with arbitrary number of processes. The
+      modified tests are testphdf5 (parallel dataset access), t_chunk_alloc
+      (chunk allocation), and t_posix_compliant (posix compliance). The rest of
+      the parallel tests already use in the code the number of processes
+      available in the communicator. (CMC - 2009/04/28)
+ 
     Tools
     -----
     - h5diff new flag, -c, --compare, list objects that are not comparable.
@@ -419,6 +423,11 @@ Cray XT3 2.0.41          n       n         n         n
 
 Known Problems
 ==============
+* Parallel tests failed with 16 processes with data inconsistency at testphdf5
+  / dataset_readAll. Parallel tests also failed with 32 and 64 processes with
+  collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
+  with MPI IO. (CMC - 2009/04/28)
+
 * There is a known issue in which HDF5 will change the timestamp on a file 
   simply by opening it with read/write permissions, even if the file is not
   modified in any way. This is due to the way in which HDF5 manages the file 
