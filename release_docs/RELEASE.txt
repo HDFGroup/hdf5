@@ -80,6 +80,11 @@ New Features
 
     Parallel Library:
     -----------------
+    - Modified parallel tests to run with arbitrary number of processes. The
+      modified tests are testphdf5 (parallel dataset access), t_chunk_alloc 
+      (chunk allocation), and t_posix_compliant (posix compliance). The rest of
+      the parallel tests already use in the code the number of processes
+      available in the communicator. (CMC - 2009/04/28) 
 
     Fortran Library:
     ----------------
@@ -529,6 +534,11 @@ SuSe Linux 2.6.5
 
 Known Problems
 ==============
+* Parallel tests failed with 16 processes with data inconsistency at testphdf5
+  / dataset_readAll. Parallel tests also failed with 32 and 64 processes with
+  collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
+  with MPI IO. (CMC - 2009/04/28)
+
 * We discovered two problems when running collective IO parallel HDF5 tests 
   with chunking storage on  ChaMPIon MPI compiler on tungsten, a linux 
   cluster at NCSA.
