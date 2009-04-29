@@ -63,7 +63,7 @@ New Features
     Tools:
     ------
     - h5diff new flag, -c, --compare, list objects that are not comparable.
-        PVN - 2009/4/10 - 1368
+      PVN - 2009/4/10 - 1368
     - h5diff new flag, -N, --nan, avoids NaNs detection. PVN - 2009/4/10
     - h5dump correctly specifies XML dtd / schema urls ADB - 2009/4/3 - 1519
     - h5dump: binary output defaults to NATIVE with -b optionally accepting
@@ -73,7 +73,6 @@ New Features
       used to read the chunks. The size of the hyperslabs are defined as 
       the size of each dimension or a predefined constant, whatever is smaller.
       This assures that the chunk read fits in the chunk cache. PVN - 2008/11/21
-
 
     F90 API:
     --------
@@ -87,50 +86,45 @@ New Features
 Support for New Platforms, Languages and Compilers
 ==================================================
 
+
 Bug Fixes since HDF5-1.6.8 Release
 ==================================
-
     Library
     -------
     - Added H5Z_class1_t macro, as H5Z_class_t is now versioned in 1.8.
-            NAF - 2009/04/20 - 1533
+      NAF - 2009/04/20 - 1533
     - Fixed a bug that prevented more than one dataset chunk from being cached
-            at a time. NAF - 2009/02/12
+      at a time. NAF - 2009/02/12
     - H5Dset_extent: when shrinking dimensions, some chunks were not deleted. 
-            Shrinking to a zero size dimension caused an assertion in the 
-            library.  PVN - 2009/01/8
+      Shrinking to a zero size dimension caused an assertion in the library.  
+      PVN - 2009/01/8
 
     Configuration
     -------------
     - h5perf will now get installed during 'make install'.  MAM - 2008/11/17
 
     Performance
-    -------------
+    -----------
 
     Tools
     -----
     - h5dump, h5diff, h5repack were not reading (by hyperslabs) datasets 
-            that have a datatype datum size greater than H5TOOLS_BUFSIZE, a 
-            constant defined as 1024Kb, such as array types with large 
-            dimensions. PVN - 2009/4/1 - 1501
+      that have a datatype datum size greater than H5TOOLS_BUFSIZE, a constant 
+      defined as 1024Kb, such as array types with large dimensions. 
+      PVN - 2009/4/1 - 1501
     - h5import: By selecting a compression type, a big endian byte order was 
       being selected. PVN - 2009/3/11 - 1462
     - zip_perf.c had missing argument on one of the open() calls. Fixed.
       AKC - 2008/12/9
 
-    Documentation 
-    ------------- 
-
-
     F90 API
     -------
     - None
-
                                 
     C++ API
     -------
     - Revised Attribute::write and Attribute::read wrappers to handle
-      memory allocation/deallocation properly. (bugzilla 1045)
+      memory allocation/deallocation properly. (Bugzilla 1045)
       BMR - 2009/4/19
 
 
@@ -151,7 +145,7 @@ Documentation
     in the document "HDF5 Software Changes from Release to Release":
 
          http://hdfgroup.org/HDF5/doc1.6/ADGuide/Changes.html
- 
+
     Since the stream I/O driver is not included in this release, the 
     functions H5Pset_fapl_stream and H5Pget_fapl_stream and the stream 
     ENUM value H5FD_STREAM have been removed from the documentation.
@@ -159,12 +153,11 @@ Documentation
 
 Platforms Tested
 ================
-
-    AIX 5.3			  xlc 7.0.0.8
-				  xlf 09.01.0000.0008
-				  xlC 7.0.0.8
-				  mpcc_r 7.0.0.8
-				  mpxlf_r 09.01.0000.0008
+    AIX 5.3                       xlc 7.0.0.8
+                                  xlf 09.01.0000.0008
+                                  xlC 7.0.0.8
+                                  mpcc_r 7.0.0.8
+                                  mpxlf_r 09.01.0000.0008
 
     FreeBSD 6.3-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
     (duty)                        g++ 3.4.6 [FreeBSD] 20060305
@@ -200,7 +193,6 @@ Platforms Tested
     Linux 2.6.16.46-0.12-debug #1 Intel(R) C++ Version 10.0.025
         SMP ia64 GNU/Linux        Intel(R) Fortran Itanium(R) Version 10.0.025
     (ucar hir1)                   
-
 
     Linux 2.6.16.46-0.14-smp #1   Intel(R) C++ for Intel(R) EM64T Ver. 10.1.013
         SMP x86_64 GNU/Linux      Intel(R) Fortran Intel(R) EM64T Ver. 10.1.013
@@ -246,7 +238,6 @@ Platforms Tested
 
 Supported Configuration Features Summary
 ========================================
-
 Key:   y   = Tested and supported
        n   = Not supported or not tested in this release
        C   = Cluster
@@ -265,7 +256,7 @@ WinXP 2005                            n        y    n        y    y     y
 WinXP .Net                            n        y    n        y    y     y
 WinVista 2005                         n        n    n        y    y     y
 Mac OS X 10.4.10                      n        y    n        y    y     y
-AIX 5.3 32-bit                	      n        y    n        y    y     n
+AIX 5.3 32-bit                        n        y    n        y    y     n
 FreeBSD 6.3 32- and 64-bit            n        n    n        y    y     y
 RedHat EL4 2.6.9-42 i686 GNU (1)  W   y        y    y        y    y     y
 RedHat EL4 2.6.9-42 i686 Intel    W   n        y    n        y    y     n
@@ -338,11 +329,9 @@ Known Problems
   IO instead.
 
   To avoid this problem, change the following line in your code:
-  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
-
+      H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
   to
-  H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_INDEPENDENT);
- 
+      H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_INDEPENDENT);
   KY - 2007/08/24
 
 * QSC (an HP alpha-based OSF1 cluster) does not create h5pfc correctly. It
@@ -435,7 +424,7 @@ Known Problems
 
   The --enable-static-exec configure flag also fails to correctly compile
   on the HPUX 11.00.
-  
+
   It is suggested that you don't use this option on these platforms
   during configuration.
 
