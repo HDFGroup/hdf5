@@ -44,7 +44,7 @@ CONTENTS
 ========
 
 - New Features
-- Support for new platforms and languages
+- Support for New Platforms, Languages, and Compilers
 - Bug Fixes since HDF5-1.8.2
 - Platforms Tested
 - Supported Configuration Features Summary
@@ -95,7 +95,7 @@ New Features
     Tools
     -----
     - h5diff new flag, -c, --compare, list objects that are not comparable.
-        PVN - 2009/4/2 - 1368
+      PVN - 2009/4/2 - 1368
     - h5diff new flag, -N, --nan, avoids NaNs detection. PVN - 2009/4/2
     - h5dump correctly specifies XML dtd / schema urls ADB - 2009/4/3 - 1519
     - h5repack now handles group creation order. PVN - 2009/4/2 - 1402
@@ -106,25 +106,22 @@ New Features
       whatever is smaller. This assures that the chunk read fits in the 
       chunk cache. PVN - 2008/11/21
 
-    High-Level APIs:
-    ------
+    High-Level APIs
+    ---------------
     - Table: In version 3.0 of Table, the writing of the "NROWS" attribute 
       (used to store number of records) was deprecated. PVN - 2008/11/24
 
-
     F90 API
-    ------
+    -------
+    - Added for the C APIs the Fortran wrappers:
+          h5dget_access_plist_f
+          h5iis_valid_f
+          h5pset_chunk_cache_f
+          h5pget_chunk_cache_f
+      MSB - 2009/04/17
 
-        - Added for the C APIs the Fortran wrappers:
-            h5dget_access_plist_f
-            h5iis_valid_f
-            h5pset_chunk_cache_f
-            h5pget_chunk_cache_f
-           				MSB - 2009/04/17
-     
-     
     C++ API
-    ------
+    -------
     - None
 
 
@@ -195,23 +192,23 @@ Bug Fixes since HDF5-1.8.2
     - Fixed a bug that could cause problems when "automatically" unmounting
       multiple files. NAF - 2008/11/17
     - H5Dset_extent: when shrinking dimensions, some chunks were not deleted.  
-            PVN - 2009/01/8 
-
+      PVN - 2009/01/8 
 
     Parallel Library
     ----------------
+    - None
 
     Tools
     -----
-     - Fixed many problems that could occur when using h5repack with named
-            datatypes. NAF - 2009/4/20 - 1516/1466
-     - h5dump, h5diff, h5repack were not reading (by hyperslabs) datasets 
-            that have a datatype datum size greater than H5TOOLS_BUFSIZE, a 
-            constant defined as 1024Kb, such as array types with large 
-            dimensions. PVN - 2009/4/1 - 1501
-     - h5import: By selecting a compression type, a big endian byte order 
-       was being selected. PVN - 2009/3/11 - 1462
-     - zip_perf.c had missing argument on one of the open() calls. Fixed.
+    - Fixed many problems that could occur when using h5repack with named
+      datatypes. NAF - 2009/4/20 - 1516/1466
+    - h5dump, h5diff, h5repack were not reading (by hyperslabs) datasets 
+      that have a datatype datum size greater than H5TOOLS_BUFSIZE, a constant
+      defined as 1024Kb, such as array types with large dimensions. 
+      PVN - 2009/4/1 - 1501
+    - h5import: By selecting a compression type, a big endian byte order 
+      was being selected. PVN - 2009/3/11 - 1462
+    - zip_perf.c had missing argument on one of the open() calls. Fixed.
       AKC - 2008/12/9
 
     F90 API
@@ -220,33 +217,33 @@ Bug Fixes since HDF5-1.8.2
 
     C++ API
     ------
+    - None
 
     High-Level APIs:
     ------
-     - Dimension scales: The scale index return value in H5DSiterate_scales 
-       was not always incremented. PVN - 2009/4/8 - 1538
+    - Dimension scales: The scale index return value in H5DSiterate_scales 
+      was not always incremented. PVN - 2009/4/8 - 1538
 
-   Fortran High-Level APIs:
+    Fortran High-Level APIs:
     ------
-     - Lite: The h5ltget_dataset_info_f function (gets information about 
-       a dataset) was not correctly returning the dimension array 
+    - Lite: The h5ltget_dataset_info_f function (gets information about 
+      a dataset) was not correctly returning the dimension array 
                                    PVN - 2009/3/23
-
 
 
 Platforms Tested
 ================
 The following platforms and compilers have been tested for this release.
 
-    AIX 5.3			  xlc 7.0.0.8
-				  xlf 09.01.0000.0008
-				  xlC 7.0.0.8
-				  mpcc_r 7.0.0.8
-				  mpxlf_r 09.01.0000.0008
+    AIX 5.3                       xlc 7.0.0.8
+                                  xlf 09.01.0000.0008
+                                  xlC 7.0.0.8
+                                  mpcc_r 7.0.0.8
+                                  mpxlf_r 09.01.0000.0008
 
     Cray XT3 (2.0.41)             cc (pgcc) 7.1-4
     (red storm)                   ftn (pgf90) 7.1-4
-				  CC (pgCC) 7.1-4
+                                  CC (pgCC) 7.1-4
 
     FreeBSD 6.3-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
     (duty)                        g++ 3.4.6 [FreeBSD] 20060305
@@ -330,7 +327,7 @@ The following platforms and compilers have been tested for this release.
                                   GNU Fortran (GCC) 4.3.0 20070810
                                   G95 (GCC 4.0.3 (g95 0.91!) Apr 24 2008)
                                   Intel C, C++ and Fortran compilers 10.1
-                                  
+
 
 Supported Configuration Features Summary
 ========================================
@@ -355,7 +352,7 @@ Windows Vista            n        n      n        y     y     y
 Mac OS X 10.5 Intel      n        y      n        y     y     y
 AIX 5.3 32- and 64-bit   n        y      n        y     y     n
 FreeBSD 6.3-STABLE 
-32&64 bit                n        y      n        y     y     y
+    32&64 bit            n        y      n        y     y     y
 RedHat EL4       (3)  W  y(1)     y      y(1)     y     y     y
 RedHat EL5       (3)  W  y(1)     y(10)  y(1)     y     y     y
 RedHat EL5 Intel (3)  W  n        y      n        y     y     n
@@ -487,7 +484,6 @@ Known Problems
       H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_COLLECTIVE);
   to
       H5Pset_dxpl_mpio(xfer_plist, H5FD_MPIO_INDEPENDENT);
-
   KY - 2007/08/24
 
 * On Intel 64 Linux cluster (RH 4, Linux 2.6.9) with Intel 10.0 compilers, 
