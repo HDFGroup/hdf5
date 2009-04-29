@@ -1344,7 +1344,7 @@ hsize_t h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
         region_ctx.ndims = ndims;
         region_ctx.need_prefix = TRUE;
         region_ctx.cur_column = ctx->cur_column;
-        region_ctx.cur_elmt = blkndx*2*ndims;//ctx->cur_elmt;
+        region_ctx.cur_elmt = 0;
         region_ctx.prev_multiline = ctx->prev_multiline;
         region_ctx.prev_prefix_len = ctx->prev_prefix_len;
         region_ctx.continuation = ctx->continuation;
@@ -1382,7 +1382,7 @@ hsize_t h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
         h5tools_region_simple_prefix(stream, info, &region_ctx, region_curr_pos, ptdata, 0);
 
         region_elmtno = 0;
-        for (jndx = 0; jndx < numelem; jndx++, region_elmtno++) {
+        for (jndx = 0; jndx < numelem; jndx++, region_elmtno++, region_ctx.cur_elmt++) {
             /* Render the element */
             h5tools_str_reset(buffer);
 
@@ -1568,7 +1568,7 @@ hsize_t h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
             region_ctx.ndims = ndims;
             region_ctx.need_prefix = TRUE;
             region_ctx.cur_column = ctx->cur_column;
-            region_ctx.cur_elmt = jndx*ndims;//ctx->cur_elmt;
+            region_ctx.cur_elmt = 0;    /* points are always 0 */
             region_ctx.prev_multiline = ctx->prev_multiline;
             region_ctx.prev_prefix_len = ctx->prev_prefix_len;
             region_ctx.continuation = ctx->continuation;
