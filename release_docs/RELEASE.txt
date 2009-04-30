@@ -161,69 +161,75 @@ Platforms Tested
 
     FreeBSD 6.3-STABLE i386       gcc 3.4.6 [FreeBSD] 20060305
     (duty)                        g++ 3.4.6 [FreeBSD] 20060305
-                                  gcc 4.2.5 20080702 
-                                  g++ 4.2.5 20080702 
-                                  gfortran 4.2.5 20080702
+                                  gcc 4.3.4 20090419
+                                  g++ 4.3.4 20090419
+                                  gfortran 4.3.4 20090419
 
     FreeBSD 6.3-STABLE amd64      gcc 3.4.6 [FreeBSD] 20060305
     (liberty)                     g++ 3.4.6 [FreeBSD] 20060305
-                                  gcc 4.2.5 20080702 
-                                  g++ 4.2.5 20080702 
-                                  gfortran 4.2.5 20080702
+                                  gcc 4.4.1 20090421
+                                  g++ 4.4.1 20090421
+                                  gfortran 4.4.1 20090421
 
     IRIX64 6.5                    MIPSpro cc 7.4.4m
     (ucar mop1 64 & n32)          F90 MIPSpro 7.4.4m (64 only)
                                   C++ MIPSpro cc 7.4.4m
 
+    Linux 2.6.18-128.1.6.el5xen   gcc (GCC) 4.1.2
+    #1 SMP i686 i686 i386         G95 (GCC 4.0.3 (g95 0.92!) Feb 4 2009)
+    (jam)                         PGI C, Fortran, C++ 7.2-1 32-bit
+                                  PGI C, Fortran, C++ 8.0-1 32-bit
+                                  Intel(R) C Compiler for 32-bit
+                                      applications, Versions 10.1, 11.0
+                                  Intel(R) C++ Compiler for 32-bit
+                                      applications, Version 10.1, 11.0
+                                  Intel(R) Fortran Compiler for 32-bit
+                                      applications, Version 10.1, 11.0
+                                  Absoft 32-bit Fortran 95 10.0.7
+                                  MPICH mpich2-1.0.8 compiled with
+                                  gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!)
+
     Linux 2.6.9-42.0.10.ELsmp #1  gcc (GCC) 3.4.6
-         SMP i686 i386            G95 (GCC 4.0.3 (g95 0.92!) April 18 2007)
-    (kagiso)                      PGI C, Fortran, C++ 7.2-1 32-bit 
-                                  Intel(R) C Compiler for 32-bit 
-                                      applications, Version 10.1 
-                                  Intel(R) C++ Compiler for 32-bit 
-                                      applications, Version 10.1
-                                  Intel(R) Fortran Compiler for 32-bit 
-                                      applications, Version 10.1 
-                                  Absoft 32-bit Fortran 95 10.0.4
-                                  MPICH mpich-1.2.7 compiled with  
-                                  gcc 3.4.6 and G95  (GCC 4.0.3 (g95 0.92!) 
-                                  MPICH mpich2-1.0.6p1 compiled with  
-                                  gcc 3.4.6 and G95 (GCC 4.0.3 (g95 0.92!)
+    SMP i686 i686 i386            G95 (GCC 4.0.3 (g95 0.92!) Feb 4 2009)
+    (kagiso)                      MPICH mpich2-1.0.8 compiled with
+                                  gcc 3.4.6 and G95  (GCC 4.0.3 (g95 0.92!)
 
     Linux 2.6.16.46-0.12-debug #1 Intel(R) C++ Version 10.0.025
         SMP ia64 GNU/Linux        Intel(R) Fortran Itanium(R) Version 10.0.025
     (ucar hir1)                   
 
-    Linux 2.6.16.46-0.14-smp #1   Intel(R) C++ for Intel(R) EM64T Ver. 10.1.013
-        SMP x86_64 GNU/Linux      Intel(R) Fortran Intel(R) EM64T Ver. 10.1.013
-    (smirom)                      PGI C, Fortran, C++ Version 7.2-1
+    Linux 2.6.16.60-0.37-smp #1   gcc 4.1.2
+    SMP x86_64 GNU/Linux          G95 (GCC 4.0.3 (g95 0.92!) Feb 4 2009)
+    (smirom)                      Intel(R) C, C++, Fortran Compilers for
+                                  applications running on Intel(R) 64,
+                                  Versions 10.1, 11.0.
+                                  PGI C, Fortran, C++ Version 7.2-1, 8.0-1
                                          for 64-bit target on x86-64
-                                  MPICH mpich-1.2.7 compiled with  
-                                  gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!) 
-                                  MPICH mpich2-1.0.7 compiled with  
-                                  gcc 4.1.2 and G95 (GCC 4.0.3 (g95 0.92!) 
+                                  gcc 4.1.2 and G95  (GCC 4.0.3 (g95 0.92!)
+                                  MPICH mpich2-1.0.8 compiled with
+                                  gcc 4.1.2 and G95 (GCC 4.0.3 (g95 0.92!)
                                   tested for both 32- and 64-bit binaries
 
     Linux 2.6.16.54-0.2.5 #1      Intel(R) C++ Version 10.1.017
-        Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 10.1.017
-    (cobalt)                      SGI MPI 1.16
+    SGI Altix SMP ia64            Intel(R) Fortran Itanium(R) Version 10.1.017
+    (cobalt)                      SGI MPI 1.38
 
-    SunOS 5.10 32- and 64-bit     Sun WorkShop 6 update 2 C 5.8
-    (linew)                       Sun WorkShop 6 update 2 Fortran 95 8.2
+    SunOS 5.10 32- and 64-bit     Sun WorkShop 6 update 2 C 5.9 Patch 124867-09
+    (linew)                       Sun WorkShop 6 update 2 Fortran 95 8.3
+                                  Patch 127000-07
                                   Sun WorkShop 6 update 2 C++ 5.8
-                                  Patch 121019-06 
+                                  Patch 124863-11
 
-    Xeon Linux 2.6.9-42.0.10.EL_lustre-1.4.10.1smp
-    (abe)                         Intel(R) C++ Version 10.0.026
-                                  Intel(R) Fortran Compiler Version 10.0.026
-                                  Open MPI 1.2.2
+    Intel Xeon Linux 2.6.18-      gcc 3.4.6 20060404
+    92.1.10.el5_lustre.1.6.6smp-  Intel(R) C++ Version 10.0.026
+    perfctr #2 SMP                Intel(R) Fortran Compiler Version 10.0.026
+    (abe)                         Open MPI 1.2.2
                                   MVAPICH2-0.9.8p28p2patched-intel-ofed-1.2
                                   compiled with icc v10.0.026 and ifort 10.0.026
 
-    IA-64 Linux 2.4.21-309.tg1 #1 SMP
-        ia64                      gcc (GCC) 3.2.2
-    (NCSA tg-login)               Intel(R) C++ Version 8.1.037
-                                  Intel(R) Fortran Compiler Version 8.1.033
+    IA-64 Linux 2.4.21-309.tg1    gcc (GCC) 3.2.2
+    #1 SMP ia64                   Intel(R) C++ Version 8.1.037
+    (NCSA tg-login)               Intel(R) Fortran Compiler Version 8.1.033
                                   mpich-gm-1.2.7p1..16-intel-8.1.037-r1
 
     Windows XP                    Visual Studio 6.0
@@ -259,12 +265,13 @@ Mac OS X 10.4.10                      n        y    n        y    y     y
 AIX 5.3 32-bit                        n        y    n        y    y     n
 FreeBSD 6.3 32- and 64-bit            n        n    n        y    y     y
 RedHat EL4 2.6.9-42 i686 GNU (1)  W   y        y    y        y    y     y
-RedHat EL4 2.6.9-42 i686 Intel    W   n        y    n        y    y     n
-RedHat EL4 2.6.9-42 i686 PGI      W   n        y    n        y    y     n
+RedHat EL4 2.6.18-128 i686 GNU (1)W   y        y    y        y    y     y
+RedHat EL4 2.6.18-128 i686 Intel  W   n        y    n        y    y     n
+RedHat EL4 2.6.18-128 i686 PGI    W   n        y    n        y    y     n
 SuSE Linux 2.6.16 x86_64 GNU (1)  W   y        y    n        y    y     y
 SuSE Linux 2.6.16 x86_64 Intel    W   n        y    n        y    y     n
 SuSE Linux 2.6.16 x86_64 PGI      W   n        y    n        y    y     n
-RedHat EL 4 2.6.9 Xeon Lustre     C   n        y    n        y    y     y
+RedHat EL 4 2.6.18 Xeon Lustre    C   n        y    n        y    y     y
 SuSE Linux 2.4.21 ia64            C   y        y    y        y    y     y
 SuSe Linux 2.6.16 SGI Altix ia64  C   n        y    n        y    y     y
 
@@ -283,12 +290,13 @@ Mac OS X 10.5.6                       n             n        n
 AIX 5.3 32-bit                        n             n        n        
 FreeBSD 6.3 32- and 64-bit            y             n        n        
 RedHat EL4 2.6.9-42 i686 GNU (1)  W   y             n        y        
+RedHat EL4 2.6.9-42 i686 GNU (1)  W   y             n        y        
 RedHat EL4 2.6.9-42 i686 Intel    W   y             n        n        
 RedHat EL4 2.6.9-42 i686 PGI      W   n             n        n        
 SuSE Linux 2.6.16 x86_64 GNU (1)  W   y             n        y        
 SuSE Linux 2.6.16 x86_64 Intel    W   y             n        n        
 SuSE Linux 2.6.16 x86_64 PGI      W   n             n        n        
-RedHat EL4 2.6.9 Xeon Lustre      C   y             n        n        
+RedHat EL4 2.6.18 Xeon Lustre     C   y             n        n        
 SuSE Linux 2.4.21 ia64            C   y             n        n        
 SuSe Linux 2.6.16 SGI Altix ia64  C   n             n        n        
 
