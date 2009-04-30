@@ -3,13 +3,13 @@
 <hr>
 <dl>
   <dt><div align=right><font color=999999 size=-1><i>
-      Last modified: 25 April 2009
+      Last modified: 30 April 2009
       </i></font></div>
  
 <dt><strong>Name:</strong> <a name="Reference-GetRegion">H5Rget_region</a> 
 <dt><strong>Signature:</strong> 
     <dd><em>hid_t</em> <code>H5Rget_region</code>(
-        <em>hid_t</em> <code>obj_id</code>, 
+        <em>hid_t</em> <code>loc_id</code>, 
         <em>H5R_type_t</em> <code>ref_type</code>, 
         <em>void *</em><code>ref</code> 
         ) 
@@ -23,9 +23,9 @@
         and defines a selection matching the selection pointed to by 
         <code>ref</code> within the dataspace copy.
         <p>
-        <code>obj_id</code> is used to identify the file containing the
-        region reference; it can be the identifier for any object
-        in the file containing <code>ref</code>, including the file itself.
+        <code>loc_id</code> is used to identify the file containing the
+        referenced region; it can be a file identifier or 
+        an identifier for any object in the file. 
         <p>
         The parameter <code>ref_type</code> specifies the reference type of 
         <code>ref</code> and must contain the following value:
@@ -37,14 +37,15 @@
     <dd>
     <table>
         <tr> 
-            <td valign="top"><em>hid_t</em> <code>obj_id</code></td>
-            <td valign="top">IN: Identifier for any object in the 
-                file containing the region reference</td>
+            <td valign="top"><em>hid_t</em> <code>loc_id</code></td>
+            <td valign="top">IN: File identifier 
+                or identifier for any object in the 
+                file containing the referenced region</td>
         </tr>
         <tr> 
             <td valign="top"><em>H5R_type_t</em>&nbsp;<code>ref_type&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">IN: Reference type of <code>ref</code>: 
-                <code>H5R_DATASET_REGION</code></td>
+            <td valign="top">IN: Reference type of <code>ref</code>, 
+                which must be <code>H5R_DATASET_REGION</code></td>
         </tr>
         <tr> 
             <td valign="top"><em>void *</em><code>ref</code></td>
