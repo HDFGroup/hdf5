@@ -2468,6 +2468,19 @@ case "X-$enable_parallel" in
     fi
 
     dnl Set RUNPARALLEL to mpirun if not set yet.
+    dnl Check for building on Cray if RUNPARALLEL is not yet set by checking
+    dnl for 'aprun' command (which is the parallel job launcher, like mpirun).
+    if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
+        dnl Find the path where aprun is located.
+  	for path in `echo $PATH | ${TR} ":" " "`; do
+  	  if test -x $path/aprun; then
+            RUNPARALLEL="aprun -q -n \$\${NPROCS:=3}"
+  	    break;
+  	  fi
+	done
+    fi
+
+    dnl Set RUNPARALLEL to mpirun if not set yet.
     if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
       RUNPARALLEL="mpirun -np \$\${NPROCS:=3}"
     fi

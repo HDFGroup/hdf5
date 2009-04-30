@@ -48681,6 +48681,15 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
     fi
 
+    if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
+      for path in `echo $PATH | ${TR} ":" " "`; do
+        if test -x $path/aprun; then
+          RUNPARALLEL="aprun -q -n \$\${NPROCS:=3}"
+          break;
+        fi
+      done
+    fi
+
         if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
       RUNPARALLEL="mpirun -np \$\${NPROCS:=3}"
     fi
