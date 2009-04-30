@@ -2,6 +2,10 @@
 <!-- HEADER RIGHT "h5diff" -->
 <hr>
 <dl>
+<dt><div align=right><font color=999999 size=-1><i>
+    Last modified: 29 April 2009
+    </i></font></div>
+
 <dt><strong>Tool Name:</strong> <a name="Tools-Diff">h5diff</a>  &nbsp;&nbsp;&nbsp;
 <dt><strong>Syntax:</strong>
     <dd><code>h5diff </code> <em>file1</em> <em>file2</em> 
@@ -54,6 +58,14 @@
         Thus, when one NaN is compared with another NaN, <code>h5diff</code> 
         treats them as equal; when a NaN is compared with a valid number,
         <code>h5diff</code> treats them as not equal.
+        <p>
+        Note that NaN detection is computationally expensive and slows
+        <code>h5diff</code> performance dramatically.
+        If you do not have NaNs in your files, or do not care about NaNs,
+        use the <code>-N</code> option below to turn off NaN detection.
+        Similarly, if <code>h5diff -N</code> produces unexpected differences,
+        running <code>h5diff</code> without <code>-N</code> should reveal 
+        whether any of the differences are associated with NaN values.
 
 
 <dt><strong>Options and Parameters:</strong>
@@ -65,8 +77,12 @@
             <dd>help message.
         <dt><code>-r</code>
             <dd>Report mode. Print the differences.<dt><code>-v</code>
-            <dd>Verbose mode. Print the differences, list of objects, warnings.<dt><code>-q</code>
+            <dd>Verbose mode. Print the differences, list of objects, warnings.
+        <dt><code>-q</code>
             <dd>Quiet mode. Do not print output.
+        <dt><code>-N</code>
+            <dd>Disables NaN detection;
+                see &ldquo;<code>h5diff</code> and NaNs&rdquo; above.
         <dt><code>-n</code> <em>count</em>
             <dd>Print difference up to <em>count</em> differences, 
 	        then stop.
