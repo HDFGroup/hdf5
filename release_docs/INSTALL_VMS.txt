@@ -1,6 +1,6 @@
 		Building and installation instructions for Alpha Open VMS
-                                  HDF5 1.8.0 release
-                                  February 12,  2008
+                                  HDF5 1.8.3 release
+                                  15 May 2009
    
 
 
@@ -29,7 +29,8 @@
 		tar -xvf <source>.tar
 
 	 -  Change default directory to [.<source>.vms]
-         -  Specify top HDF5 source directory in the build.com file
+         -  Specify top HDF5 source directory in the build.com file where the 
+            "hdf5top" is defined.
          -  Edit make.com:
          	specify path to ZLIB library
         	if necessary, modify compilation flags 
@@ -42,11 +43,12 @@
 			Fortran library and tests
 			C++ library and tests
             It also runs test scripts to test C, Fortran and C++ libraries, and
-	    h5dump, h5diff, h5ls, h5repack and h5import utilities.
+	    h5dump, h5diff, h5ls, and h5repack utilities.
 
 	3. Installing HDF5 libraries
 
-	   Modify install.com file to specify installation directory and run
+	   Modify install.com file to specify installation directory (hdf5top) 
+           and run
 	       @install
            to install HDF5 C, Fortran, and C++ libraries, and utilities.
            The script will create the directories shown below in the
@@ -67,8 +69,6 @@
 
 	3. Known problems
 
-	   - dsets test fails for test_scleoffset_double and
-	     test_scleoffset_double_2 tests when G_FLOAT double is used
            - There is no support for szip compression filter.
 	   - Fortran multifile driver test fails; similar C test passes.
 
