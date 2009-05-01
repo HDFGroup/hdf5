@@ -1,4 +1,4 @@
-HDF5 version 1.6.9 currently under development
+HDF5 version 1.6.9 released on Fri May  1 15:26:44 CDT 2009
 ==> README.txt <==
 
 Periodic code snapshots are provided at the following URL:
