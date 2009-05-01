@@ -312,8 +312,7 @@ The following platforms and compilers have been tested for this release.
     perfctr #2 SMP                Intel(R) Fortran Compiler Version 10.0.026
     (abe)                         Open MPI 1.2.2
                                   MVAPICH2-0.9.8p28p2patched-intel-ofed-1.2
-                                  compiled with icc v10.0.026 and 
-                                  ifort 10.0.026
+                                  compiled with icc v10.0.026 and ifort 10.0.026
 
     IA-64 Linux 2.4.21-309.tg1    gcc (GCC) 3.2.2
     #1 SMP ia64                   Intel(R) C++ Version 8.1.037
@@ -405,7 +404,7 @@ Cray XT3 2.0.41          n       n         n         n
            (3)  Linux 2.6 with GNU, Intel, and PGI compilers, as indicated.  
                   W or C indicates workstation or cluster, respectively.
            (4)  Using mvapich2 0.9.8.
-           (5)  Linux 2.6.18-92.1.10.  Xeon cluster with ELsmp_perfctr_lustre 
+           (5)  Linux 2.6.18-128.1.10.  Xeon cluster with ELsmp_perfctr_lustre 
                   and Intel compilers
            (6)  Linux 2.6.16.54-0.2.5.  Xeon cluster with ELsmp_perfctr_lustre 
                   and Intel compilers
