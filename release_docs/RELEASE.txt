@@ -58,7 +58,7 @@ New Features
       IO, irregular hyperslab selection with collective IO) and
       t_chunk_alloc (chunk allocation). The rest of the parallel tests already
       use in the code the number of processes available in the communicator.
-      (CMC - 2009/04/28)
+      CMC - 2009/04/28
 
     Tools:
     ------
@@ -313,7 +313,7 @@ Known Problems
 * Parallel tests failed with 15, 16, and 32 processes with data inconsistency
   at testphdf5 / dataset_readAll. Parallel tests also failed with 64 processes
   with collective abort of all ranks at testphdf5  / collective irregular simple
-  chunk write. (CMC - 2009/04/28)
+  chunk write. CMC - 2009/04/28
 
 * h5repack may not handle committed datatypes correctly. NAF - 2009/4/20 - 1516/
   1466
