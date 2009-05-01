@@ -1,4 +1,4 @@
-HDF5 version 1.8.3 currently under development
+HDF5 version 1.8.3 released on Wed Apr 29 15:38:19 CDT 2009
 ================================================================================
 
 INTRODUCTION
@@ -64,6 +64,11 @@ New Features
 
     Library
     -------
+    - Embed the content of libhdf5.settings into the hdf5 executables
+      so that an "orphaned" executables can display (via the Unix
+      strings command, for example) the library settings used to build
+      the executables.  This is a prototype implementation. Improvement will
+      be added in next release.  AKC - 2009/04/20
     - Separated "factory" free list class from block free lists. These free
       lists are dynamically created and manage blocks of a fixed size.
       H5set_free_list_limits() will use the same settings specified for block
@@ -423,13 +428,20 @@ Known Problems
 * Parallel tests failed with 16 processes with data inconsistency at testphdf5
   / dataset_readAll. Parallel tests also failed with 32 and 64 processes with
   collective abort of all ranks at t_posix_compliant / allwrite_allread_blocks
-  with MPI IO. (CMC - 2009/04/28)
+  with MPI IO. CMC - 2009/04/28
 
 * There is a known issue in which HDF5 will change the timestamp on a file 
   simply by opening it with read/write permissions, even if the file is not
   modified in any way. This is due to the way in which HDF5 manages the file 
   superblock. A fix is currently underway and should be included in the 1.8.4
   release of HDF5. MAM - 2009/04/28
+
+* For gcc v4.3 and v4.4, with production mode, if -O3 is used, H5Tinit.c
+  would fail to compile. Actually bad H5Tinit.c is produced.  If -O (same
+  as -O1) is used, H5Tinit.c compiled okay but test/dt_arith would fail.
+  When -O0 (no optimizatio) is used, H5Tinit.c compilete okay and all
+  tests passed. Therefore, -O0 is imposed for v4.3 and v4.4 of gcc.
+  AKC - 2009/04/20
 
 * For Red Storm, a Cray XT3 system, the tools/h5ls/testh5ls.sh and
   tools/h5copy/testh5copy.sh will fail some of its sub-tests. These sub-tests
