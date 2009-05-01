@@ -59,7 +59,4 @@ $! set def 'hdf5toolstest_h5import'
 $! copy [-]check_h5import.com check_h5import.com
 $!@check_h5import.com
 $!
-$ set def 'hdf5vms'
-$@install
-$
 $ exit

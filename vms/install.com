@@ -159,8 +159,8 @@ $ rename 'hdf5install_examples_cxx'*.cpp 'hdf5install_examples_cxx'*.cxx
 $
 $ 
 $!
-$! set def 'hdf5top'
-$! copy [.examples]*.com 'hdf5install_examples_c'
-$! copy [.fortran.examples]*.com 'hdf5install_examples_f90'
-$! copy [.c__.examples]*.com 'hdf5install_examples_cxx'
+$ set def 'hdf5top'
+$ copy [.examples]*.com 'hdf5install_examples_c'
+$ copy [.fortran.examples]*.com 'hdf5install_examples_f90'
+$ copy [.c__.examples]*.com 'hdf5install_examples_cxx'
 $ exit
