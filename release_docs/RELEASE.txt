@@ -358,85 +358,66 @@ Supported Configuration Features Summary
     In the tables below
           y   = tested and supported
           n   = not supported or not tested in this release
+          C   = Cluster
+          W   = Workstation
           x   = not working in this release
           dna = does not apply
           ( ) = footnote appears below second table
           <blank> = testing incomplete on this feature or platform 
 
-Platform                 C        F90    F90      C++   zlib  SZIP
-                         parallel        parallel
-Solaris2.10 32-bit       n        y      n        y     y     y
-Solaris2.10 64-bit       n        y      n        y     y     y
-IRIX64_6.5 32-bit        n        n      n        n     y     y
-IRIX64_6.5 64-bit        n        y      y        y     y     y
-Windows XP               n        y(15)  n(15)    y     y     y
-Windows XP x64           n        y(15)  n(15)    y     y     y
-Windows Vista            n        n      n        y     y     y
-Mac OS X 10.5 Intel      n        y      n        y     y     y
-AIX 5.3 32- and 64-bit   n        y      n        y     y     n
-FreeBSD 6.3-STABLE 
-    32&64 bit            n        y      n        y     y     y
-RedHat EL4       (3)  W  y(1)     y      y(1)     y     y     y
-RedHat EL5       (3)  W  y(1)     y(10)  y(1)     y     y     y
-RedHat EL5 Intel (3)  W  n        y      n        y     y     n
-RedHat EL5 PGI   (3)  W  n        y      n        y     y     n
-SuSe x86_64 gcc(3,12) W  y(1)     y(11)  y(1)     y     y     y
-SuSe x86_64 Int(3,12) W  n        y(13)  n        y     y     n
-SuSe x86_64 PGI(3,12) W  n        y(8)   n        y     y     y
-Linux 2.6 SuSE ia64   C 
-    Intel       (3,7)    y        y      y        y     y     n
-Linux 2.6 SGI Altix   C
-    ia64 Intel    (3)    y        y      y        y     y     y
-Linux 2.6 RHEL        C
-    Lustre Intel  (5)    y(4)     y      y(4)     y     y     n
-Cray XT3 2.0.41          y        y      y        y     y     n
+Platform                           C        F90    F90      C++   zlib  SZIP
+                                   parallel        parallel
+Solaris2.10 32-bit                   n        y      n        y     y     y
+Solaris2.10 64-bit                   n        y      n        y     y     y
+IRIX64_6.5 32-bit                    n        n      n        n     y     y
+IRIX64_6.5 64-bit                    n        y      y        y     y     y
+Windows XP                           n        y(4)   n(4)     y     y     y
+Windows XP x64                       n        y(4)   n(4)     y     y     y
+Windows Vista                        n        n      n        y     y     y
+Mac OS X 10.5 Intel                  n        y      n        y     y     y
+AIX 5.3 32- and 64-bit               n        y      n        y     y     n
+FreeBSD 6.3-STABLE 32&64 bit         n        y      n        y     y     y
+RedHat EL4 2.6.9-42 i686 GNU (1)  W  y        y      y        y     y     y
+RedHat EL5 2.6.18-128 i686 GNU (1)W  y        y(2)   y        y     y     y
+RedHat EL5 2.6.18-128 i686 Intel  W  n        y      n        y     y     n
+RedHat EL5 2.6.18-128 i686 PGI    W  n        y      n        y     y     n
+SuSe Linux 2.6.16 x86_64 GNU (1)  W  y        y(3)   y        y     y     y
+SuSe Linux 2.6.16 x86_64 Intel    W  n        y      n        y     y     n
+SuSe Linux 2.6.16 x86_64 PGI      W  n        y      n        y     y     y
+SuSe Linux 2.6.16 SGI Altix ia64  C  y        y      y        y     y     y
+RedHat EL4 2.6.18 Xeon Lustre     C  y        y      y        y     y     n
+SuSe Linux 2.4.21 ia64 Intel      C  y        y      y        y     y     n
+Cray XT3 2.0.41                      y        y      y        y     y     n
 
 
-Platform                 Shared  Shared    Shared    Thread-  
-                         C libs  F90 libs  C++ libs  safe     
-Solaris2.10 32-bit       y       y         y         y        
-Solaris2.10 64-bit       y       y         y         y        
-IRIX64_6.5 32-bit        y       dna       y         y        
-IRIX64_6.5 64-bit        y       y         n         y        
-Windows XP               y       y(15)     y         y        
-Windows XP x64           y       y(15)     y         y        
-Windows Vista            y       n         n         y        
-Mac OS X 10.5            y       n         y         n        
-AIX 5.3 32- and 64-bit   n       n         n         n        
-FreeBSD 6.2 32&64 bit    y       n         y         y        
-RedHat EL4       (3)  W  y       y         y         y        
-RedHat EL5       (3)  W  y       y(10)     y         y        
-RedHat EL5 Intel (3)  W  y       y         y         n        
-RedHat EL5 PGI   (3)  W  y       y         y         n        
-SuSe x86_64 GNU(3,12) W  y       y         y         y        
-SuSe x86_64 Int(3,12) W  y       y         y         n        
-SuSe x86_64 PGI(3,12) W  y       y         y         n        
-Linux 2.4 SuSE        C
-    ia64 C Intel (7)     y       y         y         n        
-Linux 2.4 SGI Altix   C
-    ia64 Intel           y                           n        
-Linux 2.6 RHEL        C
-    Lustre Intel (5)     y       y         y         n
-Cray XT3 2.0.41          n       n         n         n
+Platform                           Shared  Shared    Shared    Thread-  
+                                   C libs  F90 libs  C++ libs  safe     
+Solaris2.10 32-bit                   y       y         y         y        
+Solaris2.10 64-bit                   y       y         y         y        
+IRIX64_6.5 32-bit                    y       dna       y         y        
+IRIX64_6.5 64-bit                    y       y         n         y        
+Windows XP                           y       y(4)      y         y        
+Windows XP x64                       y       y(4)      y         y        
+Windows Vista                        y       n         n         y        
+Mac OS X 10.5                        y       n         y         n        
+AIX 5.3 32- and 64-bit               n       n         n         n        
+FreeBSD 6.3-STABLE 32&64 bit         y       n         y         y        
+RedHat EL4 2.6.9-42 i686 GNU (1)  W  y       y         y         y        
+RedHat EL5 2.6.18-128 i686 GNU (1)W  y       y(2)      y         y        
+RedHat EL5  2.6.18-128 i686 Intel W  y       y         y         n        
+RedHat EL5 2.6.18-128 i686 PGI    W  y       y         y         n        
+SuSe Linux 2.6.16 x86_64 GNU (1)  W  y       y         y         y        
+SuSe Linux 2.6.16 x86_64 Intel    W  y       y         y         n        
+SuSe Linux 2.6.16 x86_64 PGI      W  y       y         y         n        
+SuSe Linux 2.6.16 SGI Altix ia64  C  y                           n        
+RedHat EL4 2.6.18 Xeon Lustre     C  y       y         y         n
+SuSe Linux 2.4.21 ia64 Intel      C  y       y         y         n        
+Cray XT3 2.0.41                      n       n         n         n
 
-    Notes: (1)  Using mpich2 1.0.8.
-           (3)  Linux 2.6 with GNU, Intel, and PGI compilers, as indicated.  
-                  W or C indicates workstation or cluster, respectively.
-           (4)  Using mvapich2 0.9.8.
-           (5)  Linux 2.6.18-128.1.10.  Xeon cluster with ELsmp_perfctr_lustre 
-                  and Intel compilers
-           (6)  Linux 2.6.16.54-0.2.5.  Xeon cluster with ELsmp_perfctr_lustre 
-                  and Intel compilers
-           (7)  Linux 2.4.21, SuSE_292.till.  Ia64 cluster with Intel compilers
-           (8)  pgf90
-           (9)  With Compaq Visual Fortran 6.6c compiler.
-           (10) With PGI and Absoft compilers.
-           (11) PGI and Intel compilers for both C and Fortran
-           (12) AMD Opteron x86_64
-           (13) ifort
-           (14) Yes with C and Fortran, but not with C++
-           (15) Using Visual Studio 2005 or Cygwin
-           (16) Not tested for this release.
+           (1) Fortran compiled with g95.
+           (2) With PGI and Absoft compilers.
+           (3) With PGI compiler for Fortran.
+           (4) Using Visual Studio 2005 or Cygwin
     Compiler versions for each platform are listed in the preceding
     "Platforms Tested" table.
 
