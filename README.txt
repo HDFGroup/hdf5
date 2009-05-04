@@ -1,4 +1,4 @@
-HDF5 version 1.8.3 currently under development
+HDF5 version 1.8.3 released on Mon May  4 09:21:00 CDT 2009
 ==> README.txt <==
 Messages sent to the list should be addressed to "<list>@hdfgroup.org".
 

@@ -1,6 +1,6 @@
 		Building and installation instructions for Alpha Open VMS
-                                  HDF5 1.8.3 release
-                                  15 May 2009
+                              HDF5 1.8.3 release
+                                  May 4, 2009
    
 
 
@@ -67,7 +67,7 @@
            to build examples against the installed libraries and to verify 
            the installation.
 
-	3. Known problems
+	4. Known problems
 
            - There is no support for szip compression filter.
 	   - Fortran multifile driver test fails; similar C test passes.
