@@ -40,7 +40,7 @@ typedef struct H5E_t H5E_t;
  */
 #define HCOMMON_ERROR(maj, min, str)  				              \
    HERROR(maj, min, str);						      \
-   (void)H5E_dump_api_stack((int)H5_IS_API(FUNC));
+   err_occurred = TRUE;
 
 /*
  * HDONE_ERROR macro, used to facilitate error reporting between a

@@ -144,13 +144,15 @@ struct H5G_t {
 typedef herr_t (*H5G_lib_iterate_t)(const H5O_link_t *lnk, void *op_data);
 
 /* Describe kind of callback to make for each link */
-typedef struct {
-    enum {
+typedef enum H5G_link_iterate_op_type_t {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-        H5G_LINK_OP_OLD,                /* "Old" application callback */
+    H5G_LINK_OP_OLD,                /* "Old" application callback */
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-        H5G_LINK_OP_NEW                 /* "New" application callback */
-    } op_type;
+    H5G_LINK_OP_NEW                 /* "New" application callback */
+} H5G_link_iterate_op_type_t;
+
+typedef struct {
+    H5G_link_iterate_op_type_t op_type;
     union {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
         H5G_iterate_t op_old;           /* "Old" application callback for each link */

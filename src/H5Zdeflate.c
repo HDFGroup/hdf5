@@ -94,9 +94,9 @@ H5Z_filter_deflate (unsigned flags, size_t cd_nelmts,
         /* Set the uncompression parameters */
 	HDmemset(&z_strm, 0, sizeof(z_strm));
 	z_strm.next_in = *buf;
-        H5_ASSIGN_OVERFLOW(z_strm.avail_in,nbytes,size_t,uInt);
+        H5_ASSIGN_OVERFLOW(z_strm.avail_in,nbytes,size_t,unsigned);
 	z_strm.next_out = outbuf;
-        H5_ASSIGN_OVERFLOW(z_strm.avail_out,nalloc,size_t,uInt);
+        H5_ASSIGN_OVERFLOW(z_strm.avail_out,nalloc,size_t,unsigned);
 
         /* Initialize the uncompression routines */
 	if (Z_OK!=inflateInit(&z_strm))

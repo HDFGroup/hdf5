@@ -1291,6 +1291,7 @@ static int test_enums(void)
     H5T_class_t type_class;
     char*   dt_str;
     size_t  str_len;
+    H5T_order_t native_order = H5Tget_order(H5T_NATIVE_INT);
 
     TESTING3("        text for enum types");
 
@@ -1302,6 +1303,12 @@ static int test_enums(void)
     if(type_class != H5T_ENUM)
         goto out;
 
+    /* Convert the variable before using it */
+    if(!H5Tequal(H5T_STD_I32LE, H5T_NATIVE_INT)) {
+        if(H5Tconvert(H5T_NATIVE_INT, H5T_STD_I32LE, 1, &value1, NULL, H5P_DEFAULT) < 0)
+            goto out;
+    }
+
     if(H5Tenum_nameof(dtype, &value1, name1, size)<0)
         goto out;
     if(strcmp(name1, "BLUE"))
@@ -1309,6 +1316,13 @@ static int test_enums(void)
 
     if(H5Tenum_valueof(dtype, name2, &value2)<0)
         goto out;
+
+    /* Convert the variable before comparing it */
+    if(!H5Tequal(H5T_STD_I32LE, H5T_NATIVE_INT)) {
+        if(H5Tconvert(H5T_NATIVE_INT, H5T_STD_I32LE, 1, &value2, NULL, H5P_DEFAULT) < 0)
+            goto out;
+    }
+
     if(value2 != 8)
         goto out;
 
@@ -1317,10 +1331,12 @@ static int test_enums(void)
     dt_str = (char*)calloc(str_len, sizeof(char));
     if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
         goto out;
-    /*if(strcmp(dt_str, "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"            5;\n      \"GREEN\"          6;\n      \"BLUE\"           7;\n      \"WHITE\"          8;\n   }")) {
-    printf("dt=\n%s\n", dt_str);
-    goto out;
-    }*/
+    if(strcmp(dt_str, "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"            6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }")) {
+
+        printf("dt=\n%s\n", dt_str);
+        goto out;
+    }
+
     free(dt_str);
 
     if(H5Tclose(dtype)<0)
@@ -1427,10 +1443,11 @@ static int test_arrays(void)
     dt_str = (char*)calloc(str_len, sizeof(char));
     if(H5LTdtype_to_text(dtype, dt_str, H5LT_DDL, &str_len)<0)
         goto out;
-    /*if(strcmp(dt_str, "H5T_ARRAY { [5][7][13] H5T_ARRAY { [17][19] H5T_COMPOUND { H5T_STD_I8BE \"arr_compound_1\"; H5T_STD_I32BE \"arr_compound_2\"; } } }")) {
-    printf("dt=\n%s\n", dt_str);
-    goto out;
-    }*/
+    if(strcmp(dt_str, "H5T_ARRAY {\n      [5][7][13] H5T_ARRAY {\n         [17][19] H5T_COMPOUND {\n            H5T_STD_I8BE \"arr_compound_1\" : 0;\n            H5T_STD_I32BE \"arr_compound_2\" : 1;\n         }\n      }\n   }")) {
+        printf("dt=\n%s\n", dt_str);
+        goto out;
+    }
+
     free(dt_str);
 
     if(H5Tclose(dtype)<0)

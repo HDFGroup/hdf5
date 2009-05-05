@@ -121,6 +121,16 @@ typedef struct H5C_t H5C_t;
 #define H5C_CALLBACK__SIZE_CHANGED_FLAG		0x1
 #define H5C_CALLBACK__RENAMED_FLAG		0x2
 
+/* Actions that can be reported to 'notify' client callback */
+typedef enum H5C_notify_action_t {
+    H5C_NOTIFY_ACTION_AFTER_INSERT,     /* Entry has been added to the cache */
+                                        /* (could be loaded from file with
+                                         *      'protect' call, or inserted
+                                         *      with 'set' call)
+                                         */
+    H5C_NOTIFY_ACTION_BEFORE_EVICT      /* Entry is about to be evicted from cache */
+} H5C_notify_action_t;
+
 typedef void *(*H5C_load_func_t)(H5F_t *f,
                                  hid_t dxpl_id,
                                  haddr_t addr,
@@ -137,6 +147,8 @@ typedef herr_t (*H5C_dest_func_t)(H5F_t *f,
 typedef herr_t (*H5C_clear_func_t)(H5F_t *f,
                                    void *thing,
                                    hbool_t dest);
+typedef herr_t (*H5C_notify_func_t)(H5C_notify_action_t action,
+                                 void *thing);
 typedef herr_t (*H5C_size_func_t)(const H5F_t *f,
                                   const void *thing,
                                   size_t *size_ptr);

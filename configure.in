@@ -1306,6 +1306,7 @@ AC_C_BIGENDIAN
 AC_CHECK_SIZEOF([char], [1])
 AC_CHECK_SIZEOF([short], [2])
 AC_CHECK_SIZEOF([int], [4])
+AC_CHECK_SIZEOF([unsigned], [4])
 AC_CHECK_SIZEOF([long], [4])
 AC_CHECK_SIZEOF([long long], [8])
 AC_CHECK_SIZEOF([__int64], [8])
@@ -2474,6 +2475,19 @@ case "X-$enable_parallel" in
 
       dnl Change to the C language
       AC_LANG_POP(Fortran)
+    fi
+
+    dnl Set RUNPARALLEL to mpirun if not set yet.
+    dnl Check for building on Cray if RUNPARALLEL is not yet set by checking
+    dnl for 'aprun' command (which is the parallel job launcher, like mpirun).
+    if test "X$PARALLEL" = "Xyes" -a -z "$RUNPARALLEL"; then
+        dnl Find the path where aprun is located.
+  	for path in `echo $PATH | ${TR} ":" " "`; do
+  	  if test -x $path/aprun; then
+            RUNPARALLEL="aprun -q -n \$\${NPROCS:=3}"
+  	    break;
+  	  fi
+	done
     fi
 
     dnl Set RUNPARALLEL to mpirun if not set yet.

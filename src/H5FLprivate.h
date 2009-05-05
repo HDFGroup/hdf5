@@ -348,8 +348,20 @@ typedef struct H5FL_seq_head_t {
 #define H5FL_SEQ_REALLOC(t,obj,new_elem) (t *)H5MM_realloc(obj,(new_elem)*sizeof(t))
 #endif /* H5_NO_SEQ_FREE_LISTS */
 
-/* Forward declaration of the data structure for free list block factory */
-typedef struct H5FL_fac_head_t H5FL_fac_head_t;
+/* Forward declarations of the data structures for free list block factory */
+typedef struct H5FL_fac_gc_node_t H5FL_fac_gc_node_t;
+typedef struct H5FL_fac_node_t H5FL_fac_node_t;
+
+/* Data structure for free list block factory */
+typedef struct H5FL_fac_head_t {
+    unsigned init;      /* Whether the free list has been initialized */
+    unsigned allocated; /* Number of blocks allocated */
+    unsigned onlist;    /* Number of blocks on free list */
+    size_t size;        /* Size of the blocks in the list */
+    H5FL_fac_node_t *list;  /* List of free blocks */
+    H5FL_fac_gc_node_t *prev_gc; /* Previous garbage collection node in list */
+} H5FL_fac_head_t;
+
 
 /*
  * Macros for defining & using free list factories
