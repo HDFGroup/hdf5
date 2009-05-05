@@ -60,9 +60,10 @@ MOSTLYCLEAN=cmpd_dset.h5 compact_dataset.h5 dataset.h5 extend.h5 istore.h5   \
             tmisc9.h5 tmisc10.h5 tmisc11.h5 tmisc12.h5 tmisc13a.h5           \
             tmisc13b.h5 tmisc14.h5 set_extent_read.h5 set_extent_create.h5   \
             getname.h5 getname1.h5 getname2.h5 getname3.h5 sec2_file.h5      \
-            family_file000[0-3][0-9].h5 multi_file-[rs].h5 core_file         \
-            new_move_[ab].h5 ntypes.h5 dangle.h5 test_filters.h5 	     \
-	    tstint[1-2].h5 unlink_chunked.h5 err_vers.h5
+            family_file000[0-3][0-9].h5 new_family_v18_000[0-3][0-9].h5      \
+            multi_file-[rs].h5 core_file new_move_[ab].h5 ntypes.h5          \
+            dangle.h5 test_filters.h5 tstint[1-2].h5 unlink_chunked.h5       \
+            err_vers.h5
 
 CLEAN=$(TIMINGS)
 

@@ -28,16 +28,18 @@
 #define FAMILY_SIZE2    (5*KB)
 #define MULTI_SIZE      128
 #define CORE_INCREMENT  (4*KB)
+#define FILE_COPY_BUF_SIZE  4096
 
 const char *FILENAME[] = {
     "sec2_file",
     "core_file",
     "family_file",
+    "new_family_v18_",
     "multi_file",
     NULL
 };
 
-#define COMPAT_BASENAME "family_v1.7_"
+#define COMPAT_BASENAME "family_v1.8_"
 
 
 /*-------------------------------------------------------------------------
@@ -342,11 +344,11 @@ error:
  * Function:    test_family_compat
  *
  * Purpose:     Tests the forward compatibility for FAMILY driver.
- *              See if we can open files created with v1.7 library.
- *              The source file was created by the test/file_handle.c
- *              of the v1.7 library.  Then tools/misc/h5repart.c was
+ *              See if we can open files created with v1.8 library.
+ *              The source file was created by the test/vfd.c
+ *              of the v1.8 library.  Then tools/misc/h5repart.c was
  *              used to concantenated.  The command was "h5repart -m 5k
- *              family_file%05d.h5 family_v1.7_%05d.h5".
+ *              family_file%05d.h5 family_v1.8_%05d.h5".
  *
  * Return:      Success:        exit(0)
  *
@@ -365,8 +367,14 @@ test_family_compat(void)
     hid_t       dset;
     char        dname[]="dataset";
     char        filename[1024];
-    char        pathname[1024];
+    char        pathname[1024], pathname_individual[1024];
+    char        newname[1024], newname_individual[1024];
     char       *srcdir = getenv("srcdir"); /*where the src code is located*/
+    FILE        *tmp_fp, *old_fp;       /* Pointers to temp & old files */
+    void        *copy_buf;              /* Pointer to buffer for copying data */
+    size_t      written;                /* Amount of data written to new file */
+    size_t      read_in;                /* Amount of data read in from old file */
+    int         counter = 0;
 
     TESTING("FAMILY file driver forward compatibility");
 
@@ -377,6 +385,8 @@ test_family_compat(void)
         goto error;
 
     h5_fixname(COMPAT_BASENAME, fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[3], fapl, newname, sizeof newname);
+
     pathname[0] = '\0';
 
     /* Generate correct name for test file by prepending the source path */
@@ -386,8 +396,41 @@ test_family_compat(void)
     }
     strcat(pathname, filename);
 
+    /* The following code makes the copies of the family files in the source directory.
+     * Since we're going to open the files with write mode, this protects the original
+     * files.
+     */
+    if(NULL == (copy_buf = HDmalloc((size_t)FILE_COPY_BUF_SIZE))) TEST_ERROR
+
+    sprintf(newname_individual, newname, counter);
+    sprintf(pathname_individual, pathname, counter);
+
+    /* Open the original files until no more left.  Copy the content into the new files. */
+    while((old_fp = HDfopen(pathname_individual,"rb"))) {
+        /* Open the new file */
+        if(NULL == (tmp_fp = fopen(newname_individual,"wb"))) TEST_ERROR
+
+        /* Copy data from the old file to the new file */
+        while((read_in = HDfread(copy_buf, (size_t)1, (size_t)FILE_COPY_BUF_SIZE, old_fp)) > 0)
+            /* Write the data to the new file */
+            if(read_in != (written = HDfwrite(copy_buf, (size_t)1, read_in, tmp_fp))) TEST_ERROR
+
+        /* Close the old file */
+        if(HDfclose(old_fp)) TEST_ERROR
+
+        /* Close the new file */
+        if(HDfclose(tmp_fp)) TEST_ERROR
+
+        counter++;
+        sprintf(newname_individual, newname, counter);
+        sprintf(pathname_individual, pathname, counter);
+    }
+
+    /* Free the copy buffer */
+    free(copy_buf);
+
     /* Make sure we can open the file.  Use the read and write mode. */
-    if((file=H5Fopen(pathname, H5F_ACC_RDONLY, fapl))<0)
+    if((file=H5Fopen(newname, H5F_ACC_RDWR, fapl))<0)
         goto error;
 
     if((dset = H5Dopen(file, dname)) < 0)
@@ -400,7 +443,7 @@ test_family_compat(void)
         goto error;
 
     /* Open the file again to make sure it isn't corrupted. */
-    if((file = H5Fopen(pathname, H5F_ACC_RDWR, fapl)) < 0)
+    if((file = H5Fopen(newname, H5F_ACC_RDWR, fapl)) < 0)
         TEST_ERROR;
 
     if((dset = H5Dopen(file, dname)) < 0)
@@ -488,7 +531,7 @@ test_multi(void)
 
     if(H5Pset_fapl_multi(fapl, memb_map, memb_fapl, memb_name, memb_addr, TRUE)<0)
         goto error;
-    h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
+    h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
 
     if((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl))<0)
         goto error;
