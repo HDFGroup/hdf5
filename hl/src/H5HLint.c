@@ -75,6 +75,9 @@ hbool_t H5HL_libinit_g = FALSE;
 /* HL-HDF5 API Entered variable */
 hbool_t H5HL_api_entered_g = FALSE;
 
+/* High-Level API error class */
+hid_t H5HL_ERR_CLS_g = (-1);
+
 
 /*******************/
 /* Local Variables */
@@ -97,7 +100,36 @@ herr_t
 H5HL_init_library(void)
 {
     /* Perform any hfg-level library scoped initialization */
+  
+  char lib_str[256];
+  herr_t status;
 
-    return SUCCEED;
+  /* open the library */
+  status = H5open();
+    
+  /* register the error class */
+
+  sprintf(lib_str, "%d.%d.%d",H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE);
+    
+  /* H5LT error class */
+
+  H5HL_ERR_CLS_g = H5Eregister_class("H5HL", "HDF5:HL", lib_str);
+
+  return SUCCEED;
 } /* end H5HL_init_library() */
 
+/*-------------------------------------------------------------------------
+ * Function:	H5HL_close
+ *
+ * Purpose:	Free high-level library scoped things.
+ *
+ * Return:	
+ *
+ * Programmer:	M. Scot Breitenfeld
+ *              May 4, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+void H5HL_close(void) {    
+  H5Eunregister_class(H5HL_ERR_CLS_g);
+    }

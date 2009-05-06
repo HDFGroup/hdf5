@@ -13,12 +13,24 @@
 * access to either file, you may request a copy from help@hdfgroup.org.     *
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <stdio.h>
-#include "H5LTprivate.h"
+/**********************/
+/* Module Declaration */
+/**********************/
 
+#define H5LT_MODULE
+
+/***********************/
+/* Other Packages Used */
+/***********************/
+
+/***********/
+/* Headers */
+/***********/
+//#include <string.h>
+#include <stdlib.h>
+//#include <assert.h>
+//#include <stdio.h>
+#include "H5LTpkg.h"            /* Lite */
 
 /* For Lex and Yacc */
 #define         COL             3
@@ -29,8 +41,46 @@ int  input_len;
 char *myinput;
 int  indent = 0;
 
+/******************/
+/* Local Typedefs */
+/******************/
+
+hid_t   H5_MY_PKG_ERR;
+
+/********************/
+/* Package Typedefs */
+/********************/
+#define AT() 		printf ("	 at %s:%d in %s()...\n",	      \
+				__FILE__, __LINE__, __FUNCTION__);
+#define H5_FAILED()	{puts("*FAILED*");fflush(stdout);}
+#define TEST_ERROR      {H5_FAILED(); AT(); goto error;}
+
+/********************/
+/* Local Prototypes */
+/********************/
 
 
+/*********************/
+/* Package Variables */
+/*********************/
+
+/* Package initialization flag */
+hbool_t H5_H5LT_init_g = FALSE;
+
+/* High-Level API error class */
+/* hid_t H5HL_ERR_CLS_g = (-1); */
+
+/* Major error codes */
+hid_t H5E_LT_g = (-1);
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 /*-------------------------------------------------------------------------
 *
@@ -38,6 +88,45 @@ int  indent = 0;
 *
 *-------------------------------------------------------------------------
 */
+
+/*-------------------------------------------------------------------------
+ * Function: H5LT__pkg_init
+ *
+ * Purpose: Package initialization 
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Quincey Koziol
+ *
+ * Date: April 14, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+
+BEGIN_FUNC(PKGINIT, ERR,
+herr_t, SUCCEED, FAIL,
+H5LT__pkg_init(void))
+
+
+/*     char lib_str[256]; */
+
+/*     sprintf(lib_str, "%d.%d.%d",H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE); */
+
+    /* Perform any package initialization actions (like registering the
+     *  package's major error code, etc) here */
+
+/*     H5HL_ERR_CLS_g = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, lib_str); */
+/*     if(H5HL_ERR_CLS_g < 0) { */
+/*        H5_MY_PKG_ERR = H5E_ERROR; */
+/*        H5E_THROW(H5E_CANTREGISTER, "H5LT: Failed to register new error class") */
+/*     } /\* end if *\/ */
+
+    CATCH
+
+END_FUNC(PKGINIT)
+
+
+
 static herr_t H5LT_get_attribute_mem(hid_t loc_id,
                                      const char *obj_name,
                                      const char *attr_name,
@@ -639,43 +728,57 @@ out:
 *
 *-------------------------------------------------------------------------
 */
-
-herr_t H5LTget_dataset_ndims( hid_t loc_id,
-                             const char *dset_name,
-                             int *rank )
-{
+BEGIN_FUNC(PUB, ERR,
+herr_t, SUCCEED, FAIL,
+H5LTget_dataset_ndims( hid_t loc_id,
+		       const char *dset_name,
+		       int *rank ) )
+  
     hid_t       did = -1;
     hid_t       sid = -1;
+    herr_t      status;
+    hid_t       current_stack_id = -1;
 
     /* Open the dataset. */
-    if((did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT)) < 0)
-        return -1;
 
+    did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT);
+
+    if(did < 0) {
+       H5_MY_PKG_ERR = H5E_DATASET;
+       H5E_THROW(H5E_NOTFOUND, "H5LT: Failed to open the dataset")
+    } /* end if */
     /* Get the dataspace handle */
-    if((sid = H5Dget_space(did)) < 0)
-        goto out;
+    sid = H5Dget_space(did);
+
+    if(sid < 0) {
+       H5_MY_PKG_ERR = H5E_DATASPACE;
+       H5E_THROW(H5E_BADSELECT, "H5LT: Failed to get dataspace handle")
+    } /* end if */
 
     /* Get rank */
-    if((*rank = H5Sget_simple_extent_ndims(sid)) < 0)
-        goto out;
+    *rank = H5Sget_simple_extent_ndims(sid);
 
-    /* Terminate access to the dataspace */
-    if(H5Sclose(sid) < 0)
-        goto out;
+    if(*rank < 0) {
+       H5_MY_PKG_ERR = H5E_DATASET;
+       H5E_THROW(H5E_BADSELECT, "H5LT: Failed to get dataspace rank")
+    } /* end if */
 
-    /* End access to the dataset */
-    if(H5Dclose(did))
-        return -1;
+CATCH
 
-    return 0;
+/* save the current error stack before closing */
+current_stack_id = H5Eget_current_stack();
 
-out:
-    H5E_BEGIN_TRY {
-        H5Dclose(did);
-        H5Sclose(sid);
-    } H5E_END_TRY;
-    return -1;
-}
+/* Close appropriate items, if error occurs it will not be reported */
+if(sid > 0)
+  status = H5Sclose(sid);
+
+if(did > 0)
+ status = H5Dclose(did);
+
+/* retrieve the error stack */
+status = H5Eset_current_stack(current_stack_id);
+
+END_FUNC(PUB)
 
 
 /*-------------------------------------------------------------------------
@@ -1790,7 +1893,6 @@ herr_t H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *
         if((ret = H5LT_dtype_to_text(dtype, &text_str, lang_type, &str_len, 1)) < 0)
             goto out;
         *len = strlen(text_str) + 1;
-        free(text_str);
     } else if(len && str) {
         if((ret = H5LT_dtype_to_text(dtype, &str, lang_type, len, 0)) < 0)
             goto out;

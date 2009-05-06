@@ -18,28 +18,28 @@
  *		Tuesday, April 14, 2009
  *
  * Purpose:	This file contains declarations which are visible only within
- *		the H5LR package.  Source files outside the H5LR package should
- *		include H5LRprivate.h instead.
+ *		the H5LT package.  Source files outside the H5LT package should
+ *		include H5LTprivate.h instead.
  */
-#if !(defined(H5LR_PACKAGE) | defined(H5LR_MODULE))
-#error "Do not include this file outside the H5LR package!"
+#if !(defined(H5LT_PACKAGE) | defined(H5LT_MODULE))
+#error "Do not include this file outside the H5LT package!"
 #endif
 
-#ifndef _H5LRpkg_H
-#define _H5LRpkg_H
+#ifndef _H5LTpkg_H
+#define _H5LTpkg_H
 
-/* If this package header is being included in one of the H5LR modules, define
+/* If this package header is being included in one of the H5LT modules, define
  *      the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
  */
-#ifdef H5LR_MODULE
-#define H5_MY_PKG       H5LR
-#define H5_MY_PKG_ERR   H5E_LR
+#ifdef H5LT_MODULE
+#define H5_MY_PKG       H5LT
+#define H5_MY_PKG_ERR   H5E_LT
 #define H5_MY_PKG_INIT  YES
-#endif /* H5LR_MODULE */
+#endif /* H5LT_MODULE */
 
 /* Get package's private header */
-#include "H5LRprivate.h"
+#include "H5LTprivate.h"
 
 /* Other private headers needed by this file */
 
@@ -48,15 +48,15 @@
 /* Package Private Macros */
 /**************************/
 
-/* If this package header is being included in one of the H5LR modules, define
+/* If this package header is being included in one of the H5LT modules, define
  *      the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
  */
-//#ifdef H5LR_MODULE
-//#define H5_MY_PKG       H5LR
-//#define H5_MY_PKG_ERR   H5E_LREF
+//#ifdef H5LT_MODULE
+//#define H5_MY_PKG       H5LT
+//#define H5_MY_PKG_ERR   H5E_LT
 //#define H5_MY_PKG_INIT  YES
-//#endif /* H5LR_MODULE */
+//#endif /* H5LT_MODULE */
 
 
 /****************************/
@@ -74,5 +74,5 @@
 /******************************/
 
 
-#endif /* _H5LRpkg_H */
+#endif /* _H5LTpkg_H */
 

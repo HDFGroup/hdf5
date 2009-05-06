@@ -19,7 +19,7 @@
 /* High-level library internal header file */
 #include "H5HLprivate2.h"
 
-/* public LT prototypes			*/
+/* public LR prototypes			*/
 #include "H5LRpublic.h"
 
 /*-------------------------------------------------------------------------

@@ -67,11 +67,13 @@
 #ifndef TRUE
 #   define TRUE 1
 #endif
-
 /* Macro for "glueing" together items, for re-scanning macros */
 #define H5_GLUE(x,y)       x##y
 #define H5_GLUE3(x,y,z)    x##y##z
 #define H5_GLUE4(w,x,y,z)  w##x##y##z
+
+
+
 
 /************************************************/
 /* Revisions to FUNC_ENTER/LEAVE & Error Macros */
@@ -149,10 +151,11 @@ H5_DECLARE_PKG_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
 #endif /* H5_MY_PKG */
 
 /* API re-entrance variable */
-extern hbool_t H5HL_api_entered_g;    /* Has library already been entered through API? */
+/* extern hbool_t H5HL_api_entered_g; */    /* Has library already been entered through API? */
 
 /* extern global variables */
 extern hbool_t H5HL_libinit_g;    /* Has the library been initialized? */
+                                                                \
 
 /* Use FUNC to safely handle variations of C99 __func__ keyword handling */
 #ifdef H5_HAVE_C99_FUNC
@@ -188,7 +191,6 @@ extern hbool_t H5HL_libinit_g;    /* Has the library been initialized? */
                                                                               \
     /* Enter scope for this type of function */				      \
     {{
-
 #define H5_PUBLIC_ENTER(pkg, pkg_init)					      \
     FUNC_ENTER_NAME_CHECK(H5_IS_PUB(FUNC))				      \
                                                                               \
@@ -203,15 +205,16 @@ extern hbool_t H5HL_libinit_g;    /* Has the library been initialized? */
             H5E_PRINTF(H5E_CANTINIT, "interface initialization failed");      \
             ret_value = fail_value;					      \
             goto func_init_failed;					      \
-        } /* end if */						              \
+        } /* end if */                                                        \
+	atexit( H5HL_close);			                              \
     } /* end if */						              \
                                                                               \
     /* Initialize this interface if desired */				      \
     H5_GLUE3(H5_PKG_, pkg_init, _INIT)(pkg)				      \
                                                                               \
     /* Check for re-entering API routine */				      \
-    assert(!H5HL_api_entered_g);					      \
-    H5HL_api_entered_g = TRUE;						      \
+    /* assert(!H5HL_api_entered_g); */					      \
+    /* H5HL_api_entered_g = TRUE; */						      \
                                                                               \
     /* Enter scope for this type of function */				      \
     {{{
@@ -246,6 +249,10 @@ func									      \
 /* Open function */							      \
 {									      \
     ret_typ ret_value = ret_init;					      \
+    H5E_auto2_t efunc2;					                      \
+    void *H5E_saved_edata;						      \
+    (void)H5Eget_auto2(H5E_DEFAULT, &efunc2, &H5E_saved_edata);               \
+    (void)H5Eset_auto2(H5E_DEFAULT, NULL, NULL);			      \
     H5_GLUE(FUNC_ERR_VAR_, use_err)(ret_typ, err)			      \
     H5_GLUE(FUNC_ENTER_, scope)
 
@@ -286,15 +293,15 @@ func_init_failed:							      \
         (void)H5HLE_dump_api_stack(TRUE);				      \
                                                                               \
     /* Check for leaving API routine */					      \
-    assert(H5HL_api_entered_g);						      \
-    H5HL_api_entered_g = FALSE;						      \
+    /* assert(H5HL_api_entered_g); */						      \
+    /* H5HL_api_entered_g = FALSE; */						      \
                                                                               \
 
 /* Use this macro when leaving all functions */
-#define END_FUNC(scope)							      \
+#define END_FUNC(scope)                                                       \
+    (void)H5Eset_auto2(H5E_DEFAULT, efunc2, H5E_saved_edata);	              \       
     /* Scope-specific function conclusion */				      \
     H5_GLUE(FUNC_LEAVE_, scope)						      \
-                                                                              \
     /* Leave routine */							      \
     return(ret_value);							      \
                                                                               \
@@ -330,7 +337,7 @@ func_init_failed:							      \
  * The return value is assigned to a variable `ret_value' and control branches
  * to the `catch_except' label, if we're not already past it.
  */
-#define H5E_THROW(...) {						      \
+#define H5E_THROW(...) {                                                      \
     H5E_PRINTF(__VA_ARGS__);						      \
     H5_LEAVE(fail_value)						      \
 }
@@ -342,6 +349,8 @@ func_init_failed:							      \
 
 /* Private functions */
 herr_t H5HL_init_library(void);
+
+void H5HL_close(void);
 
 #endif /* _H5HLprivate2_H */
 
