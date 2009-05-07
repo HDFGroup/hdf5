@@ -100,6 +100,10 @@ static int          display_packed_bits = FALSE; /*print 1-byte numbers as packe
 static H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
 static H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | descending]   */
 
+/* packed bits display parameters */
+static int packed_offset[8];
+static int packed_lenght[8];
+
 /**
  **  Added for XML  **
  **/
@@ -119,6 +123,7 @@ static int              indent;              /*how far in to indent the line    
 /* internal functions */
 static hid_t    h5_fileaccess(void);
 static void     dump_oid(hid_t oid);
+static void     dump_packed_bits(unsigned int packed_index);
 static void     print_enum(hid_t type);
 static int      xml_name_to_XID(const char *, char *, int , int );
 static void     init_prefix(char **prfx, size_t prfx_len);
@@ -2221,6 +2226,9 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     if(display_dcpl)
         dump_dcpl(dcpl_id, type, did);
 
+    if(display_packed_bits)
+        dump_packed_bits(packed_output-1);
+
     if(display_data)
         switch(H5Tget_class(type)) {
             case H5T_TIME:
@@ -2593,6 +2601,22 @@ dump_oid(hid_t oid)
 {
     indentation(indent + COL);
     printf("%s %s %d %s\n", OBJID, BEGIN, oid, END);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    dump_packed_bits
+ *
+ * Purpose:     Prints the packed bits offset and lenght
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+dump_packed_bits(unsigned int packed_index)
+{
+    indentation(indent + COL);
+    printf("%s %s=%d %s=%d\n", PACKED_BITS, PACKED_OFFSET, packed_offset[packed_index], PACKED_LENGHT, packed_lenght[packed_index]);
 }
 
 /*-------------------------------------------------------------------------
@@ -3500,6 +3524,8 @@ parse_mask_list(const char *h_list)
 
     packed_counter = 0;
     memset(packed_mask,0,8);
+    memset(packed_offset,0,8);
+    memset(packed_lenght,0,8);
     
     if (!h_list || !*h_list || *h_list == ';')
         return;
@@ -3539,6 +3565,9 @@ parse_mask_list(const char *h_list)
                 ptr++;
         }
         if(lenght_value>=0) {
+            packed_offset[packed_output] = offset_value;
+            packed_lenght[packed_output] = lenght_value;
+            
             packed_mask[packed_output] = 1 << offset_value;
             while(lenght_value>1) {
                 packed_mask[packed_output] = packed_mask[packed_output] << 1;
