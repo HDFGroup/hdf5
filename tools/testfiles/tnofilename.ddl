@@ -26,6 +26,8 @@ usage: h5dump [OPTIONS] file
      -m T, --format=T     Set the floating point output format
      -q Q, --sort_by=Q    Sort groups and attributes by index Q
      -z Z, --sort_order=Z Sort groups and attributes by order Z
+     -M M, --packedbits=M Print packed bits using mask format M for dataset P given
+                          in option d. Where M is (offset,length)[,(offset,length)].
      -R, --region         Print dataset pointed by region references
      -x, --xml            Output in XML using Schema
      -u, --use-dtd        Output in XML using DTD
@@ -65,6 +67,8 @@ usage: h5dump [OPTIONS] file
         -d (dataset) is used. B is an optional argument, defaults to NATIVE
   Q - is the sort index type. It can be "creation_order" or "name" (default)
   Z - is the sort order type. It can be "descending" or "ascending" (default)
+  M - is a paired list of integers the first number of which is the offset and the
+        second number is the length of the its being queried
 
   Examples:
 

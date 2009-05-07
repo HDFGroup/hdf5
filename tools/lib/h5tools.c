@@ -40,6 +40,8 @@ FILE *rawdatastream; /* should initialize to stdout but gcc moans about it */
 int bin_output; /* binary output */
 int bin_form; /* binary form */
 int region_output; /* region output */
+int packed_output; /* number of packed bits to display */
+unsigned int packed_counter; /* counter for which packed bits to display */
 
 static h5tool_format_t h5tools_dataformat = { 
 0, /*raw */

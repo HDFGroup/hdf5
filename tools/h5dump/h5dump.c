@@ -81,7 +81,6 @@ static const char   *fp_format = NULL;
 const char          *outfname=NULL;
 
 
-
 /* things to display or which are set via command line parameters */
 static int          display_all       = TRUE;
 static int          display_oid       = FALSE;
@@ -95,6 +94,7 @@ static int          display_fi        = FALSE; /*file index */
 static int          display_ai        = TRUE;  /*array index */
 static int          display_escape    = FALSE; /*escape non printable characters */
 static int          display_region    = FALSE; /*print region reference data */
+static int          display_packed_bits = FALSE; /*print 1-byte numbers as packed bits*/
 
 /* sort parameters */
 static H5_index_t   sort_by           = H5_INDEX_NAME; /*sort_by [creation_order | name]  */
@@ -389,7 +389,7 @@ struct handler_t {
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:R";
+static const char *s_opts = "hnpeyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o:b*F:s:S:Aq:z:m:RM:";
 static struct long_options l_opts[] = {
     { "help", no_arg, 'h' },
     { "hel", no_arg, 'h' },
@@ -502,6 +502,7 @@ static struct long_options l_opts[] = {
     { "sort_order", require_arg, 'z' },
     { "format", require_arg, 'm' },
     { "region", no_arg, 'R' },
+    { "packed-bits", require_arg, 'M' },
     { NULL, 0, '\0' }
 };
 
@@ -655,6 +656,8 @@ usage(const char *prog)
     fprintf(stdout, "     -m T, --format=T     Set the floating point output format\n");
     fprintf(stdout, "     -q Q, --sort_by=Q    Sort groups and attributes by index Q\n");
     fprintf(stdout, "     -z Z, --sort_order=Z Sort groups and attributes by order Z\n");
+    fprintf(stdout, "     -M M, --packedbits=M Print packed bits using mask format M for dataset P given\n");
+    fprintf(stdout, "                          in option d. Where M is (offset,length)[,(offset,length)].\n");
     fprintf(stdout, "     -R, --region         Print dataset pointed by region references\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
     fprintf(stdout, "     -u, --use-dtd        Output in XML using DTD\n");
@@ -694,6 +697,8 @@ usage(const char *prog)
     fprintf(stdout, "        -d (dataset) is used. B is an optional argument, defaults to NATIVE\n");
     fprintf(stdout, "  Q - is the sort index type. It can be \"creation_order\" or \"name\" (default)\n");
     fprintf(stdout, "  Z - is the sort order type. It can be \"descending\" or \"ascending\" (default)\n");
+    fprintf(stdout, "  M - is a paired list of integers the first number of which is the offset and the\n");
+    fprintf(stdout, "        second number is the length of the its being queried\n");
     fprintf(stdout, "\n");
     fprintf(stdout, "  Examples:\n");
     fprintf(stdout, "\n");
@@ -2394,12 +2399,10 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     outputformat->pindex=display_index;
 
     /* do not print indices for regions */
-    if(obj_data == DATASET_DATA)
-    {
+    if(obj_data == DATASET_DATA) {
         hid_t f_type = H5Dget_type(obj_id);
 
-        if (H5Tequal(f_type, H5T_STD_REF_DSETREG))
-        {
+        if (H5Tequal(f_type, H5T_STD_REF_DSETREG)) {
             if (display_region) {
                 if (display_index) {
                     outputformat->pindex = 1;
@@ -2490,13 +2493,15 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
         status = h5tools_dump_dset(stdout, outputformat, obj_id, -1, sset, depth);
 
         H5Tclose(f_type);
-    } else {
+    } 
+    else {
         /* need to call h5tools_dump_mem for the attribute data */
         space = H5Aget_space(obj_id);
         space_type = H5Sget_simple_extent_type(space);
         if(space_type == H5S_NULL || space_type == H5S_NO_CLASS) {
             status = SUCCEED;
-        } else {
+        } 
+        else {
             char        string_prefix[64];
             h5tool_format_t    string_dataformat;
 
@@ -3475,6 +3480,80 @@ parse_subset_params(char *dset)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    parse_mask_list
+ *
+ * Purpose:     Parse a list of comma or space separated integers and fill
+ *              the packed_bits list and counter. The string being passed into this function
+ *              should be at the start of the list you want to parse. 
+ *
+ * Return:      None
+ *
+ *-------------------------------------------------------------------------
+ */
+static void
+parse_mask_list(const char *h_list)
+{
+    hsize_t        *p_list;
+    const char     *ptr;
+    unsigned int    size_count = 0, i = 0, last_digit = 0;
+    int             offset_value = 0, lenght_value = 0;
+
+    packed_counter = 0;
+    memset(packed_mask,0,8);
+    
+    if (!h_list || !*h_list || *h_list == ';')
+        return;
+
+    /* count how many integers do we have */
+    for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++) {
+        if (isdigit(*ptr)) {
+            if (!last_digit)
+                /* the last read character wasn't a digit */
+                size_count++;
+
+            last_digit = 1;
+        } 
+        else {
+            last_digit = 0;
+        }
+    }
+
+    if (size_count == 0) 
+        /* there aren't any integers to read */
+       return;
+
+    offset_value = -1;
+    lenght_value = -1;
+    packed_output = 0;
+    for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++) {
+        if(isdigit(*ptr)) {
+            i++;
+            /* we should have an integer now */
+            if(offset_value==-1)
+                offset_value = atoi(ptr);
+            else
+                lenght_value = atoi(ptr);
+
+            while (isdigit(*ptr))
+                /* scroll to end of integer */
+                ptr++;
+        }
+        if(lenght_value>=0) {
+            packed_mask[packed_output] = 1 << offset_value;
+            while(lenght_value>1) {
+                packed_mask[packed_output] = packed_mask[packed_output] << 1;
+                packed_mask[packed_output] |= 1 << offset_value;
+                lenght_value--;
+            }
+            packed_output++;
+            offset_value = -1;
+            lenght_value = -1;
+        }
+    }
+    packed_counter = packed_mask[0];
+}
+
+/*-------------------------------------------------------------------------
  * Function:    handle_datasets
  *
  * Purpose:     Handle the datasets from the command.
@@ -4008,74 +4087,70 @@ parse_start:
             break;
 
         case 'o':
+            if ( bin_output ) {
+                if (set_output_file(opt_arg, 1) < 0) {
+                    usage(progname);
+                    leave(EXIT_FAILURE);
+                }
+            }
+            else {
+                if (set_output_file(opt_arg, 0) < 0) {
+                    usage(progname);
+                    leave(EXIT_FAILURE);
+                }
+            }
 
-         if ( bin_output )
-         {
-          if (set_output_file(opt_arg, 1) < 0){
-           usage(progname);
-           leave(EXIT_FAILURE);
-          }
-         }
-         else
-         {
-          if (set_output_file(opt_arg, 0) < 0){
-           usage(progname);
-           leave(EXIT_FAILURE);
-          }
-         }
+            usingdasho = TRUE;
+            last_was_dset = FALSE;
+            outfname = opt_arg;
+            break;
 
-         usingdasho = TRUE;
-         last_was_dset = FALSE;
-         outfname = opt_arg;
-         break;
+        case 'b':
+            if ( opt_arg != NULL) {
+                if ( ( bin_form = set_binary_form(opt_arg)) < 0) {
+                    /* failed to set binary form */
+                    usage(progname);
+                    leave(EXIT_FAILURE);
+                }
+            }
+            bin_output = TRUE;
+            if (outfname!=NULL) {
+                if (set_output_file(outfname, 1) < 0)  {
+                    /* failed to set output file */
+                    usage(progname);
+                    leave(EXIT_FAILURE);
+                }
 
-       case 'b':
+                last_was_dset = FALSE;
+            }
+            break;
 
-        if ( opt_arg != NULL)
-           {
-               if ( ( bin_form = set_binary_form(opt_arg)) < 0)
-               {
-                   /* failed to set binary form */
-                   usage(progname);
-                   leave(EXIT_FAILURE);
-               }
-           }
-           bin_output = TRUE;
-           if (outfname!=NULL) 
-           {
-               if (set_output_file(outfname, 1) < 0)
-               {
-                   /* failed to set output file */
-                   usage(progname);
-                   leave(EXIT_FAILURE);
-               }
-               
-               last_was_dset = FALSE;
-           }
-           
-           break;
+        case 'q':
+            if ( ( sort_by = set_sort_by(opt_arg)) < 0) {
+                /* failed to set "sort by" form */
+                usage(progname);
+                leave(EXIT_FAILURE);
+            }
+            break;
 
-       case 'q':
+        case 'z':
+            if ( ( sort_order = set_sort_order(opt_arg)) < 0) {
+                /* failed to set "sort order" form */
+                usage(progname);
+                leave(EXIT_FAILURE);
+            }
+            break;
 
-           if ( ( sort_by = set_sort_by(opt_arg)) < 0)
-           {
-               /* failed to set "sort by" form */
-               usage(progname);
-               leave(EXIT_FAILURE);
-           }
-
-           break;
-
-       case 'z':
-
-           if ( ( sort_order = set_sort_order(opt_arg)) < 0)
-           {
-               /* failed to set "sort order" form */
-               usage(progname);
-               leave(EXIT_FAILURE);
-           }
-
-           break;
+        case 'M':
+            if (!last_was_dset) {
+                error_msg(progname,
+                          "option `-%c' can only be used after --dataset option\n",
+                          opt);
+                leave(EXIT_FAILURE);
+            }
+            parse_mask_list(opt_arg);
+            display_packed_bits = TRUE;
+            break;
 
         /** begin XML parameters **/
         case 'x':

@@ -507,11 +507,15 @@ struct subset_t {
     hsize_t *block;
 };
 
+/* mask list for packed bits */
+unsigned int packed_mask[8];  /* packed bits are restricted to 1 byte */
+
 extern FILE   *rawdatastream;       /* output stream for raw data */
 extern int     bin_output;          /* binary output */
 extern int     bin_form;            /* binary form */
 extern int     region_output;       /* region output */
-
+extern int     packed_output;       /* packed bits output count */
+extern unsigned int  packed_counter;      /* counter for which packed bits to display */
 
 
 /* Strings for output */
