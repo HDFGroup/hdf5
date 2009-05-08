@@ -71,7 +71,7 @@
 #define FILE_CONTENTS   "FILE_CONTENTS"
 #define PACKED_BITS     "PACKED_BITS"
 #define PACKED_OFFSET   "OFFSET"
-#define PACKED_LENGHT   "LENGHT"
+#define PACKED_LENGTH   "LENGTH"
 
 #define BEGIN           "{"
 #define END             "}"

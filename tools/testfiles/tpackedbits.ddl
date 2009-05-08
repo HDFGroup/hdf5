@@ -5,7 +5,7 @@ HDF5 "tdset.h5" {
 DATASET "/dset1" {
    DATATYPE  H5T_STD_I32BE
    DATASPACE  SIMPLE { ( 10, 20 ) / ( 10, 20 ) }
-   PACKED_BITS OFFSET=0 LENGHT=2
+   PACKED_BITS OFFSET=0 LENGTH=2
    DATA {
    (0,0): 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3,
    (1,0): 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3, 0,

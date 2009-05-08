@@ -102,7 +102,7 @@ static H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | d
 
 /* packed bits display parameters */
 static int packed_offset[8];
-static int packed_lenght[8];
+static int packed_length[8];
 #define PACKED_BITS_LOOP_MAX         8
 
 /**
@@ -2617,7 +2617,7 @@ dump_oid(hid_t oid)
 /*-------------------------------------------------------------------------
  * Function:    dump_packed_bits
  *
- * Purpose:     Prints the packed bits offset and lenght
+ * Purpose:     Prints the packed bits offset and length
  *
  * Return:      void
  *
@@ -2627,7 +2627,7 @@ static void
 dump_packed_bits(unsigned int packed_index)
 {
     indentation(indent + COL);
-    printf("%s %s=%d %s=%d\n", PACKED_BITS, PACKED_OFFSET, packed_offset[packed_index], PACKED_LENGHT, packed_lenght[packed_index]);
+    printf("%s %s=%d %s=%d\n", PACKED_BITS, PACKED_OFFSET, packed_offset[packed_index], PACKED_LENGTH, packed_length[packed_index]);
 }
 
 /*-------------------------------------------------------------------------
@@ -3531,12 +3531,12 @@ parse_mask_list(const char *h_list)
     hsize_t        *p_list;
     const char     *ptr;
     unsigned int    size_count = 0, i = 0, last_digit = 0;
-    int             offset_value = 0, lenght_value = 0;
+    int             offset_value = 0, length_value = 0;
 
     packed_counter = 0;
     memset(packed_mask,0,8);
     memset(packed_offset,0,8);
-    memset(packed_lenght,0,8);
+    memset(packed_length,0,8);
     
     if (!h_list || !*h_list || *h_list == ';')
         return;
@@ -3560,7 +3560,7 @@ parse_mask_list(const char *h_list)
        return;
 
     offset_value = -1;
-    lenght_value = -1;
+    length_value = -1;
     packed_output = 0;
     for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++) {
         if(isdigit(*ptr)) {
@@ -3569,25 +3569,25 @@ parse_mask_list(const char *h_list)
             if(offset_value==-1)
                 offset_value = atoi(ptr);
             else
-                lenght_value = atoi(ptr);
+                length_value = atoi(ptr);
 
             while (isdigit(*ptr))
                 /* scroll to end of integer */
                 ptr++;
         }
-        if(lenght_value>=0) {
+        if(length_value>=0) {
             packed_offset[packed_output] = offset_value;
-            packed_lenght[packed_output] = lenght_value;
+            packed_length[packed_output] = length_value;
             
             packed_mask[packed_output] = 1 << offset_value;
-            while(lenght_value>1) {
+            while(length_value>1) {
                 packed_mask[packed_output] = packed_mask[packed_output] << 1;
                 packed_mask[packed_output] |= 1 << offset_value;
-                lenght_value--;
+                length_value--;
             }
             packed_output++;
             offset_value = -1;
-            lenght_value = -1;
+            length_value = -1;
         }
     }
     if(packed_output > PACKED_BITS_LOOP_MAX)
