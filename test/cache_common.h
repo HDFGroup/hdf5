@@ -51,8 +51,9 @@
 #define HUGE_ENTRY_TYPE		7
 #define MONSTER_ENTRY_TYPE	8
 #define VARIABLE_ENTRY_TYPE	9
+#define NOTIFY_ENTRY_TYPE	10
 
-#define NUMBER_OF_ENTRY_TYPES   10
+#define NUMBER_OF_ENTRY_TYPES   11
 
 #define PICO_ENTRY_SIZE		(size_t)1
 #define NANO_ENTRY_SIZE		(size_t)4
@@ -64,6 +65,7 @@
 #define HUGE_ENTRY_SIZE		(size_t)(16 * 1024)
 #define MONSTER_ENTRY_SIZE	(size_t)(64 * 1024)
 #define VARIABLE_ENTRY_SIZE	(size_t)(10 * 1024)
+#define NOTIFY_ENTRY_SIZE	(size_t)1
 
 #define NUM_PICO_ENTRIES	(10 * 1024)
 #define NUM_NANO_ENTRIES	(10 * 1024)
@@ -75,6 +77,7 @@
 #define NUM_HUGE_ENTRIES	(10 * 1024)
 #define NUM_MONSTER_ENTRIES	(10 * 1024)
 #define NUM_VARIABLE_ENTRIES	(10 * 1024)
+#define NUM_NOTIFY_ENTRIES	(10 * 1024)
 
 #define MAX_ENTRIES		(10 * 1024)
 
@@ -97,9 +100,11 @@
                                       (HUGE_ENTRY_SIZE * NUM_HUGE_ENTRIES))
 #define VARIABLE_BASE_ADDR	(haddr_t)(MONSTER_BASE_ADDR + \
 				     (MONSTER_ENTRY_SIZE * NUM_MONSTER_ENTRIES))
+#define NOTIFY_BASE_ADDR	(haddr_t)(VARIABLE_BASE_ADDR + \
+				     (VARIABLE_ENTRY_SIZE * NUM_VARIABLE_ENTRIES))
 
-#define PICO_ALT_BASE_ADDR	(haddr_t)(VARIABLE_BASE_ADDR + \
-			           (VARIABLE_ENTRY_SIZE * NUM_VARIABLE_ENTRIES))
+#define PICO_ALT_BASE_ADDR	(haddr_t)(NOTIFY_BASE_ADDR + \
+			           (NOTIFY_ENTRY_SIZE * NUM_NOTIFY_ENTRIES))
 #define NANO_ALT_BASE_ADDR	(haddr_t)(PICO_ALT_BASE_ADDR + \
                                       (PICO_ENTRY_SIZE * NUM_PICO_ENTRIES))
 #define MICRO_ALT_BASE_ADDR	(haddr_t)(NANO_ALT_BASE_ADDR + \
@@ -118,6 +123,8 @@
                                       (HUGE_ENTRY_SIZE * NUM_HUGE_ENTRIES))
 #define VARIABLE_ALT_BASE_ADDR	(haddr_t)(MONSTER_ALT_BASE_ADDR + \
                                      (MONSTER_ENTRY_SIZE * NUM_MONSTER_ENTRIES))
+#define NOTIFY_ALT_BASE_ADDR	(haddr_t)(VARIABLE_ALT_BASE_ADDR + \
+                                     (VARIABLE_ENTRY_SIZE * NUM_VARIABLE_ENTRIES))
 
 #define MAX_PINS	8	/* Maximum number of entries that can be
 				 * directly pinned by a single entry.
@@ -309,6 +316,9 @@ typedef struct test_entry_t
     hbool_t		pinned_from_client;	/* entry was pinned by client call */
     hbool_t		pinned_from_cache;	/* entry was pinned by cache internally */
     unsigned            flush_order;    /* Order that entry was flushed in */
+
+    unsigned            notify_after_insert_count;    /* Count of times that entry was inserted in cache */
+    unsigned            notify_before_evict_count;    /* Count of times that entry was removed in cache */
 } test_entry_t;
 
 /* The following is a cut down copy of the hash table manipulation
@@ -530,6 +540,7 @@ herr_t large_clear(H5F_t * f, void *  thing, hbool_t dest);
 herr_t huge_clear(H5F_t * f, void *  thing, hbool_t dest);
 herr_t monster_clear(H5F_t * f, void *  thing, hbool_t dest);
 herr_t variable_clear(H5F_t * f, void *  thing, hbool_t dest);
+herr_t notify_clear(H5F_t * f, void *  thing, hbool_t dest);
 
 
 herr_t pico_dest(H5F_t * f, void * thing);
@@ -542,6 +553,7 @@ herr_t large_dest(H5F_t * f, void * thing);
 herr_t huge_dest(H5F_t * f, void *  thing);
 herr_t monster_dest(H5F_t * f, void *  thing);
 herr_t variable_dest(H5F_t * f, void *  thing);
+herr_t notify_dest(H5F_t * f, void *  thing);
 
 
 herr_t pico_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
@@ -563,6 +575,8 @@ herr_t huge_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
 herr_t monster_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                      haddr_t addr, void *thing, unsigned * flags_ptr);
 herr_t variable_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
+                      haddr_t addr, void *thing, unsigned * flags_ptr);
+herr_t notify_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
                       haddr_t addr, void *thing, unsigned * flags_ptr);
 
 
@@ -586,6 +600,8 @@ void * monster_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
                     const void *udata1, void *udata2);
 void * variable_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
                      const void *udata1, void *udata2);
+void * notify_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+                     const void *udata1, void *udata2);
 
 
 herr_t pico_size(H5F_t * f, void * thing, size_t * size_ptr);
@@ -598,6 +614,9 @@ herr_t large_size(H5F_t * f, void * thing, size_t * size_ptr);
 herr_t huge_size(H5F_t * f, void * thing, size_t * size_ptr);
 herr_t monster_size(H5F_t * f, void * thing, size_t * size_ptr);
 herr_t variable_size(H5F_t * f, void * thing, size_t * size_ptr);
+herr_t notify_size(H5F_t * f, void * thing, size_t * size_ptr);
+
+herr_t notify_notify(H5C_notify_action_t action, void *thing);
 
 /* callback table extern */
 

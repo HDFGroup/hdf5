@@ -43,6 +43,7 @@ test_entry_t large_entries[NUM_LARGE_ENTRIES], orig_large_entries[NUM_LARGE_ENTR
 test_entry_t huge_entries[NUM_HUGE_ENTRIES], orig_huge_entries[NUM_HUGE_ENTRIES];
 test_entry_t monster_entries[NUM_MONSTER_ENTRIES], orig_monster_entries[NUM_MONSTER_ENTRIES];
 test_entry_t variable_entries[NUM_VARIABLE_ENTRIES], orig_variable_entries[NUM_VARIABLE_ENTRIES];
+test_entry_t notify_entries[NUM_NOTIFY_ENTRIES], orig_notify_entries[NUM_NOTIFY_ENTRIES];
 
 hbool_t orig_entry_arrays_init = FALSE;
 
@@ -57,7 +58,8 @@ test_entry_t * entries[NUMBER_OF_ENTRY_TYPES] =
     large_entries,
     huge_entries,
     monster_entries,
-    variable_entries
+    variable_entries,
+    notify_entries
 };
 
 test_entry_t * orig_entries[NUMBER_OF_ENTRY_TYPES] =
@@ -71,7 +73,8 @@ test_entry_t * orig_entries[NUMBER_OF_ENTRY_TYPES] =
     orig_large_entries,
     orig_huge_entries,
     orig_monster_entries,
-    orig_variable_entries
+    orig_variable_entries,
+    orig_notify_entries
 };
 
 const int32_t max_indices[NUMBER_OF_ENTRY_TYPES] =
@@ -85,7 +88,8 @@ const int32_t max_indices[NUMBER_OF_ENTRY_TYPES] =
     NUM_LARGE_ENTRIES - 1,
     NUM_HUGE_ENTRIES - 1,
     NUM_MONSTER_ENTRIES - 1,
-    NUM_VARIABLE_ENTRIES - 1
+    NUM_VARIABLE_ENTRIES - 1,
+    NUM_NOTIFY_ENTRIES - 1
 };
 
 const size_t entry_sizes[NUMBER_OF_ENTRY_TYPES] =
@@ -99,7 +103,8 @@ const size_t entry_sizes[NUMBER_OF_ENTRY_TYPES] =
     LARGE_ENTRY_SIZE,
     HUGE_ENTRY_SIZE,
     MONSTER_ENTRY_SIZE,
-    VARIABLE_ENTRY_SIZE
+    VARIABLE_ENTRY_SIZE,
+    NOTIFY_ENTRY_SIZE
 };
 
 const haddr_t base_addrs[NUMBER_OF_ENTRY_TYPES] =
@@ -113,7 +118,8 @@ const haddr_t base_addrs[NUMBER_OF_ENTRY_TYPES] =
     LARGE_BASE_ADDR,
     HUGE_BASE_ADDR,
     MONSTER_BASE_ADDR,
-    VARIABLE_BASE_ADDR
+    VARIABLE_BASE_ADDR,
+    NOTIFY_BASE_ADDR
 };
 
 const haddr_t alt_base_addrs[NUMBER_OF_ENTRY_TYPES] =
@@ -127,7 +133,8 @@ const haddr_t alt_base_addrs[NUMBER_OF_ENTRY_TYPES] =
     LARGE_ALT_BASE_ADDR,
     HUGE_ALT_BASE_ADDR,
     MONSTER_ALT_BASE_ADDR,
-    VARIABLE_ALT_BASE_ADDR
+    VARIABLE_ALT_BASE_ADDR,
+    NOTIFY_ALT_BASE_ADDR
 };
 
 const char * entry_type_names[NUMBER_OF_ENTRY_TYPES] =
@@ -141,7 +148,8 @@ const char * entry_type_names[NUMBER_OF_ENTRY_TYPES] =
     "large entries -- 4 KB",
     "huge entries -- 16 KB",
     "monster entries -- 64 KB",
-    "variable entries -- 1B - 10KB"
+    "variable entries -- 1B - 10KB",
+    "notify entries -- 1B"
 };
 
 
@@ -238,6 +246,15 @@ const H5C_class_t types[NUMBER_OF_ENTRY_TYPES] =
     (H5C_clear_func_t)variable_clear,
     (H5C_notify_func_t)NULL,
     (H5C_size_func_t)variable_size
+  },
+  {
+    NOTIFY_ENTRY_TYPE,
+    (H5C_load_func_t)notify_load,
+    (H5C_flush_func_t)notify_flush,
+    (H5C_dest_func_t)notify_dest,
+    (H5C_clear_func_t)notify_clear,
+    (H5C_notify_func_t)notify_notify,
+    (H5C_size_func_t)notify_size
   }
 };
 
@@ -248,6 +265,7 @@ static herr_t flush(H5F_t *f, hid_t dxpl_id, hbool_t dest,
 static void * load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
                    const void *udata1, void *udata2);
 static herr_t size(H5F_t * f, void * thing, size_t * size_ptr);
+static herr_t notify(H5C_notify_action_t action, void *thing);
 
 
 
@@ -542,6 +560,13 @@ variable_clear(H5F_t * f, void *  thing, hbool_t dest)
     return(clear(f, thing, dest));
 }
 
+herr_t
+notify_clear(H5F_t * f, void *  thing, hbool_t dest)
+{
+    HDassert ( ((test_entry_t *)thing)->type == NOTIFY_ENTRY_TYPE );
+    return(clear(f, thing, dest));
+}
+
 
 
 /*-------------------------------------------------------------------------
@@ -707,6 +732,13 @@ herr_t
 variable_dest(H5F_t * f, void *  thing)
 {
     HDassert ( ((test_entry_t *)thing)->type == VARIABLE_ENTRY_TYPE );
+    return(destroy(f, thing));
+}
+
+herr_t
+notify_dest(H5F_t * f, void *  thing)
+{
+    HDassert ( ((test_entry_t *)thing)->type == NOTIFY_ENTRY_TYPE );
     return(destroy(f, thing));
 }
 
@@ -888,6 +920,14 @@ variable_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
     return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
 }
 
+herr_t
+notify_flush(H5F_t *f, hid_t dxpl_id, hbool_t dest, haddr_t addr,
+	       void *thing, unsigned * flags_ptr)
+{
+    HDassert ( ((test_entry_t *)thing)->type == NOTIFY_ENTRY_TYPE );
+    return(flush(f, dxpl_id, dest, addr, thing, flags_ptr));
+}
+
 
 
 /*-------------------------------------------------------------------------
@@ -1029,6 +1069,13 @@ variable_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
     return(load(f, dxpl_id, addr, udata1, udata2));
 }
 
+void *
+notify_load(H5F_t *f, hid_t dxpl_id, haddr_t addr,
+              const void *udata1, void *udata2)
+{
+    return(load(f, dxpl_id, addr, udata1, udata2));
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:	size & friends
@@ -1147,6 +1194,73 @@ variable_size(H5F_t * f, void * thing, size_t * size_ptr)
     HDassert ( ((test_entry_t *)thing)->type == VARIABLE_ENTRY_TYPE );
     return(size(f, thing, size_ptr));
 }
+
+herr_t
+notify_size(H5F_t * f, void * thing, size_t * size_ptr)
+{
+    HDassert ( ((test_entry_t *)thing)->type == NOTIFY_ENTRY_TYPE );
+    return(size(f, thing, size_ptr));
+}
+
+
+/*-------------------------------------------------------------------------
+ * Function:	notify & friends
+ *
+ * Purpose:	Record notifications of cache events for the entry.
+ *              The helper functions verify that the correct version of notify
+ *              is being called, and then call notify proper.
+ *
+ * Return:	SUCCEED
+ *
+ * Programmer:	Quincey Koziol
+ *              4/28/09
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static herr_t
+notify(H5C_notify_action_t action, void *thing)
+{
+    test_entry_t * entry_ptr;
+    test_entry_t * base_addr;
+
+    HDassert( thing );
+
+    entry_ptr = (test_entry_t *)thing;
+    base_addr = entries[entry_ptr->type];
+
+    HDassert( entry_ptr->index >= 0 );
+    HDassert( entry_ptr->index <= max_indices[entry_ptr->type] );
+    HDassert( entry_ptr == &(base_addr[entry_ptr->index]) );
+    HDassert( entry_ptr == entry_ptr->self );
+    HDassert( entry_ptr->header.addr == entry_ptr->addr );
+    HDassert( ( entry_ptr->type == VARIABLE_ENTRY_TYPE ) || \
+              ( entry_ptr->size == entry_sizes[entry_ptr->type] ) );
+
+    /* Increment count for appropriate action */
+    switch(action) {
+        case H5C_NOTIFY_ACTION_AFTER_INSERT:     /* Entry has been added to the cache */
+            entry_ptr->notify_after_insert_count++;
+            break;
+
+        case H5C_NOTIFY_ACTION_BEFORE_EVICT:      /* Entry is about to be evicted from cache */
+            entry_ptr->notify_before_evict_count++;
+            break;
+
+        default:
+            HDassert(0 && "Unknown notify action!?!");
+    } /* end switch */
+
+    return(SUCCEED);
+} /* notify() */
+
+herr_t
+notify_notify(H5C_notify_action_t action, void *thing)
+{
+    HDassert ( ((test_entry_t *)thing)->type == NOTIFY_ENTRY_TYPE );
+    return(notify(action, thing));
+}
+
 
 
 
@@ -1677,6 +1791,9 @@ reset_entries(void)
                 base_addr[j].pinned_from_cache = FALSE;
 
                 base_addr[j].flush_order = 0;
+
+                base_addr[j].notify_after_insert_count = 0;
+                base_addr[j].notify_before_evict_count = 0;
 
                 addr += (haddr_t)entry_size;
                 alt_addr += (haddr_t)entry_size;
