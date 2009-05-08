@@ -515,6 +515,7 @@ extern int     bin_output;          /* binary output */
 extern int     bin_form;            /* binary form */
 extern int     region_output;       /* region output */
 extern int     packed_output;       /* packed bits output count */
+extern int     packed_normalize; /* number of bits to shift right to display normalized */
 extern unsigned int  packed_counter;      /* counter for which packed bits to display */
 
 

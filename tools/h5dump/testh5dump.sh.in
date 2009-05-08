@@ -515,6 +515,7 @@ TOOLTEST textlinkfar.ddl textlinkfar.h5
 
 # test for dataset packed bits 
 TOOLTEST tpackedbits.ddl -d /dset1 -M 0,2 tdset.h5
+TOOLTEST tpackedbits2.ddl -d /dset1 -M 0,2,2,1 tdset.h5
 
 
 if test $nerrors -eq 0 ; then

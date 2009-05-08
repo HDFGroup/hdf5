@@ -41,6 +41,7 @@ int bin_output; /* binary output */
 int bin_form; /* binary form */
 int region_output; /* region output */
 int packed_output; /* number of packed bits to display */
+int packed_normalize; /* number of bits to shift right to display normalized */
 unsigned int packed_counter; /* counter for which packed bits to display */
 
 static h5tool_format_t h5tools_dataformat = { 

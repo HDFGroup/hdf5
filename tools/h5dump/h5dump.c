@@ -2194,6 +2194,8 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     hid_t       type, space;
     unsigned    attr_crt_order_flags;
     hid_t       dcpl_id;  /* dataset creation property list ID */
+    int         data_loop = 1;
+    int         i;
 
 
     if ((dcpl_id = H5Dget_create_plist(did)) < 0)
@@ -2226,10 +2228,16 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
     if(display_dcpl)
         dump_dcpl(dcpl_id, type, did);
 
-    if(display_packed_bits)
-        dump_packed_bits(packed_output-1);
+    if(display_data) {
+        if(display_packed_bits)
+            data_loop = packed_output;
+        for(i=0;i<data_loop;i++) {
+        if(display_packed_bits) {
+            dump_packed_bits(i);
+            packed_counter = packed_mask[i];
+            packed_normalize = packed_offset[i];
+        }
 
-    if(display_data)
         switch(H5Tget_class(type)) {
             case H5T_TIME:
                 indentation(indent + COL);
@@ -2252,6 +2260,8 @@ dump_dataset(hid_t did, const char *name, struct subset_t *sset)
             default:
                 break;
         } /* end switch */
+        }
+    }
 
     indent += COL;
 

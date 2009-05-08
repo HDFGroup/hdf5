@@ -827,13 +827,13 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info,
     else if (H5Tequal(type, H5T_NATIVE_INT)) {
         HDmemcpy(&tempint, vp, sizeof(int));
         if(packed_output)
-            tempint &= packed_counter;
+            tempint = (tempint & packed_counter)>>packed_normalize;
         h5tools_str_append(str, OPT(info->fmt_int, "%d"), tempint);
     }
     else if (H5Tequal(type, H5T_NATIVE_UINT)) {
         HDmemcpy(&tempuint, vp, sizeof(unsigned int));
         if(packed_output)
-            tempuint &= packed_counter;
+            tempuint = (tempuint & packed_counter)>>packed_normalize;
         h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
     }
     else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
@@ -847,7 +847,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info,
 
         HDmemcpy(&tempshort, vp, sizeof(short));
         if(packed_output)
-            tempshort &= packed_counter;
+            tempshort = (tempshort & packed_counter)>>packed_normalize;
         h5tools_str_append(str, OPT(info->fmt_short, "%d"), tempshort);
     }
     else if (H5Tequal(type, H5T_NATIVE_USHORT)) {
@@ -855,19 +855,19 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info,
 
         HDmemcpy(&tempushort, vp, sizeof(unsigned short));
         if(packed_output)
-            tempushort &= packed_counter;
+            tempushort = (tempushort & packed_counter)>>packed_normalize;
         h5tools_str_append(str, OPT(info->fmt_ushort, "%u"), tempushort);
     }
     else if (H5Tequal(type, H5T_NATIVE_LONG)) {
         HDmemcpy(&templong, vp, sizeof(long));
         if(packed_output)
-            templong &= packed_counter;
+            templong = (templong & packed_counter)>>packed_normalize;
         h5tools_str_append(str, OPT(info->fmt_long, "%ld"), templong);
     }
     else if (H5Tequal(type, H5T_NATIVE_ULONG)) {
         HDmemcpy(&tempulong, vp, sizeof(unsigned long));
         if(packed_output)
-            tempulong &= packed_counter;
+            tempulong = (tempulong & packed_counter)>>packed_normalize;
         h5tools_str_append(str, OPT(info->fmt_ulong, "%lu"), tempulong);
     }
     else if (H5Tequal(type, H5T_NATIVE_LLONG)) {
