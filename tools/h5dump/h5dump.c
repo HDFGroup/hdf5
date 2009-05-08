@@ -103,6 +103,7 @@ static H5_iter_order_t sort_order     = H5_ITER_INC; /*sort_order [ascending | d
 /* packed bits display parameters */
 static int packed_offset[8];
 static int packed_lenght[8];
+#define PACKED_BITS_LOOP_MAX         8
 
 /**
  **  Added for XML  **
@@ -3589,6 +3590,8 @@ parse_mask_list(const char *h_list)
             lenght_value = -1;
         }
     }
+    if(packed_output > PACKED_BITS_LOOP_MAX)
+        packed_output = PACKED_BITS_LOOP_MAX;
     packed_counter = packed_mask[0];
 }
 
