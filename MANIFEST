@@ -1220,6 +1220,8 @@
 ./tools/testfiles/tnullspace.ddl
 ./tools/testfiles/tobjref.h5
 ./tools/testfiles/topaque.h5
+./tools/testfiles/tpackedbits.h5
+./tools/testfiles/tpackedbits2.h5
 ./tools/testfiles/tsaf.ddl
 ./tools/testfiles/tsaf.h5
 ./tools/testfiles/tscaleoffset.ddl
