@@ -337,22 +337,35 @@ enum_def        :       '"' enum_symbol '"' {
                                 short short_val=(short)yylval.ival;
                                 int int_val=(int)yylval.ival;
                                 long long_val=(long)yylval.ival;
-                                long_long llong_val=(long_long)yylval.ival;
+                                long long llong_val=(long long)yylval.ival;
                                 hid_t super = H5Tget_super(enum_id);
                                 hid_t native = H5Tget_native_type(super, H5T_DIR_ASCEND);
-                                
+                                H5T_order_t super_order = H5Tget_order(super);
+                                H5T_order_t native_order = H5Tget_order(native);
+ 
                                 if(is_enum && is_enum_memb) { /*if it's an enum member*/
                                     /*To handle machines of different endianness*/
-                                    if(H5Tequal(native, H5T_NATIVE_SCHAR) || H5Tequal(native, H5T_NATIVE_UCHAR))
+                                    if(H5Tequal(native, H5T_NATIVE_SCHAR) || H5Tequal(native, H5T_NATIVE_UCHAR)) {
+                                        if(super_order != native_order)
+                                            H5Tconvert(native, super, 1, &char_val, NULL, H5P_DEFAULT); 
                                         H5Tenum_insert(enum_id, enum_memb_symbol, &char_val);
-                                    else if(H5Tequal(native, H5T_NATIVE_SHORT) || H5Tequal(native, H5T_NATIVE_USHORT))
+                                    } else if(H5Tequal(native, H5T_NATIVE_SHORT) || H5Tequal(native, H5T_NATIVE_USHORT)) {
+                                        if(super_order != native_order)
+                                            H5Tconvert(native, super, 1, &short_val, NULL, H5P_DEFAULT); 
                                         H5Tenum_insert(enum_id, enum_memb_symbol, &short_val);
-                                    else if(H5Tequal(native, H5T_NATIVE_INT) || H5Tequal(native, H5T_NATIVE_UINT))
+                                    } else if(H5Tequal(native, H5T_NATIVE_INT) || H5Tequal(native, H5T_NATIVE_UINT)) {
+                                        if(super_order != native_order)
+                                            H5Tconvert(native, super, 1, &int_val, NULL, H5P_DEFAULT); 
                                         H5Tenum_insert(enum_id, enum_memb_symbol, &int_val);
-                                    else if(H5Tequal(native, H5T_NATIVE_LONG) || H5Tequal(native, H5T_NATIVE_ULONG))
+                                    } else if(H5Tequal(native, H5T_NATIVE_LONG) || H5Tequal(native, H5T_NATIVE_ULONG)) {
+                                        if(super_order != native_order)
+                                            H5Tconvert(native, super, 1, &long_val, NULL, H5P_DEFAULT); 
                                         H5Tenum_insert(enum_id, enum_memb_symbol, &long_val);
-                                    else if(H5Tequal(native, H5T_NATIVE_LLONG) || H5Tequal(native, H5T_NATIVE_ULLONG))
+                                    } else if(H5Tequal(native, H5T_NATIVE_LLONG) || H5Tequal(native, H5T_NATIVE_ULLONG)) {
+                                        if(super_order != native_order)
+                                            H5Tconvert(native, super, 1, &llong_val, NULL, H5P_DEFAULT); 
                                         H5Tenum_insert(enum_id, enum_memb_symbol, &llong_val);
+                                    }
 
                                     is_enum_memb = 0; 
                                     if(enum_memb_symbol) free(enum_memb_symbol);

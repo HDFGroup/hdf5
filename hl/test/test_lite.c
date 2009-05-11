@@ -1294,6 +1294,7 @@ static int test_enums(void)
     H5T_class_t type_class;
     char*   dt_str;
     size_t  str_len;
+    H5T_order_t native_order = H5Tget_order(H5T_NATIVE_INT);
 
     TESTING3("        text for enum types");
 
@@ -1305,6 +1306,12 @@ static int test_enums(void)
     if(type_class != H5T_ENUM)
         goto out;
 
+    /* Convert the variable before using it */
+    if(!H5Tequal(H5T_STD_I32LE, H5T_NATIVE_INT)) {
+        if(H5Tconvert(H5T_NATIVE_INT, H5T_STD_I32LE, 1, &value1, NULL, H5P_DEFAULT) < 0)
+            goto out;
+    }
+
     if(H5Tenum_nameof(dtype, &value1, name1, size)<0)
         goto out;
     if(strcmp(name1, "BLUE"))
@@ -1312,6 +1319,13 @@ static int test_enums(void)
 
     if(H5Tenum_valueof(dtype, name2, &value2)<0)
         goto out;
+
+    /* Convert the variable before comparing it */
+    if(!H5Tequal(H5T_STD_I32LE, H5T_NATIVE_INT)) {
+        if(H5Tconvert(H5T_NATIVE_INT, H5T_STD_I32LE, 1, &value2, NULL, H5P_DEFAULT) < 0)
+            goto out;
+    }
+
     if(value2 != 8)
         goto out;
 
