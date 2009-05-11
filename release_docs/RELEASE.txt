@@ -229,7 +229,7 @@ WinXP 2005                            n        y    n        y    y     y
 WinXP .Net                            n        y    n        y    y     y
 WinVista 2005                         n        n    n        y    y     y
 Mac OS X 10.4.10                      n        y    n        y    y     y
-AIX 5.3 32-bit                        n        y    n        y    y     n
+AIX 5.3 32- and 64-bit                n        y    n        y    y     n
 FreeBSD 6.3 32- and 64-bit            n        n    n        y    y     y
 RedHat EL4 2.6.9-42 i686 GNU (1)  W   y        y    y        y    y     y
 RedHat EL4 2.6.18-128 i686 GNU (1)W   y        y    y        y    y     y
@@ -254,7 +254,7 @@ WinXP 2005                            y             n        n
 WinXP .Net                            y             n        n        
 WinVista 2005                         y             n        n        
 Mac OS X 10.5.6                       n             n        n        
-AIX 5.3 32-bit                        n             n        n        
+AIX 5.3 32- and 64-bit                n             n        n        
 FreeBSD 6.3 32- and 64-bit            y             n        n        
 RedHat EL4 2.6.9-42 i686 GNU (1)  W   y             n        y        
 RedHat EL4 2.6.9-42 i686 GNU (1)  W   y             n        y        
