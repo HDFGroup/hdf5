@@ -717,6 +717,40 @@ end do
 
 call passed()
 
+
+!-------------------------------------------------------------------------
+! string 
+!-------------------------------------------------------------------------
+
+call test_begin(' Make/Read datasets (string)    ')
+
+
+!
+! write dataset. 
+!
+call h5ltmake_dataset_string_f(file_id, dsetname5, buf1, errcode)
+
+!
+! read dataset. 
+!
+call h5ltread_dataset_string_f(file_id, dsetname5, buf1r, errcode)
+
+!
+! compare read and write buffers.
+!
+if ( buf1 .ne. buf1r ) then
+ print *, 'read buffer differs from write buffer'
+ print *,  buf1, ' and ',   buf1r
+ stop
+endif
+
+call passed()
+
+
+
+
+
+
 call test_begin(' Get dataset dimensions/info    ')
 
 !-------------------------------------------------------------------------
@@ -799,8 +833,8 @@ character(LEN=5), parameter :: attrname2 = "attr2"   ! Attribute name
 character(LEN=5), parameter :: attrname3 = "attr3"   ! Attribute name
 character(LEN=5), parameter :: attrname4 = "attr4"   ! Attribute name
 character(LEN=5), parameter :: attrname5 = "attr5"   ! Attribute name
-character(LEN=9), parameter :: buf1 = "mystring"     ! Data buffer
-character(LEN=9)                  :: bufr1           ! Data buffer
+character(LEN=8), parameter :: buf1 = "mystring"     ! Data buffer
+character(LEN=8)                  :: bufr1           ! Data buffer
 integer, dimension(DIM1)          :: buf2            ! Data buffer
 integer, dimension(DIM1)          :: bufr2           ! Data buffer
 real, dimension(DIM1)             :: buf3            ! Data buffer
@@ -933,6 +967,38 @@ do i = 1, DIM1
    stop
   endif
 end do
+
+call passed()
+
+
+
+!-------------------------------------------------------------------------
+! string
+!-------------------------------------------------------------------------
+
+call test_begin(' Set/Get attributes string      ')
+
+
+!
+! write attribute. 
+!
+call h5ltset_attribute_string_f(file_id,dsetname1,attrname5,buf1,errcode)
+
+!
+! read attribute. 
+!
+call h5ltget_attribute_string_f(file_id,dsetname1,attrname5,bufr1,errcode)
+
+!
+! compare read and write buffers.
+!
+
+if ( buf1 .ne. bufr1 ) then
+  print *, 'read buffer differs from write buffer'
+  print *,  buf1, ' and ',   bufr1
+  stop
+ endif
+
 
 call passed()
 
