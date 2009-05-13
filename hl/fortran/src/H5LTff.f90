@@ -2453,9 +2453,10 @@ subroutine h5ltmake_dataset_string_f(loc_id,&
  character(len=*), intent(in) :: buf                ! data buffer 
  integer :: errcode                                 ! error code
  integer :: namelen                                 ! name length
+ integer :: buflen                                  ! buffer length
             
  interface
-  integer function h5ltmake_dataset_string_c(loc_id,namelen,dset_name,buf)
+  integer function h5ltmake_dataset_string_c(loc_id,namelen,dset_name,buflen,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
   !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTMAKE_DATASET_STRING_C'::h5ltmake_dataset_string_c
@@ -2463,13 +2464,15 @@ subroutine h5ltmake_dataset_string_f(loc_id,&
   !DEC$ATTRIBUTES reference :: dset_name
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
+  integer :: buflen                                       ! lenght of data buffer
   character(len=*), intent(in) :: dset_name               ! name of the dataset 
   character(len=*), intent(in) :: buf                     ! data buffer  
   end function h5ltmake_dataset_string_c
  end interface
 
  namelen = len(dset_name)
- errcode = h5ltmake_dataset_string_c(loc_id,namelen,dset_name,buf)
+ buflen = len(buf)
+ errcode = h5ltmake_dataset_string_c(loc_id,namelen,dset_name,buflen,buf)
 
 end subroutine h5ltmake_dataset_string_f
 
@@ -2775,9 +2778,10 @@ subroutine h5ltset_attribute_string_f(loc_id,&
  character(len=*), intent(in) :: buf                ! data buffer
  integer :: namelen                                 ! name length
  integer :: attrlen                                 ! name length
+ integer :: buflen                                  ! data buffer length
 
  interface
-  integer function h5ltset_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
+  integer function h5ltset_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buflen,buf)
   use h5global
   !DEC$ IF DEFINED(HDF5F90_WINDOWS)
   !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5LTSET_ATTRIBUTE_STRING_C'::h5ltset_attribute_string_c
@@ -2787,6 +2791,7 @@ subroutine h5ltset_attribute_string_f(loc_id,&
   integer(hid_t),   intent(in) :: loc_id                  ! file or group identifier
   integer :: namelen                                      ! lenght of name buffer
   integer :: attrlen                                      ! lenght of attr name buffer
+  integer :: buflen                                       ! data buffer length
   character(len=*), intent(in) :: dset_name               ! name of the dataset 
   character(len=*), intent(in) :: attr_name               ! name of the attribute
   character(len=*), intent(in) :: buf                     ! data buffer
@@ -2795,7 +2800,8 @@ subroutine h5ltset_attribute_string_f(loc_id,&
 
  namelen = len(dset_name)
  attrlen = len(attr_name)
- errcode = h5ltset_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buf)
+ buflen = len(buf)
+ errcode = h5ltset_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buflen,buf)
 
 end subroutine h5ltset_attribute_string_f
 

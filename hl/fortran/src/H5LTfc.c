@@ -561,6 +561,7 @@ int_f
 nh5ltmake_dataset_string_c (hid_t_f *loc_id,
                             int_f *namelen,
                             _fcd name,
+                            int_f *buflen,
                             char *buf)
 {
     int     ret_value = -1;
@@ -568,6 +569,8 @@ nh5ltmake_dataset_string_c (hid_t_f *loc_id,
     hid_t   c_loc_id;
     char    *c_name = NULL;
     int     c_namelen;
+    char    *c_buf = NULL;
+    int     c_buflen;
 
     /*
     * convert FORTRAN name to C name
@@ -577,12 +580,17 @@ nh5ltmake_dataset_string_c (hid_t_f *loc_id,
     if (c_name == NULL)
         goto done;
 
+    c_buflen = *buflen;
+    c_buf = (char *)HD5f2cstring(buf, c_buflen);
+    if (c_buf == NULL)
+        goto done;
+
     /*
     * call H5LTmake_dataset_string function.
     */
     c_loc_id = (hid_t)*loc_id;
 
-    ret = H5LTmake_dataset_string(c_loc_id,c_name,buf);
+    ret = H5LTmake_dataset_string(c_loc_id,c_name,c_buf);
 
     if (ret < 0)
         goto done;
@@ -592,6 +600,8 @@ nh5ltmake_dataset_string_c (hid_t_f *loc_id,
 done:
     if(c_name!=NULL)
         free(c_name);
+    if(c_buf!=NULL)
+        free(c_buf);
 
     return ret_value;
 }
@@ -907,6 +917,7 @@ nh5ltset_attribute_string_c(hid_t_f *loc_id,
                             _fcd dsetname,
                             int_f *attrnamelen,
                             _fcd attrname,
+                            int_f *buflen,
                             void *buf)
 {
     int     ret_value = -1;
@@ -916,6 +927,8 @@ nh5ltset_attribute_string_c(hid_t_f *loc_id,
     char    *c_attrname = NULL;
     int     c_namelen;
     int     c_attrnamelen;
+    char    *c_buf = NULL;
+    int     c_buflen;
 
     /*
     * convert FORTRAN name to C name
@@ -930,12 +943,18 @@ nh5ltset_attribute_string_c(hid_t_f *loc_id,
     if (c_attrname == NULL) 
         goto done;
 
+    c_buflen = *buflen;
+    c_buf = (char *)HD5f2cstring(buf, c_buflen);
+    if (c_buf == NULL)
+        goto done;
+
+
     /*
     * call H5LTset_attribute_string function.
     */
     c_loc_id = (hid_t)*loc_id;
 
-    ret = H5LTset_attribute_string(c_loc_id,c_name,c_attrname,buf);
+    ret = H5LTset_attribute_string(c_loc_id,c_name,c_attrname,c_buf);
 
     if (ret < 0) 
         goto done;
@@ -948,6 +967,8 @@ done:
         free(c_name);
     if(c_attrname!=NULL)
         free(c_attrname);
+    if(c_buf!=NULL)
+        free(c_buf);
 
     return ret_value;
 }
