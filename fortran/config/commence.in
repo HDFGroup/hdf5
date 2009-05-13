@@ -60,10 +60,10 @@ TRACE=:
 ## Installation points
 prefix=@prefix@
 exec_prefix=@exec_prefix@
-bindir=@bindir@
-libdir=@libdir@
-includedir=@includedir@
-docdir=@exec_prefix@/doc
+bindir=$(DESTDIR)@bindir@
+libdir=$(DESTDIR)@libdir@
+includedir=$(DESTDIR)@includedir@
+docdir=$(DESTDIR)@exec_prefix@/doc
 PUB_LIB=$(LIB)
 
 ## Shared libraries

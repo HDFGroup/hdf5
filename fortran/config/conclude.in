@@ -174,19 +174,19 @@ _check-p: $(LIB) $(PROGS) $(TESTS)
 
 ## Make installation directories directories if they don't exist.
 $(libdir):
-	$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
+	$(top_srcdir)/bin/mkdirs $@
 
 $(includedir):
-	$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
+	$(top_srcdir)/bin/mkdirs $@
 
 $(bindir):
-	$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
+	$(top_srcdir)/bin/mkdirs $@
 
 $(DOCDIR):
-	$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
+	$(top_srcdir)/bin/mkdirs $@
 
 $(EXAMPLEDIR):
-	$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
+	$(top_srcdir)/bin/mkdirs $@
 
 ## Install the library, the public header files, and public programs.
 ## Install h5fc as h5pfc for parallel mode.
@@ -194,20 +194,20 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	@for f in X $(PUB_LIB); do					      \
 	   if test $$f != X; then					      \
 	      (cd .libs && rm -f $(PUB_LIB)i && ln -s ../$(PUB_LIB) $(PUB_LIB)i); \
-	      ($(LT_INSTALL_LIB) $$f $(DESTDIR)$(libdir)/. || exit 1);		      \
+	      ($(LT_INSTALL_LIB) $$f $(libdir)/. || exit 1);		      \
 	   fi;								      \
 	done
 	@if test -n "$(F9XMODEXT)" && test "X$(F9XMODEXT)" != "Xo"; then      \
 	   if test -f "hdf5.$(F9XMODEXT)" || test -f "HDF5.$(F9XMODEXT)"; then \
-	      ((cp *.$(F9XMODEXT) $(DESTDIR)$(libdir)/. && chmod 644 $(DESTDIR)$(libdir)/*.$(F9XMODEXT)) || exit 1); \
+	      ((cp *.$(F9XMODEXT) $(libdir)/. && chmod 644 $(libdir)/*.$(F9XMODEXT)) || exit 1); \
 	   fi;                                                                \
 	fi
 	@for f in X $(PUB_HDR); do					      \
 	   if test $$f != X; then					      \
 	      if test -f $$f; then					      \
-		 (set -x; $(INSTALL_DATA) $$f $(DESTDIR)$(includedir)/. || exit 1);     \
+		 (set -x; $(INSTALL_DATA) $$f $(includedir)/. || exit 1);     \
 	      else							      \
-	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(includedir)/. ||    \
+	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(includedir)/. ||    \
 		    exit 1);						      \
 	      fi;							      \
 	   fi;								      \
@@ -215,9 +215,9 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	@for f in X $(PUB_PROGS); do					      \
 	   if test $$f != X; then					      \
 	     if test "X$(PARALLEL)" != "Xno" -a $$f = "h5fc"; then            \
-	      ($(LT_INSTALL_PROG) $$f $(DESTDIR)$(bindir)/h5pfc || exit 1);	      \
+	      ($(LT_INSTALL_PROG) $$f $(bindir)/h5pfc || exit 1);	      \
 	     else							      \
-	      ($(LT_INSTALL_PROG) $$f $(DESTDIR)$(bindir)/. || exit 1);		      \
+	      ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);		      \
 	     fi;                                                              \
 	   fi;							              \
 	done
@@ -225,30 +225,30 @@ install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 install-examples: $(EXAMPLE_PROGS) $(EXAMPLEDIR)
 	@for f in X $(EXAMPLE_PROGS); do				      \
 	  if test $$f != X; then					      \
-	    (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(EXAMPLEDIR)/. || exit 1);\
+	    (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
 	  fi;								      \
 	done
 
 uninstall-examples:
 	@if test -n "$(EXAMPLE_PROGS)"; then 				      \
-	  set -x; cd $(DESTDIR)$(EXAMPLEDIR) && $(RM) $(EXAMPLE_PROGS);		      \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(EXAMPLE_PROGS);		      \
 	fi
 
 ## Removes those things that `make install' (would have) installed.
 uninstall:
 	@if test -n "$(PUB_HDR)"; then  				      \
-	  set -x; cd $(DESTDIR)$(includedir) && $(RM) $(PUB_HDR);			      \
+	  set -x; cd $(includedir) && $(RM) $(PUB_HDR);			      \
 	fi
 	@if test -n "$(F9XMODEXT)" -a "X$(F9XMODEXT)" != "Xo"; then	      \
-	  if test -f "$(DESTDIR)$(libdir)/hdf5.$(F9XMODEXT)" -o -f "$(DESTDIR)$(libdir)/HDF5.$(F9XMODEXT)"; then \
+	  if test -f "$(libdir)/hdf5.$(F9XMODEXT)" -o -f "$(libdir)/HDF5.$(F9XMODEXT)"; then \
 	    for f in $(FORTMODFILES); do                                    \
-	      set -x; $(RM) $(DESTDIR)$(libdir)/$$f.$(F9XMODEXT);                     \
+	      set -x; $(RM) $(libdir)/$$f.$(F9XMODEXT);                     \
 	    done                                                            \
 	  fi;								      \
 	fi
 	@for f in X $(PUB_PROGS); do					      \
 	  if test $$f != X; then					      \
-	    $(LT_UNINSTALL) $(DESTDIR)$(bindir)/$$f;				      \
+	    $(LT_UNINSTALL) $(bindir)/$$f;				      \
 	  fi;								      \
 	done
 

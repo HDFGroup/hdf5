@@ -179,66 +179,66 @@ _check-p: $(LIB) $(PROGS) $(TESTS)
 
 ## Make installation directories directories if they don't exist.
 $(libdir):
-	$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
+	$(top_srcdir)/bin/mkdirs $@
 
 $(includedir):
-	$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
+	$(top_srcdir)/bin/mkdirs $@
 
 $(bindir):
-	$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
+	$(top_srcdir)/bin/mkdirs $@
 
 $(EXAMPLEDIR):
-	$(top_srcdir)/bin/mkdirs $(DESTDIR)$@
+	$(top_srcdir)/bin/mkdirs $@
 
 ## Install the library, the public header files, and public programs.
 install: $(PUB_LIB) $(PUB_HDR) $(PUB_PROGS) $(libdir) $(includedir) $(bindir)
 	@for f in X $(PUB_LIB); do					      \
 	   if test $$f != X; then					      \
-	      ($(LT_INSTALL_LIB) $$f $(DESTDIR)$(libdir)/. || exit 1);		      \
+	      ($(LT_INSTALL_LIB) $$f $(libdir)/. || exit 1);		      \
 	   fi;								      \
 	done
 	@if test -f libhdf5_cpp.settings; then				      \
-	   (set -x; $(INSTALL_DATA) libhdf5_cpp.settings $(DESTDIR)$(libdir)/. || exit 1);  \
+	   (set -x; $(INSTALL_DATA) libhdf5_cpp.settings $(libdir)/. || exit 1);  \
 	fi
 	@for f in X $(PUB_HDR); do					      \
 	   if test $$f != X; then					      \
 	      if test -f $$f; then					      \
-		 (set -x; $(INSTALL_DATA) $$f $(DESTDIR)$(includedir)/. || exit 1);     \
+		 (set -x; $(INSTALL_DATA) $$f $(includedir)/. || exit 1);     \
 	      else							      \
-	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(includedir)/. ||    \
+	         (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(includedir)/. ||    \
 		    exit 1);						      \
 	      fi;							      \
 	   fi;								      \
 	done
 	@for f in X $(PUB_PROGS); do					      \
 	   if test $$f != X; then					      \
-	     ($(LT_INSTALL_PROG) $$f $(DESTDIR)$(bindir)/. || exit 1);		      \
+	     ($(LT_INSTALL_PROG) $$f $(bindir)/. || exit 1);		      \
 	   fi;							              \
 	done
 
 install-examples: $(EXAMPLE_PROGS) $(EXAMPLEDIR)
 	@for f in X $(EXAMPLE_PROGS); do				      \
 	  if test $$f != X; then					      \
-	    (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(DESTDIR)$(EXAMPLEDIR)/. || exit 1);\
+	    (set -x; $(INSTALL_DATA) $(srcdir)/$$f $(EXAMPLEDIR)/. || exit 1);\
 	  fi;								      \
 	done
 
 uninstall-examples:
 	@if test -n "$(EXAMPLE_PROGS)"; then 				      \
-	  set -x; cd $(DESTDIR)$(EXAMPLEDIR) && $(RM) $(EXAMPLE_PROGS);		      \
+	  set -x; cd $(EXAMPLEDIR) && $(RM) $(EXAMPLE_PROGS);		      \
 	fi
 
 ## Removes those things that `make install' (would have) installed.
 uninstall:
 	@for f in libhdf5_cpp.settings $(LIB); do				      \
-            $(LT_UNINSTALL) $(DESTDIR)$(libdir)/$$f;				      \
+            $(LT_UNINSTALL) $(libdir)/$$f;				      \
 	done
 	@if test -n "$(PUB_HDR)"; then   				      \
-	   set -x; cd $(DESTDIR)$(includedir) && $(RM) $(PUB_HDR);		      \
+	   set -x; cd $(includedir) && $(RM) $(PUB_HDR);		      \
 	fi
 	@for f in X $(PUB_PROGS); do					      \
 	    if test $$f != X; then					      \
-	        $(LT_UNINSTALL) $(DESTDIR)$(bindir)/$$f;				      \
+	        $(LT_UNINSTALL) $(bindir)/$$f;				      \
 	    fi;								      \
 	done
 

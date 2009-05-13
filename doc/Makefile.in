@@ -27,10 +27,10 @@ tests TAGS dep depend:
 	done
 
 install-doc:
-	@if test -d $(DESTDIR)$(DOCDIR) ; then                                          \
+	@if test -d $(DOCDIR) ; then                                          \
 		:;                                                                 \
 	else                                                                  \
-		mkdir $(DESTDIR)$(DOCDIR) && chmod 755 $(DESTDIR)$(DOCDIR);                            \
+		mkdir $(DOCDIR) && chmod 755 $(DOCDIR);                            \
 	fi
 	@@SETX@; for d in $(SUBDIRS); do                                      \
 		(cd $$d && $(MAKE) $@) || exit 1;                                  \
