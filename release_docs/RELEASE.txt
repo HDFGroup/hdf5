@@ -149,6 +149,16 @@ Bug Fixes since HDF5-1.8.2
 
     Library
     -------
+    - Modified default cache configuration settings in order to address 
+      a performance issue due to unintended interactions between supporting
+      a min_clean_fraction in the serial case and the flash cache size
+      increase policy. The new default settings are as follows:
+         - created separate default settings for parallel and serial case.
+         - increased maximum cache size from 16MB to 32MB in both cases.
+         - increased maximum entry size from 10MB to 32MB.
+         - decreased min_clean_fraction from 0.3 to 0.01 in serial case.
+         - increased flash_multiple from 1.0 to 1.4 in serial case.
+             MAM - 2009/05/13
     - Added versioning to H5Z_class_t struct to allow compatibility with 1.6
       API. NAF - 2009/04/20 - 1533
     - Fixed a problem with using data transforms with non-native types in the
