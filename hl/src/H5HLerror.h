@@ -30,13 +30,12 @@
 #define H5HL_ERR_CLS		(H5OPEN H5HL_ERR_CLS_g)
 H5_DLLVAR hid_t H5HL_ERR_CLS_g;
 
-
 /*********************/
 /* Major error codes */
 /*********************/
 
-#define H5E_LT          (H5OPEN H5E_LT_g)
-H5_DLLVAR hid_t H5E_LT_g;     /* HDF5 Lite */
+#define H5E_HL          (H5OPEN H5E_HL_g)
+H5_DLLVAR hid_t H5E_HL_g;     /* HDF5 High Level */
 
 /*********************/
 /* Minor error codes */

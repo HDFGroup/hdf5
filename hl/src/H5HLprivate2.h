@@ -151,7 +151,7 @@ H5_DECLARE_PKG_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
 #endif /* H5_MY_PKG */
 
 /* API re-entrance variable */
-/* extern hbool_t H5HL_api_entered_g; */    /* Has library already been entered through API? */
+extern hbool_t H5HL_api_entered_g;    /* Has library already been entered through API? */
 
 /* extern global variables */
 extern hbool_t H5HL_libinit_g;    /* Has the library been initialized? */
@@ -206,7 +206,6 @@ extern hbool_t H5HL_libinit_g;    /* Has the library been initialized? */
             ret_value = fail_value;					      \
             goto func_init_failed;					      \
         } /* end if */                                                        \
-	atexit( H5HL_close);			                              \
     } /* end if */						              \
                                                                               \
     /* Initialize this interface if desired */				      \
@@ -214,7 +213,7 @@ extern hbool_t H5HL_libinit_g;    /* Has the library been initialized? */
                                                                               \
     /* Check for re-entering API routine */				      \
     /* assert(!H5HL_api_entered_g); */					      \
-    /* H5HL_api_entered_g = TRUE; */						      \
+    /* H5HL_api_entered_g = TRUE; */					      \
                                                                               \
     /* Enter scope for this type of function */				      \
     {{{
@@ -237,7 +236,7 @@ extern hbool_t H5HL_libinit_g;    /* Has the library been initialized? */
 #define FUNC_ERR_VAR_ERR(ret_typ, err)					      \
     hbool_t past_catch = FALSE;						      \
     ret_typ fail_value = err;
-#define FUNC_ERR_VAR_ERRCATCH(ret_typ, err)					      \
+#define FUNC_ERR_VAR_ERRCATCH(ret_typ, err)				      \
     hbool_t past_catch = FALSE;
 #define FUNC_ERR_VAR_NOERR(ret_typ, err)
 
@@ -294,7 +293,7 @@ func_init_failed:							      \
                                                                               \
     /* Check for leaving API routine */					      \
     /* assert(H5HL_api_entered_g); */						      \
-    /* H5HL_api_entered_g = FALSE; */						      \
+    /* H5HL_api_entered_g = FALSE;	 */					      \
                                                                               \
 
 /* Use this macro when leaving all functions */

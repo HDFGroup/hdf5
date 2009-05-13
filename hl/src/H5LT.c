@@ -68,10 +68,10 @@ hid_t   H5_MY_PKG_ERR;
 hbool_t H5_H5LT_init_g = FALSE;
 
 /* High-Level API error class */
-/* hid_t H5HL_ERR_CLS_g = (-1); */
+hid_t H5HL_ERR_CLS_g = (-1);
 
 /* Major error codes */
-hid_t H5E_LT_g = (-1);
+hid_t H5E_HL_g = (-1);
 
 /*****************************/
 /* Library Private Variables */
@@ -107,21 +107,7 @@ BEGIN_FUNC(PKGINIT, ERR,
 herr_t, SUCCEED, FAIL,
 H5LT__pkg_init(void))
 
-
-/*     char lib_str[256]; */
-
-/*     sprintf(lib_str, "%d.%d.%d",H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE); */
-
-    /* Perform any package initialization actions (like registering the
-     *  package's major error code, etc) here */
-
-/*     H5HL_ERR_CLS_g = H5Eregister_class(ERR_CLS_NAME, PROG_NAME, lib_str); */
-/*     if(H5HL_ERR_CLS_g < 0) { */
-/*        H5_MY_PKG_ERR = H5E_ERROR; */
-/*        H5E_THROW(H5E_CANTREGISTER, "H5LT: Failed to register new error class") */
-/*     } /\* end if *\/ */
-
-    CATCH
+CATCH
 
 END_FUNC(PKGINIT)
 
@@ -744,14 +730,12 @@ H5LTget_dataset_ndims( hid_t loc_id,
     did = H5Dopen2(loc_id, dset_name, H5P_DEFAULT);
 
     if(did < 0) {
-       H5_MY_PKG_ERR = H5E_DATASET;
        H5E_THROW(H5E_NOTFOUND, "H5LT: Failed to open the dataset")
     } /* end if */
     /* Get the dataspace handle */
     sid = H5Dget_space(did);
 
     if(sid < 0) {
-       H5_MY_PKG_ERR = H5E_DATASPACE;
        H5E_THROW(H5E_BADSELECT, "H5LT: Failed to get dataspace handle")
     } /* end if */
 
@@ -759,7 +743,6 @@ H5LTget_dataset_ndims( hid_t loc_id,
     *rank = H5Sget_simple_extent_ndims(sid);
 
     if(*rank < 0) {
-       H5_MY_PKG_ERR = H5E_DATASET;
        H5E_THROW(H5E_BADSELECT, "H5LT: Failed to get dataspace rank")
     } /* end if */
 
@@ -773,7 +756,7 @@ if(sid > 0)
   status = H5Sclose(sid);
 
 if(did > 0)
- status = H5Dclose(did);
+  status = H5Dclose(did);
 
 /* retrieve the error stack */
 status = H5Eset_current_stack(current_stack_id);
@@ -1674,6 +1657,8 @@ out:
     return -1;
 
 }
+
+
 
 
 /*-------------------------------------------------------------------------

@@ -52,12 +52,6 @@
  *      the proper control macros for the generic FUNC_ENTER/LEAVE and error
  *      reporting macros.
  */
-//#ifdef H5LR_MODULE
-//#define H5_MY_PKG       H5LR
-//#define H5_MY_PKG_ERR   H5E_LREF
-//#define H5_MY_PKG_INIT  YES
-//#endif /* H5LR_MODULE */
-
 
 /****************************/
 /* Package Private Typedefs */
