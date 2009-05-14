@@ -3004,14 +3004,14 @@ out:
  *
  *-------------------------------------------------------------------------
  */
+BEGIN_FUNC(PUB, ERR,
+herr_t, SUCCEED, FAIL,
+H5LTread_region(const char *file,
+		const char *path,
+		hsize_t *block_coord,
+		hid_t mem_type,
+		void *buf ) )
 
-herr_t H5LTread_region(const char *file,     /* */
-		       const char *path,
-                       hsize_t *block_coord,
-		       hid_t mem_type,
-		       void *buf )
-{
-  hid_t ret_value = SUCCEED;          /* Return value */
   herr_t status;
   hsize_t  *dims1;
   hid_t file_id;
@@ -3021,23 +3021,37 @@ herr_t H5LTread_region(const char *file,     /* */
   int ndim;
   int i;
   hsize_t *start, *count;
-  
+  hbool_t dims1_alloc = FALSE;
+  hbool_t start_alloc = FALSE;
+  hbool_t count_alloc = FALSE;
+  hid_t current_stack_id = -1;
 
   /* Open the  file */
   file_id = H5Fopen(file, H5F_ACC_RDONLY,  H5P_DEFAULT);
+  if(file_id < 0) {
+    H5E_THROW(H5E_CANTOPENFILE, "H5LT: Failed to open file")
+  }
 
   /* Open the dataset for a given the path */
   dset_id = H5Dopen2(file_id, path, H5P_DEFAULT);
+  if(dset_id < 0)
+    H5E_THROW(H5E_CANTOPENOBJ, "H5LT: Failed to open dataset")
 
   /* Get the dataspace of the dataset */
   sid1 = H5Dget_space(dset_id);
+  if(sid1 < 0)
+     H5E_THROW(H5E_CANTOPENOBJ, "H5LT: Failed to open dataspace")
 
   /* Find the rank of the dataspace */
   ndim = H5Sget_simple_extent_ndims(sid1);
-
+  if(ndim < 0)
+     H5E_THROW(H5E_NOTFOUND, "H5LT: Failed to find extents of dataspace")
 
   /* Allocate space for the dimension array */
   dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
+  if(dims1 == NULL)
+     H5E_THROW(H5E_CANTALLOC, "H5LT: Failed to allocate enough memory")
+  dims1_alloc = TRUE;
 
   /* find the dimensions of each data space from the block coordinates */
   for (i=0; i<ndim; i++)
@@ -3045,25 +3059,100 @@ herr_t H5LTread_region(const char *file,     /* */
 
   /* Create dataspace for reading buffer */
   sid2 = H5Screate_simple(ndim, dims1, NULL);
+  if(sid2 < 0)
+     H5E_THROW(H5E_CANTCREATE, "H5LT: Failed to create dataspace for retrieving elements")
+
 
   /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
   /*          1   2        n      1   2        n                                       */
 
   start = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
+  if(start == NULL)
+    H5E_THROW(H5E_CANTALLOC, "H5LT: Failed to allocate enough memory")
+  start_alloc = TRUE;
+
   count = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
+  if(count == NULL)
+    H5E_THROW(H5E_CANTALLOC, "H5LT: Failed to allocate enough memory")
+  count_alloc = TRUE;
+
   for (i=0; i<ndim; i++) {
     start[i] = block_coord[i];
     count[i] = dims1[i];
   }
 
   status = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,NULL,count,NULL);
+  if(status < 0)
+    H5E_THROW(H5E_CANTSELECT, "H5LT: Failed to select hyperslab")
 
   status = H5Dread(dset_id, mem_type, sid2, sid1, H5P_DEFAULT, buf);
+  if(status < 0)
+    H5E_THROW(H5E_READERROR, "H5LT: Unable to retrieve elements")
 
-/*   H5Sget_select_npoints(hid_t space_id) */
+  /* CLOSE THE DATA */
 
-  return ret_value;
-}
+  /* Close the dataset */
+  if(dset_id > 0) {
+    status = H5Dclose(dset_id);
+    dset_id = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close dataset")
+	}
+  }
+  /* Close the dataspaces */
+  if(sid1 > 0) {
+    status = H5Sclose(sid1);
+    sid1 = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LR: Failed to close dataspace")
+	}
+  }
+  if(sid2 > 0) {
+    status = H5Sclose(sid2);
+    sid2 = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LR: Failed to close dataspace")
+	}
+  }
+  if(file_id > 0) {
+    status = H5Fclose(file_id);
+    file_id = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LR: Failed to close dataset")
+	}
+  }
+
+  free(dims1);
+  dims1_alloc = FALSE;
+  free(start);
+  start_alloc = FALSE;
+  free(count);
+  count_alloc = FALSE;
+
+  CATCH
+
+      current_stack_id = H5Eget_current_stack();
+
+      if(dims1_alloc) free(dims1);
+      if(start_alloc) free(start);
+      if(count_alloc) free(count);
+
+    /* Close the dataspace */
+      if(sid1 > 0)
+	status = H5Sclose(sid1);
+      if(sid2 > 0)
+	status = H5Sclose(sid2);
+      
+    /* Close the dataset */
+      if(dset_id > 0)
+	status = H5Dclose(dset_id);
+    /* Close the file */
+      if(file_id > 0)
+	status = H5Fclose(file_id);
+
+      status = H5Eset_current_stack(current_stack_id);
+
+END_FUNC(PUB)
 
 /*-------------------------------------------------------------------------
  * Function: H5LTcopy_region
@@ -3084,14 +3173,15 @@ herr_t H5LTread_region(const char *file,     /* */
  *-------------------------------------------------------------------------
  */
 
-herr_t H5LTcopy_region(const char *file_src,
-		       const char *path_src,
-		       const hsize_t *block_coord_src,
-		       const char *file_dest,
-		       const char *path_dest,
-                       hsize_t *block_coord_dset)
-{
-  hid_t ret_value = SUCCEED;          /* Return value */
+BEGIN_FUNC(PUB, ERR,
+herr_t, SUCCEED, FAIL,
+H5LTcopy_region(const char *file_src,
+		const char *path_src,
+		const hsize_t *block_coord_src,
+		const char *file_dest,
+		const char *path_dest,
+		hsize_t *block_coord_dset) )
+
   herr_t status;
   hsize_t  *dims1, *dims_src;
   hid_t sid1;
@@ -3105,22 +3195,38 @@ herr_t H5LTcopy_region(const char *file_src,
   int i, j;
   hsize_t *start, *count;
   hid_t dtype;
-
+  hbool_t dims_src_alloc = FALSE;
+  hbool_t dims1_alloc = FALSE;
+  hbool_t buf_alloc = FALSE;
+  hbool_t start_alloc = FALSE;
+  hbool_t count_alloc = FALSE;
+  hid_t       current_stack_id = -1;
 
   /* Open the file */
   fid_src = H5Fopen(file_src, H5F_ACC_RDONLY,  H5P_DEFAULT);
+  if(fid_src < 0)
+    H5E_THROW(H5E_CANTOPENFILE, "H5LT: Failed to open file")
 
   /* Open the dataset for a given the path */
   did_src = H5Dopen2(fid_src, path_src, H5P_DEFAULT);
+  if(did_src < 0)
+    H5E_THROW(H5E_CANTOPENOBJ, "H5LT: Failed to open dataset for the given path")
 
   /* Get the dataspace of the dataset */
   sid_src = H5Dget_space(did_src);
+  if(sid_src < 0)
+     H5E_THROW(H5E_CANTOPENOBJ, "H5LT: Failed to open dataspace")
 
   /* Find the rank of the dataspace */
   nrank_src = H5Sget_simple_extent_ndims(sid_src);
+  if(nrank_src < 0)
+     H5E_THROW(H5E_NOTFOUND, "H5LT: Failed to find extents of dataspace")
 
   /* Allocate space for the dimension array */
   dims_src = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src);
+  if(dims_src == NULL)
+     H5E_THROW(H5E_CANTALLOC, "H5LT: Failed to allocate enough memory")
+  dims_src_alloc = TRUE;
 
 /*   bounds_coor = (hsize_t *)malloc (sizeof (hsize_t) * nrank * 2); */
 /*   status = H5Sget_select_hyper_blocklist(sid_ref, 0, 1, bounds_coor); */
@@ -3132,48 +3238,111 @@ herr_t H5LTcopy_region(const char *file_src,
   }
 
   dtype = H5Dget_type(did_src);
+  if(dtype < 0)
+       H5E_THROW(H5E_CANTGET, "H5LT: Failed to find the data type")
+  
   type_id = H5Tget_native_type(dtype , H5T_DIR_DEFAULT );
+  if(type_id < 0)
+    H5E_THROW(H5E_CANTGET, "H5LT: Failed to find the native data type")
 
   buf = malloc(sizeof(type_id) * numelem_src);
+  if(buf == NULL)
+    H5E_THROW(H5E_CANTALLOC, "H5LT: Failed to allocate enough memory")
+  buf_alloc = TRUE;
 
   /* Create dataspace for reading buffer */
   sid2 = H5Screate_simple(nrank_src, dims_src, NULL);
+  if(sid2 < 0)
+     H5E_THROW(H5E_CANTCREATE, "H5LT: Unable to create dataspace for retrieving elements")
 
   /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
   /*          1   2        n      1   2        n                                       */
 
   start = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src);
+  if(start == NULL)
+    H5E_THROW(H5E_CANTALLOC, "H5LR: Failed to allocate enough memory")
+  start_alloc = TRUE;
+
   count = (hsize_t *)malloc (sizeof (hsize_t) * nrank_src);
+  if(count == NULL)
+    H5E_THROW(H5E_CANTALLOC, "H5LR: Failed to allocate enough memory")
+  count_alloc = TRUE;
+
   for (i=0; i<nrank_src; i++) {
     start[i] = block_coord_src[i];
     count[i] = dims_src[i];
   }
 
   status = H5Sselect_hyperslab(sid_src,H5S_SELECT_SET,start,NULL,count,NULL);
+  if(status < 0)
+    H5E_THROW(H5E_CANTSELECT, "H5LT: Failed to select hyperslab")
 
   status = H5Dread(did_src, type_id, sid2, sid_src, H5P_DEFAULT, buf);
+  if(status < 0)
+    H5E_THROW(H5E_READERROR, "H5LT: Unable to retrieve elements in hyperslab")
 
-  status = H5Dclose(did_src);
-  status = H5Sclose(sid_src);
-  status = H5Sclose(sid2);
-  status = H5Fclose(fid_src);
+
+  if(did_src > 0) {
+    status = H5Dclose(did_src);
+    did_src = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close dataset")
+	}
+  }
+  if(sid_src > 0) {
+    status = H5Sclose(sid_src);
+    sid_src = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close dataspace")
+	}
+  }
+  if(sid2 > 0) {
+    status = H5Sclose(sid2);
+    sid2 = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close dataspace")
+	}
+  }
+  if(fid_src > 0) {
+    status = H5Fclose(fid_src);
+    fid_src = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close dataset")
+	}
+  }
   free(dims_src);
+  free(start);
+  free(count);
+  dims_src_alloc = FALSE;
+  start_alloc = FALSE;
+  count_alloc = FALSE;
 
-/*   Open the file */
-   file_id = H5Fopen(file_dest, H5F_ACC_RDWR,  H5P_DEFAULT);
+/* Open the file */
+  
+  file_id = H5Fopen(file_dest, H5F_ACC_RDWR,  H5P_DEFAULT);
+  if(file_id < 0)
+    H5E_THROW(H5E_CANTOPENFILE, "H5LT: Failed to open file")
 
-/*   Open the dataset for a given the path */
-   dset_id = H5Dopen2(file_id, path_dest, H5P_DEFAULT);
+/* Open the dataset for a given the path */
+  dset_id = H5Dopen2(file_id, path_dest, H5P_DEFAULT);
+  if(dset_id < 0)
+     H5E_THROW(H5E_CANTOPENOBJ, "H5LT: Failed to open dataset")
 
 /*   Get the dataspace of the dataset */
    sid1 = H5Dget_space(dset_id);
-
+   if(sid1 < 0)
+     H5E_THROW(H5E_CANTOPENOBJ, "H5LT: Failed to open dataspace for given path")
 
 /*   Find the rank of the dataspace */
    ndim = H5Sget_simple_extent_ndims(sid1);
+   if(ndim < 0)
+     H5E_THROW(H5E_NOTFOUND, "H5LT: Failed to find extents of dataspace")
 
   /* Allocate space for the dimension array */
    dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
+   if(dims1 == NULL)
+     H5E_THROW(H5E_CANTALLOC, "H5LT: Failed to allocate enough memory")
+   dims1_alloc = TRUE;
 
   /* find the dimensions of each data space from the block coordinates */
   for (i=0; i<ndim; i++)
@@ -3181,12 +3350,21 @@ herr_t H5LTcopy_region(const char *file_src,
 
    /* Create dataspace for writing the buffer */
    sid2 = H5Screate_simple(ndim, dims1, NULL);
+   if(sid2 < 0)
+     H5E_THROW(H5E_CANTCREATE, "H5LT: Unable to create dataspace for retrieving elements")
 
 /*   Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for writing memory dataset */
 /*            1   2        n      1   2        n                                       */
 
    start = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
+   if(start == NULL)
+     H5E_THROW(H5E_CANTALLOC, "H5LT: Failed to allocate enough memory")
+   start_alloc = TRUE;
+
    count = (hsize_t *)malloc (sizeof (hsize_t) * ndim);
+   if(count == NULL)
+     H5E_THROW(H5E_CANTALLOC, "H5LT: Failed to allocate enough memory")
+   count_alloc = TRUE;
 
    for (i=0; i<ndim; i++) {
      start[i] = block_coord_dset[i];
@@ -3194,22 +3372,101 @@ herr_t H5LTcopy_region(const char *file_src,
    }
 
   status = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,NULL,count,NULL);
+  if(status < 0)
+    H5E_THROW(H5E_CANTSELECT, "H5LT: Failed to select hyperslab")
 
   status = H5Dwrite(dset_id, type_id, sid2, sid1, H5P_DEFAULT, buf);
+  if(status < 0)
+    H5E_THROW(H5E_CANTCREATE, "H5LT: Unable to create dataset")
 
-/* close the data */
+/* CLOSE THE DATA */
+   /* Close the dataset */
+      if(dset_id > 0) {
+	status = H5Dclose(dset_id);
+	dset_id = -1;
+	if(status < 0) {
+	  H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close dataset")
+	}
+      }
+    /* Close the dataspace */
+      if(sid1 > 0) {
+	status = H5Sclose(sid1);
+        sid1 = -1;
+	if(status < 0) {
+	  H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close dataspace")
+	}
+      }
 
-  status = H5Dclose(dset_id);
-  status = H5Sclose(sid1);
-  status = H5Sclose(sid2);
-  status = H5Tclose(type_id);
-  status = H5Fclose(file_id);
-  free(dims1);
+    /* Close the dataspace */
+      if(sid2 > 0) {
+	status = H5Sclose(sid2);
+        sid2 = -1;
+	if(status < 0) {
+	  H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close dataspace")
+	}
+      }
+  if(type_id > 0) {
+    status = H5Tclose(type_id);
+    type_id = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close datatype")
+	}
+  }
+  if(dtype > 0) {
+    status = H5Tclose(dtype);
+    dtype = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close datatype")
+	}
+  }
+  if(file_id > 0) {
+    status = H5Fclose(file_id);
+    file_id = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close dataset")
+	}
+  }
+  free(start);
+  free(count);
   free(buf);
+  free(dims1);
 
-  return ret_value;
+  start_alloc = FALSE;
+  count_alloc = FALSE;
+  buf_alloc   = FALSE;
+  dims1_alloc = FALSE;
 
-}
+  CATCH
+
+      current_stack_id = H5Eget_current_stack();
+
+      if(dims1_alloc) free(dims1);
+      if(buf_alloc) free(buf_alloc);
+      if(start_alloc) free(start);
+      if(count_alloc) free(count);
+      if(dims_src_alloc) free(dims_src_alloc);
+
+    /* Close the dataspace */
+      if(sid1 > 0)
+	status = H5Sclose(sid1);
+      if(sid2 > 0)
+	status = H5Sclose(sid2);
+      
+    /* Close the dataset */
+      if(dset_id > 0)
+	status = H5Dclose(dset_id);
+    /* Close the file */
+      if(file_id > 0)
+	status = H5Fclose(file_id);
+    /* Close the datatypes */
+      if(dtype > 0)
+	status = H5Tclose(dtype);
+      if(type_id > 0)
+	status = H5Tclose(type_id);
+
+      status = H5Eset_current_stack(current_stack_id);
+
+END_FUNC(PUB)
 
 /*-------------------------------------------------------------------------
  * Function: H5LTread_quality_flag
@@ -3229,20 +3486,25 @@ herr_t H5LTcopy_region(const char *file_src,
  *
  *-------------------------------------------------------------------------
  */
+BEGIN_FUNC(PUB, ERR,
+herr_t, SUCCEED, FAIL,
+H5LTread_bitfield_value(hid_t dset_id, int num_values, const unsigned *offset,
+			const unsigned *lengths, hid_t *space, hid_t *dtype,  int *buf) )
 
-herr_t H5LTread_bitfield_value(hid_t dset_id, int num_values, const unsigned *offset,
-			       const unsigned *lengths, hid_t *space, hid_t *dtype,  int *buf)
-{
-  hid_t ret_value = SUCCEED;          /* Return value */
   herr_t status;
   H5S_sel_type sel_type;
-  hid_t space_id, mem_space;
+  hid_t space_id = -1, mem_space = -1;
   hsize_t dims1[1];
-  unsigned char *buf2;
   int i, j, icnt;
+  unsigned char *buf2;
+  hbool_t buf2_alloc = FALSE;
+  hid_t current_stack_id = -1;
 
   /* Determine the type of the dataspace selection */
   space_id = H5Dget_space (dset_id);
+  if(space_id < 0)
+     H5E_THROW(H5E_CANTOPENOBJ, "H5LT: Failed to open dataspace for given path")
+
   sel_type = H5Sget_select_type(space_id);
   
   /* Get the number of elements */
@@ -3254,16 +3516,25 @@ herr_t H5LTread_bitfield_value(hid_t dset_id, int num_values, const unsigned *of
     return ret_value;
   } else if(sel_type==H5S_SEL_ALL){
     dims1[0] = H5Sget_select_npoints(space_id);
-  }
+  } else 
+    H5E_THROW(H5E_BADSELECT, "H5LT: Failed to find selection type")
 
   /* Create a new simple dataspace in memory and open it for access */
   mem_space = H5Screate_simple (1, dims1, NULL);
+  if(mem_space < 0)
+     H5E_THROW(H5E_CANTCREATE, "H5LT: Unable to create dataspace for retrieving elements")
 
   buf2 = malloc(sizeof(unsigned char) * dims1[0]);
+  if(buf2 == NULL){
+       H5E_THROW(H5E_CANTALLOC, "H5LT: Failed to allocate enough memory")
+	 }
+  buf2_alloc = TRUE;
 
   /* Read the region data from the file_space into the mem_space */
   status = H5Dread (dset_id, dtype, mem_space, space_id, H5P_DEFAULT, buf2);
-
+  if(status < 0)
+    H5E_THROW(H5E_READERROR, "H5LT: Unable to read region data")
+  
   icnt = 0;
   for (i = 0; i<dims1[0]; i++)
     for (j = 0; j<num_values; j++){
@@ -3271,7 +3542,49 @@ herr_t H5LTread_bitfield_value(hid_t dset_id, int num_values, const unsigned *of
       icnt  += 1;
     }
 
-  free(buf2);
+    /* Close the dataspace */
+      if(space_id > 0) {
+	status = H5Sclose(space_id);
+        space_id = -1;
+	if(status < 0) {
+	  H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close dataspace")
+	}
+      }
 
-  return ret_value;
-}
+/*   if(sel_type > 0) { */
+/*     status = H5Tclose(sel_type); */
+/*     sel_type = -1; */
+/*     if(status < 0) { */
+/*       H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close datatype") */
+/* 	} */
+/*   } */
+  if(mem_space > 0) {
+    status = H5Sclose(mem_space);
+    mem_space = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LT: Failed to close dataspace")
+	}
+  }
+
+  free(buf2);
+  buf2_alloc = FALSE;
+
+CATCH
+
+  current_stack_id = H5Eget_current_stack();
+
+  /* Close the dataspace */
+  if(mem_space > 0)
+    status = H5Sclose(mem_space);
+  if(space_id> 0)
+    status = H5Sclose(space_id);
+ /* Close the datatypes */
+/*   if(sel_type > 0) */
+/*     status = H5Tclose(sel_type); */
+
+  if(buf2_alloc) free(buf2);
+
+  status = H5Eset_current_stack(current_stack_id);
+
+END_FUNC(PUB)
+

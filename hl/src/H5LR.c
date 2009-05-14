@@ -1037,13 +1037,14 @@ H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,
     H5E_THROW(H5E_CANTGET, "H5LR: Failed to find the native data type")
 
   buf = malloc(sizeof(type_id) * numelem_src);
+  if(buf == NULL)
+    H5E_THROW(H5E_CANTALLOC, "H5LR: Failed to allocate enough memory")
+  buf_alloc = TRUE;
 
   /* Create dataspace for reading buffer */
   sid2 = H5Screate_simple(nrank_src, dims_src, NULL);
-  if(buf == NULL){
-    H5E_THROW(H5E_CANTALLOC, "H5LR: Failed to allocate enough memory")
-      }
-  buf_alloc = TRUE;
+  if(sid2 < 0)
+     H5E_THROW(H5E_CANTCREATE, "H5LR: Unable to create dataspace for retrieving elements")
 
   /* Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for reading memory dataset */
   /*          1   2        n      1   2        n                                       */
@@ -1196,6 +1197,13 @@ H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,
   if(type_id > 0) {
     status = H5Tclose(type_id);
     type_id = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LR: Failed to close datatype")
+	}
+  }
+  if(dtype > 0) {
+    status = H5Tclose(dtype);
+    dtype = -1;
     if(status < 0) {
       H5E_THROW(H5E_CLOSEERROR, "H5LR: Failed to close datatype")
 	}
