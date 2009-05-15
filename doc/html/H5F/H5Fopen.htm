@@ -2,32 +2,44 @@
 <!-- HEADER RIGHT "H5Fopen" -->
 <hr>
 <dl>
+<dt><div align=right><font color=999999 size=-1><i>
+    Last modified: 15 May 2009
+    </i></font></div>
+
 <dt><strong>Name:</strong> <a name="File-Open">H5Fopen</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hid_t </em><code>H5Fopen</code>(<em>const char *</em><code>name</code>,
+    <dd><em>hid_t </em><code>H5Fopen</code>(
+            <em>const char *</em><code>name</code>,
             <em>unsigned</em> <code>flags</code>,
-            <em>hid_t</em> <code>access_id</code>
+            <em>hid_t</em> <code>fapl_id</code>
         )
+
+<p>
 <dt><strong>Purpose:</strong>
-        <dd>Opens an existing file.
+        <dd>Opens an existing HDF5 file.
+
+<p>
 <dt><strong>Description:</strong>
-        <dd><code>H5Fopen</code> opens an existing file and is the primary 
-            function for accessing existing HDF5 files.  
+        <dd><code>H5Fopen</code> is the primary function for accessing 
+            existing HDF5 files.  
+            This function opens the named file in the specified access mode
+            and with the specified access property list.
             <p>
             Note that <code>H5Fopen</code> does not create a file 
-            if it does not already exist.  
-            See <a href="#File-Create"><code>H5Fcreate</code></a>.
+            if it does not already exist;  
+            see <a href="#File-Create"><code>H5Fcreate</code></a>.
             <p>
-            The parameter <code>access_id</code> is a file access property
-            list identifier or <code>H5P_DEFAULT</code> if the 
-            default I/O access parameters are to be used  
+            The <code>name</code> parameter specifies the name of the file
+            to be opened.
             <p>
-            The <code>flags</code> argument determines whether writing 
-            to an existing file will be allowed.  
-            The file is opened with read and write permission if 
-            <code>flags</code> is set to <code>H5F_ACC_RDWR</code>.  
-            All flags may be combined with the bit-wise OR operator (`|') 
-            to change the behavior of the file open call.  
+            The <code>fapl_id</code> parameter specifies the file access 
+            property list.  Use of <code>H5P_DEFAULT</code> specifies that
+            default I/O access properties are to be used  
+            <p>
+            The <code>flags</code> parameter specifies whether the file
+            will be opened in read-write or read-only mode,
+            <code>H5F_ACC_RDWR</code> or <code>H5F_ACC_RDONLY</code>,
+            respectively.
             More complex behaviors of file access are controlled 
             through the file-access property list.
             <p>
@@ -64,11 +76,12 @@
             It is generally recommended that applications avoid 
             multiple opens of the same file.
 
+<p>
 <dt><strong>Parameters:</strong>
-    <ul><table>
+    <dd><table>
         <tr>
 		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">IN: Name of the file to access.</td></tr>
+            <td valign="top">IN: Name of the file to be created.</td></tr>
         <tr>
 		    <td valign="top"><em>unsigned</em> <code>flags</code></td>
             <td valign="top">IN: File access flags.  Allowable values are:
@@ -82,21 +95,27 @@
                 are mutually exclusive; use exactly one.
 <!-- NEW PAGE -->
                 <li>An additional flag, <code>H5F_ACC_DEBUG</code>, prints 
-                debug information.  This flag is used only by HDF5 library 
-                developers; it is neither tested nor supported
-                for use in applications.
+                debug information.  This flag can be combined with one of the 
+                above values using the bit-wise OR operator (`|'), 
+                but it is used only by HDF5 Library developers; <i>it is neither 
+                tested nor supported</i> for use in applications.</td></tr>
                 </ul></td></tr>
         <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>access_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
             <td valign="top">IN: Identifier for the file access properties list.
                 If parallel file access is desired, this is a collective
                 call according to the communicator stored in the
-                <code>access_id</code>. 
-                Use <code>H5P_DEFAULT</code> for default file access properties.</td></tr>
-    </table></ul>
+                <code>fapl_id</code>. 
+                Use <code>H5P_DEFAULT</code> for default file access 
+                properties.</td></tr>
+    </table></dd>
+
+<p>
 <dt><strong>Returns:</strong>
     <dd>Returns a file identifier if successful;
         otherwise returns a negative value.
+
+<p>
 <dt><strong>Fortran90 Interface:</strong> h5fopen_f
     <dd>
 	<pre>
@@ -115,13 +134,7 @@ SUBROUTINE h5fopen_f(name, access_flags, file_id, hdferr, &
                                          ! File access property list 
                                          ! identifier  
 END SUBROUTINE h5fopen_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
+    </pre>
+
 </dl>
 

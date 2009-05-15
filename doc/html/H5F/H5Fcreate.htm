@@ -2,30 +2,52 @@
 <!-- HEADER RIGHT "H5Fcreate" -->
 <hr>
 <dl>
+<dt><div align=right><font color=999999 size=-1><i>
+    Last modified: 15 May 2009
+    </i></font></div>
+
 <dt><strong>Name:</strong> <a name="File-Create">H5Fcreate</a>
 <dt><strong>Signature:</strong>
-    <dd><em>hid_t </em><code>H5Fcreate</code>(<em>const char *</em><code>name</code>,
+    <dd><em>hid_t </em><code>H5Fcreate</code>(
+            <em>const char *</em><code>name</code>,
             <em>unsigned</em> <code>flags</code>,
-            <em>hid_t</em> <code>create_id</code>,
-            <em>hid_t</em> <code>access_id</code>
+            <em>hid_t</em> <code>fcpl_id</code>,
+            <em>hid_t</em> <code>fapl_id</code>
         )
+
+<p>
 <dt><strong>Purpose:</strong>
-        <dd>Creates HDF5 files.
+        <dd>Creates an HDF5 file.
+
+<p>
 <dt><strong>Description:</strong>
         <dd><code>H5Fcreate</code> is the primary function for creating 
-            HDF5 files . 
+            HDF5 files; it creates a new HDF5 file with the specified 
+            name and property lists and specifies whether an existing file of 
+            same name should be overwritten.
             <p>
-            The <code>flags</code> parameter determines whether an 
-            existing file will be overwritten.  All newly created files 
-            are opened for both reading and writing.  All flags may be 
-            combined with the bit-wise OR operator (`|') to change 
-            the behavior of the <code>H5Fcreate</code> call.
+            The <code>name</code> parameter specifies the name of the new file.
             <p>
-            The more complex behaviors of file creation and access
-            are controlled through the file-creation and file-access
-            property lists.  The value of <code>H5P_DEFAULT</code> for 
-            a property list value indicates that the library should use
-            the default values for the appropriate property list.
+            The <code>flags</code> parameter specifies whether an 
+            existing file is to be overwritten.
+            It should be set to either <code>H5F_ACC_TRUNC</code> to 
+            overwrite an existing file or <code>H5F_ACC_EXCL</code>, 
+            instructing the function to fail if the file already exists.
+            <p>
+            New files are always created in read-write mode,
+            so the read-write and read-only flags, <code>H5F_ACC_RDWR</code> 
+            and <code>H5F_ACC_RDONLY</code>, respectively, are not relevant 
+            in this function. 
+            Further note that a specification of <code>H5F_ACC_RDONLY</code> 
+            will be ignored; the file will be created in read-write mode, 
+            regardless.
+            <p>
+            More complex behaviors of file creation and access
+            are controlled through the file creation and file access
+            property lists, <code>fcpl_id</code> and <code>fapl_id</code>,
+            respectively.  The value of <code>H5P_DEFAULT</code> for 
+            any property list value indicates that the library should use
+            the default values for that appropriate property list.
             <p>
             The return value is a file identifier for the newly-created file;
             this file identifier should be closed by calling 
@@ -64,8 +86,9 @@
             Applications should avoid calling <code>H5Fcreate</code> 
             with an already opened file.
 
+<p>
 <dt><strong>Parameters:</strong>
-    <ul><table>
+    <dd><table>
         <tr>
 		    <td valign="top"><em>const&nbsp;char&nbsp;*</em><code>name&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
             <td valign="top">IN: Name of the file to access.</td></tr>
@@ -82,25 +105,32 @@
                 <li><code>H5F_ACC_TRUNC</code> and <code>H5F_ACC_EXCL</code> 
                 are mutually exclusive; use exactly one.
                 <li>An additional flag, <code>H5F_ACC_DEBUG</code>, prints 
-                debug information.  This flag is used only by HDF5 library 
-                developers; <i>it is neither tested nor supported</i> 
-                for use in applications.</td></tr>
+                debug information.  This flag can be combined with one of the 
+                above values using the bit-wise OR operator (`|'), 
+                but it is used only by HDF5 Library developers; <i>it is neither 
+                tested nor supported</i> for use in applications.</td></tr>
         <tr>
-		    <td valign="top"><em>hid_t</em>&nbsp;<code>create_id&nbsp;&nbsp;&nbsp;&nbsp;</code></td>
-            <td valign="top">IN: File creation property list identifier, used when modifying
-                default file meta-data.
-                Use <code>H5P_DEFAULT</code> for default file creation properties.</td></tr>
+            <td valign="top"><em>hid_t</em> <code>fcpl_id</code></td>
+            <td valign="top">IN: File creation property list identifier, 
+                used when modifying default file meta-data.
+                Use <code>H5P_DEFAULT</code> to specify default file creation 
+                properties.</td></tr>
         <tr>
-		    <td valign="top"><em>hid_t</em> <code>access_id</code></td>
+            <td valign="top"><em>hid_t</em> <code>fapl_id</code></td>
             <td valign="top">IN: File access property list identifier.
                 If parallel file access is desired, this is a collective
                 call according to the communicator stored in the
-                <code>access_id</code>. 
-                Use <code>H5P_DEFAULT</code> for default file access properties.</td></tr>
-    </table></ul>
+                <code>fapl_id</code>. 
+                Use <code>H5P_DEFAULT</code> for default file access 
+                properties.</td></tr>
+    </table></dd>
+
+<p>
 <dt><strong>Returns:</strong>
     <dd>Returns a file identifier if successful;
         otherwise returns a negative value.
+
+<p>
 <dt><strong>Fortran90 Interface:</strong> h5fcreate_f
     <dd>
 	<pre>
@@ -129,13 +159,7 @@ SUBROUTINE h5fcreate_f(name, access_flags, file_id, hdferr, &
                                          ! specified its value is
                                          ! H5P_DEFAULT_F  
 END SUBROUTINE h5fcreate_f
-	</pre>		
-		
-		<!--<dt><strong>Non-C API(s):</strong>
-    	<dd>
-        
-        <img src="Graphics/Java.gif"> 
-        <img src="Graphics/C++.gif">
-        -->
+    </pre>
+
 </dl>
 
