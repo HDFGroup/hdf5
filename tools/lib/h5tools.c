@@ -40,6 +40,7 @@ FILE *rawdatastream; /* should initialize to stdout but gcc moans about it */
 int bin_output; /* binary output */
 int bin_form; /* binary form */
 int region_output; /* region output */
+
 int packed_output; /* number of packed bits to display */
 int packed_normalize; /* number of bits to shift right to display normalized */
 unsigned int packed_counter; /* counter for which packed bits to display */
@@ -865,8 +866,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info,
                 char ref_name[1024];
 
                 /* region data */
-                region_id = H5Rdereference(container, H5R_DATASET_REGION, mem
-                        + i * size);
+                region_id = H5Rdereference(container, H5R_DATASET_REGION, mem + i * size);
                 if (region_id >= 0) {
                     region_space = H5Rget_region(container, H5R_DATASET_REGION,
                             mem + i * size);
@@ -1302,7 +1302,31 @@ hsize_t h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
 
     ctx->need_prefix = TRUE;
 
-    /* Render the datatype element */
+    /* Render the dataspace element */
+    h5tools_str_reset(buffer);
+
+    ctx->need_prefix = TRUE;
+    h5tools_str_append(buffer, "%s ",
+            h5tools_dump_header_format->dataspacebegin);
+
+    h5tools_print_dataspace(buffer, info, ctx, region_space);
+
+    if (HDstrlen(h5tools_dump_header_format->dataspaceblockend)) {
+        h5tools_str_append(buffer, "%s",
+                h5tools_dump_header_format->dataspaceblockend);
+        if (HDstrlen(h5tools_dump_header_format->dataspaceend))
+            h5tools_str_append(buffer, " ");
+    }
+    if (HDstrlen(h5tools_dump_header_format->dataspaceend))
+        h5tools_str_append(buffer, "%s",
+                h5tools_dump_header_format->dataspaceblockend);
+
+    curr_pos = h5tools_render_element(stream, info, ctx, buffer, curr_pos,
+            flags, ncols, elmt_counter, i_count);
+
+    ctx->need_prefix = TRUE;
+
+    /* Render the data element */
     h5tools_str_reset(buffer);
 
     h5tools_str_append(buffer, "%s %s ",
@@ -1538,7 +1562,32 @@ hsize_t h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
 
         ctx->need_prefix = TRUE;
 
-        /* Render the datatype element */
+
+    /* Render the dataspace element */
+    h5tools_str_reset(buffer);
+
+    ctx->need_prefix = TRUE;
+    h5tools_str_append(buffer, "%s ",
+            h5tools_dump_header_format->dataspacebegin);
+
+    h5tools_print_dataspace(buffer, info, ctx, region_space);
+
+    if (HDstrlen(h5tools_dump_header_format->dataspaceblockend)) {
+        h5tools_str_append(buffer, "%s",
+                h5tools_dump_header_format->dataspaceblockend);
+        if (HDstrlen(h5tools_dump_header_format->dataspaceend))
+            h5tools_str_append(buffer, " ");
+    }
+    if (HDstrlen(h5tools_dump_header_format->dataspaceend))
+        h5tools_str_append(buffer, "%s",
+                h5tools_dump_header_format->dataspaceblockend);
+
+    curr_pos = h5tools_render_element(stream, info, ctx, buffer, curr_pos,
+            flags, ncols, elmt_counter, i_count);
+
+    ctx->need_prefix = TRUE;
+
+        /* Render the data element */
         h5tools_str_reset(buffer);
 
         h5tools_str_append(buffer, "%s %s ",
@@ -2392,11 +2441,6 @@ int h5tools_dump_mem(FILE *stream, const h5tool_format_t *info, hid_t obj_id,
  *
  * Return:      void
  *
- * Programmer:  Ruey-Hsia Li
- *
- * Modifications: pvn, March 28, 2006
- *  print information about type when a native match is not possible
- *
  *-------------------------------------------------------------------------
  */
 void h5tools_print_datatype(h5tools_str_t *buffer/*in,out*/,
@@ -2837,6 +2881,75 @@ void h5tools_print_datatype(h5tools_str_t *buffer/*in,out*/,
         break;
     }
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    print_dataspace
+ *
+ * Purpose:     print the dataspace.
+ *
+ * Return:      void
+ *
+ *-------------------------------------------------------------------------
+ */
+void h5tools_print_dataspace(h5tools_str_t *buffer/*in,out*/,
+        const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,
+        hid_t space) {
+
+    hsize_t   size[H5TOOLS_DUMP_MAX_RANK];
+    hsize_t   maxsize[H5TOOLS_DUMP_MAX_RANK];
+    int       ndims = H5Sget_simple_extent_dims(space, size, maxsize);
+    H5S_class_t space_type = H5Sget_simple_extent_type(space);
+    int       i;
+
+
+    switch(space_type) {
+    case H5S_SCALAR:
+        /* scalar dataspace */
+        h5tools_str_append(buffer, "%s %s",
+                h5tools_dump_header_format->dataspacedescriptionbegin, S_SCALAR);
+        break;
+
+    case H5S_SIMPLE:
+        /* simple dataspace */
+        h5tools_str_append(buffer, "%s %s { %s %hu",
+                h5tools_dump_header_format->dataspacedescriptionbegin, S_SIMPLE,
+                h5tools_dump_header_format->dataspacedimbegin, size[0]);
+
+        for(i = 1; i < ndims; i++)
+            h5tools_str_append(buffer, ", %hu", size[i]);
+
+        h5tools_str_append(buffer, " %s / ", h5tools_dump_header_format->dataspacedimend);
+
+        if(maxsize[0] == H5S_UNLIMITED)
+            h5tools_str_append(buffer, "%s %s",
+                    h5tools_dump_header_format->dataspacedimbegin,
+                    "H5S_UNLIMITED");
+        else
+            h5tools_str_append(buffer, "%s %hu",
+                    h5tools_dump_header_format->dataspacedimbegin, maxsize[0]);
+
+        for(i = 1; i < ndims; i++)
+            if(maxsize[i] == H5S_UNLIMITED)
+                h5tools_str_append(buffer, ", %s", "H5S_UNLIMITED");
+            else
+                h5tools_str_append(buffer, ", %hu", maxsize[i]);
+
+        h5tools_str_append(buffer, " %s }", h5tools_dump_header_format->dataspacedimend);
+        break;
+
+    case H5S_NULL:
+        /* null dataspace */
+        h5tools_str_append(buffer, "%s %s",
+                h5tools_dump_header_format->dataspacedescriptionbegin, S_NULL);
+        break;
+
+    case H5S_NO_CLASS:
+    default:
+        h5tools_str_append(buffer, "%s unknown dataspace %s\n", BEGIN, END);
+        break;
+    } /* end switch */
+}
+
 
 /*-------------------------------------------------------------------------
  * Function:    print_enum

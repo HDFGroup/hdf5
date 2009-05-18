@@ -2405,14 +2405,19 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     hsize_t     size[64], nelmts = 1, alloc_size;
     int         depth;
     int         stdindent = COL;    /* should be 3 */
-
+    
     if (fp_format)
     {
         outputformat->fmt_double = fp_format;
         outputformat->fmt_float = fp_format;
     }
 
-    outputformat->line_ncols = nCols;
+    if (nCols==0) {
+        outputformat->line_ncols = 65535;
+        outputformat->line_per_line = 1;
+    }
+    else
+        outputformat->line_ncols = nCols;
     outputformat->do_escape=display_escape;
     /* print the matrix indices */
     outputformat->pindex=display_index;
@@ -5512,7 +5517,12 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
     int                     depth;
     int                     stdindent = COL;    /* should be 3 */
 
-    outputformat->line_ncols = nCols;
+    if (nCols==0) {
+        outputformat->line_ncols = 65535;
+        outputformat->line_per_line = 1;
+    }
+    else
+        outputformat->line_ncols = nCols;
     indent += COL;
 
     /*
