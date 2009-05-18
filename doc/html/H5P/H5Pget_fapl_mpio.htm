@@ -2,6 +2,10 @@
 <!-- HEADER RIGHT "H5Pget_fapl_mpio" -->
 <hr>
 <dl>
+  <dt><div align=right><font color=999999 size=-1><i>
+      Last modified: 15 May 2009
+      </i></font></div>
+
   <dt><strong>Name:</strong> <a name="Property-GetFaplMpio">H5Pget_fapl_mpio</a>
   <dt><strong>Signature:</strong>
     <dd><em>herr_t</em> <code>H5Pget_fapl_mpio</code>(
@@ -9,16 +13,24 @@
                      <em>MPI_Comm *</em><code>comm</code>,
                      <em>MPI_Info *</em><code>info</code>
     )
+
   <p>
   <dt><strong>Purpose:</strong>
     <dd> Returns MPI communicator information.
+
   <p>
   <dt><strong>Description:</strong>
     <dd>If the file access property list is set to the <code>H5FD_MPIO</code> 
         driver, <code>H5Pget_fapl_mpio</code> returns duplicates of 
-        the stored MPI communicator and information object through the 
+        the stored MPI communicator and Info object through the 
         <code>comm</code> and <code>info</code>
         pointers, if those values are non-null.
+        <p>
+        Since the MPI communicator and Info object are duplicates of the
+        stored information, future modifications to the access property list 
+        will not affect them.  
+        It is the responsibility of the application to free these objects.
+
   <p>
   <dt><strong>Parameters:</strong>
     <ul><table>
@@ -32,10 +44,12 @@
             <td valign="top"><em>MPI_Info *</em><code>info</code></td>
             <td valign="top">OUT: MPI-2 Info object</td></tr>
     </table></ul>
+
   <p>
   <dt><strong>Returns:</strong>
     <dd>Returns a non-negative value if successful.
         Otherwise returns a negative value.
+
   <p>
   <dt><strong>Fortran90 Interface:</strong> h5pget_fapl_mpio_f
     <dd>
@@ -63,10 +77,9 @@ END SUBROUTINE h5pget_fapl_mpio_f
           <td valign="top">1.4.5</td>
           <td valign="top">
             Handling of the MPI Communicator 
-            and Info objects changed at this release. A copy 
-            of each of these objects is now stored in the 
-            property list instead of pointers to each 
-            object.</td></tr>
+            and Info object changed at this release. A duplicate 
+            of each of these objects is now returned
+            instead of pointers to each object.</td></tr>
         <tr>
           <td valign="top">1.4.0</td>
           <td valign="top">

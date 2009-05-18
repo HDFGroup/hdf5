@@ -3,7 +3,7 @@
 <hr>
 <dl>
   <dt><div align=right><font color=999999 size=-1><i>
-      Last modified: 15 April 2009
+      Last modified: 15 May 2009
       </i></font></div>
 
   <dt><strong>Name:</strong> <a name="Property-SetFaplMpio">H5Pset_fapl_mpio</a>
@@ -35,14 +35,15 @@
         so modifications to <code>comm</code> after this function call 
         returns have no effect on the file access property list.
         <p>
-        <code>info</code> is the MPI info object to be used for 
+        <code>info</code> is the MPI Info object to be used for 
         file open, as defined in <code>MPI_FILE_OPEN</code> of MPI-2. 
         This function makes a duplicate copy of the Info object, 
         so modifications to the Info object after this function call 
         returns will have no effect on the file access property list. 
         <p>
         If the file access property list already contains previously-set 
-        comm and Info values, those values will be replaced. 
+        communicator and Info values, those values will be replaced 
+        and the old communicator and Info object will be freed.
  
   <p>
   <dt><strong>Note:</strong>
@@ -105,10 +106,9 @@ END SUBROUTINE h5pset_fapl_mpio_f
           <td valign="top">1.4.5</td>
           <td valign="top">
             Handling of the MPI Communicator 
-            and Info objects changed at this release. A copy 
-            of each of these objects is now stored in the 
-            property list instead of pointers to each 
-            object.</td></tr>
+            and Info object changed at this release. A duplicate 
+            of each of these is now stored in the 
+            property list instead of pointers to each.</td></tr>
         <tr>
           <td valign="top">1.4.0</td>
           <td valign="top">
