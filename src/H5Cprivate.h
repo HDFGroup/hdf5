@@ -46,7 +46,7 @@
  *
  *					JRM - 5/17/04
  */
-#define H5C_MAX_ENTRY_SIZE		((size_t)(10 * 1024 * 1024))
+#define H5C_MAX_ENTRY_SIZE		((size_t)(32 * 1024 * 1024))
 
 /* H5C_COLLECT_CACHE_STATS controls overall collection of statistics
  * on cache activity.  In general, this #define should be set to 0.
