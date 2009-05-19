@@ -1284,7 +1284,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	 * file (since we can't do that while the file is open), or if the
 	 * request was to create a non-existent file (since the file already
 	 * exists), or if the new request adds write access (since the
-	 * readers don't expect the file to change under them).
+	 * readers don't expect the file to change under them), or if the
+         * SWMR Write access flags don't agree.
 	 */
 	if(H5FD_close(lf) < 0)
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to close low-level file info")
@@ -1294,6 +1295,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t d
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file exists")
 	if((flags & H5F_ACC_RDWR) && 0 == (shared->flags & H5F_ACC_RDWR))
 	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "file is already open for read-only")
+	if(((flags & H5F_ACC_SWMR_WRITE) && 0 == (shared->flags & H5F_ACC_SWMR_WRITE))
+                || (0 == (flags & H5F_ACC_SWMR_WRITE) && (shared->flags & H5F_ACC_SWMR_WRITE)))
+	    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "single-writer access flag not the same for file that is already open")
 
         /* Allocate new "high-level" file struct */
         if((file = H5F_new(shared, fcpl_id, fapl_id, NULL)) == NULL)
@@ -1490,11 +1494,15 @@ H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
 
     /* Check/fix arguments */
-    if (!filename || !*filename)
+    if(!filename || !*filename)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
-    if (flags & ~(H5F_ACC_EXCL|H5F_ACC_TRUNC|H5F_ACC_DEBUG))
+    /* In this routine, we only accept the following flags:
+     *          H5F_ACC_EXCL, H5F_ACC_TRUNC, H5F_ACC_DEBUG and H5F_ACC_SWMR_WRITE
+     */
+    if(flags & ~(H5F_ACC_EXCL | H5F_ACC_TRUNC | H5F_ACC_DEBUG | H5F_ACC_SWMR_WRITE))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid flags")
-    if ((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
+    /* The H5F_ACC_EXCL and H5F_ACC_TRUNC flags are mutually exclusive */
+    if((flags & H5F_ACC_EXCL) && (flags & H5F_ACC_TRUNC))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mutually exclusive flags for file creation")
 
     /* Check file creation property list */
@@ -1594,9 +1602,13 @@ H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
     /* Check/fix arguments. */
     if(!filename || !*filename)
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file name")
+    /* Reject undefined flags (~H5F_ACC_PUBLIC_FLAGS) and the H5F_ACC_TRUNC & H5F_ACC_EXCL flags */
     if((flags & ~H5F_ACC_PUBLIC_FLAGS) ||
             (flags & H5F_ACC_TRUNC) || (flags & H5F_ACC_EXCL))
 	HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid file open flags")
+    /* Asking for SWMR Write access on a read-only file is invalid */
+    if((flags & H5F_ACC_SWMR_WRITE) && 0 == (flags & H5F_ACC_RDWR))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "single-writer access on a file open for read-only is not allowed")
     if(H5P_DEFAULT == fapl_id)
         fapl_id = H5P_FILE_ACCESS_DEFAULT;
     else
@@ -2183,10 +2195,16 @@ H5Fget_intent(hid_t file_id, unsigned *intent_flags)
          * Simplify things for them so that they only get either H5F_ACC_RDWR
          * or H5F_ACC_RDONLY.
          */
-        if(H5F_INTENT(file) & H5F_ACC_RDWR)
+        if(H5F_INTENT(file) & H5F_ACC_RDWR) {
             *intent_flags = H5F_ACC_RDWR;
+
+            /* Check for SWMR Write access on the file */
+            if(H5F_INTENT(file) & H5F_ACC_SWMR_WRITE)
+                *intent_flags |= H5F_ACC_SWMR_WRITE;
+        } /* end if */
         else
             *intent_flags = H5F_ACC_RDONLY;
+
     } /* end if */
 
 done:
