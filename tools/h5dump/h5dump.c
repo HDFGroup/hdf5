@@ -2405,7 +2405,7 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
     hsize_t     size[64], nelmts = 1, alloc_size;
     int         depth;
     int         stdindent = COL;    /* should be 3 */
-    
+
     if (fp_format)
     {
         outputformat->fmt_double = fp_format;
