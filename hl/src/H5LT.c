@@ -68,10 +68,10 @@ hid_t   H5_MY_PKG_ERR;
 hbool_t H5_H5LT_init_g = FALSE;
 
 /* High-Level API error class */
-hid_t H5HL_ERR_CLS_g = (-1);
+  hid_t H5HL_ERR_CLS_g = (-1);
 
 /* Major error codes */
-hid_t H5E_HL_g = (-1);
+  hid_t H5E_HL_g = (-1);
 
 /*****************************/
 /* Library Private Variables */
@@ -3008,7 +3008,7 @@ BEGIN_FUNC(PUB, ERR,
 herr_t, SUCCEED, FAIL,
 H5LTread_region(const char *file,
 		const char *path,
-		hsize_t *block_coord,
+		const hsize_t *block_coord,
 		hid_t mem_type,
 		void *buf ) )
 
@@ -3180,7 +3180,7 @@ H5LTcopy_region(const char *file_src,
 		const hsize_t *block_coord_src,
 		const char *file_dest,
 		const char *path_dest,
-		hsize_t *block_coord_dset) )
+		const hsize_t *block_coord_dset) )
 
   herr_t status;
   hsize_t  *dims1, *dims_src;
@@ -3200,7 +3200,7 @@ H5LTcopy_region(const char *file_src,
   hbool_t buf_alloc = FALSE;
   hbool_t start_alloc = FALSE;
   hbool_t count_alloc = FALSE;
-  hid_t       current_stack_id = -1;
+  hid_t current_stack_id = -1;
 
   /* Open the file */
   fid_src = H5Fopen(file_src, H5F_ACC_RDONLY,  H5P_DEFAULT);

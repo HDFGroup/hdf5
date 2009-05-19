@@ -319,7 +319,7 @@ herr_t, SUCCEED, FAIL,
 H5LRcreate_region_references(hid_t file_id,
 			     size_t num_elem,
 			     const char **path,
-			     hsize_t *block_coord,
+			     const hsize_t *block_coord,
 			     hdset_reg_ref_t *buf) )
 
   hid_t  sid1 = -1;
@@ -445,13 +445,15 @@ END_FUNC(PUB)
  */
 BEGIN_FUNC(PUB, ERR,
 	   herr_t, SUCCEED, FAIL,
-	   H5LRmake_dataset(hid_t loc_id, const char *path, hid_t type_id, hid_t loc_id_ref, int buf_size, hdset_reg_ref_t *ref) )
+	   H5LRmake_dataset(hid_t loc_id, const char *path, hid_t type_id, 
+			    const size_t buf_size, const hid_t *loc_id_ref, const hdset_reg_ref_t *ref) )
 
   hid_t dset_ref = -1, sid_ref = -1;
   H5S_sel_type sel_type;
   hid_t dset_id;
   int nrank;
-  int i,j;
+  size_t i;
+  int j;
   hsize_t *dims1;
   void *buf;
   herr_t status;
@@ -465,7 +467,8 @@ BEGIN_FUNC(PUB, ERR,
   hbool_t bounds_coor_alloc = FALSE;
   hbool_t buf_alloc = FALSE;
 
-  for (i=0; i<buf_size; i++) {
+/*   for (i=0; i<buf_size; i++) { */
+  for (i=1; i<2; i++) {
 
 /*  status= H5LRread_region(loc_id_ref,
 		       ref[i], 
@@ -672,6 +675,7 @@ H5LRcopy_region(hid_t obj_id,
   hid_t dset_id;
   int ndim;
   void *buf;
+  int *buf2;
   size_t numelem;
   int nrank;
   int i, j;
@@ -686,6 +690,9 @@ H5LRcopy_region(hid_t obj_id,
   hbool_t start_alloc = FALSE;
   hbool_t count_alloc = FALSE;
   hid_t current_stack_id = -1;
+hsize_t dims_mem[1];
+hid_t sel_type, mem_space;
+int inte;
 
   /* Region reference data */
   dset_ref = H5Rdereference(obj_id, H5R_DATASET_REGION, ref);
@@ -741,26 +748,21 @@ H5LRcopy_region(hid_t obj_id,
       }
   buf_alloc = TRUE;
 
+  buf2 = malloc(sizeof(int) * numelem);
+
   status= H5LRread_region(obj_id,
-			  (const hdset_reg_ref_t*)ref, 
+			  (const hdset_reg_ref_t*)ref,
 			  type_id,
 			  &numelem,
-			  buf );
+			  buf2 );
+
+  for (j=0; j<6; j++) {
+  printf(" here %d \n",buf2[j]);
+  }
+
   if(status < 0)
      H5E_THROW(H5E_NONE_MINOR, "H5LR: Failed in internal H5LRread_region")
 
-/*   sel_type = H5Sget_select_type(sid); */
-    
-/*   dims1[0] = H5Sget_select_npoints(sid); */
-
-/*   mem_space = H5Screate_simple (1, dims1, NULL); */
-
-/*   Allocate space for the dimension array */
-/*   dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndim);   */
-
-/*   status = H5Dread (dset, mem_type, mem_space, sid, H5P_DEFAULT, buf); */
-
-  
      if(sid_ref > 0) {
        status = H5Sclose(sid_ref);
        sid_ref = -1;
@@ -777,7 +779,7 @@ H5LRcopy_region(hid_t obj_id,
      }
 
 
-/*   Open the file */
+/* Open the file */
    file_id = H5Fopen(file, H5F_ACC_RDWR,  H5P_DEFAULT);
    if(file_id < 0) {
      H5E_THROW(H5E_CANTOPENFILE, "H5LR: Failed to open file")
@@ -794,19 +796,13 @@ H5LRcopy_region(hid_t obj_id,
      H5E_THROW(H5E_CANTOPENOBJ, "H5LR: Failed to open dataspace for given path")
 
 /*   Find the rank of the dataspace */
-   ndim = H5Sget_simple_extent_ndims(sid1);
-   if(ndim < 0)
-     H5E_THROW(H5E_NOTFOUND, "H5LR: Failed to find extents of dataspace")
+/*    ndim = H5Sget_simple_extent_ndims(sid1); */
+/*    if(ndim < 0) */
+/*      H5E_THROW(H5E_NOTFOUND, "H5LR: Failed to find extents of dataspace") */
 
-/*   /\* Allocate space for the dimension array *\/ */
-/*   dims1 = (hsize_t *)malloc (sizeof (hsize_t) * ndim); */
-
-/*   /\* find the dimensions of each data space from the block coordinates *\/ */
-/*   for (i=0; i<ndim; i++) */
-/*     dims1[i] = block_coord[i+ndim] - block_coord[i] + 1; */
-
+       dims_mem[0] = numelem;
    /* Create dataspace for writing the buffer */
-    if((sid2 = H5Screate_simple(ndim, dims1, NULL) < 0))
+    if((sid2 = H5Screate_simple(1, dims_mem, NULL) < 0))
      H5E_THROW(H5E_CANTCREATE, "H5LR: Unable to create dataspace for retrieving elements")
 
 /*   Select (x , x , ..., x ) x (y , y , ..., y ) hyperslab for writing memory dataset */
@@ -822,15 +818,9 @@ H5LRcopy_region(hid_t obj_id,
      H5E_THROW(H5E_CANTALLOC, "H5LR: Failed to allocate enough memory")
    count_alloc = TRUE;
    
-      
-/*    for (i=0; i<ndim; i++) { */
-/*      start[i] = block_coord[i]; */
-/*      count[i] = block_coord[i + ndim] - start[i] + 1; */
-/*    } */
-
    for (i=0; i<ndim; i++) {
      start[i] = block_coord[i];
-     count[i] = dims1[i];
+     count[i] = block_coord[i + ndim] - start[i] + 1;
    }
 
   status = H5Sselect_hyperslab(sid1,H5S_SELECT_SET,start,NULL,count,NULL);
@@ -841,18 +831,6 @@ H5LRcopy_region(hid_t obj_id,
   if(status < 0)
     H5E_THROW(H5E_CANTCREATE, "H5LR: Unable to create dataset")
 
-/*   H5Sget_select_npoints(sid); */
-
-
-/*   sel_type = H5Sget_select_type(sid); */
-
-/*   dims1[0] = H5Sget_select_npoints(sid); */
-
-/*   *numelem = dims1[0]; */
-
-/*   mem_space = H5Screate_simple (1, dims1, NULL); */
-
-/*   status = H5Dread (dset, mem_type, mem_space, sid, H5P_DEFAULT, buf); */
 
   free(start);
   free(count);

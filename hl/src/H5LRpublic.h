@@ -37,8 +37,9 @@ extern "C" {
 
 H5_HLDLL herr_t H5LRmake_dataset(hid_t loc_id, 
 				 const char *path, 
-				 hid_t type_id, hid_t loc_id_ref,
-				 int buf_size, hdset_reg_ref_t *buf);
+				 hid_t type_id, const size_t buf_size,
+				 const hid_t *loc_id_ref,
+				 const hdset_reg_ref_t *buf);
 
 /*-------------------------------------------------------------------------
  *
@@ -49,7 +50,7 @@ H5_HLDLL herr_t H5LRmake_dataset(hid_t loc_id,
 H5_HLDLL herr_t H5LRcreate_region_references(hid_t obj_id,
 					     size_t num_elem,
 					     const char **path,
-					     hsize_t *block_coord,
+					     const hsize_t *block_coord,
 					     hdset_reg_ref_t *buf);
 
 H5_HLDLL herr_t H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,

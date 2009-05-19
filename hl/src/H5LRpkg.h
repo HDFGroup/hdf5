@@ -34,7 +34,7 @@
  */
 #ifdef H5LR_MODULE
 #define H5_MY_PKG       H5LR
-#define H5_MY_PKG_ERR   H5E_LR
+#define H5_MY_PKG_ERR   H5E_HL
 #define H5_MY_PKG_INIT  YES
 #endif /* H5LR_MODULE */
 

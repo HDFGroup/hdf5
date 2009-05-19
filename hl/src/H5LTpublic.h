@@ -88,7 +88,7 @@ H5_HLDLL herr_t H5LTcopy_region(const char *file_src,
 				const hsize_t *block_coord_src,
 				const char *file_dest,
 				const char *path_dest,
-				hsize_t *block_coord_dset);
+				const hsize_t *block_coord_dset);
 
 
 /*-------------------------------------------------------------------------
@@ -134,7 +134,7 @@ H5_HLDLL herr_t  H5LTread_dataset_string( hid_t loc_id,
 
 H5_HLDLL herr_t  H5LTread_region(const char *file,
 				 const char *path,
-				 hsize_t *block_coord,
+				 const hsize_t *block_coord,
 				 hid_t mem_type,
 				 void *buf );
 
