@@ -1296,14 +1296,6 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line,
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
     } /* end else */
 
-    /* Check for mis-matches in major & minor error classes */
-    if(NULL == (maj_ptr = (H5E_msg_t *)H5I_object_verify(maj_id, H5I_ERROR_MSG)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error message ID")
-    if(NULL == (min_ptr = (H5E_msg_t *)H5I_object_verify(min_id, H5I_ERROR_MSG)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error message ID")
-    if(maj_ptr->cls != min_ptr->cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, FAIL, "major and minor errors not from same error class")
-
 /* Note that the variable-argument parsing for the format is identical in
  *      the H5E_printf_stack() routine - correct errors and make changes in both
  *      places. -QAK
