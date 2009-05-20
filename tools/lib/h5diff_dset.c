@@ -708,7 +708,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
                 
             {
                 
-                parallel_print("<%s> is of class %s and <%s> is of class %s\n",
+                parallel_print("Not comparable: <%s> is of class %s and <%s> is of class %s\n",
                     obj1_name, get_class(tclass1),
                     obj2_name, get_class(tclass2) );
                 
