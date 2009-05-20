@@ -79,7 +79,7 @@ int main(void)
     hsize_t block_coord[4] ={ 3, 3, 5, 4};
     hsize_t num_elem = 2;
     const char *path[num_elem];
-    hsize_t block_coord_6[6] ={ 0, 5, 0, 0, 1, 2};
+    hsize_t block_coord_6[6] ={ 4, 6, 5, 7, 0, 0, 1, 2};
     hsize_t block_coord_4[4] ={ 1, 3, 3, 4};
     hsize_t block_coord_1D_src[2] ={ 0, 5};
     hsize_t block_coord_1D_dest[2] ={ 5, 10};
@@ -88,8 +88,9 @@ int main(void)
     hsize_t block_coord_2D_dest_a[4] ={0, 3, 2, 4 };
     hdset_reg_ref_t ref6[num_elem];
     hdset_reg_ref_t ref_new;
+    hid_t file_id_array[num_elem];
 
-    path[0] ="/Group_1D/DS1";
+    path[0] ="/Group_2D/DS2";
     path[1] ="/Group_2D/DS2";
 
 
@@ -442,8 +443,6 @@ int main(void)
     
 
     /* check the data pointed to by the new region reference */
-
-
     status = H5LRread_region(file_id,
   			     &ref_new,
   			     H5T_NATIVE_INT,
@@ -465,14 +464,10 @@ int main(void)
       }
     printf("\n");
 
-    /* create a */
-
-
-
+    /* copy the region reference into a block_coord */
     status = H5LRcopy_region(file_id, &ref[1], filename, "/Group_2D/DS2", block_coord_4);
 
    /* check the region was copied correctly */
-
     status = H5LTread_dataset(file_id,"/Group_2D/DS2",H5T_NATIVE_INT,data_read_2D);
     
     printf("2D DATA AFTER H5LRCOPY_REGION: [(%d,%d)-(%d,%d)] --> [(%d,%d)-(%d,%d)]",
@@ -492,8 +487,11 @@ int main(void)
 					  path,
 					  block_coord_6,
 					  ref6);
+    for (i=0; i<num_elem; i++) 
+      file_id_array[i] = file_id;
 
-    status = H5LRmake_dataset(file_id, "/Group_2D/DS2a", H5T_NATIVE_INT, 2, file_id, ref6);
+
+/*     status = H5LRmake_dataset(file_id, "/Group_2D/DS2a", H5T_NATIVE_INT, num_elem, file_id_array, ref6); */
 
 
 

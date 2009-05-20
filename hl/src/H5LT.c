@@ -3318,7 +3318,6 @@ H5LTcopy_region(const char *file_src,
   count_alloc = FALSE;
 
 /* Open the file */
-  
   file_id = H5Fopen(file_dest, H5F_ACC_RDWR,  H5P_DEFAULT);
   if(file_id < 0)
     H5E_THROW(H5E_CANTOPENFILE, "H5LT: Failed to open file")
@@ -3328,12 +3327,12 @@ H5LTcopy_region(const char *file_src,
   if(dset_id < 0)
      H5E_THROW(H5E_CANTOPENOBJ, "H5LT: Failed to open dataset")
 
-/*   Get the dataspace of the dataset */
+/* Get the dataspace of the dataset */
    sid1 = H5Dget_space(dset_id);
    if(sid1 < 0)
      H5E_THROW(H5E_CANTOPENOBJ, "H5LT: Failed to open dataspace for given path")
 
-/*   Find the rank of the dataspace */
+/* Find the rank of the dataspace */
    ndim = H5Sget_simple_extent_ndims(sid1);
    if(ndim < 0)
      H5E_THROW(H5E_NOTFOUND, "H5LT: Failed to find extents of dataspace")
@@ -3441,10 +3440,10 @@ H5LTcopy_region(const char *file_src,
       current_stack_id = H5Eget_current_stack();
 
       if(dims1_alloc) free(dims1);
-      if(buf_alloc) free(buf_alloc);
+      if(buf_alloc) free(buf);
       if(start_alloc) free(start);
       if(count_alloc) free(count);
-      if(dims_src_alloc) free(dims_src_alloc);
+      if(dims_src_alloc) free(dims_src);
 
     /* Close the dataspace */
       if(sid1 > 0)
