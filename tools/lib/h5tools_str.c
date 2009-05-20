@@ -850,10 +850,18 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
         h5tools_str_append(str, OPT(info->fmt_uint, "%u"), tempuint);
     }
     else if (H5Tequal(type, H5T_NATIVE_SCHAR)) {
-        h5tools_str_append(str, OPT(info->fmt_schar, "%d"), *cp_vp);
+        char               tempchar;
+        HDmemcpy(&tempchar, cp_vp, sizeof(char));
+        if(packed_output)
+            tempchar = (tempchar & packed_counter)>>packed_normalize;
+        h5tools_str_append(str, OPT(info->fmt_schar, "%d"), tempchar);
     }
     else if (H5Tequal(type, H5T_NATIVE_UCHAR)) {
-        h5tools_str_append(str, OPT(info->fmt_uchar, "%u"), *ucp_vp);
+        unsigned char      tempuchar;
+        HDmemcpy(&tempuchar, ucp_vp, sizeof(unsigned char));
+        if(packed_output)
+            tempuchar = (tempuchar & packed_counter)>>packed_normalize;
+        h5tools_str_append(str, OPT(info->fmt_uchar, "%u"), tempuchar);
     }
     else if (H5Tequal(type, H5T_NATIVE_SHORT)) {
         short tempshort;
