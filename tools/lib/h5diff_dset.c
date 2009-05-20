@@ -260,7 +260,7 @@ hsize_t diff_datasetid( hid_t did1,
     if (storage_size1==0 || storage_size2==0)
     {
         if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
-            printf("<%s> or <%s> are empty datasets\n", obj1_name, obj2_name);
+            printf("Not comparable: <%s> or <%s> are empty datasets\n", obj1_name, obj2_name);
         can_compare=0;
         options->not_cmp=1;
     }
@@ -310,7 +310,7 @@ hsize_t diff_datasetid( hid_t did1,
     {
         if ((options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name) 
         {
-            printf("<%s> has sign %s ", obj1_name, get_sign(sign1));
+            printf("Not comparable: <%s> has sign %s ", obj1_name, get_sign(sign1));
             printf("and <%s> has sign %s\n", obj2_name, get_sign(sign2));
         }
         
@@ -691,7 +691,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
             if ( is_compound )
             {
                 
-                printf("<%s> has a class %s and <%s> has a class %s\n",
+                printf("Not comparable: <%s> has a class %s and <%s> has a class %s\n",
                     obj1_name, get_class(tclass1),
                     obj2_name, get_class(tclass2) );
                 
@@ -701,7 +701,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
                 
             {
                 
-                printf("<%s> is of class %s and <%s> is of class %s\n",
+                printf("Not comparable: <%s> is of class %s and <%s> is of class %s\n",
                     obj1_name, get_class(tclass1),
                     obj2_name, get_class(tclass2) );
                 
@@ -741,7 +741,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
 
         if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
         {
-            printf("<%s> and <%s> are of class %s\n",
+            printf("Not comparable: <%s> and <%s> are of class %s\n",
                 obj1_name,obj2_name,get_class(tclass2) );
         }
         can_compare = 0;
@@ -786,7 +786,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
 
         if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
         {
-            printf("<%s> has rank %d, dimensions ", obj1_name, rank1);
+            printf("Not comparable: <%s> has rank %d, dimensions ", obj1_name, rank1);
             print_dimensions(rank1,dims1);
             printf(", max dimensions ");
             print_dimensions(rank1,maxdim1);
@@ -829,7 +829,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
     {
         if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
         {
-            printf("<%s> has rank %d, dimensions ", obj1_name, rank1);
+            printf("Not comparable: <%s> has rank %d, dimensions ", obj1_name, rank1);
             print_dimensions(rank1,dims1);
             if (maxdim1 && maxdim2) 
             {
@@ -888,7 +888,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
             
             if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
             {
-                printf("<%s> has %d members ", obj1_name, nmembs1);
+                printf("Not comparable: <%s> has %d members ", obj1_name, nmembs1);
                 printf("<%s> has %d members ", obj2_name, nmembs2);
                 printf("\n");
             }
