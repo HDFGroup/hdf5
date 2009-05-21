@@ -26,6 +26,10 @@
 #   include <time.h>
 #endif
 
+#ifdef _WIN32
+#	include <winsock.h>
+#endif /* _WIN32 */
+
 /* The different types of timers we can have */
 typedef enum timer_type_ {
     HDF5_FILE_OPENCLOSE,

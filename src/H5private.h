@@ -1156,8 +1156,11 @@ H5_DLL int HDfprintf (FILE *stream, const char *fmt, ...);
     #define HDstrchr(S,C)		strchr(S,C)
 #endif /* HDstrchr */
 #ifndef HDstrcmp
-    #define HDstrcmp(X,Y)		strcmp(X,Y)
+    #define HDstrcmp(X,Y)       strcmp(X,Y)
 #endif /* HDstrcmp */
+#ifndef HDstrcasecmp
+    #define HDstrcasecmp(X,Y)       strcasecmp(X,Y)
+#endif /* HDstrcasecmp */
 #ifndef HDstrcoll
     #define HDstrcoll(X,Y)		strcoll(X,Y)
 #endif /* HDstrcoll */

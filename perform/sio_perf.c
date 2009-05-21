@@ -353,7 +353,7 @@ main(int argc, char **argv)
     }
 
     if (opts->output_file) {
-        if ((output = fopen(opts->output_file, "w")) == NULL) {
+        if ((output = HDfopen(opts->output_file, "w")) == NULL) {
             fprintf(stderr, "%s: cannot open output file\n", progname);
             perror(opts->output_file);
             goto finish;
@@ -918,7 +918,7 @@ report_parameters(struct options *opts)
     }
 
     {
-        char *prefix = getenv("HDF5_PREFIX");
+        char *prefix = HDgetenv("HDF5_PREFIX");
 
         HDfprintf(output, "Env HDF5_PREFIX=%s\n",
                   (prefix ? prefix : "not set"));
@@ -992,9 +992,9 @@ parse_command_line(int argc, char *argv[])
                         if (isalnum(*end) && i < 10)
                             buf[i++] = *end;
 
-                    if (!strcasecmp(buf, "hdf5")) {
+                    if (!HDstrcasecmp(buf, "hdf5")) {
                         cl_opts->io_types |= SIO_HDF5;
-                    } else if (!strcasecmp(buf, "posix")) {
+                    } else if (!HDstrcasecmp(buf, "posix")) {
                         cl_opts->io_types |= SIO_POSIX;
                     } else {
                         fprintf(stderr, "sio_perf: invalid --api option %s\n",
@@ -1145,19 +1145,19 @@ parse_command_line(int argc, char *argv[])
             cl_opts->h5_threshold = parse_size_directive(opt_arg);
             break;
         case 'v':
-            if (!strcasecmp(opt_arg, "sec2")) {
+            if (!HDstrcasecmp(opt_arg, "sec2")) {
                 cl_opts->vfd=sec2;
-            } else if (!strcasecmp(opt_arg, "stdio")) {
+            } else if (!HDstrcasecmp(opt_arg, "stdio")) {
                 cl_opts->vfd=stdio;
-            } else if (!strcasecmp(opt_arg, "core")) {
+            } else if (!HDstrcasecmp(opt_arg, "core")) {
                 cl_opts->vfd=core;
-            } else if (!strcasecmp(opt_arg, "split")) {
+            } else if (!HDstrcasecmp(opt_arg, "split")) {
                 cl_opts->vfd=split;
-            } else if (!strcasecmp(opt_arg, "multi")) {
+            } else if (!HDstrcasecmp(opt_arg, "multi")) {
                 cl_opts->vfd=multi;
-            } else if (!strcasecmp(opt_arg, "family")) {
+            } else if (!HDstrcasecmp(opt_arg, "family")) {
                 cl_opts->vfd=family;
-            } else if (!strcasecmp(opt_arg, "direct")) {
+            } else if (!HDstrcasecmp(opt_arg, "direct")) {
                 cl_opts->vfd=direct;
             } else {
                 fprintf(stderr, "sio_perf: invalid --api option %s\n",
