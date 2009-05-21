@@ -42,12 +42,12 @@ int main(void)
   
   space_id = H5Screate_simple(rank, dims, NULL);
   
-  dset_id = H5Dcreate2(file_id, "Granule 1",  H5T_STD_B8BE, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  dset_id = H5Dcreate2(file_id, "Granule 1",  H5T_NATIVE_UCHAR, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   
   /*
    * Write data to the dataset.
    */
-  status = H5Dwrite(dset_id, H5T_NATIVE_B8, H5S_ALL , H5S_ALL, H5P_DEFAULT,wdata);
+  status = H5Dwrite(dset_id, H5T_NATIVE_UCHAR, H5S_ALL , H5S_ALL, H5P_DEFAULT,wdata);
   status = H5Dclose(dset_id);
   status = H5Sclose(space_id);
   status = H5Fclose(file_id);
@@ -73,7 +73,7 @@ int main(void)
    * store it in a char buffer. This selects all the elements (H5S_ALL)
    */
   status = H5LTread_bitfield_value(qf_dset, num_flags, offset, length,
-				   H5S_ALL, H5T_NATIVE_B8, qf_data);
+				   H5S_ALL, H5T_NATIVE_UCHAR, qf_data);
   printf("Bit Field:\n");
   for (i = 0; i<DIM0; i++) {
     printf (" [");
