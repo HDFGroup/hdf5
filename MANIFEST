@@ -1614,7 +1614,7 @@
 ./hl/src/H5LRprivate.h
 ./hl/src/H5LRpublic.h
 ./hl/src/H5LT.c
-./hl/src/H5LPpkg.h
+./hl/src/H5LTpkg.h
 ./hl/src/H5LTanalyze.l
 ./hl/src/H5LTanalyze.c
 ./hl/src/H5LTparse.y
