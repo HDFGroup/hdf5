@@ -487,8 +487,6 @@ typedef struct H5D_rdcc_ent_t {
     uint32_t	rd_count;	/*bytes remaining to be read		*/
     uint32_t	wr_count;	/*bytes remaining to be written		*/
     haddr_t     chunk_addr;     /*address of chunk in file		*/
-    uint32_t	chunk_size;	/*size of a chunk			*/
-    size_t	alloc_size;	/*amount allocated for the chunk	*/
     uint8_t	*chunk;		/*the unfiltered chunk data		*/
     unsigned	idx;		/*index in hash table			*/
     struct H5D_rdcc_ent_t *next;/*next item in doubly-linked list	*/

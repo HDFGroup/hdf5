@@ -2227,12 +2227,12 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
         udata.common.mesg = &dset->shared->layout;
         udata.common.offset = ent->offset;
         udata.filter_mask = 0;
-        udata.nbytes = ent->chunk_size;
+        udata.nbytes = dset->shared->layout.u.chunk.size;
         udata.addr = ent->chunk_addr;
 
         /* Should the chunk be filtered before writing it to disk? */
         if(dset->shared->dcpl_cache.pline.nused) {
-            size_t alloc = ent->alloc_size;     /* Bytes allocated for BUF	*/
+            size_t alloc = udata.nbytes;        /* Bytes allocated for BUF	*/
             size_t nbytes;                      /* Chunk size (in bytes) */
 
             if(!reset) {
@@ -2241,10 +2241,10 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
                  * the pipeline because we'll want to save the original buffer
                  * for later.
                  */
-                H5_ASSIGN_OVERFLOW(alloc, ent->chunk_size, uint32_t, size_t);
+                H5_ASSIGN_OVERFLOW(alloc, udata.nbytes, uint32_t, size_t);
                 if(NULL == (buf = H5MM_malloc(alloc)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for pipeline")
-                HDmemcpy(buf, ent->chunk, ent->chunk_size);
+                HDmemcpy(buf, ent->chunk, udata.nbytes);
             } /* end if */
             else {
                 /*
@@ -2394,7 +2394,7 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
     /* Remove from cache */
     rdcc->slot[ent->idx] = NULL;
     ent->idx = UINT_MAX;
-    rdcc->nbytes_used -= ent->chunk_size;
+    rdcc->nbytes_used -= dset->shared->layout.u.chunk.size;
     --rdcc->nused;
 
     /* Free */
@@ -2464,8 +2464,8 @@ H5D_chunk_cache_prune(const H5D_t *dset, hid_t dxpl_id,
 	for(i = 0; i < nmeth && (rdcc->nbytes_used + size) > total; i++) {
 	    if(0 == i && p[0] && !p[0]->locked &&
                     ((0 == p[0]->rd_count && 0 == p[0]->wr_count) ||
-                     (0 == p[0]->rd_count && p[0]->chunk_size == p[0]->wr_count) ||
-                     (p[0]->chunk_size == p[0]->rd_count && 0 == p[0]->wr_count))) {
+                     (0 == p[0]->rd_count && dset->shared->layout.u.chunk.size == p[0]->wr_count) ||
+                     (dset->shared->layout.u.chunk.size == p[0]->rd_count && 0 == p[0]->wr_count))) {
 		/*
 		 * Method 0: Preempt entries that have been completely written
 		 * and/or completely read but not entries that are partially
@@ -2699,8 +2699,6 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
         ent->locked = 0;
         ent->dirty = FALSE;
         ent->chunk_addr = chunk_addr;
-        H5_ASSIGN_OVERFLOW(ent->chunk_size, chunk_size, size_t, uint32_t);
-        ent->alloc_size = chunk_size;
         for(u = 0; u < layout->u.chunk.ndims; u++)
             ent->offset[u] = io_info->store->chunk.offset[u];
         H5_ASSIGN_OVERFLOW(ent->rd_count, chunk_size, size_t, uint32_t);
@@ -2835,8 +2833,6 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
             HDmemcpy(ent.offset, io_info->store->chunk.offset, layout->u.chunk.ndims * sizeof(ent.offset[0]));
             HDassert(layout->u.chunk.size > 0);
             ent.chunk_addr = udata->addr;
-            ent.chunk_size = layout->u.chunk.size;
-            H5_ASSIGN_OVERFLOW(ent.alloc_size, ent.chunk_size, uint32_t, size_t);
             ent.chunk = (uint8_t *)chunk;
 
             if(H5D_chunk_flush_entry(io_info->dset, io_info->dxpl_id, io_info->dxpl_cache, &ent, TRUE) < 0)
@@ -3738,7 +3734,7 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dims)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, H5_ITER_ERROR, "memory allocation failed for stack node")
 
             /* Set up chunk record for fill routine */
-            tmp_stack->rec.nbytes = ent->chunk_size;
+            tmp_stack->rec.nbytes = dset->shared->layout.u.chunk.size;
             HDmemcpy(tmp_stack->rec.offset, ent->offset, sizeof(tmp_stack->rec.offset));
             tmp_stack->rec.filter_mask = 0; /* Since the chunk is already in cache this doesn't matter */
             tmp_stack->rec.chunk_addr = ent->chunk_addr;
