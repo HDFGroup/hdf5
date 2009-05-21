@@ -374,7 +374,7 @@ HDfprintf(stderr, "%s: Index block address is: %a\n", FUNC, hdr->idx_blk_addr);
     if(idx < hdr->cparam.idx_blk_elmts) {
         /* Set element in index block */
         HDmemcpy(((uint8_t *)iblock->elmts) + (hdr->cparam.cls->nat_elmt_size * idx), elmt, hdr->cparam.cls->nat_elmt_size);
-        dblock_cache_flags |= H5AC__DIRTIED_FLAG;
+        iblock_cache_flags |= H5AC__DIRTIED_FLAG;
     } /* end if */
     else {
         unsigned sblk_idx;      /* Which superblock does this index fall in? */
@@ -418,7 +418,7 @@ HDfprintf(stderr, "%s: dblk_idx = %u, iblock->ndblk_addrs = %Zu\n", FUNC, dblk_i
 
                 /* Set data block address in index block */
                 iblock->dblk_addrs[dblk_idx] = dblk_addr;
-                dblock_cache_flags |= H5AC__DIRTIED_FLAG;
+                iblock_cache_flags |= H5AC__DIRTIED_FLAG;
             } /* end if */
 
             /* Protect data block */
@@ -453,7 +453,7 @@ HDfprintf(stderr, "%s: New super block address is: %a\n", FUNC, sblk_addr);
 
                 /* Set super block address in index block */
                 iblock->sblk_addrs[sblk_off] = sblk_addr;
-                dblock_cache_flags |= H5AC__DIRTIED_FLAG;
+                iblock_cache_flags |= H5AC__DIRTIED_FLAG;
             } /* end if */
 
             /* Protect super block */
