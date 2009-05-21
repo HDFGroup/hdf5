@@ -1220,8 +1220,8 @@
 ./tools/testfiles/tnullspace.ddl
 ./tools/testfiles/tobjref.h5
 ./tools/testfiles/topaque.h5
-./tools/testfiles/tpackedbits.h5
-./tools/testfiles/tpackedbits2.h5
+./tools/testfiles/tpackedbits.ddl
+./tools/testfiles/tpackedbits2.ddl
 ./tools/testfiles/tsaf.ddl
 ./tools/testfiles/tsaf.h5
 ./tools/testfiles/tscaleoffset.ddl
@@ -1614,6 +1614,7 @@
 ./hl/src/H5LRprivate.h
 ./hl/src/H5LRpublic.h
 ./hl/src/H5LT.c
+./hl/src/H5LPpkg.h
 ./hl/src/H5LTanalyze.l
 ./hl/src/H5LTanalyze.c
 ./hl/src/H5LTparse.y
