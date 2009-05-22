@@ -79,7 +79,7 @@ int main(void)
     hsize_t block_coord[4] ={ 3, 3, 5, 4};
     hsize_t num_elem = 2;
     const char *path[num_elem];
-    hsize_t block_coord_6[6] ={ 4, 6, 5, 7, 0, 0, 1, 2};
+    hsize_t block_coord_6[8] ={ 4, 6, 5, 7, 0, 0, 2, 1};
     hsize_t block_coord_4[4] ={ 1, 3, 3, 4};
     hsize_t block_coord_1D_src[2] ={ 0, 5};
     hsize_t block_coord_1D_dest[2] ={ 5, 10};
@@ -259,16 +259,6 @@ int main(void)
 /* 		    NULL, */
 /* 		    H5R_DATASET_REGION ); */
 
-/*     status = H5LRget_region_info(-1, */
-/* 				 NULL, */
-/* 				 NULL, */
-/* 				 &nlength, */
-/* 				 &rank_out, */
-/* 				 NULL, */
-/* 				 NULL, */
-/* 				 H5R_DATASET_REGION ); */
-
-
 /*     if(status < 0 )  */
 /*       printf(" Testing for incorrect object id, PASSED \n"); */
 
@@ -314,30 +304,8 @@ int main(void)
     if(buf[0] != 3 || buf[1] != 3 || buf[2] != 5 || buf[3] != 4)
       printf(" VALIDATION ERROR: hyperslab coordinates\n");
 
-/*     size  = H5Tget_size(dtype); */
-
-/*     /\* */
-/*      * Allocate array of pointers to rows. */
-/*      *\/ */
-/*     rdata = (int **) malloc ( (buf[2]-buf[0]+1 )* sizeof (int *)); */
-
-/*     /\* */
-/*      * Allocate space for integer data. */
-/*      *\/ */
-/*     rdata[0] = (int *) malloc ( (buf[2]-buf[0]+1) * (buf[3]-buf[1]+1) * sizeof (int)); */
-
-/*     /\* */
-/*      * Set the rest of the pointers to rows to the correct addresses. */
-/*      *\/ */
-/*     for (i=1; i<(buf[2]-buf[0]+1); i++) */
-/*         rdata[i] = rdata[0] + i * (buf[3]-buf[1]+1); */
-
-
-/*     rdata = ( int **) malloc(  numelem * sizeof (int *) ); */
-
-
     /* Read a region of the data using a region reference */
-/*     file_id = -1; */
+     /* file_id = -1; */
 
     if ( H5LRread_region(file_id, 
 			 &ref[1], 
@@ -383,15 +351,6 @@ int main(void)
 	}
       printf("\n");
     }
- 
-
-/*     status = H5LTcopy_region(filename,  */
-/* 			     "/Group_1D/DS1", */
-/* 	                     block_coord_1D_src, */
-/* 			     filename, */
-/*  			     "/Group_1D/DS1", */
-/*  			     block_coord_1D_dest); */
-
 
     /* copy a region described by blocks to another region described by another block */
     status = H5LTcopy_region(filename,
@@ -429,6 +388,7 @@ int main(void)
     printf("2D DATA AFTER H5LRCOPY_REFERENCES: [(%d,%d)-(%d,%d)] --> [(%d,%d)-(%d,%d)]",
 	   (int)block_coord[0],(int)block_coord[1],(int)block_coord[2],(int)block_coord[3],
 	   (int)block_coord_2D_dest_a[0], (int)block_coord_2D_dest_a[1],(int)block_coord_2D_dest_a[2], (int)block_coord_2D_dest_a[3]);
+
     for (i=0; i<9; i++) {
       printf("\n[ ");
       for (j=0; j<8; j++) {
@@ -473,6 +433,7 @@ int main(void)
     printf("2D DATA AFTER H5LRCOPY_REGION: [(%d,%d)-(%d,%d)] --> [(%d,%d)-(%d,%d)]",
 	   (int)block_coord[0],(int)block_coord[1],(int)block_coord[2],(int)block_coord[3],
 	   (int)block_coord_4[0], (int)block_coord_4[1],(int)block_coord_4[2], (int)block_coord_4[3]);
+
     for (i=0; i<9; i++) {
       printf("\n[ ");
       for (j=0; j<8; j++) {
@@ -490,17 +451,7 @@ int main(void)
     for (i=0; i<num_elem; i++) 
       file_id_array[i] = file_id;
 
-
-/*     status = H5LRmake_dataset(file_id, "/Group_2D/DS2a", H5T_NATIVE_INT, num_elem, file_id_array, ref6); */
-
-
-
-
-/*        printf("Selected  hyperslab: "); */
-/*     for (i=0; i<2; i++) */
-/*       for (j=0; j<2; j++) */
-/* 	for (k=0; k<2; k++) */
-/* 	  printf("%d %d %d %d \n ",i,j,k,data3D[i][j][k]); */
+    status = H5LRmake_dataset(file_id, "/Group_2D/DS2a", H5T_NATIVE_INT, num_elem, file_id_array, ref6);
 
     return 0;
 out:
