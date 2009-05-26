@@ -34,6 +34,7 @@
 #endif /* NOT_YET */
 
 /* Private headers needed by this file */
+#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5Fprivate.h"		/* File access				*/
 
 
@@ -129,6 +130,10 @@ H5_DLL herr_t H5EA_get_nelmts(const H5EA_t *ea, hsize_t *nelmts);
 H5_DLL herr_t H5EA_get_addr(const H5EA_t *ea, haddr_t *addr);
 H5_DLL herr_t H5EA_set(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, const void *elmt);
 H5_DLL herr_t H5EA_get(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, void *elmt);
+H5_DLL herr_t H5EA_depend(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx,
+    H5AC_info_t *child_entry);
+H5_DLL herr_t H5EA_undepend(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx,
+    H5AC_info_t *child_entry);
 H5_DLL herr_t H5EA_close(H5EA_t *ea, hid_t dxpl_id);
 H5_DLL herr_t H5EA_delete(H5F_t *f, hid_t dxpl_id, haddr_t ea_addr);
 

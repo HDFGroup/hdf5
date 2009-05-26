@@ -135,6 +135,37 @@ struct earray_test_param_t {
     H5EA_sblk_info_t *sblk_info;        /* Array of information for each super block */
 };
 
+/* Flush depend test context */
+typedef struct earray_flush_depend_ctx_t {
+    hbool_t idx0_obj;                   /* Flag to indicate that index 0's object has been flushed */
+    hbool_t idx0_elem;                  /* Flag to indicate that index 0's element has been flushed */
+    hbool_t idx1_obj;                   /* Flag to indicate that index 1's object has been flushed */
+    hbool_t idx1_elem;                  /* Flag to indicate that index 1's element has been flushed */
+    hbool_t idx10000_obj;               /* Flag to indicate that index 10000's object has been flushed */
+    hbool_t idx10000_elem;              /* Flag to indicate that index 10000's element has been flushed */
+} earray_flush_depend_ctx_t;
+
+/* Extensible array test cache object */
+typedef struct earray_test_t {
+    /* Information for H5AC cache functions, _must_ be first field in structure */
+    H5AC_info_t cache_info;
+
+    /* Entry information */
+    uint64_t idx;                       /* Index that entry corresponds to */
+    earray_flush_depend_ctx_t *fd_info; /* Context information for flush depend test */
+} earray_test_t;
+
+
+/* Local prototypes */
+
+/* Metadata cache (H5AC) callbacks */
+static earray_test_t *earray_cache_test_load(H5F_t *f, hid_t dxpl_id, haddr_t addr, const void *udata, void *udata2);
+static herr_t earray_cache_test_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, earray_test_t *test, unsigned * flags_ptr);
+static herr_t earray_cache_test_clear(H5F_t *f, earray_test_t *test, hbool_t destroy);
+static herr_t earray_cache_test_size(const H5F_t *f, const earray_test_t *test, size_t *size_ptr);
+static herr_t earray_cache_test_dest(H5F_t *f, earray_test_t *test);
+
+
 /* Local variables */
 const char *FILENAME[] = {
     "earray",
@@ -147,8 +178,17 @@ char filename_g[EARRAY_FILENAME_LEN];
 /* Empty file size */
 h5_stat_size_t empty_size_g;
 
+/* H5EA test object inherits cache-like properties from H5AC */
+const H5AC_class_t H5AC_EARRAY_TEST[1] = {{
+    H5AC_TEST_ID,
+    (H5AC_load_func_t)earray_cache_test_load,
+    (H5AC_flush_func_t)earray_cache_test_flush,
+    (H5AC_dest_func_t)earray_cache_test_dest,
+    (H5AC_clear_func_t)earray_cache_test_clear,
+    (H5AC_notify_func_t)NULL,
+    (H5AC_size_func_t)earray_cache_test_size,
+}};
 
-/* Local prototypes */
 
 
 /*-------------------------------------------------------------------------
@@ -439,13 +479,13 @@ error:
  */
 static int
 create_array(H5F_t *f, hid_t dxpl, const H5EA_create_t *cparam,
-    H5EA_t **ea, haddr_t *ea_addr)
+    H5EA_t **ea, haddr_t *ea_addr, H5EA__ctx_cb_t *cb)
 {
     hsize_t     nelmts;                 /* Number of elements in array */
     earray_state_t state;               /* State of extensible array */
 
     /* Create array */
-    if(NULL == (*ea = H5EA_create(f, dxpl, cparam, NULL)))
+    if(NULL == (*ea = H5EA_create(f, dxpl, cparam, cb)))
         FAIL_STACK_ERROR
 
     /* Check status of array */
@@ -558,6 +598,191 @@ HDsystem("cp earray.h5 earray.h5.save");
 error:
     return(-1);
 } /* finish() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	earray_cache_test_load
+ *
+ * Purpose:	Loads an extensible array test object from the disk.
+ *
+ * Return:	Success:	Pointer to a new extensible array test object
+ *		Failure:	NULL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		May 26 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static earray_test_t *
+earray_cache_test_load(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, haddr_t UNUSED addr, const void UNUSED *udata1, void UNUSED *udata2)
+{
+    /* Check arguments */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+
+    /* Should never be called */
+    HDassert(0 && "Can't be called!");
+
+    return(NULL);
+} /* end earray_cache_test_load() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	earray_cache_test_flush
+ *
+ * Purpose:	Flushes a dirty extensible array test object to disk.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		May 26 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+earray_cache_test_flush(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, hbool_t destroy, haddr_t UNUSED addr, earray_test_t *test, unsigned UNUSED * flags_ptr)
+{
+    /* check arguments */
+    HDassert(f);
+    HDassert(H5F_addr_defined(addr));
+    HDassert(test);
+
+    if(test->cache_info.is_dirty) {
+        /* Check which index this entry corresponds to */
+        if((uint64_t)0 == test->idx) {
+            /* Check for out of order flush */
+            if(test->fd_info->idx0_obj || test->fd_info->idx0_elem)
+                TEST_ERROR
+
+            /* Set flag for object flush */
+            test->fd_info->idx0_obj = TRUE;
+        } /* end if */
+        else if((uint64_t)1 == test->idx) {
+            /* Check for out of order flush */
+            if(test->fd_info->idx1_obj || test->fd_info->idx1_elem)
+                TEST_ERROR
+
+            /* Set flag for object flush */
+            test->fd_info->idx1_obj = TRUE;
+        } /* end if */
+        else if((uint64_t)10000 == test->idx) {
+            /* Check for out of order flush */
+            if(test->fd_info->idx10000_obj || test->fd_info->idx10000_elem)
+                TEST_ERROR
+
+            /* Set flag for object flush */
+            test->fd_info->idx10000_obj = TRUE;
+        } /* end if */
+
+        /* Mark the entry as clean */
+	test->cache_info.is_dirty = FALSE;
+    } /* end if */
+
+    if(destroy)
+        if(earray_cache_test_dest(f, test) < 0)
+            TEST_ERROR
+
+    return(SUCCEED);
+
+error:
+    return(FAIL);
+} /* earray_cache_test_flush() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	earray_cache_test_dest
+ *
+ * Purpose:	Destroys an extensible array test object in memory.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		May 26 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+earray_cache_test_dest(H5F_t UNUSED *f, earray_test_t *test)
+{
+    /*
+     * Check arguments.
+     */
+    HDassert(test);
+
+    /* Free the shared info itself */
+    HDfree(test);
+
+    return(SUCCEED);
+} /* end earray_cache_test_dest() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	earray_cache_test_clear
+ *
+ * Purpose:	Mark an extensible array test object in memory as non-dirty.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		May 26 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+earray_cache_test_clear(H5F_t *f, earray_test_t *test, hbool_t destroy)
+{
+    /*
+     * Check arguments.
+     */
+    HDassert(test);
+
+    /* Reset the dirty flag.  */
+    test->cache_info.is_dirty = FALSE;
+
+    if(destroy)
+        if(earray_cache_test_dest(f, test) < 0)
+            TEST_ERROR
+
+    return(SUCCEED);
+
+error:
+    return(FAIL);
+} /* end earray_cache_test_clear() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	earray_cache_test_size
+ *
+ * Purpose:	Compute the size in bytes of an extensible array test object
+ *		on disk, and return it in *size_ptr.  On failure,
+ *		the value of *size_ptr is undefined.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		May 26 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+earray_cache_test_size(const H5F_t UNUSED *f, const earray_test_t UNUSED *test, size_t *size_ptr)
+{
+    /* check arguments */
+    HDassert(f);
+    HDassert(test);
+    HDassert(size_ptr);
+
+    /* Set size value */
+    /* (hard-code to 1) */
+    *size_ptr = 1;
+
+    return(SUCCEED);
+} /* earray_cache_test_size() */
 
 
 /*-------------------------------------------------------------------------
@@ -750,7 +975,7 @@ test_create(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tpara
     TESTING("extensible array creation");
 
     /* Create array */
-    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr) < 0)
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr, NULL) < 0)
         TEST_ERROR
 
     PASSED()
@@ -813,7 +1038,7 @@ test_reopen(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     TESTING("create, close & reopen extensible array");
 
     /* Create array */
-    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr) < 0)
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr, NULL) < 0)
         TEST_ERROR
 
     /* Close the extensible array */
@@ -886,7 +1111,7 @@ test_open_twice(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     TESTING("open extensible array twice");
 
     /* Create array */
-    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr) < 0)
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr, NULL) < 0)
         TEST_ERROR
 
     /* Open the array again, through the first file handle */
@@ -992,7 +1217,7 @@ test_delete_open(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam)
     TESTING("deleting open extensible array");
 
     /* Create array */
-    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr) < 0)
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr, NULL) < 0)
         TEST_ERROR
 
     /* Open the array again */
@@ -1075,6 +1300,259 @@ error:
 
     return 1;
 } /* test_delete_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_flush_depend_cb
+ *
+ * Purpose:	Callback for flush dependency 'depend'/'undepend' routines
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Tuesday, May 26, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_flush_depend_cb(const void *_elmt, size_t nelmts, void *udata)
+{
+    earray_flush_depend_ctx_t *ctx = (earray_flush_depend_ctx_t *)udata;
+    const uint64_t *elmt = (const uint64_t *)_elmt;     /* Convenience pointer to native elements */
+
+    /* Look for magic values */
+    while(nelmts > 0) {
+        /* Check for elements of interest */
+        if((uint64_t)0 == *elmt) {
+            /* Check for out-of-order flush */
+            if(!ctx->idx0_obj)
+                return(FAIL);
+
+            /* Indicate that the element was flushed */
+            ctx->idx0_elem = TRUE;
+        } /* end if */
+        else if((uint64_t)1 == *elmt) {
+            /* Check for out-of-order flush */
+            if(!ctx->idx1_obj)
+                return(FAIL);
+
+            /* Indicate that the element was flushed */
+            ctx->idx1_elem = TRUE;
+        } /* end if */
+        else if((uint64_t)10000 == *elmt) {
+            /* Check for out-of-order flush */
+            if(!ctx->idx10000_obj)
+                return(FAIL);
+
+            /* Indicate that the element was flushed */
+            ctx->idx10000_elem = TRUE;
+        } /* end if */
+
+        /* Decrement elements left to inspect */
+        nelmts--;
+        elmt++;
+    } /* end while */
+
+    return(SUCCEED);
+} /* end test_flush_depend_cb() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	test_flush_depend
+ *
+ * Purpose:	Exercise flush dependency 'depend'/'undepend' routines
+ *
+ * Return:	Success:	0
+ *		Failure:	1
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, May 21, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static unsigned
+test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED *tparam)
+{
+    hid_t	file = -1;              /* File ID */
+    H5F_t	*f = NULL;              /* Internal file object pointer */
+    H5EA_t      *ea = NULL;             /* Extensible array wrapper */
+    haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
+    H5EA__ctx_cb_t cb;                  /* Extensible array context action info */
+    earray_flush_depend_ctx_t fd_info;  /* Context information for flush depend test */
+    haddr_t     addr1;                  /* Test entry #1 address */
+    earray_test_t *entry1;              /* Pointer to test entry #1 */
+    haddr_t     addr2;                  /* Test entry #2 address */
+    earray_test_t *entry2;              /* Pointer to test entry #2 */
+    haddr_t     addr3;                  /* Test entry #3 address */
+    earray_test_t *entry3;              /* Pointer to test entry #3 */
+    uint64_t    welmt;                  /* Element to write */
+    hsize_t     idx;                    /* Index value of element */
+
+    /* Create file & retrieve pointer to internal file object */
+    if(create_file(fapl, &file, &f) < 0)
+        TEST_ERROR
+
+    /*
+     * Display testing message
+     */
+    TESTING("flush dependencies on array metadata");
+
+    /* Create array */
+    cb.encode = test_flush_depend_cb;
+    HDmemset(&fd_info, 0, sizeof(earray_flush_depend_ctx_t));
+    cb.udata = &fd_info;
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr, &cb) < 0)
+        TEST_ERROR
+
+    /* Verify the creation parameters */
+    if(verify_cparam(ea, cparam) < 0)
+        TEST_ERROR
+
+    /* Create entry #1 to insert */
+    if(NULL == (entry1 = (earray_test_t *)HDmalloc(sizeof(earray_test_t))))
+        TEST_ERROR
+    HDmemset(entry1, 0, sizeof(earray_test_t));
+    entry1->fd_info = &fd_info;
+
+    /* Insert test entry into cache */
+    addr1 = HADDR_MAX - 1;
+    if(H5AC_set(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr1, entry1, H5AC__PIN_ENTRY_FLAG) < 0)
+        TEST_ERROR
+
+    /* Set the test entry as a flush dependency for 0th index in the array */
+    if(H5EA_depend(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)0, (H5AC_info_t *)entry1) < 0)
+        TEST_ERROR
+
+    /* Set element of array */
+    welmt = (uint64_t)0;
+    idx = 0;
+    if(H5EA_set(ea, H5P_DATASET_XFER_DEFAULT, idx, &welmt) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create entry #2 to insert */
+    if(NULL == (entry2 = (earray_test_t *)HDmalloc(sizeof(earray_test_t))))
+        TEST_ERROR
+    HDmemset(entry2, 0, sizeof(earray_test_t));
+    entry2->idx = (uint64_t)1;
+    entry2->fd_info = &fd_info;
+
+    /* Insert test entry into cache */
+    addr2 = HADDR_MAX - 2;
+    if(H5AC_set(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr2, entry2, H5AC__PIN_ENTRY_FLAG) < 0)
+        TEST_ERROR
+
+    /* Set the test entry as a flush dependency for 1st index in the array */
+    if(H5EA_depend(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)1, (H5AC_info_t *)entry2) < 0)
+        TEST_ERROR
+
+    /* Set element of array */
+    welmt = (uint64_t)1;
+    idx = 1;
+    if(H5EA_set(ea, H5P_DATASET_XFER_DEFAULT, idx, &welmt) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create entry #3 to insert */
+    if(NULL == (entry3 = (earray_test_t *)HDmalloc(sizeof(earray_test_t))))
+        TEST_ERROR
+    HDmemset(entry3, 0, sizeof(earray_test_t));
+    entry3->idx = (uint64_t)10000;
+    entry3->fd_info = &fd_info;
+
+    /* Insert test entry into cache */
+    addr3 = HADDR_MAX - 3;
+    if(H5AC_set(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr3, entry3, H5AC__PIN_ENTRY_FLAG) < 0)
+        TEST_ERROR
+
+    /* Set the test entry as a flush dependency for 10,000th index in the array */
+    if(H5EA_depend(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)10000, (H5AC_info_t *)entry3) < 0)
+        TEST_ERROR
+
+    /* Set element of array */
+    welmt = (uint64_t)10000;
+    idx = 10000;
+    if(H5EA_set(ea, H5P_DATASET_XFER_DEFAULT, idx, &welmt) < 0)
+        FAIL_STACK_ERROR
+
+
+    /* Flush the cache */
+    if(H5Fflush(file, H5F_SCOPE_GLOBAL) < 0)
+        TEST_ERROR
+
+    /* Check that all callback flags have been set */
+    if(!fd_info.idx0_obj)
+        TEST_ERROR
+    if(!fd_info.idx0_elem)
+        TEST_ERROR
+    if(!fd_info.idx1_obj)
+        TEST_ERROR
+    if(!fd_info.idx1_elem)
+        TEST_ERROR
+    if(!fd_info.idx10000_obj)
+        TEST_ERROR
+    if(!fd_info.idx10000_elem)
+        TEST_ERROR
+
+
+    /* Remove the test entry as a flush dependency for 0th index in the array */
+    if(H5EA_undepend(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)0, (H5AC_info_t *)entry1) < 0)
+        TEST_ERROR
+
+    /* Protect the test entry */
+    if(NULL == (entry1 = (earray_test_t *)H5AC_protect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr1, NULL, NULL, H5AC_WRITE)))
+        TEST_ERROR
+
+    /* Unprotect & unpin the test entry */
+    if(H5AC_unprotect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr1, entry1, (H5AC__UNPIN_ENTRY_FLAG | H5AC__DELETED_FLAG)) < 0)
+        TEST_ERROR
+
+    /* Remove the test entry as a flush dependency for 1st index in the array */
+    if(H5EA_undepend(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)1, (H5AC_info_t *)entry2) < 0)
+        TEST_ERROR
+
+    /* Protect the test entry */
+    if(NULL == (entry2 = (earray_test_t *)H5AC_protect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr2, NULL, NULL, H5AC_WRITE)))
+        TEST_ERROR
+
+    /* Unprotect & unpin the test entry */
+    if(H5AC_unprotect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr2, entry2, (H5AC__UNPIN_ENTRY_FLAG | H5AC__DELETED_FLAG)) < 0)
+        TEST_ERROR
+
+    /* Remove the test entry as a flush dependency for 10,000th index in the array */
+    if(H5EA_undepend(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)10000, (H5AC_info_t *)entry3) < 0)
+        TEST_ERROR
+
+    /* Protect the test entry */
+    if(NULL == (entry3 = (earray_test_t *)H5AC_protect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr3, NULL, NULL, H5AC_WRITE)))
+        TEST_ERROR
+
+    /* Unprotect & unpin the test entry */
+    if(H5AC_unprotect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, addr3, entry3, (H5AC__UNPIN_ENTRY_FLAG | H5AC__DELETED_FLAG)) < 0)
+        TEST_ERROR
+
+    /* Close the extensible array */
+    if(H5EA_close(ea, H5P_DATASET_XFER_DEFAULT) < 0)
+        FAIL_STACK_ERROR
+    ea = NULL;
+
+    /* Close the file */
+    if(H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+
+    /* All tests passed */
+    PASSED()
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+        if(ea)
+            H5EA_close(ea, H5P_DATASET_XFER_DEFAULT);
+	H5Fclose(file);
+    } H5E_END_TRY;
+
+    return 1;
+} /* test_flush_depend() */
 
 /* Extensible array iterator info for forward iteration */
 typedef struct eiter_fw_t {
@@ -1822,7 +2300,7 @@ eiter_cyc_next(void *_eiter)
     HDassert(eiter);
 
     /* Get the next array index to test */
-    ret_val = eiter->pos;
+    ret_val = (hssize_t)eiter->pos;
     eiter->pos += EA_CYC_COUNT;
     if(eiter->pos >= eiter->cnt)
         eiter->pos = ++eiter->cyc;
@@ -1940,7 +2418,7 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
         TEST_ERROR
 
     /* Create array */
-    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr) < 0)
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr, NULL) < 0)
         TEST_ERROR
 
     /* Verify the creation parameters */
@@ -2114,7 +2592,7 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam,
         TEST_ERROR
 
     /* Create array */
-    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr) < 0)
+    if(create_array(f, H5P_DATASET_XFER_DEFAULT, cparam, &ea, &ea_addr, NULL) < 0)
         TEST_ERROR
 
     /* Verify the creation parameters */
@@ -2322,6 +2800,7 @@ main(void)
         nerrors += test_reopen(fapl, &cparam, &tparam);
         nerrors += test_open_twice(fapl, &cparam, &tparam);
         nerrors += test_delete_open(fapl, &cparam, &tparam);
+        nerrors += test_flush_depend(fapl, &cparam, &tparam);
 
         /* Iterate over the type of capacity tests */
         for(curr_iter = EARRAY_ITER_FW; curr_iter < EARRAY_ITER_NITERS; curr_iter++) {
@@ -2378,7 +2857,7 @@ main(void)
             for(sblk = 0; sblk < 9; sblk++) {
                 for(dblk = 0; dblk < tparam.sblk_info[sblk].ndblks; dblk ++) {
                     /* Test first element in data block */
-                    nelmts = (hsize_t)(1 + cparam.idx_blk_elmts +
+                    nelmts = (hsize_t)((hsize_t)1 + cparam.idx_blk_elmts +
                         tparam.sblk_info[sblk].start_idx +
                         (tparam.sblk_info[sblk].dblk_nelmts * dblk));
                     sprintf(test_str, "setting first element of array's data block #%llu", (unsigned long long)ndblks);
