@@ -201,10 +201,12 @@ typedef herr_t (*H5C_log_flush_func_t)(H5C_t * cache_ptr,
 
 /* Maximum height of flush dependency relationships between entries.  This is
  * currently tuned to the extensible array (H5EA) data structure, which only
- * requires 4 levels of dependency (i.e. heights 0-4).
+ * requires 6 levels of dependency (i.e. heights 0-6) (actually, the extensible
+ * array needs 4 levels, plus another 2 levels are needed: one for the layer
+ * under the extensible array and one for the layer above it).
  */
 
-#define H5C__NUM_FLUSH_DEP_HEIGHTS            4
+#define H5C__NUM_FLUSH_DEP_HEIGHTS            6
 
 
 
