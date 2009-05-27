@@ -254,7 +254,7 @@ const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {{
 /* Declare a free list to manage the H5F_rdcc_ent_ptr_t sequence information */
 H5FL_SEQ_DEFINE_STATIC(H5D_rdcc_ent_ptr_t);
 
-/* Declare a free list to manage H5F_rdcc_ent_t objects */
+/* Declare a free list to manage H5D_rdcc_ent_t objects */
 H5FL_DEFINE_STATIC(H5D_rdcc_ent_t);
 
 /* Declare a free list to manage the H5D_chunk_info_t struct */
@@ -1692,7 +1692,7 @@ H5D_chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
         H5D_chunk_info_t *chunk_info;   /* Chunk information */
         H5D_io_info_t *chk_io_info;     /* Pointer to I/O info object for this chunk */
         void *chunk;                    /* Pointer to locked chunk buffer */
-        H5D_chunk_ud_t udata;		/* B-tree pass-through	*/
+        H5D_chunk_ud_t udata;		/* Index pass-through	*/
         htri_t cacheable;               /* Whether the chunk is cacheable */
 
         /* Get the actual chunk information from the skip list node */
@@ -2198,7 +2198,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *dxpl_cache,
     H5D_rdcc_ent_t *ent, hbool_t reset)
 {
@@ -2300,13 +2300,20 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
         /* Write the data to the file */
         HDassert(H5F_addr_defined(udata.addr));
         if(H5F_block_write(dset->oloc.file, H5FD_MEM_DRAW, udata.addr, udata.nbytes, dxpl_id, buf) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
+            HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to write raw data to file")
 
         /* Cache the chunk's info, in case it's accessed again shortly */
         H5D_chunk_cinfo_cache_update(&dset->shared->cache.chunk.last, &udata);
 
         /* Mark cache entry as clean */
         ent->dirty = FALSE;
+
+        /* Check for SWMR writes to the file */
+        if(dset->shared->layout.u.chunk.ops->can_swim && H5F_INTENT(dset->oloc.file) & H5F_ACC_SWMR_WRITE) {
+            /* Mark the proxy entry in the cache as clean */
+            if(H5D_chunk_proxy_mark(dset, dxpl_id, ent, FALSE) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTMARKDIRTY, FAIL, "can't mark proxy for chunk from metadata cache as clean")
+        } /* end if */
 
         /* Increment # of flushed entries */
         dset->shared->cache.chunk.stats.nflushes++;
@@ -2379,6 +2386,13 @@ H5D_chunk_cache_evict(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
 	if(ent->chunk != NULL)
 	    ent->chunk = (uint8_t *)H5D_chunk_xfree(ent->chunk, &(dset->shared->dcpl_cache.pline));
     } /* end else */
+
+    /* Check for SWMR writes to the file */
+    if(dset->shared->layout.u.chunk.ops->can_swim && H5F_INTENT(dset->oloc.file) & H5F_ACC_SWMR_WRITE) {
+        /* Remove the proxy entry in the cache */
+        if(H5D_chunk_proxy_remove(dset, dxpl_id, ent) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTREMOVE, FAIL, "can't remove proxy for chunk from metadata cache")
+    } /* end if */
 
     /* Unlink from list */
     if(ent->prev)
@@ -2699,6 +2713,8 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
         ent->locked = 0;
         ent->dirty = FALSE;
         ent->chunk_addr = chunk_addr;
+        ent->proxy_addr = HADDR_UNDEF;
+        ent->proxy = NULL;
         for(u = 0; u < layout->u.chunk.ndims; u++)
             ent->offset[u] = io_info->store->chunk.offset[u];
         H5_ASSIGN_OVERFLOW(ent->rd_count, chunk_size, size_t, uint32_t);
@@ -2723,6 +2739,19 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
             rdcc->head = rdcc->tail = ent;
             ent->prev = NULL;
         } /* end else */
+
+        /* Check for SWMR writes to the file */
+        if(io_info->dset->shared->layout.u.chunk.ops->can_swim
+                && H5F_INTENT(io_info->dset->oloc.file) & H5F_ACC_SWMR_WRITE) {
+            /* Insert a proxy entry in the cache, to make certain that the
+             *  flush dependencies are maintained in the proper way for SWMR
+             *  access to work.
+             */
+            if(H5D_chunk_proxy_create(io_info->dset, io_info->dxpl_id, udata, ent) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, NULL, "can't insert proxy for chunk in metadata cache")
+        } /* end if */
+
+        /* Indicate that the chunk is in the cache now */
         found = TRUE;
     } else if(!found) {
         /*
@@ -2857,6 +2886,14 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
         if(dirty) {
             ent->dirty = TRUE;
             ent->wr_count -= MIN(ent->wr_count, naccessed);
+
+            /* Check for SWMR writes to the file */
+            if(io_info->dset->shared->layout.u.chunk.ops->can_swim
+                    && H5F_INTENT(io_info->dset->oloc.file) & H5F_ACC_SWMR_WRITE) {
+                /* Mark the proxy entry in the cache as dirty */
+                if(H5D_chunk_proxy_mark(io_info->dset, io_info->dxpl_id, ent, TRUE) < 0)
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTMARKDIRTY, FAIL, "can't mark proxy for chunk from metadata cache as dirty")
+            } /* end if */
         } /* end if */
         else
             ent->rd_count -= MIN(ent->rd_count, naccessed);

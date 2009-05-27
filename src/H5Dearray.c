@@ -132,6 +132,10 @@ static herr_t H5D_earray_idx_copy_shutdown(H5O_layout_t *layout_src,
 static herr_t H5D_earray_idx_size(const H5D_chk_idx_info_t *idx_info,
     hsize_t *size);
 static herr_t H5D_earray_idx_reset(H5O_layout_t *layout, hbool_t reset_addr);
+static herr_t H5D_earray_idx_depend(const H5D_chk_idx_info_t *idx_info,
+    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
+static herr_t H5D_earray_idx_undepend(const H5D_chk_idx_info_t *idx_info,
+    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
 static herr_t H5D_earray_idx_dump(const H5D_chk_idx_info_t *idx_info,
     FILE *stream);
 static herr_t H5D_earray_idx_dest(const H5D_chk_idx_info_t *idx_info);
@@ -143,6 +147,7 @@ static herr_t H5D_earray_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* Extensible array indexed chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_EARRAY[1] = {{
+    TRUE,                               /* Extensible array indices support SWMR access */
     NULL,
     H5D_earray_idx_create,
     H5D_earray_idx_is_space_alloc,
@@ -155,6 +160,8 @@ const H5D_chunk_ops_t H5D_COPS_EARRAY[1] = {{
     H5D_earray_idx_copy_shutdown,
     H5D_earray_idx_size,
     H5D_earray_idx_reset,
+    H5D_earray_idx_depend,
+    H5D_earray_idx_undepend,
     H5D_earray_idx_dump,
     H5D_earray_idx_dest
 }};
@@ -1429,6 +1436,108 @@ H5D_earray_idx_reset(H5O_layout_t *layout, hbool_t reset_addr)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D_earray_idx_reset() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_earray_idx_depend
+ *
+ * Purpose:	Create a dependency between a chunk [proxy] and the index
+ *              metadata that contains the record for the chunk.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, May 21, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_earray_idx_depend(const H5D_chk_idx_info_t *idx_info,
+    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry)
+{
+    H5EA_t      *ea;                    /* Pointer to extensible array structure */
+    hsize_t     idx;                    /* Array index of chunk */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_depend)
+
+    HDassert(idx_info);
+    HDassert(udata);
+    HDassert(child_entry);
+
+    /* Check if the extensible array is open yet */
+    if(NULL == idx_info->layout->u.chunk.u.earray.ea) {
+        /* Open the extensible array in file */
+        if(H5D_earray_idx_open(idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
+    } /* end if */
+
+    /* Set convenience pointer to extensible array structure */
+    ea = idx_info->layout->u.chunk.u.earray.ea;
+
+    /* Compute array index for chunk offset */
+    idx = udata->offset[0] / idx_info->layout->u.chunk.dim[0];
+
+    /* Create flush dependency between the child_entry and the piece of metadata
+     *  in the extensible array that contains the entry for this chunk.
+     */
+    if(H5EA_depend(ea, idx_info->dxpl_id, idx, child_entry) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on extensible array metadata")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_earray_idx_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_earray_idx_undepend
+ *
+ * Purpose:	Remove a dependency between a chunk [proxy] and the index
+ *              metadata that contains the record for the chunk.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, May 21, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_earray_idx_undepend(const H5D_chk_idx_info_t *idx_info,
+    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry)
+{
+    H5EA_t      *ea;                    /* Pointer to extensible array structure */
+    hsize_t     idx;                    /* Array index of chunk */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_undepend)
+
+    HDassert(idx_info);
+    HDassert(udata);
+    HDassert(child_entry);
+
+    /* Check if the extensible array is open yet */
+    if(NULL == idx_info->layout->u.chunk.u.earray.ea) {
+        /* Open the extensible array in file */
+        if(H5D_earray_idx_open(idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
+    } /* end if */
+
+    /* Set convenience pointer to extensible array structure */
+    ea = idx_info->layout->u.chunk.u.earray.ea;
+
+    /* Compute array index for chunk offset */
+    idx = udata->offset[0] / idx_info->layout->u.chunk.dim[0];
+
+    /* Remove flush dependency between the child_entry and the piece of metadata
+     *  in the extensible array that contains the entry for this chunk.
+     */
+    if(H5EA_undepend(ea, idx_info->dxpl_id, idx, child_entry) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on extensible array metadata")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_earray_idx_undepend() */
 
 
 /*-------------------------------------------------------------------------

@@ -487,6 +487,7 @@
 ./src/H5Doh.c
 ./src/H5Dpkg.h
 ./src/H5Dprivate.h
+./src/H5Dproxy.c
 ./src/H5Dpublic.h
 ./src/H5Dscatgath.c
 ./src/H5Dselect.c

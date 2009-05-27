@@ -495,6 +495,7 @@ typedef struct H5EA_hdr_t {
     haddr_t addr;                       /* Address of header in file */
     size_t size;                        /* Size of header in file */
     H5F_t *f;                           /* Pointer to file for extensible array */
+    hbool_t swmr_write;                 /* Flag indicating the file is opened with SWMR-write access */
     size_t file_rc;                     /* Reference count of files using array header */
     hbool_t pending_delete;             /* Array is pending deletion */
     size_t sizeof_addr;                 /* Size of file addresses */

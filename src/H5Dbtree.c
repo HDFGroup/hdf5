@@ -165,6 +165,7 @@ static herr_t H5D_btree_idx_dest(const H5D_chk_idx_info_t *idx_info);
 
 /* v1 B-tree indexed chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_BTREE[1] = {{
+    FALSE,                               /* v1 B-tree indices don't support SWMR access */
     H5D_btree_idx_init,
     H5D_btree_idx_create,
     H5D_btree_idx_is_space_alloc,
@@ -177,6 +178,8 @@ const H5D_chunk_ops_t H5D_COPS_BTREE[1] = {{
     H5D_btree_idx_copy_shutdown,
     H5D_btree_idx_size,
     H5D_btree_idx_reset,
+    NULL,
+    NULL,
     H5D_btree_idx_dump,
     H5D_btree_idx_dest
 }};

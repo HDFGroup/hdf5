@@ -134,6 +134,7 @@ H5EA__hdr_alloc(H5F_t *f, const H5EA_class_t *cls, void *udata))
 
     /* Set the internal parameters for the array */
     hdr->f = f;
+    hdr->swmr_write = (H5F_INTENT(f) & H5F_ACC_SWMR_WRITE) > 0;
     hdr->sizeof_addr = H5F_SIZEOF_ADDR(f);
     hdr->sizeof_size = H5F_SIZEOF_SIZE(f);
 

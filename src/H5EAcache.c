@@ -857,27 +857,30 @@ H5EA__cache_iblock_notify(H5AC_notify_action_t action, H5EA_iblock_t *iblock))
     /* Sanity check */
     HDassert(iblock);
 
-    /* Determine which action to take */
-    switch(action) {
-        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
-            /* Create flush dependency on extensible array header */
-            if(H5EA__create_flush_depend(iblock->hdr, (H5AC_info_t *)iblock->hdr, (H5AC_info_t *)iblock) < 0)
-                H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between index block and header, address = %llu", (unsigned long long)iblock->addr)
-            break;
+    /* Check if the file was opened with SWMR-write access */
+    if(iblock->hdr->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+                /* Create flush dependency on extensible array header */
+                if(H5EA__create_flush_depend(iblock->hdr, (H5AC_info_t *)iblock->hdr, (H5AC_info_t *)iblock) < 0)
+                    H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between index block and header, address = %llu", (unsigned long long)iblock->addr)
+                break;
 
-        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-            /* Destroy flush dependency on extensible array header */
-            if(H5EA__destroy_flush_depend(iblock->hdr, (H5AC_info_t *)iblock->hdr, (H5AC_info_t *)iblock) < 0)
-                H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between index block and header, address = %llu", (unsigned long long)iblock->addr)
-            break;
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* Destroy flush dependency on extensible array header */
+                if(H5EA__destroy_flush_depend(iblock->hdr, (H5AC_info_t *)iblock->hdr, (H5AC_info_t *)iblock) < 0)
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between index block and header, address = %llu", (unsigned long long)iblock->addr)
+                break;
 
-        default:
+            default:
 #ifdef NDEBUG
-            H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
 #else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
+                HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    } /* end switch */
+        } /* end switch */
+    } /* end if */
 
 CATCH
 
@@ -1288,27 +1291,30 @@ H5EA__cache_sblock_notify(H5AC_notify_action_t action, H5EA_sblock_t *sblock))
     /* Sanity check */
     HDassert(sblock);
 
-    /* Determine which action to take */
-    switch(action) {
-        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
-            /* Create flush dependency on index block */
-            if(H5EA__create_flush_depend(sblock->hdr, (H5AC_info_t *)sblock->parent, (H5AC_info_t *)sblock) < 0)
-                H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between super block and index block, address = %llu", (unsigned long long)sblock->addr)
-            break;
+    /* Check if the file was opened with SWMR-write access */
+    if(sblock->hdr->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+                /* Create flush dependency on index block */
+                if(H5EA__create_flush_depend(sblock->hdr, (H5AC_info_t *)sblock->parent, (H5AC_info_t *)sblock) < 0)
+                    H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between super block and index block, address = %llu", (unsigned long long)sblock->addr)
+                break;
 
-        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-            /* Destroy flush dependency on index block */
-            if(H5EA__destroy_flush_depend(sblock->hdr, (H5AC_info_t *)sblock->parent, (H5AC_info_t *)sblock) < 0)
-                H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between super block and index block, address = %llu", (unsigned long long)sblock->addr)
-            break;
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* Destroy flush dependency on index block */
+                if(H5EA__destroy_flush_depend(sblock->hdr, (H5AC_info_t *)sblock->parent, (H5AC_info_t *)sblock) < 0)
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between super block and index block, address = %llu", (unsigned long long)sblock->addr)
+                break;
 
-        default:
+            default:
 #ifdef NDEBUG
-            H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
 #else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
+                HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    } /* end switch */
+        } /* end switch */
+    } /* end if */
 
 CATCH
 
@@ -1653,27 +1659,30 @@ H5EA__cache_dblock_notify(H5AC_notify_action_t action, H5EA_dblock_t *dblock))
     /* Sanity check */
     HDassert(dblock);
 
-    /* Determine which action to take */
-    switch(action) {
-        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
-            /* Create flush dependency on parent */
-            if(H5EA__create_flush_depend(dblock->hdr, (H5AC_info_t *)dblock->parent, (H5AC_info_t *)dblock) < 0)
-                H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block and parent, address = %llu", (unsigned long long)dblock->addr)
-            break;
+    /* Check if the file was opened with SWMR-write access */
+    if(dblock->hdr->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+                /* Create flush dependency on parent */
+                if(H5EA__create_flush_depend(dblock->hdr, (H5AC_info_t *)dblock->parent, (H5AC_info_t *)dblock) < 0)
+                    H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block and parent, address = %llu", (unsigned long long)dblock->addr)
+                break;
 
-        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-            /* Destroy flush dependency on parent */
-            if(H5EA__destroy_flush_depend(dblock->hdr, (H5AC_info_t *)dblock->parent, (H5AC_info_t *)dblock) < 0)
-                H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block and parent, address = %llu", (unsigned long long)dblock->addr)
-            break;
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* Destroy flush dependency on parent */
+                if(H5EA__destroy_flush_depend(dblock->hdr, (H5AC_info_t *)dblock->parent, (H5AC_info_t *)dblock) < 0)
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block and parent, address = %llu", (unsigned long long)dblock->addr)
+                break;
 
-        default:
+            default:
 #ifdef NDEBUG
-            H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
 #else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
+                HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    } /* end switch */
+        } /* end switch */
+    } /* end if */
 
 CATCH
 
@@ -2007,27 +2016,30 @@ H5EA__cache_dblk_page_notify(H5AC_notify_action_t action, H5EA_dblk_page_t *dblk
     /* Sanity check */
     HDassert(dblk_page);
 
-    /* Determine which action to take */
-    switch(action) {
-        case H5AC_NOTIFY_ACTION_AFTER_INSERT:
-            /* Create flush dependency on parent */
-            if(H5EA__create_flush_depend(dblk_page->hdr, (H5AC_info_t *)dblk_page->parent, (H5AC_info_t *)dblk_page) < 0)
-                H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block page and parent, address = %llu", (unsigned long long)dblk_page->addr)
-            break;
+    /* Check if the file was opened with SWMR-write access */
+    if(dblk_page->hdr->swmr_write) {
+        /* Determine which action to take */
+        switch(action) {
+            case H5AC_NOTIFY_ACTION_AFTER_INSERT:
+                /* Create flush dependency on parent */
+                if(H5EA__create_flush_depend(dblk_page->hdr, (H5AC_info_t *)dblk_page->parent, (H5AC_info_t *)dblk_page) < 0)
+                    H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency between data block page and parent, address = %llu", (unsigned long long)dblk_page->addr)
+                break;
 
-        case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
-            /* Destroy flush dependency on parent */
-            if(H5EA__destroy_flush_depend(dblk_page->hdr, (H5AC_info_t *)dblk_page->parent, (H5AC_info_t *)dblk_page) < 0)
-                H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block page and parent, address = %llu", (unsigned long long)dblk_page->addr)
-            break;
+            case H5AC_NOTIFY_ACTION_BEFORE_EVICT:
+                /* Destroy flush dependency on parent */
+                if(H5EA__destroy_flush_depend(dblk_page->hdr, (H5AC_info_t *)dblk_page->parent, (H5AC_info_t *)dblk_page) < 0)
+                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block page and parent, address = %llu", (unsigned long long)dblk_page->addr)
+                break;
 
-        default:
+            default:
 #ifdef NDEBUG
-            H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
+                H5E_THROW(H5E_BADVALUE, "unknown action from metadata cache")
 #else /* NDEBUG */
-            HDassert(0 && "Unknown action?!?");
+                HDassert(0 && "Unknown action?!?");
 #endif /* NDEBUG */
-    } /* end switch */
+        } /* end switch */
+    } /* end if */
 
 CATCH
 

@@ -127,7 +127,8 @@ END_FUNC(PKG)   /* end H5EA__create_flush_depend() */
  */
 BEGIN_FUNC(PKG, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA__destroy_flush_depend(H5EA_hdr_t *hdr, H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
+H5EA__destroy_flush_depend(H5EA_hdr_t *hdr, H5AC_info_t *parent_entry,
+    H5AC_info_t *child_entry))
 
     /* Sanity check */
     HDassert(hdr);

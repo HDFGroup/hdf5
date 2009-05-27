@@ -33,8 +33,6 @@
 
 /* Other private headers needed by this file */
 #include "H5Gprivate.h"		/* Groups 			  	*/
-#include "H5Oprivate.h"		/* Object headers		  	*/
-#include "H5Sprivate.h"		/* Dataspaces 				*/
 #include "H5SLprivate.h"	/* Skip lists				*/
 #include "H5Tprivate.h"		/* Datatypes         			*/
 
@@ -284,12 +282,17 @@ typedef herr_t (*H5D_chunk_copy_shutdown_func_t)(H5O_layout_t *layout_src,
 typedef herr_t (*H5D_chunk_size_func_t)(const H5D_chk_idx_info_t *idx_info,
     hsize_t *idx_size);
 typedef herr_t (*H5D_chunk_reset_func_t)(H5O_layout_t *layout, hbool_t reset_addr);
+typedef herr_t (*H5D_chunk_depend_func_t)(const H5D_chk_idx_info_t *idx_info,
+    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
+typedef herr_t (*H5D_chunk_undepend_func_t)(const H5D_chk_idx_info_t *idx_info,
+    H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
 typedef herr_t (*H5D_chunk_dump_func_t)(const H5D_chk_idx_info_t *idx_info,
     FILE *stream);
 typedef herr_t (*H5D_chunk_dest_func_t)(const H5D_chk_idx_info_t *idx_info);
 
 /* Typedef for grouping chunk I/O routines */
 typedef struct H5D_chunk_ops_t {
+    hbool_t can_swim;                       /* Flag to indicate that the index supports SWMR access */
     H5D_chunk_init_func_t init;             /* Routine to initialize indexing information in memory */
     H5D_chunk_create_func_t create;         /* Routine to create chunk index */
     H5D_chunk_is_space_alloc_func_t is_space_alloc;    /* Query routine to determine if storage/index is allocated */
@@ -302,6 +305,8 @@ typedef struct H5D_chunk_ops_t {
     H5D_chunk_copy_shutdown_func_t copy_shutdown; /* Routine to perform any necessary shutdown for copying chunks */
     H5D_chunk_size_func_t size;             /* Routine to get size of indexing information */
     H5D_chunk_reset_func_t reset;           /* Routine to reset indexing information */
+    H5D_chunk_depend_func_t depend;         /* Routine to create dependency between chunk [proxy] and index metadata */
+    H5D_chunk_undepend_func_t undepend;     /* Routine to remove dependency between chunk [proxy] and index metadata */
     H5D_chunk_dump_func_t dump;             /* Routine to dump indexing information */
     H5D_chunk_dest_func_t dest;             /* Routine to destroy indexing information in memory */
 } H5D_chunk_ops_t;
@@ -370,15 +375,15 @@ typedef struct H5D_rdcc_t {
     } stats;
     size_t		nbytes_max; /* Maximum cached raw data in bytes	*/
     size_t		nslots;	/* Number of chunk slots allocated	*/
-    double      w0;     /* Chunk preemption policy          */
+    double		w0;     /* Chunk preemption policy          */
     struct H5D_rdcc_ent_t *head; /* Head of doubly linked list		*/
     struct H5D_rdcc_ent_t *tail; /* Tail of doubly linked list		*/
     size_t		nbytes_used; /* Current cached raw data in bytes */
-    int		nused;	/* Number of chunk slots in use		*/
+    int			nused;	/* Number of chunk slots in use		*/
     H5D_chunk_cached_t last;    /* Cached copy of last chunk information */
     struct H5D_rdcc_ent_t **slot; /* Chunk slots, each points to a chunk*/
-    H5SL_t *sel_chunks;     /* Skip list containing information for each chunk selected */
-    H5S_t  *single_space;    /* Dataspace for single element I/O on chunks */
+    H5SL_t		*sel_chunks; /* Skip list containing information for each chunk selected */
+    H5S_t		*single_space; /* Dataspace for single element I/O on chunks */
     H5D_chunk_info_t *single_chunk_info;  /* Pointer to single chunk's info */
 } H5D_rdcc_t;
 
@@ -488,11 +493,21 @@ typedef struct H5D_rdcc_ent_t {
     uint32_t	wr_count;	/*bytes remaining to be written		*/
     haddr_t     chunk_addr;     /*address of chunk in file		*/
     uint8_t	*chunk;		/*the unfiltered chunk data		*/
+    haddr_t     proxy_addr;     /*address of chunk proxy in file	*/
+    struct H5D_chunk_proxy_t *proxy;   /*pointer to chunk proxy in memory	*/
     unsigned	idx;		/*index in hash table			*/
     struct H5D_rdcc_ent_t *next;/*next item in doubly-linked list	*/
     struct H5D_rdcc_ent_t *prev;/*previous item in doubly-linked list	*/
 } H5D_rdcc_ent_t;
 typedef H5D_rdcc_ent_t *H5D_rdcc_ent_ptr_t; /* For free lists */
+
+/* Metadata cache chunk proxy type */
+typedef struct H5D_chunk_proxy_t {
+    H5AC_info_t cache_info; /* Information for H5AC cache functions, _must_ be */
+                            /* first field in structure */
+    H5D_t *dset;            /* Pointer to dataset that chunk proxies are related to */
+    H5D_rdcc_ent_t *ent;    /* Pointer to chunk cache entry this proxy is standing in for */
+} H5D_chunk_proxy_t;
 
 
 /*****************************/
@@ -588,6 +603,8 @@ H5_DLL herr_t H5D_chunk_unlock(const H5D_io_info_t *io_info,
     const H5D_chunk_ud_t *udata, hbool_t dirty, unsigned idx_hint, void *chunk,
     uint32_t naccessed);
 H5_DLL herr_t H5D_chunk_flush(H5D_t *dset, hid_t dxpl_id, unsigned flags);
+H5_DLL herr_t H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id,
+    const H5D_dxpl_cache_t *dxpl_cache, H5D_rdcc_ent_t *ent, hbool_t reset);
 H5_DLL herr_t H5D_chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes);
 H5_DLL herr_t H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite);
 H5_DLL herr_t H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id,
@@ -626,6 +643,14 @@ H5_DLL herr_t H5D_fill_refill_vl(H5D_fill_buf_info_t *fb_info, size_t nelmts,
     hid_t dxpl_id);
 H5_DLL herr_t H5D_fill_release(H5D_fill_buf_info_t *fb_info);
 H5_DLL herr_t H5D_fill_term(H5D_fill_buf_info_t *fb_info);
+
+/* Functions that operate on chunk proxy objects */
+H5_DLL herr_t H5D_chunk_proxy_create(H5D_t *dset, hid_t dxpl_id,
+    H5D_chunk_common_ud_t *udata, H5D_rdcc_ent_t *ent);
+H5_DLL herr_t H5D_chunk_proxy_remove(const H5D_t *dset, hid_t dxpl_it,
+    H5D_rdcc_ent_t *ent);
+H5_DLL herr_t H5D_chunk_proxy_mark(const H5D_t *dset, hid_t dxpl_id,
+    const H5D_rdcc_ent_t *ent, hbool_t dirty);
 
 #ifdef H5_HAVE_PARALLEL
 

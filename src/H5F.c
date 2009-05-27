@@ -894,6 +894,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	f->shared->accum.loc = HADDR_UNDEF;
         f->shared->lf = lf;
         f->shared->root_addr = HADDR_UNDEF;
+        f->shared->next_proxy_addr = HADDR_MAX;
 
 	/*
 	 * Copy the file creation and file access property lists into the
