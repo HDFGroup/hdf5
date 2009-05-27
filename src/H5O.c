@@ -1580,20 +1580,17 @@ H5O_protect(H5O_loc_t *loc, hid_t dxpl_id)
 
     /* Lock the object header into the cache */
     if(NULL == (ret_value = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
-	HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unable to load object header")
+	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header")
 
     /* Mark object header as un-evictable */
-    if(H5AC_pin_protected_entry(loc->file, ret_value) < 0) {
-        if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, ret_value, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header")
-
+    if(H5AC_pin_protected_entry(loc->file, ret_value) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, NULL, "unable to pin object header")
-    } /* end if */
 
+done:
     /* Release the object header from the cache */
     if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, ret_value, H5AC__NO_FLAGS_SET) < 0)
-	HGOTO_ERROR(H5E_OHDR, H5E_PROTECT, NULL, "unable to release object header")
-done:
+        HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_protect() */
 

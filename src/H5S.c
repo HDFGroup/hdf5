@@ -1756,27 +1756,25 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5S_set_extent
+ * Function:    H5S_set_extent
  *
- * Purpose: Modify the dimensions of a dataspace. Based on H5S_extend
+ * Purpose:     Modify the dimensions of a dataspace. Based on H5S_extend
  *
- * Return: Success: Non-negative
+ * Return:      Success: Non-negative
+ *              Failure: Negative
  *
- * Failure: Negative
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: March 13, 2002
+ * Programmer:  Pedro Vicente, pvn@ncsa.uiuc.edu
+ *              March 13, 2002
  *
  *-------------------------------------------------------------------------
  */
-int
+htri_t
 H5S_set_extent(H5S_t *space, const hsize_t *size)
 {
     unsigned u;                 /* Local index variable */
-    herr_t ret_value = 0;       /* Return value */
+    htri_t ret_value = FALSE;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_set_extent, FAIL);
+    FUNC_ENTER_NOAPI(H5S_set_extent, FAIL)
 
     /* Check args */
     HDassert(space && H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space));
@@ -1785,21 +1783,26 @@ H5S_set_extent(H5S_t *space, const hsize_t *size)
     /* Verify that the dimensions being changed are allowed to change */
     for(u = 0; u < space->extent.rank; u++) {
         if(space->extent.size[u] != size[u]) {
+            /* Check for invalid dimension size modification */
             if(space->extent.max && H5S_UNLIMITED != space->extent.max[u] &&
                      space->extent.max[u] < size[u])
-                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "dimension cannot be modified")
-            ret_value++;
+                 HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "dimension cannot be modified")
+
+            /* Indicate that dimension size can be modified */
+            ret_value = TRUE;
         } /* end if */
     } /* end for */
 
-    /* Update */
+    /* Update dimension size(s) */
     if(ret_value)
-        H5S_set_extent_real(space, size);
+        if(H5S_set_extent_real(space, size) < 0)
+             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTSET, FAIL, "failed to change dimension size(s)")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
-}
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_set_extent() */
 
+
 /*-------------------------------------------------------------------------
  * Function: H5S_has_extent
  *
@@ -1824,7 +1827,7 @@ H5S_has_extent(const H5S_t *ds)
 
     HDassert(ds);
 
-    if(ds->extent.rank==0 && ds->extent.nelem == 0 && ds->extent.type != H5S_NULL)
+    if(0 == ds->extent.rank && 0 == ds->extent.nelem && H5S_NULL != ds->extent.type)
         ret_value = FALSE;
     else
         ret_value = TRUE;
@@ -1835,43 +1838,41 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function: H5S_set_extent_real
+ * Function:    H5S_set_extent_real
  *
- * Purpose: Modify the dimensions of a dataspace. Based on H5S_extend
+ * Purpose:     Modify the dimensions of a dataspace. Based on H5S_extend
  *
- * Return: Success: Non-negative
+ * Return:      Success: Non-negative
+ *              Failure: Negative
  *
- * Failure: Negative
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: March 13, 2002
+ * Programmer:  Pedro Vicente, pvn@ncsa.uiuc.edu
+ *              March 13, 2002
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5S_set_extent_real( H5S_t *space, const hsize_t *size )
+H5S_set_extent_real(H5S_t *space, const hsize_t *size)
 {
     hsize_t nelem;      /* Number of elements in extent */
     unsigned u;         /* Local index variable */
-    herr_t ret_value=SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_set_extent_real, FAIL );
+    FUNC_ENTER_NOAPI(H5S_set_extent_real, FAIL)
 
     /* Check args */
-    assert(space && H5S_SIMPLE==H5S_GET_EXTENT_TYPE(space));
-    assert(size);
+    HDassert(space && H5S_SIMPLE == H5S_GET_EXTENT_TYPE(space));
+    HDassert(size);
 
     /* Change the dataspace size & re-compute the number of elements in the extent */
-    for (u=0, nelem=1; u < space->extent.rank; u++ ) {
+    for(u = 0, nelem = 1; u < space->extent.rank; u++ ) {
         space->extent.size[u] = size[u];
-        nelem*=space->extent.size[u];
+        nelem *= space->extent.size[u];
     } /* end for */
     space->extent.nelem = nelem;
 
     /* If the selection is 'all', update the number of elements selected */
-    if(H5S_GET_SELECT_TYPE(space)==H5S_SEL_ALL)
-        if(H5S_select_all(space, FALSE)<0)
+    if(H5S_SEL_ALL == H5S_GET_SELECT_TYPE(space))
+        if(H5S_select_all(space, FALSE) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTDELETE, FAIL, "can't change selection")
 
     /* Mark the dataspace as no longer shared if it was before */
@@ -1879,7 +1880,7 @@ H5S_set_extent_real( H5S_t *space, const hsize_t *size )
         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTRESET, FAIL, "can't stop sharing dataspace")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_set_extent_real() */
 
 
