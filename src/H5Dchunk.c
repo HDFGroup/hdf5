@@ -173,8 +173,7 @@ typedef struct H5D_chunk_it_ud4_t {
 /********************/
 
 /* Chunked layout operation callbacks */
-static herr_t H5D_chunk_construct(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
-    const H5P_genplist_t *dc_plist);
+static herr_t H5D_chunk_construct(H5F_t *f, H5D_t *dset);
 static herr_t H5D_chunk_io_init(const H5D_io_info_t *io_info,
     const H5D_type_info_t *type_info, hsize_t nelmts, const H5S_t *file_space,
     const H5S_t *mem_space, H5D_chunk_map_t *fm);
@@ -217,6 +216,7 @@ static herr_t H5D_chunk_mem_cb(void *elem, hid_t type_id, unsigned ndims,
 /* Chunked storage layout I/O ops */
 const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
     H5D_chunk_construct,
+    H5D_chunk_init,
     H5D_chunk_is_space_alloc,
     H5D_chunk_io_init,
     H5D_chunk_read,
@@ -237,6 +237,7 @@ const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
 
 /* "nonexistent" storage layout I/O ops */
 const H5D_layout_ops_t H5D_LOPS_NONEXISTENT[1] = {{
+    NULL,
     NULL,
     NULL,
     NULL,
@@ -285,8 +286,7 @@ H5FL_DEFINE_STATIC(H5D_chunk_prune_stack_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_chunk_construct(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
-    const H5P_genplist_t *dc_plist)
+H5D_chunk_construct(H5F_t *f, H5D_t *dset)
 {
     const H5T_t *type = dset->shared->type;     /* Convenience pointer to dataset's datatype */
     hsize_t max_dim[H5O_LAYOUT_NDIMS];          /* Maximum size of data in elements */
@@ -300,7 +300,6 @@ H5D_chunk_construct(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
     /* Sanity checks */
     HDassert(f);
     HDassert(dset);
-    HDassert(dc_plist);
 
     /* Set up layout information */
     if((ndims = H5S_GET_EXTENT_NDIMS(dset->shared->space)) < 0)
@@ -349,13 +348,86 @@ H5D_chunk_construct(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, H5D_t *dset,
     if(H5D_chunk_idx_reset(&dset->shared->layout, TRUE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to reset chunked storage index")
 
-    /* Initialize the chunk cache for the dataset */
-    if(H5D_chunk_init(f, dapl_id, dxpl_id, dset) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize chunk cache")
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_chunk_construct() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_chunk_init
+ *
+ * Purpose:	Initialize the raw data chunk cache for a dataset.  This is
+ *		called when the dataset is initialized.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *              Monday, May 18, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D_chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset, hid_t dapl_id)
+{
+    H5D_chk_idx_info_t idx_info;        /* Chunked index info */
+    H5D_rdcc_t	*rdcc = &(dset->shared->cache.chunk);   /* Convenience pointer to dataset's chunk cache */
+    H5P_genplist_t *dapl;               /* Data access property list object pointer */
+    herr_t      ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI(H5D_chunk_init, FAIL)
+
+    /* Sanity check */
+    HDassert(f);
+    HDassert(dset);
+    HDassert((H5D_CHUNK_EARRAY == dset->shared->layout.u.chunk.idx_type && 
+                H5D_COPS_EARRAY == dset->shared->layout.u.chunk.ops) ||
+            (H5D_CHUNK_BTREE == dset->shared->layout.u.chunk.idx_type && 
+                H5D_COPS_BTREE == dset->shared->layout.u.chunk.ops));
+
+    if(NULL == (dapl = (H5P_genplist_t *)H5I_object(dapl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for fapl ID");
+
+    /* Use the properties in dapl_id if they have been set, otherwise use the properties from the file */
+    if(H5P_get(dapl, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &rdcc->nslots) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache number of slots");
+    if(rdcc->nslots == H5D_CHUNK_CACHE_NSLOTS_DEFAULT)
+        rdcc->nslots = H5F_RDCC_NSLOTS(f);
+
+    if(H5P_get(dapl, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc->nbytes_max) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache byte size");
+    if(rdcc->nbytes_max == H5D_CHUNK_CACHE_NBYTES_DEFAULT)
+        rdcc->nbytes_max = H5F_RDCC_NBYTES(f);
+
+    if(H5P_get(dapl, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &rdcc->w0) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get preempt read chunks");
+    if(rdcc->w0 < 0)
+        rdcc->w0 = H5F_RDCC_W0(f);
+
+    /* If nbytes_max or nslots is 0, set them both to 0 and avoid allocating space */
+    if(!rdcc->nbytes_max || !rdcc->nslots)
+        rdcc->nbytes_max = rdcc->nslots = 0;
+    else {
+        rdcc->slot = H5FL_SEQ_CALLOC(H5D_rdcc_ent_ptr_t, rdcc->nslots);
+        if(NULL == rdcc->slot)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
+
+        /* Reset any cached chunk info for this dataset */
+        H5D_chunk_cinfo_cache_reset(&(rdcc->last));
+    } /* end else */
+
+    /* Compose chunked index info struct */
+    idx_info.f = f;
+    idx_info.dxpl_id = dxpl_id;
+    idx_info.pline = &dset->shared->dcpl_cache.pline;
+    idx_info.layout = &dset->shared->layout;
+
+    /* Allocate any indexing structures */
+    if(dset->shared->layout.u.chunk.ops->init && (dset->shared->layout.u.chunk.ops->init)(&idx_info, dset->oloc.addr) < 0)
+	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize indexing information")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_chunk_init() */
 
 
 /*-------------------------------------------------------------------------
@@ -1835,83 +1907,6 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_chunk_init
- *
- * Purpose:	Initialize the raw data chunk cache for a dataset.  This is
- *		called when the dataset is initialized.
- *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Robb Matzke
- *              Monday, May 18, 1998
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5D_chunk_init(H5F_t *f, hid_t dapl_id, hid_t dxpl_id, const H5D_t *dset)
-{
-    H5D_chk_idx_info_t idx_info;        /* Chunked index info */
-    H5D_rdcc_t	*rdcc = &(dset->shared->cache.chunk);   /* Convenience pointer to dataset's chunk cache */
-    H5P_genplist_t *dapl;               /* Data access property list object pointer */
-    herr_t      ret_value = SUCCEED;    /* Return value */
-
-    FUNC_ENTER_NOAPI(H5D_chunk_init, FAIL)
-
-    /* Sanity check */
-    HDassert(f);
-    HDassert(dset);
-    HDassert((H5D_CHUNK_EARRAY == dset->shared->layout.u.chunk.idx_type && 
-                H5D_COPS_EARRAY == dset->shared->layout.u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == dset->shared->layout.u.chunk.idx_type && 
-                H5D_COPS_BTREE == dset->shared->layout.u.chunk.ops));
-
-    if(NULL == (dapl = (H5P_genplist_t *)H5I_object(dapl_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for fapl ID");
-
-    /* Use the properties in dapl_id if they have been set, otherwise use the properties from the file */
-    if(H5P_get(dapl, H5D_ACS_DATA_CACHE_NUM_SLOTS_NAME, &rdcc->nslots) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache number of slots");
-    if(rdcc->nslots == H5D_CHUNK_CACHE_NSLOTS_DEFAULT)
-        rdcc->nslots = H5F_RDCC_NSLOTS(f);
-
-    if(H5P_get(dapl, H5D_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc->nbytes_max) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache byte size");
-    if(rdcc->nbytes_max == H5D_CHUNK_CACHE_NBYTES_DEFAULT)
-        rdcc->nbytes_max = H5F_RDCC_NBYTES(f);
-
-    if(H5P_get(dapl, H5D_ACS_PREEMPT_READ_CHUNKS_NAME, &rdcc->w0) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get preempt read chunks");
-    if(rdcc->w0 < 0)
-        rdcc->w0 = H5F_RDCC_W0(f);
-
-    /* If nbytes_max or nslots is 0, set them both to 0 and avoid allocating space */
-    if(!rdcc->nbytes_max || !rdcc->nslots)
-        rdcc->nbytes_max = rdcc->nslots = 0;
-    else {
-        rdcc->slot = H5FL_SEQ_CALLOC(H5D_rdcc_ent_ptr_t, rdcc->nslots);
-        if(NULL == rdcc->slot)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-        /* Reset any cached chunk info for this dataset */
-        H5D_chunk_cinfo_cache_reset(&(rdcc->last));
-    } /* end else */
-
-    /* Compose chunked index info struct */
-    idx_info.f = f;
-    idx_info.dxpl_id = dxpl_id;
-    idx_info.pline = &dset->shared->dcpl_cache.pline;
-    idx_info.layout = &dset->shared->layout;
-
-    /* Allocate any indexing structures */
-    if(dset->shared->layout.u.chunk.ops->init && (dset->shared->layout.u.chunk.ops->init)(&idx_info) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize indexing information")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_chunk_init() */
-
-
-/*-------------------------------------------------------------------------
  * Function:	H5D_chunk_idx_reset
  *
  * Purpose:	Reset index information
@@ -2311,7 +2306,7 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
         /* Check for SWMR writes to the file */
         if(dset->shared->layout.u.chunk.ops->can_swim && H5F_INTENT(dset->oloc.file) & H5F_ACC_SWMR_WRITE) {
             /* Mark the proxy entry in the cache as clean */
-            if(H5D_chunk_proxy_mark(dset, dxpl_id, ent, FALSE) < 0)
+            if(H5D_chunk_proxy_mark(dset, ent, FALSE) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTMARKDIRTY, FAIL, "can't mark proxy for chunk from metadata cache as clean")
         } /* end if */
 
@@ -2747,7 +2742,7 @@ H5D_chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata,
              *  flush dependencies are maintained in the proper way for SWMR
              *  access to work.
              */
-            if(H5D_chunk_proxy_create(io_info->dset, io_info->dxpl_id, udata, ent) < 0)
+            if(H5D_chunk_proxy_create(io_info->dset, io_info->dxpl_id, (H5D_chunk_common_ud_t *)udata, ent) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, NULL, "can't insert proxy for chunk in metadata cache")
         } /* end if */
 
@@ -2855,16 +2850,16 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
          *	 don't discard the `const' qualifier.
          */
         if(dirty) {
-            H5D_rdcc_ent_t ent;         /* "fake" chunk cache entry */
+            H5D_rdcc_ent_t fake_ent;         /* "fake" chunk cache entry */
 
-            HDmemset(&ent, 0, sizeof(ent));
-            ent.dirty = TRUE;
-            HDmemcpy(ent.offset, io_info->store->chunk.offset, layout->u.chunk.ndims * sizeof(ent.offset[0]));
+            HDmemset(&fake_ent, 0, sizeof(fake_ent));
+            fake_ent.dirty = TRUE;
+            HDmemcpy(fake_ent.offset, io_info->store->chunk.offset, layout->u.chunk.ndims * sizeof(fake_ent.offset[0]));
             HDassert(layout->u.chunk.size > 0);
-            ent.chunk_addr = udata->addr;
-            ent.chunk = (uint8_t *)chunk;
+            fake_ent.chunk_addr = udata->addr;
+            fake_ent.chunk = (uint8_t *)chunk;
 
-            if(H5D_chunk_flush_entry(io_info->dset, io_info->dxpl_id, io_info->dxpl_cache, &ent, TRUE) < 0)
+            if(H5D_chunk_flush_entry(io_info->dset, io_info->dxpl_id, io_info->dxpl_cache, &fake_ent, TRUE) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
         } /* end if */
         else {
@@ -2891,7 +2886,7 @@ H5D_chunk_unlock(const H5D_io_info_t *io_info, const H5D_chunk_ud_t *udata,
             if(io_info->dset->shared->layout.u.chunk.ops->can_swim
                     && H5F_INTENT(io_info->dset->oloc.file) & H5F_ACC_SWMR_WRITE) {
                 /* Mark the proxy entry in the cache as dirty */
-                if(H5D_chunk_proxy_mark(io_info->dset, io_info->dxpl_id, ent, TRUE) < 0)
+                if(H5D_chunk_proxy_mark(io_info->dset, ent, TRUE) < 0)
                     HGOTO_ERROR(H5E_DATASET, H5E_CANTMARKDIRTY, FAIL, "can't mark proxy for chunk from metadata cache as dirty")
             } /* end if */
         } /* end if */

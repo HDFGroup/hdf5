@@ -114,6 +114,8 @@ static herr_t H5D_earray_filt_debug(FILE *stream, int indent, int fwidth,
     hsize_t idx, const void *elmt);
 
 /* Chunked layout indexing callbacks */
+static herr_t H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info,
+    haddr_t dset_ohdr_addr);
 static herr_t H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_earray_idx_is_space_alloc(const H5O_layout_t *layout);
 static herr_t H5D_earray_idx_insert(const H5D_chk_idx_info_t *idx_info,
@@ -148,7 +150,7 @@ static herr_t H5D_earray_idx_dest(const H5D_chk_idx_info_t *idx_info);
 /* Extensible array indexed chunk I/O ops */
 const H5D_chunk_ops_t H5D_COPS_EARRAY[1] = {{
     TRUE,                               /* Extensible array indices support SWMR access */
-    NULL,
+    H5D_earray_idx_init,
     H5D_earray_idx_create,
     H5D_earray_idx_is_space_alloc,
     H5D_earray_idx_insert,
@@ -598,8 +600,12 @@ H5D_earray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
 /*-------------------------------------------------------------------------
  * Function:	H5D_earray_idx_open
  *
- * Purpose:	Opens an existing extensible array and initializes
- *              the layout struct with information about the storage.
+ * Purpose:	Opens an existing extensible array.
+ *
+ * Note:	This information is passively initialized from each index
+ *              operation callback because those abstract chunk index operations
+ *              are designed to work with the v1 B-tree chunk indices also,
+ *              which don't require an 'open' for the data structure.
  *
  * Return:	Success:	non-negative
  *		Failure:	negative
@@ -639,6 +645,37 @@ H5D_earray_idx_open(const H5D_chk_idx_info_t *idx_info)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_earray_idx_open() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_earray_idx_init
+ *
+ * Purpose:	Initialize the indexing information for a dataset.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, May 27, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_earray_idx_init(const H5D_chk_idx_info_t *idx_info, haddr_t dset_ohdr_addr)
+{
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_earray_idx_init)
+
+    /* Check args */
+    HDassert(idx_info);
+    HDassert(idx_info->f);
+    HDassert(idx_info->pline);
+    HDassert(idx_info->layout);
+    HDassert(H5F_addr_defined(dset_ohdr_addr));
+
+    /* Store the dataset's object header address for later */
+    idx_info->layout->u.chunk.u.earray.dset_ohdr_addr = dset_ohdr_addr;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5D_earray_idx_init() */
 
 
 /*-------------------------------------------------------------------------
@@ -1277,7 +1314,6 @@ static herr_t
 H5D_earray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
     const H5D_chk_idx_info_t *idx_info_dst)
 {
-    H5EA_t      *ea_src;                    /* Pointer to extensible array structure */
     herr_t      ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_copy_setup)
@@ -1298,9 +1334,6 @@ H5D_earray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
         if(H5D_earray_idx_open(idx_info_src) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't open extensible array")
     } /* end if */
-
-    /* Set convenience pointer to extensible array structure */
-    ea_src = idx_info_src->layout->u.chunk.u.earray.ea;
 
     /* Create the extensible array that describes chunked storage in the dest. file */
     if(H5D_earray_idx_create(idx_info_dst) < 0)
@@ -1430,8 +1463,10 @@ H5D_earray_idx_reset(H5O_layout_t *layout, hbool_t reset_addr)
     HDassert(layout);
 
     /* Reset index info */
-    if(reset_addr)
+    if(reset_addr) {
 	layout->u.chunk.u.earray.addr = HADDR_UNDEF;
+        layout->u.chunk.u.earray.dset_ohdr_addr = HADDR_UNDEF;
+    } /* end if */
     layout->u.chunk.u.earray.ea = NULL;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
@@ -1593,6 +1628,9 @@ H5D_earray_idx_dest(const H5D_chk_idx_info_t *idx_info)
 
     /* Check if the extensible array is open */
     if(idx_info->layout->u.chunk.u.earray.ea) {
+        /* Sanity check */
+        HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.earray.dset_ohdr_addr));
+
         if(H5EA_close(idx_info->layout->u.chunk.u.earray.ea, idx_info->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
         idx_info->layout->u.chunk.u.earray.ea = NULL;

@@ -65,7 +65,8 @@ static herr_t H5D_init_type(H5F_t *file, const H5D_t *dset, hid_t type_id,
     const H5T_t *type);
 static herr_t H5D_init_space(H5F_t *file, const H5D_t *dset, const H5S_t *space);
 static herr_t H5D_set_io_ops(H5D_t *dataset);
-static herr_t H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset);
+static herr_t H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset,
+    hid_t dapl_id);
 static herr_t H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id);
 static herr_t H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, unsigned flags);
 
@@ -767,7 +768,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
+H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
 {
     H5O_t              *oh = NULL;      /* Pointer to dataset's object header */
     size_t              ohdr_size = H5D_MINHDR_SIZE;    /* Size of dataset's object header */
@@ -778,6 +779,7 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
     H5O_fill_t		*fill_prop;     /* Pointer to dataset's fill value information */
     H5D_fill_value_t	fill_status;    /* Fill value status */
     hbool_t             fill_changed = FALSE;      /* Flag indicating the fill value was changed */
+    hbool_t             layout_init = FALSE;    /* Flag to indicate that chunk information was initialized */
     herr_t ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_update_oh_info)
@@ -894,6 +896,13 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to update filter header message")
     } /* end if */
 
+    /* Initialize the layout information for the new dataset */
+    if(dset->shared->layout.ops->init && (dset->shared->layout.ops->init)(file, dxpl_id, dset, dapl_id) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize layout information")
+
+    /* Indicate that the layout information was initialized */
+    layout_init = TRUE;
+
     /*
      * Allocate storage if space allocate time is early; otherwise delay
      * allocation until later.
@@ -994,6 +1003,14 @@ done:
     if(oloc != NULL && oh != NULL)
         if(H5O_unprotect(oloc, oh) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to unprotect dataset object header")
+
+    /* Error cleanup */
+    if(ret_value < 0) {
+        if(dset->shared->layout.type == H5D_CHUNKED && layout_init) {
+            if(H5D_chunk_dest(file, dxpl_id, dset) < 0)
+                HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL, "unable to destroy chunk cache")
+        } /* end if */
+    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_update_oh_info() */
@@ -1152,15 +1169,15 @@ H5D_create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id,
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize I/O operations")
 
     /* Create the layout information for the new dataset */
-    if((new_dset->shared->layout.ops->construct)(file, dapl_id, dxpl_id, new_dset, dc_plist) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to initialize layout information")
+    if((new_dset->shared->layout.ops->construct)(file, new_dset) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to construct layout information")
+
+    /* Update the dataset's object header info. */
+    if(H5D_update_oh_info(file, dxpl_id, new_dset, dapl_id) != SUCCEED)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't update the metadata cache")
 
     /* Indicate that the layout information was initialized */
     layout_init = TRUE;
-
-    /* Update the dataset's object header info. */
-    if(H5D_update_oh_info(file, dxpl_id, new_dset) != SUCCEED)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "can't update the metadata cache")
 
     /* Add the dataset to the list of opened objects in the file */
     if(H5FO_top_incr(new_dset->oloc.file, new_dset->oloc.addr) < 0)
@@ -1443,7 +1460,7 @@ H5D_open_oid(H5D_t *dataset, hid_t dapl_id, hid_t dxpl_id)
 
         case H5D_CHUNKED:
             /* Initialize the chunk cache for the dataset */
-            if(H5D_chunk_init(dataset->oloc.file, dapl_id, dxpl_id, dataset) < 0)
+            if(H5D_chunk_init(dataset->oloc.file, dxpl_id, dataset, dapl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize chunk cache")
             break;
 

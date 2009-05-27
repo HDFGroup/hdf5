@@ -135,7 +135,8 @@ static herr_t H5D_btree_debug_key(FILE *stream, H5F_t *f, hid_t dxpl_id,
     int indent, int fwidth, const void *key, const void *udata);
 
 /* Chunked layout indexing callbacks */
-static herr_t H5D_btree_idx_init(const H5D_chk_idx_info_t *idx_info);
+static herr_t H5D_btree_idx_init(const H5D_chk_idx_info_t *idx_info,
+    haddr_t dset_ohdr_addr);
 static herr_t H5D_btree_idx_create(const H5D_chk_idx_info_t *idx_info);
 static hbool_t H5D_btree_idx_is_space_alloc(const H5O_layout_t *layout);
 static herr_t H5D_btree_idx_insert(const H5D_chk_idx_info_t *idx_info,
@@ -845,7 +846,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_btree_idx_init(const H5D_chk_idx_info_t *idx_info)
+H5D_btree_idx_init(const H5D_chk_idx_info_t *idx_info, haddr_t UNUSED dset_ohdr_addr)
 {
     herr_t      ret_value = SUCCEED;       /* Return value */
 
@@ -856,6 +857,7 @@ H5D_btree_idx_init(const H5D_chk_idx_info_t *idx_info)
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
+    HDassert(H5F_addr_defined(dset_ohdr_addr));
 
     /* Allocate the shared structure */
     if(H5D_btree_shared_create(idx_info->f, idx_info->layout) < 0)

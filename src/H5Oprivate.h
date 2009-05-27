@@ -367,6 +367,7 @@ struct H5EA_t;                          /* Defined in H5EAprivate.h          */
 
 typedef struct H5O_layout_chunk_earray_t {
     haddr_t	addr;			/* File address of extensible array  */
+    haddr_t	dset_ohdr_addr;		/* File address dataset's object header */
     struct H5EA_t *ea;                  /* Pointer to extensible array struct */
 } H5O_layout_chunk_earray_t;
 

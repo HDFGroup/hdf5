@@ -395,7 +395,7 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
             else {
                 /* Encoded # of bytes for each chunk dimension */
                 HDassert(mesg->u.chunk.enc_bytes_per_dim > 0 && mesg->u.chunk.enc_bytes_per_dim <= 8);
-                *p++ = mesg->u.chunk.enc_bytes_per_dim;
+                *p++ = (uint8_t)mesg->u.chunk.enc_bytes_per_dim;
 
                 /* Number of dimensions */
                 HDassert(mesg->u.chunk.ndims > 0 && mesg->u.chunk.ndims <= H5O_LAYOUT_NDIMS);

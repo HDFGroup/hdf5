@@ -467,7 +467,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D_chunk_proxy_mark(const H5D_t *dset, hid_t dxpl_id, const H5D_rdcc_ent_t *ent,
+H5D_chunk_proxy_mark(const H5D_t *dset, const H5D_rdcc_ent_t *ent,
     hbool_t dirty)
 {
     herr_t ret_value = SUCCEED;         /* Return value */
