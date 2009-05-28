@@ -267,7 +267,7 @@ hsize_t diff_datasetid( hid_t did1,
     if (storage_size1==0 || storage_size2==0)
     {
         if ( (options->m_verbose||options->m_list_not_cmp) && obj1_name && obj2_name)
-            parallel_print("Not comparable: <%s> or <%s> are empty datasets\n", obj1_name, obj2_name);
+            parallel_print("Not comparable: <%s> or <%s> is an empty dataset\n", obj1_name, obj2_name);
         can_compare=0;
         options->not_cmp=1;
     }
@@ -788,6 +788,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
     *-------------------------------------------------------------------------
     */
     
+
     if ( rank1 != rank2 )
     {
 
@@ -798,7 +799,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
             parallel_print(", max dimensions ");
             print_dimensions(rank1,maxdim1);
             parallel_print("\n" );
-            parallel_print("<%s> has rank %d, dimensions ", obj2_name, rank2);
+            parallel_print("and <%s> has rank %d, dimensions ", obj2_name, rank2);
             print_dimensions(rank2,dims2);
             parallel_print(", max dimensions ");
             print_dimensions(rank2,maxdim2);
@@ -843,7 +844,7 @@ int diff_can_type( hid_t       f_tid1, /* file data type */
                 parallel_print(", max dimensions ");
                 print_dimensions(rank1,maxdim1);
                 parallel_print("\n" );
-                parallel_print("<%s> has rank %d, dimensions ", obj2_name, rank2);
+                parallel_print("and <%s> has rank %d, dimensions ", obj2_name, rank2);
                 print_dimensions(rank2,dims2);
                 parallel_print(", max dimensions ");
                 print_dimensions(rank2,maxdim2);
