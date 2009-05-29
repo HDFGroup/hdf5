@@ -69,8 +69,8 @@
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
                                                    ! File access property list
                                                    ! identifier
-            INTEGER :: creation_prp_default 
-            INTEGER :: access_prp_default
+            INTEGER(HID_T) :: creation_prp_default 
+            INTEGER(HID_T) :: access_prp_default
             INTEGER :: namelen ! Length of the name character string
 
 !            INTEGER, EXTERNAL :: h5fcreate_c
@@ -85,10 +85,10 @@
               !DEC$ENDIF
               !DEC$ATTRIBUTES reference :: name 
               CHARACTER(LEN=*), INTENT(IN) :: name
-              INTEGER, INTENT(IN) :: access_flags
+              INTEGER       , INTENT(IN)  :: access_flags
               INTEGER(HID_T), INTENT(OUT) :: file_id
-              INTEGER, INTENT(IN) :: creation_prp_default
-              INTEGER, INTENT(IN) :: access_prp_default
+              INTEGER(HID_T), INTENT(IN)  :: creation_prp_default
+              INTEGER(HID_T), INTENT(IN)  :: access_prp_default
               INTEGER :: namelen
               END FUNCTION h5fcreate_c
             END INTERFACE
@@ -96,8 +96,8 @@
             creation_prp_default = H5P_DEFAULT_F
             access_prp_default = H5P_DEFAULT_F
 
-            if (present(creation_prp)) creation_prp_default = creation_prp 
-            if (present(access_prp))   access_prp_default   = access_prp 
+            IF (PRESENT(creation_prp)) creation_prp_default = creation_prp 
+            IF (PRESENT(access_prp))   access_prp_default   = access_prp 
             namelen = LEN(name)
             hdferr = h5fcreate_c(name, namelen, access_flags, &
                      creation_prp_default, access_prp_default, file_id) 
@@ -224,7 +224,7 @@
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
                                                    ! File access property list
                                                    ! identifier
-            INTEGER :: access_prp_default 
+            INTEGER(HID_T) :: access_prp_default 
             INTEGER :: namelen ! Length of the name character string
   
 !            INTEGER, EXTERNAL :: h5fmount_c
@@ -247,7 +247,7 @@
             END INTERFACE
 
             access_prp_default = H5P_DEFAULT_F
-            if (present(access_prp))   access_prp_default   = access_prp 
+            IF (PRESENT(access_prp))   access_prp_default   = access_prp 
             namelen = LEN(name)
             hdferr = h5fmount_c(loc_id, name, namelen, child_id, access_prp_default) 
                       
@@ -361,7 +361,7 @@
             INTEGER(HID_T), OPTIONAL, INTENT(IN) :: access_prp
                                                    ! File access property list
                                                    ! identifier
-            INTEGER :: access_prp_default 
+            INTEGER(HID_T) :: access_prp_default 
             INTEGER :: namelen ! Length of the name character string
 
 !            INTEGER, EXTERNAL :: h5fopen_c
@@ -378,7 +378,7 @@
               CHARACTER(LEN=*), INTENT(IN) :: name
               INTEGER :: namelen
               INTEGER, INTENT(IN) :: access_flags
-              INTEGER, INTENT(IN) :: access_prp_default
+              INTEGER(HID_T), INTENT(IN) :: access_prp_default
               INTEGER(HID_T), INTENT(OUT) :: file_id
               END FUNCTION h5fopen_c
             END INTERFACE
