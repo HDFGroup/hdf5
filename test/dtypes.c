@@ -6334,6 +6334,7 @@ main(void)
 
     /* Set the random # seed */
     rand_seed = (unsigned long)HDtime(NULL);
+    rand_seed = 1241443798UL;
     HDsrandom(rand_seed);
 
     reset_hdf5();
