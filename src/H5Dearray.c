@@ -1516,7 +1516,7 @@ H5D_earray_idx_depend(const H5D_chk_idx_info_t *idx_info,
     /* Create flush dependency between the child_entry and the piece of metadata
      *  in the extensible array that contains the entry for this chunk.
      */
-    if(H5EA_depend(ea, idx_info->dxpl_id, idx, child_entry) < 0)
+    if(H5EA_support(ea, idx_info->dxpl_id, idx, child_entry) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on extensible array metadata")
 
 done:
@@ -1567,7 +1567,7 @@ H5D_earray_idx_undepend(const H5D_chk_idx_info_t *idx_info,
     /* Remove flush dependency between the child_entry and the piece of metadata
      *  in the extensible array that contains the entry for this chunk.
      */
-    if(H5EA_undepend(ea, idx_info->dxpl_id, idx, child_entry) < 0)
+    if(H5EA_unsupport(ea, idx_info->dxpl_id, idx, child_entry) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on extensible array metadata")
 
 done:

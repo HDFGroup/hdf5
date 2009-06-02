@@ -137,6 +137,7 @@ struct earray_test_param_t {
 
 /* Flush depend test context */
 typedef struct earray_flush_depend_ctx_t {
+    hbool_t base_obj;                   /* Flag to indicate that base object has been flushed */
     hbool_t idx0_obj;                   /* Flag to indicate that index 0's object has been flushed */
     hbool_t idx0_elem;                  /* Flag to indicate that index 0's element has been flushed */
     hbool_t idx1_obj;                   /* Flag to indicate that index 1's object has been flushed */
@@ -650,6 +651,10 @@ earray_cache_test_flush(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, hbool_t destroy, 
     HDassert(test);
 
     if(test->cache_info.is_dirty) {
+        /* Check for out of order flush */
+        if(test->fd_info->base_obj)
+            TEST_ERROR
+
         /* Check which index this entry corresponds to */
         if((uint64_t)0 == test->idx) {
             /* Check for out of order flush */
@@ -674,6 +679,10 @@ earray_cache_test_flush(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, hbool_t destroy, 
 
             /* Set flag for object flush */
             test->fd_info->idx10000_obj = TRUE;
+        } /* end if */
+        else if((uint64_t)-1 == test->idx) {
+            /* Set flag for object flush */
+            test->fd_info->base_obj = TRUE;
         } /* end if */
 
         /* Mark the entry as clean */
@@ -1305,7 +1314,8 @@ error:
 /*-------------------------------------------------------------------------
  * Function:	test_flush_depend_cb
  *
- * Purpose:	Callback for flush dependency 'depend'/'undepend' routines
+ * Purpose:	Callback for flush dependency 'depend'/'undepend' and
+ *		'support'/'unsupport' routines
  *
  * Return:	Success:	0
  *		Failure:	1
@@ -1320,6 +1330,10 @@ test_flush_depend_cb(const void *_elmt, size_t nelmts, void *udata)
 {
     earray_flush_depend_ctx_t *ctx = (earray_flush_depend_ctx_t *)udata;
     const uint64_t *elmt = (const uint64_t *)_elmt;     /* Convenience pointer to native elements */
+
+    /* Check for out of order flush */
+    if(ctx->base_obj)
+        return(FAIL);
 
     /* Look for magic values */
     while(nelmts > 0) {
@@ -1380,6 +1394,8 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
     haddr_t     ea_addr = HADDR_UNDEF;  /* Array address in file */
     H5EA__ctx_cb_t cb;                  /* Extensible array context action info */
     earray_flush_depend_ctx_t fd_info;  /* Context information for flush depend test */
+    haddr_t     base_addr;              /* Base test entry address */
+    earray_test_t *base_entry;          /* Pointer to base test entry */
     haddr_t     addr1;                  /* Test entry #1 address */
     earray_test_t *entry1;              /* Pointer to test entry #1 */
     haddr_t     addr2;                  /* Test entry #2 address */
@@ -1409,6 +1425,22 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
     if(verify_cparam(ea, cparam) < 0)
         TEST_ERROR
 
+    /* Create base entry to insert */
+    if(NULL == (base_entry = (earray_test_t *)HDmalloc(sizeof(earray_test_t))))
+        TEST_ERROR
+    HDmemset(base_entry, 0, sizeof(earray_test_t));
+    base_entry->idx = (uint64_t)-1;
+    base_entry->fd_info = &fd_info;
+
+    /* Insert test entry into cache */
+    base_addr = HADDR_MAX;
+    if(H5AC_set(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, base_addr, base_entry, H5AC__PIN_ENTRY_FLAG) < 0)
+        TEST_ERROR
+
+    /* Set the base entry as a flush dependency for the array */
+    if(H5EA_depend((H5AC_info_t *)base_entry, ea) < 0)
+        TEST_ERROR
+
     /* Create entry #1 to insert */
     if(NULL == (entry1 = (earray_test_t *)HDmalloc(sizeof(earray_test_t))))
         TEST_ERROR
@@ -1421,7 +1453,7 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
         TEST_ERROR
 
     /* Set the test entry as a flush dependency for 0th index in the array */
-    if(H5EA_depend(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)0, (H5AC_info_t *)entry1) < 0)
+    if(H5EA_support(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)0, (H5AC_info_t *)entry1) < 0)
         TEST_ERROR
 
     /* Set element of array */
@@ -1443,7 +1475,7 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
         TEST_ERROR
 
     /* Set the test entry as a flush dependency for 1st index in the array */
-    if(H5EA_depend(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)1, (H5AC_info_t *)entry2) < 0)
+    if(H5EA_support(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)1, (H5AC_info_t *)entry2) < 0)
         TEST_ERROR
 
     /* Set element of array */
@@ -1465,7 +1497,7 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
         TEST_ERROR
 
     /* Set the test entry as a flush dependency for 10,000th index in the array */
-    if(H5EA_depend(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)10000, (H5AC_info_t *)entry3) < 0)
+    if(H5EA_support(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)10000, (H5AC_info_t *)entry3) < 0)
         TEST_ERROR
 
     /* Set element of array */
@@ -1480,6 +1512,8 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
         TEST_ERROR
 
     /* Check that all callback flags have been set */
+    if(!fd_info.base_obj)
+        TEST_ERROR
     if(!fd_info.idx0_obj)
         TEST_ERROR
     if(!fd_info.idx0_elem)
@@ -1494,8 +1528,20 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
         TEST_ERROR
 
 
+    /* Remove the base entry as a flush dependency for the array */
+    if(H5EA_undepend((H5AC_info_t *)base_entry, ea) < 0)
+        TEST_ERROR
+
+    /* Protect the base entry */
+    if(NULL == (base_entry = (earray_test_t *)H5AC_protect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, base_addr, NULL, NULL, H5AC_WRITE)))
+        TEST_ERROR
+
+    /* Unprotect & unpin the base entry */
+    if(H5AC_unprotect(f, H5P_DATASET_XFER_DEFAULT, H5AC_EARRAY_TEST, base_addr, base_entry, (H5AC__UNPIN_ENTRY_FLAG | H5AC__DELETED_FLAG)) < 0)
+        TEST_ERROR
+
     /* Remove the test entry as a flush dependency for 0th index in the array */
-    if(H5EA_undepend(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)0, (H5AC_info_t *)entry1) < 0)
+    if(H5EA_unsupport(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)0, (H5AC_info_t *)entry1) < 0)
         TEST_ERROR
 
     /* Protect the test entry */
@@ -1507,7 +1553,7 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
         TEST_ERROR
 
     /* Remove the test entry as a flush dependency for 1st index in the array */
-    if(H5EA_undepend(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)1, (H5AC_info_t *)entry2) < 0)
+    if(H5EA_unsupport(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)1, (H5AC_info_t *)entry2) < 0)
         TEST_ERROR
 
     /* Protect the test entry */
@@ -1519,7 +1565,7 @@ test_flush_depend(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t UNUSED 
         TEST_ERROR
 
     /* Remove the test entry as a flush dependency for 10,000th index in the array */
-    if(H5EA_undepend(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)10000, (H5AC_info_t *)entry3) < 0)
+    if(H5EA_unsupport(ea, H5P_DATASET_XFER_DEFAULT, (hsize_t)10000, (H5AC_info_t *)entry3) < 0)
         TEST_ERROR
 
     /* Protect the test entry */
