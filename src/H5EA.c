@@ -781,8 +781,94 @@ END_FUNC(PRIV)  /* end H5EA_get() */
 /*-------------------------------------------------------------------------
  * Function:	H5EA_depend
  *
- * Purpose:	Create a flush dependency on the array metadata that contains
- *              the element for an array index.
+ * Purpose:	Make a child flush dependency between the extensible array's
+ *              header and another piece of metadata in the file.
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		May 27 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA_depend(H5AC_info_t *parent_entry, H5EA_t *ea))
+
+    /* Local variables */
+    H5EA_hdr_t *hdr = ea->hdr;          /* Header for EA */
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(ea);
+    HDassert(hdr);
+
+    /* Set the shared array header's file context for this operation */
+    hdr->f = ea->f;
+
+    /* Set up flush dependency between child_entry and metadata array 'thing' */
+    if(H5EA__create_flush_depend(hdr, parent_entry, (H5AC_info_t *)hdr) < 0)
+        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency on file metadata")
+
+CATCH
+
+END_FUNC(PRIV)  /* end H5EA_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA_undepend
+ *
+ * Purpose:	Remove a child flush dependency between the extensible array's
+ *              header and another piece of metadata in the file.
+ *
+ * Return:	SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *		koziol@hdfgroup.org
+ *		May 27 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+BEGIN_FUNC(PRIV, ERR,
+herr_t, SUCCEED, FAIL,
+H5EA_undepend(H5AC_info_t *parent_entry, H5EA_t *ea))
+
+    /* Local variables */
+    H5EA_hdr_t *hdr = ea->hdr;          /* Header for EA */
+
+#ifdef QAK
+HDfprintf(stderr, "%s: Called\n", FUNC);
+#endif /* QAK */
+
+    /*
+     * Check arguments.
+     */
+    HDassert(ea);
+    HDassert(hdr);
+
+    /* Set the shared array header's file context for this operation */
+    hdr->f = ea->f;
+
+    /* Remove flush dependency between child_entry and metadata array 'thing' */
+    if(H5EA__destroy_flush_depend(hdr, parent_entry, (H5AC_info_t *)hdr) < 0)
+        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency on file metadata")
+
+CATCH
+
+END_FUNC(PRIV)  /* end H5EA_undepend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5EA_support
+ *
+ * Purpose:	Create a child flush dependency on the array metadata that
+ *              contains the element for an array index.
  *
  * Return:	SUCCEED/FAIL
  *
@@ -794,7 +880,7 @@ END_FUNC(PRIV)  /* end H5EA_get() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA_depend(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, H5AC_info_t *child_entry))
+H5EA_support(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, H5AC_info_t *child_entry))
 
     /* Local variables */
     H5EA_hdr_t *hdr = ea->hdr;          /* Header for EA */
@@ -835,11 +921,11 @@ CATCH
     if(thing && (thing_unprot_func)(thing, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array metadata")
 
-END_FUNC(PRIV)  /* end H5EA_depend() */
+END_FUNC(PRIV)  /* end H5EA_support() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5EA_undepend
+ * Function:	H5EA_unsupport
  *
  * Purpose:	Remove a flush dependency on the array metadata that contains
  *              the element for an array index.
@@ -854,7 +940,7 @@ END_FUNC(PRIV)  /* end H5EA_depend() */
  */
 BEGIN_FUNC(PRIV, ERR,
 herr_t, SUCCEED, FAIL,
-H5EA_undepend(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, H5AC_info_t *child_entry))
+H5EA_unsupport(const H5EA_t *ea, hid_t dxpl_id, hsize_t idx, H5AC_info_t *child_entry))
 
     /* Local variables */
     H5EA_hdr_t *hdr = ea->hdr;          /* Header for EA */
@@ -895,7 +981,7 @@ CATCH
     if(thing && (thing_unprot_func)(thing, dxpl_id, H5AC__NO_FLAGS_SET) < 0)
         H5E_THROW(H5E_CANTUNPROTECT, "unable to release extensible array metadata")
 
-END_FUNC(PRIV)  /* end H5EA_undepend() */
+END_FUNC(PRIV)  /* end H5EA_unsupport() */
 
 
 /*-------------------------------------------------------------------------
