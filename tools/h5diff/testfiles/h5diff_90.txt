@@ -27,7 +27,7 @@ dataset: </g1/dset4> and </g1/dset4>
 group  : </g2> and </g2>
 0 differences found
 dataset: </g2/dset1> and </g2/dset1>
-Not comparable: </g2/dset1> or </g2/dset1> are empty datasets
+Not comparable: </g2/dset1> or </g2/dset1> is an empty dataset
 0 differences found
 dataset: </g2/dset2> and </g2/dset2>
 0 differences found
@@ -44,7 +44,7 @@ dataset: </g2/dset7> and </g2/dset7>
 dataset: </g2/dset8> and </g2/dset8>
 0 differences found
 dataset: </g2/dset9> and </g2/dset9>
-Not comparable: </g2/dset9> or </g2/dset9> are empty datasets
+Not comparable: </g2/dset9> or </g2/dset9> is an empty dataset
 0 differences found
 group  : </> and </>
 0 differences found
