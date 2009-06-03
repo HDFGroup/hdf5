@@ -245,7 +245,7 @@ position        array3D         array3D         difference
 [ 3 2 1 ]          72              0               72             
 72 differences found
 dataset: </g1/arrayd> and </g1/arrayd>
-Not comparable: </g1/arrayd> or </g1/arrayd> are empty datasets
+Not comparable: </g1/arrayd> or </g1/arrayd> is an empty dataset
 0 differences found
 dataset: </g1/bitfield> and </g1/bitfield>
 size:           [2]           [2]
@@ -380,10 +380,10 @@ position        enum            enum            difference
 [ 0 ]          RED              GREEN            
 1 differences found
 dataset: </g1/enum2D> and </g1/enum2D>
-Not comparable: </g1/enum2D> or </g1/enum2D> are empty datasets
+Not comparable: </g1/enum2D> or </g1/enum2D> is an empty dataset
 0 differences found
 dataset: </g1/enum3D> and </g1/enum3D>
-Not comparable: </g1/enum3D> or </g1/enum3D> are empty datasets
+Not comparable: </g1/enum3D> or </g1/enum3D> is an empty dataset
 0 differences found
 dataset: </g1/float> and </g1/float>
 size:           [2]           [2]
