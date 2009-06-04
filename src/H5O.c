@@ -439,8 +439,11 @@ H5Olink(hid_t obj_id, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a location")
     if(!new_name || !*new_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no name specified")
+/* Avoid compiler warning on 32-bit machines */
+#if H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T
     if(HDstrlen(new_name) > H5L_MAX_LINK_NAME_LEN)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "name too long")
+#endif /* H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T */
     if(lcpl_id != H5P_DEFAULT && (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a link creation property list")
 
@@ -1128,9 +1131,13 @@ H5O_create(H5F_t *f, hid_t dxpl_id, size_t size_hint, hid_t ocpl_id,
             oh->flags |= H5O_HDR_ATTR_STORE_PHASE_CHANGE;
 
         /* Determine correct value for chunk #0 size bits */
+/* Avoid compiler warning on 32-bit machines */
+#if H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T
         if(size_hint > 4294967295)
             oh->flags |= H5O_HDR_CHUNK0_8;
-        else if(size_hint > 65535)
+        else 
+#endif /* H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T */
+        if(size_hint > 65535)
             oh->flags |= H5O_HDR_CHUNK0_4;
         else if(size_hint > 255)
             oh->flags |= H5O_HDR_CHUNK0_2;
@@ -1545,15 +1552,14 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_protect
+ * Function:	H5O_pin
  *
- * Purpose:	Wrapper around H5AC_protect for use during a H5O_protect->
- *              H5O_msg_append->...->H5O_msg_append->H5O_unprotect sequence of calls
- *              during an object's creation.
+ * Purpose:	Pin an object header down for use during a sequence of message
+ *              operations, which prevents the object header from being
+ *              evicted from the cache.
  *
  * Return:	Success:	Pointer to the object header structure for the
  *                              object.
- *
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
@@ -1563,11 +1569,12 @@ done:
  *-------------------------------------------------------------------------
  */
 H5O_t *
-H5O_protect(H5O_loc_t *loc, hid_t dxpl_id)
+H5O_pin(H5O_loc_t *loc, hid_t dxpl_id)
 {
-    H5O_t	       *ret_value;      /* Return value */
+    H5O_t       *oh = NULL;      /* Object header */
+    H5O_t       *ret_value;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_protect, NULL)
+    FUNC_ENTER_NOAPI(H5O_pin, NULL)
 
     /* check args */
     HDassert(loc);
@@ -1579,31 +1586,38 @@ H5O_protect(H5O_loc_t *loc, hid_t dxpl_id)
 	HGOTO_ERROR(H5E_OHDR, H5E_WRITEERROR, NULL, "no write intent on file")
 
     /* Lock the object header into the cache */
-    if(NULL == (ret_value = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
+    if(NULL == (oh = (H5O_t *)H5AC_protect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, NULL, NULL, H5AC_WRITE)))
 	HGOTO_ERROR(H5E_OHDR, H5E_CANTPROTECT, NULL, "unable to load object header")
 
-    /* Mark object header as un-evictable */
-    if(H5AC_pin_protected_entry(loc->file, ret_value) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, NULL, "unable to pin object header")
+    /* Check if the object header needs to be pinned */
+    if(0 == oh->npins) {
+        /* Mark object header as un-evictable */
+        if(H5AC_pin_protected_entry(loc->file, oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTPIN, NULL, "unable to pin object header")
+    } /* end if */
+
+    /* Increment the pin count */
+    oh->npins++;
+
+    /* Set the return value */
+    ret_value = oh;
 
 done:
     /* Release the object header from the cache */
-    if(H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, ret_value, H5AC__NO_FLAGS_SET) < 0)
+    if(oh && H5AC_unprotect(loc->file, dxpl_id, H5AC_OHDR, loc->addr, ret_value, H5AC__NO_FLAGS_SET) < 0)
         HDONE_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, NULL, "unable to release object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_protect() */
+} /* end H5O_pin() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_unprotect
+ * Function:	H5O_unpin
  *
- * Purpose:	Wrapper around H5AC_unprotect for use during a H5O_protect->
- *              H5O_msg_append->...->H5O_msg_append->H5O_unprotect sequence of calls
- *              during an object's creation.
+ * Purpose:	Unpin an object header, allowing it to be evicted from the
+ *              metadata cache.
  *
  * Return:	Success:	Non-negative
- *
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
@@ -1613,11 +1627,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_unprotect(H5O_loc_t *loc, H5O_t *oh)
+H5O_unpin(H5O_loc_t *loc, H5O_t *oh)
 {
     herr_t ret_value = SUCCEED;      /* Return value */
 
-    FUNC_ENTER_NOAPI(H5O_unprotect, FAIL)
+    FUNC_ENTER_NOAPI(H5O_unpin, FAIL)
 
     /* check args */
     HDassert(loc);
@@ -1625,13 +1639,19 @@ H5O_unprotect(H5O_loc_t *loc, H5O_t *oh)
     HDassert(H5F_addr_defined(loc->addr));
     HDassert(oh);
 
-    /* Mark object header as evictable again */
-    if(H5AC_unpin_entry(loc->file, oh) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
+    /* Check if this is the last unpin operation */
+    if(1 == oh->npins) {
+        /* Mark object header as evictable again */
+        if(H5AC_unpin_entry(loc->file, oh) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPIN, FAIL, "unable to unpin object header")
+    } /* end if */
+
+    /* Decrement the pin count */
+    oh->npins--;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_unprotect() */
+} /* end H5O_unpin() */
 
 
 /*-------------------------------------------------------------------------
