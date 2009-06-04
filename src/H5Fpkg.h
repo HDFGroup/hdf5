@@ -162,6 +162,7 @@ typedef struct H5F_file_t {
     haddr_t     root_addr;      /* Root group address                   */
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5RC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
+    haddr_t	next_proxy_addr; /* Next address to use for metadata cache proxy entries */
 
     /* File space allocation information */
     unsigned fs_aggr_merge[H5FD_MEM_NTYPES];    /* Flags for whether free space can merge with aggregator(s) */
