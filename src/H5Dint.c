@@ -857,8 +857,8 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
     HDassert(file == dset->oloc.file);
 
     /* Get a pointer to the object header itself */
-    if((oh = H5O_protect(oloc, dxpl_id)) == NULL)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect dataset object header")
+    if(NULL == (oh = H5O_pin(oloc, dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 
     /* Write new fill value message */
     if(H5O_msg_append_oh(file, dxpl_id, oh, H5O_FILL_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, fill_prop) < 0)
@@ -1001,8 +1001,8 @@ H5D_update_oh_info(H5F_t *file, hid_t dxpl_id, H5D_t *dset, hid_t dapl_id)
 done:
     /* Release pointer to object header itself */
     if(oloc != NULL && oh != NULL)
-        if(H5O_unprotect(oloc, oh) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to unprotect dataset object header")
+        if(H5O_unpin(oloc, oh) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
 
     /* Error cleanup */
     if(ret_value < 0) {
@@ -2442,8 +2442,8 @@ H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, unsigned flags)
         unsigned update_flags = H5O_UPDATE_TIME;        /* Modification time flag */
 
         /* Get a pointer to the dataset's object header */
-        if((oh = H5O_protect(&dataset->oloc, dxpl_id)) == NULL)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect dataset object header")
+        if(NULL == (oh = H5O_pin(&dataset->oloc, dxpl_id)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
 
         /* Update the layout on disk, if it's been changed */
         if(dataset->shared->layout_dirty) {
@@ -2511,8 +2511,8 @@ H5D_flush_real(H5D_t *dataset, hid_t dxpl_id, unsigned flags)
 done:
     /* Release pointer to object header */
     if(oh != NULL)
-        if(H5O_unprotect(&(dataset->oloc), oh) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPROTECT, FAIL, "unable to unprotect dataset object header")
+        if(H5O_unpin(&(dataset->oloc), oh) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D_flush_real() */

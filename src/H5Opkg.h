@@ -266,6 +266,11 @@ struct H5O_t {
     /* File-specific information (not stored) */
     size_t      sizeof_size;            /* Size of file sizes 		     */
     size_t      sizeof_addr;            /* Size of file addresses	     */
+
+    /* Misc. information (not stored) */
+    unsigned    npins;                  /* Number of times the header is pinned */
+
+    /* Debugging information (not stored) */
 #ifdef H5O_ENABLE_BAD_MESG_COUNT
     hbool_t     store_bad_mesg_count;   /* Flag to indicate that a bad message count should be stored */
                                         /* (This is to simulate a bug in earlier
