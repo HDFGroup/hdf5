@@ -85,11 +85,11 @@ am_libhdf5_la_OBJECTS = H5.lo H5checksum.lo H5dbg.lo H5system.lo \
 	H5B2stat.lo H5B2test.lo H5C.lo H5CS.lo H5D.lo H5Dbtree.lo \
 	H5Dchunk.lo H5Dcompact.lo H5Dcontig.lo H5Ddbg.lo H5Ddeprec.lo \
 	H5Dearray.lo H5Defl.lo H5Dfill.lo H5Dint.lo H5Dio.lo \
-	H5Dmpio.lo H5Doh.lo H5Dproxy.lo H5Dscatgath.lo H5Dselect.lo H5Dtest.lo \
-	H5E.lo H5Edeprec.lo H5Eint.lo H5EA.lo H5EAcache.lo H5EAdbg.lo \
-	H5EAdblkpage.lo H5EAdblock.lo H5EAhdr.lo H5EAiblock.lo \
-	H5EAint.lo H5EAsblock.lo H5EAstat.lo H5EAtest.lo H5F.lo \
-	H5Faccum.lo H5Fdbg.lo H5Ffake.lo H5Fio.lo H5Fmount.lo \
+	H5Dmpio.lo H5Doh.lo H5Dproxy.lo H5Dscatgath.lo H5Dselect.lo \
+	H5Dtest.lo H5E.lo H5Edeprec.lo H5Eint.lo H5EA.lo H5EAcache.lo \
+	H5EAdbg.lo H5EAdblkpage.lo H5EAdblock.lo H5EAhdr.lo \
+	H5EAiblock.lo H5EAint.lo H5EAsblock.lo H5EAstat.lo H5EAtest.lo \
+	H5F.lo H5Faccum.lo H5Fdbg.lo H5Ffake.lo H5Fio.lo H5Fmount.lo \
 	H5Fmpi.lo H5Fquery.lo H5Fsfile.lo H5Fsuper.lo H5Ftest.lo \
 	H5FD.lo H5FDcore.lo H5FDdirect.lo H5FDfamily.lo H5FDint.lo \
 	H5FDlog.lo H5FDmpi.lo H5FDmpio.lo H5FDmpiposix.lo H5FDmulti.lo \
