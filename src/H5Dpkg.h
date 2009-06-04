@@ -285,9 +285,9 @@ typedef herr_t (*H5D_chunk_copy_shutdown_func_t)(H5O_layout_t *layout_src,
 typedef herr_t (*H5D_chunk_size_func_t)(const H5D_chk_idx_info_t *idx_info,
     hsize_t *idx_size);
 typedef herr_t (*H5D_chunk_reset_func_t)(H5O_layout_t *layout, hbool_t reset_addr);
-typedef herr_t (*H5D_chunk_depend_func_t)(const H5D_chk_idx_info_t *idx_info,
+typedef herr_t (*H5D_chunk_support_func_t)(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
-typedef herr_t (*H5D_chunk_undepend_func_t)(const H5D_chk_idx_info_t *idx_info,
+typedef herr_t (*H5D_chunk_unsupport_func_t)(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
 typedef herr_t (*H5D_chunk_dump_func_t)(const H5D_chk_idx_info_t *idx_info,
     FILE *stream);
@@ -308,8 +308,8 @@ typedef struct H5D_chunk_ops_t {
     H5D_chunk_copy_shutdown_func_t copy_shutdown; /* Routine to perform any necessary shutdown for copying chunks */
     H5D_chunk_size_func_t size;             /* Routine to get size of indexing information */
     H5D_chunk_reset_func_t reset;           /* Routine to reset indexing information */
-    H5D_chunk_depend_func_t depend;         /* Routine to create dependency between chunk [proxy] and index metadata */
-    H5D_chunk_undepend_func_t undepend;     /* Routine to remove dependency between chunk [proxy] and index metadata */
+    H5D_chunk_support_func_t support;       /* Routine to create dependency between chunk [proxy] and index metadata */
+    H5D_chunk_unsupport_func_t unsupport;   /* Routine to remove dependency between chunk [proxy] and index metadata */
     H5D_chunk_dump_func_t dump;             /* Routine to dump indexing information */
     H5D_chunk_dest_func_t dest;             /* Routine to destroy indexing information in memory */
 } H5D_chunk_ops_t;

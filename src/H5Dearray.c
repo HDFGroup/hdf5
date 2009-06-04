@@ -134,9 +134,9 @@ static herr_t H5D_earray_idx_copy_shutdown(H5O_layout_t *layout_src,
 static herr_t H5D_earray_idx_size(const H5D_chk_idx_info_t *idx_info,
     hsize_t *size);
 static herr_t H5D_earray_idx_reset(H5O_layout_t *layout, hbool_t reset_addr);
-static herr_t H5D_earray_idx_depend(const H5D_chk_idx_info_t *idx_info,
+static herr_t H5D_earray_idx_support(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
-static herr_t H5D_earray_idx_undepend(const H5D_chk_idx_info_t *idx_info,
+static herr_t H5D_earray_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry);
 static herr_t H5D_earray_idx_dump(const H5D_chk_idx_info_t *idx_info,
     FILE *stream);
@@ -162,8 +162,8 @@ const H5D_chunk_ops_t H5D_COPS_EARRAY[1] = {{
     H5D_earray_idx_copy_shutdown,
     H5D_earray_idx_size,
     H5D_earray_idx_reset,
-    H5D_earray_idx_depend,
-    H5D_earray_idx_undepend,
+    H5D_earray_idx_support,
+    H5D_earray_idx_unsupport,
     H5D_earray_idx_dump,
     H5D_earray_idx_dest
 }};
@@ -598,6 +598,116 @@ H5D_earray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx,
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5D_earray_idx_depend
+ *
+ * Purpose:	Create flush dependency between extensible array and dataset's
+ *              object header.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, June  2, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_earray_idx_depend(const H5D_chk_idx_info_t *idx_info)
+{
+    H5O_loc_t oloc;         /* Temporary object header location for dataset */
+    H5O_t *oh = NULL;       /* Dataset's object header */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_depend)
+
+    /* Check args */
+    HDassert(idx_info);
+    HDassert(idx_info->f);
+    HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
+    HDassert(idx_info->pline);
+    HDassert(idx_info->layout);
+    HDassert(H5D_CHUNK_EARRAY == idx_info->layout->u.chunk.idx_type);
+    HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.earray.addr));
+    HDassert(idx_info->layout->u.chunk.u.earray.ea);
+
+    /* Set up object header location for dataset */
+    H5O_loc_reset(&oloc);
+    oloc.file = idx_info->f;
+    oloc.addr = idx_info->layout->u.chunk.u.earray.dset_ohdr_addr;
+
+    /* Pin the dataset's object header */
+    if(NULL == (oh = H5O_pin(&oloc, idx_info->dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
+
+    /* Make the extensible array a child flush dependency of the dataset's object header */
+    if(H5EA_depend((H5AC_info_t *)oh, idx_info->layout->u.chunk.u.earray.ea) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
+
+done:
+    /* Unpin the dataset's object header */
+    if(oh && H5O_unpin(&oloc, oh) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_earray_idx_depend() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:	H5D_earray_idx_undepend
+ *
+ * Purpose:	Remove flush dependency between extensible array and dataset's
+ *              object header.
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, June  2, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D_earray_idx_undepend(const H5D_chk_idx_info_t *idx_info)
+{
+    H5O_loc_t oloc;         /* Temporary object header location for dataset */
+    H5O_t *oh = NULL;       /* Dataset's object header */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_undepend)
+
+    /* Check args */
+    HDassert(idx_info);
+    HDassert(idx_info->f);
+    HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
+    HDassert(idx_info->pline);
+    HDassert(idx_info->layout);
+    HDassert(H5D_CHUNK_EARRAY == idx_info->layout->u.chunk.idx_type);
+    HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.earray.addr));
+    HDassert(idx_info->layout->u.chunk.u.earray.ea);
+
+    /* Set up object header location for dataset */
+    H5O_loc_reset(&oloc);
+    oloc.file = idx_info->f;
+    oloc.addr = idx_info->layout->u.chunk.u.earray.dset_ohdr_addr;
+
+    /* Pin the dataset's object header */
+    if(NULL == (oh = H5O_pin(&oloc, idx_info->dxpl_id)))
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTPIN, FAIL, "unable to pin dataset object header")
+
+    /* Remove the extensible array as a child flush dependency of the dataset's object header */
+    if(H5EA_undepend((H5AC_info_t *)oh, idx_info->layout->u.chunk.u.earray.ea) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on object header")
+
+done:
+    /* Unpin the dataset's object header */
+    if(oh && H5O_unpin(&oloc, oh) < 0)
+        HDONE_ERROR(H5E_DATASET, H5E_CANTUNPIN, FAIL, "unable to unpin dataset object header")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D_earray_idx_undepend() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5D_earray_idx_open
  *
  * Purpose:	Opens an existing extensible array.
@@ -641,6 +751,12 @@ H5D_earray_idx_open(const H5D_chk_idx_info_t *idx_info)
     cls = (idx_info->pline->nused > 0) ?  H5EA_CLS_FILT_CHUNK : H5EA_CLS_CHUNK;
     if(NULL == (idx_info->layout->u.chunk.u.earray.ea = H5EA_open(idx_info->f, idx_info->dxpl_id, idx_info->layout->u.chunk.u.earray.addr, cls, &udata)))
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't open extensible array")
+
+    /* Check for SWMR writes to the file */
+    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
+        if(H5D_earray_idx_depend(idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -748,6 +864,12 @@ H5D_earray_idx_create(const H5D_chk_idx_info_t *idx_info)
     /* Get the address of the extensible array in file */
     if(H5EA_get_addr(idx_info->layout->u.chunk.u.earray.ea, &(idx_info->layout->u.chunk.u.earray.addr)) < 0)
 	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't query extensible array address")
+
+    /* Check for SWMR writes to the file */
+    if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
+        if(H5D_earray_idx_depend(idx_info) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTDEPEND, FAIL, "unable to create flush dependency on object header")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1474,7 +1596,7 @@ H5D_earray_idx_reset(H5O_layout_t *layout, hbool_t reset_addr)
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_earray_idx_depend
+ * Function:	H5D_earray_idx_support
  *
  * Purpose:	Create a dependency between a chunk [proxy] and the index
  *              metadata that contains the record for the chunk.
@@ -1487,14 +1609,14 @@ H5D_earray_idx_reset(H5O_layout_t *layout, hbool_t reset_addr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_earray_idx_depend(const H5D_chk_idx_info_t *idx_info,
+H5D_earray_idx_support(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry)
 {
     H5EA_t      *ea;                    /* Pointer to extensible array structure */
     hsize_t     idx;                    /* Array index of chunk */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_depend)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_support)
 
     HDassert(idx_info);
     HDassert(udata);
@@ -1521,11 +1643,11 @@ H5D_earray_idx_depend(const H5D_chk_idx_info_t *idx_info,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_earray_idx_depend() */
+} /* end H5D_earray_idx_support() */
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_earray_idx_undepend
+ * Function:	H5D_earray_idx_unsupport
  *
  * Purpose:	Remove a dependency between a chunk [proxy] and the index
  *              metadata that contains the record for the chunk.
@@ -1538,14 +1660,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D_earray_idx_undepend(const H5D_chk_idx_info_t *idx_info,
+H5D_earray_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
     H5D_chunk_common_ud_t *udata, H5AC_info_t *child_entry)
 {
     H5EA_t      *ea;                    /* Pointer to extensible array structure */
     hsize_t     idx;                    /* Array index of chunk */
     herr_t      ret_value = SUCCEED;    /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_undepend)
+    FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_unsupport)
 
     HDassert(idx_info);
     HDassert(udata);
@@ -1572,7 +1694,7 @@ H5D_earray_idx_undepend(const H5D_chk_idx_info_t *idx_info,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_earray_idx_undepend() */
+} /* end H5D_earray_idx_unsupport() */
 
 
 /*-------------------------------------------------------------------------
@@ -1630,6 +1752,12 @@ H5D_earray_idx_dest(const H5D_chk_idx_info_t *idx_info)
     if(idx_info->layout->u.chunk.u.earray.ea) {
         /* Sanity check */
         HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.earray.dset_ohdr_addr));
+
+        /* Check for SWMR writes to the file */
+        if(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE) {
+            if(H5D_earray_idx_undepend(idx_info) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTUNDEPEND, FAIL, "unable to remove flush dependency on object header")
+        } /* end if */
 
         if(H5EA_close(idx_info->layout->u.chunk.u.earray.ea, idx_info->dxpl_id) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTCLOSEOBJ, FAIL, "unable to close extensible array")
