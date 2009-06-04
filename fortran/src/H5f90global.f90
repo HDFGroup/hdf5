@@ -316,7 +316,7 @@
 ! H5FD file drivers flags declaration
 !
       INTEGER, PARAMETER :: H5FD_HID_FLAGS_LEN = 7
-      INTEGER H5FD_hid_flags(H5FD_HID_FLAGS_LEN)
+      INTEGER(HID_T) H5FD_hid_flags(H5FD_HID_FLAGS_LEN)
 !DEC$if defined(BUILD_HDF5_DLL)
 !DEC$ATTRIBUTES DLLEXPORT :: /H5FD_HID_FLAGS/
 !DEC$endif
