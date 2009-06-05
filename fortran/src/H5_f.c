@@ -190,7 +190,7 @@ int_f
 nh5init_flags_c( int_f *h5d_flags, int_f *h5e_flags, int_f *h5f_flags,
                  int_f *h5fd_flags, hid_t *h5fd_hid_flags,
                  int_f *h5g_flags, int_f *h5i_flags,
-                 int_f *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
+                 hid_t *h5p_flags, int_f *h5r_flags, int_f *h5s_flags,
                  int_f *h5t_flags, int_f *h5z_flags)
 {
     int ret_value = -1;

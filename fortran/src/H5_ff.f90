@@ -96,7 +96,7 @@
           INTEGER(HID_T) i_H5FD_hid_flags(H5FD_HID_FLAGS_LEN)
           INTEGER i_H5E_flags(H5E_FLAGS_LEN)
           INTEGER i_H5I_flags(H5I_FLAGS_LEN)
-          INTEGER i_H5P_flags(H5P_FLAGS_LEN)
+          INTEGER(HID_T) i_H5P_flags(H5P_FLAGS_LEN)
           INTEGER i_H5R_flags(H5R_FLAGS_LEN)
           INTEGER i_H5S_flags(H5S_FLAGS_LEN)
           INTEGER i_H5T_flags(H5T_FLAGS_LEN)
