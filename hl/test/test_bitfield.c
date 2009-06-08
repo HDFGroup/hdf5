@@ -73,7 +73,7 @@ int main(void)
    * store it in a char buffer. This selects all the elements (H5S_ALL)
    */
   status = H5LTread_bitfield_value(qf_dset, num_flags, offset, length,
-				   H5S_ALL, H5T_NATIVE_UCHAR, qf_data);
+				   H5S_ALL, qf_data);
   printf("Bit Field:\n");
   for (i = 0; i<DIM0; i++) {
     printf (" [");
