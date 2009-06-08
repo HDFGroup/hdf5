@@ -374,13 +374,17 @@ HDfprintf(stderr, "%s: Check 2.0\n", FUNC);
     if(alloc_type != H5FD_MEM_DRAW) {
         /* Handle metadata differently from "raw" data */
         if(HADDR_UNDEF == (ret_value = H5MF_aggr_alloc(f, dxpl_id, &(f->shared->meta_aggr), &(f->shared->sdata_aggr), alloc_type, size)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate metadata")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate metadata")
     } /* end if */
     else {
         /* Allocate "raw" data */
         if(HADDR_UNDEF == (ret_value = H5MF_aggr_alloc(f, dxpl_id, &(f->shared->sdata_aggr), &(f->shared->meta_aggr), alloc_type, size)))
-            HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate raw data")
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate raw data")
     } /* end else */
+
+    /* Check for overlapping into file's temporary allocation space */
+    if(H5F_addr_gt((ret_value + size), f->shared->tmp_addr))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF, "'normal' file space allocation request overlaps into 'temporary' file space")
 
 done:
 #ifdef H5MF_ALLOC_DEBUG
@@ -391,6 +395,63 @@ H5MF_sects_dump(f, dxpl_id, stderr);
 #endif /* H5MF_ALLOC_DEBUG_DUMP */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5MF_alloc() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    H5MF_alloc_tmp
+ *
+ * Purpose:     Allocate temporary space in the file
+ *
+ * Note:	The address returned is non-overlapping with any other address
+ *		in the file and suitable for insertion into the metadata
+ *		cache.
+ *
+ *		The address is _not_ suitable for actual file I/O and will
+ *		cause an error if it is so used.
+ *
+ *		The space allocated with this routine should _not_ be freed,
+ *		it should just be abandoned.  Calling H5MF_xfree() with space
+ *              from this routine will cause an error.
+ *
+ * Return:      Success:        Temporary file address
+ *              Failure:        HADDR_UNDEF
+ *
+ * Programmer:  Quincey Koziol
+ *              Thursday, June  4, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+haddr_t
+H5MF_alloc_tmp(H5F_t *f, hsize_t size)
+{
+    haddr_t eoa;                /* End of allocated space in the file */
+    haddr_t ret_value;          /* Return value */
+
+    FUNC_ENTER_NOAPI(H5MF_alloc_tmp, HADDR_UNDEF)
+
+    /* check args */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->lf);
+    HDassert(size > 0);
+
+    /* Retrieve the 'eoa' for the file */
+    if(HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "driver get_eoa request failed")
+
+    /* Compute value to return */
+    ret_value = f->shared->tmp_addr - size;
+
+    /* Check for overlap into the actual allocated space in the file */
+    if(H5F_addr_le(ret_value, eoa))
+	HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "driver get_eoa request failed")
+
+    /* Adjust temporary address allocator in the file */
+    f->shared->tmp_addr = ret_value;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5MF_alloc_tmp() */
 
 
 /*-------------------------------------------------------------------------
@@ -426,6 +487,10 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
     if(!H5F_addr_defined(addr) || 0 == size)
         HGOTO_DONE(SUCCEED);
     HDassert(addr != 0);        /* Can't deallocate the superblock :-) */
+
+    /* Check for attempting to free space that's a 'temporary' file address */
+    if(H5F_addr_le(f->shared->tmp_addr, addr))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, FAIL, "attempting to free temporary file space")
 
     /* Check if the space to free intersects with the file's metadata accumulator */
     if(H5F_accum_free(f, dxpl_id, alloc_type, addr, size) < 0)

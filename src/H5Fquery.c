@@ -687,32 +687,3 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_fileno() */
 
-
-/*-------------------------------------------------------------------------
- * Function:	H5F_get_next_proxy_addr
- *
- * Purpose:	Quick and dirty routine to retrieve the next metadata proxy
- *          address for a file.
- *          (Mainly added to stop non-file routines from poking about in the
- *          H5F_t data structure)
- *
- * Return:	Success:	Address to use for metadata cache proxy
- * 		Failure:	abort (should not happen)
- *
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
- *		May 19, 2009
- *
- *-------------------------------------------------------------------------
- */
-haddr_t
-H5F_get_next_proxy_addr(const H5F_t *f)
-{
-    /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_next_proxy_addr)
-
-    HDassert(f);
-    HDassert(f->shared);
-
-    FUNC_LEAVE_NOAPI(f->shared->next_proxy_addr--)
-} /* end H5F_get_next_proxy_addr() */
-

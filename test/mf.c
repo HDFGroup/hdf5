@@ -718,6 +718,175 @@ error:
 } /* test_mf_eoa_extend() */
 
 /*
+ * To verify that temporary blocks are allocated correctly
+ *
+ * Set up:
+ * 	There is nothing in free-space manager
+ *
+ * Tests:
+ *      Allocate a reasonable-sized temporary block
+ *      Check that the temporary address is high enough
+ *      Check that file I/O with the temporary address fails
+ *      Check that freeing a temporary address fails
+ *      Check that closing the file doesn't change the file's size
+ *      Check that overlapping normal & temporary address space fails:
+ *         - Reopen the file
+ *         - Allocate enough temporary space to use ~1/3 of the file
+ *         - Allocate enough 'normal' space to use ~1/3 of the file
+ *         - Check that allocating another 1/2 of the file as temporary address
+ *              space fails
+ *         - Check that allocating another 1/2 of the file as normal address
+ *              space fails
+ */
+static unsigned
+test_mf_tmp(const char *env_h5_drvr, hid_t fapl)
+{
+    hid_t	file = -1;              /* File ID */
+    hbool_t     contig_addr_vfd;        /* Whether VFD used has a contigous address space */
+
+    TESTING("'temporary' file space allocation");
+
+    /* Skip test when using VFDs that has different address spaces for each
+     *  type of metadata allocation.
+     */
+    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
+    if(contig_addr_vfd) {
+        char		filename[FILENAME_LEN]; /* Filename to use */
+        H5F_t		*f = NULL;              /* Internal file object pointer */
+        h5_stat_size_t  file_size, new_file_size;      /* file size */
+        haddr_t		tmp_addr;               /* Temporary space file address */
+        haddr_t		norm_addr;              /* Normal space file address */
+        haddr_t		check_addr;             /* File address for checking for errors */
+        unsigned char   buf = 0;                /* Buffer to read/write with */
+        herr_t          status;                 /* Generic status value */
+
+        /* Set the filename to use for this test */
+        h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
+
+        /* Create the file to work on */
+        if((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Close file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
+
+        /* Get the size of the file */
+        if((file_size = h5_get_file_size(filename, fapl)) < 0)
+            TEST_ERROR
+
+
+        /* Re-open the file */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
+            FAIL_STACK_ERROR
+
+        /* Allocate some temporary address space */
+        if(HADDR_UNDEF == (tmp_addr = H5MF_alloc_tmp(f, (hsize_t)TEST_BLOCK_SIZE30)))
+            FAIL_STACK_ERROR
+
+        /* Check if temporary file address is valid */
+        if(tmp_addr < (haddr_t)(HADDR_MAX - TEST_BLOCK_SIZE30))
+            TEST_ERROR
+
+        /* Reading & writing with a temporary address value should fail */
+        H5E_BEGIN_TRY {
+            status = H5F_block_read(f, H5FD_MEM_SUPER, tmp_addr, sizeof(buf), H5P_DATASET_XFER_DEFAULT, &buf);
+        } H5E_END_TRY;
+        if(status >= 0)
+            TEST_ERROR
+        H5E_BEGIN_TRY {
+            status = H5F_block_write(f, H5FD_MEM_SUPER, tmp_addr, sizeof(buf), H5P_DATASET_XFER_DEFAULT, &buf);
+        } H5E_END_TRY;
+        if(status >= 0)
+            TEST_ERROR
+
+        /* Freeing a temporary address value should fail */
+        H5E_BEGIN_TRY {
+            status = H5MF_xfree(f, H5FD_MEM_SUPER, H5P_DATASET_XFER_DEFAULT, tmp_addr, (hsize_t)TEST_BLOCK_SIZE30);
+        } H5E_END_TRY;
+        if(status >= 0)
+            TEST_ERROR
+
+        /* Close the file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
+
+        /* Get the size of the file */
+        if((new_file_size = h5_get_file_size(filename, fapl)) < 0)
+            TEST_ERROR
+
+        /* Verify the file is the correct size */
+        if(new_file_size != file_size)
+            TEST_ERROR
+
+
+        /* Re-open the file */
+        if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
+            FAIL_STACK_ERROR
+
+        /* Allocate 1/3 of the file as temporary address space */
+        if(HADDR_UNDEF == (tmp_addr = H5MF_alloc_tmp(f, (hsize_t)(HADDR_MAX / 3))))
+            FAIL_STACK_ERROR
+
+        /* Allocate 1/3 of the file as normal address space */
+        if(HADDR_UNDEF == (norm_addr = H5MF_alloc(f, H5FD_MEM_DRAW, H5P_DATASET_XFER_DEFAULT, (hsize_t)(HADDR_MAX / 3))))
+            FAIL_STACK_ERROR
+
+        /* Test that pushing temporary space allocation into normal space fails */
+        H5E_BEGIN_TRY {
+            check_addr = H5MF_alloc_tmp(f, (hsize_t)(HADDR_MAX / 3));
+        } H5E_END_TRY;
+        if(H5F_addr_defined(check_addr))
+            TEST_ERROR
+
+        /* Test that pushing normal space allocation into temporary space fails */
+        H5E_BEGIN_TRY {
+            check_addr = H5MF_alloc(f, H5FD_MEM_DRAW, H5P_DATASET_XFER_DEFAULT, (hsize_t)(HADDR_MAX / 3));
+        } H5E_END_TRY;
+        if(H5F_addr_defined(check_addr))
+            TEST_ERROR
+
+        /* Free the normal block (so the file doesn't blow up to a huge size) */
+        if(H5MF_xfree(f, H5FD_MEM_DRAW, H5P_DATASET_XFER_DEFAULT, norm_addr, (hsize_t)(HADDR_MAX / 3)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Close the file */
+        if(H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
+
+        /* Get the size of the file */
+        if((new_file_size = h5_get_file_size(filename, fapl)) < 0)
+            TEST_ERROR
+
+        /* Verify the file is the correct size */
+        if(new_file_size != file_size)
+            TEST_ERROR
+
+        PASSED()
+    } /* end if */
+    else {
+	SKIPPED();
+	puts("    Current VFD doesn't support continuous address space");
+    } /* end else */
+
+    return(0);
+
+error:
+    H5E_BEGIN_TRY {
+	H5Fclose(file);
+    } H5E_END_TRY;
+    return(1);
+} /* test_mf_tmp() */
+
+/*
  * To verify that the free-space manager is started up via H5MF_alloc_start()
  *
  * Set up:
@@ -5625,11 +5794,6 @@ main(void)
         env_h5_drvr = "nomatch";
 
     fapl = h5_fileaccess();
-    if((new_fapl = H5Pcopy(fapl)) < 0) TEST_ERROR
-
-    /* alignment is not set for the following tests */
-    if(H5Pset_alignment(fapl, (hsize_t)1, (hsize_t)1) < 0)
-	TEST_ERROR
 
     /* meta/small data is set to 2048 for the following tests */
     if(H5Pset_meta_block_size(fapl, (hsize_t)TEST_BLOCK_SIZE2048) < 0)
@@ -5637,10 +5801,20 @@ main(void)
     if(H5Pset_small_data_block_size(fapl, (hsize_t)TEST_BLOCK_SIZE2048) < 0)
 	TEST_ERROR
 
+    /* Make a copy of the FAPL before adjusting the alignment */
+    if((new_fapl = H5Pcopy(fapl)) < 0) TEST_ERROR
+
+    /* alignment is not set for the following tests */
+    if(H5Pset_alignment(fapl, (hsize_t)1, (hsize_t)1) < 0)
+	TEST_ERROR
+
     /* interaction with file allocation */
     nerrors += test_mf_eoa(env_h5_drvr, fapl);
     nerrors += test_mf_eoa_shrink(env_h5_drvr, fapl);
     nerrors += test_mf_eoa_extend(env_h5_drvr, fapl);
+
+    /* interaction with temporary file space allocation */
+    nerrors += test_mf_tmp(env_h5_drvr, fapl);
 
     /* interaction with free-space manager */
     nerrors += test_mf_fs_start(fapl);
@@ -5662,12 +5836,6 @@ main(void)
     /*
      * tests for alignment
      */
-
-    /* set meta/sdata block size = 2048 */
-    if(H5Pset_meta_block_size(new_fapl, (hsize_t)TEST_BLOCK_SIZE2048) < 0)
-	TEST_ERROR
-    if(H5Pset_small_data_block_size(new_fapl, (hsize_t)TEST_BLOCK_SIZE2048) < 0)
-	TEST_ERROR
 
     for(curr_test = TEST_NORMAL; curr_test < TEST_NTESTS; curr_test++) {
 
