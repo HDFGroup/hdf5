@@ -298,7 +298,7 @@ func_init_failed:							      \
 
 /* Use this macro when leaving all functions */
 #define END_FUNC(scope)                                                       \
-    (void)H5Eset_auto2(H5E_DEFAULT, efunc2, H5E_saved_edata);	              \       
+    (void)H5Eset_auto2(H5E_DEFAULT, efunc2, H5E_saved_edata);	              \
     /* Scope-specific function conclusion */				      \
     H5_GLUE(FUNC_LEAVE_, scope)						      \
     /* Leave routine */							      \

@@ -139,7 +139,7 @@ H5_HLDLL herr_t  H5LTread_region(const char *file,
 				 void *buf );
 
 H5_HLDLL herr_t H5LTread_bitfield_value(hid_t dset_id, int num_values, const unsigned *offset,
-					const unsigned *lengths, hid_t *space, hid_t *dtype,  int *buf);
+					const unsigned *lengths, hid_t *space, int *buf);
 
 /*-------------------------------------------------------------------------
  *
