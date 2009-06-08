@@ -36,6 +36,111 @@
 
 #define TESTING2(WHAT) {printf("%-70s", "Testing     " WHAT); fflush(stdout);}
 
+int start_counter;  /* starting index counter for placeing data into 1D array, used by H5LRcreate_regref_to_all */
+
+herr_t op_func_L1 (hid_t loc_id, const char *name, const H5L_info_t *info,
+		   int *operator_data)
+{
+    herr_t          status;
+    H5O_info_t      infobuf;
+
+    /*
+     * Get type of the object and display its name and type.
+     * The name of the object is passed to this function by
+     * the Library.
+     */
+    status = H5Oget_info_by_name (loc_id, name, &infobuf, H5P_DEFAULT);
+    if(status < 0) return -1;
+
+    return op_func1 (loc_id, name, &infobuf, operator_data);
+}
+
+
+/************************************************************
+
+  Operator function:
+     (1) Sums the number of elements in each region reference
+         if operator_data is NULL.
+     (2) Reads the data from the region references into a
+         1D array (operator_data). 
+
+ ************************************************************/
+
+herr_t op_func1 (hid_t loc_id, const char *name, const H5O_info_t *info,
+		int *operator_data)
+{
+    herr_t status; 
+    hid_t dtype_id, dtype, native_type, space_id,space_id_ref, dset;
+    int rank, ndim;
+    hsize_t *dims;
+    int i, j;
+    hdset_reg_ref_t *ref_out;
+    H5S_sel_type sel_type;
+    hsize_t size_loc;
+    int *data;
+    int *data_loc;
+    /*
+     * Check if the current object is a region reference.
+     */
+    size_loc = 0;
+    if(info->type == H5O_TYPE_DATASET) {
+      dtype_id = H5Dopen2(loc_id, name, H5P_DEFAULT);
+      if(dtype_id < 0) goto out;
+      dtype = H5Dget_type(dtype_id);
+      if(dtype < 0) goto out;
+      native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT);
+      if(native_type < 0) goto out;
+      /* check if object is a region reference */
+      if(H5Tget_class(native_type) == H5T_REFERENCE){
+
+	space_id = H5Dget_space(dtype_id);
+	if(space_id < 0) goto out;
+	rank = H5Sget_simple_extent_ndims(space_id);
+	if(rank < 0) goto out;
+
+	dims = (hsize_t *)malloc (sizeof (hsize_t) * rank);
+	if(dims == NULL) goto out;
+
+	ndim = H5Sget_simple_extent_dims(space_id, dims, NULL);
+	if(ndim < 0) goto out;
+
+ 	ref_out = malloc (sizeof (hdset_reg_ref_t) * dims[0]);
+	if(ref_out == NULL) goto out;
+
+	/* loop through the region references */
+	for (i=0; i<ndim; i++){
+	  status = H5Dread(dtype_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, 
+			   H5P_DEFAULT, ref_out);
+	  if(status != 0) goto out;
+	}
+	size_loc = 0;
+	for (i=0; i<dims[0]; i++){
+
+	  space_id_ref = H5Rget_region(dtype_id, H5R_DATASET_REGION, ref_out[i]);
+	  size_loc = (hsize_t)H5Sget_select_npoints(space_id_ref);
+	  data_loc = malloc (sizeof (int) * size_loc);
+	  status = H5LRread_region(dtype_id, ref_out[i], H5T_NATIVE_INT,  &size_loc, data_loc);
+	  if(status != 0) goto out;
+
+	  for (j=start_counter;j<size_loc;j++){
+	    if(operator_data[j+start_counter]!=data_loc[j]) goto out; 
+	  }
+	  start_counter += size_loc;
+	}
+	free(dims);
+	free(ref_out);
+      }
+
+      status = H5Dclose(dtype_id);
+      if(status != 0) goto out;
+      status = H5Tclose(native_type);
+      if(status != 0) goto out;
+    }
+    return 0;
+out:
+    return -2;
+}
+
 static int test_regref_hyper( void )
 {
     hid_t file_id;        /* file identifier */
@@ -55,6 +160,7 @@ static int test_regref_hyper( void )
     hsize_t dims3D[3] = {9,8,6};
     herr_t status;
     hdset_reg_ref_t ref[4];
+    int data_read_1D[37];
     int data[9][8], data_read_2D[9][8];
     int data1D[9];
     int data3D[9][8][6];
@@ -643,15 +749,20 @@ static int test_regref_hyper( void )
      */
 
     TESTING("H5LRcreate_regref_to_all");
-
+    start_counter = 0;
     status = H5LRcreate_regref_to_all(file_id, "/",
 				      "/Group_2D/DS2c", H5_INDEX_NAME, H5_ITER_INC);
 
     if(status < 0) goto out; 
 
+    status = H5LTread_dataset(file_id,"/Group_2D/DS2c",H5T_NATIVE_INT,data_read_1D);
+
+    if(status<0) goto out;
+
+    status = H5Lvisit_by_name(file_id, "/", H5_INDEX_NAME, H5_ITER_INC, op_func_L1, data_read_1D, H5P_DEFAULT );
+
     PASSED();
     
-
 /*     close(file_id);  */
 
     return 0;

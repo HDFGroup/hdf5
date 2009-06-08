@@ -27,6 +27,12 @@
  *-------------------------------------------------------------------------
  */
 
+H5_HLDLL herr_t op_func_L (hid_t loc_id, const char *name, const H5L_info_t *info,
+		  void *operator_data);
+
+H5_HLDLL herr_t op_func (hid_t loc_id, const char *name, const H5O_info_t *info,
+		void *operator_data);
+
 /* H5_HLDLL herr_t  H5LT_get_attribute_disk( hid_t obj_id, */
 /*                            const char *attr_name, */
 /*                            void *data ); */
