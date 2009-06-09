@@ -382,9 +382,8 @@ HDfprintf(stderr, "%s: Check 2.0\n", FUNC);
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate raw data")
     } /* end else */
 
-    /* Check for overlapping into file's temporary allocation space */
-    if(H5F_addr_gt((ret_value + size), f->shared->tmp_addr))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF, "'normal' file space allocation request overlaps into 'temporary' file space")
+    /* Sanity check for overlapping into file's temporary allocation space */
+    HDassert(H5F_addr_le((ret_value + size), f->shared->tmp_addr));
 
 done:
 #ifdef H5MF_ALLOC_DEBUG
@@ -428,6 +427,9 @@ H5MF_alloc_tmp(H5F_t *f, hsize_t size)
     haddr_t ret_value;          /* Return value */
 
     FUNC_ENTER_NOAPI(H5MF_alloc_tmp, HADDR_UNDEF)
+#ifdef H5MF_ALLOC_DEBUG
+HDfprintf(stderr, "%s: size = %Hu\n", FUNC, size);
+#endif /* H5MF_ALLOC_DEBUG */
 
     /* check args */
     HDassert(f);
