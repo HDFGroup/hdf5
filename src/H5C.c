@@ -2048,6 +2048,7 @@ if ( (cache_ptr)->index_size !=                                             \
                         (cache_ptr)->pel_tail_ptr, 			  \
 			(cache_ptr)->pel_len,                             \
                         (cache_ptr)->pel_size, (fail_val))                \
+        HDassert( (cache_ptr)->pel_len >= 0 );                            \
                                                                           \
     } else {                                                              \
                                                                           \
@@ -2110,6 +2111,7 @@ if ( (cache_ptr)->index_size !=                                             \
                         (cache_ptr)->pel_tail_ptr, 			  \
 			(cache_ptr)->pel_len,                             \
                         (cache_ptr)->pel_size, (fail_val))                \
+        HDassert( (cache_ptr)->pel_len >= 0 );                            \
                                                                           \
     } else {                                                              \
                                                                           \
@@ -2475,6 +2477,7 @@ if ( (cache_ptr)->index_size !=                                             \
     H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,            \
                     (cache_ptr)->pel_tail_ptr, (cache_ptr)->pel_len,   \
                     (cache_ptr)->pel_size, (fail_val))                 \
+    HDassert( (cache_ptr)->pel_len >= 0 );                             \
                                                                        \
     /* modified LRU specific code */                                   \
                                                                        \
@@ -2527,6 +2530,7 @@ if ( (cache_ptr)->index_size !=                                             \
     H5C__DLL_REMOVE((entry_ptr), (cache_ptr)->pel_head_ptr,            \
                     (cache_ptr)->pel_tail_ptr, (cache_ptr)->pel_len,   \
                     (cache_ptr)->pel_size, (fail_val))                 \
+    HDassert( (cache_ptr)->pel_len >= 0 );                             \
                                                                        \
     /* modified LRU specific code */                                   \
                                                                        \
@@ -7778,12 +7782,12 @@ H5C_unpin_entry_from_client(H5C_t *		  cache_ptr,
     if(!entry_ptr->pinned_from_client)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPIN, FAIL, "Entry wasn't pinned by cache client")
 
-    /* If requested, update the replacement policy if the entry is not protected */
-    if(update_rp && !entry_ptr->is_protected)
-        H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, FAIL)
-
     /* Check if the entry is not pinned from a flush dependency */
     if(!entry_ptr->pinned_from_cache) {
+        /* If requested, update the replacement policy if the entry is not protected */
+        if(update_rp && !entry_ptr->is_protected)
+            H5C__UPDATE_RP_FOR_UNPIN(cache_ptr, entry_ptr, FAIL)
+
         /* Unpin the entry now */
         entry_ptr->is_pinned = FALSE;
 

@@ -57,6 +57,7 @@
 /* Callback context */
 typedef struct H5EA__test_ctx_t {
     uint32_t    bogus;          /* Placeholder field to verify that context is working */
+    H5EA__ctx_cb_t *cb;         /* Pointer to context's callback action */
 } H5EA__test_ctx_t;
 
 /********************/
@@ -126,10 +127,11 @@ H5FL_DEFINE_STATIC(H5EA__test_ctx_t);
  */
 BEGIN_FUNC(STATIC, ERR,
 void *, NULL, NULL,
-H5EA__test_crt_context(void UNUSED *udata))
+H5EA__test_crt_context(void *_udata))
 
     /* Local variables */
     H5EA__test_ctx_t *ctx;              /* Context for callbacks */
+    H5EA__ctx_cb_t *udata = (H5EA__ctx_cb_t *)_udata;   /* User data for context */
 
     /* Sanity checks */
 
@@ -139,6 +141,7 @@ H5EA__test_crt_context(void UNUSED *udata))
 
     /* Initialize the context */
     ctx->bogus = H5EA__TEST_BOGUS_VAL;
+    ctx->cb = udata;
 
     /* Set return value */
     ret_value = ctx;
@@ -219,8 +222,8 @@ END_FUNC(STATIC)  /* end H5EA__test_fill() */
  *
  *-------------------------------------------------------------------------
  */
-BEGIN_FUNC(STATIC, NOERR,
-herr_t, SUCCEED, -,
+BEGIN_FUNC(STATIC, ERR,
+herr_t, SUCCEED, FAIL,
 H5EA__test_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx))
 
     /* Local variables */
@@ -232,6 +235,12 @@ H5EA__test_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx))
     HDassert(elmt);
     HDassert(nelmts);
     HDassert(H5EA__TEST_BOGUS_VAL == ctx->bogus);
+
+    /* Check for callback action */
+    if(ctx->cb) {
+        if((*ctx->cb->encode)(elmt, nelmts, ctx->cb->udata) < 0)
+            H5E_THROW(H5E_BADVALUE, "extensible array testing callback action failed")
+    } /* end if */
 
     /* Encode native elements into raw elements */
     while(nelmts) {
@@ -245,6 +254,8 @@ H5EA__test_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx))
         /* Decrement # of elements to encode */
         nelmts--;
     } /* end while */
+
+CATCH
 
 END_FUNC(STATIC)  /* end H5EA__test_encode() */
 

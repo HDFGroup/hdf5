@@ -677,7 +677,7 @@ position        float3D of </>  float3D of </>  difference
 [ 3 2 1 ]          24              0               24             
 24 differences found
 dataset: </dset> and </dset>
-Not comparable: </dset> or </dset> are empty datasets
+Not comparable: </dset> or </dset> is an empty dataset
 attribute: <string of </dset>> and <string of </dset>>
 size:           [2]           [2]
 position        string of </dset> string of </dset> difference          

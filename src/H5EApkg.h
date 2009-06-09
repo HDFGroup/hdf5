@@ -32,7 +32,6 @@
 #include "H5EAprivate.h"
 
 /* Other private headers needed by this file */
-#include "H5ACprivate.h"	/* Metadata cache			*/
 #include "H5FLprivate.h"	/* Free Lists                           */
 
 /************************************************/
@@ -624,6 +623,12 @@ typedef struct H5EA_sblock_load_ud_t {
     unsigned sblk_idx;          /* Index of super block */
 } H5EA_sblock_load_ud_t;
 
+#ifdef H5EA_TESTING
+typedef struct H5EA__ctx_cb_t {
+    herr_t (*encode)(const void *elmt, size_t nelmts, void *udata);   /* Perform action during encode step */
+    void *udata;                /* User data for encode action */
+} H5EA__ctx_cb_t;
+#endif /* H5EA_TESTING */
 
 /*****************************/
 /* Package Private Variables */
