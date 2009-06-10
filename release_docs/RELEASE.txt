@@ -98,7 +98,8 @@ Bug Fixes since HDF5-1.8.3
 
     Library
     -------
-    - None
+    - Fixed an issue with committed compound datatypes containing a vlen. Also
+      fixed memory leaks involving committed datatypes. NAF - 2009/06/10 - 1593
 
     Parallel Library
     ----------------
