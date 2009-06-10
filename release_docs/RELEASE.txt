@@ -167,6 +167,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed an issue with committed compound datatypes containing a vlen.
+            Also fixed memory leaks involving committed datatypes.
+            (NAF - 2009/06/10 - 1593)
       - Added versioning to H5Z_class_t struct to allow compatibility with 1.6
             API. (NAF - 2009/04/20 - 1533)
       - Fixed a problem with using data transforms with non-native types in the

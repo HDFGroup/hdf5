@@ -5805,6 +5805,209 @@ error:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	test_named_indirect_reopen
+ *
+ * Purpose:	Tests that open named datatypes can be reopened indirectly
+ *              through H5Dget_type without causing problems.
+ *
+ * Return:	Success:	0
+ *
+ *		Failure:	number of errors
+ *
+ * Programmer:	Neil Fortner
+ *              Thursday, June 4, 2009
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_named_indirect_reopen(hid_t fapl)
+{
+    hid_t		file=-1, type=-1, reopened_type=-1, strtype=-1, dset=-1, space=-1;
+    static hsize_t	dims[1] = {3};
+    size_t              dt_size;
+    int                 enum_value;
+    const char          *tag = "opaque_tag";
+    char                *tag_ret = NULL;
+    char		filename[1024];
+
+    TESTING("indirectly reopening committed datatypes");
+
+    /* Create file, dataspace */
+    h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
+    if ((file=H5Fcreate (filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) TEST_ERROR
+    if ((space = H5Screate_simple (1, dims, dims)) < 0) TEST_ERROR
+
+    /*
+     * Compound
+     */
+
+    /* Create compound type */
+    if((strtype = H5Tcopy(H5T_C_S1)) < 0) TEST_ERROR
+    if(H5Tset_size(strtype, H5T_VARIABLE) < 0) TEST_ERROR
+    if((type = H5Tcreate(H5T_COMPOUND, sizeof(char *))) < 0) TEST_ERROR
+    if(H5Tinsert(type, "vlstr", 0, strtype) < 0) TEST_ERROR
+    if(H5Tclose(strtype) < 0) TEST_ERROR
+
+    /* Get size of compound type */
+    if((dt_size = H5Tget_size(type)) == 0) TEST_ERROR
+
+    /* Commit compound type and verify the size doesn't change */
+    if(H5Tcommit2(file, "cmpd_type", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(dt_size != H5Tget_size(type)) TEST_ERROR
+
+    /* Create dataset with compound type */
+    if((dset = H5Dcreate2(file, "cmpd_dset", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Indirectly reopen type and verify that the size doesn't change */
+    if((reopened_type = H5Dget_type(dset)) < 0) TEST_ERROR
+    if(dt_size != H5Tget_size(reopened_type)) TEST_ERROR
+
+    /* Close types and dataset */
+    if(H5Tclose(type) < 0) TEST_ERROR
+    if(H5Tclose(reopened_type) < 0) TEST_ERROR
+    if(H5Dclose(dset) < 0) TEST_ERROR
+
+    /*
+     * Enum
+     */
+
+    /* Create enum type */
+    if((type = H5Tenum_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+    enum_value = 0;
+    if(H5Tenum_insert(type, "val1", &enum_value) < 0) TEST_ERROR
+    enum_value = 1;
+    if(H5Tenum_insert(type, "val2", &enum_value) < 0) TEST_ERROR
+
+    /* Get size of enum type */
+    if((dt_size = H5Tget_size(type)) == 0) TEST_ERROR
+
+    /* Commit enum type and verify the size doesn't change */
+    if(H5Tcommit2(file, "enum_type", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(dt_size != H5Tget_size(type)) TEST_ERROR
+
+    /* Create dataset with enum type */
+    if((dset = H5Dcreate2(file, "enum_dset", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Indirectly reopen type and verify that the size doesn't change */
+    if((reopened_type = H5Dget_type(dset)) < 0) TEST_ERROR
+    if(dt_size != H5Tget_size(reopened_type)) TEST_ERROR
+
+    /* Close types and dataset */
+    if(H5Tclose(type) < 0) TEST_ERROR
+    if(H5Tclose(reopened_type) < 0) TEST_ERROR
+    if(H5Dclose(dset) < 0) TEST_ERROR
+
+    /*
+     * Vlen
+     */
+
+    /* Create vlen type */
+    if((type = H5Tvlen_create(H5T_NATIVE_INT)) < 0) TEST_ERROR
+
+    /* Get size of vlen type */
+    if((dt_size = H5Tget_size(type)) == 0) TEST_ERROR
+
+    /* Commit vlen type and verify the size doesn't change */
+    if(H5Tcommit2(file, "vlen_type", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(dt_size != H5Tget_size(type)) TEST_ERROR
+
+    /* Create dataset with vlen type */
+    if((dset = H5Dcreate2(file, "vlen_dset", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Indirectly reopen type and verify that the size doesn't change */
+    if((reopened_type = H5Dget_type(dset)) < 0) TEST_ERROR
+    if(dt_size != H5Tget_size(reopened_type)) TEST_ERROR
+
+    /* Close types and dataset */
+    if(H5Tclose(type) < 0) TEST_ERROR
+    if(H5Tclose(reopened_type) < 0) TEST_ERROR
+    if(H5Dclose(dset) < 0) TEST_ERROR
+
+    /*
+     * Opaque
+     */
+
+    /* Create opaque type */
+    if((type = H5Tcreate(H5T_OPAQUE, 13)) < 0) TEST_ERROR
+    if(H5Tset_tag(type, tag) < 0) TEST_ERROR
+
+    /* Get size of opaque type */
+    if((dt_size = H5Tget_size(type)) == 0) TEST_ERROR
+
+    /* Commit opaque type and verify the size and tag don't change */
+    if(H5Tcommit2(file, "opaque_type", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(dt_size != H5Tget_size(type)) TEST_ERROR
+    if(NULL == (tag_ret = H5Tget_tag(type))) TEST_ERROR
+    if(HDstrcmp(tag, tag_ret)) TEST_ERROR
+    HDfree(tag_ret);
+    tag_ret = NULL;
+
+    /* Create dataset with opaque type */
+    if((dset = H5Dcreate2(file, "opaque_dset", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Indirectly reopen type and verify that the size and tag don't change */
+    if((reopened_type = H5Dget_type(dset)) < 0) TEST_ERROR
+    if(dt_size != H5Tget_size(reopened_type)) TEST_ERROR
+    if(NULL == (tag_ret = H5Tget_tag(type))) TEST_ERROR
+    if(HDstrcmp(tag, tag_ret)) TEST_ERROR
+    HDfree(tag_ret);
+    tag_ret = NULL;
+
+    /* Close types and dataset */
+    if(H5Tclose(type) < 0) TEST_ERROR
+    if(H5Tclose(reopened_type) < 0) TEST_ERROR
+    if(H5Dclose(dset) < 0) TEST_ERROR
+
+    /*
+     * Array
+     */
+
+    /* Create array type */
+    if((type = H5Tarray_create2(H5T_NATIVE_INT, 1, dims)) < 0) TEST_ERROR
+
+    /* Get size of array type */
+    if((dt_size = H5Tget_size(type)) == 0) TEST_ERROR
+
+    /* Commit array type and verify the size doesn't change */
+    if(H5Tcommit2(file, "array_type", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) TEST_ERROR
+    if(dt_size != H5Tget_size(type)) TEST_ERROR
+
+    /* Create dataset with array type */
+    if((dset = H5Dcreate2(file, "array_dset", type, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) TEST_ERROR
+
+    /* Indirectly reopen type and verify that the size doesn't change */
+    if((reopened_type = H5Dget_type(dset)) < 0) TEST_ERROR
+    if(dt_size != H5Tget_size(reopened_type)) TEST_ERROR
+
+    /* Close types and dataset */
+    if(H5Tclose(type) < 0) TEST_ERROR
+    if(H5Tclose(reopened_type) < 0) TEST_ERROR
+    if(H5Dclose(dset) < 0) TEST_ERROR
+
+    /* Close file and dataspace */
+    if(H5Sclose(space) < 0) TEST_ERROR
+    if(H5Fclose(file) < 0) TEST_ERROR
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY {
+	H5Tclose(type);
+	H5Tclose(strtype);
+	H5Tclose(reopened_type);
+	H5Sclose(space);
+	H5Dclose(dset);
+	H5Fclose(file);
+    } H5E_END_TRY;
+    if(tag_ret)
+        HDfree(tag_ret);
+    return 1;
+} /* end test_named_indirect_reopen() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	test_deprec
  *
  * Purpose:	Tests deprecated API routines for datatypes.
@@ -5977,6 +6180,7 @@ main(void)
     nerrors += test_encode();
     nerrors += test_latest();
     nerrors += test_int_float_except();
+    nerrors += test_named_indirect_reopen(fapl);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     nerrors += test_deprec(fapl);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
