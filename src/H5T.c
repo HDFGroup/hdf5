@@ -2690,7 +2690,7 @@ H5T_t *
 H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 {
     H5T_t	*new_dt=NULL, *tmp=NULL;
-    H5T_shared_t    *reopened_fo;
+    H5T_shared_t    *reopened_fo = NULL;
     unsigned	i;
     char	*s;
     H5T_t	*ret_value;
@@ -2708,10 +2708,6 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
 
     /* Copy shared information (entry information is copied last) */
     *(new_dt->shared) = *(old_dt->shared);
-
-    /* Copy parent information */
-    if (new_dt->shared->parent)
-        new_dt->shared->parent = H5T_copy(new_dt->shared->parent, method);
 
     /* Check what sort of copy we are making */
     switch (method) {
@@ -2785,110 +2781,118 @@ H5T_copy(const H5T_t *old_dt, H5T_copy_t method)
             break;
     } /* end switch */
 
-    switch(new_dt->shared->type) {
-        case H5T_COMPOUND:
-            {
-            int accum_change=0;    /* Amount of change in the offset of the fields */
+    /* Update fields in the new struct, if we aren't sharing an already opened
+     * committed datatype */
+    if(!reopened_fo) {
+        /* Copy parent information */
+        if(old_dt->shared->parent)
+            new_dt->shared->parent = H5T_copy(old_dt->shared->parent, method);
 
-            /*
-             * Copy all member fields to new type, then overwrite the
-             * name and type fields of each new member with copied values.
-             * That is, H5T_copy() is a deep copy.
-             */
-            new_dt->shared->u.compnd.memb = H5MM_malloc(new_dt->shared->u.compnd.nalloc *
-                                sizeof(H5T_cmemb_t));
-            if (NULL==new_dt->shared->u.compnd.memb)
-                HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+        switch(new_dt->shared->type) {
+            case H5T_COMPOUND:
+                {
+                int accum_change=0;    /* Amount of change in the offset of the fields */
 
-            HDmemcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
-                 new_dt->shared->u.compnd.nmembs * sizeof(H5T_cmemb_t));
+                /*
+                * Copy all member fields to new type, then overwrite the
+                * name and type fields of each new member with copied values.
+                * That is, H5T_copy() is a deep copy.
+                */
+                new_dt->shared->u.compnd.memb = H5MM_malloc(new_dt->shared->u.compnd.nalloc *
+                                    sizeof(H5T_cmemb_t));
+                if (NULL==new_dt->shared->u.compnd.memb)
+                    HGOTO_ERROR (H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
 
-            for (i=0; i<new_dt->shared->u.compnd.nmembs; i++) {
-                unsigned	j;
-                int    old_match;
+                HDmemcpy(new_dt->shared->u.compnd.memb, old_dt->shared->u.compnd.memb,
+                    new_dt->shared->u.compnd.nmembs * sizeof(H5T_cmemb_t));
 
-                s = new_dt->shared->u.compnd.memb[i].name;
-                new_dt->shared->u.compnd.memb[i].name = H5MM_xstrdup(s);
-                tmp = H5T_copy (old_dt->shared->u.compnd.memb[i].type, method);
-                new_dt->shared->u.compnd.memb[i].type = tmp;
+                for (i=0; i<new_dt->shared->u.compnd.nmembs; i++) {
+                    unsigned	j;
+                    int    old_match;
 
-                /* Apply the accumulated size change to the offset of the field */
-                new_dt->shared->u.compnd.memb[i].offset += accum_change;
+                    s = new_dt->shared->u.compnd.memb[i].name;
+                    new_dt->shared->u.compnd.memb[i].name = H5MM_xstrdup(s);
+                    tmp = H5T_copy (old_dt->shared->u.compnd.memb[i].type, method);
+                    new_dt->shared->u.compnd.memb[i].type = tmp;
 
-                if(old_dt->shared->u.compnd.sorted != H5T_SORT_VALUE) {
-                    for (old_match=-1, j=0; j<old_dt->shared->u.compnd.nmembs; j++) {
-                        if(!HDstrcmp(new_dt->shared->u.compnd.memb[i].name,old_dt->shared->u.compnd.memb[j].name)) {
-                            old_match=j;
-                            break;
-                        } /* end if */
-                    } /* end for */
+                    /* Apply the accumulated size change to the offset of the field */
+                    new_dt->shared->u.compnd.memb[i].offset += accum_change;
 
-                    /* check if we couldn't find a match */
-                    if(old_match<0)
-                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "fields in datatype corrupted");
-                } /* end if */
-                else {
-                    old_match=i;
-                } /* end else */
+                    if(old_dt->shared->u.compnd.sorted != H5T_SORT_VALUE) {
+                        for (old_match=-1, j=0; j<old_dt->shared->u.compnd.nmembs; j++) {
+                            if(!HDstrcmp(new_dt->shared->u.compnd.memb[i].name,old_dt->shared->u.compnd.memb[j].name)) {
+                                old_match=j;
+                                break;
+                            } /* end if */
+                        } /* end for */
 
-                /* If the field changed size, add that change to the accumulated size change */
-                if(new_dt->shared->u.compnd.memb[i].type->shared->size != old_dt->shared->u.compnd.memb[old_match].type->shared->size) {
-                    /* Adjust the size of the member */
-                    new_dt->shared->u.compnd.memb[i].size = (old_dt->shared->u.compnd.memb[old_match].size*tmp->shared->size)/old_dt->shared->u.compnd.memb[old_match].type->shared->size;
+                        /* check if we couldn't find a match */
+                        if(old_match<0)
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCOPY, NULL, "fields in datatype corrupted");
+                    } /* end if */
+                    else {
+                        old_match=i;
+                    } /* end else */
 
-                    accum_change += (new_dt->shared->u.compnd.memb[i].type->shared->size - old_dt->shared->u.compnd.memb[old_match].type->shared->size);
-                } /* end if */
-            } /* end for */
+                    /* If the field changed size, add that change to the accumulated size change */
+                    if(new_dt->shared->u.compnd.memb[i].type->shared->size != old_dt->shared->u.compnd.memb[old_match].type->shared->size) {
+                        /* Adjust the size of the member */
+                        new_dt->shared->u.compnd.memb[i].size = (old_dt->shared->u.compnd.memb[old_match].size*tmp->shared->size)/old_dt->shared->u.compnd.memb[old_match].type->shared->size;
 
-            /* Apply the accumulated size change to the size of the compound struct */
-            new_dt->shared->size += accum_change;
+                        accum_change += (new_dt->shared->u.compnd.memb[i].type->shared->size - old_dt->shared->u.compnd.memb[old_match].type->shared->size);
+                    } /* end if */
+                } /* end for */
 
-            }
-            break;
+                /* Apply the accumulated size change to the size of the compound struct */
+                new_dt->shared->size += accum_change;
 
-        case H5T_ENUM:
-            /*
-             * Copy all member fields to new type, then overwrite the name fields
-             * of each new member with copied values. That is, H5T_copy() is a
-             * deep copy.
-             */
-            new_dt->shared->u.enumer.name = H5MM_malloc(new_dt->shared->u.enumer.nalloc *
-                                sizeof(char*));
-            new_dt->shared->u.enumer.value = H5MM_malloc(new_dt->shared->u.enumer.nalloc *
-                                 new_dt->shared->size);
-            if (NULL==new_dt->shared->u.enumer.value)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
-            HDmemcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
-                 new_dt->shared->u.enumer.nmembs * new_dt->shared->size);
-            for (i=0; i<new_dt->shared->u.enumer.nmembs; i++) {
-                s = old_dt->shared->u.enumer.name[i];
-                new_dt->shared->u.enumer.name[i] = H5MM_xstrdup(s);
-            }
-            break;
+                }
+                break;
 
-        case H5T_VLEN:
-            if(method==H5T_COPY_TRANSIENT || method==H5T_COPY_REOPEN) {
-                /* H5T_copy converts any VL type into a memory VL type */
-                if (H5T_vlen_mark(new_dt, NULL, H5T_VLEN_MEMORY)<0)
-                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
-            }
-            break;
+            case H5T_ENUM:
+                /*
+                * Copy all member fields to new type, then overwrite the name fields
+                * of each new member with copied values. That is, H5T_copy() is a
+                * deep copy.
+                */
+                new_dt->shared->u.enumer.name = H5MM_malloc(new_dt->shared->u.enumer.nalloc *
+                                    sizeof(char*));
+                new_dt->shared->u.enumer.value = H5MM_malloc(new_dt->shared->u.enumer.nalloc *
+                                    new_dt->shared->size);
+                if (NULL==new_dt->shared->u.enumer.value)
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
+                HDmemcpy(new_dt->shared->u.enumer.value, old_dt->shared->u.enumer.value,
+                    new_dt->shared->u.enumer.nmembs * new_dt->shared->size);
+                for (i=0; i<new_dt->shared->u.enumer.nmembs; i++) {
+                    s = old_dt->shared->u.enumer.name[i];
+                    new_dt->shared->u.enumer.name[i] = H5MM_xstrdup(s);
+                }
+                break;
 
-        case H5T_OPAQUE:
-            /*
-             * Copy the tag name.
-             */
-            new_dt->shared->u.opaque.tag = HDstrdup(new_dt->shared->u.opaque.tag);
-            break;
+            case H5T_VLEN:
+                if(method==H5T_COPY_TRANSIENT || method==H5T_COPY_REOPEN) {
+                    /* H5T_copy converts any VL type into a memory VL type */
+                    if (H5T_vlen_mark(new_dt, NULL, H5T_VLEN_MEMORY)<0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "invalid VL location");
+                }
+                break;
 
-        case H5T_ARRAY:
-            /* Re-compute the array's size, in case it's base type changed size */
-            new_dt->shared->size=new_dt->shared->u.array.nelem*new_dt->shared->parent->shared->size;
-            break;
+            case H5T_OPAQUE:
+                /*
+                * Copy the tag name.
+                */
+                new_dt->shared->u.opaque.tag = HDstrdup(new_dt->shared->u.opaque.tag);
+                break;
 
-        default:
-            break;
-    } /* end switch */
+            case H5T_ARRAY:
+                /* Re-compute the array's size, in case it's base type changed size */
+                new_dt->shared->size=new_dt->shared->u.array.nelem*new_dt->shared->parent->shared->size;
+                break;
+
+            default:
+                break;
+        } /* end switch */
+    } /* end if */
 
     /* Deep copy of the symbol table entry, if there was one */
     if(new_dt->shared->state == H5T_STATE_NAMED || new_dt->shared->state == H5T_STATE_OPEN) {
