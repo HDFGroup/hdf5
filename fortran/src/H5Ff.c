@@ -72,7 +72,13 @@ nh5fcreate_c(_fcd name, int_f *namelen, int_f *access_flags, hid_t_f* crt_prp, h
      /*
       * Call H5Fcreate function.
       */
+     printf("\n DEBUG STATEMENTS IN H5Ff.c \n");
+     printf("filename = %s \n", c_name);
+     printf("access_flags = %d \n", (int)c_access_flags);
+     printf("c_crt_prp = %d \n",(int)c_crt_prp);
+     printf("c_acc_prp = %d \n",(int)c_acc_prp);
      c_file_id = H5Fcreate(c_name, c_access_flags, c_crt_prp, c_acc_prp);
+     printf("c_file_id = %d \n",(int)c_file_id);
 
      if (c_file_id < 0) return ret_value;
      *file_id = c_file_id;
