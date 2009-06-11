@@ -742,15 +742,11 @@ static unsigned
 test_mf_tmp(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t	file = -1;              /* File ID */
-    hbool_t     contig_addr_vfd;        /* Whether VFD used has a contigous address space */
 
     TESTING("'temporary' file space allocation");
 
-    /* Skip test when using VFDs that has different address spaces for each
-     *  type of metadata allocation.
-     */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
-    if(contig_addr_vfd) {
+    /* Can't run this test with multi-file VFDs */
+    if(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
         char		filename[FILENAME_LEN]; /* Filename to use */
         H5F_t		*f = NULL;              /* Internal file object pointer */
         h5_stat_size_t  file_size, new_file_size;      /* file size */
