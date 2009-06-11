@@ -30,6 +30,7 @@
 #include "H5FSpkg.h"
 
 #define H5F_PACKAGE
+#define H5F_TESTING
 #include "H5Fpkg.h"
 
 #include "H5FLprivate.h"
@@ -790,6 +791,8 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Check if temporary file address is valid */
+        if(!H5F_IS_TMP_ADDR(f, tmp_addr))
+            TEST_ERROR
         if(tmp_addr < (haddr_t)(maxaddr - TEST_BLOCK_SIZE30))
             TEST_ERROR
 
@@ -836,10 +839,14 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl)
         /* Allocate 1/3 of the file as temporary address space */
         if(HADDR_UNDEF == (tmp_addr = H5MF_alloc_tmp(f, (hsize_t)(maxaddr / 3))))
             FAIL_STACK_ERROR
+        if(!H5F_IS_TMP_ADDR(f, tmp_addr))
+            TEST_ERROR
 
         /* Allocate 1/3 of the file as normal address space */
         if(HADDR_UNDEF == (norm_addr = H5MF_alloc(f, H5FD_MEM_DRAW, H5P_DATASET_XFER_DEFAULT, (hsize_t)(maxaddr / 3))))
             FAIL_STACK_ERROR
+        if(H5F_IS_TMP_ADDR(f, norm_addr))
+            TEST_ERROR
 
         /* Test that pushing temporary space allocation into normal space fails */
         H5E_BEGIN_TRY {
