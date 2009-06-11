@@ -47,7 +47,7 @@ typedef __int64             h5_stat_size_t;
     #ifdef __cplusplus
         extern "C" {
     #endif /* __cplusplus */
-    int HDgettimeofday(struct timeval *tv, void *tz);
+    H5_DLL int HDgettimeofday(struct timeval *tv, void *tz);
     #ifdef __cplusplus
         }
     #endif /* __cplusplus */
