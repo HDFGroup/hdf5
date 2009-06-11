@@ -742,14 +742,19 @@ static unsigned
 test_mf_tmp(const char *env_h5_drvr, hid_t fapl)
 {
     hid_t	file = -1;              /* File ID */
+    hbool_t     contig_addr_vfd;        /* Whether VFD used has a contigous address space */
 
     TESTING("'temporary' file space allocation");
 
-    /* Can't run this test with multi-file VFDs */
-    if(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") && HDstrcmp(env_h5_drvr, "family")) {
+    /* Skip test when using VFDs that has different address spaces for each
+     *  type of metadata allocation.
+     */
+    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
+    if(contig_addr_vfd) {
         char		filename[FILENAME_LEN]; /* Filename to use */
         H5F_t		*f = NULL;              /* Internal file object pointer */
         h5_stat_size_t  file_size, new_file_size;      /* file size */
+        haddr_t         maxaddr;                /* File's max. address */
         haddr_t		tmp_addr;               /* Temporary space file address */
         haddr_t		norm_addr;              /* Normal space file address */
         haddr_t		check_addr;             /* File address for checking for errors */
@@ -780,12 +785,16 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl)
         if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
+        /* Retrieve the file's maxaddr */
+        if(H5F_get_maxaddr_test(file, &maxaddr) < 0)
+            FAIL_STACK_ERROR
+
         /* Allocate some temporary address space */
         if(HADDR_UNDEF == (tmp_addr = H5MF_alloc_tmp(f, (hsize_t)TEST_BLOCK_SIZE30)))
             FAIL_STACK_ERROR
 
         /* Check if temporary file address is valid */
-        if(tmp_addr < (haddr_t)(HADDR_MAX - TEST_BLOCK_SIZE30))
+        if(tmp_addr < (haddr_t)(maxaddr - TEST_BLOCK_SIZE30))
             TEST_ERROR
 
         /* Reading & writing with a temporary address value should fail */
@@ -829,29 +838,29 @@ test_mf_tmp(const char *env_h5_drvr, hid_t fapl)
             FAIL_STACK_ERROR
 
         /* Allocate 1/3 of the file as temporary address space */
-        if(HADDR_UNDEF == (tmp_addr = H5MF_alloc_tmp(f, (hsize_t)(HADDR_MAX / 3))))
+        if(HADDR_UNDEF == (tmp_addr = H5MF_alloc_tmp(f, (hsize_t)(maxaddr / 3))))
             FAIL_STACK_ERROR
 
         /* Allocate 1/3 of the file as normal address space */
-        if(HADDR_UNDEF == (norm_addr = H5MF_alloc(f, H5FD_MEM_DRAW, H5P_DATASET_XFER_DEFAULT, (hsize_t)(HADDR_MAX / 3))))
+        if(HADDR_UNDEF == (norm_addr = H5MF_alloc(f, H5FD_MEM_DRAW, H5P_DATASET_XFER_DEFAULT, (hsize_t)(maxaddr / 3))))
             FAIL_STACK_ERROR
 
         /* Test that pushing temporary space allocation into normal space fails */
         H5E_BEGIN_TRY {
-            check_addr = H5MF_alloc_tmp(f, (hsize_t)(HADDR_MAX / 3));
+            check_addr = H5MF_alloc_tmp(f, (hsize_t)(maxaddr / 3));
         } H5E_END_TRY;
         if(H5F_addr_defined(check_addr))
             TEST_ERROR
 
         /* Test that pushing normal space allocation into temporary space fails */
         H5E_BEGIN_TRY {
-            check_addr = H5MF_alloc(f, H5FD_MEM_DRAW, H5P_DATASET_XFER_DEFAULT, (hsize_t)(HADDR_MAX / 3));
+            check_addr = H5MF_alloc(f, H5FD_MEM_DRAW, H5P_DATASET_XFER_DEFAULT, (hsize_t)(maxaddr / 3));
         } H5E_END_TRY;
         if(H5F_addr_defined(check_addr))
             TEST_ERROR
 
         /* Free the normal block (so the file doesn't blow up to a huge size) */
-        if(H5MF_xfree(f, H5FD_MEM_DRAW, H5P_DATASET_XFER_DEFAULT, norm_addr, (hsize_t)(HADDR_MAX / 3)) < 0)
+        if(H5MF_xfree(f, H5FD_MEM_DRAW, H5P_DATASET_XFER_DEFAULT, norm_addr, (hsize_t)(maxaddr / 3)) < 0)
             FAIL_STACK_ERROR
 
         /* Close the file */

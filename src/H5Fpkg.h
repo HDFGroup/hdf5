@@ -250,6 +250,7 @@ H5_DLL herr_t H5F_sfile_remove(H5F_file_t *shared);
 H5_DLL herr_t H5F_get_sohm_mesg_count_test(hid_t fid, unsigned type_id,
     size_t *mesg_count);
 H5_DLL herr_t H5F_check_cached_stab_test(hid_t file_id);
+H5_DLL herr_t H5F_get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

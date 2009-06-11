@@ -894,7 +894,6 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
 	f->shared->accum.loc = HADDR_UNDEF;
         f->shared->lf = lf;
         f->shared->root_addr = HADDR_UNDEF;
-        f->shared->tmp_addr = HADDR_MAX;
 
 	/*
 	 * Copy the file creation and file access property lists into the
@@ -950,6 +949,7 @@ H5F_new(H5F_file_t *shared, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf)
         f->shared->maxaddr = H5FD_get_maxaddr(lf);
         if(!H5F_addr_defined(f->shared->maxaddr))
             HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, NULL, "bad maximum address from VFD")
+        f->shared->tmp_addr = f->shared->maxaddr;
         if(H5FD_get_feature_flags(lf, &f->shared->feature_flags) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get feature flags from VFD")
         if(H5FD_get_fs_type_map(lf, f->shared->fs_type_map) < 0)
