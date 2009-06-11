@@ -580,6 +580,52 @@ HDremove_all(const char *fname)
 }
 #endif
 
+/*-------------------------------------------------------------------------
+ * Function:	HDgettimeofday
+ *
+ * Purpose:	Wrapper function for gettimeofday on Windows systems
+ *
+ * 		This function can get the time as well as a timezone
+ *
+ * Return:	0
+ *
+ *      This implementation is taken from the Cygwin source distribution at
+ *          src/winsup/mingw/mingwex/gettimeofday.c
+ *
+ *      The original source code was contributed by 
+ *          Danny Smith <dannysmith@users.sourceforge.net>
+ *      and released in the public domain.
+ *
+ * Programmer:	Scott Wegner
+ *              May 19, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+#if !defined(H5_HAVE_GETTIMEOFDAY) && defined(_WIN32)
+
+/* Offset between 1/1/1601 and 1/1/1970 in 100 nanosec units */
+#define _W32_FT_OFFSET (116444736000000000ULL)
+
+int 
+HDgettimeofday(struct timeval *tv, void *tz)
+ {
+  union {
+    unsigned long long ns100; /*time since 1 Jan 1601 in 100ns units */
+    FILETIME ft;
+  }  _now;
+
+  if(tv)
+    {
+      GetSystemTimeAsFileTime (&_now.ft);
+      tv->tv_usec=(long)((_now.ns100 / 10ULL) % 1000000ULL );
+      tv->tv_sec= (long)((_now.ns100 - _W32_FT_OFFSET) / 10000000ULL);
+    }
+  /* Always return 0 as per Open Group Base Specifications Issue 6.
+     Do not set errno on error.  */
+  return 0;
+}
+#endif
+
 
 /*
  *-------------------------------------------------------------------------

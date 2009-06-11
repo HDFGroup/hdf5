@@ -43,6 +43,16 @@ typedef __int64             h5_stat_size_t;
 #define HDstat(S,B)         _stati64(S,B)
 #define HDgetcwd(S,Z)       _getcwd(S,Z)
 #define HDgetdcwd(D,S,Z)    _getdcwd(D,S,Z)
+#ifndef H5_HAVE_GETTIMEOFDAY
+    #ifdef __cplusplus
+        extern "C" {
+    #endif /* __cplusplus */
+    H5_DLL int HDgettimeofday(struct timeval *tv, void *tz);
+    #ifdef __cplusplus
+        }
+    #endif /* __cplusplus */
+    #define HDgettimeofday(V,Z) HDgettimeofday(V,Z)
+#endif /* H5_HAVE_GETTIMEOFDAY */
 #define HDgetdrive()        _getdrive()
 #define HDlseek(F,O,W)      _lseeki64(F,O,W)
 #define HDmemset(X,C,Z)     memset((void*)(X),C,Z)
@@ -50,13 +60,14 @@ typedef __int64             h5_stat_size_t;
 #define HDopen(S,F,M)       _open(S,F|_O_BINARY,M)
 #define HDread(F,M,Z)       _read(F,M,Z)
 #define HDsetvbuf(F,S,M,Z)  setvbuf(F,S,M,(Z>1?Z:2))
+#define HDstrcasecmp(A,B)   _stricmp(A,B)
+#define HDstrtoull(S,R,N)   _strtoui64(S,R,N)
 #define HDstrdup(S)         _strdup(S)
 #define HDsnprintf          _snprintf /*varargs*/
 #define HDtzset()           _tzset()
 #define HDunlink(S)         _unlink(S)
 #define HDvsnprintf(S,N,FMT,A) _vsnprintf(S,N,FMT,A)
 #define HDwrite(F,M,Z)      _write(F,M,Z)
-#define HDstrtoull(S,R,N)   _strtoui64(S,R,N)
 
 /* Non-POSIX functions */
 

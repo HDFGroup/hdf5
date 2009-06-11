@@ -107,7 +107,9 @@ Bug Fixes since HDF5-1.8.3
 
     Tools
     -----
-    - None
+    - perf_serial test added to Windows projects and check batch file. 
+      ADB - 2009/06/11 -1504
+
 
     F90 API
     ------
@@ -124,7 +126,7 @@ Bug Fixes since HDF5-1.8.3
     Fortran High-Level APIs:
     ------
     - Lite: the h5ltread_dataset_string_f and h5ltget_attribute_string_f functions 
-           had memory problems with the g95 fortran compiler. (PVN – 5/13/2009) 1522
+           had memory problems with the g95 fortran compiler. (PVN ï¿½ 5/13/2009) 1522
 
 
 
