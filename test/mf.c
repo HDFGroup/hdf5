@@ -3753,6 +3753,10 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
         if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
             FAIL_STACK_ERROR
 
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
+            FAIL_STACK_ERROR
+
         /* shrink the block */
         if(H5MF_try_shrink(f, type, H5P_DATASET_XFER_DEFAULT, addr1, (hsize_t)TEST_BLOCK_SIZE50) <= 0)
             TEST_ERROR
@@ -3802,6 +3806,10 @@ test_mf_align_eoa(const char *env_h5_drvr, hid_t fapl, hid_t new_fapl)
 
         /* Re-open the file */
         if((file = H5Fopen(filename, H5F_ACC_RDWR, fapl1)) < 0)
+            FAIL_STACK_ERROR
+
+        /* Get a pointer to the internal file object */
+        if(NULL == (f = (H5F_t *)H5I_object(file)))
             FAIL_STACK_ERROR
 
         /* try to extend the block */
@@ -5864,7 +5872,7 @@ main(void)
 	nerrors += test_mf_align_alloc4(env_h5_drvr, fapl, new_fapl);
 	nerrors += test_mf_align_alloc5(env_h5_drvr, fapl, new_fapl);
 	nerrors += test_mf_align_alloc6(env_h5_drvr, fapl, new_fapl);
-    }
+    } /* end if */
 
     if(nerrors)
         goto error;

@@ -302,6 +302,8 @@ HDfprintf(stderr, "%s: alloc_type = %u, size = %Hu\n", FUNC, (unsigned)alloc_typ
 
     /* check arguments */
     HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->lf);
     HDassert(size > 0);
 
     /* Get free space type from allocation type */
@@ -768,6 +770,8 @@ HDfprintf(stderr, "%s: Entering - alloc_type = %u, addr = %a, size = %Hu\n", FUN
 
     /* check arguments */
     HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->lf);
     HDassert(H5F_addr_defined(addr));
     HDassert(size > 0);
 
