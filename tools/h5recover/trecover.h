@@ -77,7 +77,7 @@ void parser(int ac, char **av);	/* command option parser */
 void init(void);		/* initialization */
 void help(void);		/* initialization */
 int create_files(const char *filename, const char *ctl_filename);
-int journal_files(const char *filename, const char *ctl_filename, const char *jnl_filename, int patch);
+int journal_files(const char *filename, const char *ctl_filename, const char *jnl_filename, int patch, hbool_t human_readable);
 
 int close_file(hid_t fid);
 

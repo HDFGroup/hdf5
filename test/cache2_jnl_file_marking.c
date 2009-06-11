@@ -1791,9 +1791,7 @@ setup_mdj_file_marking_on_open_test(hbool_t verbose)
             /* close the data set, the data space, and the file */
 	    if ( ( H5Dclose(dataset_id) < 0 ) ||
 	         ( H5Sclose(dataspace_id) < 0 ) ||
-#if 1 /* JRM */
                  ( H5Pclose(fapl_id) < 0 ) ||
-#endif /* JRM */
 	         ( H5Fclose(file_id) < 0 ) ) {
 
                 pass2 = FALSE;

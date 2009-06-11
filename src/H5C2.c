@@ -1167,17 +1167,13 @@ H5C2_expunge_entry(H5F_t *              f,
     HDassert( entry_ptr->type == type );
 
     if ( entry_ptr->is_protected ) {
-#if 0 /* JRM */
-        HDfprintf(stdout, "%s: Target entry is protected.\n", FUNC);
-#endif /* JRM */
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, \
 		    "Target entry is protected.")
     }
 
     if ( entry_ptr->is_pinned ) {
-#if 0 /* JRM */
-        HDfprintf(stdout, "%s: Target entry is pinned.\n", FUNC);
-#endif /* JRM */
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, \
 		    "Target entry is pinned.")
     }
@@ -1219,9 +1215,7 @@ H5C2_expunge_entry(H5F_t *              f,
                                      TRUE);
 
     if ( result < 0 ) {
-#if 0 /* JRM */
-        HDfprintf(stdout, "%s: H5C2_flush_single_entry() failed.\n", FUNC);
-#endif /* JRM */
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTEXPUNGE, FAIL, \
                     "H5C2_flush_single_entry() failed.")
     }
@@ -2585,10 +2579,6 @@ H5C2_insert_entry(H5F_t *              f,
 
         if ( result < 0 ) {
 
-#if 0 /* JRM */
-            HDfprintf(stdout, "%s: H5C2__flash_increase_cache_size failed.\n",
-		      FUNC);
-#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
                         "H5C2__flash_increase_cache_size failed.")
         }
@@ -2610,9 +2600,6 @@ H5C2_insert_entry(H5F_t *              f,
 
             if ( result < 0 ) {
 
-#if 0 /* JRM */
-            HDfprintf(stdout, "%s: Can't get write_permitted.\n", FUNC);
-#endif /* JRM */
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
                             "Can't get write_permitted")
             }
@@ -2663,9 +2650,6 @@ H5C2_insert_entry(H5F_t *              f,
 
         if ( result < 0 ) {
 
-#if 0 /* JRM */
-            HDfprintf(stdout, "%s: H5C2_make_space_in_cache() failed.\n", FUNC);
-#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
                         "H5C2_make_space_in_cache failed.")
         }
@@ -2681,9 +2665,6 @@ H5C2_insert_entry(H5F_t *              f,
 
         if ( test_entry_ptr == entry_ptr ) {
 
-#if 0 /* JRM */
-            HDfprintf(stdout, "%s: entry already in cache.\n", FUNC);
-#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_CANTINS, FAIL, \
                         "entry already in cache.")
 
@@ -3333,9 +3314,9 @@ H5C2_mark_pinned_or_protected_entry_dirty(void *   thing)
 #endif /* JRM */
 
     if ( entry_ptr->is_protected ) {
-#if 0 /* JRM - uncomment this when possible */
+
 	HDassert( ! ((entry_ptr)->is_read_only) );
-#endif
+
         /* set the dirtied flag */
         entry_ptr->dirtied = TRUE;
 
@@ -4076,9 +4057,6 @@ H5C2_protect(H5F_t *		  f,
 
         if ( thing == NULL ) {
 
-#if 0 /* JRM */
-	    HDfprintf(stdout, "%s can't load entry.\n", FUNC);
-#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't load entry")
         }
 
@@ -4095,10 +4073,6 @@ H5C2_protect(H5F_t *		  f,
 
             if ( result < 0 ) {
 
-#if 0 /* JRM */
-	        HDfprintf(stdout, 
-			"%s H5C2__flash_increase_cache_size failed.\n", FUNC);
-#endif /* JRM */
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
                             "H5C2__flash_increase_cache_size failed.")
              }
@@ -4123,10 +4097,6 @@ H5C2_protect(H5F_t *		  f,
 
                 if ( result < 0 ) {
 
-#if 0 /* JRM */
-	            HDfprintf(stdout, 
-			      "%s Can't get write_permitted 1.\n", FUNC);
-#endif /* JRM */
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
                                "Can't get write_permitted 1")
 
@@ -4188,10 +4158,6 @@ H5C2_protect(H5F_t *		  f,
 
             if ( result < 0 ) {
 
-#if 0 /* JRM */
-                HDfprintf(stdout, 
-                         "%s H5C2_make_space_in_cache failed 1.\n", FUNC);
-#endif /* JRM */
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
                             "H5C2_make_space_in_cache failed 1.")
             }
@@ -4247,10 +4213,6 @@ H5C2_protect(H5F_t *		  f,
 
 	} else {
 
-#if 0 /* JRM */
-            HDfprintf(stdout, 
-                      "%s Target already protected & not read only?!?\n", FUNC);
-#endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
                         "Target already protected & not read only?!?.")
 	}
@@ -4320,10 +4282,6 @@ H5C2_protect(H5F_t *		  f,
                                                   write_permitted);
             if ( result != SUCCEED ) {
 
-#if 0 /* JRM */
-                HDfprintf(stdout, 
-                      "%s Cache auto-resize failed.?!?\n", FUNC);
-#endif /* JRM */
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
                             "Cache auto-resize failed.")
             }
@@ -4349,10 +4307,6 @@ H5C2_protect(H5F_t *		  f,
 
                 if ( result < 0 ) {
 
-#if 0 /* JRM */
-                    HDfprintf(stdout, 
-                          "%s H5C2_make_space_in_cache failed 2.\n", FUNC);
-#endif /* JRM */
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTPROTECT, NULL, \
                                 "H5C2_make_space_in_cache failed 2.")
                 }
@@ -4779,6 +4733,7 @@ H5C2_set_evictions_enabled(const H5F_t * f,
      */
     if ( ( evictions_enabled != TRUE ) &&
          ( ( cache_ptr->resize_ctl.incr_mode != H5C2_incr__off ) ||
+           ( cache_ptr->resize_ctl.flash_incr_mode != H5C2_flash_incr__off ) ||
            ( cache_ptr->resize_ctl.decr_mode != H5C2_decr__off ) ) ) {
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, \
@@ -9004,10 +8959,7 @@ H5C2_flush_single_entry(const H5F_t *	     f,
 	    entry_ptr->magic = H5C2__H5C2_CACHE_ENTRY_T_BAD_MAGIC;
 #endif /* NDEBUG */
             entry_ptr->cache_ptr = NULL;
-#if 0 /* JRM */
-	    HDfprintf(stdout, "%s: calling free_icr(%d -- %s).\n", FUNC, 
-		      type_ptr->id, type_ptr->name);
-#endif /* JRM */
+
             if ( type_ptr->free_icr(entry_ptr->addr, entry_ptr->size,
 		                    (void *)entry_ptr) != SUCCEED )
             {
@@ -9155,34 +9107,21 @@ H5C2_load_entry(H5F_t *              f,
 
     image_ptr = H5MM_malloc(len);
 
-    if ( image_ptr == NULL )
-    {
-#if 0 /* JRM */
-        HDfprintf(stdout, 
-		  "memory allocation failed for on disk image buffer.\n");
-#endif /* JRM */
+    if ( image_ptr == NULL ) {
+
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, \
                     "memory allocation failed for on disk image buffer.")
     }
 
-    if ( H5F_block_read(f, type->mem_type, addr, len, dxpl_id, image_ptr) < 0 )
-    {
-#if 0 /* JRM */
-        HDfprintf(stdout, "can't read image.\n.");
-	HDfprintf(stdout, "%s: addr = 0X%llx, len = %d.\n",
-		  FUNC, (long long)addr, (int)len);
-	fflush(stdout);
-#endif /* JRM */
+    if ( H5F_block_read(f, type->mem_type, addr, len, dxpl_id, image_ptr) < 0 ) {
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image*")
     }
 
     thing = type->deserialize(addr, len, image_ptr, udata_ptr, &dirty);
 
-    if ( thing == NULL )
-    {
-#if 0 /* JRM */
-        HDfprintf(stdout, "can't deserialize image.\n.");
-#endif /* JRM */
+    if ( thing == NULL ) {
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't deserialize image")
     }
 
@@ -9191,34 +9130,27 @@ H5C2_load_entry(H5F_t *              f,
     {
         size_t			new_len;
 
-        if ( type->image_len(thing, &new_len) != SUCCEED )
-        {
-#if 0 /* JRM */
-            HDfprintf(stdout, "image_len() failed.\n.");
-#endif /* JRM */
+        if ( type->image_len(thing, &new_len) != SUCCEED ) {
+
 	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "image_len() failed.\n");
-	}
-	else if ( new_len == 0 )
-	{
-#if 0 /* JRM */
-            HDfprintf(stdout, "new_len == 0\n.");
-#endif /* JRM */
+
+	} else if ( new_len == 0 ) {
+
 	    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "new_len == 0\n")
 	}
 	else if ( new_len != len)
 	{
 	    image_ptr = H5MM_realloc(image_ptr, new_len);
 
-	    if ( image_ptr == NULL )
-	    {
-#if 0 /* JRM */
-                HDfprintf(stdout, "image_ptr null after H5MM_realloc().\n");
-#endif /* JRM */
+	    if ( image_ptr == NULL ) {
+
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, \
                             "image_ptr null after H5MM_realloc().")
 	    }
 
-            /* If the thing's image needs to be bigger, free the thing and retry with new length */
+            /* If the thing's image needs to be bigger, free the thing 
+             * and retry with new length 
+             */
             if ( new_len > len)
             {
                 if ( type->free_icr(addr, len, thing) != SUCCEED )
@@ -9227,22 +9159,20 @@ H5C2_load_entry(H5F_t *              f,
                                 "free_icr callback failed.")
                 }
 
-                if ( H5F_block_read(f, type->mem_type, addr, new_len, dxpl_id, image_ptr) < 0 )
-                {
-#if 0 /* JRM */
-                    HDfprintf(stdout, "can't read image.\n.");
-#endif /* JRM */
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't read image")
+                if ( H5F_block_read(f, type->mem_type, addr, new_len, 
+                                    dxpl_id, image_ptr) < 0 ) {
+
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, \
+                                "Can't read image")
                 }
 
-                thing = type->deserialize(addr, new_len, image_ptr, udata_ptr, &dirty);
+                thing = type->deserialize(addr, new_len, image_ptr, 
+                                          udata_ptr, &dirty);
 
-                if ( thing == NULL )
-                {
-#if 0 /* JRM */
-                    HDfprintf(stdout, "can't deserialize image.\n.");
-#endif /* JRM */
-                    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "Can't deserialize image")
+                if ( thing == NULL ) {
+
+                    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, \
+                                "Can't deserialize image")
                 }
 
             }

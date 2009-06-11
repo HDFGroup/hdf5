@@ -1625,7 +1625,9 @@ H5_DLL herr_t H5C2_jb__init(H5C2_jbrb_t * struct_ptr,
                             size_t buf_size,
                             int num_bufs,
                             hbool_t use_aio,
-                            hbool_t human_readable);
+                            hbool_t human_readable,
+                            size_t sizeof_addr,
+                            size_t sizeof_size);
 
 H5_DLL herr_t H5C2_jb__start_transaction(H5C2_jbrb_t * struct_ptr,
                                          uint64_t trans_num);

@@ -128,7 +128,8 @@ static void open_existing_file_for_journaling(const char * hdf_file_name,
                                               const char * journal_file_name,
                                               hid_t * file_id_ptr,
                                               H5F_t ** file_ptr_ptr,
-                                              H5C2_t ** cache_ptr_ptr); 
+                                              H5C2_t ** cache_ptr_ptr,
+                                              hbool_t human_readable); 
 
 static void open_existing_file_without_journaling(const char * hdf_file_name,
                                                   hid_t * file_id_ptr,
@@ -140,6 +141,7 @@ static void setup_cache_for_journaling(const char * hdf_file_name,
                                        hid_t * file_id_ptr,
                                        H5F_t ** file_ptr_ptr,
                                        H5C2_t ** cache_ptr_ptr,
+                                       hbool_t human_readable,
 				       hbool_t use_core_driver_if_avail);
 
 static void takedown_cache_after_journaling(hid_t file_id,
@@ -148,7 +150,8 @@ static void takedown_cache_after_journaling(hid_t file_id,
 			                    hbool_t use_core_driver_if_avail);
 
 static void verify_journal_contents(const char * journal_file_path_ptr,
-                                    const char * expected_file_path_ptr);
+                                    const char * expected_file_path_ptr,
+                                    hbool_t human_readable);
 
 static void verify_journal_deleted(const char * journal_file_path_ptr);
 
@@ -207,19 +210,30 @@ static void verify_mdjsc_callback_execution(void);
 
 static void verify_mdjsc_callback_registration_deregistration(void);
 
+static void check_binary_message_format(void);
+
+static void verify_journal_msg(int fd,
+                               uint8_t expected_msg[],
+                               int expected_msg_len,
+                               hbool_t last_msg,
+                               const char * mismatch_failure_msg,
+                               const char * read_failure_msg,
+                               const char * eof_failure_msg,
+                               const char * not_last_msg_msg);
+
 static void check_message_format(void);
 
 static void check_legal_calls(void);
 
 static void check_transaction_tracking(void);
 
-static void mdj_api_example_test(void);
+static void mdj_api_example_test(hbool_t human_readable);
 
-static void mdj_smoke_check_00(void);
+static void mdj_smoke_check_00(hbool_t human_readable);
 
-static void mdj_smoke_check_01(void);
+static void mdj_smoke_check_01(hbool_t human_readable);
 
-static void mdj_smoke_check_02(void);
+static void mdj_smoke_check_02(hbool_t human_readable);
 
 static void write_verify_trans_num(H5C2_jbrb_t * struct_ptr, 
                                    uint64_t trans_num, 
@@ -1921,6 +1935,9 @@ jrnl_row_major_scan_forward2(H5F_t * file_ptr,
  *
  * Modifications:
  *
+ *		JRM -- 6/10/09
+ *		Added human readable parameter.
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -1929,7 +1946,8 @@ open_existing_file_for_journaling(const char * hdf_file_name,
                                   const char * journal_file_name,
                                   hid_t * file_id_ptr,
                                   H5F_t ** file_ptr_ptr,
-                                  H5C2_t ** cache_ptr_ptr) 
+                                  H5C2_t ** cache_ptr_ptr,
+                                  hbool_t human_readable) 
 {
     const char * fcn_name = "open_existing_file_for_journaling()";
     hbool_t show_progress = FALSE;
@@ -2018,7 +2036,7 @@ open_existing_file_for_journaling(const char * hdf_file_name,
         jnl_config.jbrb_buf_size           = (8 * 1024);
         jnl_config.jbrb_num_bufs           = 2;
         jnl_config.jbrb_use_aio            = FALSE;
-        jnl_config.jbrb_human_readable     = TRUE;
+        jnl_config.jbrb_human_readable     = human_readable;
     }
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
@@ -2291,6 +2309,11 @@ open_existing_file_without_journaling(const char * hdf_file_name,
  *
  * Modifications:
  *
+ *		Added the human_readable parameter and associated 
+ *		code to allow selection of either binary or human 
+ *		readable journal file.
+ *						JRM -- 5/8/09
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -2300,6 +2323,7 @@ setup_cache_for_journaling(const char * hdf_file_name,
                            hid_t * file_id_ptr,
                            H5F_t ** file_ptr_ptr,
                            H5C2_t ** cache_ptr_ptr,
+                           hbool_t human_readable,
 #if USE_CORE_DRIVER
 			   hbool_t use_core_driver_if_avail)
 #else /* USE_CORE_DRIVER */
@@ -2435,6 +2459,8 @@ setup_cache_for_journaling(const char * hdf_file_name,
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
     if ( pass2 ) {
+
+        jnl_config.jbrb_human_readable = human_readable;
 
         result = H5Pset_jnl_config(fapl_id, &jnl_config);
 
@@ -2651,12 +2677,17 @@ takedown_cache_after_journaling(hid_t file_id,
  *
  * Modifications:
  *
+ *		JRM -- 6/10/09
+ *		Updated function to deal with binary as well as human 
+ *		readable journal files.
+ *
  *-------------------------------------------------------------------------
  */
 
 static void
 verify_journal_contents(const char * journal_file_path_ptr,
-                        const char * expected_file_path_ptr)
+                        const char * expected_file_path_ptr,
+                        hbool_t human_readable)
 {
     const char * fcn_name = "verify_journal_contents()";
     char ch;
@@ -2688,6 +2719,14 @@ verify_journal_contents(const char * journal_file_path_ptr,
             pass2 = FALSE;
 
         }
+    }
+
+    if ( ( pass2 ) && ( verbose ) ) {
+
+        HDfprintf(stdout, "%s: *journal_file_path_ptr = \"%s\"\n",
+                  fcn_name, journal_file_path_ptr);
+        HDfprintf(stdout, "%s: *expected_file_path_ptr = \"%s\"\n",
+                  fcn_name, expected_file_path_ptr);
     }
 
     /* get the actual length of the journal file */
@@ -2923,16 +2962,29 @@ verify_journal_contents(const char * journal_file_path_ptr,
 
         if ( pass2 ) {
 
-            if ( HDstrcmp(journal_buf, expected_buf) != 0 ) {
+            if ( human_readable ) {
 
-		if ( verbose ) {
+                if ( HDstrcmp(journal_buf, expected_buf) != 0 ) {
 
-                    HDfprintf(stdout, "expected_buf = \"%s\"\n", expected_buf);
-                    HDfprintf(stdout, "journal_buf  = \"%s\"\n", journal_buf);
+		    if ( verbose ) {
+
+                        HDfprintf(stdout, 
+                                  "expected_buf = \"%s\"\n", expected_buf);
+                        HDfprintf(stdout, 
+                                  "journal_buf  = \"%s\"\n", journal_buf);
+                    }
+
+                    failure_mssg2 = "Unexpected journal file contents(2).";
+                    pass2 = FALSE;
                 }
+            } else { /* binary journal file -- can't use strcmp() */
 
-                failure_mssg2 = "Unexpected journal file contents(2).";
-                pass2 = FALSE;
+                if ( HDmemcmp(journal_buf, expected_buf, (size_t)cur_buf_len)
+                     != 0 ) {
+
+                    failure_mssg2 = "Unexpected journal file contents(2b).";
+                    pass2 = FALSE;
+                }
             }
 	}
     }
@@ -3154,16 +3206,18 @@ verify_journal_empty(const char * journal_file_path_ptr)
  * Programmer:  John Mainzer
  *              3/11/08
  *
- * Changes:	None.
+ * Changes:	Modified function to run using either a human readable 
+ *		or binary journal file.
+ *							JRM -- 5/8/9
  *
  *-------------------------------------------------------------------------
  */
 
 static void
-mdj_smoke_check_00(void)
+mdj_smoke_check_00(hbool_t human_readable)
 {
     const char * fcn_name = "mdj_smoke_check_00()";
-    const char * testfiles[] = 
+    const char * human_readable_testfiles[] = 
     {
         "testfiles/cache2_journal_sc00_000.jnl",
         "testfiles/cache2_journal_sc00_001.jnl",
@@ -3186,12 +3240,36 @@ mdj_smoke_check_00(void)
         "testfiles/cache2_journal_sc00_018.jnl",
 	NULL
     };
+    const char * binary_testfiles[] = 
+    {
+        "testfiles/cache2_journal_bsc00_000.jnl",
+        "testfiles/cache2_journal_bsc00_001.jnl",
+        "testfiles/cache2_journal_bsc00_002.jnl",
+        "testfiles/cache2_journal_bsc00_003.jnl",
+        "testfiles/cache2_journal_bsc00_004.jnl",
+        "testfiles/cache2_journal_bsc00_005.jnl",
+        "testfiles/cache2_journal_bsc00_006.jnl",
+        "testfiles/cache2_journal_bsc00_007.jnl",
+        "testfiles/cache2_journal_bsc00_008.jnl",
+        "testfiles/cache2_journal_bsc00_009.jnl",
+        "testfiles/cache2_journal_bsc00_010.jnl",
+        "testfiles/cache2_journal_bsc00_011.jnl",
+        "testfiles/cache2_journal_bsc00_012.jnl",
+        "testfiles/cache2_journal_bsc00_013.jnl",
+        "testfiles/cache2_journal_bsc00_014.jnl",
+        "testfiles/cache2_journal_bsc00_015.jnl",
+        "testfiles/cache2_journal_bsc00_016.jnl",
+        "testfiles/cache2_journal_bsc00_017.jnl",
+        "testfiles/cache2_journal_bsc00_018.jnl",
+	NULL
+    };
+    char * ((* testfiles)[]);
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t testfile_missing = FALSE;
     hbool_t show_progress = FALSE;
     hbool_t verbose = FALSE;
-    hbool_t update_architypes = FALSE;
+    hbool_t update_architypes;
     herr_t result;
     int cp = 0;
     hid_t file_id = -1;
@@ -3199,7 +3277,20 @@ mdj_smoke_check_00(void)
     H5C2_t * cache_ptr = NULL;
     H5AC2_jnl_config_t jnl_config;
     
-    TESTING("mdj smoke check 00 -- general coverage");
+    if ( human_readable ) {
+
+        testfiles = &human_readable_testfiles;
+        /* set update_architypes to TRUE to generate new architype files */
+        update_architypes = FALSE;
+        TESTING("human readable mdj smoke check 00 -- general coverage");
+
+    } else {
+
+        testfiles = &binary_testfiles;
+        /* set update_architypes to TRUE to generate new architype files */
+        update_architypes = TRUE;
+        TESTING("binary mdj smoke check 00 -- general coverage");
+    }
 
     pass2 = TRUE;
 
@@ -3253,10 +3344,10 @@ mdj_smoke_check_00(void)
     /* clean out any existing journal file */
     HDremove(journal_filename);
     setup_cache_for_journaling(filename, journal_filename, &file_id,
-                               &file_ptr, &cache_ptr, FALSE);
+                               &file_ptr, &cache_ptr, human_readable, FALSE);
 
     if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+        HDfprintf(stdout, "%s:%d *cp = %d.\n", fcn_name, pass2, cp++);
  
 
     /********************************************************************/
@@ -3271,7 +3362,9 @@ mdj_smoke_check_00(void)
     begin_trans(cache_ptr, verbose, (uint64_t)1, "transaction 1.0");
 
     insert_entry2(file_ptr, 0, 1, FALSE, H5C2__NO_FLAGS_SET); 
+
     protect_entry2(file_ptr, 0, 0);
+
     unprotect_entry2(file_ptr, 0, 0, TRUE, H5C2__NO_FLAGS_SET);
 
     end_trans(file_ptr, cache_ptr, verbose, (uint64_t)1, "transaction 1.0");
@@ -3280,12 +3373,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[0]);
+        copy_file(journal_filename, (*testfiles)[0]);
     }
-    
-    if ( file_exists(testfiles[0]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[0]);
+    if ( file_exists((*testfiles)[0]) ) {
+
+        verify_journal_contents(journal_filename, (*testfiles)[0], 
+                                human_readable);
 
     } else {
 
@@ -3360,12 +3454,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[1]);
+        copy_file(journal_filename, (*testfiles)[1]);
     }
     
-    if ( file_exists(testfiles[1]) ) {
+    if ( file_exists((*testfiles)[1]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[1]);
+        verify_journal_contents(journal_filename, (*testfiles)[1],
+                                human_readable);
 
     } else {
 
@@ -3408,12 +3503,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[2]);
+        copy_file(journal_filename, (*testfiles)[2]);
     }
     
-    if ( file_exists(testfiles[2]) ) {
+    if ( file_exists((*testfiles)[2]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[2]);
+        verify_journal_contents(journal_filename, (*testfiles)[2],
+                                human_readable);
 
     } else {
 
@@ -3446,12 +3542,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[3]);
+        copy_file(journal_filename, (*testfiles)[3]);
     }
     
-    if ( file_exists(testfiles[3]) ) {
+    if ( file_exists((*testfiles)[3]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[3]);
+        verify_journal_contents(journal_filename, (*testfiles)[3],
+                                human_readable);
 
     } else {
 
@@ -3494,12 +3591,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[4]);
+        copy_file(journal_filename, (*testfiles)[4]);
     }
     
-    if ( file_exists(testfiles[4]) ) {
+    if ( file_exists((*testfiles)[4]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[4]);
+        verify_journal_contents(journal_filename, (*testfiles)[4],
+                                human_readable);
 
     } else {
 
@@ -3547,12 +3645,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[5]);
+        copy_file(journal_filename, (*testfiles)[5]);
     }
     
-    if ( file_exists(testfiles[5]) ) {
+    if ( file_exists((*testfiles)[5]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[5]);
+        verify_journal_contents(journal_filename, (*testfiles)[5],
+                                human_readable);
 
     } else {
 
@@ -3586,12 +3685,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[6]);
+        copy_file(journal_filename, (*testfiles)[6]);
     }
     
-    if ( file_exists(testfiles[6]) ) {
+    if ( file_exists((*testfiles)[6]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[6]);
+        verify_journal_contents(journal_filename, (*testfiles)[6],
+                                human_readable);
 
     } else {
 
@@ -3637,12 +3737,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[7]);
+        copy_file(journal_filename, (*testfiles)[7]);
     }
     
-    if ( file_exists(testfiles[7]) ) {
+    if ( file_exists((*testfiles)[7]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[7]);
+        verify_journal_contents(journal_filename, (*testfiles)[7],
+                                human_readable);
 
     } else {
 
@@ -3700,12 +3801,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[8]);
+        copy_file(journal_filename, (*testfiles)[8]);
     }
     
-    if ( file_exists(testfiles[8]) ) {
+    if ( file_exists((*testfiles)[8]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[8]);
+        verify_journal_contents(journal_filename, (*testfiles)[8],
+                                human_readable);
 
     } else {
 
@@ -3766,12 +3868,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[9]);
+        copy_file(journal_filename, (*testfiles)[9]);
     }
     
-    if ( file_exists(testfiles[9]) ) {
+    if ( file_exists((*testfiles)[9]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[9]);
+        verify_journal_contents(journal_filename, (*testfiles)[9],
+                                human_readable);
 
     } else {
 
@@ -3836,12 +3939,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[10]);
+        copy_file(journal_filename, (*testfiles)[10]);
     }
     
-    if ( file_exists(testfiles[10]) ) {
+    if ( file_exists((*testfiles)[10]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[10]);
+        verify_journal_contents(journal_filename, (*testfiles)[10],
+                                human_readable);
 
     } else {
 
@@ -3891,12 +3995,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[11]);
+        copy_file(journal_filename, (*testfiles)[11]);
     }
     
-    if ( file_exists(testfiles[11]) ) {
+    if ( file_exists((*testfiles)[11]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[11]);
+        verify_journal_contents(journal_filename, (*testfiles)[11],
+                                human_readable);
 
     } else {
 
@@ -3992,12 +4097,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[12]);
+        copy_file(journal_filename, (*testfiles)[12]);
     }
     
-    if ( file_exists(testfiles[12]) ) {
+    if ( file_exists((*testfiles)[12]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[12]);
+        verify_journal_contents(journal_filename, (*testfiles)[12],
+                                human_readable);
 
     } else {
 
@@ -4021,12 +4127,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[13]);
+        copy_file(journal_filename, (*testfiles)[13]);
     }
     
-    if ( file_exists(testfiles[13]) ) {
+    if ( file_exists((*testfiles)[13]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[13]);
+        verify_journal_contents(journal_filename, (*testfiles)[13],
+                                human_readable);
 
     } else {
 
@@ -4052,12 +4159,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[14]);
+        copy_file(journal_filename, (*testfiles)[14]);
     }
     
-    if ( file_exists(testfiles[14]) ) {
+    if ( file_exists((*testfiles)[14]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[14]);
+        verify_journal_contents(journal_filename, (*testfiles)[14],
+                                human_readable);
 
     } else {
 
@@ -4106,12 +4214,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[15]);
+        copy_file(journal_filename, (*testfiles)[15]);
     }
     
-    if ( file_exists(testfiles[15]) ) {
+    if ( file_exists((*testfiles)[15]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[15]);
+        verify_journal_contents(journal_filename, (*testfiles)[15],
+                                human_readable);
 
     } else {
 
@@ -4137,12 +4246,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[16]);
+        copy_file(journal_filename, (*testfiles)[16]);
     }
     
-    if ( file_exists(testfiles[16]) ) {
+    if ( file_exists((*testfiles)[16]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[16]);
+        verify_journal_contents(journal_filename, (*testfiles)[16],
+                                human_readable);
 
     } else {
 
@@ -4188,7 +4298,7 @@ mdj_smoke_check_00(void)
 
     /* c) Re-open the hdf5 file. */
     open_existing_file_for_journaling(filename, journal_filename, &file_id,
-                                      &file_ptr, &cache_ptr);
+                                      &file_ptr, &cache_ptr, human_readable);
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -4208,12 +4318,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[17]);
+        copy_file(journal_filename, (*testfiles)[17]);
     }
     
-    if ( file_exists(testfiles[17]) ) {
+    if ( file_exists((*testfiles)[17]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[17]);
+        verify_journal_contents(journal_filename, (*testfiles)[17],
+                                human_readable);
 
     } else {
 
@@ -4369,12 +4480,13 @@ mdj_smoke_check_00(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[18]);
+        copy_file(journal_filename, (*testfiles)[18]);
     }
     
-    if ( file_exists(testfiles[18]) ) {
+    if ( file_exists((*testfiles)[18]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[18]);
+        verify_journal_contents(journal_filename, (*testfiles)[18],
+                                human_readable);
 
     } else {
 
@@ -4474,16 +4586,18 @@ mdj_smoke_check_00(void)
  * Programmer:  John Mainzer
  *              5/19/08
  *
- * Changes:	None.
+ * Changes:	Modified function to run using either a human readable 
+ *		or binary journal file.
+ *							JRM -- 5/13/09
  *
  *-------------------------------------------------------------------------
  */
 
 static void
-mdj_smoke_check_01(void)
+mdj_smoke_check_01(hbool_t human_readable)
 {
     const char * fcn_name = "mdj_smoke_check_01()";
-    const char * testfiles[] = 
+    const char * human_readable_testfiles[] = 
     {
         "testfiles/cache2_journal_sc01_000.jnl",
         "testfiles/cache2_journal_sc01_001.jnl",
@@ -4492,13 +4606,23 @@ mdj_smoke_check_01(void)
         "testfiles/cache2_journal_sc01_004.jnl",
 	NULL
     };
+    const char * binary_testfiles[] = 
+    {
+        "testfiles/cache2_journal_bsc01_000.jnl",
+        "testfiles/cache2_journal_bsc01_001.jnl",
+        "testfiles/cache2_journal_bsc01_002.jnl",
+        "testfiles/cache2_journal_bsc01_003.jnl",
+        "testfiles/cache2_journal_bsc01_004.jnl",
+	NULL
+    };
+    char * ((* testfiles)[]);
     char filename[512];
     char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
     hbool_t testfile_missing = FALSE;
     hbool_t show_progress = FALSE;
     hbool_t dirty_inserts = FALSE;
     hbool_t verbose = FALSE;
-    hbool_t update_architypes = FALSE;
+    hbool_t update_architypes;
     int dirty_unprotects = FALSE;
     int dirty_destroys = FALSE;
     hbool_t display_stats = FALSE;
@@ -4509,386 +4633,21 @@ mdj_smoke_check_01(void)
     hid_t file_id = -1;
     H5F_t * file_ptr = NULL;
     H5C2_t * cache_ptr = NULL;
-    
-    TESTING("mdj smoke check 01 -- jrnl clean ins, prot, unprot, del, ren");
 
-    pass2 = TRUE;
+    if ( human_readable ) {
 
-    /********************************************************************/
-    /* Create a file with cache configuration set to enable journaling. */
-    /********************************************************************/
-
-    /* setup the file name */
-    if ( pass2 ) {
-
-        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
-				            == NULL ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (1).\n";
-        }
-    }
-
-    if ( show_progress ) 
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s: filename = \"%s\".\n", fcn_name, filename); 
-    }
-
-    /* setup the journal file name */
-    if ( pass2 ) {
-
-        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
-                        sizeof(journal_filename)) == NULL ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "h5_fixname() failed (2).\n";
-        }
-	else if ( strlen(journal_filename) >= 
-			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "journal file name too long.\n";
-        }
-    }
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    if ( verbose ) { 
-        HDfprintf(stdout, "%s: journal filename = \"%s\".\n", 
-		  fcn_name, journal_filename); 
-    }
-
-    /* clean out any existing journal file */
-    HDremove(journal_filename);
-
-    /* Unfortunately, we get different journal output depending on the 
-     * file driver, as at present we are including the end of address
-     * space in journal entries, and the end of address space seems to 
-     * be in part a function of the file driver.  
-     *
-     * Thus, if we want to use the core file driver when available, we 
-     * will either have to remove the end of address space from the 
-     * journal entries, get the different file drivers to aggree on 
-     * end of address space, or maintain different sets of architype
-     * files for the different file drivers.
-     */
-    setup_cache_for_journaling(filename, journal_filename, &file_id,
-                               &file_ptr, &cache_ptr, FALSE);
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
- 
-
-    /******************************************/
-    /* Run a small, fairly simple stress test */
-    /******************************************/
-
-    trans_num = 0;
-
-    jrnl_row_major_scan_forward2(/* file_ptr               */ file_ptr,
-                                 /* max_index              */ max_index,
-                                 /* lag                    */ lag,
-                                 /* verbose                */ verbose,
-                                 /* reset_stats            */ TRUE,
-                                 /* display_stats          */ display_stats,
-                                 /* display_detailed_stats */ FALSE,
-                                 /* do_inserts             */ TRUE,
-                                 /* dirty_inserts          */ dirty_inserts,
-                                 /* do_renames             */ TRUE,
-                                 /* rename_to_main_addr    */ FALSE,
-                                 /* do_destroys            */ TRUE,
-                                 /* do_mult_ro_protects    */ TRUE,
-                                 /* dirty_destroys         */ dirty_destroys,
-                                 /* dirty_unprotects       */ dirty_unprotects,
-                                 /* trans_num              */ trans_num);
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    flush_journal(cache_ptr);
-
-    if ( update_architypes ) {
-
-        copy_file(journal_filename, testfiles[0]);
-    }
-    
-    if ( file_exists(testfiles[0]) ) {
-
-        verify_journal_contents(journal_filename, testfiles[0]);
+        testfiles = &human_readable_testfiles;
+        /* set update_architypes to TRUE to generate new architype files */
+        update_architypes = FALSE;
+        TESTING("hr mdj smoke check 01 -- jnl clean ins, prot, unprot, del, ren");
 
     } else {
 
-    	testfile_missing = TRUE;
+        testfiles = &binary_testfiles;
+        /* set update_architypes to TRUE to generate new architype files */
+        update_architypes = FALSE;
+        TESTING("b mdj smoke check 01 -- jnl clean ins, prot, unprot, del, ren");
     }
-
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
-
-    verify_journal_empty(journal_filename);
-
-    trans_num = 0;
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    jrnl_row_major_scan_backward2(/* file_ptr               */ file_ptr,
-                                  /* max_index              */ max_index,
-                                  /* lag                    */ lag,
-                                  /* verbose                */ verbose,
-                                  /* reset_stats            */ TRUE,
-                                  /* display_stats          */ display_stats,
-                                  /* display_detailed_stats */ FALSE,
-                                  /* do_inserts             */ FALSE,
-                                  /* dirty_inserts          */ dirty_inserts,
-                                  /* do_renames             */ TRUE,
-                                  /* rename_to_main_addr    */ TRUE,
-                                  /* do_destroys            */ FALSE,
-                                  /* do_mult_ro_protects    */ TRUE,
-                                  /* dirty_destroys         */ dirty_destroys,
-                                  /* dirty_unprotects       */ dirty_unprotects,
-                                  /* trans_num              */ trans_num);
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    flush_journal(cache_ptr);
-
-    if ( update_architypes ) {
-
-        copy_file(journal_filename, testfiles[1]);
-    }
-    
-    if ( file_exists(testfiles[1]) ) {
-
-        verify_journal_contents(journal_filename, testfiles[1]);
-
-    } else {
-
-    	testfile_missing = TRUE;
-    }
-
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
-
-    verify_journal_empty(journal_filename);
-
-    trans_num = 0;
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    jrnl_row_major_scan_forward2(/* file_ptr               */ file_ptr,
-                                 /* max_index              */ max_index,
-                                 /* lag                    */ lag,
-                                 /* verbose                */ verbose,
-                                 /* reset_stats            */ TRUE,
-                                 /* display_stats          */ display_stats,
-                                 /* display_detailed_stats */ FALSE,
-                                 /* do_inserts             */ TRUE,
-                                 /* dirty_inserts          */ dirty_inserts,
-                                 /* do_renames             */ TRUE,
-                                 /* rename_to_main_addr    */ FALSE,
-                                 /* do_destroys            */ TRUE,
-                                 /* do_mult_ro_protects    */ TRUE,
-                                 /* dirty_destroys         */ dirty_destroys,
-                                 /* dirty_unprotects       */ dirty_unprotects,
-                                 /* trans_num              */ trans_num);
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    flush_journal(cache_ptr);
-
-    if ( update_architypes ) {
-
-        copy_file(journal_filename, testfiles[2]);
-    }
-    
-    if ( file_exists(testfiles[2]) ) {
-
-        verify_journal_contents(journal_filename, testfiles[2]);
-
-    } else {
-
-    	testfile_missing = TRUE;
-    }
-
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
-
-    trans_num = 0;
-
-    verify_journal_empty(journal_filename);
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    jrnl_col_major_scan_forward2(/* file_ptr               */ file_ptr,
-                                 /* max_index              */ max_index,
-                                 /* lag                    */ lag,
-                                 /* verbose                */ verbose,
-                                 /* reset_stats            */ TRUE,
-                                 /* display_stats          */ display_stats,
-                                 /* display_detailed_stats */ TRUE,
-                                 /* do_inserts             */ TRUE,
-                                 /* dirty_inserts          */ dirty_inserts,
-                                 /* dirty_unprotects       */ dirty_unprotects,
-                                 /* trans_num              */ trans_num);
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    flush_journal(cache_ptr);
-
-    if ( update_architypes ) {
-
-        copy_file(journal_filename, testfiles[3]);
-    }
-    
-    if ( file_exists(testfiles[3]) ) {
-
-        verify_journal_contents(journal_filename, testfiles[3]);
-
-    } else {
-
-    	testfile_missing = TRUE;
-    }
-
-    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
-
-    verify_journal_empty(journal_filename);
-
-    trans_num = 0;
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    jrnl_col_major_scan_backward2(/* file_ptr               */ file_ptr,
-                                  /* max_index              */ max_index,
-                                  /* lag                    */ lag,
-                                  /* verbose                */ verbose,
-                                  /* reset_stats            */ TRUE,
-                                  /* display_stats          */ display_stats,
-                                  /* display_detailed_stats */ TRUE,
-                                  /* do_inserts             */ TRUE,
-                                  /* dirty_inserts          */ dirty_inserts,
-                                  /* dirty_unprotects       */ dirty_unprotects,
-                                  /* trans_num              */ trans_num);
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    flush_journal(cache_ptr);
-
-    if ( update_architypes ) {
-
-        copy_file(journal_filename, testfiles[4]);
-    }
-    
-    if ( file_exists(testfiles[4]) ) {
-
-        verify_journal_contents(journal_filename, testfiles[4]);
-
-    } else {
-
-    	testfile_missing = TRUE;
-    }
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    /****************************************************/
-    /* Close and discard the file and the journal file. */
-    /****************************************************/
-
-    takedown_cache_after_journaling(file_id, filename, journal_filename, FALSE);
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    verify_clean2();
-    verify_unprotected2();
-
-    if ( show_progress )
-        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
-
-    if ( pass2 ) { 
-	    
-        PASSED(); 
-
-	if ( testfile_missing ) {
-
-	    puts("	WARNING: One or more missing test files."); 
-	    fflush(stdout);
-        }
-    } else { 
-	    
-        H5_FAILED(); 
-    }
-
-    if ( ! pass2 ) {
-
-	failures2++;
-        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
-                  fcn_name, failure_mssg2);
-    }
-
-    return;
-
-} /* mdj_smoke_check_01() */
-
-
-/*-------------------------------------------------------------------------
- * Function:    mdj_smoke_check_02()
- *
- * Purpose:     Run a cut down version of smoke_check_2 in cache2.c, with
- * 		journaling enabled.  Check the journal files generated,
- * 		and verify that the journal output matches the architype
- * 		test files.  Skip the comparison and generate a warning
- * 		if an architype file is missing.
- *
- * Return:      void
- *
- * Programmer:  John Mainzer
- *              5/19/08
- *
- * Changes:	None.
- *
- *-------------------------------------------------------------------------
- */
-
-static void
-mdj_smoke_check_02(void)
-{
-    const char * fcn_name = "mdj_smoke_check_02()";
-    const char * testfiles[] = 
-    {
-        "testfiles/cache2_journal_sc02_000.jnl",
-        "testfiles/cache2_journal_sc02_001.jnl",
-        "testfiles/cache2_journal_sc02_002.jnl",
-        "testfiles/cache2_journal_sc02_003.jnl",
-        "testfiles/cache2_journal_sc02_004.jnl",
-	NULL
-    };
-    char filename[512];
-    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
-    hbool_t testfile_missing = FALSE;
-    hbool_t show_progress = FALSE;
-    hbool_t dirty_inserts = TRUE;
-    hbool_t verbose = FALSE;
-    hbool_t update_architypes = FALSE;
-    int dirty_unprotects = TRUE;
-    int dirty_destroys = TRUE;
-    hbool_t display_stats = FALSE;
-    int32_t lag = 10;
-    int cp = 0;
-    int32_t max_index = 128;
-    uint64_t trans_num = 0;
-    hid_t file_id = -1;
-    H5F_t * file_ptr = NULL;
-    H5C2_t * cache_ptr = NULL;
-    
-    TESTING("mdj smoke check 02 -- jrnl dirty ins, prot, unprot, del, ren");
 
     pass2 = TRUE;
 
@@ -4954,7 +4713,7 @@ mdj_smoke_check_02(void)
      * files for the different file drivers.
      */
     setup_cache_for_journaling(filename, journal_filename, &file_id,
-                               &file_ptr, &cache_ptr, FALSE);
+                               &file_ptr, &cache_ptr, human_readable, FALSE);
 
     if ( show_progress )
         HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
@@ -4990,12 +4749,13 @@ mdj_smoke_check_02(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[0]);
+        copy_file(journal_filename, (*testfiles)[0]);
     }
     
-    if ( file_exists(testfiles[0]) ) {
+    if ( file_exists((*testfiles)[0]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[0]);
+        verify_journal_contents(journal_filename, (*testfiles)[0],
+                                human_readable);
 
     } else {
 
@@ -5035,12 +4795,421 @@ mdj_smoke_check_02(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[1]);
+        copy_file(journal_filename, (*testfiles)[1]);
     }
     
-    if ( file_exists(testfiles[1]) ) {
+    if ( file_exists((*testfiles)[1]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[1]);
+        verify_journal_contents(journal_filename, (*testfiles)[1],
+                                human_readable);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
+
+    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+
+    verify_journal_empty(journal_filename);
+
+    trans_num = 0;
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    jrnl_row_major_scan_forward2(/* file_ptr               */ file_ptr,
+                                 /* max_index              */ max_index,
+                                 /* lag                    */ lag,
+                                 /* verbose                */ verbose,
+                                 /* reset_stats            */ TRUE,
+                                 /* display_stats          */ display_stats,
+                                 /* display_detailed_stats */ FALSE,
+                                 /* do_inserts             */ TRUE,
+                                 /* dirty_inserts          */ dirty_inserts,
+                                 /* do_renames             */ TRUE,
+                                 /* rename_to_main_addr    */ FALSE,
+                                 /* do_destroys            */ TRUE,
+                                 /* do_mult_ro_protects    */ TRUE,
+                                 /* dirty_destroys         */ dirty_destroys,
+                                 /* dirty_unprotects       */ dirty_unprotects,
+                                 /* trans_num              */ trans_num);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    flush_journal(cache_ptr);
+
+    if ( update_architypes ) {
+
+        copy_file(journal_filename, (*testfiles)[2]);
+    }
+    
+    if ( file_exists((*testfiles)[2]) ) {
+
+        verify_journal_contents(journal_filename, (*testfiles)[2],
+                                human_readable);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
+
+    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+
+    trans_num = 0;
+
+    verify_journal_empty(journal_filename);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    jrnl_col_major_scan_forward2(/* file_ptr               */ file_ptr,
+                                 /* max_index              */ max_index,
+                                 /* lag                    */ lag,
+                                 /* verbose                */ verbose,
+                                 /* reset_stats            */ TRUE,
+                                 /* display_stats          */ display_stats,
+                                 /* display_detailed_stats */ TRUE,
+                                 /* do_inserts             */ TRUE,
+                                 /* dirty_inserts          */ dirty_inserts,
+                                 /* dirty_unprotects       */ dirty_unprotects,
+                                 /* trans_num              */ trans_num);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    flush_journal(cache_ptr);
+
+    if ( update_architypes ) {
+
+        copy_file(journal_filename, (*testfiles)[3]);
+    }
+    
+    if ( file_exists((*testfiles)[3]) ) {
+
+        verify_journal_contents(journal_filename, (*testfiles)[3],
+                                human_readable);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
+
+    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+
+    verify_journal_empty(journal_filename);
+
+    trans_num = 0;
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    jrnl_col_major_scan_backward2(/* file_ptr               */ file_ptr,
+                                  /* max_index              */ max_index,
+                                  /* lag                    */ lag,
+                                  /* verbose                */ verbose,
+                                  /* reset_stats            */ TRUE,
+                                  /* display_stats          */ display_stats,
+                                  /* display_detailed_stats */ TRUE,
+                                  /* do_inserts             */ TRUE,
+                                  /* dirty_inserts          */ dirty_inserts,
+                                  /* dirty_unprotects       */ dirty_unprotects,
+                                  /* trans_num              */ trans_num);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    flush_journal(cache_ptr);
+
+    if ( update_architypes ) {
+
+        copy_file(journal_filename, (*testfiles)[4]);
+    }
+    
+    if ( file_exists((*testfiles)[4]) ) {
+
+        verify_journal_contents(journal_filename, (*testfiles)[4],
+                                human_readable);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    /****************************************************/
+    /* Close and discard the file and the journal file. */
+    /****************************************************/
+
+    takedown_cache_after_journaling(file_id, filename, journal_filename, FALSE);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    verify_clean2();
+    verify_unprotected2();
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    if ( pass2 ) { 
+	    
+        PASSED(); 
+
+	if ( testfile_missing ) {
+
+	    puts("	WARNING: One or more missing test files."); 
+	    fflush(stdout);
+        }
+    } else { 
+	    
+        H5_FAILED(); 
+    }
+
+    if ( ! pass2 ) {
+
+	failures2++;
+        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
+                  fcn_name, failure_mssg2);
+    }
+
+    return;
+
+} /* mdj_smoke_check_01() */
+
+
+/*-------------------------------------------------------------------------
+ * Function:    mdj_smoke_check_02()
+ *
+ * Purpose:     Run a cut down version of smoke_check_2 in cache2.c, with
+ * 		journaling enabled.  Check the journal files generated,
+ * 		and verify that the journal output matches the architype
+ * 		test files.  Skip the comparison and generate a warning
+ * 		if an architype file is missing.
+ *
+ * Return:      void
+ *
+ * Programmer:  John Mainzer
+ *              5/19/08
+ *
+ * Changes:	Modified function to run using either a human readable 
+ *		or binary journal file.
+ *							JRM -- 5/13/09
+ *
+ *-------------------------------------------------------------------------
+ */
+
+static void
+mdj_smoke_check_02(hbool_t human_readable)
+{
+    const char * fcn_name = "mdj_smoke_check_02()";
+    const char * human_readable_testfiles[] = 
+    {
+        "testfiles/cache2_journal_sc02_000.jnl",
+        "testfiles/cache2_journal_sc02_001.jnl",
+        "testfiles/cache2_journal_sc02_002.jnl",
+        "testfiles/cache2_journal_sc02_003.jnl",
+        "testfiles/cache2_journal_sc02_004.jnl",
+	NULL
+    };
+    const char * binary_testfiles[] = 
+    {
+        "testfiles/cache2_journal_bsc02_000.jnl",
+        "testfiles/cache2_journal_bsc02_001.jnl",
+        "testfiles/cache2_journal_bsc02_002.jnl",
+        "testfiles/cache2_journal_bsc02_003.jnl",
+        "testfiles/cache2_journal_bsc02_004.jnl",
+	NULL
+    };
+    char * ((* testfiles)[]);
+    char filename[512];
+    char journal_filename[H5AC2__MAX_JOURNAL_FILE_NAME_LEN + 1];
+    hbool_t testfile_missing = FALSE;
+    hbool_t show_progress = FALSE;
+    hbool_t dirty_inserts = TRUE;
+    hbool_t verbose = FALSE;
+    hbool_t update_architypes = FALSE;
+    int dirty_unprotects = TRUE;
+    int dirty_destroys = TRUE;
+    hbool_t display_stats = FALSE;
+    int32_t lag = 10;
+    int cp = 0;
+    int32_t max_index = 128;
+    uint64_t trans_num = 0;
+    hid_t file_id = -1;
+    H5F_t * file_ptr = NULL;
+    H5C2_t * cache_ptr = NULL;
+
+    if ( human_readable ) {
+
+        testfiles = &human_readable_testfiles;
+        /* set update_architypes to TRUE to generate new architype files */
+        update_architypes = FALSE;
+        TESTING("hr mdj smoke check 02 -- jnl dirty ins, prot, unprot, del, ren");
+
+    } else {
+
+        testfiles = &binary_testfiles;
+        /* set update_architypes to TRUE to generate new architype files */
+        update_architypes = FALSE;
+        TESTING("b mdj smoke check 02 -- jnl dirty ins, prot, unprot, del, ren");
+    }
+
+    pass2 = TRUE;
+
+    /********************************************************************/
+    /* Create a file with cache configuration set to enable journaling. */
+    /********************************************************************/
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
+				            == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (1).\n";
+        }
+    }
+
+    if ( show_progress ) 
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s: filename = \"%s\".\n", fcn_name, filename); 
+    }
+
+    /* setup the journal file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[3], H5P_DEFAULT, journal_filename, 
+                        sizeof(journal_filename)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed (2).\n";
+        }
+	else if ( strlen(journal_filename) >= 
+			H5AC2__MAX_JOURNAL_FILE_NAME_LEN ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "journal file name too long.\n";
+        }
+    }
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    if ( verbose ) { 
+        HDfprintf(stdout, "%s: journal filename = \"%s\".\n", 
+		  fcn_name, journal_filename); 
+    }
+
+    /* clean out any existing journal file */
+    HDremove(journal_filename);
+
+    /* Unfortunately, we get different journal output depending on the 
+     * file driver, as at present we are including the end of address
+     * space in journal entries, and the end of address space seems to 
+     * be in part a function of the file driver.  
+     *
+     * Thus, if we want to use the core file driver when available, we 
+     * will either have to remove the end of address space from the 
+     * journal entries, get the different file drivers to agree on 
+     * end of address space, or maintain different sets of architype
+     * files for the different file drivers.
+     */
+    setup_cache_for_journaling(filename, journal_filename, &file_id,
+                               &file_ptr, &cache_ptr, human_readable, FALSE);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+ 
+
+    /******************************************/
+    /* Run a small, fairly simple stress test */
+    /******************************************/
+
+    trans_num = 0;
+
+    jrnl_row_major_scan_forward2(/* file_ptr               */ file_ptr,
+                                 /* max_index              */ max_index,
+                                 /* lag                    */ lag,
+                                 /* verbose                */ verbose,
+                                 /* reset_stats            */ TRUE,
+                                 /* display_stats          */ display_stats,
+                                 /* display_detailed_stats */ FALSE,
+                                 /* do_inserts             */ TRUE,
+                                 /* dirty_inserts          */ dirty_inserts,
+                                 /* do_renames             */ TRUE,
+                                 /* rename_to_main_addr    */ FALSE,
+                                 /* do_destroys            */ TRUE,
+                                 /* do_mult_ro_protects    */ TRUE,
+                                 /* dirty_destroys         */ dirty_destroys,
+                                 /* dirty_unprotects       */ dirty_unprotects,
+                                 /* trans_num              */ trans_num);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    flush_journal(cache_ptr);
+
+    if ( update_architypes ) {
+
+        copy_file(journal_filename, (*testfiles)[0]);
+    }
+    
+    if ( file_exists((*testfiles)[0]) ) {
+
+        verify_journal_contents(journal_filename, (*testfiles)[0],
+                                human_readable);
+
+    } else {
+
+    	testfile_missing = TRUE;
+    }
+
+    flush_cache2(file_ptr, FALSE, FALSE, FALSE); /* resets transaction number */
+
+    verify_journal_empty(journal_filename);
+
+    trans_num = 0;
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    jrnl_row_major_scan_backward2(/* file_ptr               */ file_ptr,
+                                  /* max_index              */ max_index,
+                                  /* lag                    */ lag,
+                                  /* verbose                */ verbose,
+                                  /* reset_stats            */ TRUE,
+                                  /* display_stats          */ display_stats,
+                                  /* display_detailed_stats */ FALSE,
+                                  /* do_inserts             */ FALSE,
+                                  /* dirty_inserts          */ dirty_inserts,
+                                  /* do_renames             */ TRUE,
+                                  /* rename_to_main_addr    */ TRUE,
+                                  /* do_destroys            */ FALSE,
+                                  /* do_mult_ro_protects    */ TRUE,
+                                  /* dirty_destroys         */ dirty_destroys,
+                                  /* dirty_unprotects       */ dirty_unprotects,
+                                  /* trans_num              */ trans_num);
+
+    if ( show_progress )
+        HDfprintf(stdout, "%s:%d cp = %d.\n", fcn_name, pass2, cp++);
+
+    flush_journal(cache_ptr);
+
+    if ( update_architypes ) {
+
+        copy_file(journal_filename, (*testfiles)[1]);
+    }
+    
+    if ( file_exists((*testfiles)[1]) ) {
+
+        verify_journal_contents(journal_filename, (*testfiles)[1],
+                                human_readable);
 
     } else {
 
@@ -5080,12 +5249,13 @@ mdj_smoke_check_02(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[2]);
+        copy_file(journal_filename, (*testfiles)[2]);
     }
     
-    if ( file_exists(testfiles[2]) ) {
+    if ( file_exists((*testfiles)[2]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[2]);
+        verify_journal_contents(journal_filename, (*testfiles)[2],
+                                human_readable);
 
     } else {
 
@@ -5120,12 +5290,13 @@ mdj_smoke_check_02(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[3]);
+        copy_file(journal_filename, (*testfiles)[3]);
     }
     
-    if ( file_exists(testfiles[3]) ) {
+    if ( file_exists((*testfiles)[3]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[3]);
+        verify_journal_contents(journal_filename, (*testfiles)[3],
+                                human_readable);
 
     } else {
 
@@ -5160,12 +5331,13 @@ mdj_smoke_check_02(void)
 
     if ( update_architypes ) {
 
-        copy_file(journal_filename, testfiles[4]);
+        copy_file(journal_filename, (*testfiles)[4]);
     }
     
-    if ( file_exists(testfiles[4]) ) {
+    if ( file_exists((*testfiles)[4]) ) {
 
-        verify_journal_contents(journal_filename, testfiles[4]);
+        verify_journal_contents(journal_filename, (*testfiles)[4],
+                                human_readable);
 
     } else {
 
@@ -5312,7 +5484,10 @@ mdj_smoke_check_02(void)
  *
  * Modifications:
  *
- * 		None.
+ * 		Modified the function to used either the human readable 
+ *		or the binary journal file format as directed via the 
+ *		new human_readable parameter.
+ *						JRM -- 5/13/09
  *
  *-------------------------------------------------------------------------
  */
@@ -5323,7 +5498,7 @@ mdj_smoke_check_02(void)
 #define NUM_RANDOM_ACCESSES     200000
 
 static void
-mdj_api_example_test(void)
+mdj_api_example_test(hbool_t human_readable)
 {
     const char * fcn_name = "mdj_api_example_test()";
     char filename[512];
@@ -5350,7 +5525,15 @@ mdj_api_example_test(void)
     H5AC2_jnl_config_t jnl_config_1;
 
 
-    TESTING("mdj example code");
+    if ( human_readable ) {
+
+        TESTING("mdj example code -- human readable journal file");
+
+    } else {
+
+        TESTING("mdj example code -- binary journal file");
+
+    }
 
     if ( skip_long_tests2 > 0 ) {
 
@@ -5510,7 +5693,7 @@ mdj_api_example_test(void)
         /* the journal buffer size should  be some multiple of the block 
          * size of the underlying file system.  
          */
-        jnl_config_0.jbrb_buf_size = (8 * 1024);
+        jnl_config_0.jbrb_buf_size = (16 * 1024);
 
         /* the number of journal buffers should be either 1 or 2 when 
          * synchronous I/O is used for journal writes.  If AIO is used,
@@ -5525,11 +5708,14 @@ mdj_api_example_test(void)
          */
         jnl_config_0.jbrb_use_aio = FALSE;
 
-	/* At present only human readable journal file are supported
-	 * so this field will be TRUE for now.  Once it becomes available,
-	 * machine readable journal files should be smaller and faster.
-	 */
-	jnl_config_0.jbrb_human_readable = TRUE;
+        /* set human readable as specified in the human_readable parameter
+         * to this function.  If human_readable is FALSE, we will use 
+         * the binary journal file format which should reduce the size
+         * of the journal file by about two thirds, and also reduce the 
+         * overhead involved in formating journal entries for writing
+         * to the journal file.
+         */
+	jnl_config_0.jbrb_human_readable = human_readable;
         
         status = H5Pset_jnl_config(fapl_id, &jnl_config_0);
 
@@ -5832,7 +6018,7 @@ mdj_api_example_test(void)
 	 * On the other hand, it will impose a significant file I/O 
 	 * overhead, and slow us down. (try it both ways).
 	 */
-#if 1 /* JRM */
+#if 1
 	status = H5Fflush(file_id, H5F_SCOPE_GLOBAL);
 
         if ( status < 0 ) {
@@ -5840,7 +6026,7 @@ mdj_api_example_test(void)
             pass2 = FALSE;
             failure_mssg2 = "H5Fflush() failed.";
         }
-#endif /* JRM */
+#endif
     }
 
     if ( ( pass2 ) && ( report_progress ) ) {
@@ -7139,10 +7325,6 @@ verify_mdjsc_table_config(H5C2_t * cache_ptr,
         {
             pass2 = FALSE;
             failure_mssg2 = "mdjsc callback table len mismatch";
-#if 1 /* JRM */
-            HDfprintf(stdout, "cache_ptr->mdjsc_cb_tbl_len = %d(%d).\n",
-		      cache_ptr->mdjsc_cb_tbl_len, table_len);
-#endif /* JRM */
         }
         else if ( cache_ptr->num_mdjsc_cbs != num_entries )
         {
@@ -7151,11 +7333,6 @@ verify_mdjsc_table_config(H5C2_t * cache_ptr,
         }
         else if ( cache_ptr->mdjsc_cb_tbl_max_idx_in_use != max_idx_in_use )
         {
-#if 1 /* JRM */
-            HDfprintf(stdout, 
-                      "cache_ptr->mdjsc_cb_tbl_max_idx_in_use = %d(%d)\n",
-		      cache_ptr->mdjsc_cb_tbl_max_idx_in_use, max_idx_in_use);
-#endif /* JRM */
             pass2 = FALSE;
             failure_mssg2 = "mdjsc callback table max idx in use mismatch";
         }
@@ -7234,12 +7411,6 @@ verify_mdjsc_table_config(H5C2_t * cache_ptr,
                 pass2 = FALSE;
                 failure_mssg2 = 
                     "mdjsc callback table free list shorter than expected.";
-#if 1 /* JRM */
-		HDfprintf(stdout, "i = %d (%d - %d = %d)\n", i,
-			  table_len, num_entries, (table_len - num_entries));
-		HDfprintf(stdout, "cache_ptr->mdjsc_cb_tbl_fl_head = %d.\n",
-			  cache_ptr->mdjsc_cb_tbl_fl_head);
-#endif /* JRM */
 
             } else if ( ( record_ptr != NULL ) &&
 			( record_ptr->fl_next != -1 ) ) {
@@ -7540,7 +7711,7 @@ verify_mdjsc_callback_error_rejection(void)
     /* clean out any existing journal file */
     HDremove(journal_filename);
     setup_cache_for_journaling(filename, journal_filename, &file_id,
-                               &file_ptr, &cache_ptr, FALSE);
+                               &file_ptr, &cache_ptr, TRUE, FALSE);
 
     if ( show_progress ) {
 
@@ -7934,7 +8105,7 @@ verify_mdjsc_callback_execution(void)
     /* clean out any existing journal file */
     HDremove(journal_filename);
     setup_cache_for_journaling(filename, journal_filename, &file_id,
-                               &file_ptr, &cache_ptr, FALSE);
+                               &file_ptr, &cache_ptr, TRUE, FALSE);
 
     if ( show_progress ) {
 
@@ -9252,7 +9423,7 @@ verify_mdjsc_callback_registration_deregistration(void)
     /* clean out any existing journal file */
     HDremove(journal_filename);
     setup_cache_for_journaling(filename, journal_filename, &file_id,
-                               &file_ptr, &cache_ptr, FALSE);
+                               &file_ptr, &cache_ptr, TRUE, FALSE);
 
 
     /* 2) Register a callback.  Verify that is is added correctly to
@@ -10290,6 +10461,10 @@ verify_mdjsc_callback_registration_deregistration(void)
  *
  * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
  *              Thursday, February 21, 2008
+ *
+ * Changes:	John Mainzer -- 4/16/09
+ *		Updated for the addition of new parameters to 
+ *		H5C2_jb__init().
  * 
  **************************************************************************/
 
@@ -10369,6 +10544,10 @@ check_buffer_writes(void)
     /* Initialize H5C2_jbrb_t structure. */
     if ( pass2 ) {
 
+        /* Note that the sizeof_addr & sizeof_size parameters are 
+         * ignored when human_readable is TRUE.
+         */
+
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
                                /* journal_magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
@@ -10376,7 +10555,9 @@ check_buffer_writes(void)
                                /* Buffer size */            16, 
                                /* Number of Buffers */      3, 
                                /* Use Synchronois I/O */    FALSE, 
-                               /* human readable journal */ TRUE);
+                               /* human readable journal */ TRUE,
+                               /* sizeof_addr */            8,
+                               /* sizeof_size */            8);
 
         if ( result != 0) {
 
@@ -10685,6 +10866,10 @@ write_noflush_verify(H5C2_jbrb_t * struct_ptr,
  * Changes:	JRM -- 3/21/09
  *		Updated test to handle the new journal creation time strings
  *		in which all white space is replaced with underscores.
+ *
+ * 		JRM -- 4/16/09
+ *		Updated for the addition of new parameters to 
+ *		H5C2_jb__init().
  * 
  **************************************************************************/
 static void 
@@ -10727,6 +10912,10 @@ check_message_format(void)
     /* Initialize H5C2_jbrb_t structure. */
     if ( pass2 ) {
 
+        /* Note that the sizeof_addr & sizeof_size parameters are 
+         * ignored when human_readable is TRUE.
+         */
+
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
                                /* journal_magic */          123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
@@ -10734,7 +10923,9 @@ check_message_format(void)
                                /* Buffer size */            16, 
                                /* Number of Buffers */      3, 
                                /* Use Synchronois I/O */    FALSE, 
-                               /* human readable journal */ TRUE);
+                               /* human readable journal */ TRUE,
+                               /* sizeof_addr */            8,
+                               /* sizeof_size */            8);
 
         if ( result != 0) {
 
@@ -11254,6 +11445,1052 @@ check_message_format(void)
 
 } /* end check_message_format */
 
+
+/***************************************************************************
+ * Function: 	check_binary_message_format
+ *
+ * Purpose:  	Verify that the functions that write binary messages into 
+ *		the journal buffers actually write the correct messages.
+ *
+ *		Note that this test was hacked from Mike's similar test
+ *		for the human readable journal messages.  Unlike Mike's
+ *		code, it also tests the eoa message.
+ *
+ * Return:      void
+ *
+ * Programmer: 	John Mainzer
+ *              5/2/09
+ *
+ * Changes:	None.
+ * 
+ **************************************************************************/
+
+static void 
+check_binary_message_format(void)
+{
+    const char * fcn_name = "check_binary_message_format()";
+    char filename[512];
+    char time_buf[32];
+    char verify[9][500];
+    char from_journal[9][500];
+    char * p;
+    hbool_t show_progress = FALSE;
+    int32_t checkpoint = 1;
+    int i;
+    int fd;
+    herr_t result;
+    FILE * readback;
+    H5C2_jbrb_t jbrb_struct;
+    time_t current_date;
+
+    TESTING("binary journal file message format");
+
+    pass2 = TRUE;
+
+    /* setup the file name */
+    if ( pass2 ) {
+
+        if ( h5_fixname(FILENAMES[1], H5P_DEFAULT, filename, sizeof(filename))
+             == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "h5_fixname() failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    /* Give structure its magic number */
+    jbrb_struct.magic = H5C2__H5C2_JBRB_T_MAGIC;
+
+    /* Initialize H5C2_jbrb_t structure. */
+    if ( pass2 ) {
+
+        /* Note that the sizeof_addr & sizeof_size parameters are 
+         * ignored when human_readable is TRUE.
+         */
+
+       	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
+                               /* journal_magic */          123,
+                               /* HDF5 file name */         HDF5_FILE_NAME,
+                               /* journal file name */      filename, 
+                               /* Buffer size */            16, 
+                               /* Number of Buffers */      3, 
+                               /* Use Synchronois I/O */    FALSE, 
+                               /* human readable journal */ FALSE,
+                               /* sizeof_addr */            8,
+                               /* sizeof_size */            8);
+
+        if ( result != 0) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb_init failed, check 2";
+
+       	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 1 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+ 
+    /* Start a transaction */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                        /* trans number */  (uint64_t)1) 
+           != SUCCEED ) {
+    
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__start_transaction failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 2 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+ 
+    /* Write a journal entry */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                    /* trans number */  (uint64_t)1, 
+                                    /* base address */  (haddr_t)0, 
+                                    /* data length  */  1, 
+                                    /* data         */  (const uint8_t *)"A") 
+           != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 3 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Write an eoa message */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__eoa(/* H5C2_jbrb_t */  &jbrb_struct, 
+                          /* eoa         */  (haddr_t)0x01020304)
+           != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__eoa failed(1)";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 4 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+ 
+    /* Write a journal entry */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                    /* trans number */  (uint64_t)1, 
+                                    /* base address */  (haddr_t)1, 
+                                    /* data length  */  2, 
+                                    /* data         */  (const uint8_t *)"AB") 
+           != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 5 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+ 
+    /* Write a journal entry */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                    /* trans number */  (uint64_t)1, 
+                                    /* base address */  (haddr_t)3, 
+                                    /* data length  */  4, 
+                                    /* data         */  (const uint8_t *)"CDEF") 
+           != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 6 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+ 
+    /* End transaction */
+    if ( pass2 ) {
+        if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                      /* trans number */  (uint64_t)1) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__end_transaction failed (1)";
+            
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 7 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Write an eoa message */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__eoa(/* H5C2_jbrb_t */  &jbrb_struct, 
+                          /* eoa         */  (haddr_t)0x0102030405)
+           != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__eoa failed(2)";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 8 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Start a transaction */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                        /* trans number */  (uint64_t)2) 
+           != SUCCEED ) {
+    
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__start_transaction failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 9 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Write a journal entry */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                    /* trans number */  (uint64_t)2, 
+                                    /* base address */  (haddr_t)285, 
+                                    /* data length  */  11, 
+                                    /* data         */  (const uint8_t *)"Test Data?!") 
+           != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 10 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* End transaction */
+    if ( pass2 ) {
+        if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                      /* trans number */  (uint64_t)2) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__end_transaction failed (2)";
+            
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 11 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Flush the journal buffers. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__flush failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( pass2 ) {
+
+        current_date = time(NULL);
+
+        /* load ascii representation of current_date into time_buf[],
+         * replacing white space with underscores.
+         */
+        time_buf[31] = '\0'; /* just to be safe */
+
+        if ( (p = HDctime(&current_date)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "HDctime() failed";
+
+        } else {
+
+            /* copy the string into time_buf, replacing white space with
+             * underscores.
+             *
+             * Do this to make parsing the header easier.
+             */
+            i = 0;
+
+            while ( ( i < 31 ) && ( *p != '\0' ) ) {
+
+                if ( isspace(*p) ) {
+
+                    time_buf[i] = '_';
+
+                } else {
+
+                    time_buf[i] = *p;
+                }
+
+                i++;
+                p++;
+            }
+
+            time_buf[i] = '\0';
+        }
+    }
+
+    if ( show_progress ) /* 12 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    if ( pass2 ) {
+
+        char expected_header[256];
+        int expected_header_len;
+
+        uint8_t expected_msg_1[] =
+        {
+            /* mssg 1: begin transaction 1 */
+                /* header:    */ 'b', 't', 'r', 'n', 
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        int expected_msg_1_len = 13;
+
+        uint8_t expected_msg_2[] =
+        {
+            /* mssg 2: journal entry */
+                /* header:    */ 'j', 'e', 'n', 't',
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* base addr: */ 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* length:    */ 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* body:      */ 'A',
+                /* chksum:    */ 0x7c, 0x5f, 0xad, 0xda
+        };
+        int expected_msg_2_len = 34;
+
+        uint8_t expected_msg_3[] =
+        {
+            /* mssg 3: eoas */
+                /* header:    */ 'e', 'o', 'a', 's', 
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x04, 0x03, 0x02, 0x01, 0x00, 0x00, 0x00, 0x00
+        };
+        int expected_msg_3_len = 13;
+
+        uint8_t expected_msg_4[] =
+        {
+            /* mssg 4: journal entry */
+                /* header:    */ 'j', 'e', 'n', 't',
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* base addr: */ 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* length:    */ 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* body:      */ 'A', 'B',
+                /* chksum:    */ 0x33, 0x93, 0x98, 0x21
+        };
+        int expected_msg_4_len = 35;
+
+        uint8_t expected_msg_5[] =
+        {
+            /* mssg 5: journal entry */
+                /* header:    */ 'j', 'e', 'n', 't',
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* base addr: */ 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* length:    */ 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* body:      */ 'C', 'D', 'E', 'F',
+                /* chksum:    */ 0x6e, 0x7d, 0xaf, 0x57
+        };
+        int expected_msg_5_len = 37;
+
+        uint8_t expected_msg_6[] =
+        {
+            /* mssg 6: end transaction 1 */
+                /* header:    */ 'e', 't', 'r', 'n', 
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        int expected_msg_6_len = 13;
+
+        uint8_t expected_msg_7[] =
+        {
+            /* mssg 7: eoas */
+                /* header:    */ 'e', 'o', 'a', 's', 
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x05, 0x04, 0x03, 0x02, 0x01, 0x00, 0x00, 0x00
+        };
+        int expected_msg_7_len = 13;
+
+        uint8_t expected_msg_8[] =
+        {
+            /* mssg 8: begin transaction 2 */
+                /* header:    */ 'b', 't', 'r', 'n', 
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        int expected_msg_8_len = 13;
+
+        uint8_t expected_msg_9[] =
+        {
+            /* mssg 9: journal entry */
+                /* h9ader:    */ 'j', 'e', 'n', 't',
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* base addr: */ 0x1d, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* length:    */ 0x0b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* body:      */ 'T', 'e', 's', 't', ' ', 'D', 'a', 't', 
+                                 'a', '?', '!',
+                /* chksum:    */ 0x01, 0x7f, 0xf3, 0x43
+        };
+        int expected_msg_9_len = 44;
+
+        uint8_t expected_msg_10[] =
+        {
+            /* mssg 10: end transaction 2 */
+                /* header:    */ 'e', 't', 'r', 'n', 
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        int expected_msg_10_len = 13;
+
+       
+        sprintf(expected_header, "0 ver_num 1 target_file_name HDF5.file journal_magic 123 creation_date %10.10s human_readable 0 offset_width 8 length_width 8\n", time_buf);
+        expected_header_len = HDstrlen(expected_header);
+
+        if ( (fd = HDopen(filename, O_RDONLY, 0777)) == -1 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "Can't open journal file for test (1).";
+ 
+        } 
+        
+        if ( pass2 ) {
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_header, 
+                /* expected msg len     */ expected_header_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual headers differ.",
+                /* read failure msg     */ "error reading header.",
+                /* eof failure msg      */ "encountered eof in header msg.",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_1, 
+                /* expected msg len     */ expected_msg_1_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual msg 1 differ.",
+                /* read failure msg     */ "error reading msg 1.",
+                /* eof failure msg      */ "encountered eof in msg 1.",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_2, 
+                /* expected msg len     */ expected_msg_2_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual msg 2 differ.",
+                /* read failure msg     */ "error reading msg 2.",
+                /* eof failure msg      */ "encountered eof in msg 2",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_3, 
+                /* expected msg len     */ expected_msg_3_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual msg 3 differ.",
+                /* read failure msg     */ "error reading msg 3.",
+                /* eof failure msg      */ "encountered eof in msg 3",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_4, 
+                /* expected msg len     */ expected_msg_4_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual msg 4 differ.",
+                /* read failure msg     */ "error reading msg 4.",
+                /* eof failure msg      */ "encountered eof in msg 4",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_5, 
+                /* expected msg len     */ expected_msg_5_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual msg 5 differ.",
+                /* read failure msg     */ "error reading msg 5.",
+                /* eof failure msg      */ "encountered eof in msg 5",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_6, 
+                /* expected msg len     */ expected_msg_6_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual msg 6 differ.",
+                /* read failure msg     */ "error reading msg 6.",
+                /* eof failure msg      */ "encountered eof in msg 6",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_7, 
+                /* expected msg len     */ expected_msg_7_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual msg7 differ.",
+                /* read failure msg     */ "error reading msg 7.",
+                /* eof failure msg      */ "encountered eof in msg 7",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_8, 
+                /* expected msg len     */ expected_msg_8_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual msg 8 differ.",
+                /* read failure msg     */ "error reading msg 8.",
+                /* eof failure msg      */ "encountered eof in msg 8",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_9, 
+                /* expected msg len     */ expected_msg_9_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual msg 9 differ.",
+                /* read failure msg     */ "error reading msg 9.",
+                /* eof failure msg      */ "encountered eof in msg 9",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_10, 
+                /* expected msg len     */ expected_msg_10_len,
+                /* last_msg             */ TRUE,
+                /* mismatch failuer msg */ "expected and actual msg 10 differ.",
+                /* read failure msg     */ "error reading msg 10.",
+                /* eof failure msg      */ "encountered eof in msg 10",
+                /* not last msg failure */ "msg 10 does not end file");
+
+            if ( HDclose(fd) != 0 ) {
+
+                pass2 = FALSE;
+                failure_mssg2 = "Unable to close journal file (1).";
+            }
+        }
+    }
+
+    /* Truncate the journal file */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__trunc(&jbrb_struct) != SUCCEED ) {
+
+		pass2 = FALSE;
+		failure_mssg2 = "H5C2_jb__trunc failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 13 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Write an eoa message */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__eoa(/* H5C2_jbrb_t */ &jbrb_struct, 
+                          /* eoa         */ (haddr_t)0x010203040506)
+             != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__eoa failed(3)";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 14 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Start a transaction */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__start_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                        /* trans number */  (uint64_t)3) 
+           != SUCCEED ) {
+    
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__start_transaction failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 15 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Write a journal entry */
+    if ( pass2 ) {
+
+        if ( H5C2_jb__journal_entry(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                 /* trans number */  (uint64_t)3, 
+                                 /* base address */  (haddr_t)28591, 
+                                 /* data length  */  6, 
+                                 /* data         */  (const uint8_t *)"#1nN`}" )
+             != SUCCEED ) {
+            
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__journal_entry failed";
+
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 16 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* End transaction */
+    if ( pass2 ) {
+        if ( H5C2_jb__end_transaction(/* H5C2_jbrb_t  */  &jbrb_struct, 
+                                      /* trans number */  (uint64_t)3) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__end_transaction failed (3)";
+            
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 17 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Add a comment */
+    if ( pass2 ) {
+        if ( H5C2_jb__comment(/* H5C2_jbrb_t     */  &jbrb_struct, 
+                              /* comment message */  "This is a comment!") 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__comment failed";
+            
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 18 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Add a comment */
+    if ( pass2 ) {
+        if ( H5C2_jb__comment(/* H5C2_jbrb_t     */  &jbrb_struct, 
+                              /* comment message */  "This is another comment!") 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__comment failed";
+            
+        } /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 19 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* Flush the journal buffers. */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__flush(/* H5C2_jbrb_t */  &jbrb_struct) 
+           != SUCCEED ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "H5C2_jb__flush failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( pass2 ) {
+
+        current_date = time(NULL);
+
+        /* load ascii representation of current_date into time_buf[],
+         * replacing white space with underscores.
+         */
+
+        time_buf[31] = '\0'; /* just to be safe */
+
+        if ( (p = HDctime(&current_date)) == NULL ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "HDctime() failed";
+
+        } else {
+
+            /* copy the string into time_buf, replacing white space with
+             * underscores.
+             *
+             * Do this to make parsing the header easier.
+             */
+            i = 0;
+
+            while ( ( i < 31 ) && ( *p != '\0' ) ) {
+
+                if ( isspace(*p) ) {
+
+                    time_buf[i] = '_';
+
+                } else {
+
+                    time_buf[i] = *p;
+                }
+
+                i++;
+                p++;
+            }
+
+            time_buf[i] = '\0';
+        }
+    }
+
+    if ( show_progress ) /* 20 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    if ( pass2 ) {
+
+        char expected_header[256];
+        int expected_header_len;
+
+        uint8_t expected_msg_11[] =
+        {
+            /* mssg 11: eoas */
+                /* header:    */ 'e', 'o', 'a', 's', 
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00, 0x00
+        };
+        int expected_msg_11_len = 13;
+
+
+        uint8_t expected_msg_12[] =
+        {
+            /* mssg 12: begin transaction 3 */
+                /* header:    */ 'b', 't', 'r', 'n', 
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        int expected_msg_12_len = 13;
+
+        uint8_t expected_msg_13[] =
+        {
+            /* mssg 13: journal entry */
+                /* header:    */ 'j', 'e', 'n', 't',
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* base addr: */ 0xaf, 0x6f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* length:    */ 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                /* body:      */ '#', '1', 'n', 'N', '`', '}',
+                /* chksum:    */ 0x6b, 0x60, 0x0d, 0x6d
+        };
+        int expected_msg_13_len = 39;
+
+        uint8_t expected_msg_14[] =
+        {
+            /* mssg 14: end transaction 1 */
+                /* header:    */ 'e', 't', 'r', 'n', 
+                /* version:   */ 0x00, 
+                /* trans num: */ 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        int expected_msg_14_len = 13;
+       
+        sprintf(expected_header, "0 ver_num 1 target_file_name HDF5.file journal_magic 123 creation_date %10.10s human_readable 0 offset_width 8 length_width 8\n", time_buf);
+        expected_header_len = HDstrlen(expected_header);
+
+        if ( (fd = HDopen(filename, O_RDONLY, 0777)) == -1 ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "Can't open journal file for test (2).";
+ 
+        } 
+
+        if ( pass2 ) {
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_header, 
+                /* expected msg len     */ expected_header_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual headers differ.",
+                /* read failure msg     */ "error reading header.",
+                /* eof failure msg      */ "encountered eof in header msg.",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_11, 
+                /* expected msg len     */ expected_msg_11_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual msg 11 differ.",
+                /* read failure msg     */ "error reading msg 11.",
+                /* eof failure msg      */ "encountered eof in msg 11.",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_12, 
+                /* expected msg len     */ expected_msg_12_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual msg 12 differ.",
+                /* read failure msg     */ "error reading msg 12.",
+                /* eof failure msg      */ "encountered eof in msg 12",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_13, 
+                /* expected msg len     */ expected_msg_13_len,
+                /* last_msg             */ FALSE,
+                /* mismatch failuer msg */ "expected and actual msg 13 differ.",
+                /* read failure msg     */ "error reading msg 13.",
+                /* eof failure msg      */ "encountered eof in msg 13",
+                /* not last msg failure */ NULL);
+
+            verify_journal_msg(
+		/* fd                   */ fd, 
+                /* expected_msg         */ expected_msg_14, 
+                /* expected msg len     */ expected_msg_14_len,
+                /* last_msg             */ TRUE,
+                /* mismatch failuer msg */ "expected and actual msg 14 differ.",
+                /* read failure msg     */ "error reading msg 14.",
+                /* eof failure msg      */ "encountered eof in msg 14",
+                /* not last msg failure */ "msg 14 does not end file");
+
+
+            if ( HDclose(fd) != 0 ) {
+
+                pass2 = FALSE;
+                failure_mssg2 = "Unable to close journal file (1).";
+            }
+        }
+    }
+
+    /* Truncate the journal file */
+    if ( pass2 ) {
+
+	if ( H5C2_jb__trunc(&jbrb_struct) != SUCCEED ) {
+
+		pass2 = FALSE;
+		failure_mssg2 = "H5C2_jb__trunc failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    /* take down the journal file */
+    if ( pass2 ) {
+
+	if (H5C2_jb__takedown(&jbrb_struct) != SUCCEED) {
+
+	    pass2 = FALSE;
+	    failure_mssg2 = "H5C2_jb__takedown failed";
+
+	} /* end if */
+
+    } /* end if */
+
+    if ( show_progress ) /* 20 */ 
+	HDfprintf(stdout, "%s%0d -- pass = %d\n", fcn_name, 
+		  checkpoint++, (int)pass2);
+
+    /* report pass / failure information */
+    if ( pass2 ) { PASSED(); } else { H5_FAILED(); }
+
+    if ( ! pass2 ) {
+
+	failures2++;
+        HDfprintf(stdout, "%s: failure_mssg2 = \"%s\".\n",
+                  fcn_name, failure_mssg2);
+
+    }
+
+    return;
+
+} /* check_binary_message_format() */
+
+
+/***************************************************************************
+ * Function: 	verify_journal_msg
+ *
+ * Purpose:  	Verify that the supplied expected journal message is 
+ *		the next in the message in the indicated journal file.
+ *
+ *		Do nothing it the expected message matches the file
+ *		contents.  If there is a mismatch, set pass2 to false
+ *		and set the failure message as specified.
+ *
+ *		Exit without any action if pass2 is false on entry.
+ *
+ * Return:      void
+ *
+ * Programmer:  J Mainzer
+ *
+ * Changes:	None.
+ * 
+ **************************************************************************/
+
+static void
+verify_journal_msg(int fd,
+                   uint8_t expected_msg[],
+                   int expected_msg_len,
+                   hbool_t last_msg,
+                   const char * mismatch_failure_msg,
+                   const char * read_failure_msg,
+                   const char * eof_failure_msg,
+                   const char * not_last_msg_msg)
+{
+    const char * fcn_name = "verify_journal_msg()";
+    hbool_t verbose = TRUE;
+    uint8_t ch;
+    int i = 0;
+    ssize_t ret_val;
+
+    if ( pass2 ) {
+
+        if ( ( fd < 0 ) ||
+             ( expected_msg == NULL ) ||
+             ( expected_msg_len <= 0 ) ||
+             ( mismatch_failure_msg == NULL ) ||
+             ( read_failure_msg  == NULL ) ||
+             ( eof_failure_msg == NULL ) ||
+             ( ( last_msg) && ( not_last_msg_msg == NULL ) ) ) {
+
+            pass2 = FALSE;
+            failure_mssg2 = "verify_journal_msg(): Bad params on entry.";
+        }
+    }
+
+    while ( ( pass2 ) && ( i < expected_msg_len ) ) 
+    {
+        ret_val = read(fd, (void *)(&ch), (size_t)1);
+
+        if ( ret_val == 1 ) {
+
+            if ( ch != expected_msg[i] ) {
+
+                pass2 = FALSE;
+	        failure_mssg2 = mismatch_failure_msg;
+            }
+
+        } else if ( ret_val == -1 ) {
+
+            if ( verbose ) {
+
+                HDfprintf(stdout, "%s: read failed with errno = %d (%s).\n",
+                          fcn_name, errno, strerror(errno));
+            }
+
+            pass2 = FALSE;
+            failure_mssg2 = mismatch_failure_msg;
+
+        } else if ( ret_val == 0 ) {
+
+            if ( verbose ) {
+
+                HDfprintf(stdout, "%s: unexpected EOF.\n", fcn_name);
+            }
+
+            pass2 = FALSE;
+            failure_mssg2 = eof_failure_msg;
+
+        } else {
+
+            if ( verbose ) {
+
+                HDfprintf(stdout, "%s: read returned unexpected value (%d).\n", 
+                          fcn_name, (int)ret_val);
+            }
+
+            pass2 = FALSE;
+            failure_mssg2 = "read returned unexpected value.";
+
+        }
+
+        i++;
+            
+    }
+
+    if ( ( pass2 ) && ( last_msg ) ) {
+
+        ret_val = read(fd, (void *)(&ch), (size_t)1);
+
+        if ( ret_val != 0 ) {
+
+            if ( verbose ) {
+
+                HDfprintf(stdout, "%s: msg not at eof as expected.\n", fcn_name);
+            }
+
+            pass2 = FALSE;
+            failure_mssg2 = not_last_msg_msg;
+        }
+    }
+
+    return;
+
+} /* verify_journal_msg() */
 
 
 /***************************************************************************
@@ -11265,8 +12502,13 @@ check_message_format(void)
  *
  * Programmer:  Mike McGreevy <mcgreevy@hdfgroup.org>
  *              Tuesday, February 26, 2008
+ *
+ * Changes:	JRM -- 4/16/09
+ *		Updated for the addition of new parameters to 
+ *		H5C2_jb__init().
  * 
  **************************************************************************/
+
 static void 
 check_legal_calls(void)
 {
@@ -11304,6 +12546,10 @@ check_legal_calls(void)
     /* Initialize H5C2_jbrb_t structure. This call should SUCCEED. */
     if ( pass2 ) {
 
+        /* Note that the sizeof_addr & sizeof_size parameters are 
+         * ignored when human_readable is TRUE.
+         */
+
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
                                /* journal magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
@@ -11311,7 +12557,9 @@ check_legal_calls(void)
                                /* Buffer size */            4000, 
                                /* Number of Buffers */      3, 
                                /* Use Synchronois I/O */    FALSE, 
-                               /* human readable journal */ TRUE);
+                               /* human readable journal */ TRUE,
+                               /* sizeof_addr */            8,
+                               /* sizeof_size */            8);
 
         if ( result != SUCCEED) {
 
@@ -11764,6 +13012,10 @@ check_legal_calls(void)
  *
  * Programmer: 	Mike McGreevy <mcgreevy@hdfgroup.org>
  *              Tuesday, February 26, 2008
+ *
+ * Changes:	JRM -- 4/16/09
+ *		Updated for the addition of new parameters to 
+ *		H5C2_jb__init().
  * 
  **************************************************************************/
 static void 
@@ -11816,6 +13068,10 @@ check_transaction_tracking(void)
     /* Initialize H5C2_jbrb_t structure. */
     if ( pass2 ) {
 
+        /* Note that the sizeof_addr & sizeof_size parameters are 
+         * ignored when human_readable is TRUE.
+         */
+
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
                                /* journal magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
@@ -11823,7 +13079,9 @@ check_transaction_tracking(void)
                                /* Buffer size */            250, 
                                /* Number of Buffers */      4, 
                                /* Use Synchronois I/O */    FALSE, 
-                               /* human readable journal */ TRUE);
+                               /* human readable journal */ TRUE,
+                               /* sizeof_addr */            8,
+                               /* sizeof_size */            8);
 
         if ( result != SUCCEED) {
 
@@ -11958,6 +13216,10 @@ check_transaction_tracking(void)
     /* Initialize H5C2_jbrb_t structure. */
     if ( pass2 ) {
 
+        /* Note that the sizeof_addr & sizeof_size parameters are 
+         * ignored when human_readable is TRUE.
+         */
+
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
                                /* journal magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
@@ -11965,7 +13227,9 @@ check_transaction_tracking(void)
                                /* Buffer size */            100, 
                                /* Number of Buffers */      4, 
                                /* Use Synchronois I/O */    FALSE, 
-                               /* human readable journal */ TRUE);
+                               /* human readable journal */ TRUE,
+                               /* sizeof_addr */            8,
+                               /* sizeof_size */            8);
 
         if ( result != SUCCEED) {
 
@@ -12074,6 +13338,10 @@ check_transaction_tracking(void)
     /* Initialize H5C2_jbrb_t structure. */
     if ( pass2 ) {
 
+        /* Note that the sizeof_addr & sizeof_size parameters are 
+         * ignored when human_readable is TRUE.
+         */
+
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
                                /* journal_magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
@@ -12081,7 +13349,9 @@ check_transaction_tracking(void)
                                /* Buffer size */            30, 
                                /* Number of Buffers */      10, 
                                /* Use Synchronois I/O */    FALSE, 
-                               /* human readable journal */ TRUE);
+                               /* human readable journal */ TRUE,
+                               /* sizeof_addr */            8,
+                               /* sizeof_size */            8);
 
         if ( result != SUCCEED) {
 
@@ -12227,6 +13497,10 @@ check_transaction_tracking(void)
     /* Initialize H5C2_jbrb_t structure. */
     if ( pass2 ) {
 
+        /* Note that the sizeof_addr & sizeof_size parameters are 
+         * ignored when human_readable is TRUE.
+         */
+
        	result = H5C2_jb__init(/* H5C2_jbrb_t */            &jbrb_struct, 
 			       /* journal_magic */	    123,
                                /* HDF5 file name */         HDF5_FILE_NAME,
@@ -12234,7 +13508,9 @@ check_transaction_tracking(void)
                                /* Buffer size */            1, 
                                /* Number of Buffers */      35, 
                                /* Use Synchronois I/O */    FALSE, 
-                               /* human readable journal */ TRUE);
+                               /* human readable journal */ TRUE,
+                               /* sizeof_addr */            8,
+                               /* sizeof_size */            8);
 
         if ( result != SUCCEED) {
 
@@ -12516,23 +13792,42 @@ main(void)
 
     }
     
+    /* Human readable smoke checks */
 #if 1
-    mdj_smoke_check_00();
+    mdj_smoke_check_00(TRUE);
 #endif
 #if 1
-    mdj_smoke_check_01();
+    mdj_smoke_check_01(TRUE);
 #endif
 #if 1
-    mdj_smoke_check_02();
+    mdj_smoke_check_02(TRUE);
 #endif
 #if 1
-    mdj_api_example_test();
+    mdj_api_example_test(TRUE);
 #endif
+
+
+    /* Binary readable smoke checks */
+#if 1
+    mdj_smoke_check_00(FALSE);
+#endif
+#if 1
+    mdj_smoke_check_01(FALSE);
+#endif
+#if 1
+    mdj_smoke_check_02(FALSE);
+#endif
+#if 1
+    mdj_api_example_test(FALSE);
+#endif
+
+    /* targeted tests */
 #if 1
     check_buffer_writes();
     check_legal_calls();
     check_message_format();
     check_transaction_tracking();
+    check_binary_message_format();
 #endif
 #if 1
     check_superblock_extensions();

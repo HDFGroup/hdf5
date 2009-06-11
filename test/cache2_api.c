@@ -276,24 +276,6 @@ check_fapl_mdc_api_calls(void)
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-#if 0 /* JRM */
-    /* since this is the test cache, must build the cache explicitly */
-    /* remove this when we start using the new cache                 */
-    if ( pass2 )
-    {
-        if ( H5AC2_create(file_ptr, &default_config) != SUCCEED ) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = "Can't construct test cache.\n";
-
-	} else {
-
-	    cache_ptr = file_ptr->shared->cache2;
-	}
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-#endif /* JRM */
     /* verify that we can access the internal version of the cache config */
     if ( pass2 ) {
 
@@ -463,24 +445,6 @@ check_fapl_mdc_api_calls(void)
 
     if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
 
-#if 0 /* JRM */
-    /* since this is the test cache, must build the cache explicitly */
-    /* remove this when we start using the new cache                 */
-    if ( pass2 )
-    {
-        if ( H5AC2_create(file_ptr, &default_config) != SUCCEED ) {
-
-	    pass2 = FALSE;
-	    failure_mssg2 = "Can't construct test cache.\n";
-
-	} else {
-
-	    cache_ptr = file_ptr->shared->cache2;
-	}
-    }
-
-    if ( show_progress ) HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-#endif /* JRM */
     /* verify that we can access the internal version of the cache config */
     if ( pass2 ) {
 
@@ -3309,9 +3273,7 @@ check_file_mdc_api_errs(void)
     size_t cur_size;
     int cur_num_entries;
     double hit_rate;
-#if 0 /* JRM */
-    H5F_t * file_ptr = NULL;
-#endif /* JRM */
+
     H5AC2_cache_config_t default_config = H5AC2__DEFAULT_CACHE_CONFIG;
     H5AC2_cache_config_t scratch;
 
@@ -3354,32 +3316,7 @@ check_file_mdc_api_errs(void)
             failure_mssg2 = "H5Fcreate() failed.\n";
         }
     }
-#if 0 /* JRM */
-    /* get a pointer to the files internal data structure */
-    if ( pass2 ) {
 
-        file_ptr = (H5F_t *)H5I_object_verify(file_id, H5I_FILE);
-
-        if ( file_ptr == NULL ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "Can't get file_ptr.\n";
-
-        }
-    }
-
-    /* since this is the test cache, must build the cache explicitly */
-    /* remove this when we start using the new cache                 */
-    if ( pass2 )
-    {
-        if ( H5AC2_create(file_ptr, &default_config) != SUCCEED ) {
-
-            pass2 = FALSE;
-            failure_mssg2 = "Can't construct test cache.\n";
-
-        }
-    }
-#endif /* JRM */
     validate_mdc_config(file_id, &default_config, TRUE, 1);
 
 

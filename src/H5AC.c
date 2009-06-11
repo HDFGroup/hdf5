@@ -3131,7 +3131,7 @@ H5AC_validate_config(H5AC_cache_config_t * config_ptr)
     if ( ( config_ptr->evictions_enabled == FALSE ) &&
 	 ( ( config_ptr->incr_mode != H5C_incr__off ) || 
 	   ( config_ptr->flash_incr_mode != H5C_flash_incr__off ) ||
-	   ( config_ptr->incr_mode != H5C_decr__off ) ) ) {
+	   ( config_ptr->decr_mode != H5C_decr__off ) ) ) {
 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, \
                     "Can't disable evictions while auto-resize is enabled.")

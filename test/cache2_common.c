@@ -3212,8 +3212,8 @@ flush_cache2(H5F_t * file_ptr,
     verify_unprotected2();
 
     if ( show_progress ) {
-	HDfprintf(stdout, "%s: mile_post = %d.\n", 
-		  fcn_name, mile_post++); /* 1 */
+	HDfprintf(stdout, "%s: mile_post = %d - %d.\n", 
+		  fcn_name, mile_post++, (int)pass2); /* 1 */
     }
 
     if ( pass2 ) {
@@ -3235,8 +3235,8 @@ flush_cache2(H5F_t * file_ptr,
     }
 
     if ( show_progress ) {
-	HDfprintf(stdout, "%s: mile_post = %d.\n", 
-		  fcn_name, mile_post++); /* 2 */
+	HDfprintf(stdout, "%s: mile_post = %d - %d.\n", 
+		  fcn_name, mile_post++, (int)pass2); /* 2 */
     }
 
     if ( dump_stats ) {
@@ -3245,8 +3245,8 @@ flush_cache2(H5F_t * file_ptr,
     }
 
     if ( show_progress ) {
-	HDfprintf(stdout, "%s: mile_post = %d.\n", 
-		  fcn_name, mile_post++); /* 3 */
+	HDfprintf(stdout, "%s: *mile_post = %d - %d.\n", 
+		  fcn_name, mile_post++, (int)pass2); /* 3 */
     }
 
     if ( result < 0 ) {
@@ -3256,8 +3256,8 @@ flush_cache2(H5F_t * file_ptr,
     }
 
     if ( show_progress ) {
-	HDfprintf(stdout, "%s: mile_post = %d.\n", 
-		  fcn_name, mile_post++); /* 4 */
+	HDfprintf(stdout, "%s: mile_post = %d - %d.\n", 
+		  fcn_name, mile_post++, (int)pass2); /* 4 */
     }
 
     return;
@@ -3678,18 +3678,6 @@ rename_entry2(H5C2_t * cache_ptr,
 	         ( ( ! ( entry_ptr->header.destroy_in_progress ) ) &&
 	           ( entry_ptr->header.addr != new_addr ) ) ) {
 
-#if 0 /* JRM */
-	        if ( result < 0 ) {
-	            HDfprintf(stdout, "%s: H5C2_rename_entry() failed.\n", 
-                              fcn_name);
-	        }
-		if ( ( ! ( entry_ptr->header.destroy_in_progress ) ) &&
-                     ( entry_ptr->header.addr != new_addr ) ) {
-	            HDfprintf(stdout, "%s: ( ( ! ( entry_ptr->header.destroy_in_progress ) ) && ( entry_ptr->header.addr != new_addr ) ).\n", 
-                              fcn_name);
-		}
-	        HDassert(FALSE);
-#endif /* JRM */
                 pass2 = FALSE;
                 failure_mssg2 = "error in H5C2_rename_entry().";
 
@@ -4271,17 +4259,6 @@ unprotect_entry2(H5F_t * file_ptr,
             HDassert( entry_ptr->header.is_dirty );
             HDassert( entry_ptr->is_dirty );
         }
-
-#if 0 /* JRM */
-	if ( entry_ptr->header.is_protected != entry_ptr->is_protected ) {
-
-	    HDfprintf(stdout, 
-	      "(%d, %d, %d): header.is_protected = %d != is_protected = %d.\n",
-	      type, idx, entry_ptr->ro_ref_count, 
-	      (int)(entry_ptr->header.is_protected),
-	      (int)(entry_ptr->is_protected));
-        } 
-#endif /* JRM */
 
 	HDassert( entry_ptr->header.is_protected == entry_ptr->is_protected );
 	HDassert( entry_ptr->header.is_read_only == entry_ptr->is_read_only );
@@ -5985,11 +5962,7 @@ check_and_validate_cache_hit_rate(hid_t file_id,
 
             pass2 = FALSE;
             failure_mssg2 = "unexpected hit rate (1).";
-#if 1 /* JRM */
-            HDfprintf(stdout, "actual/expected hit rate = %f/%f.\n",
-		      hit_rate, expected_hit_rate);
-	    HDassert(0);
-#endif /* JRM */
+
         }
     }
 

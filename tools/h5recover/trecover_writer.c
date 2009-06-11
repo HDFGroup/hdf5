@@ -46,7 +46,7 @@ create_files(const char *filename, const char *ctl_filename)
 }
 
 int
-journal_files(const char *filename, const char *ctl_filename, const char *jnl_filename, int patch)
+journal_files(const char *filename, const char *ctl_filename, const char *jnl_filename, int patch, hbool_t human_readable)
 {
     /*
      * Create a new file and the control file using H5F_ACC_TRUNC access,
@@ -82,7 +82,7 @@ journal_files(const char *filename, const char *ctl_filename, const char *jnl_fi
     jnl_config.jbrb_buf_size = 8*1024;    /* multiples of sys buffer size*/
     jnl_config.jbrb_num_bufs = 2;
     jnl_config.jbrb_use_aio = 0;          /* only sync IO is supported */
-    jnl_config.jbrb_human_readable = 1;   /* only readable form is supported */
+    jnl_config.jbrb_human_readable = human_readable;
     strcpy(jnl_config.journal_file_path, jnl_filename);
 
     if ( H5Pset_jnl_config(faccpl, &jnl_config) < 0 ) {

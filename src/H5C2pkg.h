@@ -110,6 +110,33 @@
  *
  * human_readable:	Boolean flag that indicates whether the journal file
  *			is to be human readable or machine readable.
+ *
+ * offset_width:	If human_readable is FALSE, this field contains the 
+ *			width of offsets in the HDF5 file in bytes (as 
+ *			specified in the superblock -- sizeof_addr in 
+ *			H5F_file_t).
+ *
+ *			If human_readable is TRUE, this field is undefined.
+ *
+ * length_width:	If human_readable is FALSE, this field contains the
+ *			width of lengths in the HDF5 file in bytes (as 
+ *			specified in the super block -- sizeof_size in 
+ *			H5F_file_t).
+ *
+ * chksum_cur_msg:	Boolean flag that is only defined if human_readable
+ *			is false.  It is used to indicate whether the current
+ *			journal message must be checksumed.  If true, the 
+ *			message checksum to date is stored in the msg_chksum
+ *			(discussed below).
+ *
+ *			If the journal message is being checksumed, this 
+ *			field will be set back to FALSE when the checksum
+ *			of the messages is written to buffer.
+ *
+ * msg_chksum:		uint32_t used to compile the checksum of a binary
+ *			journal file message.  Note that not all messages
+ *			are checksumed -- this field is only defined when
+ *			chksum_cur_msg is TRUE.
  *	
  * journal_is_empty:	Boolean flag that indicates if the journal file
  *			associated with the ring buffer is currently
@@ -171,6 +198,22 @@
 #define H5C2_JNL__JNL_MAGIC_TAG		"journal_magic"
 #define H5C2_JNL__CREATION_DATE_TAG	"creation_date"
 #define H5C2_JNL__HUMAN_READABLE_TAG	"human_readable"
+#define H5C2_JNL__OFFSET_WIDTH_TAG	"offset_width"
+#define H5C2_JNL__LENGTH_WIDTH_TAG	"length_width"
+
+/* signatures and versions used to mark the beginnings of journal file 
+ * messages in binary journal files.
+ */
+
+#define H5C2_BJNL__SIG_LEN		((size_t)(4))
+#define H5C2_BJNL__BEGIN_TRANS_SIG	"btrn"
+#define H5C2_BJNL__BEGIN_TRANS_VER	((uint8_t)(0))
+#define H5C2_BJNL__JOURNAL_ENTRY_SIG	"jent"
+#define H5C2_BJNL__JOURNAL_ENTRY_VER	((uint8_t)(0))
+#define H5C2_BJNL__END_TRANS_SIG	"etrn"
+#define H5C2_BJNL__END_TRANS_VER	((uint8_t)(0))
+#define H5C2_BJNL__END_ADDR_SPACE_SIG	"eoas"
+#define H5C2_BJNL__END_ADDR_SPACE_VER	((uint8_t)(0))
 
 struct H5C2_jbrb_t 
 {
@@ -186,6 +229,10 @@ struct H5C2_jbrb_t
 	hbool_t 	jentry_written;
 	hbool_t		use_aio;
 	hbool_t		human_readable;
+        int		offset_width;
+        int		length_width;
+        hbool_t		chksum_cur_msg;
+        uint32_t	msg_chksum;
 	hbool_t		journal_is_empty;
 	uint64_t	cur_trans;
 	uint64_t	last_trans_on_disk;

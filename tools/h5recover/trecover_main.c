@@ -33,6 +33,7 @@
 CrasherParam_t	AsyncCrashParam;
 int		CrashMode = SyncCrash;	/* default to synchronous crash */
 hid_t		datafile, ctl_file;    /* data and control file ids */
+hbool_t         humanReadableJnl = 1;
 
 /* local variables */
 #if 0
@@ -65,6 +66,9 @@ parser(int ac, char **av)
 		    help();
 		    exit(1);
 		}
+		break;
+	    case 'b':	/* binary journal file option */
+		humanReadableJnl = 0;
 		break;
 	    case 'd':	/* -d dataset type */
 		if (--ac > 0){
@@ -155,17 +159,18 @@ void
 help(void)
 {
     fprintf(stderr, 
-        "Usage: trecover ([-a <seconds>] [-d <dataset-type>] [-h]) | [-v]\n"
-	"\t-a\tAsync crash seconds where <seconds> is a real number.\n"
-	"\t-d\tDataset to create. <dataset-type> can be:\n"
-	"\t\t  A\tAll datasets\n"
-	"\t\t  C\tContingous datasets\n"
-	"\t\t  G\tGzip compressed datasets\n"
-	"\t\t  K\tChunked datasets\n"
-	"\t\t  S\tSzip compressed datasets\n"
-	"\t\tDefault is all datasets\n"
-	"\t\tTemp Default is Chunked datasets\n"
-	"\t-v\tVerify recovery -- may not be combined with any other option.\n"
+       "Usage: trecover ([-a <seconds>] [-b] [-d <dataset-type>] [-h]) | [-v]\n"
+       "\t-a\tAsync crash seconds where <seconds> is a real number.\n"
+       "\t-b\tUse binary journal file (default human readable).\n"
+       "\t-d\tDataset to create. <dataset-type> can be:\n"
+       "\t\t  A\tAll datasets\n"
+       "\t\t  C\tContingous datasets\n"
+       "\t\t  G\tGzip compressed datasets\n"
+       "\t\t  K\tChunked datasets\n"
+       "\t\t  S\tSzip compressed datasets\n"
+       "\t\tDefault is all datasets\n"
+       "\t\tTemp Default is Chunked datasets\n"
+       "\t-v\tVerify recovery -- may not be combined with any other option.\n"
    );
 }
 
@@ -200,7 +205,8 @@ main (int ac, char **av)
         }
 
         /* Open data file with Journaling and control file without. */
-        journal_files(H5FILE_NAME, CTL_H5FILE_NAME, JNL_H5FILE_NAME, PatchMode);
+        journal_files(H5FILE_NAME, CTL_H5FILE_NAME, JNL_H5FILE_NAME, 
+                      PatchMode, humanReadableJnl);
     
         if (PatchMode){
 	    /* extend the datafile again without writing data, then close it. */

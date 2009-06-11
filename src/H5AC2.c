@@ -4154,20 +4154,7 @@ H5AC2_validate_jnl_config(const H5AC2_jnl_config_t *config_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
 
     if ( config_ptr->version != H5AC2__CURR_JNL_CONFIG_VER ) {
-#if 0 /* JRM */
-	HDfprintf(stdout, "version = %d(%d).\n", config_ptr->version,
-		  H5AC2__CURR_JNL_CONFIG_VER);
-	HDfprintf(stdout, "enable_journaling = %d.\n", 
-		  (int)(config_ptr->enable_journaling));
-	HDfprintf(stdout, "journal_recovered = %d\n", 
-		  (int)(config_ptr->journal_recovered));
-	HDfprintf(stdout, "jbrb_buf_size = %ld\n",
-		  (long)(config_ptr->jbrb_buf_size));
-	HDfprintf(stdout, "jbrb_num_bufs = %d\n", config_ptr->jbrb_num_bufs);
-	HDfprintf(stdout, "jbrb_use_aio = %d\n", (int)(config_ptr->jbrb_use_aio));
-	HDfprintf(stdout, "jbrb_human_readable = %d\n",
-		  (int)(config_ptr->jbrb_human_readable));
-#endif /* JRM */
+
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
     }
 

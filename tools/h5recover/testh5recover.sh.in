@@ -504,6 +504,7 @@ test_point() {
     pass=1
     seconds=$1
     usecs=$2
+    trecover_options=$3
 
     if [ $usecs -lt 10 ] 
     then
@@ -548,13 +549,13 @@ test_point() {
         fi
     fi
 
-    echo "trecover -a $delay"
+    echo "trecover -a $delay $trecover_options"
 
     # Generate the data, journal and the control files.
     # The testing shell will still print "Terminated" though the signal is
     # trapped. Need to find a way to block or filter it out.
     trap true 15
-    $RUNSERIAL ./trecover -a $delay > /dev/null 2>&1
+    $RUNSERIAL ./trecover -a $delay $trecover_options > /dev/null 2>&1
 
     if [ -f trecover.h5 ]
     then
@@ -671,6 +672,8 @@ run_jnl_invarient_test() {
     echo "Testing journaling invarients...."
     echo ""
 
+    trecover_options=$1
+
     finished=0;
     sec=0;
     usec=0;
@@ -687,7 +690,7 @@ run_jnl_invarient_test() {
 
 	fi
 
-	test_point $sec $usec
+	test_point $sec $usec $trecover_options
 
 	pass=$?
 
@@ -742,6 +745,9 @@ run_jnl_invarient_test() {
 
 # default test setting
 TOOLTEST default.txt
+
+# repeat using the binary journal file format
+TOOLTEST default.txt -b
 
 
 # h5recover output and journal rejection tests
@@ -806,7 +812,13 @@ run_h5recover_output_test test38 "-x -v" "38 verbose examine bad HDF5 file"
 # basic idea is to scan the execution time of a journaled process to 
 # look for points in time at which the journaling invarients are not
 # maintained.  see comments for details.
+#
+# Run the test twice -- once with human readable journal file format, and
+# once with binary journal file format.
+
 run_jnl_invarient_test
+
+run_jnl_invarient_test -b
 
 
 if test $nerrors -eq 0 ; then

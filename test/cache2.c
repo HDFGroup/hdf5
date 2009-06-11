@@ -9674,11 +9674,7 @@ check_flush_cache__flush_op_test(H5F_t * file_ptr,
     }
     else if ( ( cache_ptr->index_len != 0 ) ||
               ( cache_ptr->index_size != 0 ) ) {
-#if 0 /* JRM */
-        HDfprintf(stdout, "%s:(1) index_len = %ld, index_size = %ld.\n",
-                  fcn_name, (long)(cache_ptr->index_len),
-                  (long)(cache_ptr->index_size));
-#endif /* JRM */
+
         pass2 = FALSE;
 
         HDsnprintf(msg, (size_t)128,
