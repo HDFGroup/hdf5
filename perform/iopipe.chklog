@@ -1,0 +1,24 @@
+============================
+ iopipe  Test Log
+============================
+fill raw        =============================================
+fill hdf5       =============================================
+out raw         =============================================
+out hdf5        =============================================
+in raw          =============================================
+in hdf5         =============================================
+in hdf5 partial =============================================
+I/O request size is 1000000.0MB
+Before getrusage() call
+fill raw        0.01user 0.00system 0.01elapsed 3245.99MB/s
+fill hdf5       0.00user 0.00system 0.01elapsed 7754.61MB/s
+out raw         0.00user 0.02system 0.02elapsed 2195.15MB/s
+out hdf5        0.00user 0.02system 0.02elapsed 2154.40MB/s
+in raw          0.00user 0.02system 0.02elapsed 2468.22MB/s
+in hdf5         0.00user 0.01system 0.01elapsed 5232.41MB/s
+in hdf5 partial 0.02user 0.01system 0.03elapsed 1619.29MB/s
+0.09user 0.30system 0:02.44elapsed 16%CPU (0avgtext+0avgdata 0maxresident)k
+264inputs+4024outputs (2major+16447minor)pagefaults 0swaps
+
+Finished testing iopipe 
+============================

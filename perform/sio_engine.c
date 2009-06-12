@@ -21,7 +21,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include <unistd.h>
+#ifdef H5_HAVE_UNISTD_H
+#	include <unistd.h>
+#endif
 #include <errno.h>
 
 #include "hdf5.h"
@@ -227,7 +229,7 @@ do_sio(parameters param)
      */
     /* Open file for write */
 
-    strcpy(base_name, "#sio_tmp");
+    HDstrcpy(base_name, "#sio_tmp");
     sio_create_filename(iot, base_name, fname, sizeof(fname), &param);
 
     if (sio_debug_level > 0)
@@ -335,7 +337,7 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     }
 
     /* First use the environment variable and then try the constant */
-    prefix = getenv("HDF5_PREFIX");
+    prefix = HDgetenv("HDF5_PREFIX");
 
 #ifdef HDF5_PREFIX
     if (!prefix)
@@ -349,8 +351,8 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
      * directory instead. */
     register char *user, *login, *subdir;
 
-    user = getenv("USER");
-    login = getenv("LOGIN");
+    user = HDgetenv("USER");
+    login = HDgetenv("LOGIN");
     subdir = (user ? user : login);
 
     if (subdir) {
@@ -363,24 +365,24 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
         fullname[i] = subdir[j];
     } else {
         /* We didn't append the prefix yet */
-        strncpy(fullname, prefix, MIN(strlen(prefix), size));
+        HDstrncpy(fullname, prefix, MIN(HDstrlen(prefix), size));
     }
 
-    if ((strlen(fullname) + strlen(base_name) + 1) < size) {
+    if ((HDstrlen(fullname) + HDstrlen(base_name) + 1) < size) {
         /* Append the base_name with a slash first. Multiple slashes are
          * handled below. */
         h5_stat_t buf;
 
         if (HDstat(fullname, &buf) < 0)
         /* The directory doesn't exist just yet */
-        if (mkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST) {
+        if (HDmkdir(fullname, 0755) < 0 && errno != EEXIST) {
             /* We couldn't make the "/tmp/${USER,LOGIN}" subdirectory.
              * Default to PREFIX's original prefix value. */
-            strcpy(fullname, prefix);
+            HDstrcpy(fullname, prefix);
         }
 
-        strcat(fullname, "/");
-        strcat(fullname, base_name);
+        HDstrcat(fullname, "/");
+        HDstrcat(fullname, base_name);
     } else {
         /* Buffer is too small */
         return NULL;
@@ -389,19 +391,19 @@ sio_create_filename(iotype iot, const char *base_name, char *fullname, size_t si
     /* Buffer is too small */
         return NULL;
     } else {
-        strcpy(fullname, base_name);
+        HDstrcpy(fullname, base_name);
     }
 
     /* Append a suffix */
     if (suffix) {
-        if (strlen(fullname) + strlen(suffix) >= size)
+        if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
             return NULL;
 
-        strcat(fullname, suffix);
+        HDstrcat(fullname, suffix);
     }
 
     /* Remove any double slashes in the filename */
-    for (ptr = fullname, i = j = 0; ptr && i < size; i++, ptr++) {
+    for (ptr = fullname, i = j = 0; ptr && (i < size); i++, ptr++) {
     if (*ptr != '/' || last != '/')
         fullname[j++] = *ptr;
 
@@ -537,14 +539,14 @@ do_write(results *res, file_descr *fd, parameters *parms, void *buffer)
             h5dset_space_id, H5P_DEFAULT, h5dcpl, H5P_DEFAULT);
 
         if (h5ds_id < 0) {
-            fprintf(stderr, "HDF5 Dataset Create failed\n");
+            HDfprintf(stderr, "HDF5 Dataset Create failed\n");
             GOTOERROR(FAIL);
         }
 
         hrc = H5Pclose(h5dcpl);
         /* verifying the close of the dcpl */
         if (hrc < 0) {
-            fprintf(stderr, "HDF5 Property List Close failed\n");
+            HDfprintf(stderr, "HDF5 Property List Close failed\n");
             GOTOERROR(FAIL);
         }
 
@@ -841,7 +843,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
         sprintf(dname, "Dataset_%ld", parms->num_bytes);
         h5ds_id = H5Dopen2(fd->h5fd, dname, H5P_DEFAULT);
         if (h5ds_id < 0) {
-            fprintf(stderr, "HDF5 Dataset open failed\n");
+            HDfprintf(stderr, "HDF5 Dataset open failed\n");
             GOTOERROR(FAIL);
         }
 
@@ -1048,7 +1050,7 @@ do_fopen(parameters *param, char *fname, file_descr *fd /*out*/, int flags)
             fd->posixfd = POSIXOPEN(fname, O_RDONLY);
 
         if (fd->posixfd < 0 ) {
-            fprintf(stderr, "POSIX File Open failed(%s)\n", fname);
+            HDfprintf(stderr, "POSIX File Open failed(%s)\n", fname);
             GOTOERROR(FAIL);
         }
 
@@ -1129,7 +1131,7 @@ set_vfd(parameters *param)
         HDmemset(memb_name, 0, sizeof memb_name);
         HDmemset(memb_addr, 0, sizeof memb_addr);
 
-        assert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
+        HDassert(HDstrlen(multi_letters)==H5FD_MEM_NTYPES);
         for (mt=H5FD_MEM_DEFAULT; mt<H5FD_MEM_NTYPES; H5_INC_ENUM(H5FD_mem_t,mt)) {
             memb_fapl[mt] = H5P_DEFAULT;
             sprintf(sv[mt], "%%s-%c.h5", multi_letters[mt]);
@@ -1220,7 +1222,7 @@ do_cleanupfile(iotype iot, char *filename)
     hid_t       driver;
 
     if (clean_file_g == -1)
-    clean_file_g = (getenv("HDF5_NOCLEANUP")==NULL) ? 1 : 0;
+    clean_file_g = (HDgetenv("HDF5_NOCLEANUP")==NULL) ? 1 : 0;
 
     if (clean_file_g){
 
