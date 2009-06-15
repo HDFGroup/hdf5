@@ -102,13 +102,13 @@ endFfile(void)
 /* Define a c_int_x type in the C header */
 void writeTypedef(const char* c_type, unsigned int size)
 {
-  fprintf(c_header, "#define c_int_%d %s\n", size, c_type);
+  fprintf(c_header, "#define c_int_%u %s\n", size, c_type);
 }
 
 /* Define a c_float_x type in the C header */
 void writeFloatTypedef(const char* c_type, unsigned int size)
 {
-  fprintf(c_header, "#define c_float_%d %s\n", size, c_type);
+  fprintf(c_header, "#define c_float_%u %s\n", size, c_type);
 }
 
 /* Call this function if there is no matching C type for sizes > 1 */
@@ -116,22 +116,22 @@ void writeTypedefDefault(unsigned int size)
 {
   assert(size %2 == 0);
 
-  fprintf(c_header, "typedef struct {c_int_%d a; c_int_%d b;} c_int_%d\n", size / 2, size / 2, size);
+  fprintf(c_header, "typedef struct {c_int_%u a; c_int_%u b;} c_int_%u\n", size / 2, size / 2, size);
 }
 
 /* Create matching Fortran and C types by writing to both files */
 void writeToFiles(const char* fortran_type, const char* c_type, unsigned int size)
 {
-  fprintf(fort_header, "        INTEGER, PARAMETER :: %s = %d\n", fortran_type, size);
-  fprintf(c_header, "typedef c_int_%d %s;\n", size, c_type);
+  fprintf(fort_header, "        INTEGER, PARAMETER :: %s = %u\n", fortran_type, size);
+  fprintf(c_header, "typedef c_int_%u %s;\n", size, c_type);
 }
 
 /* Create matching Fortran and C floating types by writing to both files */
 void writeFloatToFiles(const char* fortran_type, const char* c_type, unsigned int size)
 {
-  fprintf(fort_header, "        INTEGER, PARAMETER :: %s = %d\n", fortran_type, size);
+  fprintf(fort_header, "        INTEGER, PARAMETER :: %s = %u\n", fortran_type, size);
 
-  fprintf(c_header, "typedef c_float_%d %s;\n", size, c_type);
+  fprintf(c_header, "typedef c_float_%u %s;\n", size, c_type);
 }
 
 int main()
