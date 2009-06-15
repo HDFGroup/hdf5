@@ -68,6 +68,9 @@
  */
 
 
+/* module-scoped variables */
+int d_status = EXIT_SUCCESS;
+
 int main(int argc, const char *argv[])
 {
     int        ret;

@@ -17,6 +17,8 @@
 #include "h5diff.h"
 #include "H5private.h"
 #include "ph5diff.h"
+#include "h5tools.h"
+#include "h5tools_utils.h"
 
 /*
  * Debug printf macros. The prefix allows output filtering by test scripts.
@@ -210,9 +212,11 @@ hsize_t h5diff(const char *fname1,
     /* disable error reporting */
     H5E_BEGIN_TRY
     {
-        /* open the files */
-        if((file1_id = H5Fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+        /* open file 1 */
+
+        if((file1_id = h5tools_fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) 
         {
+
             parallel_print("h5diff: <%s>: unable to open file\n", fname1);
             options->err_stat = 1;
 
@@ -223,8 +227,13 @@ hsize_t h5diff(const char *fname1,
 #endif
             goto out;
         } /* end if */
-        if((file2_id = H5Fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+
+
+        /* open file 2 */
+        
+        if((file2_id = h5tools_fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT, NULL, NULL, (size_t)0)) < 0) 
         {
+
             parallel_print("h5diff: <%s>: unable to open file\n", fname2);
             options->err_stat = 1;
 
