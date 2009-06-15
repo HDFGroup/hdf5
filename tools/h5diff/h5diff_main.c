@@ -30,6 +30,7 @@ void h5diff_exit(int status);
 
 /* module-scoped variables */
 const char  *progname = "h5diff";
+int         d_status = EXIT_SUCCESS;
 
 /*
  * Command-line options: The user can specify short or long-named
@@ -405,85 +406,85 @@ int check_d_input( const char *str )
 
 void usage(void)
 {
- printf("usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]] \n");
- printf("  file1                    File name of the first HDF5 file\n");
- printf("  file2                    File name of the second HDF5 file\n");
- printf("  [obj1]                   Name of an HDF5 object, in absolute path\n");
- printf("  [obj2]                   Name of an HDF5 object, in absolute path\n");
-
- printf("  OPTIONS\n");
-
- printf("   -h, --help              Print a usage message and exit\n");
- printf("   -V, --version           Print version number and exit\n");
- printf("   -r, --report            Report mode. Print differences\n");
- printf("   -v, --verbose           Verbose mode. Print differences, list of objects\n");
- printf("   -q, --quiet             Quiet mode. Do not do output\n");
- printf("   -c, --compare           List objects that are not comparable\n");
- printf("   -N, --nan               Avoid NaNs detection\n");
-
- printf("   -n C, --count=C         Print differences up to C number\n");
- printf("   -d D, --delta=D         Print difference when greater than limit D\n");
- printf("   -p R, --relative=R      Print difference when greater than relative limit R\n");
-
-
- printf("\n");
-
- printf("  C - is a positive integer\n");
- printf("  D - is a positive number. Compare criteria is |a - b| > D\n");
- printf("  R - is a positive number. Compare criteria is |(b-a)/a| > R\n");
-
- printf("\n");
-
- printf(" Modes of output:\n");
- printf("\n");
- printf("  Default mode: print the number of differences found and where they occured\n");
- printf("  -r Report mode: print the above plus the differences\n");
- printf("  -v Verbose mode: print the above plus a list of objects and warnings\n");
- printf("  -q Quiet mode: do not print output\n");
-
- printf("\n");
-
- printf(" Compare criteria\n");
- printf("\n");
- printf(" If no objects [obj1[obj2]] are specified, h5diff only compares objects\n");
- printf("   with the same absolute path in both files\n");
- printf("\n");
-
- printf(" The compare criteria is:\n");
- printf("   1) datasets: numerical array differences 2) groups: name string difference\n");
- printf("   3) datatypes: the return value of H5Tequal 4) links: name string difference\n");
- printf("   of the linked value\n");
-
- printf("\n");
-
- printf(" Return exit code:\n");
- printf("\n");
- printf("  1 if differences found, 0 if no differences, 2 if error\n");
-
- printf("\n");
-
- printf(" Examples of use:\n");
- printf("\n");
- printf(" 1) h5diff file1 file2 /g1/dset1 /g1/dset2\n");
- printf("\n");
- printf("    Compares object '/g1/dset1' in file1 with '/g1/dset2' in file2\n");
- printf("\n");
- printf(" 2) h5diff file1 file2 /g1/dset1\n");
- printf("\n");
- printf("    Compares object '/g1/dset1' in both files\n");
- printf("\n");
- printf(" 3) h5diff file1 file2\n");
- printf("\n");
- printf("    Compares all objects in both files\n");
- printf("\n");
- printf(" Note)  file1 and file2 can be the same file. Use\n");
- printf("\n");
- printf("    h5diff file1 file1 /g1/dset1 /g1/dset2\n");
- printf("\n");
- printf("    to compare '/g1/dset1' and '/g1/dset2' in the same file\n");
- printf("\n");
-
-
+    printf("usage: h5diff [OPTIONS] file1 file2 [obj1[obj2]] \n");
+    printf("  file1                    File name of the first HDF5 file\n");
+    printf("  file2                    File name of the second HDF5 file\n");
+    printf("  [obj1]                   Name of an HDF5 object, in absolute path\n");
+    printf("  [obj2]                   Name of an HDF5 object, in absolute path\n");
+    
+    printf("  OPTIONS\n");
+    
+    printf("   -h, --help              Print a usage message and exit\n");
+    printf("   -V, --version           Print version number and exit\n");
+    printf("   -r, --report            Report mode. Print differences\n");
+    printf("   -v, --verbose           Verbose mode. Print differences, list of objects\n");
+    printf("   -q, --quiet             Quiet mode. Do not do output\n");
+    printf("   -c, --compare           List objects that are not comparable\n");
+    printf("   -N, --nan               Avoid NaNs detection\n");
+    
+    printf("   -n C, --count=C         Print differences up to C number\n");
+    printf("   -d D, --delta=D         Print difference when greater than limit D\n");
+    printf("   -p R, --relative=R      Print difference when greater than relative limit R\n");
+    
+    
+    printf("\n");
+    
+    printf("  C - is a positive integer\n");
+    printf("  D - is a positive number. Compare criteria is |a - b| > D\n");
+    printf("  R - is a positive number. Compare criteria is |(b-a)/a| > R\n");
+    
+    printf("\n");
+    
+    printf(" Modes of output:\n");
+    printf("\n");
+    printf("  Default mode: print the number of differences found and where they occured\n");
+    printf("  -r Report mode: print the above plus the differences\n");
+    printf("  -v Verbose mode: print the above plus a list of objects and warnings\n");
+    printf("  -q Quiet mode: do not print output\n");
+    
+    printf("\n");
+    
+    printf(" Compare criteria\n");
+    printf("\n");
+    printf(" If no objects [obj1[obj2]] are specified, h5diff only compares objects\n");
+    printf("   with the same absolute path in both files\n");
+    printf("\n");
+    
+    printf(" The compare criteria is:\n");
+    printf("   1) datasets: numerical array differences 2) groups: name string difference\n");
+    printf("   3) datatypes: the return value of H5Tequal 4) links: name string difference\n");
+    printf("   of the linked value\n");
+    
+    printf("\n");
+    
+    printf(" Return exit code:\n");
+    printf("\n");
+    printf("  1 if differences found, 0 if no differences, 2 if error\n");
+    
+    printf("\n");
+    
+    printf(" Examples of use:\n");
+    printf("\n");
+    printf(" 1) h5diff file1 file2 /g1/dset1 /g1/dset2\n");
+    printf("\n");
+    printf("    Compares object '/g1/dset1' in file1 with '/g1/dset2' in file2\n");
+    printf("\n");
+    printf(" 2) h5diff file1 file2 /g1/dset1\n");
+    printf("\n");
+    printf("    Compares object '/g1/dset1' in both files\n");
+    printf("\n");
+    printf(" 3) h5diff file1 file2\n");
+    printf("\n");
+    printf("    Compares all objects in both files\n");
+    printf("\n");
+    printf(" Note)  file1 and file2 can be the same file. Use\n");
+    printf("\n");
+    printf("    h5diff file1 file1 /g1/dset1 /g1/dset2\n");
+    printf("\n");
+    printf("    to compare '/g1/dset1' and '/g1/dset2' in the same file\n");
+    printf("\n");
+    
+    
 }
 
 

@@ -16,6 +16,8 @@
 #include <stdlib.h>
 #include "h5diff.h"
 #include "H5private.h"
+#include "h5tools.h"
+#include "h5tools_utils.h"
 
 
 /*-------------------------------------------------------------------------
@@ -90,19 +92,24 @@ hsize_t h5diff(const char *fname1,
      /* disable error reporting */
     H5E_BEGIN_TRY 
     {
-        /* open the files */
-        if((file1_id = H5Fopen(fname1, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) 
+        /* open file 1 */
+        
+        if((file1_id = h5tools_fopen(fname1, NULL, NULL, 0)) < 0) 
         {
             printf("h5diff: <%s>: unable to open file\n", fname1 );
             options->err_stat = 1;
             goto out;
-        } /* end if */
-        if((file2_id = H5Fopen(fname2, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0) 
+        } 
+
+        /* open file 2 */
+
+        if((file2_id = h5tools_fopen(fname2, NULL, NULL, 0)) < 0) 
         {
             printf("h5diff: <%s>: unable to open file\n", fname2 );
             options->err_stat = 1;
             goto out;
-        } /* end if */
+        } 
+
     /* enable error reporting */
     } H5E_END_TRY;
     
