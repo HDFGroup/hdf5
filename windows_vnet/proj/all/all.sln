@@ -1087,14 +1087,24 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mfdll", "..\..\test\mfdll\m
 		{B5D88BF3-5F9B-49CC-A677-BF4D364F1163} = {B5D88BF3-5F9B-49CC-A677-BF4D364F1163}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "perf_serial", "..\..\perform\perf_serial\perf_serial.vcproj", "{453D3EE8-1B28-40F1-A1A1-957A1419A8AD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BB439F14-D29D-4A05-9AB0-0B08682721DE} = {BB439F14-D29D-4A05-9AB0-0B08682721DE}
+		{BC88C469-E7E8-4D02-A388-D378974DEDED} = {BC88C469-E7E8-4D02-A388-D378974DEDED}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "perf_serialdll", "..\..\perform\perf_serialdll\perf_serialdll.vcproj", "{162792B4-5FCC-4688-9251-41666A8A8CCC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{99251C69-C5DD-4886-85F3-A33ACE4CDB94} = {99251C69-C5DD-4886-85F3-A33ACE4CDB94}
+		{B5D88BF3-5F9B-49CC-A677-BF4D364F1163} = {B5D88BF3-5F9B-49CC-A677-BF4D364F1163}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		AlphaDbg = AlphaDbg
 		AlphaRel = AlphaRel
 		Debug = Debug
 		Release = Release
-	EndGlobalSection
-	GlobalSection(ProjectDependencies) = postSolution
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{BF2DE306-9D25-431E-A6FC-A96672B61BCC}.AlphaDbg.ActiveCfg = Release|Win32
@@ -2367,6 +2377,22 @@ Global
 		{05FF4827-ABF8-49C0-93BD-AE195AB89D3C}.Debug.Build.0 = Debug|Win32
 		{05FF4827-ABF8-49C0-93BD-AE195AB89D3C}.Release.ActiveCfg = Release|Win32
 		{05FF4827-ABF8-49C0-93BD-AE195AB89D3C}.Release.Build.0 = Release|Win32
+		{453D3EE8-1B28-40F1-A1A1-957A1419A8AD}.AlphaDbg.ActiveCfg = Debug|Win32
+		{453D3EE8-1B28-40F1-A1A1-957A1419A8AD}.AlphaDbg.Build.0 = Debug|Win32
+		{453D3EE8-1B28-40F1-A1A1-957A1419A8AD}.AlphaRel.ActiveCfg = Debug|Win32
+		{453D3EE8-1B28-40F1-A1A1-957A1419A8AD}.AlphaRel.Build.0 = Debug|Win32
+		{453D3EE8-1B28-40F1-A1A1-957A1419A8AD}.Debug.ActiveCfg = Debug|Win32
+		{453D3EE8-1B28-40F1-A1A1-957A1419A8AD}.Debug.Build.0 = Debug|Win32
+		{453D3EE8-1B28-40F1-A1A1-957A1419A8AD}.Release.ActiveCfg = Release|Win32
+		{453D3EE8-1B28-40F1-A1A1-957A1419A8AD}.Release.Build.0 = Release|Win32
+		{162792B4-5FCC-4688-9251-41666A8A8CCC}.AlphaDbg.ActiveCfg = Release|Win32
+		{162792B4-5FCC-4688-9251-41666A8A8CCC}.AlphaDbg.Build.0 = Release|Win32
+		{162792B4-5FCC-4688-9251-41666A8A8CCC}.AlphaRel.ActiveCfg = Release|Win32
+		{162792B4-5FCC-4688-9251-41666A8A8CCC}.AlphaRel.Build.0 = Release|Win32
+		{162792B4-5FCC-4688-9251-41666A8A8CCC}.Debug.ActiveCfg = Debug|Win32
+		{162792B4-5FCC-4688-9251-41666A8A8CCC}.Debug.Build.0 = Debug|Win32
+		{162792B4-5FCC-4688-9251-41666A8A8CCC}.Release.ActiveCfg = Release|Win32
+		{162792B4-5FCC-4688-9251-41666A8A8CCC}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
