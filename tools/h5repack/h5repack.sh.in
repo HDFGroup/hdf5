@@ -54,6 +54,7 @@ FILE13=h5repack_soffset.h5
 FILE14=h5repack_layouto.h5      # A file with an older version of the layout message
                                 # (copy of test/tlayouto.h5)
 FILE15=h5repack_named_dtypes.h5
+FILE16=tfamily%05d.h5           # located in common testfiles folder
 
 
 nerrors=0
@@ -140,6 +141,8 @@ TOOLTEST()
     rm -f $outfile
 }
 
+# same as TOOLTEST, but it uses the old syntax -i input_file -o output_file
+#
 TOOLTEST0() 
 {
     # Run test.
@@ -155,6 +158,38 @@ TOOLTEST0()
      $RUNSERIAL $H5REPACK_BIN -i $infile -o $outfile $@
     else
      $RUNSERIAL $H5REPACK_BIN -i $infile -o $outfile "$@"
+    fi
+
+    RET=$?
+    if [ $RET != 0 ] ; then
+     echo "*FAILED*"
+     nerrors="`expr $nerrors + 1`"
+    else
+     echo " PASSED"
+     DIFFTEST $infile $outfile
+    fi
+    rm -f $outfile
+}
+
+
+# same as TOOLTEST, but it uses the common testfiles at $srcdir/../testfiles/
+# used to test the family driver, where these files reside
+#
+TOOLTEST1() 
+{
+    # Run test.
+    # Tflops interprets "$@" as "" when no parameter is given (e.g., the
+    # case of missing file name).  Changed it to use $@ till Tflops fixes it.
+    TESTING $H5REPACK $@
+
+    infile=$srcdir/../testfiles/$1
+    path=`pwd`
+    outfile=$path/out.$1
+    shift
+    if [ "`uname -s`" = "TFLOPS O/S" ]; then
+     $RUNSERIAL $H5REPACK_BIN $@ $infile $outfile
+    else
+     $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
     fi
 
     RET=$?
@@ -513,6 +548,9 @@ TOOLTEST $FILE1 -f GZIP=1
 
 # Check repacking file with committed datatypes in odd configurations
 TOOLTEST $FILE15
+
+# tests family driver (file is located in common testfiles folder, uses TOOLTEST1
+TOOLTEST1 $FILE16
 
 if test $nerrors -eq 0 ; then
    echo "All $H5REPACK tests passed."
