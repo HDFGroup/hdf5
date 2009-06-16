@@ -2221,6 +2221,8 @@
 ./windows_vnet/hl/tools/gifconvdll/gif2h5dll.vcproj
 ./windows_vnet/hl/tools/gifconvdll/h52gifdll.vcproj
 ./windows_vnet/misc/typegen/h5tinit/h5tinit.vcproj
+./windows_vnet/perform/perf_serial/perf_serial.vcproj
+./windows_vnet/perform/perf_serialdll/perf_serialdll.vcproj
 ./windows_vnet/proj/all/all.vcproj
 ./windows_vnet/proj/all/all.sln
 ./windows_vnet/proj/hdf5/hdf5.vcproj
