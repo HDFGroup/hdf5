@@ -57,7 +57,9 @@ hid_t   H5_MY_PKG_ERR;
 /********************/
 /* Local Prototypes */
 /********************/
+static herr_t op_func_L (hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_data);
 
+static herr_t op_func (hid_t loc_id, const char *name, const H5O_info_t *info, void *operator_data);
 
 /*********************/
 /* Package Variables */
@@ -75,9 +77,10 @@ hbool_t H5_H5LR_init_g = FALSE;
 /* Local Variables */
 /*******************/
 
-int regref_to_all_start;  /* starting index counter for placeing data into 1D array, used by H5LRcreate_regref_to_all */ 
-hsize_t regref_to_all_size; /* size of the 1D array needed to hold all the region references created by H5LRcreate_regref_to_all */
-hid_t type_id_ref2;
+/* USED BY HL API: H5LRcreate_regref_to_all */
+static size_t  _regref_to_all_start;  /* starting index counter for placing data into 1D array, used by H5LRcreate_regref_to_all */ 
+static hsize_t _regref_to_all_size;   /* size of the 1D array needed to hold all the region references created by H5LRcreate_regref_to_all */
+static hid_t   _regref_to_all_dtype;  /* data type of the 1D array created by H5LRcreate_regref_to_all */
 
 /*-------------------------------------------------------------------------
  *
@@ -85,138 +88,151 @@ hid_t type_id_ref2;
  *
  *-------------------------------------------------------------------------
  */
-/*
- * Operator functions to be called by H5Lvisit_by_name. used by H5LRcreate_regref_to_all
- */
-
 
 /************************************************************
 
-  Operator function for H5Lvisit_by_name.  This function simply
+  Operator function used by HL API H5LRcreate_regref_to_all:
+     (1) Sums the number of elements in each region reference
+         if operator_data is NULL.
+     (2) Reads the data from the region references into a
+         1D array (operator_data) if operator_data is not NULL. 
+
+ ************************************************************/
+
+static herr_t 
+op_func (hid_t loc_id, const char *name, const H5O_info_t *info, void *operator_data)
+{
+    herr_t status; 
+    hid_t dtype_id=-1, dtype=-1, native_type=-1, space_id=-1, space_id_ref=-1;
+    int rank, ndim;
+    hsize_t *dims;
+    int i;
+    hdset_reg_ref_t *ref_out;
+    size_t size_loc;
+    size_t  get_size;
+    hid_t dset_ref;
+    hid_t dtype_ref;
+    hid_t type_id_ref;
+    int ref_size;
+    /*
+     * Check if the current object is a region reference.
+     */
+    if(info->type == H5O_TYPE_DATASET) {
+      if( ( dtype_id = H5Dopen2(loc_id, name, H5P_DEFAULT) ) < 0) goto out;
+      if( ( dtype = H5Dget_type(dtype_id) ) < 0) goto out;
+      if( ( native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT) ) < 0) goto out;
+      /* check if object is a region reference */
+      if(H5Tget_class(native_type) == H5T_REFERENCE){
+
+	if( (space_id = H5Dget_space(dtype_id) )  < 0) goto out;
+	if( (rank = H5Sget_simple_extent_ndims(space_id) ) < 0) goto out;
+	if( (dims = (hsize_t *)malloc (sizeof (hsize_t) * rank) ) == NULL) goto out;
+	if( (ndim = H5Sget_simple_extent_dims(space_id, dims, NULL) ) < 0) goto out;
+	ref_size = 0;
+	for(i=0; i<ndim;i++)
+	  ref_size += dims[i];
+	if( (ref_out = malloc (sizeof (hdset_reg_ref_t) * ref_size)) == NULL) goto out;
+
+	if( H5Dread(dtype_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_out) != 0) goto out;
+
+	size_loc = 0;
+	/* loop over the region references */
+	for (i=0; i<ref_size; i++){
+
+	  space_id_ref = H5Rget_region(dtype_id, H5R_DATASET_REGION, ref_out[i]);
+
+	  dset_ref = H5Rdereference(loc_id, H5R_DATASET_REGION, ref_out[i]);
+	  dtype_ref = H5Dget_type(dset_ref);
+	  type_id_ref = H5Tget_native_type(dtype_ref, H5T_DIR_DEFAULT );
+	  if(_regref_to_all_dtype==0){
+	    _regref_to_all_dtype = H5Tcopy(type_id_ref); /* assume the data type is the same for all region reference, so just store one */
+	  } else {
+	    if( !(H5Tequal(_regref_to_all_dtype,type_id_ref)) ) goto out; /* checking all the region references are of the same type */
+	  }
+
+	  if(operator_data==NULL) { /* add to the size of the 1D array for the region reference */
+	    size_loc += (size_t)H5Sget_select_npoints(space_id_ref);
+	  } else { /* read the region reference into the correct section of the 1D array */
+	    size_loc = (size_t)H5Sget_select_npoints(space_id_ref);
+	    get_size= H5Tget_size(type_id_ref);
+	    status = H5LRread_region(dtype_id, ref_out[i], type_id_ref,  &size_loc, ((char*)operator_data)+get_size*_regref_to_all_start);
+	    if(status != 0) goto out;
+	    _regref_to_all_start += size_loc;
+	  }
+	  /* close resources associated with region references */
+	  if(H5Sclose(space_id_ref) < 0) goto out;
+	  space_id_ref = -1;
+	  if(H5Dclose(dset_ref    ) < 0) goto out;
+	  dset_ref = -1;
+	  if(H5Tclose(dtype_ref   ) < 0) goto out;
+	  dtype_ref = -1;
+	  if(H5Tclose(type_id_ref ) < 0) goto out;
+	  type_id_ref = -1;
+	}
+	free(dims);
+	free(ref_out);
+	
+	if(H5Sclose(space_id) < 0) goto out;
+	space_id = -1;
+
+	if(operator_data==NULL) _regref_to_all_size += size_loc;
+      }
+      if(H5Dclose(dtype_id) != 0) goto out;
+      dtype_id = -1;
+      if(H5Tclose(dtype) != 0) goto out;
+      dtype = -1;
+      if(H5Tclose(native_type) != 0) goto out;
+      native_type = -1;
+    }
+    return 0;
+
+ out:
+
+    if(dtype_id > 0)
+      H5Dclose(dtype_id);
+    if(dtype > 0)
+      H5Tclose(dtype);
+    if(native_type > 0)
+      H5Tclose(native_type);
+    if(space_id>0)
+      H5Sclose(space_id);
+    if(dset_ref >0)
+      H5Dclose(dset_ref);
+    if(space_id_ref >0)
+      H5Sclose(space_id_ref);
+    if(type_id_ref > 0)
+      H5Tclose(type_id_ref );
+
+    return -2;
+}
+
+/************************************************************
+
+  Operator function for H5Lvisit_by_name, used by
+  the HL API H5LRcreate_regref_to_all.  This function simply
   retrieves the info for the object the current link points
   to, and calls the operator function, op_func.
 
  ************************************************************/
 
-herr_t op_func_L (hid_t loc_id, const char *name, const H5L_info_t *info,
-            void *operator_data)
+static herr_t 
+op_func_L (hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_data)
 {
-    herr_t          status;
-    H5O_info_t      infobuf;
+  herr_t          status;
+  H5O_info_t      infobuf;
 
-    /*
-     * Get type of the object and display its name and type.
-     * The name of the object is passed to this function by
-     * the Library.
-     */
-    status = H5Oget_info_by_name (loc_id, name, &infobuf, H5P_DEFAULT);
-    if(status < 0) return -1;
+  /*
+   * Get type of the object and display its name and type.
+   * The name of the object is passed to this function by
+   * the Library.
+   */
+  status = H5Oget_info_by_name (loc_id, name, &infobuf, H5P_DEFAULT);
+  if(status < 0) return -1;
 
-    status = op_func (loc_id, name, &infobuf, operator_data);
-
-/*     return op_func (loc_id, name, &infobuf, operator_data);*/
-
-    return status;
+  return op_func (loc_id, name, &infobuf, operator_data);
 
 }
-/************************************************************
 
-  Operator function:
-     (1) Sums the number of elements in each region reference
-         if operator_data is NULL.
-     (2) Reads the data from the region references into a
-         1D array (operator_data). 
-
- ************************************************************/
-
-herr_t op_func (hid_t loc_id, const char *name, const H5O_info_t *info,
-		void *operator_data)
-{
-    herr_t status; 
-    hid_t dtype_id, dtype, native_type, space_id,space_id_ref, dset;
-    int rank, ndim;
-    hsize_t *dims;
-    int i;
-    hdset_reg_ref_t *ref_out;
-    H5S_sel_type sel_type;
-    hsize_t size_loc;
-    int *data;
-    size_t  get_size;
-    hid_t dset_ref;
-    hid_t dtype_ref;
-    hid_t type_id_ref;
-    /*
-     * Check if the current object is a region reference.
-     */
-    size_loc = 0;
-    if(info->type == H5O_TYPE_DATASET) {
-      dtype_id = H5Dopen2(loc_id, name, H5P_DEFAULT);
-      if(dtype_id < 0) goto out;
-      dtype = H5Dget_type(dtype_id);
-      if(dtype < 0) goto out;
-      native_type = H5Tget_native_type(dtype, H5T_DIR_DEFAULT);
-      if(native_type < 0) goto out;
-      /* check if object is a region reference */
-      if(H5Tget_class(native_type) == H5T_REFERENCE){
-
-	space_id = H5Dget_space(dtype_id);
-	if(space_id < 0) goto out;
-	rank = H5Sget_simple_extent_ndims(space_id);
-	if(rank < 0) goto out;
-
-	dims = (hsize_t *)malloc (sizeof (hsize_t) * rank);
-	if(dims == NULL) goto out;
-
-	ndim = H5Sget_simple_extent_dims(space_id, dims, NULL);
-	if(ndim < 0) goto out;
-
- 	ref_out = malloc (sizeof (hdset_reg_ref_t) * dims[0]);
-	if(ref_out == NULL) goto out;
-
-	/* loop through the region references */
-	for (i=0; i<ndim; i++){
-	  status = H5Dread(dtype_id, H5T_STD_REF_DSETREG, H5S_ALL, H5S_ALL, 
-			   H5P_DEFAULT, ref_out);
-	  if(status != 0) goto out;
-	}
-	size_loc = 0;
-	for (i=0; i<dims[0]; i++){
-
-	  space_id_ref = H5Rget_region(dtype_id, H5R_DATASET_REGION, ref_out[i]);
-
-	  if(operator_data==NULL) { /* add to the size of the 1D array for the region reference */
-	    size_loc += (hsize_t)H5Sget_select_npoints(space_id_ref);
-	  } else { /* read the region reference into the 1D array */
-	    size_loc = (hsize_t)H5Sget_select_npoints(space_id_ref);
-
-	    dset_ref = H5Rdereference(loc_id, H5R_DATASET_REGION, ref_out[i]);
-	    dtype_ref = H5Dget_type(dset_ref);
-	    type_id_ref = H5Tget_native_type(dtype_ref, H5T_DIR_DEFAULT ); /* ADD: Need check if all the data types are the same for all region references */
-	    if(i==0) type_id_ref2 = H5Tcopy(type_id_ref);
-	    get_size= H5Tget_size(type_id_ref);
-	    status = H5LRread_region(dtype_id, ref_out[i], type_id_ref,  &size_loc, ((char*)operator_data)+get_size*regref_to_all_start);
-	    if(status != 0) goto out;
-	    regref_to_all_start += size_loc;
-	  }
-	}
-	free(dims);
-	free(ref_out);
-	if(operator_data==NULL) regref_to_all_size += size_loc;
-      }
-      status = H5Dclose(dtype_id);
-      if(status != 0) goto out;
-      status = H5Tclose(native_type);
-      if(status != 0) goto out;
-    }
-
-    return 0;
-
- out:
-
-    return -2;
-
-
-}
 
 /*-------------------------------------------------------------------------
  * Function: H5LR__pkg_init
@@ -1332,8 +1348,7 @@ H5LRcopy_references(hid_t obj_id, hdset_reg_ref_t *ref, const char *file,
   if(status < 0)
     H5E_THROW(H5E_CANTSELECT, "H5LR: Failed to select hyperslab")
 
-  status = (int)H5Sget_select_npoints(file_space_id);
-  if(status < 0)
+  if( H5Sget_select_npoints(file_space_id) < 0)
     H5E_THROW(H5E_CANTSELECT, "H5LR: Failed to select points")
 
   status = H5Dwrite(dset_id, type_id, mem_space_id, file_space_id, H5P_DEFAULT, buf);
@@ -1460,57 +1475,90 @@ H5LRcreate_regref_to_all(hid_t loc_id, const char *group_path,
   herr_t status; /* API return status */
   hid_t filespace;
   hid_t dset_id;
-  hsize_t dims[1];
-  void *data;
+  hsize_t dims[1];  
+  void *data;       /* 1D array to hold data from region references */
+  size_t size_ref;
 
   hid_t current_stack_id = -1; /* current error stack id */
+
   /* flags marking state of allocation */
   hbool_t data_alloc = FALSE;
 
-/* first determine the size of the resulting dataset from the region references */
 
-  regref_to_all_size = 0;
+  _regref_to_all_size  = 0;
+  _regref_to_all_dtype = 0;
+
+/* First determine the size of the resulting dataset from the region references */
   status = H5Lvisit_by_name( loc_id, group_path, index_type, order, op_func_L, NULL, H5P_DEFAULT );
 
-/* create the new dataset with the region references */
+  if(op_func_L<0){
+    if(op_func_L == -1) {
+      H5E_THROW(H5E_CANTCREATE, "H5LR: Failure in internal callback routine H5Oget_info_by_name ")
+    } else if(op_func_L == -2) {
+      H5E_THROW(H5E_CANTCREATE, "H5LR: Failure in internal callback loop over region references  ")
+    }
+  }
+
+ /* if there are no region references then return */
+  if( _regref_to_all_size == 0 ) 
+    goto catch_except;
+  
+/* CREATE THE NEW DATASET WITH THE REGION REFERENCES */
 
 /* Create the dataspace for the new dataset */
-  dims[0] = regref_to_all_size;
+  
+  dims[0] = (size_t)_regref_to_all_size;
 
   filespace = H5Screate_simple(1, dims, NULL);
   if(filespace < 0)
     H5E_THROW(H5E_CANTCREATE, "H5LR: Unable to create dataspace")
 
-
-
 /* Create dataset */
-   dset_id = H5Dcreate2(loc_id, ds_path, H5T_NATIVE_INT, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
+   dset_id = H5Dcreate2(loc_id, ds_path, _regref_to_all_dtype, filespace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT );
    if(dset_id < 0)
        H5E_THROW(H5E_CANTCREATE, "H5LR: Unable to create dataset")
 
-/* regref_to_all_size size of the current data set from region references */
-	 /* size = H5Tget_size( loc_id ) */
-   data = malloc (sizeof (int) * regref_to_all_size);
+/* _regref_to_all_size size of the current data set from region references */
+   size_ref = H5Tget_size( _regref_to_all_dtype );
+   data = malloc ( size_ref * _regref_to_all_size);
 
    if(data == NULL)
     H5E_THROW(H5E_CANTALLOC, "H5LR: Failed to allocate enough memory")
 
    data_alloc = TRUE;
-   regref_to_all_start = 0;
+   _regref_to_all_start = 0;
    status = H5Lvisit_by_name( loc_id, group_path, index_type, order, op_func_L, data, H5P_DEFAULT );
 
+   if(status <0) 
+    H5E_THROW(H5E_CANTCREATE, "H5LR: Failure in reading or writing data associated with region references")
+
+   if(op_func_L<0){
+    if(op_func_L == -1) {
+      H5E_THROW(H5E_CANTCREATE, "H5LR: Failure in internal callback routine H5Oget_info_by_name ")
+    } else if(op_func_L == -2) {
+      H5E_THROW(H5E_CANTCREATE, "H5LR: Failure in internal callback loop over region references  ")
+    }
+  }
 /* write the data */
-   status = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+   status = H5Dwrite(dset_id, _regref_to_all_dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
    status = H5Dclose(dset_id); 
    dset_id = -1;
    status = H5Sclose(filespace);
    filespace = -1;
 
-/* deallocate memory */
+/* DEALLOCATE MEMORY */
    free(data);
    data_alloc = FALSE;
 
-   
+/* CLOSE RESOURCES */
+
+   if(_regref_to_all_dtype > 0) {
+    status = H5Tclose(_regref_to_all_dtype);
+    _regref_to_all_dtype = -1;
+    if(status < 0) {
+      H5E_THROW(H5E_CLOSEERROR, "H5LR: Failed to close datatype")
+    }
+   }
 
 CATCH
 
@@ -1518,16 +1566,19 @@ CATCH
 
    if(data_alloc) free(data);
 
-  /* Close the dataspace */
-  if(filespace > 0)
-    status = H5Sclose(filespace);
+   /* Close the dataspace */
+   if(filespace > 0)
+     status = H5Sclose(filespace);
       
-  /* Close the dataset */
-  if(dset_id > 0)
-    status = H5Dclose(dset_id);
+   /* Close the dataset */
+   if(dset_id > 0)
+     status = H5Dclose(dset_id);
+
+   if(_regref_to_all_dtype > 0)
+     status = H5Tclose(_regref_to_all_dtype);
 
    status = H5Eset_current_stack(current_stack_id);
-
+   
 END_FUNC(PUB)
 
 
