@@ -104,6 +104,10 @@ H5F_block_read(const H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size,
     HDassert(f->shared);
     HDassert(buf);
 
+    /* Check for attempting I/O on 'temporary' file address */
+    if(H5F_addr_le(f->shared->tmp_addr, (addr + size)))
+        HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "attempting I/O in temporary file space")
+
     /* Check if this I/O can be satisfied by the metadata accumulator */
     if((accumulated = H5F_accum_read(f, dxpl_id, type, addr, size, buf)) < 0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "read from metadata accumulator failed")
@@ -149,6 +153,10 @@ HDfprintf(stderr, "%s: write to addr = %a, size = %Zu\n", FUNC, addr, size);
     HDassert(f->shared);
     HDassert(f->intent & H5F_ACC_RDWR);
     HDassert(buf);
+
+    /* Check for attempting I/O on 'temporary' file address */
+    if(H5F_addr_le(f->shared->tmp_addr, (addr + size)))
+        HGOTO_ERROR(H5E_IO, H5E_BADRANGE, FAIL, "attempting I/O in temporary file space")
 
     /* Check for accumulating metadata */
     if((accumulated = H5F_accum_write(f, dxpl_id, type, addr, size, buf)) < 0)

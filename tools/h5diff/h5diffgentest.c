@@ -97,6 +97,9 @@ static int write_dset(hid_t loc_id,int rank,hsize_t *dims,const char *name,hid_t
 *-------------------------------------------------------------------------
 */
 
+/* module-scoped variables */
+int d_status = EXIT_SUCCESS;
+
 int main(void)
 {
     test_basic(FILE1, FILE2, FILE11);

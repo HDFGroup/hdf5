@@ -119,6 +119,9 @@ HDfprintf(stderr, "%s: type = %u, size = %Hu\n", FUNC, (unsigned)type, size);
     HDassert(type >= H5FD_MEM_DEFAULT && type < H5FD_MEM_NTYPES);
     HDassert(size > 0);
 
+    if(HADDR_UNDEF == (eoa = H5F_get_eoa(f, type)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, HADDR_UNDEF, "Unable to get eoa")
+
     /*
      * If the aggregation feature is enabled for this file, allocate "generic"
      * space and sub-allocate out of that, if possible. Otherwise just allocate
@@ -138,9 +141,6 @@ HDfprintf(stderr, "%s: aggr = {%a, %Hu, %Hu}\n", FUNC, aggr->addr, aggr->tot_siz
 	    frag_size = alignment - mis_align;
 	}
 
-	if (HADDR_UNDEF == (eoa = H5F_get_eoa(f, type)))
-	    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "Unable to get eoa")
-
 	alloc_type = aggr->feature_flag == H5FD_FEAT_AGGREGATE_METADATA ? H5FD_MEM_DEFAULT : H5FD_MEM_DRAW;
 	other_alloc_type = other_aggr->feature_flag == H5FD_FEAT_AGGREGATE_METADATA ? H5FD_MEM_DEFAULT : H5FD_MEM_DRAW;
 
@@ -149,8 +149,11 @@ HDfprintf(stderr, "%s: aggr = {%a, %Hu, %Hu}\n", FUNC, aggr->addr, aggr->tot_siz
 
             /* Check if the block asked for is too large for 'normal' aggregator block */
             if(size >= aggr->alloc_size) {
-
 		hsize_t ext_size = size + frag_size;
+
+                /* Check for overlapping into file's temporary allocation space */
+                if(H5F_addr_gt((aggr->addr + aggr->size + ext_size), f->shared->tmp_addr))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF, "'normal' file space allocation request will overlap into 'temporary' file space")
 
 		if ((aggr->addr > 0) && (extended=H5FD_try_extend(f->shared->lf, alloc_type, aggr->addr + aggr->size, ext_size)) < 0)
 		    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't extending space")
@@ -160,6 +163,10 @@ HDfprintf(stderr, "%s: aggr = {%a, %Hu, %Hu}\n", FUNC, aggr->addr, aggr->tot_siz
 		    aggr->addr += ext_size;
 		    aggr->tot_size += ext_size;
 		} else {
+                    /* Check for overlapping into file's temporary allocation space */
+                    if(H5F_addr_gt((eoa + size), f->shared->tmp_addr))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF, "'normal' file space allocation request will overlap into 'temporary' file space")
+
 		    if ((other_aggr->size > 0) && (H5F_addr_eq((other_aggr->addr + other_aggr->size), eoa)) &&
 			((other_aggr->tot_size - other_aggr->size) >= other_aggr->alloc_size)) {
 
@@ -189,6 +196,10 @@ HDfprintf(stderr, "%s: Allocating block\n", FUNC);
 		if (frag_size > (ext_size - size))
 		    ext_size += (frag_size - (ext_size - size));
 
+                /* Check for overlapping into file's temporary allocation space */
+                if(H5F_addr_gt((aggr->addr + aggr->size + ext_size), f->shared->tmp_addr))
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF, "'normal' file space allocation request will overlap into 'temporary' file space")
+
 		if ((aggr->addr > 0) && (extended = H5FD_try_extend(f->shared->lf, alloc_type, aggr->addr + aggr->size, ext_size)) < 0)
 		    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't extending space")
 		else if (extended) {
@@ -196,6 +207,10 @@ HDfprintf(stderr, "%s: Allocating block\n", FUNC);
 		    aggr->size += (ext_size - frag_size);
 		    aggr->tot_size += ext_size;
 		} else {
+                    /* Check for overlapping into file's temporary allocation space */
+                    if(H5F_addr_gt((eoa + aggr->alloc_size), f->shared->tmp_addr))
+                        HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF, "'normal' file space allocation request will overlap into 'temporary' file space")
+
 		    if ((other_aggr->size > 0) && (H5F_addr_eq((other_aggr->addr + other_aggr->size), eoa)) &&
 			((other_aggr->tot_size - other_aggr->size) >= other_aggr->alloc_size)) {
 
@@ -250,6 +265,10 @@ HDfprintf(stderr, "%s: Allocating block\n", FUNC);
         }
     } /* end if */
     else {
+        /* Check for overlapping into file's temporary allocation space */
+        if(H5F_addr_gt((eoa + size), f->shared->tmp_addr))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_BADRANGE, HADDR_UNDEF, "'normal' file space allocation request will overlap into 'temporary' file space")
+
         /* Allocate data from the file */
         if(HADDR_UNDEF == (ret_value = H5FD_alloc(f->shared->lf, dxpl_id, type, size, &eoa_frag_addr, &eoa_frag_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, HADDR_UNDEF, "can't allocate file space")
@@ -257,6 +276,9 @@ HDfprintf(stderr, "%s: Allocating block\n", FUNC);
 	    if(H5MF_xfree(f, type, dxpl_id, eoa_frag_addr, eoa_frag_size) < 0)
 		HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, HADDR_UNDEF, "can't free eoa fragment")
     } /* end else */
+
+    /* Sanity check for overlapping into file's temporary allocation space */
+    HDassert(H5F_addr_le((ret_value + size), f->shared->tmp_addr));
 
 done:
 #ifdef H5MF_AGGR_DEBUG

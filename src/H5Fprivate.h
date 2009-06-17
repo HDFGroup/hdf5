@@ -265,7 +265,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_HAS_FEATURE(F,FL)   ((F)->shared->lf->feature_flags & (FL))
 #define H5F_DRIVER_ID(F)        ((F)->shared->lf->driver_id)
 #define H5F_GET_FILENO(F,FILENUM) ((FILENUM) = (F)->shared->lf->fileno)
-#define H5F_GET_NEXT_PROXY_ADDR(F) ((F)->shared->next_proxy_addr--)
+#define H5F_IS_TMP_ADDR(F, ADDR) (H5F_addr_le((F)->shared->tmp_addr, (ADDR)))
 #else /* H5F_PACKAGE */
 #define H5F_INTENT(F)           (H5F_get_intent(F))
 #define H5F_FCPL(F)             (H5F_get_fcpl(F))
@@ -288,7 +288,7 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5F_HAS_FEATURE(F,FL)   (H5F_has_feature(F,FL))
 #define H5F_DRIVER_ID(F)        (H5F_get_driver_id(F))
 #define H5F_GET_FILENO(F,FILENUM) (H5F_get_fileno((F), &(FILENUM)))
-#define H5F_GET_NEXT_PROXY_ADDR(F) (H5F_get_next_proxy_addr(F))
+#define H5F_IS_TMP_ADDR(F, ADDR) (H5F_is_tmp_addr((F), (ADDR)))
 #endif /* H5F_PACKAGE */
 
 
@@ -474,7 +474,6 @@ H5_DLL char *H5F_get_name(const H5F_t *f);
 H5_DLL hid_t H5F_get_id(H5F_t *file, hbool_t app_ref);
 H5_DLL size_t H5F_get_obj_count(const H5F_t *f, unsigned types, hbool_t app_ref);
 H5_DLL size_t H5F_get_obj_ids(const H5F_t *f, unsigned types, size_t max_objs, hid_t *obj_id_list, hbool_t app_ref);
-H5_DLL haddr_t H5F_get_next_proxy_addr(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL hid_t H5F_get_fcpl(const H5F_t *f);
@@ -492,6 +491,7 @@ H5_DLL unsigned H5F_gc_ref(const H5F_t *f);
 H5_DLL hbool_t H5F_use_latest_format(const H5F_t *f);
 H5_DLL H5F_close_degree_t H5F_get_fc_degree(const H5F_t *f);
 H5_DLL hbool_t H5F_store_msg_crt_idx(const H5F_t *f);
+H5_DLL hbool_t H5F_is_tmp_addr(const H5F_t *f, haddr_t addr);
 
 /* Functions that retrieve values from VFD layer */
 H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);

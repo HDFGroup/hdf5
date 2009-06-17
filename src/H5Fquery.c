@@ -689,30 +689,30 @@ done:
 
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_get_next_proxy_addr
+ * Function:	H5F_is_tmp_addr
  *
- * Purpose:	Quick and dirty routine to retrieve the next metadata proxy
- *          address for a file.
+ * Purpose:	Quick and dirty routine to determine if an address is in
+ *		the 'temporary' file space.
  *          (Mainly added to stop non-file routines from poking about in the
  *          H5F_t data structure)
  *
- * Return:	Success:	Address to use for metadata cache proxy
- * 		Failure:	abort (should not happen)
+ * Return:	TRUE/FALSE on success/abort on failure (shouldn't fail)
  *
  * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
- *		May 19, 2009
+ *		June 11, 2009
  *
  *-------------------------------------------------------------------------
  */
-haddr_t
-H5F_get_next_proxy_addr(const H5F_t *f)
+hbool_t
+H5F_is_tmp_addr(const H5F_t *f, haddr_t addr)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOFUNC here to avoid performance issues */
-    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_get_next_proxy_addr)
+    FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5F_is_tmp_addr)
 
     HDassert(f);
     HDassert(f->shared);
+    HDassert(f->shared->lf);
 
-    FUNC_LEAVE_NOAPI(f->shared->next_proxy_addr--)
-} /* end H5F_get_next_proxy_addr() */
+    FUNC_LEAVE_NOAPI(H5F_addr_le(f->shared->tmp_addr, addr))
+} /* end H5F_is_tmp_addr() */
 

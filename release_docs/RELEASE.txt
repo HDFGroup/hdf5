@@ -1,4 +1,4 @@
-HDF5 version 1.9.41 currently under development
+HDF5 version 1.9.42 currently under development
 ================================================================================
 
 
@@ -167,6 +167,9 @@ Bug Fixes since HDF5-1.8.0 release
 
     Library
     -------
+      - Fixed an issue with committed compound datatypes containing a vlen.
+            Also fixed memory leaks involving committed datatypes.
+            (NAF - 2009/06/10 - 1593)
       - Added versioning to H5Z_class_t struct to allow compatibility with 1.6
             API. (NAF - 2009/04/20 - 1533)
       - Fixed a problem with using data transforms with non-native types in the
@@ -299,6 +302,8 @@ Bug Fixes since HDF5-1.8.0 release
 
     Performance
     -------------
+      - perf_serial test added to Windows projects and check batch file. 
+        (ADB - 2009/06/11)
 
     Tools
     -----
@@ -346,7 +351,7 @@ Bug Fixes since HDF5-1.8.0 release
       - Lite: The h5ltget_dataset_info_f function (gets information about a dataset) 
            was not correctly returning the dimension array. (PVN - 2009/3/23)
       - Lite: the h5ltread_dataset_string_f and h5ltget_attribute_string_f functions 
-           had memory problems with the g95 fortran compiler. (PVN – 5/13/2009) 1522
+           had memory problems with the g95 fortran compiler. (PVN ï¿½ 5/13/2009) 1522
 
 
 
