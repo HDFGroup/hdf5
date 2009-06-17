@@ -22,7 +22,9 @@ usage: h5dump [OPTIONS] file
      -o F, --output=F     Output raw data into file F
      -b B, --binary=B     Binary file output, of form B
      -t P, --datatype=P   Print the specified named data type
-     -w N, --width=N      Set the number of columns of output
+     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)
+                          sets the number of columns to the maximum (65535).
+                          Default width is 80 columns.
      -m T, --format=T     Set the floating point output format
      -x, --xml            Output in XML using Schema
      -u, --use-dtd        Output in XML using DTD

@@ -609,7 +609,9 @@ usage(const char *prog)
     fprintf(stdout, "     -o F, --output=F     Output raw data into file F\n");
     fprintf(stdout, "     -b B, --binary=B     Binary file output, of form B\n");
     fprintf(stdout, "     -t P, --datatype=P   Print the specified named data type\n");
-    fprintf(stdout, "     -w N, --width=N      Set the number of columns of output\n");
+    fprintf(stdout, "     -w N, --width=N      Set the number of columns of output. A value of 0 (zero)\n");
+    fprintf(stdout, "                          sets the number of columns to the maximum (65535).\n");
+    fprintf(stdout, "                          Default width is 80 columns.\n");
     fprintf(stdout, "     -m T, --format=T     Set the floating point output format\n");
     fprintf(stdout, "     -x, --xml            Output in XML using Schema\n");
     fprintf(stdout, "     -u, --use-dtd        Output in XML using DTD\n");
@@ -1999,7 +2001,12 @@ dump_data(hid_t obj_id, int obj_data, struct subset_t *sset, int display_index)
         outputformat->fmt_float = fp_format;
     }
 
-    outputformat->line_ncols = nCols;
+    if (nCols==0) {
+        outputformat->line_ncols = 65535;
+        outputformat->line_per_line = 1;
+    }
+    else
+        outputformat->line_ncols = nCols;
     outputformat->do_escape=display_escape;
     /* print the matrix indices */
     outputformat->pindex=display_index;
@@ -4813,7 +4820,12 @@ xml_dump_data(hid_t obj_id, int obj_data, struct subset_t UNUSED * sset, int UNU
     int                     depth;
     int                     stdindent = COL;    /* should be 3 */
 
-    outputformat->line_ncols = nCols;
+    if (nCols==0) {
+        outputformat->line_ncols = 65535;
+        outputformat->line_per_line = 1;
+    }
+    else
+        outputformat->line_ncols = nCols;
     indent += COL;
 
     /*
