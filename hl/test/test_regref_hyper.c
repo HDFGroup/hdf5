@@ -12,18 +12,9 @@
  * http://hdfgroup.org/HDF5/doc/Copyright.html.  If you do not have          *
  * access to either file, you may request a copy from help@hdfgroup.org.     *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 /*
-    This program shows how to create, store and dereference references
-    to the dataset regions.
-
-    It creates a file and writes a two dimensional integer dataset
-    to it. Then it creates a dataset to store region references in. It
-    stores references to a hyperslab and 3 points selected (for the
-    integer dataset previously created).
-
-    It then reopens the references dataset, reads and dereferences the
-    region references, and then reads and displays the selected hyperslab
-    and selected elements data from the integer dataset.
+   Tests hl region references and hyperslab APIs.
 */
 
 #include "h5hltest.h"
@@ -34,27 +25,7 @@
 #define dsetnamev "DS2"
 #define dsetnamer "R1"
 
-#define TESTING2(WHAT) {printf("%-70s", "Testing     " WHAT); fflush(stdout);}
-
-int start_counter;  /* starting index counter for placeing data into 1D array, used by H5LRcreate_regref_to_all */
-
-herr_t op_func_L1 (hid_t loc_id, const char *name, const H5L_info_t *info,
-		   int *operator_data)
-{
-    herr_t          status;
-    H5O_info_t      infobuf;
-
-    /*
-     * Get type of the object and display its name and type.
-     * The name of the object is passed to this function by
-     * the Library.
-     */
-    status = H5Oget_info_by_name (loc_id, name, &infobuf, H5P_DEFAULT);
-    if(status < 0) return -1;
-
-    return op_func1 (loc_id, name, &infobuf, operator_data);
-}
-
+static size_t start_counter;  /* starting index counter for placing data into 1D array, used by H5LRcreate_regref_to_all */
 
 /************************************************************
 
@@ -66,18 +37,17 @@ herr_t op_func_L1 (hid_t loc_id, const char *name, const H5L_info_t *info,
 
  ************************************************************/
 
-herr_t op_func1 (hid_t loc_id, const char *name, const H5O_info_t *info,
+static herr_t op_func (hid_t loc_id, const char *name, const H5O_info_t *info,
 		int *operator_data)
 {
     herr_t status; 
-    hid_t dtype_id, dtype, native_type, space_id,space_id_ref, dset;
+    hid_t dtype_id, dtype, native_type, space_id,space_id_ref;
     int rank, ndim;
     hsize_t *dims;
-    int i, j;
+    hsize_t i;
+    int j;
     hdset_reg_ref_t *ref_out;
-    H5S_sel_type sel_type;
-    hsize_t size_loc;
-    int *data;
+    size_t size_loc;
     int *data_loc;
     /*
      * Check if the current object is a region reference.
@@ -104,7 +74,7 @@ herr_t op_func1 (hid_t loc_id, const char *name, const H5O_info_t *info,
 	ndim = H5Sget_simple_extent_dims(space_id, dims, NULL);
 	if(ndim < 0) goto out;
 
- 	ref_out = malloc (sizeof (hdset_reg_ref_t) * dims[0]);
+ 	ref_out = (hdset_reg_ref_t*)malloc (sizeof (hdset_reg_ref_t) * dims[0]);
 	if(ref_out == NULL) goto out;
 
 	/* loop through the region references */
@@ -117,8 +87,8 @@ herr_t op_func1 (hid_t loc_id, const char *name, const H5O_info_t *info,
 	for (i=0; i<dims[0]; i++){
 
 	  space_id_ref = H5Rget_region(dtype_id, H5R_DATASET_REGION, ref_out[i]);
-	  size_loc = (hsize_t)H5Sget_select_npoints(space_id_ref);
-	  data_loc = malloc (sizeof (int) * size_loc);
+	  size_loc = (size_t)H5Sget_select_npoints(space_id_ref);
+	  data_loc = (int*)malloc (sizeof (int) * size_loc);
 	  status = H5LRread_region(dtype_id, ref_out[i], H5T_NATIVE_INT,  &size_loc, data_loc);
 	  if(status != 0) goto out;
 
@@ -139,6 +109,23 @@ herr_t op_func1 (hid_t loc_id, const char *name, const H5O_info_t *info,
     return 0;
 out:
     return -2;
+}
+
+static herr_t op_func_L (hid_t loc_id, const char *name, const H5L_info_t *info,
+		   int *operator_data)
+{
+    herr_t          status;
+    H5O_info_t      infobuf;
+
+    /*
+     * Get type of the object and display its name and type.
+     * The name of the object is passed to this function by
+     * the Library.
+     */
+    status = H5Oget_info_by_name (loc_id, name, &infobuf, H5P_DEFAULT);
+    if(status < 0) return -1;
+
+    return op_func (loc_id, name, &infobuf, operator_data);
 }
 
 static int test_regref_hyper( void )
@@ -170,7 +157,7 @@ static int test_regref_hyper( void )
     hsize_t count3D[3];
     hsize_t coord[5] = {1,2,4,6,7};
     size_t num_points = 5;
-    int i, ii, iii, j, jj, k, kk;
+    hsize_t i, ii, iii, j, jj, k, kk;
     size_t nlength;
     int rank_out[3];
     hid_t dtype;
@@ -521,7 +508,7 @@ static int test_regref_hyper( void )
 			 NULL) < 0) goto out;
 
     /* check size of data from region reference */
-    if( (int)numelem_size !=  (block_coord[2]-block_coord[0]+1) * (block_coord[3]-block_coord[1]+1) )
+    if( (hsize_t)numelem_size !=  (block_coord[2]-block_coord[0]+1) * (block_coord[3]-block_coord[1]+1) )
 	goto out;
 
     data_out = (int *)malloc( numelem_size * sizeof(int));
@@ -531,14 +518,13 @@ static int test_regref_hyper( void )
 			 H5T_NATIVE_INT,
 			 &numelem_size, 
 			 data_out) < 0) goto out;
-    
-/*     printf("REGION REFERENCED 2D HYPERSLAB (H5LRread_region),"); */
+
 
     ii = 0; jj = 0;
     for (i=0; i<numelem_size; i++){
       if( data_out[i] != data[ii+(int)block_coord[0]][jj+(int)block_coord[1]])
 	goto out;
-      if( jj+1 == ( (int)block_coord[3]-(int)block_coord[1] + 1) ) {
+      if( jj+1 == ( (size_t)block_coord[3]-(size_t)block_coord[1] + 1) ) {
 	ii = ii + 1;
 	jj = 0;
       } else {
@@ -571,19 +557,16 @@ static int test_regref_hyper( void )
  			     H5T_NATIVE_INT,
  			     data_out);
     if(status < 0) goto out;
-/*     printf("REGION REFERENCED 3D HYPERSLAB (H5LTread_region),"); */
-/*     printf(" COORDINATES (%d,%d,%d)-(%d,%d,%d):\n",(int)block_coord_3D[0],(int)block_coord_3D[1],(int)block_coord_3D[2], */
-/* 	   (int)block_coord_3D[3],(int)block_coord_3D[4],(int)block_coord_3D[5]); */
 
     ii = 0; jj = 0; kk = 0;
     for (i=0; i<numelem_size; i++){
       if( data_out[i] != data3D[ii+(int)block_coord_3D[0]][jj+(int)block_coord_3D[1]][kk+(int)block_coord_3D[2]])
 	goto out;
-      if( ( jj +1 == ( (int)block_coord_3D[4]-(int)block_coord_3D[1] + 1) ) && ( kk+1 == ( (int)block_coord_3D[5]-(int)block_coord_3D[2] + 1 ) ) ) {
+      if( ( jj +1 == (hsize_t)( block_coord_3D[4]-block_coord_3D[1] + 1) ) && ( kk+1 == (hsize_t)( block_coord_3D[5]-block_coord_3D[2] + 1 ) ) ) {
 	ii = ii + 1;
 	jj = 0;
 	kk = 0;
-      } else if( kk+1 == ( (int)block_coord_3D[5]-(int)block_coord_3D[2] + 1)) {
+      } else if( kk+1 == (hsize_t)( block_coord_3D[5]-block_coord_3D[2] + 1)) {
 	jj = jj+1;
 	kk = 0;
       }  
@@ -612,9 +595,9 @@ static int test_regref_hyper( void )
     status = H5Fclose(file_id);
 
     ii =  block_coord_2D_src[0];
-    for (i=0; i< (int)block_coord_2D_dest[2] - (int)block_coord_2D_dest[0] + 1 ; i++) {
+    for (i=0; i< (hsize_t)(block_coord_2D_dest[2] - block_coord_2D_dest[0] + 1) ; i++) {
       jj =  block_coord_2D_src[1];
-      for (j=0; j< (int)block_coord_2D_dest[3] - (int)block_coord_2D_dest[1] + 1  ; j++) {
+      for (j=0; j< (hsize_t)(block_coord_2D_dest[3] - block_coord_2D_dest[1] + 1)  ; j++) {
 	if(data_read_2D[i][j] != data[ii][jj])
 	  goto out;
 	jj = jj + 1;
@@ -638,9 +621,9 @@ static int test_regref_hyper( void )
     /* data_read_2D is the full dataset located at given path */
 
     ii =  block_coord[0];
-    for (i=block_coord_2D_dest_a[0]; i< (int)block_coord_2D_dest_a[2] + 1; i++) {
+    for (i=block_coord_2D_dest_a[0]; i< (hsize_t)block_coord_2D_dest_a[2] + 1; i++) {
       jj =  block_coord[1];
-      for (j=block_coord_2D_dest_a[1]; j< (int)block_coord_2D_dest_a[3] + 1 ; j++) {
+      for (j=block_coord_2D_dest_a[1]; j< (hsize_t)block_coord_2D_dest_a[3] + 1 ; j++) {
 	if(data_read_2D[i][j] != data[ii][jj])
 	  goto out;
 	jj = jj + 1;
@@ -648,7 +631,6 @@ static int test_regref_hyper( void )
       ii = ii + 1;
     }
 
-    
     /* check the data pointed to by the new region reference */
     status = H5LRread_region(file_id,
   			     (const hdset_reg_ref_t*)ref_new,
@@ -659,9 +641,9 @@ static int test_regref_hyper( void )
     if(status<0) goto out;
 
     ii = block_coord[0];
-    for (i = 0 ; i < (int)block_coord[2] - (int)block_coord[0] + 1; i++) {
+    for (i = 0 ; i < (hsize_t)(block_coord[2] - block_coord[0] + 1); i++) {
       jj = block_coord[1];
-      for (j = 0; j < (int)block_coord[3] - (int)block_coord[1] + 1 ; j++) {
+      for (j = 0; j < (hsize_t)(block_coord[3] - block_coord[1] + 1) ; j++) {
 	if(data_out2[i][j] != data[ii][jj])
 	  goto out;
 	jj = jj + 1;
@@ -684,9 +666,9 @@ static int test_regref_hyper( void )
     if(status<0) goto out;
     
     ii =  block_coord[0];
-    for (i=block_coord_4[0]; i< (int)block_coord_4[2] + 1; i++) {
+    for (i=block_coord_4[0]; i< (hsize_t)block_coord_4[2] + 1; i++) {
       jj =  block_coord[1];
-      for (j=block_coord_4[1]; j< (int)block_coord_4[3] + 1 ; j++) {
+      for (j=block_coord_4[1]; j< (hsize_t)block_coord_4[3] + 1 ; j++) {
 	if(data_read_2D[i][j] != data[ii][jj])
 	  goto out;
 	jj = jj + 1;
@@ -706,8 +688,7 @@ static int test_regref_hyper( void )
     if(status < 0) goto out;
 
     PASSED();
-
-    for (i=0; i< (int)num_elem; i++) 
+    for (i=0; i< (hsize_t)num_elem; i++) 
       file_id_array[i] = file_id;
 
 
@@ -717,7 +698,7 @@ static int test_regref_hyper( void )
     /* check the regions and check they were made correctly */
 
     kk = 0;
-    for (iii=0; iii< (int)num_elem; iii++) {
+    for (iii=0; iii< (hsize_t)num_elem; iii++) {
       status = H5LRread_region(file_id,
 			       (const hdset_reg_ref_t*)ref6[iii],
 			       H5T_NATIVE_INT,
@@ -727,9 +708,9 @@ static int test_regref_hyper( void )
 
       /* check the values */
       ii =  block_coord_6[0+kk];
-      for (i=0 ; i < (int)block_coord_6[kk+2] - (int)block_coord_6[0+kk] + 1; i++) {
+      for (i=0 ; i < (hsize_t)(block_coord_6[kk+2] - block_coord_6[0+kk] + 1); i++) {
 	jj =  block_coord_6[1+kk];
-	for (j=0 ; j < (int)block_coord_6[kk+3] - (int)block_coord_6[1+kk] + 1; j++) {
+	for (j=0 ; j < (hsize_t)(block_coord_6[kk+3] - block_coord_6[1+kk] + 1); j++) {
 	  if(data_out2[i][j] != data_read_2D[ii][jj])
 	  goto out;
 
@@ -759,11 +740,10 @@ static int test_regref_hyper( void )
 
     if(status<0) goto out;
 
-    status = H5Lvisit_by_name(file_id, "/", H5_INDEX_NAME, H5_ITER_INC, op_func_L1, data_read_1D, H5P_DEFAULT );
+    status = H5Lvisit_by_name(file_id, "/", H5_INDEX_NAME, H5_ITER_INC, op_func_L, data_read_1D, H5P_DEFAULT );
 
     PASSED();
     
-/*     close(file_id);  */
 
     return 0;
 out:
