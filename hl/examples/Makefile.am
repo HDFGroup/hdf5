@@ -37,7 +37,9 @@ TEST_PROG = ex_lite1 ex_lite2 ex_lite3 ptExampleFL ptExampleVL \
             ex_table_01 ex_table_02 ex_table_03 ex_table_04 \
             ex_table_05 ex_table_06 ex_table_07 ex_table_08 \
             ex_table_09 ex_table_10 ex_table_11 ex_table_12 \
-            ex_ds1
+            ex_ds1 ex_bitfield ex_lite_copy_region ex_lite_read_region  \
+	    ex_regref_copy_references ex_regref_create ex_regref_read \
+            ex_regref_to_all
 
 # Install files
 # List all file that should be installed in examples directory
@@ -80,6 +82,13 @@ ex_table09: $(srcdir)/ex_table09.c
 ex_table10: $(srcdir)/ex_table10.c
 ex_table11: $(srcdir)/ex_table11.c
 ex_table12: $(srcdir)/ex_table12.c
+ex_bitfield: $(srcdir)/ex_bitfield.c
+ex_lite_copy_region: $(srcdir)/ex_lite_copy_region.c
+ex_lite_read_region: $(srcdir)/ex_lite_read_region.c
+ex_regref_copy_references: $(srcdir)/ex_regref_copy_references.c
+ex_regref_create: $(srcdir)/ex_regref_create.c
+ex_regref_read: $(srcdir)/ex_regref_read.c
+ex_regref_to_all: $(srcdir)/ex_regref_to_all.c
 
 if BUILD_SZIP_CONDITIONAL
 export LD_LIBRARY_PATH=$(LL_PATH)
