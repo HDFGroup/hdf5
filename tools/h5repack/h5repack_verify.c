@@ -18,8 +18,8 @@
 #include "h5tools_utils.h"
 
 extern char  *progname;
-static int has_layout(hid_t pid, pack_info_t *obj);
-static int has_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter);
+static int verify_layout(hid_t pid, pack_info_t *obj);
+static int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter);
 
 
 /*-------------------------------------------------------------------------
@@ -82,7 +82,7 @@ int h5repack_verify(const char *fname,
         * filter check
         *-------------------------------------------------------------------------
         */
-        if(has_filters(pid, tid, obj->nfilters, obj->filter) <= 0)
+        if(verify_filters(pid, tid, obj->nfilters, obj->filter) <= 0)
                 ok = 0;
 
 
@@ -90,7 +90,7 @@ int h5repack_verify(const char *fname,
         * layout check
         *-------------------------------------------------------------------------
         */
-        if((obj->layout != -1) && (has_layout(pid, obj) == 0))
+        if((obj->layout != -1) && (verify_layout(pid, obj) == 0))
             ok = 0;
 
        /*-------------------------------------------------------------------------
@@ -151,7 +151,7 @@ int h5repack_verify(const char *fname,
                 if(options->all_filter == 1)
                 {
 
-                    if(has_filters(pid, tid, options->n_filter_g, options->filter_g) <= 0)
+                    if(verify_filters(pid, tid, options->n_filter_g, options->filter_g) <= 0)
                         ok = 0;
                 }
 
@@ -165,7 +165,7 @@ int h5repack_verify(const char *fname,
                     init_packobject(&pack);
                     pack.layout = options->layout_g;
                     pack.chunk = options->chunk_g;
-                    if(has_layout(pid, &pack) == 0)
+                    if(verify_layout(pid, &pack) == 0)
                         ok = 0;
                 }
 
@@ -215,13 +215,13 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function: has_layout
+ * Function: verify_layout
  *
  * Purpose: verify which layout is present in the property list DCPL_ID
  *
  *  H5D_COMPACT	  	= 0
  *  H5D_CONTIGUOUS	= 1
- *  H5D_CHUNKED		  = 2
+ *  H5D_CHUNKED		= 2
  *
  * Return: 1 has, 0 does not, -1 error
  *
@@ -232,8 +232,8 @@ error:
  *-------------------------------------------------------------------------
  */
 
-int has_layout(hid_t pid,
-               pack_info_t *obj)
+int verify_layout(hid_t pid,
+                  pack_info_t *obj)
 {
     hsize_t      chsize[64];     /* chunk size in elements */
     H5D_layout_t layout;         /* layout */
@@ -241,17 +241,13 @@ int has_layout(hid_t pid,
     int          rank;           /* rank */
     int          i;              /* index */
 
-    /* if no information about the input layout is requested return exit */
-    if (obj==NULL)
-        return 1;
-
     /* check if we have filters in the input object */
     if ((nfilters = H5Pget_nfilters(pid)) < 0)
         return -1;
 
-    /* a non chunked layout was requested on a filtered object; avoid the test */
+    /* a non chunked layout was requested on a filtered object */
     if (nfilters && obj->layout!=H5D_CHUNKED)
-        return 1;
+        return 0;
 
     /* get layout */
     if ((layout = H5Pget_layout(pid)) < 0)
@@ -458,7 +454,7 @@ error:
 
 
 /*-------------------------------------------------------------------------
- * Function: has_filters
+ * Function: verify_filters
  *
  * Purpose: verify if all requested filters in the array FILTER obtained
  *  from user input are present in the property list PID obtained from
@@ -477,7 +473,7 @@ error:
  */
 
 static 
-int has_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
+int verify_filters(hid_t pid, hid_t tid, int nfilters, filter_info_t *filter)
 {
     int           nfilters_dcpl;  /* number of filters in DCPL*/
     unsigned      filt_flags;     /* filter flags */
