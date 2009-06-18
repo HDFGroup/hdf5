@@ -91,7 +91,8 @@
 
             if (present(creation_prp)) creation_prp_default = creation_prp 
             if (present(access_prp))   access_prp_default   = access_prp 
-            namelen = LEN(name)
+            namelen = LEN_TRIM(name)
+
             hdferr = h5fcreate_c(name, namelen, access_flags, &
                      creation_prp_default, access_prp_default, file_id) 
 
