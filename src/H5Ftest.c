@@ -153,3 +153,36 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_check_cached_stab_test() */
 
+
+/*-------------------------------------------------------------------------
+ * Function:	H5F_get_maxaddr_test
+ *
+ * Purpose:     Retrieve the maximum address for a file
+ *
+ * Return:	Success:        Non-negative
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *	        Jun 10, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_get_maxaddr_test(hid_t file_id, haddr_t *maxaddr)
+{
+    H5F_t	*file;                  /* File info */
+    herr_t	ret_value = SUCCEED;    /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT(H5F_get_maxaddr_test)
+
+    /* Check arguments */
+    if(NULL == (file = (H5F_t *)H5I_object_verify(file_id, H5I_FILE)))
+	HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file")
+
+    /* Retrieve maxaddr for file */
+    *maxaddr = file->shared->maxaddr;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_get_maxaddr_test() */
+
