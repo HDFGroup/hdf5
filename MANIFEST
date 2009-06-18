@@ -1962,6 +1962,8 @@
 
 # Performance Tests
 ./windows/perform/checkperformtests.bat
+./windows/perform/perf_serialdll/perf_serialdll.vcproj
+./windows/perform/perf_serial/perf_serial.vcproj
 
 # Project Files
 ./windows/proj/all/all.sln

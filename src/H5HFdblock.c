@@ -148,8 +148,8 @@ H5HF_man_dblock_create(hid_t dxpl_id, H5HF_hdr_t *hdr, H5HF_indirect_t *par_iblo
 HDmemset(dblock->blk, 0, dblock->size);
 #endif /* H5_CLEAR_MEMORY */
 
-    /* Allocate space for the direct block on disk */
-    if(HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
+    /* Allocate [temporary] space for the direct block on disk */
+    if(HADDR_UNDEF == (dblock_addr = H5MF_alloc_tmp(hdr->f, (hsize_t)dblock->size)))
 	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
 #ifdef QAK
 HDfprintf(stderr, "%s: direct block address = %a\n", FUNC, dblock_addr);
@@ -695,22 +695,26 @@ HDfprintf(stderr, "%s: Done expunging direct block from cache\n", FUNC);
 #endif /* QAK */
     } /* end if */
 
-    /* Release direct block's disk space */
-    /* (XXX: Under the best of circumstances, this block's space in the file
-     *          would be freed in the H5AC_expunge_entry() call above (and the
-     *          H5AC__FREE_FILE_SPACE_FLAG used there), but since the direct
-     *          block structure might have a different size on disk than in
-     *          the heap's 'abstract' address space, we would need to set the
-     *          "file_size" field for the direct block structure.  In order to
-     *          do that, we'd have to protect/unprotect the direct block and
-     *          that would add a bunch of unnecessary overhead to the process,
-     *          so we just release the file space here, directly.  When the
-     *          revised metadata cache is operating, it will "know" the file
-     *          size of each entry in the cache and we can the the
-     *          H5AC_expunge_entry() method.  -QAK)
-     */
-    if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, dblock_addr, dblock_size) < 0)
-        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+    /* Check if the direct block is NOT currently allocated in temp. file space */
+    /* (temp. file space does not need to be freed) */
+    if(!H5F_IS_TMP_ADDR(f, dblock_addr)) {
+        /* Release direct block's disk space */
+        /* (XXX: Under the best of circumstances, this block's space in the file
+         *          would be freed in the H5AC_expunge_entry() call above (and the
+         *          H5AC__FREE_FILE_SPACE_FLAG used there), but since the direct
+         *          block structure might have a different size on disk than in
+         *          the heap's 'abstract' address space, we would need to set the
+         *          "file_size" field for the direct block structure.  In order to
+         *          do that, we'd have to protect/unprotect the direct block and
+         *          that would add a bunch of unnecessary overhead to the process,
+         *          so we just release the file space here, directly.  When the
+         *          revised metadata cache is operating, it will "know" the file
+         *          size of each entry in the cache and we can the the
+         *          H5AC_expunge_entry() method.  -QAK)
+         */
+        if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, dblock_addr, dblock_size) < 0)
+            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

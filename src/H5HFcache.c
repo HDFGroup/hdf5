@@ -361,7 +361,7 @@ HDfprintf(stderr, "%s: Load heap header, addr = %a\n", FUNC, addr);
         H5O_pline_t *pline;         /* Pipeline information from the header on disk */
 
         /* Compute the offset of the filter info in the header */
-        filter_info_off = p - buf;
+        filter_info_off = (size_t)(p - buf);
 
         /* Compute the size of the extra filter information */
         filter_info_size = hdr->sizeof_size     /* Size of size for filtered root direct block */
@@ -1056,6 +1056,57 @@ HDfprintf(stderr, "%s: iblock->filt_ents[%Zu] = {%Zu, %x}\n", FUNC, u, iblock->f
         HDassert(max_child == iblock->max_child);
 #endif /* NDEBUG */
 
+        /* Check for needing to re-allocate indirect block from 'temp.' to 'normal' file space */
+        if(H5F_IS_TMP_ADDR(f, addr)) {
+#ifdef QAK
+HDfprintf(stderr, "%s: Re-allocating indirect block in temporary space - addr = %a\n", FUNC, addr);
+#endif /* QAK */
+            /* Sanity check */
+            HDassert(H5F_addr_eq(iblock->addr, addr));
+
+            /* Allocate 'normal' space for the new indirect block on disk */
+            if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, (hsize_t)iblock->size)))
+                HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
+
+            /* Sanity check */
+            HDassert(!H5F_addr_eq(iblock->addr, addr));
+
+            /* Let the metadata cache know the block moved */
+            if(H5AC_rename(f, H5AC_FHEAP_IBLOCK, iblock->addr, addr) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move indirect block")
+
+            /* Update the internal address for the block */
+            iblock->addr = addr;
+
+            /* Check for root indirect block */
+            if(NULL == iblock->parent) {
+                /* Update information about indirect block's location */
+                hdr->man_dtable.table_addr = addr;
+
+                /* Mark that heap header was modified */
+                if(H5HF_hdr_dirty(hdr) < 0)
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
+            } /* end if */
+            else {
+                H5HF_indirect_t *par_iblock;    /* Parent indirect block */
+                unsigned par_entry;             /* Entry in parent indirect block */
+
+                /* Get parent information */
+                par_iblock = iblock->parent;
+                par_entry = iblock->par_entry;
+
+                /* Update information about indirect block's location */
+                par_iblock->ents[par_entry].addr = addr;
+
+                /* Mark that parent was modified */
+                if(H5HF_iblock_dirty(par_iblock) < 0)
+                    HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
+            } /* end if */
+        } /* end if */
+
+        /* Indirect block must be in 'normal' file space now */
+        HDassert(!H5F_IS_TMP_ADDR(f, addr));
+
 	/* Write the indirect block */
 	if(H5F_block_write(f, H5FD_MEM_FHEAP_IBLOCK, addr, iblock->size, dxpl_id, buf) < 0)
 	    HGOTO_ERROR(H5E_HEAP, H5E_CANTFLUSH, FAIL, "unable to save fractal heap indirect block to disk")
@@ -1112,10 +1163,14 @@ HDfprintf(stderr, "%s: Destroying indirect block\n", FUNC);
 
     /* Check for freeing file space for indirect block */
     if(iblock->cache_info.free_file_space_on_destroy) {
-        /* Release the space on disk */
-        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
-        if(H5MF_xfree(f, H5FD_MEM_FHEAP_IBLOCK, H5AC_dxpl_id, iblock->cache_info.addr, (hsize_t)iblock->size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block")
+        /* Check if the indirect block is NOT currently allocated in temp. file space */
+        /* (temp. file space does not need to be freed) */
+        if(!H5F_IS_TMP_ADDR(f, iblock->cache_info.addr)) {
+            /* Release the space on disk */
+            /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+            if(H5MF_xfree(f, H5FD_MEM_FHEAP_IBLOCK, H5AC_dxpl_id, iblock->cache_info.addr, (hsize_t)iblock->size) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap indirect block")
+        } /* end if */
     } /* end if */
 
     /* Set the shared heap header's file context for this operation */
@@ -1130,11 +1185,11 @@ HDfprintf(stderr, "%s: Destroying indirect block\n", FUNC);
 
     /* Release entry tables */
     if(iblock->ents)
-        H5FL_SEQ_FREE(H5HF_indirect_ent_t, iblock->ents);
+        (void)H5FL_SEQ_FREE(H5HF_indirect_ent_t, iblock->ents);
     if(iblock->filt_ents)
-        H5FL_SEQ_FREE(H5HF_indirect_filt_ent_t, iblock->filt_ents);
+        (void)H5FL_SEQ_FREE(H5HF_indirect_filt_ent_t, iblock->filt_ents);
     if(iblock->child_iblocks)
-        H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
+        (void)H5FL_SEQ_FREE(H5HF_indirect_ptr_t, iblock->child_iblocks);
 
     /* Free fractal heap indirect block info */
     (void)H5FL_FREE(H5HF_indirect_t, iblock);
@@ -1436,6 +1491,7 @@ H5HF_cache_dblock_flush(H5F_t *f, hid_t dxpl_id, hbool_t destroy, haddr_t addr, 
 
     if(dblock->cache_info.is_dirty) {
         H5HF_hdr_t *hdr;        /* Shared fractal heap information */
+        hbool_t at_tmp_addr = H5F_IS_TMP_ADDR(f, addr);     /* Flag to indicate direct block is at temporary address */
         void *write_buf;        /* Pointer to buffer to write out */
         size_t write_size;      /* Size of buffer to write out */
         uint8_t *p;             /* Pointer into raw data buffer */
@@ -1525,13 +1581,17 @@ HDfprintf(stderr, "%s: hdr->man_dtable.table_addr = %a, addr = %a\n", FUNC, hdr-
                 } /* end if */
 
                 /* Check if we need to re-size the block on disk */
-                if(hdr->pline_root_direct_size != write_size) {
+                if(hdr->pline_root_direct_size != write_size || at_tmp_addr) {
 #ifdef QAK
 HDfprintf(stderr, "%s: Need to re-allocate root direct block!\n", FUNC);
 #endif /* QAK */
-                    /* Release direct block's current disk space */
-                    if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, addr, (hsize_t)hdr->pline_root_direct_size) < 0)
-                        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+                    /* Check if the direct block is NOT currently allocated in temp. file space */
+                    /* (temp. file space does not need to be freed) */
+                    if(!at_tmp_addr) {
+                        /* Release direct block's current disk space */
+                        if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, addr, (hsize_t)hdr->pline_root_direct_size) < 0)
+                            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+                    } /* end if */
 
                     /* Allocate space for the compressed direct block */
                     if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
@@ -1579,13 +1639,17 @@ HDfprintf(stderr, "%s: par_iblock->ents[%u].addr = %a, addr = %a\n", FUNC, par_e
                 } /* end if */
 
                 /* Check if we need to re-size the block on disk */
-                if(par_iblock->filt_ents[par_entry].size != write_size) {
+                if(par_iblock->filt_ents[par_entry].size != write_size || at_tmp_addr) {
 #ifdef QAK
 HDfprintf(stderr, "%s: Need to re-allocate non-root direct block!\n", FUNC);
 #endif /* QAK */
-                    /* Release direct block's current disk space */
-                    if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, addr, (hsize_t)par_iblock->filt_ents[par_entry].size) < 0)
-                        HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+                    /* Check if the direct block is NOT currently allocated in temp. file space */
+                    /* (temp. file space does not need to be freed) */
+                    if(!at_tmp_addr) {
+                        /* Release direct block's current disk space */
+                        if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, addr, (hsize_t)par_iblock->filt_ents[par_entry].size) < 0)
+                            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+                    } /* end if */
 
                     /* Allocate space for the compressed direct block */
                     if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
@@ -1613,7 +1677,69 @@ HDfprintf(stderr, "%s: Need to re-allocate non-root direct block!\n", FUNC);
         else {
             write_buf = dblock->blk;
             write_size = dblock->size;
+
+            /* Check for needing to re-allocate direct block from 'temp.' to 'normal' file space */
+            if(at_tmp_addr) {
+#ifdef QAK
+HDfprintf(stderr, "%s: Re-allocating direct block in temporary space - addr = %a, write_size = %Zu\n", FUNC, addr, write_size);
+#endif /* QAK */
+                /* Check for root direct block */
+                if(NULL == dblock->parent) {
+                    /* Sanity check */
+                    HDassert(H5F_addr_eq(hdr->man_dtable.table_addr, addr));
+
+                    /* Allocate 'normal' space for the direct block */
+                    if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
+                        HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
+
+                    /* Sanity check */
+                    HDassert(!H5F_addr_eq(hdr->man_dtable.table_addr, addr));
+
+                    /* Let the metadata cache know the block moved */
+                    if(H5AC_rename(f, H5AC_FHEAP_DBLOCK, hdr->man_dtable.table_addr, addr) < 0)
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move direct block")
+
+                    /* Update information about direct block's location */
+                    hdr->man_dtable.table_addr = addr;
+
+                    /* Mark that heap header was modified */
+                    if(H5HF_hdr_dirty(hdr) < 0)
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
+                } /* end if */
+                else {
+                    H5HF_indirect_t *par_iblock;    /* Parent indirect block */
+                    unsigned par_entry;             /* Entry in parent indirect block */
+
+                    /* Get parent information */
+                    par_iblock = dblock->parent;
+                    par_entry = dblock->par_entry;
+
+                    /* Sanity check */
+                    HDassert(H5F_addr_eq(par_iblock->ents[par_entry].addr, addr));
+
+                    /* Allocate 'normal' space for the direct block */
+                    if(HADDR_UNDEF == (addr = H5MF_alloc(f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)write_size)))
+                        HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
+
+                    /* Sanity check */
+                    HDassert(!H5F_addr_eq(par_iblock->ents[par_entry].addr, addr));
+
+                    /* Let the metadata cache know the block moved */
+                    if(H5AC_rename(f, H5AC_FHEAP_DBLOCK, par_iblock->ents[par_entry].addr, addr) < 0)
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTRENAME, FAIL, "unable to move direct block")
+
+                    /* Update information about direct block's location */
+                    par_iblock->ents[par_entry].addr = addr;
+
+                    /* Mark that parent was modified */
+                    if(H5HF_iblock_dirty(par_iblock) < 0)
+                        HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
+                } /* end else */
+            } /* end if */
         } /* end else */
+
+        /* Direct block must be in 'normal' file space now */
+        HDassert(!H5F_IS_TMP_ADDR(f, addr));
 
 	/* Write the direct block */
 #ifdef QAK
@@ -1674,10 +1800,14 @@ HDfprintf(stderr, "%s: Destroying direct block, dblock = %p\n", FUNC, dblock);
         /* Sanity check */
         HDassert(dblock->file_size > 0);
 
-        /* Release the space on disk */
-        /* (XXX: Nasty usage of internal DXPL value! -QAK) */
-        if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, H5AC_dxpl_id, dblock->cache_info.addr, dblock->file_size) < 0)
-            HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+        /* Check if the direct block is NOT currently allocated in temp. file space */
+        /* (temp. file space does not need to be freed) */
+        if(!H5F_IS_TMP_ADDR(f, dblock->cache_info.addr)) {
+            /* Release the space on disk */
+            /* (XXX: Nasty usage of internal DXPL value! -QAK) */
+            if(H5MF_xfree(f, H5FD_MEM_FHEAP_DBLOCK, H5AC_dxpl_id, dblock->cache_info.addr, dblock->file_size) < 0)
+                HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to free fractal heap direct block")
+        } /* end if */
     } /* end if */
 
     /* Set the shared heap header's file context for this operation */

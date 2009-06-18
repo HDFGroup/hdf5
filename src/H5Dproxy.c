@@ -46,6 +46,7 @@
 #include "H5private.h"		/* Generic Functions			*/
 #include "H5Dpkg.h"		/* Dataset functions			*/
 #include "H5Eprivate.h"		/* Error handling		  	*/
+#include "H5MFprivate.h"	/* File memory management		*/
 
 
 /****************/
@@ -329,8 +330,9 @@ H5D_chunk_proxy_create(H5D_t *dset, hid_t dxpl_id, H5D_chunk_common_ud_t *udata,
     HDassert(dset);
     HDassert(ent);
 
-    /* Get the chunk proxy address & adjust for next address */
-    ent->proxy_addr = H5F_GET_NEXT_PROXY_ADDR(dset->oloc.file);
+    /* Get a temp. address for chunk proxy */
+    if(HADDR_UNDEF == (ent->proxy_addr = H5MF_alloc_tmp(dset->oloc.file, (hsize_t)1)))
+	HGOTO_ERROR(H5E_DATASET, H5E_NOSPACE, FAIL, "file allocation failed for chunk proxy")
 #ifdef QAK
 HDfprintf(stderr, "%s: ent->proxy_addr = %a\n", FUNC, ent->proxy_addr);
 #endif /* QAK */

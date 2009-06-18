@@ -162,7 +162,7 @@ typedef struct H5F_file_t {
     haddr_t     root_addr;      /* Root group address                   */
     H5FO_t *open_objs;          /* Open objects in file                 */
     H5RC_t *grp_btree_shared;   /* Ref-counted group B-tree node info   */
-    haddr_t	next_proxy_addr; /* Next address to use for metadata cache proxy entries */
+    haddr_t	tmp_addr;       /* Next address to use for temp. space in the file */
 
     /* File space allocation information */
     unsigned fs_aggr_merge[H5FD_MEM_NTYPES];    /* Flags for whether free space can merge with aggregator(s) */
@@ -250,6 +250,7 @@ H5_DLL herr_t H5F_sfile_remove(H5F_file_t *shared);
 H5_DLL herr_t H5F_get_sohm_mesg_count_test(hid_t fid, unsigned type_id,
     size_t *mesg_count);
 H5_DLL herr_t H5F_check_cached_stab_test(hid_t file_id);
+H5_DLL herr_t H5F_get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
 #endif /* H5F_TESTING */
 
 #endif /* _H5Fpkg_H */

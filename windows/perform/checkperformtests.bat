@@ -79,6 +79,7 @@ rem on it for sending parameters.  --SJW 9/6/07
     call :add_test iopipe%2 ..\test\iopipe%2\%1
     call :add_test chunk%2 ..\test\chunk%2\%1
     call :add_test overhead%2 ..\test\overhead%2\%1
+    call :add_test perf_serial%2 ..\perform\perf_serial%2\%1
     
     
     rem Run the tests, passing in which version to run

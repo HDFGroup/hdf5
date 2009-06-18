@@ -52,6 +52,8 @@ static void ph5diff_worker(int );
  *-------------------------------------------------------------------------
  */
 
+/* module-scoped variables */
+int d_status = EXIT_SUCCESS;
 
 int main(int argc, const char *argv[])
 {

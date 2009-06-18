@@ -26,7 +26,7 @@ dnl
 dnl NOTE: Don't forget to change the version number here when we do a
 dnl release!!!
 dnl
-AC_INIT([HDF5], [1.9.40-FA_a2], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.9.42-FA_a2], [help@hdfgroup.org])
 AC_CONFIG_SRCDIR([src/H5.c])
 AM_CONFIG_HEADER([src/H5config.h])
 
@@ -1287,8 +1287,9 @@ esac
 
 AC_TRY_COMPILE([#include <sys/types.h>],
                [off64_t n = 0;],
-               [AC_CHECK_FUNCS([lseek64 fseek64 ftruncate64 fseeko ftello])],
-               [AC_MSG_RESULT([skipping test for lseek64(), fseek64(), ftruncate64(), fseeko(), and ftello()])])
+               [AC_CHECK_FUNCS([lseek64 fseek64 ftruncate64])],
+               [AC_MSG_RESULT([skipping test for lseek64(), fseek64(), ftruncate64()])])
+AC_CHECK_FUNCS(fseeko ftello)
 AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <sys/stat.h>],
