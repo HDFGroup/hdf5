@@ -659,6 +659,23 @@ int main (void)
     if (h5repack_end (&pack_options) < 0)
         GOERROR;
 
+    /*-------------------------------------------------------------------------
+    * do the same test for a file with filters (chunked)
+    *-------------------------------------------------------------------------
+    */
+    if (h5repack_init (&pack_options, 0) < 0)
+        GOERROR;
+    if (h5repack_addlayout("CONTI",&pack_options) < 0)
+        GOERROR;
+    if (h5repack(FNAME8,FNAME8OUT,&pack_options) < 0)
+        GOERROR;
+    if (h5diff(FNAME8,FNAME8OUT,NULL,NULL,&diff_options) >0)
+        GOERROR;
+    if (h5repack_verify(FNAME8OUT,&pack_options)<=0)
+        GOERROR;
+    if (h5repack_end (&pack_options) < 0)
+        GOERROR;
+
     PASSED();
 
     TESTING("    adding layout compact");

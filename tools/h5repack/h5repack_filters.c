@@ -453,6 +453,12 @@ int apply_filters(const char* name,    /* object name from traverse list */
             if (H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY)<0)
                 return -1;
         }
+        /* remove filters for the H5D_CONTIGUOUS case */
+        else if (H5D_CONTIGUOUS == obj.layout) 
+        {
+            if (H5Premove_filter(dcpl_id,H5Z_FILTER_ALL)<0)
+                return -1;
+        }
 
     }
 
