@@ -1491,10 +1491,10 @@ H5LRcreate_regref_to_all(hid_t loc_id, const char *group_path,
 /* First determine the size of the resulting dataset from the region references */
   status = H5Lvisit_by_name( loc_id, group_path, index_type, order, op_func_L, NULL, H5P_DEFAULT );
 
-  if(op_func_L<0){
-    if(op_func_L == -1) {
+  if((herr_t)*op_func_L < 0){
+    if( (herr_t)*op_func_L == -1) {
       H5E_THROW(H5E_CANTCREATE, "H5LR: Failure in internal callback routine H5Oget_info_by_name ")
-    } else if(op_func_L == -2) {
+    } else if( (herr_t)*op_func_L == -2) {
       H5E_THROW(H5E_CANTCREATE, "H5LR: Failure in internal callback loop over region references  ")
     }
   }
@@ -1532,10 +1532,10 @@ H5LRcreate_regref_to_all(hid_t loc_id, const char *group_path,
    if(status <0) 
     H5E_THROW(H5E_CANTCREATE, "H5LR: Failure in reading or writing data associated with region references")
 
-   if(op_func_L<0){
-    if(op_func_L == -1) {
+   if( (herr_t)*op_func_L < 0){
+    if( (herr_t)*op_func_L == -1) {
       H5E_THROW(H5E_CANTCREATE, "H5LR: Failure in internal callback routine H5Oget_info_by_name ")
-    } else if(op_func_L == -2) {
+    } else if((herr_t)*op_func_L == -2) {
       H5E_THROW(H5E_CANTCREATE, "H5LR: Failure in internal callback loop over region references  ")
     }
   }

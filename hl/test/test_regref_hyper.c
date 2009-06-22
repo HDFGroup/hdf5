@@ -170,19 +170,19 @@ static int test_regref_hyper( void )
     int data_out2[3][2];
     hsize_t block_coord_3D[6] ={ 0, 1, 2, 1, 2, 3};
     hsize_t block_coord[4] ={ 3, 3, 5, 4};
-    hsize_t num_elem = 2;
-    const char *path[num_elem];
+    hsize_t num_elem;
+    char *path[2];
     hsize_t block_coord_6[8] ={ 3, 6, 5, 7, 0, 0, 2, 1};
     hsize_t block_coord_4[4] ={ 1, 3, 3, 4};
     hsize_t block_coord_2D_src[4] ={ 0, 0, 1, 2};
     hsize_t block_coord_2D_dest[4] ={5, 5, 7, 6 };
     hsize_t block_coord_2D_dest_a[4] ={0, 3, 2, 4 };
     hsize_t block_coord_3D_refblock[6] ={ 3, 3, 3, 4, 4, 4 };
-    hdset_reg_ref_t ref6[num_elem];
+    hdset_reg_ref_t ref6[2];
     hdset_reg_ref_t ref_new;
-    hid_t file_id_array[num_elem];
+    hid_t file_id_array[2];
 
-
+    num_elem = 2;
     TESTING("creating dataset for region reference"); 
 
     path[0] ="/Group_2D/DS2";
@@ -501,10 +501,10 @@ static int test_regref_hyper( void )
      */
     TESTING("H5LRget_region, 2D dataset");
     /* Read a region of the 2D data using a region reference */
-    if ( H5LRread_region(file_id, 
-			 (const hdset_reg_ref_t*)ref[1], 
+    if ( H5LRread_region(file_id,
+			 (const hdset_reg_ref_t*)ref[1],
 			 H5T_NATIVE_INT,
-			 &numelem_size, 
+			 &numelem_size,
 			 NULL) < 0) goto out;
 
     /* check size of data from region reference */
@@ -513,10 +513,10 @@ static int test_regref_hyper( void )
 
     data_out = (int *)malloc( numelem_size * sizeof(int));
 
-    if ( H5LRread_region(file_id, 
-			 (const hdset_reg_ref_t*)ref[1], 
+    if ( H5LRread_region(file_id,
+			 (const hdset_reg_ref_t*)ref[1],
 			 H5T_NATIVE_INT,
-			 &numelem_size, 
+			 &numelem_size,
 			 data_out) < 0) goto out;
 
 
@@ -548,7 +548,7 @@ static int test_regref_hyper( void )
 
     numelem_size = (block_coord_3D[3]-block_coord_3D[0]+1) * (block_coord_3D[4]-block_coord_3D[1]+1) * (block_coord_3D[5]-block_coord_3D[2]+1);
 
-    data_out = (int *)malloc( numelem_size * sizeof(int));  
+    data_out = (int *)malloc( numelem_size * sizeof(int));
 
 
     status = H5LTread_region(filename,
@@ -569,11 +569,11 @@ static int test_regref_hyper( void )
       } else if( kk+1 == (hsize_t)( block_coord_3D[5]-block_coord_3D[2] + 1)) {
 	jj = jj+1;
 	kk = 0;
-      }  
+      }
       else {
 	kk = kk + 1;
       }
-    }   
+    }
 
     free(data_out);
     PASSED();
@@ -680,6 +680,7 @@ static int test_regref_hyper( void )
 
     TESTING("H5LRcreate_region_references, 2D dataset");
 
+
     status = H5LRcreate_region_references(file_id,
 					  num_elem,
 					  path,
@@ -688,7 +689,7 @@ static int test_regref_hyper( void )
     if(status < 0) goto out;
 
     PASSED();
-    for (i=0; i< (hsize_t)num_elem; i++) 
+    for (i=0; i< num_elem; i++)
       file_id_array[i] = file_id;
 
 
@@ -734,7 +735,7 @@ static int test_regref_hyper( void )
     status = H5LRcreate_regref_to_all(file_id, "/",
 				      "/Group_2D/DS2c", H5_INDEX_NAME, H5_ITER_INC);
 
-    if(status < 0) goto out; 
+    if(status < 0) goto out;
 
     status = H5LTread_dataset(file_id,"/Group_2D/DS2c",H5T_NATIVE_INT,data_read_1D);
 
