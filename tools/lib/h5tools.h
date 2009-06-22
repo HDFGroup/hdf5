@@ -507,6 +507,9 @@ struct subset_t {
     hsize_t *block;
 };
 
+/* include after above stucts are defined */
+#include "h5tools_str.h"
+
 /* mask list for packed bits */
 unsigned int packed_mask[8];  /* packed bits are restricted to 1 byte */
 
@@ -517,7 +520,6 @@ extern int     region_output;       /* region output */
 extern int     packed_output;       /* packed bits output count */
 extern int     packed_normalize; /* number of bits to shift right to display normalized */
 extern unsigned int  packed_counter;      /* counter for which packed bits to display */
-
 
 /* Strings for output */
 #define H5_TOOLS_GROUP           "GROUP"
@@ -547,6 +549,16 @@ extern int      h5tools_canreadf(const char* name,
 extern int      h5tools_can_encode(H5Z_filter_t filtn);
 
 void            init_acc_pos(h5tools_context_t *ctx, hsize_t *dims);
-
+void            h5tools_dump_datatype(FILE *stream, const h5tool_format_t *info,
+                         h5tools_context_t *ctx/*in,out*/, unsigned flags, hid_t type); 
+void            h5tools_print_dataspace(h5tools_str_t *buffer/*in,out*/,
+                         const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,
+                         hid_t space);
+void            h5tools_print_datatype(h5tools_str_t *buffer/*in,out*/,
+                         const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,
+                         hid_t type);
+void            h5tools_print_enum(h5tools_str_t *buffer/*in,out*/,
+                        const h5tool_format_t *info, h5tools_context_t *ctx/*in,out*/,
+                        hid_t type);
 #endif /* H5TOOLS_H__ */
 

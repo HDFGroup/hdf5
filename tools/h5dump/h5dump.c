@@ -3535,7 +3535,6 @@ parse_subset_params(char *dset)
 static void
 parse_mask_list(const char *h_list)
 {
-    hsize_t        *p_list;
     const char     *ptr;
     unsigned int    size_count = 0, i = 0, last_digit = 0;
     int             offset_value = 0, length_value = 0;

@@ -26,7 +26,6 @@
 
 #include "h5tools.h"
 #include "h5tools_ref.h"
-#include "h5tools_str.h"
 #include "h5tools_utils.h"
 #include "H5private.h"
 
@@ -837,11 +836,7 @@ h5tools_dump_simple_data(FILE *stream, const h5tool_format_t *info, hid_t contai
 {
     unsigned char *mem = (unsigned char*) _mem;
     hsize_t        i;         /*element counter  */
-    char          *s;
-    char          *section;   /*a section of output  */
-    int            secnum;    /*section sequence number */
     size_t         size;      /*size of each datum  */
-    hid_t          f_type;
     hid_t          region_space;
     hid_t          region_id;
     size_t         ncols = 80; /*available output width */
@@ -1216,12 +1211,9 @@ hsize_t h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
     hssize_t nblocks;
     size_t numelem;
     int ndims;
-    int ctx_ndims;
     h5tools_context_t region_ctx; /* print context  */
     hsize_t region_total_size[H5S_MAX_RANK];
     hsize_t region_elmtno; /* elemnt index  */
-    hsize_t region_low[H5S_MAX_RANK]; /* low bound of hyperslab */
-    hsize_t region_high[H5S_MAX_RANK]; /* higher bound of hyperslab */
     unsigned int region_flags; /* buffer extent flags */
     hsize_t region_curr_pos;
     int jndx;
@@ -1410,7 +1402,7 @@ hsize_t h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
         /* assume entire data space to be printed */
         for (jndx = 0; jndx < (size_t) region_ctx.ndims; jndx++)
             region_ctx.p_min_idx[jndx] = start[jndx];
-        init_acc_pos(&region_ctx, &region_total_size);
+        init_acc_pos(&region_ctx, region_total_size);
         /* print the data */
         region_flags = START_OF_DATA;
 
@@ -1488,10 +1480,7 @@ hsize_t h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
     hsize_t *ptdata;
     hsize_t *dims1;
     h5tools_context_t region_ctx; /* print context  */
-    hsize_t region_total_size[H5S_MAX_RANK];
     hsize_t region_elmtno; /* elemnt index  */
-    hsize_t region_low[H5S_MAX_RANK]; /* low bound of hyperslab */
-    hsize_t region_high[H5S_MAX_RANK]; /* higher bound of hyperslab */
     unsigned int region_flags; /* buffer extent flags */
     hsize_t region_curr_pos;
     int ndims;
