@@ -250,10 +250,10 @@ func									      \
     ret_typ ret_value = ret_init;					      \
     H5E_auto2_t efunc2;					                      \
     void *H5E_saved_edata;						      \
-    (void)H5Eget_auto2(H5E_DEFAULT, &efunc2, &H5E_saved_edata);               \
-    (void)H5Eset_auto2(H5E_DEFAULT, NULL, NULL);			      \
     H5_GLUE(FUNC_ERR_VAR_, use_err)(ret_typ, err)			      \
-    H5_GLUE(FUNC_ENTER_, scope)
+    H5_GLUE(FUNC_ENTER_, scope)                                               \
+    herr_t err1 = H5Eget_auto2(H5E_DEFAULT, &efunc2, &H5E_saved_edata);       \
+    herr_t err2 = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);			     
 
 /* Macros for label when a function initialization can fail */
 #define H5_PRIV_YES_FUNC_INIT_FAILED func_init_failed:
