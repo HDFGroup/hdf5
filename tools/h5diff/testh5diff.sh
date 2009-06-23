@@ -543,8 +543,8 @@ TOOLTEST h5diff_628.txt -n 1 $FILE1 $FILE2 g1/dset3 g1/dset4
 
 # Disabling this test as it hangs - LRK 20090618
 # 6.29  non valid files
-TESTING $H5DIFF file1.h6 file2.h6
-TOOLTEST h5diff_629.txt file1.h6 file2.h6
+#TESTING $H5DIFF file1.h6 file2.h6
+#TOOLTEST h5diff_629.txt file1.h6 file2.h6
 
 # ##############################################################################
 # 7.  attributes

@@ -445,11 +445,13 @@ int apply_filters(const char* name,    /* object name from traverse list */
         if (H5Pset_layout(dcpl_id, obj.layout)<0)
             return -1;
 
-        if (H5D_CHUNKED==obj.layout) { /* set up chunk */
+        if (H5D_CHUNKED == obj.layout) 
+        { 
             if(H5Pset_chunk(dcpl_id, obj.chunk.rank, obj.chunk.chunk_lengths)<0)
                 return -1;
         }
-        else if (H5D_COMPACT==obj.layout) {
+        else if (H5D_COMPACT == obj.layout) 
+        {
             if (H5Pset_alloc_time(dcpl_id, H5D_ALLOC_TIME_EARLY)<0)
                 return -1;
         }
