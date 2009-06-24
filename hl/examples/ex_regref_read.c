@@ -26,7 +26,7 @@
 
     Main illustrative functions: H5LRget_region_info, H5LRread_region
 */
-
+#include <stdlib.h>
 #include "hdf5.h"
 #include "hdf5_hl.h"
 
