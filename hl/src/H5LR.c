@@ -252,7 +252,6 @@ BEGIN_FUNC(PKGINIT, ERR,
 herr_t, SUCCEED, FAIL,
 H5LR__pkg_init(void))
 
-CATCH
 
 END_FUNC(PKGINIT)
 
@@ -279,15 +278,15 @@ END_FUNC(PKGINIT)
  */
 BEGIN_FUNC(PUB, ERR,
 herr_t, SUCCEED, FAIL,
-H5LRget_region_info(hid_t obj_id,               /* -IN-      Id. of any object in a file associated with reference */
-		    const hdset_reg_ref_t *ref, /* -IN-      Region reference to query                             */
-		    size_t *len,                /* -OUT-     Size of the buffer path                               */
-		    char *path,                 /* -OUT-     Full path that a region reference points to           */
-		    int *rank,                  /* -OUT-     The number of dimensions of the dataset pointed by region reference */
-		    hid_t *dtype,               /* -OUT-     Dataset datatype pointed by region reference          */
-		    H5S_sel_type *sel_type,     /* -OUT-     Type fo the selection (point or hyperslab)            */
-		    size_t *numelem,            /* -IN/OUT-  Number of coordinate blocks or selected elements      */
-		    hsize_t *buf ) )            /* -OUT-     Buffer containing description of the region           */
+H5LRget_region_info(hid_t obj_id,              
+		    const hdset_reg_ref_t *ref, 
+		    size_t *len,                
+		    char *path,                 
+		    int *rank,                 
+		    hid_t *dtype,               
+		    H5S_sel_type *sel_type,     
+		    size_t *numelem,            
+		    hsize_t *buf ) )
 
   hid_t dset = -1, sid = -1; /* dataset and space id */
 
@@ -401,11 +400,11 @@ END_FUNC(PUB)
  */
 BEGIN_FUNC(PUB, ERR,
 herr_t, SUCCEED, FAIL,
-H5LRread_region(hid_t obj_id,               /* -IN-      Id. of any object in a file associated with reference */
-		const hdset_reg_ref_t *ref, /* -IN-      Region reference to query                             */
-		hid_t mem_type,             /* -IN-      Id. of the memory datatype                            */
-		size_t *numelem,            /* -IN/OUT-  Number of elements in the referenced region           */
-		void *buf) )                /* -OUT-     Buffer containing data from the referenced region     */
+H5LRread_region(hid_t obj_id,               
+		const hdset_reg_ref_t *ref, 
+		hid_t mem_type,             
+		size_t *numelem,            
+		void *buf) )                
 
     hid_t dset = -1, file_space = -1;   /* Identifier of the dataset's dataspace in the file */
     hid_t mem_space = -1;               /* Identifier of the memory dataspace                */
