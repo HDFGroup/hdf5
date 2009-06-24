@@ -29,9 +29,11 @@
 /***********/
 /* Headers */
 /***********/
-//#include <string.h>
+#include <string.h>
 #include <stdlib.h>
-//#include <stdio.h>
+#include <assert.h>
+#include <stdio.h>
+#include "H5LRprivate.h"
 #include "H5LRpkg.h"            /* Lite References */
 
 

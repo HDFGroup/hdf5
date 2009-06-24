@@ -26,10 +26,11 @@
 /***********/
 /* Headers */
 /***********/
-//#include <string.h>
+#include <string.h>
 #include <stdlib.h>
-//#include <assert.h>
-//#include <stdio.h>
+#include <assert.h>
+#include <stdio.h>
+#include "H5LTprivate.h"
 #include "H5LTpkg.h"            /* Lite */
 
 /* For Lex and Yacc */
@@ -106,8 +107,6 @@ hbool_t H5_H5LT_init_g = FALSE;
 BEGIN_FUNC(PKGINIT, ERR,
 herr_t, SUCCEED, FAIL,
 H5LT__pkg_init(void))
-
-CATCH
 
 END_FUNC(PKGINIT)
 
