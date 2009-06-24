@@ -17,6 +17,7 @@
    Tests hl region references and hyperslab APIs.
 */
 
+#include <stdlib.h>
 #include "h5hltest.h"
 #include "hdf5.h"
 #include "hdf5_hl.h"
