@@ -5547,6 +5547,7 @@ test_filter_delete(hid_t file)
     hsize_t      dims[2]={20,20};       /* dataspace dimensions */
     hsize_t      chunk_dims[2]={10,10}; /* chunk dimensions */
     int          nfilters;              /* number of filters in DCPL */
+    unsigned     flags;                 /* flags for filter */
     herr_t       ret;                   /* generic return value */
     int          i;
 
@@ -5586,6 +5587,16 @@ test_filter_delete(hid_t file)
         if(H5Z_FILTER_DEFLATE==filtn)
             goto error;
     }
+
+    /* try to get the info for the deflate filter */
+    H5E_BEGIN_TRY {
+        ret=H5Pget_filter_by_id2(dcpl1,H5Z_FILTER_DEFLATE,&flags,NULL,NULL,0,NULL,NULL);
+    } H5E_END_TRY;
+    if(ret >=0) {
+        H5_FAILED();
+        printf("    Line %d: Shouldn't have deleted filter!\n",__LINE__);
+        goto error;
+    } /* end if */
 
     /* try to delete the deflate filter again */
     H5E_BEGIN_TRY {
