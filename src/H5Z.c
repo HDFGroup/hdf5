@@ -1086,7 +1086,7 @@ H5Z_filter_info(const H5O_pline_t *pline, H5Z_filter_t filter)
             break;
 
     /* Check if the filter was not already in the pipeline */
-    if(idx>pline->nused)
+    if(idx>=pline->nused)
 	HGOTO_ERROR(H5E_PLINE, H5E_NOTFOUND, NULL, "filter not in pipeline")
 
     /* Set return value */
