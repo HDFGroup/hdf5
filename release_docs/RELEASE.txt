@@ -98,6 +98,8 @@ Bug Fixes since HDF5-1.8.3
 
     Library
     -------
+    - Fixed a bug where H5Pget_fitler_by_id would succeed when called for a
+      ilter that wasn't present. NAF - 2009/06/25
     - Fixed an issue with committed compound datatypes containing a vlen. Also
       fixed memory leaks involving committed datatypes. NAF - 2009/06/10 - 1593
 
