@@ -226,9 +226,6 @@ H5O_attr_decode(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, unsigned UNUSED mesg_fl
         HDmemcpy(attr->shared->data, p, attr->shared->data_size);
     } /* end if */
 
-    /* Indicate that the fill values aren't to be written out */
-    attr->shared->initialized = 1;
-
     /* Increment the reference count for this object header message in cache(compact
        storage) or for the object from dense storage. */
     attr->shared->nrefs++;
@@ -804,9 +801,6 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE * stream, int in
     fprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
             "Character Set of Name:",
             s);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-	    "Initialized:",
-	    mesg->shared->initialized);
     HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
 	    "Object opened:",
 	    mesg->obj_opened);

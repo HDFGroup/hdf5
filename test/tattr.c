@@ -10145,6 +10145,66 @@ test_attr_bug5(hid_t fcpl, hid_t fapl)
 
 /****************************************************************
 **
+**  test_attr_bug6(): Test basic H5A (attribute) code.
+**      Tests if reading an empty attribute is OK.
+**
+****************************************************************/
+static void
+test_attr_bug6(hid_t fcpl, hid_t fapl)
+{
+    hid_t   fid;            /* File ID */
+    hid_t   gid;            /* Group ID */
+    hid_t   aid1, aid2;     /* Attribute IDs */
+    hid_t   sid;            /* Dataspace ID */
+    hsize_t dims[1] = {5};  /* Attribute dimensions */
+    int     intar[5];       /* Data reading buffer */
+    herr_t  ret;            /* Generic return status */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing that empty attribute can be read\n"));
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, fcpl, fapl);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Open root group */
+    gid = H5Gopen2(fid, "/", H5P_DEFAULT);
+    CHECK(gid, FAIL, "H5Gcreate2");
+
+    /* Create dataspace */
+    sid = H5Screate_simple(1, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create attribute on group */
+    aid1 = H5Acreate2(gid, "attr", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(aid1, FAIL, "H5Acreate2");
+
+    ret = H5Aclose(aid1);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Open the attribute again */
+    aid2 = H5Aopen_name(gid, "attr");
+    CHECK(aid2, FAIL, "H5Aopen_name");
+
+    ret = H5Aread(aid2, H5T_NATIVE_INT, intar);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Close IDs */
+    ret = H5Aclose(aid2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+}
+
+/****************************************************************
+**
 **  test_attr(): Main H5A (attribute) testing routine.
 **
 ****************************************************************/
@@ -10288,6 +10348,7 @@ test_attr(void)
                 test_attr_bug3(my_fcpl, my_fapl);               /* Test "self referential" attributes */
                 test_attr_bug4(my_fcpl, my_fapl);               /* Test attributes on named datatypes */
                 test_attr_bug5(my_fcpl, my_fapl);               /* Test opening/closing attributes through different file handles */
+                test_attr_bug6(my_fcpl, my_fapl);               /* Test reading empty attribute */ 
             } /* end for */
         } /* end if */
         else {
@@ -10311,6 +10372,7 @@ test_attr(void)
             test_attr_bug3(fcpl, my_fapl);                      /* Test "self referential" attributes */
             test_attr_bug4(fcpl, my_fapl);                      /* Test attributes on named datatypes */
             test_attr_bug5(fcpl, my_fapl);                      /* Test opening/closing attributes through different file handles */
+            test_attr_bug6(fcpl, my_fapl);                      /* Test reading empty attribute */ 
         } /* end else */
     } /* end for */
 
