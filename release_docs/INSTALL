@@ -284,7 +284,7 @@ CONTENTS
         build the distribution with 64-bit support should specify the
         correct flags with the CC variable:
 
-            $ CC='cc -xarch=v9' ./configure
+            $ CC='cc -m64' ./configure
 
         To configure AIX 64-bit support including the Fortran and C++ APIs,
         (Note: need to set $AR to 'ar -X 64'.)
