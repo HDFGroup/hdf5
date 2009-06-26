@@ -21,7 +21,7 @@ VPATH=.:@srcdir@
 @COMMENCE@
 
 # Subdirectories in build-order (not including `examples')
-SUBDIRS=ADGuide Graphics Intro PSandPDF TechNotes Tutor \
+SUBDIRS=ADGuide Graphics Intro PSandPDF TechNotes \
         cpplus cpplus_RM fortran ed_libs ed_styles 
 DOCDIR=$(docdir)/hdf5
 
