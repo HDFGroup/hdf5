@@ -1425,7 +1425,7 @@ hsize_t h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
 
             h5tools_str_append(buffer, "%s",
                     jndx ? OPTIONAL_LINE_BREAK "" : "");
-            h5tools_str_sprint(buffer, info, region_id, type_id, (region_buf
+            h5tools_str_sprint(buffer, info, region_id, type_id, ((char*)region_buf
                     + jndx * type_size), &region_ctx);
 
             if (jndx + 1 < numelem || (flags & END_OF_DATA) == 0)
@@ -1663,7 +1663,7 @@ hsize_t h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
             
             h5tools_region_simple_prefix(stream, info, &region_ctx, region_curr_pos, ptdata, 0);
 
-            h5tools_str_sprint(buffer, info, region_id, type_id, (region_buf
+            h5tools_str_sprint(buffer, info, region_id, type_id, ((char*)region_buf
                     + jndx * type_size), &region_ctx);
 
             if (jndx + 1 < npoints || (region_flags & END_OF_DATA) == 0)

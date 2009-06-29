@@ -510,9 +510,6 @@ struct subset_t {
 /* include after above stucts are defined */
 #include "h5tools_str.h"
 
-/* mask list for packed bits */
-unsigned int packed_mask[8];  /* packed bits are restricted to 1 byte */
-
 extern FILE   *rawdatastream;       /* output stream for raw data */
 extern int     bin_output;          /* binary output */
 extern int     bin_form;            /* binary form */

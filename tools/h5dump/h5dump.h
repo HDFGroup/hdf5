@@ -160,4 +160,7 @@ typedef struct h5dump_header_t {
 } h5dump_header_t;
 
 
+/* mask list for packed bits */
+unsigned int packed_mask[8];  /* packed bits are restricted to 1 byte */
+
 #endif  /* !H5DUMP_H__ */
