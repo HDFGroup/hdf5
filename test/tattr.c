@@ -1463,6 +1463,68 @@ test_attr_compat(void)
 
 /****************************************************************
 **
+**  test_attr_empty_read(): Test H5A (attribute) code for reading
+**                          an empty attribute for bug #1513.
+**                          v1.6 library works correctly because
+**                          fill value is written to the attribute
+**                          during H5A_close if no data is written.
+**                          v1.8 and later leaves it empty.
+****************************************************************/
+test_attr_empty_read(void)
+{
+    hid_t   fid;            /* File ID */
+    hid_t   gid;            /* Group ID */
+    hid_t   aid1, aid2;     /* Attribute IDs */
+    hid_t   sid;            /* Dataspace ID */
+    hsize_t dims[ATTR1_RANK] = {ATTR1_DIM1};  /* Attribute dimensions */
+    int     intar[ATTR1_DIM1];       /* Data reading buffer */
+    herr_t  ret;            /* Generic return status */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("Testing that empty attribute can be read\n"));
+
+    /* Create file */
+    fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    CHECK(fid, FAIL, "H5Fcreate");
+
+    /* Open root group */
+    gid = H5Gopen(fid, "/");
+    CHECK(gid, FAIL, "H5Gopen");
+
+    /* Create dataspace */
+    sid = H5Screate_simple(1, dims, NULL);
+    CHECK(sid, FAIL, "H5Screate_simple");
+
+    /* Create attribute on group */
+    aid1 = H5Acreate(gid, ATTR1_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT);
+    CHECK(aid1, FAIL, "H5Acreate2");
+
+    ret = H5Aclose(aid1);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    /* Open the attribute again */
+    aid2 = H5Aopen_name(gid, ATTR1_NAME);
+    CHECK(aid2, FAIL, "H5Aopen_name");
+
+    ret = H5Aread(aid2, H5T_NATIVE_INT, intar);
+    CHECK(ret, FAIL, "H5Aread");
+
+    /* Close IDs */
+    ret = H5Aclose(aid2);
+    CHECK(ret, FAIL, "H5Aclose");
+
+    ret = H5Gclose(gid);
+    CHECK(ret, FAIL, "H5Gclose");
+
+    ret = H5Fclose(fid);
+    CHECK(ret, FAIL, "H5Fclose");
+
+    ret = H5Sclose(sid);
+    CHECK(ret, FAIL, "H5Sclose");
+}
+
+/****************************************************************
+**
 **  test_attr_dtype_shared(): Test H5A (attribute) code for using
 **                              shared datatypes in attributes.
 **
@@ -1658,6 +1720,8 @@ test_attr(void)
     /* These next two tests use the same file information */
     test_attr_scalar_write();  /* Test scalar dataspace H5A writing code */
     test_attr_scalar_read();   /* Test scalar dataspace H5A reading code */
+
+    test_attr_empty_read();     /* Test H5A reading code for an empty attribute */
 
     /* These next five tests use the same file information */
     test_attr_mult_write();     /* Test H5A writing code for multiple attributes */
