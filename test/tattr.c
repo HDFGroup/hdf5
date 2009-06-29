@@ -10160,8 +10160,8 @@ test_attr_bug6(hid_t fcpl, hid_t fapl)
     hid_t   gid;            /* Group ID */
     hid_t   aid1, aid2;     /* Attribute IDs */
     hid_t   sid;            /* Dataspace ID */
-    hsize_t dims[1] = {5};  /* Attribute dimensions */
-    int     intar[5];       /* Data reading buffer */
+    hsize_t dims[ATTR1_RANK] = {ATTR1_DIM1};  /* Attribute dimensions */
+    int     intar[ATTR1_DIM1];       /* Data reading buffer */
     herr_t  ret;            /* Generic return status */
 
     /* Output message about test being performed */
@@ -10180,14 +10180,14 @@ test_attr_bug6(hid_t fcpl, hid_t fapl)
     CHECK(sid, FAIL, "H5Screate_simple");
 
     /* Create attribute on group */
-    aid1 = H5Acreate2(gid, "attr", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT);
+    aid1 = H5Acreate2(gid, ATTR1_NAME, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(aid1, FAIL, "H5Acreate2");
 
     ret = H5Aclose(aid1);
     CHECK(ret, FAIL, "H5Aclose");
 
     /* Open the attribute again */
-    aid2 = H5Aopen_name(gid, "attr");
+    aid2 = H5Aopen(gid, ATTR1_NAME, H5P_DEFAULT);
     CHECK(aid2, FAIL, "H5Aopen_name");
 
     ret = H5Aread(aid2, H5T_NATIVE_INT, intar);
