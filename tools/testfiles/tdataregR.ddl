@@ -9,7 +9,7 @@ GROUP "/" {
       DATA {
       (0): DATASET /Dataset2 {
          (0): REGION_TYPE BLOCK  (2,2)-(7,7)
-         (0): DATATYPE  H5T_STD_U8LE
+         (0): DATATYPE  H5T_STD_U8BE
          (0): DATASPACE  SIMPLE { ( 10, 10 ) / ( 10, 10 ) }
          (0): DATA { 
             (2,2): 66, 69, 72, 75, 78, 81,
@@ -23,7 +23,7 @@ GROUP "/" {
       (1): DATASET /Dataset2  {
          (1): REGION_TYPE POINT  (6,9), (2,2), (8,4), (1,6), (2,8), (3,2),
          (1):  (0,4), (9,0), (7,1), (3,3)
-         (1): DATATYPE  H5T_STD_U8LE
+         (1): DATATYPE  H5T_STD_U8BE
          (1): DATASPACE  SIMPLE { ( 10, 10 ) / ( 10, 10 ) }
          (1): DATA { 
             (6,9): 207,

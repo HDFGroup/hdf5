@@ -1295,7 +1295,7 @@ hsize_t h5tools_dump_region_data_blocks(hid_t region_space, hid_t region_id,
             h5tools_dump_header_format->datatypebegin,
             h5tools_dump_header_format->datatypeblockbegin);
 
-    h5tools_print_datatype(buffer, info, ctx, type_id);
+    h5tools_print_datatype(buffer, info, ctx, dtype);
 
     if (HDstrlen(h5tools_dump_header_format->datatypeblockend)) {
         h5tools_str_append(buffer, "%s",
@@ -1552,7 +1552,7 @@ hsize_t h5tools_dump_region_data_points(hid_t region_space, hid_t region_id,
                 h5tools_dump_header_format->datatypebegin,
                 h5tools_dump_header_format->datatypeblockbegin);
 
-        h5tools_print_datatype(buffer, info, ctx, type_id);
+        h5tools_print_datatype(buffer, info, ctx, dtype);
 
         if (HDstrlen(h5tools_dump_header_format->datatypeblockend)) {
             h5tools_str_append(buffer, "%s",
