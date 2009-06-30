@@ -10173,7 +10173,7 @@ test_attr_bug6(hid_t fcpl, hid_t fapl)
 
     /* Open root group */
     gid = H5Gopen2(fid, "/", H5P_DEFAULT);
-    CHECK(gid, FAIL, "H5Gcreate2");
+    CHECK(gid, FAIL, "H5Gopen2");
 
     /* Create dataspace */
     sid = H5Screate_simple(1, dims, NULL);
@@ -10188,7 +10188,7 @@ test_attr_bug6(hid_t fcpl, hid_t fapl)
 
     /* Open the attribute again */
     aid2 = H5Aopen(gid, ATTR1_NAME, H5P_DEFAULT);
-    CHECK(aid2, FAIL, "H5Aopen_name");
+    CHECK(aid2, FAIL, "H5Aopen");
 
     ret = H5Aread(aid2, H5T_NATIVE_INT, intar);
     CHECK(ret, FAIL, "H5Aread");
