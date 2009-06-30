@@ -41,11 +41,13 @@ int main(void)
     int data[DIM0][DIM1]; /* data */
     int i, j;
     int rdata[6][2]; /* buffer to read the data into */
-    hsize_t num_elem = 2; /* number of region references to create */
-    const char *path[num_elem]; /* paths to the data for the region references */
+    hsize_t num_elem; /* number of region references to create */
+    const char *path[2]; /* paths to the data for the region references */
     hsize_t block_coord[8] ={ 2, 5, 4, 6, 0, 0, 2, 1}; /* hyperslab coordinates defining region references */
-    hdset_reg_ref_t ref[num_elem]; /* region references */
-    hid_t file_id_array[num_elem]; /* file id of the region references */
+    hdset_reg_ref_t ref[2]; /* region references */
+    hid_t file_id_array[2]; /* file id of the region references */
+
+    num_elem = 2;
 
 /*********************************************************  
    This writes data to the HDF5 file.  
