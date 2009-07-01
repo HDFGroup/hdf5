@@ -149,8 +149,14 @@ HDmemset(dblock->blk, 0, dblock->size);
 #endif /* H5_CLEAR_MEMORY */
 
     /* Allocate [temporary] space for the direct block on disk */
-    if(HADDR_UNDEF == (dblock_addr = H5MF_alloc_tmp(hdr->f, (hsize_t)dblock->size)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
+    if(H5F_USE_TMP_SPACE(hdr->f)) {
+        if(HADDR_UNDEF == (dblock_addr = H5MF_alloc_tmp(hdr->f, (hsize_t)dblock->size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
+    } /* end if */
+    else {
+        if(HADDR_UNDEF == (dblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_DBLOCK, dxpl_id, (hsize_t)dblock->size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap direct block")
+    } /* end else */
 #ifdef QAK
 HDfprintf(stderr, "%s: direct block address = %a\n", FUNC, dblock_addr);
 #endif /* QAK */

@@ -600,8 +600,14 @@ HDfprintf(stderr, "%s: new_next_entry = %u\n", FUNC, new_next_entry);
     iblock->size = H5HF_MAN_INDIRECT_SIZE(hdr, iblock);
 
     /* Allocate [temporary] space for the new indirect block on disk */
-    if(HADDR_UNDEF == (new_addr = H5MF_alloc_tmp(hdr->f, (hsize_t)iblock->size)))
-        HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
+    if(H5F_USE_TMP_SPACE(hdr->f)) {
+        if(HADDR_UNDEF == (new_addr = H5MF_alloc_tmp(hdr->f, (hsize_t)iblock->size)))
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
+    } /* end if */
+    else {
+        if(HADDR_UNDEF == (new_addr = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, (hsize_t)iblock->size)))
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
+    } /* end else */
 #ifdef QAK
 HDfprintf(stderr, "%s: Check 1.0 - iblock->addr = %a, new_addr = %a\n", FUNC, iblock->addr, new_addr);
 #endif /* QAK */
@@ -771,8 +777,14 @@ HDfprintf(stderr, "%s: iblock->nrows = %u\n", FUNC, iblock->nrows);
     iblock->size = H5HF_MAN_INDIRECT_SIZE(hdr, iblock);
 
     /* Allocate [temporary] space for the new indirect block on disk */
-    if(HADDR_UNDEF == (new_addr = H5MF_alloc_tmp(hdr->f, (hsize_t)iblock->size)))
-        HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
+    if(H5F_USE_TMP_SPACE(hdr->f)) {
+        if(HADDR_UNDEF == (new_addr = H5MF_alloc_tmp(hdr->f, (hsize_t)iblock->size)))
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
+    } /* end if */
+    else {
+        if(HADDR_UNDEF == (new_addr = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, (hsize_t)iblock->size)))
+            HGOTO_ERROR(H5E_HEAP, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
+    } /* end else */
 #ifdef QAK
 HDfprintf(stderr, "%s: new_addr = %a\n", FUNC, new_addr);
 #endif /* QAK */
@@ -1087,8 +1099,14 @@ HDfprintf(stderr, "%s: dir_rows = %u\n", FUNC, dir_rows);
         iblock->child_iblocks = NULL;
 
     /* Allocate [temporary] space for the indirect block on disk */
-    if(HADDR_UNDEF == (*addr_p = H5MF_alloc_tmp(hdr->f, (hsize_t)iblock->size)))
-	HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
+    if(H5F_USE_TMP_SPACE(hdr->f)) {
+        if(HADDR_UNDEF == (*addr_p = H5MF_alloc_tmp(hdr->f, (hsize_t)iblock->size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
+    } /* end if */
+    else {
+        if(HADDR_UNDEF == (*addr_p = H5MF_alloc(hdr->f, H5FD_MEM_FHEAP_IBLOCK, dxpl_id, (hsize_t)iblock->size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "file allocation failed for fractal heap indirect block")
+    } /* end else */
     iblock->addr = *addr_p;
 
     /* Attach to parent indirect block, if there is one */
