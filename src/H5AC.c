@@ -1623,7 +1623,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5AC_mark_pinned_entry_dirty() */
+} /* H5AC_mark_pinned_or_protected_entry_dirty() */
 
 
 /*-------------------------------------------------------------------------
