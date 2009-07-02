@@ -346,7 +346,7 @@ H5D_earray_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx)
     /* Encode native elements into raw elements */
     while(nelmts) {
         /* Encode element */
-        /* (advances 'raw' pointer */
+        /* (advances 'raw' pointer) */
         H5F_addr_encode_len(ctx->file_addr_len, (uint8_t **)&raw, *elmt);
 
         /* Advance native element pointer */
@@ -390,7 +390,7 @@ H5D_earray_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
     /* Decode raw elements into native elements */
     while(nelmts) {
         /* Decode element */
-        /* (advances 'raw' pointer */
+        /* (advances 'raw' pointer) */
         H5F_addr_decode_len(ctx->file_addr_len, &raw, elmt);
 
         /* Advance native element pointer */
@@ -500,7 +500,7 @@ H5D_earray_filt_encode(void *_raw, const void *_elmt, size_t nelmts, void *_ctx)
     /* Encode native elements into raw elements */
     while(nelmts) {
         /* Encode element */
-        /* (advances 'raw' pointer */
+        /* (advances 'raw' pointer) */
         H5F_addr_encode_len(ctx->file_addr_len, &raw, elmt->addr);
         UINT64ENCODE_VAR(raw, elmt->nbytes, ctx->chunk_size_len);
         UINT32ENCODE(raw, elmt->filter_mask);
@@ -546,7 +546,7 @@ H5D_earray_filt_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx)
     /* Decode raw elements into native elements */
     while(nelmts) {
         /* Decode element */
-        /* (advances 'raw' pointer */
+        /* (advances 'raw' pointer) */
         H5F_addr_decode_len(ctx->file_addr_len, &raw, &elmt->addr);
         UINT64DECODE_VAR(raw, elmt->nbytes, ctx->chunk_size_len);
         UINT32DECODE(raw, elmt->filter_mask);
@@ -1440,6 +1440,7 @@ H5D_earray_idx_copy_setup(const H5D_chk_idx_info_t *idx_info_src,
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_copy_setup)
 
+    /* Check args */
     HDassert(idx_info_src);
     HDassert(idx_info_src->f);
     HDassert(idx_info_src->pline);
@@ -1487,6 +1488,7 @@ H5D_earray_idx_copy_shutdown(H5O_layout_t *layout_src, H5O_layout_t *layout_dst,
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_copy_shutdown)
 
+    /* Check args */
     HDassert(layout_src);
     HDassert(layout_src->u.chunk.u.earray.ea);
     HDassert(layout_dst);
@@ -1582,6 +1584,7 @@ H5D_earray_idx_reset(H5O_layout_t *layout, hbool_t reset_addr)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_earray_idx_reset)
 
+    /* Check args */
     HDassert(layout);
 
     /* Reset index info */
@@ -1618,6 +1621,7 @@ H5D_earray_idx_support(const H5D_chk_idx_info_t *idx_info,
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_support)
 
+    /* Check args */
     HDassert(idx_info);
     HDassert(udata);
     HDassert(child_entry);
@@ -1669,6 +1673,7 @@ H5D_earray_idx_unsupport(const H5D_chk_idx_info_t *idx_info,
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_unsupport)
 
+    /* Check args */
     HDassert(idx_info);
     HDassert(udata);
     HDassert(child_entry);
@@ -1714,6 +1719,7 @@ H5D_earray_idx_dump(const H5D_chk_idx_info_t *idx_info, FILE *stream)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOFUNC(H5D_earray_idx_dump)
 
+    /* Check args */
     HDassert(idx_info);
     HDassert(idx_info->f);
     HDassert(idx_info->layout);
@@ -1744,6 +1750,7 @@ H5D_earray_idx_dest(const H5D_chk_idx_info_t *idx_info)
 
     FUNC_ENTER_NOAPI_NOINIT(H5D_earray_idx_dest)
 
+    /* Check args */
     HDassert(idx_info);
     HDassert(idx_info->f);
     HDassert(idx_info->layout);
