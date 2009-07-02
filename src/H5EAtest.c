@@ -245,7 +245,7 @@ H5EA__test_encode(void *raw, const void *_elmt, size_t nelmts, void *_ctx))
     /* Encode native elements into raw elements */
     while(nelmts) {
         /* Encode element */
-        /* (advances 'raw' pointer */
+        /* (advances 'raw' pointer) */
         UINT64ENCODE(raw, *elmt);
 
         /* Advance native element pointer */
@@ -291,7 +291,7 @@ H5EA__test_decode(const void *_raw, void *_elmt, size_t nelmts, void *_ctx))
     /* Decode raw elements into native elements */
     while(nelmts) {
         /* Decode element */
-        /* (advances 'raw' pointer */
+        /* (advances 'raw' pointer) */
         UINT64DECODE(raw, *elmt);
 
         /* Advance native element pointer */
