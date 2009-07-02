@@ -279,7 +279,8 @@ H5P_dcrt_copy(hid_t dst_plist_id, hid_t src_plist_id, void UNUSED *copy_data)
 
             /* Reset index info, if the chunk ops are set */
             if(dst_layout.u.chunk.ops)
-                if(H5D_chunk_idx_reset(&dst_layout) < 0)
+		/* Reset address and pointer of the array struct for the chunked storage index */
+                if(H5D_chunk_idx_reset(&dst_layout, TRUE) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTINIT, FAIL, "unable to reset chunked storage index in dest")
 
             /* Reset chunk index ops */

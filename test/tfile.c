@@ -233,7 +233,7 @@ test_file_create(void)
     {
        hid_t       dataset_id, dataspace_id;  /* identifiers */
        hsize_t     dims[F2_RANK];
-       int         data[F2_DIM0][F2_DIM1];
+       unsigned    data[F2_DIM0][F2_DIM1];
        unsigned i,j;
 
        /* Create the data space for the dataset. */
@@ -243,7 +243,7 @@ test_file_create(void)
        CHECK(dataspace_id, FAIL, "H5Screate_simple");
 
        /* Create the dataset. */
-       dataset_id = H5Dcreate2(fid2, F2_DSET, H5T_NATIVE_INT, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+       dataset_id = H5Dcreate2(fid2, F2_DSET, H5T_NATIVE_UINT, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
        CHECK(dataset_id, FAIL, "H5Dcreate2");
 
        for(i = 0; i < F2_DIM0; i++)
@@ -251,7 +251,7 @@ test_file_create(void)
                data[i][j] = i * 10 + j;
 
        /* Write data to the new dataset */
-       ret = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+       ret = H5Dwrite(dataset_id, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
        CHECK(ret, FAIL, "H5Dwrite");
 
        /* End access to the dataset and release resources used by it. */
@@ -804,7 +804,7 @@ create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
     {
        hid_t       dataset_id, dataspace_id;  /* identifiers */
        hsize_t     dims[F2_RANK];
-       int         data[F2_DIM0][F2_DIM1];
+       unsigned    data[F2_DIM0][F2_DIM1];
        unsigned    i,j;
 
        /* Create the data space for the dataset. */
@@ -814,7 +814,7 @@ create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
        CHECK(dataspace_id, FAIL, "H5Screate_simple");
 
        /* Create the dataset. */
-       dataset_id = H5Dcreate2(fid1, "/dset", H5T_NATIVE_INT, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+       dataset_id = H5Dcreate2(fid1, "/dset", H5T_NATIVE_UINT, dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
        CHECK(dataset_id, FAIL, "H5Dcreate2");
 
        for(i = 0; i < F2_DIM0; i++)
@@ -822,8 +822,7 @@ create_objects(hid_t fid1, hid_t fid2, hid_t *ret_did, hid_t *ret_gid1,
                data[i][j] = i * 10 + j;
 
        /* Write data to the new dataset */
-       ret = H5Dwrite(dataset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL,
-                H5P_DEFAULT, data);
+       ret = H5Dwrite(dataset_id, H5T_NATIVE_UINT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
        CHECK(ret, FAIL, "H5Dwrite");
 
        if(ret_did != NULL)
@@ -2014,7 +2013,7 @@ test_cached_stab_info(void)
 
     /* Reopen file */
     file_id = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
-    CHECK(ret, FAIL, "H5Fopen");
+    CHECK(file_id, FAIL, "H5Fopen");
 
     /* Verify the cached symbol table information */
     ret = H5F_check_cached_stab_test(file_id);
@@ -2058,7 +2057,7 @@ test_file(void)
 #endif /*H5_CANNOT_OPEN_TWICE*/
     test_userblock_file_size(); /* Tests that files created with a userblock have the correct size */
     test_cached_stab_info();    /* Tests that files are created with cached stab info in the superblock */
-}				/* test_file() */
+} /* test_file() */
 
 
 /*-------------------------------------------------------------------------

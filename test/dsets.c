@@ -138,10 +138,12 @@ const char *FILENAME[] = {
 #define FILTER_HS_SIZE2         50
 
 /* Names for noencoder test */
+#ifdef H5_HAVE_FILTER_SZIP
 #define NOENCODER_FILENAME "noencoder.h5"
 #define NOENCODER_TEST_DATASET "noencoder_tdset.h5"
 #define NOENCODER_SZIP_DATASET "noencoder_szip_dset.h5"
 #define NOENCODER_SZIP_SHUFF_FLETCH_DATASET "noencoder_szip_shuffle_fletcher_dset.h5"
+#endif /* H5_HAVE_FILTER_SZIP */
 
 /* Names for zero-dim test */
 #define ZERODIM_DATASET "zerodim"
@@ -974,9 +976,9 @@ test_tconv(hid_t file)
     hsize_t	dims[1];
     hid_t	space, dataset;
 
-    out = HDmalloc((size_t)(4 * 1000 * 1000));
+    out = (char *)HDmalloc((size_t)(4 * 1000 * 1000));
     HDassert(out);
-    in = HDmalloc((size_t)(4 * 1000 * 1000));
+    in = (char *)HDmalloc((size_t)(4 * 1000 * 1000));
     HDassert(in);
 
     TESTING("data type conversion");
@@ -1131,7 +1133,7 @@ set_local_bogus2(hid_t dcpl_id, hid_t type_id, hid_t UNUSED space_id)
         return(FAIL);
 
     /* Set "local" parameters for this dataset */
-    cd_values[2]=(add_on>0);    /* Flag to indicate data is modified */
+    cd_values[2]=(unsigned)(add_on>0);    /* Flag to indicate data is modified */
     cd_values[3]=add_on;        /* Amount the data was modified by */
 
     /* Modify the filter's parameters for this dataset */
@@ -1185,12 +1187,12 @@ filter_bogus2(unsigned int flags, size_t cd_nelmts,
         /* "Compressing" */
         else {
             unsigned add_on=cd_values[3];   /* Get "add on" value */
-            int *int_ptr=*buf;          /* Pointer to the data values */
+            int *int_ptr=(int *)*buf;          /* Pointer to the data values */
             size_t buf_left=*buf_size;  /* Amount of data buffer left to process */
 
             /* Add the "add on" value to all the data values */
             while(buf_left>0) {
-                *int_ptr++ += add_on;
+                *int_ptr++ += (int)add_on;
                 buf_left -= sizeof(int);
             } /* end while */
         } /* end else */
@@ -2661,7 +2663,7 @@ test_nbit_int(hid_t file)
     /* Check that the values read are the same as the values written
      * Use mask for checking the significant bits, ignoring the padding bits
      */
-    mask = ~(~0 << (precision + offset)) & (~0 << offset);
+    mask = ~((unsigned)~0 << (precision + offset)) & ((unsigned)~0 << offset);
     for(i=0; i<(size_t)size[0]; i++) {
         for(j=0; j<(size_t)size[1]; j++) {
             if((new_data[i][j] & mask) != (orig_data[i][j] & mask)) {
@@ -3220,7 +3222,7 @@ test_nbit_compound(hid_t file)
         /* some even-numbered integer values are negtive */
         if((i*size[1]+j+1)%2 == 0) {
             orig_data[i][j].i = -orig_data[i][j].i;
-            orig_data[i][j].s = -orig_data[i][j].s;
+            orig_data[i][j].s = (short)-orig_data[i][j].s;
         }
       }
 
@@ -3262,9 +3264,9 @@ test_nbit_compound(hid_t file)
     /* Check that the values read are the same as the values written
      * Use mask for checking the significant bits, ignoring the padding bits
      */
-    i_mask = ~(~0 << (precision[0] + offset[0])) & (~0 << offset[0]);
-    c_mask = ~(~0 << (precision[1] + offset[1])) & (~0 << offset[1]);
-    s_mask = ~(~0 << (precision[2] + offset[2])) & (~0 << offset[2]);
+    i_mask = ~((unsigned)~0 << (precision[0] + offset[0])) & ((unsigned)~0 << offset[0]);
+    c_mask = ~((unsigned)~0 << (precision[1] + offset[1])) & ((unsigned)~0 << offset[1]);
+    s_mask = ~((unsigned)~0 << (precision[2] + offset[2])) & ((unsigned)~0 << offset[2]);
     for(i=0; i<size[0]; i++) {
         for(j=0; j<size[1]; j++) {
             if((new_data[i][j].i & i_mask) != (orig_data[i][j].i & i_mask) ||
@@ -3522,10 +3524,10 @@ test_nbit_compound_2(hid_t file)
     /* Check that the values read are the same as the values written
      * Use mask for checking the significant bits, ignoring the padding bits
      */
-    i_mask = ~(~0 << (precision[0] + offset[0])) & (~0 << offset[0]);
-    c_mask = ~(~0 << (precision[1] + offset[1])) & (~0 << offset[1]);
-    s_mask = ~(~0 << (precision[2] + offset[2])) & (~0 << offset[2]);
-    b_mask = ~(~0 << (precision[4] + offset[4])) & (~0 << offset[4]);
+    i_mask = ~((unsigned)~0 << (precision[0] + offset[0])) & ((unsigned)~0 << offset[0]);
+    c_mask = ~((unsigned)~0 << (precision[1] + offset[1])) & ((unsigned)~0 << offset[1]);
+    s_mask = ~((unsigned)~0 << (precision[2] + offset[2])) & ((unsigned)~0 << offset[2]);
+    b_mask = ~((unsigned)~0 << (precision[4] + offset[4])) & ((unsigned)~0 << offset[4]);
     for(i=0; i<(size_t)size[0]; i++) {
       for(j=0; j<(size_t)size[1]; j++) {
         b_failed = 0;
@@ -5904,7 +5906,7 @@ test_missing_chunk(hid_t file)
 
     /* Initialize data */
     for(u=0; u<MISSING_CHUNK_DIM; u++) {
-        wdata[u]=u;
+        wdata[u]=(int)u;
         rdata[u]=911;
     } /* end for */
 
@@ -6037,8 +6039,8 @@ test_random_chunks(hid_t fapl)
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i=0; i<NPOINTS; i++){
         do {
-            chunk_row = (int)HDrandom () % (dsize[0]/csize[0]);
-            chunk_col = (int)HDrandom () % (dsize[1]/csize[1]);
+            chunk_row = (int)HDrandom () % (int)(dsize[0]/csize[0]);
+            chunk_col = (int)HDrandom () % (int)(dsize[1]/csize[1]);
         } while (check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row+chunk_col+1;
@@ -6127,8 +6129,8 @@ test_random_chunks(hid_t fapl)
     /* Generate random point coordinates. Only one point is selected per chunk */
     for(i = 0; i < NPOINTS; i++){
         do {
-            chunk_row = (int)HDrandom() % (nsize[0] / csize[0]);
-            chunk_col = (int)HDrandom() % (nsize[1] / csize[1]);
+            chunk_row = (int)HDrandom() % (int)(nsize[0] / csize[0]);
+            chunk_col = (int)HDrandom() % (int)(nsize[1] / csize[1]);
         } while (check2[chunk_row][chunk_col]);
 
         wbuf[i] = check2[chunk_row][chunk_col] = chunk_row + chunk_col + 1;
@@ -7370,7 +7372,7 @@ main(void)
     } /* end for */
 
     /* Close 2nd FAPL */
-    H5Pclose(fapl2);
+    if(H5Pclose(fapl2) < 0) TEST_ERROR
 
     if(nerrors)
         goto error;

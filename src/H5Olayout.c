@@ -390,6 +390,10 @@ H5O_layout_copy(const void *_mesg, void *_dest)
         HDmemcpy(dest->u.compact.buf, mesg->u.compact.buf, dest->u.compact.size);
     } /* end if */
 
+    /* Reset the pointer of the chunked storage index but not the address */
+    if(dest->type == H5D_CHUNKED && dest->u.chunk.ops)
+	H5D_chunk_idx_reset(dest, FALSE);
+
     /* Set return value */
     ret_value = dest;
 
@@ -517,7 +521,7 @@ H5O_layout_free(void *_mesg)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
+H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t *open_oh, void *_mesg)
 {
     H5O_layout_t *mesg = (H5O_layout_t *) _mesg;
     herr_t ret_value = SUCCEED;   /* Return value */
@@ -526,6 +530,7 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
 
     /* check args */
     HDassert(f);
+    HDassert(open_oh);
     HDassert(mesg);
 
     /* Perform different actions, depending on the type of storage */
@@ -542,7 +547,7 @@ H5O_layout_delete(H5F_t *f, hid_t dxpl_id, H5O_t UNUSED *open_oh, void *_mesg)
 
         case H5D_CHUNKED:       /* Chunked blocks on disk */
             /* Free the file space for the index & chunk raw data */
-            if(H5D_chunk_delete(f, dxpl_id, mesg) < 0)
+            if(H5D_chunk_delete(f, dxpl_id, open_oh, mesg) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free raw data")
             break;
 
@@ -626,7 +631,7 @@ H5O_layout_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst,
         case H5D_CHUNKED:
             if(H5D_chunk_is_space_alloc(layout_src)) {
                 /* Layout is not created in the destination file, reset index address */
-                if(H5D_chunk_idx_reset(layout_dst) < 0)
+                if(H5D_chunk_idx_reset(layout_dst, TRUE) < 0)
                     HGOTO_ERROR(H5E_IO, H5E_CANTINIT, NULL, "unable to reset chunked storage index in dest")
 
                 /* Create chunked layout */
