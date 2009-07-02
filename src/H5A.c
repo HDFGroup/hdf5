@@ -436,9 +436,6 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
         if(H5S_set_latest_version(attr->shared->ds) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set latest version of dataspace")
 
-    /* Mark it initially set to initialized */
-    attr->shared->initialized = TRUE; /*for now, set to false later*/
-
     /* Copy the object header information */
     if(H5O_loc_copy(&(attr->oloc), loc->oloc, H5_COPY_DEEP) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, FAIL, "unable to copy entry")
@@ -498,9 +495,6 @@ H5A_create(const H5G_loc_t *loc, const char *name, const H5T_t *type,
     if((ret_value = H5I_register(H5I_ATTR, attr, TRUE)) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register attribute for ID")
 
-    /* Now it's safe to say it's uninitialized */
-    attr->shared->initialized = FALSE;
-
 done:
     /* Cleanup on failure */
     if(ret_value < 0 && attr && H5A_close(attr) < 0)
@@ -550,7 +544,6 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t UNUSED aapl_id)
     /* Read in attribute from object header */
     if(NULL == (attr = H5O_attr_open_by_name(loc.oloc, attr_name, H5AC_ind_dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to load attribute info from object header")
-    attr->shared->initialized = TRUE;
 
     /* Finish initializing attribute */
     if(H5A_open_common(&loc, attr) < 0)
@@ -805,7 +798,6 @@ H5A_open_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
     /* Read in attribute from object header */
     if(NULL == (attr = H5O_attr_open_by_idx(obj_loc.oloc, idx_type, order, n, dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, NULL, "unable to load attribute info from object header")
-    attr->shared->initialized = TRUE;
 
     /* Finish initializing attribute */
     if(H5A_open_common(&obj_loc, attr) < 0)
@@ -871,7 +863,6 @@ H5A_open_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_na
     /* Read in attribute from object header */
     if(NULL == (attr = H5O_attr_open_by_name(obj_loc.oloc, attr_name, dxpl_id)))
         HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, NULL, "unable to load attribute info from object header")
-    attr->shared->initialized = TRUE;
 
     /* Finish initializing attribute */
     if(H5A_open_common(loc, attr) < 0)
@@ -1036,9 +1027,6 @@ H5A_write(H5A_t *attr, const H5T_t *mem_type, const void *buf, hid_t dxpl_id)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to modify attribute")
     } /* end if */
 
-    /* Indicate the the attribute doesn't need fill-values */
-    attr->shared->initialized = TRUE;
-
 done:
     /* Release resources */
     if(src_id >= 0)
@@ -1144,7 +1132,7 @@ H5A_read(const H5A_t *attr, const H5T_t *mem_type, void *buf, hid_t dxpl_id)
         dst_type_size = H5T_GET_SIZE(mem_type);
 
         /* Check if the attribute has any data yet, if not, fill with zeroes */
-        if(attr->obj_opened && !attr->shared->initialized)
+        if(attr->obj_opened && !attr->shared->data)
             HDmemset(buf, 0, (dst_type_size * nelmts));
         else {  /* Attribute exists and has a value */
             /* Convert memory buffer into disk buffer */
