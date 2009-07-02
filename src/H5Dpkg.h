@@ -342,12 +342,9 @@ typedef struct H5D_chunk_map_t {
     hsize_t last_index;         /* Index of last chunk operated on */
     H5D_chunk_info_t *last_chunk_info;  /* Pointer to last chunk's info */
 
-    hsize_t chunks[H5O_LAYOUT_NDIMS];   /* Number of chunks in each dimension */
     hsize_t chunk_dim[H5O_LAYOUT_NDIMS];    /* Size of chunk in each dimension */
-    hsize_t down_chunks[H5O_LAYOUT_NDIMS];   /* "down" size of number of chunks in each dimension */
 
 #ifdef H5_HAVE_PARALLEL
-    hsize_t total_chunks;       /* Number of chunks covered by dataspace */
     H5D_chunk_info_t **select_chunk;    /* Store the information about whether this chunk is selected or not */
 #endif /* H5_HAVE_PARALLEL */
 } H5D_chunk_map_t;
@@ -578,6 +575,9 @@ H5_DLL htri_t H5D_chunk_cacheable(const H5D_io_info_t *io_info, haddr_t caddr,
     hbool_t write_op);
 H5_DLL herr_t H5D_chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
 H5_DLL herr_t H5D_chunk_create(H5D_t *dset /*in,out*/, hid_t dxpl_id);
+H5_DLL herr_t H5D_chunk_set_info(const H5D_t *dset);
+H5_DLL herr_t H5D_chunk_set_info_real(H5O_layout_t *layout, unsigned ndims,
+    const hsize_t *curr_dims);
 H5_DLL herr_t H5D_chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset,
     hid_t dapl_id);
 H5_DLL hbool_t H5D_chunk_is_space_alloc(const H5O_layout_t *layout);
@@ -594,8 +594,7 @@ H5_DLL herr_t H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwr
 H5_DLL herr_t H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id,
     const hsize_t *old_dims);
 #ifdef H5_HAVE_PARALLEL
-H5_DLL herr_t H5D_chunk_addrmap(const H5D_io_info_t *io_info,
-    haddr_t chunk_addr[], const hsize_t down_chunks[]);
+H5_DLL herr_t H5D_chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[]);
 #endif /* H5_HAVE_PARALLEL */
 H5_DLL herr_t H5D_chunk_update_cache(H5D_t *dset, hid_t dxpl_id);
 H5_DLL herr_t H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src,

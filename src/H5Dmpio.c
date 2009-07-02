@@ -843,7 +843,7 @@ H5D_link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *type
     } /* end if */
 
     /* Retrieve total # of chunks in dataset */
-    H5_ASSIGN_OVERFLOW(total_chunks, fm->total_chunks, hsize_t, size_t);
+    H5_ASSIGN_OVERFLOW(total_chunks, fm->layout->u.chunk.nchunks, hsize_t, size_t);
 
     /* Handle special case when dataspace dimensions only allow one chunk in
      *  the dataset.  [This sometimes is used by developers who want the
@@ -997,7 +997,7 @@ if(H5DEBUG(D))
             total_chunk_addr_array = H5MM_malloc(sizeof(haddr_t) * total_chunks);
 
             /* Retrieve chunk address map */
-            if(H5D_chunk_addrmap(io_info, total_chunk_addr_array, fm->down_chunks) < 0)
+            if(H5D_chunk_addrmap(io_info, total_chunk_addr_array) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
 
             /* Get chunk with lowest address */
@@ -1103,7 +1103,7 @@ H5D_multi_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
 #endif
 
     /* Retrieve total # of chunks in dataset */
-    H5_ASSIGN_OVERFLOW(total_chunk, fm->total_chunks, hsize_t, size_t);
+    H5_ASSIGN_OVERFLOW(total_chunk, fm->layout->u.chunk.nchunks, hsize_t, size_t);
     HDassert(total_chunk != 0);
 
     /* Allocate memories */
@@ -1706,7 +1706,7 @@ H5D_sort_chunk(H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
      *   0, we would always want to obtain the chunk addresses individually
      *   for each process.
      */
-    bsearch_coll_chunk_threshold = (sum_chunk * 100) / ((int)fm->total_chunks * mpi_size);
+    bsearch_coll_chunk_threshold = (sum_chunk * 100) / ((int)fm->layout->u.chunk.nchunks * mpi_size);
     if((bsearch_coll_chunk_threshold > H5D_ALL_CHUNK_ADDR_THRES_COL)
             && ((sum_chunk / mpi_size) >= H5D_ALL_CHUNK_ADDR_THRES_COL_NUM))
         many_chunk_opt = H5D_OBTAIN_ALL_CHUNK_ADDR_COL;
@@ -1725,19 +1725,19 @@ if(H5DEBUG(D))
     HDfprintf(H5DEBUG(D), "Coming inside H5D_OBTAIN_ALL_CHUNK_ADDR_COL\n");
 #endif
         /* Allocate array for chunk addresses */
-        if(NULL == (total_chunk_addr_array = H5MM_malloc(sizeof(haddr_t) * (size_t)fm->total_chunks)))
+        if(NULL == (total_chunk_addr_array = H5MM_malloc(sizeof(haddr_t) * (size_t)fm->layout->u.chunk.nchunks)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory chunk address array")
 
         /* Retrieve all the chunk addresses with process 0 */
         if((mpi_rank = H5F_mpi_get_rank(io_info->dset->oloc.file)) < 0)
             HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi rank")
 	if(mpi_rank == 0) {
-            if(H5D_chunk_addrmap(io_info, total_chunk_addr_array, fm->down_chunks) < 0)
+            if(H5D_chunk_addrmap(io_info, total_chunk_addr_array) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address")
 	} /* end if */
 
 	/* Broadcasting the MPI_IO option info. and chunk address info. */
-	if(MPI_SUCCESS != (mpi_code = MPI_Bcast(total_chunk_addr_array, (int)(sizeof(haddr_t) * fm->total_chunks), MPI_BYTE, (int)0, io_info->comm)))
+	if(MPI_SUCCESS != (mpi_code = MPI_Bcast(total_chunk_addr_array, (int)(sizeof(haddr_t) * fm->layout->u.chunk.nchunks), MPI_BYTE, (int)0, io_info->comm)))
 	   HMPI_GOTO_ERROR(FAIL, "MPI_BCast failed", mpi_code)
     } /* end if */
 
@@ -1869,12 +1869,12 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
         HGOTO_ERROR(H5E_IO, H5E_MPI, FAIL, "unable to obtain mpi size")
 
     /* Setup parameters */
-    H5_ASSIGN_OVERFLOW(total_chunks, fm->total_chunks, hsize_t, int);
+    H5_ASSIGN_OVERFLOW(total_chunks, fm->layout->u.chunk.nchunks, hsize_t, int);
     percent_nproc_per_chunk = H5P_peek_unsigned(dx_plist, H5D_XFER_MPIO_CHUNK_OPT_RATIO_NAME);
 #if defined(H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS) && defined(H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS)
     chunk_opt_mode = (H5FD_mpio_chunk_opt_t)H5P_peek_unsigned(dx_plist, H5D_XFER_MPIO_CHUNK_OPT_HARD_NAME);
     if((chunk_opt_mode == H5FD_MPIO_CHUNK_MULTI_IO) || (percent_nproc_per_chunk == 0)) {
-        if(H5D_chunk_addrmap(io_info, chunk_addr, fm->down_chunks) < 0)
+        if(H5D_chunk_addrmap(io_info, chunk_addr) < 0)
            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk address");
         for(ic = 0; ic < total_chunks; ic++)
            assign_io_mode[ic] = H5D_CHUNK_IO_MODE_COL;
@@ -1931,7 +1931,7 @@ H5D_obtain_mpio_mode(H5D_io_info_t* io_info, H5D_chunk_map_t *fm,
 #endif
 
         /* calculating the chunk address */
-        if(H5D_chunk_addrmap(io_info, chunk_addr, fm->down_chunks) < 0) {
+        if(H5D_chunk_addrmap(io_info, chunk_addr) < 0) {
             HDfree(nproc_per_chunk);
 #if !defined(H5_MPI_COMPLEX_DERIVED_DATATYPE_WORKS) || !defined(H5_MPI_SPECIAL_COLLECTIVE_IO_WORKS)
             HDfree(ind_this_chunk);

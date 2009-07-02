@@ -2366,9 +2366,12 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
          *-------------------------------------------------------------------------
          */
         /* Update the index values for the cached chunks for this dataset */
-        if(H5D_CHUNKED == dset->shared->layout.type)
+        if(H5D_CHUNKED == dset->shared->layout.type) {
+            if(H5D_chunk_set_info(dset) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to update # of chunks")
             if(H5D_chunk_update_cache(dset, dxpl_id) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to update cached chunk indices")
+        } /* end if */
 
         /* Allocate space for the new parts of the dataset, if appropriate */
         if(expand && dset->shared->dcpl_cache.fill.alloc_time == H5D_ALLOC_TIME_EARLY)
