@@ -379,9 +379,9 @@ H5D_chunk_init(H5F_t *f, hid_t dxpl_id, const H5D_t *dset, hid_t dapl_id)
     /* Sanity check */
     HDassert(f);
     HDassert(dset);
-    HDassert((H5D_CHUNK_EARRAY == dset->shared->layout.u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_EARRAY == dset->shared->layout.u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == dset->shared->layout.u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.u.chunk.ops));
 
     if(NULL == (dapl = (H5P_genplist_t *)H5I_object(dapl_id)))
@@ -451,9 +451,9 @@ H5D_chunk_is_space_alloc(const H5O_layout_t *layout)
 
     /* Sanity checks */
     HDassert(layout);
-    HDassert((H5D_CHUNK_EARRAY == layout->u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == layout->u.chunk.idx_type && 
                 H5D_COPS_EARRAY == layout->u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == layout->u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == layout->u.chunk.idx_type && 
                 H5D_COPS_BTREE == layout->u.chunk.ops));
 
     /* Query index layer */
@@ -1932,9 +1932,9 @@ H5D_chunk_idx_reset(H5O_layout_t *layout, hbool_t reset_addr)
     /* Sanity checks */
     HDassert(layout);
     HDassert(layout->u.chunk.ops);
-    HDassert((H5D_CHUNK_EARRAY == layout->u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == layout->u.chunk.idx_type && 
                 H5D_COPS_EARRAY == layout->u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == layout->u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == layout->u.chunk.idx_type && 
                 H5D_COPS_BTREE == layout->u.chunk.ops));
 
     /* Reset index structures */
@@ -2087,9 +2087,9 @@ H5D_chunk_create(H5D_t *dset /*in,out*/, hid_t dxpl_id)
     HDassert(dset);
     HDassert(H5D_CHUNKED == dset->shared->layout.type);
     HDassert(dset->shared->layout.u.chunk.ndims > 0 && dset->shared->layout.u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-    HDassert((H5D_CHUNK_EARRAY == dset->shared->layout.u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_EARRAY == dset->shared->layout.u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == dset->shared->layout.u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.u.chunk.ops));
 #ifndef NDEBUG
 {
@@ -2139,9 +2139,9 @@ H5D_chunk_get_info(const H5D_t *dset, hid_t dxpl_id, const hsize_t *chunk_offset
 
     HDassert(dset);
     HDassert(dset->shared->layout.u.chunk.ndims > 0);
-    HDassert((H5D_CHUNK_EARRAY == dset->shared->layout.u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_EARRAY == dset->shared->layout.u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == dset->shared->layout.u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.u.chunk.ops));
     HDassert(chunk_offset);
     HDassert(udata);
@@ -2205,9 +2205,9 @@ H5D_chunk_flush_entry(const H5D_t *dset, hid_t dxpl_id, const H5D_dxpl_cache_t *
 
     HDassert(dset);
     HDassert(dset->shared);
-    HDassert((H5D_CHUNK_EARRAY == dset->shared->layout.u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_EARRAY == dset->shared->layout.u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == dset->shared->layout.u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.u.chunk.ops));
     HDassert(dxpl_cache);
     HDassert(ent);
@@ -3004,9 +3004,9 @@ H5D_chunk_allocated(H5D_t *dset, hid_t dxpl_id, hsize_t *nbytes)
 
     HDassert(dset);
     HDassert(dset->shared);
-    HDassert((H5D_CHUNK_EARRAY == dset->shared->layout.u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_EARRAY == dset->shared->layout.u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == dset->shared->layout.u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.u.chunk.ops));
 
     /* Fill the DXPL cache values for later use */
@@ -3087,9 +3087,9 @@ H5D_chunk_allocate(H5D_t *dset, hid_t dxpl_id, hbool_t full_overwrite)
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
     HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-    HDassert((H5D_CHUNK_EARRAY == layout->u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == layout->u.chunk.idx_type && 
                 H5D_COPS_EARRAY == layout->u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == layout->u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == layout->u.chunk.idx_type && 
                 H5D_COPS_BTREE == layout->u.chunk.ops));
     HDassert(TRUE == H5P_isa_class(dxpl_id, H5P_DATASET_XFER));
 
@@ -3663,9 +3663,9 @@ H5D_chunk_prune_by_extent(H5D_t *dset, hid_t dxpl_id, const hsize_t *old_dims)
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
     HDassert(layout->u.chunk.ndims > 0 && layout->u.chunk.ndims <= H5O_LAYOUT_NDIMS);
-    HDassert((H5D_CHUNK_EARRAY == layout->u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == layout->u.chunk.idx_type && 
                 H5D_COPS_EARRAY == layout->u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == layout->u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == layout->u.chunk.idx_type && 
                 H5D_COPS_BTREE == layout->u.chunk.ops));
     HDassert(dxpl_cache);
 
@@ -3905,9 +3905,9 @@ H5D_chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[],
 
     HDassert(dset);
     HDassert(dset->shared);
-    HDassert((H5D_CHUNK_EARRAY == dset->shared->layout.u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_EARRAY == dset->shared->layout.u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == dset->shared->layout.u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.u.chunk.ops));
     HDassert(chunk_addr);
     HDassert(down_chunks);
@@ -3960,9 +3960,9 @@ H5D_chunk_delete(H5F_t *f, hid_t dxpl_id, H5O_t *oh, H5O_layout_t *layout)
     HDassert(f);
     HDassert(oh);
     HDassert(layout);
-    HDassert((H5D_CHUNK_EARRAY == layout->u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == layout->u.chunk.idx_type && 
                 H5D_COPS_EARRAY == layout->u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == layout->u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == layout->u.chunk.idx_type && 
                 H5D_COPS_BTREE == layout->u.chunk.ops));
 
     /* Check for I/O pipeline message */
@@ -4310,14 +4310,14 @@ H5D_chunk_copy(H5F_t *f_src, H5O_layout_t *layout_src, H5F_t *f_dst,
     HDassert(f_src);
     HDassert(f_dst);
     HDassert(layout_src && H5D_CHUNKED == layout_src->type);
-    HDassert((H5D_CHUNK_EARRAY == layout_src->u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == layout_src->u.chunk.idx_type && 
                 H5D_COPS_EARRAY == layout_src->u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == layout_src->u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == layout_src->u.chunk.idx_type && 
                 H5D_COPS_BTREE == layout_src->u.chunk.ops));
     HDassert(layout_dst && H5D_CHUNKED == layout_dst->type);
-    HDassert((H5D_CHUNK_EARRAY == layout_dst->u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == layout_dst->u.chunk.idx_type && 
                 H5D_COPS_EARRAY == layout_dst->u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == layout_dst->u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == layout_dst->u.chunk.idx_type && 
                 H5D_COPS_BTREE == layout_dst->u.chunk.ops));
     HDassert(dt_src);
 
@@ -4526,9 +4526,9 @@ H5D_chunk_bh_info(H5F_t *f, hid_t dxpl_id, H5O_layout_t *layout,
     /* Check args */
     HDassert(f);
     HDassert(layout);
-    HDassert((H5D_CHUNK_EARRAY == layout->u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == layout->u.chunk.idx_type && 
                 H5D_COPS_EARRAY == layout->u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == layout->u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == layout->u.chunk.idx_type && 
                 H5D_COPS_BTREE == layout->u.chunk.ops));
     HDassert(pline);
     HDassert(index_size);
@@ -4617,9 +4617,9 @@ H5D_chunk_dump_index(H5D_t *dset, hid_t dxpl_id, FILE *stream)
 
     /* Sanity check */
     HDassert(dset);
-    HDassert((H5D_CHUNK_EARRAY == dset->shared->layout.u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_EARRAY == dset->shared->layout.u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == dset->shared->layout.u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.u.chunk.ops));
 
     /* Only display info if stream is defined */
@@ -4680,9 +4680,9 @@ H5D_chunk_dest(H5F_t *f, hid_t dxpl_id, H5D_t *dset)
 
     HDassert(f);
     HDassert(dset);
-    HDassert((H5D_CHUNK_EARRAY == dset->shared->layout.u.chunk.idx_type && 
+    HDassert((H5D_CHUNK_IDX_EARRAY == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_EARRAY == dset->shared->layout.u.chunk.ops) ||
-            (H5D_CHUNK_BTREE == dset->shared->layout.u.chunk.idx_type && 
+            (H5D_CHUNK_IDX_BTREE == dset->shared->layout.u.chunk.idx_type && 
                 H5D_COPS_BTREE == dset->shared->layout.u.chunk.ops));
 
     /* Fill the DXPL cache values for later use */

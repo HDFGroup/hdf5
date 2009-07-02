@@ -145,7 +145,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 
             /* Set the chunk operations */
             /* (Only "btree" indexing type currently supported in this version) */
-            mesg->u.chunk.idx_type = H5D_CHUNK_BTREE;
+            mesg->u.chunk.idx_type = H5D_CHUNK_IDX_BTREE;
             mesg->u.chunk.ops = H5D_COPS_BTREE;
         } /* end if */
         else {
@@ -233,7 +233,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 
                     /* Set the chunk operations */
                     /* (Only "btree" indexing type supported with v3 of message format) */
-                    mesg->u.chunk.idx_type = H5D_CHUNK_BTREE;
+                    mesg->u.chunk.idx_type = H5D_CHUNK_IDX_BTREE;
                     mesg->u.chunk.ops = H5D_COPS_BTREE;
                 } /* end if */
                 else {
@@ -257,11 +257,11 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 
                     /* Chunk index type */
                     mesg->u.chunk.idx_type = *p++;
-                    if(mesg->u.chunk.idx_type > H5D_CHUNK_EARRAY)
+                    if(mesg->u.chunk.idx_type > H5D_CHUNK_IDX_EARRAY)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown chunk index type")
 
                     switch(mesg->u.chunk.idx_type) {
-                        case H5D_CHUNK_BTREE:
+                        case H5D_CHUNK_IDX_BTREE:
                             /* B-tree address */
                             H5F_addr_decode(f, &p, &(mesg->u.chunk.u.btree.addr));
 
@@ -269,7 +269,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
                             mesg->u.chunk.ops = H5D_COPS_BTREE;
                             break;
 
-                        case H5D_CHUNK_EARRAY:
+                        case H5D_CHUNK_IDX_EARRAY:
                             /* Extensible array address */
                             H5F_addr_decode(f, &p, &(mesg->u.chunk.u.earray.addr));
 
@@ -409,12 +409,12 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
                 *p++ = (uint8_t)mesg->u.chunk.idx_type;
 
                 switch(mesg->u.chunk.idx_type) {
-                    case H5D_CHUNK_BTREE:
+                    case H5D_CHUNK_IDX_BTREE:
                         /* B-tree address */
                         H5F_addr_encode(f, &p, mesg->u.chunk.u.btree.addr);
                         break;
 
-                    case H5D_CHUNK_EARRAY:
+                    case H5D_CHUNK_IDX_EARRAY:
                         /* Extensible array address */
                         H5F_addr_encode(f, &p, mesg->u.chunk.u.earray.addr);
                         break;
@@ -802,14 +802,14 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
 
             /* Index information */
             switch(mesg->u.chunk.idx_type) {
-                case H5D_CHUNK_BTREE:
+                case H5D_CHUNK_IDX_BTREE:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "v1 B-tree");
                     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
                               "B-tree address:", mesg->u.chunk.u.btree.addr);
                     break;
 
-                case H5D_CHUNK_EARRAY:
+                case H5D_CHUNK_IDX_EARRAY:
                     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
                               "Index Type:", "Extensible Array");
                     HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
@@ -919,12 +919,12 @@ H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
                 ret_value++;
 
                 switch(mesg->u.chunk.idx_type) {
-                    case H5D_CHUNK_BTREE:
+                    case H5D_CHUNK_IDX_BTREE:
                         /* B-tree address */
                         ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
                         break;
 
-                    case H5D_CHUNK_EARRAY:
+                    case H5D_CHUNK_IDX_EARRAY:
                         /* Extensible Array address */
                         ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
                         break;
@@ -997,7 +997,7 @@ H5O_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
             /* Check for rank == 1 (>1 unsupported currently) */
             if(1 == ndims) {
                 /* Set the chunk index type */
-                layout->u.chunk.idx_type = H5D_CHUNK_EARRAY;
+                layout->u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
             } /* end if */
         } /* end if */
     } /* end if */

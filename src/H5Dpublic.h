@@ -50,8 +50,8 @@ typedef enum H5D_layout_t {
 
 /* Types of chunk index data structures */
 typedef enum H5D_chunk_index_t {
-    H5D_CHUNK_BTREE	= 0,	/* v1 B-tree index (default)		     */
-    H5D_CHUNK_EARRAY            /* Extensible array (for 1-D unlimited dim)  */
+    H5D_CHUNK_IDX_BTREE	= 0,	/* v1 B-tree index (default)		     */
+    H5D_CHUNK_IDX_EARRAY	/* Extensible array (for 1 unlimited dim)    */
 } H5D_chunk_index_t;
 
 /* Values for the space allocation time property */
@@ -135,6 +135,7 @@ H5_DLL herr_t H5Ddebug(hid_t dset_id);
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 
 /* Macros */
+#define H5D_CHUNK_BTREE H5D_CHUNK_IDX_BTREE
 
 
 /* Typedefs */

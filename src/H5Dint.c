@@ -727,11 +727,11 @@ H5D_set_io_ops(H5D_t *dataset)
 
             /* Set the chunk operations */
             switch(dataset->shared->layout.u.chunk.idx_type) {
-                case H5D_CHUNK_BTREE:
+                case H5D_CHUNK_IDX_BTREE:
                     dataset->shared->layout.u.chunk.ops = H5D_COPS_BTREE;
                     break;
 
-                case H5D_CHUNK_EARRAY:
+                case H5D_CHUNK_IDX_EARRAY:
                     dataset->shared->layout.u.chunk.ops = H5D_COPS_EARRAY;
                     break;
 

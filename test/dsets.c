@@ -6997,11 +6997,11 @@ test_chunk_fast(hid_t fapl)
                 /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
                 if(low == H5F_LIBVER_LATEST) {
                     /* Verify index type */
-                    if(idx_type != H5D_CHUNK_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
+                    if(idx_type != H5D_CHUNK_IDX_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
                 } /* end if */
                 else {
                     /* Verify index type */
-                    if(idx_type != H5D_CHUNK_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+                    if(idx_type != H5D_CHUNK_IDX_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
                 } /* end else */
 
                 /* Fill existing elements */
@@ -7088,11 +7088,11 @@ test_chunk_fast(hid_t fapl)
                 /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
                 if(low == H5F_LIBVER_LATEST) {
                     /* Verify index type */
-                    if(idx_type != H5D_CHUNK_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
+                    if(idx_type != H5D_CHUNK_IDX_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
                 } /* end if */
                 else {
                     /* Verify index type */
-                    if(idx_type != H5D_CHUNK_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+                    if(idx_type != H5D_CHUNK_IDX_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
                 } /* end else */
 
                 /* Create scalar dataspace */
@@ -7440,11 +7440,11 @@ test_chunk_expand(hid_t fapl)
                 /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
                 if(low == H5F_LIBVER_LATEST) {
                     /* Verify index type */
-                    if(idx_type != H5D_CHUNK_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
+                    if(idx_type != H5D_CHUNK_IDX_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
                 } /* end if */
                 else {
                     /* Verify index type */
-                    if(idx_type != H5D_CHUNK_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+                    if(idx_type != H5D_CHUNK_IDX_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
                 } /* end else */
 
                 /* Fill elements */
@@ -7562,11 +7562,11 @@ test_chunk_expand(hid_t fapl)
                 /* Chunk index tyepe expected depends on whether we are using the latest version of the format */
                 if(low == H5F_LIBVER_LATEST) {
                     /* Verify index type */
-                    if(idx_type != H5D_CHUNK_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
+                    if(idx_type != H5D_CHUNK_IDX_EARRAY) FAIL_PUTS_ERROR("should be using extensible array as index");
                 } /* end if */
                 else {
                     /* Verify index type */
-                    if(idx_type != H5D_CHUNK_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
+                    if(idx_type != H5D_CHUNK_IDX_BTREE) FAIL_PUTS_ERROR("should be using v1 B-tree as index");
                 } /* end else */
 
                 /* Create scalar dataspace */

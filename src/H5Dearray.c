@@ -626,7 +626,7 @@ H5D_earray_idx_depend(const H5D_chk_idx_info_t *idx_info)
     HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5D_CHUNK_EARRAY == idx_info->layout->u.chunk.idx_type);
+    HDassert(H5D_CHUNK_IDX_EARRAY == idx_info->layout->u.chunk.idx_type);
     HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.earray.addr));
     HDassert(idx_info->layout->u.chunk.u.earray.ea);
 
@@ -681,7 +681,7 @@ H5D_earray_idx_undepend(const H5D_chk_idx_info_t *idx_info)
     HDassert(H5F_INTENT(idx_info->f) & H5F_ACC_SWMR_WRITE);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5D_CHUNK_EARRAY == idx_info->layout->u.chunk.idx_type);
+    HDassert(H5D_CHUNK_IDX_EARRAY == idx_info->layout->u.chunk.idx_type);
     HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.earray.addr));
     HDassert(idx_info->layout->u.chunk.u.earray.ea);
 
@@ -739,7 +739,7 @@ H5D_earray_idx_open(const H5D_chk_idx_info_t *idx_info)
     HDassert(idx_info->f);
     HDassert(idx_info->pline);
     HDassert(idx_info->layout);
-    HDassert(H5D_CHUNK_EARRAY == idx_info->layout->u.chunk.idx_type);
+    HDassert(H5D_CHUNK_IDX_EARRAY == idx_info->layout->u.chunk.idx_type);
     HDassert(H5F_addr_defined(idx_info->layout->u.chunk.u.earray.addr));
     HDassert(NULL == idx_info->layout->u.chunk.u.earray.ea);
 

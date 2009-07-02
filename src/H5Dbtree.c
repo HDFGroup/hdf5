@@ -238,7 +238,7 @@ H5D_btree_get_shared(const H5F_t UNUSED *f, const void *_udata)
 
     HDassert(udata);
     HDassert(udata->mesg);
-    HDassert(udata->mesg->u.chunk.idx_type == H5D_CHUNK_BTREE);
+    HDassert(udata->mesg->u.chunk.idx_type == H5D_CHUNK_IDX_BTREE);
     HDassert(udata->mesg->u.chunk.u.btree.shared);
 
     /* Increment reference count on B-tree info */
