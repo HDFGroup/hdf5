@@ -3890,7 +3890,6 @@ H5D_chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[])
     HDassert(dset);
     HDassert(dset->shared);
     HDassert(chunk_addr);
-    HDassert(down_chunks);
 
     /* Set up user data for B-tree callback */
     HDmemset(&udata, 0, sizeof(udata));
@@ -3988,10 +3987,6 @@ H5D_chunk_update_cache(H5D_t *dset, hid_t dxpl_id)
     H5D_dxpl_cache_t _dxpl_cache;       /* Data transfer property cache buffer */
     H5D_dxpl_cache_t *dxpl_cache = &_dxpl_cache;   /* Data transfer property cache */
     unsigned            rank;	        /*current # of dimensions */
-    hsize_t             curr_dims[H5O_LAYOUT_NDIMS];	/*current dataspace dimensions */
-    hsize_t             chunks[H5O_LAYOUT_NDIMS];	        /*current number of chunks in each dimension */
-    hsize_t             down_chunks[H5O_LAYOUT_NDIMS];   /* "down" size of number of elements in each dimension */
-    unsigned            u;	        /*counters  */
     herr_t              ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5D_chunk_update_cache, FAIL)
@@ -4008,18 +4003,6 @@ H5D_chunk_update_cache(H5D_t *dset, hid_t dxpl_id)
     if(rank == 1)
         HGOTO_DONE(SUCCEED)
 
-    /* Go get the dimensions */
-    if(H5S_get_simple_extent_dims(dset->shared->space, curr_dims, NULL) < 0)
-	HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get dataset dimensions")
-
-    /* Round up to the next integer # of chunks, to accomodate partial chunks */
-    for(u = 0; u < rank; u++)
-        chunks[u] = ((curr_dims[u] + dset->shared->layout.u.chunk.dim[u]) - 1) / dset->shared->layout.u.chunk.dim[u];
-
-    /* Get the "down" sizes for each dimension */
-    if(H5V_array_down(rank, chunks, down_chunks) < 0)
-        HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL, "can't compute 'down' sizes")
-
     /* Fill the DXPL cache values for later use */
     if(H5D_get_dxpl_cache(dxpl_id, &dxpl_cache) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't fill dxpl cache")
@@ -4033,7 +4016,7 @@ H5D_chunk_update_cache(H5D_t *dset, hid_t dxpl_id)
         next = ent->next;
 
         /* Calculate the index of this chunk */
-        if(H5V_chunk_index(rank, ent->offset, dset->shared->layout.u.chunk.dim, down_chunks, &idx) < 0)
+        if(H5V_chunk_index(rank, ent->offset, dset->shared->layout.u.chunk.dim, dset->shared->layout.u.chunk.down_chunks, &idx) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL, "can't get chunk index")
 
         /* Compute the index for the chunk entry */
