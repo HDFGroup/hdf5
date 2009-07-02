@@ -360,6 +360,9 @@ typedef struct H5O_layout_chunk_t {
     unsigned	ndims;			/* Num dimensions in chunk           */
     uint32_t	dim[H5O_LAYOUT_NDIMS];	/* Size of chunk in elements         */
     uint32_t    size;                   /* Size of chunk in bytes            */
+    hsize_t     nchunks;                /* Number of chunks in dataset	     */
+    hsize_t     chunks[H5O_LAYOUT_NDIMS]; /* # of chunks in dataset dimensions */
+    hsize_t    	down_chunks[H5O_LAYOUT_NDIMS];	/* "down" size of number of chunks in each dimension */
     const struct H5D_chunk_ops_t *ops;  /* Pointer to chunked layout operations */
     union {
         H5O_layout_chunk_btree_t btree; /* Information for v1 B-tree index   */

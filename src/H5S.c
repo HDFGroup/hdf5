@@ -841,6 +841,61 @@ done:
 
 
 /*-------------------------------------------------------------------------
+ * Function:	H5S_extent_get_dims
+ *
+ * Purpose:	Returns the size in each dimension of a dataspace.  This
+ *		function may not be meaningful for all types of dataspaces.
+ *
+ * Return:	Success:	Number of dimensions.  Zero implies scalar.
+ *		Failure:	Negative
+ *
+ * Programmer:	Quincey Koziol
+ *		Tuesday, June 30, 2009
+ *
+ *-------------------------------------------------------------------------
+ */
+int
+H5S_extent_get_dims(const H5S_extent_t *ext, hsize_t dims[], hsize_t max_dims[])
+{
+    int	i;              /* Local index variable */
+    int	ret_value;      /* Return value */
+
+    FUNC_ENTER_NOAPI(H5S_extent_get_dims, FAIL)
+
+    /* check args */
+    HDassert(ext);
+
+    switch(ext->type) {
+        case H5S_NULL:
+        case H5S_SCALAR:
+            ret_value = 0;
+            break;
+
+        case H5S_SIMPLE:
+            ret_value = (int)ext->rank;
+            for(i = 0; i < ret_value; i++) {
+                if(dims)
+                    dims[i] = ext->size[i];
+                if(max_dims) {
+                    if(ext->max)
+                        max_dims[i] = ext->max[i];
+                    else
+                        max_dims[i] = ext->size[i];
+                } /* end if */
+            } /* end for */
+            break;
+
+        default:
+            HDassert("unknown dataspace class" && 0);
+            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown dataspace class)")
+    } /* end switch */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5S_extent_get_dims() */
+
+
+/*-------------------------------------------------------------------------
  * Function:	H5S_get_simple_extent_dims
  *
  * Purpose:	Returns the size in each dimension of a dataspace.  This
@@ -860,7 +915,6 @@ done:
 int
 H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
 {
-    int	i;              /* Local index variable */
     int	ret_value;      /* Return value */
 
     FUNC_ENTER_NOAPI(H5S_get_simple_extent_dims, FAIL)
@@ -868,30 +922,9 @@ H5S_get_simple_extent_dims(const H5S_t *ds, hsize_t dims[], hsize_t max_dims[])
     /* check args */
     HDassert(ds);
 
-    switch(H5S_GET_EXTENT_TYPE(ds)) {
-        case H5S_NULL:
-        case H5S_SCALAR:
-            ret_value = 0;
-            break;
-
-        case H5S_SIMPLE:
-            ret_value = (int)ds->extent.rank;
-            for(i = 0; i < ret_value; i++) {
-                if(dims)
-                    dims[i] = ds->extent.size[i];
-                if(max_dims) {
-                    if(ds->extent.max)
-                        max_dims[i] = ds->extent.max[i];
-                    else
-                        max_dims[i] = ds->extent.size[i];
-                } /* end if */
-            } /* end for */
-            break;
-
-        default:
-            HDassert("unknown dataspace class" && 0);
-            HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "internal error (unknown dataspace class)")
-    } /* end switch */
+    /* Get dims for extent */
+    if((ret_value = H5S_extent_get_dims(&ds->extent, dims, max_dims)) < 0)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGET, FAIL, "can't retrieve dataspace extent dims")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

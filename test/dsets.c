@@ -1401,8 +1401,8 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
      */
     TESTING("    filters (uninitialized read)");
 
-    if(H5Dread (dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
-	goto error;
+    if(H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl, check) < 0)
+	TEST_ERROR;
 
     for(i=0; i<(size_t)size[0]; i++) {
 	for(j=0; j<(size_t)size[1]; j++) {
