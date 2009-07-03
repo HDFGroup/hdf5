@@ -2324,7 +2324,7 @@ H5D_set_extent(H5D_t *dset, const hsize_t *size, hid_t dxpl_id)
 
     /* Check if we are allowed to modify this file */
     if(0 == (H5F_INTENT(dset->oloc.file) & H5F_ACC_RDWR))
-    HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
+        HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "no write intent on file")
 
     /* Check if we are allowed to modify the space; only datasets with chunked and external storage are allowed to be modified */
     if(H5D_COMPACT == dset->shared->layout.type)
