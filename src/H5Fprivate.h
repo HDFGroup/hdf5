@@ -430,6 +430,10 @@ typedef struct H5F_blk_aggr_t H5F_blk_aggr_t;
 #define H5EA_SBLOCK_MAGIC               "EASB"          /* Super block */
 #define H5EA_DBLOCK_MAGIC               "EADB"          /* Data block */
 
+/* Fixed array signatures */
+#define H5FA_HDR_MAGIC                  "FAHD"          /* Header */
+#define H5FA_DBLOCK_MAGIC               "FADB"          /* Data block */
+
 /* Free space signatures */
 #define H5FS_HDR_MAGIC                  "FSHD"          /* Header */
 #define H5FS_SINFO_MAGIC                "FSSE"          /* Serialized sections */

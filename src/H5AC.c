@@ -496,6 +496,9 @@ static const char * H5AC_entry_type_names[H5AC_NTYPES] =
     "extensible array super blocks",
     "extensible array data blocks",
     "extensible array data block pages",
+    "fixed array headers",
+    "fixed array data block",
+    "fixed array data block pages",
     "test entry"	/* for testing only -- not used for actual files */
 };
 

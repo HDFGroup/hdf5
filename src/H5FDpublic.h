@@ -110,6 +110,18 @@ typedef enum H5FD_mem_t {
 #define H5FD_MEM_EARRAY_DBLOCK  H5FD_MEM_LHEAP
 #define H5FD_MEM_EARRAY_DBLK_PAGE  H5FD_MEM_LHEAP
 
+/* Map "fixed array" header blocks to 'ohdr' type file memory, since its
+ * a fair amount of work to add a new kind of file memory and they are similar
+ * enough to object headers and probably too minor to deserve their own type.
+ *
+ * Map "fixed array" data blocks & pages to 'lheap' type file memory, since
+ * they are similar enough to local heap info.
+ *
+ */
+#define H5FD_MEM_FARRAY_HDR     H5FD_MEM_OHDR
+#define H5FD_MEM_FARRAY_DBLOCK  H5FD_MEM_LHEAP
+#define H5FD_MEM_FARRAY_DBLK_PAGE  H5FD_MEM_LHEAP
+
 /*
  * A free-list map which maps all types of allocation requests to a single
  * free list.  This is useful for drivers that don't really care about
