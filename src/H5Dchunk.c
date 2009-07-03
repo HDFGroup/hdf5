@@ -422,7 +422,7 @@ H5D_chunk_construct(H5F_t *f, H5D_t *dset)
 
     /* Reset address and pointer of the array struct for the chunked storage index */
     if(H5D_chunk_idx_reset(&dset->shared->layout, TRUE) < 0)
-        HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to reset chunked storage index")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to reset chunked storage index")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3899,6 +3899,7 @@ H5D_chunk_addrmap(const H5D_io_info_t *io_info, haddr_t chunk_addr[])
     /* Compose chunked index info struct */
     idx_info.f = dset->oloc.file;
     idx_info.dxpl_id = io_info->dxpl_id;
+    idx_info.pline = &dset->shared->dcpl_cache.pline;
     idx_info.layout = &dset->shared->layout;
 
     /* Iterate over chunks to build mapping of chunk addresses */
