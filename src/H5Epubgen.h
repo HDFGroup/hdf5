@@ -24,9 +24,7 @@
 /* Major error codes */
 /*********************/
 
-#define H5E_DATASET          (H5OPEN H5E_DATASET_g)
 #define H5E_FUNC             (H5OPEN H5E_FUNC_g)
-#define H5E_STORAGE          (H5OPEN H5E_STORAGE_g)
 #define H5E_FILE             (H5OPEN H5E_FILE_g)
 #define H5E_SOHM             (H5OPEN H5E_SOHM_g)
 #define H5E_SYM              (H5OPEN H5E_SYM_g)
@@ -36,28 +34,29 @@
 #define H5E_REFERENCE        (H5OPEN H5E_REFERENCE_g)
 #define H5E_DATASPACE        (H5OPEN H5E_DATASPACE_g)
 #define H5E_RESOURCE         (H5OPEN H5E_RESOURCE_g)
-#define H5E_PLIST            (H5OPEN H5E_PLIST_g)
-#define H5E_LINK             (H5OPEN H5E_LINK_g)
-#define H5E_DATATYPE         (H5OPEN H5E_DATATYPE_g)
 #define H5E_RS               (H5OPEN H5E_RS_g)
+#define H5E_FARRAY           (H5OPEN H5E_FARRAY_g)
 #define H5E_HEAP             (H5OPEN H5E_HEAP_g)
-#define H5E_OHDR             (H5OPEN H5E_OHDR_g)
-#define H5E_ATOM             (H5OPEN H5E_ATOM_g)
 #define H5E_ATTR             (H5OPEN H5E_ATTR_g)
-#define H5E_NONE_MAJOR       (H5OPEN H5E_NONE_MAJOR_g)
 #define H5E_IO               (H5OPEN H5E_IO_g)
-#define H5E_SLIST            (H5OPEN H5E_SLIST_g)
 #define H5E_EFL              (H5OPEN H5E_EFL_g)
 #define H5E_TST              (H5OPEN H5E_TST_g)
+#define H5E_FSPACE           (H5OPEN H5E_FSPACE_g)
+#define H5E_DATASET          (H5OPEN H5E_DATASET_g)
+#define H5E_STORAGE          (H5OPEN H5E_STORAGE_g)
+#define H5E_LINK             (H5OPEN H5E_LINK_g)
+#define H5E_PLIST            (H5OPEN H5E_PLIST_g)
+#define H5E_DATATYPE         (H5OPEN H5E_DATATYPE_g)
+#define H5E_OHDR             (H5OPEN H5E_OHDR_g)
+#define H5E_ATOM             (H5OPEN H5E_ATOM_g)
+#define H5E_NONE_MAJOR       (H5OPEN H5E_NONE_MAJOR_g)
+#define H5E_SLIST            (H5OPEN H5E_SLIST_g)
 #define H5E_ARGS             (H5OPEN H5E_ARGS_g)
 #define H5E_EARRAY           (H5OPEN H5E_EARRAY_g)
-#define H5E_ERROR            (H5OPEN H5E_ERROR_g)
 #define H5E_PLINE            (H5OPEN H5E_PLINE_g)
-#define H5E_FSPACE           (H5OPEN H5E_FSPACE_g)
+#define H5E_ERROR            (H5OPEN H5E_ERROR_g)
 #define H5E_CACHE            (H5OPEN H5E_CACHE_g)
-H5_DLLVAR hid_t H5E_DATASET_g;       /* Dataset */
 H5_DLLVAR hid_t H5E_FUNC_g;          /* Function entry/exit */
-H5_DLLVAR hid_t H5E_STORAGE_g;       /* Data storage */
 H5_DLLVAR hid_t H5E_FILE_g;          /* File accessability */
 H5_DLLVAR hid_t H5E_SOHM_g;          /* Shared Object Header Messages */
 H5_DLLVAR hid_t H5E_SYM_g;           /* Symbol table */
@@ -67,24 +66,27 @@ H5_DLLVAR hid_t H5E_BTREE_g;         /* B-Tree node */
 H5_DLLVAR hid_t H5E_REFERENCE_g;     /* References */
 H5_DLLVAR hid_t H5E_DATASPACE_g;     /* Dataspace */
 H5_DLLVAR hid_t H5E_RESOURCE_g;      /* Resource unavailable */
-H5_DLLVAR hid_t H5E_PLIST_g;         /* Property lists */
-H5_DLLVAR hid_t H5E_LINK_g;          /* Links */
-H5_DLLVAR hid_t H5E_DATATYPE_g;      /* Datatype */
 H5_DLLVAR hid_t H5E_RS_g;            /* Reference Counted Strings */
+H5_DLLVAR hid_t H5E_FARRAY_g;        /* Fixed Array */
 H5_DLLVAR hid_t H5E_HEAP_g;          /* Heap */
-H5_DLLVAR hid_t H5E_OHDR_g;          /* Object header */
-H5_DLLVAR hid_t H5E_ATOM_g;          /* Object atom */
 H5_DLLVAR hid_t H5E_ATTR_g;          /* Attribute */
-H5_DLLVAR hid_t H5E_NONE_MAJOR_g;    /* No error */
 H5_DLLVAR hid_t H5E_IO_g;            /* Low-level I/O */
-H5_DLLVAR hid_t H5E_SLIST_g;         /* Skip Lists */
 H5_DLLVAR hid_t H5E_EFL_g;           /* External file list */
 H5_DLLVAR hid_t H5E_TST_g;           /* Ternary Search Trees */
+H5_DLLVAR hid_t H5E_FSPACE_g;        /* Free Space Manager */
+H5_DLLVAR hid_t H5E_DATASET_g;       /* Dataset */
+H5_DLLVAR hid_t H5E_STORAGE_g;       /* Data storage */
+H5_DLLVAR hid_t H5E_LINK_g;          /* Links */
+H5_DLLVAR hid_t H5E_PLIST_g;         /* Property lists */
+H5_DLLVAR hid_t H5E_DATATYPE_g;      /* Datatype */
+H5_DLLVAR hid_t H5E_OHDR_g;          /* Object header */
+H5_DLLVAR hid_t H5E_ATOM_g;          /* Object atom */
+H5_DLLVAR hid_t H5E_NONE_MAJOR_g;    /* No error */
+H5_DLLVAR hid_t H5E_SLIST_g;         /* Skip Lists */
 H5_DLLVAR hid_t H5E_ARGS_g;          /* Invalid arguments to routine */
 H5_DLLVAR hid_t H5E_EARRAY_g;        /* Extensible Array */
-H5_DLLVAR hid_t H5E_ERROR_g;         /* Error API */
 H5_DLLVAR hid_t H5E_PLINE_g;         /* Data filters */
-H5_DLLVAR hid_t H5E_FSPACE_g;        /* Free Space Manager */
+H5_DLLVAR hid_t H5E_ERROR_g;         /* Error API */
 H5_DLLVAR hid_t H5E_CACHE_g;         /* Object cache */
 
 /*********************/

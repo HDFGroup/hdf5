@@ -529,6 +529,16 @@
 ./src/H5Fprivate.h
 ./src/H5Fpublic.h
 ./src/H5Ftest.c
+./src/H5FA.c
+./src/H5FAcache.c
+./src/H5FAdbg.c
+./src/H5FAdblkpage.c
+./src/H5FAdblock.c
+./src/H5FAhdr.c
+./src/H5FApkg.h
+./src/H5FAprivate.h
+./src/H5FAstat.c
+./src/H5FAtest.c
 ./src/H5FD.c
 ./src/H5FDcore.c
 ./src/H5FDcore.h
