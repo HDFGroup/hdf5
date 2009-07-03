@@ -192,6 +192,14 @@ get_H5FA_class(const uint8_t *sig)
             cls = H5FA_CLS_TEST;
             break;
 
+        case H5FA_CLS_CHUNK_ID:
+            cls = H5FA_CLS_CHUNK;
+            break;
+
+        case H5FA_CLS_FILT_CHUNK_ID:
+            cls = H5FA_CLS_FILT_CHUNK;
+            break;
+
         default:
             fprintf(stderr, "Unknown array class %u\n", (unsigned)(clsid));
             HDexit(4);

@@ -257,7 +257,7 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 
                     /* Chunk index type */
                     mesg->u.chunk.idx_type = *p++;
-                    if(mesg->u.chunk.idx_type > H5D_CHUNK_IDX_EARRAY)
+                    if(mesg->u.chunk.idx_type >= H5D_CHUNK_IDX_NTYPES)
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, NULL, "unknown chunk index type")
 
                     switch(mesg->u.chunk.idx_type) {
@@ -275,6 +275,14 @@ H5O_layout_decode(H5F_t *f, hid_t UNUSED dxpl_id, H5O_t UNUSED *open_oh,
 
                             /* Set the chunk operations */
                             mesg->u.chunk.ops = H5D_COPS_EARRAY;
+                            break;
+
+                        case H5D_CHUNK_IDX_FARRAY:
+                            /* Fixed Array Header address */
+                            H5F_addr_decode(f, &p, &(mesg->u.chunk.u.farray.addr));
+
+                            /* Set the chunk operations */
+                            mesg->u.chunk.ops = H5D_COPS_FARRAY;
                             break;
 
                         default:
@@ -417,6 +425,11 @@ H5O_layout_encode(H5F_t *f, hbool_t UNUSED disable_shared, uint8_t *p, const voi
                     case H5D_CHUNK_IDX_EARRAY:
                         /* Extensible array address */
                         H5F_addr_encode(f, &p, mesg->u.chunk.u.earray.addr);
+                        break;
+
+                    case H5D_CHUNK_IDX_FARRAY:
+                        /* Fixed Array Header address */
+                        H5F_addr_encode(f, &p, mesg->u.chunk.u.farray.addr);
                         break;
 
                     default:
@@ -833,6 +846,13 @@ H5O_layout_debug(H5F_t UNUSED *f, hid_t UNUSED dxpl_id, const void *_mesg,
                               "Extensible Array address:", mesg->u.chunk.u.earray.addr);
                     break;
 
+                case H5D_CHUNK_IDX_FARRAY:
+                    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+                              "Index Type:", "Fixed Array");
+                    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+                              "Fixed Array address:", mesg->u.chunk.u.farray.addr);
+                    break;
+
                 default:
                     HDfprintf(stream, "%*s%-*s %s (%u)\n", indent, "", fwidth,
                               "Index Type:", "Unknown", (unsigned)mesg->u.chunk.idx_type);
@@ -946,6 +966,11 @@ H5O_layout_meta_size(const H5F_t *f, const void *_mesg)
                         ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
                         break;
 
+                    case H5D_CHUNK_IDX_FARRAY:
+                        /* Fixed Array address */
+                        ret_value += H5F_SIZEOF_ADDR(f);    /* Address of data */
+                        break;
+
                     default:
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTENCODE, 0, "Invalid chunk index type")
                 } /* end switch */
@@ -995,12 +1020,14 @@ H5O_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
 
     /* Avoid scalar/null dataspace */
     if(ndims > 0) {
-        hsize_t max_dims[H5O_LAYOUT_NDIMS];     /* Current dimension sizes */
+        hsize_t max_dims[H5O_LAYOUT_NDIMS];     /* Maximum dimension sizes */
+        hsize_t curr_dims[H5O_LAYOUT_NDIMS];    /* Current dimension sizes */
         unsigned unlim_count;           /* Count of unlimited max. dimensions */
+	hbool_t	fixed = FALSE;		/* Fixed dimension or not */
         unsigned u;                     /* Local index variable */
 
         /* Query the dataspace's dimensions */
-        if(H5S_get_simple_extent_dims(space, NULL, max_dims) < 0)
+        if(H5S_get_simple_extent_dims(space, curr_dims, max_dims) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get dataspace max. dimensions")
 
         /* Spin through the max. dimensions, looking for unlimited dimensions */
@@ -1008,6 +1035,16 @@ H5O_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
         for(u = 0; u < ndims; u++)
             if(max_dims[u] == H5S_UNLIMITED)
                 unlim_count++;
+
+        /* Check if it is fixed dimension */
+	if(0 == unlim_count) {
+	    fixed = TRUE;
+	    for(u = 0; u < ndims; u++)
+		if(curr_dims[u] != max_dims[u]) {
+		    fixed = FALSE;
+		    break;
+		} /* end if */
+	} /* end if */
 
         /* If we have only 1 unlimited dimension, we can use extensible array index */
         if(1 == unlim_count) {
@@ -1017,6 +1054,11 @@ H5O_layout_set_latest_version(H5O_layout_t *layout, const H5S_t *space)
                 layout->u.chunk.idx_type = H5D_CHUNK_IDX_EARRAY;
             } /* end if */
         } /* end if */
+        /* Chunked datasets with fixed dimensions */
+        else if(layout->type == H5D_CHUNKED && fixed) {
+            /* Set the chunk index type */
+	    layout->u.chunk.idx_type = H5D_CHUNK_IDX_FARRAY;
+	} /* end if */
     } /* end if */
 
 done:

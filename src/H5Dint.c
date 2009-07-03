@@ -735,6 +735,10 @@ H5D_set_io_ops(H5D_t *dataset)
                     dataset->shared->layout.u.chunk.ops = H5D_COPS_EARRAY;
                     break;
 
+                case H5D_CHUNK_IDX_FARRAY:
+                    dataset->shared->layout.u.chunk.ops = H5D_COPS_FARRAY;
+                    break;
+
                 default:
                     HDassert(0 && "Unknown chunk index method!");
                     HGOTO_ERROR(H5E_DATASET, H5E_UNSUPPORTED, FAIL, "unknown chunk index method")

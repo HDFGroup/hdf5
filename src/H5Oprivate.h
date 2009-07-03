@@ -371,6 +371,14 @@ typedef struct H5O_layout_chunk_earray_t {
     struct H5EA_t *ea;                  /* Pointer to extensible array struct */
 } H5O_layout_chunk_earray_t;
 
+/* Forward declaration of structs used below */
+struct H5FA_t;                          /* Defined in H5FAprivate.h          */
+
+typedef struct H5O_layout_chunk_farray_t {
+    haddr_t	addr;			/* File address of fixed index array  */
+    struct H5FA_t *fa;                  /* Pointer to fixed index array struct */
+} H5O_layout_chunk_farray_t;
+
 typedef struct H5O_layout_chunk_t {
     H5D_chunk_index_t idx_type;		/* Type of chunk index               */
     unsigned	ndims;			/* Num dimensions in chunk           */
@@ -384,6 +392,7 @@ typedef struct H5O_layout_chunk_t {
     union {
         H5O_layout_chunk_btree_t btree; /* Information for v1 B-tree index   */
         H5O_layout_chunk_earray_t earray; /* Information for extensible array index */
+        H5O_layout_chunk_farray_t farray; /* Information for fixed array index */
     } u;
 } H5O_layout_chunk_t;
 
